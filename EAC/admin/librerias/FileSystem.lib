@@ -1,0 +1,368 @@
+#!/bin/bash
+##########################################################
+#####librerias de FileSystem v0.0.8r5 para Advanced Deploy enViorenment###########
+# Liberado bajo licencia GPL <http://www.gnu.org/licenses/gpl.html>################
+############# 2008 Antonio Jesús Doblas Viso adv@uma.es##########################
+########### Universidad de Malaga (Spain)############################
+##########################################################
+
+function MountRepo () {
+if [ $# = 0 ]
+then 
+	Msg "error de sintaxis:" red 
+	Msg "Monta un Repositorio alternamtivo en \$REPO-ALT" red
+	Msg "MountRepo str_ip" red
+	Msg "devuelve \$REPOALT el punto de montaje dentro de mnt, /mnt/172.16.72.120/" red
+	return
+fi
+if `ping -c 1 $1 1>/dev/null 2>&1` 
+then
+	pointhdimages=`showmount -e $1 | grep /hdimages | cut -f1 -d" "` && echo $1:$pointhdimages /mnt/$1$pointhdimages >> /etc/mtab && mkdir -p /mnt/$1$pointhdimages && mount -n -t nfs $1:$pointhdimages /mnt/$1$pointhdimages  && echo $1:$pointhdimages /mnt/$1$pointhdimages && export REPOALT=/mnt/$1	 
+	pointadmin=`showmount -e $1 | grep /admin | cut -f1 -d" "` && echo $1:$pointadmin /mnt/$1$pointadmin >> /etc/mtab && mkdir -p /mnt/$1$pointadmin && mount -n -t nfs $1:$pointadmin /mnt/$1$pointadmin  && echo $1:$pointadmin /mnt/$1$pointadmin
+else
+	echo "no route to $1"
+fi
+}
+
+
+function UmountRepo () {
+if [ $# = 0 ]
+then 
+	Msg "error de sintaxis:" red 
+	Msg "Monta un Repositorio alternamtivo" red
+	Msg "MountRepo str_ip" red
+	Msg "devuelve el punto de montaje dentro de mnt, /mnt/172.16.72.120/" red
+	return
+fi
+repomount=`mount | grep $1 | cut -f3 -d" "`
+for i in $repomount; do
+	umount $i && rmdir $i 1>/dev/null 2>&1 && echo "function UmountRepo $i succesfully"
+	cat /etc/mtab | grep -v $i > /var/tmp/mtab.temporal; mv /var/tmp/mtab.temporal /var/tmp/mtab 
+done
+reposubdir=`find /mnt/$1 -type d | sort -r`
+for i in $reposubdir; do
+	rmdir -p $i 1>/dev/null 2>&1;
+done
+unset REPOALT
+}
+
+function MountPartition () {
+if [ $# = 0 ]
+then 
+	Msg "error de sintaxis:" red 
+	Msg "opcion 1 parametro:  MountPartition CACHE -> ejemplo MountPartition CACHE" red
+	Msg "opcion 2 parametros: MountPartition int_disk int_partition -> ejemplo MountPartition 1 3" red
+	Msg "devuelve el punto de montaje dentro de mnt, /mnt/sda2/" red
+	return
+fi
+############ si 1 parametro es cache o CACHE monta la cache
+if [ $# = 1 -a $1 = 'CACHE' ]
+then
+MountCache
+fi
+if [ $# = 2 ]
+	then
+		#UmountPartition $1 $2 2> /dev/null
+		# Sustituye num. de disco por el dispositivo.2
+		DISCO="$(Disk |cut -f$1 -d' ')"
+		[ -z "$DISCO" -o ! -b "$DISCO" ] && return 2
+		PART="$DISCO$2"
+		[ ! -b "$PART" ] && return 2
+		particion=`IdPartition $1 $2`
+		
+		## Comprobar si la particion ya estaba montada.
+		tmpdir=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
+		# #Si no, montarla en un directorio temporal.
+		if [ -z "$tmpdir" ]; then
+		#  tmpdir=/tmp/mount$$
+			mkdir -p /mnt/${particion}
+			# Elegir la orden de montaje segun el tipo de particion.
+			case "$(TypeFS $1 $2)" in
+			EXT[234])       MOUNT=mount ;;
+			NTFS|HNTFS)     MOUNT=ntfs-3g ;;
+			FAT|VFAT)       MOUNT=mount.vfat ;;
+			CACHE)          MOUNT=mount ;;
+			*)   ;; #   exit 3;;
+			esac
+		# Montar la particion y registrarlo en mtabpersonal.    # || exit 3
+		$MOUNT $PART /mnt/${particion} ||  $MOUNT $PART /mnt/${particion} -o force -o remove_hiberfile
+		echo $PART /mnt/$particion >> /etc/mtab	
+fi
+# Mostrar el punto de montaje,
+#rm /etc/mtab 2> /dev/null
+echo /mnt/${particion}
+fi
+}
+
+function MountCache () {
+CacheLinux=`FindCache`
+CacheEAC=`DiskEAC $CacheLinux`
+CACHE=`MountPartition $CacheEAC`
+echo $CACHE
+export CACHE
+}
+
+function UmountCache () {
+cachelinux=`FindCache`
+cacheeac=`DiskEAC $cachelinux`
+echo UmountPartition $cacheeac
+UmountPartition $cacheeac
+}
+
+
+function UmountPartition () {
+if [ $# = 0 ]
+then 
+	Msg "error de sintaxis:" red 
+	Msg "opcion 1 parametro:  UmountPartition str_puntomontaje -> ejemplo UmountPartition CACHE" red
+	Msg "opcion 2 parametros: UmountPartition int_disk int_partition -> ejemplo UmountPartition 1 3" red
+return
+fi
+############ si 1 parametro solo se acepta CACHE (punto de montaje)  -a $1 = 'CACHE'
+if [  $# = 1 ] 
+then
+	if [ $1 = 'CACHE' ]
+	then		
+		UmountCache 
+	else
+		return
+	fi
+fi
+
+######### si 2 parametros (int_disk int_partition)
+if [ $# = 2 ]
+then
+	dev="$1 $2"
+	echo $dev
+	# Comprobar si la particion ya estaba montada.
+	tmpdir=$(mount | awk -v P=`Disk $dev` '{if ($1==P) {print $3}}')
+	if [ -n "$tmpdir" ] 
+	then
+		particion=`IdPartition $dev`
+		# echo $particion
+		umount /mnt/$particion 2> /dev/null || umount  /dev/${particion} 2> /dev/null
+		sleep 1
+		rmdir  /mnt/$particion
+		sleep 1
+		cat /etc/mtab | grep -v $particion > /var/tmp/mtab.temporal && cp /var/tmp/mtab.temporal /var/tmp/mtab && rm /var/tmp/mtab.temporal
+		unset particion
+
+	fi
+fi
+unset tmpdir
+unset particion
+}
+
+
+function InfoCache () {
+### asignada en UpdateCache y FormatCache
+if FindCache
+then
+	dev=`FindCache` 
+	dev=`MountCache`
+	info=`df -h | grep $dev`
+	infoFilesystem=`echo $info | cut -f1 -d" "`
+	infoSize=`echo $info | cut -f2 -d" "`
+	infoUsed=`echo $info | cut -f3 -d" "`
+	infoAvail=`echo $info | cut -f4 -d" "`
+	infoUsedPorcet=`echo $info | cut -f5 -d" "`
+	infoMountedOn=`echo $info | cut -f2 -d" "`
+        if `ls  ${dev}/var/EAC 2> /dev/null` 
+		then
+		       cd ${dev}/var/EAC
+			content=`find hdimages/ -type f -printf "%h/  %f  %s \n"`
+			cd /
+			echo $info
+			echo -ne $content
+			echo "$info" > ${REPO}hosts/${IP}-InfoCache
+			echo "$content" >> ${REPO}hosts/${IP}-InfoCache                			
+		else
+			echo $info
+			echo "$info" > ${REPO}hosts/${IP}-InfoCache			
+	fi
+else
+	echo " " > ${REPO}hosts/${IP}-InfoCache
+	UmountCache
+fi
+}
+
+function FormatToLower () {
+echo $* | tr "[A-Z]" "[a-z]"
+}
+
+function FormatToUpper () {
+echo $* | tr "[a-z]" "[A-Z]"
+}
+
+function FormatSintaxDev () {
+if [ $# = 0 ]
+then
+	Msg "comentario: define la estrucutra dev como /dev/sda1 sin la ultima barra." red
+	Msg "sintaxis: FormatSintxDev /dev/sda1/  " red
+	Msg "ejemplo salida: resultado /dev/sda1" red
+fi
+dispositivo=`echo $1 | awk -F\/ '{for (I=2;I<=NF;I++) print $I}'`
+camino=`echo $dispositivo | tr " " "/"`
+echo \/${camino}
+unset dispositivo
+unset camino
+}
+
+function FormatSintaxSpacePath () {
+if [ $# = 0 ]
+then
+	Msg "comentario: formate un path, escapando los espacios en blanco." red
+	Msg "sintaxis: FormatSintaxSpacePath \"/mnt/sda1/Windows/Documents and Settings/antonio/NTUSER.DAT\"  " red
+	Msg "Sintaxis: FormatSintaxSpacePath \"\$HiveUser3\" " red
+fi
+echo $1 | sed -e 's/ /\\ /g'
+}
+
+function FormatSintaxBackSlashPath () {
+if [ $# = 0 ]
+then
+	Msg "comentario: formatea un path, escapando los backslash, inserta un back  ." red
+	Msg "sintaxis: FormatSintaxSpacePath \"/mnt/sda1/Windows/Documents\ and\ Settings/antonio/NTUSER.DAT\"  " red
+	Msg "Sintaxis: FormatSintaxSpacePath \"\$HiveUser3\" " red
+fi
+echo $1 | sed -e 's/\\/\\\\/g'
+}
+
+function GetPath () {
+if [ $# = 0 ]
+then
+	Msg "comentario: obtiene la ruta del directorio padre de un fichero dado en su ubicacion absoluta" red
+	Msg "sintaxis: GetPath /mnt/hdimages/vm.img   o GetPath /mnt/hdimages/" red
+	Msg "ejemplo: resutlado /mnt/hdimages" red
+return
+fi
+camino=`echo $1 | awk -F\/ '{for (I=2;I<NF;I++) print $I}'`
+camino=`echo $camino | tr " " "/"`
+echo \/$camino
+unset camino
+}
+
+function GetLastStr() {
+if [ $# = 0 ]
+then
+	Msg "comentario: devuelve la subcadena, comprendida desde el ultimo elemento separador hasta el final de la cadena" red
+	Msg "sintaxis: GetLastStr str_cadena str_patronseparador" red
+	Msg "ejemplo: GetLastStr xp.sda1.000-1.gzip ." red
+	return
+fi
+echo $1 | awk -F$2 '{print $NF}' 
+}
+
+function GetFirstStr() {
+if [ $# = 0 ]
+then
+	Msg "comentario: devuelve la subcadena, comprendida desde el principio de la cadena hasta el ultimo elemento separador" red
+	Msg "sintaxis: GetFirstStr str_cadena str_patronseparador" red
+	Msg "ejemplo: GetFirtsStr xp.sda1.000-1.gzip ." red
+	return
+fi
+camino=`echo $1 | awk -F\$2 '{for (I=1;I<NF;I++) print $I}'`
+#echo $camino
+camino=`echo $camino | tr " " $2`
+echo $camino
+#echo \/$camino
+unset camino
+#echo $1 | awk -F$2 '{print $NF}' 
+}
+
+
+
+MkdirPath () {
+if [ $# = 0 ]
+then
+	Msg "comentario: crear la estrucutura de directorios para una ruta completa, si indicamos con fichero crea hasta el directorio padre" red	
+	Msg "sintaxis: MkdirPath /mnt/hdimages/vm.img    o    MkdirPath /mnt/hdimages/ " red
+	Msg "ejemplo: resutlado  /mnt/hdimages" red
+return
+fi
+ruta=`GetPath $1`
+mkdir -p $ruta
+unset ruta
+}
+
+
+function DetectaEtiquetas () {
+for i in `ls /dev/disk/by-label/`
+do
+	echo $i
+done
+unset i
+}
+
+function IfFileExist () {
+if [ $# = 0 ]
+then
+	Msg "comentario: devuelve 0 si el fichero existe IfFileExist $fichero && operacion " red
+	return
+fi
+if [ $# = 1 ]
+then
+	if [ -e $1 ]
+	then
+		return 0
+	else 
+		return 1
+	fi
+fi
+}
+
+
+function IfFileNotExist () {
+if [ $# = 0 ]
+then
+	Msg "comentario: devuelve 0 si el fichero No existe IfFileNotExist $fichero && operacion " red
+	return
+fi
+if [ $# = 1 ]
+then
+	if [ ! -e $1 ]
+	then
+		return 0
+	else 
+		return 1
+	fi
+fi
+}
+
+function WhatsTime () {
+date +'%H:%M:%S'
+}
+
+function HowLongHasWorked () {
+if [ $# = 1 ]
+then
+endtime=`WhatsTime`
+endH=`echo $endtime | cut -f1 -d":"`
+endM=`echo $endtime | cut -f2 -d":"`
+endS=`echo $endtime | cut -f3 -d":"`
+endHs=`expr $endH \* 3600`
+endMs=`expr $endM \* 60`
+endsegundos=`expr $endHs + $endMs + $endS`
+
+startH=`echo $1 | cut -f1 -d":"`
+startM=`echo $1 | cut -f2 -d":"`
+startS=`echo $1 | cut -f3 -d":"`
+startHs=`expr $startH \* 3600`
+startMs=`expr $startM \* 60`
+startsegundos=`expr $startHs + $startMs + $startS`
+
+totalsegundos=`expr $endsegundos - $startsegundos`
+
+resultM=`expr $totalsegundos / 60`
+resultS=`expr $totalsegundos % 60`
+resultH=`expr $resultM / 60`
+ResultM=`expr $resultM % 60`
+
+echo $resultH:$ResultM:$resultS
+
+else 
+	Msg "error de sintaxis: HowLongHasWorked  \"12:04:21\" " example
+	return
+fi
+}
+

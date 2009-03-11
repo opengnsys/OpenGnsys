@@ -1,0 +1,114 @@
+version 0.0.8.r6
+Este documento describe: 1)  como instalar un servidor que soporte la aplicación EAC. y 2) descargar el Targz de EAC y configurarlo.
+
+
+-------------------------------------------------------------
+ 1. Procedimiento de instalacion de un servidor EAC (ubuntu) para centralizar los clientes pxe
+-----------------------------------------------
+
+1.1 Instalación base:
+	El S.O. de referencia es ubuntu server 8.10  
+	Se define una primera particion (10gb), la segunda como repositorio EAC (se montara en /var/EAC), y la tercera la swap.
+		En el /etc/fstab definimos el montaje de /var/EAC/ a la particion correspondiente del equipo.
+
+
+1.3 configuracion mínima. parametros de red.
+	hostname:   EACaula
+	ip:		    xx.xxx.xxx.242
+	export http_proxy=proxy.alumnos.uma.es:3128
+	export ftp_proxy=roxy.alumnos.uma.es:3128
+	
+1.2 instalación de software adicional.
+	apt-get update
+	apt-get install dhcp3-server atftpd syslinux nfs-kernel-server nfs-common bittorrent  apache2 mysql-server mysql-client php5 php5-mysql phpmyadmin clusterssh
+	compilar las ultimas versiones de udpcast(compilar)ctorrent(compilar)
+
+1.3 configurar los servicios del servicios del servidor. [ si ya tienes los tar.gz de EAC, echale un vistazo al autoconfigurador, en /var/EAC/admin/config/EAC_conf_server.sh]
+	1.3.a Servicio nfs. /etc/exports    --   cambiar la ipde subred por la ip de subred a configurar
+		/var/EAC/nfsroot/stable 172.16.72.0/255.255.255.0(ro,no_subtree_check,async,no_root_squash)
+		/var/EAC/nfsroot/testing 172.16.72.0/255.255.255.0(ro,no_subtree_check,async,no_root_squash)
+		/var/EAC/admin 172.16.72.0/255.255.255.0(ro,no_subtree_check,no_root_squash,async)
+		/var/EAC/hdimages 172.16.72.0/255.255.255.0(rw,no_subtree_check,no_root_squash,sync)	
+
+	1.3.b contenedor del tftpboot
+		se creara (en el apartado de configuracion de EAC, punto 2) un enlace /tftpboot -> /var/EAC/tftpboot
+	
+	1.3.b /etc/host.allow
+		portmap:172.17.1.0/255.255.255.0 
+		nfs:172.17.1.0/255.255.255.0 
+		#ALL:172.17.1.0/255.255.255.0 	
+
+	1.3.c servicio apache+mysql+php
+		Comprobamos que en /etc/mysql/my.cnf
+			bind-address = 0.0.0.0
+			skip-name-resolve [nota: esto evita resolucion de nombres]
+			
+			
+	1.3.d servicio dhcpd   /etc/dhcpd.conf
+		1.3.d-I   Servidor dhcp en una máquina distintinta al servidor EAC, introducir estos dos parametros en la definicion global. la ip debe corresponder al servidor EAC.
+			next-server 172.16.72.242;
+			filename /tftpboot/pxelinux.0;
+		1.3.d-II   Servidor dhcp en la misma maquina EAC,	
+			Subnet 172.16.72.0 netmsk 255.255.255.0 {
+			next-server 172.16.72.242;
+			filename /tftpboot/pxelinux.0;
+			
+			host equipo01 {
+			hardware ethernet 00:16:76:2a:0d:1e;
+			fixed-address ipequipo;
+			}
+			}
+		1.3.d-III  Comprobar que enviamos peticiones, con el servidor parado lo arrancamos en modo debug dhcp3 -d
+			
+			
+			
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. Instalar el Entorno Avanzado de Clonación EAC.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2.1 bajar el ultimo tar.gz del EAC. y descomprimirlo en /var/EAC
+	debemos de tener una estrucutra tal que: 
+			/var/EAC/{admin hdimages tftpboot nfsroot}
+			/var/www/eac
+
+
+2.2 Configuración basica del EAC.   [echale un vistazo al autoconfigurador de EAC en /var/EAC/admin/config/EAC_conf_EAC.sh]
+	/var/EAC/admin/config/EAC.conf
+		######## Parametros acceso BDe ######################
+		define("SQL_HOST", "172.16.72.242");
+		define("SQL_HOST_LOCAL", "localhost");
+		define ("SQL_USER", "eac");
+		define ("SQL_PASS", "eac");
+		define ("DATABASE", "eac");
+		######## Parametros almacenaje ######################
+		define ("REPO", "/var/EAC/");
+		######## PARAMETROS MCAST ########################
+		define ("McastAddress", "239.172.16.72");  
+		define ("McastMethod", "full-duplex");   //half-duplex  or broadcast
+		define ("McastMaxBitrate", "70M");   // maxima velocida
+		define ("McastControlError", "8x8/128");
+		define ("McastNumberClients", "80");
+		define ("McastTimeWaitForAllClients", "40");
+	
+
+2.3 adaptación del servicio tftpboot al entorno EAC.
+	Debemos tener el enlace /tftpboot que apunta a /var/EAC/tftpboot y le damos permiso de lectura a todo el mundo.
+	nos situamos en /var/tftpboot/pxelinux.cfg
+		debemos comprobar que el fichero ./default las ip que aparece deben coincidir con la ip del servidor EAC que se esta configurando.
+		si existen más ficheros del estilo 01-xxx-xxx-xxxx, son ficheros especificos para MAC de equipos, comprueban que no son de tu aula y las borras.
+
+
+2.4 Configurar la Base de Datos
+	Importar la base de datos, cuyo fichero es eacDB.sql, con phpmyadmin
+	Crear los usuarios
+		eac desde localhost
+		eac desde %
+		[ nombre usuario => eac]
+		[servidor => %]
+		[contrase => eac]
+		[ verificar que otorgue todos los privilegios globales (marcar todos)]
+
+
+2.5 Sistema EACBootAgent  /var/EAC/nfsroot/{stable testing}	
+	etc/rc.local
+	etc/resolv.conf
+

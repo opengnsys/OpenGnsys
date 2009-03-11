@@ -1,0 +1,136 @@
+#!/usr/bin/php
+<?
+######################################################
+######Servidor EAC  v0.0.8r5 para Advanced Deploy enViorenment###########
+# Liberado bajo licencia GPL <http://www.gnu.org/licenses/gpl.html>################
+############## 2008 Antonio Doblas Viso##########################
+############ Universidad de Malaga (Spain)############################
+###########################################################
+
+require("/var/EAC/admin/config/EAC.conf");
+
+#$IP=system('echo $IP', $retval);
+#$MAC=system('echo $MAC', $retval);
+$mac=$_SERVER["MAC"];
+$ip=$_SERVER["IP"];
+echo($_SERVER['argv'][1]);
+
+$conexion=mysql_connect(SQL_HOST, SQL_USER, SQL_PASS) or die ('no se ha podido conectar con mysql');
+mysql_select_db(DATABASE, $conexion);
+if ($_SERVER['argv'][1] == "RunStartPage")
+{
+	#echo("hola");
+	//busqueda de la startpage y copiarlo a /var/tmp
+	$peticion="select startpage FROM equipos WHERE ip='".$ip."'";
+	$resultequipos = mysql_query($peticion);
+	while ($filaequipos = mysql_fetch_array($resultequipos))
+	{
+	#	echo("dos");
+		#echo trim($filaequipos[0]);
+		######echo "bash -c " . REPO . "/admin/startpage/" . trim($filaequipos[0]);
+		exec("cp  " . REPO . "/admin/startpage/" . trim($filaequipos[0])  . " /var/tmp/");
+		#######exec( REPO . "/admin/startpage/" . trim($filaequipos[0]) . " &>/dev/tty1");
+		#########//system("/EAC.files/admin/startpage/" . trim($filaequipos[0]));
+	}
+}
+
+if ($_SERVER['argv'][1] == "SetHostname")
+{
+echo("Determinando el hostname con el metodo " .  HostnameMethod . " ");
+	switch (HostnameMethod)
+	{
+	case "variables":
+		$uno=exec('/bin/hostname ' . HostnameVariables, $retval);		
+		break;
+	# modulo case dns: Juan Antonio LLamas Mantecón
+	case "dns":
+	
+	break;
+	case "file":
+		$nom=exec("cat " . REPO . "admin/config/hostnamefile.txt | grep " . $ip . " | cut -f2 -d';'", $retval); 
+
+		$uno=exec('/bin/hostname ' . $nom, $retval);		
+		#echo("$(cat " . REPO . "admin/config/hostnamefile.txt | grep " . $ip . " | cut -f2 -d';')"); 
+		#echo $uno;	
+	break;
+	default:
+	break;
+	}
+}
+
+if ($_SERVER['argv'][1] == "IsHostRegistry")
+{	
+	echo "Chequeando el hosts en el servidor EAC ....... ";
+	$query="select ip, mac, hostname from equipos where ip='" . $ip ."'";
+	$rs=mysql_query($query);	
+	if ( mysql_num_rows($rs) <= 0 )
+	{
+		echo "   dando de alta al equipo\n";
+		system(REPO . "admin/procedimientos/EACclient SetHostname");		
+		$newhostname=system('hostname', $retval);
+		#$insert="insert into equipos (hostname, mac, ip) values ('" . $newhostname . "', '" . $mac . "', '" . $ip . "')";
+		$insert="insert into equipos (hostname, mac, ip, vga, acpi, pci) values ('" . $newhostname . "', '" . $mac . "', '" . $ip . "' , '788', '" . $_SERVER['acpi'] . "', '" . $_SERVER['pci'] . "')";
+		#echo $insert;
+		$resultado=mysql_query($insert);
+		### configurando los parametros del kernel
+		#exec("/bin/bash InfoHardware");
+		#echo("cat " . REPO ."hosts/" . $ip ."-InfoHardware | grep 'Dell' && export pci=nomsi; export acpi=off");
+		#exec("cat " . REPO ."hosts/" . $ip ."-InfoHardware | grep 'Dell' && export pci=nomsi; export acpi=off");
+		#$insert="insert into kernelparameters (ip, vga, acpi, pci) values ('" . $ip . "', '788', '" . $_SERVER['acpi'] . "', '" . $_SERVER['pci'] . "')";
+		#echo $insert;
+		#$resultado=mysql_query($insert);
+	}
+	else 
+	{	
+	## obtenemos el hostname, ip y mac
+	echo "Host registrado previamente con hostname :  ";
+	$result = mysql_fetch_array($rs);
+	$hostname=$result["hostname"];
+	echo $hostname;
+	system('/bin/hostname ' . $hostname, $retval);
+	}
+	
+	
+}
+	
+if ($_SERVER['argv'][1] == "StartPage")
+{
+	echo("hola");
+	//busqueda de la startpage y copiarlo a /var/tmp
+	$peticion="select startpage FROM equipos WHERE ip='".$ip."'";
+	$resultequipos = mysql_query($peticion);
+	while ($filaequipos = mysql_fetch_array($resultequipos))
+	{
+		echo("dos");
+		#echo trim($filaequipos[0]);
+		######echo "bash -c " . REPO . "/admin/startpage/" . trim($filaequipos[0]);
+		#exec("cp  " . REPO . "/admin/startpage/" . trim($filaequipos[0])  . " /var/tmp/");
+		#######exec( REPO . "/admin/startpage/" . trim($filaequipos[0]) . " &>/dev/tty1");
+		#########//system("/EAC.files/admin/startpage/" . trim($filaequipos[0]));
+	}
+}
+
+if ($_SERVER['argv'][1] == "Log")
+{
+	# formato de entrada 
+	# 1 LOG; 2IP ; 3tiempo proceso; 4comando; 5parametros 
+	$hora=date("H:i:s");
+	$dia=date("Y-m-d");
+	#formato del log
+	# IPsolicitante ; dia ; hora ; tiempo proceso ; comando; parametros
+	#formato del log
+	#mensaje en ventana del solicitante.
+	#echo($_SERVER['argv'][1]  . " ; " . $dia . " ; " . $hora . " ; "  . $_SERVER['argv'][2] . " ; "  . $_SERVER['argv'][3] . " ; "  . $_SERVER['argv'][4]);
+	$info=$_SERVER['argv'][1]  . " ; " . $dia . " ; " . $hora . " ; "  . $_SERVER['argv'][2] . " ; "  . $_SERVER['argv'][3] . " ; "  . $_SERVER['argv'][4] . "\n";
+	echo($info);
+	## escritura en el ficheor /var/EAC/hosts/$IP-Log
+	$fp = fopen(REPO . "hosts/" . $_SERVER['argv'][1] ."-Log", "ab");
+	fwrite($fp, $info);
+	fclose($fp);
+	
+	$insert="insert into log (ip, dia, hora, tiempo_proceso, comando, parametros) values ('".$_SERVER['argv'][1] . "','" . $dia . "','" .$hora . "','" .$_SERVER['argv'][2]."','".$_SERVER['argv'][3]."','".$_SERVER['argv'][4]."')";
+	#echo $insert . "\n";
+	$resultado = mysql_query($insert) or die (mysql_error());
+	mysql_close($conexion);
+}
+?>

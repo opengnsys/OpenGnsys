@@ -1,0 +1,743 @@
+#!/bin/bash
+###########################################################
+#####librerias de Deployment v0.0.8r5 para Advanced Deploy enViorenment###########
+# Liberado bajo licencia GPL <http://www.gnu.org/licenses/gpl.html>################
+############# 2008 Antonio Doblas Viso  adv@uma.es  ##########################
+########### Universidad de Malaga (Spain)############################
+##########################################################
+
+function SetDefaultStartpage () {
+if [ $# = 2 ]
+then
+	processtart=`WhatsTime`
+	${REPO}/admin/procedimientos/TareasServidor.php SetDefaultStartpage $1 $2
+	parametros="$*"
+	howlong=`HowLongHasWorked $processtart`
+	${REPO}/admin/procedimientos/Log "$IP" "$howlong" "SetDefaultStartpage" "$parametros" 
+else 
+	Msg "error de sintaxis: SetDefaultStartpage default.sh \$IP" red
+return
+fi
+}
+
+
+function ConnectToRepo () {
+if [ $# != 3 ]
+then
+	Msg "sintaxis: CConnectToRepo <iprespositorio> <pathbase> 		<nombreimagen.compresion>" red
+	Msg "ejemplo:	ConnectToRepo	      \$IP              hdimages/pruebas/   base.gzip" red
+	Msg " en iprepositorio admite cualquier ip de un servdior EAC, se llama a la funcion MountRepo ip" red
+fi
+if [ $# = 3 ]
+then
+case $1 in
+		$IPservidor)
+		camino=$REPO$2$3;;
+		"/var/EAC/")
+		camino=$REPO$2$3;;
+		$IP)
+		MountPartition CACHE > /dev/null;
+		camino=${CACHE}${REPO}$2$3;;
+		$CACHE)
+		MountPartition CACHE;
+		camino=${CACHE}${REPO}$2$3;;
+		*)
+		MountRepo $1;
+		camino=${REPOALT}${REPO}$2$3;;
+	esac
+echo $camino;
+fi
+}
+
+
+function CreateImageFromPartition () {
+if [ $# != 5 ]
+then
+	Msg "sintaxis: CreateImageFromPartition <ndisco> <nparticion> <iprespositorio> <pathbase> 		<nombreimagen.compresion>" red
+	Msg "ejemplo: CreateImageFromPartition 	1  		1 		      \$IP              hdimages/pruebas/   base.gzip" red
+	Msg " en iprepositorio admite cualquier ip de un servdior EAC, se llama a la funcion MountRepo ip" red
+fi
+if [ $# = 5 ]
+then
+	processtart=`WhatsTime`
+	#clean green
+	disco=`Disk $1 $2`
+	UmountPartition $1 $2
+		#echo determinando tipo de Sistema Operativo y consulando la variable global $CloneImageNTFS:  $fs
+	fs=`TypeFS $disco`
+	case $fs in
+				"NTFS")
+					case $CloneImageNTFS in
+						"ntfsclone")
+							imaged="ntfsclone --force --save-image -O - $disco | "
+							program=ntfsclone
+							;;
+						"partimage")
+							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout |"
+							program=partimage
+							;;
+						"partimage-ng")
+							echo "partimage-ng" 
+							imaged="partimage-ng save $disco stdout"
+							program=partimage-ng
+							;;
+					esac
+				;;
+				EXT[23])
+					case $CloneImageEXT3 in
+						"partimage")
+							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout |"
+							program=partimage
+						;;
+					esac
+				;;
+		esac
+
+	#metodo de compresion.
+	CompresionImage=`echo $5 | cut -f2 -d.`
+		case $CompresionImage in
+			"gzip")
+				comando="$imaged gzip -c >"
+			;;
+			"lzop")
+				comando="$imaged lzop >"
+			;;			
+		esac
+		
+	#. determnamos el fichero donde se almacenará la image
+	camino=`ConnectToRepo $3 $4 $5`
+	MkdirPath $camino
+	sleep 1
+	#preparamos y ejecutamos el comanod a realizar	
+	Msg "Creando imagen particion $disco programa $program  compresion $CompresionImage en el repositorio $3" green
+	comando="$comando ${camino}-$2"
+	echo $comando > /var/tmp/run.sh
+	sh /var/tmp/run.sh
+	unset comando
+	#creamos el log
+	parametros="$*"
+	howlong=`HowLongHasWorked $processtart`
+	${REPO}/admin/procedimientos/Log "$IP" "$howlong" "CreateImageFromPartition" "$parametros" 
+	#iniciamos la creacion del torrent
+	Msg "Iniciando la creacion del punto torrent con CreateTorrentFromImage ip=$3 path=$4 image=$5-$2" green
+	CreateTorrentFromImage $3 $4 $5-$2
+	# iniciacmos el putno mcast
+	Msg "creando un punto mcast ${camino}-$2.mcast" green
+	echo "program;$program" >  ${camino}.mcast
+	echo "compresion;$CompresionImage" >> ${camino}.mcast
+	echo "fsimage;$fs" >> ${camino}.mcast
+	
+	#UmountRepo $3
+fi
+}
+
+
+
+
+
+
+function CreateTorrentFromImage () {
+if [ $# = 3 ]
+then
+	processtart=`WhatsTime`
+	unset camino
+	case $1 in
+		$IPservidor)
+			camino=$REPO$2$3;
+			echo $camino
+			IfFileExist $camino.torrent && Msg "elimando torrent previo $camino.torrent " red && rm $camino.torrent
+			${REPO}/admin/procedimientos/TareasServidor.php CreateTorrentFromImage $camino $1;
+		;;
+		$IP)
+			MountPartition CACHE;
+			camino=${CACHE}${REPO}$2$3;
+			echo ctorrent -t $camino -u http://$1:1234/announce -s $camino.torrent;
+			ctorrent -t $camino -u http://$1:1234/announce -s $camino.torrent;
+		;;
+		*)
+			MountRepo $1;
+			camino=$REPO$2$3;
+			echo servidor $REPOALT subpath $camino;
+			IfFileExist $REPOALT$camino.torrent && Msg "elimando torrent previo $REPOALT$camino.torrent" red && rm $REPOALT$camino.torrent;
+			${REPO}/admin/procedimientos/TareasServidor.php CreateTorrentFromImage $camino $1;
+			UmountRepo $1;
+		;;
+	esac
+	parametros="$*"
+	howlong=`HowLongHasWorked $processtart`
+	${REPO}/admin/procedimientos/Log "$IP" "$howlong" "CreateTorrentFromImage" "$parametros" 
+else
+        Msg "CreateTorrentFromImage str_IPRepositorio str_PathImagen str_NombreImagen-1" red
+        Msg "CreateTorrentFromImage $IPservidor hdimages/pruebas/ base-1" red
+        return
+fi
+}
+
+
+
+
+function DetectMethodTransfer () {
+if [ $# = 0 ]
+then
+        Msg "Devuelve metodo transfer " red
+        Msg "sintaxis: 		DetectMethodTransfer    1str_nameFile" red
+        Msg "return unicast:  DetectMethodTransfer  	 xp1.gzip-1        " orange
+        Msg "return torrent:  DetectMethodTransfer    xp1.gzip-1.torrent     " orange
+        Msg "return mcast:    DetectMethodTransfer    xp1.gzip-1.mcast     " orange
+fi
+if [ $# = 1 ]
+then
+#unset imagefile1
+#unset imagerestore
+	if [ `echo $1 | grep mcast` ] 
+	then 
+		echo mcast
+		#export imagefile1=`echo $1 | sed s/.mcast//g`
+		#imagerestore=`echo $1 | sed s/.mcast//g`
+	else if [ `echo $1 | grep torrent` ]
+		then
+			echo torrent
+		#	export imagefile1=`echo $1 | sed s/.torrent//g`
+		#	imagerestore=`echo $1 | sed s/.torrent//g`
+			#echo $imagefile1
+		else
+			echo ucast
+		#	export imagefile1=`echo $1`
+		fi	
+	        #export imagefile=`echo $1 | sed s/.torrent//g | sed s/.torrent//g `
+	fi
+fi
+}
+
+function GetImageFile () {
+if [ $# = 0 ]
+then
+        Msg "Devuelve el nombre de la imagen sin su extension de transferencia" red
+        Msg "sintaxis: 		GetImageFile    1str_nameFile" red
+        Msg "return xp1.gzip-1:  GetImageFile  	 xp1.gzip-1        " orange
+        Msg "return xp1.gzip-1:  GetImageFile    xp1.gzip-1.torrent     " orange
+        Msg "return xp1.gzip-1:    GetImageFile   xp1.gzip-1.mcast     " orange
+fi
+if [ $# = 1 ]
+then
+        export imagefile=`echo $1 | sed s/.torrent//g | sed s/.mcast//g `
+	echo $imagefile
+fi
+}
+
+
+function UpdateCache () {
+if [ $# = 0 ]
+then
+        Msg "sintaxis: UpdateCache    1str_PathRepositoryOrigen      2str_PahtImagen          3str_nameImage" red
+        Msg "ejemplo Unicast:  UpdateCache    \$IPservidor     	hdimages/			xp1.gzip-1        " orange
+        Msg "ejemplo Torrent:  UpdateCache    \$IPservidor     	hdimages/			xp1.gzip-1.torrent     " orange
+        Msg "ejemplo Mcast:    UpdateCache    \$IPservidor     	hdimages/			xp1.gzip-1.mcast     " orange
+fi
+if [ $# = 3 ]
+then	
+	processtart=`WhatsTime`
+	# obtenemos el metodo de transferencia
+	metodo=`DetectMethodTransfer $3`
+	# obtenemos el nombre de la imagen que tendra en cache: sin punto torrent ni punto mcast
+	unset imagerestore
+	export imagerestore=`GetImageFile $3`	
+	
+	#obtenemos el punto base del servidor
+	case $1 in
+	$IPservidor)
+		pointserver=$REPO;;
+	*)
+		MountRepo $1;
+		pointserver=$REPOALT$REPO;
+		echo $pointserver;
+	;;
+	esac
+
+	# preparamamos la particion cache
+	MountPartition CACHE > /dev/null
+	MkdirPath $CACHE$REPO$2
+	
+	#comprobamos si la imagen está en cache
+	if $(IfFileNotExist "$CACHE$REPO$2$imagerestore")
+	then
+		case $metodo in
+			mcast)			
+				pathimagenorigen=${pointserver}$2${imagerestore};	#la imagen que utilizara el servidor multicast 		
+				pathimagendestino=${CACHE}${REPO}$2${imagerestore};
+				Msg "UpdateCache via MCAST con origen= $pathimagenorigen y destino $pathimagendestino " blue;
+				${REPO}/admin/procedimientos/TareasServidor.php Direct$metodo ${pathimagenorigen} $IPservidor
+				udp-receiver -p "mbuffer -m 20M " --file ${pathimagendestino};
+				#udp-receiver -p "mbuffer -m 20M " --nokbd --file ${pathimagendestino};
+			;;
+			torrent)		
+				pathimagenorigen=${pointserver}$2$3;
+				pathimagendestino=${CACHE}${REPO}$2${imagerestore};
+				${REPO}/admin/procedimientos/TareasServidor.php Enviotorrent ${pathimagenorigen} $IPservidor
+			
+				Msg "UpdateCache via Per2Per con origen= $pathimagenorigen y destino $pathimagendestino " blue;
+				echo "ctorrent $pathimagenorigen -s $pathimagendestino -b ${pathimagendestino}.bf -e 0 "
+				ctorrent $pathimagenorigen -s $pathimagendestino -b ${pathimagendestino}.bf -e 0 
+			;;
+			ucast)
+				pathimagenorigen=${pointserver}$2${imagerestore};	#la imagen que utilizara el servidor multicast 		
+				pathimagendestino=${CACHE}${REPO}$2${imagerestore};
+				Msg "UpdateCache via UniCAST con origen= $pathimagenorigen y destino $pathimagendestino " blue;
+				cp -v $pathimagenorigen $pathimagendestino
+			;;
+			*)
+				Msg "Sistema de transferenica aun no soportado" red;
+			;;
+		esac
+	
+	else
+		Msg "La imagen $imagerestore ya está en la CACHE local" blue 
+		#CheckImage $IP $2 $imagerestore
+	fi
+	UmountPartition $CACHE
+	parametros="$*"
+	howlong=`HowLongHasWorked $processtart`
+	${REPO}/admin/procedimientos/Log "$IP" "$howlong" "UpdateCache" "$parametros" 
+fi
+}
+
+function CheckImageTORRENT () { 
+if [ $# = 0 ]
+then
+	Msg "sintaxis: CheckImageTORRENT    1str_PathRepositoryOrigen      2str_PahtImagen          3str_nameImage" red
+	Msg "ejemplo Unicast:  UpdateCache    \$IPservidor     	hdimages/			xp1.gzip-1        " orange
+	Msg "ejemplo Torrent:  UpdateCache    \$IPservidor     	hdimages/			xp1.gzip-1.torrent     " orange
+	Msg "ejemplo Mcast:    UpdateCache    \$IPservidor     	hdimages/			xp1.gzip-1.mcast     " orange
+fi
+
+gzip -tv 
+}
+
+
+
+
+function CheckImage () {
+if [ $# != 3 ]
+then
+	Msg "sintaxis: CheckImage    1str_PathRepositoryOrigen      2str_PahtImagen          3str_nameImage" red
+	Msg "ejemplo   CheckImage  \$IPservidor     	hdimages/			xp1.gzip-1        " orange
+else
+
+case $1 in
+	$IP)
+		compresion=`DetectCompresionImage $CACHE$REPO$2$3`;
+		case $compresion in
+		lzop)
+			lzop -t <  $CACHE$REPO$2$3;
+			echo lzop -t <  $CACHE$REPO$2$3
+			;;
+		gzip)
+			gzip -tfv $CACHE$REPO$2$3;
+			echo gzip -tfv $CACHE$REPO$2$3;
+			;;
+		esac		
+	;;
+	$IPservidor)
+		compresion=`DetectCompresionImage $REPO$2$3`;
+		case $compresion in
+		lzop)
+			lzop -t <  $REPO$2$3;
+			;;
+		gzip)
+			gzip -tfv $REPO$2$3;
+			;;
+		esac	
+	;;
+esac
+#echo CheckImage`FormatToUpper $compresion` $1 $2 $3
+#CheckImage`FormatToUpper $compresion` $1 $2 $3
+		
+fi
+}
+
+
+function DetectaProgramaImagen () {
+if [ $# != 1 ]
+then
+	Msg "error de sintaxis: DetectaProgramaImagen str_repositorio str_directorio str_imagen" red
+	#Msg "ejemplo: DetectaProgramaImagen $CACHE/hdimages/imagen1.bz2" orange
+else
+	tipo=`file -z $1 | awk '{print $2}'`
+	case $tipo in
+		"PartImage")
+			echo partimage;;
+		"data")
+			echo ntfsclone;;
+		"BitTorrent")
+			echo bittorrent;;
+		"lzop")
+			echo lzop;;
+		"x86")
+			echo sparse;;
+		*)
+		;;
+	esac
+
+fi
+}
+
+function DetectaFSImagen () {
+if [ $# != 1 ]
+then
+	Msg "error de sintaxis: DetectaFSImagen str_repositorio+pathimagen" red
+	Msg "ejemplo: DetectaFSImagen $CACHE/hdimages/imagen1.bz2" orange
+else
+	programa=`DetectaProgramaImagen $1`
+	case $programa in
+		"ntfsclone")
+			echo ntfs;;
+		"partimage")
+			fs=`file -z $1 | awk '{print $9}'`;
+			echo $fs;;
+		*)
+			echo unknow;
+		;;
+	esac
+fi
+}
+
+
+function DetectCompresionImage () {
+if [ $# != 1 ]
+then
+	Msg "error de sintaxis: DetectCompresionImage str_repositoriostr_dir str_imagen" red
+	Msg "ejemplo: DetectcompresionImage $CACHE/hdimages/imagen1.bz2" orange
+else
+	compressor=`file $1 | cut -f2 -d' '`
+	echo $compressor
+fi
+}
+
+
+function RestorePartitionFromImage () {
+if [ $# != 5 ]
+then
+        Msg "          nuevo sintaxis:          RestorePartitionFromImage     int_disk int_part   str_IPrepository    str_PathReporitory     str_PathImagen" red
+        Msg "ej. desde cache:              RestorePartitionFromImage       1       1        \$IP        	   hdimages/             imagen1.bz2" orange
+        Msg "ej. desde servidor(unicast):  RestorePartitionFromImage       1       1        \$IPservidor    	   hdimages/             imagen1.bz2" orange
+        Msg "ej. (Multicast):    		   RestorePartitionFromImage       1       1        \$IPservidor        hdimages/             imagen1.bz2.mcast" orange
+else
+processtart=`WhatsTime`
+# particion destino
+disco=`Disk $1 $2`
+UmountPartition $1 $2 > /dev/null
+
+
+#detectamos el metodo de transferencia y obtenemos $imagefile con el nombre final de la imagen (sin .mcast)
+export metodo=`DetectMethodTransfer $5`
+export imagefile=`GetImageFile $5`
+
+case $3 in
+	$IPservidor)
+		if [ "$metodo" = 'mcast' -o "$metodo" = 'torrent' ]
+		then 
+			Msg "Solicitando una restauracion directar por Multicast con   Direct$metodo $REPO$4$imagefile $IPservidor" green;
+			${REPO}/admin/procedimientos/TareasServidor.php Direct$metodo $REPO$4$imagefile $IPservidor;
+			
+			#obtenemos la metainfo del punto mcast
+		        program=`cat $REPO$4${imagefile}.mcast | grep program | cut -f2 -d';'`
+		        fs=`cat $REPO$4${imagefile}.mcast | grep fsimage | cut -f2 -d';'`
+			compresion="`cat $REPO$4${imagefile}.mcast | grep compresion | cut -f2 -d';'` -dc"			
+			#test $program = 'partimage' &&  udp-receiver -p "mbuffer -m 20M " --nokbd | $compresion  | partimage -f3 -B gui=no restore $disco stdin;
+			Msg "Restaurando la PARTICION:$disco con FILESYSTEM:$fs PROGRAMA:$program COMPRESION:$compresion.  METODO:MultiCAST " green;
+			test $program = 'partimage' &&  udp-receiver -p "mbuffer -m 20M " | $compresion  | partimage -f3 -B gui=no restore $disco stdin;
+			test $program = 'ntfsclone' &&  udp-receiver -p "mbuffer -m 20M " | $compresion  | ntfsclone -r -O $disco -;
+			
+		fi
+		if [ "$metodo" = 'ucast' ]
+		then 
+			# obtenemos los datos de la restauracion programa y sistema de archvios.
+		        program=`DetectaProgramaImagen $REPO$4$imagefile`
+			fs=`DetectaFSImagen $REPO$4$imagefile`
+			compresion=`DetectCompresionImage $REPO$4${imagefile}`
+			
+			Msg "Restaurando la PARTICION:$disco con FILESYSTEM:$fs PROGRAMA:$program COMPRESION:$compresion.  METODO:UniCAST " green;
+			case $program in
+				partimage)
+					#test $program = 'partimage' &&  $compresion -dc ${REPO}$4$5 | $program -f3 -B gui=no restore $disco stdin;
+					$compresion -dc ${REPO}$4$5 | $program -f3 -B gui=no restore $disco stdin;
+				;;
+				ntfsclone)
+					#test $program = 'ntfsclone' &&  $compresion -dc ${REPO}$4$5 | $program --restore-image --overwrite $disco - ;
+					$compresion -dc ${REPO}$4$5 | $program --restore-image --overwrite $disco - ;
+				;;
+				lzop)
+					#if [ $program = 'lzop' ]
+					#then
+					#$compresion -dc ${REPO}$4$5 | partimage -B gui=no restore $disco stdin || $compresion -dc ${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
+					#fi
+				$compresion -dc ${REPO}$4$5 | partimage -B gui=no restore $disco stdin || $compresion -dc ${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
+				;;
+			esac
+		fi
+	;;
+	$IP)
+		#detectamos el programa para restaurar la imagen.
+		MountCache;
+		if IfFileExist ${CACHE}$REPO$4$imagefile
+		then
+			# obtenemos los datos de la restauracion programa y sistema de archvios.
+			program=`DetectaProgramaImagen ${CACHE}$REPO$4$imagefile`;
+			fs=`DetectaFSImagen ${CACHE}$REPO$4$imagefile`
+			compresion=`DetectCompresionImage ${CACHE}$REPO$4${imagefile}`
+			Msg "Restaurando la PARTICION:$disco con FILESYSTEM:$fs PROGRAMA:$program COMPRESION:$compresion.  METODO:allocatin from cache " green;
+			case $program in
+				partimage)
+					echo partimage
+					$compresion -dc ${CACHE}${REPO}$4$imagefile | $program -f3 -B gui=no restore $disco stdin; 
+				;;
+				ntfsclone)
+					echo ntfsclone
+					$compresion -dc ${CACHE}${REPO}$4$imagefile | $program --restore-image --overwrite $disco - ;
+				;;
+				lzop)
+					echo lzop
+					$compresion -dc ${CACHE}${REPO}$4$5 | partimage -f3 -B gui=no restore $disco stdin || $compresion -dc ${CACHE}${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
+				;;
+			esac
+			UmountPartition $CACHE;
+		else 
+			Msg " desarrollar,imagen no encontrada intentando con un deploy " red	
+			return;
+		fi
+	;;
+	testear)
+		MountRepo $3;
+		if IfFileExist ${REPOALT}${REPO}$4$imagefile
+		then
+			# obtenemos los datos de la restauracion programa y sistema de archvios.
+			program=`cat ${REPOALT}$REPO$4${imagefile}.mcast | grep program | cut -f2 -d';'`
+			fs=`cat ${REPOALT}$REPO$4${imagefile}.mcast | grep fsimage | cut -f2 -d';'`
+			compresion="`cat $REPO$4${imagefile}.mcast | grep compresion | cut -f2 -d';'` -dc"
+			
+			Msg "el path de la imagen es ${REPOALT}${REPO}$4$imagefile   ha sido generada con el soft $program su filesystem es $fs" green
+			test $program = 'partimage' &&  $compresion ${REPOALT}${REPO}$4$imagefile | $program -f3 -B gui=no restore $disco stdin; 
+			test $program = 'ntfsclone' &&  $compresion ${REPOALT}${REPO}$4$imagefile | $program --restore-image --overwrite $disco - ;
+			UmountRepo $3;
+		else 
+			echo "imagen no encontrada"	
+			return;
+		fi
+		return
+	;;
+esac
+parametros="$*"
+
+howlong=`HowLongHasWorked $processtart`
+
+${REPO}/admin/procedimientos/Log "$IP" "$howlong" "RestorePartitionFromImagen" "$parametros" 
+fs=`TypeFS $1 $2`
+case $fs in
+	NTFS)
+		SetPartitionType $1 $2 NTFS
+		AmpliarFileSystemNT $1 $2 
+	;;
+	EXT3)
+		SetPartitionType $1 $2 EXT3
+	;;
+esac
+fi
+}
+
+function DeployPartitionFromImage () {
+if [ $# != 5 ]
+then
+	Msg "           sintaxis:        DeployPartitionFromImage     int_disk int_part   str_IPrepository    str_PathReporitory     str_PathImagen" red
+	Msg "ej. desde cache:              DeployPartitionFromImage       1       1        \$IP        	   hdimages/             imagen1.bz2" orange
+	Msg "ej. desde servidor(unicast):  DeployPartitionFromImage       1       1        \$IPservidor    	   hdimages/             imagen1.bz2" orange
+	Msg "ej. (torrent):   	DeployPartitionFromImage       1       1        \$IPservidor        hdimages/             imagen1.bz2.torrent" orange
+	Msg "ej. (Multicast):    DeployPartitionFromImage       1       1        \$IPservidor        hdimages/             imagen1.bz2.mcast" orange
+else
+	# desmontamos particion destino
+	UmountPartition $1 $2 > /dev/null
+	
+	#Msg "llamada a UpdateCache  \$IPservidor \$path \$imagen"
+	UpdateCache $3 $4 $5
+
+	
+	#imagerestore es la imagen devuelta por UpdateCache
+	RestorePartitionFromImage $1 $2 $IP $4 $imagerestore
+fi
+}
+
+RestorePartitionFromPartition () {
+if [ $# != 6 ]
+then
+        Msg "           sintaxis:          RestorePartitionFromPartition  IPdestino int_disk_desti int_disk_destino IPorigen int_disk_orign int_parti_orign" red  
+	Msg " ejemplo RestorePartitionFromPartition 172.16.72.34 1 1 172.16.72.34 1 1" red
+else
+	processtart=`WhatsTime`
+	## obtenemos las variables de discoorigen discodestino
+	SourceDisk=`Disk $5 $6`
+	TargetDisk=`Disk $2 $3`
+				#UmountPartition $4 $5
+				#origen=`Disk $4 $5`
+
+
+
+## comprobar si operacion en el mismo equipo
+	if [ "$1" = "$4" ]
+		then
+			mode=local				
+		else 
+			mode=remote
+	fi
+echo $mode
+## realizar la operacion segun el modo
+	case $mode in
+		local)
+			UmountPartition $2 $3 > /dev/null
+			UmountPartition $5 $6 > /dev/null
+		echo # de particion a particion:  
+		echo $SourceDisk
+			SourceFS=`TypeFS $SourceDisk`
+			echo $SourceFS
+			case $SourceFS in
+				NTFS)
+				echo $SourceDisk  $TargetDisk
+					case $CloneImageNTFS in
+						ntfsclone)
+							ntfsclone -f -s -O - $SourceDisk | lzop | mbuffer -m 20M | lzop -dc | ntfsclone -r -O $TargetDisk -
+						;;
+						partimage)
+							partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $SourceDisk stdout | lzop | mbuffer -m 20M | lzop -dc | partimage -f3 -B gui=no restore $TargetDisk stdin
+						#&&  udp-receiver -p "mbuffer -m 20M " | $compresion  | partimage -f3 -B gui=no restore $disco stdin;
+						;;
+					esac
+				;;
+				EXT3)
+					case $CloneImageEXT3 in
+						partimage)
+							partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $SourceDisk stdout | lzop | mbuffer -m 20M | lzop -dc | partimage -f3 -B gui=no restore $TargetDisk stdin
+						;;
+						*)
+							echo aun no desarrollado
+						;;
+					esac
+				;;
+			esac		
+		;;
+		remote)
+			case $4 in
+			$IP)
+				echo "Enviando por Multicast la partition $5 $6"
+				UmountPartition $5 $6 > /dev/null
+					#1opciion#########udp-sender --pipe 'mbuffer -m 20M' --full-duplex --file $origen --ttl 2
+					#2 opcion  ########ntfsclone -s -O - $origen | udp-sender --pipe 'mbuffer -m 20M' 
+					#ntfsclone -f -s -O - $SourceDisk | lzop | udp-sender --pipe 'mbuffer -m 20M'  --max-bitrate 70M 
+					partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $SourceDisk stdout | lzop | udp-sender --pipe 'mbuffer -m 20M' 
+				;;
+			*)
+				echo "Recibiendo en $2 $3 la particion $5 $6 del equipo $3"
+				UmountPartition $2 $3 > /dev/null				
+				#1 opcion ######udp-receiver --pipe 'mbuffer -m 20M' --file $destino
+				#2opcion ###### udp-receiver --pipe 'mbuffer -m 20M' | ntfsclone -r -O $destino - ;
+				#udp-receiver --pipe 'mbuffer -m 20M' | lzop -dc | ntfsclone -r -O $TargetDisk - ;				
+				udp-receiver -p 'mbuffer -m 20M' | lzop -dc | partimage -f3 -B gui=no restore $TargetDisk stdin;
+						
+			;;
+			esac
+		;;
+	esac
+	parametros="$*"
+	howlong=`HowLongHasWorked $processtart`
+	${REPO}/admin/procedimientos/Log "$IP" "$howlong" "RestorePartitionFromPartition" "$parametros" 		
+fi
+
+}
+
+
+
+
+function OpenArchiveZIP () {
+if [ $# != 4 ]
+then
+        Msg "           sintaxis:          OpenArchiveZIP  ficherocomprimido int_disk  int_partition str_directorio" red  
+	Msg " ejemplo OpenArchiveZIP /mnt/sda3/fichero1.tgz 1 1 /programas" red
+else
+	disco=`MountPartition $2 $3`
+	echo ${disco}/$4	
+	MkdirPath ${disco}/$4
+	tar xzvf $1 -C ${disco}$4
+	fi
+}
+
+function OpenArchiveNT () {
+mount -t ntfs -o loop $1 $2
+}
+
+function Synchronize () {
+	#rsync -av --delete /mnt/virtual/ /mnt/windows/
+	rsync -av --delete $1 $2
+}
+
+function MakeOffline() {
+if [ $# != 2 ]
+then
+        Msg "           sintaxis:          MakeOffline   int_disk  int_partition" red  
+	Msg " ejemplo MakeOffline 1 3 " red
+	Msg " ejemplo MakeOffline \$(DiskEAC \`FindCache\`)"      
+else
+	processtart=`WhatsTime`
+	PARTICION=`MountPartition $1 $2`	
+	DISPOSITIVO=/dev/`IdPartition $1 $2`
+	
+Msg "Instalando el Boot Agent para Offline en $DISPOSITIVO, accedido temporalmente desde $PARTICION" red
+	cp -axv /. ${PARTICION}/.
+	cp -axv /dev/. ${PARTICION}/dev/.
+	rsync -avr --exclude="hdimages" /var/EAC/admin/ ${PARTICION}/var/EAC/admin/	
+
+Msg "configurando fstab para que el raiz sea $DISPOSITIVO" red
+	echo "proc		/proc	proc		defaults	0	0" > ${PARTICION}/etc/fstab
+	echo "$DISPOSITIVO	/	ext3		defaults	0	0" >> ${PARTICION}/etc/fstab
+
+Msg " configurar /etc/network/interfaces para la interfaz eth0 con ip $IP y nombre `hostname`" red
+	echo "auto lo" > ${PARTICION}/etc/network/interfaces
+	echo "iface lo inet loopback" >> ${PARTICION}/etc/network/interfaces
+	echo "auto eth0" >> ${PARTICION}/etc/network/interfaces
+	echo "iface eth0 inet static" >> ${PARTICION}/etc/network/interfaces
+	echo "address $IP" >> ${PARTICION}/etc/network/interfaces
+	echo "netmask 255.255.255.0" >> ${PARTICION}/etc/network/interfaces
+	echo "gateway 172.16.72.254" >> ${PARTICION}/etc/network/interfaces
+	echo "`hostname`" >> ${PARTICION}/etc/hostname
+	
+	
+Msg "instalando la primera etapa del grup en el bootsector de la particion y la segunda en el disco $1 $2" red
+	Msg "se utiliza una llamada a InstallGrub PARTITION $1 $2 " red
+        InstallGrub MBR $1 $2	
+	Msg "se utiliza una llamada a ConfGrub $1 $2 " red
+	ConfGrub $1 $2
+	SetPartitionType $1 $2 EXT3
+	SetPartitionActive $1 $2
+fi
+parametros="$*"
+howlong=`HowLongHasWorked $processtart`
+${REPO}/admin/procedimientos/Log "$IP" "$howlong" "MakeOffline" "$parametros" 
+}
+
+
+
+function MountChrootEACclient {
+	mount -t proc none /var/EAC/nfsroot/stable/proc
+mount -t sysfs none /var/EAC/nfsroot/stable/sys
+mount -o bind /dev /var/EAC/nfsroot/stable/dev
+echo "entrando en el entorno de EAC client, para salir tecla exit"
+chroot /var/EAC/nfsroot/stable
+}
+
+function UmountChrootEACclient
+{
+umount /var/EAC/nfsroot/stable/proc
+umount /var/EAC/nfsroot/stable/sys
+umount /var/EAC/nfsroot/stable/dev
+}
+
+function MakePhotoConsole {
+fbgrab ${REPO}hosts/${IP}.png
+}
+

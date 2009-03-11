@@ -1,0 +1,102 @@
+#!/usr/bin/php
+<?
+############################################################
+###### EACpxe  v0.0.8r5 para Advanced Deploy enViorenment###########
+# Liberado bajo licencia GPL <http://www.gnu.org/licenses/gpl.html>################
+############## 2008 Antonio Doblas Viso##########################
+############ Universidad de Malaga (Spain)############################
+###########################################################
+# str_boot_label str_ip
+#echo "consultando configuracion en /var/EAC/admin/config/parametrosBD.php";
+require("/var/EAC/admin/config/EAC.conf");
+
+$boot=($_SERVER['argv'][1]);
+$ip=($_SERVER['argv'][2]);
+
+echo $ip;
+echo $boot;
+$conexion=mysql_connect(SQL_HOST_LOCAL, SQL_USER, SQL_PASS) or die ('no se ha podido conectar con mysql');
+mysql_select_db(DATABASE, $conexion);
+
+$peticion="select * from equipos where ip='".$ip . "'";
+$resultparameters = mysql_query($peticion);
+$parameters = mysql_fetch_assoc($resultparameters);
+
+$mac=$parameters["mac"];
+$vga=$parameters["vga"];
+$acpi=$parameters["acpi"];
+$pci=$parameters["pci"];
+echo $mac;
+echo $vga;
+echo $acpi;
+echo $pci;
+
+mysql_free_result($resultparameters);
+
+## preparamos el fichero de arranque
+$macfile="01-" . str_replace(":","-",strtolower($mac));	
+$nombre_archivo=REPO . "tftpboot/pxelinux.cfg/" . $macfile;
+
+echo $macfile;
+if (!$gestion= fopen($nombre_archivo, 'w+')) 
+	{
+	echo "No se puede abrir el archivo ($nombre_archivo)";
+	return;
+	}						
+switch ($boot)
+	{
+	case "pxe":
+		fwrite($gestion, "Default boot\n");
+		fwrite($gestion, "LABEL boot\n");
+		fwrite($gestion, "KERNEL nfsrootstable/vmlinuz-2.6.27-7-server\n");
+		fwrite($gestion, "APPEND root=/dev/nfs initrd=nfsrootstable/initrd.img-2.6.27-7-server nfsroot=" .SQL_HOST .":/var/EAC/nfsroot/stable ip=dhcp ro vga=" . $vga . " acpi=" . $acpi . " pci=" .$pci ."\n");
+		$bootstatus="SUCCESFULL";
+		break;
+	case "1":
+		fwrite($gestion, "Default boot\n");
+		fwrite($gestion, "LABEL boot\n");
+		fwrite($gestion, "LOCALBOOT 0");  
+		$bootstatus="SUCCESFULL";
+		break;							
+	case "11":
+		fwrite($gestion, "Default boot\n");
+		fwrite($gestion, "LABEL boot\n");
+		fwrite($gestion, "kernel syslinux/chain.c32\n"); 							
+		fwrite($gestion, "append hd0 1\n");	
+		$bootstatus="SUCCESFULL";
+		break;							
+	case "12":
+		fwrite($gestion, "Default boot\n");
+		fwrite($gestion, "LABEL boot\n");
+		fwrite($gestion, "kernel syslinux/chain.c32\n"); 
+		fwrite($gestion, "append hd0 2\n");	
+		$bootstatus="SUCCESFULL";	
+		break;
+	case "13":
+		fwrite($gestion, "Default boot\n");
+		fwrite($gestion, "LABEL boot\n");
+		fwrite($gestion, "kernel syslinux/chain.c32\n"); 
+		fwrite($gestion, "append hd0 3\n");	
+		$bootstatus="SUCCESFULL";
+		break;
+		default:
+		$bootstatus="FAILED";
+		break;
+	}
+	fwrite($gestion, " \n");  
+	fclose($gestion); 
+	exec("chown www-data:www-data /tftpboot/pxelinux.cfg/". $macfile);
+	
+	
+	# actualizando el boot del cliente
+$query3="update equipos set arranque='" . $boot ."'  where mac='" .$mac . "'";
+$resultado = mysql_query($query3) or die (mysql_error());
+#system(REPO . "admin/procedimientos/Log " . SQL_HOST . "  ' 00:00 '  ' " . $ip . " solicita un SetDefaultBoot ' ' " . $boot . " " . $ip . " con resultado " .  $bootstatus ."'");
+
+
+
+
+
+
+
+?>		
