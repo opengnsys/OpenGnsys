@@ -5,8 +5,8 @@
    source /var/EAC/admin/librerias/Boot.lib 
    source /var/EAC/admin/librerias/Deploy.lib 
    source /var/EAC/admin/librerias/PostConf.lib 
-   RestorePartitionFromImage 1 1 $IPservidor hdimages/curso0809/ xp6-nosysprep.lzop-1.mcast
+   RestorePartitionFromImage 1 1 $IPservidor hdimages/XPBasico/ XPbasico.lzop-1.mcast
    MakePhotoConsole 
    SetDefaultBoot 11 $IP  
    SetDefaultStartpage default.sh $IP 
-   reboot
+   HDBoot 1 1

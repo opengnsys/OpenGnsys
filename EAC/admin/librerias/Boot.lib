@@ -64,9 +64,14 @@ case $tipo in
 		#kexec --debug  -l /mnt/${particion}/grub.exe --append=--config-file="find --set-root /ntldr; chainloader /ntldr";
         ;;
         EXT*|CACHE)
-		Msg "inciando linux en $particion" red;
-		kexec -l /mnt/${particion}/grub.exe --append=--config-file="find --set-root /sbin/init; configfile /boot/grub/menu.lst";;	
-		# kexec -l /mnt/${particion}/grub.exe;;
+		Msg "iniciando linux en $particion" red;
+		MountPartition $1 $2
+                # Suponemos que en la imagen hemos copiado el kernel con el que queremos 
+                # arrancar a /boot/vmlinuz y el initrd de la version adecuada a /boot/initrd
+                # PROBLEMA: La nomenclatura de la particion de arranque puede no coincidir
+                # en el kernel del cliente y en el que montamosi (variando de sda a hda). 
+                # No sé cómo podremos dar la varible del sistema de ficheros de inicio.
+		kexec -l /mnt/${particion}/boot/vmlinuz --initrd=/mnt/${particion}/boot/initrd --append='root=/dev/hda2'
 	esac
 kexec -e
 }

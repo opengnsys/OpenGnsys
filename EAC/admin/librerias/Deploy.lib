@@ -63,9 +63,9 @@ then
 	#clean green
 	disco=`Disk $1 $2`
 	UmountPartition $1 $2
-		#echo determinando tipo de Sistema Operativo y consulando la variable global $CloneImageNTFS:  $fs
 	fs=`TypeFS $disco`
-	case $fs in
+	        #echo determinando tipo de Sistema Operativo y consulando la variable global $CloneImageNTFS:  $fs
+	case "$fs" in
 				"NTFS")
 					case $CloneImageNTFS in
 						"ntfsclone")
@@ -84,10 +84,11 @@ then
 					esac
 				;;
 				EXT[23])
-					case $CloneImageEXT3 in
+					case $CloneImageEXT23 in
 						"partimage")
 							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout |"
 							program=partimage
+                                                        echo "imaged: $imaged"
 						;;
 					esac
 				;;
@@ -110,6 +111,7 @@ then
 	sleep 1
 	#preparamos y ejecutamos el comanod a realizar	
 	Msg "Creando imagen particion $disco programa $program  compresion $CompresionImage en el repositorio $3" green
+        echo "comando: $comando"
 	comando="$comando ${camino}-$2"
 	echo $comando > /var/tmp/run.sh
 	sh /var/tmp/run.sh
@@ -370,8 +372,13 @@ else
 			echo ntfsclone;;
 		"BitTorrent")
 			echo bittorrent;;
-		"lzop")
-			echo lzop;;
+		gzip|lzop)
+                        if $tipo -dc $1|head -1|grep -qi "^partimage"; then
+			        echo partimage
+                        else
+			        echo "$tipo"
+                        fi
+                        ;;
 		"x86")
 			echo sparse;;
 		*)
@@ -477,16 +484,34 @@ case $3 in
 		fi
 	;;
 	$IP)
+                echo "Restauramos desde cache"
 		#detectamos el programa para restaurar la imagen.
 		MountCache;
 		if IfFileExist ${CACHE}$REPO$4$imagefile
 		then
 			# obtenemos los datos de la restauracion programa y sistema de archvios.
 			program=`DetectaProgramaImagen ${CACHE}$REPO$4$imagefile`;
+                        if [ $program != "partimage" -a $program != "ntfsclone" ] 
+                        then
+                        echo "Formato de imagen no conocido"
+                        exit 2
+                        fi
 			fs=`DetectaFSImagen ${CACHE}$REPO$4$imagefile`
 			compresion=`DetectCompresionImage ${CACHE}$REPO$4${imagefile}`
 			Msg "Restaurando la PARTICION:$disco con FILESYSTEM:$fs PROGRAMA:$program COMPRESION:$compresion.  METODO:allocatin from cache " green;
-			case $program in
+			#case $program in
+			case $compresion in
+				lzop)
+					echo lzop
+                                        echo "test $program = 'partimage' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | partimage -f3 -B gui=no restore $disco stdin;"
+                                        test $program = 'partimage' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | partimage -f3 -B gui=no restore $disco stdin;
+                                        echo "test $program = 'ntfsclone' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | ntfsclone -r -O $disco -;"
+                                        # Linea siguiente mal, aunque no
+se cumpla hace el comando
+                                       # test $program = 'ntfsclone' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | ntfsclone -r -O $disco -;
+
+					#$compresion -dc ${CACHE}${REPO}$4$5 | partimage -f3 -B gui=no restore $disco stdin || $compresion -dc ${CACHE}${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
+				;;
 				partimage)
 					echo partimage
 					$compresion -dc ${CACHE}${REPO}$4$imagefile | $program -f3 -B gui=no restore $disco stdin; 
@@ -497,7 +522,10 @@ case $3 in
 				;;
 				lzop)
 					echo lzop
-					$compresion -dc ${CACHE}${REPO}$4$5 | partimage -f3 -B gui=no restore $disco stdin || $compresion -dc ${CACHE}${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
+                                        test $program = 'partimage' &&   $compresion  | partimage -f3 -B gui=no restore $disco stdin;
+                                        test $program = 'ntfsclone' &&   $compresion  | ntfsclone -r -O $disco -;
+
+					#$compresion -dc ${CACHE}${REPO}$4$5 | partimage -f3 -B gui=no restore $disco stdin || $compresion -dc ${CACHE}${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
 				;;
 			esac
 			UmountPartition $CACHE;
@@ -610,8 +638,8 @@ echo $mode
 						;;
 					esac
 				;;
-				EXT3)
-					case $CloneImageEXT3 in
+				EXT[23])
+					case $CloneImageEXT23 in
 						partimage)
 							partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $SourceDisk stdout | lzop | mbuffer -m 20M | lzop -dc | partimage -f3 -B gui=no restore $TargetDisk stdin
 						;;
