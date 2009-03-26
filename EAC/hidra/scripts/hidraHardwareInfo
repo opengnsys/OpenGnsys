@@ -1,0 +1,42 @@
+#!/bin/bash
+# Nombre:	hidraHardwareInfo
+# Descripcion:	Recopila información del inventario hardware del PC.
+# Formato:	hidraHardwareInfo
+# Salida:	TipoDispositivo:Modelo
+#	TipoDispositivo = { aud, cpu, dis, mem, net, vga }
+# Error:	No
+# Requisitos:	awk, hidraDisk
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - No compatible con EAC (probar el fichero de inventario,
+#			EAC incluye nuevos comandos de deteccion de hardware).
+# Autor:	Ramón Gómez, ETSII Univ. Sevilla
+# Fecha:	18/04/2008
+
+
+source $(dirname $0)/hidraEnviron
+
+# Tipo de CPU
+awk -F: '/model name/ {print "cpu="$2;}' /proc/cpuinfo 2>/dev/null
+# Cantidad de memoria
+awk -F: '/MemTotal:/ {print "mem="$2/1024" MB";}' /proc/meminfo 2>/dev/null
+# Discos internos
+for d in $(hidraDisk); do 
+    parted -s $d print | \
+	awk -F: '/Model/	{m=$2;}
+		 /^Disk/	{d=$2;}
+		 END { printf "dis=%s %s\n",m,d; }
+		'
+done
+# Tarjeta de sonido
+awk -F: '{if ($2!="") print "aud="$2;}' /proc/asound/cards 2>/dev/null
+# Tarjetas PCI (códigos y driver)
+# - Clase 2xx: red
+# - Clase 3xx: vídeo
+for pci in /sys/bus/pci/devices/*; do
+    awk -F= '	$1~/PCI_CLASS/	{if ($2~/^2/) c="net";
+				 if ($2~/^3/) c="vga";}
+		$1~/PCI_ID/	{i=$2}
+	    END {if (c!="") 
+		    printf ("%s=%s\n",c,tolower(i));
+	}' $pci/uevent 2>/dev/null
+done

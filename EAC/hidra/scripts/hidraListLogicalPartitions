@@ -1,0 +1,32 @@
+#!/bin/bash
+# Nombre:	hidraListLogicalPartitions
+# Descripcion:	Lista las particiones primarias de un disco.
+# Formato:	hidraListLogicalPartitions numdisco
+# Salida:	TipoPart:TamañoKB ...
+# 	TipoPart= { FAT32, NTFS, EXT3, LINUX-SWAP, CACHE, ...
+#		    EXTENDED, EMPTY, UNKNOWN }
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+# Requisitos:	sfdisk, awk, hidraDisk, hidraTypeFS
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatible con EAC: funcion no definida.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	26/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se recibe 1 parametro.
+[ $# != 1 ] && exit 1
+
+# Sustituye num. de disco por el dispositivo.
+DISCO="$(hidraDisk $1)" || exit $?
+
+# Procesar la salida de "sfdisk".
+sfdisk -d $DISCO | awk 'BEGIN {FS="[:=,]"}
+	$1~/[5-9]/ { if ($3!=0) {
+			tipo="";
+			sprintf("hidraTypeFS %s",$1)|getline tipo;
+			printf "%s:%d ", tipo, $5/2;
+		     }
+		   }
+	'

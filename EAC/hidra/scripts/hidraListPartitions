@@ -1,0 +1,21 @@
+#!/bin/bash
+# Nombre:	hidraListPartitions
+# Descripcion:	Meta-funcion para listar las particiones de un disco.
+# Formato:	hidraListPartitions numdisco
+# Salida:	Tipo=Valor
+# 	Mnemonico: { pri=primarias, log=logicas }
+#	Valor: lo especificado en las funciones.
+# Error:	Salida de error de la ultima funcion.
+# Requisitos:	hidraListPrimaryPartitions, hidraListarLogicalPartitions
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatible con EAC: sustituye a la funcion ListPartitons.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	26/03/2009
+
+source  $(dirname $0)/hidraEnviron
+
+DATOS=$(hidraListPrimaryPartitions $*) || exit $?
+[ -n "$DATOS" ] && echo "pri=$DATOS"
+DATOS=$(hidraListLogicalPartitions $*) || exit $?
+[ -n "$DATOS" ] && echo "log=$DATOS"
+exit 0

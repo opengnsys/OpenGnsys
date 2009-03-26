@@ -1,7 +1,7 @@
 #!/bin/bash
-# Nombre:	hidraMountPartition
+# Nombre:	hidraMount
 # Descripcion:	Monta una particion segun su tipo definido en la tabla del disco.
-# Formato:	hidraMountPartition numdisco numparticion
+# Formato:	hidraMount numdisco numparticion
 # Salida:	Directorio del punto de montaje.
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
