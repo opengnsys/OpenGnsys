@@ -1,0 +1,30 @@
+#!/bin/bash
+# Nombre:	hidraMountPartition
+# Descripcion:	Monta una particion segun su tipo definido en la tabla del disco.
+# Formato:	hidraMountPartition numdisco numparticion
+# Salida:	Directorio del punto de montaje.
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+#		3 - tipo de particion desconocido o no se puede montar.
+# Requisitos:	mount, awk, hidraDisk, hidraTypeFS
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Version inicial.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	26/05/2008
+# Version:	1.1 - Compatibilidad Con EAC.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	25/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 2 parametros.
+[ $# -ne 2 ] && exit 1
+
+# Sustituye num. de disco por el dispositivo.
+PART="$(hidraDisk $1 $2)" || exit $?
+
+# NOTAS: no se comprueba previamente el tipo de particion, la funcion Mount no devuelve errores.
+SAL=$(MountPartition $*)
+# Si la salida empieza por "/", se ha montado la particion
+echo $SAL
+

@@ -1,0 +1,57 @@
+#!/bin/bash
+# Nombre:	hidraTypeFS
+# Descripcion:	Devuelve el mnemonico con el tipo de particion.
+# Formato:	hidraTypeFS numdisco numparticion | dispositivo
+# Salida:	Mnemonico
+#	Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234],
+#			BIGDOS, HBIGDOS, VFAT, HVFAT, NTFS, HNTFS,
+#			CACHE, EMPTY, EXTENDED, UNKNOWN }
+# Error:	1 - formato incorrecto.
+#		2 - disco o particion no corresponden con un dispositivo.
+# Requisitos:	sfdisk, hidraDisk
+# Notas:	Solo ejecutable por root
+# Licencia:	GNU GPL
+# Version:	1.0 - Compatibilidad con EAC: sustituye a la funcion TypeFS.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	25/03/2009
+
+PATH=$PATH:$(dirname $0)
+
+# Error si no se reciben 1 o 2 parametros.
+[ $# -lt 1 -o $# -gt 2 ] && exit 1
+# Si solo hay 1 parametro, comprobar que es dispositivo (/dev/*).
+if [ $# = 1 ]; then
+    [ -n "${1%/dev/*}" ] && exit 1
+    DISCO="${1%%[0-9]}"
+    NPART="${1#$DISCO}"
+else
+# Si son 2 parametros, detectar el dispositivo.
+    DISCO="$(hidraDisk $1)" || exit $?
+    NPART="$2"
+fi
+[ -z "$DISCO" -o ! -b "$DISCO" ] && exit 2
+[ ! -b "$DISCO$NPART" ] && exit 2
+
+# Detectar id. de tipo de particion y codificar al mnemonico.
+ID=$(sfdisk --id $DISCO $NPART)
+case "$ID" in
+     0) 	TIPO="EMPTY" ;;
+     5) 	TIPO="EXTENDED" ;;
+     [6e])	TIPO="BIGDOS" ;;
+     7) 	TIPO="NTFS" ;;
+     [bc])	TIPO="VFAT" ;;
+     1[6e])	TIPO="HBIGDOS" ;;
+     17)	TIPO="HNTFS" ;;
+     1[bc])	TIPO="HVFAT" ;;
+     82)	TIPO="LINUX-SWAP" ;;
+     83)	TIPO="$(parted -s $DISCO print | awk -v var=$NPART '{if ($1==var) {print toupper($6)}}')"
+		TIPO=${TIPO:-"EXT3"}
+		;;
+     8e)	TIPO="LINUX-LVM" ;;
+     a7)	TIPO="CACHE" ;;
+     fd)	TIPO="$(parted -s $DISCO print | awk -v var=$NPART '{if ($1==var) {print toupper($6)}}')"
+		TIPO=RAID-${TIPO:-"EXT3"}
+		;;
+     *) 	TIPO="UNKNOWN" ;;
+esac
+echo $TIPO

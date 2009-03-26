@@ -1,0 +1,21 @@
+#!/bin/bash
+# Nombre:	hidraEnviron
+# Descripcion:	Define las variables del entorno de trabajo de Hidra.
+# Formato:	source hidraEnviron
+# Notas:	Solo ejecutable por root
+# Licencia:	GNU GPL
+# Version:	1.0 - Version inicial compatible con EAC
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	26/03/2009
+
+# Funciones EAC
+REPO=${REPO:-/var/EAC}
+if ! typeset -F Disk; then
+    for i in $REPO/admin/librerias/*.lib; do
+	source $i
+    done
+fi
+# Caminos de busqueda de comando.
+[ -z "$(echo $PATH|grep $REPO/admin)" ] && PATH=$PATH:$REPO/admin/procedimientos
+[ -z "$(echo $PATH|grep $REPO/hidra)" ] && PATH=$PATH:$REPO/hidra/scripts
+export PATH
