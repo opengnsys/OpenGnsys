@@ -8,14 +8,19 @@
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
 # Fecha:	26/03/2009
 
+# Directorios de EAC y de HIDRA.
+REPO=${REPO:-"/var/EAC"}
+HIDRADIR=${HIDRADIR:-"$REPO/hidra"}
+
 # Funciones EAC
-REPO=${REPO:-/var/EAC}
 if ! typeset -F Disk; then
-    for i in $REPO/admin/librerias/*.lib; do
-	source $i
-    done
+    if [ -d $REPO/admin/librerias ]; then
+	for i in $REPO/admin/librerias/*.lib; do
+	    source $i
+	done
+	[ -z "$(echo $PATH|grep $REPO/admin)" ] && PATH=$PATH:$REPO/admin/procedimientos
+    fi
 fi
 # Caminos de busqueda de comando.
-[ -z "$(echo $PATH|grep $REPO/admin)" ] && PATH=$PATH:$REPO/admin/procedimientos
-[ -z "$(echo $PATH|grep $REPO/hidra)" ] && PATH=$PATH:$REPO/hidra/scripts
-export PATH
+[ -z "$(echo $PATH|grep $HIDRADIR)" ] && PATH=$PATH:$HIDRADIR/scripts
+export PATH HIDRADIR

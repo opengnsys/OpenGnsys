@@ -8,7 +8,7 @@
 #			CACHE, EMPTY, EXTENDED, UNKNOWN }
 # Error:	1 - formato incorrecto.
 #		2 - disco o particion no corresponden con un dispositivo.
-# Requisitos:	sfdisk, hidraDisk
+# Requisitos:	sfdisk, parted, hidraDisk
 # Notas:	Solo ejecutable por root
 # Licencia:	GNU GPL
 # Version:	1.0 - Compatibilidad con EAC: sustituye a la funcion TypeFS.
@@ -33,7 +33,7 @@ fi
 [ ! -b "$DISCO$NPART" ] && exit 2
 
 # Detectar id. de tipo de particion y codificar al mnemonico.
-ID=$(sfdisk --id $DISCO $NPART)
+ID=$(sfdisk --id $DISCO $NPART 2>/dev/null)
 case "$ID" in
      0) 	TIPO="EMPTY" ;;
      5) 	TIPO="EXTENDED" ;;

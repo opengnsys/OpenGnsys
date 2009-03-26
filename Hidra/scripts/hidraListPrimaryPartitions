@@ -22,7 +22,7 @@ source $(dirname $0)/hidraEnviron
 DISCO="$(hidraDisk $1)" || exit $?
 
 # Procesar la salida de "sfdisk".
-sfdisk -d $DISCO | awk 'BEGIN {FS="[:=,]"}
+sfdisk -d $DISCO 2>/dev/null | awk 'BEGIN {FS="[:=,]"}
 	$1~/[1-4]/ { if ($3!=0) {
 			tipo="";
 			sprintf("hidraTypeFS %s",$1)|getline tipo;
