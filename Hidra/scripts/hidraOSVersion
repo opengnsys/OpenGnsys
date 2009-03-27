@@ -1,0 +1,47 @@
+#!/bin/bash
+# Nombre:       HidraOSVersion
+# Descripcion:  Muestra tipo y version de SO de la particion seleccionada.
+# Formato:      hidraOSVersion ndisco nparticion
+# Salida:       tipo:version
+# 	tipo : ( Linux, Windows )
+# Error:        1 - mal formato de ejecucion.
+#               2 - no existe el fichero de dispositivo.
+#		3 - fallo al montar la particion		
+# Requisitos:   awk, head, hidraMount, hidraTypeFS, hidraGetRegistryKey
+# Notas:        Solo ejecutable por root
+# Licencia:	GNU GPL
+# Version:      1.0 - Detecta Linux y Windows, no existe equivalente en EAC.
+# Autor:        Ramon Gomez - ETSII, Univ. Sevilla
+# Fecha:        27/03/2009
+
+source  $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 2 parametros.
+[ $# != 2 ] && exit 1
+
+# Montar la particion, si no lo estaba previamente.
+DIRMONT=$(hidraMount $1 $2) || exit $?
+#trap "hidraUnmount $DIRMONT" 1 2 3 6	### NO disponible aun
+trap "hidraUnmount $1 $2" 1 2 3 6
+
+case "$(hidraTypeFS $1 $2)" in
+    EXT[234] | REISERFS | REISER4)
+	TIPO="Linux"
+	# RedHat/Fedora o Ubuntu: comprueba si hay enlace simbolico.
+	REDHAT="$DIRMONT/etc/redhat-release"
+	[ -L $REDHAT ] && REDHAT="$DIRMONT/$(ls -l $REDHAT | awk '{print $11}')"
+	[ -f $REDHAT ] && VERSION="$(head -1 $REDHAT)"
+	UBUNTU="$DIRMONT/etc/lsb-release"
+	[ -L $UBUNTU ] && UBUNTU="$DIRMONT/$(ls -l $UBUNTU | awk '{print $11}')"
+	[ -f $UBUNTU ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $UBUNTU)"
+	;;
+    NTFS | HTNFS | VFAT | HVFAT)
+	TIPO="Windows"
+	# Windows: lee la version del registro.
+	VERSION=$(hidraGetRegistryKey $DIRMONT software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+	;;
+esac
+
+# Mostrar resultado.
+[ -n "$VERSION" ] && echo "$TIPO:$VERSION"
+

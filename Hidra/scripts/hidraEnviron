@@ -13,7 +13,7 @@ REPO=${REPO:-"/var/EAC"}
 HIDRADIR=${HIDRADIR:-"$REPO/hidra"}
 
 # Funciones EAC
-if ! typeset -F Disk; then
+if ! typeset -F Disk >/dev/null; then
     if [ -d $REPO/admin/librerias ]; then
 	for i in $REPO/admin/librerias/*.lib; do
 	    source $i

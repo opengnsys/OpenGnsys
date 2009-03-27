@@ -15,6 +15,8 @@
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
 # Fecha:	27/03/2009
 
+source $(dirname $0)/hidraEnviron
+
 # Error si no se reciben entre 2 y 5 parametros
 [ $# -lt 2 -o $# -gt 5 ] && exit 1
 
@@ -69,5 +71,5 @@ done
 
 ### Proceso de pruebas (quitar comentarios para trabajar).
 # Definir particiones.
-#sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null
+sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null
 rm $tmpsfdisk

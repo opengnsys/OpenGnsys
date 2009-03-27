@@ -1,14 +1,14 @@
 #!/bin/bash
-# Nombre:	hidraMount
+# Nombre:	hidraUnmount
 # Descripcion:	Monta una particion segun su tipo definido en la tabla del disco.
-# Formato:	hidraMount numdisco numparticion
-# Salida:	Directorio del punto de montaje.
+# Formato:	hidraUnmount numdisco numparticion
+# Salida:	(ninguna)
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - tipo de particion desconocido o no se puede montar.
-# Requisitos:	hidraDisk, MountPartition (EAC)
+# Requisitos:	hidraDisk, UmountPartition (EAC)
 # Notas:	Solo ejecutable por root
-# Version:	1.0 - Compatibilidad Con EAC: llama a la funcion MountPartition.
+# Version:	1.0 - Compatibilidad Con EAC: llama a la funcion UmountPartition.
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
 # Fecha:	25/03/2009
 
@@ -20,8 +20,6 @@ source $(dirname $0)/hidraEnviron
 # Sustituye num. de disco por el dispositivo.
 PART="$(hidraDisk $1 $2)" || exit $?
 
-# NOTAS: no se comprueba previamente el tipo de particion, la funcion MountPartition no devuelve errores.
-SAL=$(MountPartition $*)
-# Si la salida empieza por "/", se ha montado la particion
-echo $SAL
+# NOTAS: no se comprueba previamente el tipo de particion, la funcion UmountPartition no devuelve errores.
+UmountPartition $* >/dev/null
 

@@ -1,0 +1,31 @@
+#!/bin/bash
+# Nombre:       CaminoWindows
+# Descripcion:  Traduce a Linux el camino completo de un fichero Windows
+#		(sin contar mayusculas ni minusculas).
+# Formato:      CaminoWindows fichero
+# Salida:       Cadena con el camino para Linux.
+# Error:        1 - mal formato de ejecución.
+#		2 - no existe el fichero.
+# Requisitos:   grep, sed
+# Notas:        Solo ejecutable por root
+#		La particion de Windows debe estar montada previamente.
+# Version:      1.0 - Version inicial.
+# Autor:        Ramon Gomez - ETSII, Univ. Sevilla
+# Fecha:        21/05/2008
+
+
+# Eliminar "/" duplicados y quitar los "/" inicial y final.
+FICH="$(echo $1|sed -e 's/\(\/\)*\1/\//g' -e 's/^\///' -e 's/\/$//')"
+FICHANT=""
+CAMINO="/"
+while [ "$FICH" != "$FICHANT" ]; do
+    # Busca el nombre correcto en el directorio actual.
+    cd "$CAMINO"
+    CAMINO="${CAMINO}/$(ls -A | grep -i "^${FICH%%/*}$")" || exit 2
+    FICHANT="$FICH"
+    FICH="${FICH#*/}"
+done
+
+# Muestra el camino Linux, quitando el "/" inicial duplicado.
+[ "$CAMINO" != "/" ] && echo ${CAMINO#/}
+
