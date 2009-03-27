@@ -1,0 +1,81 @@
+#!/bin/bash
+# Nombre:	hidraCreatePrimaryPartitions
+# Descripcion:	Asigna las tabla de particiones primarias de un disco.
+# Formato:	hidraCreatePrimaryPartitions numdisco tipopart1:tamañoKB1 ...
+# Salida:	tabla de particiones (por determinar)
+# 	tipopart = { VFAT, NTFS, EXT2, EXT3, EXT4, LINUX-SWAP,
+#			EXTENDED, CACHE, EMPTY }
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+# Requisitos:	sfdisk, fdisk, parted, awk, hidraDisk
+# Notas:	Solo ejecutable por root
+#		Queda definir formato para atributos (arranque, oculta, ...).
+# Version:	1.0 - Compatible con EAC: sustituye parcialmente a la funcion CreatePartions
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	27/03/2009
+
+# Error si no se reciben  entre 2 y 5 parametros
+[ $# -lt 2 -o $# -gt 5 ] && exit 1
+
+# Sustituye num. de disco por el dispositivo.
+DISCO="$(hidraDsik $1)" || exit $?
+shift 
+
+# Num. total de sectores, para evitar desbordamiento
+NSECTORES=$(awk -v D=${DISCO#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
+
+# Sector de inicio de la particon (la 1a. empieza en el sector 63).
+SECTOR=63
+PART=1
+
+# Fichero temporal de entrada para "sfdisk"
+tmpsfdisk=/tmp/sfdisk$$
+trap "rm -f $tmpsfdisk" 1 2 3 9 15
+
+echo "unit: sectors" >$tmpsfdisk
+echo                >>$tmpsfdisk
+
+# Generar fichero temporal para "sfdisk" con las 4 particiones primarias.
+while [ $PART -le 4 ]; do
+    # Si el parametro es nulo, se define particion vacia.
+    if [ -z "$1" ]; then
+	echo "$DISCO$PART : start=0, size=0, Id=0" >>$tmpsfdisk
+    else
+	# Formato de cada parametro - Tipo:Tamanyo
+	TIPO="${1%%:*}"
+	TAM="${1#*:}"
+	[ -z "$TAM" ] && exit 1
+	# Convertir en sectores de 512 B.
+	TAM=$[TAM*2]
+	[ $TAM -eq 0 ] && exit 1
+	# Identificador de tipo de particion.
+	case "$TIPO" in
+	     EMPTY)	 ID=0  ;;
+	     EXTENDED)	 ID=5 
+			 PARTEXT="start=$SECTOR, size=$TAM, Id=0" ;;
+	     NTFS)	 ID=7  ;;
+	     HNTFS)	 ID=17 ;;
+	     VFAT)	 ID=b  ;;
+	     HVFAT)	 ID=1b ;;
+	     EXT[234])	 ID=83 ;;
+	     LINUX-SWAP) ID=82 ;;
+	     CACHE)	 ID=a7 ;;
+	     *)		 exit 1;;
+	esac
+	echo "$DISCO$PART : start=$SECTOR, size=$TAM, Id=$ID" >>$tmpsfdisk
+	SECTOR=$[SECTOR+TAM]
+	# Error si se supera el num. total de sectores.
+	[ $SECTOR -gt $NSECTORES ] && exit 1
+    fi
+    PART=$[PART+1]
+    shift
+done
+# Si se define particion extendida, crear una particion 5 vacia.
+[ -n "$PARTEXT" ] && echo "${DISCO}5 : $PARTEXT" >>$tmpsfdisk
+
+### Proceso de pruebas (quitar comentarios para trabajar).
+# Si la tabla de particiones no es valida, volver a generarla.
+#[ parted -s $DISCO print >/dev/null ] && fdisk $DISCO <<< "w"
+# Definir particiones.
+#sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null
+rm $tmpsfdisk

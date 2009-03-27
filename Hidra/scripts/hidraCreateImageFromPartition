@@ -1,0 +1,27 @@
+#!/bin/bash
+# Nombre:	hidraCreateImageFromPartition
+# Descripcion:	Crea una imagen completa de una particion de disco.
+# Formato:	hidraCreateImageFromPartition numdisco numparticion iprepo dirbase imagen compresor
+# Salida:	(por determinar)
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+#		3 - tipo de particion desconocido o no se puede montar.
+#		4 - programa compresor no accesible
+# Requisitos:	hidraDisk, CreateImageFromPartition (EAC)
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatible con EAC: llama a la funcion CreateImageFromPartition
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	27/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 6 parametros.
+[ $# -ne 6 ] && exit 1
+
+# Sustituye num. de disco por el dispositivo.
+PART="$(hidraDisk $1 $2)" || exit $?
+
+# NOTAS: no se comprueba previamente el tipo de particion,
+#	 la funcion CreateImageFromPartition no devuelve errores.
+CreateImageFromPartition $1 $2 $3 "${4%/}/" "$5.$6"
+
