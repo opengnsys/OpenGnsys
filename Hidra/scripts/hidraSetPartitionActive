@@ -20,4 +20,4 @@ source $(dirname $0)/hidraEnviron
 # Comprobar que existe la particion.
 PART="$(hidraDisk $1 $2)" || exit $?
 
-SetPartitionActive $1 $2
+SetPartitionActive $1 $2 >/dev/null

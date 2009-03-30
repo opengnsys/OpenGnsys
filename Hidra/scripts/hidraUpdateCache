@@ -16,11 +16,8 @@
 
 source $(dirname $0)/hidraEnviron
 
-# Error si no se reciben 6 parametros.
-[ $# -ne 5 ] && exit 1
-
-# Sustituye num. de disco por el dispositivo.
-PART="$(hidraDisk $1 $2)" || exit $?
+# Error si no se reciben 3 parametros.
+[ $# -ne 3 ] && exit 1
 
 # NOTAS: no se comprueba previamente el tipo de particion,
 #	 la funcion RestorePartitionFromImage no devuelve errores.

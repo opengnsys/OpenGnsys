@@ -41,5 +41,5 @@ case "$3" in
 esac
 
 # Modificar la particion.
-sfdisk --change-id $DISCO $2 $ID >/dev/null
+sfdisk --change-id $DISCO $2 $ID >/dev/null 2>&1
 
