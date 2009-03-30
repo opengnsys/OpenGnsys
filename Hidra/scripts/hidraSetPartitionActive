@@ -1,0 +1,23 @@
+#!/bin/bash
+# Nombre:	hidraSetPartitionActive
+# Descripcion:	Asigna el bit de "activa" a una determinada particion.
+# Formato:	hidraSetPartitionActive numdisco numparticion
+# Salida:	Ninguna (por determinar)
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+# Requisitos:	hidraDisk, SetPartitionActive (EAC)
+# Notas:	Solo ejecutable por root
+#		Queda definir formato para atributos (arranque, oculta, ...).
+# Version:	1.0 - Compatible con EAC: llama ala funcion SetPartitionActive
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	30/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 2 parametros
+[ $# -ne 2 ] && exit 1
+
+# Comprobar que existe la particion.
+PART="$(hidraDisk $1 $2)" || exit $?
+
+SetPartitionActive $1 $2

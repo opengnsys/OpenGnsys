@@ -1,15 +1,15 @@
 #!/bin/bash
 # Nombre:	hidraFormat
 # Descripcion:	Formatea una particion segun su tipo definido en la tabla del disco.
-# Formato:	hidraFormat numdisco numparticion
+# Formato:	hidraFormat numdisco numparticion [etiqueta]
 # Salida:	salida de mkfs (por determinar)
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - tipo de particion desconocido o no formateable.
 # Requisitos:	mkfs*, hidraDisk, hidraTypeFS
 # Notas:	Solo ejecutable por root
-#		Puede ser interesante poner un indicador de forzoso para particion ya formateada.
 #		Puede definirse un parametro para la etiqueta de volumen.
+#		Puede ser interesante poner un indicador de forzoso para particion ya formateada.
 # Version:	1.0 - Version inicial: EAC define pero no usa la funcion FormatParticion
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
 # Fecha:	27/03/2009
@@ -17,11 +17,13 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# -ne 2 ] && exit 1
+[ $# -le 2 -o $# -gt 3 ] && exit 1
 
 # Sustituye num. de disco por el dispositivo.
 DISCO="$(hidraDisk $1)" || exit $?
 PART ="$(hidraDisk $1 $2)" || exit $?
+# Etiquetas de particion.
+[ -n "$3" ] && PARAMS="-L $3"
 
 # Elegir tipo de formato segun el tipo de particion.
 case "$(hidraTypeFS $1 $2)" in
@@ -39,4 +41,5 @@ esac
 
 # Formatear particion.
 ### Modo depuracion, quitar comentarios para trabajar.
-mkfs -t $TIPO $PART
+mkfs -t $TIPO $PARAMS $PART
+

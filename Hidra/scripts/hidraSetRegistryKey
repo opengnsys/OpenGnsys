@@ -1,0 +1,42 @@
+#!/bin/bash
+# Nombre:       hidraSetRegistryKey
+# Descripcion:  Asigna un valor a una clave del registro de Windows.
+# Formato:      hidraSetRegistryKey puntomontaje tiporegistro clave valor
+#	tiporegistro: { default, sam, security, software, system, components }
+# Salida:       (ninguna, por determinar)
+# Error:        1 - mal formato de ejecución.
+#               2 - no existe el fichero o la clave del registro.
+# Requisitos:   drbl-chntpw, hidraPath
+# Notas:        Solo ejecutable por root
+#		La particion de Windows debe estar montada previamente.
+# Version:      1.0 - version inicial.
+# Autor:        Ramon Gomez - ETSII, Univ. Sevilla
+# Fecha:        30/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 4 parametros.
+[ $# != 4 ] && exit 1
+
+# Camino del fichero de registro en NT/2000.
+FICHNT=$(hidraPath "/$1/winnt/system32/config/$2")
+[ -f $FICHNT ] && FICH="$FICHNT" 
+# Camino del fichero de registro en XP/Vista.
+FICHXP=$(hidraPath "/$1/windows/system32/config/$2")
+[ -f $FICHXP ] && FICH="$FICHXP" 
+[ ! -f $FICH ] && exit 2
+
+# Asigna nuevo valor a la clave del registro.
+drbl-chntpw $FICH <<<"
+ed $3
+$4
+q
+y" 2>/dev/null
+
+# chntpw da salida 2 si se cambia el registro, 0 si no hay cambios.
+COD=$?
+case $COD in
+     2) exit 0 ;;
+     0) exit 2 ;;
+     *) exit $COD ;;
+esac

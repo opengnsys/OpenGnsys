@@ -1,0 +1,31 @@
+#!/bin/bash
+# Nombre:       hidraLinuxSoftware
+# Descripcion:  Muestra los paquetes de programas instalados en Linux.
+# Formato:      hidraLinuxSoftware numdisco numparticion
+# Salida:       Lineas con el formato (una por aplicacion):
+#		Programa Version
+# Error:        1 - mal formato de ejecución.
+#               2 - no existe el fichero de dispositivo.
+#		3 - fallo al montar la particion		
+# Requisitos:   
+# Notas:        Solo ejecutable por root
+# Version:      1.0 - Version inicial: solo compatible con dpkg.
+# Autor:        Ramon Gomez - ETSII, Univ. Sevilla
+# Fecha:        30/03/2008
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 2 parametros.
+[ $# != 2 ] && exit 1
+
+# Montar particion.
+DIRMONT=$(hidraMount $1 $2) || exit $?
+
+trap "hidraUnmount $DIRMONT" 1 2 3 6
+
+# Procesar paquetes dpkg.
+PAQ="${DIRMONT}/var/lib/dpkg/status"
+if [ -r $PAQ ]; then 
+    awk '$1 = /Package/ {P=$2}
+	 $1 = /Status/ && $2 ~ /install/ {print P}'
+fi

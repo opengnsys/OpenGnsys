@@ -20,7 +20,7 @@ source $(dirname $0)/hidraEnviron
 [ $# -lt 2 -o $# -gt 5 ] && exit 1
 
 # Sustituye num. de disco por el dispositivo.
-DISCO="$(hidraDsik $1)" || exit $?
+DISCO="$(hidraDisk $1)" || exit $?
 shift 
 
 # Num. total de sectores, para evitar desbordamiento

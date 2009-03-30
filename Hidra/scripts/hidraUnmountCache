@@ -1,0 +1,15 @@
+#!/bin/bash
+# Nombre:	hidraUnmountCache
+# Descripcion:	Desmonta la particion de cache.
+# Formato:	hidraUnmountCache
+# Salida:	Ninguna (por determinar).
+# Error:	(definido por EAC)
+# Requisitos:	UmountCache (EAC)
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatibilidad Con EAC: llama a la funcion UmountCache
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	30/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+UmountCache
