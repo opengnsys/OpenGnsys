@@ -20,6 +20,7 @@ source $(dirname $0)/hidraEnviron
 # Sustituye num. de disco por el dispositivo.
 PART="$(hidraDisk $1 $2)" || exit $?
 
-# NOTAS: no se comprueba previamente el tipo de particion, ni si hay sistema operativo, la funcion HDBoot no devuelve errores.
-HDBoot $*
+# Con hidraOSVersion se comprueba si hay un SO definido antes de arrancar.
+# NOTA: la funcion HDBoot no devuelve errores.
+[ -n $(hidraOSVersion $1 $2) ] && HDBoot $*
 

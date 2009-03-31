@@ -24,3 +24,4 @@ fi
 # Caminos de busqueda de comando.
 [ -z "$(echo $PATH|grep $HIDRADIR)" ] && PATH=$PATH:$HIDRADIR/scripts
 export PATH HIDRADIR
+

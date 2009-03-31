@@ -21,12 +21,20 @@ source $(dirname $0)/hidraEnviron
 # Montar particion.
 DIRMONT=$(hidraMount $1 $2) || exit $?
 
+
 trap "hidraUnmount $DIRMONT" 1 2 3 6
 
 # Procesar paquetes dpkg.
 DPKGDIR="${DIRMONT}/var/lib/dpkg"
 if [ -r $DPKGDIR ]; then 
     dpkg --admindir=$DPKGDIR -l | \
-		awk '$1~/ii/ {sub(/^.*:/,"",$3);sub(/-.*$/,"",$3);
-			      print $2,$3}'
+		awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
+			      sub(/-.*$/,"",$3); print $2,$3}' | sort | uniq
+fi
+# Procesar paquetes RPM.
+RPMDIR="${DIRMONT}/var/lib/rpm"
+if [ -r $RPMDIR ]; then 
+    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
+		awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
+		sort | uniq
 fi

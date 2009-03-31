@@ -1,0 +1,24 @@
+#!/bin/bash
+# Nombre:	hidraGetPartitionActive
+# Descripcion:	Muestra que particion de un disco esta marcada como de activa.
+# Formato:	hidraGetPartitionActive numdisco
+# Salida:	Ninguna (por determinar)
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+# Requisitos:	hidraDisk, parted
+# Notas:	Solo ejecutable por root
+#		Queda definir formato para atributos (arranque, oculta, ...).
+# Version:	1.0 - Compatible con EAC: no existe equivalente.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	31/03/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se recibe 1 parametro.
+[ $# -ne 1 ] && exit 1
+
+# Comprobar que existe la particion.
+DISCO="$(hidraDisk $1)" || exit $?
+
+parted $DISCO print 2>/dev/null | awk '$0~/boot/ {print $1}'
+
