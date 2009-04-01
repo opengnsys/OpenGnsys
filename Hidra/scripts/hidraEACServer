@@ -1,7 +1,7 @@
 #!/bin/bash
-# Nombre:	hidraEACServerIP
+# Nombre:	hidraEACServer
 # Descripcion:	Devuelve la direccion IP del servidor principal EAC.
-# Formato:	hidraEACServertIP
+# Formato:	hidraEACServer
 # Salida:	ip (por determinar).
 # Error:	(definido por EAC)
 # Requisitos:	Variable IPservidor (EAC)

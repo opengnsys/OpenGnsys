@@ -7,7 +7,7 @@
 #			EXTENDED, CACHE, EMPTY }
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
-# Requisitos:	sfdisk, fdisk, parted, awk, hidraDisk
+# Requisitos:	sfdisk, parted, partprobe, awk, hidraDisk
 # Notas:	Solo ejecutable por root
 #		Queda definir formato para atributos (arranque, oculta, ...).
 # Version:	1.0 - Compatible con EAC: sustituye parcialmente a la funcion CreatePartions
@@ -78,6 +78,6 @@ done
 ### Proceso de pruebas (quitar comentarios para trabajar).
 # Si la tabla de particiones no es valida, volver a generarla.
 [ parted -s $DISCO print >/dev/null ] && fdisk $DISCO <<< "w"
-# Definir particiones.
-sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null
+# Definir particiones y notificar al kernel.
+sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null && partprobe
 rm $tmpsfdisk

@@ -6,6 +6,7 @@
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - tipo de particion desconocido o no se puede montar.
+#		5 - sin sistema operativo.
 # Requisitos:	hidraDisk, hidraTypeFS, HDBoot (EAC)
 # Notas:	Solo ejecutable por root
 # Version:	1.0 - Compatibilidad Con EAC: llama a la funcion HDBoot
@@ -22,5 +23,6 @@ PART="$(hidraDisk $1 $2)" || exit $?
 
 # Con hidraOSVersion se comprueba si hay un SO definido antes de arrancar.
 # NOTA: la funcion HDBoot no devuelve errores.
-[ -n $(hidraOSVersion $1 $2) ] && HDBoot $*
+[ -z "$(hidraOSVersion $1 $2)" ] && exit 5
+HDBoot $*
 
