@@ -7,22 +7,42 @@
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - tipo de particion desconocido o no se puede montar.
 #		5 - sin sistema operativo.
-# Requisitos:	hidraDisk, hidraTypeFS, HDBoot (EAC)
+# Requisitos:	hidraDisk, hidraTypeFS, hidraOSVersion,
+#		hidraLinuxBootParameters,  HDBoot (EAC)
 # Notas:	Solo ejecutable por root
-# Version:	1.0 - Compatibilidad Con EAC: llama a la funcion HDBoot
+# Version:	1.0 - Compatibilidad Con EAC:
+#			Para Windows: llama a la funcion HDBoot.
+#			Para Linux: soluciona el problema de HDBoot.
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
-# Fecha:	27/03/2009
+# Fecha:	01/04/2009
 
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
 [ $# -ne 2 ] && exit 1
 
-# Sustituye num. de disco por el dispositivo.
-PART="$(hidraDisk $1 $2)" || exit $?
+# Obtiene el tipo de particion.
+TIPO="$(hidraTypeFS $1 $2)" || exit $?
 
-# Con hidraOSVersion se comprueba si hay un SO definido antes de arrancar.
-# NOTA: la funcion HDBoot no devuelve errores.
-[ -z "$(hidraOSVersion $1 $2)" ] && exit 5
-HDBoot $*
+case "$TIPO" in
+     NTFS|HNTFS|BIGDOS|HBIGDOS)
+	# Arranque Windows.
+	# Compruebar si hay un SO definido antes de arrancar.
+	[ -z "$(hidraOSVersion $1 $2)" ] && exit 5
+	HDBoot $*
+	;;
+     EXT[234]|REISERFS|REISER4)
+	# Obtiene los parametros de arranque.
+	PARAMS=$(hidraLinuxBootParameters $1 $2) || exit $?
+	read -e KERNEL INITRD APPEND <<<"$PARAMS"
+	# Si no hay kernel, no hay sistema operativo.
+	[ -z "$KERNEL" ] && exit 5
+	# Arranca Linux con los parametros leidos de su GRUB.
+	MONT=$(hidraMount $1 $2)
+	kexec -l ${MONT}${KERNEL} --append="$APPEND" --initrd=${MONT}${INITRD}
+	kexec -e
+	;;
+     *) exit 3
+	;;
+esac
 

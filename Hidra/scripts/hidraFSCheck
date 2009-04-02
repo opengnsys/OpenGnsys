@@ -34,6 +34,8 @@ case "$(hidraTypeFS $1 $2)" in
      *) 		exit 3;;
 esac
 
+# Desmontar la particion antes de comprobarla.
+hidraUnmount $1 $2
 # Comprobar particion, si no se define programa se usa fsck.
 if [ -z "$PROG" ]; then
     fsck -t $TIPO $PART

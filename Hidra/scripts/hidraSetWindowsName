@@ -1,12 +1,13 @@
 #!/bin/bash
 # Nombre:       hidraSetWindwosName
 # Descripcion:  Cambia el nombre del equipo en el registro de Windows.
-# Formato:      hidraSetWindowsName ndisco nparticion nombre
+#		Si no se especifica nombre, asigna el actual del sistema.
+# Formato:      hidraSetWindowsName ndisco nparticion [nombre]
 # Salida:       (ninguna, por determinar)j
 # Error:        1 - mal formato de ejecución.
 #               2 - no existe el fichero de dispositivo.
 #		3 - fallo al montar la particion		
-# Requisitos:   hidraMount, hidraSetRegistryKey
+# Requisitos:   hidraMount, hidraSetRegistryKey, hostname
 # Notas:        Solo ejecutable por root
 # Version:      1.0 - Compatible con EAC: sustituye a la funcion SetWindowsName
 # Autor:        Ramon Gomez - ETSII, Univ. Sevilla
@@ -14,15 +15,17 @@
 
 source $(dirname $0)/hidraEnviron
 
-# Error si no se reciben 3 parametros.
-[ $# != 3 ] && exit 1
+# Error si no se reciben 2 o 3 parametros.
+[ $# -lt 2 -o $# -gt 3 ] && exit 1
+
+# Si no se indica nombre en el 3er parametro, lo toma de la orden "hostname".
+NOMBRE="${3:-$(hostname)}"
 
 # Montar particion.
 DIRMONT=$(hidraMount $1 $2) || exit $?
 
 trap "hidraUnmount $DIRMONT" 1 2 3 6
 
-### Modo depuracion, quitar comentarios para trabajar.
 # Modificar claves de registro.
 hidraSetRegistryKey $DIRMONT system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$3"
 hidraSetRegistryKey $DIRMONT system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$3"

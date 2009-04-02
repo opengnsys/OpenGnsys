@@ -1,0 +1,13 @@
+#!/bin/bash
+# Nombre:	hidraPoweroff
+# Descripcion:	Apaga el ordenador cliente.
+# Formato:	hidraPoweroff
+# Salida:	Ninguna (por determinar).
+# Error:	Ninguno (por determinar).
+# Requisitos:	poweroff
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatibilidad Con EAC: apagado Linux.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	02/04/2009
+
+poweroff
