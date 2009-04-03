@@ -501,17 +501,6 @@ case $3 in
 			Msg "Restaurando la PARTICION:$disco con FILESYSTEM:$fs PROGRAMA:$program COMPRESION:$compresion.  METODO:allocatin from cache " green;
 			#case $program in
 			case $compresion in
-				lzop)
-					echo lzop
-                                        echo "test $program = 'partimage' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | partimage -f3 -B gui=no restore $disco stdin;"
-                                        test $program = 'partimage' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | partimage -f3 -B gui=no restore $disco stdin;
-                                        echo "test $program = 'ntfsclone' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | ntfsclone -r -O $disco -;"
-                                        # Linea siguiente mal, aunque no
-se cumpla hace el comando
-                                       # test $program = 'ntfsclone' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | ntfsclone -r -O $disco -;
-
-					#$compresion -dc ${CACHE}${REPO}$4$5 | partimage -f3 -B gui=no restore $disco stdin || $compresion -dc ${CACHE}${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
-				;;
 				partimage)
 					echo partimage
 					$compresion -dc ${CACHE}${REPO}$4$imagefile | $program -f3 -B gui=no restore $disco stdin; 
@@ -520,12 +509,10 @@ se cumpla hace el comando
 					echo ntfsclone
 					$compresion -dc ${CACHE}${REPO}$4$imagefile | $program --restore-image --overwrite $disco - ;
 				;;
-				lzop)
-					echo lzop
-                                        test $program = 'partimage' &&   $compresion  | partimage -f3 -B gui=no restore $disco stdin;
-                                        test $program = 'ntfsclone' &&   $compresion  | ntfsclone -r -O $disco -;
-
-					#$compresion -dc ${CACHE}${REPO}$4$5 | partimage -f3 -B gui=no restore $disco stdin || $compresion -dc ${CACHE}${REPO}$4$5 | ntfsclone --restore-image --overwrite $disco - ;
+				lzop|gzip)
+					echo $compresion
+                                        test $program = 'partimage' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile  | partimage -f3 -B gui=no restore $disco stdin;
+                                        test $program = 'ntfsclone' &&   $compresion -dc ${CACHE}${REPO}$4$imagefile | ntfsclone -r -O $disco -;
 				;;
 			esac
 			UmountPartition $CACHE;

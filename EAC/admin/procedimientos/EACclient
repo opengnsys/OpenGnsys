@@ -22,7 +22,7 @@ if ($_SERVER['argv'][1] == "RunStartPage")
 	#echo("hola");
 	//busqueda de la startpage y copiarlo a /var/tmp
 	$peticion="select startpage FROM equipos WHERE ip='".$ip."'";
-	$resultequipos = mysql_query($peticion);
+	$resultequipos = mysql_query($peticion,$conexion);
 	while ($filaequipos = mysql_fetch_array($resultequipos))
 	{
 	#	echo("dos");

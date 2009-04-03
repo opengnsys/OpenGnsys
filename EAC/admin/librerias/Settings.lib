@@ -4,7 +4,8 @@ export temporal="/tmp/temporal"
 export temporalreg="/tmp/temporalreg"
 export REPO="/var/EAC/"
 export TERM="xterm" 
-export LANG="es_ES.UTF-8"
+#export LANG="es_ES.UTF-8"
+export LANG="C"
 #setupcon
 #export servertime="hora.alumnos.uma.es"
 
