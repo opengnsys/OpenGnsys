@@ -77,7 +77,7 @@ done
 
 ### Proceso de pruebas (quitar comentarios para trabajar).
 # Si la tabla de particiones no es valida, volver a generarla.
-[ parted -s $DISCO print >/dev/null ] && fdisk $DISCO <<< "w"
+[ $(parted -s $DISCO print >/dev/null) ] || fdisk $DISCO <<< "w"
 # Definir particiones y notificar al kernel.
 sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null && partprobe
 rm $tmpsfdisk

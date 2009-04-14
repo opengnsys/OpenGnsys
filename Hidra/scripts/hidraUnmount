@@ -1,11 +1,10 @@
 #!/bin/bash
 # Nombre:	hidraUnmount
-# Descripcion:	Monta una particion segun su tipo definido en la tabla del disco.
+# Descripcion:	Desmonta una particion local.
 # Formato:	hidraUnmount numdisco numparticion
 # Salida:	(ninguna)
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
-#		3 - tipo de particion desconocido o no se puede montar.
 # Requisitos:	hidraDisk, UmountPartition (EAC)
 # Notas:	Solo ejecutable por root
 # Version:	1.0 - Compatibilidad Con EAC: llama a la funcion UmountPartition.
