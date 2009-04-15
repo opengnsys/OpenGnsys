@@ -191,9 +191,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 	if (trama.ejecutor=='1'){	// Debe ejecutar el servidor
 		INTROaFINCAD(parametros);
 		nombrefuncion=toma_parametro("nfn",parametros); 
-		resul=strcmp(nombrefuncion,"inclusion_cliRMB");
+		resul=strcmp(nombrefuncion,"InclusionClienteHIDRA");
 		if(resul==0){
-			if(!inclusion_cliRMB(s,parametros))
+			if(!InclusionClienteHIDRA(s,parametros))
 				respuesta_cortesia(s);
 			return;
 		}
@@ -210,9 +210,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 			return;
 		}		
 
-		resul=strcmp(nombrefuncion,"COMANDOSpendientes");
+		resul=strcmp(nombrefuncion,"ComandosPendientes");
 		if(resul==0){
-			if(!COMANDOSpendientes(s,parametros))
+			if(!ComandosPendientes(s,parametros))
 				respuesta_cortesia(s);
 			return;
 		}
@@ -230,9 +230,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 				respuesta_cortesia(s);
 			return;
 		}
-		resul=strcmp(nombrefuncion,"disponibilidadCOMANDOS");
+		resul=strcmp(nombrefuncion,"DisponibilidadComandos");
 		if(resul==0){
-			disponibilidadCOMANDOS(s,parametros);
+			DisponibilidadComandos(s,parametros);
 			respuesta_cortesia(s);
 			return;
 		}
@@ -291,9 +291,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 			respuesta_cortesia(s);
 			return;
 		}
-		resul=strcmp(nombrefuncion,"RESPUESTA_EjecutarScript");
+		resul=strcmp(nombrefuncion,"RESPUESTA_ExecShell");
 		if(resul==0){
-			RESPUESTA_EjecutarScript(s,parametros);
+			RESPUESTA_ExecShell(s,parametros);
 			respuesta_cortesia(s);
 			return;
 		}
@@ -701,7 +701,7 @@ int NoComandosPendientes(SOCKET s)
 	return(manda_comando(s,nwparametros));
 }
 // ________________________________________________________________________________________________________
-// Funcin: Iinclusion_cliRMB
+// Funcin: IInclusionClienteHIDRA
 //
 //		Descripcin:
 //			Esta funcin incorpora el socket de un nuevo cliente a la tabla de sockets y le devuelve alguna de sus propiedades: nombre, 
@@ -710,7 +710,7 @@ int NoComandosPendientes(SOCKET s)
 //			- s: Socket del cliente
 //			- parametros: Parnetros de la trama recibida
 // ________________________________________________________________________________________________________
-int inclusion_cliRMB(SOCKET s,char *parametros)
+int InclusionClienteHIDRA(SOCKET s,char *parametros)
 {
 	char ErrStr[200],sqlstr[1000];
 	Database db;
@@ -843,7 +843,7 @@ int inclusion_cliRMB(SOCKET s,char *parametros)
 	inclusion_srvRMB(ipservidorrembo,puertorepo); // Actualiza tabla de servidores rembo
 
 	// Prepara la trama
-	lon=sprintf(nwparametros,"nfn=RESPUESTA_inclusion_cliRMB\r");
+	lon=sprintf(nwparametros,"nfn=RESPUESTA_InclusionClienteHIDRA\r");
 	lon+=sprintf(nwparametros+lon,"ido=%d\r",idordenador);
 	lon+=sprintf(nwparametros+lon,"npc=%s\r",nombreordenador);
 	lon+=sprintf(nwparametros+lon,"ida=%d\r",idaula);
@@ -1449,7 +1449,7 @@ void TomaParticiones(char* cfg, char* parts,int lonprt)
 	lon+=sprintf(parts+lon,"@prt");
 }
 // ________________________________________________________________________________________________________
-// Funcin: COMANDOSpendientes
+// Funcin: ComandosPendientes
 //
 //		Descripcin:
 //			Esta funcin busca en la base de datos,comandos pendientes de ejecutar por un  ordenador  concreto
@@ -1457,7 +1457,7 @@ void TomaParticiones(char* cfg, char* parts,int lonprt)
 //			- s: Socket del cliente
 //			- parametros: Parnetros de la trama recibida
 // ________________________________________________________________________________________________________
-int COMANDOSpendientes(SOCKET s,char *parametros)
+int ComandosPendientes(SOCKET s,char *parametros)
 {
 	char *iph,*ido,*coletilla;
 	int ids;
@@ -1572,7 +1572,7 @@ int EjecutarItem(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: disponibilidadCOMANDOS
+// Funcin: DisponibilidadComandos
 //
 //		Descripcin:
 //			Esta funcin habilita a un clinte rembo para recibir o no, comandos iteractivos
@@ -1580,7 +1580,7 @@ int EjecutarItem(SOCKET s,char *parametros)
 //			- s: Socket del cliente
 //			- parametros: Parmetros de la trama recibida
 // ________________________________________________________________________________________________________
-int disponibilidadCOMANDOS(SOCKET s,char *parametros)
+int DisponibilidadComandos(SOCKET s,char *parametros)
 {
 	char *iph,*swd;
 	int resul=0,i;
@@ -2165,7 +2165,7 @@ int borra_entrada(int i)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_EjecutarScript
+// Funcin: RESPUESTA_ExecShell
 //
 //		Descripcin:
 //			Responde al comando Ejecutar script
@@ -2173,7 +2173,7 @@ int borra_entrada(int i)
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
-int RESPUESTA_EjecutarScript(SOCKET s,char *parametros)
+int RESPUESTA_ExecShell(SOCKET s,char *parametros)
 {
 	char ErrStr[200];
 	Database db;
@@ -3592,7 +3592,7 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 //************************************************************************************************************************************************
 // PROGRAMA PRINCIPAL ( SERVICIO)
 //***************************************************************************************************************************************************
-int main (int argc, char *argv[])
+ int main (int argc, char *argv[])
 {
     SOCKET	socket_s; // Socket donde escucha el servidor
     SOCKET	socket_c; // Socket de los clientes que se conectan
@@ -3669,7 +3669,7 @@ int main (int argc, char *argv[])
 		}
 		//resul=pthread_create(&hThread,NULL,GestionaConexion,(void*)&socket_c);
 		GestionaConexion(&socket_c);
-		/*if(resul!=0){
+		/*if(resul!=0){2
 			RegistraLog("***Fallo al crear la hebra cliente",false);
 		    break;
         }

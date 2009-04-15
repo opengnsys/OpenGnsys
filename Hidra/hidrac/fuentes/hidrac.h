@@ -29,12 +29,14 @@
 #define LONGITUD_CONFIGURACION 1024	// Longitud mxima de las configuraciones de particin
 #define MAX_NUM_CSADDRS        20
 #define MAX_INTERFACE_LIST     20
-#define MAXCNX 5		// Mximos intentos de conexin al servidor HIDRA
+#define MAXCNX 5		// Mximos intentos de conexión al servidor HIDRA
 #define MAXITEMS 100
 #define MAXHTMLMNU 4000
 #define MAXPARTICIONES 24
 #define MAXINFOSO 5 // Numero máximo de nemonicos enla inforamción del S.O. de una partición 
-
+#define MAXARGS 16 // Numero máximo de argumentos enviados a un scripts 
+#define LONSTD 512 // Longitud de memoria estandar 
+#define LONSTDC 256 // Longitud de memoria estandar corta
 
 #define PUERTOMINUSER 20000
 #define PUERTOMAXUSER 60000
@@ -56,38 +58,44 @@ typedef  int  SOCKET;
 typedef struct{		// EstructUra de la trama recibida
 	char arroba;	// cabecera de la trama
 	char identificador[9];	// identificador de la trama
-	char ejecutor;	// ejecutor de la trama 1=el servidor rembo  2=el cliente rembo
+	char ejecutor;	// ejecutor de la trama 1=el servidor hidra  2=el cliente hidra 3=el repositorio
 	char parametros[LONGITUD_PARAMETROS]; // Contenido de la trama (par?etros)
 }TRAMA;
 
+TRAMA trama[1];
 
 char IPlocal[20];		// Ip local
-char servidorhidra[20]; // IP servidor HIDRA
+char Servidorhidra[20]; // IP servidor HIDRA
 char Puerto[20]; 		// Puerto Unicode
-int puerto;	// Puerto
 
-char szPathFileCfg[128],szPathFileLog[128];
+char szPathFileCfg[128];
+char szPathFileLog[128];
 
 //___________________________________________________________________________________________________
 // Variables y estructuras
 //___________________________________________________________________________________________________
 
-char cmdshell[512];
-char msglog[512];
-char filecmdshell[250];
-char filemenu[250];
-char fileitem[250];
-char fileini[250];
-char filecmd[250];
+char cmdshell[LONSTD];
+char parametros[LONSTD];
+char* argumentos[MAXARGS];
+char msglog[LONSTD];
+char msgcon[LONSTD];
+char filecmdshell[LONSTDC];
+char filemenu[LONSTDC];
+char fileitem[LONSTDC];
+char fileini[LONSTDC];
+char filecmd[LONSTDC];
 
 struct excepcion {
 	int herror;
-	char msg[250];
-	char modulo[250];	
+	char msg[LONSTDC];
+	char modulo[LONSTDC];	
 };
 struct excepcion e;
 
-// Nemnicos
+int ndebug=1; // Nivel de debuger por defecto
+
+// Nemónicos
 int MsDos=1;
 int Win98=2;
 int Win2K=3;
@@ -95,30 +103,27 @@ int WinXP=4;
 int Linux=5;
 	 	
 BOOL PROCESO=true;			// Indicador de la actividad del proceso principal
-BOOL OFFLINE;				// Indicador modo offline
-BOOL ADMINISTRADO;			// Indicador modo administrado por el servidor HIDRA
 BOOL CACHEEXISTS;			// Indica si existe cache
-char HIDRACHERAIZ[250];		// Path al directorio de imgenes de HIDRA referido a la cach?
-char HIDRASRVRAIZ[250];		// Path al directorio raiz HIDRA referido al servidor	
-char HIDRACHEIMAGENES[250];	// Path del directorio hidra donde estn las imgenes (en la cach)
-char HIDRASRVIMAGENES[250];	// Path del directorio hidra donde estn las imgenes (en el servidor)
-char HIDRASRVCMD[250];		// Path del directorio hidra donde se depositan los comandos para el cliente rembo
-char HIDRASCRIPTS[250];		// PAth al directorio donde estan los scripts
-int HIDRAVER;				// Versin Hidra
-int TPAR ;					// Tamao de la particin
+
+char HIDRACHEIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en la caché)
+char HIDRASRVIMAGENES[LONSTDC];	// Path al directorio hidra donde están las imágenes (en el repositorio)
+char HIDRASRVCMD[LONSTDC];	// Path del directorio del repositorio donde se depositan los comandos para el cliente hidra
+char HIDRASCRIPTS[LONSTDC];	// Path al directorio donde están los scripts de hidra (en el cliente hidra)
+
+int HIDRAVER;	// Versión Hidra
+int TPAR ;	// Tamaño de la particin
 	
-// Socket
-SOCKET sock;
+SOCKET sock;	// Socket
 
 struct s_CabMnu {
 	char resolucion[2];			 // Resolucin de pantalla
-	char titulo[250];						// Titulo del menu
+	char titulo[LONSTDC];						// Titulo del menu
 	char coorx[4];					// Coordenada x
 	char coory[4];					// Coordenada y
 	char modalidad[2];		// modalidad ( numero de items por linea )
 	char scoorx[4];				// Coordenada x // Menu privado
 	char scoory[4];				// Coordenada y
-	char smodalidad[250];		// modalidad ( numero de items por linea )
+	char smodalidad[LONSTDC];		// modalidad ( numero de items por linea )
 	char htmmenupub[64];	// Nombre del fichero que contiene el html del menu (público)
 	char htmmenupri[64];		// Nombre del fichero que contiene el html del menu (privado)
 } CabMnu;  // Estructura con los datos de los menús
@@ -126,11 +131,11 @@ struct s_CabMnu {
 BOOL swmnu=false; // Indicador de menu asignado
 	
 struct s_Item{
-	char idaccionmenu[16];		// Identificador del item a ejecutar
-	char urlimg[64];						// Nombre de la imagen de fonfo del botn
-	char literal[250];						// Literal del item
-	char tipoitem[2];					// Tipo de otem ( público o privado)
-	char tipoaccion[2];				// Tipo de accin que ejecuta el item
+	char idaccionmenu[16];	// Identificador del item a ejecutar
+	char urlimg[64];	// Nombre de la imagen de fonfo del botn
+	char literal[LONSTDC];	// Literal del item
+	char tipoitem[2];	// Tipo de otem ( público o privado)
+	char tipoaccion[2];	// Tipo de accin que ejecuta el item
 } ;
 	
 struct s_Propiedades {
@@ -190,93 +195,95 @@ BOOL CMDPTES;	// Indicador de comandos pendientes
 BOOL aut = false; // Variable para controlar el acceso al menu de administracion
 
 
-char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecucin de este mdulo",\
+char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecución de este módulo",\
 		"001-No hay memoria suficiente para el buffer",\
-		"002-No se puede establecer conexin con el servidor Hidra",\
+		"002-No se puede establecer conexión con el servidor Hidra",\
 		"003-El fichero especificado no existe o bien no puede crearse o abrirse",\
 		"004-Comando Error",\
 		"005-El fichero est vacio",\
-		"006-Error en la ejecucin del fichero autoexec",\
+		"006-Error en la ejecución del fichero autoexec",\
 		"007-Error en la recuperacion del Menu principal",\
 		"008-No hay espacio reservado para la cache en este disco",\
-		"009-Ha ocurrido algn error generando el perfil software",\
+		"009-Ha ocurrido algún error generando el perfil software",\
 		"010-IPlocal, NO se ha definido este parámetro",\
 		"011-IPhidra, NO se ha definido este parámetro",\
 		"012-Puerto, NO se ha definido este parámetro",\
 		"013-NO existe fichero de configuración o contiene un error de sintaxis",\
-		"014-Fallo de sintaxis en los parámetros: Debe especificar -f nombre_del_fichero_de_configuración_del_servicio",\
-		"015-No existe Menu principal"};		
+		"014-Fallo de sintaxis en los parámetros: Debe especificar -f nombre_del_fichero_de_configuración",\
+		"015-No se ha podido crear socket para comunicación con el repositorio",\
+		"016-No se ha podido comunicar con el repositorio",\
+		"017-No existe Menu principal",\
+		"018-No se ha podido recuperar la configuración hardware del ordenador",\
+		"019-El cliente no se ha podido incluir en el sistema por un fallo en la conexión con el Servidor Hidra",\
+		"020-No se ha podido crear la carpeta en el repositorio",\
+		"021-Error en el envío de tramas al servidor Hidra",\
+		"022-Error en la recepción de tramas desde el servidor Hidra",\
+		"023-Error desconocido",\
+		};		
 		
+#define MAXERROR 23		// Error máximo cometido
 
 // Prototipos de funciones
-void RaiseError(int,char*,char*);
-int Nemonico(char*);
-void LogError(char*, struct excepcion);
+char* Desencriptar(char *);
+char* Encriptar(char *);
+int ValidacionParametros(int,char**);
+int CrearArchivoLog(char*);
+int LeeFileConfiguracion();
 void Log(char*);
-char * Buffer(int);
-int Abre_conexion();
-void Cierra_conexion();
+void UltimoError(int,char*);
+void INTROaFINCAD(char*);
+char* TomaParametro(char*,char*);
+int SplitParametros(char**,char*, char*);
+
+int EjecutarScript (char*,char* ,char*);
+char* ReservaMemoria(int);
+
+SOCKET TCPConnect(char *,char* );
+void TCPClose(SOCKET);
+int AbreConexionTCP(void);
+void CierraConexionTCP(void);
+int EnviaTramasHidra(SOCKET,TRAMA*);
+int RecibeTramasHidra(SOCKET,TRAMA*);
+int TCPWrite(SOCKET ,TRAMA*);
+int TCPRead(SOCKET ,TRAMA*);
+SOCKET UDPConnect();
+int EnviaTramaRepo(SOCKET,TRAMA*,char*,char*);
+int RecibeTramaRepo(SOCKET);
+
+long CreateTextFile(char*,char*);
+int ExisteFichero(char*);
+int RemoveFile(char *);
+int LoadTextFile(char *);
+
+int ProcesaComandos();
+int DisponibilidadComandos(int);
+int GestionTramas(TRAMA *);
+
 int Cortesia();
 int NoComandosPtes();
-int inclusion_cliRMB();
-int gestion_tramas(TRAMA *);
-int envia_tramas(SOCKET,TRAMA *);
-int recibe_tramas(SOCKET,TRAMA *);
-int TCPWrite(SOCKET ,TRAMA* );
-int TCPRead(SOCKET ,TRAMA* );
-SOCKET TCPConnect(char *,char* );
-BOOL RemoveFile(char *);
-int BuildDiskImage(int , char *, char* ) ;
-
-int CreateVirtualImage(char *, char* , char* ) ;
-int Synchronize(char *, char* , char* ) ;
-int FreeVirtualImage(char* ) ;
-
-BOOL SacaMensaje(char* ,char* , int );
-
-void INTROaFINCAD(char*);
-char * toma_parametro(char* ,char *);
-
+int TomaIPlocal();
+int InclusionClienteHIDRA();
+int RESPUESTA_InclusionClienteHIDRA(TRAMA*);
+int ComandosPendientes(void);
+int Arrancar(TRAMA *,TRAMA *);
 int Apagar(TRAMA*,TRAMA*);
 int Reiniciar(TRAMA*,TRAMA*);
 int Actualizar();
-int RESPUESTA_inclusion_cliRMB(TRAMA*);
-int RemboOffline(TRAMA*,TRAMA*);
-int EjecutarScript(TRAMA*,TRAMA*);
 int CrearPerfilSoftware(TRAMA*,TRAMA*);
-int CrearPerfil(char* ,char* ,char* ,char* );
-int Restaura_Imagen(char* ,char* ,char* ,char*);	
-int RespuestaEjecucionComando(TRAMA* , TRAMA *, int );
-int disponibilidadCOMANDOS(int);	
-int CloseWindow(char *);
-int Pantallazo(char* );
-int PowerOff();
-int  Muestra_Menu_Principal();
-char* URLDecode(char* );
-int CreateDir(char* );
-int CrearIncremental(char* ,char* ,char* ,char*,char* );
-int CrearSoftwareIncremental(TRAMA*,TRAMA*);
+int CrearPerfil(char*,char*,char*,char*,char*);
+int Nemonico(char*);
 int RestaurarImagen(TRAMA*,TRAMA*);
-int  reparticiona(int ,char* );
-int cambiaFstab(char* ,char * ,char* );
-int  DetectaConfiguracion();
-int TomaConfiguracion(TRAMA *,TRAMA *);
-int InventarioHardware(TRAMA *,TRAMA *);
-int EjecutarItem(char* );
-int GetCachePartitionSize(char*);
-int CreateTree(char* );
-int Arrancar(TRAMA *,TRAMA *);
-SOCKET UDPConnect(char *);
-int envia_comandos(SOCKET ,TRAMA* , char* ,char *);
-char *recibe_comandos(SOCKET);
-char* gestion_comandos(TRAMA*);
-int ExisteFichero(char *);
-char* Respuesta_ExisteFichero(TRAMA*);
-char* Respuesta_EliminaFichero(TRAMA*);
-char* Respuesta_LeeFicheroTexto(TRAMA*);
-char * Desencriptar(char *);
-char * Encriptar(char *);
-int ejecutarscript (char *,char * ,char *);
-int ExecShell(char*,char *);
+int RestaurandoImagen(char*,char*,char*,char*,char*,char*,char*); 
 int ParticionaryFormatear(TRAMA*,TRAMA*);
+int Particionar(char*,char*,char* );
+int Particionando(char*,char*,char*);
+int Formatear(char*,char*);
+int SetCachePartitionSize(int);
+int AutoexecClienteHidra(void);
+char* LeeConfiguracion(char*);
 char* TomaNomSO(char*,int);
+int InventarioHardware(TRAMA *,TRAMA *);
+int TomaConfiguracion(TRAMA *,TRAMA *);
+int RespuestaEjecucionComando(TRAMA* , TRAMA *, int);
+int ExecShell(TRAMA *,TRAMA *);
+char* URLDecode(char*);

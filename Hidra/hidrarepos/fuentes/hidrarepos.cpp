@@ -721,7 +721,7 @@ bool ExisteFichero(TramaRepos *trmInfo)
 	else
 		strcpy(swf,"1");
 	if(f) fclose(f);
-	return(respuesta_peticion(trmInfo,"Respuesta_ExisteFichero",swf));
+	return(respuesta_peticion(trmInfo,"Respuesta_ExisteFichero",swf,nomfile));
 }
 //_______________________________________________________________________________________________________________
 //
@@ -743,7 +743,7 @@ bool respuesta_clienteHidra(TramaRepos *trmInfo)
 //
 // Envia respuesta a peticin de comando
 //_______________________________________________________________________________________________________________
-bool respuesta_peticion(TramaRepos *trmInfo,char *LitRes,char* swf)
+bool respuesta_peticion(TramaRepos *trmInfo,char *LitRes,char* swf,char*txt)
 {
 	int lon,ret;
 	TRAMA *trama=(TRAMA*)malloc(LONGITUD_TRAMA);
@@ -756,6 +756,7 @@ bool respuesta_peticion(TramaRepos *trmInfo,char *LitRes,char* swf)
 	trama->ejecutor='1';
 	lon=sprintf(trama->parametros,"nfn=%s\r",LitRes);
 	lon+=sprintf(trama->parametros+lon,"res=%s\r",swf);		
+	lon+=sprintf(trama->parametros+lon,"txt=%s\r",txt);		
 	//MandaRespuesta
 	Encriptar((char*)trama);
 	ret=sendto(trmInfo->sck,(char*)trama,lon+11,0,(struct sockaddr*)&trmInfo->cliente,trmInfo->sockaddrsize);
@@ -781,10 +782,10 @@ bool EliminaFichero(TramaRepos *trmInfo)
 	sprintf(cmdshell,"rm -f %s",pathfile);
 	res=system(cmdshell);
 	if(res==0)
-		strcpy(swf,"0");
-	else
 		strcpy(swf,"1");
-	return(respuesta_peticion(trmInfo,"Respuesta_EliminaFichero",swf));
+	else
+		strcpy(swf,"0");
+	return(respuesta_peticion(trmInfo,"Respuesta_EliminaFichero",swf,nomfile));
 }
 //_______________________________________________________________________________________________________________
 //
@@ -796,6 +797,7 @@ bool LeeFicheroTexto(TramaRepos *trmInfo)
 	long lSize;
 	FILE *f;	
 	char pathfile[250];
+	char swf[2];
 	
 	char *nomfile=toma_parametro("nfl",trmInfo->trama.parametros); // Toma nombre funcin
 	sprintf(pathfile,"%s%s",PathHidra,nomfile);
@@ -804,6 +806,7 @@ bool LeeFicheroTexto(TramaRepos *trmInfo)
 	if(!f){ // El fichero no existe
 		texto=(char*)malloc(2);
 		strcpy(texto," ");
+		strcpy(swf,"0");
 	}
 	else{
 		fseek(f,0,SEEK_END);
@@ -812,14 +815,16 @@ bool LeeFicheroTexto(TramaRepos *trmInfo)
 		if(!texto){ 
 			texto=(char*)malloc(2);
 			strcpy(texto," ");
+			strcpy(swf,"0");
 		}
 		else{				
 			rewind (f);								// Coloca al principio el puntero de lectura
 			fread (texto,1,lSize,f); 	// Lee el contenido del fichero
+			strcpy(swf,"1");
 			fclose(f);
 		}
 	}
-	return(respuesta_peticion(trmInfo,"Respuesta_LeeFicheroTexto",texto));
+	return(respuesta_peticion(trmInfo,"Respuesta_LeeFicheroTexto",swf,texto));
 }
 //_______________________________________________________________________________________________________________
 //

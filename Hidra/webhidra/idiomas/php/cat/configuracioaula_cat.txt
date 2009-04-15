@@ -1,0 +1,23 @@
+<?
+//________________________________________________________________________________________________________
+//
+//	Fitxer d'idiomes php: configuracionaula_esp.php 
+//	Idioma: Català
+//________________________________________________________________________________________________________
+$TbMsg=array();
+$TbMsg[0]='Configuració Ordinadors';
+$TbMsg[1]='Características del Aula';
+$TbMsg[2]="Nombre Aula";
+$TbMsg[3]="Ubicació";
+$TbMsg[4]="Canó";
+$TbMsg[5]="Pissarra";
+$TbMsg[6]="LLocs";
+$TbMsg[7]="Url Imatge";
+$TbMsg[8]="Comentaris";
+$TbMsg[9]='Dades de configuracio';
+$TbMsg[10]='Partició';
+$TbMsg[11]='Nombre S.O.';
+$TbMsg[12]='Tamany';
+$TbMsg[13]='Ordinadors';
+
+?>

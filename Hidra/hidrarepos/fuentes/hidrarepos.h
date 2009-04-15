@@ -113,7 +113,7 @@ bool ExisteFichero(TramaRepos *);
 bool EliminaFichero(TramaRepos *);
 bool LeeFicheroTexto(TramaRepos *);
 int gestiona_comando(TramaRepos *);
-bool respuesta_peticion(TramaRepos *,char*,char*);
+bool respuesta_peticion(TramaRepos *,char*,char*,char*);
 bool RecibePerfilSoftware(TramaRepos *trmInfo);
 bool EnviaPerfilSoftware(TramaRepos *trmInfo);
 SOCKET Abre_conexion(char *,int);
