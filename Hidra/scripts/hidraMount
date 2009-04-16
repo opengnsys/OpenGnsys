@@ -20,8 +20,10 @@ source $(dirname $0)/hidraEnviron
 # Sustituye num. de disco por el dispositivo.
 PART="$(hidraDisk $1 $2)" || exit $?
 
-# NOTAS: no se comprueba previamente el tipo de particion, la funcion MountPartition no devuelve errores.
-SAL=$(MountPartition $*)
-# Si la salida empieza por "/", se ha montado la particion
-echo $SAL
+# NOTAS: no se comprueba previamente el tipo de particion,
+#	 la funcion MountPartition no devuelve errores.
+MONT=$(MountPartition $* 2>/dev/null)
+# Error si la salida no empieza por "/", no se ha montado la particion.
+[ "${MONT:0:1}" = "/" ] || exit $ERRPARTITION
+echo $MONT
 

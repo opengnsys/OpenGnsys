@@ -18,10 +18,21 @@ if ! typeset -F Disk >/dev/null; then
 	for i in $REPO/admin/librerias/*.lib; do
 	    source $i
 	done
+	# Caminos de busqueda de procedimientos EAC.
 	[ -z "$(echo $PATH|grep $REPO/admin)" ] && PATH=$PATH:$REPO/admin/procedimientos
     fi
 fi
-# Caminos de busqueda de comando.
-[ -z "$(echo $PATH|grep $HIDRADIR)" ] && PATH=$PATH:$HIDRADIR/scripts
+
+# Mnemonicos de errores Hidra.
+if [ -z "$ERRFORMAT" ]; then
+    declare -ir ERRFORMAT=1	# Formato de ejecucion incorrecto.
+    declare -ir ERRNOTFOUND=2	# Fichero o dispositivo no encontrado.
+    declare -ir ERRPARTITION=3	# Error en particion de disco.
+    declare -ir ERRNOTEXEC=4	# Programa o funcion no ejecutable.
+    declare -ir ERRNOTOS=5	# Sin sistema operativo.
+    # Caminos de busqueda de comandos Hidra.
+    [ -z "$(echo $PATH|grep $HIDRADIR)" ] && PATH=$PATH:$HIDRADIR/scripts
+fi
+
 export PATH HIDRADIR
 

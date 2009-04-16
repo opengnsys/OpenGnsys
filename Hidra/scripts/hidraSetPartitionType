@@ -16,7 +16,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 3 parametros
-[ $# -ne 3 ] && exit 1
+[ $# -ne 3 ] && exit $ERRFORMAT
 
 # Comprobar que existe la particion.
 DISCO="$(hidraDisk $1)" || exit $?
@@ -28,8 +28,8 @@ case "$3" in
      EXTENDED)	 ID=5  ;;
      NTFS)	 ID=7  ;;
      HNTFS)	 ID=17 ;;
-     VFAT)	 ID=b  ;;
-     HVFAT)	 ID=1b ;;
+     FAT32)	 ID=b  ;;
+     HFAT32)	 ID=1b ;;
      BIGDOS)	 ID=6  ;;
      HBIGDOS)	 ID=16 ;;
      EXT[234])	 ID=83 ;;

@@ -4,7 +4,7 @@
 # Formato:	hidraTypeFS numdisco numparticion | dispositivo
 # Salida:	Mnemonico
 #	Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234],
-#			BIGDOS, HBIGDOS, VFAT, HVFAT, NTFS, HNTFS,
+#			BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS,
 #			CACHE, EMPTY, EXTENDED, UNKNOWN }
 # Error:	1 - formato incorrecto.
 #		2 - disco o particion no corresponden con un dispositivo.
@@ -18,7 +18,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 1 o 2 parametros.
-[ $# -lt 1 -o $# -gt 2 ] && exit 1
+[ $# -lt 1 -o $# -gt 2 ] && exit $ERRFORMAT
 # Si solo hay 1 parametro, comprobar que es dispositivo (/dev/*).
 if [ $# = 1 ]; then
     [ -n "${1%/dev/*}" ] && exit 1
@@ -30,7 +30,7 @@ else
     NPART="$2"
 fi
 [ -z "$DISCO" -o ! -b "$DISCO" ] && exit 2
-[ ! -b "$DISCO$NPART" ] && exit 2
+[ ! -b "$DISCO$NPART" ] && exit $ERRNOTFOUND
 
 # Detectar id. de tipo de particion y codificar al mnemonico.
 ID=$(sfdisk --id $DISCO $NPART 2>/dev/null)
@@ -39,10 +39,10 @@ case "$ID" in
      5) 	TIPO="EXTENDED" ;;
      [6e])	TIPO="BIGDOS" ;;
      7) 	TIPO="NTFS" ;;
-     [bc])	TIPO="VFAT" ;;
+     [bc])	TIPO="FAT32" ;;
      1[6e])	TIPO="HBIGDOS" ;;
      17)	TIPO="HNTFS" ;;
-     1[bc])	TIPO="HVFAT" ;;
+     1[bc])	TIPO="HFAT32" ;;
      82)	TIPO="LINUX-SWAP" ;;
      83)	TIPO="$(parted -s $DISCO print | awk -v var=$NPART '{if ($1==var) {print toupper($6)}}')"
 		TIPO=${TIPO:-"EXT3"}

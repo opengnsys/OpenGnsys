@@ -3,7 +3,7 @@
 # Descripcion:	Asigna las tabla de particiones primarias de un disco.
 # Formato:	hidraCreatePrimaryPartitions numdisco tipopart1:tamañoKB1 ...
 # Salida:	tabla de particiones (por determinar)
-# 	tipopart = { VFAT, NTFS, EXT2, EXT3, EXT4, LINUX-SWAP,
+# 	tipopart = { FAT32, NTFS, EXT2, EXT3, EXT4, LINUX-SWAP,
 #			EXTENDED, CACHE, EMPTY }
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
@@ -17,7 +17,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben  entre 2 y 5 parametros
-[ $# -lt 2 -o $# -gt 5 ] && exit 1
+[ $# -lt 2 -o $# -gt 5 ] && exit $ERRFORMAT
 
 # Sustituye num. de disco por el dispositivo.
 DISCO="$(hidraDisk $1)" || exit $?
@@ -57,8 +57,8 @@ while [ $PART -le 4 ]; do
 			 PARTEXT="start=$SECTOR, size=$TAM, Id=0" ;;
 	     NTFS)	 ID=7  ;;
 	     HNTFS)	 ID=17 ;;
-	     VFAT)	 ID=b  ;;
-	     HVFAT)	 ID=1b ;;
+	     FAT32)	 ID=b  ;;
+	     HFAT32)	 ID=1b ;;
 	     EXT[234])	 ID=83 ;;
 	     LINUX-SWAP) ID=82 ;;
 	     CACHE)	 ID=a7 ;;

@@ -17,7 +17,7 @@
 source  $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# != 2 ] && exit 1
+[ $# != 2 ] && exit $ERRFORMAT
 
 # Montar la particion, si no lo estaba previamente.
 DIRMONT=$(hidraMount $1 $2) || exit $?
@@ -35,13 +35,14 @@ case "$(hidraTypeFS $1 $2)" in
 	[ -L $UBUNTU ] && UBUNTU="$DIRMONT/$(ls -l $UBUNTU | awk '{print $11}')"
 	[ -f $UBUNTU ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $UBUNTU)"
 	;;
-    NTFS | HTNFS | VFAT | HVFAT)
+    NTFS | HTNFS | FAT32 | HFAT32)
 	TIPO="Windows"
 	# Windows: lee la version del registro.
 	VERSION=$(hidraGetRegistryKey $DIRMONT software '\Microsoft\Windows NT\CurrentVersion\ProductName')
 	;;
 esac
 
-# Mostrar resultado.
+# Mostrar resultado y salir sin errores.
 [ -n "$VERSION" ] && echo "$TIPO:$VERSION"
+exit 0
 

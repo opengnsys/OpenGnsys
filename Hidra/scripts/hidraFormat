@@ -17,7 +17,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# -lt 2 -o $# -gt 3 ] && exit 1
+[ $# -lt 2 -o $# -gt 3 ] && exit $ERRFORMAT
 
 # Sustituye num. de disco por el dispositivo.
 DISCO="$(hidraDisk $1)" || exit $?
@@ -33,7 +33,7 @@ case "$(hidraTypeFS $1 $2)" in
      REISERFS)		TIPO="reiserfs" ;;
      REISER4)		TIPO="reiser4" ;;
      NTFS|HNTFS)	TIPO="ntfs -f" ;;
-     VFAT|HVFAT)	TIPO="vfat" ;;
+     FAT32|HFAT32)	TIPO="vfat" ;;
      BIGDOS|HBIGDOS)	TIPO="msdos" ;;
      CACHE)		TIPO="ext3" ;;
      *) 		exit 3;;
