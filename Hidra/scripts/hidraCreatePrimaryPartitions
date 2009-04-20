@@ -46,10 +46,10 @@ while [ $PART -le 4 ]; do
 	# Formato de cada parametro - Tipo:Tamanyo
 	TIPO="${1%%:*}"
 	TAM="${1#*:}"
-	[ -z "$TAM" ] && exit 1
+	[ -z "$TAM" ] && exit $ERRFORMAT
 	# Convertir en sectores de 512 B.
 	TAM=$[TAM*2]
-	[ $TAM -eq 0 ] && exit 1
+	[ $TAM -eq 0 ] && exit $ERRFORMAT
 	# Identificador de tipo de particion.
 	case "$TIPO" in
 	     EMPTY)	 ID=0  ;;
@@ -62,12 +62,12 @@ while [ $PART -le 4 ]; do
 	     EXT[234])	 ID=83 ;;
 	     LINUX-SWAP) ID=82 ;;
 	     CACHE)	 ID=a7 ;;
-	     *)		 exit 1;;
+	     *)		 exit $ERRFORMAT;;
 	esac
 	echo "$DISCO$PART : start=$SECTOR, size=$TAM, Id=$ID" >>$tmpsfdisk
 	SECTOR=$[SECTOR+TAM]
 	# Error si se supera el num. total de sectores.
-	[ $SECTOR -gt $NSECTORES ] && exit 1
+	[ $SECTOR -gt $NSECTORES ] && exit $ERRFORMAT
     fi
     PART=$[PART+1]
     shift

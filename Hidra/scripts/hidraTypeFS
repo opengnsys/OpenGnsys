@@ -21,7 +21,7 @@ source $(dirname $0)/hidraEnviron
 [ $# -lt 1 -o $# -gt 2 ] && exit $ERRFORMAT
 # Si solo hay 1 parametro, comprobar que es dispositivo (/dev/*).
 if [ $# = 1 ]; then
-    [ -n "${1%/dev/*}" ] && exit 1
+    [ -n "${1%/dev/*}" ] && exit $ERRFORMAT
     DISCO="${1%%[0-9]}"
     NPART="${1#$DISCO}"
 else
@@ -29,7 +29,7 @@ else
     DISCO="$(hidraDisk $1)" || exit $?
     NPART="$2"
 fi
-[ -z "$DISCO" -o ! -b "$DISCO" ] && exit 2
+[ -z "$DISCO" -o ! -b "$DISCO" ] && exit $ERRNOTFOUND
 [ ! -b "$DISCO$NPART" ] && exit $ERRNOTFOUND
 
 # Detectar id. de tipo de particion y codificar al mnemonico.

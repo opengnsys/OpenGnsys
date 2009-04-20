@@ -37,7 +37,7 @@ case "$3" in
      LINUX-LVM)	 ID=8e ;;
      CACHE)	 ID=a7 ;;
      RAID-EXT[234]) ID=fd ;;
-     *)		 exit 3;;
+     *)		 exit $ERRPARTITION;;
 esac
 
 # Modificar la particion.

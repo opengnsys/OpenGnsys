@@ -15,7 +15,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# -ne 2 ] && exit 1
+[ $# -ne 2 ] && exit $ERRFORMAT
 
 # Sustituye num. de disco por el dispositivo.
 PART="$(hidraDisk $1 $2)" || exit $?
@@ -23,7 +23,7 @@ PART="$(hidraDisk $1 $2)" || exit $?
 # NOTAS: no se comprueba previamente el tipo de particion,
 #	 la funcion MountPartition no devuelve errores.
 MONT=$(MountPartition $* 2>/dev/null)
-# Error si la salida no empieza por "/", no se ha montado la particion.
-[ "${MONT:0:1}" = "/" ] || exit $ERRPARTITION
+# Error si la salida tiene mas de 1 palabra ( ), no se ha montado la particion.
+[ -z "${MONT/* *}" ] && exit $ERRPARTITION
 echo $MONT
 

@@ -19,7 +19,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# -ne 2 ] && exit 1
+[ $# -ne 2 ] && exit $ERRFORMAT
 
 # Obtiene el tipo de particion.
 TIPO="$(hidraTypeFS $1 $2)" || exit $?
@@ -28,7 +28,7 @@ case "$TIPO" in
      NTFS|HNTFS|BIGDOS|HBIGDOS)
 	# Arranque Windows.
 	# Compruebar si hay un SO definido antes de arrancar.
-	[ -z "$(hidraOSVersion $1 $2)" ] && exit 5
+	[ -z "$(hidraOSVersion $1 $2)" ] && exit $ERRNOTOS
 	HDBoot $*
 	;;
      EXT[234]|REISERFS|REISER4)
@@ -36,13 +36,13 @@ case "$TIPO" in
 	PARAMS=$(hidraLinuxBootParameters $1 $2) || exit $?
 	read -e KERNEL INITRD APPEND <<<"$PARAMS"
 	# Si no hay kernel, no hay sistema operativo.
-	[ -z "$KERNEL" ] && exit 5
+	[ -z "$KERNEL" ] && exit $ERRNOTOS
 	# Arranca Linux con los parametros leidos de su GRUB.
 	MONT=$(hidraMount $1 $2)
 	kexec -l ${MONT}${KERNEL} --append="$APPEND" --initrd=${MONT}${INITRD}
 	kexec -e
 	;;
-     *) exit 3
+     *) exit $ERRPARTITION
 	;;
 esac
 

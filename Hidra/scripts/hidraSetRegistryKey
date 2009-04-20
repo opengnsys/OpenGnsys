@@ -16,7 +16,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 4 parametros.
-[ $# != 4 ] && exit 1
+[ $# != 4 ] && exit $ERRFORMAT
 
 # Camino del fichero de registro en NT/2000.
 FICHNT=$(hidraPath "/$1/winnt/system32/config/$2")
@@ -24,7 +24,7 @@ FICHNT=$(hidraPath "/$1/winnt/system32/config/$2")
 # Camino del fichero de registro en XP/Vista.
 FICHXP=$(hidraPath "/$1/windows/system32/config/$2")
 [ -f $FICHXP ] && FICH="$FICHXP" 
-[ ! -f $FICH ] && exit 2
+[ ! -f $FICH ] && exit $ERRNOTFOUND
 
 # Asigna nuevo valor a la clave del registro.
 drbl-chntpw $FICH <<<"
@@ -37,6 +37,6 @@ y" 2>/dev/null
 COD=$?
 case $COD in
      2) exit 0 ;;
-     0) exit 2 ;;
+     0) exit $ERRNOTFOUND ;;
      *) exit $COD ;;
 esac

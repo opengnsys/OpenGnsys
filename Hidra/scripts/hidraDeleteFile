@@ -17,5 +17,5 @@ source $(dirname $0)/hidraEnviron
 
 FICH="$(hidraPath $(hidraMount $1 $2)/$3)" || exit $?
 
-[ ! -f $FICH ] && exit 2
+[ ! -f $FICH ] && exit $ERRNOTFOUND
 rm $FICH

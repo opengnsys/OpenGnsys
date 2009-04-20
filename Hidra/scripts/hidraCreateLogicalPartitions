@@ -36,9 +36,9 @@ sfdisk -d $DISCO | grep -e "$DISCO[1-4]" >>$tmpsfdisk
 # Sector inicial y num. total de sectores para particiones logicas (a partir de la 5).
 DATOSEXT=$(awk 'BEGIN {FS="[:=,]"} { if ($7==" 5") {printf "%d:%d",$3,$5} }' $tmpsfdisk)
 SECTOR="${DATOSEXT%:*}"
-[ -z "$SECTOR" ] && exit 3
+[ -z "$SECTOR" ] && exit $ERRPARTITION
 NSECTORES="$[SECTOR+${DATOSEXT#*:}]"
-[ "$NSECTORES" = "$SECTOR" ] && exit 3
+[ "$NSECTORES" = "$SECTOR" ] && exit $ERRPARTITION
 PART=5
 
 # Terminar de generar fichero temporal para "sfdisk".
@@ -46,10 +46,10 @@ while [ $# != 0 ]; do
 	# Formato de cada parametro - Tipo:Tamanyo
 	TIPO="${1%%:*}"
 	TAM="${1#*:}"
-	[ -z "$TAM" ] && exit 1
+	[ -z "$TAM" ] && exit $ERRFORMAT
 	# Convertir en sectores de 512 B.
 	TAM=$[TAM*2]
-	[ $TAM -eq 0 ] && exit 1
+	[ $TAM -eq 0 ] && exit $ERRFORMAT
 	# Identificador de tipo de particion.
 	case "$TIPO" in
 	     EMPTY)	 ID=0  ;;
@@ -59,12 +59,12 @@ while [ $# != 0 ]; do
 	     HFAT32)	 ID=1b ;;
 	     EXT[234])	 ID=83 ;;
 	     LINUX-SWAP) ID=82 ;;
-	     *)		 exit 1;;
+	     *)		 exit $ERRFORMAT;;
 	esac
 	echo "$DISCO$PART : start=$SECTOR, size=$TAM, Id=$ID" >>$tmpsfdisk
 	SECTOR=$[SECTOR+TAM]
 	# Error si se supera el num. total de sectores.
-	[ $SECTOR -gt $NSECTORES ] && exit 1
+	[ $SECTOR -gt $NSECTORES ] && exit $ERRFORMAT
 	PART=$[PART+1]
 	shift
 done

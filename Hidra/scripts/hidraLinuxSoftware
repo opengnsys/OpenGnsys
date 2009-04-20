@@ -16,7 +16,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# != 2 ] && exit 1
+[ $# != 2 ] && exit $ERRFORMAT
 
 # Montar particion.
 DIRMONT=$(hidraMount $1 $2) || exit $?

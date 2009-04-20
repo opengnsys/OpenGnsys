@@ -16,7 +16,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 o 3 parametros.
-[ $# -lt 2 -o $# -gt 3 ] && exit 1
+[ $# -lt 2 -o $# -gt 3 ] && exit $ERRFORMAT
 
 # Si no se indica nombre en el 3er parametro, lo toma de la orden "hostname".
 NOMBRE="${3:-$(hostname)}"

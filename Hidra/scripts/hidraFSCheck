@@ -31,7 +31,7 @@ case "$(hidraTypeFS $1 $2)" in
      FAT32|HFAT32)	TIPO="vfat" ;;
      BIGDOS|HBIGDOS)	TIPO="msdos" ;;
      CACHE)		TIPO="ext3" ;;
-     *) 		exit 3;;
+     *) 		exit $ERRPARTITION;;
 esac
 
 # Desmontar la particion antes de comprobarla.

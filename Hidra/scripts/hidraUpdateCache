@@ -17,9 +17,9 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 3 parametros.
-[ $# -ne 3 ] && exit 1
+[ $# -ne 3 ] && exit $ERRFORMAT
 
 # NOTAS: no se comprueba previamente el tipo de particion,
-#	 la funcion RestorePartitionFromImage no devuelve errores.
+#	 la funcion UpdateCache no devuelve errores.
 UpdateCache $1 "${2%/}/" "$3"
 

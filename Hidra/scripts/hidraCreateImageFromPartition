@@ -16,7 +16,7 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 6 parametros.
-[ $# -ne 6 ] && exit 1
+[ $# -ne 6 ] && exit $ERRFORMAT
 
 # Desmontar la particion, si estaba montada previamente.
 hidraUnmount $1 $2 || exit $?
@@ -28,7 +28,7 @@ if [ "$3" = "$IPservidor" ]; then
     for d in $(showmount -d $IPservidor | grep $REPO); do
 	DIR=$(ConnectToRepo $IPservidor "$4" / | grep "$d")
     done
-    [ -z "$DIR" ] && exit 4
+    [ -z "$DIR" ] && exit $ERRNOTFOUND
 fi
 
 # NOTAS: no se comprueba previamente el tipo de particion,

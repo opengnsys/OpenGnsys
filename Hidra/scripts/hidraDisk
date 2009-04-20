@@ -30,18 +30,18 @@ case $# in
 	echo "$DISCOS"
 	;;
      1) # Error si el parametro no es un digito.
-	[ -n "${1/[1-9]/}" ] && exit 1 
+	[ -n "${1/[1-9]/}" ] && exit $ERRFORMAT
 	DISCO=$(echo $DISCOS | awk -v n=$1 '{print $n}')
-	[ ! -b "$DISCO" ] && exit 2
+	[ ! -b "$DISCO" ] && exit $ERRNOTFOUND
 	echo "$DISCO"
 	;;
      2) # Error si los 2 parametros no son digitos.
-	[ -n "${1/[1-9]/}" -o -n "${2/[1-9]/}" ] && exit 1 
+	[ -n "${1/[1-9]/}" -o -n "${2/[1-9]/}" ] && exit $ERRFORMAT
 	PART=$(echo $DISCOS | awk -v n=$1 '{print $n}')$2
-	[ ! -b "$PART" ] && exit 2
+	[ ! -b "$PART" ] && exit $ERRNOTFOUND
 	echo "$PART"
 	;;
      *) # Formato erroneo.
-	exit 1
+	exit $ERRFORMAT
 esac
 

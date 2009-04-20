@@ -16,14 +16,14 @@
 source $(dirname $0)/hidraEnviron
 
 # Error si no se reciben 2 parametros.
-[ $# -ne 2 ] && exit 1
+[ $# -ne 2 ] && exit $ERRFORMAT
 
 # Obtiene el punto de montaje de la particion.
 MONT="$(hidraMount $1 $2)" || exit $?
 
 # Fichero de configuracion de GRUB.
 CONF=$MONT/boot/grub/menu.lst
-[ ! -f $CONF ] && exit 4
+[ ! -f $CONF ] && exit $ERRNOTFOUND
 
 # Toma del fichero de configuracion los valores del kernel, initrd
 #    y parametros de arranque usando las clausulas por defecto, y
