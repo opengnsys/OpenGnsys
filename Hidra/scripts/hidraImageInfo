@@ -1,0 +1,28 @@
+#!/bin/bash
+# Nombre:	hidraImageInfo
+# Descripcion:	Muestra informacion de un fichero de imagen.
+# Formato:	hidraImageInfo iprepo dirbase imagen
+#		El fichero imagen tiene el formato:
+#			nombre.compresor-numparticion[.metodotransferencia]
+# Salida:	(por determinar)
+# Error:	1 - formato incorrecto.
+#		2 - fichero no encontrado.
+# Requisitos:	partimage, ConnectToRepo (EAC)
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatible con EAC: nueva funcion.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	14/04/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 3 parametros.
+[ $# -ne 3 ] && exit $ERRFORMAT
+
+# Error si no existe el fichero.
+FICH=$(ConnectToRepo "$1" "${2%/}/" "$3")
+[ -f "$FICH" ] || exit $ERRNOTFOUND
+
+# Formato por determinar (por el momento solo el tamano en KB).
+partimage -B gui=no imginfo "$FICH"
+#    awk '/Partition size/ {sub(/\.\.+/," "); printf "%d",$3*1024*1024;}'
+

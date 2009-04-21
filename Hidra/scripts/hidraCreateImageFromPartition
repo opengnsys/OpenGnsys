@@ -24,9 +24,10 @@ hidraUnmount $1 $2 || exit $?
 # ATENCION: la funcion CreateImageFromPartition no comprueba que se genere la
 #	 imagen en el directorio exportado por el servidor y la puede crear en
 #	 local. El codigo comprueba que el directorio este importado.
+DIRIMG=$(ConnectToRepo $IPservidor "$4" / | grep "$d")
 if [ "$3" = "$IPservidor" ]; then
     for d in $(showmount -d $IPservidor | grep $REPO); do
-	DIR=$(ConnectToRepo $IPservidor "$4" / | grep "$d")
+	DIR=$DIR$(echo $DIRIMG|grep $d)
     done
     [ -z "$DIR" ] && exit $ERRNOTFOUND
 fi

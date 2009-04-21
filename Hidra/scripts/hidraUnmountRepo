@@ -1,0 +1,15 @@
+#!/bin/bash
+# Nombre:	hidraUnmountRepo
+# Descripcion:	Desmonta el directorio de un repositorio alternaivo.
+# Formato:	hidraUnmountRempo iprepo
+# Salida:	Punto de montaje (por determinar).
+# Error:	(definido por EAC)
+# Requisitos:	UmountRepo (EAC)
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatibilidad Con EAC: llama a la funcion MountCache
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	20/04/2009
+
+source $(dirname $0)/hidraEnviron
+
+UmountRepo $*

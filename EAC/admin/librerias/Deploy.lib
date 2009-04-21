@@ -69,11 +69,11 @@ then
 				"NTFS")
 					case $CloneImageNTFS in
 						"ntfsclone")
-							imaged="ntfsclone --force --save-image -O - $disco | "
+							imaged="ntfsclone --force --save-image -O - $disco"
 							program=ntfsclone
 							;;
 						"partimage")
-							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout |"
+							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout"
 							program=partimage
 							;;
 						"partimage-ng")
@@ -90,6 +90,11 @@ then
 							program=partimage
                                                         echo "imaged: $imaged"
 						;;
+						"partimage-ng")
+							echo "partimage-ng" 
+							imaged="partimage-ng save $disco stdout"
+							program=partimage-ng
+							;;
 					esac
 				;;
 		esac
@@ -98,10 +103,10 @@ then
 	CompresionImage=`echo $5 | cut -f2 -d.`
 		case $CompresionImage in
 			"gzip")
-				comando="$imaged gzip -c >"
+				comando="$imaged | gzip -c >"
 			;;
 			"lzop")
-				comando="$imaged lzop >"
+				comando="$imaged | lzop >"
 			;;			
 		esac
 		
