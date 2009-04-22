@@ -423,7 +423,7 @@ int gestiona_comando(TramaRepos *trmInfo)
 	if(resul==0)
 		return(EnviaPerfilSoftware(trmInfo));	
 	
-	resul=strcmp(nombrefuncion,"EjecutarScript");
+	resul=strcmp(nombrefuncion,"ExecShell");
 	if(resul==0)
 		return(RegistraComando(trmInfo));	
 
@@ -1036,7 +1036,7 @@ int RESPUESTA_inclusionREPO(TRAMA *trama)
 
 	INTROaFINCAD(trama->parametros);
 	char* prm;
-	prm=toma_parametro("prp",trama->parametros); // Toma nombre funcin
+	prm=toma_parametro("prp",trama->parametros); // Puero de comunicaciones
 	puertorepo=atoi(prm);
 	prm=toma_parametro("pth",trama->parametros); // Path al directorio base de Hidra
 	strcpy(PathHidra,prm);
