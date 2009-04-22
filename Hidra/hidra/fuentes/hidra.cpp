@@ -3066,7 +3066,8 @@ int envia_comandos(SOCKET s,TRAMA* trama, char* ipsrv,int puerto)
     addrRepo.sin_port = htons((short)puerto);
     addrRepo.sin_addr.s_addr = inet_addr(ipsrv); //  Direccin IP repositorio
     Encriptar((char*)trama);
-	ret = sendto(s,(char *)trama,lon+11,0,(struct sockaddr *)&addrRepo, sizeof(addrRepo));
+	lon=strlen((char*)trama);
+	ret = sendto(s,(char *)trama,lon,0,(struct sockaddr *)&addrRepo, sizeof(addrRepo));
     if (ret == SOCKET_ERROR){
     	RegistraLog("***send() fallo en envío al repositorio",true);
 		return(FALSE);

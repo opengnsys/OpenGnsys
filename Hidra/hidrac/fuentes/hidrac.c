@@ -389,7 +389,7 @@ int EjecutarScript ( char *script,char * parametros,char *salida)
 		close (descr[ESCRIBIR]);
 		bytesleidos = read (descr[LEER], buffer, 512);
 		while(bytesleidos>0){
-			if(salida!=(char*)NULL){ // Si se solicita retorno de información...
+			if(salida!=(char*)NULL){ // Si se solicita retorno de información...			
 				buffer[bytesleidos]='\0';
 				for(i=bytesleidos-1;i>=0;i--){
 					if(buffer[i]<32) // Caracter Asci menor de 32
@@ -847,10 +847,10 @@ int LoadTextFile(char *nomfile)
 // ________________________________________________________________________________________________________
 int ProcesaComandos()
 {
-		sprintf(filecmd,"%s/CMD_%s",HIDRASRVCMD,Propiedades.IPlocal);	// Nombre del fichero de comandos		
+		sprintf(filecmd,"/comandos/CMD_%s",Propiedades.IPlocal);	// Nombre del fichero de comandos		
 		if(ExisteFichero(filecmd))	// Borra fichero de comandos si previamente exista de anteriores procesos
 			RemoveFile(filecmd);
-		if(!DisponibilidadComandos(false)){	// Notifica  al servidor HIDRA su disponibilidad para recibir comandos
+		if(!DisponibilidadComandos(true)){	// Notifica  al servidor HIDRA su disponibilidad para recibir comandos
 			UltimoError(0,"ProcesaComandos()");	
 			return(false);	
 		}
@@ -866,7 +866,7 @@ int ProcesaComandos()
 				Log("Procesa comandos pendientes");
 				ComandosPendientes(); // Bucle para procesar comandos pendientes
 				Log("Disponibilidad para comandos interactivos activada ...");				
-				if(!DisponibilidadComandos(false)){	// Notifica  al servidor HIDRA su disponibilidad para recibir comandos
+				if(!DisponibilidadComandos(true)){	// Notifica  al servidor HIDRA su disponibilidad para recibir comandos
 					UltimoError(0,"ProcesaComandos()");	
 					return(false);
 				}
@@ -974,7 +974,7 @@ int GestionTramas(TRAMA *trama)
 		return(Cortesia());			
 					
 	
-	res=strcmp(nombrefuncion,"EjecutarScript");
+	res=strcmp(nombrefuncion,"ExecShell");
 	if(res==0)
 		return(ExecShell(trama,nwtrama));			
 			
@@ -1705,14 +1705,14 @@ int SetCachePartitionSize(int t)
 //
 //  
 //______________________________________________________________________________________________________
-// Función: AutoexecClienteHidra
+// Función: AutoClienteHidra
 //
 //	Descripción: 
 //		Ejecuta un fichero autoexec preparado para  el cliente
 // ________________________________________________________________________________________________________
 int AutoexecClienteHidra()
 {
-	sprintf(fileini,"%s/INI_%s",HIDRASRVCMD,Propiedades.IPlocal);	// Nombre del fichero autoexec		
+	sprintf(fileini,"/comandos/INI_%s",Propiedades.IPlocal);	// Nombre del fichero autoexec		
 	if(ExisteFichero(fileini)){
 		if(LoadTextFile(fileini)){ // Lee fichero autoexec		
 			GestionTramas(trama);	// Analiza la trama
@@ -1914,24 +1914,32 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 		fwrite(codigo,1,lSize,f);	// Escribe el código a ejecutar
 		fclose(f);
 		
-		sprintf(cmdshell,"chmod +x %s/%s",HIDRASCRIPTS,filecmdshell);	// Da permiso de ejecución al fichero
-		herror=EjecutarScript(cmdshell,NULL,NULL);
+		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
+		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
+		
+		herror=EjecutarScript(cmdshell,parametros,NULL);
 		if(herror){
 			UltimoError(herror,"ExecShell()");	// Se ha producido algún error
 			res=false;	
 		}
 		else{
-			sprintf(cmdshell,"%s/%s",HIDRASCRIPTS,filecmdshell);	// Ejecución el fichero de script creado
-			int herror=EjecutarScript(cmdshell,NULL,NULL);
+			sprintf(cmdshell,"%s",filecmdshell);	// Ejecución el fichero de script creado
+			//int herror=EjecutarScript(cmdshell,NULL,NULL);
+			int herror=system(cmdshell);
 			if(herror){
 				UltimoError(herror,"ExecShell()");	// Se ha producido algún error
 				res=false;	
 			}		
 		}
 	}
-
+	
+	char *disco=(char*)ReservaMemoria(2);
+	sprintf(disco,"1"); // Siempre el disco 1
+	char* parametroscfg=LeeConfiguracion(disco);
 	int lon;			
+	
 	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_ExecShell\r");	
+	lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);	
 	RespuestaEjecucionComando(trama,nwtrama,res);	
 		
 	return(res);
@@ -1950,7 +1958,7 @@ char* URLDecode(char *src)
 {
 	const char *p = src;
 	char code[3] = {0};
-	unsigned long ascii = 0;
+	unsigned long ascii = 0;	
 	char *end = NULL;
 	char *dest,*cad;
 
@@ -1966,7 +1974,7 @@ char* URLDecode(char *src)
 		else
 			*dest++ = *p++;
 	}
-	return(cad);
+	return(cad);	
 }
 //______________________________________________________________________________________________________
 // Función: RespuestaEjecucionComando
@@ -1982,7 +1990,7 @@ char* URLDecode(char *src)
 // ________________________________________________________________________________________________________
 int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 { 
-		int idsuceso=0;
+		int idsuceso=0;	
 		char *widsuceso=TomaParametro("ids",trama->parametros);
 		if(widsuceso) idsuceso=atoi(widsuceso);	
 		int lon;
@@ -2000,13 +2008,13 @@ int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 			lon+=sprintf(nwtrama->parametros+lon,"der=%s\r",descrierror);	// Descripción del error si lo ha habido
 		}
 		if(AbreConexionTCP()){
-			if(!EnviaTramasHidra(sock,trama)){
+			if(!EnviaTramasHidra(sock,nwtrama)){
 				UltimoError(21,"RespuestaEjecucionComando()"); 
 				return(false);
 			}
 			if(!RecibeTramasHidra(sock,trama)){
 				UltimoError(22,"RespuestaEjecucionComando()");
-				return(false);
+				return(false);	
 			}		
 			CierraConexionTCP();
 			GestionTramas(trama);	// Analiza la trama
@@ -2027,7 +2035,7 @@ int  main(int argc, char *argv[])
 
 /*
 	ndebug=3;
-	strcpy(szPathFileLog,"hidrac_0.0.0.0.log");
+	strcpy(szPathFileLog,"hidrac_0.0.0.0.log");	
 	sprintf(cmdshell,"/var/EAC/hidra/scripts/hidraCreatePrimaryPartitions");
 	sprintf(parametros," %s %s %s","hidraCreatePrimaryPartitions","1","NTFS:3333333");
 	char* retorno=(char*)ReservaMemoria(2000);
@@ -2038,8 +2046,8 @@ int  main(int argc, char *argv[])
 	// Validación de argumentos y lectura del fichero de configuración
 	if(!ValidacionParametros(argc,argv))
 		exit(EXIT_FAILURE);
-	else{
-		if(CrearArchivoLog(szPathFileLog))
+	else{	
+		if(!CrearArchivoLog(szPathFileLog))
 			exit(EXIT_FAILURE);
 		else
 			if(!LeeFileConfiguracion(szPathFileCfg)){ // Toma parámetros de configuracion
@@ -2047,34 +2055,34 @@ int  main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 	}
-	// Guarda datos básicos del cliente
-	strcpy(Propiedades.servidorhidra,Servidorhidra);
-	strcpy(Propiedades.puerto,Puerto);
+	// Guarda datos básicos del cliente	
+	strcpy(Propiedades.servidorhidra,Servidorhidra);	
+	strcpy(Propiedades.puerto,Puerto);	
 	strcpy(Propiedades.idordenador,"0");
-	if(!TomaIPlocal()){ // Error al recuperar la IP local
+	if(!TomaIPlocal()){ // Error al recuperar la IP local	
 		UltimoError(0,"Main()");	
 		exit(EXIT_FAILURE);
 	}
 	strcpy(Propiedades.IPlocal,IPlocal);	
 
-	Log("Abriendo sesión en el servidor Hidra");	
+	Log("Abriendo sesión en el servidor Hidra");		
 	if(InclusionClienteHIDRA()){	// El cliente ha abierto sesión correctamente
 		if(strcmp(Propiedades.idordenador,"0")==0){	// Ha habido algún problema al inciar sesión
 			UltimoError(0,"Main()");	
 			exit(EXIT_FAILURE);
 		}
-		Log("Cliente hidra iniciado");	
+		Log("Cliente hidra iniciado");		
 		Log("Ejecución de comandos Autoexec");
-		if(AutoexecClienteHidra()){  // Ejecución fichero autoexec	
+		if(!AutoexecClienteHidra()){  // Ejecución fichero autoexec	
 			UltimoError(0,"Main()");	
 			exit(EXIT_FAILURE);
-		}		
+		}				
 		Log("Procesa comandos pendientes");
 		ComandosPendientes(); // Bucle para procesar comandos pendientes
 		Log("Acciones pendientes procesadas");
 		Log("Disponibilidad para comandos interactivos activada ...");
-		ProcesaComandos(); // Bucle para procesar comandos interactivos 
-		Log("Disponibilidad para comandos interactivos desactivada...");
+		ProcesaComandos(); // Bucle para procesar comando	s interactivos 
+		Log("Disponibilidad para comandos interactivos d	esactivada...");
 	}
 	else{
 		UltimoError(0,"Main()");	
@@ -2083,6 +2091,6 @@ int  main(int argc, char *argv[])
 	exit(0);
 }
 
-
+	
 
 
