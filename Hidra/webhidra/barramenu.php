@@ -13,6 +13,7 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 //________________________________________________________________________________________________________
 ?>
 <HTML>
+	<meta content="text/html;charset=iso-8859-1" http-equiv="Content-Type" />
 	<TITLE>Administración web de aulas</TITLE>
 	<HEAD>
 		<LINK rel="stylesheet" type="text/css" href="hidra.css">
