@@ -1,0 +1,19 @@
+<?
+//________________________________________________________________________________________________________
+//
+//	Fitxer d'idiomes php: configuracionordenador_esp.php 
+//	Idioma: Català
+//________________________________________________________________________________________________________
+	$TbMsg=array();
+	$TbMsg[0]='Configuracions d'ordinadors';
+	$TbMsg[1]='Característiques del ordinador';
+	$TbMsg[2]='Nombre';
+	$TbMsg[3]='Direcció IP';
+	$TbMsg[4]='Direcció MAC';
+	$TbMsg[5]='Perfil Hardware';
+	$TbMsg[6]='Particin';
+	$TbMsg[7]='Nombre del Sistema';
+	$TbMsg[8]='Tamany';
+	$TbMsg[9]='Dades de configuració';
+
+?>

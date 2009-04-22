@@ -1,0 +1,13 @@
+<?
+//________________________________________________________________________________________________________
+//
+//	Fitxer d'idiomes php: informacion_servidordhcp_esp.php 
+//	Idioma: Català 
+//________________________________________________________________________________________________________
+	$TbMsg=array();
+	$TbMsg[0]='Servidors Dhcp ';
+	$TbMsg[1]='Informació sobre Servidors Dhcp ';
+	$TbMsg[2]='Servidor Dhcp' ;
+	$TbMsg[3]='Informació Servidor Dhcp';
+	$TbMsg[4]='Comentario';
+?>

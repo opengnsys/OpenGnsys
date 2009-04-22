@@ -1,0 +1,16 @@
+<?
+//________________________________________________________________________________________________________
+//
+//	Fitxer d'idiomes php: propiedades_servidoresdhcp_esp.php 
+//	Idioma: Català 
+//________________________________________________________________________________________________________
+$TbMsg=array();
+$TbMsg[0]="Sense Opció";
+$TbMsg[1]="Insertar";
+$TbMsg[2]="Modificar";
+$TbMsg[3]="Eliminar";
+$TbMsg[4]="Gestió Servidors Dhcp";
+$TbMsg[5]="Nom del Servidor";
+$TbMsg[6]="Direcció IP";
+$TbMsg[7]="Comentaris"; 
+?>

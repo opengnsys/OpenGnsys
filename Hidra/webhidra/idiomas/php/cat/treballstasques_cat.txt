@@ -1,0 +1,13 @@
+<?
+//________________________________________________________________________________________________________
+//
+//	Fitxer d'idiomes php: trabajostareas_esp.php 
+//	Idioma: Català 
+//________________________________________________________________________________________________________
+	$TbMsg=array();
+	$TbMsg[0]="Tasques en Treball";
+	$TbMsg[1]="Tasques incloses";
+	$TbMsg[2]="Treball";
+	$TbMsg[3]="Nom de la Tasca";
+	$TbMsg[4]="(*)Per a incloure alguna tasca en aquest treball deu fer click sobre la casella de verificació corresponent";
+?>

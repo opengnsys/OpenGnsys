@@ -1,0 +1,13 @@
+<?
+//________________________________________________________________________________________________________
+//
+//	Fitxer d'idiomes php: informacion_servidorrembo_esp.php 
+//	Idioma: Català 
+//________________________________________________________________________________________________________
+	$TbMsg=array();
+	$TbMsg[0]='Servidors Rembo ';
+	$TbMsg[1]='Informacio sobre Servidors Rembo ';
+	$TbMsg[2]='Servidor Rembo';
+	$TbMsg[3]='Informació Servidor Rembo';
+	$TbMsg[4]='Comentaris';
+?>
