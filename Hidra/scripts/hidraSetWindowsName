@@ -27,7 +27,7 @@ DIRMONT=$(hidraMount $1 $2) || exit $?
 trap "hidraUnmount $DIRMONT" 1 2 3 6
 
 # Modificar claves de registro.
-hidraSetRegistryKey $DIRMONT system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$3"
-hidraSetRegistryKey $DIRMONT system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$3"
-hidraSetRegistryKey $DIRMONT system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$3"
+hidraSetRegistryKey $DIRMONT system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$NOMBRE"
+hidraSetRegistryKey $DIRMONT system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$NOMBRE"
+hidraSetRegistryKey $DIRMONT system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NOMBRE"
 

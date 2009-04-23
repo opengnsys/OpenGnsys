@@ -3,16 +3,53 @@
 # Descripcion:	Recopila información del inventario hardware del PC.
 # Formato:	hidraHardwareInfo
 # Salida:	TipoDispositivo:Modelo
-#	TipoDispositivo = { aud, cpu, dis, mem, net, vga }
+#	TipoDispositivo = { bio, boa, cdr, cpu, dis, fir, mem, mod, mul,
+#			    net, ser, vga }
 # Error:	No
-# Requisitos:	awk, hidraDisk
+# Requisitos:	lshw, awk
 # Notas:	Solo ejecutable por root
 # Version:	1.0 - No compatible con EAC (probar el fichero de inventario,
 #			EAC incluye nuevos comandos de deteccion de hardware).
-# Autor:	Ramón Gómez, ETSII Univ. Sevilla
-# Fecha:	18/04/2008
+# Autor:	Ramoon oómez, ETSII Univ. Sevilla
+# Fecha:	18/03/2009
+# Version:	1.1 - Usa lshw con todos los datos en vez del fichero de 
+#			inventario de EAC.
+# Autor:	Ramoon oómez, ETSII Univ. Sevilla
+# Fecha:	23/04/2009
 
 
+# Recopilacion de disposibivos procesando la salida de lshw.
+lshw | awk 'BEGIN {tipo="mod";}
+	/product:/ {sub(/ *product: */,"");  prod=$0;}
+	/vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
+	/version:/ {sub(/ *version: */,"v.");vers=$0;}
+	/size:/    {sub(/ *size: */,"");     size=$0;}
+	/\*-/	   {if (tipo=="mem")
+			print tipo"="size;
+		    else
+			if (tipo!="" && prod!="")
+			    print tipo"="vend,prod,size,vers;
+		    tipo=prod=vend=vers=size="";}
+	/-core/    {tipo="boa";}
+	/-firmware/ {tipo="bio";}
+	/-cpu/     {tipo="cpu";}
+	/-memory/  {tipo="mem";}
+	/-disk/    {tipo="dis";}
+	/-cdrom/   {tipo="cdr";}
+	/-display/ {tipo="vga";}
+	/-network/ {tipo="net";}
+	/-multimedia/ {tipo="mul";}
+	/-usb/     {tipo="usb";}
+	/-firewire/ {tipo="fir";}
+	/-serial/  {tipo="ser";}
+	END 	   {if (tipo!="" && prod!="")
+			print tipo"="vend,prod,size,vers;}
+      ' $FICH
+
+exit
+
+
+### CODIGO ANTIGUO ###
 source $(dirname $0)/hidraEnviron
 
 # Tipo de CPU
