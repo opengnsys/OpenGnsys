@@ -86,7 +86,7 @@ then
 				EXT[23])
 					case $CloneImageEXT23 in
 						"partimage")
-							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout |"
+							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout"
 							program=partimage
                                                         echo "imaged: $imaged"
 						;;
