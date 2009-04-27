@@ -8,11 +8,11 @@
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - tipo de particion desconocido o no se puede montar.
-# Requisitos:	hidraDisk, RestoreImageFromPartition (EAC)
+# Requisitos:	hidraDisk hidraFSExtend, RestoreImageFromPartition (EAC)
 # Notas:	Solo ejecutable por root
 # Version:	1.0 - Compatible con EAC: llama a la funcion RestorePartitionFromImage 
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
-# Fecha:	27/03/2009
+# Fecha:	27/04/2009
 
 source $(dirname $0)/hidraEnviron
 
@@ -25,4 +25,5 @@ PART="$(hidraDisk $1 $2)" || exit $?
 # NOTAS: no se comprueba previamente el tipo de particion,
 #	 la funcion RestorePartitionFromImage no devuelve errores.
 RestorePartitionFromImage $1 $2 $3 "${4%/}/" "$5"
-
+# Extender el sistema de archivos a al particion.
+hidraFSExtend $1 $2

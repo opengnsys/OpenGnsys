@@ -25,11 +25,14 @@ PART="$(hidraDisk $1 $2)" || exit $?
 case "$(hidraTypeFS $1 $2)" in
      EXT[234])
 	hidraUnmount $1 $2
-	# Traduce el num. de sectores de 4KB a tamano minimo en MB.
-	TAM=$(resize2fs -P $PART | awk '/minimum size/ {print int($7/256+1000)}')
+	# Tamano de los bloques del sistema de archivos
+	BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')	
+	# Traduce el num. en sectores de 512B a tamano en MB.
+	TAM=$(resize2fs -P $PART | \
+		awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')	
 	resize2fs -fp $PART "${TAM}M" >/dev/null || exit $ERRPARTITION
 	;;
-     REISERFS)		TIPO="resize_reiserfs" ;;
+#     REISERFS)		# Usar "resize_reiserfs"
      NTFS|HNTFS)
 	hidraDeleteFile $1 $2 pagefile.sys
 	hidraUnmount $1 $2

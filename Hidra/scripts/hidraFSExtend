@@ -1,0 +1,35 @@
+#!/bin/bash
+# Nombre:	hidraFSExtend
+# Descripcion:	Extiende el sistema de archivos hasta el tamano de la particion.
+# Formato:	hidraFSExtend numdisco numparticion
+# Salida:	(por determinar)
+# Error:	1 - formato incorrecto.
+#		2 - disco no detectado (no corresponde con un dispositivo).
+#		3 - tipo de particion desconocido o no formateable.
+# Requisitos:	*resize*, hidraTypeFS, hidraUnmount
+# Notas:	Solo ejecutable por root
+#		Puede ser interesante usar la funcion para ampliar y reducir.
+# Version:	1.0 - Version inicial: sustituye a la funcion ReducirFileSystemNT.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	24/04/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 2 parametros.
+[ $# != 2 ] && exit $ERRFORMAT
+
+# Sustituye num. de particion por el dispositivo.
+PART="$(hidraDisk $1 $2)" || exit $?
+
+hidraUnmount $1 $2
+# Redimensionar al tamano maximo segun el tipo de particion.
+case "$(hidraTypeFS $1 $2)" in
+     EXT[234])
+	resize2fs -f $PART || exit $ERRPARTITION
+	;;
+#     REISERFS)		# Usar "resize_reiserfs"
+     NTFS|HNTFS)
+	ntfsresize -f $PART <<<"y" || exit $ERRPARTITION
+	;;
+     *) exit $ERRPARTITION;;
+esac
