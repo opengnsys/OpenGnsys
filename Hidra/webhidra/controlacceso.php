@@ -14,8 +14,8 @@ include_once("./clases/AdoPhp.php");
 $cnx="localhost;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexi� a la base de datos
 $ips="10.1.15.3"; // IP del servidor hidra
 $prt="2008"; // Puerto de comunicaci� con el servidor
-$wer="http://10.1.15.3/webhidra/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="http://10.1.15.3/webhidra/acceso.php"; // P�ina de login de la aplicaci�
+$wer="http://10.1.15.3/hidraweb/pagerror.php"; // P�ina de redireccionamiento de errores
+$wac="http://10.1.15.3/hidraweb/acceso.php"; // P�ina de login de la aplicaci�
 //========================================================================================================
 
 $usu="";

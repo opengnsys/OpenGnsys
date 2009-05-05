@@ -2,10 +2,10 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: informacion_procedimientos_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Parámetros de los Comandos del Procedimiento';
-	$TbMsg[1]='Parámetro';
+	$TbMsg[0]='ParÃ¡metros de los Comandos del Procedimiento';
+	$TbMsg[1]='ParÃ¡metro';
 	$TbMsg[2]='Valor';
 ?>

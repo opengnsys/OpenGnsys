@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// Aplicaciï¿½ WEB: Hidra
+// Copyright 200-2005 Josï¿½Manuel Alonso. Todos los derechos reservados.
+// Fecha Creaciï¿½: Aï¿½ 2003-2004
+// Fecha ï¿½tima modificaciï¿½: Febrero-2005
 // Nombre del fichero: informacion_procedimientos.php
-// Descripción : 
+// Descripciï¿½ : 
 //		Muestra los comandos que forman parte de un procedimiento y sus valores
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -24,8 +24,9 @@ if (isset($_GET["descripcionprocedimiento"]))	$descripcionprocedimiento=$_GET["d
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>Administraciï¿½ web de aulas</TITLE>
 <HEAD>
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
 	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
 </HEAD>
 <BODY>
@@ -78,12 +79,12 @@ function pintacomandos($cmd,$idprocedimientocomando){
 	$textambito="";
 	$urlimg="";
 	$auxVP=split(";",$rs->campos["visuparametros"]); // Parametros visualizables
-	$auxP=split(chr(13),$rs->campos["parametros"]); // Recorre parametros para visualizar los que así sean
+	$auxP=split(chr(13),$rs->campos["parametros"]); // Recorre parametros para visualizar los que asï¿½sean
 	for ($i=0;$i<sizeof($auxP);$i++){
 		$dualparam=split("=",$auxP[$i]);
 		for ($k=0;$k<sizeof($auxVP);$k++){
 			 if($auxVP[$k]==$dualparam[0]){
-				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del parámetro en la tabla cargada previamentre con todos los parámetros
+				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del parï¿½etro en la tabla cargada previamentre con todos los parï¿½etros
 				if ($posp>=0){
 					$auxtabla_parametros=$tabla_parametros[$posp][1];
 					$HTMLparametros.='<TR>'.chr(13);

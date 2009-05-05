@@ -2,17 +2,17 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: barramenu_esp.php 
-//	Idioma: Español 
+//	Idioma: Espa?l 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Aulas';
 	$TbMsg[1]='Acciones';
-	$TbMsg[2]='Imágenes';
+	$TbMsg[2]='ImÃ¡genes';
 	$TbMsg[3]='Hardware';
 	$TbMsg[4]='Software';
 	$TbMsg[5]='Servidores';
-	$TbMsg[6]='Menús';
+	$TbMsg[6]='MenÃºs';
 	$TbMsg[7]='Reservas';
-	$TbMsg[8]='Administración';
+	$TbMsg[8]='AdministraciÃ³n';
 	$TbMsg[9]='Iconos';
 ?>

@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
-// Fecha Creación: Diciembre-2003
-// Fecha Última modificación: Marzo-2005
+// Aplicaciï¿½ WEB: Hidra
+// Copyright 2003-2005 Josï¿½Manuel Alonso. Todos los derechos reservados.
+// Fecha Creaciï¿½: Diciembre-2003
+// Fecha ï¿½tima modificaciï¿½: Marzo-2005
 // Nombre del fichero: barramenu.php
-// Descripción :Este fichero implementa el menu general de la aplicación
+// Descripciï¿½ :Este fichero implementa el menu general de la aplicaciï¿½
 // *************************************************************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
@@ -13,9 +13,9 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-	<TITLE>Administración web de aulas</TITLE>
+	<TITLE>Administraciï¿½ web de aulas</TITLE>
 	<HEAD>
-		<META HTTP-EQUIV="Content-Type"CONTENT="text/html;charset=ISO-8859-1"> 
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
 		<LINK rel="stylesheet" type="text/css" href="hidra.css">
 		<SCRIPT language="javascript">
 			var currentOp=null;
