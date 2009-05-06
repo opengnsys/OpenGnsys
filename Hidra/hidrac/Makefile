@@ -19,7 +19,7 @@ all: $(PROYECTO)
 
 $(PROYECTO): $(OBJS)
 	g++ $(DIRS) $(LIBS) $(OBJS) -o $(PROYECTO)
-	strip $(PROYECTO)
+#	strip $(PROYECTO)	# Optimizacion
 
 clean:
 	rm $(PROYECTO) $(OBJS)
