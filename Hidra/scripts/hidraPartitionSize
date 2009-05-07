@@ -1,0 +1,26 @@
+#!/bin/bash
+# Nombre:	hidraGetPartitionSize
+# Descripcion:	Muestra el tamano en KB de una particion determinada.
+# Formato:	hidraGetPartitionSize numdisco numparticion
+# Salida:	TamañoKB
+# Error:	1 - formato incorrecto.
+#		2 - disco o particion no detectado (no es un dispositivo).
+# Requisitos:	sfdisk, awk, hidraDisk
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatible con EAC: funcion no definida.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	06/05/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 2 parametros.
+[ $# != 2 ] && exit $ERRFORMAT
+
+# Sustituye num. de disco por el dispositivo.
+DISCO="$(hidraDisk $1)" || exit $?
+PART="$(hidraDisk $1 $2)" || exit $?
+
+# Procesar la salida de "sfdisk".
+sfdisk -d $DISCO 2>/dev/null | awk -v p=$PART 'BEGIN {FS="[:=,]"}
+	{ sub (/ /,""); if ($1==p) printf ("%d\n", $5/2); }
+	'

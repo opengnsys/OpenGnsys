@@ -3,7 +3,7 @@
 # Descripcion:	Recopila información del inventario hardware del PC.
 # Formato:	hidraHardwareInfo
 # Salida:	TipoDispositivo:Modelo
-#	TipoDispositivo = { bio, boa, cdr, cpu, dis, fir, mem, mod, mul,
+#	TipoDispositivo = { ata, bio, boa, cdr, cpu, dis, fir, mem, mod, mul,
 #			    net, ser, vga }
 # Error:	No
 # Requisitos:	lshw, awk
@@ -34,6 +34,7 @@ lshw | awk 'BEGIN {tipo="mod";}
 	/-firmware/ {tipo="bio";}
 	/-cpu/     {tipo="cpu";}
 	/-memory/  {tipo="mem";}
+	/-ide/     {tipo="ide";}
 	/-disk/    {tipo="dis";}
 	/-cdrom/   {tipo="cdr";}
 	/-display/ {tipo="vga";}
@@ -41,7 +42,7 @@ lshw | awk 'BEGIN {tipo="mod";}
 	/-multimedia/ {tipo="mul";}
 	/-usb/     {tipo="usb";}
 	/-firewire/ {tipo="fir";}
-	/-serial/  {tipo="ser";}
+	/-serial/  {tipo="bus";}
 	END 	   {if (tipo!="" && prod!="")
 			print tipo"="vend,prod,size,vers;}
       ' $FICH

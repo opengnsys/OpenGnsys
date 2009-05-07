@@ -20,5 +20,5 @@ source $(dirname $0)/hidraEnviron
 # Comprobar que existe la particion.
 DISCO="$(hidraDisk $1)" || exit $?
 
-parted $DISCO print 2>/dev/null | awk '$0~/boot/ {print $1}'
+parted $DISCO print 2>/dev/null | awk '/boot/ {print $1}'
 

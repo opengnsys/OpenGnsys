@@ -21,9 +21,14 @@ source $(dirname $0)/hidraEnviron
 
 # Sustituye num. de disco por el dispositivo.
 PART="$(hidraDisk $1 $2)" || exit $?
+# Error si no existe el fichero de imagen.
+FICH=$(ConnectToRepo "$3" "${4%/}/" "$5")
+[ -f "$FICH" ] || exit $ERRNOTFOUND
+# Error si la imagen no cabe en la particion.
+[ $(hidraImageSize "$3" "$4" "$5") > $(hidraPartitionSize $1 $2) ] && exit $ERRPARTITION
 
 # NOTAS: no se comprueba previamente el tipo de particion,
 #	 la funcion RestorePartitionFromImage no devuelve errores.
 RestorePartitionFromImage $1 $2 $3 "${4%/}/" "$5"
-# Extender el sistema de archivos a al particion.
+# Extender el sistema de archivos al tamano de la particion.
 hidraFSExtend $1 $2
