@@ -1,20 +1,21 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
-// Fecha Creación: Diciembre-2003
-// Fecha Última modificación: Febrero-2005
+// Aplicaciï¿½ WEB: Hidra
+// Copyright 2003-2005 Josï¿½Manuel Alonso. Todos los derechos reservados.
+// Fecha Creaciï¿½: Diciembre-2003
+// Fecha ï¿½tima modificaciï¿½: Febrero-2005
 // Nombre del fichero: controlacceso.php
-// Descripción :Este fichero implementa el control de acceso a la aplicación en todas las páginas
+// Descripciï¿½ :Este fichero implementa el control de acceso a la aplicaciï¿½ en todas las pï¿½inas
 // *************************************************************************************************************************************************
 include_once("./includes/ctrlacc.php");
 //________________________________________________________________________________________________________
 $herror=0;
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
+echo $urlacceso;
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-	<TITLE> Administración web de aulas</TITLE>
+	<TITLE> Administraciï¿½ web de aulas</TITLE>
 	<HEAD>
 		<LINK rel="stylesheet" type="text/css" href="hidra.css">
 	</HEAD>
@@ -27,7 +28,7 @@ if (isset($_GET["herror"])) $herror=$_GET["herror"];
 			echo '	 ao=o;'.chr(13);
 			echo '	 o=o.parent;';
 			echo '	 };'.chr(13);
-			echo '	ao.location="'.$urlacceso.'?herror='.$herror.'";'.chr(13);
+			echo '	//ao.location="'.$urlacceso.'?herror='.$herror.'";'.chr(13);
 			echo '</SCRIPT>'.chr(13);
 		?>
 	</BODY>

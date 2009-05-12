@@ -1418,7 +1418,7 @@ void TomaParticiones(char* cfg, char* parts,int lonprt)
 	char *tbIgualdad[2]; // Para albergar hasta 8 parnetros de particin;
 	char ch[2]; // Carnter delimitador
 	char *apun;
-
+	int p;
 	// Toma memoria para cada elemento de particin
 	for(i=0;i<10;i++)
 		tbParticiones[i]=(char*)malloc(lonprt); 
@@ -1435,9 +1435,9 @@ void TomaParticiones(char* cfg, char* parts,int lonprt)
 	strcpy(ch,"\t");// caracter delimitador (tabulador)
 	lonprt=split_parametros(tbParticiones,cfg,ch);
 	// Trocea las cadenas de parametros de particin
-	for (i=0;i<lonprt;i++){
+	for (p=0;p<lonprt;p++){
 		strcpy(ch,"\n");// caracter delimitador (salto de linea)
-		split_parametros(tbParticion,tbParticiones[i],ch);
+		split_parametros(tbParticion,tbParticiones[p],ch);
 		strcpy(ch,"=");// caracter delimitador "="
 		split_parametros(tbIgualdad,tbParticion[4],ch); // Nmero de particin
 		lon+=sprintf(parts+lon,"%s=",tbIgualdad[1]);

@@ -143,10 +143,12 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 	$tablaHtml.= '<TH colspan=4 align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
 	$tablaHtml.= '</TR>';
 	$auxsplit=split(";",$particion);
+
 	for($j=0;$j<sizeof($auxsplit)-1;$j++){
 		$dual=split("=",$auxsplit[$j]);
 		$particion=$dual[0]; // Toma la partici�
 		$tipopart=$dual[1]; // Toma la partici�
+
 		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP") continue;
 
 		$tablaHtml.='<TR >'.chr(13);

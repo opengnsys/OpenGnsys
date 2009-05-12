@@ -1,12 +1,12 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// Aplicaciï¿½ WEB: Hidra
+// Copyright 2003-2005  Josï¿½Manuel Alonso. Todos los derechos reservados.
+// Fecha Creaciï¿½: Aï¿½ 2003-2004
+// Fecha ï¿½tima modificaciï¿½: Marzo-2005
 // Nombre del fichero: RestaurarImagenAula.php
-// Descripción : 
-//		Implementación del comando "RestaurarImagen" (Aula)
+// Descripciï¿½ : 
+//		Implementaciï¿½ del comando "RestaurarImagen" (Aula)
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -53,14 +53,14 @@ $grupoid=0;
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiï¿½ con servidor B.D.
 $resul=toma_propiedades($cmd,$idaula);
 if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
+		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaciï¿½ de datos.
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>Administraciï¿½ web de aulas</TITLE>
 <HEAD>
 <LINK rel="stylesheet" type="text/css" href="../hidra.css">
 <SCRIPT language="javascript" src="./jscripts/RestaurarImagenAula.js"></SCRIPT>
@@ -227,7 +227,7 @@ function HTMLSELECT_Imagendis($cmd,$idcentro,$tipopart,$particion,$miso,$idimage
 	return($SelectHtml);
 }
 /*________________________________________________________________________________________________________
-	Crea la tabla de ordenadores ( iconos pequeños cuando en el aula no hay uniformidad
+	Crea la tabla de ordenadores ( iconos pequeï¿½s cuando en el aula no hay uniformidad
 ________________________________________________________________________________________________________*/
 function PintaOrdenadores($cmd,$idaula,$idperfilhard,$idparticion){
 	$ipidpidc="";
@@ -277,8 +277,8 @@ function tabla_particiones($cmd,$idcentro,$idaula,$idperfilhard,$idparticion,$cu
 	$auxsplit=split(";",$particion);
 	for($j=0;$j<sizeof($auxsplit)-1;$j++){
 		$dual=split("=",$auxsplit[$j]);
-		$particion=$dual[0]; // Toma la partición
-		$tipopart=$dual[1]; // Toma la partición
+		$particion=$dual[0]; // Toma la particiï¿½
+		$tipopart=$dual[1]; // Toma la particiï¿½
 		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP") continue;
 
 		$tablaHtml.='<TR >'.chr(13);
@@ -324,7 +324,7 @@ function CuestionIncrementales($cmd,$idperfilhard,$idperfilsoft,$idimagen){
 	return(true);
 }
 //________________________________________________________________________________________________________
-//	Comprueba que existe una incremental para cierta combinación de perfil software y perfil hardware
+//	Comprueba que existe una incremental para cierta combinaciï¿½ de perfil software y perfil hardware
 //________________________________________________________________________________________________________
 function ExisteIncremental($cmd,$idperfilhard,$idperfilsoft ,$idsoftincremental){
 	$rs=new Recordset; 
@@ -337,7 +337,7 @@ function ExisteIncremental($cmd,$idperfilhard,$idperfilsoft ,$idsoftincremental)
 /*________________________________________________________________________________________________________
 	Recupera los datos de un aula
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiï¿½ abierta)  
 		- ida:El identificador del aula
 ________________________________________________________________________________________________________*/
 function toma_propiedades($cmd,$ida){
