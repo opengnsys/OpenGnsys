@@ -56,7 +56,7 @@ if (!$cmd)
 	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
 $resul=toma_propiedades($cmd,$idaula);
 if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci� de datos.
+	Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci� de datos.
 //________________________________________________________________________________________________________
 ?>
 <HTML>

@@ -11,7 +11,6 @@ include_once("./includes/ctrlacc.php");
 //________________________________________________________________________________________________________
 $herror=0;
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
-echo $urlacceso;
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -28,7 +27,7 @@ echo $urlacceso;
 			echo '	 ao=o;'.chr(13);
 			echo '	 o=o.parent;';
 			echo '	 };'.chr(13);
-			echo '	//ao.location="'.$urlacceso.'?herror='.$herror.'";'.chr(13);
+			echo '	ao.location="'.$urlacceso.'?herror='.$herror.'";'.chr(13);
 			echo '</SCRIPT>'.chr(13);
 		?>
 	</BODY>
