@@ -18,6 +18,38 @@
 # Fecha:	23/04/2009
 
 
+# Recopilacion de disposibivos procesando la salida de lshw.
+lshw | awk 'BEGIN {tipo="mod";}
+	/product:/ {sub(/ *product: */,"");  prod=$0;}
+	/vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
+	/version:/ {sub(/ *version: */,"v.");vers=$0;}
+	/size:/    {sub(/ *size: */,"");     size=$0;}
+	/\*-/	   {if (tipo=="mem")
+			print tipo"="size;
+		    else
+			if (tipo!="" && prod!="")
+			    print tipo"="vend,prod,size,vers;
+		    tipo=prod=vend=vers=size="";}
+	/-core/    {tipo="boa";}
+	/-firmware/ {tipo="bio";}
+	/-cpu/     {tipo="cpu";}
+	/-memory/  {tipo="mem";}
+	/-ide/     {tipo="ide";}
+	/-disk/    {tipo="dis";}
+	/-cdrom/   {tipo="cdr";}
+	/-display/ {tipo="vga";}
+	/-network/ {tipo="net";}
+	/-multimedia/ {tipo="mul";}
+	/-usb/     {tipo="usb";}
+	/-firewire/ {tipo="fir";}
+	/-serial/  {tipo="bus";}
+	END 	   {if (tipo!="" && prod!="")
+			print tipo"="vend,prod,size,vers;}
+      ' $FICH
+
+exit
+
+
 ### CODIGO ANTIGUO ###
 source $(dirname $0)/hidraEnviron
 

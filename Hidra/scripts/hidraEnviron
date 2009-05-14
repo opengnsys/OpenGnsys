@@ -30,6 +30,7 @@ if [ -z "$ERRFORMAT" ]; then
     declare -ir ERRPARTITION=3	# Error en particion de disco.
     declare -ir ERRNOTEXEC=4	# Programa o funcion no ejecutable.
     declare -ir ERRNOTOS=5	# Sin sistema operativo.
+    declare -ir ERRLOCKED=6	# Particion o fichero bloqueado.
     # Caminos de busqueda de comandos Hidra.
     [ -z "$(echo $PATH|grep $HIDRADIR)" ] && PATH=$PATH:$HIDRADIR/scripts
 fi

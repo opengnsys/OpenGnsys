@@ -17,6 +17,9 @@ source $(dirname $0)/hidraEnviron
 # Error si no se reciben 2 parametros.
 [ $# -ne 2 ] && exit $ERRFORMAT
 
+# Error si la particion esta bloqueada.
+hidraIsLocked $1 $2 && exit $ERRLOCKED
+
 # Sustituye num. de disco por el dispositivo.
 PART="$(hidraDisk $1 $2)" || exit $?
 

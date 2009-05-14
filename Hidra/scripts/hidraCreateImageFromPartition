@@ -18,6 +18,9 @@ source $(dirname $0)/hidraEnviron
 # Error si no se reciben 6 parametros.
 [ $# -ne 6 ] && exit $ERRFORMAT
 
+# Error si la particion esta bloqueada.
+hidraIsLocked $1 $2 && exit $ERRLOCKED
+
 # Desmontar la particion, si estaba montada previamente.
 hidraUnmount $1 $2 || exit $?
 
@@ -32,8 +35,15 @@ if [ "$3" = "$IPservidor" ]; then
     [ -z "$DIR" ] && exit $ERRNOTFOUND
 fi
 
+#Bloquear la particion.
+hidraLock $1 $2
+
+# Desbloquear la particion y borrar ficheros creados si hay salida de error.
+trap "hidraUnlock $1 $2; rm $(ConnectToRepo $3 $4 /)$5.$6-$2{,.mcast,.torrent}" 1 2 3 6 9
+
 # NOTAS: no se comprueba previamente el tipo de particion,
-#	 no se comprueba donde se genera la imagen,
 #	 la funcion CreateImageFromPartition no devuelve errores.
 CreateImageFromPartition $1 $2 $3 "${4%/}/" "$5.$6"
 
+# Desbloquear la particion.
+hidraUnlock $1 $2
