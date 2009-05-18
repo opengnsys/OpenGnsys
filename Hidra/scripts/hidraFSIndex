@@ -28,7 +28,9 @@ case "$(hidraTypeFS $1 $2)" in
     EXT[234]|REISERFS|REISER4|BIGDOS|HBIGDOS)
 	# Error si no se puede montar la particion.
 	DIR="$(hidraMount $1 $2)" || exit $?
-	ls -RAQln $DIR
+	cd $DIR
+#	ls -RAQln
+	find . -exec ls -Qdln {} \;
 	;;
     *) 	exit $ERRPARTITION;;
 esac

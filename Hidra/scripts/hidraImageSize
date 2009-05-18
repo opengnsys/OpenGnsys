@@ -23,6 +23,6 @@ FICH=$(ConnectToRepo "$1" "${2%/}/" "$3")
 [ -f "$FICH" ] || exit $ERRNOTFOUND
 
 # Formato por determinar (por el momento solo el tamano en KB).
-partimage -B gui=no imginfo "$FICH" | \
-	awk '/Partition size/ {sub(/\.\.+/," "); printf "%d",$3*1024*1024;}'
+partimage -B gui=no imginfo "$FICH" 2>&1 | \
+	awk '/Partition size/ {sub(/\.\.+/," "); printf "%d\n",$3*1024*1024;}'
 

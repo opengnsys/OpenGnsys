@@ -39,8 +39,11 @@ case "$(hidraTypeFS $1 $2)" in
      *) 		exit $ERRPARTITION;;
 esac
 
+# Error si la particion esta bloqueada.
+hidraIsLocked $1 $2 && exit $ERRLOCKED
 # Desmontar la particion antes de formatear.
 hidraUnmount $1 $2
-# Formatear particion.
+# Formatear particion (uso exclusivo).
+hidraLock $1 $2
 mkfs -t $TIPO $PARAMS $PART
-
+hidraUnlock $1 $2
