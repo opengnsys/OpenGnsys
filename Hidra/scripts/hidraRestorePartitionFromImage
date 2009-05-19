@@ -24,10 +24,9 @@ PART="$(hidraDisk $1 $2)" || exit $?
 hidraIsLocked $1 $2 && exit $ERRLOCKED
 
 # Error si no existe el fichero de imagen.
-FICH=$(ConnectToRepo "$3" "${4%/}/" "$5")
-[ -f "$FICH" ] || exit $ERRNOTFOUND
+FICH=$(hidraPath "$3" "$4/$5") || exit $ERRNOTFOUND
 # Error si la imagen no cabe en la particion.
-[ $(hidraImageSize "$3" "$4" "$5") > $(hidraPartitionSize $1 $2) ] && exit $ERRPARTITION
+[ $(hidraImageSize "$3" "$4" "$5") -gt $(hidraPartitionSize $1 $2) ] && exit $ERRPARTITION
 
 # Bloquear la particion mientras se restaurarn los datos.
 hidraLock $1 $2

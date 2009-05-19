@@ -30,7 +30,7 @@ case "$(hidraTypeFS $1 $2)" in
 	DIR="$(hidraMount $1 $2)" || exit $?
 	cd $DIR
 #	ls -RAQln
-	find . -exec ls -Qdln {} \;
+	find . -ls
 	;;
     *) 	exit $ERRPARTITION;;
 esac

@@ -7,7 +7,7 @@
 # Salida:	TamañoKB
 # Error:	1 - formato incorrecto.
 #		2 - fichero no encontrado.
-# Requisitos:	partimage, ConnectToRepo (EAC)
+# Requisitos:	partimage, hidraPath
 # Notas:	Solo ejecutable por root
 # Version:	1.0 - Compatible con EAC: nueva funcion.
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
@@ -19,8 +19,7 @@ source $(dirname $0)/hidraEnviron
 [ $# -ne 3 ] && exit $ERRFORMAT
 
 # Error si no existe el fichero.
-FICH=$(ConnectToRepo "$1" "${2%/}/" "$3")
-[ -f "$FICH" ] || exit $ERRNOTFOUND
+FICH=$(hidraPath "$1" "$2/$3") || exit $ERRNOTFOUND
 
 # Formato por determinar (por el momento solo el tamano en KB).
 partimage -B gui=no imginfo "$FICH" 2>&1 | \
