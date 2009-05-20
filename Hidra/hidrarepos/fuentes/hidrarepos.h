@@ -77,6 +77,8 @@ int puerto;	// Puerto
 char filecmdshell[250];
 char cmdshell[512];
 
+char msglog[250];
+
 char usuario[20];
 char pasguor[20];
 char datasource[20];

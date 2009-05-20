@@ -235,7 +235,7 @@ void INTROaFINCAD(char*);
 char* TomaParametro(char*,char*);
 int SplitParametros(char**,char*, char*);
 
-int EjecutarScript (char*,char* ,char*);
+int EjecutarScript (char*,char* ,char*,int);
 char* ReservaMemoria(int);
 
 SOCKET TCPConnect(char *,char* );

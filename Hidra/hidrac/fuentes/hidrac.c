@@ -336,13 +336,16 @@ int SplitParametros(char **trozos,char *cadena, char * ch)
 //		- script: Nombre del script de la  shell
 //		- parametros: Parámetros que se le pasarán al script
 //		- salida: Recoge la salida por pantalla que genera el script
+//		- swasci: Filtra la respuesta del script:
+//					 true=Elimina de la respuesta caracteres menores de asci 32
+//					 false= No los elimina					
 // 	Devuelve:
 //		Código de error de la ejecución. ( Ver tabla de código de errores en la documentación)
 //	Especificaciones:
 //		El parámetro salida recoge la salida por pantalla que se genera en la ejecución del script siempre que
 //		sea disinto de NULL, esto es, si al llamar a la función este parámetro es NULL no se recogerá dicha salida. 
 //______________________________________________________________________________________________________
-int EjecutarScript ( char *script,char * parametros,char *salida)
+int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
 {
 	int  descr[2];	/* Descriptores de E y S de la turbería */
 	int  bytesleidos;	/* Bytes leidos en el mensaje */
@@ -392,7 +395,7 @@ int EjecutarScript ( char *script,char * parametros,char *salida)
 			if(salida!=(char*)NULL){ // Si se solicita retorno de información...			
 				buffer[bytesleidos]='\0';
 				for(i=bytesleidos-1;i>=0;i--){
-					if(buffer[i]<32) // Caracter Asci menor de 32
+					if(buffer[i]<32 && swasci) // Caracter Asci menor de 32
 						buffer[i]='\0';
 				}
 				strcat(salida,buffer);
@@ -1069,7 +1072,7 @@ int TomaIPlocal()
    	int herror;
 	
 	sprintf(cmdshell,"%s/hidraClientIP",HIDRASCRIPTS);
-	herror=EjecutarScript (cmdshell,NULL,IPlocal);	
+	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);	
 	if(herror){
 		UltimoError(herror,"TomaIPlocal()"); // Se ha producido algún error
 		return(false);
@@ -1389,7 +1392,7 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
 		Log(msglog);
 	}
 	
-	herror=EjecutarScript(cmdshell,parametros,NULL);
+	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 		UltimoError(herror,"CrearPerfil()");	 // Se ha producido algún error
 		return(false);
@@ -1551,7 +1554,7 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 		Log(msglog);
 	}
 	
-	herror=EjecutarScript(cmdshell,parametros,NULL);
+	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 		UltimoError(herror,"RestaurandoImagen()");	// Se ha producido algún error
 		return(false);
@@ -1655,7 +1658,7 @@ int Particionando(char* disco,char* stxParticion,char* script)
 		sprintf(msglog,"Modificando tabla de particiones:%s disco:%s, cadena:%s",script,disco,stxParticion);
 		Log(msglog);
 	}
-	herror=EjecutarScript(cmdshell,parametros,NULL);
+	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 		UltimoError(herror,"Particionar()");	 // Se ha producido algún error
 		return(false); 
@@ -1680,7 +1683,7 @@ int Formatear(char* disco,char* particion)
 
 	sprintf(cmdshell,"%s/hidraFormat",HIDRASCRIPTS);	
 	sprintf(parametros," %s %s %s","hidraFormat",disco,particion);
-	herror=EjecutarScript(cmdshell,parametros,NULL);
+	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 	    UltimoError(herror,"Formatear()");	 // Se ha producido algún error
 		return(false); 
@@ -1743,7 +1746,7 @@ char* LeeConfiguracion(char* disco)
 	cadenaparticiones=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
 	sprintf(cmdshell,"%s/hidraListPrimaryPartitions",HIDRASCRIPTS);	
 	sprintf(parametros," %s %s","hidraListPrimaryPartitions",disco);
-	herror=EjecutarScript(cmdshell,parametros,cadenaparticiones);
+	herror=EjecutarScript(cmdshell,parametros,cadenaparticiones,true);
 	if(herror){
 	    UltimoError(herror,"LeeConfiguracion()");	 // Se ha producido algún error
 		return(NULL); 
@@ -1813,7 +1816,7 @@ char* TomaNomSO(char*disco,int particion)
 	
 	sprintf(cmdshell,"%s/hidraOSVersion",HIDRASCRIPTS);	
 	sprintf(parametros," %s %s %d","hidraOSVersion",disco,particion);
-	herror=EjecutarScript(cmdshell,parametros,infosopar);
+	herror=EjecutarScript(cmdshell,parametros,infosopar,true);
 	
 	if(herror){
 	    UltimoError(herror,"TomaNomSO()");	 // Se ha producido algún error
@@ -1845,7 +1848,7 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	
 	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
 	sprintf(cmdshell,"%s/hidraHardwareInfo",HIDRASCRIPTS);
-	herror=EjecutarScript (cmdshell,NULL,parametroshrd);
+	herror=EjecutarScript (cmdshell,NULL,parametroshrd,false);
 	if(herror){
 	    UltimoError(herror,"InventarioHardware()");	// Se ha producido algún error
     }
@@ -1917,14 +1920,14 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
 		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
 		
-		herror=EjecutarScript(cmdshell,parametros,NULL);
+		herror=EjecutarScript(cmdshell,parametros,NULL,true);
 		if(herror){
 			UltimoError(herror,"ExecShell()");	// Se ha producido algún error
 			res=false;	
 		}
 		else{
 			sprintf(cmdshell,"%s",filecmdshell);	// Ejecución el fichero de script creado
-			//int herror=EjecutarScript(cmdshell,NULL,NULL);
+			//int herror=EjecutarScript(cmdshell,NULL,NULL,true);
 			int herror=system(cmdshell);
 			if(herror){
 				UltimoError(herror,"ExecShell()");	// Se ha producido algún error
@@ -2039,7 +2042,7 @@ int  main(int argc, char *argv[])
 	sprintf(cmdshell,"/var/EAC/hidra/scripts/hidraCreatePrimaryPartitions");
 	sprintf(parametros," %s %s %s","hidraCreatePrimaryPartitions","1","NTFS:3333333");
 	char* retorno=(char*)ReservaMemoria(2000);
-	int herror=EjecutarScript(cmdshell,parametros,retorno);
+	int herror=EjecutarScript(cmdshell,parametros,retorno,true);
 	Log(retorno);
 	exit(herror);
 */
