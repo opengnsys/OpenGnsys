@@ -1,0 +1,29 @@
+#!/bin/bash
+# Nombre:	hidraSetPartitionSize
+# Descripcion:	Cambia el tamano en KB de una particion determinada.
+# Formato:	hidraSetPartitionSize numdisco numparticion
+# Salida:	Ninguna (por determinar).
+# Error:	1 - formato incorrecto.
+#		2 - disco o particion no detectado (no es un dispositivo).
+#		3 - error en el tipo o en tamano de la particion.
+# Requisitos:	sfdisk, hidraDisk
+# Notas:	Solo ejecutable por root
+# Version:	1.0 - Compatible con EAC: funcion no definida.
+# Autor:	Ramon Gomez, ETSII Univ. Sevilla
+# Fecha:	21/05/2009
+
+source $(dirname $0)/hidraEnviron
+
+# Error si no se reciben 3 parametros.
+[ $# != 3 ] && exit $ERRFORMAT
+# Error si el 3er parametro no es un numero.
+[ -n "${3//[0-9]/}" ] && exit $ERRFORMAT
+# Sustituye num. de disco por el dispositivo.
+DISCO="$(hidraDisk $1)" || exit $?
+PART="$(hidraDisk $1 $2)" || exit $?
+
+# Convertir tamano en KB a sectores de 512 B.
+TAM=$[$3*2]
+# Usar "sfdisk" para redefinir el tamano.
+# NOTA: no se comprueba el tamano y puede solaparse con la siguiente particion.
+sfdisk -f -uS -N$2 $DISCO <<< ",$TAM" || exit $ERRPARTITION
