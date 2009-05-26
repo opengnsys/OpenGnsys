@@ -8,7 +8,7 @@
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - error en formato o tipo de particion extendida.
-# Requisitos:	sfdisk, partprobe, grep, awk, hidraDisk
+# Requisitos:	sfdisk, partprobe, grep, awk, hidraDisk, hidraUnmountAll
 # Notas:	Solo ejecutable por root
 #		Queda definir formato para atributos (arranque, oculta, ...).
 # Version:	1.0 - Compatible con EAC: sustituye parcialmente a la funcion CreatePartitions
@@ -69,7 +69,8 @@ while [ $# != 0 ]; do
 	shift
 done
 
-### Proceso de pruebas (quitar comentarios para trabajar).
+# Desmontar todos los sistemas de archivos del disco.
+hidraUnmountAll $1
 # Definir particiones y notificar al kernel.
 sfdisk -f $DISCO < $tmpsfdisk 2>/dev/null && partprobe
 rm $tmpsfdisk

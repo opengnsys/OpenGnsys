@@ -7,7 +7,7 @@
 #		2 - disco no detectado (no corresponde con un dispositivo).
 #		3 - tipo de particion desconocido o no se puede montar.
 #		5 - sin sistema operativo.
-# Requisitos:	hidraDisk, hidraTypeFS, hidraOSVersion,
+# Requisitos:	hidraDisk, hidraTypeFS, hidraOSVersion, hidraSetPartitionActive
 #		hidraLinuxBootParameters,  HDBoot (EAC)
 # Notas:	Solo ejecutable por root
 # Version:	1.0 - Compatibilidad Con EAC:
@@ -24,25 +24,26 @@ source $(dirname $0)/hidraEnviron
 # Obtiene el tipo de particion y montarla.
 TIPO="$(hidraTypeFS $1 $2)" || exit $?
 # Montar la particion.
-MONT=$(hidraMount $1 $2) || exit $?
+DIRMONT=$(hidraMount $1 $2) || exit $?
 
 case "$TIPO" in
-     NTFS|HNTFS|FAT32|HFAT32)
-	# Arranque Windows.
+     NTFS|HNTFS|FAT32|HFAT32)	# Arranque Windows.
 	# Compruebar si hay un SO definido antes de arrancar.
 	[ -z "$(hidraOSVersion $1 $2)" ] && exit $ERRNOTOS
-	cp $REPO/admin/gestion/grub/* $MONT
+	# Activar la particion.
+	hidraSetPartitionActive $1 $2
+	cp $REPO/admin/gestion/grub/* $DIRMONT
 	# Configurar GRUB4DOS
-	kexec -l $MONT/grub.exe --append=--config-file="find --set-root /ntldr; chainloader /ntldr"
+	kexec -l $DIRMONT/grub.exe --append=--config-file="find --set-root /ntldr; chainloader /ntldr"
 	;;
-     EXT[234]|REISERFS|REISER4)
+     EXT[234]|REISERFS|REISER4)	# Arranque Linux.
 	# Obtiene los parametros de arranque.
 	PARAMS=$(hidraLinuxBootParameters $1 $2) || exit $?
 	read -e KERNEL INITRD APPEND <<<"$PARAMS"
 	# Si no hay kernel, no hay sistema operativo.
 	[ -z "$KERNEL" ] && exit $ERRNOTOS
 	# Configurar kernel Linux con los parametros leidos de su GRUB.
-	kexec -l ${MONT}${KERNEL} --append="$APPEND" --initrd=${MONT}${INITRD}
+	kexec -l ${DIRMONT}${KERNEL} --append="$APPEND" --initrd=${DIRMONT}${INITRD}
 	;;
      *) exit $ERRPARTITION
 	;;

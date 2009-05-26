@@ -28,18 +28,11 @@ case "$(hidraTypeFS $1 $2)" in
     EXT[234] | REISERFS | REISER4)
 	TIPO="Linux"
 	# Leer descripcion del sistema Linux.
-	VERSION=$(chroot $DIRMONT lsb_release -d | awk -F: '{print $2}')
-#	# RedHat/Fedora o Ubuntu: comprueba si hay enlace simbolico.
-#	REDHAT="$DIRMONT/etc/redhat-release"
-#	[ -L $REDHAT ] && REDHAT="$DIRMONT/$(ls -l $REDHAT | awk '{print $11}')"
-#	[ -f $REDHAT ] && VERSION="$(head -1 $REDHAT)"
-#	UBUNTU="$DIRMONT/etc/lsb-release"
-#	[ -L $UBUNTU ] && UBUNTU="$DIRMONT/$(ls -l $UBUNTU | awk '{print $11}')"
-#	[ -f $UBUNTU ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $UBUNTU)"
+	VERSION=$(chroot $DIRMONT lsb_release -d | awk -F: '{gsub (/\t/,""); print $2}')
 	;;
     NTFS | HTNFS | FAT32 | HFAT32)
 	TIPO="Windows"
-	# Windows: lee la version del registro.
+	# Leer la version del registro de Windows.
 	VERSION=$(hidraGetRegistryKey $DIRMONT software '\Microsoft\Windows NT\CurrentVersion\ProductName')
 	;;
 esac

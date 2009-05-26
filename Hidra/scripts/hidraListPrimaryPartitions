@@ -2,15 +2,15 @@
 # Nombre:	hidraListPrimaryPartitions
 # Descripcion:	Lista las particiones primarias de un disco.
 # Formato:	hidraListPrimaryPartitions numdisco
-# Salida:	TipoPart:Taman±oK[:TamanoLibreKB] ...
+# Salida:	TipoPart:TamanoKB ...
 # 	TipoPart= { FAT32, NTFS, EXT3, LINUX-SWAP, CACHE, ...
-#		    EXTENDED, EMPTY, UNKNOWN }
+#		    EXTENDED, EMPTY, EXCED, UNKNOWN }
 # Error:	1 - formato incorrecto.
 #		2 - disco no detectado (no corresponde con un dispositivo).
 # Requisitos:	sfdisk, awk, hidraDisk, hidraTypeFS
 # Notas:	Si no hay espacio entre particiones el formato es tipo:tamano.
-#		Si hay un hueco libre, el formato es: tipo:tamano:libre
-#		Si las particiones se solapan: tipo:tamano:-solapado
+#		Si hay un hueco libre, el formato es: EXCED:TamanoLibre
+#		Si las particiones se solapan: EXCED:-TamanoSolapado
 # Version:	1.0 - Compatible con EAC: funcion no definida.
 # Autor:	Ramon Gomez, ETSII Univ. Sevilla
 # Fecha:	26/03/2009
@@ -30,13 +30,11 @@ DISCO="$(hidraDisk $1)" || exit $?
 sfdisk -d $DISCO 2>/dev/null | awk 'BEGIN {FS="[:=,]"}
 	$1~/[1-4]/ { if ($3!=0) {
 			if (suma > 0 && $3-suma != 0)
-			    printf ":%d ",($3-suma)/2;
-			else
-			    printf " ";
+			    printf "EXCED:%d ",($3-suma)/2;
 			suma=$3+$5;
-			tipo="";
+			tipo="UNKNOWN";
 			sprintf("hidraTypeFS %s",$1)|getline tipo;
-			printf "%s:%d", tipo, $5/2;
+			printf "%s:%d ", tipo, $5/2;
 		     }
 		   }
 	END {printf "\n";}'

@@ -24,9 +24,12 @@ DISCO="$(hidraDisk $1)" || exit $?
 # Procesar la salida de "sfdisk".
 sfdisk -d $DISCO 2>/dev/null | awk 'BEGIN {FS="[:=,]"}
 	$1~/[5-9]/ { if ($3!=0) {
-			tipo="";
+			if (suma > 0 && $3-suma != 0)
+			    printf "EXCED:%d ",($3-suma)/2;
+			suma=$3+$5;
+			tipo="UNKNOWN";
 			sprintf("hidraTypeFS %s",$1)|getline tipo;
 			printf "%s:%d ", tipo, $5/2;
 		     }
 		   }
-	'
+	END {printf "\n";} '
