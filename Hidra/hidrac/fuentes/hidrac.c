@@ -1508,6 +1508,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 					break;
 				case 5:
 					Log("Restaurar imagen Linux...");
+					res=RestaurandoImagen(disco,compres,mettran,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
 					//res=Restaurar_Linux(fileperfil, pathperfil,wparticion);
 					//if(wswrestauraimg=="O")
 					//	cambiaFstab("disk://0:",wparticion,wparticion);

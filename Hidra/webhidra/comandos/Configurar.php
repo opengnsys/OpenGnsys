@@ -334,6 +334,10 @@ function tabla_particiones($cmd,$idcentro,$idambito,$idconfiguracion,$cuenta){
 						$codpar=7;
 						$nombreso='<span style="COLOR:blue">Linux-swap</span>';
 						break;
+					case "CACHE": 
+						$codpar=8;
+						$nombreso='<span style="COLOR:blue">CACHE</span>';
+						break;
 		}
 		$ultpa=$p; // Valor de la ultima particion de esa configuraci�
 		$tablaHtml.='<TR id=TRparticion_'.$p."_".$idc.'>'.chr(13);
@@ -350,7 +354,9 @@ function tabla_particiones($cmd,$idcentro,$idambito,$idconfiguracion,$cuenta){
 		$opciones.="4=EXT2".chr(13);
 		$opciones.="5=EXT3".chr(13);
 		$opciones.="6=EXT4".chr(13);
-		$opciones.="7=LINUX-SWAP";
+		$opciones.="7=LINUX-SWAP".chr(13);
+		$opciones.="8=CACHE";
+
 		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"tipospar_".$p."_".$idc,"estilodesple","EMPTY",$codpar,100,"chgtipopar").'</TD>'.chr(13);
 		$tablaHtml.='<TD><span id=tiposo_'.$p."_".$idc.' value=0>&nbsp;'.$nombreso.'&nbsp;</span></TD>'.chr(13);
 		$tablaHtml.='<TD align=center>&nbsp<input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value='.$tamapart.' >&nbsp</TD>'.chr(13);
@@ -399,7 +405,7 @@ function Patrontabla_Particion(){
 		$opciones="1=".$TbMsg[14]."".chr(13);
 		$opciones.="2=".$TbMsg[15]."".chr(13);
 		$opciones.="3=".$TbMsg[16]."";
-		$tablaHtml.='<TD>&nbsp'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],0,100,"chgaccion").'&nbsp</TD>'.chr(13);
+		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],0,100,"chgaccion").'&nbsp</TD>'.chr(13);
 		$tablaHtml.='</TR>'.chr(13);
 		$tablaHtml.='</TABLE>';
 		$tablaHtml.= '</TD></TR></TABLE>';

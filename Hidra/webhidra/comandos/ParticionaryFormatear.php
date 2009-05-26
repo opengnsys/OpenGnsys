@@ -163,7 +163,10 @@ function Patrontabla_Particion(){
 	$opciones.="2=FAT32".chr(13);
 	$opciones.="3=NTFS".chr(13);
 	$opciones.="4=EXT2".chr(13);
-	$opciones.="5=LINUX-SWAP";
+	$opciones.="5=EXT3".chr(13);
+	$opciones.="6=EXT4".chr(13);
+	$opciones.="7=LINUX-SWAP".chr(13);
+	$opciones.="8=CACHE";
 	$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"tipospar_".$p."_".$idc,"estilodesple","EMPTY",0,100,"chgtipopar").'</TD>'.chr(13);
 	$tablaHtml.='<TD><span id=tiposo_'.$p."_".$idc.' value=0>&nbsp;<span style="COLOR:red">'.$TbMsg[17].'</span>&nbsp;</span></TD>'.chr(13);
 	$tablaHtml.='<TD align=center><INPUT type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value=0 ></TD>'.chr(13);

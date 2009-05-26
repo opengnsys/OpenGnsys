@@ -3593,7 +3593,7 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 //************************************************************************************************************************************************
 // PROGRAMA PRINCIPAL ( SERVICIO)
 //***************************************************************************************************************************************************
- int main (int argc, char *argv[])
+  int main (int argc, char *argv[])
 {
     SOCKET	socket_s; // Socket donde escucha el servidor
     SOCKET	socket_c; // Socket de los clientes que se conectan

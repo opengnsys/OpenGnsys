@@ -139,76 +139,106 @@ function chgpar(o){
 	var p=despletipopar.selectedIndex
 	var tipopar=despletipopar.options[p].value
 	switch(parseInt(tipopar)){
-		case 0: // Bigdos
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red"> Espacio sin particionar !!</span>&nbsp;';
-			littiposo.value=0
-			despleacc.selectedIndex=0
-			break;
-		case 1: // Bigdos
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Msdos,Windows 95</span>&nbsp;';
-			littiposo.value=1
-			despleacc.selectedIndex=1
-			break;
-		case  2: // FAt32
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows 98,Millenium</span>&nbsp;';
-			littiposo.value=1
-			despleacc.selectedIndex=1
-			break;
-		case 3: // NTFS
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003</span>&nbsp;';
-			littiposo.value=1
-			despleacc.selectedIndex=1
-			break;
-		case 4:
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux</span>&nbsp;';
-			littiposo.value=1
-			despleacc.selectedIndex=1
-			break;
-		case  5:
-			littiposo.innerHTML='&nbsp;<span style="COLOR:blue">Linux swap</span>&nbsp;';
-			littiposo.value=0
-			despleacc.selectedIndex=0
-			break;
-	}
-	swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
+			case 0: // Sin particionar
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red"> Espacio sin particionar !!</span>&nbsp;';
+				littiposo.value=0
+				despleacc.selectedIndex=0
+				break;
+			case 1: // Bigdos
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Msdos,Windows 95</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+			case  2: // FAt32
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows 98,Millenium</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+			case 3: // NTFS
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+			case 4: //Linux Ext2
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux (Ext2)</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+			case 5: //Linux Ext3
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux(Ext3)</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+			case 6: //Linux Ext4
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux (Ext4)</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+			case  7:
+				littiposo.innerHTML='&nbsp;<span style="COLOR:blue">Linux swap</span>&nbsp;';
+				littiposo.value=0
+				despleacc.selectedIndex=0
+				break;
+			case  8:
+				littiposo.innerHTML='&nbsp;<span style="COLOR:blue">Caché</span>&nbsp;';
+				littiposo.value=1
+				despleacc.selectedIndex=1
+				break;
+		}
+		swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
 }
 //________________________________________________________________________________________________________
 function chgtipopar(o){
+
 	var auxSplit=o.getAttribute("id").split("_"); 
 	var despleacc=document.getElementById("acciones_"+auxSplit[1]+"_"+auxSplit[2]) 
 	var littiposo=document.getElementById("tiposo_"+auxSplit[1]+"_"+auxSplit[2]) 
 	var swenvio=document.getElementById("tb_particiones_"+auxSplit[2]) 
 	var p=o.selectedIndex
 	var tipopar=o.options[p].value
-	if(tipopar>0 && tipopar<5)
+	if(tipopar!=0 && tipopar!=7)
 		despleacc.selectedIndex=1;
 	else
 		despleacc.selectedIndex=0;
-	switch(parseInt(tipopar)){
-		case 0: // Bigdos
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red"> Espacio sin particionar !!</span>&nbsp;';
-			break;
-		case 1: // Bigdos
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Msdos,Windows 95</span>&nbsp;';
-			break;
-			littiposo.value=1
-		case  2: // FAt32
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows 98,Millenium</span>&nbsp;';
-			littiposo.value=1
-			break;
-		case 3: // NTFS
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003</span>&nbsp;';
-			littiposo.value=1
-			break;
-		case 4:
-			littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux</span>&nbsp;';
-			littiposo.value=1
-			break;
-		case  5:
-			littiposo.innerHTML='&nbsp;<span style="COLOR:blue">Linux swap</span>&nbsp;';
-			littiposo.value=0
-			break;
-	}
+
+switch(parseInt(tipopar)){
+			case 0: // Bigdos
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red"> Espacio sin particionar !!</span>&nbsp;';
+				break;
+			case 1: // Bigdos
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Msdos,Windows 95</span>&nbsp;';
+				break;
+				littiposo.value=1
+			case  2: // FAt32
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows 98,Millenium</span>&nbsp;';
+				littiposo.value=1
+				break;
+			case 3: // NTFS
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003</span>&nbsp;';
+				littiposo.value=1
+				break;
+			case 4: //Linux Ext2
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux (Ext2)</span>&nbsp;';
+				littiposo.value=1
+				break;
+			case 5: //Linux Ext3
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux(Ext3)</span>&nbsp;';
+				littiposo.value=1
+				break;
+			case 6: //Linux Ext4
+				littiposo.innerHTML='&nbsp;<span style="COLOR:red">Linux (Ext4)</span>&nbsp;';
+				littiposo.value=1
+				break;
+			case  7:
+				littiposo.innerHTML='&nbsp;<span style="COLOR:blue">Linux swap</span>&nbsp;';
+				littiposo.value=0
+				break;
+			case  8:
+				littiposo.innerHTML='&nbsp;<span style="COLOR:blue">Caché</span>&nbsp;';
+				littiposo.value=1
+				break;
+	
+		}
 	swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
 }
 //________________________________________________________________________________________________________
@@ -219,7 +249,7 @@ function chgtama(idc){
 			var oTDs=oTRs[i].getElementsByTagName('TD') // Numero de particiones 
 			var despleacc=oTDs[5].childNodes[0] // recupera el desplegable de accion
 			var desplepar=oTDs[2].childNodes[0] // recupera el desplegable de tipos departiciones
-			if(desplepar.selectedIndex!=0 && desplepar.selectedIndex!=5){ // Si la particion no esta vacia
+			if(desplepar.selectedIndex!=0 && desplepar.selectedIndex!=7){ // Si la particion no esta vacia
 				despleacc.selectedIndex=1;
 				var littiposo=oTDs[3].childNodes[0]
 				littiposo.value=1 // Marca como forzamente formaeable esta paticion
