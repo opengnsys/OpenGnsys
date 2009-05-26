@@ -30,7 +30,6 @@ else
     NPART="$2"
 fi
 [ -z "$DISCO" -o ! -b "$DISCO" ] && exit $ERRNOTFOUND
-[ ! -b "$DISCO$NPART" ] && exit $ERRNOTFOUND
 
 # Detectar id. de tipo de particion y codificar al mnemonico.
 ID=$(sfdisk --id $DISCO $NPART 2>/dev/null)
