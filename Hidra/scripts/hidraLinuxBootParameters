@@ -23,13 +23,13 @@ MONT="$(hidraMount $1 $2)" || exit $?
 
 # Fichero de configuracion de GRUB.
 CONF=$MONT/boot/grub/menu.lst
-[ ! -f $CONF ] && exit $ERRNOTFOUND
+[ ! -e $CONF ] && exit $ERRNOTFOUND
 
 # Toma del fichero de configuracion los valores del kernel, initrd
 #    y parametros de arranque usando las clausulas por defecto, y
 #    los formatea para que sean compatibles con kexec.
 awk 'BEGIN {cont=-1;}
-     $1~/^default/	{def=$2}
+     $1~/^default/	{sub(/=/," "); def=$2;}
      $1~/^title/	{cont++}
      $1~/^kernel/	{if (def==cont) {
 			    kern=$2;

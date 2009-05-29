@@ -28,7 +28,17 @@ case "$(hidraTypeFS $1 $2)" in
     EXT[234] | REISERFS | REISER4)
 	TIPO="Linux"
 	# Leer descripcion del sistema Linux.
-	VERSION=$(chroot $DIRMONT lsb_release -d | awk -F: '{gsub (/\t/,""); print $2}')
+	VERSION=$(chroot $DIRMONT lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
+	# Si no se puede obtener, buscar en ficheros del sistema.
+	if [ -z "$VERSION" ]; then
+ 	    UBUNTU="$DIRMONT/etc/lsb-release" 
+ 	    [ -e $UBUNTU ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $UBUNTU)"
+ 	    REDHAT="$DIRMONT/etc/redhat-release" 
+	    [ -e $REDHAT ] && VERSION="$(head -1 $REDHAT)" 
+ 	    SUSE="$DIRMONT/etc/SuSE-release" 
+	    [ -e $SUSE ] && VERSION="$(head -1 $SUSE)" 
+	fi
+	[ -e $DIRMONT/lib64 ] && VERSION="$VERSION 64 bits"
 	;;
     NTFS | HTNFS | FAT32 | HFAT32)
 	TIPO="Windows"

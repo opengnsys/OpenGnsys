@@ -34,7 +34,11 @@ fi
 # Procesar paquetes RPM.
 RPMDIR="${DIRMONT}/var/lib/rpm"
 if [ -r $RPMDIR ]; then 
+    # Correccion inconsistencia de version de base de datos.
+    rm -f ${RPMDIR}/__db.*
     rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
 		awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
 		sort | uniq
+    rm -f ${RPMDIR}/__db.*
 fi
+
