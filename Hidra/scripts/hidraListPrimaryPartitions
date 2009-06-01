@@ -29,7 +29,7 @@ DISCO="$(hidraDisk $1)" || exit $?
 # Procesar la salida de "sfdisk".
 sfdisk -d $DISCO 2>/dev/null | awk 'BEGIN {FS="[:=,]"}
 	$1~/[1-4]/ { if ($3!=0) {
-			if (suma > 0 && $3-suma != 0)
+			if (suma > 0 && (int($3-suma)/2) >= 1)
 			    printf "EXCED:%d ",($3-suma)/2;
 			suma=$3+$5;
 			tipo="UNKNOWN";

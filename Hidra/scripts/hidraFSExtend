@@ -27,7 +27,9 @@ case "$(hidraTypeFS $1 $2)" in
      EXT[234])
 	resize2fs -f $PART || exit $ERRPARTITION
 	;;
-#     REISERFS)		# Usar "resize_reiserfs"
+     REISERFS)		# Usar "resize_reiserfs"
+	resize_reiserfs -f $PART || exit $ERRPARTITION
+	;;
      NTFS|HNTFS)
 	ntfsresize -f $PART <<<"y" || exit $ERRPARTITION
 	;;

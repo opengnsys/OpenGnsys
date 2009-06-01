@@ -32,7 +32,8 @@ case "$(hidraTypeFS $1 $2)" in
 		awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')	
 	resize2fs -fp $PART "${TAM}M" >/dev/null || exit $ERRPARTITION
 	;;
-#     REISERFS)		# Usar "resize_reiserfs"
+     REISERFS)		# Usar "resize_reiserfs"
+	;;
      NTFS|HNTFS)
 	hidraDeleteFile $1 $2 pagefile.sys
 	hidraUnmount $1 $2

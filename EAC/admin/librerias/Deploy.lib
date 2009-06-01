@@ -83,7 +83,7 @@ then
 							;;
 					esac
 				;;
-				EXT[23])
+				EXT[234]|REISERFS)
 					case $CloneImageEXT23 in
 						"partimage")
 							imaged="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $disco stdout"

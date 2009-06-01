@@ -57,7 +57,8 @@ while [ $# != 0 ]; do
 	     HNTFS)	 ID=17 ;;
 	     FAT32)	 ID=b  ;;
 	     HFAT32)	 ID=1b ;;
-	     EXT[234])	 ID=83 ;;
+	     EXT[234]|REISERFS|REISER4)
+			 ID=83 ;;
 	     LINUX-SWAP) ID=82 ;;
 	     *)		 exit $ERRFORMAT;;
 	esac
