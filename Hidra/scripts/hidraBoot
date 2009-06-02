@@ -28,13 +28,17 @@ DIRMONT=$(hidraMount $1 $2) || exit $?
 
 case "$TIPO" in
      NTFS|HNTFS|FAT32|HFAT32)	# Arranque Windows.
-	# Compruebar si hay un SO definido antes de arrancar.
-	[ -z "$(hidraOSVersion $1 $2)" ] && exit $ERRNOTOS
 	# Activar la particion.
 	hidraSetPartitionActive $1 $2
+	# Compruebar si hay un cargador de Windows.
+	for f in io.sys ntldr bootmgr; do
+	    FICH="$(hidraPath $1 $2 $f)"
+	    [ -n "$FICH" ] && LOADER="$(basename $FICH)"
+	done
+	[ -z "$LOADER" ] && exit $ERRNOTOS
+	# Copiar y configurar GRUB4DOS
 	cp $REPO/admin/gestion/grub/* $DIRMONT
-	# Configurar GRUB4DOS
-	kexec -l $DIRMONT/grub.exe --append=--config-file="find --set-root /ntldr; chainloader /ntldr"
+	kexec -l $DIRMONT/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
 	;;
      EXT[234]|REISERFS|REISER4)	# Arranque Linux.
 	# Obtiene los parametros de arranque.

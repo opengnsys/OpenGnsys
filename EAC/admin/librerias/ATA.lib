@@ -300,7 +300,7 @@ if [ $# = 2 ]
 	then 
 	dev=`Disk $1`
 	partition=$2
-	parted $dev set $partition boot on
+	parted -s $dev set $partition boot on
 fi
 }
 
