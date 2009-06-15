@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>Fichero Fuente Hidra/includes/Database.h</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Generado por Doxygen 1.5.5 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Página&nbsp;principal</span></a></li>
+      <li class="current"><a href="files.html"><span>Archivos</span></a></li>
+    </ul>
+  </div>
+<h1>Hidra/includes/Database.h</h1><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">// ******************************************************************************************************</span>
+<a name="l00002"></a>00002 <span class="comment">// Aplicaci� HIDRA</span>
+<a name="l00003"></a>00003 <span class="comment">// Copyright 2004 Jos�Manuel Alonso. Todos los derechos reservados.</span>
+<a name="l00004"></a>00004 <span class="comment">// Fichero: Database.h</span>
+<a name="l00005"></a>00005 <span class="comment">//      Descripci�:</span>
+<a name="l00006"></a>00006 <span class="comment">//              Fichero de cabecera de la clase Database para implementar funciones de manipulaci�</span>
+<a name="l00007"></a>00007 <span class="comment">//              de bases de datos sobre un Servidor Mysql</span>
+<a name="l00008"></a>00008 <span class="comment">// ******************************************************************************************************</span>
+<a name="l00009"></a>00009 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;/usr/include/mysql/mysql.h&gt;</span>
+<a name="l00013"></a>00013 <span class="comment">// __________________________________________________________________________</span>
+<a name="l00014"></a>00014 <span class="keyword">class </span>Database; 
+<a name="l00015"></a>00015 <span class="keyword">class </span>Table;
+<a name="l00016"></a>00016 <span class="comment">// __________________________________________________________________________</span>
+<a name="l00017"></a>00017 <span class="keyword">class </span>Database
+<a name="l00018"></a>00018 {
+<a name="l00019"></a>00019 <span class="keyword">public</span>:
+<a name="l00020"></a>00020         MYSQL *m_Cnn;
+<a name="l00021"></a>00021         <span class="keywordtype">char</span> m_ErrStr[500];
+<a name="l00022"></a>00022         Database();
+<a name="l00023"></a>00023         <span class="keywordtype">bool</span> Open(<span class="keywordtype">char</span>* UserName, <span class="keywordtype">char</span>* Pwd,<span class="keywordtype">char</span>* server,<span class="keywordtype">char</span>*Database);
+<a name="l00024"></a>00024         <span class="keywordtype">bool</span> OpenTbl(<span class="keywordtype">int</span> Mode, <span class="keywordtype">char</span>* CmdStr, Table&amp; Tbl);
+<a name="l00025"></a>00025         <span class="keywordtype">bool</span> Close(<span class="keywordtype">void</span>);
+<a name="l00026"></a>00026         <span class="keywordtype">bool</span> Execute(<span class="keywordtype">char</span>* CmdStr);
+<a name="l00027"></a>00027         <span class="keywordtype">bool</span> Execute(<span class="keywordtype">char</span>* CmdStr, Table&amp; Tbl);
+<a name="l00028"></a>00028         <span class="keywordtype">void</span> GetErrorErrStr(<span class="keywordtype">char</span>* ErrStr);
+<a name="l00029"></a>00029 };
+<a name="l00030"></a>00030 <span class="comment">// __________________________________________________________________________</span>
+<a name="l00031"></a>00031 <span class="keyword">class </span>Table{
+<a name="l00032"></a>00032         <span class="keywordtype">char</span>* tomadato(<span class="keywordtype">char</span>* FieldName);
+<a name="l00033"></a>00033 <span class="keyword">public</span>:
+<a name="l00034"></a>00034         <span class="keywordtype">bool</span> eof,bof;
+<a name="l00035"></a>00035         MYSQL_RES       * m_Rec ;
+<a name="l00036"></a>00036         MYSQL_FIELD *fields;
+<a name="l00037"></a>00037         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> num_fields;
+<a name="l00038"></a>00038         MYSQL_ROW       row ;
+<a name="l00039"></a>00039         MYSQL_ROW_OFFSET ptr;
+<a name="l00040"></a>00040         my_ulonglong numreg;
+<a name="l00041"></a>00041         <span class="keywordtype">char</span> m_ErrStr[500];
+<a name="l00042"></a>00042         Table();
+<a name="l00043"></a>00043         <span class="keywordtype">void</span> GetErrorErrStr(<span class="keywordtype">char</span>* ErrStr);
+<a name="l00044"></a>00044         <span class="keywordtype">bool</span> ISEOF();
+<a name="l00045"></a>00045         <span class="keywordtype">bool</span> MoveNext();
+<a name="l00046"></a>00046         <span class="keywordtype">bool</span> MovePrevious();
+<a name="l00047"></a>00047         <span class="keywordtype">bool</span> MoveFirst();
+<a name="l00048"></a>00048         <span class="keywordtype">bool</span> MoveLast();
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050         <span class="keywordtype">bool</span> Get(<span class="keywordtype">char</span>* FieldName, <span class="keywordtype">char</span>* FieldValue);
+<a name="l00051"></a>00051         <span class="keywordtype">bool</span> Get(<span class="keywordtype">char</span>* FieldName,<span class="keywordtype">int</span> &amp;FieldValue);
+<a name="l00052"></a>00052         <span class="keywordtype">bool</span> Get(<span class="keywordtype">char</span>* FieldName,<span class="keywordtype">char</span> &amp;FieldValue);
+<a name="l00053"></a>00053 };
+<a name="l00054"></a>00054 <span class="comment">// __________________________________________________________________________</span>
+<a name="l00055"></a>00055 <span class="keyword">class </span>Herror
+<a name="l00056"></a>00056 {
+<a name="l00057"></a>00057 <span class="keyword">public</span>:
+<a name="l00058"></a>00058         <span class="keywordtype">int</span> nError; <span class="comment">// C�igo del error</span>
+<a name="l00059"></a>00059         <span class="keywordtype">char</span> dError[500]; <span class="comment">// Descripci� del error</span>
+<a name="l00060"></a>00060 };
+</pre></div></div>
+<hr size="1"><address style="text-align: right;"><small>Generado el Mon Jun 15 10:24:00 2009 por&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.5 </small></address>
+</body>
+</html>

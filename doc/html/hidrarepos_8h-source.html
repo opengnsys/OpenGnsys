@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>Fichero Fuente Hidra/hidrarepos/fuentes/hidrarepos.h</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Generado por Doxygen 1.5.5 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Página&nbsp;principal</span></a></li>
+      <li class="current"><a href="files.html"><span>Archivos</span></a></li>
+    </ul>
+  </div>
+<h1>Hidra/hidrarepos/fuentes/hidrarepos.h</h1><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">// *************************************************************************************************************</span>
+<a name="l00002"></a>00002 <span class="comment">// Aplicacin HIDRA</span>
+<a name="l00003"></a>00003 <span class="comment">// Copyright 2003-2007 Jos Manuel Alonso. Todos los derechos reservados.</span>
+<a name="l00004"></a>00004 <span class="comment">// Fichero: hidrarepos.h</span>
+<a name="l00005"></a>00005 <span class="comment">// </span>
+<a name="l00006"></a>00006 <span class="comment">//      Descripcin:</span>
+<a name="l00007"></a>00007 <span class="comment">//       Fichero de cabecera de hidrapxedhcp.cpp</span>
+<a name="l00008"></a>00008 <span class="comment">// **************************************************************************************************************</span>
+<a name="l00009"></a>00009 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+<a name="l00016"></a>00016 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00017"></a>00017 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+<a name="l00018"></a>00018 <span class="preprocessor">#include &lt;time.h&gt;</span>
+<a name="l00019"></a>00019 <span class="preprocessor">#include &lt;/usr/include/mysql/mysql.h&gt;</span>
+<a name="l00020"></a>00020 <span class="preprocessor">#include &lt;pthread.h&gt;</span>
+<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;signal.h&gt;</span>
+<a name="l00022"></a>00022 <span class="preprocessor">#include "Database.h"</span>
+<a name="l00023"></a>00023 <span class="preprocessor">#include "encriptacion.h"</span>
+<a name="l00024"></a>00024 
+<a name="l00025"></a>00025 <span class="preprocessor">#define LONGITUD_PARAMETROS 4048        // Longitud m?ima de la informacin de la trama (parametros)</span>
+<a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define LONGITUD_TRAMA          LONGITUD_PARAMETROS+8   // Longitud m?ima de la trama completa</span>
+<a name="l00027"></a>00027 <span class="preprocessor"></span>
+<a name="l00028"></a>00028 <span class="preprocessor">#define MAXIMOS_CLIENTES  4000 // M?imo numero de clientes rembo controlados por el servidor rembo</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define MAXCNX 5                // Mximos intentos de conexin al servidor HIDRA</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define PUERTO_WAKEUP                   9       // Puerto por defecto del wake up</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a>00032 <span class="preprocessor">#define PUERTOMINUSER 20000</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define PUERTOMAXUSER 60000</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#define LEER            0</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define ESCRIBIR        1</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span>
+<a name="l00038"></a>00038 <span class="preprocessor">#define TRUE 1</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define FALSE 0</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span>
+<a name="l00041"></a>00041 <span class="preprocessor">#define true 1</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span><span class="preprocessor">#define false 0</span>
+<a name="l00043"></a>00043 <span class="preprocessor"></span>
+<a name="l00044"></a>00044 <span class="preprocessor">#define SOCKET_ERROR            (-1)</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span><span class="preprocessor">#define INVALID_SOCKET  (SOCKET)(~0)</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span>
+<a name="l00047"></a>00047 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> DWORD;
+<a name="l00048"></a>00048 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span>  WORD;
+<a name="l00049"></a>00049 <span class="keyword">typedef</span>  <span class="keywordtype">int</span>  BOOL;
+<a name="l00050"></a>00050 <span class="keyword">typedef</span> <span class="keywordtype">char</span>  BYTE;
+<a name="l00051"></a>00051 <span class="keyword">typedef</span>  <span class="keywordtype">int</span>  SOCKET;
+<a name="l00052"></a>00052 <span class="keyword">typedef</span>  <span class="keywordtype">void</span>* LPVOID;
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keyword">typedef</span> <span class="keyword">struct</span>{         <span class="comment">// EstructUra de la trama recibida</span>
+<a name="l00055"></a>00055         <span class="keywordtype">char</span> arroba;    <span class="comment">// cabecera de la trama</span>
+<a name="l00056"></a>00056         <span class="keywordtype">char</span> identificador[9];  <span class="comment">// identificador de la trama</span>
+<a name="l00057"></a>00057         <span class="keywordtype">char</span> ejecutor;  <span class="comment">// ejecutor de la trama 1=el servidor rembo  2=el cliente rembo</span>
+<a name="l00058"></a>00058         <span class="keywordtype">char</span> parametros[LONGITUD_PARAMETROS]; <span class="comment">// Contenido de la trama (par?etros)</span>
+<a name="l00059"></a>00059 }TRAMA;
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061 <span class="comment">// Estructura para trabajar en cada hebra con el cliente en cuestion</span>
+<a name="l00062"></a>00062 <span class="keyword">struct  </span>TramaRepos{
+<a name="l00063"></a>00063         SOCKET sck;
+<a name="l00064"></a>00064         <span class="keyword">struct </span>sockaddr_in cliente;
+<a name="l00065"></a>00065         socklen_t sockaddrsize;
+<a name="l00066"></a>00066         TRAMA trama;
+<a name="l00067"></a>00067 };
+<a name="l00068"></a>00068 <span class="keywordtype">char</span> szPathFileCfg[128],szPathFileLog[128];
+<a name="l00069"></a>00069 FILE *FLog,*Fconfig;
+<a name="l00070"></a>00070 SOCKET sClient;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072 <span class="keywordtype">char</span> IPlocal[20];               <span class="comment">// Ip local</span>
+<a name="l00073"></a>00073 <span class="keywordtype">char</span> servidorhidra[20]; <span class="comment">// IP servidor HIDRA</span>
+<a name="l00074"></a>00074 <span class="keywordtype">char</span> Puerto[20];                <span class="comment">// Puerto Unicode</span>
+<a name="l00075"></a>00075 <span class="keywordtype">int</span> puerto;     <span class="comment">// Puerto</span>
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077 <span class="keywordtype">char</span> filecmdshell[250];
+<a name="l00078"></a>00078 <span class="keywordtype">char</span> cmdshell[512];
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080 <span class="keywordtype">char</span> msglog[250];
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082 <span class="keywordtype">char</span> usuario[20];
+<a name="l00083"></a>00083 <span class="keywordtype">char</span> pasguor[20];
+<a name="l00084"></a>00084 <span class="keywordtype">char</span> datasource[20];
+<a name="l00085"></a>00085 <span class="keywordtype">char</span> catalog[50];
+<a name="l00086"></a>00086 <span class="keywordtype">int</span> puertorepo; <span class="comment">// Puerto</span>
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088 <span class="comment">//______________________________________________________</span>
+<a name="l00089"></a>00089 <span class="keyword">static</span> pthread_mutex_t guardia; <span class="comment">// Controla acceso exclusivo de hebras </span>
+<a name="l00090"></a>00090 <span class="comment">//______________________________________________________</span>
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092 <span class="keywordtype">char</span> PathHidra[1024]; <span class="comment">// path al directorio base de Hidra</span>
+<a name="l00093"></a>00093 <span class="keywordtype">char</span> PathComandos[1024]; <span class="comment">// path al directorio donde se depositan los comandos para los clientes</span>
+<a name="l00094"></a>00094 <span class="keywordtype">char</span> PathUsuarios[1024]; <span class="comment">// path al directorio donde se depositan los ficheros de login de los operadores</span>
+<a name="l00095"></a>00095 <span class="keywordtype">char</span> PathIconos[1024]; <span class="comment">// path al directorio donde se depositan los iconos de los items de los mens</span>
+<a name="l00096"></a>00096 
+<a name="l00097"></a>00097 <span class="comment">// Prototipos de funciones</span>
+<a name="l00098"></a>00098 <span class="keywordtype">void</span> RegistraLog(<span class="keywordtype">char</span> *,<span class="keywordtype">int</span> );
+<a name="l00099"></a>00099 <span class="keywordtype">int</span> split_parametros(<span class="keywordtype">char</span> **,<span class="keywordtype">char</span> *, <span class="keywordtype">char</span> * );
+<a name="l00100"></a>00100 <span class="keywordtype">int</span> TomaConfiguracion(<span class="keywordtype">char</span>* );
+<a name="l00101"></a>00101 <span class="keywordtype">void</span> INTROaFINCAD(<span class="keywordtype">char</span>* );
+<a name="l00102"></a>00102 <span class="keywordtype">void</span> FINCADaINTRO(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00103"></a>00103 <span class="keywordtype">char</span> * toma_parametro(<span class="keywordtype">char</span>* ,<span class="keywordtype">char</span> *);
+<a name="l00104"></a>00104 <span class="keywordtype">int</span> ClienteExistente(TramaRepos *);
+<a name="l00105"></a>00105 LPVOID GestionaServicioRepositorio(LPVOID);
+<a name="l00106"></a>00106 <span class="keywordtype">int</span>     Actualizar(TramaRepos*);
+<a name="l00107"></a>00107 <span class="keywordtype">int</span> Arrancar(TramaRepos *);
+<a name="l00108"></a>00108 <span class="keywordtype">int</span> Wake_Up(SOCKET,<span class="keywordtype">char</span> *);
+<a name="l00109"></a>00109 <span class="keywordtype">void</span> PasaHexBin( <span class="keywordtype">char</span> *,<span class="keywordtype">char</span> *);
+<a name="l00110"></a>00110 <span class="keywordtype">int</span> levanta(<span class="keywordtype">char</span> *);
+<a name="l00111"></a>00111 <span class="keywordtype">int</span> FicheroOperador(TramaRepos *);
+<a name="l00112"></a>00112 <span class="keywordtype">int</span> IconoItem(TramaRepos *);
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114 <span class="keywordtype">bool</span> ExisteFichero(TramaRepos *);
+<a name="l00115"></a>00115 <span class="keywordtype">bool</span> EliminaFichero(TramaRepos *);
+<a name="l00116"></a>00116 <span class="keywordtype">bool</span> LeeFicheroTexto(TramaRepos *);
+<a name="l00117"></a>00117 <span class="keywordtype">int</span> gestiona_comando(TramaRepos *);
+<a name="l00118"></a>00118 <span class="keywordtype">bool</span> respuesta_peticion(TramaRepos *,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00119"></a>00119 <span class="keywordtype">bool</span> RecibePerfilSoftware(TramaRepos *trmInfo);
+<a name="l00120"></a>00120 <span class="keywordtype">bool</span> EnviaPerfilSoftware(TramaRepos *trmInfo);
+<a name="l00121"></a>00121 SOCKET Abre_conexion(<span class="keywordtype">char</span> *,<span class="keywordtype">int</span>);
+<a name="l00122"></a>00122 <span class="keywordtype">int</span> envia_tramas(SOCKET,TRAMA *);
+<a name="l00123"></a>00123 <span class="keywordtype">int</span> recibe_tramas(SOCKET ,TRAMA *);
+<a name="l00124"></a>00124 <span class="keywordtype">int</span> inclusion_REPO();
+<a name="l00125"></a>00125 <span class="keywordtype">int</span> RESPUESTA_inclusionREPO(TRAMA *);
+<a name="l00126"></a>00126 <span class="keywordtype">int</span> TomaRestoConfiguracion(TRAMA *);
+<a name="l00127"></a>00127 <span class="keywordtype">int</span> RegistraComando(TramaRepos *);
+<a name="l00128"></a>00128 <span class="keywordtype">int</span> Apagar(TramaRepos *);
+<a name="l00129"></a>00129 <span class="keywordtype">char</span> * Buffer(<span class="keywordtype">int</span> );
+<a name="l00130"></a>00130 <span class="keywordtype">int</span> TomaPuertoLibre(<span class="keywordtype">int</span> *);
+<a name="l00131"></a>00131 <span class="keywordtype">int</span> ejecutarscript ( <span class="keywordtype">char</span> *,<span class="keywordtype">char</span> * ,<span class="keywordtype">char</span> *);
+<a name="l00132"></a>00132 <span class="keywordtype">void</span> NwGestionaServicioRepositorio(TramaRepos *);
+<a name="l00133"></a>00133 <span class="keywordtype">int</span> ExecShell(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span> *);
+</pre></div></div>
+<hr size="1"><address style="text-align: right;"><small>Generado el Mon Jun 15 10:24:00 2009 por&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.5 </small></address>
+</body>
+</html>

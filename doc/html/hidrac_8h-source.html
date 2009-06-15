@@ -1,0 +1,309 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>Fichero Fuente Hidra/hidrac/fuentes/hidrac.h</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Generado por Doxygen 1.5.5 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="index.html"><span>Página&nbsp;principal</span></a></li>
+      <li class="current"><a href="files.html"><span>Archivos</span></a></li>
+    </ul>
+  </div>
+<h1>Hidra/hidrac/fuentes/hidrac.h</h1><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">// ***************************************************************************************************************************************</span>
+<a name="l00002"></a>00002 <span class="comment">// Aplicacin HIDRA (Gestin y Admistracin de aulas de informtica)</span>
+<a name="l00003"></a>00003 <span class="comment">// Copyright 2003-2007 Jos Manuel Alonso. Todos los derechos reservados.</span>
+<a name="l00004"></a>00004 <span class="comment">// Fichero: hidrax.h</span>
+<a name="l00005"></a>00005 <span class="comment">//      Descripcin:</span>
+<a name="l00006"></a>00006 <span class="comment">//              Fichero de cabecera de hidrax.cpp</span>
+<a name="l00007"></a>00007 <span class="comment">// ***************************************************************************************************************************************</span>
+<a name="l00008"></a>00008 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00009"></a>00009 <span class="preprocessor">#include &lt;sys/wait.h&gt;</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00016"></a>00016 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00017"></a>00017 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+<a name="l00018"></a>00018 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00019"></a>00019 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+<a name="l00020"></a>00020 <span class="preprocessor">#include &lt;time.h&gt;</span>
+<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;signal.h&gt;</span>
+<a name="l00022"></a>00022 
+<a name="l00023"></a>00023 <span class="preprocessor">#define LEER            0</span>
+<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define ESCRIBIR        1</span>
+<a name="l00025"></a>00025 <span class="preprocessor"></span>
+<a name="l00026"></a>00026 <span class="preprocessor">#define LONGITUD_SCRIPTSALIDA 1024      // Longitud máima de la informacin devuelta por un script</span>
+<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define LONGITUD_PARAMETROS 4048        // Longitud m?ima de la informacin de la trama (parametros)</span>
+<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define LONGITUD_TRAMA LONGITUD_PARAMETROS+11   // Longitud m?ima de la trama completa</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define LONGITUD_CONFIGURACION 1024     // Longitud mxima de las configuraciones de particin</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define MAX_NUM_CSADDRS        20</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define MAX_INTERFACE_LIST     20</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define MAXCNX 5                // Mximos intentos de conexión al servidor HIDRA</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define MAXITEMS 100</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="preprocessor">#define MAXHTMLMNU 4000</span>
+<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="preprocessor">#define MAXPARTICIONES 24</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define MAXINFOSO 5 // Numero máximo de nemonicos enla inforamción del S.O. de una partición </span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define MAXARGS 16 // Numero máximo de argumentos enviados a un scripts </span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="preprocessor">#define LONSTD 512 // Longitud de memoria estandar </span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define LONSTDC 256 // Longitud de memoria estandar corta</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span>
+<a name="l00041"></a>00041 <span class="preprocessor">#define PUERTOMINUSER 20000</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span><span class="preprocessor">#define PUERTOMAXUSER 60000</span>
+<a name="l00043"></a>00043 <span class="preprocessor"></span>
+<a name="l00044"></a>00044 <span class="preprocessor">#define TRUE 1</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span><span class="preprocessor">#define FALSE 0</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span>
+<a name="l00047"></a>00047 <span class="preprocessor">#define true 1</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span><span class="preprocessor">#define false 0</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span>
+<a name="l00050"></a>00050 <span class="preprocessor">#define SOCKET_ERROR            (-1)</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define INVALID_SOCKET  (SOCKET)(~0)</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span>
+<a name="l00053"></a>00053 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span>  WORD;
+<a name="l00054"></a>00054 <span class="keyword">typedef</span>  <span class="keywordtype">int</span>  BOOL;
+<a name="l00055"></a>00055 <span class="keyword">typedef</span> <span class="keywordtype">char</span>  BYTE;
+<a name="l00056"></a>00056 <span class="keyword">typedef</span>  <span class="keywordtype">int</span>  SOCKET;
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="keyword">typedef</span> <span class="keyword">struct</span>{         <span class="comment">// EstructUra de la trama recibida</span>
+<a name="l00059"></a>00059         <span class="keywordtype">char</span> arroba;    <span class="comment">// cabecera de la trama</span>
+<a name="l00060"></a>00060         <span class="keywordtype">char</span> identificador[9];  <span class="comment">// identificador de la trama</span>
+<a name="l00061"></a>00061         <span class="keywordtype">char</span> ejecutor;  <span class="comment">// ejecutor de la trama 1=el servidor hidra  2=el cliente hidra 3=el repositorio</span>
+<a name="l00062"></a>00062         <span class="keywordtype">char</span> parametros[LONGITUD_PARAMETROS]; <span class="comment">// Contenido de la trama (par?etros)</span>
+<a name="l00063"></a>00063 }TRAMA;
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065 TRAMA trama[1];
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067 <span class="keywordtype">char</span> IPlocal[20];               <span class="comment">// Ip local</span>
+<a name="l00068"></a>00068 <span class="keywordtype">char</span> Servidorhidra[20]; <span class="comment">// IP servidor HIDRA</span>
+<a name="l00069"></a>00069 <span class="keywordtype">char</span> Puerto[20];                <span class="comment">// Puerto Unicode</span>
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071 <span class="keywordtype">char</span> szPathFileCfg[128];
+<a name="l00072"></a>00072 <span class="keywordtype">char</span> szPathFileLog[128];
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074 <span class="comment">//___________________________________________________________________________________________________</span>
+<a name="l00075"></a>00075 <span class="comment">// Variables y estructuras</span>
+<a name="l00076"></a>00076 <span class="comment">//___________________________________________________________________________________________________</span>
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078 <span class="keywordtype">char</span> cmdshell[LONSTD];
+<a name="l00079"></a>00079 <span class="keywordtype">char</span> parametros[LONSTD];
+<a name="l00080"></a>00080 <span class="keywordtype">char</span>* argumentos[MAXARGS];
+<a name="l00081"></a>00081 <span class="keywordtype">char</span> msglog[LONSTD];
+<a name="l00082"></a>00082 <span class="keywordtype">char</span> msgcon[LONSTD];
+<a name="l00083"></a>00083 <span class="keywordtype">char</span> filecmdshell[LONSTDC];
+<a name="l00084"></a>00084 <span class="keywordtype">char</span> filemenu[LONSTDC];
+<a name="l00085"></a>00085 <span class="keywordtype">char</span> fileitem[LONSTDC];
+<a name="l00086"></a>00086 <span class="keywordtype">char</span> fileini[LONSTDC];
+<a name="l00087"></a>00087 <span class="keywordtype">char</span> filecmd[LONSTDC];
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089 <span class="keyword">struct </span>excepcion {
+<a name="l00090"></a>00090         <span class="keywordtype">int</span> herror;
+<a name="l00091"></a>00091         <span class="keywordtype">char</span> msg[LONSTDC];
+<a name="l00092"></a>00092         <span class="keywordtype">char</span> modulo[LONSTDC];   
+<a name="l00093"></a>00093 };
+<a name="l00094"></a>00094 <span class="keyword">struct </span>excepcion e;
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096 <span class="keywordtype">int</span> ndebug=1; <span class="comment">// Nivel de debuger por defecto</span>
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098 <span class="comment">// Nemónicos</span>
+<a name="l00099"></a>00099 <span class="keywordtype">int</span> MsDos=1;
+<a name="l00100"></a>00100 <span class="keywordtype">int</span> Win98=2;
+<a name="l00101"></a>00101 <span class="keywordtype">int</span> Win2K=3;
+<a name="l00102"></a>00102 <span class="keywordtype">int</span> WinXP=4; 
+<a name="l00103"></a>00103 <span class="keywordtype">int</span> Linux=5;
+<a name="l00104"></a>00104                 
+<a name="l00105"></a>00105 BOOL PROCESO=<span class="keyword">true</span>;                      <span class="comment">// Indicador de la actividad del proceso principal</span>
+<a name="l00106"></a>00106 BOOL CACHEEXISTS;                       <span class="comment">// Indica si existe cache</span>
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108 <span class="keywordtype">char</span> HIDRACHEIMAGENES[LONSTDC]; <span class="comment">// Path al directorio donde están las imágenes (en la caché)</span>
+<a name="l00109"></a>00109 <span class="keywordtype">char</span> HIDRASRVIMAGENES[LONSTDC]; <span class="comment">// Path al directorio hidra donde están las imágenes (en el repositorio)</span>
+<a name="l00110"></a>00110 <span class="keywordtype">char</span> HIDRASRVCMD[LONSTDC];      <span class="comment">// Path del directorio del repositorio donde se depositan los comandos para el cliente hidra</span>
+<a name="l00111"></a>00111 <span class="keywordtype">char</span> HIDRASCRIPTS[LONSTDC];     <span class="comment">// Path al directorio donde están los scripts de hidra (en el cliente hidra)</span>
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113 <span class="keywordtype">int</span> HIDRAVER;   <span class="comment">// Versión Hidra</span>
+<a name="l00114"></a>00114 <span class="keywordtype">int</span> TPAR ;      <span class="comment">// Tamaño de la particin</span>
+<a name="l00115"></a>00115         
+<a name="l00116"></a>00116 SOCKET sock;    <span class="comment">// Socket</span>
+<a name="l00117"></a>00117 
+<a name="l00118"></a>00118 <span class="keyword">struct </span>s_CabMnu {
+<a name="l00119"></a>00119         <span class="keywordtype">char</span> resolucion[2];                      <span class="comment">// Resolucin de pantalla</span>
+<a name="l00120"></a>00120         <span class="keywordtype">char</span> titulo[LONSTDC];                                           <span class="comment">// Titulo del menu</span>
+<a name="l00121"></a>00121         <span class="keywordtype">char</span> coorx[4];                                  <span class="comment">// Coordenada x</span>
+<a name="l00122"></a>00122         <span class="keywordtype">char</span> coory[4];                                  <span class="comment">// Coordenada y</span>
+<a name="l00123"></a>00123         <span class="keywordtype">char</span> modalidad[2];              <span class="comment">// modalidad ( numero de items por linea )</span>
+<a name="l00124"></a>00124         <span class="keywordtype">char</span> scoorx[4];                         <span class="comment">// Coordenada x // Menu privado</span>
+<a name="l00125"></a>00125         <span class="keywordtype">char</span> scoory[4];                         <span class="comment">// Coordenada y</span>
+<a name="l00126"></a>00126         <span class="keywordtype">char</span> smodalidad[LONSTDC];               <span class="comment">// modalidad ( numero de items por linea )</span>
+<a name="l00127"></a>00127         <span class="keywordtype">char</span> htmmenupub[64];    <span class="comment">// Nombre del fichero que contiene el html del menu (público)</span>
+<a name="l00128"></a>00128         <span class="keywordtype">char</span> htmmenupri[64];            <span class="comment">// Nombre del fichero que contiene el html del menu (privado)</span>
+<a name="l00129"></a>00129 } CabMnu;  <span class="comment">// Estructura con los datos de los menús</span>
+<a name="l00130"></a>00130         
+<a name="l00131"></a>00131 BOOL swmnu=<span class="keyword">false</span>; <span class="comment">// Indicador de menu asignado</span>
+<a name="l00132"></a>00132         
+<a name="l00133"></a>00133 <span class="keyword">struct </span>s_Item{
+<a name="l00134"></a>00134         <span class="keywordtype">char</span> idaccionmenu[16];  <span class="comment">// Identificador del item a ejecutar</span>
+<a name="l00135"></a>00135         <span class="keywordtype">char</span> urlimg[64];        <span class="comment">// Nombre de la imagen de fonfo del botn</span>
+<a name="l00136"></a>00136         <span class="keywordtype">char</span> literal[LONSTDC];  <span class="comment">// Literal del item</span>
+<a name="l00137"></a>00137         <span class="keywordtype">char</span> tipoitem[2];       <span class="comment">// Tipo de otem ( público o privado)</span>
+<a name="l00138"></a>00138         <span class="keywordtype">char</span> tipoaccion[2];     <span class="comment">// Tipo de accin que ejecuta el item</span>
+<a name="l00139"></a>00139 } ;
+<a name="l00140"></a>00140         
+<a name="l00141"></a>00141 <span class="keyword">struct </span>s_Propiedades {
+<a name="l00142"></a>00142         <span class="keywordtype">char</span> idordenador[16];                            <span class="comment">// Identificador del ordenador</span>
+<a name="l00143"></a>00143         <span class="keywordtype">char</span> nombreordenador[64];                <span class="comment">// Nombre del ordenador</span>
+<a name="l00144"></a>00144         <span class="keywordtype">char</span> idaula[16];                                                                <span class="comment">// Identificador del aula</span>
+<a name="l00145"></a>00145         <span class="keywordtype">char</span> servidorhidra[64];                         <span class="comment">// IP  del servidor HUDRA</span>
+<a name="l00146"></a>00146         <span class="keywordtype">char</span> puerto[16];                                                                <span class="comment">// Puerto</span>
+<a name="l00147"></a>00147         <span class="keywordtype">char</span> iprepo[16];                                                                <span class="comment">// Direción IP repositorio     </span>
+<a name="l00148"></a>00148         <span class="keywordtype">char</span> puertorepo[16];                                                            <span class="comment">// Puerto       </span>
+<a name="l00149"></a>00149         <span class="keywordtype">char</span> idperfilhard[16];                                  <span class="comment">// Identificador del perfil hardware</span>
+<a name="l00150"></a>00150         <span class="keywordtype">char</span> IPlocal[16];                                               <span class="comment">// Ip local</span>
+<a name="l00151"></a>00151 } Propiedades;    <span class="comment">// Estructura con los datos del odenador</span>
+<a name="l00152"></a>00152         
+<a name="l00153"></a>00153 <span class="keyword">struct </span>s_Particiones{
+<a name="l00154"></a>00154         <span class="keywordtype">char</span> tiposo[64];                                <span class="comment">// Tipo de sistema operativo </span>
+<a name="l00155"></a>00155         <span class="keywordtype">char</span> tipopart[16];                      <span class="comment">// Tipo de particin</span>
+<a name="l00156"></a>00156         <span class="keywordtype">char</span> tamapart[16];              <span class="comment">// Tamao de la particin</span>
+<a name="l00157"></a>00157         <span class="keywordtype">char</span> numpart[5];                <span class="comment">// Nmero de la particin</span>
+<a name="l00158"></a>00158         <span class="keywordtype">char</span> nombreso[64];    <span class="comment">// Nombre del S.O.</span>
+<a name="l00159"></a>00159 };
+<a name="l00160"></a>00160         
+<a name="l00161"></a>00161 <span class="keyword">struct </span>s_Hardware{
+<a name="l00162"></a>00162         <span class="keywordtype">char</span> nemonico[4];                               <span class="comment">// Tipo de sistema operativo </span>
+<a name="l00163"></a>00163         <span class="keywordtype">char</span> tipo[45];                  <span class="comment">// Tipo de hardware</span>
+<a name="l00164"></a>00164         <span class="keywordtype">char</span> codigovalor[256];                  <span class="comment">// Codigo o descripcion</span>
+<a name="l00165"></a>00165 }
+<a name="l00166"></a>00166 ;       
+<a name="l00167"></a>00167 <span class="keyword">struct </span>tiposo {
+<a name="l00168"></a>00168   <span class="keywordtype">char</span> *tipopart;
+<a name="l00169"></a>00169   <span class="keywordtype">char</span> *tiposo;
+<a name="l00170"></a>00170   <span class="keywordtype">char</span> *nombreso;  
+<a name="l00171"></a>00171 };      
+<a name="l00172"></a>00172 <span class="keyword">struct </span>tiposo tiposos[] = {
+<a name="l00173"></a>00173                 {<span class="stringliteral">"BIGDOS"</span>, <span class="stringliteral">"MsDos"</span>,<span class="stringliteral">"MsDos"</span>},
+<a name="l00174"></a>00174                 {<span class="stringliteral">"NTFS"</span>,<span class="stringliteral">"Windows NT Platafom"</span>,<span class="stringliteral">"Windows 2000,XP,2003"</span>},
+<a name="l00175"></a>00175                 {<span class="stringliteral">"FAT32"</span>,<span class="stringliteral">"Windows"</span>,<span class="stringliteral">"Windos 98,SE,Millenium"</span>},                   
+<a name="l00176"></a>00176                 {<span class="stringliteral">"EXT"</span>,<span class="stringliteral">"Extendida"</span>,<span class="stringliteral">"Extendida"</span>},
+<a name="l00177"></a>00177                 {<span class="stringliteral">"EXT3"</span>,<span class="stringliteral">"Linux"</span>,<span class="stringliteral">"Linux"</span>},
+<a name="l00178"></a>00178                 {<span class="stringliteral">"EXT2"</span>,<span class="stringliteral">"Linux"</span>,<span class="stringliteral">"Linux"</span>},       
+<a name="l00179"></a>00179                 {<span class="stringliteral">"VFAT"</span>,<span class="stringliteral">"VFAT"</span>,<span class="stringliteral">"VFAT"</span>}, 
+<a name="l00180"></a>00180                 {<span class="stringliteral">"CACHE"</span>,<span class="stringliteral">"CACHE"</span>,<span class="stringliteral">"CACHE"</span>},                      
+<a name="l00181"></a>00181                 {<span class="stringliteral">"UNKNOWN"</span>,<span class="stringliteral">"UNKNOWN"</span>,<span class="stringliteral">"UNKNOWN"</span>},                        
+<a name="l00182"></a>00182                 {<span class="stringliteral">"EMPTY"</span>,<span class="stringliteral">"Libre"</span>,<span class="stringliteral">"Libre"</span>},
+<a name="l00183"></a>00183                 {<span class="stringliteral">"LINUX-SWAP"</span>,<span class="stringliteral">""</span>,<span class="stringliteral">"Linux-swap"</span>}};
+<a name="l00184"></a>00184                 
+<a name="l00185"></a>00185 <span class="keywordtype">int</span> ntiposo = <span class="keyword">sizeof</span> (tiposos) / <span class="keyword">sizeof</span> (<span class="keyword">struct</span> tiposo);
+<a name="l00186"></a>00186 
+<a name="l00187"></a>00187 <span class="keyword">struct </span>s_Item tbMenu[MAXITEMS];                 <span class="comment">// Tabla con los items del menu</span>
+<a name="l00188"></a>00188 <span class="keywordtype">int</span> contitems;                  <span class="comment">// Contador items del menu</span>
+<a name="l00189"></a>00189         
+<a name="l00190"></a>00190 BOOL PRCCMD;            <span class="comment">// Indicador de comandos interactivos</span>
+<a name="l00191"></a>00191 BOOL CMDPTES;   <span class="comment">// Indicador de comandos pendientes</span>
+<a name="l00192"></a>00192         
+<a name="l00193"></a>00193 <span class="comment">//char modulo[64];      // Nombre de la funcin donde se produce el error</span>
+<a name="l00194"></a>00194 
+<a name="l00195"></a>00195 BOOL aut = <span class="keyword">false</span>; <span class="comment">// Variable para controlar el acceso al menu de administracion</span>
+<a name="l00196"></a>00196 
+<a name="l00197"></a>00197 
+<a name="l00198"></a>00198 <span class="keywordtype">char</span>* tbErrores[]={<span class="stringliteral">"000-Se han generado errores. No se puede continuar la ejecución de este módulo"</span>,\
+<a name="l00199"></a>00199                 <span class="stringliteral">"001-No hay memoria suficiente para el buffer"</span>,\
+<a name="l00200"></a>00200                 <span class="stringliteral">"002-No se puede establecer conexión con el servidor Hidra"</span>,\
+<a name="l00201"></a>00201                 <span class="stringliteral">"003-El fichero especificado no existe o bien no puede crearse o abrirse"</span>,\
+<a name="l00202"></a>00202                 <span class="stringliteral">"004-Comando Error"</span>,\
+<a name="l00203"></a>00203                 <span class="stringliteral">"005-El fichero est vacio"</span>,\
+<a name="l00204"></a>00204                 <span class="stringliteral">"006-Error en la ejecución del fichero autoexec"</span>,\
+<a name="l00205"></a>00205                 <span class="stringliteral">"007-Error en la recuperacion del Menu principal"</span>,\
+<a name="l00206"></a>00206                 <span class="stringliteral">"008-No hay espacio reservado para la cache en este disco"</span>,\
+<a name="l00207"></a>00207                 <span class="stringliteral">"009-Ha ocurrido algún error generando el perfil software"</span>,\
+<a name="l00208"></a>00208                 <span class="stringliteral">"010-IPlocal, NO se ha definido este parámetro"</span>,\
+<a name="l00209"></a>00209                 <span class="stringliteral">"011-IPhidra, NO se ha definido este parámetro"</span>,\
+<a name="l00210"></a>00210                 <span class="stringliteral">"012-Puerto, NO se ha definido este parámetro"</span>,\
+<a name="l00211"></a>00211                 <span class="stringliteral">"013-NO existe fichero de configuración o contiene un error de sintaxis"</span>,\
+<a name="l00212"></a>00212                 <span class="stringliteral">"014-Fallo de sintaxis en los parámetros: Debe especificar -f nombre_del_fichero_de_configuración"</span>,\
+<a name="l00213"></a>00213                 <span class="stringliteral">"015-No se ha podido crear socket para comunicación con el repositorio"</span>,\
+<a name="l00214"></a>00214                 <span class="stringliteral">"016-No se ha podido comunicar con el repositorio"</span>,\
+<a name="l00215"></a>00215                 <span class="stringliteral">"017-No existe Menu principal"</span>,\
+<a name="l00216"></a>00216                 <span class="stringliteral">"018-No se ha podido recuperar la configuración hardware del ordenador"</span>,\
+<a name="l00217"></a>00217                 <span class="stringliteral">"019-El cliente no se ha podido incluir en el sistema por un fallo en la conexión con el Servidor Hidra"</span>,\
+<a name="l00218"></a>00218                 <span class="stringliteral">"020-No se ha podido crear la carpeta en el repositorio"</span>,\
+<a name="l00219"></a>00219                 <span class="stringliteral">"021-Error en el envío de tramas al servidor Hidra"</span>,\
+<a name="l00220"></a>00220                 <span class="stringliteral">"022-Error en la recepción de tramas desde el servidor Hidra"</span>,\
+<a name="l00221"></a>00221                 <span class="stringliteral">"023-Error desconocido"</span>,\
+<a name="l00222"></a>00222                 };              
+<a name="l00223"></a>00223                 
+<a name="l00224"></a>00224 <span class="preprocessor">#define MAXERROR 23             // Error máximo cometido</span>
+<a name="l00225"></a>00225 <span class="preprocessor"></span>
+<a name="l00226"></a>00226 <span class="comment">// Prototipos de funciones</span>
+<a name="l00227"></a>00227 <span class="keywordtype">char</span>* Desencriptar(<span class="keywordtype">char</span> *);
+<a name="l00228"></a>00228 <span class="keywordtype">char</span>* Encriptar(<span class="keywordtype">char</span> *);
+<a name="l00229"></a>00229 <span class="keywordtype">int</span> ValidacionParametros(<span class="keywordtype">int</span>,<span class="keywordtype">char</span>**);
+<a name="l00230"></a>00230 <span class="keywordtype">int</span> CrearArchivoLog(<span class="keywordtype">char</span>*);
+<a name="l00231"></a>00231 <span class="keywordtype">int</span> LeeFileConfiguracion();
+<a name="l00232"></a>00232 <span class="keywordtype">void</span> Log(<span class="keywordtype">char</span>*);
+<a name="l00233"></a>00233 <span class="keywordtype">void</span> UltimoError(<span class="keywordtype">int</span>,<span class="keywordtype">char</span>*);
+<a name="l00234"></a>00234 <span class="keywordtype">void</span> INTROaFINCAD(<span class="keywordtype">char</span>*);
+<a name="l00235"></a>00235 <span class="keywordtype">char</span>* TomaParametro(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00236"></a>00236 <span class="keywordtype">int</span> SplitParametros(<span class="keywordtype">char</span>**,<span class="keywordtype">char</span>*, <span class="keywordtype">char</span>*);
+<a name="l00237"></a>00237 
+<a name="l00238"></a>00238 <span class="keywordtype">int</span> EjecutarScript (<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>* ,<span class="keywordtype">char</span>*,<span class="keywordtype">int</span>);
+<a name="l00239"></a>00239 <span class="keywordtype">char</span>* ReservaMemoria(<span class="keywordtype">int</span>);
+<a name="l00240"></a>00240 
+<a name="l00241"></a>00241 SOCKET TCPConnect(<span class="keywordtype">char</span> *,<span class="keywordtype">char</span>* );
+<a name="l00242"></a>00242 <span class="keywordtype">void</span> TCPClose(SOCKET);
+<a name="l00243"></a>00243 <span class="keywordtype">int</span> AbreConexionTCP(<span class="keywordtype">void</span>);
+<a name="l00244"></a>00244 <span class="keywordtype">void</span> CierraConexionTCP(<span class="keywordtype">void</span>);
+<a name="l00245"></a>00245 <span class="keywordtype">int</span> EnviaTramasHidra(SOCKET,TRAMA*);
+<a name="l00246"></a>00246 <span class="keywordtype">int</span> RecibeTramasHidra(SOCKET,TRAMA*);
+<a name="l00247"></a>00247 <span class="keywordtype">int</span> TCPWrite(SOCKET ,TRAMA*);
+<a name="l00248"></a>00248 <span class="keywordtype">int</span> TCPRead(SOCKET ,TRAMA*);
+<a name="l00249"></a>00249 SOCKET UDPConnect();
+<a name="l00250"></a>00250 <span class="keywordtype">int</span> EnviaTramaRepo(SOCKET,TRAMA*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00251"></a>00251 <span class="keywordtype">int</span> RecibeTramaRepo(SOCKET);
+<a name="l00252"></a>00252 
+<a name="l00253"></a>00253 <span class="keywordtype">long</span> CreateTextFile(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00254"></a>00254 <span class="keywordtype">int</span> ExisteFichero(<span class="keywordtype">char</span>*);
+<a name="l00255"></a>00255 <span class="keywordtype">int</span> RemoveFile(<span class="keywordtype">char</span> *);
+<a name="l00256"></a>00256 <span class="keywordtype">int</span> LoadTextFile(<span class="keywordtype">char</span> *);
+<a name="l00257"></a>00257 
+<a name="l00258"></a>00258 <span class="keywordtype">int</span> ProcesaComandos();
+<a name="l00259"></a>00259 <span class="keywordtype">int</span> DisponibilidadComandos(<span class="keywordtype">int</span>);
+<a name="l00260"></a>00260 <span class="keywordtype">int</span> GestionTramas(TRAMA *);
+<a name="l00261"></a>00261 
+<a name="l00262"></a>00262 <span class="keywordtype">int</span> Cortesia();
+<a name="l00263"></a>00263 <span class="keywordtype">int</span> NoComandosPtes();
+<a name="l00264"></a>00264 <span class="keywordtype">int</span> TomaIPlocal();
+<a name="l00265"></a>00265 <span class="keywordtype">int</span> InclusionClienteHIDRA();
+<a name="l00266"></a>00266 <span class="keywordtype">int</span> RESPUESTA_InclusionClienteHIDRA(TRAMA*);
+<a name="l00267"></a>00267 <span class="keywordtype">int</span> ComandosPendientes(<span class="keywordtype">void</span>);
+<a name="l00268"></a>00268 <span class="keywordtype">int</span> Arrancar(TRAMA *,TRAMA *);
+<a name="l00269"></a>00269 <span class="keywordtype">int</span> Apagar(TRAMA*,TRAMA*);
+<a name="l00270"></a>00270 <span class="keywordtype">int</span> Reiniciar(TRAMA*,TRAMA*);
+<a name="l00271"></a>00271 <span class="keywordtype">int</span> Actualizar();
+<a name="l00272"></a>00272 <span class="keywordtype">int</span> CrearPerfilSoftware(TRAMA*,TRAMA*);
+<a name="l00273"></a>00273 <span class="keywordtype">int</span> CrearPerfil(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00274"></a>00274 <span class="keywordtype">int</span> Nemonico(<span class="keywordtype">char</span>*);
+<a name="l00275"></a>00275 <span class="keywordtype">int</span> RestaurarImagen(TRAMA*,TRAMA*);
+<a name="l00276"></a>00276 <span class="keywordtype">int</span> RestaurandoImagen(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*); 
+<a name="l00277"></a>00277 <span class="keywordtype">int</span> ParticionaryFormatear(TRAMA*,TRAMA*);
+<a name="l00278"></a>00278 <span class="keywordtype">int</span> Particionar(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>* );
+<a name="l00279"></a>00279 <span class="keywordtype">int</span> Particionando(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00280"></a>00280 <span class="keywordtype">int</span> Formatear(<span class="keywordtype">char</span>*,<span class="keywordtype">char</span>*);
+<a name="l00281"></a>00281 <span class="keywordtype">int</span> SetCachePartitionSize(<span class="keywordtype">int</span>);
+<a name="l00282"></a>00282 <span class="keywordtype">int</span> AutoexecClienteHidra(<span class="keywordtype">void</span>);
+<a name="l00283"></a>00283 <span class="keywordtype">char</span>* LeeConfiguracion(<span class="keywordtype">char</span>*);
+<a name="l00284"></a>00284 <span class="keywordtype">char</span>* TomaNomSO(<span class="keywordtype">char</span>*,<span class="keywordtype">int</span>);
+<a name="l00285"></a>00285 <span class="keywordtype">int</span> InventarioHardware(TRAMA *,TRAMA *);
+<a name="l00286"></a>00286 <span class="keywordtype">int</span> TomaConfiguracion(TRAMA *,TRAMA *);
+<a name="l00287"></a>00287 <span class="keywordtype">int</span> RespuestaEjecucionComando(TRAMA* , TRAMA *, <span class="keywordtype">int</span>);
+<a name="l00288"></a>00288 <span class="keywordtype">int</span> ExecShell(TRAMA *,TRAMA *);
+<a name="l00289"></a>00289 <span class="keywordtype">char</span>* URLDecode(<span class="keywordtype">char</span>*);
+</pre></div></div>
+<hr size="1"><address style="text-align: right;"><small>Generado el Mon Jun 15 10:24:00 2009 por&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.5 </small></address>
+</body>
+</html>
