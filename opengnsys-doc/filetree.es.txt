@@ -1,0 +1,62 @@
+
+Estructura de Ficheros de OpenGNSys
+===================================
+
+
+Estructura de directorios de OpenGNSys Client
+---------------------------------------------
+
+/opt/opengnsys
+  bin (ro) - utilidades asociadas.
+  etc (ro) - configuración.
+  images (normal=ro, admin=rw) - imágenes de arranque.
+  init (ro) - scripts de arranque.
+  lib (ro) - librerías de las utilidades.
+    engine/bin (ro) - librerías de funciones del motot de clonación.
+    modules (ro) - módulos extra del kernel.
+  log (rw) - registros de incidencias (enlazado en /var/log/opengnsys).
+
+
+Servicios de OpenGNSys Server:
+------------------------------
+- Syslog - gestión de logs de servidores y clientes.
+- NFS
+- DHCP
+- PXE
+- TFTP
+- Base de datos
+- Servidor de órdenes
+
+
+Estructura de directorios de OpenGNSys Server:
+----------------------------------------------
+
+/opt/opengnsys
+  bin - binarios del servidor.
+  client - exporta por NFS la estructura de directorios del cliente.
+  etc - configuración (enlazado en /etc/opengnsys).
+  lib - librerías de las utilidades.
+  log - registros de incidencias (enlazado en /var/log/opengnsys).
+  tftpboot - enlace simbólico a /var/lib/tftpboot (o donde corresponda).
+
+NOTA: páginas de manuales y documentación se copian a los directorios estándares del sistema operativo.
+
+
+Estructura de directorios de OpenGNSys Repository Manager
+---------------------------------------------------------
+
+/opt/opengnsys
+  bin - binarios del servidor.
+  etc - configuración (enlazado en /etc/opengnsys).
+  images - imágenes de sistemas de archivos.
+  log - registros de incidencias (enlazado en /var/log/opengnsys).
+
+
+
+Relación NFS
+------------
+Server: exporta /opt/opengnsys/client -> Client: importa /opt/opengnsys
+Server: exporta /opt/opengnsys/log/client -> Client: importa /opt/opengnsys/log
+RepoMan: exporta /opt/opengnsys/images -> Client: importa /opt/opengnsys/images
+
+
