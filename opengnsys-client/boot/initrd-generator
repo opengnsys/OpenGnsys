@@ -1,0 +1,219 @@
+#!/bin/bash
+
+DIST="jaunty"
+URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-i386/current/images/netboot/ubuntu-installer/i386
+if [ "$TMP" = "" ] ; then TMP=/tmp ; fi
+TMPINITRD=$TMP/initrd
+NEWROOT=$TMPINITRD/newroot
+DEST=$PWD
+LINUX=1
+
+# Comprueba los argumentos pasados para modificar los valores por defecto
+function parsearParametros
+{
+    #TODO
+    sleep 1
+}
+
+function descargar
+{
+    # Creamos directorio temporal y nos vamos alli
+    mkdir -p $TMPINITRD
+    cd $TMPINITRD
+
+    # Borramos el initrd anterior si existe
+    if [ -f initrd.gz ]; then rm initrd.gz; fi
+
+    # Nos lo descargamos
+    wget $URL/initrd.gz
+    if [ $? = 1 ] ; then
+        echo Error no se ha podido descarga el initrd.gz
+        exit -1
+    fi
+
+    # Si la opcion de descargar el nucleo tambien esta habilitado nos lo descargamos
+    if [ $LINUX = 1 ] ; then
+        if [ -f linux ] ; then
+            rm linux
+        fi
+        wget $URL/linux
+        if [ $? = 1 ] ; then
+            echo Error no se ha podido descargar el nucleo linux
+            exit -1
+        fi
+    fi
+}
+
+# Descomprimimos el initrd
+function descomprimir
+{
+    if [ ! -f  $TMPINITRD/initrd.gz ]; then
+        echo No se encuentra el initrd.gz
+        exit -1
+    fi
+
+    if [ -f $NEWROOT ];then
+    	rm -rf $NEWROOT
+    fi
+
+    mkdir -p $NEWROOT
+    cd $NEWROOT
+
+    gzip -dc $TMPINITRD/initrd.gz | cpio -id
+}
+
+# Borrar todos los scripts del directorio actual
+function borrarScripts
+{
+    # Primero los hacemos con los enlaces para que no se produzcan errores si borramos a lo que apunta primero
+    for i in `ls -F -1 | grep @ | awk -F @ '{print $1}'`; do
+        if [ $(file $i -L | grep "shell script" | wc -l) -gt 0 ]; then
+            rm $i
+        fi
+    done
+
+    # Ahora lo hacemos con todos los ejecutables
+    for i in `ls`; do
+        if [ $(file $i | grep "shell script" | wc -l) -gt 0 ]; then
+            rm $i
+        fi
+    done
+}
+
+# Borra todos los ejecutables que enlacen con la libreria debian-installer
+function borrarEjecutablesDebinstall
+{
+    # Primero lo hacemos con los enlaces para que no se produzcan errores si borramos a lo que apunta primero
+    for i in `ls -F -1 | grep @ | awk -F @ '{print $1}'`; do
+        if [ $(ldd $i | grep -e libdebian-installer -e libdebconf | wc -l) -gt 0 ]; then
+            rm $i
+        fi
+    done
+
+    # Ahora lo hacemos con todos los ejecutables
+    for i in `ls`; do
+        if [ $(ldd $i | grep -e libdebian-installer -e libdebconf | wc -l) -gt 0 ]; then
+            rm $i
+        fi
+    done
+}
+
+# Elimina todos los fichero innecesarios del initrd
+function purgarFicherosDebian
+{
+    mkdir -p $NEWROOT
+    cd $NEWROOT
+
+    rm init
+
+    # Pasamos por todos los directorios y vamos borrando lo innecesario
+    cd bin/
+    borrarScripts
+    borrarEjecutablesDebinstall
+
+    cd ../etc/
+    rm -rf cdebconf.conf default-release lsb-release preseed_aliases udebs-source
+
+    cd ../lib/
+    rm -rf chroot-setup.sh debian-installer* kickseed main-menu.d preseed libdebian-installer*
+
+    cd ../sbin/
+    borrarScripts
+    borrarEjecutablesDebinstall
+
+    cd ../usr/bin/
+    borrarScripts
+    borrarEjecutablesDebinstall
+
+    cd ../lib/
+    rm -rf base-installer.d debian-installer finish-install.d libdebconfclient* cdebconf fetch-url net-retriever post-base-installer.d
+
+    # Solo queda un enlace simbolico que ya no apunta a nada
+    cd ../sbin/
+    rm -rf *
+
+    cd ../share/
+    rm -rf debconf keyrings save-logs
+
+    cd ../../var/
+    rm -rf cache/anna/ spool/kickseed/
+
+    cd lib/
+    rm -rf apt-install cdebconf dpkg
+
+    cd ../..
+}
+
+# Le agrega los archivos necesarios para que arranque de otra manera
+function agregarNuevoArranque
+{
+    cd $NEWROOT
+
+    cd etc/
+
+    # Script inicial que ejecuta el resto de scripts de /etc/rcS.d/
+    #echo "#! /bin/sh" >> rc
+    #echo "for script in /etc/rcS.d/S[0-9][0-9]*; do if [ -x $script ]; then $script fi done" >> rc
+    #chmod +x rc
+
+    # Agregamos para que ejecute el script anterior lo primero
+    #echo "::sysinit:/etc/init.d/rc" > inittab
+    # Que ejecute el fichero /init cuando se reinicio el proceso init
+    #echo "::restart:/sbin/init" >> inittab
+    # Que funciona el control alt supr
+    #echo "::ctrlaltdel:/sbin/reboot" >> inittab
+
+    # Cosas que hacer si se apaga
+    #echo "::shutdown:/bin/umount -a -r" >> inittab
+    #echo "::shutdown:/sbin/swapoff -a" >> inittab
+
+    # Ahora agregamos los scripts a rcS.d
+    cd rcS.d
+
+    # Primero ejecutamos el dhcp
+    echo "mkdir -p /var/state/dhcp" > S01dhclient
+    echo "/sbin/dhclient" >> S01dhclient
+    chmod +x S01dhclient
+
+    # Montamos NFS y ejecutamos el script con nombre nuestra ip
+    echo "DHCP_SERVER=\`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" > S02montarnfs
+    echo "IP=\`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> S02montarnfs
+    echo "mkdir -p /opt/opengnsys" >> S02montarnfs
+    echo "mount -t nfs -onolock \$DHCP_SERVER:/opt/opengnsys/client/ /opt/opengnsys/" >> S02montarnfs
+    echo "/opt/opengnsys/init/\$IP.sh" >> S02montarnfs
+    echo "sh" >> S02montarnfs
+    #echo "sh" >> S02montarnfs
+    chmod +x S02montarnfs
+
+    # Si el script anterior termina sin reinicar apagamos nosotros
+    echo "halt" > S99halt
+    chmod +x S99halt
+}
+
+function comprimir
+{
+    cd $NEWROOT
+
+    if [ $? = 1 ] ; then
+        exit -1
+    fi
+
+    find ./ | cpio -H newc -o > $TMPINITRD/new-initrd
+    cd $TMPINITRD
+    gzip -9 new-initrd
+}
+
+function finalizar
+{
+    mv $TMPINITRD/new-initrd.gz $DEST/initrd.gz
+    mv $TMPINITRD/linux $DEST/linux
+    cd $ACTUALPWD
+}
+
+parsearParametros
+descargar
+descomprimir
+#purgarFicherosDebian
+agregarNuevoArranque
+comprimir
+finalizar
