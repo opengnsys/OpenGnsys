@@ -1,27 +1,73 @@
 #include "mainwindow.h"
 #include <QtWebKit>
+#include <QStringList>
+#include <QWebView>
 #include <QLayout>
 #include <QtDebug>
 #include <QWebPage>
 #include <QProcess>
+#include <QTextEdit>
 
 #define BUFFERSIZE 2048
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWebView(parent),process(new QProcess(this))
+    : QWidget(parent),web(new QWebView()),text(new QTextEdit()),
+      layout(new QVBoxLayout()),process(new QProcess(this)),
+      dirlog(QString("")),server(QString(""))
 {
-    load(QUrl("/home/alex/hola.html"));
-    page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(page(),SIGNAL(linkClicked(const QUrl&)),this,SLOT(slotLinkHandle(const QUrl&)));
+    // Graphic
+    layout->addWidget(web);
+    layout->addWidget(text);
+    setLayout(layout);
+
+    showFullScreen();
+
+    text->insertPlainText("helllo");
+
+    web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    connect(web->page(),SIGNAL(linkClicked(const QUrl&)),this,
+            SLOT(slotLinkHandle(const QUrl&)));
+
+    // Get all environment variables
+    QStringList enviroment=QProcess::systemEnvironment();
+
+    // Look for OGLOG 
+    QStringList listlog=enviroment.filter("OGLOG=");
+    if(listlog.isEmpty())
+        dirlog="";
+    else
+    {
+        dirlog=listlog.first();
+        dirlog=(dirlog.split("="))[1];
+    }
+
+    // Look for SERVER
+    QStringList listserver=enviroment.filter("SERVER=");
+    if(listserver.isEmpty())
+        server="";
+    else
+    {
+        server=listserver.first();
+        server=(server.split("="))[1];
+    }
+
+    QStringList arguments=QCoreApplication::arguments();
+    if(arguments.size()>1)
+        web->load(QUrl(arguments[1]));
+    else
+        web->load(QUrl("/home/alex/hola.html"));
+
 
     connect(process,SIGNAL(started()),this,SLOT(slotStarted()));
     connect(process,SIGNAL(finished(int,QProcess::ExitStatus)),
             this,SLOT(slotFinished(int,QProcess::ExitStatus)));
 
-    connect(process,SIGNAL(error(QProcess::ProcessError)),this,SLOT(slotError(QProcess::ProcessError)));
+    connect(process,SIGNAL(error(QProcess::ProcessError)),
+            this,SLOT(slotError(QProcess::ProcessError)));
 
     connect(process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotOutput()));
-    connect(process,SIGNAL(readyReadStandardError()),this,SLOT(slotErrorOutput()));
+    connect(process,SIGNAL(readyReadStandardError()),
+            this,SLOT(slotErrorOutput()));
 
 }
 
@@ -44,7 +90,7 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     else
     {
         qDebug() << "Load URL: " << url <<endl;
-        load(url);
+        web->load(url);
     }
 }
 
