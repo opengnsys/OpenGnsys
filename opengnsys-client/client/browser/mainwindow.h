@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define PROTOCOL "command://"
+#define PROTOCOL "command:"
 
 #include <QWidget>
 #include <QProcess>
@@ -25,13 +25,16 @@ class MainWindow : public QWidget
     public slots:
         // Funcion que maneja los links
         void slotLinkHandle(const QUrl& url);
+        void slotWebLoadStarted();
+        void slotWebLoadFinished(bool ok);
+        void slotWebLoadProgress(int progress);
 
         // Funciones que manejan cada vez que el proceso hace algo
-        void slotStarted();
-        void slotFinished(int code,QProcess::ExitStatus status);
-        void slotError(QProcess::ProcessError error);
-        void slotOutput();
-        void slotErrorOutput();
+        void slotProcessStarted();
+        void slotProcessFinished(int code,QProcess::ExitStatus status);
+        void slotProcessError(QProcess::ProcessError error);
+        void slotProcessOutput();
+        void slotProcessErrorOutput();
 
     protected:
         QWebView *web;

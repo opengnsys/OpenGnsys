@@ -22,11 +22,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     showFullScreen();
 
-    text->insertPlainText("helllo");
+    text->setReadOnly(true);
 
     web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+
+    // Web signals
     connect(web->page(),SIGNAL(linkClicked(const QUrl&)),this,
             SLOT(slotLinkHandle(const QUrl&)));
+    connect(web,SIGNAL(loadStarted()),this,SLOT(slotWebLoadStarted()));
+    connect(web,SIGNAL(loadFinished(bool)),this,SLOT(slotWebLoadFinished(bool)));
+    connect(web,SIGNAL(loadProgress(int)),this,SLOT(slotWebLoadProgress(int)));
 
     // Get all environment variables
     QStringList enviroment=QProcess::systemEnvironment();
@@ -52,22 +57,20 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     QStringList arguments=QCoreApplication::arguments();
-    if(arguments.size()>1)
-        web->load(QUrl(arguments[1]));
-    else
-        web->load(QUrl("/home/alex/hola.html"));
+    web->load(QUrl(arguments[1]));
 
 
-    connect(process,SIGNAL(started()),this,SLOT(slotStarted()));
+    // Process signals
+    connect(process,SIGNAL(started()),this,SLOT(slotProcessStarted()));
     connect(process,SIGNAL(finished(int,QProcess::ExitStatus)),
-            this,SLOT(slotFinished(int,QProcess::ExitStatus)));
+            this,SLOT(slotProcessFinished(int,QProcess::ExitStatus)));
 
     connect(process,SIGNAL(error(QProcess::ProcessError)),
-            this,SLOT(slotError(QProcess::ProcessError)));
+            this,SLOT(slotProcessError(QProcess::ProcessError)));
 
-    connect(process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotOutput()));
+    connect(process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotProcessOutput()));
     connect(process,SIGNAL(readyReadStandardError()),
-            this,SLOT(slotErrorOutput()));
+            this,SLOT(slotProcessErrorOutput()));
 
 }
 
@@ -94,35 +97,60 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     }
 }
 
-void MainWindow::slotStarted()
+void MainWindow::slotWebLoadStarted()
+{
+    qDebug()<<"Empieza la carga de la web";
+}
+
+void MainWindow::slotWebLoadProgress(int progress)
+{
+    qDebug()<<"Progress "<<progress;
+}
+
+void MainWindow::slotWebLoadFinished(bool ok)
+{
+    if(ok)
+        qDebug()<<"Descarga finalizada satisfactoriamente";
+    else
+        qDebug()<<"Error accediendo a la web";
+}
+
+void MainWindow::slotProcessStarted()
 {
     qDebug()<<"Proceso inicializado"<<endl;
 }
 
-void MainWindow::slotOutput()
+void MainWindow::slotProcessOutput()
 {
     qDebug()<<"Output"<<endl;
     process->setReadChannel(QProcess::StandardOutput);
     char buf[BUFFERSIZE];
     while((process->readLine(buf,BUFFERSIZE) > 0))
     {
-        qDebug()<<buf;
+        text->insertPlainText(buf);
+        /*
+        QString str="<b>";
+        str+=buf;
+        str+="</b>";
+        text->insertHtml(str);
+        */
         output<<buf;
     }
 }
 
-void MainWindow::slotErrorOutput()
+void MainWindow::slotProcessErrorOutput()
 {
     qDebug()<<"ErrorOutput"<<endl;
     process->setReadChannel(QProcess::StandardError);
     char buf[BUFFERSIZE];
     while((process->readLine(buf,BUFFERSIZE) > 0))
     {
+        text->insertPlainText(buf);
         errors<<buf;
     }
 }
 
-void MainWindow::slotFinished(int code,QProcess::ExitStatus status)
+void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
 {
     if(status==QProcess::NormalExit)
     {
@@ -137,7 +165,7 @@ void MainWindow::slotFinished(int code,QProcess::ExitStatus status)
     }
 }
 
-void MainWindow::slotError(QProcess::ProcessError error)
+void MainWindow::slotProcessError(QProcess::ProcessError error)
 {
     switch(error)
     {
