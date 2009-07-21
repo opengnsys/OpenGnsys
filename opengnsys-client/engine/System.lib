@@ -1,0 +1,46 @@
+#!/bin/bash
+#/**
+#@file     System.lib
+#@class    System
+#@brief    Funciones básicas del sistema.
+#@version  0.9
+#@warning  License: GNU GPLv3+
+#*/
+
+function ogEcho {
+#/**
+#@function ogEcho color message...
+#@brief    Muestra mensajes en consola.
+#@param \c str_color:   código de color
+#@param \c str_message: mensaje (puede recibir más de 1 parámetro.
+#@return   Mensaje mostrado.
+#@note     Primera versión para OpenGNSys
+#*/
+
+#/// En pruebas.
+echo -n "Color: $1"
+shift
+echo "$*"
+}
+
+
+function ogRaiseError {
+#/**
+#@function ogRaiseError int_errcode ["str_errmessage"]
+#@brief    Devuelve el mensaje y el código de error correspondiente.
+#@param \c errcode código de error.
+#@param \c str_errmessage mensaje complementario de error.
+#@return   Mensaje de error.
+#@exception Código de error.
+#@warning  No definidas
+#@note     Primera versión para OpenGNSys
+#@author   Ramon Gomez Universidad Sevilla
+#@date     2009-07-20
+#*/ 
+
+#/// En pruebas.
+echo "${FUNCNAME[1]}: error: $1.$2."
+return $1
+}
+
+

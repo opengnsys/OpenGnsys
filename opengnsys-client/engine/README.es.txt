@@ -1,6 +1,6 @@
 
-OpenGNSys Client Cloning Engine  README.txt
-===========================================
+OpenGNSys Client Cloning Engine  README
+=======================================
 
 En este directorio se incluirán las funciones del motor de clonación de
 OpenGNSys y la documentación asociada.

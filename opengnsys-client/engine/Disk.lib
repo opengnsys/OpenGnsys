@@ -1,0 +1,64 @@
+#!/bin/bash
+#/**
+#@file    Disk.lib
+#@class   Disk
+#@brief   Funciones para gestión de discos.
+#@version 0.9
+#@warning License: GNU GPLv3+
+#*/
+
+function ogDiskToDev {
+#/**
+#@function ogDiskToDev [int_ndisk [int_npartition]]
+#@brief    Devuelve la equivalencia entre el nº de orden del dispositivo (dicso o partición) y el nombre de fichero de dispositivo correspondiente.
+#@param \c ndisk:      nº de orden del disco
+#@param \c npartition: nº de orden de la partición
+#@return   Para 0 parametros: Devuelve los nombres de ficheros  de los dispositivos sata/ata/usb linux encontrados.
+#@return   Para 1 parametros: Devuelve la ruta del disco duro indicado.
+#@return   Para 2 parametros: Devuelve la ruta de la particion indicada.
+#@exception Formato incorrecto.
+#@exception Dispositivo no detectado.
+#@note     Primera versión para OpenGNSys
+#@author   Ramon Gomez Universidad Sevilla
+#@date     2009-07-20
+#*/
+
+#/// Variables locales
+local DISCOS DISCO PART
+
+#/// Listar dispositivo para los discos duros (tipos: 3=hd, 8=sd).
+DISCOS=$(awk '($1==3 || $1==8) && $4!~/[0-9]/ {printf "/dev/%s ",$4}' /proc/partitions)
+
+#/// Mostrar salidas segun el número de parametros.
+case $# in
+     0) # Muestra todos los discos, separados por espacios.
+	echo "$DISCOS"
+	;;
+     1) # Error si el parametro no es un digito.
+	[ -n "${1/[1-9]/}" ] && ogRaiseError $OG_ERR_FORMAT
+	DISCO=$(echo $DISCOS | awk -v n=$1 '{print $n}')
+	# Error si no es fichero de bloques.
+	[ -b "$DISCO" ] || ogRaiseError $OG_ERR_NOTFOUND "$1"
+	echo "$DISCO"
+	;;
+     2) # Error si los 2 parametros no son digitos.
+	[ -n "${1/[1-9]/}" -o -n "${2/[1-9]/}" ] && ogRaiseError $OG_ERR_FORMAT
+	PART=$(echo $DISCOS | awk -v n=$1 '{print $n}')$2
+	# Error si no es fichero de bloques.
+	[ -b "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2"
+	echo "$PART"
+	;;
+     *) # Formato erroneo.
+	ogRaiseError $OG_ERR_FORMAT
+esac
+}
+
+
+function ogListPartitions {
+#/**
+#@function ogListPartitions int_ndisk
+#@brief    Lista las particiones definidas en un disco.
+#@param \c ndisk: nº de orden del disco
+#*/
+}
+

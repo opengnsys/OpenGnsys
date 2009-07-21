@@ -16,8 +16,8 @@ Librería o clase Install:
 - ogLoadEnviron			(hidraEnviron)
 
 Librería o clase System:
-- ogHardwareInfo		(InfoHardware, DetectDevices, hidraHardwareInfo)
 - ogEcho			(Msg)
+- ogRaiseError			(?)
 
 Librería o clase Disk:
 - ogUpdatePartitionTable	(UpdateDisk)
@@ -53,7 +53,7 @@ Librería o clase FileSystem:
 - ogMountCache, ogMount		(MountCache, hidraMountCache)
 - ogUnmountCache, ogUnmount	(UmountCache, hidraUnmountCache)
 
-Librería o clase Deploy:
+Librería o clase Image:
 - ogCreateImage			(CreateImageFromPartition, hidraCreateImageFromPartition)
 - ogRestoreImage		(RestorePartitionFromImage, RestorePartitionFromPartition, hidraRestorePartitionFromImage)
 - ogCreateTorrent		(CreateTorrentFromImage)
@@ -63,6 +63,14 @@ Librería o clase Boot:
 - ogBoot			(HDBoot, BootLinuxEX, hidraBoot)
 - ogInstallGrub			(InstallGrub)
 - ogConfigureGrub		(ConfGrub)
+- ogGetWindowsName		(hidraGetWindowsName)
+- ogSetWindowsName		(hidraSetWindowsName)
+
+Librería o clase Inventory:
+- ogListHardwareInfo		(InfoHardware, DetectDevices, hidraHardwareInfo)
+- ogGetOsVersion			(hidraOSVersion)
+- ogGetLinuxSoftware		(hidraLinuxSoftware)
+- hogGetWindowsSoftware		(idraWindowsSoftware)
 
 Librería o clase File:
 - ogGetPath			(ConnectToRepo, hidraPath)
@@ -190,19 +198,14 @@ hidraDeleteFile
 hidraEACServer 
 hidraFSCheck 
 hidraGetRegistryKey 
-hidraGetWindowsName 
 hidraImageSize 
 hidraLinuxBootParameters 
-* hidraLinuxSoftware 
 hidraListRegistryKeys 
-* hidraOSVersion 
 hidraPoweroff 
 hidraReboot 
 hidraSetPartitionSize 
 hidraSetRegistryKey 
-hidraSetWindowsName 
 hidraUpdateCache 
-* hidraWindowsSoftware
 
 
 Funciones de configuracion Unizar
