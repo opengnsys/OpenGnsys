@@ -7,7 +7,8 @@
 #@warning  License: GNU GPLv3+
 #*/
 
-function ogEcho {
+
+function ogEcho () {
 #/**
 #@function ogEcho color message...
 #@brief    Muestra mensajes en consola.
@@ -18,13 +19,13 @@ function ogEcho {
 #*/
 
 #/// En pruebas.
-echo -n "Color: $1"
+echo "Color: $1"
 shift
 echo "$*"
 }
 
 
-function ogRaiseError {
+function ogRaiseError () {
 #/**
 #@function ogRaiseError int_errcode ["str_errmessage"]
 #@brief    Devuelve el mensaje y el código de error correspondiente.
@@ -34,12 +35,20 @@ function ogRaiseError {
 #@exception Código de error.
 #@warning  No definidas
 #@note     Primera versión para OpenGNSys
-#@author   Ramon Gomez Universidad Sevilla
-#@date     2009-07-20
+#@author   Ramon Gomez, ETSII Universidad Sevilla
+#@date     2009-07-21
 #*/ 
 
 #/// En pruebas.
-echo "${FUNCNAME[1]}: error: $1.$2."
+local MSG
+
+case "$1" in
+     $OG_ERR_FORMAT)	MSG="$MSG_ERR_FORMAT" ;;
+     $OG_ERR_NOTFOUND)	MSG="$MSG_ERR_NOTFOUND $2" ;;
+     *)			MSG="$MSG_ERR_GENERIC" ;;
+esac
+
+echo "${FUNCNAME[${#FUNCNAME[*]}-1]}: $MSG" >&2
 return $1
 }
 

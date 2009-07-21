@@ -1,0 +1,53 @@
+#!/bin/bash
+#/**
+#@file    FileSystem.lib
+#@class   FileSystem
+#@brief   Funciones para gestión de sistemas de archivos.
+#@version 0.9
+#@warning License: GNU GPLv3+
+#*/
+
+
+function ogGetFsType () {
+#/**
+#@function ogGetFsType int_ndisk int_npartition
+#@brief    Devuelve el mnemonico con el tipo de sistema de archivos.
+#@param \c ndisk:      nº de orden del disco
+#@param \c npartition: nº de orden de la partición
+#@return   Mnemonico
+#@note 	   Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234], BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@exception Formato incorrecto.
+#@exception Disco o particion no corresponden con un dispositivo.
+#@version  0.9 - Primera adaptación para OpenGNSys.
+#@author   Ramon Gomez, ETSII Universidad de Sevilla
+#@date     2009/07/21
+#*/
+
+#/// Error si no se reciben 2 parametros.
+[ $# != 2 ] && ogRaiseError $OG_ERR_FORMAT
+
+#/// Detectar id. de tipo de particion y codificar al mnemonico.
+local ID=$(ogGetPartitionId $1 $2) || return $?
+case "$ID" in
+     0) 	TIPO="EMPTY" ;;
+     5) 	TIPO="EXTENDED" ;;
+     [6e])	TIPO="BIGDOS" ;;
+     7) 	TIPO="NTFS" ;;
+     [bc])	TIPO="FAT32" ;;
+     1[6e])	TIPO="HBIGDOS" ;;
+     17)	TIPO="HNTFS" ;;
+     1[bc])	TIPO="HFAT32" ;;
+     82)	TIPO="LINUX-SWAP" ;;
+     83)	TIPO="$(parted -s $DISCO print | awk -v var=$NPART '{if ($1==var) {print toupper($6)}}')"
+		TIPO=${TIPO:-"EXT3"}
+		;;
+     8e)	TIPO="LINUX-LVM" ;;
+     a7)	TIPO="CACHE" ;;
+     fd)	TIPO="$(parted -s $DISCO print | awk -v var=$NPART '{if ($1==var) {print toupper($6)}}')"
+		TIPO=RAID-${TIPO:-"EXT3"}
+		;;
+     *) 	TIPO="UNKNOWN" ;;
+esac
+echo $TIPO
+}
+

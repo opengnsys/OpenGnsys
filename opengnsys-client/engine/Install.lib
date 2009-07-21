@@ -8,15 +8,16 @@
 #*/
 
 
+function ogLoadEnviron () {
 #/**
 #@function ogLoadEnviron
 #@brief    Carga las variables de entorno genéricas.
 #@param    ninguno
 #@return   nada
-#@author   Ramon Gomez, ETSII Univ. Sevilla
+#@author   Ramon Gomez, ETSII Universidad de Sevilla
 #@date     2009-07-20
 #*/
-function ogLoadEnviron {
+
 #/// Directorios del projecto OpenGNSys.
 PROJECT=${PROJECT:-"/var/opengnsys"}
 if [ -d $PROJECT ]; then
@@ -31,13 +32,13 @@ if [ -d $PROJECT ]; then
 fi
 
 #/// Declaración de códigos de error.
-OG_ERR_FORMAT=1	#/// Formato de ejecucion incorrecto.
+OG_ERR_FORMAT=1		#/// Formato de ejecucion incorrecto.
 OG_ERR_NOTFOUND=2	#/// Fichero o dispositivo no encontrado.
 OG_ERR_PARTITION=3	#/// Error en particion de disco.
 OG_ERR_NOTEXEC=4	#/// Programa o funcion no ejecutable.
-OG_ERR_NOTOS=5	#/// Sin sistema operativo.
-OG_ERR_LOCKED=6	#/// Particion o fichero bloqueado.
-export OG_ERR_FORMAT OG_ERR_NOTFOUND
+OG_ERR_NOTOS=5		#/// Sin sistema operativo.
+OG_ERR_LOCKED=6		#/// Particion o fichero bloqueado.
+export OG_ERR_FORMAT=1 OG_ERR_NOTFOUND=2
 }
 
 

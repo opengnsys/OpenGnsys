@@ -2,12 +2,12 @@
 #/**
 #@file    Disk.lib
 #@class   Disk
-#@brief   Funciones para gestión de discos.
+#@brief   Funciones para gestión de discos y particiones.
 #@version 0.9
 #@warning License: GNU GPLv3+
 #*/
 
-function ogDiskToDev {
+function ogDiskToDev () {
 #/**
 #@function ogDiskToDev [int_ndisk [int_npartition]]
 #@brief    Devuelve la equivalencia entre el nº de orden del dispositivo (dicso o partición) y el nombre de fichero de dispositivo correspondiente.
@@ -19,7 +19,7 @@ function ogDiskToDev {
 #@exception Formato incorrecto.
 #@exception Dispositivo no detectado.
 #@note     Primera versión para OpenGNSys
-#@author   Ramon Gomez Universidad Sevilla
+#@author   Ramon Gomez, ETSII Universidad Sevilla
 #@date     2009-07-20
 #*/
 
@@ -54,11 +54,27 @@ esac
 }
 
 
-function ogListPartitions {
+function ogGetPartitionId () {
 #/**
-#@function ogListPartitions int_ndisk
-#@brief    Lista las particiones definidas en un disco.
-#@param \c ndisk: nº de orden del disco
-#*/
+#@function ogGetPartitionId int_ndisk int_npartition
+#@brief    Devuelve el mnemonico con el tipo de sistema de archivos.
+#@param \c ndisk:      nº de orden del disco
+#@param \c npartition: nº de orden de la partición
+#@return   Identificador de tipo de partición.
+#@exception Formato incorrecto.
+#@exception Disco o particion no corresponden con un dispositivo.
+#@version  0.9 - Primera versión compatible con OpenGNSys.
+#@author   Ramon Gomez, ETSII Universidad de Sevilla
+#@date     25/03/2009
+
+local DISK PART
+
+#/// Error si no se reciben 2 parametros.
+[ $# != 2 ] && ogRaiseError $OG_ERR_FORMAT
+
+#/// Detectar id. de tipo de particion y codificar al mnemonico.
+DISK=$(ogDiskToDev $1) || return $?
+PART=$(ogDiskToDev $1 $2) || return $?
+echo $(sfdisk --id $DISK $2 2>/dev/null)
 }
 
