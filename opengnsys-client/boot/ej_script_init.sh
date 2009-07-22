@@ -17,6 +17,10 @@ mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/images $OGIMAGES
 export PATH=$OGBIN:$OGLIB/engine/bin:$PATH
 export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
+insmod $OGLIB/modules/psmouse.ko
+mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/
+ln -s $OGLIB/fonts /usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts
+
 . ATA.lib
 
 bash

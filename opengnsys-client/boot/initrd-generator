@@ -7,6 +7,8 @@ TMPINITRD=$TMP/initrd
 NEWROOT=$TMPINITRD/newroot
 DEST=$PWD
 LINUX=1
+CHROOTINITSCRIPT=/oginit
+INITSCRIPT=$NEWROOT$CHROOTINITSCRIPT
 
 # Comprueba los argumentos pasados para modificar los valores por defecto
 function parsearParametros
@@ -53,7 +55,7 @@ function descomprimir
     fi
 
     if [ -f $NEWROOT ];then
-    	rm -rf $NEWROOT
+	rm -rf $NEWROOT
     fi
 
     mkdir -p $NEWROOT
@@ -150,6 +152,9 @@ function agregarNuevoArranque
     cd $NEWROOT
 
     cd etc/
+    #echo "s/debian-installer$/${OGINIT//\//\\\/}/"
+    #cat inittab | sed "s/debian-installer$/${OGINIT//\//\\\/}/" > inittab
+    perl -i -p -e "s/\/sbin\/debian-installer\$/${CHROOTINITSCRIPT//\//\/}/" inittab
 
     # Script inicial que ejecuta el resto de scripts de /etc/rcS.d/
     #echo "#! /bin/sh" >> rc
@@ -167,27 +172,20 @@ function agregarNuevoArranque
     #echo "::shutdown:/bin/umount -a -r" >> inittab
     #echo "::shutdown:/sbin/swapoff -a" >> inittab
 
-    # Ahora agregamos los scripts a rcS.d
-    cd rcS.d
-
     # Primero ejecutamos el dhcp
-    echo "mkdir -p /var/state/dhcp" > S01dhclient
-    echo "/sbin/dhclient" >> S01dhclient
-    chmod +x S01dhclient
+    echo "#! /bin/sh" > $INITSCRIPT
+    echo "set -e" >> $INITSCRIPT
+    echo "mkdir -p /var/state/dhcp" >> $INITSCRIPT
+    echo "/sbin/dhclient" >> $INITSCRIPT
 
     # Montamos NFS y ejecutamos el script con nombre nuestra ip
-    echo "DHCP_SERVER=\`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" > S02montarnfs
-    echo "IP=\`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> S02montarnfs
-    echo "mkdir -p /opt/opengnsys" >> S02montarnfs
-    echo "mount -t nfs -onolock \$DHCP_SERVER:/opt/opengnsys/client/ /opt/opengnsys/" >> S02montarnfs
-    echo "/opt/opengnsys/init/\$IP.sh" >> S02montarnfs
-    echo "sh" >> S02montarnfs
-    #echo "sh" >> S02montarnfs
-    chmod +x S02montarnfs
+    echo "DHCP_SERVER=\`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> $INITSCRIPT
+    echo "IP=\`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> $INITSCRIPT
+    echo "mkdir -p /opt/opengnsys" >> $INITSCRIPT
+    echo "mount -t nfs -onolock \$DHCP_SERVER:/opt/opengnsys/client/ /opt/opengnsys/" >> $INITSCRIPT
+    echo "/opt/opengnsys/init/\$IP.sh" >> $INITSCRIPT
 
-    # Si el script anterior termina sin reinicar apagamos nosotros
-    echo "halt" > S99halt
-    chmod +x S99halt
+    chmod +x $INITSCRIPT
 }
 
 function comprimir
