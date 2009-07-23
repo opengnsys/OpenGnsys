@@ -8,11 +8,12 @@ Estructura de directorios de OpenGNSys Client
 
 /opt/opengnsys
   bin (ro) - utilidades asociadas.
+  cache (ro) - directorio donde esta montado la particion de cache
   etc (ro) - configuración.
+    init (ro) - scripts de arranque.
   images (normal=ro, admin=rw) - imágenes de arranque.
-  init (ro) - scripts de arranque.
   lib (ro) - librerías de las utilidades.
-    engine/bin (ro) - librerías de funciones del motot de clonación.
+    engine/bin (ro) - librerías de funciones del motor de clonación.
     modules (ro) - módulos extra del kernel.
   log (rw) - registros de incidencias (enlazado en /var/log/opengnsys).
 

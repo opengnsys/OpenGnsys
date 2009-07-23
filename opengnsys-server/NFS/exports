@@ -1,0 +1,3 @@
+/opt/opengnsys/client/ 10.1.12.0/255.255.252.0(ro,no_subtree_check,no_root_squash,sync)
+/opt/opengnsys/images/ 10.1.12.0/255.255.252.0(rw,no_subtree_check,no_root_squash,sync,crossmnt)
+/opt/opengnsys/log/clients 10.1.12.0/255.255.252.0(rw,no_subtree_check,no_root_squash,sync)
