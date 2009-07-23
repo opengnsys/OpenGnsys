@@ -1,6 +1,7 @@
 #!/bin/bash
 #/**
 #@file     System.lib
+#@brief    Librería o clase System
 #@class    System
 #@brief    Funciones básicas del sistema.
 #@version  0.9
@@ -8,36 +9,72 @@
 #*/
 
 
-function ogEcho () {
 #/**
-#@function ogEcho color message...
-#@brief    Muestra mensajes en consola.
-#@param \c str_color:   código de color
-#@param \c str_message: mensaje (puede recibir más de 1 parámetro.
-#@return   Mensaje mostrado.
-#@note     Primera versión para OpenGNSys
+#         ogEcho [loglevel] [position] message...
+#@brief   Muestra mensajes en consola y lo registra en fichero de incidencias.
+#@arg  \c str_loglevel nivel de registro de incidencias.
+#@arg  \c str_position posición del mensaje en pantalla.
+#@arg  \c str_message  mensaje (puede recibir más de 1 parámetro.
+#@return  Mensaje mostrado.
+#@note    Primera versión para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2009-07-23
 #*/
+function ogEcho () {
 
-#/// En pruebas.
-echo "Color: $1"
-shift
-echo "$*"
+#/// Variables locales
+local LOGLEVEL DATETIME         #/// Variables locales
+
+# Selección del nivel de registro (opcional).
+case "$1" in
+     info)    tput setf 2; LOGLEVEL=$1; shift ;;
+     warning) tput setf 6; LOGLEVEL=$1; shift ;;
+     error)   tput setf 8; LOGLEVEL=$1; shift ;;
+     *)       tput setf 9;
+esac
+ 
+# Selección de la posición en pantalla (opcional).
+case "$2" in
+     "up-left")       tput cup  0  0; shift ;;
+     "up-center")     tput cup  0 40; shift ;;
+     "up-right")      tput cup  0 80; shift ;;
+     "middle-left")   tput cup 40  0; shift ;;
+     "middle-center") tput cup 40 40; shift ;;
+     "middle-right")  tput cup 40 80; shift ;;
+     "down-left")     tput cup 80  0; shift ;;
+     "down-center")   tput cup 80 40; shift ;;
+     "down-right")    tput cup 80 80; shift ;;
+     *)               ;;
+esac
+
+#/// Mostrar mensaje en consola.
+DATETIME=$(date +"%F %T")
+echo "$DATETIME $*"
+tput setf 9
+
+#/// Registro de incidencias.
+if [ -w "$OGLOGFILE" ]; then
+    if [ -z "$LOGLEVEL" ]; then
+        echo "$DATETIME $*" >>$OGLOGFILE 
+    else
+        echo "$DATETIME $LOGLEVEL: $*" >>$OGLOGFILE 
+    fi
+fi
 }
 
 
-function ogRaiseError () {
 #/**
-#@function ogRaiseError int_errcode ["str_errmessage"]
-#@brief    Devuelve el mensaje y el código de error correspondiente.
-#@param \c errcode código de error.
-#@param \c str_errmessage mensaje complementario de error.
-#@return   Mensaje de error.
-#@exception Código de error.
-#@warning  No definidas
-#@note     Primera versión para OpenGNSys
-#@author   Ramon Gomez, ETSII Universidad Sevilla
-#@date     2009-07-21
+#         ogRaiseError errcode ["errmessage"]
+#@brief   Devuelve el mensaje y el código de error correspondiente.
+#@arg  \c int_errcode    código de error.
+#@arg  \c str_errmessage mensaje complementario de error.
+#@return  Mensaje de error.
+#@warning No definidas
+#@note    Primera versión para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2009-07-21
 #*/ 
+function ogRaiseError () {
 
 #/// En pruebas.
 local MSG
@@ -48,7 +85,7 @@ case "$1" in
      *)			MSG="$MSG_ERR_GENERIC" ;;
 esac
 
-echo "${FUNCNAME[${#FUNCNAME[*]}-1]}: $MSG" >&2
+ogEcho error "${FUNCNAME[${#FUNCNAME[*]}-1]}: $MSG" >&2
 return $1
 }
 

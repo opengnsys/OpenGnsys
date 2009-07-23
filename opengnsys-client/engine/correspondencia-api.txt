@@ -63,6 +63,9 @@ Librería o clase Boot:
 - ogBoot			(HDBoot, BootLinuxEX, hidraBoot)
 - ogInstallGrub			(InstallGrub)
 - ogConfigureGrub		(ConfGrub)
+- ogListRegistryKeys		(hidraListRegistryKeys)
+- ogGetRegistryKey		(hidraGetRegistryKey)
+- ogSetRegistryKey		(hidraSetRegistryKey)
 - ogGetWindowsName		(hidraGetWindowsName)
 - ogSetWindowsName		(hidraSetWindowsName)
 
@@ -197,14 +200,11 @@ hidraClientMAC
 hidraDeleteFile 
 hidraEACServer 
 hidraFSCheck 
-hidraGetRegistryKey 
 hidraImageSize 
 hidraLinuxBootParameters 
-hidraListRegistryKeys 
 hidraPoweroff 
 hidraReboot 
 hidraSetPartitionSize 
-hidraSetRegistryKey 
 hidraUpdateCache 
 
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 #/**
 #@file    FileSystem.lib
+#@brief   Librería o clase FileSystem
 #@class   FileSystem
 #@brief   Funciones para gestión de sistemas de archivos.
 #@version 0.9
@@ -8,23 +9,23 @@
 #*/
 
 
-function ogGetFsType () {
 #/**
-#@function ogGetFsType int_ndisk int_npartition
-#@brief    Devuelve el mnemonico con el tipo de sistema de archivos.
-#@param \c ndisk:      nº de orden del disco
-#@param \c npartition: nº de orden de la partición
-#@return   Mnemonico
-#@note 	   Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234], BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS, CACHE, EMPTY, EXTENDED, UNKNOWN }
-#@exception Formato incorrecto.
-#@exception Disco o particion no corresponden con un dispositivo.
-#@version  0.9 - Primera adaptación para OpenGNSys.
-#@author   Ramon Gomez, ETSII Universidad de Sevilla
+#         ogGetFsType int_ndisk int_npartition
+#@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
+#@arg  \c ndisk:      nº de orden del disco
+#@arg  \c npartition: nº de orden de la partición
+#@return  Mnemonico
+#@note 	  Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234], BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
+#@version 0.9 - Primera adaptación para OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date     2009/07/21
 #*/
+function ogGetFsType () {
 
 #/// Error si no se reciben 2 parametros.
-[ $# != 2 ] && ogRaiseError $OG_ERR_FORMAT
+[ $# != 2 ] && {ogRaiseError $OG_ERR_FORMAT; return $?}
 
 #/// Detectar id. de tipo de particion y codificar al mnemonico.
 local ID=$(ogGetPartitionId $1 $2) || return $?
