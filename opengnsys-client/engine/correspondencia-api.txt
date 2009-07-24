@@ -71,7 +71,7 @@ Librería o clase Boot:
 
 Librería o clase Inventory:
 - ogListHardwareInfo		(InfoHardware, DetectDevices, hidraHardwareInfo)
-- ogGetOsVersion			(hidraOSVersion)
+- ogGetOsVersion		(hidraOSVersion)
 - ogGetLinuxSoftware		(hidraLinuxSoftware)
 - hogGetWindowsSoftware		(idraWindowsSoftware)
 
@@ -88,98 +88,98 @@ Funciones EAC:
 
 Referencia del Archivo ATA.lib
 
-function        DetectNumberPartition () -> GetPartitionNumber
-function        NewMbrXP ()
-function        DeleteLABELS ()
-function        IsFSequalPartition () -> CompareSizeFSPartition
-function        AmpliarFileSystemNT () -> desaparece (la anterior detecta el tipo de FS)
-function        CrearSistemaArchivos ()
-function        ELIMINARReducirFileSystemNT ()
+DetectNumberPartition -> GetPartitionNumber
+NewMbrXP
+DeleteLABELS
+IsFSequalPartition -> CompareSizeFSPartition
+AmpliarFileSystemNT -> desaparece (la anterior detecta el tipo de FS)
+CrearSistemaArchivos
+ELIMINARReducirFileSystemNT
 
 Referencia del Archivo Boot.lib
 
-function        BootLinuxEX ()
-function        SetDefaultBoot ()
-function        ConvertToGrub ()
-function        InstalaGrub4dos ()
-function        moddhcpdconf ()
+BootLinuxEX
+SetDefaultBoot
+ConvertToGrub
+InstalaGrub4dos
+moddhcpdconf
 
 Referencia del Archivo Deploy.lib
 
-function        SetDefaultStartpage ()
-function        DetectMethodTransfer ()
-function        GetImageFile ()
-function        UpdateCache ()
-function        CheckImage ()
-function        DetectInfoImage () -> GetImageInfo
-function        DetectaProgramaImagen () -> GetImageProgram
-function        DetectaFSImagen () -> GetImageFS
-function        DetectCompresionImage () -> GetImageCompression
-function        DeployPartitionFromImage ()
-function        OpenArchiveZIP ()
-function        OpenArchiveNT ()
-function        Synchronize ()
-function        MakeOffline ()
-function        MountChrootEACclient ()
-function        UmountChrootEACclient ()
-function        MakePhotoConsole ()
-function        BORRARCheckImageTORRENT ()
+SetDefaultStartpage
+DetectMethodTransfer ()
+GetImageFile ()
+UpdateCache ()
+CheckImage ()
+DetectInfoImage () -> GetImageInfo
+DetectaProgramaImagen () -> GetImageProgram
+DetectaFSImagen () -> GetImageFS
+DetectCompresionImage () -> GetImageCompression
+DeployPartitionFromImage ()
+OpenArchiveZIP ()
+OpenArchiveNT ()
+Synchronize ()
+MakeOffline ()
+MountChrootEACclient ()
+UmountChrootEACclient ()
+MakePhotoConsole ()
+BORRARCheckImageTORRENT ()
 
 Referencia del Archivo EACInstall.lib
 
-function        BuildEACOSBase ()
-function        BuildEACBootAgenPXE ()
-function        BuildEACServer ()
-function        TestPxe ()
+BuildEACOSBase ()
+BuildEACBootAgenPXE ()
+BuildEACServer ()
+TestPxe ()
 
 Referencia del Archivo FileSystem.lib
 
-function        SizeFileSystem ()
-function        InfoCache ()
-function        FormatToLower ()
-function        FormatToUpper ()
-function        FormatSintaxDev ()
-function        FormatSintaxSpacePath ()
-function        FormatSintaxBackSlashPath ()
-function        GetPath ()
-function        GetLastStr ()
-function        GetFirstStr ()
-function        MkdirPath ()
-function        DetectaEtiquetas ()
-function        WhatsTime ()
-function        HowLongHasWorked ()
-function        NumberRound ()
+SizeFileSystem ()
+InfoCache ()
+FormatToLower ()
+FormatToUpper ()
+FormatSintaxDev ()
+FormatSintaxSpacePath ()
+FormatSintaxBackSlashPath ()
+GetPath ()
+GetLastStr ()
+GetFirstStr ()
+MkdirPath ()
+DetectaEtiquetas ()
+WhatsTime ()
+HowLongHasWorked ()
+NumberRound ()
 
 Referencia del Archivo PostConf.lib
 
-function        CrearPatron ()
-function        ParseaSysprep ()
-function        NTDetect ()
-function        LoadRegistrySystem ()
-function        LoadRegistryUsers ()
-function        UpdateRegistry ()
-function        NTChangeName ()
-function        NTDrivers ()
-function        NTDrivers2 ()
-function        NTSetGroupName ()
-function        NTSetOwner ()
-function        NTAutoLogon ()
-function        NTStatusRatonTeclado ()
-function        NTRunOnceMachine ()
-function        NTRunMachine ()
-function        NTRunUser ()
-function        NTPolUserOn ()
-function        NTPolUserOFF ()
-function        NTStatusBootChk ()
-function        NTNoMsgNewHardware ()
-function        ChangeName ()
+CrearPatron ()
+ParseaSysprep ()
+NTDetect ()
+LoadRegistrySystem ()
+LoadRegistryUsers ()
+UpdateRegistry ()
+NTChangeName ()
+NTDrivers ()
+NTDrivers2 ()
+NTSetGroupName ()
+NTSetOwner ()
+NTAutoLogon ()
+NTStatusRatonTeclado ()
+NTRunOnceMachine ()
+NTRunMachine ()
+NTRunUser ()
+NTPolUserOn ()
+NTPolUserOFF ()
+NTStatusBootChk ()
+NTNoMsgNewHardware ()
+ChangeName ()
 
 Referencia del Archivo Settings.lib
 
-function        IPservidor ()
-function        IfacesEACclient ()
-function        ExportEACconf ()
-function        clean ()
+IPservidor ()
+IfacesEACclient ()
+ExportEACconf ()
+clean ()
 
 Referencia del Archivo DBProcess.php
 

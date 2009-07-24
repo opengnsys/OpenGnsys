@@ -24,8 +24,8 @@
 #*/
 function ogGetFsType () {
 
-#/// Error si no se reciben 2 parametros.
-[ $# != 2 ] && {ogRaiseError $OG_ERR_FORMAT; return $?}
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Detectar id. de tipo de particion y codificar al mnemonico.
 local ID=$(ogGetPartitionId $1 $2) || return $?

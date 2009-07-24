@@ -49,7 +49,7 @@ esac
 
 #/// Mostrar mensaje en consola.
 DATETIME=$(date +"%F %T")
-echo "$DATETIME $*"
+echo -e "$DATETIME $*"
 tput setf 9
 
 #/// Registro de incidencias.
@@ -64,10 +64,10 @@ fi
 
 
 #/**
-#         ogRaiseError errcode ["errmessage"]
+#         ogRaiseError errcode ["errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.
 #@arg  \c int_errcode    código de error.
-#@arg  \c str_errmessage mensaje complementario de error.
+#@arg  \c str_errmessage mensajes complementarios de error.
 #@return  Mensaje de error.
 #@warning No definidas
 #@note    Primera versión para OpenGNSys
@@ -77,16 +77,21 @@ fi
 function ogRaiseError () {
 
 #/// En pruebas.
-local MSG
+local MSG CODE
 
-case "$1" in
-     $OG_ERR_FORMAT)	MSG="$MSG_ERR_FORMAT" ;;
-     $OG_ERR_NOTFOUND)	MSG="$MSG_ERR_NOTFOUND $2" ;;
-     *)			MSG="$MSG_ERR_GENERIC" ;;
+CODE=$1
+case "$CODE" in
+     $OG_ERR_FORMAT)
+        MSG="$MSG_ERR_FORMAT"
+        [ -n "$2" ] && MSG="$MSG\n\t$MSG_FORMAT: $2"
+        [ -n "$3" ] && MSG="$MSG\n\t$MSG_EXAMPLE: $3"
+        ;;
+     $OG_ERR_NOTFOUND)	MSG="$MSG_ERR_NOTFOUND \"$2\"" ;;
+     *)			MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 
 ogEcho error "${FUNCNAME[${#FUNCNAME[*]}-1]}: $MSG" >&2
-return $1
+return $CODE
 }
 
 
