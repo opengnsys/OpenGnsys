@@ -18,7 +18,7 @@
 function ogLoadEnviron () {
 
 #/// Directorios del projecto OpenGNSys.
-OPENGNSYS=${OPENGNSYS:-"/var/opengnsys"}
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 if [ -d $OPENGNSYS ]; then
    OGBIN=$OPENGNSYS/bin
    OGETC=$OPENGNSYS/etc
