@@ -195,7 +195,7 @@ LABEL ogClientsNfs
 #KERNEL EACBootAgent/stable/vmlinuz-2.6.28-11-server
 KERNEL ${vmlinuznfs}
 #APPEND root=/dev/nfs initrd=EACBootAgent/stable/initrd.img-2.6.28-11-server nfsroot=${iphost}:/var/EAC/nfsroot/stable ip=dhcp ro vga=788 irqpoll nolapic allowed_drive_mask=0 acpi=off pci=nomsi EACregistred=NO
-APPEND root=/dev/nfs initrd=${initrdnfs} nfsroot=${iphost}:/opt/opengnsys/tftpboot/ogClientNfs ip=dhcp ro vga=788 irqpoll nolapic  acpi=off pci=nomsi EACregistred=NO
+APPEND root=/dev/nfs initrd=${initrdnfs} nfsroot=${iphost}:/var/lib/tftpboot/ogClients/ogClientNfs ip=dhcp ro vga=788 irqpoll nolapic  acpi=off pci=nomsi EACregistred=NO
 
 
 LABEL ogClientRam
