@@ -7,77 +7,83 @@ La columna de la izquierda es la propuesta de nombre para función/método y la 
 
 En el resto del fichero están las funciones originales que aún no he revisado.
 
+Entre el nombre de la función y sus equivalentes, se añade estado de la migración.
+    version 0.1 incorporada desde hidra, brutalix, EAC, o interfaz hidra-eac pero no compatible.
+    version 0.x proceso de migración
+    version 0.9 totalmente funcional con la estructura definida en las primeras funciones insertadas por Ramón. Un ejemplo es ogPartitionActive de la libreria Disk.lib
+
+
 PROPUESTA
 ---------
 
 Librería o clase Install:
-- ogConfigureServer		(CustomEACServer, InterfazCustomEACServer)
-- ogLoadConfig			(scirpt_uso)
-- ogLoadEnviron			(hidraEnviron)
+- ogConfigureServer		  	0.1       (CustomEACServer, InterfazCustomEACServer)
+- ogLoadConfig			            (scirpt_uso)
+- ogLoadEnviron			 	 0.9       (hidraEnviron)
 
 Librería o clase System:
-- ogEcho			(Msg)
-- ogRaiseError			(?)
+- ogEcho			     	 0.9       	(Msg)
+- ogRaiseError			         	 (?)
 
 Librería o clase Disk:
-- ogUpdatePartitionTable	(UpdateDisk)
-- ogDeletePartitionTable	(DeletePartitionTable, hidraDeletePartitionTable)
-- ogDevToDisk			(Disk, IdPartition, hidraDisk)
-- ogDiskToDev			(DiskEAC)
-- ogCreatePartitions		(CreatePartitions, hidraCreatePrimaryPartitions, hidraCreateLogicalPartitions)
-- ogListPartitions		(ListPartitions, hidraListPartitions, hidraListPrimaryPartitions, hidraListLogicalPartitions)
-- ogGetPartitionActive		(hidraGetPartitionActive)
-- ogSetPartitionActive		(SetPartitionActive, hidraSetPartitionActive)
-- ogGetPartitionId		(?)
-- ogSetPartitionId		(?)
-- ogGetPartitionSize		(SizePartition, hidraGetPartitionSize)
-- ogSetPartitionSize		(?)
+- ogUpdatePartitionTable  	0.1	   (UpdateDisk)  
+- ogDeletePartitionTable	       (DeletePartitionTable, hidraDeletePartitionTable)
+- ogDevToDisk			       		(Disk, IdPartition, hidraDisk)
+- ogDiskToDev			    0.9   	(DiskEAC)
+- ogCreatePartitions		   		(CreatePartitions, hidraCreatePrimaryPartitions, hidraCreateLogicalPartitions)
+- ogListPartitions		       		(ListPartitions, hidraListPartitions, hidraListPrimaryPartitions, hidraListLogicalPartitions)
+- ogGetPartitionActive				(hidraGetPartitionActive)
+- ogSetPartitionActive				(SetPartitionActive, hidraSetPartitionActive)
+- ogGetPartitionId					(?)
+- ogSetPartitionId					(?)
+- ogGetPartitionSize		0.9		(SizePartition, hidraGetPartitionSize)
+- ogSetPartitionSize				(?)
 
 Librería o clase FileSystem:
-- ogFormat, ogFormatFs		(FormatPartition, hidraFormat)
-- ogFormatCache			(FormatCACHE, hidraFormatCache)
-- ogExtend, ogExtendFs		(EnlargeFileSystem, hidraFSExtend)
-- ogReduce, ogReduceFs		(ReduceFileSystem, hidraFSReduce)
-- ogGetFsType			(TypeFS, hidraTypeFS)
-- ogSetFsType			(SetPartitionType, hidraSetPartitionType)
-- ogFindCache			(FindCache, hidraFindCache)
-- ogIsLocked, ogIsFsLocked	(hidraIsLocked)
-- ogLock, ogLockFs		(hidraLock)
-- ogUnlock, ogUnlockFs		(hidraUnlock)
-- ogMountFs, ogMount		(MountPartition, hidraMount)
-- ogUnmountFs, ogUnmount	(UmountPartition, hidraUnmount)
-- ogMountAllFs, ogMountAll	(hidraMountAll)
-- ogUnmountAllFs, ogUnmountAll	(hidraUnmmountAll)
-- ogMountRepo, ogMount		(MountRepo, hidraMountRepo)
-- ogUnmountRepo, ogUnmount	(UmountRepo, hidraUnmountRepo)
-- ogMountCache, ogMount		(MountCache, hidraMountCache)
-- ogUnmountCache, ogUnmount	(UmountCache, hidraUnmountCache)
+- ogFormat, ogFormatFs				(FormatPartition, hidraFormat)
+- ogFormatCache						(FormatCACHE, hidraFormatCache)
+- ogExtend, ogExtendFs				(EnlargeFileSystem, hidraFSExtend)
+- ogReduce, ogReduceFs				(ReduceFileSystem, hidraFSReduce)
+- ogGetFsType						(TypeFS, hidraTypeFS)
+- ogSetFsType						(SetPartitionType, hidraSetPartitionType)
+- ogFindCache						(FindCache, hidraFindCache)
+- ogIsLocked, ogIsFsLocked			(hidraIsLocked)
+- ogLock, ogLockFs					(hidraLock)
+- ogUnlock, ogUnlockFs				(hidraUnlock)
+- ogMountFs, ogMount				(MountPartition, hidraMount)
+- ogUnmountFs, ogUnmount			(UmountPartition, hidraUnmount)
+- ogMountAllFs, ogMountAll			(hidraMountAll)
+- ogUnmountAllFs, ogUnmountAll		(hidraUnmmountAll)
+- ogMountRepo, ogMount				(MountRepo, hidraMountRepo)
+- ogUnmountRepo, ogUnmount			(UmountRepo, hidraUnmountRepo)
+- ogMountCache, ogMount				(MountCache, hidraMountCache)
+- ogUnmountCache, ogUnmount			(UmountCache, hidraUnmountCache)
 
 Librería o clase Image:
-- ogCreateImage			(CreateImageFromPartition, hidraCreateImageFromPartition)
-- ogRestoreImage		(RestorePartitionFromImage, RestorePartitionFromPartition, hidraRestorePartitionFromImage)
-- ogCreateTorrent		(CreateTorrentFromImage)
+- ogCreateImage						(CreateImageFromPartition, hidraCreateImageFromPartition)
+- ogRestoreImage					(RestorePartitionFromImage, RestorePartitionFromPartition, hidraRestorePartitionFromImage)
+- ogCreateTorrent					(CreateTorrentFromImage)
 
 
 Librería o clase Boot:
-- ogBoot			(HDBoot, BootLinuxEX, hidraBoot)
-- ogInstallGrub			(InstallGrub)
-- ogConfigureGrub		(ConfGrub)
-- ogListRegistryKeys		(hidraListRegistryKeys)
-- ogGetRegistryKey		(hidraGetRegistryKey)
-- ogSetRegistryKey		(hidraSetRegistryKey)
-- ogGetWindowsName		(hidraGetWindowsName)
-- ogSetWindowsName		(hidraSetWindowsName)
+- ogBoot							(HDBoot, BootLinuxEX, hidraBoot)
+- ogInstallGrub						(InstallGrub)
+- ogConfigureGrub					(ConfGrub)
+- ogListRegistryKeys				(hidraListRegistryKeys)
+- ogGetRegistryKey					(hidraGetRegistryKey)
+- ogSetRegistryKey					(hidraSetRegistryKey)
+- ogGetWindowsName					(hidraGetWindowsName)
+- ogSetWindowsName					(hidraSetWindowsName)
 
 Librería o clase Inventory:
-- ogListHardwareInfo		(InfoHardware, DetectDevices, hidraHardwareInfo)
-- ogGetOsVersion		(hidraOSVersion)
-- ogGetLinuxSoftware		(hidraLinuxSoftware)
-- hogGetWindowsSoftware		(idraWindowsSoftware)
+- ogListHardwareInfo				(InfoHardware, DetectDevices, hidraHardwareInfo)
+- ogGetOsVersion					(hidraOSVersion)
+- ogGetLinuxSoftware				(hidraLinuxSoftware)
+- hogGetWindowsSoftware				(idraWindowsSoftware)
 
 Librería o clase File:
-- ogGetPath			(ConnectToRepo, hidraPath)
-- ogIsFile			(IfFileExist, IfFileNotExist)
+- ogGetPath							(ConnectToRepo, hidraPath)
+- ogIsFile							(IfFileExist, IfFileNotExist)
 
 Librería o clase String:
 
