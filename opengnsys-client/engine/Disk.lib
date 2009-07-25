@@ -49,7 +49,7 @@ case $# in
 	[ -z "${1/[1-9]/}" -a -z "${2/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
 	PART=$(echo $ALLDISKS | awk -v n=$1 '{print $n}')$2
 	# Error si no es fichero de bloques.
-	[ -b "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $? 
+	[ -b "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
 	echo "$PART"
 	;;
      *) # Formato erroneo.
@@ -185,3 +185,21 @@ done
 echo
 }
 
+#/**
+#         ogUpdateDisk
+#@brief   Fuerza al kernel releer la tabla de particiones de los discos duros
+#@arg  \c no requiere
+#@return  informacion propia de la herramienta
+#@exception
+#@exception
+#@note    Requisitos: \c partprobe
+#@warning pendiente estructurar la funcion a opengnsys
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@note	 funcion importada de EAC
+#*/
+
+function ogUpdateDisk () {
+echo "Forzando al kernel la lectura de la tabla de particiones"
+list=`partprobe -s | cut -f1 -d: ` 2>/dev/null
+echo $list > /tmp/disk
+}
