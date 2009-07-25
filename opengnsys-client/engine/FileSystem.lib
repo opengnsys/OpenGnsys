@@ -15,7 +15,7 @@
 #@arg  \c ndisk:      nº de orden del disco
 #@arg  \c npartition: nº de orden de la partición
 #@return  Mnemonico
-#@note 	  Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234], BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note 	  Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234], BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS, DINAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.9 - Primera adaptación para OpenGNSys.
@@ -38,6 +38,7 @@ case "$ID" in
      1[6e])	TIPO="HBIGDOS" ;;
      17)	TIPO="HNTFS" ;;
      1[bc])	TIPO="HFAT32" ;;
+     42)	TIPO="DINAMIC" ;;
      82)	TIPO="LINUX-SWAP" ;;
      83)	TIPO="$(parted -s $DISCO print | awk -v var=$NPART '{if ($1==var) {print toupper($6)}}')"
 		TIPO=${TIPO:-"EXT3"}
