@@ -26,9 +26,16 @@
 function ogDiskToDev () {
 
 #/// Variables locales
-local FORMAT="$FUNCNAME int_ndisk [int_npartition]"
-local EXAMPLE="$FUNCNAME 1_1"
 local ALLDISKS DISK PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npartition]" \
+           "$FUNCNAME      =>  /dev/sda /dev/sdb" \
+           "$FUNCNAME 1    =>  /dev/sda" \
+           "$FUNCNAME 1 1  =>  /dev/sda1"
+    return
+fi
 
 #/// Listar dispositivo para los discos duros (tipos: 3=hd, 8=sd).
 ALLDISKS=$(awk '($1==3 || $1==8) && $4!~/[0-9]/ {printf "/dev/%s ",$4}' /proc/partitions)
@@ -39,21 +46,23 @@ case $# in
 	echo "$ALLDISKS"
 	;;
      1) # Error si el parametro no es un digito.
-	[ -z "${1/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
+	[ -z "${1/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT || return $?
 	DISK=$(echo $ALLDISKS | awk -v n=$1 '{print $n}')
 	# Error si no es fichero de bloques.
 	[ -b "$DISK" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
 	echo "$DISK"
 	;;
      2) # Error si los 2 parametros no son digitos.
-	[ -z "${1/[1-9]/}" -a -z "${2/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
+	[ -z "${1/[1-9]/}" -a -z "${2/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT|| return $?
 	PART=$(echo $ALLDISKS | awk -v n=$1 '{print $n}')$2
 	# Error si no es fichero de bloques.
 	[ -b "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
 	echo "$PART"
 	;;
      *) # Formato erroneo.
-	ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE"; return $?
+	ogRaiseError $OG_ERR_FORMAT
+        return $OG_ERR_FORMAT
+        ;;
 esac
 }
 
@@ -74,18 +83,21 @@ esac
 function ogGetPartitionActive () {
 
 #/// Variables locales
-local FORMAT="$FUNCNAME int_ndisk"
-local EXAMPLE="$FUNCNAME 1"
 local DISK
 
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" "$FUNCNAME 1  =>  1"
+    return
+fi
+
 #/// Error si no se recibe 1 parámetro.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Comprobar que el disco existe y listar su partición activa.
 DISK="$(ogDiskToDev $1)" || return $?
 parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 }
-
 
 
 #/**
@@ -104,12 +116,17 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 function ogGetPartitionId () {
 
 #/// Variables locales.
-local FORMAT="$FUNCNAME int_ndisk int_npartition"
-local EXAMPLE="$FUNCNAME 1_1"
 local DISK PART
 
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1  =>  7"
+    return
+fi
+
 #/// Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Detectar id. de tipo de particion y codificar al mnemonico.
 DISK=$(ogDiskToDev $1) || return $?
@@ -134,12 +151,17 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 function ogGetPartitionSize () {
 
 #/// Variables locales.
-local FORMAT="$FUNCNAME int_ndisk int_npartition"
-local EXAMPLE="$FUNCNAME 1_1"
 local DISK PART
 
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1  =>  10000000"
+    return
+fi
+
 #/// Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Sustituye nº de disco y de partición por sus dispositivos.
 DISK="$(ogDiskToDev $1)" || return $?
@@ -167,12 +189,17 @@ sfdisk -s $PART
 function ogListPartitions () {
 
 #/// Variables locales.
-local FORMAT="$FUNCNAME int_ndisk"
-local EXAMPLE="$FUNCNAME 1"
-local DISK PART p
+local DISK PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1  =>  1:NTFS:10000000 2:EXT3:5000000 3:LINUX-SWAP:1000000"
+    return
+fi
 
 #/// Error si no se recibe 1 parámetro.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" "$EXAMPLE" || return $?
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" return $?
 
 #/// Sustituye nº de disco por su dispositivo.
 DISK="$(ogDiskToDev $1)" || return $?

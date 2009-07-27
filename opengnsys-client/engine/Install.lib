@@ -33,13 +33,12 @@ if [ -d $OPENGNSYS ]; then
 fi
 
 #/// Declaración de códigos de error.
-OG_ERR_FORMAT=1		# Formato de ejecucion incorrecto.
-OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
-OG_ERR_PARTITION=3	# Error en particion de disco.
+export OG_ERR_FORMAT=1		# Formato de ejecucion incorrecto.
+export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
+export OG_ERR_PARTITION=3	# Error en particion de disco.
 OG_ERR_NOTEXEC=4	# Programa o funcion no ejecutable.
 OG_ERR_NOTOS=5		# Sin sistema operativo.
 OG_ERR_LOCKED=6		# Particion o fichero bloqueado.
-export OG_ERR_FORMAT OG_ERR_NOTFOUND
 }
 
 

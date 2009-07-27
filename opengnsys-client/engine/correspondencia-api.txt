@@ -17,73 +17,73 @@ PROPUESTA
 ---------
 
 Librería o clase Install:
-- ogConfigureServer		  	0.1       (CustomEACServer, InterfazCustomEACServer)
-- ogLoadConfig			            (scirpt_uso)
-- ogLoadEnviron			 	 0.9       (hidraEnviron)
+- ogConfigureServer		0.1	(CustomEACServer, InterfazCustomEACServer)
+- ogLoadConfig				(scirpt_uso)
+- ogLoadEnviron			0.9	(hidraEnviron)
 
 Librería o clase System:
-- ogEcho			     	 0.9       	(Msg)
-- ogRaiseError			         	 (?)
+- ogEcho			0.9	(Msg)
+- ogRaiseError			       	(?)
 
 Librería o clase Disk:
-- ogUpdatePartitionTable  	0.1	   (UpdateDisk)  
-- ogDeletePartitionTable	       (DeletePartitionTable, hidraDeletePartitionTable)
-- ogDevToDisk			       		(Disk, IdPartition, hidraDisk)
-- ogDiskToDev			    0.9   	(DiskEAC)
-- ogCreatePartitions		   		(CreatePartitions, hidraCreatePrimaryPartitions, hidraCreateLogicalPartitions)
-- ogListPartitions		       		(ListPartitions, hidraListPartitions, hidraListPrimaryPartitions, hidraListLogicalPartitions)
-- ogGetPartitionActive				(hidraGetPartitionActive)
-- ogSetPartitionActive				(SetPartitionActive, hidraSetPartitionActive)
-- ogGetPartitionId					(?)
-- ogSetPartitionId					(?)
-- ogGetPartitionSize		0.9		(SizePartition, hidraGetPartitionSize)
-- ogSetPartitionSize				(?)
+- ogUpdatePartitionTable  	0.1	(UpdateDisk)  
+- ogDeletePartitionTable		(DeletePartitionTable, hidraDeletePartitionTable)
+- ogDevToDisk			       	(Disk, IdPartition, hidraDisk)
+- ogDiskToDev			0.9	(DiskEAC)
+- ogCreatePartitions		   	(CreatePartitions, hidraCreatePrimaryPartitions, hidraCreateLogicalPartitions)
+- ogListPartitions		       	(ListPartitions, hidraListPartitions, hidraListPrimaryPartitions, hidraListLogicalPartitions)
+- ogGetPartitionActive			(hidraGetPartitionActive)
+- ogSetPartitionActive			(SetPartitionActive, hidraSetPartitionActive)
+- ogGetPartitionId		0.9	(?)
+- ogSetPartitionId			(?)
+- ogGetPartitionSize		0.9	(SizePartition, hidraGetPartitionSize)
+- ogSetPartitionSize			(hidraSetPartitionSize)
 
 Librería o clase FileSystem:
-- ogFormat, ogFormatFs				(FormatPartition, hidraFormat)
-- ogFormatCache						(FormatCACHE, hidraFormatCache)
-- ogExtend, ogExtendFs				(EnlargeFileSystem, hidraFSExtend)
-- ogReduce, ogReduceFs				(ReduceFileSystem, hidraFSReduce)
-- ogGetFsType						(TypeFS, hidraTypeFS)
-- ogSetFsType						(SetPartitionType, hidraSetPartitionType)
-- ogFindCache						(FindCache, hidraFindCache)
-- ogIsLocked, ogIsFsLocked			(hidraIsLocked)
-- ogLock, ogLockFs					(hidraLock)
-- ogUnlock, ogUnlockFs				(hidraUnlock)
-- ogMountFs, ogMount				(MountPartition, hidraMount)
-- ogUnmountFs, ogUnmount			(UmountPartition, hidraUnmount)
-- ogMountAllFs, ogMountAll			(hidraMountAll)
+- ogFormat, ogFormatFs			(FormatPartition, hidraFormat)
+- ogFormatCache				(FormatCACHE, hidraFormatCache)
+- ogExtend, ogExtendFs			(EnlargeFileSystem, hidraFSExtend)
+- ogReduce, ogReduceFs			(ReduceFileSystem, hidraFSReduce)
+- ogGetFsType				(TypeFS, hidraTypeFS)
+- ogSetFsType				(SetPartitionType, hidraSetPartitionType)
+- ogFindCache				(FindCache, hidraFindCache)
+- ogIsLocked, ogIsFsLocked		(hidraIsLocked)
+- ogLock, ogLockFs			(hidraLock)
+- ogUnlock, ogUnlockFs			(hidraUnlock)
+- ogMountFs, ogMount			(MountPartition, hidraMount)
+- ogUnmountFs, ogUnmount		(UmountPartition, hidraUnmount)
+- ogMountAllFs, ogMountAll		(hidraMountAll)
 - ogUnmountAllFs, ogUnmountAll		(hidraUnmmountAll)
-- ogMountRepo, ogMount				(MountRepo, hidraMountRepo)
-- ogUnmountRepo, ogUnmount			(UmountRepo, hidraUnmountRepo)
-- ogMountCache, ogMount				(MountCache, hidraMountCache)
-- ogUnmountCache, ogUnmount			(UmountCache, hidraUnmountCache)
+- ogMountRepo, ogMount			(MountRepo, hidraMountRepo)
+- ogUnmountRepo, ogUnmount		(UmountRepo, hidraUnmountRepo)
+- ogMountCache, ogMount			(MountCache, hidraMountCache)
+- ogUnmountCache, ogUnmount		(UmountCache, hidraUnmountCache)
 
 Librería o clase Image:
-- ogCreateImage						(CreateImageFromPartition, hidraCreateImageFromPartition)
-- ogRestoreImage					(RestorePartitionFromImage, RestorePartitionFromPartition, hidraRestorePartitionFromImage)
-- ogCreateTorrent					(CreateTorrentFromImage)
+- ogCreateImage				(CreateImageFromPartition, hidraCreateImageFromPartition)
+- ogRestoreImage			(RestorePartitionFromImage, RestorePartitionFromPartition, hidraRestorePartitionFromImage)
+- ogCreateTorrent			(CreateTorrentFromImage)
 
 
 Librería o clase Boot:
-- ogBoot							(HDBoot, BootLinuxEX, hidraBoot)
-- ogInstallGrub						(InstallGrub)
-- ogConfigureGrub					(ConfGrub)
-- ogListRegistryKeys				(hidraListRegistryKeys)
-- ogGetRegistryKey					(hidraGetRegistryKey)
-- ogSetRegistryKey					(hidraSetRegistryKey)
-- ogGetWindowsName					(hidraGetWindowsName)
-- ogSetWindowsName					(hidraSetWindowsName)
+- ogBoot				(HDBoot, BootLinuxEX, hidraBoot)
+- ogInstallGrub				(InstallGrub)
+- ogConfigureGrub			(ConfGrub)
+- ogListRegistryKeys			(hidraListRegistryKeys)
+- ogGetRegistryKey			(hidraGetRegistryKey)
+- ogSetRegistryKey			(hidraSetRegistryKey)
+- ogGetWindowsName			(hidraGetWindowsName)
+- ogSetWindowsName			(hidraSetWindowsName)
 
 Librería o clase Inventory:
-- ogListHardwareInfo				(InfoHardware, DetectDevices, hidraHardwareInfo)
-- ogGetOsVersion					(hidraOSVersion)
-- ogGetLinuxSoftware				(hidraLinuxSoftware)
-- hogGetWindowsSoftware				(idraWindowsSoftware)
+- ogListHardwareInfo			(InfoHardware, DetectDevices, hidraHardwareInfo)
+- ogGetOsVersion			(hidraOSVersion)
+- ogGetLinuxSoftware			(hidraLinuxSoftware)
+- hogGetWindowsSoftware			(idraWindowsSoftware)
 
 Librería o clase File:
-- ogGetPath							(ConnectToRepo, hidraPath)
-- ogIsFile							(IfFileExist, IfFileNotExist)
+- ogGetPath				(ConnectToRepo, hidraPath)
+- ogIsFile				(IfFileExist, IfFileNotExist)
 
 Librería o clase String:
 
@@ -113,79 +113,79 @@ moddhcpdconf
 Referencia del Archivo Deploy.lib
 
 SetDefaultStartpage
-DetectMethodTransfer ()
-GetImageFile ()
-UpdateCache ()
-CheckImage ()
-DetectInfoImage () -> GetImageInfo
-DetectaProgramaImagen () -> GetImageProgram
-DetectaFSImagen () -> GetImageFS
-DetectCompresionImage () -> GetImageCompression
-DeployPartitionFromImage ()
-OpenArchiveZIP ()
-OpenArchiveNT ()
-Synchronize ()
-MakeOffline ()
-MountChrootEACclient ()
-UmountChrootEACclient ()
-MakePhotoConsole ()
-BORRARCheckImageTORRENT ()
+DetectMethodTransfer
+GetImageFile
+UpdateCache
+CheckImage
+DetectInfoImage -> GetImageInfo
+DetectaProgramaImagen -> GetImageProgram
+DetectaFSImagen -> GetImageFS
+DetectCompresionImage -> GetImageCompression
+DeployPartitionFromImage
+OpenArchiveZIP
+OpenArchiveNT
+Synchronize
+MakeOffline
+MountChrootEACclient
+UmountChrootEACclient
+MakePhotoConsole
+BORRARCheckImageTORRENT
 
 Referencia del Archivo EACInstall.lib
 
-BuildEACOSBase ()
-BuildEACBootAgenPXE ()
-BuildEACServer ()
-TestPxe ()
+BuildEACOSBase
+BuildEACBootAgenPXE
+BuildEACServer
+TestPxe
 
 Referencia del Archivo FileSystem.lib
 
-SizeFileSystem ()
-InfoCache ()
-FormatToLower ()
-FormatToUpper ()
-FormatSintaxDev ()
-FormatSintaxSpacePath ()
-FormatSintaxBackSlashPath ()
-GetPath ()
-GetLastStr ()
-GetFirstStr ()
-MkdirPath ()
-DetectaEtiquetas ()
-WhatsTime ()
-HowLongHasWorked ()
-NumberRound ()
+SizeFileSystem
+InfoCache
+FormatToLower
+FormatToUpper
+FormatSintaxDev
+FormatSintaxSpacePath
+FormatSintaxBackSlashPath
+GetPath
+GetLastStr
+GetFirstStr
+MkdirPath
+DetectaEtiquetas
+WhatsTime
+HowLongHasWorked
+NumberRound
 
 Referencia del Archivo PostConf.lib
 
-CrearPatron ()
-ParseaSysprep ()
-NTDetect ()
-LoadRegistrySystem ()
-LoadRegistryUsers ()
-UpdateRegistry ()
-NTChangeName ()
-NTDrivers ()
-NTDrivers2 ()
-NTSetGroupName ()
-NTSetOwner ()
-NTAutoLogon ()
-NTStatusRatonTeclado ()
-NTRunOnceMachine ()
-NTRunMachine ()
-NTRunUser ()
-NTPolUserOn ()
-NTPolUserOFF ()
-NTStatusBootChk ()
-NTNoMsgNewHardware ()
-ChangeName ()
+CrearPatron
+ParseaSysprep
+NTDetect
+LoadRegistrySystem
+LoadRegistryUsers
+UpdateRegistry
+NTChangeName
+NTDrivers
+NTDrivers2
+NTSetGroupName
+NTSetOwner
+NTAutoLogon
+NTStatusRatonTeclado
+NTRunOnceMachine
+NTRunMachine
+NTRunUser
+NTPolUserOn
+NTPolUserOFF
+NTStatusBootChk
+NTNoMsgNewHardware
+ChangeName
 
 Referencia del Archivo Settings.lib
 
-IPservidor ()
-IfacesEACclient ()
-ExportEACconf ()
-clean ()
+IPservidor
+IfacesEACclient
+ExportEACconf
+clean
 
 Referencia del Archivo DBProcess.php
 
@@ -210,7 +210,6 @@ hidraImageSize
 hidraLinuxBootParameters 
 hidraPoweroff 
 hidraReboot 
-hidraSetPartitionSize 
 hidraUpdateCache 
 
 
