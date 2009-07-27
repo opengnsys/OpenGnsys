@@ -8,6 +8,47 @@
 #@warning License: GNU GPLv3+
 #*/
 
+
+#/**
+#         ogDevToDisk device
+#@brief   Devuelve el nº de orden de dicso (y partición) correspondiente al nombre de fichero de dispositivo.
+#@arg  \c path_device Camino del fichero de dispositivo.
+#@return  ndisk (para dispositivo de disco)
+#@return  ndisk npartition (para dispositivo de partición).
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Dispositivo no detectado.
+#@note    Requisitos: awk
+#@version 0.9 - Primera versión para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2009-07-20
+#*/
+function ogDevToDisk () {
+
+#/// Variables locales.
+local d n
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME path_device" \
+           "$FUNCNAME /dev/sda  =>  1 1"
+    return
+fi
+
+#/// Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#/// Error si no es fichero de bloques.
+[ -b "$1" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
+
+#/// Procesa todos los discos para devolver su nº de orden y de partición.
+n=1
+for d in $(ogDiskToDev); do
+    [ -n "$(echo $1 | grep $d)" ] && echo "$n ${1#$d}" && return
+    n=$[n+1]
+done
+ogRaiseError $OG_ERR_NOTFOUND "$1"
+return $OG_ERR_NOTFOUND
+}
+
+
 #/**
 #         ogDiskToDev [ndisk [npartition]]
 #@brief   Devuelve la equivalencia entre el nº de orden del dispositivo (dicso o partición) y el nombre de fichero de dispositivo correspondiente.
@@ -199,7 +240,7 @@ if [ "$*" == "help" ]; then
 fi
 
 #/// Error si no se recibe 1 parámetro.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" return $?
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" || return $?
 
 #/// Sustituye nº de disco por su dispositivo.
 DISK="$(ogDiskToDev $1)" || return $?

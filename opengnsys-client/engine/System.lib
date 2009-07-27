@@ -28,10 +28,10 @@ local LOGLEVEL DATETIME         #/// Variables locales
 
 # Selección del nivel de registro (opcional).
 case "$1" in
-     info)    tput setf 2; LOGLEVEL=$1; shift ;;
      help)    tput setf 3; shift ;;
+     info)    tput setf 2; LOGLEVEL=$1; shift ;;
      warning) tput setf 6; LOGLEVEL=$1; shift ;;
-     error)   tput setf 8; LOGLEVEL=$1; shift ;;
+     error)   tput setf 4; LOGLEVEL=$1; shift ;;
      *)       tput setf 9;
 esac
  
@@ -79,9 +79,10 @@ fi
 #*/ 
 function ogRaiseError () {
 
-#/// En pruebas.
+#/// Variables locales
 local MSG CODE
 
+#/// Obtener código y mensaje de error.
 CODE=$1
 case "$CODE" in
      $OG_ERR_FORMAT)    MSG="$MSG_ERR_FORMAT" ;;
@@ -90,7 +91,7 @@ case "$CODE" in
      *)			MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 
-#ogEcho error "${FUNCNAME[${#FUNCNAME[*]}-1]}: $MSG" >&2
+#/// Mostrar mensaje de error y salir con el código indicado.
 ogEcho error "${FUNCNAME[1]}: $MSG" >&2
 return $CODE
 }
