@@ -1,0 +1,62 @@
+#!/bin/bash
+#/**
+#@file    Inventory.lib
+#@brief   Librería o clase Inventory
+#@class   Inventory
+#@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
+#@version 0.9
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogListHardwareInfo
+#@brief   Lista el inventario de hardware de la máquina cliente.
+#@return  TipoDispositivo:Modelo    (por determinar)
+#@warning Se ignoran los parámetros de entrada.
+#@note    TipoDispositivo = { ata, bio, boa, cdr, cpu, dis, fir, mem, mod, mul, net, ser, vga }
+#@note    Requisitos: lshw, awk
+#@version 0.1 - Primeras pruebas con OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-07-28
+#*/
+function ogListHardwareInfo () {
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+
+#/// Recopilación de disposibivos procesando la salida de \c lshw
+ogEcho info "$MSG_HARDWAREINVENTORY}"
+lshw | awk 'BEGIN {type="mod";}
+	/product:/ {sub(/ *product: */,"");  prod=$0;}
+	/vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
+	/version:/ {sub(/ *version: */,"v.");vers=$0;}
+	/size:/    {sub(/ *size: */,"");     size=$0;}
+	/\*-/	   {if (type=="mem")
+			print type"="size;
+		    else
+			if (type!="" && prod!="")
+			    print type"="vend,prod,size,vers;
+		    type=prod=vend=vers=size="";}
+	/-core/    {type="boa";}
+	/-firmware/ {type="bio";}
+	/-cpu/     {type="cpu";}
+	/-memory/  {type="mem";}
+	/-ide/     {type="ide";}
+	/-disk/    {type="dis";}
+	/-cdrom/   {type="cdr";}
+	/-display/ {type="vga";}
+	/-network/ {type="net";}
+	/-multimedia/ {type="mul";}
+	/-usb/     {type="usb";}
+	/-firewire/ {type="fir";}
+	/-serial/  {type="bus";}
+	END 	   {if (type!="" && prod!="")
+			print type"="vend,prod,size,vers;}
+      '
+}
+
+

@@ -15,7 +15,7 @@
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
 #@return  Mnemonico
-#@note 	  Mnemonico: { EXT2, EXT3, EXT4, LINUX-SWAP, LINUX-LVM, RAID-EXT[234], BIGDOS, HBIGDOS, FAT32, HFAT32, NTFS, HNTFS, DINAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.9 - Primera adaptación para OpenGNSys.
@@ -24,34 +24,37 @@
 #*/
 function ogGetFsType () {
 
+#/// Variables locales.
+local DISK ID TYPE
+
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Detectar id. de tipo de particion y codificar al mnemonico.
-local ID=$(ogGetPartitionId $1 $2) || return $?
+#/// Detectar id. de tipo de partición y codificar al mnemonico.
+DISK=$(ogDiskToDev $1) || return $?
+ID=$(ogGetPartitionId $1 $2) || return $?
 case "$ID" in
-     0) 	TIPO="EMPTY" ;;
-     5) 	TIPO="EXTENDED" ;;
-     [6e])	TIPO="BIGDOS" ;;
-     7) 	TIPO="NTFS" ;;
-     [bc])	TIPO="FAT32" ;;
-     1[6e])	TIPO="HBIGDOS" ;;
-     17)	TIPO="HNTFS" ;;
-     1[bc])	TIPO="HFAT32" ;;
-     42)	TIPO="DINAMIC" ;;
-     82)	TIPO="LINUX-SWAP" ;;
-     83)	TIPO="$(parted -s $DISCO print | awk -v var=$2 '{if ($1==var) {print toupper($6)}}')"
-		TIPO=${TIPO:-"EXT3"}
+     0) 	TYPE="EMPTY" ;;
+     5|f) 	TYPE="EXTENDED" ;;
+     [6e])	TYPE="FAT16" ;;
+     7) 	TYPE="NTFS" ;;          # Nota: también puede ser EXFAT
+     [bc])	TYPE="FAT32" ;;
+     12) 	TYPE="COMPAQDIAG" ;;
+     1[6e])	TYPE="HFAT16" ;;
+     17)	TYPE="HNTFS" ;;
+     1[bc])	TYPE="HFAT32" ;;
+     42)	TYPE="WIN-DYNAMIC" ;;
+     82)	TYPE="LINUX-SWAP" ;;
+     83)	TYPE="$(parted -s $DISK print | awk -v var=$2 '{if ($1==var) {print toupper($6)}}')"
+		TYPE=${TYPE:-"EXT3"}
 		;;
-     8e)	TIPO="LINUX-LVM" ;;
-     a7)	TIPO="CACHE" ;;
-     bf)	TIPO="SOLARIS" ;;
-     fd)	TIPO="$(parted -s $DISCO print | awk -v var=$2 '{if ($1==var) {print toupper($6)}}')"
-		TIPO=RAID-${TIPO:-"EXT3"}
-		;;
-     *) 	TIPO="UNKNOWN" ;;
+     8e)	TYPE="LINUX-LVM" ;;
+     a7)	TYPE="CACHE" ;;
+     bf)	TYPE="SOLARIS" ;;
+     fd)	TYPE="LINUX-RAID" ;;
+     *) 	TYPE="UNKNOWN" ;;
 esac
-echo $TIPO
+echo $TYPE
 }
 
 
@@ -101,7 +104,7 @@ if [ -z "$MNTDIR" ]; then
         CACHE)          MOUNT=mount ;;
         EXT[234])       MOUNT=mount ;;
         NTFS|HNTFS)     MOUNT=ntfs-3g ;;
-        BIGDOS|FAT32|HBIGDOS|HFAT32)
+        FAT16|FAT32|HFAT16|HFAT32)
 			MOUNT=mount.vfat ;;
         *)  #/// Error, si la partición no es montable.
             rmdir $MNTDIR
