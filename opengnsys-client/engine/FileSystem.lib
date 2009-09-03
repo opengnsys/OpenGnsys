@@ -59,6 +59,76 @@ echo $TYPE
 
 
 #/**
+#         ogIsLocked int_ndisk int_npartition
+#@brief   Comprueba si una partición está bloqueada por una operación de uso exclusivo.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  0 - sin bloquear, 1 - bloqueada.
+#@note    El fichero de bloqueo se localiza en /var/lock/part, siendo part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
+#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-03
+#*/
+function ogIsLocked () {
+
+#/// Variables locales
+local PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1  =>  0"
+    return
+fi
+
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return $?
+
+#/// Comprobar existencia del fichero de bloqueo.
+test -f /var/lock/lock${PART//\//-}
+}
+
+
+#/**
+#         ogLock int_ndisk int_npartition
+#@brief   Genera un fichero de bloqueo para una partición en uso exlusivo.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    El fichero de bloqueo se localiza en /var/lock/part, siendo part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
+#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-03
+#*/
+function ogLock () {
+
+#/// Variables locales
+local PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return $?
+
+#/// Crear archivo de bloqueo exclusivo.
+touch /var/lock/lock${PART//\//-}
+}
+
+
+#/**
 #         ogMount int_ndisk int_npartition
 #@brief   Monta un sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
@@ -94,7 +164,7 @@ MNTDIR=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #/// Si no, montarla en un directorio de sistema
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
-    #ogIsLocked $1 $2 && return $OG_ERR_LOCKED
+    ogIsLocked $1 $2 && return $OG_ERR_LOCKED
     #/// Crear punto de montaje.
     MNTDIR=${PART/dev/mnt}
     mkdir -p $MNTDIR
@@ -103,6 +173,7 @@ if [ -z "$MNTDIR" ]; then
     case "$TYPE" in
         CACHE)          MOUNT=mount ;;
         EXT[234])       MOUNT=mount ;;
+        REISERFS)       MOUNT=mount ;;
         NTFS|HNTFS)     MOUNT=ntfs-3g ;;
         FAT16|FAT32|HFAT16|HFAT32)
 			MOUNT=mount.vfat ;;
@@ -116,6 +187,43 @@ if [ -z "$MNTDIR" ]; then
 fi
 echo $MNTDIR
 }
+
+
+#/**
+#         ogUnlock int_ndisk int_npartition
+#@brief   Elimina el fichero de bloqueo para una particion.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    El fichero de bloqueo se localiza en /var/lock/part, siendo part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
+#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-03
+#*/
+function ogUnlock () {
+
+#/// Variables locales
+local PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return $?
+
+#/// Borrar archivo de bloqueo exclusivo.
+rm -f /var/lock/lock${PART//\//-}
+}
+
 
 
 #/**
@@ -151,7 +259,7 @@ MNTDIR=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #/// Si está montada, desmontarla.
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
-    #ogIsLocked $1 $2 && return $OG_ERR_LOCKED
+    ogIsLocked $1 $2 && return $OG_ERR_LOCKED
     #/// Crear punto de montaje.
     umount $PART 2>/dev/null && rmdir $MNTDIR || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
 else
