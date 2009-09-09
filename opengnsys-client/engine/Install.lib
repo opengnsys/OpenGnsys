@@ -11,34 +11,65 @@
 
 #/**
 #         ogLoadEnviron
-#@brief   Carga las variables de entorno genéricas.
+#@brief   Carga y modifica variables de entorno necesarias para el funcionamiento de Opengnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-20
 #*/
 function ogLoadEnviron () {
 
-#/// Directorios del projecto OpenGNSys.
+# FIXME Temporal
+LANG=ES_es
+
+# Directorios del projecto OpenGNSys.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 if [ -d $OPENGNSYS ]; then
-   OGBIN=$OPENGNSYS/bin
-   OGETC=$OPENGNSYS/etc
-   OGLIB=$OPENGNSYS/lib
-   OGAPI=$OGLIB/engine/bin
-   OGLOG=$OPENGNSYS/log
-   OGLOGFILE=$OPENGNSYS/log/opengnsys.log
-   export PATH=$PATH:$OGBIN:$OGAPI
-   #/// Cargar idioma.
-   LANGFILE=$OGETC/lang.$LANG.conf
-   [ -f $LANGFILE ] && source $LANGFILE
+    export OGBIN=$OPENGNSYS/bin
+    export OGETC=$OPENGNSYS/etc
+    export OGLIB=$OPENGNSYS/lib
+    export OGAPI=$OPENGNSYS/engine/bin
+    export OGIMG=$OPENGNSYS/images
+    export OGCAC=$OPENGNSYS/cache
+    export OGLOG=$OPENGNSYS/log
+
+    export OG_DHCP_SERVER=`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
+    export OG_SERVER_IP=$OG_DHCP_SERVER
+    export OG_IP=`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
+
+    export OGLOGFILE=$OGLOG/$OG_IP.log
+
+    # FIXME Pruebas para grupos de ordenadores
+    export OGGROUP=aula3
+
+    export PATH=$OGBIN:$OGAPI:$PATH
+    export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
+
+    # Incluimos el modulo del raton
+    insmod $OGLIB/modules/psmouse.ko
+
+    # Cargar idioma.
+    LANGFILE=$OGETC/lang.$LANG.conf
+    [ -f $LANGFILE ] && source $LANGFILE
+
+    # Montamos el resto de cosas necesarias
+    mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/log/clients $OGLOG
+    mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/images $OGIMG
+    if [ mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/cache $OGIMG ]; then
+        export OGCACHE=1;
+    else
+        export OGCACHE=0;
+    fi
+
+
+    # FIXME Necesario temporalmente
+    mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/
+    ln -s $OGLIB/fonts /usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts
 fi
 
 #/// Declaración de códigos de error.
 export OG_ERR_FORMAT=1		# Formato de ejecucion incorrecto.
 export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
 export OG_ERR_PARTITION=3	# Error en particion de disco.
-OG_ERR_NOTEXEC=4	# Programa o funcion no ejecutable.
-OG_ERR_NOTOS=5		# Sin sistema operativo.
-OG_ERR_LOCKED=6		# Particion o fichero bloqueado.
+export OG_ERR_NOTEXEC=4     # Programa o funcion no ejecutable.
+export OG_ERR_NOTOS=5		# Sin sistema operativo.
+export OG_ERR_LOCKED=6		# Particion o fichero bloqueado.
 }
-
-
