@@ -64,7 +64,7 @@ echo $TYPE
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
 #@return  0 - sin bloquear, 1 - bloqueada.
-#@note    El fichero de bloqueo se localiza en /var/lock/part, siendo part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
+#@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
 #@version 0.1 - En pruebas para adaptarla a OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
@@ -72,7 +72,7 @@ echo $TYPE
 function ogIsLocked () {
 
 #/// Variables locales
-local PART
+local PART LOCKFILE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -88,7 +88,8 @@ fi
 PART="$(ogDiskToDev $1 $2)" || return $?
 
 #/// Comprobar existencia del fichero de bloqueo.
-test -f /var/lock/lock${PART//\//-}
+LOCKFILE="/var/lock/lock${PART//\//-}"
+test -f $LOCKFILE
 }
 
 
@@ -100,7 +101,7 @@ test -f /var/lock/lock${PART//\//-}
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
-#@note    El fichero de bloqueo se localiza en /var/lock/part, siendo part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
+#@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
 #@version 0.1 - En pruebas para adaptarla a OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
@@ -124,12 +125,21 @@ fi
 PART="$(ogDiskToDev $1 $2)" || return $?
 
 #/// Crear archivo de bloqueo exclusivo.
-touch /var/lock/lock${PART//\//-}
+LOCKFILE="/var/lock/lock${PART//\//-}"
+touch $LOCKFILE
 }
 
 
 #/**
 #         ogMount int_ndisk int_npartition
+#@see     ogMountPartition
+*/
+function ogMount () {
+ogMountPartition $*
+}
+
+#/**
+#         ogMountPartition int_ndisk int_npartition
 #@brief   Monta un sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
@@ -141,7 +151,7 @@ touch /var/lock/lock${PART//\//-}
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-27
 #*/
-function ogMount () {
+function ogMountPartition () {
 
 #/// Variables locales
 local PART TYPE MNTDIR MOUNT
@@ -197,7 +207,7 @@ echo $MNTDIR
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
-#@note    El fichero de bloqueo se localiza en /var/lock/part, siendo part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
+#@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
 #@version 0.1 - En pruebas para adaptarla a OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
@@ -221,7 +231,8 @@ fi
 PART="$(ogDiskToDev $1 $2)" || return $?
 
 #/// Borrar archivo de bloqueo exclusivo.
-rm -f /var/lock/lock${PART//\//-}
+LOCKFILE="/var/lock/lock${PART//\//-}"
+rm -f $LOCKFILE
 }
 
 

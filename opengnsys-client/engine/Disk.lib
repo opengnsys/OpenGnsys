@@ -10,9 +10,119 @@
 
 
 #/**
+#         ogCreatePartitions ndisk parttype:partsize ...
+#@brief   Asigna las tabla de particiones primarias de un disco.
+#@arg \c  int_ndisk      nº de orden del disco
+#@arg \c  str_parttype   mnemónico del tipo de partición
+#@arg \c  int_partsize   tamaño de la partición (en KB)
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
+#@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
+#@attention Pueden definirse particiones vacías de tipo \c EMPTY
+#@note    Requisitos: sfdisk, parted, partprobe, awk
+#@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
+#@version 0.9 - Primera versión para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/09/09
+#*/
+function ogCreatePartitions () {
+
+# Variables locales.
+local DISK PART SECTORS START SIZE TYPE EXTSTART EXTSIZE tmpsfdisk
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
+           "$FUNCNAME 1 NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
+    return
+fi
+
+#/// Error si no se reciben menos de 2 parámetros.
+[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+#/// Sustituye nº de disco por su dispositivo.
+DISK="$(ogDiskToDev $1)" || return $?
+shift 
+
+# Nº total de sectores, para evitar desbordamiento
+SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
+# Sector de inicio de la particon (la 1ª empieza en el sector 63).
+START=63
+PART=1
+
+#/// Fichero temporal de entrada para "sfdisk"
+tmpsfdisk=/tmp/sfdisk$$
+trap "rm -f $tmpsfdisk" 1 2 3 9 15
+
+echo "unit: sectors" >$tmpsfdisk
+echo                >>$tmpsfdisk
+
+#/// Generar fichero de entrada para "sfdisk" con las particiones.
+while [ $# -gt 0 ]; do
+    #/// Leer formato de cada parámetro - Tipo:Tamaño
+    TYPE="${1%%:*}"
+    SIZE="${1#*:}"
+    [ -z "$SIZE" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+    #/// Convertir en sectores de 512 B.
+    SIZE=$[SIZE*2]
+    [ $SIZE -eq 0 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+    #/// Obtener identificador de tipo de partición.
+    case "$TYPE" in
+	EMPTY)          ID=0  ;;
+	EXTENDED)	ID=5 
+			[ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+                        EXTSTART=$START
+                        EXTSIZE=$SIZE
+                              ;;
+	 NTFS|EXFAT)    ID=7  ;;
+	 HNTFS)	        ID=17 ;;
+	 FAT32)	        ID=b  ;;
+	 HFAT32)	ID=1b ;;
+	 EXT[234]|REISERFS|REISER4)
+			ID=83 ;;
+	 LINUX-SWAP)    ID=82 ;;
+	 CACHE)         ID=a7 ;;
+	 *)		ogRaiseError $OG_ERR_FORMAT
+	                return $? ;;
+    esac
+    #/// Incluir particiones lógicas dentro de la partición extendida.
+    if [ $PART = 5 ]; then
+        [ -z "$EXTSTART" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+        START=$EXTSTART
+        SECTORS=$[EXTSTART+EXTSIZE]
+    fi
+    #/// Generar datos para la partición.
+    echo "$DISK$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
+    #/// Error si se supera el nº total de sectores.
+    START=$[START+SIZE]
+    [ $START -gt $SECTORS ] && ogRaiseError $OG_ERR_FORMAT && return $?
+    PART=$[PART+1]
+    shift
+done
+#/// Si no se indican las 4 particiones primarias, definir particion vacía.
+while [ $PART -le 4 ]; do
+    echo "$DISK$PART : start=0, size=0, Id=0" >>$tmpsfdisk
+    PART=$[PART+1]
+done
+#/// Si se define partición extendida sin lógicas, crear particion 5 vacía.
+if [ $PART = 5 -a -n "$EXTSTART" ]; then
+    echo "${DISK}5 : start=$EXTSTART, size=$EXTSIZE, Id=0" >>$tmpsfdisk
+fi
+
+# Desmontar todos los sistemas de archivos del disco.
+#hidraUnmountAll $1
+# Si la tabla de particiones no es valida, volver a generarla.
+[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
+# Definir particiones y notificar al kernel.
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
+rm -f $tmpsfdisk
+}
+
+
+#/**
 #         ogDevToDisk device
 #@brief   Devuelve el nº de orden de dicso (y partición) correspondiente al nombre de fichero de dispositivo.
-#@arg  \c path_device Camino del fichero de dispositivo.
+#@arg \c  path_device Camino del fichero de dispositivo.
 #@return  ndisk (para dispositivo de disco)
 #@return  ndisk npartition (para dispositivo de partición).
 #@exception OG_ERR_FORMAT   Formato incorrecto.
@@ -24,7 +134,7 @@
 #*/
 function ogDevToDisk () {
 
-#/// Variables locales.
+# Variables locales.
 local d n
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then 
@@ -52,8 +162,8 @@ return $OG_ERR_NOTFOUND
 #/**
 #         ogDiskToDev [ndisk [npartition]]
 #@brief   Devuelve la equivalencia entre el nº de orden del dispositivo (dicso o partición) y el nombre de fichero de dispositivo correspondiente.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@arg \c  int_ndisk      nº de orden del disco
+#@arg \c  int_npartition nº de orden de la partición
 #@return  Para 0 parametros: Devuelve los nombres de ficheros  de los dispositivos sata/ata/usb linux encontrados.
 #@return  Para 1 parametros: Devuelve la ruta del disco duro indicado.
 #@return  Para 2 parametros: Devuelve la ruta de la particion indicada.
@@ -111,7 +221,7 @@ esac
 #/**
 #         ogGetPartitionActive ndisk
 #@brief   Muestra que particion de un disco esta marcada como de activa.
-#@arg  \c int_ndisk      nº de orden del disco
+#@arg \c  int_ndisk      nº de orden del disco
 #@return  Nº de partición activa
 #@exception OG_ERR_FORMAT Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
@@ -144,8 +254,8 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #/**
 #         ogGetPartitionId ndisk npartition
 #@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@arg \c  int_ndisk      nº de orden del disco
+#@arg \c  int_npartition nº de orden de la partición
 #@return  Identificador de tipo de partición.
 #@exception OG_ERR_FORMAT Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
@@ -179,8 +289,8 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 #/**
 #         ogGetPartitionSize ndisk npartition
 #@brief   Muestra el tamano en KB de una particion determinada.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@arg \c  int_ndisk      nº de orden del disco
+#@arg \c  int_npartition nº de orden de la partición
 #@return  tamañoKB
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
@@ -213,16 +323,14 @@ sfdisk -s $PART
 }
 
 
-
-#/**
-#         ogListPartitions ndisk
+#         ogListPartitions int_ndisk
 #@brief   Lista las particiones definidas en un disco.
-#@arg  \c int_ndisk  nº de orden del disco
-#@return  numpart:tipo:tamanoKB ...
+#@arg \c  int_ndisk  nº de orden del disco
+#@return  tipo:tamanoKB ...
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: \c parted \c awk
-#@warning Los datos de las particiones están separados por espacios en blanco.
+#@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
 #@version 0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
@@ -235,7 +343,7 @@ local DISK PART
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then 
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
-           "$FUNCNAME 1  =>  1:NTFS:10000000 2:EXT3:5000000 3:LINUX-SWAP:1000000"
+           "$FUNCNAME 1  =>  NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
 fi
 
@@ -256,10 +364,8 @@ echo
 #/**
 #         ogUpdateDisk
 #@brief   Fuerza al kernel releer la tabla de particiones de los discos duros
-#@arg  \c no requiere
+#@arg \c  no requiere
 #@return  informacion propia de la herramienta
-#@exception
-#@exception
 #@note    Requisitos: \c partprobe
 #@warning pendiente estructurar la funcion a opengnsys
 #@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
