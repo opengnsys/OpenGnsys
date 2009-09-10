@@ -28,7 +28,19 @@
 #@date    2009/09/10
 #*/
 function ogCreateImage () {
-local PART IMGDIR IMGFILE
+
+# Variables locales
+local PART IMGDIR IMGFILE SIZE REDSIZE
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart path_dir str_image" \
+           "$FUNCNAME 1 1 aula1 winxp"
+    return
+fi
+#/// Error si no se reciben menos de 2 parámetros.
+[ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
 PART="$(ogDiskToDev $1 $2)" || return $?
 
 ogIsLocked $1 $2 && return $?
@@ -39,7 +51,7 @@ IMGDIR="$OGIMG/$3"
 #mkdir -p "$IMGDIR"
 IMGFILE="$IMGDIR/$4"
 
-ogLock $1 $2
+ogLock $1 $2 && return $?
 trap "ogUnlock $1 $2" 1 2 3 6 9
 
 SIZE=$(ogGetPartitionSize $1 $2)
@@ -48,10 +60,14 @@ SIZE=$(ogGetPartitionSize $1 $2)
 
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
-    NTFS|HNTFS)
-        ;;
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART $IMGFILE && ogRaiseError $OG_ERR_IMAGE && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        ;;
+    NTFS|HNTFS)
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        ;;
+    FAT16|FAT32|HFAT16|HFAT32)
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
         ;;
     *)  ogRaiseError $OG_ERR_FORMAT 
         return $? ;;

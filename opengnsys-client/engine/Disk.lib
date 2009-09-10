@@ -176,7 +176,7 @@ return $OG_ERR_NOTFOUND
 #*/
 function ogDiskToDev () {
 
-#/// Variables locales
+# Variables locales
 local ALLDISKS DISK PART
 
 #/// Si se solicita, mostrar ayuda.
@@ -226,14 +226,14 @@ esac
 #@exception OG_ERR_FORMAT Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    Requisitos: parted
-#@warning Queda definir formato para atributos (arranque, oculta, ...).
+#@todo    Queda definir formato para atributos (arranque, oculta, ...).
 #@version 0.9 - Primera versión compatible con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/
 function ogGetPartitionActive () {
 
-#/// Variables locales
+# Variables locales
 local DISK
 
 #/// Si se solicita, mostrar ayuda.
@@ -241,7 +241,6 @@ if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" "$FUNCNAME 1  =>  1"
     return
 fi
-
 #/// Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -266,7 +265,7 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #*/
 function ogGetPartitionId () {
 
-#/// Variables locales.
+# Variables locales.
 local DISK PART
 
 #/// Si se solicita, mostrar ayuda.
@@ -275,7 +274,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1  =>  7"
     return
 fi
-
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -301,8 +299,8 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 #*/
 function ogGetPartitionSize () {
 
-#/// Variables locales.
-local DISK PART
+# Variables locales.
+local PART
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -310,15 +308,11 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1  =>  10000000"
     return
 fi
-
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Sustituye nº de disco y de partición por sus dispositivos.
-DISK="$(ogDiskToDev $1)" || return $?
+#/// Obtener el tamaño de la partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
-
-#/// Procesar la salida de "sfdisk".
 sfdisk -s $PART
 }
 
@@ -331,14 +325,15 @@ sfdisk -s $PART
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: \c parted \c awk
 #@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
+#@attention Las tuplas de valores están separadas por espacios.
 #@version 0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/
 function ogListPartitions () {
 
-#/// Variables locales.
-local DISK PART
+# Variables locales.
+local DISK PART NPARTS
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then 
@@ -346,7 +341,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1  =>  NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
 fi
-
 #/// Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" || return $?
 
@@ -354,9 +348,9 @@ fi
 DISK="$(ogDiskToDev $1)" || return $?
 
 #/// Procesar la salida de \c parted .
-PARTS=$(parted -s $DISK print | awk '$1~/^[1-9]/ {print $1}')
-for p in $PARTS; do
-    echo -n "$p:$(ogGetFsType $1 $p):$(ogGetPartitionSize $1 $p) "
+NPARTS=$(parted -s $DISK print | awk '$1~/^[1-9]/ {print $1}')
+for PART in $NPARTS; do
+    echo -n "$(ogGetFsType $1 $PART):$(ogGetPartitionSize $1 $PART) "
 done
 echo
 }

@@ -17,16 +17,16 @@
 #@arg  \c str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
-#version  Primera versión para OpenGNSys
+#version  0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-23
 #*/
 function ogEcho () {
 
-#/// Variables locales
-local LOGLEVEL DATETIME         #/// Variables locales
+# Variables locales
+local LOGLEVEL DATETIME
 
-# Selección del nivel de registro (opcional).
+#/// Selección del nivel de registro (opcional).
 case "$1" in
      help)    tput setf 3; shift ;;
      info)    tput setf 2; LOGLEVEL=$1; shift ;;
@@ -35,7 +35,7 @@ case "$1" in
      *)       tput setf 9;
 esac
  
-# Selección de la posición en pantalla (opcional).
+#/// Selección de la posición en pantalla (opcional).
 case "$2" in
      "up-left")       tput cup  0  0; shift ;;
      "up-center")     tput cup  0 40; shift ;;
@@ -79,7 +79,7 @@ fi
 #*/ 
 function ogRaiseError () {
 
-#/// Variables locales
+# Variables locales
 local MSG CODE
 
 #/// Obtener código y mensaje de error.
@@ -114,6 +114,7 @@ return $CODE
 #*/
 function ogHelp () {
 
+# Variables locales.
 local FUNC MSG
 
 #/// Mostrar función, descripción y formato.

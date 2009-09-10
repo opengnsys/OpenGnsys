@@ -24,9 +24,15 @@
 #*/
 function ogGetFsType () {
 
-#/// Variables locales.
+# Variables locales.
 local DISK ID TYPE
 
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1  =>  NTFS"
+    return
+fi
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -71,7 +77,7 @@ echo $TYPE
 #*/
 function ogIsLocked () {
 
-#/// Variables locales
+# Variables locales
 local PART LOCKFILE
 
 #/// Si se solicita, mostrar ayuda.
@@ -80,7 +86,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1  =>  0"
     return
 fi
-
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -108,8 +113,8 @@ test -f $LOCKFILE
 #*/
 function ogLock () {
 
-#/// Variables locales
-local PART
+# Variables locales
+local PART LOCKFILE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -117,7 +122,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1"
     return
 fi
-
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -162,7 +166,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1  =>  /mnt/sda1"
     return
 fi
-
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -174,7 +177,7 @@ MNTDIR=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #/// Si no, montarla en un directorio de sistema
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
-    ogIsLocked $1 $2 && return $OG_ERR_LOCKED
+    ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
     #/// Crear punto de montaje.
     MNTDIR=${PART/dev/mnt}
     mkdir -p $MNTDIR
@@ -214,8 +217,8 @@ echo $MNTDIR
 #*/
 function ogUnlock () {
 
-#/// Variables locales
-local PART
+# Variables locales
+local PART LOCKFILE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -223,7 +226,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1"
     return
 fi
-
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
@@ -252,7 +254,7 @@ rm -f $LOCKFILE
 #*/
 function ogUnmount () {
 
-#/// Variables locales
+# Variables locales
 local PART
 
 #/// Si se solicita, mostrar ayuda.
@@ -270,7 +272,7 @@ MNTDIR=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #/// Si está montada, desmontarla.
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
-    ogIsLocked $1 $2 && return $OG_ERR_LOCKED
+    ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
     #/// Crear punto de montaje.
     umount $PART 2>/dev/null && rmdir $MNTDIR || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
 else
