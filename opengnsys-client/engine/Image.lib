@@ -1,0 +1,64 @@
+#!/bin/bash
+#/**
+#@file    Image.lib
+#@brief   Librería o clase Image
+#@class   Image
+#@brief   Funciones para creación, restauración y clonación de imágenes de sistemas.
+#@version 0.9
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogCreateImage ndisk npartition dir image
+#@brief   Crea una imagen a partir de una partición.
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
+#@arg  \c path_dir       directorio o grupo donde guardar la imagen
+#@arg  \c str_image      nombre de la imagen
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
+#@exception OG_ERR_LOCKED   particion bloqueada por otra operación.
+#@exception OG_ERR_IMAGE    error al crear la imagen del sistema.
+#@warning En pruebas iniciales
+#@todo    Comprobaciones, control de errores, definir parámetros, etc.
+#@version 0.1 - Primera versión muy en pruebas para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/09/10
+#*/
+function ogCreateImage () {
+local PART IMGDIR IMGFILE
+PART="$(ogDiskToDev $1 $2)" || return $?
+
+ogIsLocked $1 $2 && return $?
+ogUnmount $1 $2 || return $?
+
+IMGDIR="$OGIMG/$3"
+#### Comprobar directorio en NFS o en caché.
+#mkdir -p "$IMGDIR"
+IMGFILE="$IMGDIR/$4"
+
+ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
+
+SIZE=$(ogGetPartitionSize $1 $2)
+#REDSIZE=$(ogFsReduze $1 $2) || REDSIZE=$[SIZE+1]
+#[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $REDSIZE
+
+TYPE="$(ogGetFsType $1 $2)"
+case "$TYPE" in
+    NTFS|HNTFS)
+        ;;
+    EXT[234]|REISERFS)
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART $IMGFILE && ogRaiseError $OG_ERR_IMAGE && return $?
+        ;;
+    *)  ogRaiseError $OG_ERR_FORMAT 
+        return $? ;;
+esac
+
+#[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $SIZE
+
+ogUnlock $1 $2
+}
+

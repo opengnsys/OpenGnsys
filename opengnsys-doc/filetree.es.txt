@@ -10,6 +10,7 @@ Estructura de directorios de OpenGNSys Client
   bin (ro) - utilidades asociadas.
   cache (rw) - directorio donde esta montado la particion de cache
   etc (ro) - configuración.
+    preinit (ro) - scripts de carga del sistema.
     init (ro) - scripts de arranque.
     startpages (ro) - paginas webs de inicio
   images (normal=ro, admin=rw) - imágenes de arranque.

@@ -69,7 +69,8 @@ fi
 export OG_ERR_FORMAT=1		# Formato de ejecucion incorrecto.
 export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
 export OG_ERR_PARTITION=3	# Error en particion de disco.
-export OG_ERR_NOTEXEC=4     # Programa o funcion no ejecutable.
-export OG_ERR_NOTOS=5		# Sin sistema operativo.
-export OG_ERR_LOCKED=6		# Particion o fichero bloqueado.
+export OG_ERR_LOCKED=4		# Particion o fichero bloqueado.
+export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
+export OG_ERR_NOTOS=6		# Sin sistema operativo.
+export OG_ERR_NOTEXEC=7         # Programa o funcion no ejecutable.
 }
