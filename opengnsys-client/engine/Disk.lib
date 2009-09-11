@@ -11,7 +11,7 @@
 
 #/**
 #         ogCreatePartitions ndisk parttype:partsize ...
-#@brief   Asigna las tabla de particiones primarias de un disco.
+#@brief   Define el conjunto de particiones de un disco.
 #@arg \c  int_ndisk      nº de orden del disco
 #@arg \c  str_parttype   mnemónico del tipo de partición
 #@arg \c  int_partsize   tamaño de la partición (en KB)
@@ -36,7 +36,6 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
 fi
-
 #/// Error si no se reciben menos de 2 parámetros.
 [ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
@@ -50,7 +49,7 @@ SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 START=63
 PART=1
 
-#/// Fichero temporal de entrada para "sfdisk"
+# Fichero temporal de entrada para "sfdisk"
 tmpsfdisk=/tmp/sfdisk$$
 trap "rm -f $tmpsfdisk" 1 2 3 9 15
 
@@ -99,12 +98,12 @@ while [ $# -gt 0 ]; do
     PART=$[PART+1]
     shift
 done
-#/// Si no se indican las 4 particiones primarias, definir particion vacía.
+# Si no se indican las 4 particiones primarias, definirlas como vacías.
 while [ $PART -le 4 ]; do
     echo "$DISK$PART : start=0, size=0, Id=0" >>$tmpsfdisk
     PART=$[PART+1]
 done
-#/// Si se define partición extendida sin lógicas, crear particion 5 vacía.
+# Si se define partición extendida sin lógicas, crear particion 5 vacía.
 if [ $PART = 5 -a -n "$EXTSTART" ]; then
     echo "${DISK}5 : start=$EXTSTART, size=$EXTSIZE, Id=0" >>$tmpsfdisk
 fi
@@ -113,7 +112,7 @@ fi
 #hidraUnmountAll $1
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
-# Definir particiones y notificar al kernel.
+#/// Definir particiones y notificar al kernel.
 sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
 rm -f $tmpsfdisk
 }
@@ -317,6 +316,7 @@ sfdisk -s $PART
 }
 
 
+#/**
 #         ogListPartitions int_ndisk
 #@brief   Lista las particiones definidas en un disco.
 #@arg \c  int_ndisk  nº de orden del disco
@@ -344,10 +344,8 @@ fi
 #/// Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" || return $?
 
-#/// Sustituye nº de disco por su dispositivo.
-DISK="$(ogDiskToDev $1)" || return $?
-
 #/// Procesar la salida de \c parted .
+DISK="$(ogDiskToDev $1)" || return $?
 NPARTS=$(parted -s $DISK print | awk '$1~/^[1-9]/ {print $1}')
 for PART in $NPARTS; do
     echo -n "$(ogGetFsType $1 $PART):$(ogGetPartitionSize $1 $PART) "

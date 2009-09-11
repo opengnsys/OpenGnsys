@@ -22,7 +22,7 @@
 #@exception OG_ERR_LOCKED   particion bloqueada por otra operación.
 #@exception OG_ERR_IMAGE    error al crear la imagen del sistema.
 #@warning En pruebas iniciales
-#@todo    Comprobaciones, control de errores, definir parámetros, etc.
+#@todo    Comprobaciones, control de errores, definir parámetros, caché/repositorio, etc.
 #@version 0.1 - Primera versión muy en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/10
@@ -76,5 +76,107 @@ esac
 #[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $SIZE
 
 ogUnlock $1 $2
+}
+
+
+#/**
+#         ogGetImageSize dir image
+#@brief   Devuelve el tamaño del sistema de archivos almacenado en un fichero de imagen.
+#@arg  \c path_dir       directorio o grupo donde guardar la imagen
+#@arg  \c str_image      nombre de la imagen
+#@return  tamaño (en KB)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND fichero de imagen no encontrado.
+#*/
+#@warning En pruebas iniciales
+#@todo    Definición de parámetros y salidas.
+#@version 0.1 - Primera versión muy en pruebas para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/09/11
+#*/
+function ogGetImageSize () {
+
+# Variables locales
+local IMGFILE
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk int_npart" \
+           "$FUNCNAME aula1 winxp  ==>  5642158"
+    return
+fi
+#/// Error si no se reciben menos de 2 parámetros.
+[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+#/// Error si el fichero de imagen no es accesible.
+IMGFILE="$OGIMG/$3/$4"
+[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+
+#/// Devuelve el tamaño de la imagen en KB.
+partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
+        awk '/Partition size/ {sub(/\.\.+/," "); printf "%d\n",$3*1024*1024;}'
+}
+
+
+#/**
+#         ogRestoreImage dir image ndisk npartition
+#@brief   Restaura una imagen de sistema de archivos en una partición.
+#@arg  \c path_dir       directorio o grupo donde guardar la imagen
+#@arg  \c str_image      nombre de la imagen
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
+#@return  (por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
+#@exception OG_ERR_LOCKED   partición bloqueada por otra operación.
+#@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
+#@warning En pruebas iniciales
+#@todo    Comprobaciones, control de errores, definir parámetros, caché/repositorio, etc.
+#@version 0.1 - Primera versión muy en pruebas para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/09/10
+#*/
+function ogRestoreImage () {
+
+# Variables locales
+local PART IMGFILE
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk int_npart" \
+           "$FUNCNAME aula1 winxp 1 1"
+    return
+fi
+#/// Error si no se reciben menos de 2 parámetros.
+[ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+PART="$(ogDiskToDev $3 $4)" || return $?
+IMGFILE="$OGIMG/$1/$2"
+[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+# Error si la imagen no cabe en la particion.
+[ $(ogGetImageSize "$1") -gt $(ogGetPartitionSize $3 $4) ] && ogRaiseError $OG_ERR_PARTITION && return $?
+
+
+ogIsLocked $3 $4 && return $?
+ogUnmount $3 $4 || return $?
+ogLock $3 $4 && return $?
+trap "ogUnlock $3 $4" 1 2 3 6 9
+
+TYPE="$(ogGetFsType $3 $4)"
+case "$TYPE" in
+    EXT[234]|REISERFS)
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" && return $?
+        ;;
+    NTFS|HNTFS)
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" && return $?
+        ;;
+    FAT16|FAT32|HFAT16|HFAT32)
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" && return $?
+        ;;
+    *)  ogRaiseError $OG_ERR_FORMAT 
+        return $? ;;
+esac
+
+#ogFsExtend $3 $4
+ogUnlock $3 $4
 }
 

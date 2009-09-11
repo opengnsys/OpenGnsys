@@ -62,11 +62,13 @@ Librería o clase FileSystem:
 Librería o clase Image:
 - ogCreateImage				(CreateImageFromPartition, hidraCreateImageFromPartition)
 - ogRestoreImage			(RestorePartitionFromImage, RestorePartitionFromPartition, hidraRestorePartitionFromImage)
+- ogGetImageSize			(hidraImageSize)
 - ogCreateTorrent			(CreateTorrentFromImage)
 
 
 Librería o clase Boot:
 - ogBoot				(HDBoot, BootLinuxEX, hidraBoot)
+- ogLinuxBootParameters			(hidraLinuxBootParameters)
 - ogInstallGrub				(InstallGrub)
 - ogConfigureGrub			(ConfGrub)
 - ogListRegistryKeys			(hidraListRegistryKeys)
@@ -104,7 +106,6 @@ ELIMINARReducirFileSystemNT
 
 Referencia del Archivo Boot.lib
 
-BootLinuxEX
 SetDefaultBoot
 ConvertToGrub
 InstalaGrub4dos
@@ -206,8 +207,6 @@ hidraClientMAC
 hidraDeleteFile 
 hidraEACServer 
 hidraFSCheck 
-hidraImageSize 
-hidraLinuxBootParameters 
 hidraPoweroff 
 hidraReboot 
 hidraUpdateCache 
