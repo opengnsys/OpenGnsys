@@ -1,34 +1,31 @@
 #!/bin/bash
 
-SVNROOT=$HOME/projects/opengnsys
-OGROOT=/opt/opengnsys/trunk
-TFTPBOOT=/var/lib/tftpboot
+#SVNROOT=$HOME/projects/opengnsys/trunk
+
+# Nota, hay que ponerlo hasta el directorio trunk como en el ejemplo de arriba
+#SVNROOT=
+OGROOT=/opt/opengnsys/
 
 function arguments_parser
 {
-#    if [ $UID != 0 ]; then
-#        echo "No tiene permisos suficientes para ejecutar este script"
-#        exit -1
-#    fi
-
-    while [ $# -ne 0 ];do
+    while [ $# -gt 0 ];do
         case $1 in
             ("-t")
             shift
             if [ $# -eq 0 ];then
                 echo "Error parseando argumentos"
-                return -1
+                exit -1
             else
-                TFTPBOOT=$1
+                OGROOT=$1
                 shift
             fi
             ;;
 
             ("-s")
             shift
-            if [ $# -eq 0 ];then
+            if [ $# -eq 0 ]; then
                 echo "Error parseando argumentos"
-                return -1
+                exit -1
             else
                 SVNROOT=$1
                 shift
@@ -36,14 +33,25 @@ function arguments_parser
             ;;
         esac
     done
+}
 
-    echo $TFTPBOOT
-    echo $SVNROOT
+function checking
+{
+    if [ $UID != 0 ]; then
+        echo "No tiene permisos suficientes para ejecutar este script"
+        exit -1
+    fi
+    if [ -z $SVNROOT ] ; then
+        echo "Necesito saber la ruta de las fuentes del proyecto."
+        echo "$0 -s /ruta/hacia/las/fuentes"
+        echo "Tambien puedes editar el script y anyadirlo manualmente."
+        exit -1
+    fi
 }
 
 function install_necesary_packages
 {
-    apt-get install pxe dhcp3-server tftpd-hpa pxe nfs-kernel-server
+    apt-get install pxe dhcp3-server tftpd-hpa nfs-kernel-server
 }
 
 function create_file_system
@@ -67,13 +75,14 @@ function create_file_system
     install -d $SVNROOT/opengnsys-client/engine/*.lib $OGROOT/client/lib/engine/
 }
 
-function dhcpd
+function install_dhcpd
 {
     cat $SVNROOT/opengnsys-server/DHCP/dhcpd.conf >> /etc/dhcp3/dhcpd.conf
+    /etc/init.d/dhcp3-server restart
     echo "Revise el archivo /etc/dhcp3/dhcpd.conf para configurarlo para su red"
 }
 
-function tftpboot
+function install_tftpboot
 {
     mkdir -p $OGROOT/tftpboot/pxelinux.cfg/
     cd $OGROOT/tftpboot/pxelinux.cfg/
@@ -81,7 +90,7 @@ function tftpboot
     $SVNROOT/opengnsys-client/boot/initrd-generator
 }
 
-function nfsexport
+function install_nfsexport
 {
     cat $SVNROOT/opengnsys-server/NFS/export >> /etc/exports
     /etc/init.d/nfs-kernel-server restart
@@ -90,3 +99,9 @@ function nfsexport
 }
 
 arguments_parser $@
+checking
+install_necesary_packages
+create_file_system
+install_dhcp
+install_tftpboot
+install_nfsexport
