@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=$WORKDIR/installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server tftpd-hpa udpcast bittorrent apache2 php5 mysql-server php5-mysql )
+DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftpd-hpa syslinux tftp-hpa openbsd-inetd update-inetd )
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -23,8 +23,8 @@ SVN_PASSWORD=potupass
 
 # Datos de base de datos
 HIDRA_DATABASE=bdhidra
-HIDRA_DB_USER=bdhidra
-HIDRA_DB_PASSWD=bdhidra
+HIDRA_DB_USER=usuhidra
+HIDRA_DB_PASSWD=passusuhidra
 HIDRA_DB_CREATION_FILE=eac-hidra/branches/eac-hidra-us/Hidra/doc/hidra-bd.sql
 
 USUARIO=`whoami`
@@ -72,7 +72,7 @@ isInArray()
 
 	echoAndLog "isInArray(): checking if $2 is in $1"
 	local deps
-	eval "deps=( \"\${$1[@]}\" )" 
+	eval "deps=( \"\${$1[@]}\" )"
 	elemento=$2
 
 	local is_in_array=1
@@ -130,10 +130,10 @@ checkDependencies()
 
 	# copia local del array del parametro 1
 	local deps
-	eval "deps=( \"\${$1[@]}\" )" 
+	eval "deps=( \"\${$1[@]}\" )"
 
 	declare -a local_notinstalled
-	
+
 	for (( i = 0 ; i < ${#deps[@]} ; i++ ))
 	do
 		checkPackage ${deps[$i]}
@@ -165,7 +165,7 @@ installDependencies()
 
 	# copia local del array del parametro 1
 	local deps
-	eval "deps=( \"\${$1[@]}\" )" 
+	eval "deps=( \"\${$1[@]}\" )"
 
 	local string_deps=""
 	for (( i = 0 ; i < ${#deps[@]} ; i++ ))
@@ -476,11 +476,15 @@ openGnsysInstallCreateDirs()
 	echoAndLog "openGnsysInstallCreateDirs(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
-	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/bin
-	mkdir -p $path_opengnsys_base/sbin
+	mkdir -p $path_opengnsys_base/client
+	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
+	mkdir -p $path_opengnsys_base/log
 	mkdir -p $path_opengnsys_base/www
+	mkdir -p $path_opengnsys_base/tftpboot/ogclients
+	mkdir -p $path_opengnsys_base/images
+
 	if [ $? -ne 0 ]; then
 		errorAndLog "openGnsysInstallCreateDirs(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -564,7 +568,7 @@ fi
 
 echoAndLog "Installing web files..."
 # copiando paqinas web
-cp -pr eac-hidra/branches/eac-hidra-us/Hidra/webhidra/* $INSTALL_TARGET/www
+cp -pr eac-hidra/branches/eac-hidra-us/Hidra/webhidra/* $INSTALL_TARGET/www   #*/ comentario para doxigen
 
 # creando configuracion de apache2
 openGnsysInstallHidraApacheConf $INSTALL_TARGET /etc/apache2/conf.d
@@ -574,5 +578,116 @@ if [ $? -ne 0 ]; then
 fi
 
 popd
-#rm -rf $WORKDIR
+rm -rf $WORKDIR
 echoAndLog "Process finalized!"
+
+
+############################################################
+########## Servicio pxe y contenedor tftpboot ##############
+###########################################################
+basetftp=/var/lib/tftpboot
+basetftpaux=/tftpboot
+basetftpog=/opt/opengnsys/tftpboot
+# creamos los correspondientes enlaces hacia nuestro contenedor.
+ln -s ${basetftp} ${basetftpog}
+ln -s ${basetftpaux} ${basetftpog}
+
+function TestPxe () {
+	cd /tmp
+	echo "comprobando servidio pxe ..... Espere"
+	tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echo "servidor tftp OK" || echo "servidor tftp KO"
+	cd /
+}
+# reiniciamos demonio internet
+/etc/init.d/openbsd-inetd start
+
+##preparcion contendor tftpboot
+	cp -pr /usr/lib/syslinux/ ${basetftpboot}/syslinux
+	cp /usr/lib/syslinux/pxelinux.0 $basetftpboot
+# enlazamos los clientes ogclients al contenedor tftpboo
+	ln -s /opt/opengnsys/tftpboot/ogclients ${basetftpboot}/ogclients
+# prepamos el directorio de la configuracion de pxe
+	mkdir -p ${basetftpboot}/pxelinux.cfg
+	touch ${basetftpboot}/pxelinux.cfg/default
+
+
+	# comprobamos el servicio tftp
+sleep 1
+TestPxe
+
+## damos perfimos de lectura a usuario web.
+chown -R www-data:www-data /var/lib/tftpboot
+
+#########################################################
+#########################################################
+## continuando la integracion modulo EAC ################
+########################################################
+
+WORKDIR=/tmp/opengnsys_installer
+pushd $WORKDIR
+
+#EAC_DATABASE=eac
+#EAC_DB_USER=eac
+#EAC_DB_PASSWD=eac
+EAC_DB_CREATION_FILE=eac-hidra/branches/eac-hidra-uma/EAC/admin/config/database/TablasEacforHidra.sql
+
+### borrar cuando subversion actualizado
+cp -pr /root/workspace/eac-hidra/branches/eac-hidra-uma/EAC/webeac/ /tmp/opengnsys_installer/eac-hidra/branches/eac-hidra-uma/EAC/
+cp /root/workspace/eac-hidra/branches/eac-hidra-uma/EAC/admin/config/database/TablasEacforHidra.sql /tmp/opengnsys_installer/eac-hidra/branches/eac-hidra-uma/EAC/admin/config/database/TablasEacforHidra.sql
+cp -pr /root/workspace/eac-hidra/branches/eac-hidra-uma/EAC/webeac/barramenu.php /tmp/opengnsys_installer/eac-hidra/branches/eac-hidra-uma/EAC/webeac/barramenu.php
+###
+
+
+
+#mysqlDbExists ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE}
+#if [ $? -ne 0 ]; then
+#	echoAndLog "Creating eac database"
+#	mysqlCreateDb ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE}
+#	if [ $? -ne 0 ]; then
+#		errorAndLog "Error while updating HIDRA database"
+#		exit 1
+#	fi
+#else
+#	echoAndLog "hidra database exists, ommiting creation"
+#fi
+
+#mysqlCheckUserExists ${MYSQL_ROOT_PASSWORD} ${HIDRA_DB_USER}
+#if [ $? -ne 0 ]; then
+#	echoAndLog "Creating user in database hidra"
+#	mysqlCreateAdminUserToDb ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE} ${HIDRA_DB_USER} "${EAC_DB_PASS}"
+#	if [ $? -ne 0 ]; then
+#		errorAndLog "Error while creating eac user"
+#		exit 1
+#	fi
+
+#fi
+
+#mysqlCheckDbIsEmpty ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE}
+#if [ $? -eq 0 ]; then
+#	echoAndLog "Creating tables..."
+#	if [ -f $WORKDIR/$EAC_DB_CREATION_FILE ]; then
+		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE} $WORKDIR/$EAC_DB_CREATION_FILE
+#	else
+#		errorAndLog "Unable to locate $WORKDIR/$EAC_DB_CREATION_FILE!!"
+#		exit 1
+#	fi
+#fi
+
+echoAndLog "Installing web files..."
+# copiando paqinas web
+cp -pr eac-hidra/branches/eac-hidra-uma/EAC/webeac $INSTALL_TARGET/www/principal/  #*/
+cp -pr eac-hidra/branches/eac-hidra-uma/EAC/webeac/barramenu.php $INSTALL_TARGET/www/barramenu.php  #*/
+
+#configurar mysql
+echo " comprobar de mysql /etc/mysql/my.cnf"
+echo "[mysqld]"
+echo "bin-address = 0.0.0.0 "
+echo "skip-name-resolve"
+
+
+### copiando doc a /opt/opengnsys
+#cp -pr eac-hidra/trunk/opengnsys-doc/* $path_opengnsys_base #*/
+cp /tmp/opengnsys_installer/eac-hidra/trunk/opengnsys-doc/* /opt/opengnsys
+
+# copiar los modelos de startpages /opt/opengnsys/client/etc/startpages
+popd
