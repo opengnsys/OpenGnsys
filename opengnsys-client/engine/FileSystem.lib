@@ -255,7 +255,7 @@ rm -f $LOCKFILE
 function ogUnmount () {
 
 # Variables locales
-local PART
+local PART MNTDIR
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -270,7 +270,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 MNTDIR=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 
 #/// Si está montada, desmontarla.
-if [ -z "$MNTDIR" ]; then
+if [ -n "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
     ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
     #/// Crear punto de montaje.

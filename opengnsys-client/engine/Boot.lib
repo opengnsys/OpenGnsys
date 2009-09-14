@@ -41,7 +41,7 @@ fi
 #/// Detectar id. de tipo de partición y codificar al mnemonico.
 PART=$(ogDiskToDev $1 $2) || return $?
 TYPE=$(ogGetFsType $1 $2) || return $?
-MNTDIR=$(ogGetMount $1 $2) || ogRaiseError OG_ERR_PARTITION || return $?
+MNTDIR=$(ogMount $1 $2) || ogRaiseError OG_ERR_PARTITION || return $?
 
 case "$TYPE" in
      NTFS|HNTFS|FAT32|HFAT32)	# Arranque Windows.
@@ -106,7 +106,7 @@ fi
 
 #/// Detectar id. de tipo de partición y codificar al mnemonico.
 PART=$(ogDiskToDev $1 $2) || return $?
-MNTDIR=$(ogGetMount $1 $2) || ogRaiseError OG_ERR_PARTITION || return $?
+MNTDIR=$(ogMount $1 $2) || ogRaiseError OG_ERR_PARTITION || return $?
 
 # Fichero de configuración de GRUB.
 CONF="$MNTDIR/boot/grub/menu.lst"
@@ -120,8 +120,7 @@ awk 'BEGIN {cont=-1;}
      $1~/^title/        {cont++}
      $1~/^kernel/       {if (def==cont) {
                             kern=$2;
-                            sub($1,"");sub($1,"");sub(/^[
-\t]*/,"");app=$0}
+                            sub($1,"");sub($1,"");sub(/^[ \t]*/,"");app=$0}
                         }
      $1~/^initrd/       {if (def==cont) init=$2}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}

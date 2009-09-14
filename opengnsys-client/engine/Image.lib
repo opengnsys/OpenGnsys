@@ -44,15 +44,15 @@ fi
 PART="$(ogDiskToDev $1 $2)" || return $?
 
 ogIsLocked $1 $2 && return $?
-ogUnmount $1 $2 || return $?
+ogUnmount $1 $2 2>/dev/null || return $?
 
 IMGDIR="$OGIMG/$3"
 #### Comprobar directorio en NFS o en caché.
-#mkdir -p "$IMGDIR"
+mkdir -p "$IMGDIR"
 IMGFILE="$IMGDIR/$4"
 
-ogLock $1 $2 && return $?
-trap "ogUnlock $1 $2" 1 2 3 6 9
+#ogLock $1 $2 && return $?
+#trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
 
 SIZE=$(ogGetPartitionSize $1 $2)
 #REDSIZE=$(ogFsReduze $1 $2) || REDSIZE=$[SIZE+1]
@@ -61,13 +61,13 @@ SIZE=$(ogGetPartitionSize $1 $2)
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
         ;;
     *)  ogRaiseError $OG_ERR_FORMAT 
         return $? ;;
