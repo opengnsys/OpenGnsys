@@ -21,48 +21,56 @@
 function ogBuildServer () {
 	## variables
 	package=/opt/opengnsys
-	dbsql=/var/EAC/admin/config/database/bdeac.sql
-	#preparcion contendor tftpboot
+	basetftpboot=/var/lib/tftpboot
+
+##############################################
+#	#preparcion contendor tftpboot
+# obtenemos el pxelinux y lo copiamos al contenedor tftpboot
 	apt-get install syslinux
-	mkdir -p ${package}/tftpboot
-	mkdir -p ${package}/tftpboot/pxelinux.cfg
-	touch ${package}/tftpboot/pxelinux.cfg/default
-	cp -rav /usr/lib/syslinux ${package}/tftpboot/syslinux
-	cp ${package}/tftpboot/syslinux/pxelinux.0 ${package}/tftpboot/
-	cd /var/lib/
-	tar czvf `date +'%F'`-tftpboot.tgz tftpboot
-	cd /
-	rm -fr /var/lib/tftpboot
-	ln -s  ${package}/tftpboot/ /var/lib/tftpboot
-	# instalamos el servidor tftpd, un cliente tftp y el superdemonio inetd
-	apt-get install tftpd-hpa tftp-hpa openbsd-inetd update-inetd
+	cp -pr /usr/lib/syslinux $basetftpboot
+	cp /usr/lib/syslinux/pxelinux.0 $basetftpboot
+# enlazamos
+	ln -s /opt/opengnsys/tftpboot/ogclients ${basetftpboot}/ogclients
+
+#mkdir -p ${package}/tftpboot/ogClients
+	mkdir -p ${basetftpboot}/pxelinux.cfg
+	touch ${basetftpboot}/pxelinux.cfg/default
+#cp -rav /usr/lib/syslinux ${package}/tftpboot/syslinux
+#	cp ${package}/tftpboot/syslinux/pxelinux.0 ${package}/tftpboot/
+#	cd /var/lib/
+#	tar czvf `date +'%F'`-tftpboot.tgz tftpboot
+#	cd /
+#	rm -fr /var/lib/tftpboot
+#	ln -s  ${package}/tftpboot/ /var/lib/tftpboot
+##	# instalamos el servidor tftpd, un cliente tftp y el superdemonio inetd
+apt-get install tftpd-hpa tftp-hpa openbsd-inetd update-inetd
 	/etc/init.d/openbsd-inetd start
 	sleep 1
 	TestPxe
-	# instalar lamp
-	/etc/init.d/lighttpd stop
-	update-rc.d -f lighttpd remove
-	apt-get install apache2 mysql-server mysql-client libmysqlclient15-dev php5 php5-mysql php5-cli phpmyadmin clusterssh
-	update-rc.d apache2 defaults
-	/etc/init.d/apache2 start
-	### descargamos la web
-	### importamos la base de datos
-	mysqldump eac > /var/EAC/admin/config/database/eacbdbackup`date +'%F'`
-	mysql -p <<<"DROP DATABASE IF EXISTS eac"
-	mysql -p <<<"CREATE DATABASE IF NOT EXISTS eac"
-	mysql -p eac < $dbsql
-	mysql -p <<<"GRANT ALL PRIVILEGES ON eac.* TO 'eac'@'%' IDENTIFIED BY 'eac'"
-	mysql -p <<<"GRANT ALL PRIVILEGES ON eac.* TO 'eac'@'localhost'IDENTIFIED BY 'eac'"
+#	# instalar lamp
+#	/etc/init.d/lighttpd stop
+#	update-rc.d -f lighttpd remove
+#	apt-get install apache2 mysql-server mysql-client libmysqlclient15-dev php5 php5-mysql php5-cli phpmyadmin clusterssh
+#	update-rc.d apache2 defaults
+#	/etc/init.d/apache2 start
+#	### descargamos la web
+#	### importamos la base de datos
+#	mysqldump eac > /var/EAC/admin/config/database/eacbdbackup`date +'%F'`
+#	mysql -p <<<"DROP DATABASE IF EXISTS eac"
+#	mysql -p <<<"CREATE DATABASE IF NOT EXISTS eac"
+#	mysql -p eac < $dbsql
+#	mysql -p <<<"GRANT ALL PRIVILEGES ON eac.* TO 'eac'@'%' IDENTIFIED BY 'eac'"
+#	mysql -p <<<"GRANT ALL PRIVILEGES ON eac.* TO 'eac'@'localhost'IDENTIFIED BY 'eac'"
 	echo " comprobar de mysql /etc/mysql/my.cnf"
 	echo "[mysqld]"
 	echo "bin-address = 0.0.0.0 "
 	echo "skip-name-resolve"
-	/etc/init.d/mysql restart
+#	/etc/init.d/mysql restart
 	### dhcp
-	apt-get install dhcp3-server
-	/etc/init.d/dhcp3-server stop
-	# otros
-	#doxygen doxygen-doc doxygen-gui graphviz sun-java6-jre gimp netpbm mysql workbenc mysql-gui-tools-5.0 bittorrent syslinux
+#	apt-get install dhcp3-server
+#	/etc/init.d/dhcp3-server stop
+#	# otros
+#	#doxygen doxygen-doc doxygen-gui graphviz sun-java6-jre gimp netpbm mysql workbenc mysql-gui-tools-5.0 bittorrent syslinux
 }
 
 #/**
