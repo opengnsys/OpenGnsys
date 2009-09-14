@@ -18,7 +18,7 @@
 function ogLoadEnviron () {
 
 # FIXME Temporal
-LANG=ES_es
+LANG=es_ES
 
 # Directorios del projecto OpenGNSys.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
@@ -26,7 +26,7 @@ if [ -d $OPENGNSYS ]; then
     export OGBIN=$OPENGNSYS/bin
     export OGETC=$OPENGNSYS/etc
     export OGLIB=$OPENGNSYS/lib
-    export OGAPI=$OPENGNSYS/engine/bin
+    export OGAPI=$OGLIB/engine/bin
     export OGIMG=$OPENGNSYS/images
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
@@ -50,6 +50,9 @@ if [ -d $OPENGNSYS ]; then
     LANGFILE=$OGETC/lang.$LANG.conf
     [ -f $LANGFILE ] && source $LANGFILE
 
+    # Crear directorio de bloqueos
+    mkdir -p /var/lock/
+
     # Montamos el resto de cosas necesarias
     mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/log/clients $OGLOG
     mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/images $OGIMG
@@ -59,6 +62,9 @@ if [ -d $OPENGNSYS ]; then
         export OGCACHE=0;
     fi
 
+    for i in $OGLIB/engine/bin/*lib; do
+        source $i 
+    done
 
     # FIXME Necesario temporalmente
     mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/

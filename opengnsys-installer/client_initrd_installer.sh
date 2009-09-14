@@ -5,7 +5,6 @@
 # Nota, hay que ponerlo hasta el directorio trunk como en el ejemplo de arriba
 #SVNROOT=
 OGROOT=/opt/opengnsys/
-
 function arguments_parser
 {
     while [ $# -gt 0 ];do
@@ -71,7 +70,7 @@ function create_file_system
     ln -s /etc/opengnsys/ /opt/opengnsys/etc/
     ln -s /var/log/opengnsys/ $OGROOT/log/
 
-    install -d $SVNROOT/opengnsys-client/nfsexports/ $OGROOT/client
+    install -d $SVNROOT/opengnsys-client/nfsexports/* $OGROOT/client
     install -d $SVNROOT/opengnsys-client/engine/*.lib $OGROOT/client/lib/engine/
 }
 

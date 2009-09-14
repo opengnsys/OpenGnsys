@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/opt/opengnsys/bin/bash
 
 bash
