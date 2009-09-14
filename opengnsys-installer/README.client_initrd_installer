@@ -17,10 +17,11 @@ en su lugar correspondiente.
 Luego intenta configurar con algunos valores por defecto los distintos
 servidores instalados pero como pone el script seguramente habra que repasar
 esos valores para nuestra red. Estos archivos son:
-    -/etc/dhcp3/dhcpd.conf  (DHCP)
+    -/etc/dhcp3/dhcpd.conf  (DHCP y TFTP)
     -/etc/exports           (NFS)
 
-El pxe y el tftp probablemente funcione correctamente sin tocar nada.
+El pxe lo configura para que arranque todos los sistema que encuentre.
+Crea un initrd.gz personalizado que descargar de internet y modifica.
 
 El script puede ejecutarse para realizar una actualizacion sin tener que
 borrar nada. Ademas se recomienda usar la ultima version tanto del script
