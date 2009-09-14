@@ -578,7 +578,7 @@ if [ $? -ne 0 ]; then
 fi
 
 popd
-rm -rf $WORKDIR
+#rm -rf $WORKDIR
 echoAndLog "Process finalized!"
 
 
