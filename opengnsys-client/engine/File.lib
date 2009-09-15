@@ -1,0 +1,76 @@
+#!/bin/bash
+#/**
+#@file    File.lib
+#@brief   Librería o clase File
+#@class   File
+#@brief   Funciones para gestión de archivos y directorios.
+#@version 0.9
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogGetPath path_filepath
+#         ogGetPath str_repo path_filepath
+#         ogGetPath int_ndisk int_npartition path_filepath
+#@brief   Inicia el proceso de arranque de un sistema de archivos.
+#@arg  \c filepath   camino del fichero (independiente de mayúsculas).
+#@arg  \c repo       repositorio de ficheros { \c REPO , \c CACHE }
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  path_file - camino completo real del fichero.
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@warning Primeras pruebas.
+#@note    Requisitos: \c grep \c sed
+#@todo    Terminar de definir parámetros para acceso a repositorios.
+#@version 0.1 - Primera adaptación para OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-15
+#*/
+function ogGetPath () {
+
+# Variables locales.
+local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32"
+           "$FUNCNAME REPO /etc/fstab  ==>  /opt/opengnsys/images/etc/fstab"
+           "$FUNCNAME 1 1 \"/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32"
+    return
+fi
+
+#/// Procesar camino según el número de parámetros.
+case $# in
+    1)	FILE="$1" ;;
+    2)	case "$1" in
+            REPO)  FILE="$OGREPO/$2" ;;
+            CACHE) FILE="$OGCACHE/$2" ;;
+            *)     ogRaiseError $OG_ERR_FORMAT
+                   return $? ;;
+        esac ;; 
+    3)	FILE="$(ogMount $1 $2)/$3" || return $OG_ERR_NOTFOUND ;;
+    *)	return $OG_ERR_FORMAT ;;
+esac
+
+#/// Eliminar caracteres \c / iniciales, finales y duplicados.
+CURRENTDIR="$PWD"
+FILE="$(echo $FILE|sed -e 's/\(\/\)*\1/\//g' -e 's/^\///' -e 's/\/$//')"
+PREVFILE=""
+FILEPATH="/"
+while [ "$FILE" != "$PREVFILE" ]; do
+    #/// Busca el nombre correcto en el directorio actual.
+    cd "$FILEPATH"
+    FILEPATH="${FILEPATH}/$(ls -A | grep -i -m1 "^${FILE%%/*}$")" || ogRaiseError $OG_ERR_NOTFOUND || return $?
+    PREVFILE="$FILE"
+    FILE="${FILE#*/}"
+done
+
+#/// Muestra el camino Linux, quitando el "/" inicial duplicado.
+[ "$FILEPATH" != "/" ] && echo ${FILEPATH#/}
+cd $CURRENTDIR
+}
+
