@@ -36,8 +36,8 @@ local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-           "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32"
-           "$FUNCNAME REPO /etc/fstab  ==>  /opt/opengnsys/images/etc/fstab"
+           "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32" \
+           "$FUNCNAME REPO /etc/fstab  ==>  /opt/opengnsys/images/etc/fstab" \
            "$FUNCNAME 1 1 \"/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32"
     return
 fi

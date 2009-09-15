@@ -18,7 +18,7 @@
 function ogLoadEnviron () {
 
 # FIXME Temporal
-LANG=es_ES
+export LANG=es_ES
 
 # Directorios del projecto OpenGNSys.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
@@ -62,8 +62,16 @@ if [ -d $OPENGNSYS ]; then
     for i in $OGAPI/*.lib; do
         source $i 
     done
+    for i in $(typeset -F | cut -f3 -d" "); do
+	export -f $i
+    done
     LANGFILE=$OGETC/lang.$LANG.conf
-    [ -f $LANGFILE ] && source $LANGFILE
+    if [ -f $LANGFILE ]; then
+	source $LANGFILE
+	for i in $(grep "^[a-zA-Z].*=" $LANGFILE | cut -f1 -d=); do
+	    export $i
+	done
+    fi
 
     # FIXME Necesario temporalmente
     mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/

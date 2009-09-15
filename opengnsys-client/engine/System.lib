@@ -28,11 +28,11 @@ local LOGLEVEL DATETIME
 
 #/// Selección del nivel de registro (opcional).
 case "$1" in
-     help)    tput setf 3; shift ;;
-     info)    tput setf 2; LOGLEVEL=$1; shift ;;
-     warning) tput setf 6; LOGLEVEL=$1; shift ;;
-     error)   tput setf 4; LOGLEVEL=$1; shift ;;
-     *)       tput setf 9;
+     help)    shift ;;
+     info)    LOGLEVEL=$1; shift ;;
+     warning) LOGLEVEL=$1; shift ;;
+     error)   LOGLEVEL=$1; shift ;;
+     *)       ;;
 esac
  
 #/// Selección de la posición en pantalla (opcional).
@@ -51,7 +51,6 @@ esac
 
 #/// Mostrar mensaje en consola.
 echo -e "$*"
-tput setf 9
 
 #/// Registro de incidencias.
 if [ -w "$OGLOGFILE" ]; then

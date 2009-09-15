@@ -137,7 +137,7 @@ touch $LOCKFILE
 #/**
 #         ogMount int_ndisk int_npartition
 #@see     ogMountPartition
-*/
+#*/
 function ogMount () {
 ogMountPartition $*
 }

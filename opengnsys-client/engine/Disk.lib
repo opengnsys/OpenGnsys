@@ -203,7 +203,7 @@ case $# in
 	echo "$DISK"
 	;;
      2) # Error si los 2 parametros no son digitos.
-	[ -z "${1/[1-9]/}" -a -z "${2/[1-9][0-9]/}" ] || ogRaiseError $OG_ERR_FORMAT|| return $?
+	[ -z "${1/[1-9]/}" -a -z "${2/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT|| return $?
 	PART=$(echo $ALLDISKS | awk -v n=$1 '{print $n}')$2
 	# Error si no es fichero de bloques.
 	[ -b "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?

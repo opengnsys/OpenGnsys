@@ -52,9 +52,9 @@ case "$(ogGetFsType $1 $2)" in
 	if [ -z "$VERSION" ]; then
  	    FILE="$MNTDIR/etc/lsb-release"
  	    [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
-	    FILE="$DIRMONT/etc/redhat-release"
+	    FILE="$MNTDIR/etc/redhat-release"
 	    [ -r $FILE ] && VERSION="$(head -1 $FILE)" 
-	    FILE="$DIRMONT/etc/SuSE-release"
+	    FILE="$MNTDIR/etc/SuSE-release"
 	    [ -r $FILE ] && VERSION="$(head -1 $FILE)" 
 	fi
 	[ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
@@ -68,7 +68,7 @@ esac
 
 #/// Mostrar resultado y salir sin errores.
 [ -n "$VERSION" ] && echo "$TYPE:$VERSION"
-exit 0
+return 0
 }
 
 
