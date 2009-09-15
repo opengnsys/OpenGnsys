@@ -46,12 +46,8 @@ if [ -d $OPENGNSYS ]; then
     # Incluimos el modulo del raton
     insmod $OGLIB/modules/psmouse.ko
 
-    # Cargar idioma.
-    LANGFILE=$OGETC/lang.$LANG.conf
-    [ -f $LANGFILE ] && source $LANGFILE
-
     # Crear directorio de bloqueos
-    mkdir -p /var/lock/
+    mkdir -p /var/lock
 
     # Montamos el resto de cosas necesarias
     mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/log/clients $OGLOG
@@ -62,9 +58,12 @@ if [ -d $OPENGNSYS ]; then
         export OGCACHE=0;
     fi
 
-    for i in $OGLIB/engine/bin/*lib; do
+    #/// Cargar API de funciones y fichero de idioma.
+    for i in $OGAPI/*.lib; do
         source $i 
     done
+    LANGFILE=$OGETC/lang.$LANG.conf
+    [ -f $LANGFILE ] && source $LANGFILE
 
     # FIXME Necesario temporalmente
     mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/
@@ -80,3 +79,4 @@ export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
 export OG_ERR_NOTOS=6		# Sin sistema operativo.
 export OG_ERR_NOTEXEC=7         # Programa o funcion no ejecutable.
 }
+

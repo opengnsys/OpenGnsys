@@ -10,6 +10,69 @@
 
 
 #/**
+#         ogGetOsVersion int_ndisk int_npartition
+#@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  TipoSistema:Versión
+#@note    TipoSistema = { Linux, Windows }
+#@note    Requisitos: awk, head, chroot
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
+#@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
+#@todo    Detectar versión de sistemas Windows.
+#@version 0.1 - Primeras pruebas con OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-15
+#*/
+function ogGetOsVersion () {
+
+# Variables locales.
+local MNTDIR TYPE VERSION FILE
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+#/// Error si no se reciben 2 parametros.
+[ $# != 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+# Montar la particion, si no lo estaba previamente.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+trap "ogUnmount $1 $2" 1 2 3 6
+
+case "$(ogGetFsType $1 $2)" in
+    EXT[234] | REISERFS | REISER4)
+	TYPE="Linux"
+	#/// Leer descripcion del sistema Linux.
+	VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
+	#/// Si no se puede obtener, buscar en ficheros del sistema.
+	if [ -z "$VERSION" ]; then
+ 	    FILE="$MNTDIR/etc/lsb-release"
+ 	    [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+	    FILE="$DIRMONT/etc/redhat-release"
+	    [ -r $FILE ] && VERSION="$(head -1 $FILE)" 
+	    FILE="$DIRMONT/etc/SuSE-release"
+	    [ -r $FILE ] && VERSION="$(head -1 $FILE)" 
+	fi
+	[ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
+	;;
+    NTFS | HTNFS | FAT32 | HFAT32)
+	TIPO="Windows"
+	#/// Leer la version del registro de Windows.
+	#VERSION=$(ogGetRegistryKey $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+	;;
+esac
+
+#/// Mostrar resultado y salir sin errores.
+[ -n "$VERSION" ] && echo "$TYPE:$VERSION"
+exit 0
+}
+
+
+#/**
 #         ogListHardwareInfo
 #@brief   Lista el inventario de hardware de la máquina cliente.
 #@return  TipoDispositivo:Modelo    (por determinar)

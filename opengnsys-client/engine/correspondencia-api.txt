@@ -80,8 +80,9 @@ Librería o clase Boot:
 Librería o clase Inventory:
 - ogListHardwareInfo			(InfoHardware, DetectDevices, hidraHardwareInfo)
 - ogGetOsVersion			(hidraOSVersion)
-- ogGetLinuxSoftware			(hidraLinuxSoftware)
-- hogGetWindowsSoftware			(idraWindowsSoftware)
+- ogListSoftware
+- ogListLinuxSoftware			(hidraLinuxSoftware)
+- ogListWindowsSoftware			(idraWindowsSoftware)
 
 Librería o clase File:
 - ogGetPath				(ConnectToRepo, hidraPath)
