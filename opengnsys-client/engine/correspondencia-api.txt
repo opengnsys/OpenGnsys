@@ -19,7 +19,6 @@ PROPUESTA
 Librería o clase Install:
 - ogConfigureServer		0.1	(CustomEACServer, InterfazCustomEACServer)
 - ogLoadConfig				(scirpt_uso)
-- ogLoadEnviron			0.9	(hidraEnviron)
 
 Librería o clase System:
 - ogEcho			0.9	(Msg)

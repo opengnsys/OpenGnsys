@@ -1,24 +1,15 @@
 #!/bin/bash
 #/**
-#@file    Install.lib
-#@brief   Librería o clase Install
-#@class   Install
-#@brief   Funciones de instalación y configuración de OpenGNSys
-#@version 0.9
+#@file    loadenviron.sh
+#@brief   Script de carga de la API de funciones.
 #@warning License: GNU GPLv3+
-#*/
-
-
-#/**
-#         ogLoadEnviron
-#@brief   Carga y modifica variables de entorno necesarias para el funcionamiento de Opengnsys.
+#@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-07-20
+#@date    2009-09-16
 #*/
-function ogLoadEnviron () {
 
 # FIXME Temporal
-export LANG=es_ES
+export LANG=${LANG:-es_ES}
 
 # Directorios del projecto OpenGNSys.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
@@ -31,6 +22,10 @@ if [ -d $OPENGNSYS ]; then
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
 
+    export PATH=$OGBIN:$OGAPI:$PATH
+    export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
+
+
     export OG_DHCP_SERVER=`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
     export OG_SERVER_IP=$OG_DHCP_SERVER
     export OG_IP=`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
@@ -39,9 +34,6 @@ if [ -d $OPENGNSYS ]; then
 
     # FIXME Pruebas para grupos de ordenadores
     export OGGROUP=aula3
-
-    export PATH=$OGBIN:$OGAPI:$PATH
-    export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
     # Incluimos el modulo del raton
     insmod $OGLIB/modules/psmouse.ko
@@ -86,5 +78,5 @@ export OG_ERR_LOCKED=4		# Particion o fichero bloqueado.
 export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
 export OG_ERR_NOTOS=6		# Sin sistema operativo.
 export OG_ERR_NOTEXEC=7         # Programa o funcion no ejecutable.
-}
+
 
