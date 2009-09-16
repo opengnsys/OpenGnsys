@@ -1,52 +1,23 @@
 <?php
 
-#no integrado
+#no integrado parcialmente. Pendiente de ser llamado desde el EACserver
 function RegistryHost ($mac,$ip)
 {
-	#require("/var/EAC/admin/config/EAC.conf");
 	echo $mac . $ip;
-	$conexion=mysql_connect(SQL_HOST, SQL_USER, SQL_PASS) or die ('no se ha podido conectar con mysql');
-	mysql_select_db(DATABASE, $conexion);
-	$retval=SetHostName () ;
-	$newhostname=trim(system('hostname', $retval));
-	echo $newhostname;
-	$insert="insert into equipos (hostname, macadress, ipaddress, startpage, aula, vga, acpi, pci) values ('" . $newhostname . "', '" . $mac . "', '" . $ip . "' ,  'default.sh' , '1', '788', '" . $_SERVER['acpi'] . "', '" . $_SERVER['pci'] . "')";
+	$conexion=mysql_connect($_SERVER['SQL_HOST'], $_SERVER['SQL_USER'], $_SERVER['SQL_PASS']) or die ('no se ha podido conectar con mysql');
+	mysql_select_db($_SERVER['DATABASE'], $conexion);
+	$insert="insert into infonetequipos (hostname, macaddress, ipaddress, startpage, aula, vga, acpi, pci) values ('" . $_SERVER['HOSTNAME'] . "', '" . $mac . "', '" . $ip . "' ,  'default.sh' , '1', '788', '" . $_SERVER['acpi'] . "', '" . $_SERVER['pci'] . "')";
 	$resultado=mysql_query($insert);
 	#ethtool -s eth0 wol g autoneg off speed 100 duplex full
 	#}
 		mysql_close($conexion);
 }
 
-# no integrado
-function SetHostName ()
-{
-	#require("/var/EAC/admin/config/EAC.conf");
-	#($_SERVER['argv'][1] == "SetHostname")
-	echo("Determinando el hostname con el metodo " .  HostnameMethod . "\n ");
-	switch (HostnameMethod)
-	{
-		case "variables":
-			$uno=system('/bin/hostname ' . HostnameVariables, $retval);
-			break;
-		case "dns":
-			exec('hostname `nslookup $IP | grep \'name\' | awk \'{print $4}\' | awk -F "." \'{print $1}\'`');  # Juan Manuel Gonzalez Navas
-			## $uno=exec('/bin/hostname ' . $nom, $retval);  # Juan Manuel Gonzalez Navas
-			break;
-		case "file":
-			$nom=exec("cat " . REPO . "admin/config/hostnamefile.txt | grep " . $ip . " | cut -f2 -d';'", $retval);
-			$uno=exec('/bin/hostname ' . $nom, $retval);
-		break;
-		default:
-		break;
-	}
-	echo " EACBootClient has been named as " . $uno . $name . "with the command /bin/hostname";
-	#}
-
-}
 
 
 
-# no integrado
+
+
 function BootServer ($boot,$ip)
 {
 #/**  @function BootServer: @brief Configura el fichero de arranque remoto para el equipo, y actualiza la base de datos.
@@ -58,7 +29,7 @@ function BootServer ($boot,$ip)
 #@note	 Notas sin especificar
 #@version 1.0       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
 #*/
-	#require("/var/EAC/admin/config/EAC.conf");
+
 
 
 	#actualizamos el menu de arranque para ese equipo
