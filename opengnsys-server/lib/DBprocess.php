@@ -10,7 +10,7 @@ function RegistryHost ($mac,$ip)
 	$retval=SetHostName () ;
 	$newhostname=trim(system('hostname', $retval));
 	echo $newhostname;
-	$insert="insert into equipos (hostname, mac, ip, startpage, aula, vga, acpi, pci) values ('" . $newhostname . "', '" . $mac . "', '" . $ip . "' ,  'default.sh' , '1', '788', '" . $_SERVER['acpi'] . "', '" . $_SERVER['pci'] . "')";
+	$insert="insert into equipos (hostname, macadress, ipaddress, startpage, aula, vga, acpi, pci) values ('" . $newhostname . "', '" . $mac . "', '" . $ip . "' ,  'default.sh' , '1', '788', '" . $_SERVER['acpi'] . "', '" . $_SERVER['pci'] . "')";
 	$resultado=mysql_query($insert);
 	#ethtool -s eth0 wol g autoneg off speed 100 duplex full
 	#}
@@ -59,52 +59,85 @@ function BootServer ($boot,$ip)
 #@version 1.0       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
 #*/
 	#require("/var/EAC/admin/config/EAC.conf");
-	
+
 
 	#actualizamos el menu de arranque para ese equipo
 	$query3="update infonetequipos set arranque='" . $boot ."'  where ipaddress='" .$ip . "'";
 	$resultado = mysql_query($query3) or die (mysql_error());
-
-## buscamos la informacion de este equipo en infohost
+############# Consultas SQL para obtener la informacion del ciente. varinfoaula, varinfoequipo, varinfoparameters
+## varinfohost= toda la informacion de este equipo almacenado en el array infohost
 	$peticion="select * from infonetequipos where ipaddress='".$ip . "'";
-	#echo $peticion;
 	$rsinfohost = mysql_query($peticion);
 	$infohost = mysql_fetch_array($rsinfohost);
-	#obtenemos los utlitmos campos del host y los metemos dentro de la variable parameters
-	$parameters=" ";
 	$aula= $infohost['aula'];
+	#obtenemos los campos del host y los metemos dentro de la variable varinfohost
+	$varinfohost=" ";
 	$lastparameters=mysql_num_fields($rsinfohost);
-	for ($i=3; $i<$lastparameters; $i++)
+	#for ($i=3; $i<$lastparameters; $i++)
+	for ($i=0; $i<$lastparameters; $i++)
 	{
 		if ( mysql_field_name($rsinfohost, $i) == 'startpage' )
 		{
-			$parameters = $parameters . " " .  mysql_field_name($rsinfohost, $i) . "=A_id" . $aula . "_" . $infohost[$i] ;
+			$varinfohost = $varinfohost . " " .  mysql_field_name($rsinfohost, $i) . "=A_id" . $aula . "_" . $infohost[$i] ;
 		}
 		else
 		{
-			$parameters = $parameters . " " .  mysql_field_name($rsinfohost, $i) . "="  . $infohost[$i] ;
+			$varinfohost = $varinfohost . " " .  mysql_field_name($rsinfohost, $i) . "="  . $infohost[$i] ;
 			#echo $infohost[$i] . "\n";
 		}
 	}
 	#echo $parameters . "\n" ;
 	mysql_free_result($rsinfohost);
-	$aula= $infohost['aula'];
-	$peticion="select * from infonetaulas where id_aula='".$aula . "'";
-	#echo $peticion . "\n";
-	$rsinfoaula = mysql_query($peticion);
-	$infoaula = mysql_fetch_assoc($rsinfoaula);
-	mysql_free_result($rsinfoaula);
-	$gateway=$infoaula['gateway'];
-	$netmask=$infoaula['netmask'];
-	$repo_client=$infoaula['repo_client'];
-	#echo $repo_client . "\n";
-	#echo $gateway . $netmask . "\n";
-	$menu=$infohost['arranque'];
-	#echo $menu ." \n" ;
+
+## obtenemos el nombre del fichero pxe para este equipo
 	$mac=$infohost['macaddress'];
 	$macfile="01-" . str_replace(":","-",strtolower($mac));
 	$nombre_archivo="/tftpboot/pxelinux.cfg/" . $macfile;
-	#echo $macfile;
+
+
+### varinfoaula= toda la informacion del aula al que pertenece el equipo infoaula.
+	$peticion="select * from infonetaulas where id_aula='".$aula . "'";
+	$rsinfoaula = mysql_query($peticion);
+	#$infoaula = mysql_fetch_assoc($rsinfoaula);
+	$infoaula = mysql_fetch_array($rsinfoaula);
+	$varinfoaula=" ";
+		$lastparameters=mysql_num_fields($rsinfoaula);
+		#for ($i=3; $i<$lastparameters; $i++)
+		for ($i=0; $i<$lastparameters; $i++)
+		{
+			$varinfoaula = $varinfoaula . " " .  mysql_field_name($rsinfoaula, $i) . "="  . $infoaula[$i] ;
+		}
+	mysql_free_result($rsinfoaula);
+
+$gateway=$infoaula['gateway'];
+	$netmask=$infoaula['netmask'];
+	$repo_client=$infoaula['repo_client'];
+	$menu=$infohost['arranque'];
+
+### varinfoparameters= toda la informacion generica de los clientes.
+	$peticion="select variable, value from infoparametersclients";
+	$rsinfoparameters = mysql_query($peticion);
+	#$infoparameters = mysql_fetch_assoc($rsinfoparameters);
+#	$infoparameters = mysql_fetch_array($rsinfoparameters);
+	$varinfoparameters=" ";
+#		$lastparameters=mysql_num_fields($rsinfoparameters);
+#		#for ($i=3; $i<$lastparameters; $i++)
+#		for ($i=0; $i<$lastparameters; $i++)
+#		{
+#			$varinfoparameters = $varinfoparameters . " " .  mysql_field_name($rsinfoparameters, $i) . "="  . $infoparameters[$i] ;
+#		}
+	while ($fila = mysql_fetch_row($rsinfoparameters))
+	{
+#foreach ($fila as $elemento)
+#		{
+#			$varinfoparameters = $varinfoparameters . "" .  $elemento . "=";
+#		}
+		$varinfoparameters = $varinfoparameters . " " .  $fila[0] . "=" . $fila[1];
+	}
+
+	mysql_free_result($rsinfoparameters);
+################################################ Fin de consustar SQL
+
 	if (!$gestion= fopen($nombre_archivo, 'w+'))
 	{
 		echo "No se puede abrir el archivo ($nombre_archivo)";
@@ -126,14 +159,14 @@ function BootServer ($boot,$ip)
 		{
 			fwrite($gestion, "MENU DEFAULT \n");
 		}
-		fwrite($gestion, $row['kernel'] . " \n");
-		$iseac=substr_count($row['append'] , "ogClientNfs");
+		fwrite($gestion, $row['kernel'] . " EACregistred=YES " . $varinfoaula  .  "\n");
+		$iseac=substr_count($row['append'] , "og");
 		echo $iseaci . " \n";
 		if ($iseac > 0)
 		{
 			$append=str_replace("repo_client", $repo_client, $row['append']);
-			echo $append . "\n";
-			fwrite($gestion, $append . " ip=" .  $infohost['ipaddress'] .":" . $repo_client . ":" . $gateway . ":" . $netmask . ":" . $infohost['hostname'] . ":eth0 ro  EACregistred=YES " . $parameters  . "\n");
+##	echo $append . "\n";
+			fwrite($gestion, $append . " ip=" .  $infohost['ipaddress'] .":" . $repo_client . ":" . $gateway . ":" . $netmask . ":" . $infohost['hostname'] . ":eth0 ro " . " " . $varinfohost  . " ". $varinfoparameters . " \n");
 		}
 		else
 		{
@@ -188,7 +221,7 @@ function Logger ()
 #primera integracion
 function InsertClassrom ($descripcion,$subred,$netmask,$broadcast,$gateway,$repo_image,$repo_client)
 {
-	
+
 	$query="select * from infonetaulas where descripcion='" . $descripcion ."'";
 	echo $query;
 	$rs=mysql_query($query);
