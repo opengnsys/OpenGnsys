@@ -1,7 +1,7 @@
 #!/bin/bash
 #/**
 #@file    loadenviron.sh
-#@brief   Script de carga de la API de funciones.
+#@brief   Script de carga de la API de funciones de OpenGNSys.
 #@warning License: GNU GPLv3+
 #@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
@@ -9,10 +9,10 @@
 #*/
 
 # FIXME Temporal
-export LANG=${LANG:-es_ES}
+export LANG="${LANG:-es_ES}"
 
-# Directorios del projecto OpenGNSys.
-OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+#/// Directorios del projecto OpenGNSys.
+export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys}"
 if [ -d $OPENGNSYS ]; then
     export OGBIN=$OPENGNSYS/bin
     export OGETC=$OPENGNSYS/etc

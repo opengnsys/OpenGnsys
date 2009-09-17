@@ -63,7 +63,7 @@ case "$TYPE" in
 	[ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
 	# Activar la partición y copiar Grub4DOS.
 	ogSetPartitionActive $1 $2
-	cp $OGLIB/grub4dos/* $MNTDIR
+	cp $OGLIB/grub4dos/* $MNTDIR    # */ (necesario para Doxygen)
 	kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
 	;;
      *) ogRaiseError $OG_ERR_PARTITION

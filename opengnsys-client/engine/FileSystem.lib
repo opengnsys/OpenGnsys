@@ -100,6 +100,14 @@ test -f $LOCKFILE
 
 #/**
 #         ogLock int_ndisk int_npartition
+#@see     ogLockPartition
+#*/
+function ogLock () {
+ogLockPartition "$@"
+}
+
+#/**
+#         ogLockPartition int_ndisk int_npartition
 #@brief   Genera un fichero de bloqueo para una partición en uso exlusivo.
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
@@ -111,7 +119,7 @@ test -f $LOCKFILE
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/
-function ogLock () {
+function ogLockPartition () {
 
 # Variables locales
 local PART LOCKFILE
@@ -139,7 +147,7 @@ touch $LOCKFILE
 #@see     ogMountPartition
 #*/
 function ogMount () {
-ogMountPartition $*
+ogMountPartition "$@"
 }
 
 #/**
@@ -204,6 +212,14 @@ echo $MNTDIR
 
 #/**
 #         ogUnlock int_ndisk int_npartition
+#@see     ogUnlockPartition
+#*/
+function ogUnlock () {
+ogUnlockPartition "$@"
+}
+
+#/**
+#         ogUnlockPartition int_ndisk int_npartition
 #@brief   Elimina el fichero de bloqueo para una particion.
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
@@ -215,7 +231,7 @@ echo $MNTDIR
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/
-function ogUnlock () {
+function ogUnlockPartition () {
 
 # Variables locales
 local PART LOCKFILE
@@ -241,6 +257,14 @@ rm -f $LOCKFILE
 
 #/**
 #         ogUnmount int_ndisk int_npartition
+#@see     ogUnmountPartition
+#*/
+function ogUnmount () {
+ogUnmountPartition "$@"
+}
+
+#/**
+#         ogUnmountPartition int_ndisk int_npartition
 #@brief   Desmonta un sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
@@ -252,7 +276,7 @@ rm -f $LOCKFILE
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-27
 #*/
-function ogUnmount () {
+function ogUnmountPartition () {
 
 # Variables locales
 local PART MNTDIR

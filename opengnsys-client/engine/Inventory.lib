@@ -20,7 +20,6 @@
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
 #@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
-#@todo    Detectar versión de sistemas Windows.
 #@version 0.1 - Primeras pruebas con OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
@@ -41,12 +40,11 @@ fi
 # Montar la particion, si no lo estaba previamente.
 MNTDIR=$(ogMount $1 $2) || return $?
 
-trap "ogUnmount $1 $2" 1 2 3 6
-
+#/// Elección del tipo de sistema operativo.
 case "$(ogGetFsType $1 $2)" in
     EXT[234] | REISERFS | REISER4)
 	TYPE="Linux"
-	#/// Leer descripcion del sistema Linux.
+	#/// Para Linux: leer descripción.
 	VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
 	#/// Si no se puede obtener, buscar en ficheros del sistema.
 	if [ -z "$VERSION" ]; then
@@ -61,7 +59,7 @@ case "$(ogGetFsType $1 $2)" in
 	;;
     NTFS | HTNFS | FAT32 | HFAT32)
 	TYPE="Windows"
-	#/// Leer la version del registro de Windows.
+	#/// Para Windows: leer la version del registro.
 	VERSION=$(ogGetRegistryKey $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
 	;;
 esac
@@ -120,6 +118,7 @@ lshw | awk 'BEGIN {type="mod";}
 	END 	   {if (type!="" && prod!="")
 			print type"="vend,prod,size,vers;}
       '
+# */ (necesario para Doxygen)
 }
 
 
