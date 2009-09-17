@@ -36,7 +36,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 #/// Error si no se reciben 2 parametros.
-[ $# != 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Montar la particion, si no lo estaba previamente.
 MNTDIR=$(ogMount $1 $2) || return $?
@@ -60,9 +60,9 @@ case "$(ogGetFsType $1 $2)" in
 	[ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
 	;;
     NTFS | HTNFS | FAT32 | HFAT32)
-	TIPO="Windows"
+	TYPE="Windows"
 	#/// Leer la version del registro de Windows.
-	#VERSION=$(ogGetRegistryKey $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+	VERSION=$(ogGetRegistryKey $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
 	;;
 esac
 
