@@ -255,7 +255,7 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #@arg \c  int_ndisk      nº de orden del disco
 #@arg \c  int_npartition nº de orden de la partición
 #@return  Identificador de tipo de partición.
-#@exception OG_ERR_FORMAT Formato incorrecto.
+#@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    Requisitos: sfdisk
 #@version 0.9 - Primera versión compatible con OpenGNSys.
@@ -352,6 +352,41 @@ for PART in $NPARTS; do
 done
 echo
 }
+
+
+#/**
+#         ogSetPartitionActive ndisk npartition
+#@brief   Establece cual la partición activa de un disco.
+#@arg \c  int_ndisk      nº de orden del disco
+#@arg \c  int_npartition nº de orden de la partición
+#@return  Nada.
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o partición no corresponden con un dispositivo.
+#@note    Requisitos: parted
+#@version 0.9 - Primera versión compatible con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/09/17
+#*/
+function ogSetPartitionActive () {
+
+# Variables locales
+local DISK PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+	   "$FUNCNAME 1 1"
+    return
+fi
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Comprobar que el disco existe y activar la partición indicada.
+DISK="$(ogDiskToDev $1)" || return $?
+PART="$(ogDiskToDev $1 $2)" || return $?
+parted -s $DISK set $2 boot on 2>/dev/null
+}
+
 
 #/**
 #         ogUpdateDisk

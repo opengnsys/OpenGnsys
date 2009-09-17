@@ -28,7 +28,7 @@
 function ogBoot () {
 
 # Variables locales.
-local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND
+local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND FILE LOADER
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -45,19 +45,6 @@ MNTDIR=$(ogMount $1 $2)
 [ -z "$MNTDIR" ] && ogRaiseError OG_ERR_PARTITION && return $?
 
 case "$TYPE" in
-     NTFS|HNTFS|FAT32|HFAT32)
-	# Activar la particion.
-	#ogSetPartitionActive $1 $2
-	#/// Compruebar si hay un cargador de Windows.
-	#for f in io.sys ntldr bootmgr; do
-	#    FILE="$(ogPath $1 $2 $f)"
-	#    [ -n "$FILE" ] && LOADER="$(basename $FILE)"
-	#done
-	#[ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
-	# Copiar y configurar GRUB4DOS
-	#cp $REPO/admin/gestion/grub/* $DIRMONT
-	#kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
-	;;
      EXT[234]|REISERFS|REISER4)
 	#/// Obtiene los parámetros de arranque para Linux.
 	PARAMS=$(ogLinuxBootParameters $1 $2) || return $?
@@ -67,8 +54,20 @@ case "$TYPE" in
 	# Configurar kernel Linux con los parámetros leidos de su GRUB.
 	kexec -l ${MNTDIR}${KERNEL} --append="$APPEND" --initrd=${MNTDIR}${INITRD}
 	;;
+     NTFS|HNTFS|FAT32|HFAT32)
+	#/// Compruebar si hay un cargador de Windows.
+	for f in io.sys ntldr bootmgr; do
+	    FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
+	    [ -n "$FILE" ] && LOADER="$(basename $FILE)"
+	done
+	[ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
+	# Activar la partición y copiar Grub4DOS.
+	ogSetPartitionActive $1 $2
+	cp $OGLIB/grub4dos/* $MNTDIR
+	kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
+	;;
      *) ogRaiseError $OG_ERR_PARTITION
-        return $?*
+        return $?
 	;;
 esac
 
