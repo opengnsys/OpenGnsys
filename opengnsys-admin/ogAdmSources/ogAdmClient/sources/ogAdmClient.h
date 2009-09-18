@@ -1,10 +1,11 @@
-// ***************************************************************************************************************************************
-// Aplicacin HIDRA (Gestin y Admistracin de aulas de informtica)
-// Copyright 2003-2007 Jos Manuel Alonso. Todos los derechos reservados.
-// Fichero: hidrax.h
-//	Descripcin:
-//		Fichero de cabecera de hidrax.cpp
-// ***************************************************************************************************************************************
+//****************************************************************************************************************************************************
+//	Aplicación OpenGNSys
+//	Autor: José Manuel Alonso.
+//	Licencia: Open Source 
+//	Fichero: ogAdmServer.cpp
+//	Descripción:
+//		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Cliente.
+// ****************************************************************************************************************************************************
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>

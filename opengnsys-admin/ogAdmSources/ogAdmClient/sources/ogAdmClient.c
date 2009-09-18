@@ -1,12 +1,12 @@
-// ******************************************************************************************************
-// Aplicación HIDRA (Gestión y Admistración de aulas de informática)
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla. 
-// Fichero: hidrac.c
+//****************************************************************************************************************************************************
+//	Aplicación OpenGNSys
+//	Autor: José Manuel Alonso.
+//	Licencia: Open Source 
+//	Fichero: ogAdmServer.cpp
 //	Descripción:
-//		Este programa es el que utiliza el cliente Hidra para comunicarse con su servidor y
-//		su repositorio mediante sockets
-// *****************************************************************************************************
-#include "hidrac.h"
+//		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Cliente.
+// ****************************************************************************************************************************************************
+#include "ogAdmClient.h"
 //______________________________________________________________________________________________________
 // Función: Encripta
 //
@@ -753,6 +753,7 @@ int ExisteFichero(char *nomfile)
 		UltimoError(16,"ExisteFichero()");
 		return(false);
 	}
+	return(true);
 }
 //______________________________________________________________________________________________________
 // Función: RemoveFile
@@ -785,6 +786,7 @@ int RemoveFile(char *nomfile)
 		UltimoError(16,"RemoveFile()");
 		return(false);
 	}
+	return(true);
 }
 //______________________________________________________________________________________________________
 // Función: LoadTextFile
@@ -1493,8 +1495,8 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 				case 3:
 					Log("Restaurar imagen Windows 2000...");
 					//res=Restaurar_WindowsNTFS(filemasterboot,fileperfil,pathperfil,wparticion,Propiedades.nombreordenador,"WINNT");
-					if(widsoftincremental!="") 
-						res=0;
+					//if(widsoftincremental!="") 
+					//	res=0;
 						//RestaurarIncrementales(wparticion,"WINNT",widsoftincremental,widperfilsoft,widperfilhard,wnemonico);
 					break;
 				case 4:

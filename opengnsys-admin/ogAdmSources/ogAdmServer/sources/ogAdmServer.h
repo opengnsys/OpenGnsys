@@ -1,10 +1,10 @@
-// ****************************************************************************************************************************************************
+//****************************************************************************************************************************************************
 //	Aplicación OpenGNSys
 //	Autor: José Manuel Alonso.
 //	Licencia: Open Source 
 //	Fichero: ogAdmServer.cpp
 //	Descripción:
-//		Este módulo de la aplicación OpenGNSys implementa el servicio central de administración.
+//		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Servidor.
 // ****************************************************************************************************************************************************
 #include <sys/types.h>
 #include <sys/socket.h>

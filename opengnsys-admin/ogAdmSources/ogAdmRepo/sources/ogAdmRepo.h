@@ -1,11 +1,11 @@
-// *************************************************************************************************************
-// Aplicacin HIDRA
-// Copyright 2003-2007 Jos Manuel Alonso. Todos los derechos reservados.
-// Fichero: hidrarepos.h
-// 
-//	Descripcin:
-//	 Fichero de cabecera de hidrapxedhcp.cpp
-// **************************************************************************************************************
+//****************************************************************************************************************************************************
+//	Aplicación OpenGNSys
+//	Autor: José Manuel Alonso.
+//	Licencia: Open Source 
+//	Fichero: ogAdmServer.cpp
+//	Descripción:
+//		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Repositorio.
+// ****************************************************************************************************************************************************
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
