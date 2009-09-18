@@ -7,44 +7,6 @@
 //		Este módulo de la aplicación OpenGNSys implementa el servicio central de administración.
 // ****************************************************************************************************************************************************
 #include "ogAdmServer.h"
-#include "encriptacion.c"
-// ________________________________________________________________________________________________________
-// Función: RegistraLog
-//
-//		Descripción:
-//			Esta Función registra los evento de errores en un fichero log
-//		Parametros:
-//			- msg : Mensage de error
-//			- swerrno: Switch que indica que recupere literal de error del sistema
-// ________________________________________________________________________________________________________
-void RegistraLog(char *msg,int swerrno)
-{
-	struct tm * timeinfo;
-	timeinfo = TomaHora();
-
-	FLog=fopen(szPathFileCfg,"at");
-	if(swerrno)
-		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s:%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg,strerror(errno));
-	else
-		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
-	fclose(FLog);
-}
-
-// ________________________________________________________________________________________________________
-// Función: TomaHora
-//
-//		Descripcin:
-//			Esta Función toma la hora actual  del sistema y devuelve una estructura conlos datos
-//		Parametros:
-//			- msg : Mensage de error
-//			- swerrno: Switch que indica que recupere literal de error del sistema
-// ________________________________________________________________________________________________________
-struct tm * TomaHora()
-{
-	time_t rawtime;
-	time ( &rawtime );
-	return(gmtime(&rawtime));
-}
 //________________________________________________________________________________________________________
 //
 // Función: TomaConfiguracion
@@ -587,57 +549,6 @@ int cuenta_ipes(char* iph)
 		if(iph[i]==';') cont++;
 	}
 	return(cont);
-}
-// ________________________________________________________________________________________________________
-// Función: toma_parametro
-// 
-//		Descripcin:
-// 			Esta Función devuelve el valor de un parametro incluido en la trama.
-// 			El formato del protocolo es: "nombre_parametro=valor_parametro"
-// 		Parnetros:
-// 			- nombre_parametro: Es el nombre del parnetro a recuperar
-// 			- parametros: Es la matriz que contiene todos los parnetros
-// ________________________________________________________________________________________________________
-char * toma_parametro(char* nombre_parametro,char *parametros)
-{
-	int i=0;
-	char* pos;
-
-	for(i=0;i<LONGITUD_PARAMETROS-4;i++){ 
-		if(parametros[i]==nombre_parametro[0]){
-			if(parametros[i+1]==nombre_parametro[1]){
-				if(parametros[i+2]==nombre_parametro[2]){
-					if(parametros[i+3]=='='){
-						pos=&parametros[i+4];
-						return(pos);
-					}
-				}
-			}
-		}
-	}
-	return(NULL);
-}
-// ________________________________________________________________________________________________________
-// Función: split_parametros
-//
-//		Descripcin:
-//			Esta Función trocea una cadena segn un carnter delimitador, Devuelve el nmero de trozos
-// 		Parnetros:
-// 			- trozos: Array de punteros a cadenas
-// 			- cadena: Cadena a trocear
-// 			- ch: Carnter delimitador
-// ________________________________________________________________________________________________________
-int split_parametros(char **trozos,char *cadena, char * ch){
-	int w=0;
-	char* token;
-
-	token= strtok(cadena,ch); // Trocea segn delimitador
-	while( token != NULL ){
-		trozos[w++]=token;
-		token=strtok(NULL,ch); // Siguiente token
-	}
-	trozos[w++]=token; 
-	return(w-1); // Devuelve el numero de trozos
 }
 // ________________________________________________________________________________________________________
 // Función: corte_iph
@@ -1606,7 +1517,7 @@ int DisponibilidadComandos(SOCKET s,char *parametros)
 //			- e: Nuevo estado
 //			- s: Socket usado por el cliente para comunicarse con el servidor HIDRA
 // ________________________________________________________________________________________________________
-int Coloca_estado(char *iph,char *e,SOCKET s)
+int Coloca_estado(char *iph,const char *e,SOCKET s)
 {
 	int i;
 	for (i=0;i<MAXIMOS_SOCKETS;i++){
@@ -2535,7 +2446,7 @@ int RESPUESTA_RestaurarImagen(SOCKET s,char *parametros)
 //			- ido: identificador del ordenador
 //			- db: Conexin ADO operativa
 // ________________________________________________________________________________________________________
-int Actualiza_ordenador_imagen(char *par,char *idi,char *ido,Database db)
+int Actualiza_ordenador_imagen(char *par,const char *idi,char *ido,Database db)
 {
 	char ErrStr[200],sqlstr[1000];
 	Table tbl;
@@ -3681,4 +3592,4 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 	close(socket_s);
 	exit(EXIT_SUCCESS); 
 }
-
+ 

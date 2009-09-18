@@ -20,6 +20,7 @@
 #include </usr/include/mysql/mysql.h>
 #include <pthread.h>
 #include "Database.h"
+#include "util.h"
 
 #define LONGITUD_PARAMETROS 4000	// Longitud m�ima de la informaci� de la trama (parametros)
 #define LONGITUD_TRAMA		LONGITUD_PARAMETROS+11	// Longitud m�ima de la trama completa
@@ -160,12 +161,11 @@ void INTROaFINCAD(char* );
 void FINCADaINTRO(char*,char*);
 
 int cuenta_ipes(char*);
-char * toma_parametro(char*,char *);
 char * corte_iph(char *);
 
 int respuesta_cortesia(SOCKET );
 int NoComandosPendientes(SOCKET);
-int Coloca_estado(char *,char *,SOCKET);
+int Coloca_estado(char *,const char *,SOCKET);
 int actualiza_configuracion(Database , Table ,char* ,int,int ,char* );
 int actualiza_hardware(Database , Table ,char* ,char* ,char*);
 int CuestrionPerfilHardware(Database , Table ,int ,char* ,int *,int ,char*);
@@ -190,7 +190,6 @@ int Conmutar(char *);
 int RenovarItems(char *);
 
 SOCKET AbreConexion(char *,int);
-void RegistraLog(char *,int);
 
 void PurgarTablaSockets(char *);
 int borra_entrada(int);
@@ -211,7 +210,7 @@ int RESPUESTA_TomaHardware(SOCKET ,char *);
 
 int	RESPUESTA_inclusionREPO(TRAMA*);
 
-int Actualiza_ordenador_imagen(char *,char *,char *,Database);
+int Actualiza_ordenador_imagen(char *,const char *,char *,Database);
 
 int busca_comandos(char* ,char*,char *,int *);
 int InsertaNotificaciones(int,int,int,char *,Database);
@@ -234,5 +233,4 @@ int Toma_idservidorres(Database ,Table ,char*,char*,int*,int*);
 
 void cambiacarac(char *,char , char );
 int TomaConfiguracion(char* );
-int split_parametros(char **,char *, char *);
 struct tm * TomaHora();

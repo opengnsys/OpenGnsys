@@ -114,7 +114,7 @@ bool Table::ISEOF()
 	return(eof);
 }
 // __________________________________________________________________________
-bool Table::Get(char* FieldName, char *FieldValue)
+bool Table::Get(const char* FieldName, char *FieldValue)
 {
 	char * aux;
 	aux=tomadato(FieldName);
@@ -125,7 +125,7 @@ bool Table::Get(char* FieldName, char *FieldValue)
 	return(true);
 }
 // __________________________________________________________________________
-bool Table::Get(char* FieldName,int &FieldValue)
+bool Table::Get(const char* FieldName,int &FieldValue)
 {
 	char *aux;
 	aux=tomadato(FieldName);
@@ -136,7 +136,7 @@ bool Table::Get(char* FieldName,int &FieldValue)
 	return(true);
 }
 // __________________________________________________________________________
-bool Table::Get(char* FieldName,char &FieldValue)
+bool Table::Get(const char* FieldName,char &FieldValue)
 {
 	char *aux;
 	aux=tomadato(FieldName);
@@ -144,7 +144,7 @@ bool Table::Get(char* FieldName,char &FieldValue)
 	return(true);
 }
 // __________________________________________________________________________
-char* Table::tomadato(char* FieldName)
+char* Table::tomadato(const char* FieldName)
 {
 	Herror hr;
 	unsigned int i;

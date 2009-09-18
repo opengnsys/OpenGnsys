@@ -29,7 +29,7 @@ public:
 };
 // __________________________________________________________________________
 class Table{
-	char* tomadato(char* FieldName);
+	char* tomadato(const char* FieldName);
 public:
 	bool eof,bof;
 	MYSQL_RES	* m_Rec ;
@@ -47,9 +47,9 @@ public:
 	bool MoveFirst();
 	bool MoveLast();
 
-	bool Get(char* FieldName, char* FieldValue);
-	bool Get(char* FieldName,int &FieldValue);
-	bool Get(char* FieldName,char &FieldValue);
+	bool Get(const char* FieldName, char* FieldValue);
+	bool Get(const char* FieldName,int &FieldValue);
+	bool Get(const char* FieldName,char &FieldValue);
 };
 // __________________________________________________________________________
 class Herror
