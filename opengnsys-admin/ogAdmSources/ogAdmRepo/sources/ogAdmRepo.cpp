@@ -1,17 +1,43 @@
-// ****************************************************************************************************************************************************
-//	Aplicación OpenGNSys
-//	Autor: José Manuel Alonso.
-//	Licencia: Open Source 
-//	Fichero: ogAdmServer.cpp
-//	Descripción:
-//		Este módulo de la aplicación OpenGNSys implementa el cliente del Repositorio.
-// ****************************************************************************************************************************************************
+// *************************************************************************************************************
+// Aplicacin HIDRA
+// Copyright 2003-2007 Jos Manuel Alonso. Todos los derechos reservados.
+// Fichero: hidrarepos.cpp
+//
+//	Descripcin:
+//	Este fichero implementa el servicio de repositorio de la aplicacin hidra.
+// **************************************************************************************************************
 #include "ogAdmRepo.h"
+#include "encriptacion.c"
+// ________________________________________________________________________________________________________
+// Funcin�:RegistraLog
+//
+//		Descripcin�:
+//			Esta funcin� registra los evento de errores en un fichero log
+//		Parametros:
+//			- msg : Mensage de error
+//			- swerrno: Switch que indica que recupere literal de error del sistema
+// ________________________________________________________________________________________________________
+void RegistraLog(const char *msg,int swerrno)
+{
+	time_t rawtime;
+	struct tm * timeinfo;
+
+	time ( &rawtime );
+	timeinfo = gmtime(&rawtime);
+
+	FLog=fopen(szPathFileLog,"at");
+	if(swerrno)
+		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s:%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg,strerror(errno));
+	else
+		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
+	fclose(FLog);
+}
+
 //________________________________________________________________________________________________________
-// Función: TomaConfiguracion
+// Funcinn: TomaConfiguracion
 //
 //		Descripcinn:
-//		Esta Función lee el fichero de configuracinn del programa hidralinuxcli  y toma los parametros
+//		Esta funcinn lee el fichero de configuracinn del programa hidralinuxcli  y toma los parametros
 //		Parametros:
 //				- pathfilecfg : Ruta al fichero de configuracinn
 //________________________________________________________________________________________________________
@@ -30,7 +56,7 @@ int TomaConfiguracion(char* pathfilecfg)
 	lSize = ftell (Fconfig);
 	rewind (Fconfig);
 	buffer = (char*) malloc (lSize);  // Toma memoria para el buffer de lectura.
-	if (buffer == NULL)	 	exit(EXIT_FAILURE);
+	if (buffer == NULL)	 	exit(EXIT_FAILURE);;
 	fread (buffer,1,lSize,Fconfig); 	// Lee contenido del fichero
 	fclose(Fconfig);
 
@@ -71,7 +97,88 @@ int TomaConfiguracion(char* pathfilecfg)
 
 	return(TRUE);
 }
+// ________________________________________________________________________________________________________
+// Funcinn: INTROaFINCAD
+//
+//		Descripcinn?:
+// 			Cambia INTROS por caracteres fin de cadena ('\0') en una cadena
+//		Parametros:
+//				- parametros : La cadena a explorar
+// ________________________________________________________________________________________________________
+void INTROaFINCAD(char* parametros)
+{
+	int lon,i;
+	lon=strlen(parametros);
+	for(i=0;i<lon;i++){ // Cambia los INTROS por NULOS
+		if(parametros[i]=='\r') parametros[i]='\0';
+	}
+}
+// ________________________________________________________________________________________________________
+// Funcinn: INTROaFINCAD
+//
+//		Descripcinn?:
+// 			Cambia INTROS por caracteres fin de cadena ('\0') en una cadena
+//		Parametros:
+//				- parametros : La cadena a explorar
+// ________________________________________________________________________________________________________
+void FINCADaINTRO(char* a,char *b)
+{
+	char *i;
+	for(i=a;i<b;i++){ // Cambia los NULOS por INTROS
+		if(*i=='\0') *i='\r';
+	}
+}
+// ________________________________________________________________________________________________________
+// Funcinn: toma_parametro
+// 
+//		Descripcinn?:
+// 			Esta funci? devuelve el valor de un parametro incluido en la trmInfo.
+// 			El formato del protocolo es: "nombre_parametro=valor_parametro"
+// 		Par?etros:
+// 			- nombre_parametro: Es el nombre del par?etro a recuperar
+// 			- parametros: Es la matriz que contiene todos los par?etros
+// ________________________________________________________________________________________________________
+char * toma_parametro(const char* nombre_parametro,char *parametros)
+{
+	int i=0;
+	char* pos;
 
+	for(i=0;i<LONGITUD_PARAMETROS-4;i++){ 
+		if(parametros[i]==nombre_parametro[0]){
+			if(parametros[i+1]==nombre_parametro[1]){
+				if(parametros[i+2]==nombre_parametro[2]){
+					if(parametros[i+3]=='='){
+						pos=&parametros[i+4];
+						return(pos);
+					}
+				}
+			}
+		}
+	}
+	return(NULL);
+}
+// ________________________________________________________________________________________________________
+// Funci�: split_parametros
+//
+//		Descripci�:
+//			Esta funci� trocea una cadena segn un car�ter delimitador, Devuelve el nmero de trozos
+// 		Par�etros:
+// 			- trozos: Array de punteros a cadenas
+// 			- cadena: Cadena a trocear
+// 			- ch: Car�ter delimitador
+// ________________________________________________________________________________________________________
+int split_parametros(char **trozos,char *cadena, char * ch){
+	int i=0;
+	char* token;
+
+	token= strtok(cadena,ch); // Trocea segn delimitador
+	while( token != NULL ){
+		trozos[i++]=token;
+		token=strtok(NULL,ch); // Siguiente token
+	}
+	trozos[i++]=token; 
+	return(i-1); // Devuelve el numero de trozos
+}
 //_______________________________________________________________________________________________________________
 //
 // Comprueba si la IP del cliente est?a en la base de datos de Hidra
@@ -347,7 +454,7 @@ int gestiona_comando(TramaRepos *trmInfo)
 	return(false);	
 }
 //_____________________________________________________________________________________________________________
-// Función: RegistraComando
+// Funcinn: RegistraComando
 //
 //	 Descripcinn:
 //		Crea un fichero de comando para cada cliente hidra
@@ -393,7 +500,7 @@ int RegistraComando(TramaRepos *trmInfo)
 // Funcin: Arrancar
 //
 //	 Descripcinn:
-//		Esta Función enciende un ordenadores
+//		Esta funcinn enciende un ordenadores
 //	Parámetros de entrada:
 //		- parametros: Cadena con las mac de los ordenadores que se van a arrancar separadas por punto y coma
 //_____________________________________________________________________________________________________________
@@ -412,7 +519,7 @@ int Arrancar(TramaRepos *trmInfo)
 	return(RegistraComando(trmInfo));
 }
 //_____________________________________________________________________________________________________________
-// Función: levanta
+// Funcinn: levanta
 //
 // Descripcion:
 //    Enciende el ordenador cuya MAC se pasa como parámetro
@@ -435,14 +542,14 @@ int levanta(char * mac)
    	bOpt = TRUE; 	// Pone el socket en modo Broadcast
    	ret = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *)&bOpt,sizeof(bOpt));
    	if (ret == SOCKET_ERROR){
-		RegistraLog("Fallo en Función setsockopt(SO_BROADCAST), mndulo levanta",true);
+		RegistraLog("Fallo en funcinn setsockopt(SO_BROADCAST), mndulo levanta",true);
 		return(FALSE);
     }
     local.sin_family = AF_INET;
     local.sin_port = htons((short)puertowakeup);
 	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
     if (bind(s, (sockaddr *)&local, sizeof(local)) == SOCKET_ERROR){
-		RegistraLog("Fallo en Función bind(), mndulo levanta",true);
+		RegistraLog("Fallo en funcinn bind(), mndulo levanta",true);
 		return(FALSE);
     }
 	Wake_Up(s,mac);
@@ -450,7 +557,7 @@ int levanta(char * mac)
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________________
-// Función: Wake_Up
+// Funcinn: Wake_Up
 //
 //	 Descripcion:
 //		Enciende el ordenador cuya MAC se pasa como parámetro
@@ -479,13 +586,13 @@ int Wake_Up(SOCKET s,char * mac)
     WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
 	ret = sendto(s,(char *)&Trama_WakeUp, sizeof(Trama_WakeUp), 0,(sockaddr *)&WakeUpCliente, sizeof(WakeUpCliente));
     if (ret == SOCKET_ERROR){
-		RegistraLog("Fallo en Función send(), mndulo Wake_Up",true);
+		RegistraLog("Fallo en funcinn send(), mndulo Wake_Up",true);
 		return(FALSE);
     	}
 	return 0;
 }
 //_____________________________________________________________________________________________________________
-// Función: PasaHexBin
+// Funcinn: PasaHexBin
 //
 //		Descripcion:
 //			Convierte a binario una direccinn mac desde una cadena de longitud 12
@@ -522,7 +629,7 @@ void PasaHexBin( char *cadena,char *numero)
 	}
 }
 //_____________________________________________________________________________________________________________
-// Función: FicheroOperador
+// Funcinn: FicheroOperador
 //
 //	 Descripcinn:
 //		Crea un fichero para que un operador de aula o administrador de centro pueda entrar en el menú privado de los clientes rembo
@@ -567,7 +674,7 @@ int FicheroOperador(TramaRepos *trmInfo)
 	return(true);
 }
 //_____________________________________________________________________________________________________________
-// Función: FicheroOperador
+// Funcinn: FicheroOperador
 //
 //	 Descripcinn:
 //		Crea un fichero para que un operador de aula o administrador de centro pueda entrar en el menú privado de los clientes rembo
@@ -645,7 +752,7 @@ bool respuesta_clienteHidra(TramaRepos *trmInfo)
 //
 // Envia respuesta a peticin de comando
 //_______________________________________________________________________________________________________________
-bool respuesta_peticion(TramaRepos *trmInfo,const char *LitRes,const char* swf,const char*txt)
+bool respuesta_peticion(TramaRepos *trmInfo,const char *LitRes,char* swf,char*txt)
 {
 	int lon,ret;
 	TRAMA *trama=(TRAMA*)malloc(LONGITUD_TRAMA);
@@ -927,10 +1034,10 @@ int TomaPuertoLibre(int * puerto)
 	return(true);
 }
 //________________________________________________________________________________________________________
-// Función: TomaRestoConfiguracion;
+// Funcinn: TomaRestoConfiguracion;
 //
 //		Descripcinn:
-//		Esta Función lee la trama respuesta de inclusin del repositorio hidra
+//		Esta funcinn lee la trama respuesta de inclusin del repositorio hidra
 
 //________________________________________________________________________________________________________
 int RESPUESTA_inclusionREPO(TRAMA *trama)
