@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include "Database.h"
-#include "util.h"
+#include "ogUtil.h"
 
 SOCKET sClient;
 
