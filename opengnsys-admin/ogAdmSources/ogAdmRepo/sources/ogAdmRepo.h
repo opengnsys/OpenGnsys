@@ -100,7 +100,7 @@ int split_parametros(char **,char *, char * );
 int TomaConfiguracion(char* );
 void INTROaFINCAD(char* );
 void FINCADaINTRO(char*,char*);
-char * toma_parametro(char* ,char *);
+char * toma_parametro(const char* ,char *);
 int ClienteExistente(TramaRepos *);
 LPVOID GestionaServicioRepositorio(LPVOID);
 int	Actualizar(TramaRepos*);
