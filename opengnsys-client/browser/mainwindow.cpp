@@ -60,10 +60,9 @@ MainWindow::MainWindow(QWidget *parent)
     if(!readEnvironmentValues())
         text->insertPlainText(tr("Any environment variable/s didn't be setted\n"));
 
-    if(env.contains("OGLOG") && env.contains("OGIP") &&
-            env["OGLOG"]!="" && env["OGIP"]!="")
+    if(env.contains("OGLOGFILE") && env["OGLOGFILE"]!="")
     {
-        logfile=new QFile(env["OGLOG"]+"/"+env["OGIP"]);
+        logfile=new QFile(env["OGLOGFILE"]);
         if(!logfile->open(QIODevice::WriteOnly | QIODevice::Text |
                     QIODevice::Append))
         {

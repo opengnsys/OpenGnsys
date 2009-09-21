@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #define PROTOCOL "command:"
-#define ENVIRONMENT "OGIP,OGSERVER,OGLOG"
+#define ENVIRONMENT "OGLOGFILE"
+//#define ENVIRONMENT "OGIP,OGSERVER,OGLOG"
 
 #include <QWidget>
 #include <QProcess>
