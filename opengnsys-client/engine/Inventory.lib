@@ -122,3 +122,69 @@ lshw | awk 'BEGIN {type="mod";}
 }
 
 
+#/**
+#         ogListSoftware
+#@brief   Lista el inventario de software instalado en un sistema operativo.
+#@return  programa versión
+#@warning Se ignoran los parámetros de entrada.
+#@note    Requisitos: ...
+#@todo    Detectar software en Linux
+#@version 0.1 - Primeras pruebas con OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-23
+#*/
+function ogListSoftware () {
+
+# Variables locales.
+local MNTDIR TYPE DPKGDIR RPMDIR KEYS k PROG VERS
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME 1 1"
+    return
+fi
+#/// Error si no se reciben 2 parametros.
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Obtener tipo de sistema de archivos y montarlo.
+TYPE=$(ogGetFsType $1 $2) || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
+
+case "$TYPE" in
+     EXT[234]|REISERFS|REISER4)
+	# Procesar paquetes dpkg.
+	DPKGDIR="${MNTDIR}/var/lib/dpkg"
+	if [ -r $DPKGDIR ]; then 
+	    dpkg --admindir=$DPKGDIR -l | \
+			awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
+				sub(/-.*$/,"",$3); print $2,$3}' | sort | uniq
+	fi
+	# Procesar paquetes RPM.
+	RPMDIR="${MNTDIR}/var/lib/rpm"
+	if [ -r $RPMDIR ]; then 
+	    # Correccion inconsistencia de version de base de datos.
+	    rm -f ${RPMDIR}/__db.*
+	    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
+			awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
+			sort | uniq
+	    rm -f ${RPMDIR}/__db.*
+	fi
+	;;
+     NTFS|HNTFS|FAT32|HFAT32)
+	# Claves de registro para programas instalados: formato "{clave}".
+	#KEYS=$(ListarClaveRegistro $DIRMONT software '\Microsoft\Windows\CurrentVersion\Uninstall' | grep "{.*}")
+	KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+	# Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+	(for k in $KEYS; do
+	    PROG=$(ogGetRegistryKey $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+	    if [ -n "$PROG" ]; then
+		VERS=$(ogGetRegistryKey $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+		echo "$PROG $VERS"
+	    fi
+	done) | sort | uniq
+	;;
+     *) ogRaiseError $OG_ERR_PARTITION "$1,$2"
+        return $? ;;
+esac
+}
+
