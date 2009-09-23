@@ -130,17 +130,20 @@ $gateway=$infoaula['gateway'];
 		{
 			fwrite($gestion, "MENU DEFAULT \n");
 		}
-		fwrite($gestion, $row['kernel'] . " EACregistred=YES " . $varinfoaula  .  "\n");
-		$iseac=substr_count($row['append'] , "og");
+
+
+		$iseac=substr_count($row['append'] , "ogclients");
 		echo $iseaci . " \n";
 		if ($iseac > 0)
 		{
+			fwrite($gestion, $row['kernel'] . " EACregistred=YES " . $varinfoaula  .  "\n");
 			$append=str_replace("repo_client", $repo_client, $row['append']);
 ##	echo $append . "\n";
 			fwrite($gestion, $append . " ip=" .  $infohost['ipaddress'] .":" . $repo_client . ":" . $gateway . ":" . $netmask . ":" . $infohost['hostname'] . ":eth0 ro " . " " . $varinfohost  . " ". $varinfoparameters . " \n");
 		}
 		else
 		{
+			fwrite($gestion, $row['kernel'] . " \n");
 			fwrite($gestion, $row['append'] . " \n");
 		}
 			$prompt=$row['prompt'];
@@ -294,9 +297,9 @@ function InsertDefaultClassrom ($descripcion,$subred,$netmask,$broadcast,$gatewa
 function InsertItemtoMenu ($menu,$item)
 {
 	#include ("/var/EAC/admin/config/EAC.conf");
-	echo $menu . $item . "\n";
-	$conexion=mysql_connect(SQL_HOST_LOCAL, SQL_USER, SQL_PASS) or die ('no se ha podido conectar con mysql');
-	mysql_select_db(DATABASE, $conexion);
+#echo $menu . $item . "\n";
+#	$conexion=mysql_connect(SQL_HOST_LOCAL, SQL_USER, SQL_PASS) or die ('no se ha podido conectar con mysql');
+#	mysql_select_db(DATABASE, $conexion);
 	$query="select * from menuboot_itemboot where labelmenu='$menu' and labelitem='$item'";
 	echo " " . $query . " \n";
 	$rs=mysql_query($query);
