@@ -10,6 +10,55 @@
 
 
 #/**
+#         ogExtendFs int_ndisk int_npartition
+#@brief   Extiende un sistema de archivos al tamaño de su partición.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  (nada)
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Partición desconocida o no accesible.
+#@note    Requisitos: *resize*
+#@version 0.9 - Primera adaptación para OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-23
+#*/
+function ogExtendFs () {
+
+# Variables locales.
+local PART
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1"
+    return
+fi
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return $?
+
+ogUnmount $1 $2
+#/// Redimensionar al tamano máximo según el tipo de partición.
+case "$(ogGetFsType $1 $2)" in
+     EXT[234])
+	resize2fs -f $PART || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	;;
+     REISERFS)		# Usar "resize_reiserfs"
+	resize_reiserfs -f $PART || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	;;
+     NTFS|HNTFS)
+	ntfsresize -f $PART <<<"y" || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	;;
+     *) ogReiseError $OG_ERR_PARTITION "$1,$2"
+	return $? ;;
+esac
+}
+
+
+#/**
 #         ogGetFsType int_ndisk int_npartition
 #@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
@@ -207,6 +256,68 @@ if [ -z "$MNTDIR" ]; then
     $MOUNT $PART $MNTDIR || $MOUNT $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
 fi
 echo $MNTDIR
+}
+
+
+
+#/**
+#         ogReduceFs int_ndisk int_npartition
+#@brief   Reduce el tamaño del sistema de archivos, sin tener en cuenta el espacio libre.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@return  tamañoKB
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Partición desconocida o no accesible.
+#@warning   El sistema de archivos se amplía al mínimo + 1 KB.
+#@note      Requisitos:	*resize*
+#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-23
+#*/
+function ogReduceFs () {
+
+# Variables locales
+local PART BLKS SIZE
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1"
+    return
+fi
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return $?
+
+#/// Redimensionar según el tipo de particion.
+case "$(ogGetFsType $1 $2)" in
+     EXT[234])
+	ogUnmount $1 $2
+	# Ext2/3/4: Tamaño de los bloques del sistema de archivos
+	BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')	
+	# Traduce el num. en sectores de 512B a tamano en MB.
+	SIZE=$(resize2fs -P $PART | \
+		awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')	
+	resize2fs -fp $PART "${SIZE}M" >/dev/null || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	;;
+     REISERFS)		# Usar "resize_reiserfs"
+	;;
+     NTFS|HNTFS)
+	rm -f $(ogGetPath $1 $2 pagefile.sys)
+	ogUnmount $1 $2
+	#NTFS: Obtiene tamano minimo en MB.
+	SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print $8+1000}')
+	ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	;;
+     *) ogReiseError $OG_ERR_PARTITION "$1,$2"
+	return $? ;;
+esac
+#/// Mostrar nuevo tamaño en KB.
+echo $[SIZE*1024]
 }
 
 
