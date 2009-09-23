@@ -68,6 +68,9 @@ if [ -d $OPENGNSYS ]; then
     # FIXME Necesario temporalmente
     mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/
     ln -s $OGLIB/fonts /usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts
+
+    # FIXME Datos de dispositivos PCI en /etc
+    ln -s $OGLIB/pci.ids /etc
 fi
 
 #/// Declaración de códigos de error.
