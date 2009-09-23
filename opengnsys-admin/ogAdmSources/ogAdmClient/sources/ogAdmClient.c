@@ -1073,7 +1073,7 @@ int TomaIPlocal()
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/hidraClientIP",HIDRASCRIPTS);
+	sprintf(cmdshell,"%s/ogAdmIP",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);	
 	if(herror){
 		UltimoError(herror,"TomaIPlocal()"); // Se ha producido algún error
@@ -1119,7 +1119,7 @@ int InclusionClienteHIDRA()
 	lon+=sprintf(trama->parametros+lon,"cfg=%s\r",parametroscfg);	// Configuración de los Sistemas Operativos del cliente
 	if(AbreConexionTCP()){
 		Log("Enviando peticion de inclusion del cliente Hidra");
-		if(!EnviaTramasHidra(sock,trama)){
+ 		if(!EnviaTramasHidra(sock,trama)){
 			UltimoError(21,"InclusionClienteHIDRA()"); // No se pudo recuperar la configuración hardware
 			return(false);
 		}
@@ -1747,8 +1747,8 @@ char* LeeConfiguracion(char* disco)
 	char *nomso;
 	
 	cadenaparticiones=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
-	sprintf(cmdshell,"%s/hidraListPrimaryPartitions",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s","hidraListPrimaryPartitions",disco);
+	sprintf(cmdshell,"%s/ogAdmListPrimaryPartitions",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s","ogAdmListPrimaryPartitions",disco);
 	herror=EjecutarScript(cmdshell,parametros,cadenaparticiones,true);
 	if(herror){
 	    UltimoError(herror,"LeeConfiguracion()");	 // Se ha producido algún error
@@ -1817,8 +1817,8 @@ char* TomaNomSO(char*disco,int particion)
 	
 	infosopar=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA); // Información del S.O. de la partición
 	
-	sprintf(cmdshell,"%s/hidraOSVersion",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s %d","hidraOSVersion",disco,particion);
+	sprintf(cmdshell,"%s/ogAdmSoVer",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s %d","ogAdmSoVer",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,infosopar,true);
 	
 	if(herror){

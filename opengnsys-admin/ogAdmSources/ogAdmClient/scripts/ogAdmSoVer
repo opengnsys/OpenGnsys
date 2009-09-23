@@ -1,0 +1,14 @@
+#!/bin/bash
+#		{"BIGDOS", "MsDos","MsDos"},
+#		{"NTFS","Windows NT Platafom","Windows 2000,XP,2003"},
+#		{"FAT32","Windows","Windos 98,SE,Millenium"},			
+#		{"EXT","Extendida","Extendida"},
+#		{"EXT3","Linux","Linux"},
+#		{"EXT2","Linux","Linux"},	
+#		{"VFAT","VFAT","VFAT"},	
+#		{"CACHE","CACHE","CACHE"},			
+#		{"UNKNOWN","UNKNOWN","UNKNOWN"},			
+#		{"EMPTY","Libre","Libre"},
+#		{"LINUX-SWAP","","Linux-swap"}};
+
+echo Windows: Windows XP Profesional
