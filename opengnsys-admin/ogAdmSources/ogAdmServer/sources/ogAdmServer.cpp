@@ -22,7 +22,7 @@ void RegistraLog(const char *msg,int swerrno)
 	struct tm * timeinfo;
 	timeinfo = TomaHora();
 
-	FLog=fopen(szPathFileCfg,"at");
+	FLog=fopen(szPathFileLog,"at");
 	if(swerrno)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s:%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg,strerror(errno));
 	else
@@ -3603,14 +3603,16 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 	//pthread_t hThread;
 	//void *resul
 	// Validación de parámetros
-    strcpy (szPathFile, "hidra.cfg");
-    strcpy (szPathFileCfg, "hidra.log");
+	
+	strcpy(szPathFileCfg,"hidra.cfg");
+	strcpy(szPathFileLog,"hidra.log");	
+	
     for(i = 1; (i+1) < argc; i+=2){
         if (argv[i][0] == '-'){
             switch (tolower(argv[i][1])){
                 case 'f':
                     if (argv[i+1]!=NULL)
-                        strcpy(szPathFile, argv[i+1]);
+                        strcpy(szPathFileCfg, argv[i+1]);
                     else{
                         RegistraLog("Fallo en los parámetros: Debe especificar el fichero de configuración del servicio",false);
                         exit(EXIT_FAILURE);
@@ -3618,7 +3620,7 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
                     break;
                 case 'l':
                     if (argv[i+1]!=NULL)
-                        strcpy(szPathFileCfg, argv[i+1]);
+                        strcpy(szPathFileLog, argv[i+1]);
                     else{
                         RegistraLog("Fallo en los parámetros: Debe especificar el fichero de log para el servicio",false);
                         exit(EXIT_FAILURE);
@@ -3631,13 +3633,14 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
             }
         }
     }
-	if (szPathFile==NULL)
-		{printf ("error\n");exit(EXIT_FAILURE);}
-	if(!TomaConfiguracion(szPathFile)){ // Toma parametros de configuracion
-			RegistraLog("NO existe fichero de configuración o contiene un error de sintaxis",false);
-			exit(EXIT_FAILURE);
+	if (szPathFileCfg==NULL){
+		printf ("***Error. No se ha especificado fichero de configuración\n");
+		exit(EXIT_FAILURE);
 	}
-
+	if(!TomaConfiguracion(szPathFileCfg)){ // Toma parametros de configuracion
+		RegistraLog("El fichero de configuración contiene un error de sintaxis",false);
+		exit(EXIT_FAILURE);
+	}
 	pthread_mutex_init(&guardia,NULL); // Creación del mutex para control de hebras
 
 	for (i=0;i<MAXIMOS_SOCKETS;i++){

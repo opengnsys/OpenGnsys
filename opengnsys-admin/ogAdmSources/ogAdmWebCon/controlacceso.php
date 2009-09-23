@@ -11,8 +11,13 @@ include_once("./clases/AdoPhp.php");
 
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
+<<<<<<< .mine
+$cnx="localhost;root;amanuel;ogBDAdmin;sqlserver"; // Cadena de conexi� a la base de datos
+$ips="10.1.15.4"; // IP del servidor hidra
+=======
 $cnx="localhost;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexi� a la base de datos
 $ips="10.1.15.3"; // IP del servidor hidra
+>>>>>>> .r279
 $prt="2008"; // Puerto de comunicaci� con el servidor
 $wer="http://10.1.15.3/hidraweb/pagerror.php"; // P�ina de redireccionamiento de errores
 $wac="http://10.1.15.3/hidraweb/acceso.php"; // P�ina de login de la aplicaci�

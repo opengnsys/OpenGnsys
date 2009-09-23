@@ -15,6 +15,10 @@ var currentTipo=null;				// Tipo de Nodo
 //____________________________________________________________________________
 var IE=(navigator.appName=="Microsoft Internet Explorer");
 var NS=(navigator.appName=="Netscape");
+//document.body.addEventListener("contextmenu",killClick,true);
+//document.oncontextmenu=function(){	return(false);}
+//window.oncontextmenu = function () { alert("pepe"); }
+
 //________________________________________________________________________________________________________
 //	
 //	Inserta un nuevo grupo 

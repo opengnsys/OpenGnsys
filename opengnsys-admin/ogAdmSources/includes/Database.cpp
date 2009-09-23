@@ -41,6 +41,7 @@ bool Database::Open(char* UserName, char* Pwd,char* server,char*Bd)
 		ErrorHandler(hr,m_ErrStr);
 		return(false); // Fallo de inicializaci�
 	}
+	
 	if(!mysql_real_connect(m_Cnn, server,UserName,Pwd,Bd, MYSQL_PORT,NULL,0)){
 		mysql_error(m_Cnn);
 		hr.nError=mysql_errno(m_Cnn);

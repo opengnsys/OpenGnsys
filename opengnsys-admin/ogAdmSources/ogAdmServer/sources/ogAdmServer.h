@@ -93,7 +93,7 @@ typedef char  BYTE;
 typedef  int  SOCKET;
 // __________________________________________________________________________________________________________
 
-char szPathFile[128],szPathFileCfg[128];
+char szPathFileLog[128],szPathFileCfg[128];
 FILE *FLog,*Fconfig;
 char AulaUp[2];
 int aulaup;	// Switch para permitir  que un ordenador se de de alta autom�icamente en un aula existenta

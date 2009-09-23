@@ -1,7 +1,7 @@
 # makefile
 
 # Nombre del proyecto
-PROYECTO := hidrac
+PROYECTO := ogAdmClient
 
 # Directorios y librerias
 DIRS :=
@@ -12,7 +12,7 @@ OPCS := -O0 -g -Wall	# Depuracion
 #OPCS := -O3 -Wall	# Optimizacion
 
 # Ficheros objetos
-OBJS := fuentes/hidrac.o
+OBJS := sources/ogAdmClient.o
 
 
 all: $(PROYECTO)
@@ -24,10 +24,10 @@ $(PROYECTO): $(OBJS)
 clean:
 	rm $(PROYECTO) $(OBJS)
 
-fuentes/%.o: fuentes/%.cpp
+sources/%.o: sources/%.cpp
 	g++ $(OPCS) -c -o"$@" "$<"
 
-fuentes/%.o: fuentes/%.c
+sources/%.o: sources/%.c
 	gcc $(OPCS) -c -o"$@" "$<"
 
 
