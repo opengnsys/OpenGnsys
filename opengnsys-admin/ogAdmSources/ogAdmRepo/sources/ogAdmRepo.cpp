@@ -1078,7 +1078,8 @@ int main(int argc, char **argv)
 	struct sockaddr_in local;
 	int i,ret;
 
-	
+	strcpy(szPathFileCfg,"ogAdmRepo.cfg");
+	strcpy(szPathFileLog,"ogAdmRepo.log");	
 	for(i = 1; i < argc; i++){
        if (argv[i][0] == '-'){
            switch (tolower(argv[i][1])){
