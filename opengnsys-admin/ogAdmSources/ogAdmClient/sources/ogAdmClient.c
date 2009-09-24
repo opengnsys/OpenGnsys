@@ -2049,6 +2049,9 @@ int  main(int argc, char *argv[])
 	Log(retorno);
 	exit(herror);
 */
+	strcpy(szPathFileCfg,"hidra.cfg");
+	strcpy(szPathFileLog,"hidra.log");
+	
 	// Validación de argumentos y lectura del fichero de configuración
 	if(!ValidacionParametros(argc,argv))
 		exit(EXIT_FAILURE);
