@@ -71,8 +71,8 @@ Librería o clase Boot:
 - ogInstallGrub				(InstallGrub)
 - ogConfigureGrub			(ConfGrub)
 - ogListRegistryKeys			(hidraListRegistryKeys)
-- ogGetRegistryKey			(hidraGetRegistryKey)
-- ogSetRegistryKey			(hidraSetRegistryKey)
+- ogGetRegistryValue			(hidraGetRegistryKey)
+- ogSetRegistryValue			(hidraSetRegistryKey)
 - ogGetWindowsName			(hidraGetWindowsName)
 - ogSetWindowsName			(hidraSetWindowsName)
 

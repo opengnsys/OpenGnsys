@@ -60,7 +60,7 @@ case "$(ogGetFsType $1 $2)" in
     NTFS | HTNFS | FAT32 | HFAT32)
 	TYPE="Windows"
 	#/// Para Windows: leer la version del registro.
-	VERSION=$(ogGetRegistryKey $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+	VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
 	;;
 esac
 
@@ -172,13 +172,12 @@ case "$TYPE" in
 	;;
      NTFS|HNTFS|FAT32|HFAT32)
 	# Claves de registro para programas instalados: formato "{clave}".
-	#KEYS=$(ListarClaveRegistro $DIRMONT software '\Microsoft\Windows\CurrentVersion\Uninstall' | grep "{.*}")
 	KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
 	# Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
 	(for k in $KEYS; do
-	    PROG=$(ogGetRegistryKey $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+	    PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
 	    if [ -n "$PROG" ]; then
-		VERS=$(ogGetRegistryKey $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+		VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
 		echo "$PROG $VERS"
 	    fi
 	done) | sort | uniq
