@@ -24,5 +24,6 @@ El pxe lo configura para que arranque todos los sistema que encuentre.
 Crea un initrd.gz personalizado que descargar de internet y modifica.
 
 El script puede ejecutarse para realizar una actualizacion sin tener que
-borrar nada. Ademas se recomienda usar la ultima version tanto del script
+borrar nada, para eso ejecutalo con la opcion -u.
+Ademas se recomienda usar la ultima version tanto del script
 como de las fuentes del proyecto.

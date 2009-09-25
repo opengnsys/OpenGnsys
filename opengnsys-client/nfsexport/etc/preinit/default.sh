@@ -1,5 +1,8 @@
 #!/opt/opengnsys/bin/bash
 
+# Para que no haya problemas con el interprete
+ln -s /opt/opengnsys/bin/bash /bin/bash
+
 /opt/opengnsys/lib/engine/bin/loadenviron.sh
 
 if [ -f $OGETC/init/$OG_IP.sh ]; then
