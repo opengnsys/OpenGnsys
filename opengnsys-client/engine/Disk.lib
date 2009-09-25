@@ -448,7 +448,7 @@ echo $list > /tmp/disk
 
 
 function ogGetPartitionsNumber () {
-#/**  @function DetectNumberPartition: @brief detecta el numero de particiones del disco duro indicado.
+#/**  @function ogGetPartitionsNumber: @brief detecta el numero de particiones del disco duro indicado.
 #@param  int_numdisk   (indentificado EAC del disco)
 #@return  devuelve el numero paritiones del disco duro indicado
 #@warning  Salidas de errores no determinada
