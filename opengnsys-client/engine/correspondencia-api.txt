@@ -28,7 +28,8 @@ Librería o clase Disk:
 - ogUpdatePartitionTable  	0.1	(UpdateDisk)  
 - ogDeletePartitionTable		(DeletePartitionTable, hidraDeletePartitionTable)
 - ogDevToDisk			       	(Disk, IdPartition, hidraDisk)
-- ogDiskToDev			0.9	(DiskEAC)
+- ogDiskToDev				0.9	(DiskEAC)
+  ogDiskToRelativeDev		0.1 (IdPartition)
 - ogCreatePartitions		   	(CreatePartitions, hidraCreatePrimaryPartitions, hidraCreateLogicalPartitions)
 - ogListPartitions		       	(ListPartitions, hidraListPartitions, hidraListPrimaryPartitions, hidraListLogicalPartitions)
 - ogGetPartitionActive			(hidraGetPartitionActive)
@@ -38,6 +39,7 @@ Librería o clase Disk:
 - ogGetPartitionSize		0.9	(SizePartition, hidraGetPartitionSize)
 - ogSetPartitionSize			(hidraSetPartitionSize)
   ogGetPartitionsNumber     0.1    (DetectNumberPartition)
+ 
 
 Librería o clase FileSystem:
 - ogFormat, ogFormatFs			(FormatPartition, hidraFormat)
