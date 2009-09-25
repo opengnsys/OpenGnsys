@@ -43,7 +43,7 @@ Librería o clase Disk:
 
 Librería o clase FileSystem:
 - ogFormat, ogFormatFs			(FormatPartition, hidraFormat)
-- ogFormatCache				(FormatCACHE, hidraFormatCache)
+- ogFormatCache				0.1 (FormatCACHE, hidraFormatCache)
 - ogExtend, ogExtendFs			(EnlargeFileSystem, hidraFSExtend)
 - ogReduce, ogReduceFs			(ReduceFileSystem, hidraFSReduce)
 - ogGetFsType				(TypeFS, hidraTypeFS)
@@ -86,6 +86,7 @@ Librería o clase Inventory:
 - ogListSoftware
 - ogListLinuxSoftware			(hidraLinuxSoftware)
 - ogListWindowsSoftware			(idraWindowsSoftware)
+  ogInfoCache					(infoCache)
 
 Librería o clase File:
 - ogGetPath				(ConnectToRepo, hidraPath)
