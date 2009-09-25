@@ -460,3 +460,30 @@ else
 fi
 }
 
+
+
+
+function ogFormatCache () {
+#/**  @function ogFormatCache: @brief Formatea la Cache EAC y le asigna el label CACHE
+#@param  No requiere
+#@return   la propia del mkfs.ext3
+#@warning
+#@attention
+#@note
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+
+if [ $# = 0 ]
+then
+	cd /
+	ogMountCache
+	dev=`ogFindCache`
+	Msg "Iniciando el formateo de la particion CACHE, ubicada en $dev, y asignandole el label CACHE" red
+	mkfs.ext3 $dev -L CACHE
+	ogInfoCache
+fi
+if [ $# = 1 ]
+then
+	mkfs.ext3 $1 -L CACHE
+fi
+}
