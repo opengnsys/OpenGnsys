@@ -117,7 +117,8 @@ int ValidacionParametros(int argc,char*argv[])
 //		true si la acción ha sido correcta y false en caso contrario
 //______________________________________________________________________________________________________
 int CrearArchivoLog(char* szPathFileLog)
-{
+{	
+	return(true);
 	FILE* FLog;
 	FLog=fopen(szPathFileLog,"wt"); // Abre de log para escritura al comienzo
 	if(FLog!=NULL){
@@ -223,12 +224,13 @@ void Log(char* msg)
 	time (&rawtime);
 	timeinfo=gmtime(&rawtime);
 
+	/*
 	FILE* FLog;
 	FLog=fopen(szPathFileLog,"at"); // Archivo de log
 	if(FLog!=NULL)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	fclose(FLog);	
-	
+	*/
 	// Lo muestra por consola
 	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	system(msgcon);
@@ -417,6 +419,102 @@ int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
 		return(resul);
 	}
 	return(-1); 
+}
+//______________________________________________________________________________________________________
+// Función: EjecutarScript
+//
+//	 Descripción:
+//		Ejecuta un script de la shell creando un proceso hijo para ello
+//	Parámetros:
+//		- script: Nombre del script de la  shell
+//		- parametros: Parámetros que se le pasarán al script
+//		- salida: Recoge la salida por pantalla que genera el script
+//		- swasci: Filtra la respuesta del script:
+//					 true=Elimina de la respuesta caracteres menores de asci 32
+//					 false= No los elimina					
+// 	Devuelve:
+//		Código de error de la ejecución. ( Ver tabla de código de errores en la documentación)
+//	Especificaciones:
+//		El parámetro salida recoge la salida por pantalla que se genera en la ejecución del script siempre que
+//		sea disinto de NULL, esto es, si al llamar a la función este parámetro es NULL no se recogerá dicha salida. 
+//______________________________________________________________________________________________________
+int nwEjecutarScript ( char *script,char * parametros,char *salida,int swasci)
+{
+	FILE *f;
+	int i,nargs,herror;
+	long lSize;
+	char wcmdshell[LONSTD],wfilecmdshell[LONSTDC];
+	
+	if(ndebug>2){
+		sprintf(msglog,">>>EJECUCIÓN DEL comando %s",script);
+		Log(msglog);
+	}
+    	
+	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
+	for(i=nargs;i<MAXARGS;i++){
+		argumentos[i]=NULL;
+	}
+    
+	if(ndebug>2){
+		for(i=0;i<nargs;i++){
+			sprintf(msglog,">>>PARAMETRO %d DEL comando %s",i,argumentos[i]);
+			Log(msglog);
+		}
+	}		
+	
+	// Elimina fichero de respuesta anterior
+	sprintf(wcmdshell,"rm %s/%s",HIDRASCRIPTS,"_ogAdmScriptRes_");
+	herror=system(wcmdshell);
+		
+	sprintf(wfilecmdshell,"%s/%s",HIDRASCRIPTS,"_ogAdmScriptCmd_");
+	f = fopen(wfilecmdshell,"wt");	// Abre fichero de script
+	if(f==NULL){
+		UltimoError(herror,"EjecutarScript()");	// Error de apertura del fichero de scripts
+		return(herror);	
+	}else{
+		lSize=strlen(parametros);
+		fwrite(parametros,1,lSize,f);	// Escribe el código a ejecutar
+		fclose(f);
+	}
+	// Permiso de ejecución
+	sprintf(wcmdshell,"/bin/chmod +x %s",wfilecmdshell);
+	herror=system(wcmdshell);
+	if(herror){
+		UltimoError(herror,"EjecutarScript()");	// Se ha producido algún error
+		return(herror);	
+	}
+	sprintf(wcmdshell,"%s",wfilecmdshell);
+	herror=system(wcmdshell);
+	
+	if(salida!=(char*)NULL){ // Si se espera respuesta
+		sprintf(wfilecmdshell,"%s/%s",HIDRASCRIPTS,"_ogAdmScriptRes_");
+		do{
+			sleep(2); // Tiempo de espera de ejecución
+			f = fopen(wfilecmdshell,"rt");	// Abre fichero de script
+			if(f!=NULL){
+				fseek (f , 0 , SEEK_END);
+				lSize= ftell(f);
+				rewind (f);
+				fread (salida,1,lSize,f); // Lee respuesta
+				fclose(f);
+				for(i=lSize-1;i>=0;i--){
+					if(salida[i]<32 && swasci) // Caracter Asci menor de 32
+						salida[i]='\0';
+				}
+				break;
+			}
+		}while(true);
+	}
+	
+	if(ndebug>2){
+		sprintf(msglog,">>>Información DEVUELTA %s",salida);
+		Log(msglog);
+	}
+	if(ndebug>2){
+		sprintf(msglog,">>>Estatus de FINALIZACIÓN:%d",herror);
+		Log(msglog);
+	} 
+	return(herror); 
 }
 //______________________________________________________________________________________________________
 // Función: ReservaMemoria
@@ -1386,8 +1484,8 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/hidraCreateImageFromPartition",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s %s gzip","hidraCreateImageFromPartition",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg);
+	sprintf(cmdshell,"%s/ogAdmCreatePerfilSoftware",HIDRASCRIPTS);
+	sprintf(parametros," %s %s %s %s %s %s gzip","ogAdmCreatePerfilSoftware",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg);
 	
 	if(ndebug>3){
 		sprintf(msglog,"Creando Perfil Software disco:%s, partición:%s, Repositorio:%s, Imagen:%s, Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,"hdimages/pruebashidra");
@@ -1549,8 +1647,8 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/hidraRestorePartitionFromImage",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s %s.%s-%s%s","hidraRestorePartitionFromImage",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg,compres,particion,mettran);
+	sprintf(cmdshell,"%s/ogAdmRestoreImage",HIDRASCRIPTS);
+	sprintf(parametros," %s %s %s %s %s %s.%s-%s%s","ogAdmRestoreImage",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg,compres,particion,mettran);
 	
 	if(ndebug>3){
 		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s.%s-%s%s Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,compres,particion,mettran,"hdimages/pruebashidra/");
@@ -1623,9 +1721,9 @@ int ParticionaryFormatear(TRAMA*trama,TRAMA*nwtrama)
 int Particionar(char* disco,char* PrParticion,char* LoParticion)
 {
 	if (strlen(PrParticion)>0){
-		if(Particionando(disco,PrParticion,"hidraCreatePrimaryPartitions")){	// Particiones Primarias
+		if(Particionando(disco,PrParticion,"ogAdmCreatePrimaryPartitions")){	// Particiones Primarias
 			if (strlen(LoParticion)>0)
-				return(Particionando(disco,PrParticion,"hidraCreateLogicalPartitions"));	// Particiones Logicas
+				return(Particionando(disco,PrParticion,"ogAdmCreateLogicalPartitions"));	// Particiones Logicas
 			else
 				return(true);
 		}
@@ -1633,7 +1731,7 @@ int Particionar(char* disco,char* PrParticion,char* LoParticion)
 			return(false);
 	}
 	if (strlen(LoParticion)>0)
-		return(Particionando(disco,PrParticion,"hidraCreateLogicalPartitions"));
+		return(Particionando(disco,PrParticion,"ogAdmCreateLogicalPartitions"));
 	else
 		return(false);
 }
@@ -1684,8 +1782,8 @@ int Formatear(char* disco,char* particion)
 {
 	int herror;
 
-	sprintf(cmdshell,"%s/hidraFormat",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s %s","hidraFormat",disco,particion);
+	sprintf(cmdshell,"%s/ogAdmDiskFormat",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s %s","ogAdmDiskFormat",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 	    UltimoError(herror,"Formatear()");	 // Se ha producido algún error
@@ -1850,8 +1948,8 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	char *parametroshrd;
 	
 	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
-	sprintf(cmdshell,"%s/hidraHardwareInfo",HIDRASCRIPTS);
-	herror=EjecutarScript (cmdshell,NULL,parametroshrd,false);
+	sprintf(cmdshell,"%s/ogAdmHardwareInfo",HIDRASCRIPTS);
+	herror=EjecutarScript(cmdshell,NULL,parametroshrd,false);
 	if(herror){
 	    UltimoError(herror,"InventarioHardware()");	// Se ha producido algún error
     }
@@ -2037,6 +2135,7 @@ int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 //***********************************************************************************************************************
 int  main(int argc, char *argv[])
 {
+ 
 	//pid_t  pid;
 
 /*

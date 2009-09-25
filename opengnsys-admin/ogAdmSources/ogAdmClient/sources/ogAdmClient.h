@@ -8,9 +8,6 @@
 // ****************************************************************************************************************************************************
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,8 +16,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <time.h>
-#include <signal.h>
-
+ 
 #define LEER		0
 #define ESCRIBIR	1
 
