@@ -26,7 +26,7 @@ Librería o clase System:
 
 Librería o clase Disk:
 - ogUpdatePartitionTable  	0.1	(UpdateDisk)  
-- ogDeletePartitionTable		(DeletePartitionTable, hidraDeletePartitionTable)
+- ogDeletePartitionTable	0.1	(DeletePartitionTable, hidraDeletePartitionTable)
 - ogDevToDisk			       	(Disk, IdPartition, hidraDisk)
 - ogDiskToDev				0.9	(DiskEAC)
   ogDiskToRelativeDev		0.1 (IdPartition)
