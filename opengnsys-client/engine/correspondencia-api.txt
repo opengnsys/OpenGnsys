@@ -39,6 +39,7 @@ Librería o clase Disk:
 - ogGetPartitionSize		0.9	(SizePartition, hidraGetPartitionSize)
 - ogSetPartitionSize			(hidraSetPartitionSize)
   ogGetPartitionsNumber     0.1    (DetectNumberPartition)
+  ogDeletePartitionsLabels  0.1     (DeleteLABELS)
  
 
 Librería o clase FileSystem:
