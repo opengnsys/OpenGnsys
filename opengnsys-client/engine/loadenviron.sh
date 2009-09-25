@@ -26,12 +26,12 @@ if [ -d $OPENGNSYS ]; then
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
     # Para tener /bin/bash y no haya problemas
-    ln -s $OGBIN/bash /bin/bash
+    ln -fs $OGBIN/bash /bin/bash
 
-
-    export OG_DHCP_SERVER=`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
-    export OG_SERVER_IP=$OG_DHCP_SERVER
-    export OG_IP=`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
+    # Obtener IP del servidor DHCP/NFS
+    SERVERIP=$(awk '/dhcp-server-identifier/ {sub(/;/,""); dhcp=$3}
+		    END {print dhcp}' \
+	 		/var/lib/dhcp3/dhclient.leases)
 
     export OGLOGFILE=$OGLOG/$OG_IP.log
 
@@ -45,13 +45,8 @@ if [ -d $OPENGNSYS ]; then
     mkdir -p /var/lock
 
     # Montamos el resto de cosas necesarias
-    mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/log/clients $OGLOG
-    mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/images $OGIMG
-    if [ mount -t nfs -onolock $DHCP_SERVER:/opt/opengnsys/cache $OGIMG ]; then
-        export OGCACHE=1;
-    else
-        export OGCACHE=0;
-    fi
+    mount -t nfs -onolock $SERVERIP:/opt/opengnsys/log/clients $OGLOG
+    mount -t nfs -onolock $SERVERIP:/opt/opengnsys/images $OGIMG
 
     #/// Cargar API de funciones y fichero de idioma.
     for i in $OGAPI/*.lib; do

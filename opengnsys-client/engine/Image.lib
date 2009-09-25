@@ -43,37 +43,40 @@ fi
 
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-ogIsLocked $1 $2 && return $?
-ogUnmount $1 $2 2>/dev/null || return $?
+if ogIsLocked $1 $2; then
+    ogRaiseError $OG_ERR_LOCKED "$1,$2"
+    return $?
+fi
+ogUnmount $1 $2 >/dev/null
 
 IMGDIR="$OGIMG/$3"
 #### Comprobar directorio en NFS o en caché.
 mkdir -p "$IMGDIR"
-IMGFILE="$IMGDIR/$4"
+IMGFILE="$IMGDIR/$4.img"
 
-ogLock $1 $2 && return $?
-#trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
-
+ogLock $1 $2 || return $?
+trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
+#/// Reducir el tamaño del sistema de archivos al mínimo sin dañar los datos.
 SIZE=$(ogGetPartitionSize $1 $2)
-#REDSIZE=$(ogReduzeFs $1 $2) || REDSIZE=$[SIZE+1]
-#[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $REDSIZE
+REDSIZE=$(ogReduceFs $1 $2) || REDSIZE=$[SIZE+1]
+[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $REDSIZE
 
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" || return $?
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" || return $?
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" || return $?
         ;;
     *)  ogRaiseError $OG_ERR_FORMAT 
         return $? ;;
 esac
 
-#[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $SIZE
+[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $SIZE
 
 ogUnlock $1 $2
 }
@@ -108,7 +111,7 @@ fi
 #/// Error si no se reciben menos de 2 parámetros.
 [ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 #/// Error si el fichero de imagen no es accesible.
-IMGFILE="$OGIMG/$3/$4"
+IMGFILE="$OGIMG/$3/$4.img"
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 #/// Devuelve el tamaño de la imagen en KB.
@@ -150,14 +153,14 @@ fi
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
 PART="$(ogDiskToDev $3 $4)" || return $?
-IMGFILE="$OGIMG/$1/$2"
+IMGFILE="$OGIMG/$1/$2.img"
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 # Error si la imagen no cabe en la particion.
 [ $(ogGetImageSize "$1") -gt $(ogGetPartitionSize $3 $4) ] && ogRaiseError $OG_ERR_PARTITION && return $?
 
 
 ogIsLocked $3 $4 && return $?
-ogUnmount $3 $4 || return $?
+ogUnmount $3 $4 >/dev/null || return $?
 ogLock $3 $4 && return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
@@ -176,7 +179,7 @@ case "$TYPE" in
         return $? ;;
 esac
 
-#ogExtendFs $3 $4
+ogExtendFs $3 $4
 ogUnlock $3 $4
 }
 
