@@ -37,6 +37,7 @@ Librería o clase Disk:
 - ogSetPartitionId			(?)
 - ogGetPartitionSize		0.9	(SizePartition, hidraGetPartitionSize)
 - ogSetPartitionSize			(hidraSetPartitionSize)
+  ogGetPartitionsNumber     0.1    (DetectNumberPartition)
 
 Librería o clase FileSystem:
 - ogFormat, ogFormatFs			(FormatPartition, hidraFormat)
@@ -45,7 +46,7 @@ Librería o clase FileSystem:
 - ogReduce, ogReduceFs			(ReduceFileSystem, hidraFSReduce)
 - ogGetFsType				(TypeFS, hidraTypeFS)
 - ogSetFsType				(SetPartitionType, hidraSetPartitionType)
-- ogFindCache				(FindCache, hidraFindCache)
+- ogFindCache			0.1	(FindCache, hidraFindCache)
 - ogIsLocked, ogIsFsLocked		(hidraIsLocked)
 - ogLock, ogLockFs			(hidraLock)
 - ogUnlock, ogUnlockFs			(hidraUnlock)
@@ -88,6 +89,8 @@ Librería o clase File:
 - ogIsFile				(IfFileExist, IfFileNotExist)
 
 Librería o clase String:
+
+Librería o clase ToolsGNU
 
 
 ===================
