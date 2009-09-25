@@ -25,6 +25,9 @@ if [ -d $OPENGNSYS ]; then
     export PATH=$OGBIN:$OGAPI:$PATH
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
+    # Para tener /bin/bash y no haya problemas
+    ln -s $OGBIN/bash /bin/bash
+
 
     export OG_DHCP_SERVER=`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1`
     export OG_SERVER_IP=$OG_DHCP_SERVER
