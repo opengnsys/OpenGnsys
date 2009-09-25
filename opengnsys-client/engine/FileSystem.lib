@@ -432,11 +432,11 @@ then
 	Msg "sintaxis: FindCache   --- Ejemplo: FindCache -> /dev/sda3/ " example
 	return
 fi
-end=`Disk | wc -w`
+end=`ogDiskToDev | wc -w`
 unset cache
 for (( disk = 1; disk <= $end; disk++))
 do
-	disco=`Disk $disk`
+	disco=`ogDiskToDev $disk`
 	totalpart=`parted $disco print | egrep ^" [0123456789] " -c`
 	#echo Buscando en disco: $disco con $totalpart particiones
 	if [ `fdisk -l $disco | egrep ^/dev | grep NeXTSTEP | cut -f1 -d" "` ]
