@@ -78,6 +78,7 @@ Librería o clase Boot:
 - ogSetRegistryValue			(hidraSetRegistryKey)
 - ogGetWindowsName			(hidraGetWindowsName)
 - ogSetWindowsName			(hidraSetWindowsName)
+  ogNewMbrXP                 (NewMbrXP)
 
 Librería o clase Inventory:
 - ogListHardwareInfo			(InfoHardware, DetectDevices, hidraHardwareInfo)
