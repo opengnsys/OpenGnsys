@@ -27,4 +27,7 @@ function egrep () {
 
 function grep () {
 }
+
+
+function partprobe () {
 }
