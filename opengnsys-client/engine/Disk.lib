@@ -31,7 +31,7 @@ function ogCreatePartitions () {
 # Variables locales.
 local DISK PART SECTORS START SIZE TYPE EXTSTART EXTSIZE tmpsfdisk
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
            "$FUNCNAME 1 NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
@@ -41,7 +41,7 @@ fi
 
 #/// Sustituye nº de disco por su dispositivo.
 DISK="$(ogDiskToDev $1)" || return $?
-shift 
+shift
 
 # Nº total de sectores, para evitar desbordamiento
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
@@ -68,7 +68,7 @@ while [ $# -gt 0 ]; do
     #/// Obtener identificador de tipo de partición.
     case "$TYPE" in
 	EMPTY)          ID=0  ;;
-	EXTENDED)	ID=5 
+	EXTENDED)	ID=5
 			[ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
                         EXTSTART=$START
                         EXTSIZE=$SIZE
@@ -136,7 +136,7 @@ function ogDevToDisk () {
 # Variables locales.
 local d n
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_device" \
            "$FUNCNAME /dev/sda  =>  1 1"
     return
@@ -179,7 +179,7 @@ function ogDiskToDev () {
 local ALLDISKS DISK PART
 
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npartition]" \
            "$FUNCNAME      =>  /dev/sda /dev/sdb" \
            "$FUNCNAME 1    =>  /dev/sda" \
@@ -336,7 +336,7 @@ function ogListPartitions () {
 local DISK PART NPARTS
 
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
            "$FUNCNAME 1  =>  NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
@@ -442,4 +442,21 @@ function ogUpdateDisk () {
 echo "Forzando al kernel la lectura de la tabla de particiones"
 list=`partprobe -s | cut -f1 -d: ` 2>/dev/null
 echo $list > /tmp/disk
+}
+
+
+
+
+function ogGetPartitionsNumber () {
+#/**  @function DetectNumberPartition: @brief detecta el numero de particiones del disco duro indicado.
+#@param  int_numdisk   (indentificado EAC del disco)
+#@return  devuelve el numero paritiones del disco duro indicado
+#@warning  Salidas de errores no determinada
+#@attention Requisitos: parted
+#@note	  Notas sin especificar
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+disco=`Disk $1`
+totalpart=`parted $disco print | egrep ^" [0123456789] " -c`
+echo $totalpart
 }
