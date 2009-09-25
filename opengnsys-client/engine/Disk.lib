@@ -559,3 +559,16 @@ then
      fi
 fi
 }
+
+function ogDeletePartitionsLabels () {
+#/**  @function ogDeletePartitionsLabels: @brief Elimina los labels de los sistemas de archivos que tenga asignado el kernel
+#@param  No requiere
+#@return   Nada
+#@warning
+#@attention Requisitos:  comando interno linux rm
+#@note
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+rm /dev/disk/by-label/*    # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
+}
+
