@@ -155,7 +155,9 @@ case "$TYPE" in
 	# Procesar paquetes dpkg.
 	DPKGDIR="${MNTDIR}/var/lib/dpkg"
 	if [ -r $DPKGDIR ]; then 
-	    dpkg --admindir=$DPKGDIR -l | \
+	#    dpkg --admindir=$DPKGDIR -l | \
+	    # FIXME Sólo 32 bits
+	    chroot "$MNTDIR" /usr/bin/dpkg -l | \
 			awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
 				sub(/-.*$/,"",$3); print $2,$3}' | sort | uniq
 	fi
@@ -163,11 +165,13 @@ case "$TYPE" in
 	RPMDIR="${MNTDIR}/var/lib/rpm"
 	if [ -r $RPMDIR ]; then 
 	    # Correccion inconsistencia de version de base de datos.
-	    rm -f ${RPMDIR}/__db.*
-	    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
+	#    rm -f ${RPMDIR}/__db.*
+	#    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
+	    # FIXME Sólo 32 bits
+	    chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
 			awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
 			sort | uniq
-	    rm -f ${RPMDIR}/__db.*
+	#    rm -f ${RPMDIR}/__db.*
 	fi
 	;;
      NTFS|HNTFS|FAT32|HFAT32)
