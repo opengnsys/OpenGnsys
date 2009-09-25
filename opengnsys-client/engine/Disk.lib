@@ -512,3 +512,50 @@ if [ -n "${1%/dev/*}" ]
 fi
 echo -ne "o\nw" | fdisk $dev
 }
+
+
+
+function ogSetPartitionId() {
+#/**  @function ogSetPartitionId: @brief Cambia el identificador de la particion, pero no su sistema de archivos.
+#@param  $1 int_numdiskEAC
+#@param  $2 int_numpartitionEAC
+#@param  $3 str_tipoPartition admite EXT2 EXT3 NTFS FAT32 SWAP CACHE
+#@return   la propia del fdisk
+#@warning    no controla los parametros, si se introducen mal o simplemente no se introducen no muestra mensaje
+#@warning    Identifica por nombre del sistema de archivos no por número
+#@attention Requisitos:  fdisk
+#@note
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+if [ $# = 0 ]
+then
+	Msg "sintaxis: ogSetPartitionId int_disk int_partition NAMEtype" red
+	return
+fi
+if [ $# = 3 ]
+then
+	case $3 in
+		"EXT2")
+			fstype=83;;
+		"EXT3")
+			fstype=83;;
+		"NTFS")
+			fstype=7 ;;
+		"FAT32")
+			fstype=b ;;
+		"SWAP")
+			fstype=82;;
+		"CACHE")
+			fstype=a7;;
+	esac
+	disco=`DiskToDev $1`
+	totalpart=`ogGetPartitionsNumber $1`
+	echo $totalpart
+	if [ $totalpart -gt 1 ]
+	then
+       echo -ne "t\n$2\n$fstype\nw\n" | fdisk $disco 1>/dev/null 2>&1
+    else
+       echo -ne "t\n$fstype\nw\n" | fdisk $disco 1>/dev/null 2>&1
+     fi
+fi
+}
