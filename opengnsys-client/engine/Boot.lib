@@ -108,9 +108,9 @@ fi
 
 #/// Camino del fichero de registro en NT/2000 o XP/Vista/7.
 FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT" 
+[ -f $FILENT ] && FILE="$FILENT"
 FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP" 
+[ -f $FLEHXP ] && FILE="$FILEXP"
 [ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
 
 #/// Devolver el dato del valor de registro.
@@ -164,7 +164,7 @@ ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerN
 #@arg  \c mountpoint   directorio donde está montado el sistema Windows
 #@arg  \c registrytype tipo de registro a leer
 #@arg  \c key          clave de registro
-#@return  
+#@return
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
@@ -190,9 +190,9 @@ fi
 
 #/// Camino del fichero de registro en NT/2000 o XP/Vista/7.
 FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT" 
+[ -f $FILENT ] && FILE="$FILENT"
 FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP" 
+[ -f $FLEHXP ] && FILE="$FILEXP"
 [ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
 
 #/// Devolver la lista de claves de registro.
@@ -289,9 +289,9 @@ fi
 
 #/// Camino del fichero de registro en NT/2000 o XP/Vista/7.
 FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT" 
+[ -f $FILENT ] && FILE="$FILENT"
 FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP" 
+[ -f $FLEHXP ] && FILE="$FILEXP"
 [ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
 
 #/// Cambiar el dato del valor de registro.
@@ -343,3 +343,25 @@ ogSetRegistryKey $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\Hostna
 ogSetRegistryKey $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NAME"
 }
 
+function NewMbrXP () {
+#/**  @function NewMbrXP: @brief Genera un nuevo Master Boot Record en el disco duro indicado, compatible con los SO tipo Windows
+#@param  $1 obligatorio   int_numdisk
+#@return  salida del programa my-sys
+#@warning    no definidos
+#@attention Requisitos:  my-sys, compilado ubicado en /var/EAC/admin/source
+#@note
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+#
+if [ $# = 0 ]
+then
+	Msg "sintaxis: ogNewMbrXP int_disco " red
+return
+fi
+if [ $# = 1 ]
+then
+	particion=`ogDiskToDev $1`
+	ms-sys -z -f $particion
+	ms-sys -m -f $particion
+fi
+}
