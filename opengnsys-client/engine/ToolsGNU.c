@@ -31,3 +31,7 @@ function grep () {
 
 function partprobe () {
 }
+
+function ms-sys () {
+}
+}
