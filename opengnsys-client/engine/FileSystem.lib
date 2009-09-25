@@ -229,7 +229,7 @@ fi
 #/// Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-#/// Comprobar si la partición ya está montada. 
+#/// Comprobar si la partición ya está montada.
 MNTDIR=$(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #/// Si no, montarla en un directorio de sistema
 if [ -z "$MNTDIR" ]; then
@@ -297,10 +297,10 @@ case "$(ogGetFsType $1 $2)" in
      EXT[234])
 	ogUnmount $1 $2
 	# Ext2/3/4: Tamaño de los bloques del sistema de archivos
-	BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')	
+	BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')
 	# Traduce el num. en sectores de 512B a tamano en MB.
 	SIZE=$(resize2fs -P $PART | \
-		awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')	
+		awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')
 	resize2fs -fp $PART "${SIZE}M" >/dev/null || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
 	;;
      REISERFS)		# Usar "resize_reiserfs"
@@ -415,4 +415,48 @@ else
 fi
 }
 
+function ogFindCache () {
+#/**  @function ogFindCache: @brief Detecta la particion CACHE EAC seg�n tipo a7 o label CACHE sobre particion ext3.
+#@param  no requiere parametros
+#@return  devuelve el identificador linux de la particion CACHE.
+#@warning  si no hay cache no devuelve nada
+#@attention Requisitos: la salida de fdisk de la cache a7 debe ser NeXTSTEP
+#@note	  Notas sin especificar
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+#
+if [ $# != 0 ]
+then
+	Msg "FindCache detecta la particion tipo a7 o aquella que tenga el label CACHE" info
+	Msg "devuelve /dev/sda3" info2
+	Msg "sintaxis: FindCache   --- Ejemplo: FindCache -> /dev/sda3/ " example
+	return
+fi
+end=`Disk | wc -w`
+unset cache
+for (( disk = 1; disk <= $end; disk++))
+do
+	disco=`Disk $disk`
+	totalpart=`parted $disco print | egrep ^" [0123456789] " -c`
+	#echo Buscando en disco: $disco con $totalpart particiones
+	if [ `fdisk -l $disco | egrep ^/dev | grep NeXTSTEP | cut -f1 -d" "` ]
+	then
+	#	echo comprobando si es particion a7
+		cache=`fdisk -l $disco | egrep ^/dev | grep NeXTSTEP | cut -f1 -d" "`
+	else
+		#echo comprobando si existe la etiqueta cache
+		if ls -R /dev/disk/ | grep CACHE > /dev/null
+		then
+			devcache=`ls -ls /dev/disk/by-label/CACHE | awk -F..\/..\/ '{print $2}'`
+			cache=/dev/$devcache
+		fi
+	fi
+done
+if [ -n "$cache" ]
+then
+	echo $cache
+else
+	return 1
+fi
+}
 
