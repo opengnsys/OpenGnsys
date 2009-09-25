@@ -11,3 +11,20 @@
 
 function awk () {
 }
+
+
+function parted () {
+}
+
+
+
+function fdisk () {
+}
+
+
+function egrep () {
+}
+
+function grep () {
+}
+}
