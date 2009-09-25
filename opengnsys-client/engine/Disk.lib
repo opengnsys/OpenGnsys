@@ -486,3 +486,29 @@ fi
 PART=$(ogDiskToDev|cut -f$1 -d' ')$2
 echo $PART | cut -f3 -d \/
 }
+
+
+function ogDeletePartitionTable () {
+#/**  @function ogDeletePartitionTable: @brief Borra la tabla de particiones del disco.
+#@param $1 opcion A (identificador LINUX) 	str_ID_linux (/dev/sda)
+#@param $1 opcion B (Identifiador EAC)  		int_numdiskEAC(1)
+#@return   la informacion propia del fdisk
+#@warning    no definidos
+#@attention
+#@note
+#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+if [ $# = 0 ]
+then
+	Msg "sintaxis1: ogDeletePartitionTable int_disk" red
+	Msg "sintaxis2: ogDeletePartitionTable str_/dev/sdX" red
+	return
+fi
+if [ -n "${1%/dev/*}" ]
+	then
+	dev=`DiskToDev $1`
+	else
+	dev=$1
+fi
+echo -ne "o\nw" | fdisk $dev
+}
