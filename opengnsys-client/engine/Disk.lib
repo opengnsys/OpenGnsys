@@ -561,7 +561,7 @@ fi
 }
 
 function ogDeletePartitionsLabels () {
-#/**  @function ogDeletePartitionsLabels: @brief Elimina los labels de los sistemas de archivos que tenga asignado el kernel
+#/**  @function ogDeletePartitionsLabels: @brief Elimina la informacion que tiene el kernel del cliente og sobre los labels de los sistemas de archivos
 #@param  No requiere
 #@return   Nada
 #@warning
