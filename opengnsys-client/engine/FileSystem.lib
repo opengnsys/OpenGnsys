@@ -476,7 +476,7 @@ function ogFormatCache () {
 if [ $# = 0 ]
 then
 	cd /
-	ogMountCache
+	ogUnmountCache
 	dev=`ogFindCache`
 	Msg "Iniciando el formateo de la particion CACHE, ubicada en $dev, y asignandole el label CACHE" red
 	mkfs.ext3 $dev -L CACHE
