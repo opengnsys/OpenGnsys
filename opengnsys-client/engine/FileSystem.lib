@@ -477,6 +477,22 @@ echo $CACHE
 export CACHE
 }
 
+function ogUnmountCache () {
+#/**  @function UmountCache: @brief Desmonta la particion Cache y elimina la variable $CACHE
+#@param  sin parametros
+#@return nada
+#@warning  Salidas de errores no determinada
+#@warning
+#@attention
+#@version 1.0	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga. Proyecto EAC
+#@note
+#*/
+cachelinux=`ogFindCache`
+cacheeac=`ogDevToDisk $cachelinux`
+#echo ogUnmountPartition $cacheeac
+ogUnmountPartition $cacheeac
+}
+
 
 function ogFormatCache () {
 #/**  @function ogFormatCache: @brief Formatea la Cache EAC y le asigna el label CACHE
