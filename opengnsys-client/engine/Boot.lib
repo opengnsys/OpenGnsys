@@ -343,7 +343,7 @@ ogSetRegistryKey $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\Hostna
 ogSetRegistryKey $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NAME"
 }
 
-function NewMbrXP () {
+function ogNewMbrXP () {
 #/**  @function NewMbrXP: @brief Genera un nuevo Master Boot Record en el disco duro indicado, compatible con los SO tipo Windows
 #@param  $1 obligatorio   int_numdisk
 #@return  salida del programa my-sys
