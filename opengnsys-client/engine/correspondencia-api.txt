@@ -59,8 +59,8 @@ Librería o clase FileSystem:
 - ogUnmountAllFs, ogUnmountAll		(hidraUnmmountAll)
 - ogMountRepo, ogMount			(MountRepo, hidraMountRepo)
 - ogUnmountRepo, ogUnmount		(UmountRepo, hidraUnmountRepo)
-- ogMountCache, ogMount			(MountCache, hidraMountCache)
-- ogUnmountCache, ogUnmount		(UmountCache, hidraUnmountCache)
+- ogMountCache, ogMount		0.1	(MountCache, hidraMountCache)
+- ogUnmountCache, ogUnmount	  0.1	(UmountCache, hidraUnmountCache)
 
 Librería o clase Image:
 - ogCreateImage				(CreateImageFromPartition, hidraCreateImageFromPartition)
