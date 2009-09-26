@@ -445,7 +445,7 @@ do
 		cache=`fdisk -l $disco | egrep ^/dev | grep NeXTSTEP | cut -f1 -d" "`
 	else
 		#echo comprobando si existe la etiqueta cache
-		if ls -R /dev/disk/ | grep CACHE > /dev/null
+		if find /dev/disk | grep CACHE > /dev/null
 		then
 			devcache=`ls -ls /dev/disk/by-label/CACHE | awk -F..\/..\/ '{print $2}'`
 			cache=/dev/$devcache
