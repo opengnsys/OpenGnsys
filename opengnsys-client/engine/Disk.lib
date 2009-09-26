@@ -548,7 +548,7 @@ then
 		"CACHE")
 			fstype=a7;;
 	esac
-	disco=`DiskToDev $1`
+	disco=`ogDiskToDev $1`
 	totalpart=`ogGetPartitionsNumber $1`
 	echo $totalpart
 	if [ $totalpart -gt 1 ]
