@@ -470,11 +470,11 @@ function ogMountCache () {
 #@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga. Proyecto EAC
 #@note
 #*/
-CacheLinux=`ogFindCache`
-CacheEAC=`ogDevToDisk $CacheLinux`
-CACHE=`ogMountPartition $CacheEAC`
-echo $CACHE
-export CACHE
+CACHELINUX=`ogFindCache`
+CACHEOG=`ogDevToDisk $CACHELINUX`
+OGCAC=`ogMountPartition $CACHEOG`
+echo $OGCAC
+export OGCAC
 }
 
 function ogUnmountCache () {
