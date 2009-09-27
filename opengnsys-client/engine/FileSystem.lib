@@ -410,6 +410,12 @@ if [ -n "$MNTDIR" ]; then
     ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
     #/// Crear punto de montaje.
     umount $PART 2>/dev/null && rmdir $MNTDIR || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
+	# linea temporal durante desarrollo para testear nuevas herramientas con el cliente completo nfs
+    if  `cat /proc/cmdline | grep nfsroot > /dev/null`
+    then
+		cat /etc/mtab | grep -v $PART > /var/tmp/mtab.temporal && cp /var/tmp/mtab.temporal /var/tmp/mtab && rm /var/tmp/mtab.temporal
+	fi
+	# fin linea temporal.
 else
     ogEcho warning "$MSG_DONTMOUNT: \"$1,$2\""
 fi
