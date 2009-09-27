@@ -30,7 +30,7 @@ function ogGetOsVersion () {
 local MNTDIR TYPE VERSION FILE
 
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME"
     return
 fi
@@ -51,9 +51,9 @@ case "$(ogGetFsType $1 $2)" in
  	    FILE="$MNTDIR/etc/lsb-release"
  	    [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
 	    FILE="$MNTDIR/etc/redhat-release"
-	    [ -r $FILE ] && VERSION="$(head -1 $FILE)" 
+	    [ -r $FILE ] && VERSION="$(head -1 $FILE)"
 	    FILE="$MNTDIR/etc/SuSE-release"
-	    [ -r $FILE ] && VERSION="$(head -1 $FILE)" 
+	    [ -r $FILE ] && VERSION="$(head -1 $FILE)"
 	fi
 	[ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
 	;;
@@ -84,7 +84,7 @@ return 0
 function ogListHardwareInfo () {
 
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME"
     return
 fi
@@ -139,7 +139,7 @@ function ogListSoftware () {
 local MNTDIR TYPE DPKGDIR RPMDIR KEYS k PROG VERS
 
 #/// Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then 
+if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME 1 1"
     return
 fi
@@ -154,7 +154,7 @@ case "$TYPE" in
      EXT[234]|REISERFS|REISER4)
 	# Procesar paquetes dpkg.
 	DPKGDIR="${MNTDIR}/var/lib/dpkg"
-	if [ -r $DPKGDIR ]; then 
+	if [ -r $DPKGDIR ]; then
 	#    dpkg --admindir=$DPKGDIR -l | \
 	    # FIXME Sólo 32 bits
 	    chroot "$MNTDIR" /usr/bin/dpkg -l | \
@@ -163,7 +163,7 @@ case "$TYPE" in
 	fi
 	# Procesar paquetes RPM.
 	RPMDIR="${MNTDIR}/var/lib/rpm"
-	if [ -r $RPMDIR ]; then 
+	if [ -r $RPMDIR ]; then
 	    # Correccion inconsistencia de version de base de datos.
 	#    rm -f ${RPMDIR}/__db.*
 	#    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
@@ -191,3 +191,43 @@ case "$TYPE" in
 esac
 }
 
+function ogInfoCache () {
+#/**  @function ogInfoCache: @brief muestra la informacion de la CACHE.
+#@param  sin parametros
+#@return  texto que se almacena en $IP.-InfoCache.  punto_montaje, tama?oTotal, TamanioOcupado, TaminioLibre, imagenes dentro de la cahce
+#@warning  Salidas de errores no determinada
+#@warning   printf no soportado por busybox
+#@attention
+#@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+if ogMountCache
+then
+	info=`df -h | grep $OGCAC`
+	infoFilesystem=`echo $info | cut -f1 -d" "`
+	infoSize=`echo $info | cut -f2 -d" "`
+	infoUsed=`echo $info | cut -f3 -d" "`
+	infoAvail=`echo $info | cut -f4 -d" "`
+	infoUsedPorcet=`echo $info | cut -f5 -d" "`
+	infoMountedOn=`echo $info | cut -f2 -d" "`
+        if `ls  ${OGCAC}$OGIMG > /dev/null 2>&1`
+	then
+	       cd ${OGCAC}${OPENGNSYS}
+		#content=`find images/ -type f -printf "%h/  %f  %s \n"`   busybox no soporta printf
+		content=`find images/ -type f`
+		cd /
+		echo $info
+		echo -ne $content
+		echo " "
+		#echo "$info" > ${OGLOG}/${IP}-InfoCache
+		#echo "$content" >> {$OGLOG}/${IP}-InfoCache
+	else
+		echo $info
+		#echo "$info" > {$OGLOG}/${IP}-InfoCache
+	fi
+	ogUnmountCache
+else
+	echo " "
+	#echo " " > {$OGLOG}/${IP}-InfoCache
+
+fi
+}
