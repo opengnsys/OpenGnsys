@@ -535,17 +535,17 @@ fi
 if [ $# = 3 ]
 then
 	case $3 in
-		"EXT2|82|ext2")
+		EXT2 | 82 | ext2)
 			fstype=83;;
-		"EXT3|83|ext3")
+		EXT3 | 83 | ext3)
 			fstype=83;;
-		"NTFS|7|ntfs")
+		NTFS | 7 | ntfs)
 			fstype=7 ;;
-		"FAT32|b|fat32")
+		FAT32 | b | fat32)
 			fstype=b ;;
-		"SWAP|82|swap")
+		SWAP | 82 | swap)
 			fstype=82;;
-		"CACHE|a7|cache")
+		CACHE | a7 | cache)
 			fstype=a7;;
 	esac
 	disco=`ogDiskToDev $1`
