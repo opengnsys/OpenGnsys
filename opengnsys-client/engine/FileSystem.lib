@@ -461,11 +461,11 @@ fi
 }
 
 function ogMountCache () {
-#/**  @function ogMountCache: @brief Monta la particion Cache y exporta la variable $CACHE
+#/**  @function ogMountCache: @brief Monta la particion Cache y exporta la variable $OGCAC
 #@param  sin parametros
-#@return Punto de montaje dentro de mnt, ejemplo con un parametro: MountCACHE => /mnt/sda3
+#@return Punto de montaje dentro de mnt, ejemplo con un parametro: ogMountCache => /mnt/sda3
 #@warning  Salidas de errores no determinada
-#@warning  Corregir las llamadas reciprocas entre MountPartition <--> MountCache
+#@warning
 #@attention
 #@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga. Proyecto EAC
 #@note
