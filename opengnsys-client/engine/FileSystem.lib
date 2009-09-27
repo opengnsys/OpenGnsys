@@ -254,6 +254,12 @@ if [ -z "$MNTDIR" ]; then
 	    ;;
     esac
     $MOUNT $PART $MNTDIR || $MOUNT $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
+	# linea temporal durante desarrollo para poder usar el cliente completo nfs y testeas nuevas herramientas.
+    if  `cat /proc/cmdline | grep nfsroot > /dev/null`
+    then
+		echo $PART $MNTDIR >> /etc/mtab
+	fi
+	# fin linea temporal.
 fi
 echo $MNTDIR
 }
