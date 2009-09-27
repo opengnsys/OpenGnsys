@@ -79,7 +79,7 @@ Librería o clase Boot:
 - ogSetRegistryValue			(hidraSetRegistryKey)
 - ogGetWindowsName			(hidraGetWindowsName)
 - ogSetWindowsName			(hidraSetWindowsName)
-  ogNewMbrXP                 (NewMbrXP)
+  ogNewMbrXP           v0.1      (NewMbrXP)
 
 Librería o clase Inventory:
 - ogListHardwareInfo			(InfoHardware, DetectDevices, hidraHardwareInfo)
@@ -87,11 +87,12 @@ Librería o clase Inventory:
 - ogListSoftware
 - ogListLinuxSoftware			(hidraLinuxSoftware)
 - ogListWindowsSoftware			(idraWindowsSoftware)
-  ogInfoCache					(infoCache)
+  ogInfoCache			v.0.1		(infoCache)
 
 Librería o clase File:
 - ogGetPath				(ConnectToRepo, hidraPath)
 - ogIsFile				(IfFileExist, IfFileNotExist)
+  ogNewPath
 
 Librería o clase String:
 
