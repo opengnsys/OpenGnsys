@@ -50,7 +50,7 @@ case $# in
             CACHE) FILE="$OGCACHE/$2" ;;
             *)     ogRaiseError $OG_ERR_FORMAT
                    return $? ;;
-        esac ;; 
+        esac ;;
     3)	FILE="$(ogMount $1 $2)/$3" || return $OG_ERR_NOTFOUND ;;
     *)	return $OG_ERR_FORMAT ;;
 esac
@@ -71,5 +71,64 @@ done
 #/// Muestra el camino Linux, quitando el "/" inicial duplicado.
 [ "$FILEPATH" != "/" ] && echo ${FILEPATH#/}
 cd $CURRENTDIR
+}
+
+
+
+#/**
+#         ogNewPath [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Crea el directorio especificado
+#@arg  \c filepath   camino del fichero (independiente de mayÃºsculas)
+#@arg  \c repo       repositorio de ficheros
+#@arg  \c ndisk      nÂº de orden del disco
+#@arg  \c npartition nÂº de orden de la particiÃ³n
+#@return  file - camino completo real del directorio creado
+#@note    repo = { REPO, CACHE }
+#@note    Requisitos: \c grep \c sed
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de particiÃ³n desconocido o no se puede montar.
+#@warning Primeras pruebas.
+#@todo    Terminar de definir parÃ¡metros para acceso a repositorios.
+#@version 0.1 - Primera adaptaciÃ³n para OpenGNSys.
+#@author  obtenido de ogGetPath de Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-15
+#*/
+function ogNewPath () {
+
+# Variables locales.
+local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32" \
+           "$FUNCNAME REPO /etc/fstab  ==>  /opt/opengnsys/images/etc/fstab" \
+           "$FUNCNAME 1 1 \"/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32"
+    return
+fi
+
+#/// Procesar camino segÃºn el nÃºmero de parÃ¡metros.
+case $# in
+     # si 1 parametro directorio-fichero completo.
+    1)	FILE="$1" ;;
+    # Si 2 parametros es REPOSITORIO  DIRECTORIO-FICHERO
+    2)	case "$1" in
+            # consultando servidor repositorio base
+            REPO | $IPREPOMAN )  FILE="$OGIMG/$2" || return $OG_ERR_NOTFOUND ;;
+	    # consultando particion auxiliar cache local
+            CACHE | $IP )
+		ogMountCache >> /dev/null && 	FILE="$OGCAC/$OGIMG/$2" || return $OG_ERR_NOTFOUND ;;
+	    # conectando con Servidor Axuliar.
+            *)     ogRaiseError $OG_ERR_FORMAT
+                   return $? ;;
+        esac ;;
+    # Si 3 parametros DISK PARTITION DIRECTORIO-FICHERO
+    3)	FILE="$(ogMount $1 $2)/$3" || return $OG_ERR_NOTFOUND ;;
+    *)	return $OG_ERR_FORMAT ;;
+esac
+
+mkdir -p ${FILE}
+echo $FILE
 }
 
