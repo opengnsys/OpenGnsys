@@ -5,6 +5,7 @@ URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-i386/current/ima
 if [ "$TMP" = "" ] ; then TMP=/tmp ; fi
 TMPINITRD=$TMP/initrd
 NEWROOT=$TMPINITRD/newroot
+ANTERIORPWD=$PWD
 DEST=$PWD
 LINUX=1
 CHROOTINITSCRIPT=/oginit
@@ -22,7 +23,6 @@ function parsearParametros
                 return -1
             else
                 DIST=$1
-                return -1
             fi
             ;;
             ("-v")
@@ -32,11 +32,20 @@ function parsearParametros
                 return -1
             else
                 DIST=$1
-                return -1
             fi
             ;;
             ("-l")
             shift
+            ;;
+            ("-t")
+            shift
+            if [ $# -eq 0 ];then
+                echo "Error en los argumentos"
+                return -1
+            else
+                DEST=$1
+                shift
+            fi
             ;;
         esac
     done
@@ -228,12 +237,12 @@ function comprimir
 
 function finalizar
 {
+    cd $ANTERIORPWD
     mv $TMPINITRD/new-initrd.gz $DEST/initrd.gz
     mv $TMPINITRD/linux $DEST/linux
-    cd $ACTUALPWD
 }
 
-parsearParametros
+parsearParametros $@
 descargar
 descomprimir
 #purgarFicherosDebian

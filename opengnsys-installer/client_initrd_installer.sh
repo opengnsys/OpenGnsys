@@ -2,6 +2,7 @@
 
 TFTPBOOT=/var/lib/tftpboot
 OGROOT=/opt/opengnsys
+INITRD=0
 
 function arguments_parser
 {
@@ -31,7 +32,12 @@ function arguments_parser
 
             ("-u")
             shift
-            UPDATE=true
+            UPDATE=1
+            ;;
+
+            ("-i")
+            shift
+            INITRD=1
             ;;
         esac
     done
@@ -81,9 +87,9 @@ function create_file_system
     mkdir -p /etc/opengnsys
     mkdir -p /var/log/opengnsys/clients
 
-    ln -s $TFTPBOOT $OGROOT/tftpboot
-    ln -s /etc/opengnsys/ $OGROOT/etc
-    ln -s /var/log/opengnsys/ $OGROOT/log
+    ln -fs $TFTPBOOT $OGROOT/tftpboot
+    ln -fs /etc/opengnsys/ $OGROOT/etc
+    ln -fs /var/log/opengnsys/ $OGROOT/log
 
     cp -ar $SVNROOT/opengnsys-client/nfsexport/* $OGROOT/client
     cp -ar $SVNROOT/opengnsys-client/engine/*.lib $OGROOT/client/lib/engine/bin
@@ -99,10 +105,12 @@ function install_dhcpd
 function install_tftpboot
 {
     mkdir -p $OGROOT/tftpboot/pxelinux.cfg/
-    cd $OGROOT/tftpboot/pxelinux.cfg/
-    cat $SVNROOT/opengnsys-server/PXE/pxelinux.cfg/default >> default
-    $SVNROOT/opengnsys-client/boot/initrd-generator
-    cd -
+    cat $SVNROOT/opengnsys-server/PXE/pxelinux.cfg/default >> $OGROOT/tftpboot/pxelinux.cfg/default
+}
+
+function install_initrd
+{
+    $SVNROOT/opengnsys-client/boot/initrd-generator -t $OGROOT/tftpboot/
 }
 
 function install_nfsexport
@@ -116,12 +124,17 @@ function install_nfsexport
 arguments_parser $@
 checking
 
-if [ -z $UPDATE ]; then
+if [ $UPDATE ]; then
+    if [ $INITRD ]; then
+        install_initrd
+    fi
+    create_file_system
+
+else
     install_necesary_packages
     create_file_system
     install_dhcpd
     install_tftpboot
+    install_initrd
     install_nfsexport
-else
-    create_file_system
 fi
