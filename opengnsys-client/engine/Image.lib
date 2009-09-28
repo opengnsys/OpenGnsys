@@ -30,7 +30,7 @@
 function ogCreateImage () {
 
 # Variables locales
-local PART IMGDIR IMGFILE SIZE REDSIZE
+local PART IMGDIR IMGFILE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -56,10 +56,6 @@ IMGFILE="$IMGDIR/$4.img"
 
 ogLock $1 $2 || return $?
 trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
-#/// Reducir el tamaño del sistema de archivos al mínimo sin dañar los datos.
-SIZE=$(ogGetPartitionSize $1 $2)
-REDSIZE=$(ogReduceFs $1 $2) || REDSIZE=$[SIZE+1]
-[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $REDSIZE
 
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
@@ -75,8 +71,6 @@ case "$TYPE" in
     *)  ogRaiseError $OG_ERR_FORMAT
         return $? ;;
 esac
-
-[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $SIZE
 
 ogUnlock $1 $2
 }

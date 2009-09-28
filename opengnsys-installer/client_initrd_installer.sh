@@ -124,12 +124,12 @@ function install_nfsexport
 arguments_parser $@
 checking
 
-if [ $UPDATE ]; then
-    if [ $INITRD ]; then
-        install_initrd
-    fi
-    create_file_system
+if [ $INITRD ]; then
+    install_initrd
+fi
 
+if [ $UPDATE ]; then
+    create_file_system
 else
     install_necesary_packages
     create_file_system

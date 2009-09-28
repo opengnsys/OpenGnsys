@@ -59,6 +59,81 @@ esac
 
 
 #/**
+#         ogFormat int_ndisk int_npartition
+#@see     ogFormatFs
+#*/
+function ogFormat () {
+ogFoarmtFS "$@"
+}
+
+
+#/**
+#         ogFoarmatFs int_ndisk int_npartition [str_label]
+#@brief   Formatea un sistema de ficheros según el tipo de su partición.
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@arg  \c label      etiqueta de volumen (opcional)
+#@return  (por determinar)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Partición no accesible o desconocida.
+#@note    Requisitos:	mkfs*, hidraDisk, hidraTypeFS
+#@todo    Definir un parámetro opcional para la etiqueta de volumen.
+#@todo    Puede ser interesante poner un indicador de forzoso para partición ya formateada.
+#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-28
+#*/
+function ogFormatFs () {
+
+# Variables locales
+local PART TYPE PARAMS
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_label]" \
+           "$FUNCNAME 1 1" \
+           "$FUNCNAME 1 1 DATA"
+    return
+fi
+#/// Error si no se reciben 2 o 3 parámetros.
+[ $# == 2 -o $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Sustituye num. de disco por el dispositivo.
+PART="$(ogDiskToDev $1 $2)" || return $?
+# Etiquetas de particion.
+[ -n "$3" ] && PARAMS="-L $3"
+
+# Elegir tipo de formato segun el tipo de particion.
+case "$(ogGetFsType $1 $2)" in
+     EXT2)          TYPE="ext2" ;;
+     EXT3)          TYPE="ext3" ;;
+     EXT4)          TYPE="ext4" ;;
+     REISERFS)      TYPE="reiserfs" ;;
+     REISER4)       TYPE="reiser4" ;;
+     NTFS|HNTFS)    TYPE="ntfs -f" ;;
+     FAT32|HFAT32)  TYPE="vfat" ;;
+     FAT16|HFAT16)  TYPE="msdos" ;;
+     CACHE)         TYPE="ext3" ;;
+     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2
+         return $? ;;
+esac
+
+# Error si la particion esta bloqueada.
+if ogIsLocked $1 $2; then
+    ogRaiseError $OG_ERR_LOCKED "$1,$2"
+    return $?
+fi
+# Desmontar la particion antes de formatear.
+ogUnmount $1 $2
+# Formatear particion (uso exclusivo).
+ogLock $1 $2
+mkfs -t $TYPE $PARAMS $PART
+ogUnlock $1 $2
+}
+
+
+#/**
 #         ogGetFsType int_ndisk int_npartition
 #@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
@@ -193,14 +268,14 @@ touch $LOCKFILE
 
 #/**
 #         ogMount int_ndisk int_npartition
-#@see     ogMountPartition
+#@see     ogMountFs
 #*/
 function ogMount () {
-ogMountPartition "$@"
+ogMountFs "$@"
 }
 
 #/**
-#         ogMountPartition int_ndisk int_npartition
+#         ogMountFs int_ndisk int_npartition
 #@brief   Monta un sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
@@ -208,11 +283,11 @@ ogMountPartition "$@"
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de particion desconocido o no se puede montar.
-#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-07-27
+#@date    2009-09-28
 #*/
-function ogMountPartition () {
+function ogMountFs () {
 
 #/// Variables locales
 local PART TYPE MNTDIR MOUNT
@@ -255,9 +330,8 @@ if [ -z "$MNTDIR" ]; then
     esac
     $MOUNT $PART $MNTDIR || $MOUNT $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
 	# linea temporal durante desarrollo para poder usar el cliente completo nfs y testeas nuevas herramientas.
-    if  `cat /proc/cmdline | grep nfsroot > /dev/null`
-    then
-		echo $PART $MNTDIR >> /etc/mtab
+    if grep -q nfsroot /proc/cmdline; then
+		echo "$PART $MNTDIR" >> /etc/mtab
 	fi
 	# fin linea temporal.
 fi
@@ -374,14 +448,14 @@ rm -f $LOCKFILE
 
 #/**
 #         ogUnmount int_ndisk int_npartition
-#@see     ogUnmountPartition
+#@see     ogUnmountFs
 #*/
 function ogUnmount () {
-ogUnmountPartition "$@"
+ogUnmountFs "$@"
 }
 
 #/**
-#         ogUnmountPartition int_ndisk int_npartition
+#         ogUnmountFs int_ndisk int_npartition
 #@brief   Desmonta un sistema de archivos.
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
@@ -389,11 +463,11 @@ ogUnmountPartition "$@"
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@warning La partición no está previamente montada o no se puede desmontar.
-#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-07-27
+#@date    2009-09-28
 #*/
-function ogUnmountPartition () {
+function ogUnmountFs () {
 
 # Variables locales
 local PART MNTDIR
@@ -417,8 +491,7 @@ if [ -n "$MNTDIR" ]; then
     #/// Crear punto de montaje.
     umount $PART 2>/dev/null && rmdir $MNTDIR || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
 	# linea temporal durante desarrollo para testear nuevas herramientas con el cliente completo nfs
-    if  `cat /proc/cmdline | grep nfsroot > /dev/null`
-    then
+    if grep -q nfsroot /proc/cmdline; then
 		cat /etc/mtab | grep -v $PART > /var/tmp/mtab.temporal && cp /var/tmp/mtab.temporal /var/tmp/mtab && rm /var/tmp/mtab.temporal
 	fi
 	# fin linea temporal.

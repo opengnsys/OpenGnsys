@@ -18,12 +18,8 @@ function parsearParametros
         case $1 in
             ("-d")
             shift
-            if [ $# -eq 0 ];then
-                echo "Error en los argumentos"
-                return -1
-            else
-                DIST=$1
-            fi
+                #URL=http://ftp.nl.debian.org/debian/dists/testing/main/installer-i386/current/images/netboot/debian-installer/i386/
+                URL=http://people.debian.org/~joeyh/d-i/images/daily/netboot/debian-installer/i386/
             ;;
             ("-v")
             shift
@@ -32,6 +28,8 @@ function parsearParametros
                 return -1
             else
                 DIST=$1
+                URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-i386/current/images/netboot/ubuntu-installer/i386
+                shift
             fi
             ;;
             ("-l")
@@ -53,6 +51,10 @@ function parsearParametros
 
 function descargar
 {
+    # Borramos si existe el directorio temporal
+    if [ -d $TMPINITRD ]; then
+        rm -r $TMPINITRD
+    fi
     # Creamos directorio temporal y nos vamos alli
     mkdir -p $TMPINITRD
     cd $TMPINITRD
@@ -68,7 +70,7 @@ function descargar
     fi
 
     # Si la opcion de descargar el nucleo tambien esta habilitado nos lo descargamos
-    if [ $LINUX = 1 ] ; then
+    if [ $LINUX ] ; then
         if [ -f linux ] ; then
             rm linux
         fi
@@ -239,7 +241,10 @@ function finalizar
 {
     cd $ANTERIORPWD
     mv $TMPINITRD/new-initrd.gz $DEST/initrd.gz
-    mv $TMPINITRD/linux $DEST/linux
+    if [ $LINUX ] ; then
+        mv $TMPINITRD/linux $DEST/linux
+        echo haaaaaa
+    fi
 }
 
 parsearParametros $@
