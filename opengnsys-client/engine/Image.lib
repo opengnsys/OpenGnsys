@@ -10,13 +10,14 @@
 
 
 #/**
-#         ogCreateImage ndisk npartition dir image
+#         ogCreateImage int_ndisk int_npartition str_repo path_image
 #@brief   Crea una imagen a partir de una partición.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
-#@arg  \c path_dir       directorio o grupo donde guardar la imagen
-#@arg  \c str_image      nombre de la imagen
+#@arg  \c ndisk      nº de orden del disco
+#@arg  \c npartition nº de orden de la partición
+#@arg  \c str_repo   repositorio de imágenes (remoto o caché local)
+#@arg  \c path_image camino completo de la imagen (sin extensión)
 #@return  (nada, por determinar)
+#@note    repo = { REPO, CACHE }
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@exception OG_ERR_LOCKED   particion bloqueada por otra operación.
@@ -42,17 +43,14 @@ fi
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
 PART="$(ogDiskToDev $1 $2)" || return $?
-
 if ogIsLocked $1 $2; then
     ogRaiseError $OG_ERR_LOCKED "$1,$2"
     return $?
 fi
 ogUnmount $1 $2 >/dev/null
 
-IMGDIR="$OGIMG/$3"
-#### Comprobar directorio en NFS o en caché.
-mkdir -p "$IMGDIR"
-IMGFILE="$IMGDIR/$4.img"
+IMGDIR=$(ogGetParentPath "$3" "$4") || return $?
+IMGFILE="$IMGDIR/$(basename $4).img"
 
 ogLock $1 $2 || return $?
 trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9

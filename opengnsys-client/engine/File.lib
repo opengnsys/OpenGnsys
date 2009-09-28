@@ -20,7 +20,7 @@
 #@note    repo = { REPO, CACHE }
 #@note    Requisitos: \c grep \c sed
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@warning Primeras pruebas.
 #@todo    Terminar de definir parámetros para acceso a repositorios.
@@ -51,8 +51,9 @@ case $# in
             *)     ogRaiseError $OG_ERR_FORMAT
                    return $? ;;
         esac ;;
-    3)	FILE="$(ogMount $1 $2)/$3" || return $OG_ERR_NOTFOUND ;;
-    *)	return $OG_ERR_FORMAT ;;
+    3)	FILE="$(ogMount $1 $2)/$3" ;;
+    *)	ogRaiseError $OG_ERR_FORMAT
+	return $? ;;
 esac
 
 #/// Eliminar caracteres \c / iniciales, finales y duplicados.
@@ -74,6 +75,46 @@ cd $CURRENTDIR
 }
 
 
+# Devuelve el camino del directorio padre.
+function ogGetParentPath () {
+local PARENT
+case $# in
+    1)	PARENT="\"$(dirnme $1)\"" ;;
+    2)	PARENT="\"$1\" \"$(dirnme $2)\"" ;;
+    3)	PARENT="\"$1\" \"$2\" \"$(dirnme $3)\"" ;;
+    *)	ogRaiseError $OG_ERR_FORMAT
+	return $? ;;
+esac
+ogGetPath $PARENT
+}
+
+
+#####  PRUEBAS.
+# Borrar fichero
+function ogDeleteFile () {
+local FILE
+FILE=$(ogGetPath "$@") || return $?
+[ -z "$FILE" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
+rm -f $FILE || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+}
+
+# Borrar subárbol de directorio.
+function ogDeleteTree () {
+local FILE
+DIR=$(ogGetPath "$@") || return $?
+[ -z "$DIR" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
+rm -fr $DIR || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+}
+
+# Crear directorio
+function ogMakeDir () {
+local PARENT DIR
+PARENT=$(ogGetParentPath "$@") || return $?
+[ -z "$PARENT" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
+DIR="$(basename ${!#})"
+mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+}
+ 
 
 #/**
 #         ogNewPath [ str_repo | int_ndisk int_npartition ] path_filepath
