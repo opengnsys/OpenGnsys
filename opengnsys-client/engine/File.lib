@@ -22,9 +22,8 @@
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@warning Primeras pruebas.
 #@todo    Terminar de definir parámetros para acceso a repositorios.
-#@version 0.1 - Primera adaptación para OpenGNSys.
+#@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
 #*/
@@ -75,13 +74,20 @@ cd $CURRENTDIR
 }
 
 
-# Devuelve el camino del directorio padre.
+#/**
+#         ogGetParentPath [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Metafunción que devuelve el camino del directorio padre.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/
 function ogGetParentPath () {
 local PARENT
 case $# in
-    1)	PARENT="\"$(dirnme $1)\"" ;;
-    2)	PARENT="\"$1\" \"$(dirnme $2)\"" ;;
-    3)	PARENT="\"$1\" \"$2\" \"$(dirnme $3)\"" ;;
+    1)	PARENT="$(dirname "$1")" ;;
+    2)	PARENT="$1 $(dirname "$2")" ;;
+    3)	PARENT="$1 $2 $(dirname "$3")" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
 	return $? ;;
 esac
@@ -89,29 +95,52 @@ ogGetPath $PARENT
 }
 
 
-#####  PRUEBAS.
-# Borrar fichero
+#/**
+#         ogDeleteFile [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Metafunción que borra un fichero de un dispositivo.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/
 function ogDeleteFile () {
 local FILE
 FILE=$(ogGetPath "$@") || return $?
 [ -z "$FILE" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
-rm -f $FILE || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
 
+
+#/**
+#         ogDeleteTree [ str_repo | int_ndisk int_npartition ] path_dirpath
+#@brief   Metafunción que borra todo un subárbol de directorios de un dispositivo.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/
 # Borrar subárbol de directorio.
 function ogDeleteTree () {
-local FILE
+local DIR
 DIR=$(ogGetPath "$@") || return $?
 [ -z "$DIR" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
-rm -fr $DIR || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
 
-# Crear directorio
+
+#/**
+#         ogMakeDir [ str_repo | int_ndisk int_npartition ] path_dirpath
+#@brief   Metafunción que crea un subdirectorio vacío en un dispositivo.
+#@see     ogGetParentPath
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/
 function ogMakeDir () {
 local PARENT DIR
 PARENT=$(ogGetParentPath "$@") || return $?
-[ -z "$PARENT" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
-DIR="$(basename ${!#})"
+DIR="$(basename "${!#}")"
+echo mkdir -p "$PARENT/$DIR"
 mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
  
