@@ -50,7 +50,7 @@ fi
 ogUnmount $1 $2 >/dev/null
 
 IMGDIR=$(ogGetParentPath "$3" "$4") || return $?
-IMGFILE="$IMGDIR/$(basename $4).img"
+IMGFILE="$IMGDIR/$(basename "$4").img"
 
 ogLock $1 $2 || return $?
 trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
@@ -75,10 +75,10 @@ ogUnlock $1 $2
 
 
 #/**
-#         ogGetImageSize dir image
+#         ogGetImageSize str_repo path_image
 #@brief   Devuelve el tamaño del sistema de archivos almacenado en un fichero de imagen.
-#@arg  \c path_dir       directorio o grupo donde guardar la imagen
-#@arg  \c str_image      nombre de la imagen
+#@arg  \c str_repo    repositorio de imágenes o caché local
+#@arg  \c path_image  camino de la imagen
 #@return  tamaño (en KB)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND fichero de imagen no encontrado.
@@ -103,7 +103,7 @@ fi
 #/// Error si no se reciben menos de 2 parámetros.
 [ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 #/// Error si el fichero de imagen no es accesible.
-IMGFILE="$OGIMG/$3/$4.img"
+IMGFILE=$(ogGetPath "$1" "$2.img.000") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 #/// Devuelve el tamaño de la imagen en KB.
@@ -112,11 +112,22 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 }
 
 
+#### PRUEBAS
+# Obtener tipo de imagen 
+function ogGetImageType () {
+local IMGFILE
+IMGFILE=$(ogGetPath "$1" "$2.img.000") || return $?
+[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
+        awk '/^Filesystem/ {sub(/\.\.+/," "); sub(/fs$/,""); print toupper($2);}'
+}
+
+
 #/**
-#         ogRestoreImage dir image ndisk npartition
+#         ogRestoreImage str_repo path_image int_ndisk int_npartition
 #@brief   Restaura una imagen de sistema de archivos en una partición.
-#@arg  \c path_dir       directorio o grupo donde guardar la imagen
-#@arg  \c str_image      nombre de la imagen
+#@arg  \c str_repo    repositorio de imágenes o caché local
+#@arg  \c path_image  camino de la imagen
 #@arg  \c int_ndisk      nº de orden del disco
 #@arg  \c int_npartition nº de orden de la partición
 #@return  (por determinar)
@@ -125,7 +136,7 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 #@exception OG_ERR_LOCKED   partición bloqueada por otra operación.
 #@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
 #@warning En pruebas iniciales
-#@todo    Comprobaciones, control de errores, definir parámetros, caché/repositorio, etc.
+#@todo    Comprobar incongruencias partición-imagen, control de errores, definir parámetros, caché/repositorio, etc.
 #@version 0.1 - Primera versión muy en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/10
@@ -145,27 +156,32 @@ fi
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
 PART="$(ogDiskToDev $3 $4)" || return $?
-IMGFILE="$OGIMG/$1/$2.img"
+IMGFILE=$(ogGetPath "$1" "$2.img.000") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 # Error si la imagen no cabe en la particion.
-[ $(ogGetImageSize "$1") -gt $(ogGetPartitionSize $3 $4) ] && ogRaiseError $OG_ERR_PARTITION && return $?
+[ $(ogGetImageSize "$1" "$2") -gt $(ogGetPartitionSize $3 $4) ] && ogRaiseError $OG_ERR_PARTITION && return $?
 
-
-ogIsLocked $3 $4 && return $?
+#/// Comprobar el bloqueo de la partición, desmontarla y bloquearla.
+if ogIsLocked $3 $4; then
+    ogRaiseError $OG_ERR_LOCKED "$3,$4"
+    return $?
+fi
 ogUnmount $3 $4 >/dev/null || return $?
-ogLock $3 $4 && return $?
+ogLock $3 $4 || return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
+#/// Restaurar según el tipo de sistema de archivos.
+#/// Atención: no se comprueba incongruencia entre partición e imagen.
 TYPE="$(ogGetFsType $3 $4)"
 case "$TYPE" in
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" || return $?
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" || return $?
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" && ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" && return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" || return $?
         ;;
     *)  ogRaiseError $OG_ERR_FORMAT
         return $? ;;

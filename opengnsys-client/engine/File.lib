@@ -45,10 +45,12 @@ fi
 case $# in
     1)	FILE="$1" ;;
     2)	case "$1" in
-            REPO)  FILE="$OGREPO/$2" ;;
-            CACHE) FILE="$OGCACHE/$2" ;;
-            *)     ogRaiseError $OG_ERR_FORMAT
-                   return $? ;;
+            [Rr][Ee][Pp][Oo])
+                FILE="$OGIMG/$2" ;;
+            [Cc][Aa][Cc][Hh][Ee])
+                FILE="$OGCAC/$2" ;;
+            *)  ogRaiseError $OG_ERR_FORMAT
+                return $? ;;
         esac ;;
     3)	FILE="$(ogMount $1 $2)/$3" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
