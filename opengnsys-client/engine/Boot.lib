@@ -246,7 +246,7 @@ CONF="$MNTDIR/boot/grub/menu.lst"
 #       y los formatea para que sean compatibles con \c kexec .  */
 awk 'BEGIN {cont=-1;}
      $1~/^default/      {sub(/=/," "); def=$2;}
-     $1~/^set/ && $2~/^default/ {sub(/=/," "); def=$3;}
+     $1~/^set/ && $2~/^default/ {gsub(/[="]/," "); def=$3;}
      $1~/^title|^menuentry/ {cont++}
      $1~/^kernel|^linux/ {if (def==cont) {
                             kern=$2;
