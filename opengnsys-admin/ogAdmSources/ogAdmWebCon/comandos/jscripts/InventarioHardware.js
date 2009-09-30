@@ -2,9 +2,9 @@
 //	Libreria de scripts de Javascript
 // Copyright 2003-2005 Jos�Manuel Alonso. Todos los derechos reservados.
 // Fecha Creació�:2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: InventarioHardware.js
-// Descripci� : 
+// Descripción : 
 //		Este fichero implementa las funciones javascript del fichero InventarioHardware.php (Comandos)
 // *************************************************************************************************************************************************
  function confirmar(){

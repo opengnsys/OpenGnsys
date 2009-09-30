@@ -1,11 +1,11 @@
 <?  
 // *************************************************************************************************************************************************
-// Aplicaci�n WEB: Hidra
+// Aplicaciónn WEB: Hidra
 // Copyright 2003-2005  Jos� Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�n: A�o 2003-2004
+// Fecha Creaciónn: A�o 2003-2004
 // Fecha �ltima modificaci�n: Marzo-2005
 // Nombre del fichero: propiedades_servidoresrembo.php
-// Descripci�n : 
+// Descripciónn : 
 //		 Presenta el formulario de captura de datos de un servidor rembo para insertar,modificar y eliminar
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -44,7 +44,7 @@ if  ($opcion!=$op_alta){
 <HTML>
 <TITLE>Administraci�n web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_servidoresrembo.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_servidoresrembo_'.$idioma.'.js"></SCRIPT>'?>

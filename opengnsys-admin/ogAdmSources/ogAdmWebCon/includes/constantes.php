@@ -151,7 +151,7 @@ $RESERVA_CONFIRMADA=1; // Reserva confirmada
 $RESERVA_PENDIENTE=2; // Reserva pendiente
 $RESERVA_DENEGADA=3; // Reserva denegada
 
-$SUPERADMINISTRADOR=1; // administrador de la aplicaci�
+$SUPERADMINISTRADOR=1; // administrador de la Aplicación
 $ADMINISTRADOR=2; // administrador de Centro
 $OPERADOR=3; // operador de aula
 

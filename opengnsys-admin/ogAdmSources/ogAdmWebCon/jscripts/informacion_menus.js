@@ -1,10 +1,10 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�:2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación:2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: informacion_menus.js
-// Descripci� : 
+// Descripción : 
 //		Este fichero implementa las funciones javascript del fichero informacion_menus.php
 // *************************************************************************************************************************************************
 var currentItem=null // Item elegido
@@ -33,7 +33,7 @@ function resultado_eliminar_accionmenu(resul,descrierror,idp,idh){
 		return
 	}
 	alert(TbMsg[1])
-	eliminar_nodo(currentNodo)  // Elimina el nodo del �bol
+	eliminar_nodo(currentNodo)  // Elimina el nodo del árbol
 }
 //________________________________________________________________________________________________________
 function modificar_items(){

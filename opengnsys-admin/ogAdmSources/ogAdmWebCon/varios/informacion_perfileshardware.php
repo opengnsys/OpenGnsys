@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: informacion_perfileshard.php
-// Descripci� : 
+// Descripción : 
 //		Muestra los componentes hardware que forman parte de un perfil hardware y los perfiles softwares disponibles
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -22,11 +22,11 @@ if (isset($_GET["descripcionperfil"])) $descripcionperfil=$_GET["descripcionperf
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idperfil); // Crea el arbol XML 
 
-// Creaci� del �bol
+// Creación del árbol
 $baseurlimg="../images/tsignos";
 $clasedefault="tabla_listados_sin";
 $titulotabla=$TbMsg[3];  
@@ -34,9 +34,9 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
@@ -56,7 +56,7 @@ include_once("../includes/iframecomun.php");
 /**************************************************************************************************************************************************
 	Devuelve una cadena con formato XML de toda la informaci� de los perfiles hardwares
 	Parametros: 
-		- cmd:Una comando ya operativo ( con conexi� abierta)  
+		- cmd:Una comando ya operativo ( con conexiónabierta)  
 		- idperfil: El identificador del perfil hardware
 ________________________________________________________________________________________________________*/
 function CreaArbol($cmd,$idperfil){

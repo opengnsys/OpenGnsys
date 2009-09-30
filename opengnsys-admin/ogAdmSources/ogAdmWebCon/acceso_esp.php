@@ -1,6 +1,6 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Diciembre-2003
 // Fecha Última modificación: Febrero-2005
@@ -22,7 +22,7 @@ $TbErr[4]="ATENCIÓN: Usted no tiene acceso a esta aplicación";
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="estilos.css">
 </HEAD>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 //________________________________________________________________________________________________________

@@ -31,7 +31,7 @@ $literal=$literal.$literalnodo;
 ?>
 <HTML>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/comandos.js"></SCRIPT>

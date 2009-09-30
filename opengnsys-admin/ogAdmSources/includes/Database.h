@@ -1,8 +1,8 @@
 // ******************************************************************************************************
-// Aplicaci� HIDRA
+// Aplicación HIDRA
 // Copyright 2004 Jos�Manuel Alonso. Todos los derechos reservados.
 // Fichero: Database.h
-//	Descripci�:
+//	Descripción:
 //	 	Fichero de cabecera de la clase Database para implementar funciones de manipulaci�
 //		de bases de datos sobre un Servidor Mysql
 // ******************************************************************************************************
@@ -56,5 +56,5 @@ class Herror
 {
 public:
 	int nError; // C�igo del error
-	char dError[500]; // Descripci� del error
+	char dError[500]; // Descripción del error
 };

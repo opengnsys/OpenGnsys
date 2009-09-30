@@ -1,7 +1,7 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: colasacciones.php
@@ -341,7 +341,7 @@ if (isset($_POST["wrk_NombreTipoAccion"])) $wrk_NombreTipoAccion=$_POST["wrk_Nom
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>

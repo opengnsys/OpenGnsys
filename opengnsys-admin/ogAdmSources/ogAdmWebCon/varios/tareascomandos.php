@@ -1,6 +1,6 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Febrero-2005
@@ -28,7 +28,7 @@ if (!$cmd)
 ?>
 <HTML>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../jscripts/tareascomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/tareascomandos_'.$idioma.'.js"></SCRIPT>'?>

@@ -1,7 +1,7 @@
 <? 
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: MArzo-2005
 // Nombre del fichero: propiedades_tipohardwares.php
@@ -42,7 +42,7 @@ if  ($opcion!=$op_alta){
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_tipohardwares.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_tipohardwares_'.$idioma.'.js"></SCRIPT>'?>

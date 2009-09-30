@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: hardwares.php
-// Descripci� : 
+// Descripción : 
 //		Administra el hardware de los ordenadores de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -19,19 +19,19 @@ include_once("../idiomas/php/".$idioma."/hardwares_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2');  // Error de conexióncon servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idcentro); // Crea el arbol XML con todos los datos del Centro
-// Creaci� del �bol
+// Creación del árbol
 $baseurlimg="../images/signos"; // Url de las im�enes de signo
-$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del �bol
+$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
 $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/hardwares.js"></SCRIPT>
@@ -44,7 +44,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 <BODY OnContextMenu="return false">
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	 // Crea �bol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
 
 // Crea contextual de tipos de hardware
@@ -78,7 +78,7 @@ include_once("../includes/iframecomun.php");
 // *************************************************************************************************************************************************
 //	Devuelve una cadena con formato XML de toda la informaci� del hardware registrado en un Centro concreto
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexi� abierta)  
+//		- cmd:Una comando ya operativo ( con conexiónabierta)  
 //		- idcentro: El identificador del centro
 //________________________________________________________________________________________________________
 function CreaArbol($cmd,$idcentro){

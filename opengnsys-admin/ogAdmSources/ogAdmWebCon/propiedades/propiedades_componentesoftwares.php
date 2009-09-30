@@ -1,11 +1,11 @@
 <? 
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: propiedades_componentesoftwares.php
-// Descripci� : 
+// Descripción : 
 //		 Presenta el formulario de captura de datos de un componente software para insertar,modificar y eliminar
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -32,7 +32,7 @@ if (isset($_GET["identificador"])) $idsoftware=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 if  ($opcion!=$op_alta){
 	$resul=TomaPropiedades($cmd,$idsoftware);
 	if (!$resul)
@@ -41,9 +41,9 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_componentesoftwares.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_componentesoftwares_'.$idioma.'.js"></SCRIPT>'?>
@@ -105,7 +105,7 @@ include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
 //	Recupera los datos de un componente software
 //		Parametros: 
-//		- cmd: Una comando ya operativo (con conexi� abierta)  
+//		- cmd: Una comando ya operativo (con conexiónabierta)  
 //		- id: El identificador del componente software
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){

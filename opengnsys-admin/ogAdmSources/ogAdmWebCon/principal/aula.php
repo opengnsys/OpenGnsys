@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: aula.php
-// Descripci� : 
+// Descripción : 
 //		Visualiza los ordenadores de las aulas de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -43,12 +43,12 @@ $nombreaula="";
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 //________________________________________________________________________________________________________
 ?>
 <HTML>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
@@ -235,7 +235,7 @@ function pintaordenadores(){
 	$parametros.="nfn=Sondeo".chr(13);
 	$parametros.="iph=".$cadenaip.chr(13);
 
-	$resul=$shidra->conectar(); // Se ha establecido la conexi� con el servidor hidra
+	$resul=$shidra->conectar(); // Se ha establecido la conexióncon el servidor hidra
 	if($resul){
 		$resul=$shidra->envia_comando($parametros);
 		$trama=$shidra->recibe_respuesta();
@@ -586,7 +586,7 @@ function ContextualXMLComandos($litambito,$ambito){
 			$layerXML.=' alpulsar="confirmarcomando('."'".$ambito."'".','.$rs->campos["idcomando"].','.$rs->campos["interactivo" ]. ')"';
 			$layerXML.=' textoitem="'.$rs->campos["descripcion"].'"';
 			$layerXML.='></ITEM>';
-			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la descripci� de mayor longitud
+			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la Descripción de mayor longitud
 				$maxlongdescri=strlen($rs->campos["descripcion"]);
 			$rs->Siguiente();
 		}

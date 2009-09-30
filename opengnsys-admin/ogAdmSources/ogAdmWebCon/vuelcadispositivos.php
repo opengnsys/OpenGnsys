@@ -1,6 +1,6 @@
 <?php
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 2003-2005 Jos�Manuel Alonso. Todos los derechos reservados.
 // Vuelca archivo de fabricantes PCI
 // *************************************************************************************************************************************************
@@ -8,11 +8,11 @@ include_once("./clases/AdoPhp.php");
 
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
-$cnx="localhost;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexi� a la base de datos
+$cnx="localhost;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexióna la base de datos
 $ips="192.168.2.15"; // IP del servidor hidra
 $prt="2008"; // Puerto de comunicaci� con el servidor
 $wer="http://192.168.2.15/webhidra/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="http://192.168.2.15/webhidra/acceso.php"; // P�ina de login de la aplicaci�
+$wac="http://192.168.2.15/webhidra/acceso.php"; // P�ina de login de la Aplicación
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
 if (!$cmd)  die("Error de conexion");
@@ -62,7 +62,7 @@ for($i=0;$i<sizeof($lineas);$i++){
 	}
 }
 // *************************************************************************************************************************************************
-//	Devuelve una objeto comando totalmente operativo (con la conexi� abierta)
+//	Devuelve una objeto comando totalmente operativo (con la conexiónabierta)
 //	Parametros: 
 //		- cadenaconexion: Una cadena con los datos necesarios para la conexi�: nombre del servidor
 //		usuario,password,base de datos,etc separados por coma

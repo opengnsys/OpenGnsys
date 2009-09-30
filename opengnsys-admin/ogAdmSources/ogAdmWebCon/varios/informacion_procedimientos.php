@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: informacion_procedimientos.php
-// Descripci� : 
+// Descripción : 
 //		Muestra los comandos que forman parte de un procedimiento y sus valores
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -24,10 +24,10 @@ if (isset($_GET["descripcionprocedimiento"]))	$descripcionprocedimiento=$_GET["d
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
 	<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <BODY>
 	<?

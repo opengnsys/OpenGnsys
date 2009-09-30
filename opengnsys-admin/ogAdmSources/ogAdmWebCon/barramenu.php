@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 2003-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: Diciembre-2003
-// Fecha �tima modificaci�: Marzo-2005
+// Fecha Creación: Diciembre-2003
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: barramenu.php
-// Descripci� :Este fichero implementa el menu general de la aplicaci�
+// Descripción :Este fichero implementa el menu general de la Aplicación
 // *************************************************************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
@@ -13,10 +13,10 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-	<TITLE>Administraci� web de aulas</TITLE>
+	<TITLE>Administración web de aulas</TITLE>
 	<HEAD>
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
-		<LINK rel="stylesheet" type="text/css" href="hidra.css">
+		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 		<SCRIPT language="javascript">
 			var currentOp=null;
 		//________________________________________________________________________________________________________

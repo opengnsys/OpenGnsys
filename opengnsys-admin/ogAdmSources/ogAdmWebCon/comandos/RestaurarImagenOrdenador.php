@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: RestaurarImagenOrdenador.php
-// Descripci� : 
+// Descripción : 
 //		Implementaci� del comando "RestaurarImagen" (Ordenadores)
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -52,16 +52,16 @@ $idservidorrembo=0;
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 $resul=toma_propiedades($cmd,$idordenador);
 if (!$resul)
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci� de datos.
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <STYLE TYPE="text/css"></STYLE>
 <SCRIPT language="javascript" src="./jscripts/RestaurarImagenOrdenador.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
@@ -254,7 +254,7 @@ function ExisteIncremental($cmd,$idperfilhard,$idperfilsoft ,$idsoftincremental)
 /*________________________________________________________________________________________________________
 	Recupera los datos de un ordenador
 		Parametros: 
-		- cmd: Una comando ya operativo (con conexi� abierta)  
+		- cmd: Una comando ya operativo (con conexiónabierta)  
 		- ido: El identificador del ordenador
 ________________________________________________________________________________________________________*/
 function toma_propiedades($cmd,$ido){

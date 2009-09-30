@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: acciones.php
-// Descripci� :
+// Descripción :
 //		Administra procedimientos,tareas y trabajos de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -19,32 +19,33 @@ include_once("../idiomas/php/".$idioma."/acciones_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2');  // Error de conexióncon servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idcentro); // Crea el arbol XML con todos los datos de las acciones registradas en el Centro
-// Creaci� del �bol
+// Creación del árbol
 $baseurlimg="../images/signos"; // Url de las im�enes de signo
-$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del �bol
+$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
 $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
 	<META HTTP-EQUIV="Content-Type"  CONTENT="text/html;charset=ISO-8859-1"> 
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/acciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
-	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
+	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/acciones_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	 // Crea �bol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
 
 // Crea contextual de los procedimientos
@@ -77,10 +78,10 @@ include_once("../includes/iframecomun.php");
 </BODY>
 </HTML>
 <?
-// *************************************************************************************************************************************************
+// ********************************************************************************************************
 //	Devuelve una cadena con formato XML con toda la informaci� de las acciones registradas en un Centro concreto
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexi� abierta)  
+//		- cmd:Una comando ya operativo ( con conexiónabierta)  
 //		- idcentro: El identificador del centro
 //________________________________________________________________________________________________________
 function CreaArbol($cmd,$idcentro){

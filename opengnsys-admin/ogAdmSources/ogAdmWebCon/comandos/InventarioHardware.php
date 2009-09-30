@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: InventarioHardware.php
-// Descripci� : 
+// Descripción : 
 //		Implementaci� del comando "Inventario Hardware"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -26,13 +26,13 @@ $nombreambito=$ValorParametros["nombreambito"];
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/InventarioHardware.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>

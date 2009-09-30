@@ -1,21 +1,21 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 2003-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: Diciembre-2003
-// Fecha �tima modificaci�: Febrero-2005
+// Fecha Creación: Diciembre-2003
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: controlacceso.php
-// Descripci� :Este fichero implementa el control de acceso a la aplicaci�
+// Descripción :Este fichero implementa el control de acceso a la Aplicación
 // *************************************************************************************************************************************************
 include_once("./clases/AdoPhp.php");
 
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
-$cnx="10.1.15.3;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexi� a la base de datos
+$cnx="10.1.15.3;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexióna la base de datos
 $ips="10.1.15.3"; // IP del servidor hidra
 $prt="2008"; // Puerto de comunicaci� con el servidor
 $wer="http://10.1.15.3/hidra/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="http://10.1.15.3/hidra/acceso.php"; // P�ina de login de la aplicaci�
+$wac="http://10.1.15.3/hidra/acceso.php"; // P�ina de login de la Aplicación
 //========================================================================================================
 
 $usu="";
@@ -34,7 +34,7 @@ if ($cmd){
 }
 
 if(!$resul)
-	Header("Location: ".$wac."?herror=4"); // Error de conexi� con servidor B.D.
+	Header("Location: ".$wac."?herror=4"); // Error de conexióncon servidor B.D.
 
 session_start(); // Activa variables de sesi�
 $_SESSION["idcentro"]=$idc; 
@@ -49,7 +49,7 @@ $_SESSION["pagerror"]=$wer;
 $_SESSION["urlacceso"]=$wac;
 
 // *************************************************************************************************************************************************
-//	Devuelve una objeto comando totalmente operativo (con la conexi� abierta)
+//	Devuelve una objeto comando totalmente operativo (con la conexiónabierta)
 //	Parametros: 
 //		- cadenaconexion: Una cadena con los datos necesarios para la conexi�: nombre del servidor
 //		usuario,password,base de datos,etc separados por coma
@@ -64,9 +64,9 @@ function CreaComando($cadenaconexion){
 	return($cmd);
 }
 //________________________________________________________________________________________________________
-//	Busca datos del usuario que intenta acceder a la aplicaci� 
+//	Busca datos del usuario que intenta acceder a la Aplicación 
 //		Parametros: 
-//		- cmd:Una comando ya operativo (con conexi� abierta)  
+//		- cmd:Una comando ya operativo (con conexiónabierta)  
 //		- usuario: Nombre del usuario  
 //		- pasguor: Password del uuario  
 //
@@ -95,9 +95,9 @@ function toma_datos($cmd,$idcentro,$nombrecentro,$idioma,$usuario,$idtipousuario
 }
 ?>
 <HTML>
-	<TITLE> Administraci� web de aulas</TITLE>
+	<TITLE> Administración web de aulas</TITLE>
 	<HEAD>
-		<LINK rel="stylesheet" type="text/css" href="hidra.css">
+		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 	</HEAD>
 	<BODY>
 		<DIV id="mensaje" style="Position:absolute;TOP:250;LEFT:330; visibility:visible">

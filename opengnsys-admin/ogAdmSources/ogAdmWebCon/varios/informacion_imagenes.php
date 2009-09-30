@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: informacion_imagenes.php
-// Descripci� : 
+// Descripción : 
 //		Muestra los perfiles que forman parte de una imagen  y los ordenadores que tienen instalada dicha imagen
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -22,11 +22,11 @@ if (isset($_GET["descripcionimagen"])) $descripcionimagen=$_GET["descripcionimag
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idimagen); // Crea el arbol XML 
 
-// Creaci� del �bol
+// Creación del árbol
 $baseurlimg="../images/tsignos"; // Url de las im�enes de signo
 $clasedefault="tabla_listados_sin";
 $titulotabla=$TbMsg[3];  
@@ -34,9 +34,9 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
@@ -54,7 +54,7 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 /**************************************************************************************************************************************************
 	Devuelve una cadena con formato XML de toda la informaci� de las imagenes
 	Parametros: 
-		- cmd:Una comando ya operativo ( con conexi� abierta)  
+		- cmd:Una comando ya operativo ( con conexiónabierta)  
 		- idimagen: El identificador del perfil hardware
 ________________________________________________________________________________________________________*/
 function CreaArbol($cmd,$idimagen){

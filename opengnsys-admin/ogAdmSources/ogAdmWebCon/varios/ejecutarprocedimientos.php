@@ -1,6 +1,6 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Año 2003-2005
 // Fecha Última modificación: Abril-2005
@@ -43,7 +43,7 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,100,1,$titul
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>

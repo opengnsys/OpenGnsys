@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci�n WEB: Hidra
+// Aplicaciónn WEB: Hidra
 // Copyright 200-2005 Jos� Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�n: A�o 2003-2004
+// Fecha Creaciónn: A�o 2003-2004
 // Fecha �ltima modificaci�n: Febrero-2005
 // Nombre del fichero: informacion_menus.php
-// Descripci�n : 
+// Descripciónn : 
 //		Muestra los items que forman parte de un menu y sus valores
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -32,7 +32,7 @@ if (!$cmd)
 else
 	$arbolXML=CreaArbol($cmd,$idmenu); // Crea el arbol XML 
 
-// Creaci�n del �rbol
+// Creaciónn del �rbol
 $baseurlimg="../images/tsignos";
 $clasedefault="tabla_listados_sin";
 $titulotabla=$TbMsg[3];  
@@ -42,7 +42,7 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 <HTML>
 <TITLE>Administraci�n web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/informacion_menus.js"></SCRIPT>

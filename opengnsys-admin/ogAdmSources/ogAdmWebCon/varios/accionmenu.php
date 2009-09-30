@@ -1,6 +1,6 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Febrero-2005
@@ -94,7 +94,7 @@ function gestiona_edicionaccion($cmd,$tipoedicion){
 	?>
 	<HTML>
 	<HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/accionmenu.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/accionmenu_'.$idioma.'.js"></SCRIPT>'?>
@@ -213,7 +213,7 @@ function gestiona_edicionitems($cmd,$tipoedicion){
 	?>
 	<HTML>
 	<HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/accionmenu.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/accionmenu_'.$idioma.'.js"></SCRIPT>'?>
@@ -328,7 +328,7 @@ function gestiona_edicionitem($cmd,$tipoedicion){
 	?>
 	<HTML>
 	<HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/accionmenu.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/accionmenu_'.$idioma.'.js"></SCRIPT>'?>

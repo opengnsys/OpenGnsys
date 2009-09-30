@@ -1,10 +1,10 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�:2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación:2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: perfilcomponente_hard.js
-// Descripci� : 
+// Descripción : 
 //		Este fichero implementa las funciones javascript del fichero perfilcomponente_hard.php
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________

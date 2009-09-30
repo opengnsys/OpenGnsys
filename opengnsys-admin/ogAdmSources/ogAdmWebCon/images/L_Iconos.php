@@ -1,6 +1,6 @@
 <?
 // ********************************************************************************************************************
-// Aplicación WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Diciembre-2003
 // Fecha Última modificación: Febrero-2005
@@ -41,7 +41,7 @@ if (!$rs->Abrir())
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 <HTML>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="L_Iconos.js"></SCRIPT>
 </HEAD>

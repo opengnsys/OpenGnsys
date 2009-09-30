@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2006
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2006
 // Nombre del fichero: aulas.php
-// Descripci� : 
+// Descripción : 
 //		Administra grupos,aulas y ordenadores de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -19,19 +19,19 @@ include_once("../idiomas/php/".$idioma."/aulas_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idcentro,$nombrecentro); // Crea el arbol XML con todos los datos de aulas del Centro
-// Creaci� del �bol
+// Creación del árbol
 $baseurlimg="../images/signos"; // Url de las im�enes de signo
-$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del �bol
-$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea el �bol (formato XML)
+$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea el árbol (formato XML)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/aulas.js"></SCRIPT>
@@ -44,7 +44,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea e
 <BODY OnContextMenu="return false">
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	// Crea �bol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	// Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
 
 // Crea contextual de los Centros y aulas
@@ -86,7 +86,7 @@ include_once("../includes/iframecomun.php");
 // *************************************************************************************************************************************************
 //	Devuelve una cadena con formato XML con toda la informaci� de aulas y ordenadores registrados en un Centro concreto
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexi� abierta)  
+//		- cmd:Una comando ya operativo ( con conexiónabierta)  
 //		- idcentro: El identificador del centro
 //		- nombrecentro: El nombre del centro
 //________________________________________________________________________________________________________
@@ -901,7 +901,7 @@ function ContextualXMLComandos($litambito,$ambito){
 			$layerXML.=' alpulsar="confirmarcomando('."'".$ambito."'".','.$rs->campos["idcomando"].','.$rs->campos["interactivo" ]. ')"';
 			$layerXML.=' textoitem="'.$rs->campos["descripcion"].'"';
 			$layerXML.='></ITEM>';
-			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la descripci� de mayor longitud
+			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la Descripción de mayor longitud
 				$maxlongdescri=strlen($rs->campos["descripcion"]);
 			$rs->Siguiente();
 		}

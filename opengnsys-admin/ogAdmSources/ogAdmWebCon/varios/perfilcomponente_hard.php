@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 200-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: perfilcomponente_hard.php
-// Descripci� : 
+// Descripción : 
 //		Administra los componentes hardware incluidos en un perfil harware
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -20,12 +20,12 @@ if (isset($_GET["descripcionperfil"])) $descripcionperfil=$_GET["descripcionperf
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 //________________________________________________________________________________________________________
 ?>
 <HTML>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../jscripts/perfilcomponente_hard.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/perfilcomponente_hard_'.$idioma.'.js"></SCRIPT>'?>

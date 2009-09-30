@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci�n WEB: Hidra
+// Aplicaciónn WEB: Hidra
 // Copyright 2003-2005  Jos� Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�n: A�o 2003-2004
+// Fecha Creaciónn: A�o 2003-2004
 // Fecha �ltima modificaci�n: Marzo-2005
 // Nombre del fichero: gestor_servidoresrembo.php
-// Descripci�n :
+// Descripciónn :
 //		Gestiona el mantenimiento de la tabla de servidoresrembo
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");

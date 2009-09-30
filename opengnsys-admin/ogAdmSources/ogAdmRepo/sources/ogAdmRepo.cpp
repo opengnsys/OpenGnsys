@@ -160,7 +160,7 @@ char * toma_parametro(const char* nombre_parametro,char *parametros)
 // ________________________________________________________________________________________________________
 // Funci�: split_parametros
 //
-//		Descripci�:
+//		Descripción:
 //			Esta funci� trocea una cadena segn un car�ter delimitador, Devuelve el nmero de trozos
 // 		Par�etros:
 // 			- trozos: Array de punteros a cadenas

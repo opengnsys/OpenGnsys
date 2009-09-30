@@ -8,7 +8,7 @@ include_once("EncripDescrip.php");
 ================================================================================*/
 class SockHidra{
 	var $ultimoerror;				// Ultimo error detectado
-	var $descripultimoerror;		// Descripci� del ltimo error detectado
+	var $descripultimoerror;		// Descripción del ltimo error detectado
 	var $socket;					// Stream socket
 	var $servidor;					// El servidor hidra
 	var $puerto;						// El puerto odnde se conectar�
@@ -65,7 +65,7 @@ class SockHidra{
 	}
 	//________________________________________________________________________________________
 	//
-	//	Cerrar la conexi� con el servidor 
+	//	Cerrar la conexióncon el servidor 
 	//	Devuelve:
 	//		- false: Si falla la conexi�
 	//		- true: En caso contrario

@@ -1,8 +1,8 @@
 // ******************************************************************************************************
-// Aplicaci� HIDRA
+// Aplicación HIDRA
 // Copyright 2004 Jos�Manuel Alonso. Todos los derechos reservados.
 // Fichero: Database.cpp
-//	Descripci�:
+//	Descripción:
 //		Fichero de implementaci� de la clase Database para funciones de manipulaci�
 //		de bases de datos sobre un Servidor Mysql
 // ******************************************************************************************************
@@ -37,7 +37,7 @@ bool Database::Open(char* UserName, char* Pwd,char* server,char*Bd)
 	m_Cnn=mysql_init(NULL);
 	if(m_Cnn==NULL){
 		hr.nError=0;
-		strcpy(hr.dError,"Error en la creaci� del objeto MYSQL");
+		strcpy(hr.dError,"Error en la Creación del objeto MYSQL");
 		ErrorHandler(hr,m_ErrStr);
 		return(false); // Fallo de inicializaci�
 	}

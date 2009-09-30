@@ -1,7 +1,7 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: EjecutarScripts.php
@@ -47,7 +47,7 @@ if (!$cmd)
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>

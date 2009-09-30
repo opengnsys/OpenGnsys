@@ -1,10 +1,10 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�:2003-2004
-// Fecha �tima modificaci�: Marzo-2006
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación:2003-2004
+// Fecha Última modificación: Marzo-2006
 // Nombre del fichero: comunes.js
-// Descripci� : 
+// Descripción : 
 //		Este fichero implementa funciones de uso comn a varios fichechos
 // *************************************************************************************************************************************************
 var corte_currentNodo			// Copia del Nodo actual para mover y colocar
@@ -44,9 +44,9 @@ function insertar_grupos(tipo,literaltipo,swi,idu){
 //	Devuelve el resultado de insertar un nuevo grupo
 // Par�etros:
 //			- resul: resultado de la operaci�(true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- nwid: Identificador asignado al nuevo registro
-//			- tablanodo: Tabla nodo generada para el nuevo registro (�bol de un s�o un elemento)
+//			- tablanodo: Tabla nodo generada para el nuevo registro (árbol de un s�o un elemento)
 //________________________________________________________________________________________________________
 function resultado_insertar_grupos(resul,descrierror,nwid,tablanodo){
 	reset_contextual(-1,-1) // Oculta menu contextual
@@ -72,7 +72,7 @@ function modificar_grupos(){
 //	Devuelve el resultado de modificar el nombre de un grupo de aulas
 //	Par�etros:
 //			- resul: resultado de la operaci� ( true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- lit: Nuevo nombre del grupo
 //________________________________________________________________________________________________________
 function resultado_modificar_grupos(resul,descrierror,lit){
@@ -103,7 +103,7 @@ function eliminar_grupos(){
 //	Devuelve el resultado de eliminar un grupo
 //	Par�etros:
 //			- resul: resultado de la operaci� ( true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- id: Identificador del registro
 //________________________________________________________________________________________________________
 function resultado_eliminar_grupos(resul,descrierror,id){
@@ -113,7 +113,7 @@ function resultado_eliminar_grupos(resul,descrierror,id){
 	}
 	var nvp=currentNodo.PapaNodo();
 	var ncel=nvp.CeldaVista;
-	EliminaNodo(currentNodo) // Elimina el nodo del �bol
+	EliminaNodo(currentNodo) // Elimina el nodo del árbol
 	var nwcurrentNodo=TomaDatosNodo(ncel);
 	resalta(nwcurrentNodo);
 	alert(CTbMsg[3]);
@@ -166,9 +166,9 @@ function insertar(l,t,w,h,pages,swi,idu){
 //	Devuelve el resultado de insertar datos
 //	Par�etros:
 //			- resul: resultado de la operaci�(true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- nwid: Identificador asignado al nuevo registro
-//			- tablanodo: Tabla nodo generada para el nuevo registro (�bol de un s�o un elemento)
+//			- tablanodo: Tabla nodo generada para el nuevo registro (árbol de un s�o un elemento)
 //________________________________________________________________________________________________________
 function resultado_insertar(resul,descrierror,nwid,tablanodo){
 	if (!resul){
@@ -193,7 +193,7 @@ function modificar(l,t,w,h,pages){
 //	Devuelve el resultado de modificar datos 
 //	Par�etros:
 //			- resul: resultado de la operaci� ( true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- lit: Nuevo nombre del grupo
 //________________________________________________________________________________________________________
 function resultado_modificar(resul,descrierror,lit){
@@ -219,7 +219,7 @@ function eliminar(l,t,w,h,pages){
 //	Devuelve el resultado de eliminar un grupo
 //	Par�etros:
 //			- resul: resultado de la operaci� ( true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- id: Identificador del registro
 //________________________________________________________________________________________________________
 function resultado_eliminar(resul,descrierror,id){
@@ -229,7 +229,7 @@ function resultado_eliminar(resul,descrierror,id){
 	}
 	var nvp=currentNodo.PapaNodo();
 	var ncel=nvp.CeldaVista;
-	EliminaNodo(currentNodo) // Elimina el nodo del �bol
+	EliminaNodo(currentNodo) // Elimina el nodo del árbol
 	var nwcurrentNodo=TomaDatosNodo(ncel);
 	resalta(nwcurrentNodo);
 	alert(CTbMsg[6]);
@@ -268,7 +268,7 @@ function colocar(pages,tipo){
 //	Devuelve el resultado de cambiar un nodo de sitio
 //	Par�etros:
 //			- resul: resultado de la operaci�( true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- id: Identificador del registro
 //________________________________________________________________________________________________________
 function resultado_mover(resul,descrierror,id){

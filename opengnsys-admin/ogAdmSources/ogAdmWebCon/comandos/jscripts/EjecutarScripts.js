@@ -1,10 +1,10 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Copyright 2003-2005 Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�:2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Fecha Creación:2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: EjecutarScripts.js
-// Descripci� : 
+// Descripción : 
 //		Este fichero implementa las funciones javascript del fichero EjecutarScripts.php (Comandos)
 // *************************************************************************************************************************************************
  function confirmar(){

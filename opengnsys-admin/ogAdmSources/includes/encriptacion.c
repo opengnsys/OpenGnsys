@@ -31,7 +31,7 @@ char * Encriptar(char *cadena)
 //
 // Funci�: Desencripta
 //
-//	 Descripci�:
+//	 Descripción:
 //		Esta funci� desencripta una cadena y la devuelve como parametro
 //__________________________________________________________________________________________________________
 char * Desencriptar(char *cadena)

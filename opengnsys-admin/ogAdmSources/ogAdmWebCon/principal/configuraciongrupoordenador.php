@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: configuraciongrupoordenador.php
-// Descripci� : 
+// Descripción : 
 //		Muestra la configuraci� de las particiones de los ordenadores de un grupo de ordenadores
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -24,7 +24,7 @@ $ordenadores=0;
 
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 $resul=TomaPropiedades($cmd,$idgrupo);
 if (!$resul)
 	Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci� de datos.
@@ -33,7 +33,7 @@ if (!$resul)
 <HTML>
 <TITLE>Administraci� web de aulas</TITLE>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 

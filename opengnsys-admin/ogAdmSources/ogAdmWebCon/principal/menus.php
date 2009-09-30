@@ -1,7 +1,7 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: menus.php
@@ -31,13 +31,14 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/menus.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
-	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/opciones_'.$idioma.'.js"></SCRIPT>'?>
+	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
+	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/opciones_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/menus_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>

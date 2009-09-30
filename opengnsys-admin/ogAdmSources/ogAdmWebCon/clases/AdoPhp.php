@@ -3,7 +3,7 @@
 Clase para conectar con una base de datos.
 
 Especificaciones:
-	- Estado de la conexi� ($estado)
+	- Estado de la conexión($estado)
 		0: No conectado
 		1: Conectado
 		2: Se est�intentando conectar
@@ -23,16 +23,16 @@ class Conexion{
 	var $inderror;					// Nmero de errores ocurridos durante el proceso
 	var $msgerrores=array(
 		"No se ha producido ningn error",
-		"001 : Conexi� Error - La conexion no se pudo establecer",
-		"002 : Conexi� Error - Se estableci� la conexi� con el servidor pero la base de datos no responde",
-		"003 : Conexi� Error - No se ha podido cerrar la actual conexi�",
-		"004 : Conexi� Error - El objeto est�ocupado intentando establecer una conexi� anterior",
-		"005 : Conexi� Error - La conexi� ya est�cerrada",
-		"006 : Conexi� Error - No se ha especificado ningn servidor de base de datos",
-		"007 : Conexi� Error - No se ha especificado ningn usuario de la base de datos",
-		"008 : Conexi� Error - No se ha especificado password de usuario",
-		"009 : Conexi� Error - No se ha especificado ninguna base de datos",
-		"010 : Conexi� Error - No se ha especificado ningn proveedor de bases de datos",
+		"001 : conexiónError - La conexion no se pudo establecer",
+		"002 : conexiónError - Se estableci� la conexióncon el servidor pero la base de datos no responde",
+		"003 : conexiónError - No se ha podido cerrar la actual conexi�",
+		"004 : conexiónError - El objeto est�ocupado intentando establecer una conexiónanterior",
+		"005 : conexiónError - La conexiónya est�cerrada",
+		"006 : conexiónError - No se ha especificado ningn servidor de base de datos",
+		"007 : conexiónError - No se ha especificado ningn usuario de la base de datos",
+		"008 : conexiónError - No se ha especificado password de usuario",
+		"009 : conexiónError - No se ha especificado ninguna base de datos",
+		"010 : conexiónError - No se ha especificado ningn proveedor de bases de datos",
 	);
 	/*--------------------------------------------------------------------------------------------*/
 	function Conexion(){ // Constructor de la clase
@@ -65,10 +65,10 @@ class Conexion{
 		if (!$this->_cadena_conexion()) return(false); else return(true);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Abre una conexi� 
+		Abre una conexión
 
 		Devuelve :
-			true : Si la apertura de la conexi� ha sido satisfactoria
+			true : Si la apertura de la conexiónha sido satisfactoria
 			false: En caso contrario
 
 		En el caso de devolver false, la funci� TomaUltimoError() devuelve el error ocurrido
@@ -79,7 +79,7 @@ class Conexion{
 		$MAXIMOS_INTENTOS_DE_CONECCION=10;
 		if (!$this->_cadena_conexion()) return(false); // Comprueba si los datos necesarios para conexiones se han aportado
 		switch ($this->estado) {
-			case 1:	// Existe actualmente una conexi� abierta que se sustituir�por la nueva
+			case 1:	// Existe actualmente una conexiónabierta que se sustituir�por la nueva
 				if (mysql_close($this->controlador)){ // Se cierra la conexion actual
 					$this->estado=0;
 					$intentos_de_conexion=0;
@@ -87,7 +87,7 @@ class Conexion{
 						$intentos_de_conexion++;
 						$resul=($this->_nueva_conexion());
 						if ($resul || $intentos_de_conexion>$MAXIMOS_INTENTOS_DE_CONECCION) return($resul);
-						sleep(1); // Espera 1 segundo para intentar la conexi� de nuevo
+						sleep(1); // Espera 1 segundo para intentar la conexiónde nuevo
 					}
 				}	
 				else{ // Error al cerrar la conexi�
@@ -101,21 +101,21 @@ class Conexion{
 				$this->ultimoerror=4;
 				return(false);
 				break;
-			default : // No existe actualmente ninguna conexi� abierta, se abrir�una nueva
+			default : // No existe actualmente ninguna conexiónabierta, se abrir�una nueva
 				$intentos_de_conexion=0;
 				while(true){
 					$intentos_de_conexion++;
 					$resul=($this->_nueva_conexion());
 					if ($resul || $intentos_de_conexion>$MAXIMOS_INTENTOS_DE_CONECCION) return($resul);
-					sleep(1); // Espera 1 segundo para intentar la conexi� de nuevo
+					sleep(1); // Espera 1 segundo para intentar la conexiónde nuevo
 				}
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
-		Cierra una conexi� 
+		Cierra una conexión
 		
 		Devuelve :
-			true : Si la conexi� se ha cerrado satisfactoriamente
+			true : Si la conexiónse ha cerrado satisfactoriamente
 			false: En caso contrario
 
 		En el caso de devolver false, la funci� TomaUltimoError() devuelve el error ocurrido
@@ -143,7 +143,7 @@ class Conexion{
 				return(false);
 				break;
 
-			default :	// Actualmente la conexi� est�ya cerrada
+			default :	// Actualmente la conexiónest�ya cerrada
 				$this->error[$this->inderror++]=5;
 				$this->ultimoerror=5;
 				return(false);
@@ -213,7 +213,7 @@ class Conexion{
 			$this->ultimoerror=10;
 			return(false);
 		}
-		$this->error[$this->inderror++]=0; // Datos de conexi� correctos
+		$this->error[$this->inderror++]=0; // Datos de conexióncorrectos
 		$this->ultimoerror=0;
 		return(true);
 	}
@@ -261,7 +261,7 @@ class parametro{
 	}
 }
 /*==========================================================================================
-	Clase para manipular bases de datos a traves de una conexi� previa.
+	Clase para manipular bases de datos a traves de una conexiónprevia.
 
 	Especificaciones:
 	
@@ -280,7 +280,7 @@ class Comando{
 	var $msgerrores=array(
 		"No se ha producido ningn error",
 		"001 : Comando Error - No se ha establecido el texto del comando",
-		"002 : Comando Error - No se ha establecido la conexi� del comando",
+		"002 : Comando Error - No se ha establecido la conexióndel comando",
 		"003 : Comando Error - No se ha abierto la conexi�",
 		"004 : Comando Error - La sentencia SQl del comando no es correcta",
 		"005 : Comando Error - No se ha podido recuperar el valor @@identity de la ltima clave insertada",
@@ -353,7 +353,7 @@ class Comando{
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece la conexi� que se usar�para ejecutar las acciones pertinentes
+		Establece la conexiónque se usar�para ejecutar las acciones pertinentes
 
 		Par�etros de entrada:
 			objconexion: Un objeto conexion
@@ -362,7 +362,7 @@ class Comando{
 		$this->Conexion= $objconexion;
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece la conexi� que se usar�para ejecutar las acciones pertinentes
+		Establece la conexiónque se usar�para ejecutar las acciones pertinentes
 
 		Par�etros de entrada:
 			textocomando: Un texto con la sentencia SQL (Puede contener par�etros)
@@ -398,13 +398,13 @@ class Comando{
 		}
 		else{
 			if ($this->Conexion==null){
-				$this->error[$this->inderror++]=2; // Conexi� NO establecida
+				$this->error[$this->inderror++]=2; // conexiónNO establecida
 				$this->ultimoerror=2;
 				return(false);
 			}
 			else{
 				if ($this->Conexion->estado==0){
-					$this->error[$this->inderror++]=3; // Conexi� NO abierta
+					$this->error[$this->inderror++]=3; // conexiónNO abierta
 					$this->ultimoerror=3;
 					return(false);
 				}
@@ -461,7 +461,7 @@ class Recordset{
 	var $msgerrores=array(
 		"No se ha producido ningn error",
 		"001 : Recordset Error - Comando no establecido",
-		"002 : Recordset Error - No se ha establecido la conexi� del comando",
+		"002 : Recordset Error - No se ha establecido la conexióndel comando",
 		"003 : Recordset Error - No se ha abierto la conexi�",
 		"004 : Recordset Error - No se pudo abrir la consulta",
 		"005 : Recordset Error - La sentencia SQl del comando no contiene la clausula SELECT",
@@ -549,13 +549,13 @@ class Recordset{
 		}
 		else{
 			if ($this->Comando->Conexion==null){
-				$this->error[$this->inderror++]=2; // Conexi� NO establecida
+				$this->error[$this->inderror++]=2; // conexiónNO establecida
 				$this->ultimoerror=2;
 				return(false);
 			}
 			else{
 				if ($this->Comando->Conexion->estado==0){
-					$this->error[$this->inderror++]=3; // Conexi� NO abierta
+					$this->error[$this->inderror++]=3; // conexiónNO abierta
 					$this->ultimoerror=3;
 					return(false);
 				}

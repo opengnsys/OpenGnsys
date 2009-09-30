@@ -1,6 +1,6 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
+// Aplicación WEB: ogAdmWebCon
 // Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Diciembre-2003
 // Fecha Última modificación: Marzo-2005

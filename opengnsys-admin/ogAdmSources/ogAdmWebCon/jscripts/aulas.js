@@ -1,10 +1,10 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�:2003-2004
-// Fecha �tima modificaci�: Noviembre-2005
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación:2003-2004
+// Fecha Última modificación: Noviembre-2005
 // Nombre del fichero: aulas.js
-// Descripci� : 
+// Descripción : 
 //		Este fichero implementa las funciones javascript del fichero aulas.php
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
@@ -43,7 +43,7 @@ function colocar_ordenador(swsufijo){
 //		Especificaciones:
 //		Los par�etros recibidos son:
 //			- resul: resultado de la operaci� de eliminaci� ( true si tuvo �ito)
-//			- descrierror: Descripci� del error en su caso
+//			- descrierror: Descripción del error en su caso
 //			- nwid: Identificador del registro
 //________________________________________________________________________________________________________
 function resultado_cambiar_ordenadores(resul,descrierror,id){

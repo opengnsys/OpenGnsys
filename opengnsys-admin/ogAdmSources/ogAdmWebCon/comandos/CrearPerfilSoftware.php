@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2005
 // Nombre del fichero: CrearPerfilSoftware.php
-// Descripci� : 
+// Descripción : 
 //		Implementaci� del comando "CrearPerfilSoftware"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -49,16 +49,16 @@ $idservidorrembo=0;
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi� con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 $resul=toma_propiedades($cmd,$idordenador);
 if (!$resul)
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci� de datos.
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci� web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/CrearPerfilSoftware.js"></SCRIPT>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/crearperfilsoftware_'.$idioma.'.js"></SCRIPT>'?>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
@@ -130,7 +130,7 @@ include_once("../includes/iframecomun.php");
 /**************************************************************************************************************************************************
 	Recupera los datos de un ordenador
 		Parametros: 
-		- cmd: Una comando ya operativo (con conexi� abierta)  
+		- cmd: Una comando ya operativo (con conexiónabierta)  
 		- ido: El identificador del ordenador
 ________________________________________________________________________________________________________*/
 function toma_propiedades($cmd,$ido){

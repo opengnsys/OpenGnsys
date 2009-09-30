@@ -30,7 +30,7 @@ $arbol=new TablaVistaXml($arbolXML,0,$baseurlimg,$clasedefault,0,20,130,$titulot
 <HTML>
 <TITLE>" Administración web de aulas"</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/TablaVistaXml.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/hardwares.js"></SCRIPT>

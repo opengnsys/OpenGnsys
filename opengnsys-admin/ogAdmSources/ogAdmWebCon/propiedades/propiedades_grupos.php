@@ -1,7 +1,7 @@
 <? 
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Marzo-2006
 // Nombre del fichero: propiedades_grupos.php
@@ -122,7 +122,7 @@ switch($literaltipo){
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<LINK rel="stylesheet" type="text/css" href="../hidra.css">
+	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_grupos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>

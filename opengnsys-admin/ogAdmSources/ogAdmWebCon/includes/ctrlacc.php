@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicaci� WEB: Hidra
-// Copyright 2003-2005  Jos�Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�: Diciembre-2003
-// Fecha �tima modificaci�: Febrero-2005
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Diciembre-2003
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: controlacceso.php
-// Descripci� :Este fichero implementa el control de acceso a la aplicaci� en todas las p�inas
+// Descripción :Este fichero implementa el control de acceso a la Aplicación en todas las p�inas
 // *************************************************************************************************************************************************
 session_start(); // Activa variables de sesi�
 
@@ -35,7 +35,7 @@ if (isset($_SESSION["urlacceso"]))	$urlacceso = $_SESSION["urlacceso"];
 $swacc=empty($cadenaconexion) || empty($servidorhidra) || empty($hidraport) || empty($usuario) || empty($idtipousuario);
 //============================================================================================================================
 if ($swacc){ // Error en alguna variable de sesi�
-	$paginaacceso="http://10.1.15.3/hidra/acceso.php?herror=1"; // P�ina de login de la aplicaci�
+	$paginaacceso="http://10.1.15.3/hidra/acceso.php?herror=1"; // P�ina de login de la Aplicación
 	Header('Location: '.$paginaacceso); // Redirecciona a la p�ina de login
 }
 //============================================================================================================================
