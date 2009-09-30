@@ -17,7 +17,7 @@
 #@arg  \c str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
-#version  0.9 - Primera versión para OpenGNSys
+#@version  0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-23
 #*/

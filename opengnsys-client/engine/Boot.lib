@@ -237,15 +237,18 @@ MNTDIR=$(ogMount $1 $2) || return $?
 
 # Fichero de configuración de GRUB.
 CONF="$MNTDIR/boot/grub/menu.lst"
-[ ! -e $CONF ] && ogRaiseError $OG_ERR_NOTFOUND && return $?
+[ ! -e $CONF ] && CONF="$MNTDIR/boot/grub/grub.cfg"
+[ ! -e $CONF ] && ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" && return $?
 
 #/** Toma del fichero de configuracion los valores del kernel, initrd
-#       y parámetros de arranque usando las cláusulas por defecto, y
-#       los formatea para que sean compatibles con \c kexec .  */
+#       y parámetros de arranque usando las cláusulas por defecto
+#       ("default" en GRUB1, "set default" en GRUB2)
+#       y los formatea para que sean compatibles con \c kexec .  */
 awk 'BEGIN {cont=-1;}
      $1~/^default/      {sub(/=/," "); def=$2;}
-     $1~/^title/        {cont++}
-     $1~/^kernel/       {if (def==cont) {
+     $1~/^set/ && $2~/^default/ {sub(/=/," "); def=$3;}
+     $1~/^title|^menuentry/ {cont++}
+     $1~/^kernel|^linux/ {if (def==cont) {
                             kern=$2;
                             sub($1,"");sub($1,"");sub(/^[ \t]*/,"");app=$0}
                         }

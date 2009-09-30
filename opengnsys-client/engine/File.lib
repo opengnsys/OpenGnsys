@@ -17,7 +17,7 @@
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
 #@return  path_file - camino completo real del fichero.
-#@note    repo = { REPO, CACHE }
+#@note    repo = { REPO, CACHE | CDROM }
 #@note    Requisitos: \c grep \c sed
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
@@ -45,10 +45,12 @@ fi
 case $# in
     1)	FILE="$1" ;;
     2)	case "$1" in
-            [Rr][Ee][Pp][Oo])
+            REPO|repo)
                 FILE="$OGIMG/$2" ;;
-            [Cc][Aa][Cc][Hh][Ee])
-                FILE="$OGCAC/$2" ;;
+            CACHE|cache)
+                FILE="$OGCAC/$OGIMG/$2" ;;
+            CDROM|cdrom)
+                FILE="$(ogMount cdrom)/$2" ;;
             *)  ogRaiseError $OG_ERR_FORMAT
                 return $? ;;
         esac ;;

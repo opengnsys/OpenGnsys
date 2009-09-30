@@ -46,7 +46,7 @@ case "$(ogGetFsType $1 $2)" in
      EXT[234])
 	resize2fs -f $PART || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
 	;;
-     REISERFS)		# Usar "resize_reiserfs"
+     REISERFS)		# Usar resize_reiserfs
 	resize_reiserfs -f $PART || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
 	;;
      NTFS|HNTFS)
@@ -115,18 +115,17 @@ case "$(ogGetFsType $1 $2)" in
      FAT32|HFAT32)  TYPE="vfat" ;;
      FAT16|HFAT16)  TYPE="msdos" ;;
      CACHE)         TYPE="ext3" ;;
-     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2
+     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
          return $? ;;
 esac
 
-# Error si la particion esta bloqueada.
+#/// Error si la particion esta bloqueada.
 if ogIsLocked $1 $2; then
     ogRaiseError $OG_ERR_LOCKED "$1,$2"
     return $?
 fi
-# Desmontar la particion antes de formatear.
+#/// Desmontar la particion y formatear en modo uso exclusivo.
 ogUnmount $1 $2
-# Formatear particion (uso exclusivo).
 ogLock $1 $2
 mkfs -t $TYPE $PARAMS $PART
 ogUnlock $1 $2
@@ -179,8 +178,9 @@ case "$ID" in
 		TYPE=${TYPE:-"EXT3"}
 		;;
      8e)	TYPE="LINUX-LVM" ;;
-     a7)	TYPE="CACHE" ;;
+     a7)	TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
      bf)	TYPE="SOLARIS" ;;
+     ca)	TYPE="CACHE" ;;
      fd)	TYPE="LINUX-RAID" ;;
      *) 	TYPE="UNKNOWN" ;;
 esac
@@ -268,11 +268,16 @@ touch $LOCKFILE
 
 #/**
 #         ogMount int_ndisk int_npartition
-#@see     ogMountFs
+#@see     ogMountFs ogMountCdrom
 #*/
 function ogMount () {
-ogMountFs "$@"
+case "$*" in
+    CDROM|cdrom)
+        ogMountCdrom ;;
+    *)  ogMountFs "$@" ;;
+esac
 }
+
 
 #/**
 #         ogMountFs int_ndisk int_npartition
@@ -338,6 +343,20 @@ fi
 echo $MNTDIR
 }
 
+
+#####  PRUEBAS
+# Montar CDROM
+function ogMountCdrom () {
+local DEV MNTDIR
+DEV="/dev/cdrom"            # Por defecto
+MNTDIR=$(mount | awk -v D=$DEV '{if ($1==D) {print $3}}')
+if [ -z "$MNTDIR" ]; then
+    MNTDIR=${DEV/dev/mnt}
+    mkdir -p $MNTDIR
+    mount -t iso9660 $DEV $MNTDIR || ogRaiseError $OG_ERR_PARTITION "cdrom" || return $?
+fi
+echo $MNTDIR
+}
 
 
 #/**
@@ -500,6 +519,7 @@ else
 fi
 }
 
+
 function ogFindCache () {
 #/**  @function ogFindCache: @brief Detecta la particion CACHE EAC seg�n tipo a7 o label CACHE sobre particion ext3.
 #@param  no requiere parametros
@@ -557,7 +577,7 @@ function ogMountCache () {
 #*/
 CACHELINUX=`ogFindCache`
 CACHEOG=`ogDevToDisk $CACHELINUX`
-OGCAC=`ogMountPartition $CACHEOG`
+OGCAC=`ogMount $CACHEOG`
 echo $OGCAC
 export OGCAC
 }
