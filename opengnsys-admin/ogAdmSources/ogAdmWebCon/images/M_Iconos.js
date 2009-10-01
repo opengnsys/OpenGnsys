@@ -1,13 +1,11 @@
-// *************************************************************************************************************************************************
-//	Libreria de scripts de Javascript
+// ********************************************************************************************************//	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación:2003-2004
 // Fecha Última modificación: Noviembre-2005
 // Nombre del fichero:M_Iconos
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero M_Iconos.php
-// *************************************************************************************************************************************************
-
+// ********************************************************************************************************
 // Opciones
 var Insertar=1
 var Eliminar=2
