@@ -12,13 +12,14 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
+include_once("../includes/opciones.php");
 include_once("../includes/TomaDato.php");
 //________________________________________________________________________________________________________
-$ipordenador="0.0.0.0";
-$idtipoaccion="0";
+$iph="0.0.0.0";
+$idt="0";
 
-if (isset($_GET["iph"]))	$ipordenador=$_GET["iph"]; 
-if (isset($_GET["idt"]))	$idtipoaccion=$_GET["idt"]; 
+if (isset($_GET["iph"])) $iph=$_GET["iph"]; 
+if (isset($_GET["idt"])) $idt=$_GET["idt"]; 
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -30,29 +31,27 @@ $cmd->texto="SELECT acciones_menus.tipoaccion, acciones_menus.idtipoaccion
 			WHERE acciones_menus.idaccionmenu=".$idt;
 $rs->Comando=&$cmd; 
 $resul=$rs->Abrir();
-if (!$rs->Abrir()) die("NO SE HA PODIDO RECUEPARA EL ITEM PARA SER EJECUTADO";
-if ($rs->EOF()) die("EL ITEM PARA SER EJECUTADO NO EXISTE";
+if (!$rs->Abrir()) die("NO SE HA PODIDO RECUEPARA EL ITEM PARA SER EJECUTADO");
+if ($rs->EOF) die("EL ITEM PARA SER EJECUTADO NO EXISTE");
 	
 $tipoaccion=$rs->campos["tipoaccion"]; 
+$idtipoaccion=$rs->campos["idtipoaccion"]; 
 switch($tipoaccion){
 	case $EJECUCION_PROCEDIMIENTO :
 		$ambito=$AMBITO_ORDENADORES;
-		$idambito=TomaDato($cmd,$idcentro,'ordenadores',$iph,'ip','idordenador');
-		$idprocedimiento=$idt;
+		$idambito=TomaDato($cmd,0,'ordenadores',$iph,'ip','idordenador',0);
 		$wurl="../gestores/gestor_ejecutarprocedimientos.php";
-		$wurl.="?ambito=".$ambito."&idambito=".$idambito."&idprocedimiento=".$idprocedimiento;
+		$wurl.="?swc=1&ambito=".$ambito."&idambito=".$idambito."&idprocedimiento=".$idtipoaccion;
 		Header('Location: '.$wurl);  // Ejecución procedimiento
 		break;
-	case EJECUCION_TAREA :
-		$idtrabajo=$idt;
-		$wurl="../gestores/gestor_tareas.php?opcion=".$op_ejecucion."&idtarea="+idt;
+	case $EJECUCION_TAREA :
+		$wurl="../gestores/gestor_tareas.php?swc=1&opcion=".$op_ejecucion."&idtarea=".$idtipoaccion;
 		Header('Location: '.$wurl);  // Ejecución procedimiento
 		break;
-	case EJECUCION_TRABAJO :
-		$idtrabajo=$idt;
-		$wurl="../gestores/gestor_trabajos.php?opcion=".$op_ejecucion."&idtrabajo="+idt;
+	case $EJECUCION_TRABAJO :
+		$wurl="../gestores/gestor_trabajos.php?swc=1&opcion=".$op_ejecucion."&idtrabajo=".$idtipoaccion;
 		Header('Location: '.$wurl);  // Ejecución procedimiento
 		break;
 }
-die("HA HABIDO ALGÚN ERROR AL PROCESAR EL ITEM";
+die("HA HABIDO ALGÚN ERROR AL PROCESAR EL ITEM");
 ?>

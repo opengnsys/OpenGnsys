@@ -10,16 +10,12 @@
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
-include_once("../clases/XmlPhp.php");
-include_once("../clases/ArbolVistaXML.php");
-include_once("../clases/MenuContextual.php");
 include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
-include_once("../idiomas/php/".$idioma."/menumliente_".$idioma.".php");
 //________________________________________________________________________________________________________
 $ipordenador="0.0.0.0";
 
-if (isset($_GET["ipordenador"]))	$ipordenador=$_GET["ipordenador"]; 
+if (isset($_GET["ip"]))	$ipordenador=$_GET["ip"]; 
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -32,8 +28,12 @@ $rsmenu=RecuperaMenu($cmd,$ipordenador);	// Recupera un recordset con los datos 
 	</HEAD>
 	<BODY>
 <?	
-if(!empty($rsmenu))
-	GeneraMenuPublico($rsmenu);
+if(!empty($rsmenu)){
+	$codeHtml=GeneraMenu($rsmenu,1); // Genera menú público
+	echo $codeHtml;
+}
+else
+	echo '<H1>NO SE HA DETCTADO NINGÚN MENÚ PARA ESTE CLIENTE</H1>';	
 ?>
 	</BODY>
 	</HTML>
@@ -42,7 +42,7 @@ if(!empty($rsmenu))
 //
 // Recupera Menú
 //___________________________________________________________________________________________________
-function RecuperaMenu($cmd,$ipordenador);	
+function RecuperaMenu($cmd,$ipordenador){
 	$rs=new Recordset; 
 	$cmd->texto="SELECT menus.resolucion,menus.titulo,menus.coorx,menus.coory,menus.modalidad,
 						menus.scoorx,menus.scoory,menus.smodalidad,menus.htmlmenupub,menus.htmlmenupri,
@@ -55,14 +55,14 @@ function RecuperaMenu($cmd,$ipordenador);
 	$rs->Comando=&$cmd; 
 	$resul=$rs->Abrir();
 	if (!$rs->Abrir()) return(false);
-	if ($rs->EOF()) return(false);
+	if ($rs->EOF) return(false);
 	return($rs);
 }
 //___________________________________________________________________________________________________
 //
 // Muestra el menu público
 //___________________________________________________________________________________________________
-function GeneraMenuPublico($rs){	
+function GeneraMenu($rs,$tipo){	
 	$titulo=$rs->campos["titulo"]; 
 	$coorx=$rs->campos["coorx"]; 
 	$coory=$rs->campos["coory"]; 
@@ -84,20 +84,21 @@ function GeneraMenuPublico($rs){
 	$c=0; // Contador de columnas
 	
 	while (!$rs->EOF){ // Recorre acciones del menu
-		$tipoaccion=$rs->campos["tipoaccion"]; 
 		$tipoitem=$rs->campos["tipoitem"]; 
-		$idtipoaccion=$rs->campos["idtipoaccion"]; 
-		$idaccionmenu=$rs->campos["idaccionmenu"]; 
-		$descripitem=$rs->campos["descripitem"]; 
-		$idurlimg=$rs->campos["idurlimg"]; 
-
-		$codeHTML.='<TD><IMG src="./imagenes/icono:item"></TD>';
-		$codeHTML.='<TD>'.$descripitem.'</TD>';
-		if($c%$modalidad==0){
-			$codeHTML.='/<TR>';
-			$codeHTML.='<TR>';
+		if($tipoitem==$tipo){
+			$tipoaccion=$rs->campos["tipoaccion"]; 
+			$idtipoaccion=$rs->campos["idtipoaccion"]; 
+			$idaccionmenu=$rs->campos["idaccionmenu"]; 
+			$descripitem=$rs->campos["descripitem"]; 
+			$idurlimg=$rs->campos["idurlimg"]; 
+			$codeHTML.='<TD><IMG src="../images/iconos/confirmadas.gif"></TD>';
+			$codeHTML.='<TD>'.$descripitem.'</TD>';
+			if($c%$modalidad==0){
+				$codeHTML.='</TR>';
+				$codeHTML.='<TR>';
+			}
+			$codeHTML.='</TR>';
 		}
-		$codeHTML.='/<TR>';
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();

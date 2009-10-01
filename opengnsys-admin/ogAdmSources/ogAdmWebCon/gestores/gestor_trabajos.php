@@ -1,7 +1,7 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Aplicación WEB: Hidra
+// Copyright 2003-2005  José Manuel Alonso. Todos los derechos reservados.
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: gestor_trabajos.php
@@ -25,6 +25,7 @@ $idtrabajo=0;
 $descripcion="";
 $comentarios="";
 $grupoid=0; 
+$swc=0; // switch de cliente, esta pagina la llama el cliente a través del browser 
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 
@@ -33,6 +34,7 @@ if (isset($_GET["descripcion"])) $descripcion=$_GET["descripcion"];
 if (isset($_GET["comentarios"])) $comentarios=$_GET["comentarios"]; 
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"];
 if (isset($_GET["identificador"])) $idtrabajo=$_GET["identificador"];
+if (isset($_GET["swc"])) $swc=$_GET["swc"]; 
 
 $tablanodo=""; // Arbol para nodos insertados
 
@@ -69,20 +71,34 @@ if ($cmd){
 	}
 echo '<p><span id="arbol_nodo">'.$tablanodo.'</span></p>';
 if ($resul){
-	echo '<SCRIPT language="javascript">'.chr(13);
-	echo 'var oHTML'.chr(13);
-	echo 'var cTBODY=document.getElementsByTagName("TBODY");'.chr(13);
-	echo 'o=cTBODY.item(1);'.chr(13);
-	if ($opcion==$op_alta )
-		echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ',".$idtrabajo.",o.innerHTML);";
-	else
-		echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ','".$descripcion."');";
-	echo '</SCRIPT>';
+	if(empty($swc)){
+		echo '<SCRIPT language="javascript">'.chr(13);
+		echo 'var oHTML'.chr(13);
+		echo 'var cTBODY=document.all.tags("TBODY");'.chr(13);
+		echo 'o=cTBODY.item(1);'.chr(13);
+		if ($opcion==$op_alta )
+			echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ',".$idtrabajo.",o.innerHTML);".chr(13);
+		else
+			echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ',".$idtrabajo.");".chr(13);
+		echo '</SCRIPT>';
+	}
+	else{
+		echo '<SCRIPT language="javascript">'.chr(13);
+		echo 'alert("El item se ha ejecutado correctamente");'.chr(13);
+		echo '</SCRIPT>';
+	}
 }
 else{
-	echo '<SCRIPT language="javascript">';
-	echo "	window.parent.".$literal."(0,'".$cmd->DescripUltimoError()."',".$idtrabajo.")";
-	echo '</SCRIPT>';
+	if(empty($swc)){
+		echo '<SCRIPT language="javascript">';
+		echo "	window.parent.".$literal."(0,'".$cmd->DescripUltimoError()."',".$idtrabajo.")";
+		echo '</SCRIPT>';
+	}
+	else{
+		echo '<SCRIPT language="javascript">'.chr(13);
+		echo 'alert("***ATENCIÓN:El item NO se ha podido ejecutar");'.chr(13);
+		echo '</SCRIPT>';
+	}
 }
 ?>
 </BODY>
@@ -237,7 +253,7 @@ function ejecutando_trabajos(){
 	$cmd->ParamSetValor("@ambito",0);
 	$cmd->ParamSetValor("@idambito",0);
 	$cmd->ParamSetValor("@ambitskwrk",$ambitrabajo);
-	$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
+	$cmd->ParamSetValor("@fechahorareg",date("d/m/y H:i:s"));
 	$cmd->ParamSetValor("@parametros",$paramtrabajo);
 	$cmd->texto="INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (@tipoaccion,@idtipoaccion,@cateaccion,@ambito,@idambito,@ambitskwrk,@fechahorareg,@estado,@resultado,@idcentro,@parametros,0,0)";
 	$resul=$cmd->Ejecutar();
@@ -310,7 +326,7 @@ function EjecutandoTareas($idtarea,$accionid,$idnotificador){
 	$cmd->ParamSetValor("@ambito",0);
 	$cmd->ParamSetValor("@idambito",0);
 	$cmd->ParamSetValor("@ambitskwrk",$ambitarea);
-	$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
+	$cmd->ParamSetValor("@fechahorareg",date("d/m/y H:i:s"));
 	$cmd->ParamSetValor("@parametros",$paramtarea);
 	$cmd->ParamSetValor("@accionid",$accionid);
 	$cmd->ParamSetValor("@idnotificador",$idnotificador);
@@ -329,7 +345,7 @@ function EjecutandoTareas($idtarea,$accionid,$idnotificador){
 		$cmd->ParamSetValor("@ambito",$tbComandos["ambito"]);
 		$cmd->ParamSetValor("@idambito",$tbComandos["idambito"]);
 		$cmd->ParamSetValor("@ambitskwrk","");
-		$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
+		$cmd->ParamSetValor("@fechahorareg",date("d/m/y H:i:s"));
 		$cmd->ParamSetValor("@parametros",$tbComandos["parametros"]);
 		$cmd->ParamSetValor("@accionid",$accionid);
 		$cmd->ParamSetValor("@idnotificador",$tbComandos["idnotificador"]);
