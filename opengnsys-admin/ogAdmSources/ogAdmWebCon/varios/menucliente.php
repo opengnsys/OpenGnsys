@@ -8,7 +8,7 @@
 // Descripción :
 //		Pagina del menu del cliente. Éste la solicita a través de su browser local
 // *************************************************************************************************************************************************
-include_once("../includes/ctrlacc.php");
+$cadenaconexion="10.1.15.3;usuhidra;passusuhidra;ogBDAdmin;sqlserver"; // Cadena de conexióna la base de datos
 include_once("../clases/AdoPhp.php");
 include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
