@@ -14,8 +14,8 @@ $pss="";
 if (isset($_POST["usu"])) $usu=$_POST["usu"]; 
 if (isset($_POST["pss"])) $pss=$_POST["pss"]; 
 
-$wer="http://10.1.15.3/hidra/pagerror.php"; // Página de redireccionamiento de errores
-$wac="http://10.1.15.3/hidra/acceso.php"; // Página de login de la aplicación
+$wer="http://10.1.15.4/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.4/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
 
 include_once("./includes/controlacceso.inc");
 ?>

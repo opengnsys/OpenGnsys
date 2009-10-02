@@ -12,8 +12,8 @@ include_once("../clases/AdoPhp.php");
 $usu="ogCliente";
 $pss="ogCliente";
 
-$wer="http://10.1.15.3/hidra/nada.php"; // Página de redireccionamiento de errores
-$wac="http://10.1.15.3/hidra/nada.php"; // Página de login de la aplicación
+$wer="http://10.1.15.4/ogAdmWebCon/nada.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.4/ogAdmWebCon/nada.php"; // Página de login de la aplicación
 
 include_once("../includes/controlacceso.inc");
 //________________________________________________________________________________________________________
