@@ -8,18 +8,17 @@
 // Descripción :
 //		Pagina del menu del cliente. Éste la solicita a través de su browser local
 // *************************************************************************************************************************************************
-$cadenaconexion="10.1.15.3;usuhidra;passusuhidra;ogBDAdmin;sqlserver"; // Cadena de conexióna la base de datos
 include_once("../clases/AdoPhp.php");
-include_once("../includes/constantes.php");
-include_once("../includes/CreaComando.php");
+$usu="ogCliente";
+$pss="ogCliente";
+
+$wer="http://10.1.15.3/hidra/nada.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.3/hidra/nada.php"; // Página de login de la aplicación
+
+include_once("../includes/controlacceso.inc");
 //________________________________________________________________________________________________________
 $iph="0.0.0.0";
-
 if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
-//________________________________________________________________________________________________________
-$cmd=CreaComando($cadenaconexion);
-if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexión con servidor B.D.
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m enú
 ?>
@@ -32,7 +31,7 @@ $ITEMS_PUBLICOS=1;
 $ITEMS_PRIVADOS=2;
 
 if(!empty($rsmenu)){
-	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PRIVADOS,$iph); // Genera menú público
+	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera menú público
 	echo $codeHtml;
 }
 else
@@ -55,6 +54,7 @@ function RecuperaMenu($cmd,$iph){
 						INNER JOIN menus ON menus.idmenu = ordenadores.idmenu 
 						INNER JOIN acciones_menus ON acciones_menus.idmenu = menus.idmenu
 						WHERE ordenadores.ip='".$iph."' ORDER by acciones_menus.orden";
+
 	$rs->Comando=&$cmd; 
 	$resul=$rs->Abrir();
 	if (!$rs->Abrir()) return(false);
