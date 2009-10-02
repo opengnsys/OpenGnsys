@@ -13,23 +13,26 @@ include_once("../clases/AdoPhp.php");
 include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
 //________________________________________________________________________________________________________
-$ipordenador="0.0.0.0";
+$iph="0.0.0.0";
 
-if (isset($_GET["ip"]))	$ipordenador=$_GET["ip"]; 
+if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
 	Header('Location: '.$pagerror.'?herror=2');  // Error de conexión con servidor B.D.
 //________________________________________________________________________________________________________
-$rsmenu=RecuperaMenu($cmd,$ipordenador);	// Recupera un recordset con los datos del m enú
+$rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m enú
 ?>
 	<HTML>
 	<HEAD>
 	</HEAD>
 	<BODY>
 <?	
+$ITEMS_PUBLICOS=1;
+$ITEMS_PRIVADOS=2;
+
 if(!empty($rsmenu)){
-	$codeHtml=GeneraMenu($rsmenu,1); // Genera menú público
+	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PRIVADOS,$iph); // Genera menú público
 	echo $codeHtml;
 }
 else
@@ -42,7 +45,7 @@ else
 //
 // Recupera Menú
 //___________________________________________________________________________________________________
-function RecuperaMenu($cmd,$ipordenador){
+function RecuperaMenu($cmd,$iph){
 	$rs=new Recordset; 
 	$cmd->texto="SELECT menus.resolucion,menus.titulo,menus.coorx,menus.coory,menus.modalidad,
 						menus.scoorx,menus.scoory,menus.smodalidad,menus.htmlmenupub,menus.htmlmenupri,
@@ -51,7 +54,7 @@ function RecuperaMenu($cmd,$ipordenador){
 						FROM ordenadores
 						INNER JOIN menus ON menus.idmenu = ordenadores.idmenu 
 						INNER JOIN acciones_menus ON acciones_menus.idmenu = menus.idmenu
-						WHERE ordenadores.ip='".$ipordenador."' ORDER by acciones_menus.orden";
+						WHERE ordenadores.ip='".$iph."' ORDER by acciones_menus.orden";
 	$rs->Comando=&$cmd; 
 	$resul=$rs->Abrir();
 	if (!$rs->Abrir()) return(false);
@@ -62,7 +65,9 @@ function RecuperaMenu($cmd,$ipordenador){
 //
 // Muestra el menu público
 //___________________________________________________________________________________________________
-function GeneraMenu($rs,$tipo){	
+function GeneraMenu($rs,$tipo,$iph){	
+	global $ITEMS_PRIVADOS;
+
 	$titulo=$rs->campos["titulo"]; 
 	$coorx=$rs->campos["coorx"]; 
 	$coory=$rs->campos["coory"]; 
@@ -75,10 +80,19 @@ function GeneraMenu($rs,$tipo){
 	$htmlmenupub=$rs->campos["htmlmenupub"]; 
 	$htmlmenupri=$rs->campos["htmlmenupri"]; 
 
+	if($tipo==$ITEMS_PRIVADOS)
+		$mod=$smodalidad;
+	else
+		$mod=$modalidad;
 	//	Genera HTML de la página en función de las propiedades del Menú del clioente
 	$codeHTML='<DIV style="POSITION:absolute;TOP:'.$coory.";LEFT:".$coorx.'">';
-	$codeHTML.='<H1>'.$titulo.'</H1>';	
-	$codeHTML.='<TABLE align="center" style="font-family:sans-serif;color: #a71026">';
+	$codeHTML.='<TABLE cellspacing=3 cellpadding=3 align="center" border=0 >';
+	$codeHTML.='<TR>';
+	$codeHTML.='<TD align=center colspan="'.($mod*2).'" style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 36px;">'.$titulo.'</TD>';
+	$codeHTML.='</TR>';
+	$codeHTML.='<TR height=30>';
+	$codeHTML.='<TD>&nbsp;</TD>';
+	$codeHTML.='</TR>';
 	$codeHTML.='<TR>';
 
 	$c=0; // Contador de columnas
@@ -92,15 +106,16 @@ function GeneraMenu($rs,$tipo){
 			$descripitem=$rs->campos["descripitem"]; 
 			$idurlimg=$rs->campos["idurlimg"]; 
 			$codeHTML.='<TD><IMG src="../images/iconos/confirmadas.gif"></TD>';
-			$codeHTML.='<TD>'.$descripitem.'</TD>';
-			if($c%$modalidad==0){
+			$codeHTML.='<TD style="font-family:sans-serif;color: #a71026"><A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'">'.$descripitem.'</A></TD>';
+			$c++;
+			if($c%$mod==0){
 				$codeHTML.='</TR>';
 				$codeHTML.='<TR>';
 			}
-			$codeHTML.='</TR>';
 		}
 		$rs->Siguiente();
 	}
+	$codeHTML.='</TR>';
 	$rs->Cerrar();
 	return($codeHTML);
 }
