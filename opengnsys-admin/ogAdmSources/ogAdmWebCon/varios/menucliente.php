@@ -16,9 +16,13 @@ $wer="http://10.1.15.4/ogAdmWebCon/nada.php"; // Página de redireccionamiento de
 $wac="http://10.1.15.4/ogAdmWebCon/nada.php"; // Página de login de la aplicación
 
 include_once("../includes/controlacceso.inc");
+
+
+
 //________________________________________________________________________________________________________
 $iph="0.0.0.0";
 if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
+$_SESSION["ogCliente"]=$iph;
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m enú
 ?>
