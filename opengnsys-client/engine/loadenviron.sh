@@ -69,6 +69,11 @@ if [ -d $OPENGNSYS ]; then
 
     # FIXME Datos de dispositivos PCI en /etc
     ln -fs $OGLIB/pci.ids /etc
+
+    # Cargar paquetes udev
+    for i in $OGLIB/udeb/*.udeb; do
+        udpkg -i "$i" >/dev/null && echo "$(basename $i) $MSG_INSTALLED"
+    done
 fi
 
 #/// Declaración de códigos de error.

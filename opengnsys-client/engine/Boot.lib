@@ -244,6 +244,7 @@ CONF="$MNTDIR/boot/grub/menu.lst"
 #       y parámetros de arranque usando las cláusulas por defecto
 #       ("default" en GRUB1, "set default" en GRUB2)
 #       y los formatea para que sean compatibles con \c kexec .  */
+#/* (ncesario para Doxygen)
 awk 'BEGIN {cont=-1;}
      $1~/^default/      {sub(/=/," "); def=$2;}
      $1~/^set/ && $2~/^default/ {gsub(/[="]/," "); def=$3;}
