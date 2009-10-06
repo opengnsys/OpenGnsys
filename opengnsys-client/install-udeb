@@ -17,3 +17,6 @@ openssh-server-udeb
 parted-udeb
 reiserfsprogs-udeb
 xfsprogs-udeb
+
+fs-core-modules-2.6.28-11-generic-di
+mouse-modules-2.6.28-11-generic-di
