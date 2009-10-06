@@ -94,6 +94,7 @@ function create_file_system
 
     cp -ar $SVNROOT/opengnsys-client/nfsexport/* $OGROOT/client
     cp -ar $SVNROOT/opengnsys-client/engine/*.lib $OGROOT/client/lib/engine/bin
+    cp -ar $SVNROOT/opengnsys-client/engine/*.sh $OGROOT/client/lib/engine/bin
 }
 
 function install_dhcpd
