@@ -9,6 +9,26 @@
 #*/
 
 
+#####  PRUEBAS
+function ogCheckFs () {
+local PART
+#/// Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#/// Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return $?
+ogUnmount $1 $2 >/dev/null
+#/// Redimensionar al tamano máximo según el tipo de partición.
+case "$(ogGetFsType $1 $2)" in
+    EXT2)         FSCK="fsck.ext2" ;;
+    EXT3)         FSCK="fsck.ext3" ;;
+    EXT4)         FSCK="fsck.ext4" ;;
+    JFS)          FSCK="fsck.jfs" ;;
+    NTFS)         FSCK="ntfsfix" ;;
+esac
+$FSCK $PART
+}
+
+
 #/**
 #         ogExtendFs int_ndisk int_npartition
 #@brief   Extiende un sistema de archivos al tamaño de su partición.
@@ -63,7 +83,7 @@ esac
 #@see     ogFormatFs
 #*/
 function ogFormat () {
-ogFoarmtFS "$@"
+ogFormatFs "$@"
 }
 
 
@@ -87,7 +107,7 @@ ogFoarmtFS "$@"
 function ogFormatFs () {
 
 # Variables locales
-local PART TYPE PARAMS
+local PART PROG PARAMS
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -106,15 +126,16 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 
 # Elegir tipo de formato segun el tipo de particion.
 case "$(ogGetFsType $1 $2)" in
-     EXT2)          TYPE="ext2" ;;
-     EXT3)          TYPE="ext3" ;;
-     EXT4)          TYPE="ext4" ;;
-     REISERFS)      TYPE="reiserfs" ;;
-     REISER4)       TYPE="reiser4" ;;
-     NTFS|HNTFS)    TYPE="ntfs -f" ;;
-     FAT32|HFAT32)  TYPE="vfat" ;;
-     FAT16|HFAT16)  TYPE="msdos" ;;
-     CACHE)         TYPE="ext3" ;;
+     EXT2)          PROG="mkfs.ext2" ;;
+     EXT3)          PROG="mkfs.ext3" ;;
+     EXT4)          PROG="mkfs.ext4" ;;
+     REISERFS)      PROG="mkfs.reiserfs" ;;
+     REISER4)       PROG="mkfs.reiser4" ;;
+     XFS)           PROG="mkfs.xfs" ;;
+     NTFS|HNTFS)    PROG="mkntfs"; PARAMS="-f" ;;
+     FAT32|HFAT32)  PROG="mkfs.vfat" ;;
+     FAT16|HFAT16)  PROG="mkfs.msdos" ;;
+     CACHE)         PROG="mkfs.ext3"; PARAMS="-L CACHE" ;;
      *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
          return $? ;;
 esac
@@ -127,7 +148,7 @@ fi
 #/// Desmontar la particion y formatear en modo uso exclusivo.
 ogUnmount $1 $2
 ogLock $1 $2
-mkfs -t $TYPE $PARAMS $PART
+$PROG $PARAMS $PART
 ogUnlock $1 $2
 }
 
@@ -328,14 +349,14 @@ if [ -z "$MNTDIR" ]; then
         REISERFS)       MOUNT=mount ;;
         NTFS|HNTFS)     MOUNT=ntfs-3g ;;
         FAT16|FAT32|HFAT16|HFAT32)
-			MOUNT=mount.vfat ;;
+			MOUNT=mount; ARGS="-t vfat" ;;
         *)  #/// Error, si la partición no es montable.
             rmdir $MNTDIR
             ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
 	    return $OG_ERR_PARTITION
 	    ;;
     esac
-    $MOUNT $PART $MNTDIR || $MOUNT $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
+    $MOUNT $ARGS $PART $MNTDIR || $MOUNT $ARGS $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
 	# linea temporal durante desarrollo para poder usar el cliente completo nfs y testeas nuevas herramientas.
     if grep -q nfsroot /proc/cmdline; then
 		echo "$PART $MNTDIR" >> /etc/mtab

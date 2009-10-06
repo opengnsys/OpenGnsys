@@ -243,7 +243,6 @@ function finalizar
     mv $TMPINITRD/new-initrd.gz $DEST/initrd.gz
     if [ $LINUX ] ; then
         mv $TMPINITRD/linux $DEST/linux
-        echo haaaaaa
     fi
 }
 
