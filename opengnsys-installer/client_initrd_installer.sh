@@ -3,6 +3,7 @@
 TFTPBOOT=/var/lib/tftpboot
 OGROOT=/opt/opengnsys
 INITRD=0
+UPDATE=0
 
 function arguments_parser
 {
@@ -124,11 +125,11 @@ function install_nfsexport
 arguments_parser $@
 checking
 
-if [ $INITRD ]; then
+if [ $INITRD -eq 1 ]; then
     install_initrd
 fi
 
-if [ $UPDATE ]; then
+if [ $UPDATE -eq 1 ]; then
     create_file_system
 else
     install_necesary_packages
