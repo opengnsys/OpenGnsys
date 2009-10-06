@@ -19,11 +19,12 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 ogUnmount $1 $2 >/dev/null
 #/// Redimensionar al tamano máximo según el tipo de partición.
 case "$(ogGetFsType $1 $2)" in
-    EXT2)         FSCK="fsck.ext2" ;;
-    EXT3)         FSCK="fsck.ext3" ;;
-    EXT4)         FSCK="fsck.ext4" ;;
+    EXT[234])     FSCK="e2fsck" ;;
+    REISERFS)     FSCK="reiserfsck" ;;
     JFS)          FSCK="fsck.jfs" ;;
-    NTFS)         FSCK="ntfsfix" ;;
+    NTFS|HNTFS)   FSCK="ntfsfix" ;;
+    *)            ogReiseError $OG_ERR_PARTITION "$1,$2"
+	              return $? ;;
 esac
 $FSCK $PART
 }
@@ -344,12 +345,17 @@ if [ -z "$MNTDIR" ]; then
     #/// Montar según el tipo de sitema de archivos.
     TYPE="$(ogGetFsType $1 $2)" || return $?
     case "$TYPE" in
-        CACHE)          MOUNT=mount ;;
-        EXT[234])       MOUNT=mount ;;
-        REISERFS)       MOUNT=mount ;;
-        NTFS|HNTFS)     MOUNT=ntfs-3g ;;
+        CACHE)      MOUNT=mount ;;
+        EXT[234])   MOUNT=mount ;;
+        REISERFS)   insmod /lib/modules/$(uname -r)/kernel/fs/reiserfs/reiserfs.ko 2>/dev/null
+                    MOUNT=mount ;; 
+        JFS)        insmod /lib/modules/$(uname -r)/kernel/fs/jfs/jfs.ko 2>/dev/null
+                    MOUNT=mount ;; 
+        XFS)        insmod /lib/modules/$(uname -r)/kernel/fs/xfs/xfs.ko 2>/dev/null
+                    MOUNT=mount ;; 
+        NTFS|HNTFS) MOUNT=ntfs-3g ;;
         FAT16|FAT32|HFAT16|HFAT32)
-			MOUNT=mount; ARGS="-t vfat" ;;
+                    MOUNT=mount; ARGS="-t vfat" ;;
         *)  #/// Error, si la partición no es montable.
             rmdir $MNTDIR
             ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
