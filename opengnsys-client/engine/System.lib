@@ -65,11 +65,13 @@ local MSG CODE
 #/// Obtener código y mensaje de error.
 CODE=$1
 case "$CODE" in
-     $OG_ERR_FORMAT)    MSG="$MSG_ERR_FORMAT" ;;
+     $OG_ERR_FORMAT)    MSG="$MSG_ERR_FORMAT $*" ;;
      $OG_ERR_NOTFOUND)	MSG="$MSG_ERR_NOTFOUND \"$2\"" ;;
      $OG_ERR_PARTITION)	MSG="$MSG_ERR_PARTITION \"$2\"" ;;
      $OG_ERR_LOCKED)   	MSG="$MSG_ERR_LOCKED \"$2\"" ;;
      $OG_ERR_IMAGE)    	MSG="$MSG_ERR_IMAGE \"$2\"" ;;
+     $OG_ERR_NOTOS)     MSG="$MSG_ERR_NOTOS \"$2\"" ;;
+     $OG_ERR_NOTEXEC)   MSG="$MSG_ERR_NOTEXEC \"$2\"" ;;
      *)                 MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 

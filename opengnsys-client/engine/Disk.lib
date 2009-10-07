@@ -37,7 +37,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 #/// Error si no se reciben menos de 2 parámetros.
-[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# -gt 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Sustituye nº de disco por su dispositivo.
 DISK="$(ogDiskToDev $1)" || return $?
@@ -67,21 +67,22 @@ while [ $# -gt 0 ]; do
     [ $SIZE -eq 0 ] && ogRaiseError $OG_ERR_FORMAT && return $?
     #/// Obtener identificador de tipo de partición.
     case "$TYPE" in
-	EMPTY)          ID=0  ;;
-	EXTENDED)	ID=5
-			[ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-                        EXTSTART=$START
-                        EXTSIZE=$SIZE
-                              ;;
-	 NTFS|EXFAT)    ID=7  ;;
-	 HNTFS)	        ID=17 ;;
-	 FAT32)	        ID=b  ;;
-	 HFAT32)	ID=1b ;;
-	 EXT[234]|REISERFS|REISER4)
-			ID=83 ;;
-	 LINUX-SWAP)    ID=82 ;;
-	 CACHE)         ID=a7 ;;
-	 *)		ogRaiseError $OG_ERR_FORMAT
+        EMPTY)      ID=0  ;;
+        EXTENDED)	ID=5
+                    [ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+                    EXTSTART=$START
+                    EXTSIZE=$SIZE
+                    ;;
+        NTFS|EXFAT) ID=7  ;;
+        HNTFS)	    ID=17 ;;
+        FAT32)	    ID=b  ;;
+        HFAT32)     ID=1b ;;
+        EXT[234]|REISERFS|REISER4|XFS|JFS)
+                    ID=83 ;;
+        LINUX-SWAP) ID=82 ;;
+        SOLARIS)    ID=bf ;;
+        CACHE)      ID=ca ;;
+        *)          ogRaiseError $OG_ERR_PARTITION "$TYPE"
 	                return $? ;;
     esac
     #/// Incluir particiones lógicas dentro de la partición extendida.
@@ -109,11 +110,11 @@ if [ $PART = 5 -a -n "$EXTSTART" ]; then
 fi
 
 # Desmontar todos los sistemas de archivos del disco.
-#hidraUnmountAll $1
+ogUnmountAll $1
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 #/// Definir particiones y notificar al kernel.
-sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null
 rm -f $tmpsfdisk
 }
 
@@ -527,38 +528,42 @@ function ogSetPartitionId() {
 #@note
 #@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
 #*/
-if [ $# = 0 ]
-then
-	Msg "sintaxis: ogSetPartitionId int_disk int_partition NAMEtype" red
-	return
+
+# Variables locales
+local DISK PART ID
+
+#/// Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1 10000000"
+    return
 fi
-if [ $# = 3 ]
-then
-	case $3 in
-		EXT2 | 82 | ext2)
-			fstype=83;;
-		EXT3 | 83 | ext3)
-			fstype=83;;
-		NTFS | 7 | ntfs)
-			fstype=7 ;;
-		FAT32 | b | fat32)
-			fstype=b ;;
-		SWAP | 82 | swap)
-			fstype=82;;
-		CACHE | a7 | cache)
-			fstype=a7;;
-	esac
-	disco=`ogDiskToDev $1`
-	totalpart=`ogGetPartitionsNumber $1`
-	echo $totalpart
-	if [ $totalpart -gt 1 ]
-	then
-       echo -ne "t\n$2\n$fstype\nw\n" | fdisk $disco 1>/dev/null 2>&1
-    else
-       echo -ne "t\n$fstype\nw\n" | fdisk $disco 1>/dev/null 2>&1
-     fi
-fi
+#/// Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+#/// Sustituye nº de disco por su dispositivo.
+DISK=`ogDiskToDev $1` || return $?
+PART=`ogDiskToDev $1 $2` || return $?
+
+#/// Elección del tipo de partición.
+case "$3" in
+    EMPTY)      ID=0  ;;
+    EXTENDED)   ID=5  ;;
+    NTFS|EXFAT) ID=7  ;;
+    FAT32)      ID=b  ;;
+    HNTFS)      ID=17 ;;
+    HFAT32)     ID=1b ;;
+    LINUX-SWAP) ID=82 ;;
+    EXT[234]|REISERFS|REISER4|XFS|JFS)
+                ID=83 ;;
+    SOLARIS)    ID=bf ;;
+    CACHE)      ID=ca ;;
+    *)          ogRaiseError $OG_ERR_PARTITION "$TYPE"
+                return $? ;;
+esac
+echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 }
+
 
 function ogDeletePartitionsLabels () {
 #/**  @function ogDeletePartitionsLabels: @brief Elimina la informacion que tiene el kernel del cliente og sobre los labels de los sistemas de archivos
