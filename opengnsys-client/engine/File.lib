@@ -22,6 +22,7 @@
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@warning En caso de error, sólo devuelve el código y no da mensajes.
 #@todo    Terminar de definir parámetros para acceso a repositorios.
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
@@ -93,7 +94,7 @@ case $# in
     2)	PARENT="$1 $(dirname "$2")" ;;
     3)	PARENT="$1 $2 $(dirname "$3")" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
-	return $? ;;
+        return $? ;;
 esac
 ogGetPath $PARENT
 }

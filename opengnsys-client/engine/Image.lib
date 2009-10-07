@@ -18,20 +18,21 @@
 #@arg  \c path_image camino completo de la imagen (sin extensión)
 #@return  (nada, por determinar)
 #@note    repo = { REPO, CACHE }
-#@exception OG_ERR_FORMAT   formato incorrecto.
-#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
-#@exception OG_ERR_LOCKED   particion bloqueada por otra operación.
-#@exception OG_ERR_IMAGE    error al crear la imagen del sistema.
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#@exception OG_ERR_PARTITION partición no accesible o no soportada.
+#@exception OG_ERR_LOCKED    particion bloqueada por otra operación.
+#@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
 #@warning En pruebas iniciales
 #@todo    Comprobaciones, control de errores, definir parámetros, caché/repositorio, etc.
-#@version 0.1 - Primera versión muy en pruebas para OpenGNSys
+#@version 0.9 - Versión en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/09/10
+#@date    2009/10/07
 #*/
 function ogCreateImage () {
 
 # Variables locales
-local PART IMGDIR IMGFILE
+local PART IMGDIR IMGFILE ERRCODE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -47,10 +48,10 @@ if ogIsLocked $1 $2; then
     ogRaiseError $OG_ERR_LOCKED "$1,$2"
     return $?
 fi
-ogUnmount $1 $2 >/dev/null
-
-IMGDIR=$(ogGetParentPath "$3" "$4") || return $?
+IMGDIR=$(ogGetParentPath "$3" "$4")
+[ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$3 $(dirname $4)" || return $?
 IMGFILE="$IMGDIR/$(basename "$4").img"
+ogUnmount $1 $2 2>/dev/null
 
 ogLock $1 $2 || return $?
 trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
@@ -58,19 +59,26 @@ trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" || return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" || return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$1,$2,$IMGFILE" || return $?
+        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
-    *)  ogRaiseError $OG_ERR_FORMAT
+    *)  ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
         return $? ;;
 esac
 
+#/// Controlar salida de error y desbloquear partición.
+ERRCODE=$?
+if [ $ERRCODE != 0] ]; then
+    ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
+    rm -f "$IMGFILE"
+fi
 ogUnlock $1 $2
+return $ERRCODE
 }
 
 
