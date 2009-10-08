@@ -424,7 +424,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 # Convertir tamaño en KB a sectores de 512 B.
 SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 #/// Usar \c sfdisk para redefinir el tamaño.
-sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" || ogReiseError $OG_ERR_PARTITION "$1,$2" || return $?
+sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 }
 
 
