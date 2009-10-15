@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(text);
     setLayout(layout);
 
-//    showFullScreen();
+    showFullScreen();
 
     text->setReadOnly(true);
 
@@ -90,12 +90,15 @@ void MainWindow::slotLinkHandle(const QUrl &url)
 {
     QString string = url.toString();
     qDebug() << string;
+    // Si es un link del tipo PROTOCOL lo ejecutamos
     if(string.startsWith(PROTOCOL))
     {
         string=string.remove(0,QString(PROTOCOL).length());
         QStringList list=string.split(" ",QString::SkipEmptyParts);
         QString command=list.takeFirst();
         process->setReadChannel(QProcess::StandardOutput);
+        // Le ponemos el mismo entorno que tiene el browser ahora mismo
+        process->setEnvironment(QProcess::systemEnvironment());
         process->start(command,list);
     }
     else
