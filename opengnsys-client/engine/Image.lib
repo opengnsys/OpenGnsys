@@ -62,7 +62,7 @@ case "$TYPE" in
         partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
+        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
         partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"

@@ -18,11 +18,12 @@ if [ -d $OPENGNSYS ]; then
     export OGETC=$OPENGNSYS/etc
     export OGLIB=$OPENGNSYS/lib
     export OGAPI=$OGLIB/engine/bin
+    export OGSCRIPTS=$OPENGNSYS/scripts
     export OGIMG=$OPENGNSYS/images
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
 
-    export PATH=$OGBIN:$OGAPI:$PATH
+    export PATH=$OGBIN:$OGAPI:$OGSCRIPTS:$PATH
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
     # Para tener /bin/bash y no haya problemas
@@ -45,8 +46,8 @@ if [ -d $OPENGNSYS ]; then
     mkdir -p /var/lock
 
     # Montamos el resto de cosas necesarias
-    mount -t nfs -onolock $SERVERIP:/opt/opengnsys/log/clients $OGLOG
-    mount -t nfs -onolock $SERVERIP:/opt/opengnsys/images $OGIMG
+    mount -t nfs -o nolock $SERVERIP:/opt/opengnsys/log/clients $OGLOG
+    mount -t nfs -o nolock $SERVERIP:/opt/opengnsys/images $OGIMG
 
     #/// Cargar API de funciones y fichero de idioma.
     for i in $OGAPI/*.lib; do
@@ -77,12 +78,12 @@ if [ -d $OPENGNSYS ]; then
 fi
 
 #/// Declaración de códigos de error.
-export OG_ERR_FORMAT=1		# Formato de ejecucion incorrecto.
+export OG_ERR_FORMAT=1		# Formato de ejecución incorrecto.
 export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
-export OG_ERR_PARTITION=3	# Error en particion de disco.
-export OG_ERR_LOCKED=4		# Particion o fichero bloqueado.
+export OG_ERR_PARTITION=3	# Error en partición de disco.
+export OG_ERR_LOCKED=4		# Partición o fichero bloqueado.
 export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
 export OG_ERR_NOTOS=6		# Sin sistema operativo.
-export OG_ERR_NOTEXEC=7         # Programa o funcion no ejecutable.
+export OG_ERR_NOTEXEC=7     # Programa o función no ejecutable.
 
 
