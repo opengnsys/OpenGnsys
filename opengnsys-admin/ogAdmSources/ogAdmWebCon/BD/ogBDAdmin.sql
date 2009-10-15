@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Servidor: localhost
--- Tiempo de generación: 30-09-2009 a las 16:22:54
+-- Tiempo de generación: 15-10-2009 a las 16:44:51
 -- Versión del servidor: 5.0.27
 -- Versión de PHP: 5.1.6
 
@@ -19,8 +19,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Estructura de tabla para la tabla `acciones`
 -- 
 
-DROP TABLE IF EXISTS `acciones`;
-CREATE TABLE IF NOT EXISTS `acciones` (
+CREATE TABLE `acciones` (
   `idaccion` int(11) NOT NULL auto_increment,
   `tipoaccion` int(11) NOT NULL default '0',
   `idtipoaccion` int(11) default NULL,
@@ -37,76 +36,12 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `accionid` int(11) default NULL,
   `idnotificador` int(11) default NULL,
   PRIMARY KEY  (`idaccion`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=149 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `acciones`
 -- 
 
-INSERT INTO `acciones` (`idaccion`, `tipoaccion`, `idtipoaccion`, `cateaccion`, `ambito`, `idambito`, `ambitskwrk`, `fechahorareg`, `fechahorafin`, `parametros`, `estado`, `resultado`, `idcentro`, `accionid`, `idnotificador`) VALUES 
-(21, 1, 3, 1, 4, 7, NULL, '2007-02-09 12:31:47', '2007-02-09 13:58:34', '2nfn=RestaurarImagen\rpar=1\ridi=1\rifs=2\rifh=1\rnem=Win98\ridc=1\rswr=M\ricr=\rtpa=FAT32\rpth=1\riph=10.1.15.101;10.1.15.102;10.1.15.103;10.1.15.104;10.1.15.105;10.1.15.106;10.1.15.107;10.1.15.108;10.1.15.109;10.1.15.110;10.1.15.111;10.1.15.112;10.1.15.113;10.1.15.114;10.1.15.115;10.1.15.116\r', '2', '1', 1, 0, 0),
-(22, 1, 8, 1, 4, 7, NULL, '2007-02-09 15:38:13', '2007-02-09 15:34:21', '2nfn=Configurar\rppa=FAT32:4996184 FAT32:4996215 NTFS:4996215 EXT:10498384\rlpa=EXT2:4996184 LINUX-SWAP:497984 FAT32:5004216\rhdc=3\riph=10.1.15.101;10.1.15.102\r', '2', '1', 1, 0, 0),
-(23, 1, 8, 1, 4, 7, NULL, '2007-02-09 15:38:13', '2007-02-09 15:34:20', '2nfn=Configurar\rppa=FAT32:4996184 FAT32:4996215 NTFS:4996215 EXT:10996399\rlpa=EXT2:4996184 LINUX-SWAP:995999 FAT32:5004216\rhdc=3\riph=10.1.15.111\r', '2', '1', 1, 0, 0),
-(24, 1, 3, 1, 4, 7, NULL, '2007-02-09 15:40:02', '2007-02-09 15:48:47', '2nfn=RestaurarImagen\rpar=3\ridi=2\rifs=1\rifh=1\rnem=WinXP\ridc=1\rswr=M\ricr=\rtpa=NTFS\rpth=1\riph=10.1.15.101;10.1.15.102;10.1.15.103;10.1.15.104;10.1.15.105;10.1.15.106;10.1.15.107;10.1.15.108;10.1.15.109;10.1.15.110;10.1.15.111;10.1.15.112;10.1.15.113;10.1.15.114;10.1.15.115;10.1.15.116\r', '2', '2', 1, 0, 0),
-(25, 1, 1, 1, 4, 7, NULL, '2007-02-12 14:50:24', '2007-02-13 12:04:15', '1nfn=Arrancar\rmac=0020ED4944D5;0020ED45E4D4;0020ED45E4D1;0020ED4944EB;0020ED4944D9;0020ED458D61;0020ED458D63;0020ED45E4D3;0020ED4944B7;0020ED4944BB;0020ED45E4AD;0020ED4944EF;0020ED45E4B0;0020ED45E4F5;0020ED4944D8;0020ED2B05F8\rrmb=10.1.15.1\riph=10.1.15.101;10.1.15.102;10.1.15.103;10.1.15.104;10.1.15.105;10.1.15.106;10.1.15.107;10.1.15.108;10.1.15.109;10.1.15.110;10.1.15.111;10.1.15.112;10.1.15.113;10.1.15.114;10.1.15.115;10.1.15.116\r', '2', '1', 1, 0, 0),
-(26, 1, 4, 1, 16, 42, NULL, '2008-03-26 17:31:31', '2008-03-26 16:32:06', '2nfn=CrearPerfilSoftware\rpar=1\rifs=1\rifh=1\rnem=WinXP\ridc=1\rida=8\riph=10.1.15.9\r', '2', '1', 1, 0, 0),
-(27, 1, 4, 1, 16, 43, NULL, '2008-03-26 18:11:08', '2008-03-26 17:17:39', '2nfn=CrearPerfilSoftware\rpar=1\rifs=3\rifh=1\rnem=Linux\ridc=1\rida=8\riph=10.1.15.3\r', '2', '1', 1, 0, 0),
-(28, 1, 4, 1, 16, 43, NULL, '2008-03-26 18:19:56', '2008-03-26 17:22:07', '2nfn=CrearPerfilSoftware\rpar=1\rifs=3\rifh=1\rnem=Linux\ridc=1\rida=8\riph=10.1.15.3\r', '2', '1', 1, 0, 0),
-(29, 1, 4, 1, 16, 43, NULL, '2008-03-26 18:23:01', '2008-03-26 17:23:02', '2nfn=CrearPerfilSoftware\rpar=1\rifs=3\rifh=1\rnem=Linux\ridc=1\rida=8\riph=10.1.15.3\r', '2', '1', 1, 0, 0),
-(30, 1, 4, 1, 16, 43, NULL, '2008-03-27 12:30:28', '2008-03-27 11:32:49', '2nfn=CrearPerfilSoftware\rpar=1\rifs=3\rifh=1\rnem=Linux\ridc=1\rida=8\riph=10.1.15.3\r', '2', '1', 1, 0, 0),
-(31, 1, 4, 1, 16, 42, NULL, '2008-03-27 12:42:42', '2008-03-27 11:43:21', '2nfn=CrearPerfilSoftware\rpar=1\rifs=1\rifh=1\rnem=WinXP\ridc=1\rida=8\riph=10.1.15.9\r', '2', '1', 1, 0, 0),
-(32, 1, 4, 1, 16, 42, NULL, '2008-03-27 12:49:54', '2008-03-27 11:49:56', '2nfn=CrearPerfilSoftware\rpar=1\rifs=1\rifh=1\rnem=WinXP\ridc=1\rida=8\riph=10.1.15.9\r', '2', '1', 1, 0, 0),
-(33, 1, 4, 1, 16, 42, NULL, '2008-03-27 12:53:16', '2008-03-27 12:58:55', '2nfn=CrearPerfilSoftware\rpar=1\rifs=1\rifh=1\rnem=WinXP\ridc=1\rida=8\riph=10.1.15.9\r', '2', '1', 1, 0, 0),
-(34, 1, 4, 1, 16, 43, NULL, '2008-03-27 14:59:06', '2008-03-27 14:02:41', '2nfn=CrearPerfilSoftware\rpar=1\rifs=3\rifh=1\rnem=Linux\ridc=1\rida=8\riph=10.1.15.3\r', '2', '1', 1, 0, 0),
-(54, 1, 9, 1, 16, 42, NULL, '2008-06-03 10:33:28', '2008-06-03 08:33:33', '2nfn=ParticionaryFormatear\rppa=NTFS:20000000 EXT2:10000000 LINUX-SWAP:1000000\rlpa=\rhdc=1;2\riph=10.1.15.9\r', '2', '2', 1, 0, 0),
-(55, 1, 9, 1, 16, 42, NULL, '2008-06-03 10:36:22', '2008-06-03 08:36:23', '2nfn=ParticionaryFormatear\rppa=NTFS:20000000 EXT2:10000000 LINUX-SWAP:1000000\rlpa=\rhdc=1;2\riph=10.1.15.9\r', '2', '2', 1, 0, 0),
-(56, 1, 6, 1, 16, 85, NULL, '2009-03-20 17:21:44', '2009-03-20 16:21:45', '2nfn=TomaConfiguracion\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(65, 1, 4, 1, 16, 85, NULL, '2009-03-26 14:58:07', '2009-03-26 13:58:19', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=23\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(79, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:47:05', '2009-04-06 14:47:18', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(66, 1, 4, 1, 16, 85, NULL, '2009-03-26 15:12:38', '2009-03-26 14:12:52', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=23\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(75, 1, 9, 1, 16, 85, NULL, '2009-04-06 14:55:04', '2009-04-06 12:55:22', '2nfn=ParticionaryFormatear\rppa=NTFS:33333\rlpa=\rhdc=1\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(76, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:07:38', '2009-04-06 14:25:18', '2nfn=CrearPerfilSoftware\rpar=1\rifs=1\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '2', 1, 0, 0),
-(77, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:30:03', '2009-04-06 14:30:17', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '2', 1, 0, 0),
-(78, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:35:14', '2009-04-06 14:35:25', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(72, 1, 9, 1, 16, 85, NULL, '2009-04-06 13:37:41', '2009-04-06 11:38:00', '2nfn=ParticionaryFormatear\rppa=NTFS:3000000\rlpa=\rhdc=1\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(80, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:48:56', '2009-04-06 14:49:09', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(81, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:50:35', '2009-04-06 14:50:49', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(82, 1, 4, 1, 16, 86, NULL, '2009-04-06 16:52:51', '2009-04-06 15:55:35', '2nfn=CrearPerfilSoftware\rpar=1\rifs=8\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(83, 1, 4, 1, 16, 86, NULL, '2009-04-07 10:39:08', '2009-04-07 08:39:27', '2nfn=CrearPerfilSoftware\rpar=2\rifs=9\rifh=24\rnem=Linux\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(89, 1, 4, 1, 16, 86, NULL, '2009-04-07 12:27:10', '2009-04-07 11:40:01', '2nfn=CrearPerfilSoftware\rpar=1\rifs=4\rifh=24\rnem=WinXP\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(90, 1, 9, 1, 16, 85, NULL, '2009-04-07 15:11:21', '2009-04-07 13:11:46', '2nfn=ParticionaryFormatear\rppa=NTFS:10000000\rlpa=\rhdc=1\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(92, 1, 3, 1, 16, 85, NULL, '2009-04-07 15:16:59', '2009-04-07 13:17:28', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(94, 1, 9, 1, 16, 85, NULL, '2009-04-07 15:24:29', '2009-04-07 13:24:52', '2nfn=ParticionaryFormatear\rppa=NTFS:10000000\rlpa=\rhdc=1\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(95, 1, 3, 1, 16, 85, NULL, '2009-04-07 15:27:12', '2009-04-07 13:27:40', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(96, 1, 3, 1, 16, 85, NULL, '2009-04-07 15:31:48', '2009-04-07 13:32:17', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(97, 1, 9, 1, 16, 85, NULL, '2009-04-07 15:40:35', '2009-04-07 13:40:58', '2nfn=ParticionaryFormatear\rppa=NTFS:10000000\rlpa=\rhdc=1\riph=10.1.15.20\r', '2', '2', 1, 0, 0),
-(98, 1, 3, 1, 16, 87, NULL, '2009-04-07 16:18:48', '2009-04-07 14:19:20', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.26\r', '2', '1', 1, 0, 0),
-(99, 1, 3, 1, 16, 87, NULL, '2009-04-07 16:20:47', '2009-04-07 14:23:32', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=2\riph=10.1.15.26\r', '2', '1', 1, 0, 0),
-(100, 1, 3, 1, 16, 87, NULL, '2009-04-07 16:24:31', '0000-00-00 00:00:00', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=2\riph=10.1.15.26\r', '1', '5', 1, 0, 0),
-(114, 1, 8, 1, 16, 85, NULL, '2009-04-16 13:39:49', '2009-04-16 11:41:00', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 EXT2:1000000 VFAT:500000\rlpa=\rhdc=2\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(115, 1, 8, 1, 16, 85, NULL, '2009-04-16 13:55:59', '2009-04-16 11:56:33', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 LINUX-SWAP:1000000 VFAT:500000\rlpa=\rhdc=\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(116, 1, 8, 1, 16, 85, NULL, '2009-04-16 13:57:40', '2009-04-16 11:58:13', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 LINUX-SWAP:1000000 VFAT:500000\rlpa=\rhdc=\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(117, 1, 8, 1, 16, 85, NULL, '2009-04-16 14:05:45', '2009-04-16 12:06:26', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 EXT2:1000000 LINUX-SWAP:500000\rlpa=\rhdc=2\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(118, 1, 8, 1, 16, 85, NULL, '2009-04-16 14:07:15', '2009-04-16 12:07:57', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 EXT2:1000000 LINUX-SWAP:500000\rlpa=\rhdc=1;2\riph=10.1.15.20\r', '2', '1', 1, 0, 0),
-(119, 1, 4, 1, 16, 86, NULL, '2009-04-17 14:49:28', '2009-04-17 13:12:35', '2nfn=CrearPerfilSoftware\rpar=2\rifs=9\rifh=24\rnem=Linux\ridc=1\rida=11\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(120, 1, 8, 1, 16, 86, NULL, '2009-04-17 15:16:12', '2009-04-17 13:24:05', '2nfn=ParticionaryFormatear\rppa=NTFS:50000000 EXT2:5000000 LINUX-SWAP:1000000\rlpa=\rhdc=\riph=10.1.15.22\r', '2', '1', 1, 0, 0),
-(121, 1, 3, 1, 16, 86, NULL, '2009-04-17 15:38:33', '2009-04-17 14:37:31', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.22\r', '2', '2', 1, 0, 0),
-(122, 1, 8, 1, 16, 86, NULL, '2009-04-21 17:18:08', '0000-00-00 00:00:00', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 EXT2:20000000 LINUX-SWAP:1000000\rlpa=\rhdc=\riph=10.1.15.22\r', '1', '5', 1, 0, 0),
-(127, 1, 3, 1, 16, 86, NULL, '2009-05-12 17:45:06', '2009-05-12 15:45:27', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(128, 1, 3, 1, 16, 86, NULL, '2009-05-12 17:47:55', '2009-05-12 15:48:11', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=24\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(130, 1, 3, 1, 16, 86, NULL, '2009-05-20 15:04:30', '2009-05-20 13:04:50', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=26\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(131, 1, 3, 1, 16, 86, NULL, '2009-05-20 15:10:46', '2009-05-20 13:11:07', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=26\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(132, 1, 8, 1, 16, 86, NULL, '2009-05-20 15:41:41', '2009-05-20 13:41:46', '2nfn=ParticionaryFormatear\rppa=NTFS:50000000 EXT2:30000000 LINUX-SWAP:1000000\rlpa=\rhdc=1;2\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(133, 1, 3, 1, 16, 86, NULL, '2009-05-20 15:49:00', '2009-05-20 13:49:30', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=26\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '1', 1, 0, 0),
-(134, 1, 3, 1, 16, 86, NULL, '2009-05-20 16:10:50', '2009-05-20 15:07:02', '2nfn=RestaurarImagen\rpar=1\ridi=4\rifs=8\rifh=26\rnem=WinXP\ridc=1\rtpa=NTFS\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '1', 1, 0, 0),
-(135, 1, 8, 1, 16, 86, NULL, '2009-05-21 12:09:41', '2009-05-21 10:10:13', '2nfn=ParticionaryFormatear\rppa=NTFS:50000000 EXT2:22000000 LINUX-SWAP:1000000\rlpa=\rhdc=2\riph=10.1.15.7\r', '2', '1', 1, 0, 0),
-(136, 1, 3, 1, 16, 86, NULL, '2009-05-21 13:02:14', '2009-05-21 11:02:20', '2nfn=RestaurarImagen\rpar=2\ridi=6\rifs=10\rifh=26\rnem=Linux\ridc=1\rtpa=EXT3\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(137, 1, 3, 1, 16, 86, NULL, '2009-05-21 13:04:35', '2009-05-21 11:04:40', '2nfn=RestaurarImagen\rpar=2\ridi=6\rifs=10\rifh=26\rnem=Linux\ridc=1\rtpa=EXT3\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '2', 1, 0, 0),
-(138, 1, 3, 1, 16, 86, NULL, '2009-05-21 13:13:00', '2009-05-21 11:42:19', '2nfn=RestaurarImagen\rpar=2\ridi=6\rifs=10\rifh=26\rnem=Linux\ridc=1\rtpa=EXT3\rswr=M\ricr=\rpth=1\riph=10.1.15.7\r', '2', '1', 1, 0, 0),
-(139, 1, 8, 1, 16, 85, NULL, '2009-05-21 16:52:06', '2009-05-21 14:52:18', '2nfn=ParticionaryFormatear\rppa=NTFS:1000000 EXT2:1000000 LINUX-SWAP:500000 EXT:2000000\rlpa=EXT2:1000000 EXT2:1000000\rhdc=1;2;3;5;6\riph=10.1.15.8\r', '2', '2', 1, 0, 0),
-(140, 1, 8, 1, 16, 85, NULL, '2009-05-21 16:55:29', '2009-05-21 14:56:06', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 EXT2:1000000 LINUX-SWAP:500000\rlpa=\rhdc=1;2\riph=10.1.15.8\r', '2', '1', 1, 0, 0),
-(141, 1, 8, 1, 16, 85, NULL, '2009-05-21 17:02:21', '2009-05-21 15:02:45', '2nfn=ParticionaryFormatear\rppa=NTFS:5000000 EXT3:1000000 LINUX-SWAP:500000\rlpa=\rhdc=\riph=10.1.15.8\r', '2', '1', 1, 0, 0),
-(147, 1, 2, 1, 16, 91, NULL, '2009-09-25 15:42:00', '2009-09-25 13:42:05', '2nfn=Apagar\riph=10.1.15.9\r', '2', '1', 1, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -114,8 +49,7 @@ INSERT INTO `acciones` (`idaccion`, `tipoaccion`, `idtipoaccion`, `cateaccion`, 
 -- Estructura de tabla para la tabla `acciones_menus`
 -- 
 
-DROP TABLE IF EXISTS `acciones_menus`;
-CREATE TABLE IF NOT EXISTS `acciones_menus` (
+CREATE TABLE `acciones_menus` (
   `idaccionmenu` int(11) NOT NULL auto_increment,
   `tipoaccion` tinyint(4) NOT NULL default '0',
   `idtipoaccion` int(11) NOT NULL default '0',
@@ -125,17 +59,12 @@ CREATE TABLE IF NOT EXISTS `acciones_menus` (
   `descripitem` varchar(250) default NULL,
   `orden` tinyint(4) default NULL,
   PRIMARY KEY  (`idaccionmenu`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `acciones_menus`
 -- 
 
-INSERT INTO `acciones_menus` (`idaccionmenu`, `tipoaccion`, `idtipoaccion`, `idmenu`, `tipoitem`, `idurlimg`, `descripitem`, `orden`) VALUES 
-(1, 0, 8, 2, 1, 6, 'Inicio Windows XP', 3),
-(2, 2, 3, 2, 2, 6, 'Restaurar Windows 98', 0),
-(3, 0, 9, 2, 1, 6, 'Restaurar Windows 98', 2),
-(4, 0, 10, 2, 1, 12, 'Apagar  Ordenador', 1);
 
 -- --------------------------------------------------------
 
@@ -143,8 +72,7 @@ INSERT INTO `acciones_menus` (`idaccionmenu`, `tipoaccion`, `idtipoaccion`, `idm
 -- Estructura de tabla para la tabla `aulas`
 -- 
 
-DROP TABLE IF EXISTS `aulas`;
-CREATE TABLE IF NOT EXISTS `aulas` (
+CREATE TABLE `aulas` (
   `idaula` int(11) NOT NULL auto_increment,
   `nombreaula` varchar(100) NOT NULL default '',
   `idcentro` int(11) NOT NULL default '0',
@@ -160,14 +88,12 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `horaresevini` tinyint(4) default NULL,
   `horaresevfin` tinyint(4) default NULL,
   PRIMARY KEY  (`idaula`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `aulas`
 -- 
 
-INSERT INTO `aulas` (`idaula`, `nombreaula`, `idcentro`, `urlfoto`, `cuadro_y`, `cuadro_x`, `cagnon`, `pizarra`, `grupoid`, `ubicacion`, `comentarios`, `puestos`, `horaresevini`, `horaresevfin`) VALUES 
-(11, 'Pruebas EAC', 1, '../images/aula.jpg', NULL, NULL, 0, 0, 2, '', '', 10, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -175,8 +101,7 @@ INSERT INTO `aulas` (`idaula`, `nombreaula`, `idcentro`, `urlfoto`, `cuadro_y`, 
 -- Estructura de tabla para la tabla `campus`
 -- 
 
-DROP TABLE IF EXISTS `campus`;
-CREATE TABLE IF NOT EXISTS `campus` (
+CREATE TABLE `campus` (
   `idcampus` int(11) NOT NULL auto_increment,
   `nombrecampus` varchar(100) NOT NULL default '',
   `iduniversidad` int(11) default NULL,
@@ -197,21 +122,18 @@ CREATE TABLE IF NOT EXISTS `campus` (
 -- Estructura de tabla para la tabla `centros`
 -- 
 
-DROP TABLE IF EXISTS `centros`;
-CREATE TABLE IF NOT EXISTS `centros` (
+CREATE TABLE `centros` (
   `idcentro` int(11) NOT NULL auto_increment,
   `nombrecentro` varchar(100) NOT NULL default '',
   `identidad` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idcentro`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `centros`
 -- 
 
-INSERT INTO `centros` (`idcentro`, `nombrecentro`, `identidad`, `comentarios`) VALUES 
-(1, 'Laboratorios de Hardware', 1, '');
 
 -- --------------------------------------------------------
 
@@ -219,8 +141,7 @@ INSERT INTO `centros` (`idcentro`, `nombrecentro`, `identidad`, `comentarios`) V
 -- Estructura de tabla para la tabla `comandos`
 -- 
 
-DROP TABLE IF EXISTS `comandos`;
-CREATE TABLE IF NOT EXISTS `comandos` (
+CREATE TABLE `comandos` (
   `idcomando` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `nfuncion1` varchar(250) default NULL,
@@ -268,8 +189,7 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `nfuncion1`, `nfuncion2`, `n
 -- Estructura de tabla para la tabla `comandos_eng`
 -- 
 
-DROP TABLE IF EXISTS `comandos_eng`;
-CREATE TABLE IF NOT EXISTS `comandos_eng` (
+CREATE TABLE `comandos_eng` (
   `idcomando` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `nfuncion1` varchar(250) default NULL,
@@ -303,85 +223,17 @@ CREATE TABLE IF NOT EXISTS `comandos_eng` (
 -- Estructura de tabla para la tabla `configuraciones`
 -- 
 
-DROP TABLE IF EXISTS `configuraciones`;
-CREATE TABLE IF NOT EXISTS `configuraciones` (
+CREATE TABLE `configuraciones` (
   `idconfiguracion` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) default NULL,
   `configuracion` text NOT NULL,
   PRIMARY KEY  (`idconfiguracion`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=103 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `configuraciones`
 -- 
 
-INSERT INTO `configuraciones` (`idconfiguracion`, `descripcion`, `configuracion`) VALUES 
-(37, NULL, '@cfg\ntiposo=\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=	'),
-(38, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=Linux	@cfg\ntiposo=\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=	'),
-(39, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=Fedora Core\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=Fedora Core\n	'),
-(40, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=Fedora core 3\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=Fedora core 3\n	'),
-(41, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=erqwerqewrqeqer\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=erqwerqewrqeqer\n	'),
-(42, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=yyyyyyyyyyy\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=yyyyyyyyyyy\n	'),
-(43, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=aaaaaaaaaaaaaaaa\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=aaaaaaaaaaaaaaaa\n	'),
-(44, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=bbbbbbbbbbbbb\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=bbbbbbbbbbbbb\n	'),
-(45, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=cccccccccccccc\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=cccccccccccccc\n	'),
-(46, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=fffffeeeeeeeeddddddddooooo\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=fffffeeeeeeeeddddddddooooo\n	'),
-(47, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=777777777777777\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=777777777777777\n	'),
-(48, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=8888888888888\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=8888888888888\n	'),
-(49, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=999999999999\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=999999999999\n	'),
-(50, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=wwwwwwwwwwwwwww\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=wwwwwwwwwwwwwww\n	'),
-(51, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=qqqqqqqqqqq\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=qqqqqqqqqqq\n	'),
-(52, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=rrrrrrrrrrrrrrrrrrrrrr=====\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=rrrrrrrrrrrrrrrrrrrrrr=====\n	'),
-(53, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=elcoÃ±o miprima\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=elcoÃ±o miprima\n	'),
-(54, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=mecagolaleche\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=mecagolaleche\n	'),
-(55, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=mecagoento\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=mecagoento\n	'),
-(56, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=mecagoenlapiputa\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=mecagoenlapiputa\n	'),
-(57, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=mecagoenlaostia\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=mecagoenlaostia\n	'),
-(58, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=mecagotoloquesemena\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=mecagotoloquesemena\n	'),
-(59, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=1\nTso=1\rVso=mecag==========rewrtwesemena\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=1\nTso=1\rVso=mecag==========rewrtwesemena\n	'),
-(60, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=2\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=2\n	'),
-(61, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=Fedoraaaaaaaarrrrrrrrrr\n	@cfg\ntiposo=UNKNOWN\ntipopart=UNKNOWN\ntamapart=78011640\nnumpart=2\nnombreso=Fedoraaaaaaaarrrrrrrrrr\n	'),
-(62, NULL, '@cfg\ntiposo=\ntipopart=EXT3\ntamapart=10209276\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1004062\nnumpart=2\nnombreso=	'),
-(63, NULL, '@cfg\r\ntiposo=WINXP\r\ntipopart=NTFS\r\ntamapart=10000000\r\nnumpart=1\r\nnombreso=Windows XP	@cfg\r\ntiposo=Linux\r\ntipopart=EXT3\r\ntamapart=5000000\r\nnumpart=2\r\nnombreso=Ubuntur	@cfg\r\ntiposo=LINUX-SWAP\r\ntipopart=LINUX-SWAP\r\ntamapart=1000000\r\nnumpart=3\r\nnombreso=LINUX-SWAP	'),
-(64, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=10000431\nnumpart=1\nnombreso=	'),
-(65, NULL, ''),
-(66, NULL, '@cfg\r\ntiposo=WinXP\r\ntipopart=NTFS\r\ntamapart=39999435\r\nnumpart=1\r\nnombreso=	@cfg\r\ntiposo=Linux\r\ntipopart=EXT3\r\ntamapart=9999360\r\nnumpart=2\r\nnombreso=	@cfg\r\ntiposo=\r\ntipopart=LINUX-SWAP\r\ntamapart=999936\r\nnumpart=3\r\nnombreso=	'),
-(67, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=40001818\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=10000462\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=996030\nnumpart=3\nnombreso=	'),
-(68, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=40000054\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=9999927\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=999957\nnumpart=3\nnombreso=	'),
-(69, NULL, '@cfg\r\ntiposo=WINXP\r\ntipopart=NTFS\r\ntamapart=40000001\r\nnumpart=1\r\nnombreso=Windows XP	@cfg\r\ntiposo=Linux\r\ntipopart=EXT3\r\ntamapart=9999997\r\nnumpart=2\r\nnombreso=Ubuntur	@cfg\r\ntiposo=\r\ntipopart=LINUX-SWAP\r\ntamapart=999999\r\nnumpart=3\r\nnombreso=	'),
-(70, NULL, '@cfg\r\ntiposo=WINXP\r\ntipopart=NTFS\r\ntamapart=40001818\r\nnumpart=1\r\nnombreso=Windows XP	@cfg\r\ntiposo=Linux\r\ntipopart=EXT2\r\ntamapart=10000462\r\nnumpart=2\r\nnombreso=Ubuntu 8.20	@cfg\r\ntiposo=Linux\r\ntipopart=EXT3\r\ntamapart=8148431\r\nnumpart=3\r\nnombreso=Cache	'),
-(71, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=10000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(72, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=40001818\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT2\ntamapart=10000462\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=8148431\nnumpart=3\nnombreso=	'),
-(73, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=10000000\nnumpart=1\nnombreso=\n	@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=\n	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=\n	'),
-(74, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=10000000\nnumpart=1\nnombreso=	@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(75, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=10000000\nnumpart=1\nnombreso=U‰åV¾¨¯î¨¯Áþ…öStµ¨¯fÿSüƒëƒîuõ[^]é	õ	@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=U‰åV¾¨¯î¨¯Áþ…öStµ¨¯fÿSüƒëƒîuõ[^]é	õ	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=U‰åV¾¨¯î¨¯Áþ…öStµ¨¯fÿSüƒëƒîuõ[^]é	õ	'),
-(76, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=10000000EXT3\nnumpart=1\nnombreso=	'),
-(77, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=40001818EXT2\nnumpart=1\nnombreso=Microsoft	'),
-(78, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=40001818\nnumpart=1\nnombreso=Microsoft Windows XP	@cfg\ntiposo=Linux\ntipopart=EXT2\ntamapart=10000462\nnumpart=2\nnombreso=Ubuntu 6.06.2 LTS	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=8148431\nnumpart=3\nnombreso=	'),
-(79, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=3000000\nnumpart=1\nnombreso=	'),
-(80, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=3333333\nnumpart=1\nnombreso=	'),
-(81, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=10000000\nnumpart=1\nnombreso=	'),
-(82, NULL, '@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=10000000\nnumpart=1\nnombreso=Ubuntu 6.10	'),
-(83, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=1000000\nnumpart=1\nnombreso=	'),
-(84, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=39999435\nnumpart=1\nnombreso=Microsoft Windows XP	@cfg\ntiposo=Linux\ntipopart=EXT2\ntamapart=9999360\nnumpart=2\nnombreso=Ubuntu 6.06.2 LTS	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=999936\nnumpart=3\nnombreso=	'),
-(85, NULL, '@cfg\ntiposo=\ntipopart=EXT3\ntamapart=104391\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-LVM\ntamapart=78011640\nnumpart=2\nnombreso=	'),
-(86, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=5000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=1000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=500000\nnumpart=3\nnombreso=	'),
-(87, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=5000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=1000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=FAT32\ntamapart=500000\nnumpart=3\nnombreso=	'),
-(88, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=5000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=FAT32\ntamapart=500000\nnumpart=3\nnombreso=	'),
-(89, NULL, '(null)'),
-(90, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=40001818\nnumpart=1\nnombreso=	@cfg\ntiposo=Linux\ntipopart=EXT2\ntamapart=10000462\nnumpart=2\nnombreso=Ubuntu 6.06.2 LTS	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=8148431\nnumpart=3\nnombreso=	'),
-(91, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=	@cfg\ntiposo=Linux\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=Ubuntu 6.06.2 LTS	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(92, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(93, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=Microsoft Windows XP	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=5000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(94, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=5000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=20000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(95, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=40000000\nnumpart=1\nnombreso=	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=20000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(96, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=16000000\nnumpart=1\nnombreso=Microsoft Windows XP	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=7358140\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=EXTENDED\ntamapart=2048287\nnumpart=3\nnombreso=	'),
-(97, NULL, '@cfg\ntiposo=\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=	'),
-(98, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=Microsoft Windows XP	'),
-(99, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=Microsoft Windows XP	@cfg\ntiposo=\ntipopart=EXT3\ntamapart=22000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(100, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=50000000\nnumpart=1\nnombreso=Microsoft Windows XP	@cfg\ntiposo=\ntipopart=EXT2\ntamapart=22000000\nnumpart=2\nnombreso=	@cfg\ntiposo=\ntipopart=LINUX-SWAP\ntamapart=1000000\nnumpart=3\nnombreso=	'),
-(101, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=99000000\nnumpart=1\nnombreso= Windows XP Profesional	'),
-(102, NULL, '@cfg\ntiposo=Windows NT Platafom\ntipopart=NTFS\ntamapart=55000000\nnumpart=1\nnombreso= Windows XP Profesional	');
 
 -- --------------------------------------------------------
 
@@ -389,22 +241,19 @@ INSERT INTO `configuraciones` (`idconfiguracion`, `descripcion`, `configuracion`
 -- Estructura de tabla para la tabla `entidades`
 -- 
 
-DROP TABLE IF EXISTS `entidades`;
-CREATE TABLE IF NOT EXISTS `entidades` (
+CREATE TABLE `entidades` (
   `identidad` int(11) NOT NULL auto_increment,
   `nombreentidad` varchar(200) NOT NULL default '',
   `comentarios` text,
   `iduniversidad` int(11) default NULL,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`identidad`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `entidades`
 -- 
 
-INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `iduniversidad`, `grupoid`) VALUES 
-(1, 'Escuela Tcnica Superior de Ingeniera Informatica', '', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -412,8 +261,7 @@ INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `idunivers
 -- Estructura de tabla para la tabla `estatus`
 -- 
 
-DROP TABLE IF EXISTS `estatus`;
-CREATE TABLE IF NOT EXISTS `estatus` (
+CREATE TABLE `estatus` (
   `idestatus` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idestatus`)
@@ -436,8 +284,7 @@ INSERT INTO `estatus` (`idestatus`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `fabricantes`
 -- 
 
-DROP TABLE IF EXISTS `fabricantes`;
-CREATE TABLE IF NOT EXISTS `fabricantes` (
+CREATE TABLE `fabricantes` (
   `idfabricante` int(11) NOT NULL auto_increment,
   `codigo` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
@@ -2204,8 +2051,7 @@ INSERT INTO `fabricantes` (`idfabricante`, `codigo`, `nombre`) VALUES
 -- Estructura de tabla para la tabla `grupos`
 -- 
 
-DROP TABLE IF EXISTS `grupos`;
-CREATE TABLE IF NOT EXISTS `grupos` (
+CREATE TABLE `grupos` (
   `idgrupo` int(11) NOT NULL auto_increment,
   `nombregrupo` varchar(250) NOT NULL default '',
   `grupoid` int(11) NOT NULL default '0',
@@ -2214,15 +2060,12 @@ CREATE TABLE IF NOT EXISTS `grupos` (
   `iduniversidad` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idgrupo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=74 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `grupos`
 -- 
 
-INSERT INTO `grupos` (`idgrupo`, `nombregrupo`, `grupoid`, `tipo`, `idcentro`, `iduniversidad`, `comentarios`) VALUES 
-(1, 'Campus', 0, 69, 0, 1, NULL),
-(2, 'L3 (Planta 1)', 0, 2, 1, 0, '');
 
 -- --------------------------------------------------------
 
@@ -2230,15 +2073,14 @@ INSERT INTO `grupos` (`idgrupo`, `nombregrupo`, `grupoid`, `tipo`, `idcentro`, `
 -- Estructura de tabla para la tabla `gruposordenadores`
 -- 
 
-DROP TABLE IF EXISTS `gruposordenadores`;
-CREATE TABLE IF NOT EXISTS `gruposordenadores` (
+CREATE TABLE `gruposordenadores` (
   `idgrupo` int(11) NOT NULL auto_increment,
   `nombregrupoordenador` varchar(250) NOT NULL default '',
   `idaula` int(11) NOT NULL default '0',
   `grupoid` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idgrupo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `gruposordenadores`
@@ -2251,8 +2093,7 @@ CREATE TABLE IF NOT EXISTS `gruposordenadores` (
 -- Estructura de tabla para la tabla `hardwares`
 -- 
 
-DROP TABLE IF EXISTS `hardwares`;
-CREATE TABLE IF NOT EXISTS `hardwares` (
+CREATE TABLE `hardwares` (
   `idhardware` int(11) NOT NULL auto_increment,
   `idtipohardware` int(11) NOT NULL default '0',
   `descripcion` varchar(250) NOT NULL default '',
@@ -2261,30 +2102,12 @@ CREATE TABLE IF NOT EXISTS `hardwares` (
   `codigo1` smallint(6) unsigned NOT NULL,
   `codigo2` smallint(6) unsigned NOT NULL,
   PRIMARY KEY  (`idhardware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=103 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `hardwares`
 -- 
 
-INSERT INTO `hardwares` (`idhardware`, `idtipohardware`, `descripcion`, `idcentro`, `grupoid`, `codigo1`, `codigo2`) VALUES 
-(35, 1, 'ASUS', 1, 0, 0, 0),
-(102, 9, 'Creative lab sound blaster', 1, 0, 0, 0),
-(101, 8, '1 Tera', 1, 0, 0, 0),
-(100, 5, '1 GB', 1, 0, 0, 0),
-(99, 4, 'Pentium 4 cuore dos duol', 1, 0, 0, 0),
-(98, 7, '  NV5M64 [RIVA TNT2 Model 64/Model 64 Pro]', 1, 0, 4318, 45),
-(97, 3, '  82557/8/9 [Ethernet Pro 100]', 1, 0, 32902, 4649),
-(96, 8, ' ATA ST320413A (scsi)  20.0GB', 1, 0, 0, 0),
-(95, 5, '248.492 MB', 1, 0, 0, 0),
-(94, 4, ' Pentium III (Coppermine)', 1, 0, 0, 0),
-(93, 3, 'Tarjetas de Red(Desconocido)', 1, 0, 4332, 33127),
-(92, 7, '  945G Integrated Graphics Controller', 1, 0, 32902, 10098),
-(91, 9, ' HDA-Intel - HDA Intel', 1, 0, 0, 0),
-(90, 8, ' ATA SAMSUNG HD080HJ (scsi)  80.0GB', 1, 0, 0, 0),
-(89, 5, '2015.98 MB', 1, 0, 0, 0),
-(88, 4, ' Intel(R) Pentium(R) Dual  CPU  E2160  @ 1.80GHz', 1, 0, 0, 0),
-(87, 4, ' Intel(R) Pentium(R) Dual  CPU  E2160  @ 1.80GHzmem', 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -2292,8 +2115,7 @@ INSERT INTO `hardwares` (`idhardware`, `idtipohardware`, `descripcion`, `idcentr
 -- Estructura de tabla para la tabla `iconos`
 -- 
 
-DROP TABLE IF EXISTS `iconos`;
-CREATE TABLE IF NOT EXISTS `iconos` (
+CREATE TABLE `iconos` (
   `idicono` int(11) NOT NULL auto_increment,
   `urlicono` varchar(200) default NULL,
   `idtipoicono` int(11) default NULL,
@@ -2329,8 +2151,7 @@ INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUE
 -- Estructura de tabla para la tabla `idiomas`
 -- 
 
-DROP TABLE IF EXISTS `idiomas`;
-CREATE TABLE IF NOT EXISTS `idiomas` (
+CREATE TABLE `idiomas` (
   `ididioma` int(11) NOT NULL auto_increment,
   `descripcion` varchar(100) default NULL,
   `nemonico` char(3) default NULL,
@@ -2342,7 +2163,7 @@ CREATE TABLE IF NOT EXISTS `idiomas` (
 -- 
 
 INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES 
-(1, 'Espaol', 'esp'),
+(1, 'Español', 'esp'),
 (2, 'Ingles', 'eng'),
 (3, 'Catalan', 'cat');
 
@@ -2352,8 +2173,7 @@ INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 -- Estructura de tabla para la tabla `imagenes`
 -- 
 
-DROP TABLE IF EXISTS `imagenes`;
-CREATE TABLE IF NOT EXISTS `imagenes` (
+CREATE TABLE `imagenes` (
   `idimagen` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `idperfilsoft` int(11) default NULL,
@@ -2361,16 +2181,12 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idimagen`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `imagenes`
 -- 
 
-INSERT INTO `imagenes` (`idimagen`, `descripcion`, `idperfilsoft`, `idcentro`, `comentarios`, `grupoid`) VALUES 
-(7, 'Windows XP (OpenGnsys)', 11, 1, '', 0),
-(4, 'WIndows XP inves (EAC)', 8, 1, '', 0),
-(6, 'Linux Ubuntu Inves (EAC)', 10, 1, '', 0);
 
 -- --------------------------------------------------------
 
@@ -2378,8 +2194,7 @@ INSERT INTO `imagenes` (`idimagen`, `descripcion`, `idperfilsoft`, `idcentro`, `
 -- Estructura de tabla para la tabla `imagenes_softincremental`
 -- 
 
-DROP TABLE IF EXISTS `imagenes_softincremental`;
-CREATE TABLE IF NOT EXISTS `imagenes_softincremental` (
+CREATE TABLE `imagenes_softincremental` (
   `idimagen` int(11) NOT NULL default '0',
   `idsoftincremental` int(11) NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -2395,8 +2210,7 @@ CREATE TABLE IF NOT EXISTS `imagenes_softincremental` (
 -- Estructura de tabla para la tabla `menus`
 -- 
 
-DROP TABLE IF EXISTS `menus`;
-CREATE TABLE IF NOT EXISTS `menus` (
+CREATE TABLE `menus` (
   `idmenu` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `idcentro` int(11) NOT NULL default '0',
@@ -2414,14 +2228,12 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `htmlmenupri` varchar(250) default NULL,
   `resolucion` tinyint(4) default NULL,
   PRIMARY KEY  (`idmenu`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `menus`
 -- 
 
-INSERT INTO `menus` (`idmenu`, `descripcion`, `idcentro`, `urlimg`, `titulo`, `coorx`, `coory`, `modalidad`, `scoorx`, `scoory`, `smodalidad`, `comentarios`, `grupoid`, `htmlmenupub`, `htmlmenupri`, `resolucion`) VALUES 
-(2, 'Aula de comunicaciones', 1, NULL, 'Menu inicial', 222, 222, 1, 222, 222, 1, '', 0, '', '', 2);
 
 -- --------------------------------------------------------
 
@@ -2429,8 +2241,7 @@ INSERT INTO `menus` (`idmenu`, `descripcion`, `idcentro`, `urlimg`, `titulo`, `c
 -- Estructura de tabla para la tabla `notificaciones`
 -- 
 
-DROP TABLE IF EXISTS `notificaciones`;
-CREATE TABLE IF NOT EXISTS `notificaciones` (
+CREATE TABLE `notificaciones` (
   `idnotificacion` int(11) NOT NULL auto_increment,
   `accionid` int(11) NOT NULL default '0',
   `idnotificador` int(11) default NULL,
@@ -2439,174 +2250,12 @@ CREATE TABLE IF NOT EXISTS `notificaciones` (
   `descrinotificacion` text,
   `idaccion` int(11) default NULL,
   PRIMARY KEY  (`idnotificacion`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=300 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `notificaciones`
 -- 
 
-INSERT INTO `notificaciones` (`idnotificacion`, `accionid`, `idnotificador`, `fechahorareg`, `resultado`, `descrinotificacion`, `idaccion`) VALUES 
-(148, 21, 30, '2007-02-09 16:03:22', '1', ' ', NULL),
-(147, 21, 32, '2007-02-09 16:03:22', '1', ' ', NULL),
-(146, 21, 27, '2007-02-09 16:03:22', '1', ' ', NULL),
-(145, 24, 29, '2007-02-09 15:48:47', '1', ' ', NULL),
-(144, 24, 39, '2007-02-09 15:42:51', '1', ' ', NULL),
-(143, 24, 28, '2007-02-09 15:42:49', '1', ' ', NULL),
-(142, 24, 35, '2007-02-09 15:42:42', '1', ' ', NULL),
-(141, 24, 37, '2007-02-09 15:42:41', '1', ' ', NULL),
-(140, 24, 38, '2007-02-09 15:42:40', '1', ' ', NULL),
-(139, 24, 30, '2007-02-09 15:42:40', '1', ' ', NULL),
-(138, 24, 25, '2007-02-09 15:42:39', '1', ' ', NULL),
-(137, 24, 27, '2007-02-09 15:42:39', '1', ' ', NULL),
-(136, 24, 26, '2007-02-09 15:42:38', '1', ' ', NULL),
-(135, 24, 33, '2007-02-09 15:42:38', '1', ' ', NULL),
-(134, 24, 24, '2007-02-09 15:42:37', '1', ' ', NULL),
-(133, 24, 31, '2007-02-09 15:42:32', '1', ' ', NULL),
-(132, 24, 36, '2007-02-09 15:42:32', '1', ' ', NULL),
-(131, 24, 32, '2007-02-09 15:42:29', '1', ' ', NULL),
-(130, 24, 34, '2007-02-09 15:39:23', '2', '<br>Error.-97 (No such device) en modulo Restaurar_WindowsNTFS<br>', NULL),
-(129, 22, 25, '2007-02-09 15:34:21', '1', ' ', NULL),
-(128, 23, 34, '2007-02-09 15:34:20', '1', ' ', NULL),
-(127, 22, 24, '2007-02-09 15:34:19', '1', ' ', NULL),
-(126, 21, 27, '2007-02-09 15:32:48', '1', ' ', NULL),
-(125, 21, 28, '2007-02-09 15:32:47', '1', ' ', NULL),
-(124, 21, 33, '2007-02-09 15:32:47', '1', ' ', NULL),
-(123, 21, 30, '2007-02-09 15:32:46', '1', ' ', NULL),
-(122, 21, 35, '2007-02-09 15:32:46', '1', ' ', NULL),
-(98, 21, 38, '2007-02-09 13:58:31', '1', ' ', NULL),
-(99, 21, 35, '2007-02-09 13:58:34', '1', ' ', NULL),
-(100, 21, 28, '2007-02-09 13:58:34', '1', ' ', NULL),
-(101, 21, 27, '2007-02-09 13:58:34', '1', ' ', NULL),
-(102, 21, 36, '2007-02-09 13:58:34', '1', ' ', NULL),
-(103, 21, 29, '2007-02-09 13:58:34', '1', ' ', NULL),
-(104, 21, 32, '2007-02-09 13:58:34', '1', ' ', NULL),
-(105, 21, 24, '2007-02-09 13:58:34', '1', ' ', NULL),
-(106, 21, 31, '2007-02-09 13:58:34', '1', ' ', NULL),
-(107, 21, 34, '2007-02-09 13:58:34', '1', ' ', NULL),
-(108, 21, 39, '2007-02-09 13:58:34', '1', ' ', NULL),
-(109, 21, 25, '2007-02-09 13:58:34', '1', ' ', NULL),
-(110, 21, 30, '2007-02-09 13:58:34', '1', ' ', NULL),
-(111, 21, 26, '2007-02-09 13:58:34', '1', ' ', NULL),
-(112, 21, 37, '2007-02-09 13:58:34', '1', ' ', NULL),
-(113, 21, 33, '2007-02-09 13:58:34', '1', ' ', NULL),
-(114, 21, 36, '2007-02-09 15:32:43', '1', ' ', NULL),
-(115, 21, 29, '2007-02-09 15:32:44', '1', ' ', NULL),
-(116, 21, 39, '2007-02-09 15:32:44', '1', ' ', NULL),
-(117, 21, 32, '2007-02-09 15:32:44', '1', ' ', NULL),
-(118, 21, 31, '2007-02-09 15:32:44', '1', ' ', NULL),
-(119, 21, 26, '2007-02-09 15:32:45', '1', ' ', NULL),
-(120, 21, 38, '2007-02-09 15:32:45', '1', ' ', NULL),
-(121, 21, 37, '2007-02-09 15:32:46', '1', ' ', NULL),
-(149, 21, 38, '2007-02-09 16:03:23', '1', ' ', NULL),
-(150, 21, 29, '2007-02-09 16:03:24', '1', ' ', NULL),
-(151, 21, 36, '2007-02-09 16:03:24', '1', ' ', NULL),
-(152, 21, 39, '2007-02-09 16:03:24', '1', ' ', NULL),
-(153, 21, 31, '2007-02-09 16:03:24', '1', ' ', NULL),
-(154, 21, 37, '2007-02-09 16:03:25', '1', ' ', NULL),
-(155, 21, 24, '2007-02-09 16:03:25', '1', ' ', NULL),
-(156, 21, 35, '2007-02-09 16:03:25', '1', ' ', NULL),
-(157, 21, 34, '2007-02-09 16:03:27', '1', ' ', NULL),
-(158, 21, 33, '2007-02-09 16:03:27', '1', ' ', NULL),
-(159, 21, 26, '2007-02-09 16:03:27', '1', ' ', NULL),
-(160, 21, 25, '2007-02-09 16:03:27', '1', ' ', NULL),
-(161, 21, 28, '2007-02-09 16:03:27', '1', ' ', NULL),
-(162, 25, 38, '2007-02-12 14:46:50', '1', ' ', NULL),
-(163, 25, 36, '2007-02-12 14:46:51', '1', ' ', NULL),
-(164, 25, 34, '2007-02-12 14:46:52', '1', ' ', NULL),
-(165, 25, 27, '2007-02-12 14:46:52', '1', ' ', NULL),
-(166, 25, 26, '2007-02-12 14:46:55', '1', ' ', NULL),
-(167, 25, 32, '2007-02-12 14:46:55', '1', ' ', NULL),
-(168, 25, 25, '2007-02-12 14:46:55', '1', ' ', NULL),
-(169, 25, 35, '2007-02-12 14:46:56', '1', ' ', NULL),
-(170, 25, 28, '2007-02-12 14:46:56', '1', ' ', NULL),
-(171, 25, 29, '2007-02-12 14:46:56', '1', ' ', NULL),
-(172, 25, 24, '2007-02-12 14:46:56', '1', ' ', NULL),
-(173, 25, 33, '2007-02-12 14:46:56', '1', ' ', NULL),
-(174, 25, 37, '2007-02-12 14:46:56', '1', ' ', NULL),
-(175, 25, 39, '2007-02-12 14:46:57', '1', ' ', NULL),
-(176, 25, 0, '2007-02-12 17:14:18', '1', ' ', NULL),
-(177, 25, 30, '2007-02-13 12:04:15', '1', ' ', NULL),
-(178, 25, 31, '2007-02-13 12:04:15', '1', ' ', NULL),
-(179, 26, 42, '2008-03-26 16:32:06', '1', '  ', NULL),
-(180, 26, 42, '2008-03-26 16:32:06', '1', '  ', NULL),
-(181, 27, 43, '2008-03-26 17:17:39', '1', '  ', NULL),
-(182, 27, 43, '2008-03-26 17:18:45', '1', '  ', NULL),
-(183, 28, 43, '2008-03-26 17:22:07', '1', '  ', NULL),
-(184, 28, 43, '2008-03-26 17:22:52', '1', '  ', NULL),
-(185, 29, 43, '2008-03-26 17:23:02', '1', '  ', NULL),
-(186, 29, 43, '2008-03-26 17:23:02', '1', '  ', NULL),
-(187, 30, 43, '2008-03-27 11:32:49', '1', '  ', NULL),
-(188, 30, 43, '2008-03-27 11:33:38', '1', '  ', NULL),
-(189, 31, 42, '2008-03-27 11:43:21', '1', '  ', NULL),
-(190, 31, 42, '2008-03-27 11:43:21', '1', '  ', NULL),
-(191, 32, 42, '2008-03-27 11:49:56', '1', '  ', NULL),
-(192, 32, 42, '2008-03-27 11:49:56', '1', '  ', NULL),
-(193, 33, 42, '2008-03-27 12:58:55', '1', '  ', NULL),
-(194, 33, 42, '2008-03-27 12:58:55', '1', '  ', NULL),
-(195, 34, 43, '2008-03-27 14:02:41', '1', '  ', NULL),
-(196, 34, 43, '2008-03-27 14:03:17', '1', '  ', NULL),
-(214, 54, 42, '2008-06-03 08:33:33', '2', 'Error.-(004-Comando Error) en modulo ParticionaryFormatear()', NULL),
-(215, 55, 42, '2008-06-03 08:36:23', '2', 'Error.-(004-Comando Error) en modulo ParticionaryFormatear()', NULL),
-(216, 56, 85, '2009-03-20 16:21:45', '1', '  ', NULL),
-(221, 65, 85, '2009-03-26 13:58:19', '2', 'Error.-(004-Comando Error) en modulo CrearPerfil()', NULL),
-(222, 66, 85, '2009-03-26 14:12:52', '2', 'Error.-(004-Comando Error) en modulo CrearPerfil()', NULL),
-(231, 75, 85, '2009-04-06 12:55:22', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(232, 72, 85, '2009-04-06 13:05:10', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(233, 72, 85, '2009-04-06 13:06:34', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(234, 76, 86, '2009-04-06 14:25:18', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo CrearPerfil()', NULL),
-(228, 72, 85, '2009-04-06 11:38:00', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(235, 77, 86, '2009-04-06 14:30:17', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo CrearPerfil()', NULL),
-(230, 72, 85, '2009-04-06 11:54:39', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(236, 78, 86, '2009-04-06 14:35:25', '1', '  ', NULL),
-(237, 79, 86, '2009-04-06 14:47:18', '1', '  ', NULL),
-(238, 80, 86, '2009-04-06 14:49:09', '1', '  ', NULL),
-(239, 81, 86, '2009-04-06 14:50:49', '1', '  ', NULL),
-(240, 82, 86, '2009-04-06 15:55:35', '1', '  ', NULL),
-(241, 83, 86, '2009-04-07 08:39:27', '1', '  ', NULL),
-(242, 89, 86, '2009-04-07 11:40:01', '1', '  ', NULL),
-(243, 90, 85, '2009-04-07 13:11:46', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(244, 92, 85, '2009-04-07 13:17:28', '1', '  ', NULL),
-(246, 94, 85, '2009-04-07 13:24:52', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(247, 95, 85, '2009-04-07 13:27:40', '1', '  ', NULL),
-(248, 96, 85, '2009-04-07 13:32:17', '1', '  ', NULL),
-(249, 97, 85, '2009-04-07 13:40:58', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo TomaNomSO()', NULL),
-(250, 98, 87, '2009-04-07 14:19:20', '1', '  ', NULL),
-(251, 99, 87, '2009-04-07 14:23:32', '1', '  ', NULL),
-(261, 114, 85, '2009-04-16 11:41:00', '1', '  ', NULL),
-(262, 115, 85, '2009-04-16 11:56:33', '1', '  ', NULL),
-(263, 116, 85, '2009-04-16 11:58:13', '1', '  ', NULL),
-(264, 117, 85, '2009-04-16 12:06:26', '1', '  ', NULL),
-(265, 118, 85, '2009-04-16 12:07:57', '1', '  ', NULL),
-(266, 118, 43, '2009-04-16 12:51:43', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(267, 118, 43, '2009-04-16 12:57:07', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(268, 118, 43, '2009-04-16 13:08:22', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(269, 118, 43, '2009-04-16 13:11:36', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(270, 118, 43, '2009-04-16 13:18:45', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(271, 118, 43, '2009-04-16 13:27:15', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(272, 118, 43, '2009-04-16 13:28:30', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(273, 118, 43, '2009-04-16 13:33:37', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(274, 118, 43, '2009-04-16 13:34:44', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(275, 118, 43, '2009-04-16 13:37:39', '2', 'Error.-(023-Error desconocido) en modulo ExecShell()', NULL),
-(276, 118, 43, '2009-04-16 13:39:56', '1', '  ', NULL),
-(277, 119, 86, '2009-04-17 13:12:35', '1', '  ', NULL),
-(278, 120, 86, '2009-04-17 13:24:05', '1', '  ', NULL),
-(279, 121, 86, '2009-04-17 14:37:31', '2', 'Error.-(002-No se puede establecer conexiÃ³n con el servidor Hidra) en modulo RestaurandoImagen()', NULL),
-(283, 127, 86, '2009-05-12 15:45:27', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo RestaurandoImagen()', NULL),
-(284, 128, 86, '2009-05-12 15:48:11', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo RestaurandoImagen()', NULL),
-(285, 130, 86, '2009-05-20 13:04:50', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo RestaurandoImagen()', NULL),
-(286, 131, 86, '2009-05-20 13:11:07', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo RestaurandoImagen()', NULL),
-(287, 132, 86, '2009-05-20 13:41:46', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo Particionar()', NULL),
-(288, 133, 86, '2009-05-20 13:49:30', '1', '  ', NULL),
-(289, 134, 86, '2009-05-20 15:07:02', '1', '  ', NULL),
-(290, 135, 86, '2009-05-21 10:10:13', '1', '  ', NULL),
-(291, 136, 86, '2009-05-21 11:02:20', '2', 'Error.-() en modulo ', NULL),
-(292, 137, 86, '2009-05-21 11:04:40', '2', 'Error.-() en modulo ', NULL),
-(293, 138, 86, '2009-05-21 11:42:19', '1', '  ', NULL),
-(294, 139, 85, '2009-05-21 14:52:18', '2', 'Error.-(001-No hay memoria suficiente para el buffer) en modulo Particionar()', NULL),
-(295, 140, 85, '2009-05-21 14:56:06', '1', '  ', NULL),
-(296, 141, 85, '2009-05-21 15:02:45', '1', '  ', NULL),
-(298, 147, 91, '2009-09-25 13:42:05', '1', '  ', NULL),
-(299, 147, 91, '2009-09-25 13:42:05', '1', '  ', NULL);
 
 -- --------------------------------------------------------
 
@@ -2614,8 +2263,7 @@ INSERT INTO `notificaciones` (`idnotificacion`, `accionid`, `idnotificador`, `fe
 -- Estructura de tabla para la tabla `ordenadores`
 -- 
 
-DROP TABLE IF EXISTS `ordenadores`;
-CREATE TABLE IF NOT EXISTS `ordenadores` (
+CREATE TABLE `ordenadores` (
   `idordenador` int(11) NOT NULL auto_increment,
   `nombreordenador` varchar(100) default NULL,
   `ip` varchar(50) NOT NULL default '',
@@ -2630,17 +2278,12 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `idparticion` int(11) default NULL,
   `cache` int(11) default NULL,
   PRIMARY KEY  (`idordenador`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=92 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `ordenadores`
 -- 
 
-INSERT INTO `ordenadores` (`idordenador`, `nombreordenador`, `ip`, `mac`, `idaula`, `idperfilhard`, `idservidordhcp`, `idservidorrembo`, `grupoid`, `idconfiguracion`, `idmenu`, `idparticion`, `cache`) VALUES 
-(86, 'HDR-7', '10.1.15.7', '001BB9933E9D', 11, 26, 1, 1, 0, 100, 0, 31, 0),
-(85, 'HRD-8', '10.1.15.8', '0002B32278F6', 11, 27, 1, 1, 0, 86, 0, 28, 0),
-(91, 'HDR-9', '10.1.15.9', '000476D6E8AD', 11, 1, 4, 2, 0, 101, 0, 30, 0),
-(90, 'HDR-4', '10.1.15.4', '0013D336A6D3', 11, 28, 4, 2, 0, 102, 0, 30, 0);
 
 -- --------------------------------------------------------
 
@@ -2648,8 +2291,7 @@ INSERT INTO `ordenadores` (`idordenador`, `nombreordenador`, `ip`, `mac`, `idaul
 -- Estructura de tabla para la tabla `ordenador_imagen`
 -- 
 
-DROP TABLE IF EXISTS `ordenador_imagen`;
-CREATE TABLE IF NOT EXISTS `ordenador_imagen` (
+CREATE TABLE `ordenador_imagen` (
   `idordenador` int(11) NOT NULL default '0',
   `particion` int(11) NOT NULL default '0',
   `idimagen` int(11) NOT NULL default '0'
@@ -2659,9 +2301,6 @@ CREATE TABLE IF NOT EXISTS `ordenador_imagen` (
 -- Volcar la base de datos para la tabla `ordenador_imagen`
 -- 
 
-INSERT INTO `ordenador_imagen` (`idordenador`, `particion`, `idimagen`) VALUES 
-(86, 2, 6),
-(90, 1, 7);
 
 -- --------------------------------------------------------
 
@@ -2669,8 +2308,7 @@ INSERT INTO `ordenador_imagen` (`idordenador`, `particion`, `idimagen`) VALUES
 -- Estructura de tabla para la tabla `parametros`
 -- 
 
-DROP TABLE IF EXISTS `parametros`;
-CREATE TABLE IF NOT EXISTS `parametros` (
+CREATE TABLE `parametros` (
   `idparametro` int(11) NOT NULL auto_increment,
   `nemonico` char(3) NOT NULL default '',
   `descripcion` varchar(250) NOT NULL default '',
@@ -2713,23 +2351,16 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 -- Estructura de tabla para la tabla `particiones`
 -- 
 
-DROP TABLE IF EXISTS `particiones`;
-CREATE TABLE IF NOT EXISTS `particiones` (
+CREATE TABLE `particiones` (
   `idparticion` int(11) NOT NULL auto_increment,
   `particion` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idparticion`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=32 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `particiones`
 -- 
 
-INSERT INTO `particiones` (`idparticion`, `particion`) VALUES 
-(28, '1=NTFS;2=EXT3;3=LINUX-SWAP;@prt'),
-(27, '1=NTFS;2=EXT3;(null)=(null);3=LINUX-SWAP;(null)=(null);(null)=(null);@prt'),
-(29, '1=NTFS;2=EXT3;(null)=(null);3=EXTENDED;(null)=(null);(null)=(null);@prt'),
-(30, '1=NTFS;@prt'),
-(31, '1=NTFS;2=EXT2;3=LINUX-SWAP;@prt');
 
 -- --------------------------------------------------------
 
@@ -2737,8 +2368,7 @@ INSERT INTO `particiones` (`idparticion`, `particion`) VALUES
 -- Estructura de tabla para la tabla `pcifabricantes`
 -- 
 
-DROP TABLE IF EXISTS `pcifabricantes`;
-CREATE TABLE IF NOT EXISTS `pcifabricantes` (
+CREATE TABLE `pcifabricantes` (
   `idpcifabricante` int(11) NOT NULL auto_increment,
   `descripcion` varchar(255) NOT NULL,
   `codigo1` int(6) NOT NULL,
@@ -7656,25 +7286,19 @@ INSERT INTO `pcifabricantes` (`idpcifabricante`, `descripcion`, `codigo1`, `codi
 -- Estructura de tabla para la tabla `perfileshard`
 -- 
 
-DROP TABLE IF EXISTS `perfileshard`;
-CREATE TABLE IF NOT EXISTS `perfileshard` (
+CREATE TABLE `perfileshard` (
   `idperfilhard` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `idcentro` int(11) NOT NULL default '0',
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idperfilhard`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=29 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `perfileshard`
 -- 
 
-INSERT INTO `perfileshard` (`idperfilhard`, `descripcion`, `idcentro`, `comentarios`, `grupoid`) VALUES 
-(1, 'Perfil default', 1, '', 0),
-(28, 'Perfil (HDR-4)', 1, NULL, 0),
-(27, 'Perfil (HRD-8)', 1, NULL, 0),
-(26, 'Perfil (HDR-7)', 1, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -7682,8 +7306,7 @@ INSERT INTO `perfileshard` (`idperfilhard`, `descripcion`, `idcentro`, `comentar
 -- Estructura de tabla para la tabla `perfileshard_hardwares`
 -- 
 
-DROP TABLE IF EXISTS `perfileshard_hardwares`;
-CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
+CREATE TABLE `perfileshard_hardwares` (
   `idperfilhard` int(11) NOT NULL default '0',
   `idhardware` int(11) NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -7692,37 +7315,6 @@ CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
 -- Volcar la base de datos para la tabla `perfileshard_hardwares`
 -- 
 
-INSERT INTO `perfileshard_hardwares` (`idperfilhard`, `idhardware`) VALUES 
-(1, 21),
-(10, 22),
-(10, 22),
-(10, 23),
-(10, 26),
-(10, 27),
-(1, 30),
-(11, 31),
-(11, 31),
-(11, 32),
-(11, 33),
-(11, 34),
-(1, 35),
-(12, 41),
-(16, 57),
-(28, 102),
-(28, 100),
-(28, 101),
-(27, 98),
-(27, 97),
-(27, 96),
-(27, 94),
-(27, 95),
-(28, 99),
-(26, 92),
-(26, 91),
-(26, 90),
-(26, 88),
-(26, 89),
-(26, 93);
 
 -- --------------------------------------------------------
 
@@ -7730,23 +7322,17 @@ INSERT INTO `perfileshard_hardwares` (`idperfilhard`, `idhardware`) VALUES
 -- Estructura de tabla para la tabla `perfileshard_perfilessoft`
 -- 
 
-DROP TABLE IF EXISTS `perfileshard_perfilessoft`;
-CREATE TABLE IF NOT EXISTS `perfileshard_perfilessoft` (
+CREATE TABLE `perfileshard_perfilessoft` (
   `idphardidpsoft` int(11) NOT NULL auto_increment,
   `idperfilhard` int(11) NOT NULL default '0',
   `idperfilsoft` int(11) NOT NULL default '0',
   PRIMARY KEY  (`idphardidpsoft`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=16 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `perfileshard_perfilessoft`
 -- 
 
-INSERT INTO `perfileshard_perfilessoft` (`idphardidpsoft`, `idperfilhard`, `idperfilsoft`) VALUES 
-(12, 26, 8),
-(14, 1, 11),
-(15, 28, 11),
-(13, 26, 10);
 
 -- --------------------------------------------------------
 
@@ -7754,24 +7340,19 @@ INSERT INTO `perfileshard_perfilessoft` (`idphardidpsoft`, `idperfilhard`, `idpe
 -- Estructura de tabla para la tabla `perfilessoft`
 -- 
 
-DROP TABLE IF EXISTS `perfilessoft`;
-CREATE TABLE IF NOT EXISTS `perfilessoft` (
+CREATE TABLE `perfilessoft` (
   `idperfilsoft` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `idcentro` int(11) NOT NULL default '0',
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idperfilsoft`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `perfilessoft`
 -- 
 
-INSERT INTO `perfilessoft` (`idperfilsoft`, `descripcion`, `idcentro`, `comentarios`, `grupoid`) VALUES 
-(10, 'Linux Inves (EAC)', 1, '', 0),
-(11, 'Windows XP (openGnsys)', 1, '', 0),
-(8, 'Windows Xp Inves (EAC)', 1, '', 0);
 
 -- --------------------------------------------------------
 
@@ -7779,8 +7360,7 @@ INSERT INTO `perfilessoft` (`idperfilsoft`, `descripcion`, `idcentro`, `comentar
 -- Estructura de tabla para la tabla `perfilessoft_softwares`
 -- 
 
-DROP TABLE IF EXISTS `perfilessoft_softwares`;
-CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
+CREATE TABLE `perfilessoft_softwares` (
   `idperfilsoft` int(11) NOT NULL default '0',
   `idsoftware` int(11) NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -7789,12 +7369,6 @@ CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
 -- Volcar la base de datos para la tabla `perfilessoft_softwares`
 -- 
 
-INSERT INTO `perfilessoft_softwares` (`idperfilsoft`, `idsoftware`) VALUES 
-(11, 3),
-(11, 7),
-(11, 1),
-(10, 6),
-(8, 1);
 
 -- --------------------------------------------------------
 
@@ -7802,8 +7376,7 @@ INSERT INTO `perfilessoft_softwares` (`idperfilsoft`, `idsoftware`) VALUES
 -- Estructura de tabla para la tabla `phard_psoft_softincremental`
 -- 
 
-DROP TABLE IF EXISTS `phard_psoft_softincremental`;
-CREATE TABLE IF NOT EXISTS `phard_psoft_softincremental` (
+CREATE TABLE `phard_psoft_softincremental` (
   `idphardidpsoft` int(11) NOT NULL default '0',
   `idsoftincremental` int(11) NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -7819,8 +7392,7 @@ CREATE TABLE IF NOT EXISTS `phard_psoft_softincremental` (
 -- Estructura de tabla para la tabla `procedimientos`
 -- 
 
-DROP TABLE IF EXISTS `procedimientos`;
-CREATE TABLE IF NOT EXISTS `procedimientos` (
+CREATE TABLE `procedimientos` (
   `idprocedimiento` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `urlimg` varchar(250) default NULL,
@@ -7828,17 +7400,12 @@ CREATE TABLE IF NOT EXISTS `procedimientos` (
   `comentarios` text,
   `grupoid` int(11) default '0',
   PRIMARY KEY  (`idprocedimiento`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `procedimientos`
 -- 
 
-INSERT INTO `procedimientos` (`idprocedimiento`, `descripcion`, `urlimg`, `idcentro`, `comentarios`, `grupoid`) VALUES 
-(8, 'Inicio sesi?n windows en partici?n 1', NULL, 1, NULL, 0),
-(9, 'Restaurar Windows 98 Comunicaciones', NULL, 1, NULL, 0),
-(10, 'Apagar', NULL, 1, NULL, 0),
-(11, 'formateo', NULL, 1, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -7846,25 +7413,19 @@ INSERT INTO `procedimientos` (`idprocedimiento`, `descripcion`, `urlimg`, `idcen
 -- Estructura de tabla para la tabla `procedimientos_comandos`
 -- 
 
-DROP TABLE IF EXISTS `procedimientos_comandos`;
-CREATE TABLE IF NOT EXISTS `procedimientos_comandos` (
+CREATE TABLE `procedimientos_comandos` (
   `idprocedimientocomando` int(11) NOT NULL auto_increment,
   `idprocedimiento` int(11) NOT NULL default '0',
   `orden` tinyint(4) default NULL,
   `idcomando` int(11) NOT NULL default '0',
   `parametros` text,
   PRIMARY KEY  (`idprocedimientocomando`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `procedimientos_comandos`
 -- 
 
-INSERT INTO `procedimientos_comandos` (`idprocedimientocomando`, `idprocedimiento`, `orden`, `idcomando`, `parametros`) VALUES 
-(4, 8, 0, 7, '2nfn=EjecutarScript\rtis=Inicio sesi?n windows en partici?n 1\rdcr=Inicio sesi?n windows en partici?n 1\rscp=HDBoot%280%2C1%29%3B\r'),
-(5, 9, 0, 3, '2nfn=RestaurarImagen\rpar=1\ridi=1\rifs=2\rifh=1\rnem=Win98\ridc=1\rswr=M\ricr=\rtpa=FAT32\rpth=1\r'),
-(6, 10, 0, 2, '2nfn=Apagar\r'),
-(7, 11, 0, 9, '2nfn=ParticionaryFormatear\rppa=FAT32:5000000 NTFS:10000000 EXT2:10000000 LINUX-SWAP:1000000\rlpa=\rhdc=1;2;3\r');
 
 -- --------------------------------------------------------
 
@@ -7872,8 +7433,7 @@ INSERT INTO `procedimientos_comandos` (`idprocedimientocomando`, `idprocedimient
 -- Estructura de tabla para la tabla `programaciones`
 -- 
 
-DROP TABLE IF EXISTS `programaciones`;
-CREATE TABLE IF NOT EXISTS `programaciones` (
+CREATE TABLE `programaciones` (
   `idprogramacion` int(11) NOT NULL auto_increment,
   `tipoaccion` int(11) default NULL,
   `identificador` int(11) default NULL,
@@ -7895,14 +7455,12 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
   `minutosfin` tinyint(4) default NULL,
   `suspendida` tinyint(1) default NULL,
   PRIMARY KEY  (`idprogramacion`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `programaciones`
 -- 
 
-INSERT INTO `programaciones` (`idprogramacion`, `tipoaccion`, `identificador`, `nombrebloque`, `annos`, `meses`, `diario`, `dias`, `semanas`, `horas`, `ampm`, `minutos`, `segundos`, `horasini`, `ampmini`, `minutosini`, `horasfin`, `ampmfin`, `minutosfin`, `suspendida`) VALUES 
-(1, 4, 2, 'bloque1', 8, 15, 0, 9, 0, 0, 1, 0, 0, 16, 1, 0, 127, 1, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -7910,8 +7468,7 @@ INSERT INTO `programaciones` (`idprogramacion`, `tipoaccion`, `identificador`, `
 -- Estructura de tabla para la tabla `reservas`
 -- 
 
-DROP TABLE IF EXISTS `reservas`;
-CREATE TABLE IF NOT EXISTS `reservas` (
+CREATE TABLE `reservas` (
   `idreserva` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `solicitante` varchar(250) default NULL,
@@ -7926,14 +7483,12 @@ CREATE TABLE IF NOT EXISTS `reservas` (
   `idtrabajo` int(11) default NULL,
   `estado` tinyint(4) default NULL,
   PRIMARY KEY  (`idreserva`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `reservas`
 -- 
 
-INSERT INTO `reservas` (`idreserva`, `descripcion`, `solicitante`, `email`, `idestatus`, `comentarios`, `grupoid`, `idcentro`, `idaula`, `idimagen`, `idtarea`, `idtrabajo`, `estado`) VALUES 
-(2, 'Curso de Redes', 'pepe', '', 4, '', 0, 1, 7, 1, 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -7941,8 +7496,7 @@ INSERT INTO `reservas` (`idreserva`, `descripcion`, `solicitante`, `email`, `ide
 -- Estructura de tabla para la tabla `reservastemporal`
 -- 
 
-DROP TABLE IF EXISTS `reservastemporal`;
-CREATE TABLE IF NOT EXISTS `reservastemporal` (
+CREATE TABLE `reservastemporal` (
   `idreservatemporal` int(11) NOT NULL auto_increment,
   `usuario` char(10) NOT NULL default '',
   `idreserva` int(11) NOT NULL default '0',
@@ -7961,8 +7515,7 @@ CREATE TABLE IF NOT EXISTS `reservastemporal` (
 -- Estructura de tabla para la tabla `servidoresdhcp`
 -- 
 
-DROP TABLE IF EXISTS `servidoresdhcp`;
-CREATE TABLE IF NOT EXISTS `servidoresdhcp` (
+CREATE TABLE `servidoresdhcp` (
   `idservidordhcp` int(11) NOT NULL auto_increment,
   `nombreservidordhcp` varchar(250) NOT NULL default '',
   `ip` varchar(15) NOT NULL default '',
@@ -7973,15 +7526,12 @@ CREATE TABLE IF NOT EXISTS `servidoresdhcp` (
   `grupoid` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idservidordhcp`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `servidoresdhcp`
 -- 
 
-INSERT INTO `servidoresdhcp` (`idservidordhcp`, `nombreservidordhcp`, `ip`, `passguor`, `pathdhcpconf`, `pathdhcpd`, `idcentro`, `grupoid`, `comentarios`) VALUES 
-(1, 'Servidor EAC', '10.1.15.4', '', '', '', 1, 0, ''),
-(4, 'Limonero', '10.1.15.3', '', '', '', 1, 0, '');
 
 -- --------------------------------------------------------
 
@@ -7989,8 +7539,7 @@ INSERT INTO `servidoresdhcp` (`idservidordhcp`, `nombreservidordhcp`, `ip`, `pas
 -- Estructura de tabla para la tabla `servidoresrembo`
 -- 
 
-DROP TABLE IF EXISTS `servidoresrembo`;
-CREATE TABLE IF NOT EXISTS `servidoresrembo` (
+CREATE TABLE `servidoresrembo` (
   `idservidorrembo` int(11) NOT NULL auto_increment,
   `nombreservidorrembo` varchar(250) NOT NULL default '',
   `ip` varchar(15) NOT NULL default '',
@@ -8002,15 +7551,12 @@ CREATE TABLE IF NOT EXISTS `servidoresrembo` (
   `comentarios` text,
   `puertorepo` int(11) NOT NULL,
   PRIMARY KEY  (`idservidorrembo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `servidoresrembo`
 -- 
 
-INSERT INTO `servidoresrembo` (`idservidorrembo`, `nombreservidorrembo`, `ip`, `passguor`, `pathremboconf`, `pathrembod`, `idcentro`, `grupoid`, `comentarios`, `puertorepo`) VALUES 
-(1, 'Servidor EAC', '10.1.15.4', '', '', '/usr/local/hidra', 1, 0, '', 2009),
-(2, 'Limonero', '10.1.15.3', '', '', '/usr/local/hidra', 1, 0, '', 2009);
 
 -- --------------------------------------------------------
 
@@ -8018,15 +7564,14 @@ INSERT INTO `servidoresrembo` (`idservidorrembo`, `nombreservidorrembo`, `ip`, `
 -- Estructura de tabla para la tabla `softincrementales`
 -- 
 
-DROP TABLE IF EXISTS `softincrementales`;
-CREATE TABLE IF NOT EXISTS `softincrementales` (
+CREATE TABLE `softincrementales` (
   `idsoftincremental` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `idcentro` int(11) default NULL,
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idsoftincremental`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `softincrementales`
@@ -8039,8 +7584,7 @@ CREATE TABLE IF NOT EXISTS `softincrementales` (
 -- Estructura de tabla para la tabla `softincremental_softwares`
 -- 
 
-DROP TABLE IF EXISTS `softincremental_softwares`;
-CREATE TABLE IF NOT EXISTS `softincremental_softwares` (
+CREATE TABLE `softincremental_softwares` (
   `idsoftincremental` int(11) NOT NULL default '0',
   `idsoftware` int(11) NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -8056,8 +7600,7 @@ CREATE TABLE IF NOT EXISTS `softincremental_softwares` (
 -- Estructura de tabla para la tabla `softwares`
 -- 
 
-DROP TABLE IF EXISTS `softwares`;
-CREATE TABLE IF NOT EXISTS `softwares` (
+CREATE TABLE `softwares` (
   `idsoftware` int(11) NOT NULL auto_increment,
   `idtiposoftware` int(11) NOT NULL default '0',
   `descripcion` varchar(250) NOT NULL default '',
@@ -8066,20 +7609,12 @@ CREATE TABLE IF NOT EXISTS `softwares` (
   `idtiposo` int(11) default NULL,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idsoftware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `softwares`
 -- 
 
-INSERT INTO `softwares` (`idsoftware`, `idtiposoftware`, `descripcion`, `idcentro`, `urlimg`, `idtiposo`, `grupoid`) VALUES 
-(1, 1, 'windows XP', 1, NULL, 3, 0),
-(2, 2, 'Matlab', 1, NULL, 0, 0),
-(3, 2, 'winzip', 1, NULL, 0, 0),
-(4, 1, 'Autocad', 1, NULL, 3, 0),
-(5, 1, 'WIndows 98', 1, NULL, 1, 0),
-(6, 1, 'Ubuntu', 1, NULL, 9, 0),
-(7, 2, 'Acorbat reader', 1, NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -8087,8 +7622,7 @@ INSERT INTO `softwares` (`idsoftware`, `idtiposoftware`, `descripcion`, `idcentr
 -- Estructura de tabla para la tabla `tareas`
 -- 
 
-DROP TABLE IF EXISTS `tareas`;
-CREATE TABLE IF NOT EXISTS `tareas` (
+CREATE TABLE `tareas` (
   `idtarea` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `urlimg` varchar(250) default NULL,
@@ -8096,15 +7630,12 @@ CREATE TABLE IF NOT EXISTS `tareas` (
   `comentarios` text,
   `grupoid` int(11) default '0',
   PRIMARY KEY  (`idtarea`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tareas`
 -- 
 
-INSERT INTO `tareas` (`idtarea`, `descripcion`, `urlimg`, `idcentro`, `comentarios`, `grupoid`) VALUES 
-(3, 'Restaurar Windows 98 Comunicaciones', NULL, 1, NULL, 0),
-(4, 'Apagar aula de pruebas', NULL, 1, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -8112,8 +7643,7 @@ INSERT INTO `tareas` (`idtarea`, `descripcion`, `urlimg`, `idcentro`, `comentari
 -- Estructura de tabla para la tabla `tareas_comandos`
 -- 
 
-DROP TABLE IF EXISTS `tareas_comandos`;
-CREATE TABLE IF NOT EXISTS `tareas_comandos` (
+CREATE TABLE `tareas_comandos` (
   `idtareacomando` int(11) NOT NULL auto_increment,
   `idtarea` int(11) NOT NULL default '0',
   `orden` tinyint(4) default NULL,
@@ -8122,15 +7652,12 @@ CREATE TABLE IF NOT EXISTS `tareas_comandos` (
   `idambito` int(11) default NULL,
   `parametros` text,
   PRIMARY KEY  (`idtareacomando`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tareas_comandos`
 -- 
 
-INSERT INTO `tareas_comandos` (`idtareacomando`, `idtarea`, `orden`, `idcomando`, `ambito`, `idambito`, `parametros`) VALUES 
-(1, 3, 0, 3, 4, 7, '2nfn=RestaurarImagen\rpar=1\ridi=1\rifs=2\rifh=1\rnem=Win98\ridc=1\rswr=M\ricr=\rtpa=FAT32\rpth=1\riph=10.1.15.101;10.1.15.102;10.1.15.103;10.1.15.104;10.1.15.105;10.1.15.106;10.1.15.107;10.1.15.108;10.1.15.109;10.1.15.110;10.1.15.111;10.1.15.112;10.1.15.113;10.1.15.114;10.1.15.115;10.1.15.116\r'),
-(2, 4, 0, 2, 4, 8, '2nfn=Apagar\riph=10.1.15.6;10.1.15.7;10.1.15.3;10.1.15.9;10.1.15.8\r');
 
 -- --------------------------------------------------------
 
@@ -8138,8 +7665,7 @@ INSERT INTO `tareas_comandos` (`idtareacomando`, `idtarea`, `orden`, `idcomando`
 -- Estructura de tabla para la tabla `tipohardwares`
 -- 
 
-DROP TABLE IF EXISTS `tipohardwares`;
-CREATE TABLE IF NOT EXISTS `tipohardwares` (
+CREATE TABLE `tipohardwares` (
   `idtipohardware` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `urlimg` varchar(250) NOT NULL default '',
@@ -8158,7 +7684,7 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 (3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 1),
 (4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
 (5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
-(7, 'Tarjetas grÃ¡ficas', '../images/iconos/vga.gif', 'vga', 1),
+(7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga', 1),
 (8, 'discos', '../images/iconos/discoduro.gif', 'dis', 0),
 (9, 'Dispositivos de sonido', '../images/iconos/tsonido.gif', 'aud', 0);
 
@@ -8168,8 +7694,7 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 -- Estructura de tabla para la tabla `tiposoftwares`
 -- 
 
-DROP TABLE IF EXISTS `tiposoftwares`;
-CREATE TABLE IF NOT EXISTS `tiposoftwares` (
+CREATE TABLE `tiposoftwares` (
   `idtiposoftware` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   `urlimg` varchar(250) NOT NULL default '',
@@ -8191,8 +7716,7 @@ INSERT INTO `tiposoftwares` (`idtiposoftware`, `descripcion`, `urlimg`) VALUES
 -- Estructura de tabla para la tabla `tiposos`
 -- 
 
-DROP TABLE IF EXISTS `tiposos`;
-CREATE TABLE IF NOT EXISTS `tiposos` (
+CREATE TABLE `tiposos` (
   `idtiposo` int(11) NOT NULL auto_increment,
   `descripcion` varchar(50) NOT NULL default '',
   `nemonico` varchar(8) NOT NULL,
@@ -8225,8 +7749,7 @@ INSERT INTO `tiposos` (`idtiposo`, `descripcion`, `nemonico`, `descripcionrmb`, 
 -- Estructura de tabla para la tabla `trabajos`
 -- 
 
-DROP TABLE IF EXISTS `trabajos`;
-CREATE TABLE IF NOT EXISTS `trabajos` (
+CREATE TABLE `trabajos` (
   `idtrabajo` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) default NULL,
   `idcentro` int(11) NOT NULL default '0',
@@ -8234,7 +7757,7 @@ CREATE TABLE IF NOT EXISTS `trabajos` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idtrabajo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `trabajos`
@@ -8247,8 +7770,7 @@ CREATE TABLE IF NOT EXISTS `trabajos` (
 -- Estructura de tabla para la tabla `trabajos_tareas`
 -- 
 
-DROP TABLE IF EXISTS `trabajos_tareas`;
-CREATE TABLE IF NOT EXISTS `trabajos_tareas` (
+CREATE TABLE `trabajos_tareas` (
   `idtrabajotarea` int(11) NOT NULL auto_increment,
   `idtrabajo` int(11) NOT NULL default '0',
   `orden` tinyint(4) default NULL,
@@ -8269,8 +7791,7 @@ CREATE TABLE IF NOT EXISTS `trabajos_tareas` (
 -- Estructura de tabla para la tabla `universidades`
 -- 
 
-DROP TABLE IF EXISTS `universidades`;
-CREATE TABLE IF NOT EXISTS `universidades` (
+CREATE TABLE `universidades` (
   `iduniversidad` int(11) NOT NULL auto_increment,
   `nombreuniversidad` varchar(200) NOT NULL default '',
   `comentarios` text,
@@ -8282,7 +7803,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
 -- 
 
 INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`) VALUES 
-(1, 'Universidad de Sevilla', '');
+(1, 'Universidad de ...', '');
 
 -- --------------------------------------------------------
 
@@ -8290,8 +7811,7 @@ INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`
 -- Estructura de tabla para la tabla `urlimagesitems`
 -- 
 
-DROP TABLE IF EXISTS `urlimagesitems`;
-CREATE TABLE IF NOT EXISTS `urlimagesitems` (
+CREATE TABLE `urlimagesitems` (
   `idurlimagesitems` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idurlimagesitems`)
@@ -8308,8 +7828,7 @@ CREATE TABLE IF NOT EXISTS `urlimagesitems` (
 -- Estructura de tabla para la tabla `usuarios`
 -- 
 
-DROP TABLE IF EXISTS `usuarios`;
-CREATE TABLE IF NOT EXISTS `usuarios` (
+CREATE TABLE `usuarios` (
   `idusuario` int(11) NOT NULL auto_increment,
   `usuario` varchar(50) NOT NULL default '',
   `pasguor` varchar(50) NOT NULL default '',
@@ -8319,16 +7838,11 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `ididioma` int(11) default NULL,
   `idtipousuario` tinyint(4) default NULL,
   PRIMARY KEY  (`idusuario`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- 
 -- Volcar la base de datos para la tabla `usuarios`
 -- 
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `idambito`, `ididioma`, `idtipousuario`) VALUES 
-(1, 'usuhidra', 'passusuhidra', 'Usuario de la base de datos MySql', '', 0, 1, 1),
-(2, 'alonso', 'diegose', 'Jos Manuel Alonso', '', 1, 1, 2),
-(3, 'tuiou', 'yioyui', 'yioyio', '', 0, 1, 3),
-(4, 'popo', 'popo', 'opop', '', 0, 1, 3),
-(7, 'pepe', 'passpepe', 'pepe', '', 7, 1, 3),
-(8, 'ramon', 'gomez', 'RAMON', '', 1, 1, 2);
+(1, 'usuog', 'passusuog', 'Usuario de la base de datos MySql', '', 0, 1, 1);
