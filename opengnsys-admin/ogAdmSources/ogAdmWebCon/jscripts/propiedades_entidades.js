@@ -86,6 +86,7 @@ function confirmar(op){
 	}
 	else
 		wurl+="&identidad="+document.fdatos.identidad.value
+
 	ifr.src=wurl; // LLama a la página gestora
 }
 //________________________________________________________________________________________________________

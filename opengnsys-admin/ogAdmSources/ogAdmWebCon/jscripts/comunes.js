@@ -126,8 +126,9 @@ function insertar(l,t,w,h,pages,swi,idu){
 	reset_contextual(-1,-1) // Oculta menu contextual
 	var identificador=currentNodo.toma_identificador()
 	var literaltipo=currentNodo.toma_sufijo()
-	if(swi!=null && swi==1) identificador=0;
+	if(swi!=null && swi==1 && idu==null) identificador=0;
 	if(identificador==null) identificador=0;
+
 	if(literaltipo==LITAMBITO_AULAS){ // Nuevo grupo de ordenador hijo de un aula
 		if(	pages=="../propiedades/propiedades_ordenadores.php")
 			var whref="../propiedades/propiedades_ordenadores.php?opcion="+op_alta+"&grupoid=0"+"&idaula="+identificador;
@@ -153,6 +154,7 @@ function insertar(l,t,w,h,pages,swi,idu){
 				break;
 			case 2:
 				whref+="&identidad="+identificador;
+
 				break;
 			case 3:
 				whref+="&idambito="+identificador;
