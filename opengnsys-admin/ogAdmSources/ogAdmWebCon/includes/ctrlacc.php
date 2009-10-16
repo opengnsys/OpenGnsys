@@ -34,9 +34,8 @@ if (isset($_SESSION["urlacceso"]))	$urlacceso = $_SESSION["urlacceso"];
 // Comprueba el valor de las variables de sesi�
 $swacc=empty($cadenaconexion) || empty($servidorhidra) || empty($hidraport) || empty($usuario) || empty($idtipousuario);
 //============================================================================================================================
-if ($swacc){ // Error en alguna variable de sesi�
-	$paginaacceso="http://10.1.15.4/ogAdmWebCon/acceso.php?herror=1"; // P�ina de login de la Aplicación
-	Header('Location: '.$paginaacceso); // Redirecciona a la p�ina de login
+if ($swacc){ // Error en alguna variable de sesión
+	die("Error de acceso");
 }
 //============================================================================================================================
 ?>
