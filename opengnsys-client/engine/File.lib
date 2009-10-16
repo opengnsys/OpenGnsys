@@ -9,6 +9,22 @@
 #*/
 
 
+##### PRUEBAS 
+#         ogGetPath [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
+function ogCopyFile () {
+local SOURCE TARGET
+case "$1" in
+    /*)     SOURCE=$(ogGetFile "$1")      # */ (necesario Doxygen)
+            shift ;;
+    [1-9]*) SOURCE=$(ogGetFile "$1" "$2" "$3")
+            shift 3 ;;
+    *)      SOURCE=$(ogGetFile "$1" "$2")
+            shift 2 ;;
+esac
+
+}
+
+
 #/**
 #         ogGetPath [ str_repo | int_ndisk int_npartition ] path_filepath
 #@brief   Inicia el proceso de arranque de un sistema de archivos.
@@ -57,7 +73,7 @@ case $# in
         esac ;;
     3)	FILE="$(ogMount $1 $2)/$3" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
-	return $? ;;
+        return $? ;;
 esac
 
 #/// Eliminar caracteres \c / iniciales, finales y duplicados.

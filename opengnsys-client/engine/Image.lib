@@ -50,22 +50,22 @@ if ogIsLocked $1 $2; then
 fi
 IMGDIR=$(ogGetParentPath "$3" "$4")
 [ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$3 $(dirname $4)" || return $?
-IMGFILE="$IMGDIR/$(basename "$4").img"
+IMGFILE="$IMGDIR/$(basename "$4")"
 ogUnmount $1 $2 2>/dev/null
 
 ogLock $1 $2 || return $?
-trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
+trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 6 9
 
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
+        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     NTFS|HNTFS)
         partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -B gui=no -c -z1 save $PART "$IMGFILE"
+        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
         ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
         return $? ;;
@@ -111,7 +111,7 @@ fi
 #/// Error si no se reciben menos de 2 parámetros.
 [ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 #/// Error si el fichero de imagen no es accesible.
-IMGFILE=$(ogGetPath "$1" "$2.img.000") || return $?
+IMGFILE=$(ogGetPath "$1" "$2") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 #/// Devuelve el tamaño de la imagen en KB.
@@ -124,7 +124,7 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 # Obtener tipo de imagen 
 function ogGetImageType () {
 local IMGFILE
-IMGFILE=$(ogGetPath "$1" "$2.img.000") || return $?
+IMGFILE=$(ogGetPath "$1" "$2") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
         awk '/^Filesystem/ {sub(/\.\.+/," "); sub(/fs$/,""); print toupper($2);}'
@@ -164,7 +164,7 @@ fi
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
 PART="$(ogDiskToDev $3 $4)" || return $?
-IMGFILE=$(ogGetPath "$1" "$2.img.000") || return $?
+IMGFILE=$(ogGetPath "$1" "$2") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 # Error si la imagen no cabe en la particion.
 [ $(ogGetImageSize "$1" "$2") -gt $(ogGetPartitionSize $3 $4) ] && ogRaiseError $OG_ERR_PARTITION && return $?

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Scirpt de ejemplo para clonar imagen.
+# create-image.sh - Scirpt de ejemplo para crear una imagen de un sistema de archivos.
 # (puede usarse como base para el programa de creación de imágenes usado por OpenGNSys Admin).
 
 PROG="$(basename $0)"
@@ -8,7 +8,7 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
-# Procesar parámetros de entrada
+# Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
 IMGDIR=$(ogGetParentPath "$3" "$4") || exit $?
 IMGFILE="$IMGDIR/$(basename $4).img"
@@ -20,13 +20,19 @@ fi
 ogEcho info "$PROG: Origen=$PART, Destino=$IMGFILE"
 
 # Obtener tamaño de la partición.
-SIZE=$(ogGetPartitionSize "$1" "$2") || exit $?
+SIZE=$(ogGetPartitionSize "$1" "$2")
 # Reducir el sistema de archvios.
 REDSIZE=$(ogReduceFs $1 $2) || REDSIZE=$[SIZE+1]
-[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $REDSIZE
+if [ $REDSIZE -lt $SIZE ]; then
+    ogSetPartitionSize $1 $2 $REDSIZE
+fi
 # Crear la imagen.
-ogCreateImage "$1" "$2" "$3" "$4" || ogRaiseError $OG_ERR_IMAGE || exit $?
-mv "$IMGFILE.000" "$IMGFILE"
+ogCreateImage "$@"
+EXITCODE=$?
 # Restaurar tamaño.
-[ $REDSIZE -lt $SIZE ] && ogSetPartitionSize $1 $2 $SIZE
+if [ $REDSIZE -lt $SIZE ]; then
+    ogSetPartitionSize $1 $2 $SIZE
+    ogExtendFs $1 $2
+fi
+exit $EXITCODE
 

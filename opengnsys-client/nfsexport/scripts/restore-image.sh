@@ -1,5 +1,5 @@
 #!/bin/bash
-# Scirpt de ejemplo para restaurar una imagen.
+# restore-image.sh - Scirpt de ejemplo para restaurar una imagen.
 # (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
 
 PROG="$(basename $0)"
@@ -9,13 +9,13 @@ if [ $# -ne 4 ]; then
 fi
 
 # Procesar parámetros de entrada
-IMGFILE=$(ogGetPath "$1" "$2") || exit $?
+IMGFILE=$(ogGetPath "$1" "$2.img") || exit $?
 PART=$(ogDiskToDev "$3" "$4") || exit $?
 # Mostrar información.
 ogEcho info "$PROG: Origen=$PART, Destino=$IMGFILE"
 
 # Restaurar la imagen.
-ogRestoreImage "$1" "$2" "$3" "$4" || exit $?
+ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 ogExtendFs $1 $2
 
