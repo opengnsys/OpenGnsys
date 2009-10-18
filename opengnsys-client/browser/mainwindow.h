@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QProcess>
 #include <QMap>
+#include <QMainWindow>
 
 class QWebView;
 class QTextEdit;
@@ -18,8 +19,9 @@ class QString;
 class QUrl;
 class QFile;
 class QTextStream;
+class QDockWidget;
 
-class MainWindow : public QWidget
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -49,7 +51,7 @@ class MainWindow : public QWidget
     protected:
         QWebView *web;
         QTextEdit *text;
-        QVBoxLayout *layout;
+        QDockWidget *dock;
 
         QProcess *process;
         QStringList output;

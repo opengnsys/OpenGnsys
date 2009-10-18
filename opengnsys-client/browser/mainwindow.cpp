@@ -2,7 +2,7 @@
 #include <QtWebKit>
 #include <QStringList>
 #include <QWebView>
-#include <QLayout>
+#include <QDockWidget>
 #include <QtDebug>
 #include <QWebPage>
 #include <QProcess>
@@ -16,16 +16,41 @@
 #define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yy hh:mm:ss")
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent),web(new QWebView()),text(new QTextEdit()),
-      layout(new QVBoxLayout()),process(new QProcess(this)),
+    : QMainWindow(parent),web(new QWebView()),text(new QTextEdit()),
+      process(new QProcess(this)),
       logfile(NULL),logstream(NULL)
 {
     // Graphic
-    layout->addWidget(web);
-    layout->addWidget(text);
-    setLayout(layout);
+    //layout->addWidget(web);
+    //layout->addWidget(text);
+    //setLayout(layout);
+    setCentralWidget(web);
 
-    showFullScreen();
+    dock=new QDockWidget(this);
+    dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    dock->setWidget(text);
+    addDockWidget(Qt::BottomDockWidgetArea,dock);
+
+
+    /*
+    QTermWidget *console = new QTermWidget();
+    
+    QFont font = QApplication::font();
+    font.setFamily("Terminus");
+    font.setPointSize(12);
+    
+    console->setTerminalFont(font);
+    
+    //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
+    console->setScrollBarPosition(QTermWidget::ScrollBarRight);
+    
+    mainWindow->setCentralWidget(console);
+    mainWindow->resize(802, 610);
+    
+    QObject::connect(console, SIGNAL(finished()), mainWindow, SLOT(close()));
+    */
+    //showFullScreen();
 
     text->setReadOnly(true);
 
