@@ -10,18 +10,27 @@
 
 
 ##### PRUEBAS 
-#         ogGetPath [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
+#         ogCopyFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
 function ogCopyFile () {
-local SOURCE TARGET
+local ARGS SOURCE TARGET
+ARGS="$@"
 case "$1" in
-    /*)     SOURCE=$(ogGetFile "$1")      # */ (necesario Doxygen)
-            shift ;;
-    [1-9]*) SOURCE=$(ogGetFile "$1" "$2" "$3")
-            shift 3 ;;
-    *)      SOURCE=$(ogGetFile "$1" "$2")
-            shift 2 ;;
+    /*)     # Camino completo.
+        SOURCE=$(ogGetPath "$1")
+        shift ;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        shift 3 ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        shift 2 ;;
 esac
-
+#/// Comprobar fichero origen y directorio destino.
+[ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+TARGET=$(ogGetPath "$@")
+[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
+#/// Copiar fichero.
+cp "$SOURCE" "$TARGET"                      # (definir posible error)
 }
 
 
