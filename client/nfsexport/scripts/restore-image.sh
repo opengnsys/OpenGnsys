@@ -23,10 +23,15 @@ else
 fi
 PART=$(ogDiskToDev "$3" "$4") || exit $?
 
-# Mostrar información.
-ogEcho info "$PROG: Origen=$IMGFILE, Destino=$PART"
 # Restaurar la imagen.
-ogRestoreImage "$1" "$2" "$3" "$4" || exit $?
+ogEcho info "$PROG: Origen=$IMGFILE, Destino=$PART"
+ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
+ogEcho info "$PROG: Extender sistema de archivos."
 ogExtendFs $1 $2
+# Cambiar nombre en sistemas Windows.
+if [ "$(ogGetOsType  $3 $4)" = "Windows" ]; then
+    ogEcho info "$PROG: Cambiar nombre Windows."
+    # ogSetWindowsName "$(ogGetHostname)"
+fi
 

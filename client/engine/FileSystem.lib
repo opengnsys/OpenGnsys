@@ -101,7 +101,7 @@ fi
 #/// Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-ogUnmount $1 $2 >/dev/null
+ogUnmount $1 $2 2>/dev/null
 #/// Redimensionar al tamano máximo según el tipo de partición.
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
@@ -122,7 +122,7 @@ if ogIsLocked $1 $2; then
 fi
 #/// Redimensionar en modo uso exclusivo.
 ogLock $1 $2
-eval $PROG $PARAMS $PART
+eval $PROG $PARAMS $PART &>/dev/null
 ERRCODE=$?
 case $ERRCODE in
     0)    ;;
@@ -577,27 +577,27 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 
 #/// Redimensionar según el tipo de particion.
 case "$(ogGetFsType $1 $2)" in
-     EXT[234])
-	ogUnmount $1 $2 >/dev/null
-	# Ext2/3/4: Tamaño de los bloques del sistema de archivos
-	BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')
-	# Traduce el num. en sectores de 512B a tamano en MB.
-	SIZE=$(resize2fs -P $PART 2>/dev/null | \
-		awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')
-	resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-	;;
-     REISERFS)		# Usar "resize_reiserfs"
-	;;
-     NTFS|HNTFS)
-	rm -f $(ogGetPath $1 $2 pagefile.sys)
-	ogUnmount $1 $2 >/dev/null
-	#NTFS: Obtiene tamano minimo en MB.
-	SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print $8+1000}')
-	ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-	ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-	;;
-     *) ogRaiseError $OG_ERR_PARTITION "$1,$2"
-	return $? ;;
+    EXT[234])
+        ogUnmount $1 $2 >/dev/null
+        # Ext2/3/4: Tamaño de los bloques del sistema de archivos
+        BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')
+        # Traduce el num. en sectores de 512B a tamano en MB.
+        SIZE=$(resize2fs -P $PART 2>/dev/null | \
+		       awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')
+        resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	    ;;
+    REISERFS)		# Usar "resize_reiserfs"
+	    ;;
+    NTFS|HNTFS)
+        rm -f $(ogGetPath $1 $2 pagefile.sys)
+        ogUnmount $1 $2 >/dev/null
+        # NTFS: Obtiene tamaño mínimo en MB.
+        SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print $8+1000}')
+        ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+        ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+	    ;;
+    *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
+	    return $? ;;
 esac
 #/// Mostrar nuevo tamaño en KB.
 echo $[SIZE*1024]

@@ -12,15 +12,15 @@
 #/**
 #         ogGetOsVersion int_ndisk int_npartition
 #@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
-#@return  TipoSistema:Versión
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
+#@return  OSType:OSVersion
 #@note    TipoSistema = { Linux, Windows }
 #@note    Requisitos: awk, head, chroot
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
 #@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
-#@version 0.1 - Primeras pruebas con OpenGNSys
+#@version 0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
 #*/
@@ -43,30 +43,44 @@ MNTDIR=$(ogMount $1 $2) || return $?
 #/// Elección del tipo de sistema operativo.
 case "$(ogGetFsType $1 $2)" in
     EXT[234] | REISERFS | REISER4)
-	TYPE="Linux"
-	#/// Para Linux: leer descripción.
-	VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
-	#/// Si no se puede obtener, buscar en ficheros del sistema.
-	if [ -z "$VERSION" ]; then
- 	    FILE="$MNTDIR/etc/lsb-release"
- 	    [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
-	    FILE="$MNTDIR/etc/redhat-release"
-	    [ -r $FILE ] && VERSION="$(head -1 $FILE)"
-	    FILE="$MNTDIR/etc/SuSE-release"
-	    [ -r $FILE ] && VERSION="$(head -1 $FILE)"
-	fi
-	[ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
-	;;
+        TYPE="Linux"
+        #/// Para Linux: leer descripción.
+        VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
+        #/// Si no se puede obtener, buscar en ficheros del sistema.
+        if [ -z "$VERSION" ]; then
+            FILE="$MNTDIR/etc/lsb-release"
+            [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+            FILE="$MNTDIR/etc/redhat-release"
+            [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+            FILE="$MNTDIR/etc/SuSE-release"
+            [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+        fi
+        [ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
+        ;;
     NTFS | HTNFS | FAT32 | HFAT32)
-	TYPE="Windows"
-	#/// Para Windows: leer la version del registro.
-	VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
-	;;
+        TYPE="Windows"
+        #/// Para Windows: leer la version del registro.
+        VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+        ;;
 esac
 
 #/// Mostrar resultado y salir sin errores.
 [ -n "$VERSION" ] && echo "$TYPE:$VERSION"
 return 0
+}
+
+
+#/**
+#         ogGetOsType int_ndisk int_npartition
+#@brief   Devuelve el tipo del sistema operativo instalado.
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
+#@return  OSType
+#@note    OSType = { Linux, Windows }
+#@see     ogGetOsVersion
+#*/
+function ogGetOsType () {
+ogGetOsVersion "$@" | cut -sf1 -d:
 }
 
 
