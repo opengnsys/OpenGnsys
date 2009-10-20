@@ -97,11 +97,11 @@ lshw | awk 'BEGIN {type="mod";}
 	/version:/ {sub(/ *version: */,"v.");vers=$0;}
 	/size:/    {sub(/ *size: */,"");     size=$0;}
 	/\*-/	   {if (type=="mem")
-			print type"="size;
-		    else
-			if (type!="" && prod!="")
-			    print type"="vend,prod,size,vers;
-		    type=prod=vend=vers=size="";}
+                    print type"="size;
+                else
+                    if (type!="" && prod!="")
+                        print type"="vend,prod,size,vers;
+                type=prod=vend=vers=size="";}
 	/-core/    {type="boa";}
 	/-firmware/ {type="bio";}
 	/-cpu/     {type="cpu";}
@@ -116,7 +116,7 @@ lshw | awk 'BEGIN {type="mod";}
 	/-firewire/ {type="fir";}
 	/-serial/  {type="bus";}
 	END 	   {if (type!="" && prod!="")
-			print type"="vend,prod,size,vers;}
+                    print type"="vend,prod,size,vers;}
       '
 # */ (necesario para Doxygen)
 }
@@ -151,42 +151,55 @@ TYPE=$(ogGetFsType $1 $2) || return $?
 MNTDIR=$(ogMount $1 $2) || return $?
 
 case "$TYPE" in
-     EXT[234]|REISERFS|REISER4)
-	# Procesar paquetes dpkg.
-	DPKGDIR="${MNTDIR}/var/lib/dpkg"
-	if [ -r $DPKGDIR ]; then
-	#    dpkg --admindir=$DPKGDIR -l | \
-	    # FIXME Sólo 32 bits
-	    chroot "$MNTDIR" /usr/bin/dpkg -l | \
-			awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
-				sub(/-.*$/,"",$3); print $2,$3}' | sort | uniq
-	fi
-	# Procesar paquetes RPM.
-	RPMDIR="${MNTDIR}/var/lib/rpm"
-	if [ -r $RPMDIR ]; then
-	    # Correccion inconsistencia de version de base de datos.
-	#    rm -f ${RPMDIR}/__db.*
-	#    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
-	    # FIXME Sólo 32 bits
-	    chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
-			awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
-			sort | uniq
-	#    rm -f ${RPMDIR}/__db.*
-	fi
-	;;
-     NTFS|HNTFS|FAT32|HFAT32)
-	# Claves de registro para programas instalados: formato "{clave}".
-	KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
-	# Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
-	(for k in $KEYS; do
-	    PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
-	    if [ -n "$PROG" ]; then
-		VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
-		echo "$PROG $VERS"
-	    fi
-	done) | sort | uniq
-	;;
-     *) ogRaiseError $OG_ERR_PARTITION "$1,$2"
+    EXT[234]|REISERFS|REISER4)
+        # Procesar paquetes dpkg.
+        DPKGDIR="${MNTDIR}/var/lib/dpkg"
+        if [ -r $DPKGDIR ]; then
+        #    dpkg --admindir=$DPKGDIR -l | \
+            # Proceso de fichero en sistemas de 64 bits.
+            if [ -e $MNTDIR/lib64 ]; then
+                awk '/Package:/ {if (pack!="") print pack,vers;
+                                 sub(/-dev$/,"",$2);
+                                 pack=$2}
+                     /Version:/ {sub(/^.*:/,"",$2); sub(/-.*$/,"",$2);
+                                 vers=$2}
+                     /Status:/  {if ($2!="install") pack=vers=""}
+                     END        {if (pack!="") print pack,vers}
+                    ' $MNTDIR/var/lib/dpkg/status | sort | uniq
+            else
+                # FIXME Sólo 32 bits
+                chroot "$MNTDIR" /usr/bin/dpkg -l | \
+                    awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
+                                  sub(/-.*$/,"",$3); print $2,$3}
+                        ' | sort | uniq
+            fi
+        fi
+        # Procesar paquetes RPM.
+        RPMDIR="${MNTDIR}/var/lib/rpm"
+        if [ -r $RPMDIR ]; then
+            # Correccion inconsistencia de version de base de datos.
+            #    rm -f ${RPMDIR}/__db.*
+            #    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
+            # FIXME Sólo 32 bits
+            chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
+                   awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
+                   sort | uniq
+           	#    rm -f ${RPMDIR}/__db.*
+        fi
+        ;;
+    NTFS|HNTFS|FAT32|HFAT32)
+        # Claves de registro para programas instalados: formato "{clave}".
+        KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+        # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+        (for k in $KEYS; do
+            PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+            if [ -n "$PROG" ]; then
+                VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                echo "$PROG $VERS"
+            fi
+        done) | sort | uniq
+        ;;
+    *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
         return $? ;;
 esac
 }

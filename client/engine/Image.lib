@@ -54,7 +54,7 @@ IMGFILE="$IMGDIR/$(basename "$4")"
 ogUnmount $1 $2 2>/dev/null
 
 ogLock $1 $2 || return $?
-trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 6 9
+trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
 
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
@@ -75,7 +75,8 @@ esac
 ERRCODE=$?
 if [ $ERRCODE != 0] ]; then
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
-    rm -f "$IMGFILE"
+           #### PRUEBAS
+    echo rm -f "$IMGFILE", ERRCODE=$ERRCODE.
 fi
 ogUnlock $1 $2
 return $ERRCODE
