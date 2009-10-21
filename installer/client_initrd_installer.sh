@@ -56,12 +56,12 @@ function checking
            echo "Tambien puedes editar el script y anyadirlo manualmente."
            exit -1
     else
-       if [ ! -d $SVNROOT/opengnsys-admin ] ||
-          [ ! -d $SVNROOT/opengnsys-client ] ||
-          [ ! -d $SVNROOT/opengnsys-doc ] ||
-          [ ! -d $SVNROOT/opengnsys-repoman ] ||
-          [ ! -d $SVNROOT/opengnsys-installer ] ||
-          [ ! -d $SVNROOT/opengnsys-server ] ; then
+       if [ ! -d $SVNROOT/admin ] ||
+          [ ! -d $SVNROOT/client ] ||
+          [ ! -d $SVNROOT/doc ] ||
+          [ ! -d $SVNROOT/repoman ] ||
+          [ ! -d $SVNROOT/installer ] ||
+          [ ! -d $SVNROOT/server ] ; then
            echo "La ruta dada para las fuentes del proyecto son incorrectas"
            exit -1;
        fi
@@ -89,17 +89,17 @@ function create_file_system
     mkdir -p /var/log/opengnsys/clients
 
     ln -fs $TFTPBOOT $OGROOT/tftpboot
-    ln -fs /etc/opengnsys/ $OGROOT/etc
-    ln -fs /var/log/opengnsys/ $OGROOT/log
+    ln -fs /etc/opengnsys $OGROOT/etc
+    ln -fs /var/log/opengnsys $OGROOT/log
 
-    cp -ar $SVNROOT/opengnsys-client/nfsexport/* $OGROOT/client
-    cp -ar $SVNROOT/opengnsys-client/engine/*.lib $OGROOT/client/lib/engine/bin
-    cp -ar $SVNROOT/opengnsys-client/engine/*.sh $OGROOT/client/lib/engine/bin
+    cp -ar $SVNROOT/client/nfsexport/* $OGROOT/client
+    cp -ar $SVNROOT/client/engine/*.lib $OGROOT/client/lib/engine/bin
+    cp -ar $SVNROOT/client/engine/*.sh $OGROOT/client/lib/engine/bin
 }
 
 function install_dhcpd
 {
-    cat $SVNROOT/opengnsys-server/DHCP/dhcpd.conf >> /etc/dhcp3/dhcpd.conf
+    cat $SVNROOT/server/DHCP/dhcpd.conf >> /etc/dhcp3/dhcpd.conf
     /etc/init.d/dhcp3-server restart
     echo "Revise el archivo /etc/dhcp3/dhcpd.conf para configurarlo para su red"
 }
@@ -107,17 +107,17 @@ function install_dhcpd
 function install_tftpboot
 {
     mkdir -p $OGROOT/tftpboot/pxelinux.cfg/
-    cat $SVNROOT/opengnsys-server/PXE/pxelinux.cfg/default >> $OGROOT/tftpboot/pxelinux.cfg/default
+    cat $SVNROOT/server/PXE/pxelinux.cfg/default >> $OGROOT/tftpboot/pxelinux.cfg/default
 }
 
 function install_initrd
 {
-    $SVNROOT/opengnsys-client/boot/initrd-generator -t $OGROOT/tftpboot/
+    $SVNROOT/client/boot/initrd-generator -t $OGROOT/tftpboot/
 }
 
 function install_nfsexport
 {
-    cat $SVNROOT/opengnsys-server/NFS/exports >> /etc/exports
+    cat $SVNROOT/server/NFS/exports >> /etc/exports
     /etc/init.d/nfs-kernel-server restart
 
     echo "Revise el archivo /etc/exports para configurarlo para su red"

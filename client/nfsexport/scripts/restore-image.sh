@@ -30,8 +30,10 @@ ogRestoreImage "$@" || exit $?
 ogEcho info "$PROG: Extender sistema de archivos."
 ogExtendFs $1 $2
 # Cambiar nombre en sistemas Windows.
-if [ "$(ogGetOsType  $3 $4)" = "Windows" ]; then
-    ogEcho info "$PROG: Cambiar nombre Windows."
-    # ogSetWindowsName "$(ogGetHostname)"
+if [ "$(ogGetOsType $3 $4)" = "Windows" ]; then
+    HOST=$(ogGetHostname)
+    HOST=${HOST:-"UNKNOWN"}
+    ogEcho info "$PROG: Cambiar nombre Windows a \"$HOST\"."
+    ogSetWindowsName "$HOST"
 fi
 

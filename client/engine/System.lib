@@ -45,6 +45,24 @@ fi
 }
 
 
+##### PRUEBAS
+#         ogGetHostname
+function ogGetHostname () {
+local HOST
+#/// Tomar nombre de la variable \c HOSTNAME
+HOST="$HOSTNAME"
+#/// Si no, tomar del DHCP, opción \c host-name
+[ -z "$HOST" ] && HOST=$(awk -F\" '/option host-name/ {gsub(/;/,""); host=$2}
+                                   END {print host}
+                                  ' /var/lib/dhcp3/dhclient.leases)
+#/// Si no, tomar del parámetro del kernel \c hostname
+[ -z "$HOST" ] && HOST=$(awk 'BEGIN {RS=""; FS="="}
+                              $1~/hostname/ {print $2}' /proc/cmdline)
+[ "$HOSTNAME" != "$HOST" ] && export HOSTNAME="$HOST"
+echo $HOST
+}
+
+
 #/**
 #         ogRaiseError errcode ["errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.

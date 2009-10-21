@@ -17,9 +17,7 @@ INSTALL_TARGET=/opt/opengnsys
 MYSQL_ROOT_PASSWORD="passwordroot"
 
 # conexión al svn
-SVN_URL=svn://www.informatica.us.es:3690/eac-hidra
-SVN_USER=lguillen
-SVN_PASSWORD=potupass
+SVN_URL=svn://www.informatica.us.es:3690/opengnsys
 
 # Datos de base de datos
 HIDRA_DATABASE=bdhidra
@@ -392,22 +390,16 @@ EOF
 
 svnCheckoutCode()
 {
-	if [ $# -lt 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "svnCheckoutCode(): invalid number of parameters"
 		exit 1
 	fi
 
 	local url=$1
-	local user=$2
-	if [ $# -gt 2 ]; then
-		local password=$3
-	else
-		local password=""
-	fi
 
 	echoAndLog "svnCheckoutCode(): downloading subversion code..."
 
-	/usr/bin/svn co "${url}" --username "${user}" --password "${password}"
+	/usr/bin/svn co "${url}"
 	if [ $? -ne 0 ]; then
 		errorAndLog "svnCheckoutCode(): error getting code from ${url}, verify your user and password"
 		return 1
@@ -521,7 +513,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-svnCheckoutCode $SVN_URL $SVN_USER $SVN_PASSWORD
+svnCheckoutCode $SVN_URL
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while getting code from svn"
 	exit 1
