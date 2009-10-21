@@ -472,7 +472,7 @@ openGnsysInstallCreateDirs()
 	mkdir -p $path_opengnsys_base/client
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
-	mkdir -p $path_opengnsys_base/log
+	mkdir -p $path_opengnsys_base/log/clients
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/tftpboot/ogclients
 	mkdir -p $path_opengnsys_base/images
