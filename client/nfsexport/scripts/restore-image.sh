@@ -2,6 +2,7 @@
 # Scirpt de ejemplo para restaurar una imagen.
 # (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
 
+TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -ne 4 ]; then
     ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion REPO|CACHE imagen"
@@ -28,12 +29,14 @@ ogEcho info "$PROG: Origen=$IMGFILE, Destino=$PART"
 ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 ogEcho info "$PROG: Extender sistema de archivos."
-ogExtendFs $1 $2
+ogExtendFs $3 $4
 # Cambiar nombre en sistemas Windows.
 if [ "$(ogGetOsType $3 $4)" = "Windows" ]; then
     HOST=$(ogGetHostname)
     HOST=${HOST:-"UNKNOWN"}
     ogEcho info "$PROG: Cambiar nombre Windows a \"$HOST\"."
-    ogSetWindowsName "$HOST"
+    ogSetWindowsName $3 $4 "$HOST"
 fi
+TIME=$[SECONDS-TIME1]
+ogEcho info "$PROG: Duración de la operación $[TIME/60]m $[TIME%60]s"
 

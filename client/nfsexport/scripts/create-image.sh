@@ -2,6 +2,7 @@
 # create-image.sh - Scirpt de ejemplo para crear una imagen de un sistema de archivos.
 # (puede usarse como base para el programa de creación de imágenes usado por OpenGNSys Admin).
 
+TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -ne 4 ]; then
     ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion REPO|CACHE imagen"
@@ -39,5 +40,7 @@ if [ $REDSIZE -lt $SIZE ]; then
     ogEcho info "$PROG: extender sistema de archivos."
     ogExtendFs $1 $2
 fi
+TIME=$[SECONDS-TIME1]
+ogEcho info "$PROG: Duración de la operación $[TIME/60]m $[TIME%60]s"
 exit $EXITCODE
 

@@ -73,10 +73,9 @@ esac
 
 #/// Controlar salida de error y desbloquear partición.
 ERRCODE=$?
-if [ $ERRCODE != 0] ]; then
+if [ $ERRCODE != 0 ]; then
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
-           #### PRUEBAS
-    echo rm -f "$IMGFILE", ERRCODE=$ERRCODE.
+    rm -f "$IMGFILE"
 fi
 ogUnlock $1 $2
 return $ERRCODE
@@ -175,7 +174,7 @@ if ogIsLocked $3 $4; then
     ogRaiseError $OG_ERR_LOCKED "$3,$4"
     return $?
 fi
-ogUnmount $3 $4 >/dev/null || return $?
+ogUnmount $3 $4 2>/dev/null || return $?
 ogLock $3 $4 || return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
@@ -184,20 +183,23 @@ trap "ogUnlock $3 $4" 1 2 3 6 9
 TYPE="$(ogGetFsType $3 $4)"
 case "$TYPE" in
     EXT[234]|REISERFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" || return $?
+        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" || return $?
+        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE" || ogRaiseError $OG_ERR_IMAGE "$IMGFILE,$3,$4" || return $?
+        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
         ;;
     *)  ogRaiseError $OG_ERR_FORMAT
         return $? ;;
 esac
-
-ogExtendFs $3 $4
+ERRCODE=$?
+if [ $ERRCODE != 0 ]; then
+    ogRaiseError $OG_ERR_IMAGE "$IMGFILE, $3, $4"
+fi
 ogUnlock $3 $4
+return $ERRCODE
 }
 
 
