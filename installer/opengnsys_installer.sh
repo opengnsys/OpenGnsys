@@ -486,11 +486,42 @@ openGnsysInstallCreateDirs()
 	return 0
 }
 
+# Copia ficheros de configuración y ejecutables genéricos del servidor.
+openGnsysCopyServerFiles () {
+	if [ $# -ne 1 ]; then
+		errorAndLog "openGnsysCopyServerFiles(): invalid number of parameters"
+		exit 1
+	fi
+
+	local path_opengnsys_base=$1
+
+	local SOURCES=( server/clients/upgrade-clients-udeb.sh server/clients/udevlist.conf )
+	local TARGETS=( bin/upgrade-clients-udeb.sh etc/udevlist.conf )
+
+	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
+		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
+		exit 1
+	fi
+
+	local i
+	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
+		if [ -f "${SOURCES[$i]}" ]; then
+			echoAndLog "openGnsysCopyServerFiles(): copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			cp -p "${SOURCES[$i]}" "${path_opengnsys_base}/${TARGETS[$i]}"
+		fi
+		if [ -d "${SOURCES[$i]}" ]; then
+			echoAndLog "openGnsysCopyServerFiles(): copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			cp -pr "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
+		fi
+	done
+}
+
+
 #####################################################################
 ####### Proceso de instalación
 #####################################################################
 
-
+	
 # Proceso de instalación de opengnsys
 declare -a notinstalled
 checkDependencies DEPENDENCIES notinstalled
@@ -512,12 +543,18 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error while creating directory paths!"
 	exit 1
 fi
-
 svnCheckoutCode $SVN_URL
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while getting code from svn"
 	exit 1
 fi
+
+openGnsysCopyServerFiles ${INSTALL_TARGET}
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while copying the server files!"
+	exit 1
+fi
+
 
 mysqlTestConnection ${MYSQL_ROOT_PASSWORD}
 if [ $? -ne 0 ]; then
