@@ -188,8 +188,6 @@ function agregarNuevoArranque
     cd $NEWROOT
 
     cd etc/
-    #echo "s/debian-installer$/${OGINIT//\//\\\/}/"
-    #cat inittab | sed "s/debian-installer$/${OGINIT//\//\\\/}/" > inittab
     perl -i -p -e "s/\/sbin\/debian-installer\$/${CHROOTINITSCRIPT//\//\/}/" inittab
 
     # Script inicial que ejecuta el resto de scripts de /etc/rcS.d/
@@ -218,7 +216,7 @@ function agregarNuevoArranque
     echo "DHCP_SERVER=\`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> $INITSCRIPT
     echo "IP=\`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> $INITSCRIPT
     echo "mkdir -p /opt/opengnsys" >> $INITSCRIPT
-    echo "mount -t nfs -onolock \$DHCP_SERVER:/opt/opengnsys/client/nfsexport/ /opt/opengnsys/" >> $INITSCRIPT
+    echo "mount -t nfs -onolock \$DHCP_SERVER:/opt/opengnsys/client /opt/opengnsys" >> $INITSCRIPT
     echo "/opt/opengnsys/etc/preinit/default.sh" >> $INITSCRIPT
 
     chmod +x $INITSCRIPT

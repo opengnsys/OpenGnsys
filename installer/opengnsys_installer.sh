@@ -495,18 +495,23 @@ openGnsysCopyServerFiles () {
 
 	local path_opengnsys_base=$1
 
-	local SOURCES=( server/clients/upgrade-clients-udeb.sh server/clients/udevlist.conf )
-	local TARGETS=( bin/upgrade-clients-udeb.sh etc/udevlist.conf )
+	local SOURCES=( server/clients/upgrade-clients-udeb.sh \
+                    server/clients/udeblist.conf )
+	local TARGETS=( bin/upgrade-clients-udeb.sh \
+                    etc/udeblist.conf )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
 		exit 1
 	fi
 
+    echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
+
+    pushd opengnsys/trunk >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
-			echoAndLog "openGnsysCopyServerFiles(): copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			echoAndLog "copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -p "${SOURCES[$i]}" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 		if [ -d "${SOURCES[$i]}" ]; then
@@ -514,6 +519,7 @@ openGnsysCopyServerFiles () {
 			cp -pr "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 	done
+    popd >/dev/null
 }
 
 
