@@ -22,6 +22,7 @@ if [ -d $OPENGNSYS ]; then
     export OGIMG=$OPENGNSYS/images
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
+    export OGADM=$OPENGNSYS/admin
 
     export PATH=$OGBIN:$OGAPI:$OGSCRIPTS:$PATH
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
@@ -48,6 +49,8 @@ if [ -d $OPENGNSYS ]; then
     # Montamos el resto de cosas necesarias
     mount -t nfs -o nolock $SERVERIP:/opt/opengnsys/log/clients $OGLOG
     mount -t nfs -o nolock $SERVERIP:/opt/opengnsys/images $OGIMG
+    mount -t nfs -o nolock $SERVERIP:/opt/opengnsys/admin $OGADM
+
 
     #/// Cargar API de funciones y fichero de idioma.
     for i in $OGAPI/*.lib; do
