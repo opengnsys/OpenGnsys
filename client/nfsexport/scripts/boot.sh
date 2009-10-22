@@ -11,6 +11,8 @@ fi
 # Procesos previos.
 
 # Arrancar.
+ogEcho info "$PROG: Desmontar todos los sistemas operativos del disco."
+ogUnmountAll "$1" | exit $?
 ogEcho info "$PROG: Arrancar sistema operativo."
 ogBoot "$1" "$2"
 

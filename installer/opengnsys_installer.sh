@@ -495,9 +495,11 @@ openGnsysCopyServerFiles () {
 
 	local path_opengnsys_base=$1
 
-	local SOURCES=( server/clients/upgrade-clients-udeb.sh \
-                    server/clients/udeblist.conf )
-	local TARGETS=( bin/upgrade-clients-udeb.sh \
+	local SOURCES=( client/boot/initrd-generator \
+                    client/boot/upgrade-clients-udeb.sh \
+                    client/boot/udeblist.conf )
+	local TARGETS=( bin/initrd-generator \
+                    bin/upgrade-clients-udeb.sh \
                     etc/udeblist.conf )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then

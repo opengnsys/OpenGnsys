@@ -1,10 +1,14 @@
-Scripts de gestión de clientes de OpenGNSys Server
-==================================================
+OpenGNSys Client Boot   README
+==============================
 
-En este directorio se incluyen los scripts y ficheros necesarios
-para configurar los clientes, ejecutables directamente desde el
-servidor de OpenGNSys.
+En este directorio se incluyen los scripts y ficheros, ejecutables
+directamente desde el servidor de OpenGNSys, y que son necesarios
+para configurar los procesos de arranque de los clientes.
 
+
+initrd-generator            (copiar en /opt/opengnsys/bin)
+    Script de generación de los básicos de arranque del cliente
+    (initrd y kernel).
 
 upgrade-clients-udeb.sh     (copiar en /opt/opengnsys/bin)
     Script de descarga de paquetes udeb, que serán incluidos en
