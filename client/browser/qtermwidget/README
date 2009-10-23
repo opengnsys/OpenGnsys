@@ -1,10 +1,8 @@
-This is a external source gotten it from:
+This is a external source gotten from:
 
 http://www.qt-apps.org/content/show.php/QTermWidget?content=82832
 
-Only library and headers needed. Compile with QtEmbedded-4.5.1.
-
-**********************************************************************************
+*************************************************************************************
 QTermWidget
 version 0.1.0
 
