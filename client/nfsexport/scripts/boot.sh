@@ -9,10 +9,17 @@ if [ $# -ne 2 ]; then
 fi
 
 # Procesos previos.
+PART=$(ogDiskToDev $1 $2) | exit $?
 
 # Arrancar.
 ogEcho info "$PROG: Desmontar todos los sistemas operativos del disco."
-ogUnmountAll "$1" | exit $?
+ogUnmountAll $1 | exit $?
+if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
+    ogEcho info "$PROG: Activar partición de Windows $PART."
+    ogSetPartitionActive $1 $2
+    ogEcho info "$PROG: Comprobar sistema de archivos."
+    ogCheckFs $1 $2
+fi
 ogEcho info "$PROG: Arrancar sistema operativo."
-ogBoot "$1" "$2"
+ogBoot $1 $2
 

@@ -27,8 +27,8 @@
 #*/
 function ogCheckFs () {
 
-# Variables locales
-local PART TYPE
+# Variables locales.
+local PART TYPE PROG PARAMS
 
 #/// Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
@@ -74,7 +74,7 @@ return $ERRCODE
 #         ogExtendFs int_ndisk int_npartition
 #@brief   Extiende un sistema de archivos al tamaño de su partición.
 #@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
@@ -148,7 +148,7 @@ ogFormatFs "$@"
 #@brief   Formatea un sistema de ficheros según el tipo de su partición.
 #@arg  \c int_ndisk      nº de orden del disco
 #@arg  \c int_npartition nº de orden de la partición
-#@arg  \c type_fstype  mnemónico de sistema de ficheros a formatear
+#@arg  \c type_fstype    mnemónico de sistema de ficheros a formatear
 #@arg  \c str_label      etiqueta de volumen (opcional)
 #@return  (por determinar)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
@@ -190,11 +190,11 @@ case "$3" in
     REISER4)   ID=83; PROG="mkfs.reiser4";;
     XFS)       ID=83; PROG="mkfs.xfs"; PARAMS="-f" ;;
     JFS)       ID=83; PROG="mkfs.jfs"; PARAMS="<<<\"y\"";;
-    NTFS)      ID=7; PROG="mkntfs"; PARAMS="-f" ;;
+    NTFS)      ID=7;  PROG="mkntfs"; PARAMS="-f" ;;
     HNTFS)     ID=17; PROG="mkntfs"; PARAMS="-f" ;;
-    FAT32)     ID=b; PROG="mkfs.vfat" ;;
+    FAT32)     ID=b;  PROG="mkfs.vfat" ;;
     HFAT32)    ID=1b; PROG="mkfs.vfat" ;;
-    FAT16)     ID=6; PROG="mkfs.msdos" ;;
+    FAT16)     ID=6;  PROG="mkfs.msdos" ;;
     HFAT16)    ID=16; PROG="mkfs.msdos" ;;
     *)         LABEL="$3" ;;
 esac
@@ -254,10 +254,10 @@ return $ERRCODE
 #/**
 #         ogGetFsType int_ndisk int_npartition
 #@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
 #@return  Mnemonico
-#@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.9 - Primera adaptación para OpenGNSys.
@@ -267,7 +267,7 @@ return $ERRCODE
 function ogGetFsType () {
 
 # Variables locales.
-local DISK ID TYPE
+local ID TYPE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -279,8 +279,7 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Detectar id. de tipo de partición y codificar al mnemonico.
-DISK=$(ogDiskToDev $1) || return $?
-ID=$(ogGetPartitionId $1 $2) || return $?
+ID=$(ogGetPartitionId "$1" "$2") || return $?
 case "$ID" in
      0) 	TYPE="EMPTY" ;;
      1) 	TYPE="FAT12" ;;
@@ -296,8 +295,8 @@ case "$ID" in
      42)	TYPE="WIN-DYNAMIC" ;;
      82)	TYPE="LINUX-SWAP" ;;
      83)	TYPE="$(parted -s $DISK print | awk -v var=$2 '{if ($1==var) {print toupper($6)}}')"
-		TYPE=${TYPE:-"EXT3"}
-		;;
+            TYPE=${TYPE:-"EXT3"}
+            ;;
      8e)	TYPE="LINUX-LVM" ;;
      a7)	TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
      bf)	TYPE="SOLARIS" ;;
@@ -317,6 +316,7 @@ echo $TYPE
 #@return  Punto de montaje
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    Requisitos: \c mount* \c awk
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
@@ -410,13 +410,13 @@ ogLockPartition "$@"
 #/**
 #         ogLockPartition int_ndisk int_npartition
 #@brief   Genera un fichero de bloqueo para una partición en uso exlusivo.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
-#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/
@@ -445,7 +445,7 @@ touch $LOCKFILE
 
 #/**
 #         ogMount int_ndisk int_npartition
-#@see     ogMountFs ogMountCdrom
+#@see     ogMountFs ogMountCache ogMountCdrom
 #*/
 function ogMount () {
 case "$*" in
@@ -461,8 +461,8 @@ esac
 #/**
 #         ogMountFs int_ndisk int_npartition
 #@brief   Monta un sistema de archivos.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
 #@return  Punto de montaje
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -514,8 +514,8 @@ if [ -z "$MNTDIR" ]; then
         *)  #/// Error, si la partición no es montable.
             rmdir $MNTDIR
             ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
-	    return $OG_ERR_PARTITION
-	    ;;
+            return $OG_ERR_PARTITION
+            ;;
     esac
     $MOUNT $ARGS $PART $MNTDIR || $MOUNT $ARGS $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
 	# linea temporal durante desarrollo para poder usar el cliente completo nfs y testeas nuevas herramientas.
@@ -546,15 +546,16 @@ echo $MNTDIR
 #/**
 #         ogReduceFs int_ndisk int_npartition
 #@brief   Reduce el tamaño del sistema de archivos, sin tener en cuenta el espacio libre.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
 #@return  tamañoKB
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Partición desconocida o no accesible.
-#@warning   El sistema de archivos se amplía al mínimo + 1 KB.
-#@note      Requisitos:	*resize*
-#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@warning En Windows, se borran los ficheros pagefile.sys e hiberfile.sys
+#@warning El sistema de archivos se amplía al mínimo + 1 KB.
+#@note    Requisitos:	*resize*
+#@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/
@@ -578,7 +579,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 #/// Redimensionar según el tipo de particion.
 case "$(ogGetFsType $1 $2)" in
     EXT[234])
-        ogUnmount $1 $2 >/dev/null
+        ogUnmount $1 $2 2>/dev/null
         # Ext2/3/4: Tamaño de los bloques del sistema de archivos
         BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')
         # Traduce el num. en sectores de 512B a tamano en MB.
@@ -589,8 +590,9 @@ case "$(ogGetFsType $1 $2)" in
     REISERFS)		# Usar "resize_reiserfs"
 	    ;;
     NTFS|HNTFS)
-        rm -f $(ogGetPath $1 $2 pagefile.sys)
-        ogUnmount $1 $2 >/dev/null
+        ogDeleteFile $1 $2 pagefile.sys
+        ogDeleteFile $1 $2 hiberfile.sys
+        ogUnmount $1 $2 2>/dev/null
         # NTFS: Obtiene tamaño mínimo en MB.
         SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print $8+1000}')
         ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
@@ -615,13 +617,13 @@ ogUnlockPartition "$@"
 #/**
 #         ogUnlockPartition int_ndisk int_npartition
 #@brief   Elimina el fichero de bloqueo para una particion.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
-#@version 0.1 - En pruebas para adaptarla a OpenGNSys.
+#@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/
@@ -648,7 +650,6 @@ rm -f $LOCKFILE
 }
 
 
-
 #/**
 #         ogUnmount int_ndisk int_npartition
 #@see     ogUnmountFs
@@ -660,8 +661,8 @@ ogUnmountFs "$@"
 #/**
 #         ogUnmountFs int_ndisk int_npartition
 #@brief   Desmonta un sistema de archivos.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
 #@return  Nada
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.

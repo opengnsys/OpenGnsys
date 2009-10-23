@@ -12,10 +12,10 @@
 #/**
 #         ogCreateImage int_ndisk int_npartition str_repo path_image
 #@brief   Crea una imagen a partir de una partición.
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
-#@arg  \c str_repo   repositorio de imágenes (remoto o caché local)
-#@arg  \c path_image camino completo de la imagen (sin extensión)
+#@arg  \c int_ndisk      nº de orden del disco
+#@arg  \c int_npartition nº de orden de la partición
+#@arg  \c str_repo       repositorio de imágenes (remoto o caché local)
+#@arg  \c path_image     camino de la imagen (sin extensión)
 #@return  (nada, por determinar)
 #@note    repo = { REPO, CACHE }
 #@exception OG_ERR_FORMAT    formato incorrecto.
@@ -24,7 +24,7 @@
 #@exception OG_ERR_LOCKED    particion bloqueada por otra operación.
 #@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
 #@warning En pruebas iniciales
-#@todo    Comprobaciones, control de errores, definir parámetros, caché/repositorio, etc.
+#@todo    Comprobaciones, control de errores, definir parámetros, etc.
 #@version 0.9 - Versión en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/10/07
@@ -134,8 +134,8 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 #/**
 #         ogRestoreImage str_repo path_image int_ndisk int_npartition
 #@brief   Restaura una imagen de sistema de archivos en una partición.
-#@arg  \c str_repo    repositorio de imágenes o caché local
-#@arg  \c path_image  camino de la imagen
+#@arg  \c str_repo       repositorio de imágenes o caché local
+#@arg  \c path_image     camino de la imagen
 #@arg  \c int_ndisk      nº de orden del disco
 #@arg  \c int_npartition nº de orden de la partición
 #@return  (por determinar)
@@ -152,7 +152,7 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 function ogRestoreImage () {
 
 # Variables locales
-local PART IMGFILE
+local PART PARTSIZE IMGFILE IMGSIZE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -160,14 +160,19 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME aula1 winxp 1 1"
     return
 fi
-#/// Error si no se reciben menos de 2 parámetros.
+#/// Error si no se reciben 4 parámetros.
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-
-PART="$(ogDiskToDev $3 $4)" || return $?
+# Procesar parámetros.
+PART="$(ogDiskToDev "$3" "$4")" || return $?
 IMGFILE=$(ogGetPath "$1" "$2") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
-# Error si la imagen no cabe en la particion.
-[ $(ogGetImageSize "$1" "$2") -gt $(ogGetPartitionSize $3 $4) ] && ogRaiseError $OG_ERR_PARTITION && return $?
+#/// Error si la imagen no cabe en la particion.
+IMGSIZE=$(ogGetImageSize "$1" "$2")
+PARTSIZE=$(ogGetPartitionSize $3 $4)
+if [ $IMGSIZE -gt $PARTSIZE ]; then
+    ogRaiseError $OG_ERR_PARTITION "$IMGSIZE > $PARTSIZE"
+    return $?
+fi
 
 #/// Comprobar el bloqueo de la partición, desmontarla y bloquearla.
 if ogIsLocked $3 $4; then
@@ -182,7 +187,7 @@ trap "ogUnlock $3 $4" 1 2 3 6 9
 #/// Atención: no se comprueba incongruencia entre partición e imagen.
 TYPE="$(ogGetFsType $3 $4)"
 case "$TYPE" in
-    EXT[234]|REISERFS)
+    EXT[234]|REISERFS|XFS|JFS)
         partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
         ;;
     NTFS|HNTFS)

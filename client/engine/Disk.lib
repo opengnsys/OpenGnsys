@@ -39,8 +39,9 @@ fi
 #/// Error si no se reciben menos de 2 parámetros.
 [ $# -gt 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Sustituye nº de disco por su dispositivo.
+#/// Desmontar todos los sistemas de archivos del disco.
 DISK="$(ogDiskToDev $1)" || return $?
+ogUnmountAll $1
 shift
 
 # Nº total de sectores, para evitar desbordamiento
@@ -73,14 +74,20 @@ while [ $# -gt 0 ]; do
                     EXTSTART=$START
                     EXTSIZE=$SIZE
                     ;;
+        EXT[234]|REISERFS|REISER4|XFS|JFS)
+                    ID=83 ;;
+        LINUX-SWAP) ID=82 ;;
+        LINUX-LVM)  ID=8e ;;
+        LINUX-RAID) ID=fd ;;
+        SOLARIS)    ID=bf ;;
         NTFS|EXFAT) ID=7  ;;
         HNTFS)	    ID=17 ;;
         FAT32)	    ID=b  ;;
         HFAT32)     ID=1b ;;
-        EXT[234]|REISERFS|REISER4|XFS|JFS)
-                    ID=83 ;;
-        LINUX-SWAP) ID=82 ;;
-        SOLARIS)    ID=bf ;;
+        FAT16)	    ID=6  ;;
+        HFAT16)     ID=16 ;;
+        FAT12)	    ID=1  ;;
+        HFAT12)     ID=11 ;;
         CACHE)      ID=ca ;;
         *)          ogRaiseError $OG_ERR_PARTITION "$TYPE"
 	                return $? ;;
@@ -109,12 +116,10 @@ if [ $PART = 5 -a -n "$EXTSTART" ]; then
     echo "${DISK}5 : start=$EXTSTART, size=$EXTSIZE, Id=0" >>$tmpsfdisk
 fi
 
-# Desmontar todos los sistemas de archivos del disco.
-ogUnmountAll $1
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 #/// Definir particiones y notificar al kernel.
-sfdisk -f $DISK < $tmpsfdisk 2>/dev/null
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && sfdisk -R $DISK
 rm -f $tmpsfdisk
 }
 

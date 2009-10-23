@@ -62,6 +62,15 @@ HOST="$HOSTNAME"
 echo $HOST
 }
 
+#         ogGetIpAddress
+function ogGetIpAddress () {
+local IP
+IP=$(awk '/fixed-address/ {gsub(/;/,""); host=$2}
+          END {print host}
+         ' /var/lib/dhcp3/dhclient.leases)
+echo $IP;
+}
+
 
 #/**
 #         ogRaiseError errcode ["errmessage" ...]
