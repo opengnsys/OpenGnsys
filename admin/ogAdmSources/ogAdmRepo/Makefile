@@ -1,7 +1,7 @@
 # makefile
 
 # Nombre del proyecto
-PROYECTO := hidrarepos
+PROYECTO := ogAdmRepo
 
 # Opciones de compilacion
 CFLAGS := -O0 -g -Wall -I../includes	# Depuracion
@@ -12,7 +12,7 @@ CPPFLAGS := $(CFLAGS)
 LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
 
 # Ficheros objetos
-OBJS := ../includes/Database.o ../includes/encriptacion.o sources/hidrarepos.o 
+OBJS := ../includes/Database.o ../includes/encriptacion.o sources/ogAdmRepo.o 
 
 
 all: $(PROYECTO)
