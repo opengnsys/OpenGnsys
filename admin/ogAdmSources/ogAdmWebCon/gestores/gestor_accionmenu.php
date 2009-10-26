@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// Aplicaciï¿½n WEB: ogAdmWebCon
+// Autor: Josï¿½ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaciï¿½n: Aï¿½o 2003-2004
+// Fecha ï¿½ltima modificaciï¿½n: Marzo-2005
 // Nombre del fichero: gestor_accionmenu.php
-// Descripción :
+// Descripciï¿½n :
 //		Gestiona el mantenimiento de la tabla de acciones_menus
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -42,7 +42,7 @@ if ($cmd){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<HEAD>
+<HEAD></HEAD>
 <BODY>
 <?
 $literal="";
