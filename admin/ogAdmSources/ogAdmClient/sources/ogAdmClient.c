@@ -2009,7 +2009,7 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 	char* wscript=TomaParametro("scp",trama->parametros); 	// Código del script	
 	char* codigo=URLDecode(wscript);	// Decodifica el código recibido con formato URLCode
 	
-	sprintf(filecmdshell,"%s/%s",HIDRASCRIPTS,"_hidrascript_");
+	sprintf(filecmdshell,"%s/%s","/tmp","_hidrascript_");
 	f = fopen(filecmdshell,"wt");	// Abre fichero de script
 	if(f==NULL)
 		res=false; // Error de apertura del fichero de configuración
