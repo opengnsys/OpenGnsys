@@ -1,4 +1,5 @@
 #!/bin/bash
 
-echo Formateando disco...
+DATOS=$(ogFormatFs $*) || exit $?
+exit 0
 

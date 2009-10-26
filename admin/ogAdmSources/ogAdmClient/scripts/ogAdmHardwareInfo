@@ -1,6 +1,9 @@
 #!/bin/bash
 
-echo cpu=Pentium 4 cuore dos duol
-echo mem=1 GB
-echo dis=1 Tera
-echo aud=Creative lab sound blaster
+#echo cpu=Pentium 4 cuore dos duol
+#echo mem=1 GB
+#echo dis=1 Tera
+#echo aud=Creative lab sound blaster
+
+ogListHardwareInfo 2>/dev/null
+exit 0

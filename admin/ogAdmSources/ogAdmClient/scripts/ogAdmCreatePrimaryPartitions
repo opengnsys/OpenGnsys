@@ -1,4 +1,9 @@
 #!/bin/bash
 
-echo Particionando...
+# Error si no se reciben 5 parametros.
+#[ $# != 5 ] &&  exit $OG_ERR_FORMAT
+
+DATOS=$(ogCreatePartitions $*) || exit $?
+exit 0
+
 

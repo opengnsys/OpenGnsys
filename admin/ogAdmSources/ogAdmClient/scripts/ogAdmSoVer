@@ -11,4 +11,11 @@
 #		{"EMPTY","Libre","Libre"},
 #		{"LINUX-SWAP","","Linux-swap"}};
 
-echo Windows: Windows XP Profesional
+#echo Windows: Windows XP Profesional
+
+# Error si no se reciben 2 parametros.
+[ $# != 2 ] &&  exit $OG_ERR_FORMAT
+
+DATOS=$(ogGetOsVersion $*) || exit $?
+[ -n "$DATOS" ] && echo $DATOS 
+exit 0
