@@ -171,8 +171,8 @@ if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_label]" \
            "$FUNCNAME 1 1" \
            "$FUNCNAME 1 1 EXT4" \
-           "$FUNCNAME 1 1 DATA" \
-           "$FUNCNAME 1 1 EXT4 DATA"
+           "$FUNCNAME 1 1 \"DATA\"" \
+           "$FUNCNAME 1 1 EXT4 \"DATA\""
     return
 fi
 #/// Error si no se reciben entre 2 y 4 parámetros.

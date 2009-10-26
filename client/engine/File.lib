@@ -10,9 +10,20 @@
 
 
 ##### PRUEBAS 
+#/**
 #         ogCopyFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
+#@brief   Metafunción para copiar un fichero de sistema OpenGNSys a un directorio OpenGNSys.
+#@see     ogGetPath
+#@warning Deben existir tanto el fichero origen como el directorio destino.
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-10-20
+#*/
 function ogCopyFile () {
+
+# Variables locales.
 local ARGS SOURCE TARGET
+
 ARGS="$@"
 case "$1" in
     /*)     # Camino completo.          */ (necesario Doxygen)
@@ -30,7 +41,7 @@ esac
 TARGET=$(ogGetPath "$@")
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
 #/// Copiar fichero.
-cp "$SOURCE" "$TARGET"                      # (definir posible error)
+cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
 }
 
 
@@ -59,7 +70,7 @@ rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 #@arg  \c ndisk      nº de orden del disco
 #@arg  \c npartition nº de orden de la partición
 #@return  path_file - camino completo real del fichero.
-#@note    repo = { REPO, CACHE | CDROM }
+#@note    repo = { REPO, CACHE, CDROM }
 #@note    Requisitos: \c grep \c sed
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
@@ -110,12 +121,12 @@ FILEPATH="/"
 while [ "$FILE" != "$PREVFILE" ]; do
     #/// Busca el nombre correcto en el directorio actual.
     cd "$FILEPATH"
-    FILEPATH="${FILEPATH}/$(ls -A | grep -i -m1 "^${FILE%%/*}$")" || return $?
+    FILEPATH="${FILEPATH}/$(ls -A | grep -i -m1 "^${FILE%%/*}$")" || return $?     # */ (necesario Doxygen)
     PREVFILE="$FILE"
     FILE="${FILE#*/}"
 done
            # */ (necesario Doxygen)
-#/// Muestra el camino Linux, quitando el "/" inicial duplicado.
+#/// Muestra el camino Linux, quitando el \c / inicial duplicado.
 [ "$FILEPATH" != "/" ] && echo ${FILEPATH#/}
 cd $CURRENTDIR
 }
