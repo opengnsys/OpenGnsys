@@ -37,7 +37,7 @@ local PART IMGDIR IMGFILE ERRCODE
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart path_dir str_image" \
-           "$FUNCNAME 1 1 aula1 winxp"
+           "$FUNCNAME 1 1 REPO /aula1/winxp"
     return
 fi
 #/// Error si no se reciben menos de 2 parámetros.
@@ -105,7 +105,7 @@ local IMGFILE
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk int_npart" \
-           "$FUNCNAME aula1 winxp  ==>  5642158"
+           "$FUNCNAME 1 1 REPO /aula1/winxp  ==>  5642158"
     return
 fi
 #/// Error si no se reciben menos de 2 parámetros.
@@ -157,7 +157,7 @@ local PART PARTSIZE IMGFILE IMGSIZE
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk int_npart" \
-           "$FUNCNAME aula1 winxp 1 1"
+           "$FUNCNAME REPO /aula1/winxp 1 1"
     return
 fi
 #/// Error si no se reciben 4 parámetros.

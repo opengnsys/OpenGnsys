@@ -329,8 +329,16 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Obtener el tamaño de la partición.
+DISK="$(ogDiskToDev $1)" || return $?
 PART="$(ogDiskToDev $1 $2)" || return $?
-sfdisk -s $PART
+case "$(ogGetPartitionId $1 $2)" in
+    5|f)  # Procesar detección de tamaño de partición Extendida.
+          sfdisk -l $DISK | \
+                    awk -v p=$PART '{if ($1==p) {sub (/\*/,""); print $5} }'
+          ;;
+    *)    sfdisk -s $PART
+          ;;
+esac
 }
 
 
@@ -351,7 +359,7 @@ sfdisk -s $PART
 function ogListPartitions () {
 
 # Variables locales.
-local DISK PART NPARTS
+local DISK PART NPARTS TYPE
 
 #/// Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -364,9 +372,15 @@ fi
 
 #/// Procesar la salida de \c parted .
 DISK="$(ogDiskToDev $1)" || return $?
-NPARTS=$(parted -s $DISK print | awk '$1~/^[1-9]/ {print $1}')
-for PART in $NPARTS; do
-    echo -n "$(ogGetFsType $1 $PART):$(ogGetPartitionSize $1 $PART) "
+#NPARTS=$(parted -s $DISK print | awk '$1~/^[1-9]/ {print $1}')
+NPARTS=$(ogGetPartitionsNumber $1)
+for (( PART = 1; PART <= NPARTS; PART++ )); do
+    TYPE=$(ogGetFsType $1 $PART) 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -n "$TYPE:$(ogGetPartitionSize $1 $PART) "
+    else
+        echo -n "EMPTY:0 "
+    fi
 done
 echo
 }

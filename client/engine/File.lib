@@ -15,7 +15,7 @@ function ogCopyFile () {
 local ARGS SOURCE TARGET
 ARGS="$@"
 case "$1" in
-    /*)     # Camino completo.
+    /*)     # Camino completo.          */ (necesario Doxygen)
         SOURCE=$(ogGetPath "$1")
         shift ;;
     [1-9]*) # ndisco npartición.
@@ -31,6 +31,23 @@ TARGET=$(ogGetPath "$@")
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
 #/// Copiar fichero.
 cp "$SOURCE" "$TARGET"                      # (definir posible error)
+}
+
+
+#/**
+#         ogDeleteTree [ str_repo | int_ndisk int_npartition ] path_dirpath
+#@brief   Metafunción que borra todo un subárbol de directorios de un dispositivo.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/
+# Borrar subárbol de directorio.
+function ogDeleteTree () {
+local DIR
+DIR=$(ogGetPath "$@") || return $?
+[ -z "$DIR" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
+rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
 
 
@@ -76,7 +93,7 @@ case $# in
             CACHE|cache)
                 FILE="$OGCAC/$OGIMG/$2" ;;
             CDROM|cdrom)
-                FILE="$(ogMount cdrom)/$2" ;;
+                FILE="$(ogMountCdrom)/$2" ;;
             *)  ogRaiseError $OG_ERR_FORMAT
                 return $? ;;
         esac ;;
@@ -97,7 +114,7 @@ while [ "$FILE" != "$PREVFILE" ]; do
     PREVFILE="$FILE"
     FILE="${FILE#*/}"
 done
-
+           # */ (necesario Doxygen)
 #/// Muestra el camino Linux, quitando el "/" inicial duplicado.
 [ "$FILEPATH" != "/" ] && echo ${FILEPATH#/}
 cd $CURRENTDIR
@@ -121,7 +138,6 @@ case $# in
     *)	ogRaiseError $OG_ERR_FORMAT
         return $? ;;
 esac
-echo $PARENT
 ogGetPath $PARENT
 }
 
@@ -139,23 +155,6 @@ local FILE
 FILE=$(ogGetPath "$@") || return $?
 [ -z "$FILE" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
 rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
-}
-
-
-#/**
-#         ogDeleteTree [ str_repo | int_ndisk int_npartition ] path_dirpath
-#@brief   Metafunción que borra todo un subárbol de directorios de un dispositivo.
-#@see     ogGetPath
-#@version 0.9 - Pruebas con OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-29
-#*/
-# Borrar subárbol de directorio.
-function ogDeleteTree () {
-local DIR
-DIR=$(ogGetPath "$@") || return $?
-[ -z "$DIR" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
-rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
 
 
