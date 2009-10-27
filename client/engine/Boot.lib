@@ -39,19 +39,22 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #/// Detectar tipo de sistema de archivos y montarlo.
+PART=$(ogDiskToDev $1 $2) || return $?
 TYPE=$(ogGetFsType $1 $2) || return $?
 MNTDIR=$(ogMount $1 $2) 2>/dev/null
 [ -z "$MNTDIR" ] && ogRaiseError OG_ERR_PARTITION "$1, $2" && return $?
 
 case "$TYPE" in
-    EXT[234]|REISERFS|REISER4)
+    EXT[234]|REISERFS|REISER4|JFS|XFS)
         #/// Obtiene los parámetros de arranque para Linux.
         PARAMS=$(ogLinuxBootParameters $1 $2) || return $?
         read -e KERNEL INITRD APPEND <<<"$PARAMS"
-        # Si no hay kernel, no hay sistema operativo.
+        #/// Si no hay kernel, no hay sistema operativo.
         [ -z "$KERNEL" ] && ogRaiseError $OG_ERR_NOTOS && return $?
+        #/// Arrancar de partición distinta a la original.
+        [ -e "$MNTDIR/etc" ] && APPEND=$(echo $APPEND | awk -v P="$PART " '{sub (/root=[-+=_/a-zA-Z0-9]* /,"root="P);print}')
         # Configurar kernel Linux con los parámetros leídos de su GRUB.
-        kexec -l ${MNTDIR}${KERNEL} --append="$APPEND" --initrd=${MNTDIR}${INITRD}
+        kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
         ;;
     NTFS|HNTFS|FAT32|HFAT32)
         #/// Compruebar si hay un cargador de Windows.
