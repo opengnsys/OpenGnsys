@@ -1,5 +1,5 @@
 // ****************************************************************************************************************************************************
-// Aplicacin HIDRA
+// Aplicación HIDRA
 // Copyright 2003-2005 JosnManuel Alonso. Todos los derechos reservados.
 // Fichero: hidra.cpp
 //	Descripcin:
@@ -3481,7 +3481,30 @@ int cuestion_nuevoordenador(Database db,Table tbl,int*ido,char *nau,char *nor,ch
 		return(false);
 	}
 	if(tbl.ISEOF()){ // Si NO existe el aula
-		return(false); 
+		sprintf(sqlstr,"SELECT idaula FROM aulas  WHERE nombreaula= '%s'","Default");
+		if(!db.Execute(sqlstr,tbl)){ // Error al consultar
+			db.GetErrorErrStr(ErrStr);
+			return(false);
+		}
+		if(tbl.ISEOF()){ // Inserta el aula por defecto
+			sprintf(sqlstr,"INSERT INTO aulas (nombreaula) VALUES ('Default')");
+			if(!db.Execute(sqlstr)){ // Error al insertar
+				db.GetErrorErrStr(ErrStr);
+				return(false);
+			}
+			ida=0;
+			sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
+			if(!db.Execute(sqlstr,tbl)){ // Error al leer
+				db.GetErrorErrStr(ErrStr);
+				return(false);
+			}
+			if(!tbl.ISEOF()){ // Si existe registro
+				if(!tbl.Get("identificador",ida)){
+					tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+					return(false);
+				}
+			}				
+		}
 	}
 	else{
 		if(!tbl.Get("idaula",ida)){ // Toma dato
