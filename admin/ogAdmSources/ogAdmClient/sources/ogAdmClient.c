@@ -1648,7 +1648,7 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
    	int herror;
 	
 	sprintf(cmdshell,"%s/ogAdmRestoreImage",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s %s.%s-%s%s","ogAdmRestoreImage",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg,compres,particion,mettran);
+	sprintf(parametros," %s %s %s %s %s %s","ogAdmRestoreImage",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg);
 	
 	if(ndebug>3){
 		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s.%s-%s%s Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,compres,particion,mettran,"hdimages/pruebashidra/");
