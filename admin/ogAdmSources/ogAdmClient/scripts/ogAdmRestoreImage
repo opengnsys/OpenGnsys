@@ -1,3 +1,4 @@
 #!/bin/bash
 
-echo Restaurando imagen
+DATOS=$(ogRestoreImage  REPO  $5 $1 $2) || exit $?
+exit 0
