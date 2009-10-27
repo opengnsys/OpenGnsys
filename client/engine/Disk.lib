@@ -614,16 +614,22 @@ PART=`ogDiskToDev $1 $2` || return $?
 #/// Elección del tipo de partición.
 case "$3" in
     EMPTY)      ID=0  ;;
+    FAT12)      ID=1  ;;
     EXTENDED)   ID=5  ;;
+    FAT16)      ID=6  ;;
     NTFS|EXFAT) ID=7  ;;
     FAT32)      ID=b  ;;
+    HFAT12)     ID=11 ;;
+    HFAT16)     ID=16 ;;
     HNTFS)      ID=17 ;;
     HFAT32)     ID=1b ;;
     LINUX-SWAP) ID=82 ;;
+    LINUX-LVM)  ID=8e ;;
     EXT[234]|REISERFS|REISER4|XFS|JFS)
                 ID=83 ;;
     SOLARIS)    ID=bf ;;
     CACHE)      ID=ca ;;
+    LINUX-RAID) ID=fd ;;
     *)          ogRaiseError $OG_ERR_PARTITION "$TYPE"
                 return $? ;;
 esac

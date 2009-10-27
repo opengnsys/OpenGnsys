@@ -42,9 +42,10 @@ case "$TYPE" in
     JFS)          PROG="fsck.jfs" ;;
     XFS)          PROG="fsck.xfs" ;;
     NTFS|HNTFS)   PROG="ntfsfix" ;;
-    FAT32|FAT32)  PROG="fsck.vfat" ;;
-    FAT16|FAT16)  PROG="fsck.msdos" ;;
-    *)            ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
+    FAT32|HFAT32) PROG="dosfsck"; PARAMS="-a" ;;
+    FAT16|HFAT16) PROG="dosfsck"; PARAMS="-a" ;;
+    FAT12|HFAT12) PROG="dosfsck"; PARAMS="-a" ;;
+    *)            ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
 	              return $? ;;
 esac
 #/// Error si el sistema de archivos esta montado o bloqueado.
@@ -192,10 +193,12 @@ case "$3" in
     JFS)       ID=83; PROG="mkfs.jfs"; PARAMS="<<<\"y\"";;
     NTFS)      ID=7;  PROG="mkntfs"; PARAMS="-f" ;;
     HNTFS)     ID=17; PROG="mkntfs"; PARAMS="-f" ;;
-    FAT32)     ID=b;  PROG="mkfs.vfat" ;;
-    HFAT32)    ID=1b; PROG="mkfs.vfat" ;;
-    FAT16)     ID=6;  PROG="mkfs.msdos" ;;
-    HFAT16)    ID=16; PROG="mkfs.msdos" ;;
+    FAT32)     ID=b;  PROG="mkdosfs"; PARAMS="-F 32" ;;
+    HFAT32)    ID=1b; PROG="mkdosfs"; PARAMS="-F 32" ;;
+    FAT16)     ID=6;  PROG="mkdosfs"; PARAMS="-F 16" ;;
+    HFAT16)    ID=16; PROG="mkdosfs"; PARAMS="-F 16" ;;
+    FAT12)     ID=1;  PROG="mkdosfs"; PARAMS="-F 12" ;;
+    HFAT12)    ID=11; PROG="mkdosfs"; PARAMS="-F 12" ;;
     *)         LABEL="$3" ;;
 esac
 #/// Si no se indica explícitamente, detectar el tipo de sistema de archivos.
@@ -209,8 +212,9 @@ if [ -z "$PROG" ]; then
         XFS)          PROG="mkfs.xfs"; PARAMS="-f" ;;
         JFS)          PROG="mkfs.jfs"; PARAMS="<<<\"y\"";;
         NTFS|HNTFS)   PROG="mkntfs"; PARAMS="-f" ;;
-        FAT32|HFAT32) PROG="mkfs.vfat" ;;
-        FAT16|HFAT16) PROG="mkfs.msdos" ;;
+        FAT32|HFAT32) PROG="mkdosfs"; PARAMS="-F 32" ;;
+        FAT16|HFAT16) PROG="mkdosfs"; PARAMS="-F 16" ;;
+        FAT12|HFAT12) PROG="mkdosfs"; PARAMS="-F 12" ;;
         *)            ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                       return $? ;;
     esac
@@ -588,8 +592,8 @@ case "$(ogGetFsType $1 $2)" in
 		       awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')
         resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 	    ;;
-    REISERFS)		# Usar "resize_reiserfs"
-	    ;;
+#    REISERFS)		# Usar "resize_reiserfs"
+#	    ;;
     NTFS|HNTFS)
         ogDeleteFile $1 $2 pagefile.sys
         ogDeleteFile $1 $2 hiberfile.sys

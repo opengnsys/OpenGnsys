@@ -15,6 +15,7 @@ IMGDIR=$(ogGetParentPath "$3" "$4") || exit $?
 IMGFILE="$IMGDIR/$(basename $4).img"
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
+    ogEcho info "Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"."
     mv "$IMGFILE" "$IMGFILE.ant"
 fi
 # Mostrar información.

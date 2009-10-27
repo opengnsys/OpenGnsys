@@ -10,17 +10,24 @@ if [ $# -ne 4 ]; then
 fi
 
 # Procesar parámetros de entrada
+IMGFILE=$(ogGetPath "$1" "$2.img")
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-    # Si la imagen no está en la caché, copiarla del repositorio.
-    IMGDIR=$(ogGetParentPath "$1" "$2") || exit $?
-    IMGFILE=$(ogGetPath "$1" "$2")
+    IMGDIR=$(ogGetParentPath "$1" "$2")
+    # Si no existe el directorio de la imagen, crearlo.
+    if [ -z "$IMGDIR"]; then
+        echo "Creando directorio de imagen \"$1, ${2%/*}\"."
+        ogMakeDir "$1" "${2%/*}" || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
+    fi
+    IMGDIR=$(ogGetParentPath "$1" "$2") || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
     if [ -z "$IMGFILE" ]; then
         echo "Copiando imagen \"$2\" del repositorio a caché local"
-        ogCopyFile "repo" "$2" "$IMGDIR" || exit $?
-        IMGFILE=$(ogGetPath "cache" "$2") || exit $?
+        ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
+        IMGFILE=$(ogGetPath "cache" "$2.img")
     fi
-else
-    IMGFILE=$(ogGetPath "$1" "$2") || exit $?
+fi
+if [ -z "$IMGFILE" ]; then
+    ogRaiseError $OG_ERR_NOTFOUND "$1, $2"
+    exit $?
 fi
 PART=$(ogDiskToDev "$3" "$4") || exit $?
 

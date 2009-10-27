@@ -9,7 +9,6 @@
 #*/
 
 
-##### PRUEBAS 
 #/**
 #         ogCopyFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
 #@brief   Metafunción para copiar un fichero de sistema OpenGNSys a un directorio OpenGNSys.
@@ -46,6 +45,24 @@ cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
 
 
 #/**
+#         ogDeleteFile [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Metafunción que borra un fichero de un dispositivo.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/
+function ogDeleteFile () {
+# Variables locales.
+local FILE
+#/// Comprobar que existe el fichero y borrarlo.
+FILE=$(ogGetPath "$@")
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+}
+
+
+#/**
 #         ogDeleteTree [ str_repo | int_ndisk int_npartition ] path_dirpath
 #@brief   Metafunción que borra todo un subárbol de directorios de un dispositivo.
 #@see     ogGetPath
@@ -53,11 +70,13 @@ cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
 #*/
-# Borrar subárbol de directorio.
 function ogDeleteTree () {
+
+# Variables locales.
 local DIR
-DIR=$(ogGetPath "$@") || return $?
-[ -z "$DIR" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
+#/// Comprobar que existe el directorio y borrarlo con su contenido.
+DIR=$(ogGetPath "$@")
+[ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
 
@@ -154,22 +173,6 @@ ogGetPath $PARENT
 
 
 #/**
-#         ogDeleteFile [ str_repo | int_ndisk int_npartition ] path_filepath
-#@brief   Metafunción que borra un fichero de un dispositivo.
-#@see     ogGetPath
-#@version 0.9 - Pruebas con OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-29
-#*/
-function ogDeleteFile () {
-local FILE
-FILE=$(ogGetPath "$@") || return $?
-[ -z "$FILE" ] && ogRaiseError $OG_ERR_NOTFOUND "$*" && reutrn $?
-rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
-}
-
-
-#/**
 #         ogMakeDir [ str_repo | int_ndisk int_npartition ] path_dirpath
 #@brief   Metafunción que crea un subdirectorio vacío en un dispositivo.
 #@see     ogGetParentPath
@@ -181,7 +184,6 @@ function ogMakeDir () {
 local PARENT DIR
 PARENT=$(ogGetParentPath "$@") || return $?
 DIR="$(basename "${!#}")"
-echo mkdir -p "$PARENT/$DIR"
 mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
 }
  
