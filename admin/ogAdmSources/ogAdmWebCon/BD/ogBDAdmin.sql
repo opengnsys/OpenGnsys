@@ -2108,6 +2108,41 @@ CREATE TABLE `hardwares` (
 -- Volcar la base de datos para la tabla `hardwares`
 -- 
 
+-- 
+-- Base de datos: `ogBDAdmin`
+-- 
+
+-- --------------------------------------------------------
+
+-- 
+-- Estructura de tabla para la tabla `tipohardwares`
+-- 
+
+CREATE TABLE `tipohardwares` (
+  `idtipohardware` int(11) NOT NULL auto_increment,
+  `descripcion` varchar(250) NOT NULL default '',
+  `urlimg` varchar(250) NOT NULL default '',
+  `nemonico` char(3) NOT NULL,
+  `pci` tinyint(1) NOT NULL,
+  PRIMARY KEY  (`idtipohardware`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+
+-- 
+-- Volcar la base de datos para la tabla `tipohardwares`
+-- 
+
+INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES 
+(1, 'placas', '../images/iconos/placabase.gif', 'boa', 0),
+(2, 'Camaras web', '../images/iconos/camweb.gif', '', 0),
+(3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 0),
+(4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
+(5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
+(7, 'Tarjetas grÃ¡ficas', '../images/iconos/vga.gif', 'vga', 0),
+(8, 'discos', '../images/iconos/discoduro.gif', 'dis', 0),
+(9, 'Dispositivos de sonido', '../images/iconos/tsonido.gif', 'aud', 0),
+(10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
+(11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio', 0),
+(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/confihard.gif', 'cdr', 0);
 
 -- --------------------------------------------------------
 
