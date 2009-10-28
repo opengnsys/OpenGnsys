@@ -81,7 +81,6 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 				currentOp.style.borderRightColor="#ffffff"
 				currentOp.style.borderTopColor="#808080"
 				currentOp.style.borderLeftColor="#808080"
-alert(href)
 				opadre.frames["frame_arbol"].document.location.href=href
 				opadre.frames["frame_contenidos"].document.location.href=href2
 		}
