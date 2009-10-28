@@ -43,6 +43,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea e
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/administracion_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
+sdfgsdfogksdflgksñfgkslkgfkgśldǵkslkglksǵflksĺgfk´g
 <?
 //________________________________________________________________________________________________________
 echo $arbol->CreaArbolVistaXML();	// Crea �bol (HTML) a partir del XML
@@ -62,6 +63,8 @@ $flotante=new MenuContextual();			// Crea objeto MenuContextual
 //________________________________________________________________________________________________________
 include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
+
+echo "<br>=====================". $cmd->texto;
 ?>
 </BODY>
 </HTML>
