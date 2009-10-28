@@ -1,6 +1,6 @@
 <?
-$wer="http://10.1.15.4/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
-$wac="http://10.1.15.4/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
+$wer="http://10.1.15.3/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.3/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
 //========================================================================================================
 // Variables de sessión de configuración de servidor y base de datos( Modificar aquí para cambio global) 
 //$cnx="10.1.15.3;usuhidra;passusuhidra;ogBDAdmin;sqlserver"; // Cadena de conexión a la base de datos
