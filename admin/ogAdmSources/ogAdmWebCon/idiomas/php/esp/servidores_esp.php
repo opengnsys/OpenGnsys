@@ -13,7 +13,7 @@
 	$TbMsg[5]='"Información Servidor"';
 	$TbMsg[6]='"Mover Servidor"';
 	$TbMsg[7]='"Propiedades"';
-	$TbMsg[8]='"Eliminar  Servidor OpenGnsys "';
+	$TbMsg[8]='"Eliminar Servidor"';
 	$TbMsg[9]='"Nuevo grupo de Servidores"';
 	$TbMsg[10]='"Añadir nuevo Servidor Dhcp"';
 	$TbMsg[11]='"Eliminar Servidor Dhcp"';
