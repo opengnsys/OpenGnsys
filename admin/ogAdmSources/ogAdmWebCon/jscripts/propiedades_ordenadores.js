@@ -116,7 +116,7 @@ function comprobar_datos(){
          return(false)
 	}
 	*/
-	/*
+	/* 
 	var  p=document.fdatos.idservidordhcp.selectedIndex
 	 if (p==0){  
          alert(TbMsg[4])

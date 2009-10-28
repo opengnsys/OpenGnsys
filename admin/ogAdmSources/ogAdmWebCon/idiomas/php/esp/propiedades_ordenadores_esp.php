@@ -15,7 +15,7 @@ $TbMsg[6]="Dirección IP";
 $TbMsg[7]="Dirección MAC";
 $TbMsg[8]="Perfil Hardware";
 $TbMsg[9]="Servidor Dhcp";
-$TbMsg[10]="Servidor Rembo ";
+$TbMsg[10]="Servidor OpenGnsys ";
 $TbMsg[11]="Menu";
 $TbMsg[12]="Tamaño Caché";
 ?>
