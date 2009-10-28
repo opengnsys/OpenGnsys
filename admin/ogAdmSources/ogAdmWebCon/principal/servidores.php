@@ -380,7 +380,7 @@ function CreacontextualXMLServidoresDhcp(){
 
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' idctx="flo_Raiz'.$LITAMBITO_SERVIDORESDHCP.'"';
-	$layerXML.=' maxanchu=175';
+	$layerXML.=' maxanchu=190';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
