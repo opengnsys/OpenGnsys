@@ -4,7 +4,7 @@ $wac="http://10.1.15.3/ogAdmWebCon/acceso.php"; // Página de login de la aplicac
 //========================================================================================================
 // Variables de sessión de configuración de servidor y base de datos( Modificar aquí para cambio global) 
 //$cnx="10.1.15.3;usuhidra;passusuhidra;ogBDAdmin;sqlserver"; // Cadena de conexión a la base de datos
-$cnx="10.1.15.3;usuhidra;passusuhidra;bdhidra;sqlserver"; // Cadena de conexión a la base de datos
+$cnx="10.1.15.3;usuhidra;passusuhidra;ogBDAdmin;sqlserver"; // Cadena de conexión a la base de datos
 $ips="10.1.15.3"; // IP del servidor hidra
 $prt="2008"; // Puerto de comunicación con el servidor
 //========================================================================================================
