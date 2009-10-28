@@ -108,18 +108,22 @@ function comprobar_datos(){
 		document.fdatos.mac.focus();
 		return(false);
 	}
+	/*
 	var  p=document.fdatos.idperfilhard.selectedIndex
 	 if (p==0){  
          alert(TbMsg[3])
          document.forms.fdatos.idperfilhard.focus()
          return(false)
 	}
+	*/
+	/*
 	var  p=document.fdatos.idservidordhcp.selectedIndex
 	 if (p==0){  
          alert(TbMsg[4])
          document.forms.fdatos.idservidordhcp.focus()
          return(false)
 	}
+	*/
 	var  p=document.fdatos.idservidorrembo.selectedIndex
 	 if (p==0){  
          alert(TbMsg[5])
