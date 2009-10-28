@@ -47,8 +47,9 @@ if (!$cmd)
 			</TR>
 		<?
 			$rs=new Recordset; 
-			$cmd->texto='SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.descripcion as hdescripcion,tipohardwares.urlimg,fabricantes.nombre as nombrefabricante,tipohardwares.pci FROM hardwares INNER JOIN perfileshard_hardwares ON hardwares.idhardware=perfileshard_hardwares.idhardware INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware LEFT OUTER JOIN fabricantes  ON fabricantes.codigo=hardwares.codigo1 WHERE perfileshard_hardwares.idperfilhard='.$idperfilhard.' ORDER BY tipohardwares.idtipohardware,hardwares.descripcion';
+			$cmd->texto='SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.descripcion as hdescripcion,tipohardwares.urlimg,tipohardwares.pci FROM hardwares INNER JOIN perfileshard_hardwares ON hardwares.idhardware=perfileshard_hardwares.idhardware INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware WHERE perfileshard_hardwares.idperfilhard='.$idperfilhard.' ORDER BY tipohardwares.idtipohardware,hardwares.descripcion';
 			$rs->Comando=&$cmd; 
+
 			if ($rs->Abrir()){ 
 				$rs->Primero();
 				$A_W=" WHERE ";
@@ -57,11 +58,7 @@ if (!$cmd)
 						 echo '<TR>';
 						 echo '<TD align=center width="10%" ><INPUT type=checkbox onclick="gestion_componente('.$rs->campos["idhardware"].',this)" checked ></INPUT></TD>';
 						 echo '<TD align=center width="10%" ><IMG alt="'. $rs->campos["hdescripcion"].'"src="'.$rs->campos["urlimg"].'"></TD>';
-						if ($rs->campos["pci"]>0)
-							$fabricante="(".trim($rs->campos["nombrefabricante"]).")";
-						else
-							$fabricante="";
-						 echo '<TD  width="80%" >&nbsp;'.$fabricante.$rs->campos["descripcion"].'</TD>';
+						 echo '<TD  width="80%" >&nbsp;'.$rs->campos["descripcion"].'</TD>';
 						 echo '</TR>';
 						 $strex.= $A_W."hardwares.idhardware<>".$rs->campos["idhardware"];
 						$A_W=" AND ";
@@ -69,7 +66,7 @@ if (!$cmd)
 				}
 			}
 			$rs->Cerrar();
-			$cmd->texto='SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.descripcion as hdescripcion,tipohardwares.urlimg,fabricantes.nombre as nombrefabricante,tipohardwares.pci  FROM hardwares  INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware  LEFT OUTER JOIN fabricantes   ON fabricantes.codigo=hardwares.codigo1  '.$strex.' AND hardwares.idcentro='.$idcentro.'  ORDER BY tipohardwares.idtipohardware,hardwares.descripcion';
+			$cmd->texto='SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.descripcion as hdescripcion,tipohardwares.urlimg,tipohardwares.pci  FROM hardwares  INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware '.$strex.' AND hardwares.idcentro='.$idcentro.'  ORDER BY tipohardwares.idtipohardware,hardwares.descripcion';
 			$rs->Comando=&$cmd; 
 			if ($rs->Abrir()){
 				$rs->Primero();
@@ -77,11 +74,8 @@ if (!$cmd)
 						 echo '<TR>';
 						 echo '<TD align=center width="10%" ><INPUT type=checkbox onclick="gestion_componente('.$rs->campos["idhardware"].',this)"  ></INPUT></TD>';
 						 echo '<TD align=center width="10%" ><IMG alt="'. $rs->campos["hdescripcion"].'"src="'.$rs->campos["urlimg"].'"></TD>';
-						if ($rs->campos["pci"]>0)
-							$fabricante="(".trim($rs->campos["nombrefabricante"]).")";
-						else
-							$fabricante="";
-						 echo '<TD width="80%" >&nbsp;'.$fabricante.$rs->campos["descripcion"].'</TD>';
+
+						 echo '<TD width="80%" >&nbsp;'.$rs->campos["descripcion"].'</TD>';
 						 echo '</TR>';
 						$rs->Siguiente();
 				}

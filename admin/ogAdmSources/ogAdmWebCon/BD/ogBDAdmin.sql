@@ -337,10 +337,8 @@ CREATE TABLE IF NOT EXISTS `hardwares` (
   `descripcion` varchar(250) NOT NULL default '',
   `idcentro` int(11) NOT NULL default '0',
   `grupoid` int(11) default NULL,
-  `codigo1` smallint(6) unsigned NOT NULL,
-  `codigo2` smallint(6) unsigned NOT NULL,
   PRIMARY KEY  (`idhardware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=86 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 -- --------------------------------------------------------
 
 -- 

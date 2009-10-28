@@ -1078,6 +1078,9 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	char ch[2]; // Carnter delimitador
 	char sqlstr[1000],ErrStr[200],descripcion[250],nombreordenador[250];
 	int idcentro;
+
+	
+	RegistraLog(hrd,false);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ACCESO atnico A TRAVEZ DE OBJETO MUTEX a este trozo de cnigo 
 	pthread_mutex_lock(&guardia); 
@@ -1105,6 +1108,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	strcpy(ch,"\n");// caracter delimitador 
 	lon=split_parametros(tbHardware,hrd,ch);
 	
+	RegistraLog("<<>>",false);
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
 		strcpy(ch,"=");// caracter delimitador "="
@@ -1116,6 +1120,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 			return(false);
 		}		
 		if(tbl.ISEOF()){ //  Tipo de Hardware NO existente
+			RegistraLog("Existe un tipo de hardware que no está registrado. Se rechaza proceso de inventario",false);
 			pthread_mutex_unlock(&guardia); 
 			return(false);
 		}
@@ -1135,13 +1140,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 				pthread_mutex_unlock(&guardia); 
 				return(false);
 			}			
-			if(pci){ // Hardware pci
-				strcpy(ch,":");// caracter delimitador "="
-				split_parametros(codigos,dualHardware[1],ch); // Nmero de particin
-				sprintf(sqlstr,"SELECT idhardware FROM hardwares WHERE idtipohardware=%d AND codigo1=0x%s AND codigo2=0x%s",idtipohardware,codigos[0],codigos[1]);
-			}
-			else // Hardware NO pci
-				sprintf(sqlstr,"SELECT idhardware FROM hardwares WHERE idtipohardware=%d AND descripcion='%s'",idtipohardware,dualHardware[1]);
+			sprintf(sqlstr,"SELECT idhardware FROM hardwares WHERE idtipohardware=%d AND descripcion='%s'",idtipohardware,dualHardware[1]);
 			
 			// EJecuta consulta
 			if(!db.Execute(sqlstr,tbl)){ // Error al leer
