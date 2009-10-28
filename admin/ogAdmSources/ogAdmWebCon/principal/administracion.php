@@ -64,7 +64,6 @@ $flotante=new MenuContextual();			// Crea objeto MenuContextual
 include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
 
-echo "<br>=====================". $cmd->texto;
 ?>
 </BODY>
 </HTML>
@@ -151,7 +150,6 @@ function SubarbolXML_universidades_entidades($cmd,$iduniversidad,$grupoid){
 	$rs=new Recordset; 
 	$cmd->texto="SELECT idgrupo,nombregrupo,grupoid FROM grupos WHERE grupoid=".$grupoid." AND idcentro=0 AND iduniversidad=".$iduniversidad." ORDER BY  nombregrupo";
 
-echo <br>=====================". $cmd->texto;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -170,7 +168,7 @@ echo <br>=====================". $cmd->texto;
 	$rs->Cerrar();
 	$cmd->texto="SELECT identidad,nombreentidad FROM entidades WHERE grupoid=".$grupoid." AND iduniversidad=".$iduniversidad." ORDER by nombreentidad desc";
 	$rs->Comando=&$cmd; 
-echo "<br>=====================". $cmd->texto;
+
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
 	while (!$rs->EOF){
