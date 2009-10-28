@@ -6,7 +6,7 @@
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"Nuevo grupo de Servidores"';
-	$TbMsg[1]='"Añadir nuevo Servidor OpenGnsys "';
+	$TbMsg[1]='"Añadir Servidor OpenGnsys "';
 	$TbMsg[2]='"Colocar Servidor"';
 	$TbMsg[3]='"Renombrar"';
 	$TbMsg[4]='"Eliminar grupo de servidores"';
