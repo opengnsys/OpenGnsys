@@ -1,5 +1,0 @@
-#!/bin/bash
-
-DATOS=$(ogGetIpAddress $*) || exit $?
-[ -n "$DATOS" ] && echo $DATOS 
-exit 0
