@@ -1070,16 +1070,14 @@ int RecuperaItem(SOCKET s,char *parametros)
 int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 {
 	int pci,idtipohardware;
-	int i,lon=0;
+	int i,lon=0,idcentro,widcentro;
 	char *tbHardware[MAXHARDWARE]; 
 	int tbidhardware[MAXHARDWARE]; 
 	char *dualHardware[2]; 
 	char ch[2]; // Carnter delimitador
 	char sqlstr[1000],ErrStr[200],descripcion[250],nombreordenador[250];
-	int idcentro;
 
-	
-	RegistraLog(hrd,false);
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ACCESO atnico A TRAVEZ DE OBJETO MUTEX a este trozo de cnigo 
 	pthread_mutex_lock(&guardia); 
@@ -1091,11 +1089,13 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 		pthread_mutex_unlock(&guardia); 
 		return(false);
 	}		
-	if(!tbl.Get("idcentro",idcentro)){ // Toma dato 
+	if(!tbl.Get("idcentro",widcentro)){ // Toma dato 
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		pthread_mutex_unlock(&guardia); 
 		return(false);
 	}			
+	idcentro=widcentro+0; // Bug Mysql
+
 	if(!tbl.Get("nombreordenador",nombreordenador)){ // Toma dato 
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		pthread_mutex_unlock(&guardia); 
@@ -1107,7 +1107,6 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	strcpy(ch,"\n");// caracter delimitador 
 	lon=split_parametros(tbHardware,hrd,ch);
 	
-	RegistraLog("<<>>",false);
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
 		strcpy(ch,"=");// caracter delimitador "="
@@ -1133,12 +1132,8 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				pthread_mutex_unlock(&guardia); 
 				return(false);
-			}			
-			if(!tbl.Get("pci",pci)){ // Toma dato si es hardware pci
-				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
-				pthread_mutex_unlock(&guardia); 
-				return(false);
-			}			
+			}
+
 			sprintf(sqlstr,"SELECT idhardware FROM hardwares WHERE idtipohardware=%d AND descripcion='%s'",idtipohardware,dualHardware[1]);
 			
 			// EJecuta consulta
@@ -1147,6 +1142,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 				pthread_mutex_unlock(&guardia); 
 				return(false);
 			}	
+
 			if(tbl.ISEOF()){ //  Hardware NO existente
 				sprintf(sqlstr,"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid) VALUES(%d,'%s',%d,0)",idtipohardware,dualHardware[1],idcentro);
 				if(!db.Execute(sqlstr,tbl)){ // Error al insertar

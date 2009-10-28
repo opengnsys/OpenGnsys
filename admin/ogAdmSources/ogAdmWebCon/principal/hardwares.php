@@ -177,7 +177,7 @@ function SubarbolXML_ComponentesHardwares($cmd,$idcentro,$grupoid){
 	global $LITAMBITO_COMPONENTESHARD;
 	$cadenaXML="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT tipohardwares.pci,hardwares.idhardware,hardwares.descripcion,tipohardwares.urlimg,fabricantes.nombre as nombrefabricante,tipohardwares.pci FROM hardwares INNER JOIN tipohardwares  ON hardwares.idtipohardware=tipohardwares.idtipohardware  LEFT OUTER JOIN fabricantes   ON fabricantes.codigo=hardwares.codigo1 WHERE idcentro=".$idcentro." AND grupoid=". $grupoid." order by tipohardwares.idtipohardware,hardwares.descripcion";
+	$cmd->texto="SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.urlimg FROM hardwares INNER JOIN tipohardwares  ON hardwares.idtipohardware=tipohardwares.idtipohardware WHERE idcentro=".$idcentro." AND grupoid=". $grupoid." order by tipohardwares.idtipohardware,hardwares.descripcion";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -188,13 +188,9 @@ function SubarbolXML_ComponentesHardwares($cmd,$idcentro,$grupoid){
 			$cadenaXML.=' imagenodo='.$rs->campos["urlimg"];
 		else
 			$cadenaXML.=' imagenodo="../images/iconos/confihard.gif"';		
-		
-		if ($rs->campos["pci"]>0)
-			$fabricante="(".trim($rs->campos["nombrefabricante"]).")";
-		else
-			$fabricante="";
 
-		$cadenaXML.=' infonodo="'.$fabricante.$rs->campos["descripcion"].'"';
+
+		$cadenaXML.=' infonodo="'.$rs->campos["descripcion"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_COMPONENTESHARD.'-'.$rs->campos["idhardware"];
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_COMPONENTESHARD."'" .')"';
 		$cadenaXML.='>';
