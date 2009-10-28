@@ -328,10 +328,19 @@ CREATE TABLE IF NOT EXISTS `gruposordenadores` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- 
--- Volcar la base de datos para la tabla `gruposordenadores`
+-- Estructura de tabla para la tabla `hardwares`
 -- 
-
-
+DROP TABLE IF EXISTS `hardwares`;
+CREATE TABLE IF NOT EXISTS `hardwares` (
+  `idhardware` int(11) NOT NULL auto_increment,
+  `idtipohardware` int(11) NOT NULL default '0',
+  `descripcion` varchar(250) NOT NULL default '',
+  `idcentro` int(11) NOT NULL default '0',
+  `grupoid` int(11) default NULL,
+  `codigo1` smallint(6) unsigned NOT NULL,
+  `codigo2` smallint(6) unsigned NOT NULL,
+  PRIMARY KEY  (`idhardware`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=86 ;
 -- --------------------------------------------------------
 
 -- 
