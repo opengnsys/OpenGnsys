@@ -60,6 +60,8 @@ if  ($opcion!=$op_alta){
 	<INPUT type=hidden name=idordenador value=<?=$idordenador?>>
 	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
 	<INPUT type=hidden name=idaula value=<?=$idaula?>>
+
+	
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
@@ -102,16 +104,6 @@ if  ($opcion!=$op_alta){
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion').'</TD>';
 				else
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion',250).'</TD>';
-			?>
-		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'servidoresdhcp',$idservidordhcp,'idservidordhcp','nombreservidordhcp').'</TD>';
-				else
-					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'servidoresdhcp',$idservidordhcp,'idservidordhcp','nombreservidordhcp',250).'</TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

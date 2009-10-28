@@ -86,13 +86,6 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
-				echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'servidoresdhcp',$idservidordhcp,'idservidordhcp','nombreservidordhcp',250).'</TD>';
-			?>
-		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
 			<?
 				echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'servidoresrembo',$idservidorrembo,'idservidorrembo','nombreservidorrembo',250).'</TD>';
