@@ -357,7 +357,7 @@ function CreacontextualXMLGruposEntidades(){
 
 	// Crear grupos de entidades
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar_grupos('.$AMBITO_GRUPOSENTIDADES.',' ."'".$LITAMBITO_GRUPOSENTIDADES."'". ',1,1)"';
+	$layerXML.=' alpulsar="insertar_grupos('.$AMBITO_GRUPOSENTIDADES.',' ."'".$LITAMBITO_GRUPOSENTIDADES."'". ',0,1)"';
 	$layerXML.=' imgitem="../images/iconos/carpeta.gif"';
 	$layerXML.=' textoitem='.$TbMsg[1];
 	$layerXML.='></ITEM>';
@@ -370,7 +370,7 @@ function CreacontextualXMLGruposEntidades(){
 	$wpages="../propiedades/propiedades_entidades.php";
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar('.$wParam.',1,1)"';
+	$layerXML.=' alpulsar="insertar('.$wParam.',0,1)"';
 	$layerXML.=' imgitem="../images/iconos/entidades.gif"';
 	$layerXML.=' textoitem='.$TbMsg[2];
 	$layerXML.='></ITEM>';
@@ -413,7 +413,7 @@ function CreacontextualXMLEntidades(){
 	$wpages="../propiedades/propiedades_centros.php";
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar('.$wParam.',1,2)"';
+	$layerXML.=' alpulsar="insertar('.$wParam.',0,2)"';
 	$layerXML.=' imgitem="../images/iconos/centros.gif"';
 	$layerXML.=' textoitem='.$TbMsg[8];
 	$layerXML.='></ITEM>';
@@ -464,7 +464,7 @@ function CreacontextualXMLCentros(){
 	$wpages="../propiedades/propiedades_usuarios.php?idtipousuario=".$ADMINISTRADOR;
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar('.$wParam.',1,3)"';
+	$layerXML.=' alpulsar="insertar('.$wParam.',0,3)"';
 	$layerXML.=' imgitem="../images/iconos/administradores.gif"';
 	$layerXML.=' textoitem='.$TbMsg[9];
 	$layerXML.='></ITEM>';
