@@ -1816,7 +1816,7 @@ int SetCachePartitionSize(int t)
 // ________________________________________________________________________________________________________
 int AutoexecClienteHidra()
 {
-	sprintf(fileini,"/comandos/INI_%s",Propiedades.IPlocal);	// Nombre del fichero autoexec		
+	sprintf(fileini,"/autoexec/INI_%s",Propiedades.IPlocal);	// Nombre del fichero autoexec		
 	if(ExisteFichero(fileini)){
 		if(LoadTextFile(fileini)){ // Lee fichero autoexec		
 			GestionTramas(trama);	// Analiza la trama
@@ -2148,8 +2148,8 @@ int  main(int argc, char *argv[])
 	Log(retorno);
 	exit(herror);
 */
-	strcpy(szPathFileCfg,"hidra.cfg");
-	strcpy(szPathFileLog,"hidra.log");
+	strcpy(szPathFileCfg,"ogAdmClient.cfg");
+	strcpy(szPathFileLog,"ogAdmClient.log");
 	
 	// Validación de argumentos y lectura del fichero de configuración
 	if(!ValidacionParametros(argc,argv))
