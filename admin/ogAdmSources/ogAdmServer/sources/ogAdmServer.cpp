@@ -737,7 +737,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 		return(false);
 	}
 	// Recupera los datos del ordenador
-	sprintf(sqlstr,"SELECT ordenadores.idordenador,ordenadores.idaula,ordenadores.nombreordenador, ordenadores.idperfilhard, ordenadores.idconfiguracion, idparticion,servidoresdhcp.ip AS ipservidordhcp, servidoresrembo.ip AS ipservidorrembo,servidoresrembo.puertorepo, ordenadores.idmenu,ordenadores.cache FROM ordenadores INNER JOIN servidoresdhcp ON ordenadores.idservidordhcp = servidoresdhcp.idservidordhcp INNER JOIN  servidoresrembo ON ordenadores.idservidorrembo = servidoresrembo.idservidorrembo  WHERE ordenadores.ip = '%s'",iph);
+	sprintf(sqlstr,"SELECT ordenadores.idordenador,ordenadores.idaula,ordenadores.nombreordenador, ordenadores.idperfilhard, ordenadores.idconfiguracion,ordenadores.idparticion,servidoresrembo.ip AS ipservidorrembo,servidoresrembo.puertorepo, ordenadores.idmenu,ordenadores.cache FROM ordenadores INNER JOIN  servidoresrembo ON ordenadores.idservidorrembo = servidoresrembo.idservidorrembo  WHERE ordenadores.ip = '%s'",iph);
 
 	if(!db.Execute(sqlstr,tbl)){ // Error al consultar
 		db.GetErrorErrStr(ErrStr);
@@ -781,10 +781,12 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				return(false);
 		}
+		/*
 		if(!tbl.Get("ipservidordhcp",ipservidordhcp)){ // Toma dato
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				return(false);
 		}
+
 		lon=strlen(ipservidordhcp);
 		for (i=0;i<lon;i++){
 			if(ipservidordhcp[i]==' ') {
@@ -792,6 +794,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 				break;
 			}
 		}
+		*/
 		if(!tbl.Get("ipservidorrembo",ipservidorrembo)){ // Toma dato
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				return(false);
@@ -837,7 +840,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 	}
 	strcpy(tbsockets[idx].estado,CLIENTE_INICIANDO); // Actualiza el estado del cliente 
 	tbsockets[idx].sock=s; // Guarda el socket 
-	strcpy(tbsockets[idx].ipsrvdhcp,ipservidordhcp);// Guarda IP servidor dhcp
+	//strcpy(tbsockets[idx].ipsrvdhcp,ipservidordhcp);// Guarda IP servidor dhcp
 	strcpy(tbsockets[idx].ipsrvrmb,ipservidorrembo);// Guarda IP servidor rembo
 
 	inclusion_srvRMB(ipservidorrembo,puertorepo); // Actualiza tabla de servidores rembo
@@ -2159,7 +2162,7 @@ int borra_entrada(int i)
 	if(!tbsockets[i].sock)
 			close(tbsockets[i].sock);
 	tbsockets[i].sock=INVALID_SOCKET;
-	tbsockets[i].ipsrvdhcp[0]=(char)NULL; 
+	//tbsockets[i].ipsrvdhcp[0]=(char)NULL; 
 	tbsockets[i].ipsrvrmb[0]=(char)NULL; 
 
 	return(true);
@@ -3583,9 +3586,10 @@ int alta_ordenador(Database db,Table tbl,int* ido,char *nor,char *iph,char*mac,i
 int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 {
 	char sqlstr[1000],ErrStr[200];
-	int identificador_dhcp,identificador_rembo;
+	int identificador_dhcp=0;
+	int identificador_rembo;
 	
-	// Servidor dhcp
+	/* Servidor dhcp
 	sprintf(sqlstr,"SELECT idservidordhcp FROM servidoresdhcp where ip='%s'",ipd);
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
@@ -3597,6 +3601,7 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 			return(false);
 		}
 	}
+	*/
 	// Servidor rembo
 	sprintf(sqlstr,"SELECT idservidorrembo FROM servidoresrembo where ip='%s'",ipr);
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
