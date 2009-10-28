@@ -1,0 +1,1 @@
+./ogAdmServer -f ogAdmServer.cfg -l ogAdmserver.log
