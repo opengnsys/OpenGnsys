@@ -1069,12 +1069,11 @@ int RecuperaItem(SOCKET s,char *parametros)
 // ________________________________________________________________________________________________________
 int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 {
-	int pci,idtipohardware,codigo1,codigo2;
+	int pci,idtipohardware;
 	int i,lon=0;
 	char *tbHardware[MAXHARDWARE]; 
 	int tbidhardware[MAXHARDWARE]; 
 	char *dualHardware[2]; 
-	char *codigos[2]; 	
 	char ch[2]; // Carnter delimitador
 	char sqlstr[1000],ErrStr[200],descripcion[250],nombreordenador[250];
 	int idcentro;
@@ -1149,44 +1148,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 				return(false);
 			}	
 			if(tbl.ISEOF()){ //  Hardware NO existente
-				if(pci){ // Hardware pci
-					sprintf(sqlstr,"SELECT * FROM pcifabricantes WHERE codigo1=0x%s AND codigo2=0x%s",codigos[0],codigos[1]);
-					if(!db.Execute(sqlstr,tbl)){ // Error al leer
-						db.GetErrorErrStr(ErrStr);
-						pthread_mutex_unlock(&guardia); 
-						return(false);
-					}	
-					if(tbl.ISEOF()){ //  Hardware NO existente
-						strcat(descripcion,"(Desconocido)");
-						sprintf(sqlstr,"INSERT pcifabricantes (descripcion,codigo1,codigo2) VALUES('%s',0x%s,0x%s)",descripcion,codigos[0],codigos[1]);
-						if(!db.Execute(sqlstr,tbl)){ // Error al insertar
-							db.GetErrorErrStr(ErrStr);
-							pthread_mutex_unlock(&guardia); 
-							return(false);
-						}
-						sprintf(sqlstr,"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid,codigo1,codigo2) VALUES(%d,'%s',%d,0,0x%s,0x%s)",idtipohardware,descripcion,idcentro,codigos[0],codigos[1]);
-					}							
-					else{				
-						if(!tbl.Get("codigo1",codigo1)){ // Toma dato
-							tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
-							pthread_mutex_unlock(&guardia); 
-							return(false);
-						}			
-						if(!tbl.Get("codigo2",codigo2)){ // Toma dato
-							tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
-							pthread_mutex_unlock(&guardia); 
-							return(false);
-						}		
-						if(!tbl.Get("descripcion",descripcion)){ // Toma dato
-							tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
-							pthread_mutex_unlock(&guardia); 
-							return(false);
-						}	
-						sprintf(sqlstr,"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid,codigo1,codigo2) VALUES(%d,'%s',%d,0,%d,%d)",idtipohardware,descripcion,idcentro,codigo1,codigo2);
-					}															
-				}
-				else
-					sprintf(sqlstr,"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid,codigo1,codigo2) VALUES(%d,'%s',%d,0,0,0)",idtipohardware,dualHardware[1],idcentro);
+				sprintf(sqlstr,"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid) VALUES(%d,'%s',%d,0)",idtipohardware,dualHardware[1],idcentro);
 				if(!db.Execute(sqlstr,tbl)){ // Error al insertar
 					db.GetErrorErrStr(ErrStr);
 					pthread_mutex_unlock(&guardia); 
