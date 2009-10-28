@@ -1,13 +1,13 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: informacion_servidorrembo_eng.php 
+//	Fichero de idiomas php: informacion_servidorOpenGnsys_eng.php 
 //	Idioma: Ingés 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Rembo Servers';
-	$TbMsg[1]='Information about Rembo Servers';
-	$TbMsg[2]='Rembo Server';
-	$TbMsg[3]='Rembo Server information';
+	$TbMsg[0]='OpenGnsys Servers';
+	$TbMsg[1]='Information about OpenGnsys Servers';
+	$TbMsg[2]='OpenGnsys Server';
+	$TbMsg[3]='OpenGnsys Server information';
 	$TbMsg[4]='Coments';
 ?>
