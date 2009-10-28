@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DATOS=$(ogFormatFs $*) || exit $?
+exit 0
+

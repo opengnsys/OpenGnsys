@@ -1,0 +1,10 @@
+#!/bin/bash
+#echo NTFS:50000000 EXT3:25000000 LINUX-SWAP:2000000
+#echo NTFS:55000000
+
+# Error si no se reciben 2 parametros.
+[ $# != 1 ] &&  exit $OG_ERR_FORMAT
+
+DATOS=$(ogListPartitions $*) || exit $?
+[ -n "$DATOS" ] && echo $DATOS
+exit 0
