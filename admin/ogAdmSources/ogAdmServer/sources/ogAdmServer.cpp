@@ -744,6 +744,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 		return(false);
 	}
 	if(tbl.ISEOF()){ // Si No existe registro
+		RegistraLog("Cliente No encontrado, se rechaza la petición",false);
 		if(aulaup==AUTOINCORPORACION_OFF) // No estnactivada la incorporacin automnica
 			return(false);
 		if(!cuestion_nuevoordenador(db,tbl,&idordenador,nau,nor,iph,mac,cfg,ipd,ipr)) // Ha habido algn error en la incorporacin automnica
@@ -1729,6 +1730,7 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	char PathHidra[1024]; // path al directorio base de Hidra
 	int puertorepo,lon;
 	
+
 	// Toma parnetros
 	iph=toma_parametro("iph",parametros); // Toma ip
 	
@@ -1739,14 +1741,15 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	}
 	// Recupera los datos del ordenador
 	sprintf(sqlstr,"SELECT puertorepo,pathrembod FROM servidoresrembo WHERE ip = '%s'",iph);
-
+	
 	if(!db.Execute(sqlstr,tbl)){ // Error al consultar
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}
-	if(tbl.ISEOF()) // Si No existe registro
+	if(tbl.ISEOF()){ // Si No existe registro
+		RegistraLog("No existe el Repositorio, se rechaza la petición",false);
 		return(false);
-
+	}
 	if(!tbl.Get("puertorepo",puertorepo)){ // Toma dato
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		return(false);
@@ -1755,13 +1758,12 @@ int inclusion_REPO(SOCKET s,char *parametros)
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		return(false);
 	}
-	
 	inclusion_srvRMB(iph,puertorepo); // Actualiza tabla de servidores rembo
-	
 	TRAMA *trama=(TRAMA*)malloc(LONGITUD_TRAMA);
 	if(!trama)
 		return(false);
 	// Envia la trama
+	
 	trama->arroba='@';
 	strncpy(trama->identificador,"JMMLCAMDJ",9);
 	trama->ejecutor='1';
@@ -1771,7 +1773,7 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	lon+=sprintf(trama->parametros+lon,"usu=%s\r",usuario);	
 	lon+=sprintf(trama->parametros+lon,"pwd=%s\r",pasguor);
 	lon+=sprintf(trama->parametros+lon,"dat=%s\r",datasource);
-	lon+=sprintf(trama->parametros+lon,"cat=%s\r",catalog);			
+	lon+=sprintf(trama->parametros+lon,"cat=%s\r",catalog);
 	return(manda_trama(s,trama));
 }
 // ________________________________________________________________________________________________________
