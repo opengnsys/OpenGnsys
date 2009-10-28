@@ -86,7 +86,7 @@ function CreaArbol($cmd,$idcentro){
 	$cadenaXML.=' classnodo=texto_arbol';
 	$cadenaXML.='>';
 	$cadenaXML.=SubarbolServidoresRemboXML($cmd,$idcentro);
-	$cadenaXML.=SubarbolServidoresDhcpXML($cmd,$idcentro);
+	//$cadenaXML.=SubarbolServidoresDhcpXML($cmd,$idcentro);
 	$cadenaXML.='</SERVIDORES>'; 
 	return($cadenaXML);
 }
