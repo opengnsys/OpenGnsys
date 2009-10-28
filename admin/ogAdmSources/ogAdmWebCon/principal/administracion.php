@@ -1,11 +1,11 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// Aplicaciï¿½ WEB: ogAdmWebCon
+// Autor: Josï¿½Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaciï¿½: Aï¿½ 2003-2004
+// Fecha ï¿½tima modificaciï¿½: Febrero-2005
 // Nombre del fichero: administracion.php
-// Descripción : 
+// Descripciï¿½ : 
 //		Administra tablas varias : ADMINISTRACION,Campus,Instituciones,iconos, etc ...
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -20,17 +20,17 @@ include_once("../idiomas/php/".$idioma."/administracion_".$idioma.".php");
 $cmd=CreaComando($cadenaconexion);
 $cadenaXML="";
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiï¿½ con servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd); // Crea el arbol XML con todos los datos de administracion
-// Creación del árbol
-$baseurlimg="../images/signos"; // Url de las imágenes de signo
-$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
-$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea el árbol (formato XML)
+// Creaciï¿½ del ï¿½bol
+$baseurlimg="../images/signos"; // Url de las imï¿½enes de signo
+$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del ï¿½bol
+$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea el ï¿½bol (formato XML)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>Administraciï¿½ web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
@@ -45,10 +45,10 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea e
 <BODY OnContextMenu="return false">
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	// Crea árbol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	// Crea ï¿½bol (HTML) a partir del XML
 
 $flotante=new MenuContextual();			// Crea objeto MenuContextual
-// Crea contextual de las imágenes
+// Crea contextual de las imï¿½enes
  $XMLcontextual=CreacontextualXMLUniversidades();
  echo $flotante->CreaMenuContextual($XMLcontextual);
  $XMLcontextual=CreacontextualXMLUsuarios();
@@ -67,9 +67,9 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 // *************************************************************************************************************************************************
-//	Devuelve una cadena con formato XML con toda la información de aulas y ordenadores registrados en un Centro concreto
+//	Devuelve una cadena con formato XML con toda la informaciï¿½ de aulas y ordenadores registrados en un Centro concreto
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexión abierta)  
+//		- cmd:Una comando ya operativo ( con conexiï¿½ abierta)  
 //		- idcentro: El identificador del centro
 //		- nombrecentro: El nombre del centro
 //________________________________________________________________________________________________________
@@ -147,6 +147,8 @@ function SubarbolXML_universidades_entidades($cmd,$iduniversidad,$grupoid){
 	global $cadenaXML;
 	$rs=new Recordset; 
 	$cmd->texto="SELECT idgrupo,nombregrupo,grupoid FROM grupos WHERE grupoid=".$grupoid." AND idcentro=0 AND iduniversidad=".$iduniversidad." ORDER BY  nombregrupo";
+
+echo <br>=====================". $cmd->texto;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -165,6 +167,7 @@ function SubarbolXML_universidades_entidades($cmd,$iduniversidad,$grupoid){
 	$rs->Cerrar();
 	$cmd->texto="SELECT identidad,nombreentidad FROM entidades WHERE grupoid=".$grupoid." AND iduniversidad=".$iduniversidad." ORDER by nombreentidad desc";
 	$rs->Comando=&$cmd; 
+echo "<br>=====================". $cmd->texto;
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
 	while (!$rs->EOF){
@@ -232,7 +235,7 @@ function SubarbolXML_administradores($cmd,$idambito){
 }
 //________________________________________________________________________________________________________
 //
-//	Menús Contextuales
+//	Mens Contextuales
 //________________________________________________________________________________________________________
 function CreacontextualXMLUniversidades(){
 	global $LITAMBITO_GRUPOSENTIDADES;

@@ -37,7 +37,7 @@ void RegistraLog(const char *msg,int swerrno)
 // Funcinn: TomaConfiguracion
 //
 //		Descripcinn:
-//		Esta funcinn lee el fichero de configuracinn del programa hidralinuxcli  y toma los parametros
+//		Esta funcinn lee el fichero de configuracinn del programa
 //		Parametros:
 //				- pathfilecfg : Ruta al fichero de configuracinn
 //________________________________________________________________________________________________________
@@ -182,7 +182,7 @@ int split_parametros(char **trozos,char *cadena, char * ch){
 //_______________________________________________________________________________________________________________
 //
 // Comprueba si la IP del cliente est?a en la base de datos de Hidra
-// Parmetros:
+// parámetros:
 //		trmInfo: Puntero a la estructura de control de la conversacin DHCP
 //		ipmac: IP o MAC del cliente que ha abierto la hebra
 //		sw: Si vale 1 o 2 o 3 el parmetro anterior ser una IP en caso contrario ser una MAC
@@ -255,13 +255,16 @@ int inclusion_REPO()
 
 	sock=Abre_conexion(servidorhidra,puerto);
 	if(sock==INVALID_SOCKET) {
-		printf("Error de socket");
+		sprintf(msglog,"Error al crear socket del Repositorio");
+		RegistraLog(msglog,false);
 		return(false);
-}
+	}
 	envia_tramas(sock,trama);
 	recibe_tramas(sock,trama);
 	close(sock);
-	RESPUESTA_inclusionREPO(trama);
+	if(!RESPUESTA_inclusionREPO(trama)){
+		return(false);
+	}
 	return(true);
 }
 // ________________________________________________________________________________________________________
@@ -269,7 +272,7 @@ int inclusion_REPO()
 //
 //		Descripcin: 
 //			Crea un socket y lo conecta a un servidor
-//		Parmetros:
+//		parámetros:
 //			- ips : La direccin IP del servidor
 //			- port : Puerto para la comunicacin
 //		Devuelve:
@@ -419,10 +422,6 @@ int gestiona_comando(TramaRepos *trmInfo)
 	if(resul==0)
 		return(LeeFicheroTexto(trmInfo));
 
-	resul=strcmp(nombrefuncion,"EnviaPerfilSoftware");
-	if(resul==0)
-		return(EnviaPerfilSoftware(trmInfo));	
-	
 	resul=strcmp(nombrefuncion,"ExecShell");
 	if(resul==0)
 		return(RegistraComando(trmInfo));	
@@ -443,10 +442,6 @@ int gestiona_comando(TramaRepos *trmInfo)
 	if(resul==0)
 		return(RegistraComando(trmInfo));	
 		
-	resul=strcmp(nombrefuncion,"RecibePerfilSoftware");
-	if(resul==0)
-		return(RecibePerfilSoftware(trmInfo));
-	
 	resul=strcmp(nombrefuncion,"ParticionaryFormatear");
 	if(resul==0)
 		return(RegistraComando(trmInfo));
@@ -476,19 +471,19 @@ int RegistraComando(TramaRepos *trmInfo)
 	*(iph-4)=(char)NULL;
 	lon=strlen((char*)&trmInfo->trama);	
 	
-	sprintf(msglog,">>>Registra comandos %s",(char*)&trmInfo->trama);
+	//sprintf(msglog,"Registra comandos %s",(char*)&trmInfo->trama);
 	RegistraLog(msglog,false);
 	
 	for(i=0;i<numipes;i++){
 		strcpy(nomfilecmd,PathComandos);
 		strcat(nomfilecmd,"/CMD_");
 		strcat(nomfilecmd,ipes[i]);
-		sprintf(msglog,">>>Crea fichero de comandos %s",nomfilecmd);
+		//sprintf(msglog,"Crea fichero de comandos %s",nomfilecmd);
 		RegistraLog(msglog,false);
 		
 		Fcomandos=fopen( nomfilecmd,"w");
 		if(!Fcomandos) return(false);
-		sprintf(msglog,">>>Fichero creado %s",nomfilecmd);
+		//sprintf(msglog,"Fichero creado %s",nomfilecmd);
 		RegistraLog(msglog,false);
 		
 		fwrite((char*)&trmInfo->trama,lon,1,Fcomandos);
@@ -835,117 +830,13 @@ bool LeeFicheroTexto(TramaRepos *trmInfo)
 	}
 	return(respuesta_peticion(trmInfo,"Respuesta_LeeFicheroTexto",swf,texto));
 }
-//_______________________________________________________________________________________________________________
-//
-// Sincroniza netcat para creacion de perfil software
-//_______________________________________________________________________________________________________________
-bool RecibePerfilSoftware(TramaRepos *trmInfo)
-{
-	char *nomfile;
-	int puertonetcat;
-	int  res;
-	char cmdshell[250];	
 
-	nomfile=toma_parametro("nfp",trmInfo->trama.parametros); // Toma nombre perfil software
-	
-	if(!TomaPuertoLibre(&puertonetcat)){ // Busca puerto libre para netcat
-		RegistraLog("***TomaPuertoLibre() fallo en modulo RecibePerfilSoftware()",true);
-		return(false);
-	}
-	// Envia puerto netcat al cliente
-	sprintf(trmInfo->trama.parametros," pnt=%d ",puertonetcat);
-	res= respuesta_clienteHidra(trmInfo);
-	if(!res){
-		RegistraLog("***sendto() fallo en modulo RecibePerfilSoftware()",true);
-		return(false);
-    }
-	// Ejejcuta script nc de servidor
-	//sprintf(parametros," %s %d ",nomfile,puertonetcat);
- 	//res=ejecutarscript(cmdshell, parametros,NULL);
- 	sprintf(cmdshell,"/usr/local/hidra/scripts/RecibirImagenEnRepo %s %d ",nomfile,puertonetcat);
-	res=ExecShell(cmdshell,NULL);
- 	if(!res){
-		RegistraLog("*** fallo en modulo RecibePerfilSoftware()",true);
-		return(false);
-    }    
-    return(true);
-}
-//_______________________________________________________________________________________________________________
-//
-// Sincroniza netcat para creacion de perfil software
-//_______________________________________________________________________________________________________________
-bool EnviaPerfilSoftware(TramaRepos *trmInfo)
-{
-	char *nomfile,*iph;
-	int puertonetcat;
-	int  res;
-	char cmdshell[250];	
-
-	nomfile=toma_parametro("nfp",trmInfo->trama.parametros); // Toma nombre perfil software
-	iph=toma_parametro("iph",trmInfo->trama.parametros); // Toma ip del cliente 
-	
-	if(!TomaPuertoLibre(&puertonetcat)){ // Busca puerto libre para netcat
-		RegistraLog("***TomaPuertoLibre() fallo en modulo EnviaPerfilSoftware()",true);
-		return(false);
-	}
-	// Envia puerto netcat al cliente
-	sprintf(trmInfo->trama.parametros," pnt=%d ",puertonetcat);
-	res= respuesta_clienteHidra(trmInfo);
-	if(!res){
-		RegistraLog("***sendto() fallo en modulo EnviaPerfilSoftware()",true);
-		return(false);
-    }
-	// Ejejcuta script nc de servidor
-	//sprintf(parametros," %s %d ",nomfile,puertonetcat);
- 	//res=ejecutarscript(cmdshell, parametros,NULL);
- 	sprintf(cmdshell,"/usr/local/hidra/scripts/EnviarImagenDesdeRepo %s %s %d ",nomfile,iph,puertonetcat);
-	res=ExecShell(cmdshell,NULL);
- 	if(!res){
-		RegistraLog("*** fallo en modulo EnviaPerfilSoftware()",true);
-		return(false);
-    }    
-    return(true);
-}
-
-//________________________________________________________________________________________________________
-//	Funcin: ExecShell
-//
-//	Descripcin:
-//		Ejecuta cdigo script
-// ________________________________________________________________________________________________________
-int ExecShell(char* cod,char *salida)
-{
-	FILE* f;
-	long lSize;
-	int herror;
-	
-	sprintf(filecmdshell,"%s","/usr/local/hidra/scripts/_hidrascript_");
-	f = fopen(filecmdshell,"wt");
-	lSize=strlen(cod);
-	fwrite(cod,1,lSize,f); 	// Lee el contenido del fichero
-	fclose(f);
-
-	sprintf(cmdshell,"chmod +x %s",filecmdshell);
-	herror=system(cmdshell);
-	if(herror){
-	   	RegistraLog("*** fallo en modulo ExecShell() al cambiar de permisos el   archivo de script",true);
-		return(false); 
-    }	
-    
-   	herror=system(filecmdshell);
-	
-	if(herror){
-	    RegistraLog("*** fallo en modulo ExecShell()",true);
-		return(false); 
-    }
-   	return(true);
-}
 //_________________________________________________________________________________________________
 //	Funcin: Buffer
 //
 //	Descripcin:
 // 		Reserva memoria  
-//	Parmetros:
+//	parámetros:
 //		- l: 	Longitud en bytes de la reserva
 //	Devuelve:
 //		Un puntero a la memoria reservada
@@ -960,46 +851,6 @@ char * Buffer(int l)
 	}
 	memset(buf,0,l);	
 	return(buf);
-}
-//_____________________________________________________________________________________________________________
-//
-// Funcin: ejecutarscript
-//
-//	 Descripcin:
-//		Esta función ejecuta un script creando un proceso hijo para ello
-// 
-//_____________________________________________________________________________________________________________
-
-int ejecutarscript ( char *script,char * parametros,char *salida)
-{
-    int  descr[2];	/* Descriptores de E y S de la turbería */
-    int  bytesleidos;	/* Bytes leidos en el mensaje */
-    int resul=0;
-    pid_t pid;
-   // char mensaje[256]="";	   /* Mensajes leído */
-   // char *script="DetectarDiscos"; /* Script a ejecutar */
-
-    pipe (descr);
-    if((pid=fork())==0){
-		/* Proceso hijo que ejecuta el script */
-       close (descr[LEER]);
-       dup2 (descr[ESCRIBIR], 1);
-       close (descr[ESCRIBIR]);
-       resul=execl (script, script, parametros,NULL);
-    }
-    else {
-       if (pid ==-1) return(false);
-		/* Proceso padre que lee la salida del script */
-       close (descr[ESCRIBIR]);
-       if(salida!=(char*)NULL){
-	       bytesleidos = read (descr[LEER], salida, 1000);
-    	   salida[bytesleidos]=(char)NULL;
-       }
-       close (descr[LEER]);
-        kill(pid,SIGQUIT);
-       return(0);
-    }
-    return(-1); 
 }
 //_______________________________________________________________________________________________________________
 //
@@ -1046,6 +897,12 @@ int RESPUESTA_inclusionREPO(TRAMA *trama)
 	INTROaFINCAD(trama->parametros);
 	char* prm;
 	prm=toma_parametro("prp",trama->parametros); // Puero de comunicaciones
+	
+	if (prm == NULL){
+		RegistraLog("ATENCIÓN.- Este repositorio no está dado de alta en el sistema. Utilice la consola de administración para hacer esto.",false);
+		return(false);
+     }
+	
 	puertorepo=atoi(prm);
 	prm=toma_parametro("pth",trama->parametros); // Path al directorio base de Hidra
 	strcpy(PathHidra,prm);
@@ -1087,7 +944,7 @@ int main(int argc, char **argv)
                    if (argv[i+1]!=NULL)
                        strcpy(szPathFileCfg, argv[i+1]);
 				else{
-					RegistraLog("Fallo en los parmetros: Debe especificar el fichero de configuracin del servicio",false);
+					RegistraLog("Fallo en los parámetros: Debe especificar el fichero de configuracin del servicio",false);
 					exit(EXIT_FAILURE);
 				}
                    break;
@@ -1095,23 +952,23 @@ int main(int argc, char **argv)
                    if (argv[i+1]!=NULL)
                        strcpy(szPathFileLog, argv[i+1]);
 				else{
-					RegistraLog("Fallo en los parmetros: Debe especificar el fichero de log para el servicio",false);
+					RegistraLog("Fallo en los parámetros: Debe especificar el fichero de log para el servicio",false);
 					exit(EXIT_FAILURE);
 				}
                    break;
                default:
-                   	RegistraLog("Fallo de sintaxis en los parmetros: Debe especificar -f nombre_del_fichero_de_configuracin_del_servicio -l nombre_del_fichero_de_log_del_servicio",false);
+                   	RegistraLog("Fallo de sintaxis en los parámetros: Debe especificar -f nombre_del_fichero_de_configuracin_del_servicio -l nombre_del_fichero_de_log_del_servicio",false);
 					exit(EXIT_FAILURE);
                    break;
            }
        }
     }
 	if(!TomaConfiguracion(szPathFileCfg)){ // Toma parametros de configuracion
-		RegistraLog("NO existe fichero de configuracin o contiene un error de sintaxis",false);
+		RegistraLog("NO existe fichero de configuración o contiene un error de sintaxis",false);
 		exit(EXIT_FAILURE);
 	}
 	if(!inclusion_REPO()){
-		RegistraLog("Ha habido algn problema al abrir sesin con el servidor Hidra",false);
+		RegistraLog("Ha habido algún problema al abrir sesión con el servidor de administración",false);
 		exit(EXIT_FAILURE);
 	}
 	
@@ -1119,7 +976,7 @@ int main(int argc, char **argv)
 
 	socket_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // Crea socket para UDP
 	if (socket_s == SOCKET_ERROR){
-		RegistraLog("***Error al crear socket para servicio de repositorio:",true);
+		RegistraLog("***Error al crear socket para servicio del Repositorio:",true);
 		exit(EXIT_FAILURE);
 	}
 	RegistraLog("***Creando Socket para comunicaciones***",false);
