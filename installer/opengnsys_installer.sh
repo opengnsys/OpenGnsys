@@ -17,13 +17,13 @@ INSTALL_TARGET=/opt/opengnsys
 MYSQL_ROOT_PASSWORD="passwordroot"
 
 # conexión al svn
-SVN_URL=svn://www.informatica.us.es:3690/opengnsys
+SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 
 # Datos de base de datos
-HIDRA_DATABASE=bdhidra
-HIDRA_DB_USER=usuhidra
-HIDRA_DB_PASSWD=passusuhidra
-HIDRA_DB_CREATION_FILE=eac-hidra/branches/eac-hidra-us/Hidra/doc/hidra-bd.sql
+#HIDRA_DATABASE=bdhidra
+#HIDRA_DB_USER=usuhidra
+#HIDRA_DB_PASSWD=passusuhidra
+#HIDRA_DB_CREATION_FILE=eac-hidra/branches/eac-hidra-us/Hidra/doc/hidra-bd.sql
 
 USUARIO=`whoami`
 
@@ -468,14 +468,15 @@ openGnsysInstallCreateDirs()
 	echoAndLog "openGnsysInstallCreateDirs(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
+	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,usuarios}
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
 	mkdir -p $path_opengnsys_base/log/clients
 	mkdir -p $path_opengnsys_base/www
-	mkdir -p $path_opengnsys_base/tftpboot/ogclients
 	mkdir -p $path_opengnsys_base/images
+	ln -fs /var/lib/tftpboot $path_opengnsys_base/tftpboot
 
 	if [ $? -ne 0 ]; then
 		errorAndLog "openGnsysInstallCreateDirs(): error while creating dirs. Do you have write permissions?"
@@ -509,7 +510,7 @@ openGnsysCopyServerFiles () {
 
     echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
 
-    pushd opengnsys/trunk >/dev/null
+    pushd trunk >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -541,9 +542,9 @@ if [ $? -ne 0 ]; then
 	fi
 fi
 
-isInArray notinstalled "mysql-server"
-if [ $? -eq 0 ]; then
-	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
+#isInArray notinstalled "mysql-server"
+#if [ $? -eq 0 ]; then
+#	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 fi
 
 openGnsysInstallCreateDirs ${INSTALL_TARGET}
