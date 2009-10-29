@@ -5,7 +5,7 @@ ln -fs /opt/opengnsys/bin/bash /bin/bash
 
 set -a
 
-/opt/opengnsys/lib/engine/bin/loadenviron.sh
+source /opt/opengnsys/lib/engine/bin/loadenviron.sh
 
 if [ -f $OGETC/init/$OG_IP.sh ]; then
     $OGETC/init/$OG_IP.sh

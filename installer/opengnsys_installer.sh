@@ -14,20 +14,17 @@ DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpca
 
 INSTALL_TARGET=/opt/opengnsys
 
-MYSQL_ROOT_PASSWORD="passwordroot"
-
 # conexión al svn
 SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 
 # Datos de base de datos
+MYSQL_ROOT_PASSWORD="passwordroot"
 #HIDRA_DATABASE=bdhidra
 #HIDRA_DB_USER=usuhidra
 #HIDRA_DB_PASSWD=passusuhidra
 #HIDRA_DB_CREATION_FILE=eac-hidra/branches/eac-hidra-us/Hidra/doc/hidra-bd.sql
 
-USUARIO=`whoami`
-
-if [ $USUARIO != 'root' ]
+if [ "$(whoami)" != 'root' ]
 then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
@@ -35,7 +32,7 @@ fi
 
 
 mkdir -p $WORKDIR
-pushd $WORKDIR
+pushd $WORKDIR >/dev/null
 
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
@@ -496,12 +493,16 @@ openGnsysCopyServerFiles () {
 
 	local path_opengnsys_base=$1
 
-	local SOURCES=( client/boot/initrd-generator \
-                    client/boot/upgrade-clients-udeb.sh \
-                    client/boot/udeblist.conf )
-	local TARGETS=( bin/initrd-generator \
-                    bin/upgrade-clients-udeb.sh \
-                    etc/udeblist.conf )
+	local SOURCES=( admin/Sources/ogAdmServer/ogAdmServer.cfg \
+                        admin/Sources/ogAdmRepo/ogAdmRepo.cfg \
+                        client/boot/initrd-generator \
+                        client/boot/upgrade-clients-udeb.sh \
+                        client/boot/udeblist.conf )
+	local TARGETS=( etc/ogAdmServer.cfg \
+                        etc/ogAdmRepo.cfg \
+                        bin/initrd-generator \
+                        bin/upgrade-clients-udeb.sh \
+                        etc/udeblist.conf )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
@@ -510,7 +511,6 @@ openGnsysCopyServerFiles () {
 
     echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
 
-    pushd trunk >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -522,7 +522,6 @@ openGnsysCopyServerFiles () {
 			cp -pr "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 	done
-    popd >/dev/null
 }
 
 

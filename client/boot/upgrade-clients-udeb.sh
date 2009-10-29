@@ -31,6 +31,7 @@ mkdir -p $TMPUDEB/partial
 rm -f $TMPUDEB/*.udeb
 
 #/// Descargar paquetes udeb, borrar los descartables y moverlos al NFS.
+apt-get update
 apt-get install -y -o dir::cache::archives=$TMPUDEB -d $PACKAGES_INSTALL
 for i in $PACKAGES_REMOVE; do
     rm -f $TMPUDEB/${i}_*.udeb
