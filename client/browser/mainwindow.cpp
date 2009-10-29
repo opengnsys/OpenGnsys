@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "mainwindow.moc"
 #include <QtWebKit>
 #include <QStringList>
 #include <QWebView>
@@ -11,42 +10,58 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QDateTime>
+#include <QProgressBar>
+#include <QTabWidget>
 
 #include "qtermwidget.h"
+
+#include "mainwindow.moc"
 
 #define BUFFERSIZE 2048
 
 #define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yy hh:mm:ss")
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),web(new QWebView()),text(new QTextEdit()),
+    : QMainWindow(parent),web(new QWebView()),output(new QTextEdit()),
       process(new QProcess(this)),
       logfile(NULL),logstream(NULL)
 {
     // Graphic
-    setCentralWidget(web);
-
-    dock=new QDockWidget(this);
-    dock->setAllowedAreas(Qt::BottomDockWidgetArea);
-    dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
-    console = new QTermWidget();
-    
-    QFont font = QApplication::font();
-    font.setFamily("Terminus");
-    font.setPointSize(12);
-    
-    console->setTerminalFont(font);
-    
-    //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
-    console->setScrollBarPosition(QTermWidget::ScrollBarRight);
-    
     //showFullScreen();
 
-    dock->setWidget(console);
+    setWindowTitle(tr("OpenGNSys Browser"));
+
+    setCentralWidget(web);
+
+    // Output
+    output->setReadOnly(true);
+
+    // Dock
+    QDockWidget* dock=new QDockWidget();
+    dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    QWidget* dummy=new QWidget();
+    dummy->setMaximumHeight(0);
+    dock->setTitleBarWidget(dummy);
+
+    // TabWidget
+    tabs=new QTabWidget(dock);
+
+    // Anyado output a las pestanyas
+    tabs->addTab(output,tr("Output"));
+    tabs->addTab(createTerminal(),tr("Term 1"));
+
+    // Las pestanyas al dock
+    dock->setWidget(tabs);
+
+    // Y el dock al mainwindow
     addDockWidget(Qt::BottomDockWidgetArea,dock);
 
-    text->setReadOnly(true);
+    // Status bar
+    QStatusBar* st=statusBar();
+    st->setSizeGripEnabled(false);
+    progressBar=new QProgressBar(this);
+    progressBar->setMinimum(0);
+    progressBar->setMaximum(100);
 
     web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
@@ -73,11 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(process,SIGNAL(readyReadStandardError()),
             this,SLOT(slotProcessErrorOutput()));
 
-    // Set tittle
-    setWindowTitle(tr("OpenGNSys Browser"));
-
     if(!readEnvironmentValues())
-        text->insertPlainText(tr("Any environment variable/s didn't be setted\n"));
+        output->insertPlainText(tr("Any environment variable/s didn't be setted\n"));
 
     if(env.contains("OGLOGFILE") && env["OGLOGFILE"]!="")
     {
@@ -85,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
         if(!logfile->open(QIODevice::WriteOnly | QIODevice::Text |
                     QIODevice::Append))
         {
-            text->insertPlainText(tr("The log file couldn't be opened: ")+logfile->fileName());
+            output->insertPlainText(tr("The log file couldn't be opened: ")+logfile->fileName());
             delete logfile;
             logfile=NULL;
         }
@@ -107,6 +119,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotLinkHandle(const QUrl &url)
 {
+    // Si ya hay un proceso ejectuandose
+    if(process->state()!=QProcess::NotRunning)
+    {
+      output->insertPlainText(tr("There is a process running."));
+      return;
+    }
+    
     QString string = url.toString();
     qDebug() << string;
     // Si es un link del tipo PROTOCOL lo ejecutamos
@@ -129,11 +148,18 @@ void MainWindow::slotLinkHandle(const QUrl &url)
 
 void MainWindow::slotWebLoadStarted()
 {
+    QStatusBar* st=statusBar();
+    st->clearMessage();
+    st->addWidget(progressBar,100);
+    progressBar->show();
+    progressBar->setFormat("%p% Loading");
+
     qDebug()<<"Empieza la carga de la web";
 }
 
 void MainWindow::slotWebLoadProgress(int progress)
 {
+    progressBar->setValue(progress);
     qDebug()<<"Progress "<<progress;
 }
 
@@ -163,7 +189,13 @@ void MainWindow::slotWebLoadFinished(bool ok)
         }
     }
     else
+    {
         qDebug()<<"Descarga finalizada satisfactoriamente";
+
+        QStatusBar* st=statusBar();
+        st->removeWidget(progressBar);
+        st->showMessage(tr("Ready"));
+    }
 }
 
 void MainWindow::slotProcessStarted()
@@ -178,14 +210,13 @@ void MainWindow::slotProcessOutput()
     char buf[BUFFERSIZE];
     while((process->readLine(buf,BUFFERSIZE) > 0))
     {
-        text->insertPlainText(buf);
+        output->insertPlainText(buf);
         /*
         QString str="<b>";
         str+=buf;
         str+="</b>";
-        text->insertHtml(str);
+        output->insertHtml(str);
         */
-        output<<buf;
         if(logstream)
             *logstream<<CURRENT_TIME()<<": "<<buf;
     }
@@ -198,8 +229,9 @@ void MainWindow::slotProcessErrorOutput()
     char buf[BUFFERSIZE];
     while((process->readLine(buf,BUFFERSIZE) > 0))
     {
-        text->insertPlainText(buf);
-        errors<<buf;
+        output->insertPlainText(buf);
+        if(logstream)
+            *logstream<<CURRENT_TIME()<<": "<<buf;
     }
 }
 
@@ -208,13 +240,11 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
     if(status==QProcess::NormalExit)
     {
         qDebug()<<"Finished: "<<code<<" "<<status<<endl;
-        qDebug()<<"OUTPUT:"<<endl<<output<<endl<<"ERROR:"<<endl<<errors<<endl;
     }
     else
     {
         qDebug()<<"Ha petado"<<endl;
         qDebug()<<"Finished: "<<code<<" "<<status<<endl;
-        qDebug()<<"OUTPUT:"<<endl<<output<<endl<<"ERROR:"<<endl<<errors<<endl;
     }
 }
 
@@ -268,5 +298,20 @@ int MainWindow::readEnvironmentValues()
     }
 
     return ret;
+}
+
+QTermWidget* MainWindow::createTerminal()
+{
+    QTermWidget* console = new QTermWidget();
+    QFont font = QApplication::font();
+    font.setFamily("Terminus");
+    font.setPointSize(12);
+    
+    console->setTerminalFont(font);
+    
+    //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
+    console->setScrollBarPosition(QTermWidget::ScrollBarRight);
+
+    return console;
 }
 

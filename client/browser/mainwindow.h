@@ -19,8 +19,8 @@ class QString;
 class QUrl;
 class QFile;
 class QTextStream;
-class QDockWidget;
 class QTermWidget;
+class QProgressBar;
 
 class MainWindow : public QMainWindow
 {
@@ -47,17 +47,16 @@ class MainWindow : public QMainWindow
     //Functions
     protected:
         int readEnvironmentValues();
+        QTermWidget* createTerminal();
 
 
     protected:
         QWebView *web;
-        QTextEdit *text;
-        QDockWidget *dock;
-        QTermWidget *console;
+        QTextEdit *output;
+        QProgressBar *progressBar;
+        QTabWidget *tabs;
 
         QProcess *process;
-        QStringList output;
-        QStringList errors;
 
         QMap<QString,QString> env;
         QFile *logfile;
