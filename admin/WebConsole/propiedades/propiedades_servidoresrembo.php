@@ -22,6 +22,7 @@ $nombreservidorrembo="";
 $ip="";
 $puertorepo="2002";
 $pathrembod="/opt/opengnsys/client/admin";
+$pathpxe="/opt/opengnsys/tftpboot/pxelinux.cfg";
 $grupoid=0;
 $comentarios="";
 $ordenadores=0; // N�mero de ordenador a los que da servicio
@@ -55,7 +56,7 @@ if  ($opcion!=$op_alta){
 	<INPUT type=hidden name=idservidorrembo value=<?=$idservidorrembo?>>
 	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
 	<INPUT type=hidden name=ordenadores value=<?=$ordenadores?>>
-	<INPUT type=hidden name=pathrembod value=<?=$pathrembod?>>
+
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
@@ -99,6 +100,16 @@ if  ($opcion!=$op_alta){
 			else	
 				echo'<TD><INPUT  class="formulariodatos" name=pathrembod type=text style="width:200" value="'.$pathrembod.'"></TD>';
 			?>
+		</TR>	
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
+		<?
+			if ($opcion==$op_eliminacion)
+					echo '<TD>'.$pathpxe.'</TD>';
+			else	
+				echo'<TD><INPUT  class="formulariodatos" name=pathpxe type=text style="width:200" value="'.$pathpxe.'"></TD>';
+			?>
 		</TR>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -139,6 +150,7 @@ function TomaPropiedades($cmd,$id){
 	global $comentarios;
 	global $puertorepo;
 	global $pathrembod;
+	global $pathpxe;
 	global $ordenadores;
 
 	$rs=new Recordset; 
@@ -152,6 +164,7 @@ function TomaPropiedades($cmd,$id){
 		$comentarios=$rs->campos["comentarios"];
 		$puertorepo=$rs->campos["puertorepo"];
 		$pathrembod=$rs->campos["pathrembod"];
+		$pathpxe=$rs->campos["pathpxe"];
 		$rs->Cerrar();
 		$cmd->texto="SELECT count(*) as numordenadores FROM ordenadores WHERE idservidorrembo=".$id;
 		$rs->Comando=&$cmd; 

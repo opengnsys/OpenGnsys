@@ -25,6 +25,8 @@ $ip="";
 $passguor="";
 $pathremboconf="";
 $pathrembod="";
+$pathpxe="";
+
 $grupoid=0;
 $puertorepo="";
 $comentarios="";
@@ -40,6 +42,7 @@ if (isset($_GET["ip"])) $ip=$_GET["ip"];
 if (isset($_GET["passguor"])) $passguor=$_GET["passguor"]; 
 if (isset($_GET["pathremboconf"])) $pathremboconf=$_GET["pathremboconf"];
 if (isset($_GET["pathrembod"])) $pathrembod=$_GET["pathrembod"]; 
+if (isset($_GET["pathpxe"])) $pathpxe=$_GET["pathpxe"]; 
 if (isset($_GET["puertorepo"])) $puertorepo=$_GET["puertorepo"];
 if (isset($_GET["comentarios"])) $comentarios=$_GET["comentarios"];
 
@@ -111,6 +114,7 @@ function Gestiona(){
 	global	$passguor;
 	global	$pathremboconf;
 	global	$pathrembod;
+	global	$pathpxe;
 	global  $puertorepo;
 	global	$comentarios;
 	
@@ -130,12 +134,13 @@ function Gestiona(){
 	$cmd->CreaParametro("@passguor",$passguor,0);
 	$cmd->CreaParametro("@pathremboconf",$pathremboconf,0);
 	$cmd->CreaParametro("@pathrembod",$pathrembod,0);
+	$cmd->CreaParametro("@pathpxe",$pathpxe,0);
 	$cmd->CreaParametro("@puertorepo",$puertorepo,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO servidoresrembo(idcentro,grupoid,nombreservidorrembo,ip,passguor,pathremboconf,pathrembod,puertorepo,comentarios) VALUES (@idcentro,@grupoid,@nombreservidorrembo,@ip,@passguor,@pathremboconf,@pathrembod,@puertorepo,@comentarios)";
+			$cmd->texto="INSERT INTO servidoresrembo(idcentro,grupoid,nombreservidorrembo,ip,passguor,pathremboconf,pathrembod,pathpxe,puertorepo,comentarios) VALUES (@idcentro,@grupoid,@nombreservidorrembo,@ip,@passguor,@pathremboconf,@pathrembod,@pathpxe,@puertorepo,@comentarios)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la p�gina que llam� �sta
 				$idservidorrembo=$cmd->Autonumerico();
@@ -147,7 +152,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE servidoresrembo SET nombreservidorrembo=@nombreservidorrembo,ip=@ip,passguor=@passguor,pathremboconf=@pathremboconf,pathrembod=@pathrembod,puertorepo=@puertorepo,comentarios=@comentarios WHERE idservidorrembo=@idservidorrembo";
+			$cmd->texto="UPDATE servidoresrembo SET nombreservidorrembo=@nombreservidorrembo,ip=@ip,passguor=@passguor,pathremboconf=@pathremboconf,pathrembod=@pathrembod,pathpxe=@pathpxe,puertorepo=@puertorepo,comentarios=@comentarios WHERE idservidorrembo=@idservidorrembo";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :

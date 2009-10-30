@@ -109,5 +109,21 @@ function comprobar_datos(){
 		document.fdatos.ip.focus();
 		return(false);
 	}
+	if (document.fdatos.puerto.value=="") {
+		alert(TbMsg[3]);
+		document.fdatos.puerto.focus();
+		return(false);
+	}
+	if (document.fdatos.pathrembod.value=="") {
+		alert(TbMsg[4]);
+		document.fdatos.pathrembod.focus();
+		return(false);
+	}
+	if (document.fdatos.pathpxe.value=="") {
+		alert(TbMsg[5]);
+		document.fdatos.pathpxe.focus();
+		return(false);
+	}
+	
 	return(true);
 }
