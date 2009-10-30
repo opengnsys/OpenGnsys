@@ -1,11 +1,11 @@
 <?
-$wer="http://10.1.15.4/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
-$wac="http://10.1.15.4/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
+$wer="http://10.1.15.3/ogAdmWebCon/pagerror.php"; // Pï¿½ina de redireccionamiento de errores
+$wac="http://10.1.15.3/ogAdmWebCon/acceso.php"; // Pï¿½ina de login de la aplicaciï¿½
 //========================================================================================================
-// Variables de sessión de configuración de servidor y base de datos( Modificar aquí para cambio global) 
-$cnx="localhost;usuog;passusuog;ogBDAdmin;sqlserver"; // Cadena de conexión a la base de datos
-$ips="10.1.15.4"; // IP del servidor hidra
-$prt="2008"; // Puerto de comunicación con el servidor
+// Variables de sessiï¿½ de configuraciï¿½ de servidor y base de datos( Modificar aquï¿½para cambio global) 
+$cnx="localhost;usuog;passusuog;ogBDAdmin;sqlserver"; // Cadena de conexiï¿½ a la base de datos
+$ips="10.1.15.3"; // IP del servidor hidra
+$prt="2008"; // Puerto de comunicaciï¿½ con el servidor
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
 $resul=false;
@@ -16,9 +16,9 @@ if ($cmd){
 	$resul=toma_datos($cmd,&$idc,&$nmc,&$idi,$usu,&$tsu,$pss);
 }
 if(!$resul)
-	Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D.
+	Header("Location: ".$wac."?herror=4"); // Error de conexiï¿½ con servidor B.D.
 
-session_start(); // Activa variables de sesión
+session_start(); // Activa variables de sesiï¿½
 $_SESSION["idcentro"]=$idc; 
 $_SESSION["nombrecentro"]=$nmc; 
 $_SESSION["usuario"]=$usu; 
@@ -31,9 +31,9 @@ $_SESSION["pagerror"]=$wer;
 $_SESSION["urlacceso"]=$wac;
 
 // *************************************************************************************************************************************************
-//	Devuelve una objeto comando totalmente operativo (con la conexión abierta)
+//	Devuelve una objeto comando totalmente operativo (con la conexiï¿½ abierta)
 //	Parametros: 
-//		- cadenaconexion: Una cadena con los datos necesarios para la conexión: nombre del servidor
+//		- cadenaconexion: Una cadena con los datos necesarios para la conexiï¿½: nombre del servidor
 //		usuario,password,base de datos,etc separados por coma
 //________________________________________________________________________________________________________
 function CreaComando($cadenaconexion){
@@ -46,9 +46,9 @@ function CreaComando($cadenaconexion){
 	return($cmd);
 }
 //________________________________________________________________________________________________________
-//	Busca datos del usuario que intenta acceder a la aplicación 
+//	Busca datos del usuario que intenta acceder a la aplicaciï¿½ 
 //		Parametros: 
-//		- cmd:Una comando ya operativo (con conexión abierta)  
+//		- cmd:Una comando ya operativo (con conexiï¿½ abierta)  
 //		- usuario: Nombre del usuario  
 //		- pasguor: Password del uuario  
 //
