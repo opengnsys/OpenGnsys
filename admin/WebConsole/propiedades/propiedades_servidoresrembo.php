@@ -82,7 +82,7 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;Puerto de Repo&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
 		<?
 			if ($opcion==$op_eliminacion)
 					echo '<TD>'.$puertorepo.'</TD>';
@@ -90,6 +90,16 @@ if  ($opcion!=$op_alta){
 				echo'<TD><INPUT  class="formulariodatos" name=puertorepo type=text style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
 		</TR>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
+		<?
+			if ($opcion==$op_eliminacion)
+					echo '<TD>'.$pathrembod.'</TD>';
+			else	
+				echo'<TD><INPUT  class="formulariodatos" name=pathrembod type=text style="width:200" value="'.$pathrembod.'"></TD>';
+			?>
+		</TR>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
