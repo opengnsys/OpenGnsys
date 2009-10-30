@@ -109,9 +109,9 @@ function comprobar_datos(){
 		document.fdatos.ip.focus();
 		return(false);
 	}
-	if (document.fdatos.puerto.value=="") {
+	if (document.fdatos.puertorepo.value=="") {
 		alert(TbMsg[3]);
-		document.fdatos.puerto.focus();
+		document.fdatos.puertorepo.focus();
 		return(false);
 	}
 	if (document.fdatos.pathrembod.value=="") {
