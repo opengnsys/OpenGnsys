@@ -13,6 +13,5 @@ $TbMsg[4]="Gestión Servidores Dhcp";
 $TbMsg[5]="Nombre del Servidor";
 $TbMsg[6]="Dirección IP";
 $TbMsg[7]="Comentarios"; 
-$TbMsg[8]="Puerto clientes"; 
-$TbMsg[9]="Directorio base"; 
+
 ?>
