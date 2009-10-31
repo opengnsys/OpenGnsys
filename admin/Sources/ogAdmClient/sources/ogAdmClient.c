@@ -1485,10 +1485,10 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
    	int herror;
 	
 	sprintf(cmdshell,"%s/ogAdmCreatePerfilSoftware",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s %s gzip","ogAdmCreatePerfilSoftware",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg);
+	sprintf(parametros," %s %s %s %s %s %s gzip","ogAdmCreatePerfilSoftware",disco,particion,iprepo,"",fileimg);
 	
 	if(ndebug>3){
-		sprintf(msglog,"Creando Perfil Software disco:%s, partición:%s, Repositorio:%s, Imagen:%s, Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,"hdimages/pruebashidra");
+		sprintf(msglog,"Creando Perfil Software disco:%s, partición:%s, Repositorio:%s, Imagen:%s, Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,"");
 		Log(msglog);
 	}
 	
@@ -1648,10 +1648,10 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
    	int herror;
 	
 	sprintf(cmdshell,"%s/ogAdmRestoreImage",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s %s","ogAdmRestoreImage",disco,particion,iprepo,"hdimages/pruebashidra/",fileimg);
-	
+	sprintf(parametros," %s %s %s %s %s","ogAdmRestoreImage",disco,particion,iprepo,fileimg);
+
 	if(ndebug>3){
-		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s.%s-%s%s Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,compres,particion,mettran,"hdimages/pruebashidra/");
+		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s",disco,particion,Propiedades.iprepo,fileimg);
 		Log(msglog);
 	}
 	
@@ -1865,7 +1865,7 @@ char* LeeConfiguracion(char* disco)
 		sprintf(tbcfg[i]->numpart,"%d",i+1); // Número de partición
 		
 		for(j=0;j<ntiposo;j++){
-			if(strcmp(tiposos[j].tipopart,duplaparticion[0])==0){
+			if(strcmp(tiposos[j].tipopart,duplaparticion[0])==0 && strcmp(tiposos[j].tipopart,"LINUX-SWAP")!=0){
 				nomso=TomaNomSO(disco,i+1);
 				if(nomso!=NULL){ // Averigua qué sistema operativo está instalado en la partición
 					strcpy(tbcfg[i]->tiposo,tiposos[j].tiposo); // Nombre S.O.
