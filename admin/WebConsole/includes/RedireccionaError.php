@@ -1,6 +1,6 @@
-<?
+﻿<?
 /*______________________________________________________________________
-	Redirecciona a la p�gina de error
+	Redirecciona a la página de error
 	Parametros: 
 		- Literal del error
 _______________________________________________________________________*/

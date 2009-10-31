@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_ordenadorestandar.php
-// Descripción :
-//		Gestiona la actualización de los ordenadores de un aula a través de la plantilla
+// DescripciÃ³n :
+//		Gestiona la actualizaciÃ³n de los ordenadores de un aula a travÃ©s de la plantilla
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");

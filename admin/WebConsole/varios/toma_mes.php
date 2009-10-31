@@ -1,13 +1,13 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: toma_mes.php
-// Descripción :
-//		Crea la tabla del mes y el año elegidos
+// DescripciÃ³n :
+//		Crea la tabla del mes y el aÃ±o elegidos
 // *************************************************************************************************************************************************
 
 include_once("../includes/ctrlacc.php");

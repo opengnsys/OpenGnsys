@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: rembooffline_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -11,6 +11,6 @@
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
 	$TbMsg[5]='Activar Rembo OffLine';
-	$TbMsg[6]='Ámbito';
+	$TbMsg[6]='Ãmbito';
 
 ?>

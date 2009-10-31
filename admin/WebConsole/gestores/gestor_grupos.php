@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_grupos.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de grupos
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -119,7 +119,7 @@ function Gestiona(){
 	global	$op_eliminacion;
 	global	$tablanodo;
 
-	if($iduniversidad) $idcentro=0; // Administración 
+	if($iduniversidad) $idcentro=0; // AdministraciÃ³n 
 
 	$cmd->CreaParametro("@nombregrupo",$nombregrupo,0);
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
@@ -133,11 +133,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO grupos(nombregrupo,idcentro,grupoid,tipo,iduniversidad,comentarios) VALUES (@nombregrupo,@idcentro,@grupoid,@tipo,@iduniversidad,@comentarios)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idgrupo=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_grupos($idgrupo,$nombregrupo,$literaltipo);
 				$baseurlimg="../images/signos";
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaNodo(0);
 			}
@@ -147,7 +147,7 @@ function Gestiona(){
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
-			$resul=EliminaGrupos($cmd,$idgrupo,"idgrupo",$literaltipo);// Eliminación en cascada
+			$resul=EliminaGrupos($cmd,$idgrupo,"idgrupo",$literaltipo);// EliminaciÃ³n en cascada
 			break;
 		default:
 			break;
@@ -172,11 +172,11 @@ function SubarbolXML_grupos($idgrupo,$nombregrupo,$literaltipo){
 /*________________________________________________________________________________________________________
 	Elimina en cascada grupos
 		Parametros: 
-		- cmd: Un comando ya operativo (con conexión abierta)  
+		- cmd: Un comando ya operativo (con conexiÃ³n abierta)  
 		- idgrupo: El identificador del grupo
 		- literaltipo: El literal del grupo
 		- literaltipo: El literal del grupo
-		- swid: Indica 0= El identificador es tipo alfanumérico	1= EI identificador es tipo numérico ( valor por defecto)
+		- swid: Indica 0= El identificador es tipo alfanumÃ©rico	1= EI identificador es tipo numÃ©rico ( valor por defecto)
 ________________________________________________________________________________________________________*/
 function	EliminaGrupos($cmd,$identificador,$nombreid,$literaltipo,$swid=1){
 	if (empty($identificador)) return(true);

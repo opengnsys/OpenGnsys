@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2005
-// Fecha Última modificación: Abril-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2005
+// Fecha Ãšltima modificaciÃ³n: Abril-2005
 // Nombre del fichero: ejecutarprocedimientos.php
-// Descripción :
+// DescripciÃ³n :
 //		Administra procedimientos,tareas y trabajos de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -28,12 +28,12 @@ if (isset($_GET["nombreambito"]))	$nombreambito=$_GET["nombreambito"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2');  // Error de conexiÃ³n con servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idcentro); // Crea el arbol XML con todos los datos de las acciones registradas en el Centro
 
-// Creación del árbol
-$baseurlimg="../images/tsignos"; // Url de las imágenes de signo
+// CreaciÃ³n del Ã¡rbol
+$baseurlimg="../images/tsignos"; // Url de las imÃ¡genes de signo
 $clasedefault="tabla_listados_sin";
 $titulotabla=$TbMsg[8];  
 $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,100,1,$titulotabla);
@@ -41,7 +41,7 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,100,1,$titul
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
@@ -87,7 +87,7 @@ switch($ambito){
 <BR>
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	 // Crea Ã¡rbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
 
 // Crea contextual de los procedimientos
@@ -101,9 +101,9 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 // *************************************************************************************************************************************************
-//	Devuelve una cadena con formato XML con toda la información de las acciones registradas en un Centro concreto
+//	Devuelve una cadena con formato XML con toda la informaciÃ³n de las acciones registradas en un Centro concreto
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexión abierta)  
+//		- cmd:Una comando ya operativo ( con conexiÃ³n abierta)  
 //		- idcentro: El identificador del centro
 //________________________________________________________________________________________________________
 function CreaArbol($cmd,$idcentro){
@@ -171,7 +171,7 @@ function SubarbolXML_Procedimientos($cmd,$idcentro,$grupoid){
 }
 //________________________________________________________________________________________________________
 //
-//	Menús Contextuales
+//	MenÃºs Contextuales
 //________________________________________________________________________________________________________
 function CreacontextualXMLProcedimiento(){
 	global $EJECUCION_PROCEDIMIENTO;

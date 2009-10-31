@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_perfilcomponente_hard.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de perfileshard_hardwares
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");

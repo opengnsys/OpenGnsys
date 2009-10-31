@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: particionaryformatear_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -11,16 +11,16 @@
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
 	$TbMsg[5]='Particionar y Formatear';
-	$TbMsg[6]='Ámbito';
+	$TbMsg[6]='Ãmbito';
 	$TbMsg[7]='';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Tipo';
 	$TbMsg[10]='Nombre S.O.';
-	$TbMsg[11]='Tamaño';
-	$TbMsg[12]='Operación';
+	$TbMsg[11]='TamaÃ±o';
+	$TbMsg[12]='OperaciÃ³n';
 	$TbMsg[13]='Sin action';
 	$TbMsg[14]='Formatear';
 	$TbMsg[15]='Ocultar';
 	$TbMsg[16]='Mostrar';
-	$TbMsg[17]='¡¡ Espacio libre !!';
+	$TbMsg[17]='Â¡Â¡ Espacio libre !!';
 ?>

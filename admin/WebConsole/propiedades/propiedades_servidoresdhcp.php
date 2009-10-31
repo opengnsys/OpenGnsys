@@ -1,11 +1,11 @@
-<?  
+ï»¿<?  
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: propiedades_servidoresdhcp.php
-// Descripción : 
+// DescripciÃ³n : 
 //		 Presenta el formulario de captura de datos de un servidor dhcp para insertar,modificar y eliminar
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -22,7 +22,7 @@ $nombreservidordhcp="";
 $ip="";
 $grupoid=0;
 $comentarios="";
-$ordenadores=0; // Número de ordenador a los que da servicio
+$ordenadores=0; // NÃºmero de ordenador a los que da servicio
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idservidordhcp"])) $idservidordhcp=$_GET["idservidordhcp"]; 
@@ -31,16 +31,16 @@ if (isset($_GET["identificador"])) $idservidordhcp=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 if  ($opcion!=$op_alta){
 	$resul=TomaPropiedades($cmd,$idservidordhcp);
 	if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
+		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaciÃ³n de datos.
 }
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_servidoresdhcp.js"></SCRIPT>
@@ -105,7 +105,7 @@ include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
 //	Recupera los datos de un servidor dhcp
 //		Parametros: 
-//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- cmd: Una comando ya operativo (con conexiÃ³n abierta)  
 //		- id: El identificador del servidor
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){

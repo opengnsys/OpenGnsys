@@ -1,4 +1,4 @@
-<?
+ï»¿<?
 include_once("../includes/ctrlacc.php");
 include_once("../includes/TomanDatos.php");
 include_once("../clases/AdoPhp.php");
@@ -184,7 +184,7 @@ function Gestiona($opcion){
 	global $ACCION_FALLIDA; // Finalizada con errores
 	global $ACCION_TERMINADA; // Finalizada manualmente con indicacion de exito 
 	global $ACCION_ABORTADA; // Finalizada manualmente con indicacion de errores 
-	global $ACCION_SINERRORES; // Activa y con algún error
+	global $ACCION_SINERRORES; // Activa y con algÃºn error
 	global $ACCION_CONERRORES; // Activa y sin error
 
 	global $ACCION_DETENIDA;
@@ -257,9 +257,9 @@ function Gestiona($opcion){
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de modificar el resultado de una notificación a Exitosa
+	Consecuencias de modificar el resultado de una notificaciÃ³n a Exitosa
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function modificar_resultado($cmd,$resultado,$idaccion){
 
@@ -278,7 +278,7 @@ function modificar_resultado($cmd,$resultado,$idaccion){
 	$nwaccionid=$Datos["accionid"];
 
 	if($nwestado<>$ACCION_FINALIZADA || $nwresultado==$ACCION_TERMINADA || $nwresultado==$ACCION_ABORTADA){
-		$cmd->texto="UPDATE acciones SET resultado='".$resultado."',estado='".$ACCION_FINALIZADA."' ,fechahorafin='".date("y/m/d h:i:s")."' WHERE idaccion=".$idaccion; // Actualiza resultado y estado de la acción
+		$cmd->texto="UPDATE acciones SET resultado='".$resultado."',estado='".$ACCION_FINALIZADA."' ,fechahorafin='".date("y/m/d h:i:s")."' WHERE idaccion=".$idaccion; // Actualiza resultado y estado de la acciÃ³n
 		$resul=$cmd->Ejecutar();
 		if($resul && $nwaccionid>0)
 			$resul=cuestion_raizernotificacion($cmd,$idaccion,$nwidnotificador,$nwaccionid,$resultado);
@@ -299,9 +299,9 @@ function modificar_resultado($cmd,$resultado,$idaccion){
 	return(true);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de modificar el resultado de una notificación a Exitosa
+	Consecuencias de modificar el resultado de una notificaciÃ³n a Exitosa
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function cuestion_raizernotificacion($cmd,$idaccion,$idnotificador,$accionid,$resultado){
 
@@ -313,11 +313,11 @@ function cuestion_raizernotificacion($cmd,$idaccion,$idnotificador,$accionid,$re
 	$nombreliterales[0]="idnotificacion";
 	$Datos=TomanDatos($cmd,"notificaciones",$idaccion,"idaccion",$nombreliterales);
 
-	if (empty($Datos)) // No existe notificación 
+	if (empty($Datos)) // No existe notificaciÃ³n 
 		$resul=InsertaNotificaciones($cmd,$idaccion,$idnotificador,$accionid,$resultado);
 	else{ // Existe modificacion y hay que modificar su resultado
-		$LITTERMINADA="¡¡ Acción terminada manualmente !!";
-		$LITABORTADA="¡¡ Acción abortada manualmente !!";
+		$LITTERMINADA="Â¡Â¡ AcciÃ³n terminada manualmente !!";
+		$LITABORTADA="Â¡Â¡ AcciÃ³n abortada manualmente !!";
 
 		if($resultado==$ACCION_TERMINADA){
 			$nwresultado=$ACCION_EXITOSA;
@@ -336,9 +336,9 @@ function cuestion_raizernotificacion($cmd,$idaccion,$idnotificador,$accionid,$re
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de modificar el resultado de una notificación a Exitosa
+	Consecuencias de modificar el resultado de una notificaciÃ³n a Exitosa
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function InsertaNotificaciones($cmd,$idaccion,$idnotificador,$accionid,$resultado){
 
@@ -347,8 +347,8 @@ function InsertaNotificaciones($cmd,$idaccion,$idnotificador,$accionid,$resultad
 	global $ACCION_TERMINADA; 
 	global $ACCION_ABORTADA; 
 
-	$LITTERMINADA="¡¡ Acción terminada manualmente !!";
-	$LITABORTADA="¡¡ Acción abortada manualmente !!";
+	$LITTERMINADA="Â¡Â¡ AcciÃ³n terminada manualmente !!";
+	$LITABORTADA="Â¡Â¡ AcciÃ³n abortada manualmente !!";
 
 	if($resultado==$ACCION_TERMINADA){
 		$nwresultado=$ACCION_EXITOSA;
@@ -374,9 +374,9 @@ function InsertaNotificaciones($cmd,$idaccion,$idnotificador,$accionid,$resultad
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de eliminar una notificación de una Acción
+	Consecuencias de eliminar una notificaciÃ³n de una AcciÃ³n
 	Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function comprueba_resultados($cmd,$idaccion,$resultado){
 	
@@ -402,28 +402,28 @@ function comprueba_resultados($cmd,$idaccion,$resultado){
 	$nwresultado=$Datos["resultado"];
 	$nwaccionid=$Datos["accionid"];
 
-	// Si el nuevo resultado es el mismo y la acción había finalizado ya, el evento se corta aquí
+	// Si el nuevo resultado es el mismo y la acciÃ³n habÃ­a finalizado ya, el evento se corta aquÃ­
 	if($nwresultado==$resultado && $nwestado==$ACCION_FINALIZADA) return(true);
 		
-	if($nwestado==$ACCION_FINALIZADA){ // La acción había finalizado
+	if($nwestado==$ACCION_FINALIZADA){ // La acciÃ³n habÃ­a finalizado
 		if($numfallidas>0)
 			$finalaccion=$ACCION_FALLIDA;
 		else
 			$finalaccion=$ACCION_EXITOSA;
 	}
-	else{ // La acción NO había finalizado luego se convierte en sinerrores
+	else{ // La acciÃ³n NO habÃ­a finalizado luego se convierte en sinerrores
 		if($numfallidas>0)
 			$finalaccion=$ACCION_CONERRORES;
 		else
 			$finalaccion=$ACCION_SINERRORES;
 	}
 
-	// Actualiza acción
+	// Actualiza acciÃ³n
 	$cmd->texto="UPDATE acciones SET resultado='".$finalaccion."' WHERE idaccion=".$idaccion;
 	$resul=$cmd->Ejecutar();
 	if (!$resul) return(false);
 
-	// Si ya existía notificación, se modifica su estado
+	// Si ya existÃ­a notificaciÃ³n, se modifica su estado
 	if($nwestado==$ACCION_FINALIZADA){
 		if($numfallidas>0)
 			$cmd->texto="UPDATE notificaciones SET resultado='".$ACCION_FALLIDA."' WHERE idaccion=".$idaccion;
@@ -434,15 +434,15 @@ function comprueba_resultados($cmd,$idaccion,$resultado){
 			return(comprueba_resultados($cmd,$nwaccionid,$resultado));
 	}
 	else{
-		// Comprueba si ha finalizado esta acción e inserta su notificador correspondiente
+		// Comprueba si ha finalizado esta acciÃ³n e inserta su notificador correspondiente
 		$resul=comprueba_finalizada($cmd,$idaccion,$nwaccionid,$resultado);
 	}
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de modificar el resultado de una notificación a Exitosa
+	Consecuencias de modificar el resultado de una notificaciÃ³n a Exitosa
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function comprueba_finalizada($cmd,$idaccion,$accionid,$resultado){
 
@@ -513,15 +513,15 @@ function comprueba_finalizada($cmd,$idaccion,$accionid,$resultado){
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de modificar el resultado de una notificación a Exitosa
+	Consecuencias de modificar el resultado de una notificaciÃ³n a Exitosa
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function modificar_estado($cmd,$estado,$idaccion){
 
 	global $ACCION_FINALIZADA;
 
-	$cmd->texto="UPDATE acciones SET estado='".$estado."' WHERE idaccion=".$idaccion." AND estado<>'".$ACCION_FINALIZADA."'"; // Actualiza estado de la acción
+	$cmd->texto="UPDATE acciones SET estado='".$estado."' WHERE idaccion=".$idaccion." AND estado<>'".$ACCION_FINALIZADA."'"; // Actualiza estado de la acciÃ³n
 	$resul=$cmd->Ejecutar();
 	if(!$resul) return(false);
 
@@ -537,19 +537,19 @@ function modificar_estado($cmd,$estado,$idaccion){
 	return(true);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de eliminar una notificación de una Acción
+	Consecuencias de eliminar una notificaciÃ³n de una AcciÃ³n
 	Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function reinicia_notificaciones($cmd,$idaccion){
 
 	global $ACCION_SINERRORES;
 	global $ACCION_INICIADA;
 
-	$cmd->texto="DELETE  FROM notificaciones WHERE accionid=".$idaccion; // Elimina notificación
+	$cmd->texto="DELETE  FROM notificaciones WHERE accionid=".$idaccion; // Elimina notificaciÃ³n
 	$resul=$cmd->Ejecutar();
 	if($resul){
-		$cmd->texto="UPDATE acciones SET resultado=".$ACCION_SINERRORES.",estado=".$ACCION_INICIADA." ,fechahorafin=null WHERE idaccion=".$idaccion; // Actualiza resultado y estado de la acción como consecuencia de la eliminación de la notificación
+		$cmd->texto="UPDATE acciones SET resultado=".$ACCION_SINERRORES.",estado=".$ACCION_INICIADA." ,fechahorafin=null WHERE idaccion=".$idaccion; // Actualiza resultado y estado de la acciÃ³n como consecuencia de la eliminaciÃ³n de la notificaciÃ³n
 		$resul=$cmd->Ejecutar();
 	}
 	if(!$resul) return(false);
@@ -559,16 +559,16 @@ function reinicia_notificaciones($cmd,$idaccion){
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	while (!$rs->EOF){
-		$resul=reinicia_notificaciones($cmd,$rs->campos["idaccion"]); // Eliminación recursiva
+		$resul=reinicia_notificaciones($cmd,$rs->campos["idaccion"]); // EliminaciÃ³n recursiva
 		if(!$resul) return($resul);
 		$rs->Siguiente();
 	}
 	return(true);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de eliminar una notificación de una Acción
+	Consecuencias de eliminar una notificaciÃ³n de una AcciÃ³n
 	Parametros: 
-		- cmd:Un comando ya operativo (con conexión abierta)  
+		- cmd:Un comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function reinicia_notificadores($cmd,$idaccion,$idnotificacion){
 	
@@ -607,16 +607,16 @@ function reinicia_notificadores($cmd,$idaccion,$idnotificacion){
 	return(reinicia_notificadores($cmd,$nwidaccion,0));
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de eliminar una notificación de una Acción
+	Consecuencias de eliminar una notificaciÃ³n de una AcciÃ³n
 	Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function delete_notificaciones($cmd,$idaccion){
 
 	global $ACCION_SINERRORES;
 	global $ACCION_INICIADA;
 
-	$cmd->texto="DELETE  FROM  notificaciones WHERE accionid=".$idaccion; // Elimina notificación
+	$cmd->texto="DELETE  FROM  notificaciones WHERE accionid=".$idaccion; // Elimina notificaciÃ³n
 	$resul=$cmd->Ejecutar();
 	if(!$resul) return(false);
 
@@ -627,7 +627,7 @@ function delete_notificaciones($cmd,$idaccion){
 	if($rs->EOF) return(true);
 
 	while (!$rs->EOF){
-		$resul=delete_notificaciones($cmd,$rs->campos["idaccion"]); // Eliminación recursiva
+		$resul=delete_notificaciones($cmd,$rs->campos["idaccion"]); // EliminaciÃ³n recursiva
 		if(!$resul) return($resul);
 		$rs->Siguiente();
 	}
@@ -638,9 +638,9 @@ function delete_notificaciones($cmd,$idaccion){
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de eliminar una notificación de una Acción
+	Consecuencias de eliminar una notificaciÃ³n de una AcciÃ³n
 	Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function modificar_resultado_notificacion($cmd,$idaccion){
 
@@ -663,13 +663,13 @@ function modificar_resultado_notificacion($cmd,$idaccion){
 	$nwestado=$Datos["estado"];
 	$nwaccionid=$Datos["accionid"];
 
-	if($nwestado==$ACCION_FINALIZADA){ // La acción había finalizado
+	if($nwestado==$ACCION_FINALIZADA){ // La acciÃ³n habÃ­a finalizado
 		if($numfallidas>0)
 			$cmd->texto="UPDATE acciones SET resultado='".$ACCION_FALLIDA."' WHERE idaccion=".$idaccion;
 		else
 			$cmd->texto="UPDATE acciones SET resultado='".$ACCION_EXITOSA."' WHERE idaccion=".$idaccion;
 	}
-	else{ // La acción NO había finalizado luego se convierte en sinerrores
+	else{ // La acciÃ³n NO habÃ­a finalizado luego se convierte en sinerrores
 		if($numfallidas>0)
 			$cmd->texto="UPDATE acciones SET resultado='".$ACCION_CONERRORES."' WHERE idaccion=".$idaccion;
 		else
@@ -688,9 +688,9 @@ function modificar_resultado_notificacion($cmd,$idaccion){
 	return($resul);
 }
 /* -------------------------------------------------------------------------------------------
-	Consecuencias de eliminar una notificación de una Acción
+	Consecuencias de eliminar una notificaciÃ³n de una AcciÃ³n
 	Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ---------------------------------------------------------------------------------------------*/
 function modificar_resultado_notificadores($cmd,$resultadoNot,$idnotificacion){
 

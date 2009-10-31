@@ -1,11 +1,11 @@
-<?
+Ôªø<?
 // *************************************************************************************************************************************************
-// AplicaciÛn WEB: ogAdmWebCon
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn: AÒo 2003-2004
-// Fecha ⁄ltima modificaciÛn: Marzo-2005
+// Aplicaci√≥n WEB: ogAdmWebCon
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n: A√±o 2003-2004
+// Fecha √öltima modificaci√≥n: Marzo-2005
 // Nombre del fichero: gestor_trabajos.php
-// DescripciÛn :
+// Descripci√≥n :
 //		Gestiona el mantenimiento de la tabla de trabajos
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -25,7 +25,7 @@ $idtrabajo=0;
 $descripcion="";
 $comentarios="";
 $grupoid=0; 
-$swc=0; // switch de cliente, esta pagina la llama el cliente a travÈs del browser 
+$swc=0; // switch de cliente, esta pagina la llama el cliente a trav√©s del browser 
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 
@@ -97,7 +97,7 @@ else{
 	}
 	else{
 		echo '<SCRIPT language="javascript">'.chr(13);
-		echo 'alert("***ATENCI”N:El item NO se ha podido ejecutar");'.chr(13);
+		echo 'alert("***ATENCI√ìN:El item NO se ha podido ejecutar");'.chr(13);
 		echo 'location.href="../varios/menucliente.php?iph='.$_SESSION["ogCliente"].'";'.chr(13);
 		echo '</SCRIPT>';
 	}
@@ -140,11 +140,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO trabajos (descripcion,comentarios,idcentro,grupoid) VALUES (@descripcion,@comentarios,@idcentro,@grupoid)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la p·gina que llamÛ Èsta
+			if ($resul){ // Crea una tabla nodo para devolver a la p√°gina que llam√≥ √©sta
 				$idtrabajo=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_trabajos($idtrabajo,$descripcion,"");
 				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del ·rbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del √°rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
@@ -234,7 +234,7 @@ function ejecutando_trabajos(){
 	$ambitrabajo=substr($ambitrabajo,0,strlen($ambitrabajo)-1); // Quita la coma final
 	$paramtrabajo=substr($paramtrabajo,0,strlen($paramtrabajo)-1); // Quita la coma final
 
-	//CreaciÛn parametros para inserciÛn  --------------------------------------------------------------------
+	//Creaci√≥n parametros para inserci√≥n  --------------------------------------------------------------------
 	$cmd->CreaParametro("@tipoaccion","",1);
 	$cmd->CreaParametro("@idtipoaccion",0,1);
 	$cmd->CreaParametro("@cateaccion",$PROCESOS,1);
@@ -261,7 +261,7 @@ function ejecutando_trabajos(){
 	$resul=$cmd->Ejecutar();
 	if(!$resul) return(false);
 
-	$accionid=$cmd->Autonumerico(); // Toma identificador dela acciÛn
+	$accionid=$cmd->Autonumerico(); // Toma identificador dela acci√≥n
 
 	// Insertar acciones:tareas --------------------------------------------------------------------
 	for ($i=0;$i<$cont_tareas;$i++){
@@ -337,7 +337,7 @@ function EjecutandoTareas($idtarea,$accionid,$idnotificador){
 	$resul=$cmd->Ejecutar();
 	if(!$resul) return(false);
 
-	$accionid=$cmd->Autonumerico(); // Toma identificador dela acciÛn
+	$accionid=$cmd->Autonumerico(); // Toma identificador dela acci√≥n
 	// Insertar acciones:comandos
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
 	for ($i=0;$i<$cont_comandos;$i++){
@@ -357,7 +357,7 @@ function EjecutandoTareas($idtarea,$accionid,$idnotificador){
 		if(!$resul) return(false);
 		$tbComandos["parametros"].="ids=".$cmd->Autonumerico().chr(13);
 
-		if ($shidra->conectar()){ // Se ha establecido la conexiÛn con el servidor hidra
+		if ($shidra->conectar()){ // Se ha establecido la conexi√≥n con el servidor hidra
 			$shidra->envia_comando($tbComandos["parametros"]);
 			$shidra->desconectar();
 		}

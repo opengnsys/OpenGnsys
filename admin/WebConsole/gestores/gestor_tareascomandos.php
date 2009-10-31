@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_tareascomandos.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de tareas_comandos
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -124,7 +124,7 @@ function Gestiona(){
 					$parametros.="ids=".$cmd->Autonumerico().chr(13);
 				}
 				$shidra=new SockHidra($servidorhidra,$hidraport); 
-				if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+				if ($shidra->conectar()){ // Se ha establecido la conexiÃ³n con el servidor hidra
 					$shidra->envia_comando($parametros);
 					$shidra->desconectar();
 				}

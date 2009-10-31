@@ -1,11 +1,11 @@
-<? 
+ï»¿<? 
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: propiedades_centros.php
-// Descripción : 
+// DescripciÃ³n : 
 //		 Presenta el formulario de captura de datos de un centro para insertar,modificar y eliminar
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -33,16 +33,16 @@ if (isset($_GET["identificador"])) $idcentro=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 if  ($opcion!=$op_alta){
 	$resul=TomaPropiedades($cmd,$idcentro);
 	if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
+		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaciÃ³n de datos.
 }
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_centros.js"></SCRIPT>
@@ -92,7 +92,7 @@ include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
 //	Recupera los datos de un centro
 //		Parametros: 
-//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- cmd: Una comando ya operativo (con conexiÃ³n abierta)  
 //		- id: El identificador del centro
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){

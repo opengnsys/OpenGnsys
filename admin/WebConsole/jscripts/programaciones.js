@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: programaciones.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero programaciones.php
 // *************************************************************************************************************************************************
 var gris="#bbbcb9"
@@ -45,7 +45,7 @@ function Desmarca(o){
 }
 //___________________________________________________________________________________________________________
 function TH_clic(o){
-	var tbobj=TBSource(o); // Busca la tabla donde se pulsó
+	var tbobj=TBSource(o); // Busca la tabla donde se pulsÃ³
 	var oTD=tbobj.getElementsByTagName('TD')
 	for(var i=0;i<oTD.length;i++){
 		if(oTD[i].getAttribute("id")!="")
@@ -57,10 +57,10 @@ function TH_clic(o){
 function clic(o,sw){
 	if (!ItemSeleccionado(o))
 		Marca(o);
-	else // Deselección
+	else // DeselecciÃ³n
 		Desmarca(o);
 	if(document.fprogramaciones.tipoaccion.value==EJECUCION_RESERVA){
-			var idtb=Sourcetb(o); // Busca la tabla donde se pulsó
+			var idtb=Sourcetb(o); // Busca la tabla donde se pulsÃ³
 			if (idtb=="tabla_horas"){
 				if(currenthoras!=o &&currenthoras!=null )
 						Desmarca(currenthoras);
@@ -83,7 +83,7 @@ function clic(o,sw){
 }
 //___________________________________________________________________________________________________________
 function cuestionesclic(o){
-	var idtb=Sourcetb(o); // Busca la tabla donde se pulsó
+	var idtb=Sourcetb(o); // Busca la tabla donde se pulsÃ³
 	if (idtb=="tabla_meses" || idtb=="tabla_annos")
 		cuestion_opciones();
 	if (!swpz){
@@ -132,7 +132,7 @@ function cuestion_opciones(){
 		if (!detecta_cambio(vd))
 			visible_simple();
 	}
-	else{ // Conmutación a opción multiple
+	else{ // ConmutaciÃ³n a opciÃ³n multiple
 		visible_multiple();
 	}
 }
@@ -140,14 +140,14 @@ function cuestion_opciones(){
 function detecta_cambio(vitem){ // vitem es el valor hexdecimal a mostrar
 
 	wmes=parseInt(valor_item("tabla_meses")); // Recupera mes
-	wanno=parseInt(valor_item("tabla_annos")); // Recupera año
-	if (wmes>0 && wanno>0){ // Si se ha elegido un año y un mes ...
+	wanno=parseInt(valor_item("tabla_annos")); // Recupera aÃ±o
+	if (wmes>0 && wanno>0){ // Si se ha elegido un aÃ±o y un mes ...
 		if (gmes!=wmes || ganno!=wanno){ // Cara de nuevo el mes en blanco
 			gmes=wmes;
 			ganno=wanno;
 			ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 			wurl="toma_mes.php?idmes="+wmes+"&idanno="+wanno+"&vitem="+vitem
-			ifr.src=wurl; // LLama a la página
+			ifr.src=wurl; // LLama a la pÃ¡gina
 			return(true);
 		}
 		return(false);
@@ -225,7 +225,7 @@ function gestor_programacion(ida,tia,idr,swop){
 		return
 	}
 	fm=document.getElementById("fechasmultiples");
-	if (fm.style.visibility == "visible"){ // Activada opciones múltiples
+	if (fm.style.visibility == "visible"){ // Activada opciones mÃºltiples
 		wdiario=valor_HEX("tabla_diasmes");
 		wdias=valor_HEX("tabla_dias");
 		wsemanas=valor_HEX("tabla_semanas");
@@ -354,7 +354,7 @@ function valor_HEX(idtb){
 }
 //___________________________________________________________________________________________________________
 // Devuelve el valor decimal de un item de la tabla (ID)
-// 0=no elección -1=más de un item n:valor del item
+// 0=no elecciÃ³n -1=mÃ¡s de un item n:valor del item
 //___________________________________________________________________________________________________________
 function valor_item(idtb){
 	var valor=0,sw=0;
@@ -376,7 +376,7 @@ function valor_item(idtb){
 	return(valor) 
 }
 //___________________________________________________________________________________________________________
-// Devuelve true si existe uno ningún item seleccionado en la tabla
+// Devuelve true si existe uno ningÃºn item seleccionado en la tabla
 // y false en caso contrario
 //  El parametro de entrada es el identificador dela tabla
 //___________________________________________________________________________________________________________
@@ -407,7 +407,7 @@ function fuera(o){
 }
 
 //___________________________________________________________________________________________________________
-//	Recibe una notificación(del IFRAME) de error al grabar programacion
+//	Recibe una notificaciÃ³n(del IFRAME) de error al grabar programacion
 //___________________________________________________________________________________________________________
 function error_programacion(swe,resultado){
 	desmarca_tablas();
@@ -415,10 +415,10 @@ function error_programacion(swe,resultado){
 	nuevo_bloque();
 }
 //___________________________________________________________________________________________________________
-//	Recibe una notificación(del IFRAME) de la acción ejecutada
+//	Recibe una notificaciÃ³n(del IFRAME) de la acciÃ³n ejecutada
 //___________________________________________________________________________________________________________		
 function registro_programacion(idr,nombrere,swop){
-	wswop=parseInt(swop); // Toma la opción ALTA,MODIFICACION O ELIMINACION
+	wswop=parseInt(swop); // Toma la opciÃ³n ALTA,MODIFICACION O ELIMINACION
 	switch (wswop){
 		case op_alta:
 			alert(TbMsg[11]);
@@ -475,7 +475,7 @@ function elimina_item(){
 	lista.remove(p);
 }
 //___________________________________________________________________________________________________________
-//	Recibe una notificación(del IFRAME) de grabación correcta programacion
+//	Recibe una notificaciÃ³n(del IFRAME) de grabaciÃ³n correcta programacion
 //___________________________________________________________________________________________________________		
 function inicializa_variables(){
 	gmes=0;
@@ -515,7 +515,7 @@ function desmarca_tablas(){
 	}
 }
 //___________________________________________________________________________________________________________
-// Averigua el nombre del bloque según lo que ya existe
+// Averigua el nombre del bloque segÃºn lo que ya existe
 //___________________________________________________________________________________________________________
 function nuevo_bloque(){
 	var lista=document.getElementById("lista_programaciones");
@@ -565,7 +565,7 @@ function desmarcando_tabla(otb){
 	}
 }
 //___________________________________________________________________________________________________________
-//	Añade la programacion a la caja de lista
+//	AÃ±ade la programacion a la caja de lista
 //___________________________________________________________________________________________________________
 function programacion_metelista(valor,texto){
 	var lista=document.getElementById("lista_programaciones");
@@ -575,7 +575,7 @@ function programacion_metelista(valor,texto){
 	lista.add(e);
 }
 //___________________________________________________________________________________________________________
-//	Llama a una página dentro del IFRAME que recupera una programacion
+//	Llama a una pÃ¡gina dentro del IFRAME que recupera una programacion
 //___________________________________________________________________________________________________________
 function consulta_programacion(){ 
 	idprogramacion=valor_programacion();
@@ -627,9 +627,9 @@ function muestra_programacion(cadena_campos){
 			ganno=pannos;
 			ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 			wmes=parseInt(valor_item("tabla_meses")); // Recupera mes
-			wanno=parseInt(valor_item("tabla_annos")); // Recupera año
+			wanno=parseInt(valor_item("tabla_annos")); // Recupera aÃ±o
 			wurl="toma_mes.php?idmes="+wmes+"&idanno="+wanno+"&vitem="+pdiario
-			ifr.src=wurl; // LLama a la página
+			ifr.src=wurl; // LLama a la pÃ¡gina
 
 	}
 	marca_item("tabla_horas",phoras);
@@ -657,7 +657,7 @@ function muestra_programacion(cadena_campos){
 	}
 }
 // ------------------------------------------------------------------
-//  Devuelve true si hay más de un item seleccionado, false al contrario
+//  Devuelve true si hay mÃ¡s de un item seleccionado, false al contrario
 //  El parametro de entrada es el valor HEXadecimal
 //___________________________________________________________________________________________________________
 function opcion_multiple(valor){ 
@@ -672,7 +672,7 @@ function opcion_multiple(valor){
 	return(false);
 }
 // ------------------------------------------------------------------
-//  Marca todos los items de una tabla según el valor HEX enviado
+//  Marca todos los items de una tabla segÃºn el valor HEX enviado
 //___________________________________________________________________________________________________________
 function marca_item(idtabla,vhex){ 
 	otb=document.getElementById(idtabla);

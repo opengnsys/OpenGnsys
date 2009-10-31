@@ -1,13 +1,13 @@
-	<?
+ï»¿	<?
 /*========================================================================================================
-	Esta clase genera tablas HTML para selección de fechas (Versión inglesa)
+	Esta clase genera tablas HTML para selecciÃ³n de fechas (VersiÃ³n inglesa)
 	
 	Atributos de la clase:
 
-		clase: Clase [CSS] de la tabla HTML que se generará.
-		onmouseover: Función Javascript que se ejuctará al generarse el evento
-		onmouseout: Función Javascript que se ejuctará al generarse el evento
-		onclick: Función Javascript que se ejuctará al hacer click sobre el objeto
+		clase: Clase [CSS] de la tabla HTML que se generarÃ¡.
+		onmouseover: FunciÃ³n Javascript que se ejuctarÃ¡ al generarse el evento
+		onmouseout: FunciÃ³n Javascript que se ejuctarÃ¡ al generarse el evento
+		onclick: FunciÃ³n Javascript que se ejuctarÃ¡ al hacer click sobre el objeto
 
 =========================================================================================================*/
 class Calendario{
@@ -19,7 +19,7 @@ class Calendario{
 	var $onmouseout;
 	var $onclick;
 
-	var $desplazamiento_dias=6; // Ajuste fino dependiendo del año de comienzo del algoritmo
+	var $desplazamiento_dias=6; // Ajuste fino dependiendo del aÃ±o de comienzo del algoritmo
 	var $nombre_mes=array();
 	var $nombre_dia=array();
 	var $dias_meses=array();
@@ -43,7 +43,7 @@ class Calendario{
 		$this->nombre_mes[11]=array ("Noviembre",0x0400);
 		$this->nombre_mes[12]=array ("Diciembre",0x0800);
 
-		$this->numero_annos[1]=array ("2004",0x01); // tamaño 1 bytes
+		$this->numero_annos[1]=array ("2004",0x01); // tamaÃ±o 1 bytes
 		$this->numero_annos[2]=array ("2005",0x02); 
 		$this->numero_annos[3]=array ("2006",0x04); 
 		$this->numero_annos[4]=array ("2007",0x08); 
@@ -65,7 +65,7 @@ class Calendario{
 		$this->dias_meses[11]=30;
 		$this->dias_meses[12]=31;
 
-		$this->nombre_dia[1]=array ("L",0x01); // tamaño 1 bytes
+		$this->nombre_dia[1]=array ("L",0x01); // tamaÃ±o 1 bytes
 		$this->nombre_dia[2]=array ("M",0x02); 
 		$this->nombre_dia[3]=array ("X",0x04); 
 		$this->nombre_dia[4]=array ("J",0x08); 
@@ -74,14 +74,14 @@ class Calendario{
 		$this->nombre_dia[7]=array ("D",0x40); 
 	}
 /*________________________________________________________________________________________________________
-		Esta función devuelve una cadena con el código HTML del calendario del mes y año elegidos
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML del calendario del mes y aÃ±o elegidos
 		y que son propiedades de la clase.
 ________________________________________________________________________________________________________*/
 	function MesAnno($mes,$anno,$CntMes){
 		$fecha="1/".$mes."/".$anno;
 		$ds=$this->_DiaSemana($fecha);
 		if ($ds==0) $ds=7;
-		$paso=2; // Porporción para el la intensidad del color
+		$paso=2; // PorporciÃ³n para el la intensidad del color
 		$swbi=0; // Suma para bisiesto
 		if ($this->bisiesto($anno) && $mes==2)	$swbi=1; 
 
@@ -90,7 +90,7 @@ ________________________________________________________________________________
 		$HTML_calendario.='<TH colspan=7 id="'.$mes.'/'.$anno.'" value="'.$this->aula.'" style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[$mes][0].'</TH></TR>'.chr(13); // Nombre del mes
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<8;$i++)
-			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // Días de la semana
+			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // DÃ­as de la semana
 		$HTML_calendario.='</TR><TR>'.chr(13);
 		for ($i=1;$i<$ds;$i++)
 			$HTML_calendario.='<TD>&nbsp;</TD>'.chr(13); // Relleno primeros dias de la semana
@@ -123,7 +123,7 @@ ________________________________________________________________________________
 	}
 
 /*________________________________________________________________________________________________________
-		Esta función devuelve una cadena con el código HTML del calendario del mes y año elegidos
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML del calendario del mes y aÃ±o elegidos
 		y que son propiedades de la clase.
 ________________________________________________________________________________________________________*/
 	function JMesAnno($mes,$anno,$JDif,$TBfechas,$sumahoras){
@@ -131,7 +131,7 @@ ________________________________________________________________________________
 		$Jdpl=$this->juliana($fecha)-$JDif; // Calcula punto departida para indice juliano
 		$ds=$this->_DiaSemana($fecha);
 		if ($ds==0) $ds=7;
-		$paso=2; // Porporción para el la intensidad del color
+		$paso=2; // PorporciÃ³n para el la intensidad del color
 		$swbi=0; // Suma para bisiesto
 		if ($this->bisiesto($anno) && $mes==2)	$swbi=1; 
  		$HTML_calendario='<TABLE  border=1 cellspacing=0 cellpadding=1 id="tabla_mesanno" class="'.$this->clase.'">'.chr(13);
@@ -139,7 +139,7 @@ ________________________________________________________________________________
 		$HTML_calendario.='<TH colspan=7 id="'.$mes.'/'.$anno.'"  style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[(int)$mes][0].'</TH></TR>'.chr(13); // Nombre del mes
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<8;$i++)
-			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // Días de la semana
+			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // DÃ­as de la semana
 		$HTML_calendario.='</TR><TR>'.chr(13);
 		for ($i=1;$i<$ds;$i++)
 			$HTML_calendario.='<TD>&nbsp;</TD>'.chr(13); // Relleno primeros dias de la semana
@@ -174,10 +174,10 @@ ________________________________________________________________________________
 	}
 
 /*________________________________________________________________________________________________________
-		Esta función devuelve el número del día de la semana:
-			0=domingo 1=Lunes, 2=mártes ... 6=sábado
+		Esta funciÃ³n devuelve el nÃºmero del dÃ­a de la semana:
+			0=domingo 1=Lunes, 2=mÃ¡rtes ... 6=sÃ¡bado
 		
-		Parámetro de entrada:
+		ParÃ¡metro de entrada:
 			Una cadena con formato de fecha dd/mm/aaaa.
 ________________________________________________________________________________________________________*/
 	function _DiaSemana($fecha){
@@ -201,16 +201,16 @@ ________________________________________________________________________________
 		return($cont%7);
 	}
 //________________________________________________________________________________________________________
-//		Esta función devuelve true si el año pasado como parámetro es bisiesto y false si no lo es
+//		Esta funciÃ³n devuelve true si el aÃ±o pasado como parÃ¡metro es bisiesto y false si no lo es
 //
-//		Parámetro de entrada:
-//			Una número que representa el año
+//		ParÃ¡metro de entrada:
+//			Una nÃºmero que representa el aÃ±o
 //________________________________________________________________________________________________________
 function bisiesto($anob){
 		if ($anob%4==0) return(true); else return(false);
 	}
 //________________________________________________________________________________________________________
-//		Esta función devuelve una cadena con el código HTML con las horas de reservas de las aulas
+//		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con las horas de reservas de las aulas
 //________________________________________________________________________________________________________
 function HorasDias($CntDia,$porcenhoras){
 	$HTML_calendario="";
@@ -276,7 +276,7 @@ function HorasDias($CntDia,$porcenhoras){
 				if($sw>0)
 					$HTML_ampm[$j].=' style="COLOR:#eeeeee;BACKGROUND-COLOR: #cc3366"';
 
-				if($sw>0) // Cuenta la fracción de 15 minutos como reservada
+				if($sw>0) // Cuenta la fracciÃ³n de 15 minutos como reservada
 					$conthoras++;
 				$HTML_ampm[$j].=' align=center>&nbsp;'.$currenthorario.'&nbsp;</TD>'.chr(13);
 				$currentminutos+=15;
@@ -313,7 +313,7 @@ function HorasDias($CntDia,$porcenhoras){
 	return($HTML_calendario);
 }	
 /* -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con las horas de apertura de las aulas
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con las horas de apertura de las aulas
 ________________________________________________________________________________________________________*/
 function Horas_Completas(){
 		$maxcolumnas=8;
@@ -330,7 +330,7 @@ function Horas_Completas(){
 	return($HTML_calendario);
 }
 /* -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con las intensidades para las reservas de un día
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con las intensidades para las reservas de un dÃ­a
 ________________________________________________________________________________________________________*/
 function TablaIntensidades(){
 		$HTML_calendario='<TABLE id="tabla_intensidad border=1class="'.$this->clase.'">'.chr(13);
@@ -353,7 +353,7 @@ function TablaIntensidades(){
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	Devuelve una cadena con los días del mes que son  lunes(1) o martes(2) o miércoles(3), etc ...domingo(7) separada por comas
+	Devuelve una cadena con los dÃ­as del mes que son  lunes(1) o martes(2) o miÃ©rcoles(3), etc ...domingo(7) separada por comas
 ________________________________________________________________________________________________________________*/
 function DiasPorMes($mes,$anno,$numerodia){
 	$cadenadias="";
@@ -366,7 +366,7 @@ function DiasPorMes($mes,$anno,$numerodia){
 			$ds++;
 			if($ds>7) $ds=1;
 		}
-		// Calcula número de dias del mes
+		// Calcula nÃºmero de dias del mes
 		$diasmaxmes=$this->dias_meses[$mes];
 		if ($mes==2){
 			if ($this->bisiesto($anno)){
@@ -380,7 +380,7 @@ function DiasPorMes($mes,$anno,$numerodia){
 		return($cadenadias);
 }
 /*________________________________________________________________________________________________________
-	Devuelve una cadena con los días del mes correspondiente a una semana concreta, separados por coma
+	Devuelve una cadena con los dÃ­as del mes correspondiente a una semana concreta, separados por coma
 ________________________________________________________________________________________________________*/
 function DiasPorSemanas($mes,$anno,$numerosemana){
 	$cadenadias="";
@@ -397,7 +397,7 @@ function DiasPorSemanas($mes,$anno,$numerosemana){
 				$nsem++;
 			}
 		}
-		// Calcula número de dias del mes
+		// Calcula nÃºmero de dias del mes
 		$diasmaxmes=$this->dias_meses[$mes];
 		if ($mes==2){
 			if ($this->bisiesto($anno)){
@@ -412,7 +412,7 @@ function DiasPorSemanas($mes,$anno,$numerosemana){
 		return($cadenadias);
 }
 // ____________________________________________________________________________
-//	Esta función devuelve el número de la última semana de un mes
+//	Esta funciÃ³n devuelve el nÃºmero de la Ãºltima semana de un mes
 // ____________________________________________________________________________
 function UltimaSemana($mes,$anno){
 	$diasmaxmes=$this->dias_meses[$mes];
@@ -431,16 +431,16 @@ function UltimaSemana($mes,$anno){
 	return($cociente);
 }
 //________________________________________________________________________________________________________
-// Función : Fechas
-// Descripción :
+// FunciÃ³n : Fechas
+// DescripciÃ³n :
 //		Devuelve una cadena de fechas separada por comas que son  las fechas que forman parte de una reserva concreta
 //	Parametros: 
-//		- anno_c: Un año determinado
+//		- anno_c: Un aÃ±o determinado
 //		- mes_desde: El mes desde que se considera la reserva
 //		- mes_hasta: El mes hasta que se considera la reserva
-//		- meses: Campo con información hexadecimal de los meses de la reserva ( la información contenida en el campo de la tabla con este nombre
+//		- meses: Campo con informaciÃ³n hexadecimal de los meses de la reserva ( la informaciÃ³n contenida en el campo de la tabla con este nombre
 //		- diario:  Idem para los dias de un mes
-//		- dias: idem para los nombres de los días
+//		- dias: idem para los nombres de los dÃ­as
 //		- semanas: Idem para las semanas
 //________________________________________________________________________________________________________
 function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){

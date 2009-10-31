@@ -1,15 +1,15 @@
-//________________________________________________________________________________________________________
+ï»¿//________________________________________________________________________________________________________
 //
 //	Fichero de idiomas javascripts: configurar_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN: No ha efectuado ningún cambio en la tabla de particiones, por tanto, no se ejecutará ninguna acción";
-TbMsg[1]="ATENCIÓN: Hay particiones con el mismo número, debe seleccionar otra o eliminarla haciendo click en la última columna";
-TbMsg[2]="ATENCIÓN: El tamaño de la partición debe ser mayor que cero";
-TbMsg[3]="ATENCIÓN: Las particiones deben ser correlativas y no debe haber espacios entre ellas";
-TbMsg[4]="ATENCIÓN: La partición está vacia , por tanto, no se ejecutará ninguna acción sobre ella";
-TbMsg[5]="ATENCIÓN:  Esta partición debe ser formateada porque ha cambiado su sistema operativo o el tamaño de alguna partición";
-TbMsg[6]="ATENCIÓN: No tiene sentido ocultar una partición que no sea un sistema Windows";
-TbMsg[7]="ATENCIÓN: No tiene sentido mostrar una partición que no sea un sistema Windows";
-TbMsg[8]="No se pueden añadir más particiones";
+TbMsg[0]="ATENCIÃ“N: No ha efectuado ningÃºn cambio en la tabla de particiones, por tanto, no se ejecutarÃ¡ ninguna acciÃ³n";
+TbMsg[1]="ATENCIÃ“N: Hay particiones con el mismo nÃºmero, debe seleccionar otra o eliminarla haciendo click en la Ãºltima columna";
+TbMsg[2]="ATENCIÃ“N: El tamaÃ±o de la particiÃ³n debe ser mayor que cero";
+TbMsg[3]="ATENCIÃ“N: Las particiones deben ser correlativas y no debe haber espacios entre ellas";
+TbMsg[4]="ATENCIÃ“N: La particiÃ³n estÃ¡ vacia , por tanto, no se ejecutarÃ¡ ninguna acciÃ³n sobre ella";
+TbMsg[5]="ATENCIÃ“N:  Esta particiÃ³n debe ser formateada porque ha cambiado su sistema operativo o el tamaÃ±o de alguna particiÃ³n";
+TbMsg[6]="ATENCIÃ“N: No tiene sentido ocultar una particiÃ³n que no sea un sistema Windows";
+TbMsg[7]="ATENCIÃ“N: No tiene sentido mostrar una particiÃ³n que no sea un sistema Windows";
+TbMsg[8]="No se pueden aÃ±adir mÃ¡s particiones";

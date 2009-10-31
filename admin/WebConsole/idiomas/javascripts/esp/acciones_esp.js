@@ -1,10 +1,10 @@
-//____________________________________________________________________________
+ï»¿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: acciones_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN.- La Tarea será ejecutada. ¿ Está seguro ?";
-TbMsg[1]="ATENCIÓN.- Este Trabajo será ejecutado. ¿ Está seguro ?";
+TbMsg[0]="ATENCIÃ“N.- La Tarea serÃ¡ ejecutada. Â¿ EstÃ¡ seguro ?";
+TbMsg[1]="ATENCIÃ“N.- Este Trabajo serÃ¡ ejecutado. Â¿ EstÃ¡ seguro ?";
 TbMsg[2]="La Tarea ha sido iniciada correctamente";
 TbMsg[3]="Este Trabajo ha sido iniciado correctamente";

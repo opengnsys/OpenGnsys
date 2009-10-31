@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: calendario_ventana.php
-// Descripción :
+// DescripciÃ³n :
 //		Muestra un calendario para elegir una fecha
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -31,7 +31,7 @@ if (isset($_POST["anno_elegido"])) $anno_elegido=$_POST["anno_elegido"];
 //_________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="JavaScript">
@@ -161,7 +161,7 @@ $mialmanaque=new Almanaque("tabla_meses");
 echo '<TABLE align="center">';
 echo '	<TR>';
 echo '	<TD align="left"><img style="cursor:hand" SRC="../images/iconos/salir_on.gif" onclick="cerrar_ventana()"></TD>';
-echo '<TD style="COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:12">&nbsp;&nbsp;Año:&nbsp;';
+echo '<TD style="COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:12">&nbsp;&nbsp;AÃ±o:&nbsp;';
 echo '<SELECT name="despleanno" onchange="elige_anno()" style="width=60">';
 for($i=2004;$i<2015;$i++){
 		echo '<OPTION value='.$i;

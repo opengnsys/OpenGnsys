@@ -1,20 +1,20 @@
-<?
+Ôªø<?
 // *************************************************************************************************************************************************
-// AplicaciÛn WEB: ogAdmWebCon.
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn:2003-2004
-// Fecha ⁄ltima modificaciÛn: Febrero-2005
+// Aplicaci√≥n WEB: ogAdmWebCon.
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n:2003-2004
+// Fecha √öltima modificaci√≥n: Febrero-2005
 // Nombre del fichero: HTMLCTESELECT.php
-// DescripciÛn :
+// Descripci√≥n :
 //		Crea la etiqueta html <SELECT> de valores constantes
 //	Parametros: 
 //		- parametros:Una cadena con la forma valor=literal separada por un caracter INTRO
 //		- nombreid: Nombre del desplegable (atributo HTML name)
 //		- clase: Clase que define su estilo
-//		- defaultlit: Literal de la primera opciÛn cuyo valor es siempre 0
-//		- valorselec: Valor del item que saldr· seleccionado por defecto
+//		- defaultlit: Literal de la primera opci√≥n cuyo valor es siempre 0
+//		- valorselec: Valor del item que saldr√° seleccionado por defecto
 //		- ancho: Anchura del desplegable
-//		- eventochg: Nombre de la funciÛn que se ejecutar· en respuesta al evento onchange
+//		- eventochg: Nombre de la funci√≥n que se ejecutar√° en respuesta al evento onchange
 // *************************************************************************************************************************************************
 function HTMLCTESELECT($parametros,$nombreid,$clase,$defaultlit,$valorselec,$ancho,$eventochg=""){
 	if (!empty($eventochg))	$eventochg='onchange="'.$eventochg.'(this);"';

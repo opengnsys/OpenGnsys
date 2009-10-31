@@ -1,6 +1,6 @@
-// ************************************************************************
+Ôªø// ************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: configuracionaula.js
 // Este fichero implementa las funciones javascript del fichero configuracionaula.php
 // ************************************************************************
@@ -8,7 +8,7 @@
 var currentOrdenador=null // Ordenador elegido
 var currentNombreordenador=null // Nombre del ordenador
 
-// CÛdigo de los ambitos
+// C√≥digo de los ambitos
 
 var AMBITO_ORDENADORES=0x10;
 
@@ -17,7 +17,7 @@ var AMBITO_ORDENADORES=0x10;
 var LITAMBITO_ORDENADORES="ordenadores";
 //____________________________________________________________________________
 //	
-//	Esta funciÛn muestra un menu contextual 
+//	Esta funci√≥n muestra un menu contextual 
 //____________________________________________________________________________
 function resalta(id,nom,nomflo){
 	currentOrdenador=id
@@ -28,7 +28,7 @@ function resalta(id,nom,nomflo){
 }
 //____________________________________________________________________________
 //	
-//	Esta funciÛn muestra los comandos a elegir para su ejecuciÛn
+//	Esta funci√≥n muestra los comandos a elegir para su ejecuci√≥n
 //____________________________________________________________________________
 function confirmarcomando(ambito,idc,interac){
 	reset_contextual(-1,-1);
@@ -45,14 +45,14 @@ function confirmarcomando(ambito,idc,interac){
 	var wurl="../principal/dialogostramas.php?identificador="+identificador+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito
 	if(interac==0){
 	   ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 	else
 		window.open(wurl,"frame_contenidos")
 }
 //____________________________________________________________________________
 //	
-//	Esta funciÛn muestra las colas de acciones
+//	Esta funci√≥n muestra las colas de acciones
 //____________________________________________________________________________
 function cola_acciones(tipoaccion){
 	reset_contextual(-1,-1);
@@ -69,7 +69,7 @@ function cola_acciones(tipoaccion){
 }
 //____________________________________________________________________________
 //	
-//	Esta funciÛn  muestra la configuraciÛn de los ordenadores de un configuracionaula
+//	Esta funci√≥n  muestra la configuraci√≥n de los ordenadores de un configuracionaula
 // objeto de argumentos de eventos:
 //	Especificaciones:
 //		El objeto e tiene las siguientes atributos o propiedades:

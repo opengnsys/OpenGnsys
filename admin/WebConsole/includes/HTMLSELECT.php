@@ -1,21 +1,21 @@
-<?
+Ôªø<?
 // *************************************************************************************************************************************************
-// AplicaciÛn WEB: ogAdmWebCon.
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn:2003-2004
-// Fecha ⁄ltima modificaciÛn: Febrero-2005
+// Aplicaci√≥n WEB: ogAdmWebCon.
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n:2003-2004
+// Fecha √öltima modificaci√≥n: Febrero-2005
 // Nombre del fichero: HTMLSELECT.php
-// DescripciÛn :
+// Descripci√≥n :
 //		Crea la etiqueta html <SELECT> con valores procedentes de una tabla
 //	Parametros: 
-//		- cmd:Un comando ya operativo (con conexiÛn abierta)  
-//		- idcentro:Centro al que pertene el registro donde se encuentra el dato a recuperar, ser·  0 para no contemplar este dato
+//		- cmd:Un comando ya operativo (con conexi√≥n abierta)  
+//		- idcentro:Centro al que pertene el registro donde se encuentra el dato a recuperar, ser√°  0 para no contemplar este dato
 //		- nombretabla: Nombre de la tabla origen de los datos
 //		- identificador: Valor del campo identificador del registro
 //		- nombreid: Nombre del campo identificador del registro 
-//		- nombreliteral: Nombre del campo de la tabla que mostrar· el desplegable
+//		- nombreliteral: Nombre del campo de la tabla que mostrar√° el desplegable
 //		- ancho: Anchura del desplegable
-//		- eventochg: Nombre de la funciÛn que se ejecutar· en respuesta al evento onchange( por defecto: ninguna)
+//		- eventochg: Nombre de la funci√≥n que se ejecutar√° en respuesta al evento onchange( por defecto: ninguna)
 //		- clase: Clase que define su estilo (por defecto: formulariodatos)
 //		- clausulawhere: Clausula Where adicional
 // *************************************************************************************************************************************************

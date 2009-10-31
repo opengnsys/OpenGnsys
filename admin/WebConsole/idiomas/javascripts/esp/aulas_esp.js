@@ -1,12 +1,12 @@
-//________________________________________________________________________________________________________
+ï»¿//________________________________________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: aulas_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="La plantilla de ordenador ha sido registrada correctamente y los ordenadores de este aula han sido actualizados con dicha plantilla";
-TbMsg[1]=" ATENCIÓN: Este ámbito será refrescado. ¿ Está seguro ?";
-TbMsg[2]="ATENCIÓN: Este ámbito será purgado. ¿ Está seguro ?";
-TbMsg[3]="ATENCIÓN: Los items de menús de este ámbito serán renovados. ¿ Está seguro ?";
-TbMsg[4]=" ATENCIÓN: Este ámbito será conmutado. ¿ Está seguro ?";
+TbMsg[1]=" ATENCIÃ“N: Este Ã¡mbito serÃ¡ refrescado. Â¿ EstÃ¡ seguro ?";
+TbMsg[2]="ATENCIÃ“N: Este Ã¡mbito serÃ¡ purgado. Â¿ EstÃ¡ seguro ?";
+TbMsg[3]="ATENCIÃ“N: Los items de menÃºs de este Ã¡mbito serÃ¡n renovados. Â¿ EstÃ¡ seguro ?";
+TbMsg[4]=" ATENCIÃ“N: Este Ã¡mbito serÃ¡ conmutado. Â¿ EstÃ¡ seguro ?";
 

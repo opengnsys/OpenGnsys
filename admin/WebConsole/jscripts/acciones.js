@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: acciones.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero acciones.php
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
@@ -19,18 +19,18 @@ function ejecutar_tareas(){
 	var seguimiento=currentNodo.value
 	var wurl="../gestores/gestor_tareas.php?opcion="+op_ejecucion+"&idtarea="+identificador+"&seguimiento="+seguimiento;
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 //	
 //	Devuelve el resultado de ejecutar una tarea
-//	Parámetros:
-//			- resul: resultado de la operación( true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//	ParÃ¡metros:
+//			- resul: resultado de la operaciÃ³n( true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- idt: Identificador de la tarea
 //________________________________________________________________________________________________________
 function resultado_ejecutar_tareas(resul,descrierror,idt){
-	if (!resul){ // Ha habido algún error en la ejecución
+	if (!resul){ // Ha habido algÃºn error en la ejecuciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -47,18 +47,18 @@ function ejecutar_trabajos(){
 	var identificador=currentNodo.toma_identificador()
 	var wurl="../gestores/gestor_trabajos.php?opcion="+op_ejecucion+"&idtrabajo="+identificador;
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 //	
 //	Devuelve el resultado de ejecutar un trabajo
-//	Parámetros:
-//			- resul: resultado de la operación( true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//	ParÃ¡metros:
+//			- resul: resultado de la operaciÃ³n( true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- idt: Identificador de la tarea
 //________________________________________________________________________________________________________
 function resultado_ejecutar_trabajos(resul,descrierror,idt){
-	if (!resul){ // Ha habido algún error en la ejecución
+	if (!resul){ // Ha habido algÃºn error en la ejecuciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -146,7 +146,7 @@ function ver_tareastrabajos(){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra el formulario de Menús disponibles para gestionar la inclusión de procedimientos, tareas o trabajos en ellos 
+//	Muestra el formulario de MenÃºs disponibles para gestionar la inclusiÃ³n de procedimientos, tareas o trabajos en ellos 
 //________________________________________________________________________________________________________
 function insertar_accionmenu(tipo){
 	reset_contextual(-1,-1)

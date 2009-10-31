@@ -1,19 +1,19 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: configuracionordenador_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Configuraciones de ordenadores';
-	$TbMsg[1]='Características del ordenador';
+	$TbMsg[1]='CaracterÃ­sticas del ordenador';
 	$TbMsg[2]='Nombre';
-	$TbMsg[3]='Dirección IP';
-	$TbMsg[4]='Dirección MAC';
+	$TbMsg[3]='DirecciÃ³n IP';
+	$TbMsg[4]='DirecciÃ³n MAC';
 	$TbMsg[5]='Perfil Hardware';
-	$TbMsg[6]='Partición';
+	$TbMsg[6]='ParticiÃ³n';
 	$TbMsg[7]='Nombre del Sistema';
-	$TbMsg[8]='Tamaño';
+	$TbMsg[8]='TamaÃ±o';
 	$TbMsg[9]='Datos de configuration';
 
 ?>

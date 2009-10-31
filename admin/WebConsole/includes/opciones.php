@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon.
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:Febrero-2005
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon.
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:Febrero-2005
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: opciones.php
-// Descripción :
-//		Variables de ámbito común 
+// DescripciÃ³n :
+//		Variables de Ã¡mbito comÃºn 
 // *************************************************************************************************************************************************
 $op_alta=1;
 $op_modificacion=2;

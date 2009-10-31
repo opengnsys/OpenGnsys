@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Noviembre-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: colasreservas.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero colasreservas.php
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
@@ -57,7 +57,7 @@
 		var wid=o.getAttribute("id");
 		var aux=wid.split("/") // Toma el identificador 
 		var onodo=document.getElementById("nodomes-"+idaula+"-"+aux[1]+"/"+aux[2]); 
-		desplieganodo(onodo); // Despliega el mes donde está el día
+		desplieganodo(onodo); // Despliega el mes donde estÃ¡ el dÃ­a
 		onodo=document.getElementById("nododia-"+idaula+"-"+wid); 
 		desplieganodo(onodo); 
 		nwhref="#anododia-"+idaula+"-"+wid

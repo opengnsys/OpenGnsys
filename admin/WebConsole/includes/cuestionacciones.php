@@ -1,4 +1,4 @@
-<?
+ï»¿<?
 /* -------------------------------------------------------------------------------------------
 	Inserta, modifica o elimina un grupo de servidores dhcp de la base de datos
 ---------------------------------------------------------------------------------------------*/
@@ -17,8 +17,8 @@ function CuestionAcciones($cmd,$shidra,$parametros){
 
 	global $identificador;
 
-	if($sw_ejya=='true' ){ // switch de ejecución inmediata ----------------------------------------------------------------------
-		if($sw_seguimiento=='true' ){ // switch de ejecución con seguimiento
+	if($sw_ejya=='true' ){ // switch de ejecuciÃ³n inmediata ----------------------------------------------------------------------
+		if($sw_seguimiento=='true' ){ // switch de ejecuciÃ³n con seguimiento
 			$cmd->texto="INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (@tipoaccion,@idtipoaccion,@cateaccion,@ambito,@idambito,@fechahorareg,@estado,@resultado,@idcentro,@parametros,0,0)";
 			$resul=$cmd->Ejecutar();
 			if($resul){
@@ -26,16 +26,16 @@ function CuestionAcciones($cmd,$shidra,$parametros){
 			}
 		}
 		// Envio al servidor hidra
-		if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+		if ($shidra->conectar()){ // Se ha establecido la conexiÃ³n con el servidor hidra
 			$shidra->envia_comando($parametros);
 			$shidra->desconectar();
 		}
 		else
 			return(false);
 	}
-	// Fin ejecución inmediata -------------------------------------------------------------------------------------------------------------
+	// Fin ejecuciÃ³n inmediata -------------------------------------------------------------------------------------------------------------
 
-	if($sw_mkprocedimiento=='true'){ // switch de creación o inclusión en procedimiento ---------------------------------------------------------
+	if($sw_mkprocedimiento=='true'){ // switch de creaciÃ³n o inclusiÃ³n en procedimiento ---------------------------------------------------------
 		if($nwidprocedimiento==0){
 			$cmd->ParamSetValor("@descripcion",$nwdescriprocedimiento,0);
 			$cmd->texto="INSERT INTO procedimientos(descripcion,idcentro) VALUES (@descripcion,@idcentro)";
@@ -45,7 +45,7 @@ function CuestionAcciones($cmd,$shidra,$parametros){
 			else
 				return(false);
 		}
-		if($nwidprocedimiento>0){ //  inclusión en procedimiento existente 
+		if($nwidprocedimiento>0){ //  inclusiÃ³n en procedimiento existente 
 			$cmd->ParamSetValor("@idprocedimiento",$nwidprocedimiento,1);
 			$cmd->ParamSetValor("@idcomando",$identificador,1);
 			$cmd->ParamSetValor("@parametros",Sin_iph($parametros),0);
@@ -56,7 +56,7 @@ function CuestionAcciones($cmd,$shidra,$parametros){
 		}
 	}	
 
-	if($sw_mktarea=='true'){ // switch de creación o inclusión en tarea -----------------------------------------------------------
+	if($sw_mktarea=='true'){ // switch de creaciÃ³n o inclusiÃ³n en tarea -----------------------------------------------------------
 		if($nwidtarea==0){ // Nueva tarea
 			$cmd->ParamSetValor("@descripcion",$nwdescritarea);
 			$cmd->texto="INSERT INTO tareas(descripcion,idcentro) VALUES (@descripcion,@idcentro)";
@@ -66,7 +66,7 @@ function CuestionAcciones($cmd,$shidra,$parametros){
 			else
 				return(false);
 		}
-		if($nwidtarea>0){ //  inclusión en tarea existente 
+		if($nwidtarea>0){ //  inclusiÃ³n en tarea existente 
 			$cmd->ParamSetValor("@idtarea",$nwidtarea);
 			$cmd->ParamSetValor("@idcomando",$identificador);
 			$cmd->texto="INSERT INTO tareas_comandos(idtarea,orden,idcomando,ambito,idambito,parametros) VALUES (@idtarea,0,@idcomando,@ambito,@idambito,@parametros)";

@@ -1,16 +1,16 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo-2005
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: RestaurarImagenGrupoOrdenadores.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero RestaurarImagenGrupoOrdenadores.php (Comandos)
 // *************************************************************************************************************************************************
 //___________________________________________________________________________________________________________
 //	
-//	Cancela la edición 
+//	Cancela la ediciÃ³n 
 //___________________________________________________________________________________________________________
   function cancelar(){
 	alert(CTbMsg[0]);
@@ -18,7 +18,7 @@
   }
 //___________________________________________________________________________________________________________
 //	
-//	Esta función desabilita la marca de un checkbox en opcion "bajas"
+//	Esta funciÃ³n desabilita la marca de un checkbox en opcion "bajas"
 //___________________________________________________________________________________________________________
  function desabilita(o) {
 	var b
@@ -27,7 +27,7 @@
  }
 //___________________________________________________________________________________________________________
 //	
-//	Confirma la edición 
+//	Confirma la ediciÃ³n 
 //___________________________________________________________________________________________________________
 function confirmar(){
 	if (comprobar_datos()){
@@ -83,7 +83,7 @@ function confirmar(){
 		wurl+="?parametros="+parametros
 		wurl+="&" +compone_urlejecucion();
 		ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-		ifr.src=wurl; // LLama a la página gestora
+		ifr.src=wurl; // LLama a la pÃ¡gina gestora
 	}
 }
 //________________________________________________________________________________________________________

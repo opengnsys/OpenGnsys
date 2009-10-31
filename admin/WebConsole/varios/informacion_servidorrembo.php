@@ -1,13 +1,13 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: informacion_servidorrembo.php
-// Descripción : 
-//		Muestra los ordenadores que están gestionados por un servidore rembo
+// DescripciÃ³n : 
+//		Muestra los ordenadores que estÃ¡n gestionados por un servidore rembo
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -23,18 +23,18 @@ if (isset($_GET["descripcionservidor"])) $descripcionservidor=$_GET["descripcion
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idservidorrembo); // Crea el arbol XML 
 
-// Creación del árbol
+// CreaciÃ³n del Ã¡rbol
 $baseurlimg="../images/tsignos";
 $clasedefault="tabla_listados_sin";
 $titulotabla=$TbMsg[3];  
 $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titulotabla);
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXml.js"></SCRIPT>
@@ -53,9 +53,9 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 /**************************************************************************************************************************************************
-	Devuelve una cadena con formato XML de toda la información de los servidores rembo
+	Devuelve una cadena con formato XML de toda la informaciÃ³n de los servidores rembo
 	Parametros: 
-		- cmd:Una comando ya operativo ( con conexión abierta)  
+		- cmd:Una comando ya operativo ( con conexiÃ³n abierta)  
 		- idservidorrembo: El identificador del perfil servidor rembo
 ________________________________________________________________________________________________________*/
 function CreaArbol($cmd,$idservidorrembo){

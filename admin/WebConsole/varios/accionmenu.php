@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: accionmenu.php
-// Descripción :
-//		Administra la inclusión de items en menus (procedimientos,tareas y trabajos de un determinado Centro)
+// DescripciÃ³n :
+//		Administra la inclusiÃ³n de items en menus (procedimientos,tareas y trabajos de un determinado Centro)
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -37,12 +37,12 @@ $EDICIONITEMS=2;
 $EDICIONITEM=3;
 $tipoedicion=0;
 if(empty($idmenu)) 
-	$tipoedicion=$EDICIONACCION; // Edición desde Acciones
+	$tipoedicion=$EDICIONACCION; // EdiciÃ³n desde Acciones
 else{
 	if(!empty($tipoitem))
-		$tipoedicion=$EDICIONITEMS; // Edición de todos los items (privados o públicos )
+		$tipoedicion=$EDICIONITEMS; // EdiciÃ³n de todos los items (privados o pÃºblicos )
 	else
-		$tipoedicion=$EDICIONITEM; // Edición de un item
+		$tipoedicion=$EDICIONITEM; // EdiciÃ³n de un item
 }
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if($cmd){

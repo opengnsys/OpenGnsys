@@ -1,7 +1,7 @@
-//____________________________________________________________________________
+﻿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: perfilcomponente_soft_esp.js 
-//	Idioma: Espa�ol 
+//	Idioma: Español 
 //____________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="Este componente software ha sido incluido en este perfil correctamente";

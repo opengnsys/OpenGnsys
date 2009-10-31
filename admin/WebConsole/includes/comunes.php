@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________
 //
 //	Trocea en elementos de una matriz la cadena enviada como parametro separando por parametros
-//	Parámetros:
+//	ParÃ¡metros:
 //		- trama: La trama
 //	 Devuelve:
 //		Una matriz con las parejas de paramertos "nombre=valor"
@@ -22,7 +22,7 @@ function extrae_parametros($parametros,$chsep,$chval){
 //________________________________________________________________________________________
 //
 //	Trocea en elementos de una matriz la cadena enviada como parametro separando por parametros y devolviendo el elegido
-//	Parámetros:
+//	ParÃ¡metros:
 //	 Devuelve:
 //________________________________________________________________________________________
 function extrae_parametro($parametros,$chsep,$chval,$chr){
@@ -43,13 +43,13 @@ function extrae_parametro($parametros,$chsep,$chval,$chr){
 //
 //	Busca una cadena dentro de otra.
 // Especificaciones:
-//		Puede ser sensible a las  mayúsculas
+//		Puede ser sensible a las  mayÃºsculas
 // Parametros:
 //		cadena; cadena donde se va a buscar
 //		subcadena; cadena a buscar
-//		swsensible; si es sensible o no a las mayúsculas y minúsculas
+//		swsensible; si es sensible o no a las mayÃºsculas y minÃºsculas
 // Devuelve:
-//		La posición de comienzo de la subcadena dentro de la cadena, o (-1) en caso de no estar dentro
+//		La posiciÃ³n de comienzo de la subcadena dentro de la cadena, o (-1) en caso de no estar dentro
 //________________________________________________________________________________________
 function EnCadena($cadena,$subcadena,$swsensible = false) {
 	$i=0;
@@ -66,7 +66,7 @@ function EnCadena($cadena,$subcadena,$swsensible = false) {
 	return -1;
  }
 //_____________________________________________________________________________________________
-// Búsqueda binaria o dicotómica en una tabla y devuelve el índice del elemento buscado tabla de una dimension
+// BÃºsqueda binaria o dicotÃ³mica en una tabla y devuelve el Ã­ndice del elemento buscado tabla de una dimension
 //_____________________________________________________________________________________________
 function busca_indicebinario($dato,$tabla,$cont){
 	if (empty($tabla)) return(-1);
@@ -88,7 +88,7 @@ function busca_indicebinario($dato,$tabla,$cont){
 	return(-1);
 }
 //_____________________________________________________________________________________________
-// Búsqueda binaria o dicotómica en una tabla y devuelve el índice del elemento buscado tabla de dos dimensiones
+// BÃºsqueda binaria o dicotÃ³mica en una tabla y devuelve el Ã­ndice del elemento buscado tabla de dos dimensiones
 //_____________________________________________________________________________________________
 function busca_indicebinariodual($dato,$tabla,$cont){
 	$a=0;
@@ -134,7 +134,7 @@ function CreaTablaParametros($cmd){
 		$rs->Siguiente();
 	}
 	$auxnemonico="";
-	// Ordena según el nemonico
+	// Ordena segÃºn el nemonico
 	for ($i=0;$i<$cont-1;$i++){
 		for ($j=$i+1;$j<$cont;$j++){
 			if($tabla_parametros[$i][0]>$tabla_parametros[$j][0]){
@@ -151,7 +151,7 @@ function CreaTablaParametros($cmd){
 	$cont_parametros=$cont;
 }
 /*______________________________________________________________________
-	Redirecciona a la página de error
+	Redirecciona a la pÃ¡gina de error
 	Parametros: 
 		- Literal del error
 _______________________________________________________________________*/

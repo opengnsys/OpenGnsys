@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: gestor_programaciones.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona las programaciones de tareas y trabajos
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -17,15 +17,15 @@ $op_modificacion=2;
 $op_eliminacion=3;
 $op_suspension=4;
 
-$pswop=0; // opcion alta,modificación o eliminación
-$pidprogramacion=0; // Identificador de la programación si se trata de mofdificación o eliminación
-$pidentificador=0; //  Identificador de la tarea o el trabajo que se está programando
-$ptipoaccion=0; //  Tipo de acción:tarea o trabajo
-$pnombrebloque=""; //  Nombre del bloque de programación
-$pannos=""; //  Valor hexadecimal que indica los años elegidos
+$pswop=0; // opcion alta,modificaciÃ³n o eliminaciÃ³n
+$pidprogramacion=0; // Identificador de la programaciÃ³n si se trata de mofdificaciÃ³n o eliminaciÃ³n
+$pidentificador=0; //  Identificador de la tarea o el trabajo que se estÃ¡ programando
+$ptipoaccion=0; //  Tipo de acciÃ³n:tarea o trabajo
+$pnombrebloque=""; //  Nombre del bloque de programaciÃ³n
+$pannos=""; //  Valor hexadecimal que indica los aÃ±os elegidos
 $pmeses=""; //  Valor hexadecimal que indica los meses elegidos
-$pdiario=""; //  Valor hexadecimal que indica los dias  elegidos en modalidad simple ( un sólo mes )
-$pdias=""; //  Valor hexadecimal que indica los días elegidos
+$pdiario=""; //  Valor hexadecimal que indica los dias  elegidos en modalidad simple ( un sÃ³lo mes )
+$pdias=""; //  Valor hexadecimal que indica los dÃ­as elegidos
 $psemanas=""; //  Valor hexadecimal que indica las semanas elegidas
 $phoras=""; //  Valor hexadecimal que indica las horas elegidas
 $pampm=0; //  Valor que indica la  modalidad a.m.=0 p.m.= 1
@@ -38,7 +38,7 @@ $phorasfin=""; //  Valor hexadecimal que indica las horas hasta elegidas
 $pampmfin=0; //  Valor que indica la  modalidad a.m.=0 p.m.= 1 hora hasta
 $pminutosfin=0; //  Valor decimal que indica los minutos hasa
 
-$wsw_sus=""; //  programación suspendida
+$wsw_sus=""; //  programaciÃ³n suspendida
 
 if (isset($_GET["wswop"]))								$pswop=$_GET["wswop"];
 if (isset($_GET["widprogramacion"]))			$pidprogramacion=$_GET["widprogramacion"];
@@ -86,7 +86,7 @@ if ($cmd){
 <BODY>
 <?
 if($pswop!=$op_suspension){
-	if (!$resul){ // Ha ocurrido algún error
+	if (!$resul){ // Ha ocurrido algÃºn error
 		$reporerr=$cmd->UltimoError();
 		$repordes=$cmd->DescripUltimoError();
 		echo '<SCRIPT language="javascript">';
@@ -117,9 +117,9 @@ if($pswop!=$op_suspension){
 }
 else{
 
-	if (!$resul){ // Ha ocurrido algún error
+	if (!$resul){ // Ha ocurrido algÃºn error
 		$reporerr=0;
-		$repordes="Error al suspender la programación";
+		$repordes="Error al suspender la programaciÃ³n";
 		echo '<SCRIPT language="javascript">';
 		echo '		window.parent.error_programacion('.$reporerr.',"'.$repordes.'")';
 		echo '</SCRIPT>';
@@ -211,9 +211,9 @@ function Gestiona(){
 	return($resul);
 }
 // *************************************************************************************************************************************************
-//	Devuelve una objeto comando totalmente operativo (con la conexión abierta)
+//	Devuelve una objeto comando totalmente operativo (con la conexiÃ³n abierta)
 //	Parametros: 
-//		- cadenaconexion: Una cadena con los datos necesarios para la conexión: nombre del servidor
+//		- cadenaconexion: Una cadena con los datos necesarios para la conexiÃ³n: nombre del servidor
 //		usuario,password,base de datos,etc separados por coma
 //________________________________________________________________________________________________________
 function CreaComando($cadenaconexion){

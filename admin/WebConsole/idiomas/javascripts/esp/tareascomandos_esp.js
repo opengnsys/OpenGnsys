@@ -1,10 +1,10 @@
-//____________________________________________________________________________
+ï»¿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: tareascomandos_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN.- El comando  será excluido de la tarea. ¿ Está seguro ?";
-TbMsg[1]="ATENCIÓN: Debe introducir un número de orden";
+TbMsg[0]="ATENCIÃ“N.- El comando  serÃ¡ excluido de la tarea. Â¿ EstÃ¡ seguro ?";
+TbMsg[1]="ATENCIÃ“N: Debe introducir un nÃºmero de orden";
 TbMsg[2]="El comando ha sido excluido correctamente de esta tarea";
 TbMsg[3]="El comando ha sido modificado correctamente";

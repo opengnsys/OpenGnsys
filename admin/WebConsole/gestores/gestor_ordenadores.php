@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_ordenadores.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de ordenadores
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -105,7 +105,7 @@ else{
 /**************************************************************************************************************************************************
 	Busca identificador del aula de un grupo de ordenador .Devuelve el identificador del aula a la que pertenece el grupo 
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 ________________________________________________________________________________________________________*/
 function toma_aula($cmd,$idgrupo){
 	$rs=new Recordset; 
@@ -159,11 +159,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idservidordhcp,idservidorrembo,idmenu,idaula,grupoid,idconfiguracion,cache) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idservidordhcp,@idservidorrembo,@idmenu,@idaula,@grupoid,0,@cache)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idordenador=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
 				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
@@ -173,7 +173,7 @@ function Gestiona(){
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
-			$resul=EliminaOrdenadores($cmd,$idordenador,"idordenador");// Eliminación en cascada
+			$resul=EliminaOrdenadores($cmd,$idordenador,"idordenador");// EliminaciÃ³n en cascada
 			break;
 		case $op_movida :
 			$cmd->texto="UPDATE ordenadores SET idaula=@idaula, grupoid=@grupoid WHERE idordenador=@idordenador";

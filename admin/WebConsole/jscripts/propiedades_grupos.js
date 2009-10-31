@@ -1,24 +1,24 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo-2006
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2006
 // Nombre del fichero: propiedades_grupos.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero propiedades_grupos.php
 // *************************************************************************************************************************************************
 var wpadre=window.parent; // Toma frame padre
 var farbol=wpadre.frames["frame_arbol"];
 //________________________________________________________________________________________________________
 //	
-//	Cancela la edición 
+//	Cancela la ediciÃ³n 
 //________________________________________________________________________________________________________
 function cancelar(){
 	selfclose();
 }
 //________________________________________________________________________________________________________
 //	
-//	Confirma la edición 
+//	Confirma la ediciÃ³n 
 //________________________________________________________________________________________________________
 function confirmar(op){
 	var opcion=op;
@@ -32,7 +32,7 @@ function confirmar(op){
 		if(!comprobar_datos()) return
 		var valor
 		var o
-		var nit=document.forms[0].elements.length // Prepara la cadena de parámetros metodo get
+		var nit=document.forms[0].elements.length // Prepara la cadena de parÃ¡metros metodo get
 		for (i=0;i<nit;i++){
 			o=document.forms[0].elements[i]
 			valor=o.value
@@ -48,7 +48,7 @@ function confirmar(op){
 	else{
 		wurl+="&idgrupo="+document.fdatos.idgrupo.value+"&literaltipo="+document.fdatos.literaltipo.value
 	}
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 //	
@@ -66,11 +66,11 @@ function comprobar_datos(){
 //	
 // Devuelve el resultado de insertar una nueva grupo en la base de datos a traves del IFRAME
 // Especificaciones:
-//		Los parámetros recibidos son:
-//			- resul: resultado de la operación de inserción (true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//		Los parÃ¡metros recibidos son:
+//			- resul: resultado de la operaciÃ³n de inserciÃ³n (true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- nwid: Identificador asignado al nuevo registro
-//			- tablanodo: Tabla nodo generada para el nuevo registro (árbol de un sólo un elemento)
+//			- tablanodo: Tabla nodo generada para el nuevo registro (Ã¡rbol de un sÃ³lo un elemento)
 //________________________________________________________________________________________________________
 function resultado_insertar_grupos(resul,descrierror,nwid,tablanodo){
 	farbol.resultado_insertar_grupos(resul,descrierror,nwid,tablanodo);
@@ -78,11 +78,11 @@ function resultado_insertar_grupos(resul,descrierror,nwid,tablanodo){
 }
 //________________________________________________________________________________________________________
 //	
-//		Devuelve el resultado de modificar algún dato de  un grupo a traves del IFRAME
+//		Devuelve el resultado de modificar algÃºn dato de  un grupo a traves del IFRAME
 //		Especificaciones:
-//		Los parámetros recibidos son:
-//			- resul: resultado de la operación de inserción ( true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//		Los parÃ¡metros recibidos son:
+//			- resul: resultado de la operaciÃ³n de inserciÃ³n ( true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- lit: Nuevo nombre del grupo
 //________________________________________________________________________________________________________
 function resultado_modificar_grupos(resul,descrierror,lit){
@@ -93,9 +93,9 @@ function resultado_modificar_grupos(resul,descrierror,lit){
 //	
 //		Devuelve el resultado de eliminar un grupo a traves del IFRAME
 //		Especificaciones:
-//		Los parámetros recibidos son:
-//			- resul: resultado de la operación de inserción ( true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//		Los parÃ¡metros recibidos son:
+//			- resul: resultado de la operaciÃ³n de inserciÃ³n ( true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- id: Identificador del registro que se quiso modificar
 //________________________________________________________________________________________________________
 function resultado_eliminar_grupos(resul,descrierror,id){

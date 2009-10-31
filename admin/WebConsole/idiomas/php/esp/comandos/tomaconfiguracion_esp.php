@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: tomaconfiguracion_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -10,7 +10,7 @@
 	$TbMsg[2]='Aulas';
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Tomar  configuración';
-	$TbMsg[6]='Ámbito';
+	$TbMsg[5]='Tomar  configuraciÃ³n';
+	$TbMsg[6]='Ãmbito';
 
 ?>

@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: restaurarimagen_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -11,10 +11,10 @@
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
 	$TbMsg[5]='Restaurar Imagen';
-	$TbMsg[6]='Ámbito';
+	$TbMsg[6]='Ãmbito';
 	$TbMsg[7]='Datos a suministrar';
 	$TbMsg[8]='Nombre S.O.';
 	$TbMsg[9]='Imagen a restaurar';
-	$TbMsg[10]='Restaurar (Mismo tipo de partición)';
-	$TbMsg[11]='Restaurar (Otro tipo de partición)';
+	$TbMsg[10]='Restaurar (Mismo tipo de particiÃ³n)';
+	$TbMsg[11]='Restaurar (Otro tipo de particiÃ³n)';
 ?>

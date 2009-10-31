@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2009
-// Fecha Última modificación: Octubre-2009
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2009
+// Fecha Ãšltima modificaciÃ³n: Octubre-2009
 // Nombre del fichero: menumliente.php
-// Descripción :
-//		Pagina del menu del cliente. Éste la solicita a través de su browser local
+// DescripciÃ³n :
+//		Pagina del menu del cliente. Ã‰ste la solicita a travÃ©s de su browser local
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -23,7 +23,7 @@ if (isset($_GET["idt"])) $idt=$_GET["idt"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2');  // Error de conexiÃ³n con servidor B.D.
 //________________________________________________________________________________________________________
 $rs=new Recordset; 
 $cmd->texto="SELECT acciones_menus.tipoaccion, acciones_menus.idtipoaccion 
@@ -42,16 +42,16 @@ switch($tipoaccion){
 		$idambito=TomaDato($cmd,0,'ordenadores',$iph,'ip','idordenador',0);
 		$wurl="../gestores/gestor_ejecutarprocedimientos.php";
 		$wurl.="?swc=1&ambito=".$ambito."&idambito=".$idambito."&idprocedimiento=".$idtipoaccion;
-		Header('Location: '.$wurl);  // Ejecución procedimiento
+		Header('Location: '.$wurl);  // EjecuciÃ³n procedimiento
 		break;
 	case $EJECUCION_TAREA :
 		$wurl="../gestores/gestor_tareas.php?swc=1&opcion=".$op_ejecucion."&idtarea=".$idtipoaccion;
-		Header('Location: '.$wurl);  // Ejecución procedimiento
+		Header('Location: '.$wurl);  // EjecuciÃ³n procedimiento
 		break;
 	case $EJECUCION_TRABAJO :
 		$wurl="../gestores/gestor_trabajos.php?swc=1&opcion=".$op_ejecucion."&idtrabajo=".$idtipoaccion;
-		Header('Location: '.$wurl);  // Ejecución procedimiento
+		Header('Location: '.$wurl);  // EjecuciÃ³n procedimiento
 		break;
 }
-die("HA HABIDO ALGÚN ERROR AL PROCESAR EL ITEM");
+die("HA HABIDO ALGÃšN ERROR AL PROCESAR EL ITEM");
 ?>

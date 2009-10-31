@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: colasacciones_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 
 // Literales de los tipo de acciones
@@ -15,16 +15,16 @@ $LITACCION_EXITOSA='Finalizada correctamente'; // Literal  Finalizada con exito
 $LITACCION_FALLIDA='Finalizada con errores'; // Literal  Finalizada con errores
 $LITACCION_TERMINADA='Finalizada manualmente'; //Literal   Finalizada manualmente con indicacion de exito 
 $LITACCION_ABORTADA='Cancelada manualmente'; // Literal  Finalizada manualmente con indicacion de errores 
-$LITACCION_SINERRORES='Activa sin errores'; // Literal  Activa y sin ningún error
-$LITACCION_CONERRORES='Activa con errores'; // Literal  Activa y con algún error
+$LITACCION_SINERRORES='Activa sin errores'; // Literal  Activa y sin ningÃºn error
+$LITACCION_CONERRORES='Activa con errores'; // Literal  Activa y con algÃºn error
 
-$LITACCION_DETENIDA='Parada'; // Literal acción momentanemente parada
-$LITACCION_INICIADA='Activa'; // Literal acción activa
-$LITACCION_FINALIZADA='Finalizada'; // Literal acción finalizada
+$LITACCION_DETENIDA='Parada'; // Literal acciÃ³n momentanemente parada
+$LITACCION_INICIADA='Activa'; // Literal acciÃ³n activa
+$LITACCION_FINALIZADA='Finalizada'; // Literal acciÃ³n finalizada
 
 $TbMsg=array();
 	$TbMsg[0]='Cola de acciones';
-	$TbMsg[1]='Opciones de búsqueda';
+	$TbMsg[1]='Opciones de bÃºsqueda';
 	$TbMsg[2]='Acciones';
 	$TbMsg[3]='Resultados';
 	$TbMsg[4]='Estados';
@@ -34,7 +34,7 @@ $TbMsg=array();
 	$TbMsg[8]='Fecha final';
 	$TbMsg[9]='Hora inicio';
 	$TbMsg[10]='Hora final';
-	$TbMsg[11]='Ámbito';
+	$TbMsg[11]='Ãmbito';
 	$TbMsg[12]='Eliminar';
 	$TbMsg[13]='Reiniciar';
 	$TbMsg[14]='Parar';
@@ -42,7 +42,7 @@ $TbMsg=array();
 	$TbMsg[16]='Cancelar';
 	$TbMsg[17]='Finalizar';
 
-	$TbMsg[18]='Acción';
+	$TbMsg[18]='AcciÃ³n';
 	$TbMsg[19]='Fecha final';
 	$TbMsg[20]='Hora final';
 	$TbMsg[21]='Fecha inicio';
@@ -59,10 +59,10 @@ $TbMsg=array();
 	$TbMsg[31]='Tareas';
 	$TbMsg[32]='Trabajos';
 
-	$TbMsg[41]='"Filtro Acción"';
-	$TbMsg[42]='"Filtro ámbito"';
+	$TbMsg[41]='"Filtro AcciÃ³n"';
+	$TbMsg[42]='"Filtro Ã¡mbito"';
 	$TbMsg[43]='"Eliminar filtro"';
-	$TbMsg[44]='"Modificar Acción"';
+	$TbMsg[44]='"Modificar AcciÃ³n"';
 	$TbMsg[45]='"Reiniciar"';
 	$TbMsg[46]='"Eliminar"';
 	$TbMsg[47]='"Tarea padre"';
@@ -75,5 +75,5 @@ $TbMsg=array();
 	$TbMsg[54]='"Finalizar"';
 	$TbMsg[55]='"Finalizar sin errores"';
 	$TbMsg[56]='"Finalizar con errores"';
-	$TbMsg[57]='Información';
+	$TbMsg[57]='InformaciÃ³n';
 ?>

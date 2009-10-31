@@ -1,18 +1,18 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: informacion_imagenes_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Imágenes';
+	$TbMsg[0]='ImÃ¡genes';
 	$TbMsg[1]='Information sobre imagenes';
 	$TbMsg[2]='Imagen';
-	$TbMsg[3]='Información de la Imagen';
+	$TbMsg[3]='InformaciÃ³n de la Imagen';
 	$TbMsg[4]='Componentes software';
 	$TbMsg[5]='Software incremental';
 	$TbMsg[6]='Perfil Software';
 	$TbMsg[7]='Ordenadores con esta imagen';
-	$TbMsg[8]='Partición';
+	$TbMsg[8]='ParticiÃ³n';
 	$TbMsg[9]='Comentarios';
 ?>

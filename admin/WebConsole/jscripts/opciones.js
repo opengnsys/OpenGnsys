@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo005
 // Nombre del fichero: opciones.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero declara valores para las opciones
 // *************************************************************************************************************************************************
 var op_alta=1;

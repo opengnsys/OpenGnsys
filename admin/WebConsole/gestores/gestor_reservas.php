@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_reservas.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de reservas
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -147,11 +147,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO reservas (descripcion,solicitante,email,idestatus,idaula,idimagen,idtarea,idtrabajo,estado,comentarios,idcentro,grupoid) VALUES (@descripcion,@solicitante,@email,@idestatus,@idaula,@idimagen,@idtarea,@idtrabajo,@estado,@comentarios,@idcentro,@grupoid)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idreserva=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_reservas($idreserva,$descripcion,$estado);
 				$baseurlimg="../images/signos"; // Url de las reservas de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
@@ -161,7 +161,7 @@ function Gestiona(){
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
-			$resul=EliminaReservas($cmd,$idreserva,"idreserva");// Eliminación en cascada
+			$resul=EliminaReservas($cmd,$idreserva,"idreserva");// EliminaciÃ³n en cascada
 			break;
 		case $op_movida :
 			$cmd->texto="UPDATE reservas SET  grupoid=@grupoid WHERE idreserva=@idreserva";

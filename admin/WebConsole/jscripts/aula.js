@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+Ôªø// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn:2003-2004
-// Fecha ⁄ltima modificaciÛn: Marzo-2006
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n:2003-2004
+// Fecha √öltima modificaci√≥n: Marzo-2006
 // Nombre del fichero: aula.js
-// DescripciÛn : 
+// Descripci√≥n : 
 //		Este fichero implementa las funciones javascript del fichero aulas.php
 // *************************************************************************************************************************************************
 var litambito="";
@@ -15,7 +15,7 @@ var wpadre=window.parent; // Toma frame padre
 var farbol=wpadre.frames["frame_arbol"];
 //________________________________________________________________________________________________________
 //	
-//	Muestra el formulario de captura de datos para modificaciÛn
+//	Muestra el formulario de captura de datos para modificaci√≥n
 //________________________________________________________________________________________________________
 function modificar(l,t,w,h,pages){
 	reset_contextual(-1,-1) // Oculta menu contextual
@@ -24,7 +24,7 @@ function modificar(l,t,w,h,pages){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra el formulario de captura de datos para eliminaciÛn
+//	Muestra el formulario de captura de datos para eliminaci√≥n
 //________________________________________________________________________________________________________
 function eliminar(l,t,w,h,pages){
 	reset_contextual(-1,-1) // Oculta menu contextual
@@ -35,9 +35,9 @@ function eliminar(l,t,w,h,pages){
 //________________________________________________________________________________________________________
 //	
 //	Devuelve el resultado de modificar datos 
-//	Par·metros:
-//			- resul: resultado de la operaciÛn ( true si tuvo Èxito)
-//			- descrierror: DescripciÛn del error en su caso
+//	Par√°metros:
+//			- resul: resultado de la operaci√≥n ( true si tuvo √©xito)
+//			- descrierror: Descripci√≥n del error en su caso
 //			- lit: Nuevo nombre del grupo
 //________________________________________________________________________________________________________
 function resultado_modificar(resul,descrierror,lit){
@@ -49,7 +49,7 @@ function resultado_modificar(resul,descrierror,lit){
 }
 //________________________________________________________________________________________________________
 //	
-//	Refresca la visualizaciÛn del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
+//	Refresca la visualizaci√≥n del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
 //________________________________________________________________________________________________________
 function actualizar_ordenadores(){
 	reset_contextual(-1,-1) // Oculta menu contextual
@@ -57,11 +57,11 @@ function actualizar_ordenadores(){
 	if (!resul)return
 	var whref="actualizar.php?litambito="+litambito+"&idambito="+idambito
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=whref; // LLama a la p·gina gestora
+	ifr.src=whref; // LLama a la p√°gina gestora
 }
 //________________________________________________________________________________________________________
 //	
-//	Conmuta el estado de los ordenadores(Modo Administrado reinici·ndolos) 
+//	Conmuta el estado de los ordenadores(Modo Administrado reinici√°ndolos) 
 //________________________________________________________________________________________________________
 function conmutar_ordenadores(){
 	reset_contextual(-1,-1) // Oculta menu contextual
@@ -69,11 +69,11 @@ function conmutar_ordenadores(){
 	if (!resul)return
 	var whref="conmutar.php?litambito="+litambito+"&idambito="+idambito
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=whref; // LLama a la p·gina gestora
+	ifr.src=whref; // LLama a la p√°gina gestora
 }
 //________________________________________________________________________________________________________
 //	
-//	Resetea la visualizaciÛn del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
+//	Resetea la visualizaci√≥n del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
 //________________________________________________________________________________________________________
 function purgar_ordenadores(){
 	reset_contextual(-1,-1) // Oculta menu contextual
@@ -81,7 +81,7 @@ function purgar_ordenadores(){
 	if (!resul)return
 	var whref="purgar.php?litambito="+litambito+"&idambito="+idambito
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=whref; // LLama a la p·gina gestora
+	ifr.src=whref; // LLama a la p√°gina gestora
 }
 //________________________________________________________________________________________________________
 //	
@@ -113,7 +113,7 @@ function Toma_Datos(o){
 }
 //________________________________________________________________________________________________________
 //	
-//  EnvÌa un comando para su ejecuciÛn o incorporaciÛn a procedimientos o tareas
+//  Env√≠a un comando para su ejecuci√≥n o incorporaci√≥n a procedimientos o tareas
 //________________________________________________________________________________________________________
 function confirmarcomando(ambito,idc,interac){
 	var identificador=idc // identificador del comando
@@ -121,14 +121,14 @@ function confirmarcomando(ambito,idc,interac){
 	var wurl="../principal/dialogostramas.php?identificador="+identificador+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito
 	if(interac==0){
 	   ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 	else
 		window.open(wurl,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
 //	
-//  EnvÌa un comando para su ejecuciÛn o incorporaciÛn a procedimientos o tareas
+//  Env√≠a un comando para su ejecuci√≥n o incorporaci√≥n a procedimientos o tareas
 //________________________________________________________________________________________________________
 function confirmarprocedimiento(ambito){
 	var wurl="../varios/ejecutarprocedimientos.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito
@@ -196,7 +196,7 @@ function ordenador_estandar(){
 }
 //________________________________________________________________________________________________________
 function resultado_ordenadorestandar(resul,descrierror){
-	if (!resul){ // Ha habido alg˙n error
+	if (!resul){ // Ha habido alg√∫n error
 		alert(descrierror)
 		return
 	}
@@ -204,9 +204,9 @@ function resultado_ordenadorestandar(resul,descrierror){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra la configuraciÛn de los ordenadores
-//	Par·metros:
-//			- ambito: ¡mbito que se quiere investigar
+//	Muestra la configuraci√≥n de los ordenadores
+//	Par√°metros:
+//			- ambito: √Åmbito que se quiere investigar
 //________________________________________________________________________________________________________
 function configuraciones(ambito){
 		switch(ambito){
@@ -226,7 +226,7 @@ function configuraciones(ambito){
 }
 //___________________________________________________________________________________________________________
 //	
-//	Muestra formulario para incorporar ordenadores a travÈs de un fichero de configuraciÛn de un servidor dhcp
+//	Muestra formulario para incorporar ordenadores a trav√©s de un fichero de configuraci√≥n de un servidor dhcp
 //___________________________________________________________________________________________________________
 function incorporarordenador(){
 	var whref="../varios/incorporaordenadores.php?idaula="+idambito+"&nombreaula="+nombreambito

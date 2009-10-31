@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: hardwares_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"Definir nuevo tipo hardware"';	
@@ -19,8 +19,8 @@
 	$TbMsg[11]='"Definir nuevo perfil"';
 	$TbMsg[12]='"Colocar perfil"';
 	$TbMsg[13]='"Eliminar grupo de perfiles"';
-	$TbMsg[14]='"Gestión Componentes"';
-	$TbMsg[15]='"Información Perfil"';
+	$TbMsg[14]='"GestiÃ³n Componentes"';
+	$TbMsg[15]='"InformaciÃ³n Perfil"';
 	$TbMsg[16]='"Mover perfil"';
 	$TbMsg[17]='"Eliminar perfil hardware"';
 	$TbMsg[18]='"Tipos de hardware"';

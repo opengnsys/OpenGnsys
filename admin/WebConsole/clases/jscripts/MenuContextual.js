@@ -1,6 +1,6 @@
-// ***************************************************************************
+Ôªø// ***************************************************************************
 //  Libreria de scripts de Javascript
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
 // Fichero: menucontextual.js
 // Este fichero implementa las funciones javascript de la clase MenuContextual
@@ -11,7 +11,7 @@ var ctx_blanco="#ffffff";
 var ctx_negro="#000000";
 var ctx_grissombra="#808080";
 
-gmenuctx=new Array(); // Guarda el ˙ltimo menu flotante
+gmenuctx=new Array(); // Guarda el √∫ltimo menu flotante
 var idxmnu=0 // Indice de los menus flotantes
 var currentItem=null;
 var currentPadresubmenu;
@@ -22,8 +22,8 @@ var ClickY=null // Coordenada y del evento click del boton derecho
 var botonraton=null;
 //____________________________________________________________________________
 //	
-//	Esta funciÛn muestra un menu contextual 
-// Par·metros:
+//	Esta funci√≥n muestra un menu contextual 
+// Par√°metros:
 //		- x: Coordenada x de referencia
 //		- y: Coordenada y de referencia
 //		- menuctx: Objeto DIV contenedor del menu contextual
@@ -32,7 +32,7 @@ function muestra_contextual(x,y,menuctx){
 	var margen=0
 	dpzx=16
 	dpzy=16
-	wtop=calculatop_ctx(y,dpzy,margen,menuctx) // Calcula posiciÛn del menu contextual
+	wtop=calculatop_ctx(y,dpzy,margen,menuctx) // Calcula posici√≥n del menu contextual
 	wleft=calculaleft_ctx(x,dpzx,margen,menuctx)
 	ftop=wtop+parseInt(document.body.scrollTop) // Tiene en cuenta el scrolling
 	fleft=wleft+parseInt(document.body.scrollLeft)
@@ -44,12 +44,12 @@ function muestra_contextual(x,y,menuctx){
 }
 //____________________________________________________________________________
 //
-// Calcula coordenada top para el menu contextual que se mostrar·.
+// Calcula coordenada top para el menu contextual que se mostrar√°.
 // Parametros:
 //	- oriy : Coordenada Y del objeto que provoca el evento
 //	- dpzy : Desplazamiento sobre el eje y
 //	- margen : Margen para que el menu aparezca un poco separado del ese objeto
-//	- menuctx: El menu (objeto DIV) que se mostrar·
+//	- menuctx: El menu (objeto DIV) que se mostrar√°
 //____________________________________________________________________________
 function calculatop_ctx(oriy,dpzy,margen,menuctx){ // Calcula Y del menu contextual
 	largodiv=parseInt(menuctx.offsetHeight);
@@ -62,12 +62,12 @@ function calculatop_ctx(oriy,dpzy,margen,menuctx){ // Calcula Y del menu context
 }
 //____________________________________________________________________________
 //
-// Calcula coordenada left para el menu contextual que se mostrar·.
+// Calcula coordenada left para el menu contextual que se mostrar√°.
 // Parametros:
 //	- orix : Coordenada X del objeto que provoca el evento
 //	- dpzx : Desplazamiento sobre el eje x
 //	- margen : Margen para que el menu aparezca un poco separado del ese objeto
-//	- menuctx: El menu (objeto DIV) que se mostrar·
+//	- menuctx: El menu (objeto DIV) que se mostrar√°
 //____________________________________________________________________________
 function calculaleft_ctx(orix,dpzx,margen,menuctx){ // Calcula Y del menu contextual
 	anchodiv=parseInt(menuctx.offsetWidth)
@@ -85,7 +85,7 @@ function calculaleft_ctx(orix,dpzx,margen,menuctx){ // Calcula Y del menu contex
 }
 //____________________________________________________________________________
 //
-// Esta funciÛn devuelve el objeto DIV al que pertenece el item <TR>  
+// Esta funci√≥n devuelve el objeto DIV al que pertenece el item <TR>  
 // Parametros:
 //	- o: El objeto <TR>
 //____________________________________________________________________________
@@ -96,7 +96,7 @@ function contextual(o){
 }
 //____________________________________________________________________________
 //
-// Esta funciÛn devuelve el objeto <TR> apuntado por el indice
+// Esta funci√≥n devuelve el objeto <TR> apuntado por el indice
 // Parametros:
 //	- o: El objeto TR
 //  - idx: el indice del item, si es nulo se devuelve el item(objeto TR), seleccionado
@@ -106,7 +106,7 @@ function menuctxSelectedItem(o,idx){
 	var oTABLE=oDIV.childNodes[0]; // objeto TABLE
 	var oINPUT=oDIV.childNodes[1]; // objeto INPUT
 	var oTBODY=oTABLE.getElementsByTagName('TBODY')[0];
-	if(idx==null) // No se especificÛ indice, devuelve el item seleccionado
+	if(idx==null) // No se especific√≥ indice, devuelve el item seleccionado
 		idx=oINPUT.getAttribute("value");
 	var oTRS=oTBODY.getElementsByTagName('TR');
 	for (var i=0;i<oTRS.length;i++){
@@ -117,9 +117,9 @@ function menuctxSelectedItem(o,idx){
 }
 //____________________________________________________________________________
 //
-// Esta funciÛn actualiza el nuevo el indice del item seleccionado
+// Esta funci√≥n actualiza el nuevo el indice del item seleccionado
 // Parametros:
-//	- o: El objeto DIV que contiene el menu contextual o un item(objeto TR) de Èl 
+//	- o: El objeto DIV que contiene el menu contextual o un item(objeto TR) de √©l 
 //  - i: El valor del indice
 //____________________________________________________________________________
 function menuctxSetSelectedIndex(o,idx){
@@ -129,9 +129,9 @@ function menuctxSetSelectedIndex(o,idx){
 }
 //____________________________________________________________________________
 //
-// Esta funciÛn devuelve el indice del item seleccionado
+// Esta funci√≥n devuelve el indice del item seleccionado
 // Parametros:
-//	-o : El objeto DIV que contiene el menu contextual o un item(objeto TR) de Èl 
+//	-o : El objeto DIV que contiene el menu contextual o un item(objeto TR) de √©l 
 //____________________________________________________________________________
 function menuctxSelectedIndex(o){
 	var oDIV=contextual(o); // Se asegura que el objeto de inicio es DIV
@@ -139,16 +139,16 @@ function menuctxSelectedIndex(o){
 	return(oINPUT.value);
 }
 //____________________________________________________________________________
-// Se ejecuta cuando se posiciona el cursor dentro de un item de alg˙n men˙ contextual.
-// Par·metros:
-//	- o: El item (objeto TR) donde se ha colocado el ratÛn 
+// Se ejecuta cuando se posiciona el cursor dentro de un item de alg√∫n men√∫ contextual.
+// Par√°metros:
+//	- o: El item (objeto TR) donde se ha colocado el rat√≥n 
 //____________________________________________________________________________
 function sobre_contextual(o){
 	var oDIV=contextual(o) // Se asegura que el objeto de inicio es DIV
 	var idx=menuctxSelectedIndex(oDIV) // Indice del Item anterior seleccionado
 	var nwid=o.getAttribute("id");
 	if (parseInt(idx)!=parseInt(nwid)){ // Si cambio de item
-		if(idx>0){ // Si existÌa item anterior seleccionado
+		if(idx>0){ // Si exist√≠a item anterior seleccionado
 			desmarcar_item(oDIV,idx) // Desmarca item anterior
 		}
 		marcar_item(o); // Marca el actual item
@@ -158,8 +158,8 @@ function sobre_contextual(o){
 //____________________________________________________________________________
 //
 // Hace resaltar el item del menu contextual donde se coloca el cursor.
-// Si este item tuviese un submenu contextual,Èste tambiÈn aparecerÌa.
-// Adem·s, inicializa el campo oculto de cada DIV donde se guarda el Ìndice
+// Si este item tuviese un submenu contextual,√©ste tambi√©n aparecer√≠a.
+// Adem√°s, inicializa el campo oculto de cada DIV donde se guarda el √≠ndice
 // del item selecionado.
 //
 // Parametros:
@@ -183,7 +183,7 @@ function marcar_item(item){
 //____________________________________________________________________________
 function desmarcar_item(o,idx){	
 	var oDIV=contextual(o) // Se asegura que el objeto de inicio es DIV
-	if(idx==null) // No se especificÛ indice
+	if(idx==null) // No se especific√≥ indice
 		idx=menuctxSelectedIndex(oDIV) // Indice del Item seleccionado
 	var item=menuctxSelectedItem(oDIV,idx)
 	if(item==null) return // No hay item seleccionado
@@ -198,7 +198,7 @@ function desmarcar_item(o,idx){
 //____________________________________________________________________________
 //
 // Marca o desmarca items dependiendo del parametro sw.
-// Par·metros:
+// Par√°metros:
 //	- o: El item (objeto TR) 
 // 	Si sw=true marca, si sw=false demarca
 //____________________________________________________________________________
@@ -247,7 +247,7 @@ function marca_desmarca(o,sw){
 }
 //____________________________________________________________________________
 //
-// Detecta si el menu contextual tiene items con im·genes asociadas
+// Detecta si el menu contextual tiene items con im√°genes asociadas
 // Devuelve true en caso afirmativo y false en caso contrario.
 //____________________________________________________________________________
 function MenuconImagen(o){
@@ -262,7 +262,7 @@ function reset_contextual(x,y){
 		if (gmenuctx[i].style.visibility=="visible")
 			swm=swm || EnContextual(x,y,gmenuctx[i])
 	}
-	if (!swm){ // No se ha hecho click en ning˙n menu contextual
+	if (!swm){ // No se ha hecho click en ning√∫n menu contextual
 		for (var i=0;i<idxmnu;i++ ){
 			desmarcar_item(gmenuctx[i]);
 			gmenuctx[i].style.visibility="hidden";
@@ -299,7 +299,7 @@ function muestra_submenu(){
 		var objdiv=contextual(currentPadresubmenu) 
 		var menuctx=document.getElementById(currentPadresubmenu.getAttribute("name")); // Obtiene el submenu
 		//desmarcar_item(menuctx)  // Desmarca el   submenu por si  se ha usado anteriormente
-		wleft=subcalculaleft_ctx(objdiv,menuctx) // La x en funciÛn del padre
+		wleft=subcalculaleft_ctx(objdiv,menuctx) // La x en funci√≥n del padre
 		wtop=subcalculatop_ctx(currentPadreY,menuctx) // La y depende de la longitud del submenu
 		menuctx.style.top=wtop
 		menuctx.style.left=wleft
@@ -310,10 +310,10 @@ function muestra_submenu(){
 }
 //____________________________________________________________________________
 //
-// Calcula coordenada top para el submenu contextual que se mostrar·.
+// Calcula coordenada top para el submenu contextual que se mostrar√°.
 // Parametros:
 //	- y : Coordenada Y de la pantalla donde se hizo click
-//	- menuctx: El submenu (objeto DIV) que se mostrar·
+//	- menuctx: El submenu (objeto DIV) que se mostrar√°
 //____________________________________________________________________________
 function subcalculatop_ctx(y,menuctx){ // Calcula el posicionamiento (y) del DIV ( SUBmenu contextual)
 	var dpl=0
@@ -327,10 +327,10 @@ function subcalculatop_ctx(y,menuctx){ // Calcula el posicionamiento (y) del DIV
 }
 //____________________________________________________________________________
 //
-// Calcula coordenada left para el submenu contextual que se mostrar·.
+// Calcula coordenada left para el submenu contextual que se mostrar√°.
 // Parametros:
 //	- padrediv : Objeto DIV padre del submenu a mostrar
-//	- menuctx: El submenu (objeto DIV) que se mostrar·
+//	- menuctx: El submenu (objeto DIV) que se mostrar√°
 //____________________________________________________________________________
 function subcalculaleft_ctx(padrediv,menuctx){ // Calcula el posicionamiento (x) del DIV ( SUBmenu contextual)
 	anchopadrediv=parseInt(padrediv.offsetWidth) // Ancho del div padre
@@ -355,7 +355,7 @@ function subcalculaleft_ctx(padrediv,menuctx){ // Calcula el posicionamiento (x)
 }
 //____________________________________________________________________________
 //
-//	Se ejecuta cada vez que se hace click con el puntero del ratÛn. Se usa para desmarca
+//	Se ejecuta cada vez que se hace click con el puntero del rat√≥n. Se usa para desmarca
 //	cualquier item de menu contextual que estuviese activo
 //____________________________________________________________________________
 function click_de_raton(e){	
@@ -373,7 +373,7 @@ function click_de_raton(e){
 }
 //____________________________________________________________________________
 //
-//	Se ejecuta cada vez que se mueve el puntero del ratÛn. Se usa para capturar coordenadas
+//	Se ejecuta cada vez que se mueve el puntero del rat√≥n. Se usa para capturar coordenadas
 //____________________________________________________________________________
 function move_de_raton(e){	
 	if(IE){
@@ -389,7 +389,7 @@ function move_de_raton(e){
 }
 //____________________________________________________________________________
 //
-//	Redirecciona el evento onmousedown a la funciÛn de usuario especificada. 
+//	Redirecciona el evento onmousedown a la funci√≥n de usuario especificada. 
 //____________________________________________________________________________
 document.onmousedown = click_de_raton; // Redefine el evento onmousedown
 document.onmousemove = move_de_raton; // Redefine el evento onmousedown

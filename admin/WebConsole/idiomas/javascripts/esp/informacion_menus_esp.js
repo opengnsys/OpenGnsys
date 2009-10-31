@@ -1,9 +1,9 @@
-//____________________________________________________________________________
+ï»¿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: informacion_menus_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN.- Este item será eliminado. ¿ Está seguro ?";
-TbMsg[1]="El  item ha sido excluido correctamente de este menú";
+TbMsg[0]="ATENCIÃ“N.- Este item serÃ¡ eliminado. Â¿ EstÃ¡ seguro ?";
+TbMsg[1]="El  item ha sido excluido correctamente de este menÃº";
 TbMsg[2]="El  item ha sido modificado correctamente";

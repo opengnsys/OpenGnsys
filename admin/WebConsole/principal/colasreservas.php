@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: colasreservas.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Visualiza las reservas pendientes, confirmadas, denegadas y fecha y hora de la reserva
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -32,7 +32,7 @@ if (isset($_GET["tipocola"])) $tipocola=$_GET["tipocola"];
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 //________________________________________________________________________________________________________
 // Criterios por defecto
 if($ambito!="" && $idambito!="" && $nombreambito!="" && $tipocola!=""){ 
@@ -99,7 +99,7 @@ if (isset($_POST["situacion"])){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
@@ -135,13 +135,13 @@ echo '<INPUT type=hidden name=idambito value="'.$idambito.'">';
 echo '<INPUT type=hidden name=nombreambito value="'.$nombreambito.'">';
 echo '<INPUT type=hidden name=estadoreserva value="'.$estadoreserva.'">';
 echo '<INPUT type=hidden name=situacion value="'.$situacion.'">';
-echo CriteriosBusquedas(); // Opciones de búsqueda
+echo CriteriosBusquedas(); // Opciones de bÃºsqueda
 echo '</FORM>'.chr(13);
 
 echo '<DIV align=center >';
 echo '<span align=center class=subcabeceras><U>'.$TbMsg[11].':'.$textambito.'</U>,&nbsp'.$nombreambito.'</span>&nbsp;&nbsp;<IMG src="'.$urlimg.'"></span></DIV></p>';
 //________________________________________________________________________________________________________
-// Localiza las aulas pertenecientes al ámbito
+// Localiza las aulas pertenecientes al Ã¡mbito
 
 $cadenaaulas="";
 $cont_aulas=0; 
@@ -162,10 +162,10 @@ switch($ambito){
 			break;
 }
 //________________________________________________________________________________________________________
-// Proceso de selección de reservas
+// Proceso de selecciÃ³n de reservas
 $ClausulaWhere="";
 //________________________________________________________________________________________________________
-// Cuestion identificador del Centro que ha ejecutado la acción
+// Cuestion identificador del Centro que ha ejecutado la acciÃ³n
 $WhereCentroAccion="";
 $WhereCentroAccion='reservas.idcentro='.$idcentro;
 $ClausulaWhere.=" AND (".$WhereCentroAccion.")";
@@ -181,7 +181,7 @@ if($WhereEstadosReservas!=""){
 	$ClausulaWhere.=" AND (".$WhereEstadosReservas.")";
 }
 //________________________________________________________________________________________________________
-// Cuestion situación de la programación
+// Cuestion situaciÃ³n de la programaciÃ³n
 $WhereSituaciones="";
 for($i=0;$i<sizeof($wsituacion);$i++){
 	if (isset($wsituacion[$i]))
@@ -274,12 +274,12 @@ switch($ambito){
 			break;
 }
 
-// Creación del árbol
-$baseurlimg="../images/tsignos"; // Url de las imágenes de signo
+// CreaciÃ³n del Ã¡rbol
+$baseurlimg="../images/tsignos"; // Url de las imÃ¡genes de signo
 $clasedefault="texto_arbol";
 $titulotabla=$TbMsg[0];  
 $arbol=new ArbolVistaXml($cadenaXML,0,$baseurlimg,$clasedefault,2,20,270,2,$titulotabla);
-$salidaHTML=$arbol->CreaArbolVistaXml();  // Muestra  árbol
+$salidaHTML=$arbol->CreaArbolVistaXml();  // Muestra  Ã¡rbol
 echo "<BR>";
 echo "<DIV align=center width=100%>";
 echo "	 <TABLE align=center width=100%>";
@@ -323,16 +323,16 @@ function CreaReservasTemporal($cmd,$anno_c,$mes_desde,$mes_hasta,$dia_i,$dia_f,$
 	$rs->Cerrar();
 }
 //________________________________________________________________________________________________________
-// Función : FechasReservas
-// Descripción :
+// FunciÃ³n : FechasReservas
+// DescripciÃ³n :
 //		Devuelve una cadena de fechas separada por comas que son precisamente  las fechas que forman parte de una reserva concreta
 //	Parametros: 
-//		- anno_c: Un año determinado
+//		- anno_c: Un aÃ±o determinado
 //		- mes_desde: El mes desde que se considera la reserva
 //		- mes_hasta: El mes hasta que se considera la reserva
-//		- meses: Campo con información hexadecimal de los meses de la reserva ( la información contenida en el campo de la tabla con este nombre
+//		- meses: Campo con informaciÃ³n hexadecimal de los meses de la reserva ( la informaciÃ³n contenida en el campo de la tabla con este nombre
 //		- diario:  Idem para los dias de un mes
-//		- dias: idem para los nombres de los días
+//		- dias: idem para los nombres de los dÃ­as
 //		- semanas: Idem para las semanas
 //________________________________________________________________________________________________________
 function FechasReservas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
@@ -394,7 +394,7 @@ function FechasReservas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$sema
 	return($cadenafechas);
 }
 /*________________________________________________________________________________________________________
-	Recorrea los distintos ámbitos
+	Recorrea los distintos Ã¡mbitos
 ________________________________________________________________________________________________________*/
 function RecorreCentro($cmd){
 	global $AMBITO_CENTROS;
@@ -560,7 +560,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 
 	// Recorre reservas temporales
 	while (!$rs->EOF){
-		// Año
+		// AÃ±o
 		if($ganno<>$rs->campos["anno"]){
 			if($swd){
 				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes);
@@ -645,7 +645,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 			$HTMLhoras="";
 		}
 		
-		// Cuestion Ocupación
+		// Cuestion OcupaciÃ³n
 		$hexhoradesde=$rs->campos["horasini"];
 		$minutosdesde=$rs->campos["minutosini"];
 		if($minutosdesde==0) $minutosdesde="00";
@@ -675,7 +675,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 		$CntDia[(int)$rs->campos["ampmfin"]][(int)$horahasta][(int)$currentminutos]=0;
 
 
-		// Descripción de la reserva
+		// DescripciÃ³n de la reserva
 		$cadenaXML.='<RESERVA ';
 		// Atributos		
 		$cadenaXML.=' imagenodo="../images/iconos/reservas.gif"';
@@ -710,7 +710,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 
 		$nombreimagen=$rs->campos["nombreimagen"];
 		if(empty($nombreimagen) ) $nombreimagen=$TbMsg[23];
-		// Descripción de la imagen a restaurar
+		// DescripciÃ³n de la imagen a restaurar
 		$cadenaXML.='<IMAGEN ';
 		// Atributos		
 		$cadenaXML.=' imagenodo="../images/iconos/imagenes.gif"';
@@ -723,7 +723,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 
 		$nombretarea=$rs->campos["nombretarea"];
 		if(!empty($nombretarea) ){
-			// Descripción de la tarea a restaurar
+			// DescripciÃ³n de la tarea a restaurar
 			$cadenaXML.='<TAREA ';
 			// Atributos		
 			$cadenaXML.=' imagenodo="../images/iconos/tareas.gif"';
@@ -737,7 +737,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 
 		$nombretrabajo=$rs->campos["nombretrabajo"];
 		if(!empty($nombretrabajo) ){
-			// Descripción del  trabajo a restaurar
+			// DescripciÃ³n del  trabajo a restaurar
 			$cadenaXML.='<TRABAJO ';
 			// Atributos		
 			$cadenaXML.=' imagenodo="../images/iconos/trabajos.gif"';

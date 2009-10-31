@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: ejecutarscripts_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -11,9 +11,9 @@
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
 	$TbMsg[5]='Ejecutar script';
-	$TbMsg[6]='Ámbito';
-	$TbMsg[7]='Título';
+	$TbMsg[6]='Ãmbito';
+	$TbMsg[7]='TÃ­tulo';
 	$TbMsg[8]='Description';
-	$TbMsg[9]='Código Rembo-C';
-	$TbMsg[10]='Fichero de código';
+	$TbMsg[9]='CÃ³digo Rembo-C';
+	$TbMsg[10]='Fichero de cÃ³digo';
 ?>

@@ -1,13 +1,13 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: programaciones.php
-// Descripción :
-//		Gestiona la programación de tareas , trabajos y reservas
+// DescripciÃ³n :
+//		Gestiona la programaciÃ³n de tareas , trabajos y reservas
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -36,7 +36,7 @@ if (isset($_GET["tipoaccion"])) $tipoaccion=$_GET["tipoaccion"]; // Recoge param
 
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 //________________________________________________________________________________________________________
 $rs=new Recordset; // Recupero acciones anidadas
 $rs->Comando=&$cmd; 
@@ -79,7 +79,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
@@ -93,15 +93,15 @@ $mialmanaque= new Almanaque("tabla_meses");
 <INPUT type=hidden name=tipoaccion value="<? echo $tipoaccion?>">
 <CENTER>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-<!-- Tabla Tabla con los tiempos y los bloques de programación  -->
+<!-- Tabla Tabla con los tiempos y los bloques de programaciÃ³n  -->
 <TABLE align=center border=0 cellPadding=0 cellSpacing=0 width=100%>
 	<TR>
 		<TD>
-			<!--  Tabla con los años dias y semanas  -->
+			<!--  Tabla con los aÃ±os dias y semanas  -->
 			<TABLE  border=0 cellPadding=0 cellSpacing=0 width="100%"  style="height: 27px">
 				  <TR>
 					<TD valign=top>
-					<!-- Tabla con la suspension y los años dias y semanas -->
+					<!-- Tabla con la suspension y los aÃ±os dias y semanas -->
 						<TABLE border=0 cellPadding=0 cellSpacing=0>
 							<TR  class=opciones_ejecucion>
 								<TD colspan=6><INPUT   id=sw_sus type=checkbox<? echo $wsw_sus?> onclick="suspender_programacion(<?=$identificador?>,<?=$tipoaccion?>)"><SPAN style="COLOR:#999999"><?echo $TbMsg[1]?></SPAN></TD>
@@ -112,11 +112,11 @@ $mialmanaque= new Almanaque("tabla_meses");
 							<TR>
 								<TD valign=top>
 									<? 	$annodesde=date("Y");
-										echo $mialmanaque->Annos(($annodesde-4),($annodesde+4)); // Años?>
+										echo $mialmanaque->Annos(($annodesde-4),($annodesde+4)); // AÃ±os?>
 								</TD>
 								<TD width="150">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 								<TD  valign=top width="164">
-										<? echo $mialmanaque->Meses(); // Meses del año?>
+										<? echo $mialmanaque->Meses(); // Meses del aÃ±o?>
 								</TD>
 								<TD width="150">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
 								<TD  valign=top width="155">
@@ -150,7 +150,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 							</TR>
 							<TR>
 								<TD>
-									<? echo $mialmanaque->DiasMes(); // Días del mes?>
+									<? echo $mialmanaque->DiasMes(); // DÃ­as del mes?>
 								</TD>
 							</TR>
 						</TABLE>
@@ -219,7 +219,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 					<TD valign=top width="80">
 						<TABLE  border=0 class=tablaprogramacion border=0 cellPadding=1 cellSpacing=6  width="103">
 							<TR>
-								<TD  class=botonprogramacion id=bt_insertar style="cursor:hand;" onclick="alta_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">Añadir</TD>
+								<TD  class=botonprogramacion id=bt_insertar style="cursor:hand;" onclick="alta_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">AÃ±adir</TD>
 							</TR>
 							<TR>
 								<TD class=botonprogramacion id=bt_modificar style="color:#bbbcb9" onclick="modifica_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">Modificar</TD>

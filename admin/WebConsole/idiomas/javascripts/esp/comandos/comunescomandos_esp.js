@@ -1,9 +1,9 @@
-//________________________________________________________________________________________________________
+ï»¿//________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: comunescomandos_esp.js (Común a todos los comandos)
-//	Idioma: Español 
+//	Fichero de idiomas javascripts: comunescomandos_esp.js (ComÃºn a todos los comandos)
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 CTbMsg=new Array;
-CTbMsg[0]="ATENCIÓN.- Acción cancelada, puede volver en cualquier momento a esta pantalla para ejecutar este Comando";
-CTbMsg[1]="ATENCIÓN: Ha ocurrido un error al intentar registrar este Comando";
+CTbMsg[0]="ATENCIÃ“N.- AcciÃ³n cancelada, puede volver en cualquier momento a esta pantalla para ejecutar este Comando";
+CTbMsg[1]="ATENCIÃ“N: Ha ocurrido un error al intentar registrar este Comando";
 CTbMsg[2]="El comando se ha registrado correctamente";

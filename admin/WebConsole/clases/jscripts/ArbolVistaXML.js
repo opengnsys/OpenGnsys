@@ -1,13 +1,13 @@
-// ************************************************************************************************
+ï»¿// ************************************************************************************************
 //  Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
 // Fichero: ArbolVistaXML.js
 // Este fichero implementa las funciones javascript de la clase ArbolVistaXML.php
 // *************************************************************************************************
-var botonraton=null;					//  Botón presionado
+var botonraton=null;					//  BotÃ³n presionado
 var currentNodo="";					// Nodo actual
-var currentpathimg="";				//	Path por defecto de las imágenes de signo
+var currentpathimg="";				//	Path por defecto de las imÃ¡genes de signo
 var gLiteralcolor;						// Color nodo vista para restablecer
 var gLiteralbackground;			// Fondo color nodo vista para restablecer
 //________________________________________________________________________________________________________
@@ -23,7 +23,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		this.ArbolHijos=null;					// El arbol conteniendo todos los nodos hijos ( Si nulo no tiene hijos)(Objeto TR)
 		this.NodoPadre=null;				// El nodo padre (Objeto TR que contiene el objeto TABLE celda vista final, del padre)
 		this.ArbolHijosNodoPadre=null;		// El arbol del padre conteniendo los nodos hijos(Objeto TR)
-		this.siguienteHermano=null;	// El nodo hermano siguiente ( Si nulo es el último hermano)(Objeto TR)
+		this.siguienteHermano=null;	// El nodo hermano siguiente ( Si nulo es el Ãºltimo hermano)(Objeto TR)
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el estado del nodo 0: Contraido 1:Desplegado
@@ -89,7 +89,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		}
 		//____________________________________________________________________________
 		//	
-		//	 Devuelve true si el nodo es el último, false en caso contrario
+		//	 Devuelve true si el nodo es el Ãºltimo, false en caso contrario
 		//____________________________________________________________________________
 		this.UltimoHermano= function(){
 					return(this.siguienteHermano==null);
@@ -154,14 +154,14 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
         o=o.nextSibling
         while(o!=null && o.nodeType!=1 )
            o=o.nextSibling
-		if(o==null){ // Es el último hermano y no tiene hijos
+		if(o==null){ // Es el Ãºltimo hermano y no tiene hijos
 			nodo.ArbolHijos=null;	
 			nodo.siguienteHermano=null;
 			return(nodo);
 		}
 		var auxsplit=o.getAttribute("id");
 		var idTRhijo=auxsplit.split("-") [0];
-		if(idTR==idTRhijo) { // El nodo no tiene hiijos y no es último hermano
+		if(idTR==idTRhijo) { // El nodo no tiene hiijos y no es Ãºltimo hermano
 			nodo.ArbolHijos=null;	
 			nodo.siguienteHermano=o; 
 			return(nodo);
@@ -174,11 +174,11 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 			nodo.siguienteHermano=null;
 			return(nodo);
 		}
-		nodo.siguienteHermano=o; // El nodo  tiene hijos y  no es último hermano
+		nodo.siguienteHermano=o; // El nodo  tiene hijos y  no es Ãºltimo hermano
 		return(nodo);
 	}
 //-----------------------------------------------------------------------------------------------------------------------
-//	 Gestiona el despliegue y contracción de nodovs
+//	 Gestiona el despliegue y contracciÃ³n de nodovs
 //-----------------------------------------------------------------------------------------------------------------------
 function clickNodo(nodov,pathimg){
         var signoimg=nodov.imgsigno.getAttribute("value");
@@ -210,7 +210,7 @@ function clickNodo(nodov,pathimg){
 		}
 }
 //-----------------------------------------------------------------------------------------------------------------------
-//	 Gestiona el despliegue y contracción de nodos a través de la imagen del nodo
+//	 Gestiona el despliegue y contracciÃ³n de nodos a travÃ©s de la imagen del nodo
 //-----------------------------------------------------------------------------------------------------------------------
 function clickImagenSigno(oIMG,pathimg){
 	currentpathimg=pathimg;
@@ -220,7 +220,7 @@ function clickImagenSigno(oIMG,pathimg){
 		resalta(nodov);
 }
 //-----------------------------------------------------------------------------------------------------------------------
-//	 Gestiona el despliegue y contracción de nodos a través del literal del nodo
+//	 Gestiona el despliegue y contracciÃ³n de nodos a travÃ©s del literal del nodo
 //-----------------------------------------------------------------------------------------------------------------------
 function clickLiteralNodo(oLIT,pathimg){
 	var nodov=TomaDatosNodo(oLIT);
@@ -302,9 +302,9 @@ function DespliegaNodo(lit,id){
 }
 //____________________________________________________________________________
 //	
-//	Inserta un nodo en el árbol
+//	Inserta un nodo en el Ã¡rbol
 // Especificaciones:
-//		Los parámetros recibidos son:
+//		Los parÃ¡metros recibidos son:
 //			- nodov: Nodo vista
 //			- tablanodo: Tabla nodo generada para la nueva celda vista
 //____________________________________________________________________________
@@ -352,8 +352,8 @@ function InsertaNodo(nodov,tablanodo){
 }
 //____________________________________________________________________________
 //	
-//	Monta y devuelve el código HTML de la estructura de una celda vista
-//		Los parámetros recibidos son:
+//	Monta y devuelve el cÃ³digo HTML de la estructura de una celda vista
+//		Los parÃ¡metros recibidos son:
 //			- pivoteNodo: Nodo vista
 //			- tablanodo: Tabla nodo generada para la nueva celda vista
 //____________________________________________________________________________
@@ -388,7 +388,7 @@ function CreaCeldaVista(nodov,tablanodo){
 //____________________________________________________________________________
 //	
 //	 Crea un nuevo nodo Hijo (objeto TABLE)
-//	 Parámetros:
+//	 ParÃ¡metros:
 //			- nodov: Un nodo vista
 //____________________________________________________________________________
 function CreaNodoHijo(nodov){
@@ -410,9 +410,9 @@ function CreaNodoHijo(nodov){
 }
 //____________________________________________________________________________
 //	
-//	Inserta un nodo en el árbol
+//	Inserta un nodo en el Ã¡rbol
 // Especificaciones:
-//		Los parámetros recibidos son:
+//		Los parÃ¡metros recibidos son:
 //			- nodov: Nodo vista
 //____________________________________________________________________________
 function EliminaNodo(nodov){
@@ -425,13 +425,13 @@ function EliminaNodo(nodov){
 	pn.removeChild(nodov.Nodo);	// Elimina Nodo
 
 	var antHermano=pn.lastChild
-	if(antHermano==null){ // El nodo padre no tiene más hijos
+	if(antHermano==null){ // El nodo padre no tiene mÃ¡s hijos
 			var pn=papa.ArbolHijos.parentNode; // Nodo padre
 			pn.removeChild(papa.ArbolHijos); // Elimina arbol hijo
 			ChgSignoPadreEliminaNodo(papa.imgsigno); 
 	}
 	else{
-		if(swuh){ // Si era el último hermano ...
+		if(swuh){ // Si era el Ãºltimo hermano ...
 			var auxsplit=antHermano.getAttribute("id");
 			var idTR=auxsplit.split("-") [0];
 			if(idTR=="TRNodoHijo"){
@@ -534,7 +534,7 @@ function ChgSignoNivel(arbolv,n){
 }
 //____________________________________________________________________________
 //
-//	Se ejecuta cada vez que se mueve el puntero del ratón. Se usa para desmarca
+//	Se ejecuta cada vez que se mueve el puntero del ratÃ³n. Se usa para desmarca
 //	cualquier item de menu contextual que estuviese activo
 //____________________________________________________________________________
 function click_de_raton_prov(e){
@@ -557,7 +557,7 @@ var IE=(navigator.appName=="Microsoft Internet Explorer");
 var NS=(navigator.appName=="Netscape");
 //____________________________________________________________________________
 //
-//	Redirecciona el evento onmousedown a la función de usuario especificada. 
+//	Redirecciona el evento onmousedown a la funciÃ³n de usuario especificada. 
 //____________________________________________________________________________
 document.onmousedown = click_de_raton_prov; // Redefine el evento onmousedown
  if(NS) document.captureEvents(Event.MOUSEDOWN | Event.MOUSEMOVE | Event.MOUSEUP)

@@ -1,4 +1,4 @@
-<?
+﻿<?
 echo '<TABLE align=center>';
 echo '<TR>';
 echo '<TD><A href=#><IMG border=0 src="../images/boton_cancelar.gif"  onclick="cancelar()"></A></TD>';

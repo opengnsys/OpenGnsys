@@ -1,7 +1,7 @@
-//____________________________________________________________________________
+﻿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: incrementalcomponente_soft_esp.js 
-//	Idioma: Espa�ol 
+//	Idioma: Español 
 //____________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="Este software incremental ha sido incluido en esta imagen correctamente";

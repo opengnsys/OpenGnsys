@@ -1,28 +1,28 @@
-//________________________________________________________________________________________________________
+ï»¿//________________________________________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: colasacciones_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN: Esta acción ha finalizado de forma automática y  no puede cambiarse su resultado manualmente";
-TbMsg[1]="ATENCIÓN: Esta acción ha finalizado y no se puede cambiar su estado";
-TbMsg[2]="ATENCIÓN: Esta acción ha terminado ya de forma manual";
+TbMsg[0]="ATENCIÃ“N: Esta acciÃ³n ha finalizado de forma automÃ¡tica y  no puede cambiarse su resultado manualmente";
+TbMsg[1]="ATENCIÃ“N: Esta acciÃ³n ha finalizado y no se puede cambiar su estado";
+TbMsg[2]="ATENCIÃ“N: Esta acciÃ³n ha terminado ya de forma manual";
 
-TbMsg[3]="ATENCIÓN: Esta acción ha sido ya cancelada";
-TbMsg[4]="ATENCIÓN: Esta acción está ya iniciada";
-TbMsg[5]="ATENCIÓN: Esta acción está ya parada";
-TbMsg[6]="ATENCIÓN: Esta acción ha sido ya eliminada";
+TbMsg[3]="ATENCIÃ“N: Esta acciÃ³n ha sido ya cancelada";
+TbMsg[4]="ATENCIÃ“N: Esta acciÃ³n estÃ¡ ya iniciada";
+TbMsg[5]="ATENCIÃ“N: Esta acciÃ³n estÃ¡ ya parada";
+TbMsg[6]="ATENCIÃ“N: Esta acciÃ³n ha sido ya eliminada";
 
-TbMsg[7]="ATENCIÓN: El resultado final de esta acción ha sido modificada correctamente ";
-TbMsg[8]="ATENCIÓN: El estado de esta acción ha sido modificada correctamente ";
-TbMsg[9]="ATENCIÓN: Esta acción ha sido correctamente reiniciada";
-TbMsg[10]="ATENCIÓN: Esta acción ha sido eliminada correctamente";
-TbMsg[11]="ATENCIÓN: Esta acción ha finalizado con éxito ";
+TbMsg[7]="ATENCIÃ“N: El resultado final de esta acciÃ³n ha sido modificada correctamente ";
+TbMsg[8]="ATENCIÃ“N: El estado de esta acciÃ³n ha sido modificada correctamente ";
+TbMsg[9]="ATENCIÃ“N: Esta acciÃ³n ha sido correctamente reiniciada";
+TbMsg[10]="ATENCIÃ“N: Esta acciÃ³n ha sido eliminada correctamente";
+TbMsg[11]="ATENCIÃ“N: Esta acciÃ³n ha finalizado con Ã©xito ";
 
-TbMsg[12]="ATENCIÓN: Esta notificación ha sido ya eliminada o reiniciada";
-TbMsg[13]="ATENCIÓN: Esta notificación ha sido ya reiniciada";
-TbMsg[14]="ATENCIÓN: Ya se ha notificado con éxitob.";
-TbMsg[15]="ATENCIÓN: Ya se ha notificado con errores.";
+TbMsg[12]="ATENCIÃ“N: Esta notificaciÃ³n ha sido ya eliminada o reiniciada";
+TbMsg[13]="ATENCIÃ“N: Esta notificaciÃ³n ha sido ya reiniciada";
+TbMsg[14]="ATENCIÃ“N: Ya se ha notificado con Ã©xitob.";
+TbMsg[15]="ATENCIÃ“N: Ya se ha notificado con errores.";
 
-TbMsg[16]="ATENCIÓN: El resultado de esta notificación ha sido modificado correctamente ";
-TbMsg[17]="ATENCIÓN: Esta notificación ha sido correctamente reiniciada";
+TbMsg[16]="ATENCIÃ“N: El resultado de esta notificaciÃ³n ha sido modificado correctamente ";
+TbMsg[17]="ATENCIÃ“N: Esta notificaciÃ³n ha sido correctamente reiniciada";

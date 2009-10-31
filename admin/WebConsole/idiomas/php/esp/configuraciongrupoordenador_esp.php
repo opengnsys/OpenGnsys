@@ -1,16 +1,16 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: configuraciongrupoordenador_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]='Configuración Ordenadores';
-$TbMsg[1]='Características del Grupo';
+$TbMsg[0]='ConfiguraciÃ³n Ordenadores';
+$TbMsg[1]='CaracterÃ­sticas del Grupo';
 $TbMsg[2]="Nombre del Grupo";
-$TbMsg[3]='Datos de la configuración';
-$TbMsg[4]='Partición';
+$TbMsg[3]='Datos de la configuraciÃ³n';
+$TbMsg[4]='ParticiÃ³n';
 $TbMsg[5]='Nombre S.O.';
-$TbMsg[6]='Tamaño';
+$TbMsg[6]='TamaÃ±o';
 $TbMsg[7]='Ordenadores';
 ?>

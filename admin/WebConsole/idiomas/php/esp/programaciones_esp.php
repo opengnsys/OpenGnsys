@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: programaciones_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 // Literales de los tipo de acciones
 $LITEJECUCION_COMANDO="Comandos";
@@ -15,5 +15,5 @@ $TbMsg=array();
  
 $TbMsg[0]="Programaciones";
 $TbMsg[1]="Suspender temporalmente todos los bloques programados";
-$TbMsg[2]="Descripción del bloque";
+$TbMsg[2]="DescripciÃ³n del bloque";
 ?>

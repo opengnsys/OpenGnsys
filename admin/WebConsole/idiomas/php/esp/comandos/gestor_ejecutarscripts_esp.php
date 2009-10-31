@@ -1,13 +1,13 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: gestor_ejecutarscripts_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[1]='"ATENCIÓN: El Comando Ejecutar Scripts has sido registrado correctamente"';
-	$TbMsg[2]='"ATENCIÓN: Hay algún problema para ejecutar el script"';
-	$TbMsg[3]='"ATENCIÓN: El fichero no tiene la extensión .rbc"';
-	$TbMsg[4]='"ATENCIÓN: El fichero no contiene código Rembo-C para ejecutar"';
-	$TbMsg[5]='"ATENCIÓN: Hay algún problema para salvar el fichero de script"';
+	$TbMsg[1]='"ATENCIÃ“N: El Comando Ejecutar Scripts has sido registrado correctamente"';
+	$TbMsg[2]='"ATENCIÃ“N: Hay algÃºn problema para ejecutar el script"';
+	$TbMsg[3]='"ATENCIÃ“N: El fichero no tiene la extensiÃ³n .rbc"';
+	$TbMsg[4]='"ATENCIÃ“N: El fichero no contiene cÃ³digo Rembo-C para ejecutar"';
+	$TbMsg[5]='"ATENCIÃ“N: Hay algÃºn problema para salvar el fichero de script"';
 ?>

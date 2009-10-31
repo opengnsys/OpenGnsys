@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Mayo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Mayo-2005
 // Nombre del fichero: gestor_procedimientos.php
-// Descripción :
-//		Gestiona la ejecución de procedimientos
+// DescripciÃ³n :
+//		Gestiona la ejecuciÃ³n de procedimientos
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -22,7 +22,7 @@ $opcion=0; // Inicializa parametros
 $idprocedimiento=0; 
 $ambito=0; 
 $idambito=0; 
-$swc=0; // switch de cliente, esta pagina la llama el cliente a través del browser 
+$swc=0; // switch de cliente, esta pagina la llama el cliente a travÃ©s del browser 
 
 if (isset($_GET["idprocedimiento"])) $idprocedimiento=$_GET["idprocedimiento"];
 if (isset($_GET["ambito"])) $ambito=$_GET["ambito"]; 
@@ -66,7 +66,7 @@ else{
 	}
 	else{
 		echo '<SCRIPT language="javascript">'.chr(13);
-		echo 'alert("***ATENCIÓN:El item NO se ha podido ejecutar");'.chr(13);
+		echo 'alert("***ATENCIÃ“N:El item NO se ha podido ejecutar");'.chr(13);
 		echo 'location.href="../varios/menucliente.php?iph='.$_SESSION["ogCliente"].";".chr(13);
 		echo '</SCRIPT>';
 	}
@@ -106,7 +106,7 @@ function Gestiona(){
 	$tabla_comandos="";
 	$cont_comandos=0;
 
-	RecopilaIpesMacs($cmd,$ambito,$idambito); // Recopila Ipes para la variable parámetros
+	RecopilaIpesMacs($cmd,$ambito,$idambito); // Recopila Ipes para la variable parÃ¡metros
 
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM procedimientos_comandos WHERE idprocedimiento=".$idprocedimiento;
@@ -128,7 +128,7 @@ function Gestiona(){
 	}
 	$rs->Cerrar();
 
-	//Creación parametros para inserción
+	//CreaciÃ³n parametros para inserciÃ³n
 	$cmd->CreaParametro("@tipoaccion","",1);
 	$cmd->CreaParametro("@idtipoaccion",0,1);
 	$cmd->CreaParametro("@cateaccion",$PROCESOS,1);
@@ -161,7 +161,7 @@ function Gestiona(){
 		$tbComandos["parametros"].="ids=".$cmd->Autonumerico().chr(13);
 
 		$shidra=new SockHidra($servidorhidra,$hidraport); 
-		if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+		if ($shidra->conectar()){ // Se ha establecido la conexiÃ³n con el servidor hidra
 			$shidra->envia_comando($tbComandos["parametros"]);
 			$shidra->desconectar();
 		}

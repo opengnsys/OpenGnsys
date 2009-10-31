@@ -1,17 +1,17 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_servidoresdhcp_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sin Opción";
+$TbMsg[0]="Sin OpciÃ³n";
 $TbMsg[1]="Insertar";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestión Servidores Dhcp";
+$TbMsg[4]="GestiÃ³n Servidores Dhcp";
 $TbMsg[5]="Nombre del Servidor";
-$TbMsg[6]="Dirección IP";
+$TbMsg[6]="DirecciÃ³n IP";
 $TbMsg[7]="Comentarios"; 
 
 ?>

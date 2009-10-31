@@ -1,18 +1,18 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_aulas_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sin Opción";
+$TbMsg[0]="Sin OpciÃ³n";
 $TbMsg[1]="Insertar";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestión Aulas";
+$TbMsg[4]="GestiÃ³n Aulas";
 $TbMsg[5]="Nombre";
-$TbMsg[6]="Ubicación";
-$TbMsg[7]="Canón";
+$TbMsg[6]="UbicaciÃ³n";
+$TbMsg[7]="CanÃ³n";
 $TbMsg[8]="Pizarra";
 $TbMsg[9]="Puestos";
 $TbMsg[10]="Url Imagen";

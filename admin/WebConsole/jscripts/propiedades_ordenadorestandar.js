@@ -1,17 +1,17 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: propiedades_ordenadorestandar.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero propiedades_ordenadorestandar.php
 // *************************************************************************************************************************************************
 var wpadre=window.parent; // Toma frame padre
 var farbol=wpadre.frames["frame_arbol"];
 //________________________________________________________________________________________________________
 //	
-//	Cancela la edición 
+//	Cancela la ediciÃ³n 
 //________________________________________________________________________________________________________
 function cancelar(){
 	selfclose();
@@ -23,11 +23,11 @@ function resultado_ordenadorestandar(resul,descrierror){
 }
 //________________________________________________________________________________________________________
 //	
-//		Devuelve el resultado de modificar algún dato de un registro
+//		Devuelve el resultado de modificar algÃºn dato de un registro
 //		Especificaciones:
-//		Los parámetros recibidos son:
-//			- resul: resultado de la operación de inserción ( true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//		Los parÃ¡metros recibidos son:
+//			- resul: resultado de la operaciÃ³n de inserciÃ³n ( true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- lit: Nuevo nombre del grupo
 //________________________________________________________________________________________________________
 function resultado_modificar_ordenadores(resul,descrierror,lit){
@@ -38,9 +38,9 @@ function resultado_modificar_ordenadores(resul,descrierror,lit){
 //	
 //		Devuelve el resultado de eliminar un registro
 //		Especificaciones:
-//		Los parámetros recibidos son:
-//			- resul: resultado de la operación de inserción ( true si tuvo éxito)
-//			- descrierror: Descripción del error en su caso
+//		Los parÃ¡metros recibidos son:
+//			- resul: resultado de la operaciÃ³n de inserciÃ³n ( true si tuvo Ã©xito)
+//			- descrierror: DescripciÃ³n del error en su caso
 //			- id: Identificador del registro que se quiso modificar
 //________________________________________________________________________________________________________
 function resultado_eliminar_ordenadores(resul,descrierror,id){
@@ -53,13 +53,13 @@ function selfclose(){
 }
 //________________________________________________________________________________________________________
 //	
-//	Confirma la edición 
+//	Confirma la ediciÃ³n 
 //________________________________________________________________________________________________________
 function confirmar(ida){
 	var wurl="../gestores/gestor_ordenadorestandar.php?idaula="+ida
 	var valor
 	var o
-		var nit=document.forms[0].elements.length // Prepara la cadena de parámetros metodo get
+		var nit=document.forms[0].elements.length // Prepara la cadena de parÃ¡metros metodo get
 		for (i=0;i<nit;i++){
 			o=document.forms[0].elements[i]
 		valor=o.value
@@ -72,5 +72,5 @@ function confirmar(ida){
 		wurl+="&"+o.name+"="+valor
 	}
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }

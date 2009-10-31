@@ -1,10 +1,10 @@
-//____________________________________________________________________________
+ï»¿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: trabajostareas_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //____________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="La Tarea ha sido incluida correctamente en este trabajo";
-TbMsg[1]="ATENCIÓN: Debe introducir un número de orden";
+TbMsg[1]="ATENCIÃ“N: Debe introducir un nÃºmero de orden";
 TbMsg[2]="La Tarea ha sido excluida correctamente de este trabajo";
 TbMsg[3]="La Tarea ha sido modificada correctamente";

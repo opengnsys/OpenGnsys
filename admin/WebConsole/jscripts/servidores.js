@@ -1,12 +1,12 @@
-// *****************************************************************************************************************************************************
+ï»¿// *****************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: servidores.js
 // Este fichero implementa las funciones javascript del fichero servidores.php
 // *****************************************************************************************************************************************************
 //___________________________________________________________________________________________________________
 //	
-//	Muestra información sobre un servidor rembo
+//	Muestra informaciÃ³n sobre un servidor rembo
 //___________________________________________________________________________________________________________
 function muestra_inforServidorrembo(){
 	reset_contextual(-1,-1)
@@ -17,7 +17,7 @@ function muestra_inforServidorrembo(){
 }
 //___________________________________________________________________________________________________________
 //	
-//	Muestra información sobre un servidor dhcp
+//	Muestra informaciÃ³n sobre un servidor dhcp
 //___________________________________________________________________________________________________________
 function muestra_inforServidordhcp(){
 	reset_contextual(-1,-1)

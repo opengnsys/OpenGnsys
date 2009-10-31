@@ -1,8 +1,8 @@
-//____________________________________________________________________________
+ï»¿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: ejecutarprocedimientos_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN.- El Procedimiento será ejecutado aplicándolo a este ámbito. ¿ Está seguro ?";
-TbMsg[1]="El Procedimiento ha sido iniciado correctamente para este ámbito";
+TbMsg[0]="ATENCIÃ“N.- El Procedimiento serÃ¡ ejecutado aplicÃ¡ndolo a este Ã¡mbito. Â¿ EstÃ¡ seguro ?";
+TbMsg[1]="El Procedimiento ha sido iniciado correctamente para este Ã¡mbito";

@@ -1,10 +1,10 @@
-//________________________________________________________________________________________________________
+ï»¿//________________________________________________________________________________________________________
 //
 //	Fichero de idiomas javascripts: ejecutarscripts_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN: Se va a ejecutar código Bash ¿ Está seguro ?";
-TbMsg[1]="Debe introducir alguna linea de código Bash o elegir un fichero de código";
-TbMsg[2]="Debe introducir el título del Script si quiere hacer un seguimiento de este Comando o guardarlo como procedimiento o tarea";
-TbMsg[3]="Debe introducir la descripción del Script si quiere hacer un seguimiento de este Comando o guardarlo como procedimiento o tarea";
+TbMsg[0]="ATENCIÃ“N: Se va a ejecutar cÃ³digo Bash Â¿ EstÃ¡ seguro ?";
+TbMsg[1]="Debe introducir alguna linea de cÃ³digo Bash o elegir un fichero de cÃ³digo";
+TbMsg[2]="Debe introducir el tÃ­tulo del Script si quiere hacer un seguimiento de este Comando o guardarlo como procedimiento o tarea";
+TbMsg[3]="Debe introducir la descripciÃ³n del Script si quiere hacer un seguimiento de este Comando o guardarlo como procedimiento o tarea";

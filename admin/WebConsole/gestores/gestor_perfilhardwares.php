@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_perfilhardwares.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de perfileshard
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -118,11 +118,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO perfileshard (descripcion,comentarios,idcentro,grupoid) VALUES (@descripcion,@comentarios,@idcentro,@grupoid)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idperfilhard=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_perfileshard($idperfilhard,$descripcion);
 				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}

@@ -1,17 +1,17 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: incorporaordenadores_esp.php (Comandos)
-//	Idioma: Español
+//	Idioma: EspaÃ±ol
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Incorporación de Ordenadores';
+	$TbMsg[0]='IncorporaciÃ³n de Ordenadores';
 	$TbMsg[1]='Aula';
 	$TbMsg[2]='Fichero';
-	$TbMsg[3]='ATENCIÓN: Ha habido algún problema al incorporar ordenadores desde el fichero';
-	$TbMsg[4]='ATENCIÓN: El fichero está vacio';
-	$TbMsg[5]='ATENCIÓN: El fichero no contiene información con el formato necesario para incorporar ordenadores';
-	$TbMsg[6]='ATENCIÓN: Hay algún problema para salvar el fichero';
+	$TbMsg[3]='ATENCIÃ“N: Ha habido algÃºn problema al incorporar ordenadores desde el fichero';
+	$TbMsg[4]='ATENCIÃ“N: El fichero estÃ¡ vacio';
+	$TbMsg[5]='ATENCIÃ“N: El fichero no contiene informaciÃ³n con el formato necesario para incorporar ordenadores';
+	$TbMsg[6]='ATENCIÃ“N: Hay algÃºn problema para salvar el fichero';
 	$TbMsg[7]='Se han incorporado correctamente ordenadores desde fichero';
 	$TbMsg[8]='Contenido';
 ?>

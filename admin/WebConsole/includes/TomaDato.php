@@ -1,27 +1,27 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon.
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon.
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: TomaDato.php
-// Descripción :
+// DescripciÃ³n :
 //			Recupera un dato de una tabla
 //	Parametros: 
-//		- cmd:Un comando ya operativo (con conexión abierta)  
-//		- idcentro:Centro al que pertene el registro donde se encuentra el dato a recuperar, será 0 para no contemplar este dato
+//		- cmd:Un comando ya operativo (con conexiÃ³n abierta)  
+//		- idcentro:Centro al que pertene el registro donde se encuentra el dato a recuperar, serÃ¡ 0 para no contemplar este dato
 //		- nombretabla: Nombre de la tabla origen de los datos
 //		- identificador: Valor del campo identificador del registro (cadena separada por comas si hay varios)
 //		- nombreid: Nombre del campo identificador del registro (cadena separada por comas si hay varios)
 //		- nombreliteral: Nombre del campo que se quiere recuperar
-//		- swid: Indica 0= El identificador es tipo alfanumérico	1= EI identificador es tipo numérico ( valor por defecto)
-//	 (*) En el caso de haber varios identificadores todos deben ser del mismo tipo  ( numérico o alfanumérico)
+//		- swid: Indica 0= El identificador es tipo alfanumÃ©rico	1= EI identificador es tipo numÃ©rico ( valor por defecto)
+//	 (*) En el caso de haber varios identificadores todos deben ser del mismo tipo  ( numÃ©rico o alfanumÃ©rico)
 //*************************************************************************************************************************************************
 function TomaDato($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombreliteral,$swid=1){
 	$Dato="";
 	if (empty($identificador)) return($Dato);
 
-	if($swid==0)	$ch='"';	else $ch=""; // Caracter comillas para campos alfanuméricos
+	if($swid==0)	$ch='"';	else $ch=""; // Caracter comillas para campos alfanumÃ©ricos
 	$auxidentificador=split(";",$identificador);
 	$auxnombreid=split(";",$nombreid);
 

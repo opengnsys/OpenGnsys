@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: imagenes.php
-// Descripción : 
-//		Administra imágenes de un determinado Centro
+// DescripciÃ³n : 
+//		Administra imÃ¡genes de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -19,17 +19,17 @@ include_once("../idiomas/php/".$idioma."/imagenes_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2');  // Error de conexiÃ³n con servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idcentro); // Crea el arbol XML con todos las acciones registradas en el Centro
-// Creación del árbol
-$baseurlimg="../images/signos"; // Url de las imágenes de signo
-$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+// CreaciÃ³n del Ã¡rbol
+$baseurlimg="../images/signos"; // Url de las imÃ¡genes de signo
+$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
@@ -44,15 +44,15 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 <BODY OnContextMenu="return false">
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	// Crea árbol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	// Crea Ã¡rbol (HTML) a partir del XML
 $flotante=new MenuContextual();			// Crea objeto MenuContextual
 
-// Crea contextual de las imágenes
+// Crea contextual de las imÃ¡genes
  $XMLcontextual=CreacontextualXMLImagenes();
  echo $flotante->CreaMenuContextual($XMLcontextual);
- $XMLcontextual=ContextualXMLGruposImagenes(); // Grupos de imágenes
+ $XMLcontextual=ContextualXMLGruposImagenes(); // Grupos de imÃ¡genes
  echo $flotante->CreaMenuContextual($XMLcontextual);
- $XMLcontextual=CreacontextualXMLImagen(); // Imágenes
+ $XMLcontextual=CreacontextualXMLImagen(); // ImÃ¡genes
  echo $flotante->CreaMenuContextual($XMLcontextual);
 //________________________________________________________________________________________________________
 include_once("../includes/iframecomun.php");
@@ -62,9 +62,9 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 // *************************************************************************************************************************************************
-//	Devuelve una cadena con formato XML con toda la información de las imáges registradas en un Centro concreto
+//	Devuelve una cadena con formato XML con toda la informaciÃ³n de las imÃ¡ges registradas en un Centro concreto
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexión abierta)  
+//		- cmd:Una comando ya operativo ( con conexiÃ³n abierta)  
 //		- idcentro: El identificador del centro
 //________________________________________________________________________________________________________
 function CreaArbol($cmd,$idcentro){
@@ -132,7 +132,7 @@ function SubarbolXML_Imagenes($cmd,$idcentro,$grupoid){
 }
 //________________________________________________________________________________________________________
 //
-//	Menús Contextuales
+//	MenÃºs Contextuales
 //________________________________________________________________________________________________________
 function CreacontextualXMLImagenes(){
 	global $AMBITO_IMAGENES;

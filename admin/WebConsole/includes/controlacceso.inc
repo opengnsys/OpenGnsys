@@ -1,4 +1,4 @@
-<?
+﻿<?
 $wer="http://10.1.15.3/ogAdmWebCon/pagerror.php"; // P�ina de redireccionamiento de errores
 $wac="http://10.1.15.3/ogAdmWebCon/acceso.php"; // P�ina de login de la aplicaci�
 //========================================================================================================

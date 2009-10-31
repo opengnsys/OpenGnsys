@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: accionmenu.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero accionmenu.php
 // *************************************************************************************************************************************************
 var  currentedicion=null;
@@ -45,11 +45,11 @@ function gestion_acciones(id,o,op){
 	currentidmenu=id // Guarda identificdor del menu
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	currentedicion=document.fdatos.tipoedicion.value
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 function resultado_insertar_accionmenu(resul,descrierror,nwid,tablanodo){
-	if (!resul){ // Ha habido algún error en la inserción
+	if (!resul){ // Ha habido algÃºn error en la inserciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -60,7 +60,7 @@ function resultado_insertar_accionmenu(resul,descrierror,nwid,tablanodo){
 }
 //________________________________________________________________________________________________________
 function resultado_eliminar_accionmenu(resul,descrierror,idp,idh){
-	if (!resul){ // Ha habido algún error en la eliminación
+	if (!resul){ // Ha habido algÃºn error en la eliminaciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -73,7 +73,7 @@ function resultado_eliminar_accionmenu(resul,descrierror,idp,idh){
 }
 //________________________________________________________________________________________________________
 function resultado_modificar_accionmenu(resul,descrierror,idp,idh){
-	if (!resul){ // Ha habido algún error en la eliminación
+	if (!resul){ // Ha habido algÃºn error en la eliminaciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -111,7 +111,7 @@ function ActualizarItems(tipoaccion,idtipoaccion,id){
 	var wurl="../gestores/gestor_accionmenu.php?opcion="+op+"&idtipoaccion="+idtipoaccion+"&idmenu="+idmenu+"&tipoaccion="+tipoaccion+"&tipoitem="+tipoitem	+"&idurlimg="+idurlimg+"&descripitem="+descripitem+"&orden="+orden
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	currentedicion=document.fdatos.tipoedicion.value
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 function ActualizarItem(tipoaccion,idtipoaccion,id){
@@ -138,5 +138,5 @@ function ActualizarItem(tipoaccion,idtipoaccion,id){
 	var wurl="../gestores/gestor_accionmenu.php?opcion="+op+"&idtipoaccion="+idtipoaccion+"&idmenu="+idmenu+"&tipoaccion="+tipoaccion+"&tipoitem="+tipoitem	+"&idurlimg="+idurlimg+"&descripitem="+descripitem+"&orden="+orden
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	currentedicion=document.fdatos.tipoedicion.value
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }

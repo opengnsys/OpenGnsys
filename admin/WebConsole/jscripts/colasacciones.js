@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+Ôªø// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn:2003-2004
-// Fecha ⁄ltima modificaciÛn: Febrero-2005
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n:2003-2004
+// Fecha √öltima modificaci√≥n: Febrero-2005
 // Nombre del fichero: colasacciones.js
-// DescripciÛn : 
+// Descripci√≥n : 
 //		Este fichero implementa las funciones javascript del fichero colasacciones.php
 // *************************************************************************************************************************************************
 	var currentNotTR=null;  
@@ -41,8 +41,8 @@
 	var op_modificar_mulestado=9;
 	var op_reiniciar_mulaccion=10;
 
-	var ACCION_ELIMINADA=-1; // AcciÛn eliminada
-	var ACCION_REINICIADA=-2; // AcciÛn reiniciada
+	var ACCION_ELIMINADA=-1; // Acci√≥n eliminada
+	var ACCION_REINICIADA=-2; // Acci√≥n reiniciada
 
 	var NOTIFICADOR_ORDENADOR=1;
 	var NOTIFICADOR_COMANDO=2;
@@ -218,7 +218,7 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 		wurl=gestorcolas+"?opcion="+op_modificar_resultado+"&idaccion="+currentAccion+"&resultado="+resultado
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 //________________________________________________________________________________________________________
 	function modificar_estado(estado){
@@ -253,7 +253,7 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 		var wurl=gestorcolas+"?opcion="+op_modificar_estado+"&idaccion="+currentAccion+"&estado="+estado
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 //________________________________________________________________________________________________________
 	function reiniciar_accion(){
@@ -273,7 +273,7 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 		var wurl=gestorcolas+"?opcion="+op_reiniciar_accion+"&idaccion="+currentAccion;
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 //________________________________________________________________________________________________________
 	function eliminar_accion(){
@@ -292,50 +292,50 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 		var wurl=gestorcolas+"?opcion="+op_eliminar_accion+"&idaccion="+currentAccion
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 //________________________________________________________________________________________________________
 	function eliminar_mulaccion(){
 		reset_contextual(-1,-1);
-		if(confirm("ATENCI”N.-Se van a eliminar todas las acciones que est·n actualmente seleccionadas. ø Est· seguro de querer hacerlo ?")){
+		if(confirm("ATENCI√ìN.-Se van a eliminar todas las acciones que est√°n actualmente seleccionadas. ¬ø Est√° seguro de querer hacerlo ?")){
 			var mulaccion=document.getElementById("mulaccion").value; // Toma los identificadores de todas las acciones
 			var wurl="../gestores/gestor_colasacciones.php?opcion="+op_eliminar_mulaccion+"&mulaccion="+mulaccion
 			ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-			ifr.src=wurl; // LLama a la p·gina gestora
+			ifr.src=wurl; // LLama a la p√°gina gestora
 		}
 	}
 //________________________________________________________________________________________________________
 	function reiniciar_mulaccion(){
 		reset_contextual(-1,-1);
-		if(confirm("ATENCI”N.-Se van a reiniciar todas las acciones que est·n actualmente seleccionadas. ø Est· seguro de querer hacerlo ?")){
+		if(confirm("ATENCI√ìN.-Se van a reiniciar todas las acciones que est√°n actualmente seleccionadas. ¬ø Est√° seguro de querer hacerlo ?")){
 			var mulaccion=document.getElementById("mulaccion").value; // Toma los identificadores de todas las acciones
 			var wurl="../gestores/gestor_colasacciones.php?opcion="+op_reiniciar_mulaccion+"&mulaccion="+mulaccion
 			ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-			ifr.src=wurl; // LLama a la p·gina gestora
+			ifr.src=wurl; // LLama a la p√°gina gestora
 		}
 	}
 //________________________________________________________________________________________________________
 	function modificar_mulestado(estado){
 		reset_contextual(-1,-1);
-		if(estado==ACCION_DETENIDA) msg="ATENCI”N.-Se van a detener todas las acciones que est·n actualmente seleccionadas y no hayan finalizado. ø Est· seguro de querer hacerlo ?"
-		if(estado==ACCION_INICIADA) msg="ATENCI”N.-Van a proseguir todas las acciones que est·n actualmente seleccionadas y estÈn detenidas. ø Est· seguro de querer hacerlo ?"
+		if(estado==ACCION_DETENIDA) msg="ATENCI√ìN.-Se van a detener todas las acciones que est√°n actualmente seleccionadas y no hayan finalizado. ¬ø Est√° seguro de querer hacerlo ?"
+		if(estado==ACCION_INICIADA) msg="ATENCI√ìN.-Van a proseguir todas las acciones que est√°n actualmente seleccionadas y est√©n detenidas. ¬ø Est√° seguro de querer hacerlo ?"
 		if(confirm(msg)){
 			var mulaccion=document.getElementById("mulaccion").value; // Toma los identificadores de todas las acciones
 			var wurl="../gestores/gestor_colasacciones.php?opcion="+op_modificar_mulestado+"&mulaccion="+mulaccion+"&estado="+estado
 			ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-			ifr.src=wurl; // LLama a la p·gina gestora
+			ifr.src=wurl; // LLama a la p√°gina gestora
 		}
 	}
 //________________________________________________________________________________________________________
 	function modificar_mulresultado(resultado){
 		reset_contextual(-1,-1);
-		if(resultado==ACCION_ABORTADA) msg="ATENCI”N.-Se van a abortar todas las acciones que est·n actualmente seleccionadas y no hayan finalizado. ø Est· seguro de querer hacerlo ?"
-		if(resultado==ACCION_TERMINADA) msg="ATENCI”N.-Van a terminar todas las acciones que est·n actualmente seleccionadas y no hayan finalizado. ø Est· seguro de querer hacerlo ?"
+		if(resultado==ACCION_ABORTADA) msg="ATENCI√ìN.-Se van a abortar todas las acciones que est√°n actualmente seleccionadas y no hayan finalizado. ¬ø Est√° seguro de querer hacerlo ?"
+		if(resultado==ACCION_TERMINADA) msg="ATENCI√ìN.-Van a terminar todas las acciones que est√°n actualmente seleccionadas y no hayan finalizado. ¬ø Est√° seguro de querer hacerlo ?"
 		if(confirm(msg)){
 			var mulaccion=document.getElementById("mulaccion").value; // Toma los identificadores de todas las acciones
 			var wurl="../gestores/gestor_colasacciones.php?opcion="+op_modificar_mulresultado+"&mulaccion="+mulaccion+"&resultado="+resultado
 			ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-			ifr.src=wurl; // LLama a la p·gina gestora
+			ifr.src=wurl; // LLama a la p√°gina gestora
 		}
 	}
 //________________________________________________________________________________________________________
@@ -455,7 +455,7 @@ var NS=(navigator.appName=="Netscape");
 //________________________________________________________________________________________________________
 	function resalta(o,tipac,nombreac){
 		var wobj=o
-		// Toma el objeto TR de la acciÛn
+		// Toma el objeto TR de la acci√≥n
 		while (wobj.tagName!="TR"){
 			wobj=wobj.parentNode
 		}
@@ -468,7 +468,7 @@ var NS=(navigator.appName=="Netscape");
 			return
 		}
 		currentIdcmdtskwrk=o.getAttribute("name"); // Toma el identificador del comando,tarea o trabajo
-		currentCodtipoaccion=tipac // Toma el tipo de acciÛn: comando,tarea o trabajo
+		currentCodtipoaccion=tipac // Toma el tipo de acci√≥n: comando,tarea o trabajo
 		currentAccion=o.getAttribute("id")
 
 		currentidTipoAccion=currentIdcmdtskwrk;  
@@ -500,7 +500,7 @@ var NS=(navigator.appName=="Netscape");
 //________________________________________________________________________________________________________
 	function resaltanot(o,tiponot){
 		var wobj=o
-		// Toma el objeto TR de la acciÛn
+		// Toma el objeto TR de la acci√≥n
 		while (wobj.tagName!="TR"){
 			wobj=wobj.parentNode
 		}
@@ -518,8 +518,8 @@ var NS=(navigator.appName=="Netscape");
 			return
 		}
 
-		currentAccion=o.getAttribute("id") // Toma el identificador de la acciÛn
-		currentNotificacion=o.name //  Toma el identificador de la notificaciÛn
+		currentAccion=o.getAttribute("id") // Toma el identificador de la acci√≥n
+		currentNotificacion=o.name //  Toma el identificador de la notificaci√≥n
 		currentIdNotificador=o.value // Toma el identificador del ordenador que notifica
 		currentTipoNotificador=tiponot // Toma el tipo de notificador ( ordenador, comando o tarea )
 
@@ -532,8 +532,8 @@ var NS=(navigator.appName=="Netscape");
 			oTDs[i].style.backgroundColor="E2007F"; // Rojo
 			oTDs[i].style.color="#ffffff" 
 		}
-		// Toma el objeto TR de la acciÛn
-		var auxSplit=currentNotTR.getAttribute("id").split("_"); // Toma identificaciÛn del nodo notificaciÛn
+		// Toma el objeto TR de la acci√≥n
+		var auxSplit=currentNotTR.getAttribute("id").split("_"); // Toma identificaci√≥n del nodo notificaci√≥n
 		var idTR='ACC_'+auxSplit[1];
 		currentTR=document.getElementById(idTR);
 		currentTipoAccion=currentTR.name
@@ -629,7 +629,7 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 		wurl=gestorcolas+"?opcion="+op_modificar_resultado_notificacion+"&idaccion="+currentAccion+"&idnotificacion="+currentNotificacion+"&resultadoNot="+resultadoNot
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 //________________________________________________________________________________________________________
 	function resultado_modificar_resultado_notificacion(resul,descrierror,id){
@@ -637,7 +637,7 @@ var NS=(navigator.appName=="Netscape");
 			alert(descrierror)
 			return
 		}
-		// Cambia imagen resultado de la notificaciÛn
+		// Cambia imagen resultado de la notificaci√≥n
 		var oIMGs=currentNotTR.getElementsByTagName('IMG')
 		ultimgale=oIMGs.length-1
 		switch(currentResultadoNot){
@@ -661,14 +661,14 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 
-		// Cambia imagen resultado de la acciÛn
+		// Cambia imagen resultado de la acci√≥n
 		var oIMGs=currentTR.getElementsByTagName('IMG')
 		ultimgale=oIMGs.length-2
-		var imgestacc=oIMGs[ultimgale] // Imagen del estado de la acciÛn
+		var imgestacc=oIMGs[ultimgale] // Imagen del estado de la acci√≥n
 		ultimgale=oIMGs.length-1
-		var imgresacc=oIMGs[ultimgale] // Imagen del resultado de la acciÛn
+		var imgresacc=oIMGs[ultimgale] // Imagen del resultado de la acci√≥n
 
-		if(currentResultadoNot==ACCION_FALLIDA){ // Si se notificÛ a Fallida
+		if(currentResultadoNot==ACCION_FALLIDA){ // Si se notific√≥ a Fallida
 			if(imgestacc.value==ACCION_FINALIZADA){ // Si estado era Finalizada 
 				imgresacc.src="../images/iconos/acFallida.gif"; // queda como fallida
 				imgresacc.value=ACCION_FALLIDA; 
@@ -681,12 +681,12 @@ var NS=(navigator.appName=="Netscape");
 			return
 		}
 
-		// Si se notificÛ a Exitosa, depende si hay alguna fallida  ...
+		// Si se notific√≥ a Exitosa, depende si hay alguna fallida  ...
 		if(AlgunaNotificacionFallidas()){
 			alert(TbMsg[16])
-			return // Existen m·s fallidas
+			return // Existen m√°s fallidas
 		}
-		// ActulizaciÛn de la imagen
+		// Actulizaci√≥n de la imagen
 		if(imgestacc.value==ACCION_FINALIZADA){ // Si estado era Finalizada 
 			imgresacc.src="../images/iconos/acExitosa.gif"; // queda como Exitosa
 			imgresacc.value=ACCION_EXITOSA; 
@@ -717,7 +717,7 @@ var NS=(navigator.appName=="Netscape");
 					break;
 		}
 		var wurl=gestorcolas+"?opcion="+op_reiniciar_notificacion+"&idaccion="+currentAccion+"&idnotificacion="+currentNotificacion+"&idnotificador="+currentIdNotificador
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 //________________________________________________________________________________________________________
 	function resultado_reiniciar_notificacion(resul,descrierror,id){
@@ -735,17 +735,17 @@ var NS=(navigator.appName=="Netscape");
 			var imgordnot=document.getElementById("ORDNOT_"+currentAccion+"_"+currentNotificacion);
 			imgordnot.src="../images/iconos/ordenadornot.gif";
 		}
-		// Cambia imagen resultado de la acciÛn
+		// Cambia imagen resultado de la acci√≥n
 		var oIMGs=currentTR.getElementsByTagName('IMG')
 		ultimgale=oIMGs.length-2
-		var imgestacc=oIMGs[ultimgale] // Imagen del estado de la acciÛn
+		var imgestacc=oIMGs[ultimgale] // Imagen del estado de la acci√≥n
 		ultimgale=oIMGs.length-1
-		var imgresacc=oIMGs[ultimgale] // Imagen del resultado de la acciÛn
+		var imgresacc=oIMGs[ultimgale] // Imagen del resultado de la acci√≥n
 
 		imgestacc.src="../images/iconos/acIniciada.gif"; // queda como iniciada
 		imgestacc.value=ACCION_INICIADA; 
 
-		//  AL eliminar la notificaciÛn se consultan las que quedan ...
+		//  AL eliminar la notificaci√≥n se consultan las que quedan ...
 		if(AlgunaNotificacionFallidas()){
 			imgresacc.src="../images/iconos/acConErrores.gif"; // queda conerrores
 			imgresacc.value=ACCION_CONERRORES;
@@ -760,20 +760,20 @@ var NS=(navigator.appName=="Netscape");
 	}
 //________________________________________________________________________________________________________
 	function AlgunaNotificacion(){
-		var idTR=currentNotTR.getAttribute("id"); // Toma id del TR de notificaciÛn
+		var idTR=currentNotTR.getAttribute("id"); // Toma id del TR de notificaci√≥n
 		o=currentNotTR.parentNode
 		while (o.tagName!="TBODY"){
 			o=o.parentNode
 		}
-		var oTRs=o.getElementsByTagName('TR') // Toma la colecciÛn de TR's
+		var oTRs=o.getElementsByTagName('TR') // Toma la colecci√≥n de TR's
 		for(var i=0;i<oTRs.length;i++){
-			if(oTRs[i].getAttribute("id")==idTR){ // Si es un TR de la notificaciÛn implicada
+			if(oTRs[i].getAttribute("id")==idTR){ // Si es un TR de la notificaci√≥n implicada
 				var oIMGs=oTRs[i].getElementsByTagName('IMG')
 				for(var j=0;j<oIMGs.length;j++){
 					var ultimgale=oIMGs.length-1
-					var imgresnot=oIMGs[ultimgale] // Imagen del resultado de la notificaciÛn
+					var imgresnot=oIMGs[ultimgale] // Imagen del resultado de la notificaci√≥n
 					if(imgresnot.value==ACCION_EXITOSA || imgresnot.value==ACCION_FALLIDA || imgresnot.value==ACCION_REINICIADA ) 
-						return(true); // Hay al menos una notificaciÛn 
+						return(true); // Hay al menos una notificaci√≥n 
 				}
 			}
 		}
@@ -781,20 +781,20 @@ var NS=(navigator.appName=="Netscape");
 	}
 //________________________________________________________________________________________________________
 	function AlgunaNotificacionFallidas(){
-		var idTR=currentNotTR.getAttribute("id"); // Toma id del TR de notificaciÛn
+		var idTR=currentNotTR.getAttribute("id"); // Toma id del TR de notificaci√≥n
 		o=currentNotTR.parentNode
 		while (o.tagName!="TBODY"){
 			o=o.parentNode
 		}
-		var oTRs=o.getElementsByTagName('TR') // Toma la colecciÛn de TR's
+		var oTRs=o.getElementsByTagName('TR') // Toma la colecci√≥n de TR's
 		for(var i=0;i<oTRs.length;i++){
-			if(oTRs[i].getAttribute("id")==idTR){ // Si es un TR de la notificaciÛn implicada
+			if(oTRs[i].getAttribute("id")==idTR){ // Si es un TR de la notificaci√≥n implicada
 				var oIMGs=oTRs[i].getElementsByTagName('IMG')
 				for(var j=0;j<oIMGs.length;j++){
 					var ultimgale=oIMGs.length-1
-					var imgresnot=oIMGs[ultimgale] // Imagen del resultado de la notificaciÛn
+					var imgresnot=oIMGs[ultimgale] // Imagen del resultado de la notificaci√≥n
 					if(imgresnot.value==ACCION_FALLIDA) 
-						return(true); // Hay al menos una notificaciÛn con error
+						return(true); // Hay al menos una notificaci√≥n con error
 				}
 			}
 		}
@@ -985,13 +985,13 @@ var NS=(navigator.appName=="Netscape");
 		patron=";"+currentAccion+":";
 		var re = new RegExp (";"+currentAccion+":", 'gi') ;
 		var pos=wmulaccion.search(re)
-		if(pos<0){ // Comprueba si est· el primero
+		if(pos<0){ // Comprueba si est√° el primero
 			patron=currentAccion+":";
 			var re = new RegExp (";"+currentAccion+":", 'gi') ;
 			var pos=wmulaccion.search(re)
-			if(pos>0) pos=-1; // No  est· el primero , asi que no est·
+			if(pos>0) pos=-1; // No  est√° el primero , asi que no est√°
 		}
-		if(pos<0) oTriada.swexst=false; // No  est· el primero , asi que no est·
+		if(pos<0) oTriada.swexst=false; // No  est√° el primero , asi que no est√°
 		pos++;
 		var posa=pos;
 		while(pos<wmulaccion.length){

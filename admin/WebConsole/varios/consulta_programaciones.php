@@ -1,11 +1,11 @@
-<? 
+ï»¿<? 
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: consulta_programacion.php
-// Descripción :
+// DescripciÃ³n :
 //		Muestra un calendario para elegir una fecha
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");

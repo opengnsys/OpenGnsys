@@ -1,18 +1,18 @@
-<?
+Ôªø<?
 // *************************************************************************************************************************************************
-// AplicaciÛn WEB: ogAdmWebCon.
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn:2003-2004
-// Fecha ⁄ltima modificaciÛn: Febrero-2005
+// Aplicaci√≥n WEB: ogAdmWebCon.
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n:2003-2004
+// Fecha √öltima modificaci√≥n: Febrero-2005
 // Nombre del fichero: HTMLCTEMULSELECT.php
-// DescripciÛn :
-//		Crea la etiqueta html <SELECT> multiselecciÛn, de valores constantes
+// Descripci√≥n :
+//		Crea la etiqueta html <SELECT> multiselecci√≥n, de valores constantes
 //	Parametros: 
 //		- parametros: Una cadena con la forma valor=literal separada por un caracter INTRO
 //		- nombreid: Nombre del desplegable (atributo HTML name)
-//		- tbvalor: Array con los valores de las opciones que aparecer·n seleccionadas
+//		- tbvalor: Array con los valores de las opciones que aparecer√°n seleccionadas
 //		- clase: Clase que define su estilo
-//		- eventochg: Nombre de la funciÛn que se ejecutar· en respuesta al evento onchange( por defecto: ninguna)
+//		- eventochg: Nombre de la funci√≥n que se ejecutar√° en respuesta al evento onchange( por defecto: ninguna)
 //		- ancho: Anchura del desplegable
 //		- alto: Altura del desplegable
 // *************************************************************************************************************************************************

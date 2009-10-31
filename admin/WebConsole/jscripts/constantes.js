@@ -1,20 +1,20 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo005
 // Nombre del fichero: constantes.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero declara variables de uso comun
 // *************************************************************************************************************************************************
-// Código de los ambitos para comandos
+// CÃ³digo de los ambitos para comandos
 var AMBITO_CENTROS=0x01;
 var AMBITO_GRUPOSAULAS=0x02;
 var AMBITO_AULAS=0x04;
 var AMBITO_GRUPOSORDENADORES=0x08;
 var AMBITO_ORDENADORES=0x10;
 
-// Código del resto de ámbitos
+// CÃ³digo del resto de Ã¡mbitos
 var AMBITO_IMAGENES=0x20;
 var AMBITO_PROCEDIMIENTOS=0x21;
 var AMBITO_TAREAS=0x22;
@@ -30,7 +30,7 @@ var AMBITO_RESERVAS=0x30;
 var AMBITO_SOFTINCREMENTAL=0x31;
 var AMBITO_RESERVAS=0x32;
 
-// Código del resto de ambitos( grupos )
+// CÃ³digo del resto de ambitos( grupos )
 var AMBITO_GRUPOSIMAGENES=0x31;
 var AMBITO_GRUPOSPROCEDIMIENTOS=0x32;
 var AMBITO_GRUPOSTAREAS=0x33;
@@ -80,23 +80,23 @@ var LITAMBITO_GRUPOSSERVIDORESDHCP="gruposervidordhcp";
 var LITAMBITO_GRUPOSSOFTINCREMENTAL="grupossoftincremental";
 var LITAMBITO_GRUPOSRESERVAS="gruposreservas";
 
-// Código de los tipo de acciones
+// CÃ³digo de los tipo de acciones
 var EJECUCION_PROCEDIMIENTO=0x0000;
 var EJECUCION_COMANDO=0x0001;
 var EJECUCION_TAREA=0x0002;
 var EJECUCION_TRABAJO=0x0003;
 var EJECUCION_RESERVA=0x0004;
 
-var ACCION_DETENIDA=0; // Acción momentanemente parada
-var ACCION_INICIADA=1; // Acción activa
-var ACCION_FINALIZADA=2;// Acción finalizada
+var ACCION_DETENIDA=0; // AcciÃ³n momentanemente parada
+var ACCION_INICIADA=1; // AcciÃ³n activa
+var ACCION_FINALIZADA=2;// AcciÃ³n finalizada
 
 var ACCION_EXITOSA=1; // Finalizada con exito
 var ACCION_FALLIDA=2; // Finalizada con errores
 var ACCION_TERMINADA=3; // Finalizada manualmente con indicacion de exito 
 var ACCION_ABORTADA=4; // Finalizada manualmente con indicacion de errores 
-var ACCION_SINERRORES=5; // Activa y sin ningún error
-var ACCION_CONERRORES=6; // Activa y con algún error
+var ACCION_SINERRORES=5; // Activa y sin ningÃºn error
+var ACCION_CONERRORES=6; // Activa y con algÃºn error
 
 var corte_currentNodo=null;
 var currentTipo=null;
@@ -106,6 +106,6 @@ var RESERVA_CONFIRMADA=1; // Reserva confirmada
 var RESERVA_PENDIENTE=2; // Reserva pendiente
 var RESERVA_DENEGADA=3; // Reserva denegada
 
-var SUPERADMINISTRADOR=1; // administrador de la aplicación
+var SUPERADMINISTRADOR=1; // administrador de la aplicaciÃ³n
 var ADMINISTRADOR=2; // administrador de Centro
 var OPERADOR=3; // operador de aula

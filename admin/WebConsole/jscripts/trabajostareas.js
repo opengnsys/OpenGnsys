@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: trabajostareas.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero trabajostareas.php
 // *************************************************************************************************************************************************
 var currentidtarea=null;
@@ -27,11 +27,11 @@ function gestion_tareas(id,o,op){
 		var wurl="../gestores/gestor_trabajostareas.php?opcion="+op_eliminacion+"&idtrabajo="+idtrabajo+"&idtarea="+id
 	currentidtarea=id // Guarda identificdor de la tarea
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 function resultado_insertar_trabajostareas(resul,descrierror,resultado_modificar_trabajostareas){
-	if (!resul){ // Ha habido algún error en la inserción
+	if (!resul){ // Ha habido algÃºn error en la inserciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -42,7 +42,7 @@ function resultado_insertar_trabajostareas(resul,descrierror,resultado_modificar
 }
 //________________________________________________________________________________________________________
 function resultado_eliminar_trabajostareas(resul,descrierror,idtt){
-	if (!resul){ // Ha habido algún error en la eliminación
+	if (!resul){ // Ha habido algÃºn error en la eliminaciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -55,7 +55,7 @@ function resultado_eliminar_trabajostareas(resul,descrierror,idtt){
 }
 //________________________________________________________________________________________________________
 function resultado_modificar_trabajostareas(resul,descrierror,id){
-	if (!resul){ // Ha habido algún error en la eliminación
+	if (!resul){ // Ha habido algÃºn error en la eliminaciÃ³n
 		alert(descrierror)
 		return
 	}

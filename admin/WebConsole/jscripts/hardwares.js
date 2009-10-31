@@ -1,6 +1,6 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: hardwares.js
 // Este fichero implementa las funciones javascript del fichero hardwares.php
 // *************************************************************************************************************************************************
@@ -17,7 +17,7 @@ function insertar_perfilcomponente(){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra información sobre los perfiles hardware
+//	Muestra informaciÃ³n sobre los perfiles hardware
 //________________________________________________________________________________________________________
 function muestra_informacion(){
 	reset_contextual(-1,-1)

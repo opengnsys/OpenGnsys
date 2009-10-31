@@ -1,11 +1,11 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo-2005
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: CrearSoftIncremental.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero CrearSoftIncremental.php (Comandos)
 // *************************************************************************************************************************************************
 function confirmar(){
@@ -32,12 +32,12 @@ function confirmar(){
 		wurl+="?cadenaip="+cadenaip+"&identificador="+identificador+"&nombrefuncion="+nombrefuncion+"&ejecutor="+ejecutor+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&idperfilhard="+idperfilhard+"&perfiles="+perfiles
 		wurl+="&" +compone_urlejecucion();
 		ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-		ifr.src=wurl; // LLama a la página gestora
+		ifr.src=wurl; // LLama a la pÃ¡gina gestora
 	}
 }
 //________________________________________________________________________________________________________
 //	
-//	Cancela la edición 
+//	Cancela la ediciÃ³n 
 //________________________________________________________________________________________________________
   function cancelar(){
 	alert(CTbMsg[0]);

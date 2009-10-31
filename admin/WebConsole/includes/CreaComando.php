@@ -1,14 +1,14 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon.
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon.
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: CreaComando.php
-// Descripción :
-//		Devuelve una objeto comando totalmente operativo (con la conexión abierta)
+// DescripciÃ³n :
+//		Devuelve una objeto comando totalmente operativo (con la conexiÃ³n abierta)
 //	Parametros: 
-//		- cadenaconexion: Una cadena con los datos necesarios para la conexión: nombre del servidor
+//		- cadenaconexion: Una cadena con los datos necesarios para la conexiÃ³n: nombre del servidor
 //		usuario,password,base de datos,etc separados por coma
 // *************************************************************************************************************************************************
 function CreaComando($cadenaconexion){

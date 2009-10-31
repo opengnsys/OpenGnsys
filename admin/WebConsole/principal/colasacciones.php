@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: colasacciones.php
-// Descripción : 
-//		Visualiza las acciones pendientes y finalizadas con los resultados de estatus y horas de inicio y finalización
+// DescripciÃ³n : 
+//		Visualiza las acciones pendientes y finalizadas con los resultados de estatus y horas de inicio y finalizaciÃ³n
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -35,7 +35,7 @@ $resultados="";
 $porcendesde=0;
 $porcenhasta=100;
 $idcmdtskwrk=""; // Identificador del comando , la tarea o el trabajo
-$codtipoaccion=""; // Identificador del tipo de acción: comando , tarea o trabajo 
+$codtipoaccion=""; // Identificador del tipo de acciÃ³n: comando , tarea o trabajo 
 $idambcmdtskwrk=""; // Identificador del ambito al que se aplica el comando , la tarea o el trabajo 
 
 $accionid=0;
@@ -50,7 +50,7 @@ if (isset($_GET["tipocola"])) $tipocola=$_GET["tipocola"];
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 //________________________________________________________________________________________________________
 // Si entra por primera vez (criterios por defecto)
 if($ambito!="" && $idambito!="" && $nombreambito!="" && $tipocola!=""){ 
@@ -155,7 +155,7 @@ if (isset($_POST["idTipoAccion"])) $idTipoAccion=$_POST["idTipoAccion"];
 if (isset($_POST["TipoAccion"])) $TipoAccion=$_POST["TipoAccion"]; 
 if (isset($_POST["NombreTipoAccion"])) $NombreTipoAccion=$_POST["NombreTipoAccion"]; 
 //________________________________________________________________________________________________________
-// Clausula WHERE ( construcción )
+// Clausula WHERE ( construcciÃ³n )
 $ClausulaWhere="";
 
 // Cuestion de fechas 
@@ -211,21 +211,21 @@ if($WhereResultados!=""){
 	$ClausulaWhere.=" AND (".$WhereResultados.")";
 }
 //________________________________________________________________________________________________________
-// Cuestion identificador del comando la tarea o el trabajo implicado en la acción
+// Cuestion identificador del comando la tarea o el trabajo implicado en la acciÃ³n
 $Wherecmdtskwrk="";
 if($idcmdtskwrk!="" && $codtipoaccion!="" ){
 	$Wherecmdtskwrk='acciones.idtipoaccion='.$idcmdtskwrk.' AND acciones.tipoaccion='.$codtipoaccion;
 	$ClausulaWhere.=" AND (".$Wherecmdtskwrk.")";
 }
 //________________________________________________________________________________________________________
-// Cuestion identificador del ambito al que se aplica el comando la tarea o el trabajo implicado en la acción
+// Cuestion identificador del ambito al que se aplica el comando la tarea o el trabajo implicado en la acciÃ³n
 $Whereambcmdtskwrk="";
 if($idambcmdtskwrk!=""){
 	$Whereambcmdtskwrk='acciones.ambito='.$idambcmdtskwrk;
 	$ClausulaWhere.=" AND (".$Whereambcmdtskwrk.")";
 }
 //________________________________________________________________________________________________________
-// Cuestion identificador del Centro que ha ejecutado la acción
+// Cuestion identificador del Centro que ha ejecutado la acciÃ³n
 $WhereCentroAccion="";
 $WhereCentroAccion='acciones.idcentro='.$idcentro;
 $ClausulaWhere.=" AND (".$WhereCentroAccion.")";
@@ -339,7 +339,7 @@ if (isset($_POST["wrk_NombreTipoAccion"])) $wrk_NombreTipoAccion=$_POST["wrk_Nom
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
@@ -700,7 +700,7 @@ function ListandoAcciones($cmd){
 								$nombreliterales[1]="visuparametros";
 								$Datos=TomanDatos($cmd,"comandos",$rs->campos["idtipoaccion"],"idcomando",$nombreliterales);
 								$nombreaccion=$Datos["descripcion"];
-							  //  Visualización de los parametros de un comando
+							  //  VisualizaciÃ³n de los parametros de un comando
 								$HTMLparametros=infoparametros($cmd,$rs->campos["idaccion"],$rs->campos["parametros"],$Datos["visuparametros"],$ipesnotificadas);
 								echo '<TD align=center><IMG name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/comandos.gif" style="cursor:hand" oncontextmenu="resalta(this,'.$EJECUCION_COMANDO.','."'".$nombreaccion.".'".')"></TD>'.chr(13);
 								break;
@@ -795,8 +795,8 @@ function infoparametrosTskWrk($cmd,$idaccion,$parametros){
 	$HTMLparametros="";
 	$HTMLparametros.='<TR id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
 	$HTMLparametros.= '<TD>&nbsp;</TD>'.chr(13);
-	$HTMLparametros.=  '<TH align=center style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4; " >Nº</TH>'.chr(13);
-	$HTMLparametros.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4;"  colspan=10>Acción</TH>'.chr(13);
+	$HTMLparametros.=  '<TH align=center style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4; " >NÂº</TH>'.chr(13);
+	$HTMLparametros.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4;"  colspan=10>AcciÃ³n</TH>'.chr(13);
 	$HTMLparametros.=  '</TR>'.chr(13);
 	
 	$rs=new Recordset; 
@@ -826,7 +826,7 @@ ________________________________________________________________________________
 function infoparametros($cmd,$idaccion,$parametros,$visuparametros,$ipesnotificadas){
 	global  $tabla_parametros;
 	global  $cont_parametros;
-	global  $MAXLONVISUSCRIPT; // longitud Maxima de visualización del script
+	global  $MAXLONVISUSCRIPT; // longitud Maxima de visualizaciÃ³n del script
 
 	$HTMLparametros="";
 	$HTMLparametros.='<TR  id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
@@ -836,12 +836,12 @@ function infoparametros($cmd,$idaccion,$parametros,$visuparametros,$ipesnotifica
 	$HTMLparametros.=  '</TR>'.chr(13);
 	
 	$auxVP=split(";",$visuparametros); // Parametros visualizables
-	$auxP=split(chr(13),$parametros); // Recorre parametros para visualizar los que así sean
+	$auxP=split(chr(13),$parametros); // Recorre parametros para visualizar los que asÃ­ sean
 	for ($i=0;$i<sizeof($auxP);$i++){
 		$dualparam=split("=",$auxP[$i]);
 		for ($k=0;$k<sizeof($auxVP);$k++){
 			 if($auxVP[$k]==$dualparam[0]){
-				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del parámetro en la tabla cargada previamentre con todos los parámetros
+				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del parÃ¡metro en la tabla cargada previamentre con todos los parÃ¡metros
 				if ($posp>=0){
 					$auxtabla_parametros=$tabla_parametros[$posp][1];
 					$HTMLparametros.='<TR  id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
@@ -1102,7 +1102,7 @@ function RecorreOrdenadores($cmd){
 	$rs->Cerrar();
 }
 /*________________________________________________________________________________________________________
-	Cuenta el numero de ordenadores a los que afecta la acción
+	Cuenta el numero de ordenadores a los que afecta la acciÃ³n
 ________________________________________________________________________________________________________*/
 function NotificacionesEsperadas($parametros,$TipoAccion){
 	global $EJECUCION_COMANDO;
@@ -1272,7 +1272,7 @@ function CriteriosBusquedas(){
   return($HTMLCriterios);
 }
 /*________________________________________________________________________________________________________
-	Crea la tabla de ordenadores ( iconos pequeños )
+	Crea la tabla de ordenadores ( iconos pequeÃ±os )
 ________________________________________________________________________________________________________*/
 function PintaOrdenadores($cmd,$cadenaip,$ipesnotificadas,$idaccion){
 	global $ACCION_EXITOSA; 
@@ -1294,7 +1294,7 @@ function PintaOrdenadores($cmd,$cadenaip,$ipesnotificadas,$idaccion){
 		$auxtbipes="";
 		$auxtbresipes="";
 		$auxtbnotif="";
-		// Ordena según la ip
+		// Ordena segÃºn la ip
 		for ($i=0;$i<$cont-1;$i++){
 			for ($j=$i+1;$j<$cont;$j++){
 				if($tbipes[$i]>$tbipes[$j]){
@@ -1322,7 +1322,7 @@ function PintaOrdenadores($cmd,$cadenaip,$ipesnotificadas,$idaccion){
 
 	$rs=new Recordset; 
 	$contor=0;
-	$maxord=5; // Máximos ordenadores por linea
+	$maxord=5; // MÃ¡ximos ordenadores por linea
 	$cmd->texto=" SELECT nombreordenador,ip FROM ordenadores  INNER JOIN aulas ON aulas.idaula=ordenadores.idaula WHERE ip IN(".$clauslaIN.") ORDER by nombreaula,nombreordenador";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(""); // Error al abrir recordset

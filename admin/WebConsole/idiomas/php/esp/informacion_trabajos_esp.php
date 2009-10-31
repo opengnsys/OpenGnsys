@@ -1,14 +1,14 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: informacion_tareas_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Tareas incluidas en Trabajos';
-	$TbMsg[1]='Parámetros de comandos en Tarea';
-	$TbMsg[2]='Parámetro';
+	$TbMsg[1]='ParÃ¡metros de comandos en Tarea';
+	$TbMsg[2]='ParÃ¡metro';
 	$TbMsg[3]='Valor';
-	$TbMsg[4]='Ámbito';
+	$TbMsg[4]='Ãmbito';
 	$TbMsg[5]='Nombre';
 ?>

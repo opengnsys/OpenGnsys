@@ -1,6 +1,6 @@
-<?php
+ï»¿<?php
 /*==================================================================================================
-Clase para trabajar con menús contextuales.
+Clase para trabajar con menÃºs contextuales.
 
 	Especificaciones de las etiquetas XML:
 		- MENUCONTEXTUAL: Elemento raiz en el se especifican los atributos del <DIV>
@@ -9,22 +9,22 @@ Clase para trabajar con menús contextuales.
 
 	Especificaciones de atributos:
 		- idctx: Identificador del menu contextual (DIV)
-		- imgitem: La url de la imagen que acompañará al literal 
-		- alignitem: La alineación del texto del item (por defecto left)
+		- imgitem: La url de la imagen que acompaÃ±arÃ¡ al literal 
+		- alignitem: La alineaciÃ³n del texto del item (por defecto left)
 		- textoitem: El literal del item
-		- subflotante: Si el item despliega otro menu contextual. El valor es el id de ése
-		- maxanchu: Máxima anchura del menu contextual
-		- swimg: Vale 1 si el menu tiene algún item con imagen y 0 en caso contrario
-		- alpulsar: Nombre de la función javascript que se ejecutará en respuesta al evento onclick
-		- clase: Estilo CSS que tendrán los item  menu contextual
-		- origen_x: Posición de origen, coordenada x
-		- origen_y: Posición de origen, coordenada y
+		- subflotante: Si el item despliega otro menu contextual. El valor es el id de Ã©se
+		- maxanchu: MÃ¡xima anchura del menu contextual
+		- swimg: Vale 1 si el menu tiene algÃºn item con imagen y 0 en caso contrario
+		- alpulsar: Nombre de la funciÃ³n javascript que se ejecutarÃ¡ en respuesta al evento onclick
+		- clase: Estilo CSS que tendrÃ¡n los item  menu contextual
+		- origen_x: PosiciÃ³n de origen, coordenada x
+		- origen_y: PosiciÃ³n de origen, coordenada y
 
 
 	Especificaciones de eventos:
-		 - Los eventos onmouseover y onmouseout están implicitos en la clase por defecto
+		 - Los eventos onmouseover y onmouseout estÃ¡n implicitos en la clase por defecto
 	Especificaciones de submenus:
-		- Si una opción lleva un submenu asociado el id de éste va en el atributo name del <TR>
+		- Si una opciÃ³n lleva un submenu asociado el id de Ã©ste va en el atributo name del <TR>
 
 
 ==================================================================================================*/
@@ -109,7 +109,7 @@ class MenuContextual{
 						$layer.='<TD  align='.$alignitem.'  id="TDLit-'.$idx .'" width='.($maxanchu-38).' '.$atributosHTML.'><A href="#" style="text-decoration: none"><SPAN>'.$textoitem.'</SPAN></A></TD>';
 					}
 					else{
-						if ($swimg==1){ // Hay algún item con imagen
+						if ($swimg==1){ // Hay algÃºn item con imagen
 							$layer.='<TD width=20></TD>'; 
 							$layer.='<TD width=3></TD>'; 
 							$layer.='<TD align='.$alignitem.' width='.($maxanchu-38).' '.$atributosHTML.'><A href="#" style="text-decoration: none"><SPAN>'.$textoitem.'</SPAN></A></TD>';
@@ -129,7 +129,7 @@ class MenuContextual{
 					$layer.='</TR>';
 				}
 				if ($tiponodo=="SEPARADOR"){ // Separadores
-					$layer.='<TR  width='.$maxanchu.' height=16>'; // Linea de separación
+					$layer.='<TR  width='.$maxanchu.' height=16>'; // Linea de separaciÃ³n
 					$layer.='<TD width=3 background="'.$this->urlImg.'/liz.gif"></TD>'; 
 					$layer.='<TD width=3></TD>'; 
 					$layer.='<TD colspan=4 background="'.$this->urlImg.'/sep.gif"></TD>';
@@ -149,13 +149,13 @@ class MenuContextual{
 			$layer.='</TR>';
 
 
-			$layer.='<TR width='.$maxanchu.' height=3>'; // Última linea
+			$layer.='<TR width='.$maxanchu.' height=3>'; // Ãšltima linea
 			$layer.='<TD width=3 background="'.$this->urlImg.'/eii.gif"></TD>'; 
 			$layer.='<TD colspan=6 background="'.$this->urlImg.'/lin.gif"></TD>'; 
 			$layer.='<TD width=3 background="'.$this->urlImg.'/eid.gif"></TD>';
 			$layer.='</TR>';
 			$layer.='</TABLE>'; 
-			$layer.='<INPUT type=hidden value="-1">'; // Representará el índice seleccionado
+			$layer.='<INPUT type=hidden value="-1">'; // RepresentarÃ¡ el Ã­ndice seleccionado
 			$layer.='</DIV>'; 
 		}
 		return($layer);

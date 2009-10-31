@@ -1,8 +1,8 @@
-//____________________________________________________________________________
+ï»¿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: propiedades_menus_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="Debe introducir un nombre para este menú";
-TbMsg[1]="ATENCIÓN: Hay ordenadores con este menú. No puede darlo de baja hasta que cambie este dato en dichos ordenadores";
+TbMsg[0]="Debe introducir un nombre para este menÃº";
+TbMsg[1]="ATENCIÃ“N: Hay ordenadores con este menÃº. No puede darlo de baja hasta que cambie este dato en dichos ordenadores";

@@ -1,29 +1,29 @@
-<?
+ï»¿<?
 include_once("XmlPhp.php");
 /*===============================================================
-Esta clase implementa la apariencia y comportamiento de un treeview en código HTML y javascript.
+Esta clase implementa la apariencia y comportamiento de un treeview en cÃ³digo HTML y javascript.
 La clase utiliza la clase XmlPhp.php para acceder al documento XML. 
 
-	Parámetros del constructor:
+	ParÃ¡metros del constructor:
 		-fXML=Fichero XML
-		-fileocade=Indica si el dato anterior es un fichero o una variable con el contenido del árbol	
+		-fileocade=Indica si el dato anterior es un fichero o una variable con el contenido del Ã¡rbol	
 			0: Es una cadena
 			1: Es un fichero
-		-baseurlimg= Url base de las imágenes de los nodos de contracción-expansión
+		-baseurlimg= Url base de las imÃ¡genes de los nodos de contracciÃ³n-expansiÃ³n
 		-clasedefault=Clase por defecto de los literales de los nodos
-		-nivelexp= Máximo nivel que aparecera expandido 
-		-x= Posición x donde aparecerá la tabla 
-		-y= Posición y donde aparecerá la tabla 
+		-nivelexp= MÃ¡ximo nivel que aparecera expandido 
+		-x= PosiciÃ³n x donde aparecerÃ¡ la tabla 
+		-y= PosiciÃ³n y donde aparecerÃ¡ la tabla 
 =================================================================*/
 class ArbolVistaXML{
-	var $baseurlimg;	// Base de la URL de las imágenes de los nodos de contracción-expansión
+	var $baseurlimg;	// Base de la URL de las imÃ¡genes de los nodos de contracciÃ³n-expansiÃ³n
 	var $clasedefault;	// Clase por defecto de los literales de los nodos
 	var $gXML;			// Objeto gestor del documento XML
-	var $nivelexp;		// Nivel máximo que aprecerá visible
-	var $x;		// Posición x donde aparecerá la tabla 
-	var $y;		// Posición y donde aparecerá la tabla 
-	var $c_imgnivel=array();	// Imagenes de expansión y contracción para los distintos niveles
-	var $v_imgnivel=array();	// Valores de expansión y contracción para los distintos niveles
+	var $nivelexp;		// Nivel mÃ¡ximo que aprecerÃ¡ visible
+	var $x;		// PosiciÃ³n x donde aparecerÃ¡ la tabla 
+	var $y;		// PosiciÃ³n y donde aparecerÃ¡ la tabla 
+	var $c_imgnivel=array();	// Imagenes de expansiÃ³n y contracciÃ³n para los distintos niveles
+	var $v_imgnivel=array();	// Valores de expansiÃ³n y contracciÃ³n para los distintos niveles
 	var $nodos_count;	// Contador de nodo
 
 	Function ArbolVistaXML($fXML,$fileocade,$baseurlimg="/.images/",$clasedefault,$nivelexp=0,$x=0,$y=0,$tipotabla=0,$titulotabla=""){
@@ -53,7 +53,7 @@ class ArbolVistaXML{
 		$this->nodos_count=0;
 	}
 	/*------------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el contenido de un treeview en código HTML
+		Esta funciÃ³n devuelve una cadena con el contenido de un treeview en cÃ³digo HTML
 	------------------------------------------------------------------------------------------------*/
 	Function CreaArbolVistaXML(){
 		if (!$this->gXML->NodoRaiz()) return; // No existe documento XML que analizar
@@ -71,7 +71,7 @@ class ArbolVistaXML{
 	}
 	// -------------------------------------------------------------------------------------
 	// Recorrido recursivo del arbol XML
-	//		Parámetros: 
+	//		ParÃ¡metros: 
 	//			nivel: nivel del nodo
 	// -------------------------------------------------------------------------------------
 	function _arbolXmlrecur($nivel){
@@ -100,7 +100,7 @@ class ArbolVistaXML{
 	}
 	// -------------------------------------------------------------------------------------
 	// Crea un  nodo
-	//		Parámetros: 
+	//		ParÃ¡metros: 
 	//			nivel: nivel del nodo
 	// -------------------------------------------------------------------------------------
 	function CreaNodo($nivel){
@@ -108,39 +108,39 @@ class ArbolVistaXML{
 		return($nodo);
 	}
 	/*------------------------------------------------------------------------------------------------
-		Dibuja los nodos del árbol 
-			parámetros:
-				nodo: La información del nodo
+		Dibuja los nodos del Ã¡rbol 
+			parÃ¡metros:
+				nodo: La informaciÃ³n del nodo
 				nivel: Nivel del nodo
 				nhijos: numero de hijos
-				uhermano: Es true si el nodo es el último de sus hermanos
+				uhermano: Es true si el nodo es el Ãºltimo de sus hermanos
 
 			Especificaciones:
 				Los atributos de los nodos pueden ser HTML o especificos de
-				esta aplicación. Lso atributos del nodo propios de ésta son:
+				esta aplicaciÃ³n. Lso atributos del nodo propios de Ã©sta son:
 
-					- clicksupimg: Función suplementaria de la imagen de signo
+					- clicksupimg: FunciÃ³n suplementaria de la imagen de signo
 					- imagenid: Identificador de la imagen de signo
-					- clickimg: La función que se ejecutará al hacer click sobre la imagen de nodo
-					- downimg: La función que se ejecutará al pulsar el ratón  sobre la imagen de nodo
-					- clickcontextualimg: Función que se ejecutara al hacer click con el boton derecho sobre la imagen del nodo
+					- clickimg: La funciÃ³n que se ejecutarÃ¡ al hacer click sobre la imagen de nodo
+					- downimg: La funciÃ³n que se ejecutarÃ¡ al pulsar el ratÃ³n  sobre la imagen de nodo
+					- clickcontextualimg: FunciÃ³n que se ejecutara al hacer click con el boton derecho sobre la imagen del nodo
 					- imagenodo: Es la url de la imagen de nodo
 					- infonodo: Es texto que se visualiza del nodo
-					- mouseovernodo: La función a ejecutar cuando se posa el ratón sobre el literal del nodo
-					- clicksupnodo: Función suplementaria del literal del nodo
-					- clickcontextualnodo: Función que se ejecutara al hacer click con el boton derecho sobre el nodo
+					- mouseovernodo: La funciÃ³n a ejecutar cuando se posa el ratÃ³n sobre el literal del nodo
+					- clicksupnodo: FunciÃ³n suplementaria del literal del nodo
+					- clickcontextualnodo: FunciÃ³n que se ejecutara al hacer click con el boton derecho sobre el nodo
 					- classnodo: Clase (style) a  la que pertenece el nodo
 					- nodoid: identificador del nodo
 					- nodovalue: parametro value del nodo
 	------------------------------------------------------------------------------------------------*/
 	function _dibujo_nodo($nodo,$nivel,$nhijos,$uhermano){
-		// Comprobar descendencia y posición dentro de los hermanos
-		$swu=false; // switch para saber si el nodo es el último hermano
+		// Comprobar descendencia y posiciÃ³n dentro de los hermanos
+		$swu=false; // switch para saber si el nodo es el Ãºltimo hermano
 		$swh=false; // switch para saber si el nodo tiene hijos
 		if ($nhijos>0) $swh=true;
 		$swu=$uhermano;
 		if ($swh){	// Si tiene hijos ..
-			if ($swu){ // Si es el último de sus hermanos ..
+			if ($swu){ // Si es el Ãºltimo de sus hermanos ..
 				if ($nivel<$this->nivelexp){
 					$this->c_imgnivel[$nivel]=$this->baseurlimg.'/menos_c.gif';
 					$this->v_imgnivel[$nivel]="menos_c";
@@ -168,7 +168,7 @@ class ArbolVistaXML{
 			}
 		}
 		else{		// Si NO tiene hijos ..
-			if ($swu){	// Si es el último de sus hermanos ..
+			if ($swu){	// Si es el Ãºltimo de sus hermanos ..
 				$this->c_imgnivel[$nivel]=$this->baseurlimg.'/nada_c.gif';
 				$this->v_imgnivel[$nivel]="nada_c";
 			}
@@ -177,7 +177,7 @@ class ArbolVistaXML{
 				$this->v_imgnivel[$nivel]="nada_t";
 			}
 		}
-		// Fin Comprobar descendencia y posición dentro de los hermanos
+		// Fin Comprobar descendencia y posiciÃ³n dentro de los hermanos
 		if($this->tipotabla==0)
 			$arbol='<TABLE  border=0 cellspacing=0 cellpadding=0>';
 		else

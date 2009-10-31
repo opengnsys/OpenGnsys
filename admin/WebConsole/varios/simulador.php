@@ -1,4 +1,4 @@
-<?
+﻿<?
     include_once("../clases/SockHidra.php");
 		
 	$shidra=new SockHidra("192.168.0.100",2005); 
@@ -21,7 +21,7 @@
 	$parametros.="iph=10.1.15.11".chr(13);
 	$parametros.="ido=23".chr(13);
 
-	$resul=$shidra->conectar(); // Se ha establecido la conexi�n con el servidor hidra
+	$resul=$shidra->conectar(); // Se ha establecido la conexión con el servidor hidra
 	if($resul){
 		$resul=$shidra->envia_comando($parametros);
 		echo $parametros;

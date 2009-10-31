@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Febrero-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: procedimientoscomandos.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero procedimientoscomandos.php
 // *************************************************************************************************************************************************
 var currentidprocedimientocomando=null;
@@ -22,7 +22,7 @@ function gestion_comandos(id,o,orden){
 	}
 	currentidprocedimientocomando=id // Guarda identificdor de la procedimiento
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=wurl; // LLama a la página gestora
+	ifr.src=wurl; // LLama a la pÃ¡gina gestora
 }
 //________________________________________________________________________________________________________
 function ActualizarAccion(id){
@@ -38,7 +38,7 @@ function ActualizarAccion(id){
 }
 //________________________________________________________________________________________________________
 function resultado_eliminar_procedimientocomando(resul,descrierror,idtt){
-	if (!resul){ // Ha habido algún error en la eliminación
+	if (!resul){ // Ha habido algÃºn error en la eliminaciÃ³n
 		alert(descrierror)
 		return
 	}
@@ -52,7 +52,7 @@ function resultado_eliminar_procedimientocomando(resul,descrierror,idtt){
 }
 //________________________________________________________________________________________________________
 function resultado_modificar_procedimientocomando(resul,descrierror,id){
-	if (!resul){ // Ha habido algún error en la eliminación
+	if (!resul){ // Ha habido algÃºn error en la eliminaciÃ³n
 		alert(descrierror)
 		return
 	}

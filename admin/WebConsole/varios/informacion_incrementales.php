@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: informacion_incrementales.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Muestra los componentes software  de un software incremental y los perfiles softwares y hardwares  disponibles
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -23,11 +23,11 @@ if (isset($_GET["descripcionincremental"])) $descripcionincremental=$_GET["descr
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idsoftincremental); // Crea el arbol XML 
 
-// Creación del árbol
+// CreaciÃ³n del Ã¡rbol
 $baseurlimg="../images/tsignos";
 $clasedefault="tabla_listados_sin";
 $titulotabla=$TbMsg[3];  
@@ -36,7 +36,7 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 ?>
 <HTML>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXml.js"></SCRIPT>
@@ -55,10 +55,10 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 /**************************************************************************************************************************************************
-	Devuelve una cadena con formato XML de toda la información de los perfiles software
+	Devuelve una cadena con formato XML de toda la informaciÃ³n de los perfiles software
 	softwares
 	Parametros: 
-		- cmd:Una comando ya operativo ( con conexión abierta)  
+		- cmd:Una comando ya operativo ( con conexiÃ³n abierta)  
 		- idsoftincremental: El identificador del perfil software
 ________________________________________________________________________________________________________*/
 function CreaArbol($cmd,$idsoftincremental){

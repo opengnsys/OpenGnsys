@@ -1,22 +1,22 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: RecopilaIpesMacs.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Prepara los parametros de las tramas de todos los comando
 //
 // Especificaciones:
-//		Esta Función recibe tres parámatros:
+//		Esta FunciÃ³n recibe tres parÃ¡matros:
 //			cmd : Un objeto comando totalmente operativo
-//			ambito:  Ámbito
-//			 idambito: Identificador del ámbito
+//			ambito:  Ãmbito
+//			 idambito: Identificador del Ã¡mbito
 //
 //	Devuelve:
-//		Todas las ipes y las macs de los ordenadores que componen el ámbito
-//		Para ellos habrá que tener declarada dos variables globales :
+//		Todas las ipes y las macs de los ordenadores que componen el Ã¡mbito
+//		Para ellos habrÃ¡ que tener declarada dos variables globales :
 //				$cadenaip  y	$cadenamac
 // *************************************************************************************************************************************************
 function RecopilaIpesMacs($cmd,$ambito,$idambito){

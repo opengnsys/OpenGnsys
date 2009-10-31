@@ -1,4 +1,4 @@
-<?
+﻿<?
 include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/clases/Almanaque_".$idioma.".php");
 $hora=""; 
@@ -6,7 +6,7 @@ if (isset($_GET["hora"])) $hora=$_GET["hora"];
 if($hora=="") $hora="8:00";
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="JavaScript">

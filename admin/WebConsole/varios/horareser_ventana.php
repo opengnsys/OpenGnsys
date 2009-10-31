@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Noviembre-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: horareser_ventana.php
-// Descripción : 
-//		Visualiza las horas del día para elegir una
+// DescripciÃ³n : 
+//		Visualiza las horas del dÃ­a para elegir una
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/clases/Calendario_".$idioma.".php");
@@ -16,7 +16,7 @@ if (isset($_GET["hora"])) $hora=$_GET["hora"];
 if($hora=="") $hora="8:00";
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="JavaScript">

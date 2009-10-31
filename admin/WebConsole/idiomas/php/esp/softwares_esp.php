@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: softwares_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='""';	
@@ -19,8 +19,8 @@
 	$TbMsg[11]='"Definir nuevo perfil"';
 	$TbMsg[12]='"Colocar perfil"';
 	$TbMsg[13]='"Eliminar grupo de perfiles"';
-	$TbMsg[14]='"Gestión componentes"';
-	$TbMsg[15]='"Información Perfil"';
+	$TbMsg[14]='"GestiÃ³n componentes"';
+	$TbMsg[15]='"InformaciÃ³n Perfil"';
 	$TbMsg[16]='"Mover perfil"';
 	$TbMsg[17]='"Eliminar perfil software"';
 	$TbMsg[18]='"Tipos de software"';
@@ -31,7 +31,7 @@
 	$TbMsg[23]='"Definir nuevo incremental"';
 	$TbMsg[24]='"Colocar incremental"';
 	$TbMsg[25]='"Eliminar grupo de incrementales"';
-	$TbMsg[26]='"Información Incremental"';
+	$TbMsg[26]='"InformaciÃ³n Incremental"';
 	$TbMsg[27]='"Mover incremental"';
 	$TbMsg[28]='"Eliminar  incremental"';
 ?>

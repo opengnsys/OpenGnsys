@@ -1,4 +1,4 @@
-<?
+ï»¿<?
 include_once("../includes/ctrlacc.php");
 
 include_once("../clases/AdoPhp.php");
@@ -18,7 +18,7 @@ if (isset($_GET["descripcionperfil"])) $descripcionperfil=$_GET["descripcionperf
 //-------------------------------------------------------------------------------
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	$arbolXML=""; // Error de conexión
+	$arbolXML=""; // Error de conexiÃ³n
 else
 	$arbolXML=CreaArbol($cmd,$idperfilhard); // Crea el arbol XML con todos los datos del perfil hardware
 $baseurlimg="../images/tsignos";
@@ -28,7 +28,7 @@ $arbol=new TablaVistaXml($arbolXML,0,$baseurlimg,$clasedefault,0,20,130,$titulot
 
 ?>
 <HTML>
-<TITLE>" Administración web de aulas"</TITLE>
+<TITLE>" AdministraciÃ³n web de aulas"</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/TablaVistaXml.js"></SCRIPT>
@@ -59,9 +59,9 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 /*==============================================================
-	Devuelve una objeto comando totalmente operativo (con la conexión abierta)
+	Devuelve una objeto comando totalmente operativo (con la conexiÃ³n abierta)
 	Parametros: 
-		- cadenaconexion: Una cadena con los datos necesarios para la conexión: nombre del servidor
+		- cadenaconexion: Una cadena con los datos necesarios para la conexiÃ³n: nombre del servidor
 		usuario,password,base de datos,etc separados por coma
 ----------------------------------------------------------------------------------------------------------------*/
 function CreaComando($cadenaconexion){
@@ -74,11 +74,11 @@ function CreaComando($cadenaconexion){
 	return($cmd);
 }
 /*=======================================================
-	Devuelve una cadena con formato XML de toda la información de las configuraciones
+	Devuelve una cadena con formato XML de toda la informaciÃ³n de las configuraciones
 	hardwares
 	Parametros: 
 		- idperfilhard: El identificador del perfil hardware
-		- cmd:Una comando ya operativo ( con conexión abierta)  
+		- cmd:Una comando ya operativo ( con conexiÃ³n abierta)  
 ----------------------------------------------------------------------------------------------------*/
 function CreaArbol($cmd,$idperfilhard){
 	$cadenaXML=SubarbolXML_PerfilesSoftwaresDisponibles($cmd,$idperfilhard);

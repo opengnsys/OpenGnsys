@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: menus.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Administra los menus de los clientes rembo de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -19,17 +19,17 @@ include_once("../idiomas/php/".$idioma."/menus_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2');  // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2');  // Error de conexiÃ³n con servidor B.D.
 else
 	$arbolXML=CreaArbol($cmd,$idcentro); // Crea el arbol XML con todos los datos del Centro
-// Creación del árbol
-$baseurlimg="../images/signos"; // Url de las imágenes de signo
-$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+// CreaciÃ³n del Ã¡rbol
+$baseurlimg="../images/signos"; // Url de las imÃ¡genes de signo
+$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
@@ -45,7 +45,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 <BODY OnContextMenu="return false">
 <?
 //________________________________________________________________________________________________________
-echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
+echo $arbol->CreaArbolVistaXML();	 // Crea Ã¡rbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
 
 // Crea contextual de los menus
@@ -53,7 +53,7 @@ $XMLcontextual=CreacontextualXMLMenus();
 echo $flotante->CreaMenuContextual($XMLcontextual); 
 $XMLcontextual=ContextualXMLGruposMenus(); // Grupos de menus
 echo $flotante->CreaMenuContextual($XMLcontextual); 
-$XMLcontextual=CreacontextualXMLMenu(); // Menús
+$XMLcontextual=CreacontextualXMLMenu(); // MenÃºs
 echo $flotante->CreaMenuContextual($XMLcontextual); 
 //________________________________________________________________________________________________________
 include_once("../includes/iframecomun.php");
@@ -63,9 +63,9 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 // *************************************************************************************************************************************************
-//	Devuelve una cadena con formato XML con toda la información de los menus iniciales de los clientes rembo de un Centro
+//	Devuelve una cadena con formato XML con toda la informaciÃ³n de los menus iniciales de los clientes rembo de un Centro
 //	Parametros: 
-//		- cmd:Una comando ya operativo ( con conexión abierta)  
+//		- cmd:Una comando ya operativo ( con conexiÃ³n abierta)  
 //		- idcentro: El identificador del centro
 //________________________________________________________________________________________________________
 function CreaArbol($cmd,$idcentro){
@@ -136,7 +136,7 @@ function SubarbolXML_Menus($cmd,$idcentro,$grupoid){
 }
 //________________________________________________________________________________________________________
 //
-//	Menús Contextuales
+//	MenÃºs Contextuales
 //________________________________________________________________________________________________________
 function CreacontextualXMLMenus(){
 	global $AMBITO_MENUS;

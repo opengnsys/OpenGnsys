@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________
 //
 //	Salva un fichero enviado por POST
-//	Parámetros:
-//		- $UrlPagina: Url de la página que carga el fichero
+//	ParÃ¡metros:
+//		- $UrlPagina: Url de la pÃ¡gina que carga el fichero
 //		- $NombreFicheroPost: Nombre temporal que le da php al fichero post
-//		- $NombreFichero: Nombre definitivo que tendrá  el fichero
+//		- $NombreFichero: Nombre definitivo que tendrÃ¡  el fichero
 //________________________________________________________________________________________
 function SalvaFichero_POST($UrlPagina,$NombreFicheroPost,$NombreFichero,$UrlFichero){
 
@@ -22,9 +22,9 @@ function SalvaFichero_POST($UrlPagina,$NombreFicheroPost,$NombreFichero,$UrlFich
 //________________________________________________________________________________________
 //
 //	Elimina un fichero en el servidor
-//	Parámetros:
-//		- $UrlPagina: Url de la página que carga el fichero
-//		- $NombreFichero: Nombre definitivo que tendrá  el fichero
+//	ParÃ¡metros:
+//		- $UrlPagina: Url de la pÃ¡gina que carga el fichero
+//		- $NombreFichero: Nombre definitivo que tendrÃ¡  el fichero
 //________________________________________________________________________________________
 function EliminaFichero($UrlPagina,$NombreFichero){
 	$PathFisicoFichero=TomaPathFIsico($UrlPagina,$NombreFichero);
@@ -35,10 +35,10 @@ function EliminaFichero($UrlPagina,$NombreFichero){
 }
 //________________________________________________________________________________________
 //
-//	Toma el path físico de un fichero
-//	Parámetros:
-//		- $UrlPagina: Url de la página que carga el fichero
-//		- $NombreFichero: Nombre definitivo que tendrá  el fichero
+//	Toma el path fÃ­sico de un fichero
+//	ParÃ¡metros:
+//		- $UrlPagina: Url de la pÃ¡gina que carga el fichero
+//		- $NombreFichero: Nombre definitivo que tendrÃ¡  el fichero
 //________________________________________________________________________________________
 function TomaPathFisico($UrlPagina,$NombreFichero){
 	$Nombrepagina=basename($UrlPagina);

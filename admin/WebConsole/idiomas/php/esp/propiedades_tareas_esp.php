@@ -1,15 +1,15 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_tareas_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sin Opción";
+$TbMsg[0]="Sin OpciÃ³n";
 $TbMsg[1]="Insertar";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestión Tareas";
+$TbMsg[4]="GestiÃ³n Tareas";
 $TbMsg[5]="Nombre Tarea";
 $TbMsg[6]="Comentarios";
 ?>

@@ -1,4 +1,4 @@
-<?
+﻿<?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -6,7 +6,7 @@
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: RestaurarImagenOrdenador.php
 // Descripción : 
-//		Implementaci� del comando "RestaurarImagen" (Ordenadores)
+//		Implementación del comando "RestaurarImagen" (Ordenadores)
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");

@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_CrearPerfilSoftware.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Gestor del comando "CrearPerfilSoftware"
 // *************************************************************************************************************************************************
 include_once("../../includes/ctrlacc.php");
@@ -82,7 +82,7 @@ function TomaPerfilAula($cmd,$idperfilhard,$idaula,$ido){
 //________________________________________________________________________________________________________
 //	Devuelve el nemonico de un S.O. incluido en un perfil software 
 //		Parametros: 
-//		- cmd:Una comando ya operativo (con conexión abierta)  
+//		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 //		- ips: identificador del perfil software  
 //________________________________________________________________________________________________________
 function toma_nemonico($cmd,$ips){
@@ -102,7 +102,7 @@ function Gestiona($cmd){
 	global $ACCION_FALLIDA; // Finalizada con errores
 	global $ACCION_TERMINADA; // Finalizada manualmente con indicacion de exito 
 	global $ACCION_ABORTADA; // Finalizada manualmente con indicacion de errores 
-	global $ACCION_SINERRORES; // Activa y con algún error
+	global $ACCION_SINERRORES; // Activa y con algÃºn error
 	global $ACCION_CONERRORES; // Activa y sin error
 	global $ACCION_DETENIDA;
 	global $ACCION_INICIADA;

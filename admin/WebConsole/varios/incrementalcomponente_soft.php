@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: incrementalcomponente_soft.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Administra los componentes software incluidos en un software incremental
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -21,7 +21,7 @@ if (isset($_GET["descripcionincremental"])) $descripcionincremental=$_GET["descr
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -70,10 +70,10 @@ if (!$cmd)
 				$strex="WHERE";
 			else
 				$strex.= $A_W;
-//  Para que no salga la opción de elegir un sistema operativo
+//  Para que no salga la opciÃ³n de elegir un sistema operativo
 //			$cmd->texto='SELECT softwares.idsoftware,softwares.descripcion,tiposoftwares.descripcion as hdescripcion,tiposoftwares.urlimg  FROM softwares  INNER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware  '.$strex.'  softwares.idtiposoftware<>1 AND softwares.idcentro='.$idcentro.' ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion';
 
-// Se deja elegir componente que sea un sistema operativo sólo para para incluir en el desplegable, en la creación de software incremental
+// Se deja elegir componente que sea un sistema operativo sÃ³lo para para incluir en el desplegable, en la creaciÃ³n de software incremental
 			$cmd->texto='SELECT softwares.idsoftware,softwares.descripcion,tiposoftwares.descripcion as hdescripcion,tiposoftwares.urlimg  FROM softwares  INNER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware  '.$strex.'   softwares.idcentro='.$idcentro.' ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion';
 			$rs->Comando=&$cmd; 
 			if ($rs->Abrir()){

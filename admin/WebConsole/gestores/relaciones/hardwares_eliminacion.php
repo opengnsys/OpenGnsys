@@ -1,17 +1,17 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: hardwares_eliminacion.php
-// Descripción :
+// DescripciÃ³n :
 //	Elimina en cascada registros de la tabla hardwares 
 //		Parametros: 
-//		-	cmd:Una comando ya operativo (con conexión abierta)  
-//		-	identificador: El identificador por el que se eliminará el hardware
+//		-	cmd:Una comando ya operativo (con conexiÃ³n abierta)  
+//		-	identificador: El identificador por el que se eliminarÃ¡ el hardware
 //		-	nombreid: Nombre del campo identificador del registro 
-//		-	swid: Indica 0= El identificador es tipo alfanumérico	1= EI identificador es tipo numérico ( valor por defecto) *************************************************************************************************************************************************
+//		-	swid: Indica 0= El identificador es tipo alfanumÃ©rico	1= EI identificador es tipo numÃ©rico ( valor por defecto) *************************************************************************************************************************************************
 function	EliminaHardwares($cmd,$identificador,$nombreid,$swid=1){
 	if (empty($identificador)) return(true);
 	if($swid==0)

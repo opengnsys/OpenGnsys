@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_entidades.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de entidades
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -120,11 +120,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO entidades(nombreentidad,comentarios,iduniversidad,grupoid) VALUES (@nombreentidad,@comentarios,@iduniversidad,@grupoid)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$identidad=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_entidades($identidad,$nombreentidad);
 				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
@@ -134,7 +134,7 @@ function Gestiona(){
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
-			$resul=EliminaEntidad($cmd,$identidad,"identidad");// Eliminación en cascada
+			$resul=EliminaEntidad($cmd,$identidad,"identidad");// EliminaciÃ³n en cascada
 			break;
 		case $op_movida :
 			$cmd->texto="UPDATE entidades SET iduniversidad=@iduniversidad, grupoid=@grupoid WHERE identidad=@identidad";

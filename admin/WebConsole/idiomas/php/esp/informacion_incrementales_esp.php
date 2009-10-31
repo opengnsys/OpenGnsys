@@ -1,14 +1,14 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: informacion_incrementales_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Software Incremental';
-	$TbMsg[1]='Información sobre software incremental';
+	$TbMsg[1]='InformaciÃ³n sobre software incremental';
 	$TbMsg[2]='Software Incremental';
-	$TbMsg[3]='Información software incremental';
+	$TbMsg[3]='InformaciÃ³n software incremental';
 	$TbMsg[4]='Componentes software';
 	$TbMsg[5]='Perfiles Combinables';
 	$TbMsg[6]='Perfiles Hardware soportados';

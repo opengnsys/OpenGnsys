@@ -1,7 +1,7 @@
-//____________________________________________________________________________
+﻿//____________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: perfilcomponente_hard_esp.js 
-//	Idioma: Espa�ol 
+//	Idioma: Español 
 //____________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="Este componente hardware ha sido incluido correctamente en este perfil";

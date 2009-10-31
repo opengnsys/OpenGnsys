@@ -1,4 +1,4 @@
-<?
+Ôªø<?
 include_once("../includes/ctrlacc.php");
 
 include_once("../clases/AdoPhp.php");
@@ -98,12 +98,12 @@ include_once("../includes/iframecomun.php");
 ?>
 </BODY>
 </HTML>
-<?	$cmd->Conexion->Cerrar(); // Cierra la conexiÛn ?>
+<?	$cmd->Conexion->Cerrar(); // Cierra la conexi√≥n ?>
 <?
 /******************************************************************
-	Devuelve una objeto comando totalmente operativo (con la conexiÛn abierta)
+	Devuelve una objeto comando totalmente operativo (con la conexi√≥n abierta)
 	Parametros: 
-		- cadenaconexion: Una cadena con los datos necesarios para la conexiÛn: nombre del servidor
+		- cadenaconexion: Una cadena con los datos necesarios para la conexi√≥n: nombre del servidor
 		usuario,password,base de datos,etc separados por coma
 ---------------------------------------------------------------------------------------------*/
 function CreaComando($cadenaconexion){
@@ -118,9 +118,9 @@ function CreaComando($cadenaconexion){
 /* -------------------------------------------------------------------------------------------
 	Crea la etiqueta html <SELECT> de cualquier tabla
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexiÛn abierta)  
+		- cmd:Una comando ya operativo (con conexi√≥n abierta)  
 		- nombretabla: El nombre de la tabla origen de los datos
-		- identificador: Un identificador de la tabla ( el que aparecer· seleccionado)
+		- identificador: Un identificador de la tabla ( el que aparecer√° seleccionado)
 		- nombreid: El nombre del identificador de la tabla
 		- nombreliteral: El nombre del literal de la tabla
 		- largo: longitud del desplegable

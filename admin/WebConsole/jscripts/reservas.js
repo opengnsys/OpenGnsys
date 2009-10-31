@@ -1,6 +1,6 @@
-// *************************************************************************************************************************************************
+Ôªø// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: reservas.js
 // Este fichero implementa las funciones javascript del fichero reservas.php
 // *************************************************************************************************************************************************
@@ -22,9 +22,9 @@ function programacion(tipoaccion){
 function cola_reservas(tiporeserva){
 	reset_contextual(-1,-1); // Oculta menu contextual
 	var ambito=AMBITO_GRUPOSRESERVAS;
-	var idambito=currentNodo.toma_identificador() // identificador del ·mbito
+	var idambito=currentNodo.toma_identificador() // identificador del √°mbito
 	if(idambito==null) idambito=0;
-	var  nombreambito=	currentNodo.toma_infonodo() // nombre del ·mbito desde p·gina aula.php
+	var  nombreambito=	currentNodo.toma_infonodo() // nombre del √°mbito desde p√°gina aula.php
 	var wurl="../principal/programacionesaulas.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito+"&tipocola="+tiporeserva
 	window.open(wurl,"frame_contenidos")
 }

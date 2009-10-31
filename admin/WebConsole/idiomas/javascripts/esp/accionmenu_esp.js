@@ -1,13 +1,13 @@
-//________________________________________________________________________________________________________
+ï»¿//________________________________________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: accionmenu_esp.js 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN: Debe introducir la descripción de litem";
-TbMsg[1]=" ATENCIÓN: Debe introducir un número de orden";
-TbMsg[2]="Este item ha sido incluido correctamente en el menú";
-TbMsg[3]="Este item ha sido excluido correctamente del menú";
+TbMsg[0]="ATENCIÃ“N: Debe introducir la descripciÃ³n de litem";
+TbMsg[1]=" ATENCIÃ“N: Debe introducir un nÃºmero de orden";
+TbMsg[2]="Este item ha sido incluido correctamente en el menÃº";
+TbMsg[3]="Este item ha sido excluido correctamente del menÃº";
 TbMsg[4]="Este item ha sido modificado correctamente";
 
 

@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_tareas.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de tareas
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -24,7 +24,7 @@ $idtarea=0;
 $descripcion="";
 $comentarios="";
 $grupoid=0; 
-$swc=0; // switch de cliente, esta pagina la llama el cliente a través del browser 
+$swc=0; // switch de cliente, esta pagina la llama el cliente a travÃ©s del browser 
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 
@@ -97,7 +97,7 @@ else{
 	}
 	else{
 		echo '<SCRIPT language="javascript">'.chr(13);
-		echo 'alert("***ATENCIÓN:El item NO se ha podido ejecutar");'.chr(13);
+		echo 'alert("***ATENCIÃ“N:El item NO se ha podido ejecutar");'.chr(13);
 		echo 'location.href="../varios/menucliente.php?iph='.$_SESSION["ogCliente"].'";'.chr(13);
 		echo '</SCRIPT>';
 	}
@@ -139,11 +139,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO tareas (descripcion,comentarios,idcentro,grupoid) VALUES (@descripcion,@comentarios,@idcentro,@grupoid)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idtarea=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_tareas($idtarea,$descripcion,"");
 				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
@@ -234,7 +234,7 @@ function EjecutandoTareas(){
 	$ambitarea=substr($ambitarea,0,strlen($ambitarea)-1); // Quita la coma final
 	$paramtarea=substr($paramtarea,0,strlen($paramtarea)-1); // Quita la coma final
 
-	//Creación parametros para inserción
+	//CreaciÃ³n parametros para inserciÃ³n
 	$cmd->CreaParametro("@tipoaccion","",1);
 	$cmd->CreaParametro("@idtipoaccion",0,1);
 	$cmd->CreaParametro("@cateaccion",$PROCESOS,1);
@@ -261,7 +261,7 @@ function EjecutandoTareas(){
 	$resul=$cmd->Ejecutar();
 	if(!$resul) return(false);
 
-	$accionid=$cmd->Autonumerico(); // Toma identificador dela acción
+	$accionid=$cmd->Autonumerico(); // Toma identificador dela acciÃ³n
 
 	// Insertar acciones:comandos
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
@@ -281,7 +281,7 @@ function EjecutandoTareas(){
 		if(!$resul) return(false);
 		$tbComandos["parametros"].="ids=".$cmd->Autonumerico().chr(13);
 
-		if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+		if ($shidra->conectar()){ // Se ha establecido la conexiÃ³n con el servidor hidra
 			$shidra->envia_comando($tbComandos["parametros"]);
 			$shidra->desconectar();
 		}

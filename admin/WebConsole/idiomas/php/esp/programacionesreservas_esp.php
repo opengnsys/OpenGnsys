@@ -1,8 +1,8 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: colasreservas_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 
 // Literales de los tipo de reservas
@@ -17,7 +17,7 @@ $LITRESERVA_ACTIVA='Activa'; // Literal reserva activa
 
 $TbMsg=array();
 	$TbMsg[0]='Reservas de aulas';
-	$TbMsg[1]='Opciones de búsqueda';
+	$TbMsg[1]='Opciones de bÃºsqueda';
 	$TbMsg[2]='Tipo';
 	$TbMsg[3]='';
 	$TbMsg[4]='Estados';
@@ -27,25 +27,25 @@ $TbMsg=array();
 	$TbMsg[8]='Fecha final';
 	$TbMsg[9]='Hora inicio';
 	$TbMsg[10]='Hora final';
-	$TbMsg[11]='Ámbito';
+	$TbMsg[11]='Ãmbito';
 
 	$TbMsg[12]='Reservas';
 	$TbMsg[13]='Grupo de reservas';
 
-	$TbMsg[15]='Año';
+	$TbMsg[15]='AÃ±o';
 	$TbMsg[16]='Mes';
-	$TbMsg[17]='Día';
+	$TbMsg[17]='DÃ­a';
 	$TbMsg[18]='Aula';
-	$TbMsg[19]='Ocupación';
+	$TbMsg[19]='OcupaciÃ³n';
 	$TbMsg[20]='Imagen asociada';
-	$TbMsg[21]='Descripción';
+	$TbMsg[21]='DescripciÃ³n';
 
-	$TbMsg[22]='Programación reservas';
+	$TbMsg[22]='ProgramaciÃ³n reservas';
 	$TbMsg[23]='(Sin especificar)';
 	$TbMsg[24]='Aula';
 	$TbMsg[25]='Solicitante';
-	$TbMsg[26]="Anticipación previa";
-	$TbMsg[27]="(Sin acción previa)";
+	$TbMsg[26]="AnticipaciÃ³n previa";
+	$TbMsg[27]="(Sin acciÃ³n previa)";
 	$TbMsg[28]="Tarea previa";
 	$TbMsg[29]="Trabajo previo";
 	$TbMsg[30]="Datos Reserva";

@@ -1,10 +1,10 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: actualizar_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Este ámbito se ha refrescado correctamente';
-	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al refrescar el ámbito';
+	$TbMsg[0]='Este Ã¡mbito se ha refrescado correctamente';
+	$TbMsg[1]='ATENCIÃ“N: Ha habido algÃºn problema al refrescar el Ã¡mbito';
 ?>

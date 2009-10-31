@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: administracion_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Administración"';
+	$TbMsg[0]='"AdministraciÃ³n"';
 	$TbMsg[1]='"Nuevo grupo de Entidades"';
 	$TbMsg[2]='"Nueva Entidad"';
 	$TbMsg[3]='"Nuevo Superadministrador"';

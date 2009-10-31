@@ -1,29 +1,29 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: informacion_menus_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Items del Menu';
-	$TbMsg[1]='Información del Menú';
-	$TbMsg[2]='Menú';
-	$TbMsg[3]='Información Menú';
+	$TbMsg[1]='InformaciÃ³n del MenÃº';
+	$TbMsg[2]='MenÃº';
+	$TbMsg[3]='InformaciÃ³n MenÃº';
 	$TbMsg[4]='Propiedades de los items';
 	$TbMsg[5]='Propiedades';
 	$TbMsg[6]='Eliminar Item';
-	$TbMsg[7]='Título';
-	$TbMsg[8]='Propiedades de los items públicos del Menú';
+	$TbMsg[7]='TÃ­tulo';
+	$TbMsg[8]='Propiedades de los items pÃºblicos del MenÃº';
 	$TbMsg[9]='Coordenada x';
 	$TbMsg[10]='Coordenada y';
 	$TbMsg[11]='Modalidad';
-	$TbMsg[12]='Propiedades de los items privados del Menú';
-	$TbMsg[13]='Items públicos ';
+	$TbMsg[12]='Propiedades de los items privados del MenÃº';
+	$TbMsg[13]='Items pÃºblicos ';
 	$TbMsg[14]='Items privados';
 	$TbMsg[15]='Orden del item';
 	$TbMsg[16]='Literal del item';
 	$TbMsg[17]='Nombre de la Imagen';
-	$TbMsg[18]='Menú simple';
-	$TbMsg[19]='Menú doble';
-	$TbMsg[20]='Código del item';
+	$TbMsg[18]='MenÃº simple';
+	$TbMsg[19]='MenÃº doble';
+	$TbMsg[20]='CÃ³digo del item';
 ?>

@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_Arrancar.php
-// Descripción : 
+// DescripciÃ³n : 
 //		Gestor del comando "Arrancar"
 // *************************************************************************************************************************************************
 include_once("../../includes/ctrlacc.php");
@@ -65,7 +65,7 @@ else{
 <?
 // *************************************************************************************************************************************************
 function Gestiona($cmd){
-	global $ACCION_SINERRORES; // Activa y con algún error
+	global $ACCION_SINERRORES; // Activa y con algÃºn error
 	global $ACCION_INICIADA;
 	global $idcentro;
 	global $identificador;

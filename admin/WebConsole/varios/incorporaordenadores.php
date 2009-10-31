@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: incorporaordenadores.php
-// Descripción : 
-//		Da de alta en la base de datos nuevos ordenadores desde un fichero de configuración dhcp
+// DescripciÃ³n : 
+//		Da de alta en la base de datos nuevos ordenadores desde un fichero de configuraciÃ³n dhcp
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -15,7 +15,7 @@ include_once("../idiomas/php/".$idioma."/incorporaordenadores_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 //___________________________________________________________________________________________________
 $swf=0; 
 $idaula=0; 
@@ -36,8 +36,8 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	$resul=procesaLineas($cmd,$idaula,$contenido);
 }
 else{
-	if(!empty($swf)){ // Se ha enviado un fichero de configuración
-		// Se envía fichero de script
+	if(!empty($swf)){ // Se ha enviado un fichero de configuraciÃ³n
+		// Se envÃ­a fichero de script
 		$ficheroPOST = $HTTP_POST_FILES['userfile']['tmp_name']; 
 		$nombreOriginal_archivo = $HTTP_POST_FILES['userfile']['name']; 
 		$URLPATHFILECFG="../includes";
@@ -50,7 +50,7 @@ else{
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
@@ -100,7 +100,7 @@ function Gestiona($cmd,$idaula){
 	global $ficheroLOCAL;
 
 	$codigo="";
-	// Se envía fichero de script 
+	// Se envÃ­a fichero de script 
 	if(!empty($ficheroPOST)){
 		if (salvafichero_POST($ficheroPOST,$ficheroLOCAL)){
 			$fp = fopen ($ficheroLOCAL, "r");

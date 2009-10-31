@@ -1,6 +1,6 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: softwares.js
 // Este fichero implementa las funciones javascript del fichero softwares.php
 // *************************************************************************************************************************************************
@@ -17,7 +17,7 @@ function insertar_perfilcomponente(){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra información sobre los perfiles software
+//	Muestra informaciÃ³n sobre los perfiles software
 //________________________________________________________________________________________________________
 function informacion_perfiles(){
 	reset_contextual(-1,-1)
@@ -39,7 +39,7 @@ function insertar_incrementalcomponente(){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra información sobre los perfiles software
+//	Muestra informaciÃ³n sobre los perfiles software
 //________________________________________________________________________________________________________
 function informacion_incrementales(){
 	reset_contextual(-1,-1)

@@ -1,11 +1,11 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Noviembre-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: cadenas.js
-// Descripción : 
-//		Este fichero implementa funciones de uso común para cadenas
+// DescripciÃ³n : 
+//		Este fichero implementa funciones de uso comÃºn para cadenas
 // *************************************************************************************************************************************************
 function TrimLeft( str ) {
 	var resultStr = "";

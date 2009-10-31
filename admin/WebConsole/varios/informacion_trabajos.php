@@ -1,12 +1,12 @@
-<?
+Ôªø<?
 // *************************************************************************************************************************************************
-// AplicaciÛn WEB: ogAdmWebCon
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Aplicaci√≥n WEB: ogAdmWebCon
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha CreaciÛn: AÒo 2003-2004
-// Fecha ⁄ltima modificaciÛn: Febrero-2005
+// Fecha Creaci√≥n: A√±o 2003-2004
+// Fecha √öltima modificaci√≥n: Febrero-2005
 // Nombre del fichero: informacion_tareas.php
-// DescripciÛn : 
+// Descripci√≥n : 
 //		Muestra las tareas, sus comandos y valores, que forman parte de un trabajo
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -25,7 +25,7 @@ if (isset($_GET["descripciontrabajo"]))	$descripciontrabajo=$_GET["descripciontr
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>AdministraciÛn web de aulas</TITLE>
+<TITLE>Administraci√≥n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
@@ -135,12 +135,12 @@ function pintacomandos($cmd,$idtareacomando){
 	$HTMLparametros.=	'</TR>';
 
 	$auxVP=split(";",$rs->campos["visuparametros"]); // Parametros visualizables
-	$auxP=split(chr(13),$rs->campos["parametros"]); // Recorre parametros para visualizar los que asÌ sean
+	$auxP=split(chr(13),$rs->campos["parametros"]); // Recorre parametros para visualizar los que as√≠ sean
 	for ($i=0;$i<sizeof($auxP);$i++){
 		$dualparam=split("=",$auxP[$i]);
 		for ($k=0;$k<sizeof($auxVP);$k++){
 			 if($auxVP[$k]==$dualparam[0]){
-				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del par·metro en la tabla cargada previamentre con todos los par·metros
+				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del par√°metro en la tabla cargada previamentre con todos los par√°metros
 				if ($posp>=0){
 					$auxtabla_parametros=$tabla_parametros[$posp][1];
 					$HTMLparametros.='<TR>'.chr(13);
@@ -175,7 +175,7 @@ function PintaOrdenadores($cmd,$cadenaip){
 		$clauslaIN.=",'".$auxP[$i]."'";
 	$rs=new Recordset; 
 	$contor=0;
-	$maxord=7; // M·ximos ordenadores por linea
+	$maxord=7; // M√°ximos ordenadores por linea
 	$cmd->texto=" SELECT nombreordenador,ip FROM ordenadores  INNER JOIN aulas ON aulas.idaula=ordenadores.idaula WHERE ip IN(".$clauslaIN.") ORDER by nombreaula,nombreordenador";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(""); // Error al abrir recordset

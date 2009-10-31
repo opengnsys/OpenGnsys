@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Febrero-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: actualizar.php
-// Descripción : 
-//		Actualiza la visualización de los ordenadores de un ámbito concreto
+// DescripciÃ³n : 
+//		Actualiza la visualizaciÃ³n de los ordenadores de un Ã¡mbito concreto
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/SockHidra.php");
@@ -23,7 +23,7 @@ if (isset($_GET["idambito"])) $idambito=$_GET["idambito"];
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃ³n con servidor B.D.
 //________________________________________________________________________________________________________
 $cadenaip="";
 switch($litambito){
@@ -56,7 +56,7 @@ $resul=manda_trama();
 // *************************************************************************************************************************************************
 ?>
 <HTML>
-<TITLE>" Administración web de aulas"</TITLE>
+<TITLE>" AdministraciÃ³n web de aulas"</TITLE>
 <HEAD>
 </HEAD>
 <BODY>
@@ -79,7 +79,7 @@ $resul=manda_trama();
 function manda_trama(){
 	global $parametros;
 	global $shidra;
-	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+	if ($shidra->conectar()){ // Se ha establecido la conexiÃ³n con el servidor hidra
 		$shidra->envia_comando($parametros);
 		$shidra->desconectar();
 		return(true);

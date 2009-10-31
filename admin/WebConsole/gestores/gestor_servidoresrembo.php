@@ -1,5 +1,5 @@
 ﻿<?
-// *************************************************************************************************************************************************
+// ******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creaciónn: A�o 2003-2004
@@ -7,7 +7,7 @@
 // Nombre del fichero: gestor_servidoresrembo.php
 // Descripciónn :
 //		Gestiona el mantenimiento de la tabla de servidoresrembo
-// *************************************************************************************************************************************************
+// ******************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");

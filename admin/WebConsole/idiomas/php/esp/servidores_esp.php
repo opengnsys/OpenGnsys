@@ -1,21 +1,21 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: servidores_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"Nuevo grupo de Servidores"';
-	$TbMsg[1]='"Añadir Servidor OpenGnsys "';
+	$TbMsg[1]='"AÃ±adir Servidor OpenGnsys "';
 	$TbMsg[2]='"Colocar Servidor"';
 	$TbMsg[3]='"Renombrar"';
 	$TbMsg[4]='"Eliminar grupo de servidores"';
-	$TbMsg[5]='"Información Servidor"';
+	$TbMsg[5]='"InformaciÃ³n Servidor"';
 	$TbMsg[6]='"Mover Servidor"';
 	$TbMsg[7]='"Propiedades"';
 	$TbMsg[8]='"Eliminar Servidor"';
 	$TbMsg[9]='"Nuevo grupo de Servidores"';
-	$TbMsg[10]='"Añadir nuevo Servidor Dhcp"';
+	$TbMsg[10]='"AÃ±adir nuevo Servidor Dhcp"';
 	$TbMsg[11]='"Eliminar Servidor Dhcp"';
 	$TbMsg[12]='"Servidores OpenGnsys"';
 	$TbMsg[13]='"Servidores Dhcp"';

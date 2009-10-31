@@ -1,10 +1,10 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: conmutar_esp.php 
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Este ámbito ha conmutado correctamente';
-	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al conmutar el ámbito';
+	$TbMsg[0]='Este Ã¡mbito ha conmutado correctamente';
+	$TbMsg[1]='ATENCIÃ“N: Ha habido algÃºn problema al conmutar el Ã¡mbito';
 ?>

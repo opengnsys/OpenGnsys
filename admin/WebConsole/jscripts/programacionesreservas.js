@@ -1,10 +1,10 @@
-// *************************************************************************************************************************************************
+ï»¿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Noviembre-2005
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n:2003-2004
+// Fecha Ãšltima modificaciÃ³n: Noviembre-2005
 // Nombre del fichero: programacionesreservas.js
-// Descripción : 
+// DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero programacionesreservas.php
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
@@ -71,13 +71,13 @@
 			return
 		}
 
-		if(wfechainicio[2]==anno) // El mismo año que el de inicio
+		if(wfechainicio[2]==anno) // El mismo aÃ±o que el de inicio
 			document.fdatos.fechafin.value="31/12/"+anno;
 		else{
 				document.fdatos.fechainicio.value="1/1/"+anno
 		}
 
-		if(wfechafin[2]==anno) // El mismo año que el de fin
+		if(wfechafin[2]==anno) // El mismo aÃ±o que el de fin
 			document.fdatos.fechainicio.value="1/1/"+anno
 		else{
 			document.fdatos.fechafin.value="31/12/"+anno;

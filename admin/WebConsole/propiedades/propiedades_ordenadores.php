@@ -1,5 +1,5 @@
 ﻿<? 
-// *************************************************************************************************************************************************
+// ****************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
@@ -7,7 +7,7 @@
 // Nombre del fichero: propiedades_ordenadores.php
 // Descripción : 
 //		 Presenta el formulario de captura de datos de un ordenador para insertar,modificar y eliminar
-// *************************************************************************************************************************************************
+// ****************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");

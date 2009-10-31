@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_trabajostareas.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de trabajos_tareas
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -91,7 +91,7 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO trabajos_tareas (idtrabajo,idtarea,orden) VALUES (@idtrabajo,@idtarea,@orden)";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idtrabajotarea=$cmd->Autonumerico();
 				$resul=actualiza_ambitoparametros($idtrabajotarea);
 			}
@@ -141,7 +141,7 @@ function actualiza_ambitoparametros($idtrabajotarea){
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
-	//Creación parametros para inserción
+	//CreaciÃ³n parametros para inserciÃ³n
 	$cmd->CreaParametro("@ambitskwrk",$ambitrabajo,0);
 	$cmd->CreaParametro("@parametros",$paramtrabajo,0);	
 	$cmd->texto="UPDATE trabajos_tareas SET ambitskwrk=@ambitskwrk,parametros=@parametros WHERE idtrabajotarea=".$idtrabajotarea;

@@ -1,15 +1,15 @@
-<?
+ï»¿<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: crearperfilsoftware_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Generación de perfiles software';
-	$TbMsg[1]='Características del ordenador';
+	$TbMsg[0]='GeneraciÃ³n de perfiles software';
+	$TbMsg[1]='CaracterÃ­sticas del ordenador';
 	$TbMsg[2]='Nombre';
-	$TbMsg[3]='Dirección IP';
-	$TbMsg[4]='Dirección MAC';
+	$TbMsg[3]='DirecciÃ³n IP';
+	$TbMsg[4]='DirecciÃ³n MAC';
 	$TbMsg[5]='Perfil Hardware';
 	$TbMsg[6]='Datos a suministrar';
 	$TbMsg[7]='';

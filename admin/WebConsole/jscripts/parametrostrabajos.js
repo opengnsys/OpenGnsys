@@ -1,12 +1,12 @@
-// ************************************************************************
+Ôªø// ************************************************************************
 //	Libreria de scripts de Javascript
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: parametrostrabajos.js
 // ************************************************************************
 //____________________________________________________________________________
 //	
-//	Esta funciÛn muestra una tabala de  parametros de comandos
-//		Los par·metros recibidos son:
+//	Esta funci√≥n muestra una tabala de  parametros de comandos
+//		Los par√°metros recibidos son:
 //			- id: identificador de la tarea
 //____________________________________________________________________________
 function abre_tablaparametros(id){
