@@ -6,7 +6,8 @@
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: barramenu.php
 // Descripción :Este fichero implementa el menu general de la Aplicación
-// ********************************************************************************************************if(isset($_SESSION)){ 	// Si existe algua sesión ...
+// ********************************************************************************************************
+if(isset($_SESSION)){ 	// Si existe algua sesión ...
 	session_unset(); // Elimina variables
 	session_destroy(); // Destruye sesión
 }
