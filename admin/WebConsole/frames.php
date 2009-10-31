@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Diciembre-2003
-// Fecha Última modificación: Febrero-2005
+// Fecha CreaciÃ³n: Diciembre-2003
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: frames.php
-// Descripción :Este fichero implementa la distribución en frames de la aplicación
+// DescripciÃ³n :Este fichero implementa la distribuciÃ³n en frames de la aplicaciÃ³n
 // *************************************************************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
@@ -15,7 +15,7 @@ include_once("./includes/constantes.php");
 ?>
 <HTML>
 <HEAD>
-<TITLE> Administración web de aulas</TITLE>
+<TITLE> AdministraciÃ³n web de aulas</TITLE>
 </HEAD>
 <FRAMESET rows="25,*">
 	<FRAME SRC="barramenu.php" frameborder=0  scrolling=no  NAME="frame_menus" >

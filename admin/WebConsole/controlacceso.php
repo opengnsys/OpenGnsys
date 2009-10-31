@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Diciembre-2003
-// Fecha Última modificación: Febrero-2005
+// Fecha CreaciÃ³n: Diciembre-2003
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: controlacceso.php
-// Descripción :Este fichero implementa el control de acceso a la aplicación
+// DescripciÃ³n :Este fichero implementa el control de acceso a la aplicaciÃ³n
 // *************************************************************************************************************************************************
 include_once("./clases/AdoPhp.php");
 
@@ -18,7 +18,7 @@ if (isset($_POST["pss"])) $pss=$_POST["pss"];
 include_once("./includes/controlacceso.inc");
 ?>
 <HTML>
-	<TITLE> Administración web de aulas</TITLE>
+	<TITLE> AdministraciÃ³n web de aulas</TITLE>
 	<HEAD>
 		<LINK rel="stylesheet" type="text/css" href="hidra.css">
 	</HEAD>

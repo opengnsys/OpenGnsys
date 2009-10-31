@@ -1,12 +1,12 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
-// Fecha Creación: Diciembre-2003
-// Fecha Última modificación: Febrero-2005
+// Fecha CreaciÃ³n: Diciembre-2003
+// Fecha Ãšltima modificaciÃ³n: Febrero-2005
 // Nombre del fichero: acceso.php
-// Descripción : Presenta la pantalla de login de la aplicación
+// DescripciÃ³n : Presenta la pantalla de login de la aplicaciÃ³n
 // *************************************************************************************************************************************************
 $herror=0;
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
@@ -14,14 +14,14 @@ if (isset($_POST["herror"])) $herror=$_POST["herror"];
 
 $TbErr=array();
 $TbErr[0]="SIN ERRORES";
-$TbErr[1]="ATENCIÓN: Debe acceder a la aplicación a través de la pagina inicial";
-$TbErr[2]="ATENCIÓN: La Aplicación no tiene acceso al Servidor de Bases de Datos";
-$TbErr[3]="ATENCIÓN: Existen problemas para recuperar el registro, puede que haya sido eliminado";
-$TbErr[4]="ATENCIÓN: Usted no tiene acceso a esta aplicación";
+$TbErr[1]="ATENCIÃ“N: Debe acceder a la aplicaciÃ³n a travÃ©s de la pagina inicial";
+$TbErr[2]="ATENCIÃ“N: La AplicaciÃ³n no tiene acceso al Servidor de Bases de Datos";
+$TbErr[3]="ATENCIÃ“N: Existen problemas para recuperar el registro, puede que haya sido eliminado";
+$TbErr[4]="ATENCIÃ“N: Usted no tiene acceso a esta aplicaciÃ³n";
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>AdministraciÃ³n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="estilos.css">
 </HEAD>
@@ -39,7 +39,7 @@ function comprobar_datos(){
 		return(false)
 	}
 	if (document.fdatos.pss.value==""){
-		alert("Debe introducir una contraseña")
+		alert("Debe introducir una contraseÃ±a")
 		document.fdatos.pss.focus()
 		return(false)
 	}

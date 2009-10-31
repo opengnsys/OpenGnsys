@@ -1,11 +1,11 @@
-<?
+ï»¿<?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2005
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2003-2004
+// Fecha Ãšltima modificaciÃ³n: Marzo-2005
 // Nombre del fichero: gestor_usuarios.php
-// Descripción :
+// DescripciÃ³n :
 //		Gestiona el mantenimiento de la tabla de usuarios
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -129,11 +129,11 @@ function Gestiona(){
 		case $op_alta :
 			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,idambito,ididioma,idtipousuario ) VALUES (@usuario,@pasguor,@nombre,@email,@idambito,@ididioma,@idtipousuario);";
 			$resul=$cmd->Ejecutar();
-			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
+			if ($resul){ // Crea una tabla nodo para devolver a la pÃ¡gina que llamÃ³ Ã©sta
 				$idusuario=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_usuarios($idusuario,$nombre,$idtipousuario);
 				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del Ã¡rbol
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 				if($idtipousuario==$OPERADOR)
@@ -169,7 +169,7 @@ function Gestiona(){
 /*________________________________________________________________________________________________________
 	Busca los datos de un usuario 
 		Parametros: 
-		- cmd:Una comando ya operativo (con conexión abierta)  
+		- cmd:Una comando ya operativo (con conexiÃ³n abierta)  
 		- idusuario:El identificador del usuario
 ________________________________________________________________________________________________________*/
 function toma_usuario($cmd,$idusuario){
@@ -223,7 +223,7 @@ function SubarbolXML_usuarios($idusuario,$nombre,$idtipousuario){
 		return($cadenaXML);
 } 
 /*________________________________________________________________________________________________________
-	Envía un comando al servidor para que cree el fichero de login de este operador
+	EnvÃ­a un comando al servidor para que cree el fichero de login de este operador
 ________________________________________________________________________________________________________*/
 function GestionLogin($cmd,$usuario,$pasguor,$idusuario,$op,$idambito){
 	global $servidorhidra;
@@ -273,7 +273,7 @@ function TomaIpesServidores($cmd,$idusuario,$idambito){
 //	Manda una trama del comando Actualizar
 //________________________________________________________________________________________________________
 function manda_trama($shidra,$parametros){
-	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+	if ($shidra->conectar()){ // Se ha establecido la conexiÃ³n con el servidor hidra
 		$shidra->envia_comando($parametros);
 		$shidra->desconectar();
 		return(true);

@@ -1,15 +1,15 @@
-<?
+Ôªø<?
 // *************************************************************************************************************************************************
-// AplicaciÛn WEB: ogAdmWebCon
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn: Diciembre-2003
-// Fecha ⁄ltima modificaciÛn: Febrero-2005
+// Aplicaci√≥n WEB: ogAdmWebCon
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n: Diciembre-2003
+// Fecha √öltima modificaci√≥n: Febrero-2005
 // Nombre del fichero: acceso.php
-// DescripciÛn : Presenta la pantalla de login de la aplicaciÛn
+// Descripci√≥n : Presenta la pantalla de login de la aplicaci√≥n
 // *************************************************************************************************************************************************
-if(isset($_SESSION)){ 	// Si existe algua sesiÛn ...
+if(isset($_SESSION)){ 	// Si existe algua sesi√≥n ...
 	session_unset(); // Elimina variables
-	session_destroy(); // Destruye sesiÛn
+	session_destroy(); // Destruye sesi√≥n
 }
 $herror=0;
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
@@ -22,7 +22,7 @@ $TbErr[3]="WARNING: There are some problem to recovery the record, must be it is
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE> AdministraciÛn web de aulas</TITLE>
+<TITLE> Administraci√≥n web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="estilos.css">
 </HEAD>
@@ -34,7 +34,7 @@ function confirmar(){
 		var pss=document.fdatos.pss.value;
 		var ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 		var wurl="controlacceso.php?usu="+usu+"&pss="+pss
-		ifr.src=wurl; // LLama a la p·gina gestora
+		ifr.src=wurl; // LLama a la p√°gina gestora
 	}
 }
 //________________________________________________________________________________________________________
