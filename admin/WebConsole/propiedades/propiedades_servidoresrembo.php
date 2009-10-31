@@ -1,7 +1,7 @@
 <?  
 // *************************************************************************************************************************************************
-// Aplicaciónn WEB: Hidra
-// Copyright 2003-2005  Jos� Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creaciónn: A�o 2003-2004
 // Fecha �ltima modificaci�n: Marzo-2005
 // Nombre del fichero: propiedades_servidoresrembo.php

@@ -1,7 +1,8 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: Hidra
-// Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+
 // Fecha Creación: Diciembre-2003
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: controlacceso.php

@@ -1,7 +1,7 @@
 <?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
-// Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2009
 // Fecha Última modificación: Octubre-2009
 // Nombre del fichero: menumliente.php

@@ -1,6 +1,6 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2005 José Manuel Alonso. Todos los derechos reservados.
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fichero: menus.js
 // Este fichero implementa las funciones javascript del fichero menus.php
 // *************************************************************************************************************************************************

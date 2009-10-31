@@ -1,7 +1,7 @@
 <?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
-// Copyright 200-2005 Jos�Manuel Alonso. Todos los derechos reservados.
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: informacion_procedimientos.php

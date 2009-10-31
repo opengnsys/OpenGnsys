@@ -1,7 +1,8 @@
 <?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
-// Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: incrementalcomponente_soft.php

@@ -1,12 +1,12 @@
 <?
-// *************************************************************************************************************************************************
+// ********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
-// Copyright 2003-2005 Jos�Manuel Alonso. Todos los derechos reservados.
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Diciembre-2003
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: barramenu.php
 // Descripción :Este fichero implementa el menu general de la Aplicación
-// *************************************************************************************************************************************************
+// ********************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
 include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
