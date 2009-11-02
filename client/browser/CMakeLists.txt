@@ -29,6 +29,8 @@ add_executable(browser ${browser_SRCS})
 
 target_link_libraries(browser qtermwidget ${QT_QTWEBKIT_LIBRARIES} )
 
+# set(CMAKE_CXX_FLAGS "-static")
+
 foreach(QT ${QT_LIBRARIES})
   message("${QT}")
 endforeach(QT)

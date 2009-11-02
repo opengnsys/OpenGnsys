@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <QProgressBar>
 #include <QTabWidget>
+#include <QLineEdit>
 
 #include "qtermwidget.h"
 
@@ -36,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Output
     output->setReadOnly(true);
 
-    // Dock
+    // Button Dock
     QDockWidget* dock=new QDockWidget();
     dock->setAllowedAreas(Qt::BottomDockWidgetArea);
     QWidget* dummy=new QWidget();
@@ -46,7 +47,9 @@ MainWindow::MainWindow(QWidget *parent)
     // TabWidget
     tabs=new QTabWidget(dock);
     QPushButton *button=new QPushButton(tr("&New Term"));
+    button->setFocusPolicy(Qt::TabFocus);
     tabs->setCornerWidget(button);
+    tabs->setFocusPolicy(Qt::NoFocus);
 
     tabs->addTab(output,tr("Output"));
     slotCreateTerminal();
@@ -56,6 +59,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Y el dock al mainwindow
     addDockWidget(Qt::BottomDockWidgetArea,dock);
+
+    // Top Dock
+    dock=new QDockWidget();
+    dock->setAllowedAreas(Qt::TopDockWidgetArea);
+    QWidget* dummy2=new QWidget();
+    dummy2->setMaximumHeight(0);
+    dock->setTitleBarWidget(dummy2);
+
+    // WebBar
+    webBar=new QLineEdit(dock);
+
+    // WebBar al dock
+    dock->setWidget(webBar);
+
+    // dock al mainwindow
+    addDockWidget(Qt::TopDockWidgetArea,dock);
 
     // Status bar
     QStatusBar* st=statusBar();
@@ -67,15 +86,13 @@ MainWindow::MainWindow(QWidget *parent)
     web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     // Web signals
-    connect(web->page(),SIGNAL(linkClicked(const QUrl&)),this,
+    connect(web,SIGNAL(linkClicked(const QUrl&)),this,
             SLOT(slotLinkHandle(const QUrl&)));
     connect(web,SIGNAL(loadStarted()),this,SLOT(slotWebLoadStarted()));
     connect(web,SIGNAL(loadFinished(bool)),this,SLOT(slotWebLoadFinished(bool)));
     connect(web,SIGNAL(loadProgress(int)),this,SLOT(slotWebLoadProgress(int)));
-
-    QStringList arguments=QCoreApplication::arguments();
-    web->load(QUrl(arguments[1]));
-
+    connect(web,SIGNAL(urlChanged(const QUrl&)),this,
+            SLOT(slotUrlChanged(const QUrl&)));
 
     // Process signals
     connect(process,SIGNAL(started()),this,SLOT(slotProcessStarted()));
@@ -89,7 +106,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(process,SIGNAL(readyReadStandardError()),
             this,SLOT(slotProcessErrorOutput()));
 
+    // Dock signals
     connect(button,SIGNAL(clicked()),this,SLOT(slotCreateTerminal()));
+    connect(webBar,SIGNAL(returnPressed()),this,SLOT(slotWebBarReturnPressed()));
 
     if(!readEnvironmentValues())
         output->insertPlainText(tr("Any environment variable/s didn't be setted\n"));
@@ -107,6 +126,10 @@ MainWindow::MainWindow(QWidget *parent)
         else
             logstream=new QTextStream(logfile);
     }
+
+    QStringList arguments=QCoreApplication::arguments();
+    webBar->setText(arguments[1]);
+    web->load(QUrl(arguments[1]));
 }
 
 MainWindow::~MainWindow()
@@ -201,6 +224,13 @@ void MainWindow::slotWebLoadFinished(bool ok)
     }
 }
 
+
+void MainWindow::slotUrlChanged(const QUrl &url)
+{
+    webBar->setText(url.toString());
+    qDebug()<<"Change"<<endl;
+}
+
 void MainWindow::slotProcessStarted()
 {
     qDebug()<<"Proceso inicializado"<<endl;
@@ -272,20 +302,37 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
 
 void MainWindow::slotCreateTerminal()
 {
-    QTermWidget* console = new QTermWidget();
+    QTermWidget* console = new QTermWidget(1,this);
     QFont font = QApplication::font();
     font.setFamily("Terminus");
     font.setPointSize(12);
     
     console->setTerminalFont(font);
+    console->setFocusPolicy(Qt::StrongFocus);
     
     //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
     console->setScrollBarPosition(QTermWidget::ScrollBarRight);
 
     ++numberTerminal;
 
+    connect(console,SIGNAL(finished()),this,SLOT(slotDeleteTerminal()));
+
     QString name=tr("Term ")+QString::number(numberTerminal);
     tabs->addTab(console,name);
+}
+
+void MainWindow::slotDeleteTerminal()
+{
+  QWidget *widget = qobject_cast<QWidget *>(sender());
+  Q_ASSERT(widget);
+  tabs->removeTab(tabs->indexOf(widget));
+}
+
+void MainWindow::slotWebBarReturnPressed()
+{
+  QUrl url(webBar->text());
+  if(url.isValid())
+    slotLinkHandle(url);
 }
 
 int MainWindow::readEnvironmentValues()

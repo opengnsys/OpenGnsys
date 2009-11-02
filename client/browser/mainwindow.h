@@ -21,6 +21,7 @@ class QFile;
 class QTextStream;
 class QTermWidget;
 class QProgressBar;
+class QLineEdit;
 
 class MainWindow : public QMainWindow
 {
@@ -46,6 +47,11 @@ class MainWindow : public QMainWindow
 
         // Funcion para crear terminales
         void slotCreateTerminal();
+        void slotDeleteTerminal();
+
+        // Funcion para el webar
+        void slotWebBarReturnPressed();
+        void slotUrlChanged(const QUrl &url);
 
     //Functions
     protected:
@@ -57,6 +63,7 @@ class MainWindow : public QMainWindow
         QTextEdit *output;
         QProgressBar *progressBar;
         QTabWidget *tabs;
+        QLineEdit *webBar;
 
         QProcess *process;
 
