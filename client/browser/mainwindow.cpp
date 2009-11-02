@@ -24,7 +24,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),web(new QWebView()),output(new QTextEdit()),
       process(new QProcess(this)),
-      logfile(NULL),logstream(NULL)
+      logfile(NULL),logstream(NULL),numberTerminal(0)
 {
     // Graphic
     //showFullScreen();
@@ -45,10 +45,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // TabWidget
     tabs=new QTabWidget(dock);
+    QPushButton *button=new QPushButton(tr("&New Term"));
+    tabs->setCornerWidget(button);
 
-    // Anyado output a las pestanyas
     tabs->addTab(output,tr("Output"));
-    tabs->addTab(createTerminal(),tr("Term 1"));
+    slotCreateTerminal();
 
     // Las pestanyas al dock
     dock->setWidget(tabs);
@@ -87,6 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotProcessOutput()));
     connect(process,SIGNAL(readyReadStandardError()),
             this,SLOT(slotProcessErrorOutput()));
+
+    connect(button,SIGNAL(clicked()),this,SLOT(slotCreateTerminal()));
 
     if(!readEnvironmentValues())
         output->insertPlainText(tr("Any environment variable/s didn't be setted\n"));
@@ -267,6 +270,24 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
     }
 }
 
+void MainWindow::slotCreateTerminal()
+{
+    QTermWidget* console = new QTermWidget();
+    QFont font = QApplication::font();
+    font.setFamily("Terminus");
+    font.setPointSize(12);
+    
+    console->setTerminalFont(font);
+    
+    //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
+    console->setScrollBarPosition(QTermWidget::ScrollBarRight);
+
+    ++numberTerminal;
+
+    QString name=tr("Term ")+QString::number(numberTerminal);
+    tabs->addTab(console,name);
+}
+
 int MainWindow::readEnvironmentValues()
 {
     // The return value
@@ -299,19 +320,3 @@ int MainWindow::readEnvironmentValues()
 
     return ret;
 }
-
-QTermWidget* MainWindow::createTerminal()
-{
-    QTermWidget* console = new QTermWidget();
-    QFont font = QApplication::font();
-    font.setFamily("Terminus");
-    font.setPointSize(12);
-    
-    console->setTerminalFont(font);
-    
-    //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
-    console->setScrollBarPosition(QTermWidget::ScrollBarRight);
-
-    return console;
-}
-

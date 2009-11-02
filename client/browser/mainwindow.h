@@ -44,10 +44,12 @@ class MainWindow : public QMainWindow
         void slotProcessOutput();
         void slotProcessErrorOutput();
 
+        // Funcion para crear terminales
+        void slotCreateTerminal();
+
     //Functions
     protected:
         int readEnvironmentValues();
-        QTermWidget* createTerminal();
 
 
     protected:
@@ -61,6 +63,8 @@ class MainWindow : public QMainWindow
         QMap<QString,QString> env;
         QFile *logfile;
         QTextStream *logstream;
+
+        int numberTerminal;
 };
 
 #endif // MAINWINDOW_H
