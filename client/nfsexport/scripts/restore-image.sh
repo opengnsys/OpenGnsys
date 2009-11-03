@@ -14,7 +14,7 @@ IMGFILE=$(ogGetPath "$1" "$2.img")
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     IMGDIR=$(ogGetParentPath "$1" "$2")
     # Si no existe el directorio de la imagen, crearlo.
-    if [ -z "$IMGDIR"]; then
+    if [ -z "$IMGDIR" ]; then
         echo "Creando directorio de imagen \"$1, ${2%/*}\"."
         ogMakeDir "$1" "${2%/*}" || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
     fi

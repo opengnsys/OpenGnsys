@@ -1,6 +1,7 @@
 #!/bin/bash
 #@file    upgrade-clients-udeb.sh
 #@brief   Actualiza los paquetes udeb que deben ser exportados a los clientes.
+#@arg  \c distrib - nombre de la distribución de Ubuntu (karmic, jaunty, ...).
 #@note    El script debe ser copiado a \c opengnsys/bin y el fichero de configuración a \c opengnsys/etc
 #@note    Formato del fichero \c udeb.list :    {install|remove}:paquete
 
@@ -8,7 +9,8 @@
 # Variables
 PROG="$(basename $0)"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-CFGFILE="$OPENGNSYS/etc/udeblist.conf"
+DISTRIB=${1:-"jaunty"}
+CFGFILE="$OPENGNSYS/etc/udeblist${1:+"-$1"}.conf"
 OGUDEB="$OPENGNSYS/client/lib/udeb"
 TMPUDEB="/tmp/udeb"
 UDEBLIST="/etc/apt/sources.list.d/udeb.list"
@@ -26,7 +28,7 @@ if [ -z "$PACKAGES_INSTALL" ]; then
 fi
 
 #/// Crear configuración para apt-get 
-echo "deb http://es.archive.ubuntu.com/ubuntu/ jaunty main/debian-installer" >$UDEBLIST
+echo "deb http://es.archive.ubuntu.com/ubuntu/ $DISTRIB main/debian-installer" >$UDEBLIST
 mkdir -p $TMPUDEB/partial
 rm -f $TMPUDEB/*.udeb
 
