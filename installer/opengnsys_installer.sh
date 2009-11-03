@@ -14,17 +14,20 @@ DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpca
 
 INSTALL_TARGET=/opt/opengnsys
 
+MYSQL_ROOT_PASSWORD="passwordroot"
+
 # conexión al svn
 SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 
 # Datos de base de datos
-MYSQL_ROOT_PASSWORD="passwordroot"
-#HIDRA_DATABASE=bdhidra
-#HIDRA_DB_USER=usuhidra
-#HIDRA_DB_PASSWD=passusuhidra
-#HIDRA_DB_CREATION_FILE=eac-hidra/branches/eac-hidra-us/Hidra/doc/hidra-bd.sql
+OPENGNSYS_DATABASE=ogBDAdmin
+OPENGNSYS_DB_USER=usuog
+OPENGNSYS_DB_PASSWD=passusuog
+OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogBDAdmin.sql
 
-if [ "$(whoami)" != 'root' ]
+USUARIO=`whoami`
+
+if [ $USUARIO != 'root' ]
 then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
@@ -32,7 +35,7 @@ fi
 
 
 mkdir -p $WORKDIR
-pushd $WORKDIR >/dev/null
+pushd $WORKDIR
 
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
@@ -208,6 +211,30 @@ mysqlSetRootPassword()
 	fi
 	echoAndLog "mysqlSetRootPassword(): root password saved!"
 	return 0
+}
+
+# Si el servicio mysql esta ya instalado cambia la variable de la clave del root por la ya existente
+mysqlGetRootPassword(){
+	local pass_mysql
+	local pass_mysql2
+	stty -echo
+	echo "Existe un servicio mysql ya instalado"
+	read -p  "Insertar clave de root de Mysql: " pass_mysql
+	echo ""
+	read -p "Confirmar clave:" pass_mysql2
+	echo ""
+	stty echo
+	if [ "$pass_mysql" == "$pass_mysql2" ] ;then
+		MYSQL_ROOT_PASSWORD=$pass_mysql 
+		echo "La clave es: ${MYSQL_ROOT_PASSWORD}"
+		return 0
+	else
+		echo "Las claves no coinciden no se configura la clave del servidor de base de datos."
+		echo "las operaciones con la base de datos daran error"
+		return 1
+	fi
+
+
 }
 
 # comprueba si puede conectar con mysql con el usuario root
@@ -396,7 +423,7 @@ svnCheckoutCode()
 
 	echoAndLog "svnCheckoutCode(): downloading subversion code..."
 
-	/usr/bin/svn co "${url}"
+	/usr/bin/svn co "${url}" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "svnCheckoutCode(): error getting code from ${url}, verify your user and password"
 		return 1
@@ -405,49 +432,107 @@ svnCheckoutCode()
 	return 0
 }
 
+############################################################
+### Esqueleto para el Servicio pxe y contenedor tftpboot ###
+############################################################
+
+function tftpConfigure() {
+        echo "Configurando el servicio tftp"
+        basetftp=/var/lib/tftpboot
+
+        # reiniciamos demonio internet ????? porque ????
+        /etc/init.d/openbsd-inetd start
+
+        # preparacion contenedor tftpboot
+        cp -pr /usr/lib/syslinux/ ${basetftp}/syslinux
+        cp /usr/lib/syslinux/pxelinux.0 ${basetftp}
+        # prepamos el directorio de la configuracion de pxe
+        mkdir -p ${basetftp}/pxelinux.cfg
+        cat > ${basetftp}/pxelinux.cfg/default <<EOF
+DEFAULT pxe
+
+LABEL pxe
+KERNEL linux
+APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on
+EOF
+        # comprobamos el servicio tftp
+        sleep 1
+        testPxe
+        ## damos perfimos de lectura a usuario web.
+        chown -R www-data:www-data ${basetftp}
+}
+
+function testPxe () {
+        cd /tmp
+        echo "comprobando servicio pxe ..... Espere"
+        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echo "servidor tftp OK" || echo "servidor tftp KO"
+        cd /
+}
+
+########################################################################
+## Configuracion servicio nfs
+########################################################################
+
+function nfsConfigure (){
+        # FALTA: las variables se pediran al principio de la instalacion y no aqui
+	# FALTA: control de errores
+        echo "Configurando servicio nfs:"
+        local ip_server
+        local net_mask
+        read  -p "Ip del servidor: " ip_server
+        read -p "Mascara de red: " net_mask
+
+        sed s/IP/$ip_server/g $WORKDIR/opengnsys/server/NFS/exports | sed s/NETMASK/$net_mask/g >> /etc/exports
+        echo "Se ha configurado el servicio nfs con la ip $ip_server y la mascara de red $net_mask"
+
+}
+
+
 #####################################################################
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-function openGnsysInstallHidraApacheConf()
+function openGnsysInstallWebConsoleApacheConf()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "openGnsysInstallHidraApacheConf(): invalid number of parameters"
+		errorAndLog "openGnsysInstallWebConsoleApacheConf(): invalid number of parameters"
 		exit 1
 	fi
 
 	local path_opengnsys_base=$1
 	local path_apache2_confd=$2
-	local path_web_hidra=${path_opengnsys_base}/www
+	local path_web_console=${path_opengnsys_base}/www
 
-	echoAndLog "openGnsysInstallHidraApacheConf(): creating apache2 config file.."
+	if [ ! -d $path_apache2_confd ]; then
+		errorAndLog "openGnsysInstallWebConsoleApacheConf(): path to apache2 conf.d can not found, verify your server installation"
+		return 1
+	fi
+
+    [ -d $path_apache2_confd/sites-available ] || mkdir $path_apache2_confd/sites-available
+    [ -d $path_apache2_confd/sites-enabled ] || mkdir $path_apache2_confd/sites-enabled
+
+	echoAndLog "openGnsysInstallWebConsoleApacheConf(): creating apache2 config file.."
 
 	# genera configuración
-	cat > $WORKDIR/apache.conf <<EOF
+	cat > $path_opengnsys_base/etc/apache.conf <<EOF
 # Hidra web interface configuration for Apache
 
-Alias /hidra ${path_web_hidra}
+Alias /opengnsys ${path_web_console}
 
-<Directory ${path_web_hidra}>
+<Directory ${path_web_console}>
 	Options -Indexes FollowSymLinks
 	DirectoryIndex acceso.php
 </Directory>
 EOF
 
-	if [ ! -d $path_apache2_confd ]; then
-		errorAndLog "openGnsysInstallHidraApacheConf(): path to apache2 conf.d can not found, verify your server installation"
-		rm -f $WORKDIR/apache.conf
-		return 1
-	fi
-	cp $WORKDIR/apache.conf $path_opengnsys_base/etc
-	ln -s $path_opengnsys_base/etc/apache.conf $path_apache2_confd/hidra.conf
+
+	ln -s $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys.conf
+	ln -s $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
 	if [ $? -ne 0 ]; then
-		errorAndLog "openGnsysInstallHidraApacheConf(): config file can't be linked to apache conf, verify your server installation"
-		rm -f $WORKDIR/apache.conf
+		errorAndLog "openGnsysInstallWebConsoleApacheConf(): config file can't be linked to apache conf, verify your server installation"
 		return 1
 	else
-		echoAndLog "openGnsysInstallHidraApacheConf(): config file created and linked, restart your apache daemon"
-		rm -f $WORKDIR/apache.conf
+		echoAndLog "openGnsysInstallWebConsoleApacheConf(): config file created and linked, restart your apache daemon"
 		return 0
 	fi
 }
@@ -474,6 +559,7 @@ openGnsysInstallCreateDirs()
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
 	ln -fs /var/lib/tftpboot $path_opengnsys_base/tftpboot
+	ln -fs /var/log/opengnsys $path_opengnsys_base/log
 
 	if [ $? -ne 0 ]; then
 		errorAndLog "openGnsysInstallCreateDirs(): error while creating dirs. Do you have write permissions?"
@@ -493,16 +579,12 @@ openGnsysCopyServerFiles () {
 
 	local path_opengnsys_base=$1
 
-	local SOURCES=( admin/Sources/ogAdmServer/ogAdmServer.cfg \
-                        admin/Sources/ogAdmRepo/ogAdmRepo.cfg \
-                        client/boot/initrd-generator \
-                        client/boot/upgrade-clients-udeb.sh \
-                        client/boot/udeblist.conf )
-	local TARGETS=( etc/ogAdmServer.cfg \
-                        etc/ogAdmRepo.cfg \
-                        bin/initrd-generator \
-                        bin/upgrade-clients-udeb.sh \
-                        etc/udeblist.conf )
+	local SOURCES=( client/boot/initrd-generator \
+                    client/boot/upgrade-clients-udeb.sh \
+                    client/boot/udeblist.conf )
+	local TARGETS=( bin/initrd-generator \
+                    bin/upgrade-clients-udeb.sh \
+                    etc/udeblist.conf )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
@@ -511,6 +593,7 @@ openGnsysCopyServerFiles () {
 
     echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
 
+    pushd opengnsys >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -522,6 +605,30 @@ openGnsysCopyServerFiles () {
 			cp -pr "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 	done
+    popd >/dev/null
+}
+
+####################################################################
+### Funciones instalacion cliente opengnsys
+####################################################################
+
+function openGnsysClientCreate () {
+	# FALTA control de errores.
+        # Creamos los directorios especificos del cliente
+        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
+
+        cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
+        cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+        cp -ar $WORKDIR/opengnsys/client/engine/*.sh $INSTALL_TARGET/client/lib/engine/bin
+
+
+        # Creando el client tftp
+        $INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
+
+        # Instalando los paquetes udeb y la configuracion
+        $INSTALL_TARGET/bin/upgrade-clients-udeb.sh
+
+
 }
 
 
@@ -541,9 +648,12 @@ if [ $? -ne 0 ]; then
 	fi
 fi
 
-#isInArray notinstalled "mysql-server"
-#if [ $? -eq 0 ]; then
-#	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
+isInArray notinstalled "mysql-server"
+if [ $? -eq 0 ]; then
+	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
+else
+	mysqlGetRootPassword
+
 fi
 
 openGnsysInstallCreateDirs ${INSTALL_TARGET}
@@ -569,10 +679,10 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error while connection to mysql"
 	exit 1
 fi
-mysqlDbExists ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE}
+mysqlDbExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
 if [ $? -ne 0 ]; then
-	echoAndLog "Creating hidra database"
-	mysqlCreateDb ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE}
+	echoAndLog "Creating web console database"
+	mysqlCreateDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while creating hidra database"
 		exit 1
@@ -581,10 +691,10 @@ else
 	echoAndLog "Hidra database exists, ommiting creation"
 fi
 
-mysqlCheckUserExists ${MYSQL_ROOT_PASSWORD} ${HIDRA_DB_USER}
+mysqlCheckUserExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DB_USER}
 if [ $? -ne 0 ]; then
 	echoAndLog "Creating user in database"
-	mysqlCreateAdminUserToDb ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE} ${HIDRA_DB_USER} "${HIDRA_DB_PASS}"
+	mysqlCreateAdminUserToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} ${OPENGNSYS_DB_USER} "${OPENGNSYS_DB_PASSWD}"
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while creating hidra user"
 		exit 1
@@ -592,66 +702,40 @@ if [ $? -ne 0 ]; then
 
 fi
 
-mysqlCheckDbIsEmpty ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE}
+mysqlCheckDbIsEmpty ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
 if [ $? -eq 0 ]; then
 	echoAndLog "Creating tables..."
-	if [ -f $WORKDIR/$HIDRA_DB_CREATION_FILE ]; then
-		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${HIDRA_DATABASE} $WORKDIR/$HIDRA_DB_CREATION_FILE
+	if [ -f $WORKDIR/$OPENGNSYS_DB_CREATION_FILE ]; then
+		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_CREATION_FILE
 	else
-		errorAndLog "Unable to locate $WORKDIR/$HIDRA_DB_CREATION_FILE!!"
+		errorAndLog "Unable to locate $WORKDIR/$OPENGNSYS_DB_CREATION_FILE!!"
 		exit 1
 	fi
 fi
 
+# Configurando tftp
+tftpConfigurate
+pxeTest
+
 echoAndLog "Installing web files..."
 # copiando paqinas web
-cp -pr eac-hidra/branches/eac-hidra-us/Hidra/webhidra/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+cp -pr opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
 
 # creando configuracion de apache2
-openGnsysInstallHidraApacheConf $INSTALL_TARGET /etc/apache2/conf.d
+openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while creating hidra apache config"
 	exit 1
 fi
 
 popd
+
+# Creando la estructura del cliente
+openGnsysClientCreate
+
 #rm -rf $WORKDIR
 echoAndLog "Process finalized!"
 
 
 
-function TestPxe () {
-	cd /tmp
-	echo "comprobando servidio pxe ..... Espere"
-	tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echo "servidor tftp OK" || echo "servidor tftp KO"
-	cd /
-}
-
-function preparacontenedortft() {
-############################################################
-### Esqueleto para el Servicio pxe y contenedor tftpboot ##############
-###########################################################
-	basetftp=/var/lib/tftpboot
-	basetftpaux=/tftpboot
-	basetftpog=/opt/opengnsys/tftpboot
-	# creamos los correspondientes enlaces hacia nuestro contenedor.
-	ln -s ${basetftp} ${basetftpog}
-	ln -s ${basetftpaux} ${basetftpog}
-
-	# reiniciamos demonio internet
-	/etc/init.d/openbsd-inetd start
-
-	##preparcion contendor tftpboot
-	cp -pr /usr/lib/syslinux/ ${basetftpboot}/syslinux
-	cp /usr/lib/syslinux/pxelinux.0 $basetftpboot
-	# prepamos el directorio de la configuracion de pxe
-	mkdir -p ${basetftpboot}/pxelinux.cfg
-	touch ${basetftpboot}/pxelinux.cfg/default
-	# comprobamos el servicio tftp
-	sleep 1
-	TestPxe
-	## damos perfimos de lectura a usuario web.
-	chown -R www-data:www-data /var/lib/tftpboot
-	######### fin revisar2 contenedor tftp
-}
 

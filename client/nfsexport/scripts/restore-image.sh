@@ -5,7 +5,7 @@
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -ne 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion REPO|CACHE imagen"
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG REPO|CACHE imagen ndisco nparticion"
     exit $?
 fi
 
