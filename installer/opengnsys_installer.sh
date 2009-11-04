@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=$WORKDIR/installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftpd-hpa syslinux openbsd-inetd update-inetd build-essential cmake qt4-qmake libqt4-dev )
+DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftpd-hpa syslinux openbsd-inetd update-inetd build-essential cmake libmysqlclient15-dev qt4-qmake libqt4-dev )
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -495,7 +495,7 @@ function nfsConfigure (){
 function dhcpConfigure (){
         echoAndLog "dhcpConfigure(): Sample DHCP Configuration."
 	#### PRUEBAS
-        cp $WORKDIR/opengnsys/server/DHCP/dhcpd.conf  > /etc/dhcp3/dhcpd.conf
+        cp $WORKDIR/opengnsys/server/DHCP/dhcpd.conf /etc/dhcp3/dhcpd.conf
 
 }
 
@@ -550,7 +550,7 @@ EOF
 }
 
 # Crea la estructura base de la instalación de opengnsys
-openGnsysInstallCreateDirs()
+function openGnsysInstallCreateDirs()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "openGnsysInstallCreateDirs(): invalid number of parameters"
@@ -583,7 +583,7 @@ openGnsysInstallCreateDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-openGnsysCopyServerFiles () {
+function openGnsysCopyServerFiles () {
 	if [ $# -ne 1 ]; then
 		errorAndLog "openGnsysCopyServerFiles(): invalid number of parameters"
 		exit 1
@@ -605,7 +605,7 @@ openGnsysCopyServerFiles () {
 
     echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
 
-    pushd opengnsys >/dev/null
+    pushd $WORKDIR/opengnsys
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -617,31 +617,31 @@ openGnsysCopyServerFiles () {
 			cp -pr "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 	done
-    popd >/dev/null
+    popd
 }
 
 # Compilar los servicios de OpenGNsys
-servicesCompilation () {
+function servicesCompilation () {
 	# Compilar OpenGNSys Server
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Server"
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer >/dev/null
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer
 	make && make install
 	# Compilar OpenGNSys Repository Manager
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Repository Manager"
-	popd >/dev/null
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo >/dev/null
+	popd
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
 	make && make install
 	# Compilar OpenGNSys Client
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
-	popd >/dev/null
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient >/dev/null
-	make && mv ogAdmClient ../../client/nfsexport/bin
-	popd >/dev/null
+	popd
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
+	make && mv ogAdmClient ../../../client/nfsexport/bin
+	popd
 	# Compilar OpenGNSys Client Browser
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Client Browser"
-	pushd $WORKDIR/opengnsys/client/browser >/dev/null
+	pushd $WORKDIR/opengnsys/client/browser
 	cmake CMakeLists.txt && make && mv browser ../nfsexport/bin
-	popd >/dev/null
+	popd
 }
 
 
@@ -674,6 +674,9 @@ function openGnsysClientCreate () {
 #####################################################################
 
 	
+# Actualizar repositorios
+apt-get update
+
 # Instalación de dependencias (paquetes de sistema operativo).
 declare -a notinstalled
 checkDependencies DEPENDENCIES notinstalled
@@ -703,7 +706,7 @@ fi
 servicesCompilation
 
 # Configurando tftp
-tftpConfigurate
+tftpConfigure
 pxeTest
 
 # Configuración NFS
@@ -767,10 +770,10 @@ if [ $? -eq 0 ]; then
 	fi
 fi
 
-# Configuración del web de OpenGNSys Admin
+# FIXME Configuración del web de OpenGNSys Admin
 echoAndLog "Installing web files..."
 # copiando paqinas web
-cp -pr opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+cp -pr $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
 
 # creando configuracion de apache2
 openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
