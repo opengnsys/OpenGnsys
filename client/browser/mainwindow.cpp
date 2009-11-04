@@ -23,19 +23,19 @@
 #define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yy hh:mm:ss")
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),web(new QWebView()),output(new QTextEdit()),
-      process(new QProcess(this)),
-      logfile(NULL),logstream(NULL),numberTerminal(0)
+    : QMainWindow(parent),m_web(new QWebView()),m_output(new QTextEdit()),
+      m_process(new QProcess(this)),
+      m_logfile(0),m_logstream(0),m_numberTerminal(0)
 {
     // Graphic
     //showFullScreen();
 
     setWindowTitle(tr("OpenGNSys Browser"));
 
-    setCentralWidget(web);
+    setCentralWidget(m_web);
 
     // Output
-    output->setReadOnly(true);
+    m_output->setReadOnly(true);
 
     // Button Dock
     QDockWidget* dock=new QDockWidget();
@@ -45,17 +45,17 @@ MainWindow::MainWindow(QWidget *parent)
     dock->setTitleBarWidget(dummy);
 
     // TabWidget
-    tabs=new QTabWidget(dock);
+    m_tabs=new QTabWidget(dock);
     QPushButton *button=new QPushButton(tr("&New Term"));
     button->setFocusPolicy(Qt::TabFocus);
-    tabs->setCornerWidget(button);
-    tabs->setFocusPolicy(Qt::NoFocus);
+    m_tabs->setCornerWidget(button);
+    m_tabs->setFocusPolicy(Qt::NoFocus);
 
-    tabs->addTab(output,tr("Output"));
+    m_tabs->addTab(m_output,tr("Output"));
     slotCreateTerminal();
 
     // Las pestanyas al dock
-    dock->setWidget(tabs);
+    dock->setWidget(m_tabs);
 
     // Y el dock al mainwindow
     addDockWidget(Qt::BottomDockWidgetArea,dock);
@@ -68,10 +68,10 @@ MainWindow::MainWindow(QWidget *parent)
     dock->setTitleBarWidget(dummy2);
 
     // WebBar
-    webBar=new QLineEdit(dock);
+    m_webBar=new QLineEdit(dock);
 
     // WebBar al dock
-    dock->setWidget(webBar);
+    dock->setWidget(m_webBar);
 
     // dock al mainwindow
     addDockWidget(Qt::TopDockWidgetArea,dock);
@@ -79,96 +79,98 @@ MainWindow::MainWindow(QWidget *parent)
     // Status bar
     QStatusBar* st=statusBar();
     st->setSizeGripEnabled(false);
-    progressBar=new QProgressBar(this);
-    progressBar->setMinimum(0);
-    progressBar->setMaximum(100);
+    m_progressBar=new QProgressBar(this);
+    m_progressBar->setMinimum(0);
+    m_progressBar->setMaximum(100);
 
-    web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    m_web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     // Web signals
-    connect(web,SIGNAL(linkClicked(const QUrl&)),this,
+    connect(m_web,SIGNAL(linkClicked(const QUrl&)),this,
             SLOT(slotLinkHandle(const QUrl&)));
-    connect(web,SIGNAL(loadStarted()),this,SLOT(slotWebLoadStarted()));
-    connect(web,SIGNAL(loadFinished(bool)),this,SLOT(slotWebLoadFinished(bool)));
-    connect(web,SIGNAL(loadProgress(int)),this,SLOT(slotWebLoadProgress(int)));
-    connect(web,SIGNAL(urlChanged(const QUrl&)),this,
+    connect(m_web,SIGNAL(loadStarted()),this,SLOT(slotWebLoadStarted()));
+    connect(m_web,SIGNAL(loadFinished(bool)),this,SLOT(slotWebLoadFinished(bool)));
+    connect(m_web,SIGNAL(loadProgress(int)),this,SLOT(slotWebLoadProgress(int)));
+    connect(m_web,SIGNAL(urlChanged(const QUrl&)),this,
             SLOT(slotUrlChanged(const QUrl&)));
 
     // Process signals
-    connect(process,SIGNAL(started()),this,SLOT(slotProcessStarted()));
-    connect(process,SIGNAL(finished(int,QProcess::ExitStatus)),
+    connect(m_process,SIGNAL(started()),this,SLOT(slotProcessStarted()));
+    connect(m_process,SIGNAL(finished(int,QProcess::ExitStatus)),
             this,SLOT(slotProcessFinished(int,QProcess::ExitStatus)));
 
-    connect(process,SIGNAL(error(QProcess::ProcessError)),
+    connect(m_process,SIGNAL(error(QProcess::ProcessError)),
             this,SLOT(slotProcessError(QProcess::ProcessError)));
 
-    connect(process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotProcessOutput()));
-    connect(process,SIGNAL(readyReadStandardError()),
+    connect(m_process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotProcessOutput()));
+    connect(m_process,SIGNAL(readyReadStandardError()),
             this,SLOT(slotProcessErrorOutput()));
 
     // Dock signals
     connect(button,SIGNAL(clicked()),this,SLOT(slotCreateTerminal()));
-    connect(webBar,SIGNAL(returnPressed()),this,SLOT(slotWebBarReturnPressed()));
+    connect(m_webBar,SIGNAL(returnPressed()),this,SLOT(slotWebBarReturnPressed()));
 
     if(!readEnvironmentValues())
-        output->insertPlainText(tr("Any environment variable/s didn't be setted\n"));
+        print(tr("Any environment variable/s didn't be setted."));
 
-    if(env.contains("OGLOGFILE") && env["OGLOGFILE"]!="")
+    if(m_env.contains("OGLOGFILE") && m_env["OGLOGFILE"]!="")
     {
-        logfile=new QFile(env["OGLOGFILE"]);
-        if(!logfile->open(QIODevice::WriteOnly | QIODevice::Text |
+        QFile* file=new QFile(m_env["OGLOGFILE"]);
+        if(!file->open(QIODevice::WriteOnly | QIODevice::Text |
                     QIODevice::Append))
         {
-            output->insertPlainText(tr("The log file couldn't be opened: ")+logfile->fileName());
-            delete logfile;
-            logfile=NULL;
+            delete file;
+            print(tr("The log file couldn't be opened: ")+m_env["OGLOGFILE"]+".");
         }
         else
-            logstream=new QTextStream(logfile);
+        {
+            m_logfile=file;
+            m_logstream=new QTextStream(m_logfile);
+        }
     }
 
     QStringList arguments=QCoreApplication::arguments();
-    webBar->setText(arguments[1]);
-    web->load(QUrl(arguments[1]));
+    m_webBar->setText(arguments[1]);
+    m_web->load(QUrl(arguments[1]));
 }
 
 MainWindow::~MainWindow()
 {
-    if(logfile)
+    if(m_logfile)
     {
-        logfile->close();
-        delete logfile;
+        m_logfile->close();
+        delete m_logfile;
     }
-    if(logstream)
-        delete logstream;
+    if(m_logstream)
+        delete m_logstream;
 }
 
 void MainWindow::slotLinkHandle(const QUrl &url)
 {
     // Si ya hay un proceso ejectuandose
-    if(process->state()!=QProcess::NotRunning)
+    if(m_process->state()!=QProcess::NotRunning)
     {
-      output->insertPlainText(tr("There is a process running."));
+      print(tr("There is a process running. Please wait a moment."));
       return;
     }
-    
-    QString string = url.toString();
-    qDebug() << string;
+ 
+    QString urlString = url.toString();
     // Si es un link del tipo PROTOCOL lo ejecutamos
-    if(string.startsWith(PROTOCOL))
+    if(urlString.startsWith(PROTOCOL))
     {
-        string=string.remove(0,QString(PROTOCOL).length());
-        QStringList list=string.split(" ",QString::SkipEmptyParts);
-        QString command=list.takeFirst();
-        process->setReadChannel(QProcess::StandardOutput);
+        urlString=urlString.remove(0,QString(PROTOCOL).length());
+        QStringList list=urlString.split(" ",QString::SkipEmptyParts);
+        QString program=list.takeFirst();
+        m_process->setReadChannel(QProcess::StandardOutput);
         // Le ponemos el mismo entorno que tiene el browser ahora mismo
-        process->setEnvironment(QProcess::systemEnvironment());
-        process->start(command,list);
+        m_process->setEnvironment(QProcess::systemEnvironment());
+        m_process->start(program,list);
+        print(tr("Launching the command: ")+program+" "+list.join(" ")+".");
+        m_web->setEnabled(false);
     }
     else
     {
-        qDebug() << "Load URL: " << url <<endl;
-        web->load(url);
+        m_web->load(url);
     }
 }
 
@@ -176,17 +178,14 @@ void MainWindow::slotWebLoadStarted()
 {
     QStatusBar* st=statusBar();
     st->clearMessage();
-    st->addWidget(progressBar,100);
-    progressBar->show();
-    progressBar->setFormat("%p% Loading");
-
-    qDebug()<<"Empieza la carga de la web";
+    st->addWidget(m_progressBar,100);
+    m_progressBar->show();
+    m_progressBar->setFormat("%p% Loading");
 }
 
 void MainWindow::slotWebLoadProgress(int progress)
 {
-    progressBar->setValue(progress);
-    qDebug()<<"Progress "<<progress;
+    m_progressBar->setValue(progress);
 }
 
 void MainWindow::slotWebLoadFinished(bool ok)
@@ -194,9 +193,8 @@ void MainWindow::slotWebLoadFinished(bool ok)
     // If any error ocurred, show a pop up
     // Sometimes when the url hasn't got a dot, i.e /var/www/pageweb,
     // the return value is always true so we check the bytes received too
-    if(ok == false || web->page()->totalBytes() == 0)
+    if(ok == false || m_web->page()->totalBytes() == 0)
     {
-        qDebug()<<"Error accediendo a la web";
         QMessageBox msgBox;
         msgBox.setText(tr("The web page couldn't load. What do you want to do?"));
 
@@ -207,7 +205,7 @@ void MainWindow::slotWebLoadFinished(bool ok)
 
         if (msgBox.clickedButton() == reloadButton)
         {
-            web->reload();
+            m_web->reload();
         }
         else
         {
@@ -216,10 +214,8 @@ void MainWindow::slotWebLoadFinished(bool ok)
     }
     else
     {
-        qDebug()<<"Descarga finalizada satisfactoriamente";
-
         QStatusBar* st=statusBar();
-        st->removeWidget(progressBar);
+        st->removeWidget(m_progressBar);
         st->showMessage(tr("Ready"));
     }
 }
@@ -227,44 +223,31 @@ void MainWindow::slotWebLoadFinished(bool ok)
 
 void MainWindow::slotUrlChanged(const QUrl &url)
 {
-    webBar->setText(url.toString());
-    qDebug()<<"Change"<<endl;
+    m_webBar->setText(url.toString());
 }
 
 void MainWindow::slotProcessStarted()
 {
-    qDebug()<<"Proceso inicializado"<<endl;
+    print(tr("Launched successfully."));
 }
 
 void MainWindow::slotProcessOutput()
 {
-    qDebug()<<"Output"<<endl;
-    process->setReadChannel(QProcess::StandardOutput);
+    m_process->setReadChannel(QProcess::StandardOutput);
     char buf[BUFFERSIZE];
-    while((process->readLine(buf,BUFFERSIZE) > 0))
+    while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
-        output->insertPlainText(buf);
-        /*
-        QString str="<b>";
-        str+=buf;
-        str+="</b>";
-        output->insertHtml(str);
-        */
-        if(logstream)
-            *logstream<<CURRENT_TIME()<<": "<<buf;
+        print(tr("Proc. Output: ")+buf,false);
     }
 }
 
 void MainWindow::slotProcessErrorOutput()
 {
-    qDebug()<<"ErrorOutput"<<endl;
-    process->setReadChannel(QProcess::StandardError);
+    m_process->setReadChannel(QProcess::StandardError);
     char buf[BUFFERSIZE];
-    while((process->readLine(buf,BUFFERSIZE) > 0))
+    while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
-        output->insertPlainText(buf);
-        if(logstream)
-            *logstream<<CURRENT_TIME()<<": "<<buf;
+        print(tr("Proc. Error: ")+buf);
     }
 }
 
@@ -272,13 +255,13 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
 {
     if(status==QProcess::NormalExit)
     {
-        qDebug()<<"Finished: "<<code<<" "<<status<<endl;
+        print(tr("Process fisnished correctly. Return value: ")+QString::number(code));
     }
     else
     {
-        qDebug()<<"Ha petado"<<endl;
-        qDebug()<<"Finished: "<<code<<" "<<status<<endl;
+        print(tr("Process crashed. Output: "+code));
     }
+    m_web->setEnabled(true);
 }
 
 void MainWindow::slotProcessError(QProcess::ProcessError error)
@@ -286,18 +269,24 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
     switch(error)
     {
         case QProcess::FailedToStart:
-            qDebug()<<"Imposible arrancar el programa"<<endl;
+            print(tr("Impossible to launch the process."));
+            break;
+        case QProcess::WriteError:
+            print(tr("Write error happened in the process."));
+            break;
+        case QProcess::ReadError:
+            print(tr("Read error happened in the process."));
             break;
         // No capturo crashed porque la pillo por finished
         case QProcess::Crashed:
         case QProcess::Timedout:
-        case QProcess::WriteError:
-        case QProcess::ReadError:
+            break;
         case QProcess::UnknownError:
         default:
-            qDebug()<<"Otro error"<<endl;
+            print(tr("Unknown error."));
             break;
     }
+    m_web->setEnabled(true);
 }
 
 void MainWindow::slotCreateTerminal()
@@ -313,26 +302,27 @@ void MainWindow::slotCreateTerminal()
     //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
     console->setScrollBarPosition(QTermWidget::ScrollBarRight);
 
-    ++numberTerminal;
+    ++m_numberTerminal;
 
     connect(console,SIGNAL(finished()),this,SLOT(slotDeleteTerminal()));
 
-    QString name=tr("Term ")+QString::number(numberTerminal);
-    tabs->addTab(console,name);
+    QString name=tr("Term ")+QString::number(m_numberTerminal);
+    m_tabs->addTab(console,name);
 }
 
 void MainWindow::slotDeleteTerminal()
 {
-  QWidget *widget = qobject_cast<QWidget *>(sender());
-  Q_ASSERT(widget);
-  tabs->removeTab(tabs->indexOf(widget));
+    QWidget *widget = qobject_cast<QWidget *>(sender());
+    Q_ASSERT(widget);
+    m_tabs->removeTab(m_tabs->indexOf(widget));
+    delete widget;
 }
 
 void MainWindow::slotWebBarReturnPressed()
 {
-  QUrl url(webBar->text());
-  if(url.isValid())
-    slotLinkHandle(url);
+    QUrl url(m_webBar->text());
+    if(url.isValid())
+      slotLinkHandle(url);
 }
 
 int MainWindow::readEnvironmentValues()
@@ -355,15 +345,25 @@ int MainWindow::readEnvironmentValues()
 
         if(stringlist.isEmpty())
         {
-            env[str]="";
+            m_env[str]="";
             ret=false;
         }
         else
         {
             // Get the first element and get the value part
-            env[str]=(stringlist.first().split("="))[1];
+            m_env[str]=(stringlist.first().split("="))[1];
         }
     }
 
     return ret;
+}
+
+void MainWindow::print(QString s,bool newLine)
+{
+  if(newLine)
+    s+="\n";
+  if(m_logstream)
+    *m_logstream<<CURRENT_TIME()<<": "<<s;
+  if(m_output)
+    m_output->insertPlainText(s);
 }

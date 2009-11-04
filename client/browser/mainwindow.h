@@ -56,22 +56,23 @@ class MainWindow : public QMainWindow
     //Functions
     protected:
         int readEnvironmentValues();
+        void print(QString s,bool newLine=true);
 
 
     protected:
-        QWebView *web;
-        QTextEdit *output;
-        QProgressBar *progressBar;
-        QTabWidget *tabs;
-        QLineEdit *webBar;
+        QWebView *m_web;
+        QTextEdit *m_output;
+        QProgressBar *m_progressBar;
+        QTabWidget *m_tabs;
+        QLineEdit *m_webBar;
 
-        QProcess *process;
+        QProcess *m_process;
 
-        QMap<QString,QString> env;
-        QFile *logfile;
-        QTextStream *logstream;
+        QMap<QString,QString> m_env;
+        QFile *m_logfile;
+        QTextStream *m_logstream;
 
-        int numberTerminal;
+        int m_numberTerminal;
 };
 
 #endif // MAINWINDOW_H
