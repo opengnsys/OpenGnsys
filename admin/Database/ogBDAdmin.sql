@@ -874,19 +874,21 @@ CREATE TABLE IF NOT EXISTS `servidoresdhcp` (
 -- 
 
 DROP TABLE IF EXISTS `servidoresrembo`;
-CREATE TABLE IF NOT EXISTS `servidoresrembo` (
+CREATE TABLE `servidoresrembo` (
   `idservidorrembo` int(11) NOT NULL auto_increment,
   `nombreservidorrembo` varchar(250) NOT NULL default '',
   `ip` varchar(15) NOT NULL default '',
   `passguor` varchar(50) NOT NULL default '',
   `pathremboconf` varchar(250) NOT NULL default '',
   `pathrembod` varchar(250) NOT NULL default '',
+  `pathpxe` varchar(250) NOT NULL,
   `idcentro` int(11) default NULL,
   `grupoid` int(11) default NULL,
   `comentarios` text,
   `puertorepo` int(11) NOT NULL,
   PRIMARY KEY  (`idservidorrembo`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
 
 -- 
 -- Volcar la base de datos para la tabla `servidoresrembo`

@@ -1,4 +1,4 @@
-﻿<?
+<?
 // *******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -7,7 +7,7 @@
 // Nombre del fichero: frames.php
 // Descripción :Este fichero implementa la distribución en frames de la aplicación
 // *******************************************************************************************************
-echo "======================";
+
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
 //________________________________________________________________________________________________________

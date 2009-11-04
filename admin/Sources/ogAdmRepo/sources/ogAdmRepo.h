@@ -89,10 +89,12 @@ int puertorepo;	// Puerto
 static pthread_mutex_t guardia; // Controla acceso exclusivo de hebras 
 //______________________________________________________
 
-char PathHidra[1024]; // path al directorio base de Hidra
-char PathComandos[1024]; // path al directorio donde se depositan los comandos para los clientes
-char PathUsuarios[1024]; // path al directorio donde se depositan los ficheros de login de los operadores
-char PathIconos[1024]; // path al directorio donde se depositan los iconos de los items de los mens
+char PathHidra[250]; // path al directorio base de Hidra
+char PathPXE[250]; // path al directorio PXE
+
+char PathComandos[250]; // path al directorio donde se depositan los comandos para los clientes
+char PathUsuarios[250]; // path al directorio donde se depositan los ficheros de login de los operadores
+char PathIconos[250]; // path al directorio donde se depositan los iconos de los items de los mens
 
 // Prototipos de funciones
 void RegistraLog(const char *,int );

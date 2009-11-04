@@ -1684,7 +1684,7 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	Table tbl;
 	
 	char *iph;
-	char PathHidra[1024]; // path al directorio base de Hidra
+	char PathHidra[250],PathPXE[250]; // path al directorio base de Hidra
 	int puertorepo,lon;
 	
 
@@ -1697,7 +1697,7 @@ int inclusion_REPO(SOCKET s,char *parametros)
 		return(false);
 	}
 	// Recupera los datos del ordenador
-	sprintf(sqlstr,"SELECT puertorepo,pathrembod FROM servidoresrembo WHERE ip = '%s'",iph);
+	sprintf(sqlstr,"SELECT puertorepo,pathrembod,pathpxe FROM servidoresrembo WHERE ip = '%s'",iph);
 	
 	if(!db.Execute(sqlstr,tbl)){ // Error al consultar
 		db.GetErrorErrStr(ErrStr);
@@ -1715,6 +1715,10 @@ int inclusion_REPO(SOCKET s,char *parametros)
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		return(false);
 	}
+	if(!tbl.Get("pathpxe",PathPXE)){ // Toma dato
+		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+		return(false);
+	}	
 	inclusion_srvRMB(iph,puertorepo); // Actualiza tabla de servidores rembo
 	TRAMA *trama=(TRAMA*)malloc(LONGITUD_TRAMA);
 	if(!trama)
@@ -1727,6 +1731,7 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	lon=sprintf(trama->parametros,"nfn=RESPUESTA_inclusionREPO\r");
 	lon+=sprintf(trama->parametros+lon,"prp=%d\r",puertorepo);
 	lon+=sprintf(trama->parametros+lon,"pth=%s\r",PathHidra);
+	lon+=sprintf(trama->parametros+lon,"ptx=%s\r",PathPXE);
 	lon+=sprintf(trama->parametros+lon,"usu=%s\r",usuario);	
 	lon+=sprintf(trama->parametros+lon,"pwd=%s\r",pasguor);
 	lon+=sprintf(trama->parametros+lon,"dat=%s\r",datasource);
@@ -3591,8 +3596,8 @@ int Toma_idservidorres(Database db,Table tbl,char*ipd,char*ipr,int*isd,int*isr)
 	//void *resul
 	// Validación de parámetros
 	
-	strcpy(szPathFileCfg,"hidra.cfg");
-	strcpy(szPathFileLog,"hidra.log");	
+	strcpy(szPathFileCfg,"ogAdmServer.cfg");
+	strcpy(szPathFileLog,"ogAdmServer.log");	
 	
     for(i = 1; (i+1) < argc; i+=2){
         if (argv[i][0] == '-'){

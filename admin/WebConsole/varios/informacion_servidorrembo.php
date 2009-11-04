@@ -1,4 +1,4 @@
-﻿<?
+<?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -37,7 +37,7 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
-	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXml.js"></SCRIPT>
+	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
 	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>

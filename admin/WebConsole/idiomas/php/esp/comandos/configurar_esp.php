@@ -1,4 +1,4 @@
-﻿<?
+<?
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: configurar_esp.php (Comandos)
@@ -11,14 +11,14 @@
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
 	$TbMsg[5]='Particionar y Formatear';
-	$TbMsg[6]='�bito';
-	$TbMsg[7]='Partici� oculta';
+	$TbMsg[6]='Ámbito';
+	$TbMsg[7]='Partición� oculta';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Tipo';
 	$TbMsg[10]='Nombre S.O.';
 	$TbMsg[11]='Tama�';
-	$TbMsg[12]='Operaci�';
-	$TbMsg[13]='Sin acci�';
+	$TbMsg[12]='Operación';
+	$TbMsg[13]='Sin acción';
 	$TbMsg[14]='Formatear';
 	$TbMsg[15]='Ocultar';
 	$TbMsg[16]='Mostrar';

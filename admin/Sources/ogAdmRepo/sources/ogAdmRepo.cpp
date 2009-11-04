@@ -906,6 +906,8 @@ int RESPUESTA_inclusionREPO(TRAMA *trama)
 	puertorepo=atoi(prm);
 	prm=toma_parametro("pth",trama->parametros); // Path al directorio base de Hidra
 	strcpy(PathHidra,prm);
+	prm=toma_parametro("ptx",trama->parametros); // Path al directorio PXE
+	strcpy(PathPXE,prm);
 	
 	strcpy(PathUsuarios,PathHidra);
 	strcpy(PathIconos,PathHidra);
@@ -928,6 +930,10 @@ int RESPUESTA_inclusionREPO(TRAMA *trama)
 //***************************************************************************************************************
 // PROGRAMA PRINCIPAL 
 //***************************************************************************************************************
+
+
+
+
 int main(int argc, char **argv)
 {
     SOCKET socket_s; // Socket donde escucha el repositorio
