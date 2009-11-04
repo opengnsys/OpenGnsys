@@ -1,2 +1,3 @@
-./ogAdmClient -f ogAdmClient.cfg -l archivo_de_log  
+./ogAdmClient -f ogAdmClient.cfg -l archivo_de_log  -d nn
 # Ojo porque el archivo de log debe estar en /opt/opengnsys/log que está montado de escritrua
+# En el parametro -d , nn indica el nivel de log (debuger) para la ejecución del servicio
