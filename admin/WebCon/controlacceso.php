@@ -20,7 +20,7 @@ include_once("./includes/controlacceso.inc");
 <HTML>
 	<TITLE> Administración web de aulas</TITLE>
 	<HEAD>
-		<LINK rel="stylesheet" type="text/css" href="hidra.css">
+		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 	</HEAD>
 	<BODY>
 		<DIV id="mensaje" style="Position:absolute;TOP:250;LEFT:330; visibility:visible">
