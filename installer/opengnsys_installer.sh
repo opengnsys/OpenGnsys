@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=$WORKDIR/installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftpd-hpa syslinux tftp-hpa openbsd-inetd update-inetd )
+DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftpd-hpa syslinux openbsd-inetd update-inetd build-essential cmake qt4-qmake libqt4-dev )
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -470,20 +470,32 @@ function testPxe () {
 }
 
 ########################################################################
-## Configuracion servicio nfs
+## Configuracion servicio NFS
 ########################################################################
 
 function nfsConfigure (){
-        # FALTA: las variables se pediran al principio de la instalacion y no aqui
-	# FALTA: control de errores
-        echo "Configurando servicio nfs:"
-        local ip_server
-        local net_mask
-        read  -p "Ip del servidor: " ip_server
-        read -p "Mascara de red: " net_mask
+        echoAndLog "nfsConfigure(): Sample NFS Configuration."
+        local net_ip net_mask VARS
+	VARS=$(route -n | awk '$2~/0\.0\.0\.0/ {print $1,$3}')
+	read -e net_ip net_mask <<<"$VARS"
+	if [ -z "$net_ip" -o -z "$net_mask" ]; then
+		echoAndLog "nfsConfigure(): Network not detected."
+		exit 1
+	fi
+        sed -e "s/NETIP/$net_ip/g" -e "s/NETMASK/$net_mask/g" $WORKDIR/opengnsys/server/NFS/exports  >> /etc/exports
+	exportfs -va
+        echoAndLog "nfsConfigure(): Sample NFS Configured in file \"/etc/exports\"."
+}
 
-        sed s/IP/$ip_server/g $WORKDIR/opengnsys/server/NFS/exports | sed s/NETMASK/$net_mask/g >> /etc/exports
-        echo "Se ha configurado el servicio nfs con la ip $ip_server y la mascara de red $net_mask"
+
+########################################################################
+## Configuracion servicio DHCP
+########################################################################
+
+function dhcpConfigure (){
+        echoAndLog "dhcpConfigure(): Sample DHCP Configuration."
+	#### PRUEBAS
+        cp $WORKDIR/opengnsys/server/DHCP/dhcpd.conf  > /etc/dhcp3/dhcpd.conf
 
 }
 
@@ -558,8 +570,8 @@ openGnsysInstallCreateDirs()
 	mkdir -p $path_opengnsys_base/log/clients
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
-	ln -fs /var/lib/tftpboot $path_opengnsys_base/tftpboot
-	ln -fs /var/log/opengnsys $path_opengnsys_base/log
+	ln -fs /var/lib/tftpboot $path_opengnsys_base
+	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 
 	if [ $? -ne 0 ]; then
 		errorAndLog "openGnsysInstallCreateDirs(): error while creating dirs. Do you have write permissions?"
@@ -580,11 +592,11 @@ openGnsysCopyServerFiles () {
 	local path_opengnsys_base=$1
 
 	local SOURCES=( client/boot/initrd-generator \
-                    client/boot/upgrade-clients-udeb.sh \
-                    client/boot/udeblist.conf )
+                        client/boot/upgrade-clients-udeb.sh \
+                        client/boot/udeblist.conf )
 	local TARGETS=( bin/initrd-generator \
-                    bin/upgrade-clients-udeb.sh \
-                    etc/udeblist.conf )
+                        bin/upgrade-clients-udeb.sh \
+                        etc/udeblist.conf )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
@@ -608,36 +620,61 @@ openGnsysCopyServerFiles () {
     popd >/dev/null
 }
 
+# Compilar los servicios de OpenGNsys
+servicesCompilation () {
+	# Compilar OpenGNSys Server
+	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Server"
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer >/dev/null
+	make && make install
+	# Compilar OpenGNSys Repository Manager
+	echoAndLog "servicesCompilation(): Compiling OpenGNSys Repository Manager"
+	popd >/dev/null
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo >/dev/null
+	make && make install
+	# Compilar OpenGNSys Client
+	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
+	popd >/dev/null
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient >/dev/null
+	make && mv ogAdmClient ../../client/nfsexport/bin
+	popd >/dev/null
+	# Compilar OpenGNSys Client Browser
+	echoAndLog "servicesCompilation(): Compiling OpenGNSys Client Browser"
+	pushd $WORKDIR/opengnsys/client/browser >/dev/null
+	cmake CMakeLists.txt && make && mv browser ../nfsexport/bin
+	popd >/dev/null
+}
+
+
 ####################################################################
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
 function openGnsysClientCreate () {
-	# FALTA control de errores.
-        # Creamos los directorios especificos del cliente
-        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
 
+	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
+        find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Cloning Engine files."
+        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.sh $INSTALL_TARGET/client/lib/engine/bin
 
-
-        # Creando el client tftp
+	echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files."
         $INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
 
-        # Instalando los paquetes udeb y la configuracion
+	echoAndLog "openGnsysClientCreate(): Loading udeb files."
         $INSTALL_TARGET/bin/upgrade-clients-udeb.sh
-
 
 }
 
 
+
 #####################################################################
-####### Proceso de instalación
+####### Proceso de instalación de OpenGNSys
 #####################################################################
 
 	
-# Proceso de instalación de opengnsys
+# Instalación de dependencias (paquetes de sistema operativo).
 declare -a notinstalled
 checkDependencies DEPENDENCIES notinstalled
 if [ $? -ne 0 ]; then
@@ -648,6 +685,41 @@ if [ $? -ne 0 ]; then
 	fi
 fi
 
+# Arbol de directorios de OpenGNSys.
+openGnsysInstallCreateDirs ${INSTALL_TARGET}
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while creating directory paths!"
+	exit 1
+fi
+
+# Descarga del repositorio de código en directorio temporal
+svnCheckoutCode $SVN_URL
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while getting code from svn"
+	exit 1
+fi
+
+# Compilar código fuente de los servicios de OpenGNSys.
+servicesCompilation
+
+# Configurando tftp
+tftpConfigurate
+pxeTest
+
+# Configuración NFS
+nfsConfigure
+
+# Configuración ejemplo DHCP
+dhcpConfigure
+
+# Copiar ficheros de servicios OpenGNSys Server.
+openGnsysCopyServerFiles ${INSTALL_TARGET}
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while copying the server files!"
+	exit 1
+fi
+
+# Instalar Base de datos de OpenGNSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
@@ -655,24 +727,6 @@ else
 	mysqlGetRootPassword
 
 fi
-
-openGnsysInstallCreateDirs ${INSTALL_TARGET}
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while creating directory paths!"
-	exit 1
-fi
-svnCheckoutCode $SVN_URL
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while getting code from svn"
-	exit 1
-fi
-
-openGnsysCopyServerFiles ${INSTALL_TARGET}
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while copying the server files!"
-	exit 1
-fi
-
 
 mysqlTestConnection ${MYSQL_ROOT_PASSWORD}
 if [ $? -ne 0 ]; then
@@ -713,10 +767,7 @@ if [ $? -eq 0 ]; then
 	fi
 fi
 
-# Configurando tftp
-tftpConfigurate
-pxeTest
-
+# Configuración del web de OpenGNSys Admin
 echoAndLog "Installing web files..."
 # copiando paqinas web
 cp -pr opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen

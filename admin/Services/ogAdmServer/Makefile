@@ -3,6 +3,9 @@
 # Nombre del proyecto
 PROYECTO := ogAdmServer
 
+# Directorio de instalación
+INSTALL_DIR := /opt/opengnsys
+
 # Opciones de compilacion
 CFLAGS := -O0 -g -Wall -I../includes	# Depuracion
 #CFLAGS := -O3 -Wall			# Optimizacion
@@ -22,8 +25,8 @@ $(PROYECTO): $(OBJS)
 #	strip $(PROYECTO)		# Optimizacion
 
 install: $(PROYECTO)
-	cp $(PROYECTO) /usr/local/sbin
-	cp $(PROYECTO).cfg /usr/local/etc
+	cp $(PROYECTO) $(INSTALL_DIR)/bin
+	cp $(PROYECTO).cfg $(INSTALL_DIR)/etc
  
 clean:
 	rm -f $(PROYECTO) $(OBJS)
