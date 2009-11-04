@@ -1,4 +1,4 @@
-﻿<?
+<?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -9,6 +9,7 @@
 // *************************************************************************************************************************************************
 session_start(); // Activa variables de sesi�
 
+/*
 $idcentro="";
 $nombrecentro="";
 $usuario="";
@@ -19,7 +20,7 @@ $servidorhidra="";
 $hidraport="";
 $pagerror="";
 $urlacceso="";
-
+*/
 if (isset($_SESSION["idcentro"]))	$idcentro = $_SESSION["idcentro"];
 if (isset($_SESSION["nombrecentro"]))	$nombrecentro = $_SESSION["nombrecentro"];
 if (isset($_SESSION["usuario"]))	$usuario = $_SESSION["usuario"];
@@ -31,11 +32,11 @@ if (isset($_SESSION["hidraport"]))	$hidraport = $_SESSION["hidraport"];
 if (isset($_SESSION["pagerror"]))	$pagerror = $_SESSION["pagerror"];
 if (isset($_SESSION["urlacceso"]))	$urlacceso = $_SESSION["urlacceso"];
 
-// Comprueba el valor de las variables de sesi�
+// Comprueba el valor de las variables de sesión�
 $swacc=empty($cadenaconexion) || empty($servidorhidra) || empty($hidraport) || empty($usuario) || empty($idtipousuario);
-//============================================================================================================================
+//===============================================================================================
 if ($swacc){ // Error en alguna variable de sesión
 	die("Error de acceso");
 }
-//============================================================================================================================
+//===============================================================================================
 ?>

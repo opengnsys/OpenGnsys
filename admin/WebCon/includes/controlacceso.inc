@@ -3,7 +3,7 @@ $wer="http://10.1.15.3/WebCon/pagerror.php"; // P�ina de redireccionamiento de
 $wac="http://10.1.15.3/WebCon/acceso.php"; // P�ina de login de la aplicaci�
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
-$cnx="localhost;usuog;passusuog;ogBDAdmin;sqlserver"; // Cadena de conexi� a la base de datos
+$cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexi� a la base de datos
 $ips="10.1.15.3"; // IP del servidor hidra
 $prt="2008"; // Puerto de comunicaci� con el servidor
 //========================================================================================================
