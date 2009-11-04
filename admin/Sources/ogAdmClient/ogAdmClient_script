@@ -1,0 +1,2 @@
+./ogAdmClient -f ogAdmClient.cfg -l archivo_de_log  
+# Ojo porque el archivo de log debe estar en /opt/opengnsys/log que está montado de escritrua
