@@ -1,6 +1,6 @@
-﻿<?
-$wer="http://10.1.15.3/ogAdmWebCon/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="http://10.1.15.3/ogAdmWebCon/acceso.php"; // P�ina de login de la aplicaci�
+<?
+$wer="http://10.1.15.3/WebCon/pagerror.php"; // P�ina de redireccionamiento de errores
+$wac="http://10.1.15.3/WebCon/acceso.php"; // P�ina de login de la aplicaci�
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
 $cnx="localhost;usuog;passusuog;ogBDAdmin;sqlserver"; // Cadena de conexi� a la base de datos
