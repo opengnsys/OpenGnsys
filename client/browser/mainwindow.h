@@ -57,6 +57,9 @@ class MainWindow : public QMainWindow
     protected:
         int readEnvironmentValues();
         void print(QString s,bool newLine=true);
+        void captureOutputForStatusBar(QString output);
+        void startProgressBar();
+        void finishProgressBar();
 
 
     protected:

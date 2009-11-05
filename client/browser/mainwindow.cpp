@@ -19,6 +19,8 @@
 #include "mainwindow.moc"
 
 #define BUFFERSIZE 2048
+#define EXPREG_RESET "^\\[(\\d+),(\\d+)\\]\\n"
+#define EXPREG_A_PASS "^\\[(\\d+)\\]\\s"
 
 #define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yy hh:mm:ss")
 
@@ -80,8 +82,6 @@ MainWindow::MainWindow(QWidget *parent)
     QStatusBar* st=statusBar();
     st->setSizeGripEnabled(false);
     m_progressBar=new QProgressBar(this);
-    m_progressBar->setMinimum(0);
-    m_progressBar->setMaximum(100);
 
     m_web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
@@ -166,7 +166,7 @@ void MainWindow::slotLinkHandle(const QUrl &url)
         m_process->setEnvironment(QProcess::systemEnvironment());
         m_process->start(program,list);
         print(tr("Launching the command: ")+program+" "+list.join(" ")+".");
-        m_web->setEnabled(false);
+        startProgressBar();
     }
     else
     {
@@ -176,11 +176,10 @@ void MainWindow::slotLinkHandle(const QUrl &url)
 
 void MainWindow::slotWebLoadStarted()
 {
-    QStatusBar* st=statusBar();
-    st->clearMessage();
-    st->addWidget(m_progressBar,100);
-    m_progressBar->show();
+    startProgressBar();
     m_progressBar->setFormat("%p% Loading");
+    m_progressBar->setMinimum(0);
+    m_progressBar->setMaximum(100);
 }
 
 void MainWindow::slotWebLoadProgress(int progress)
@@ -214,12 +213,9 @@ void MainWindow::slotWebLoadFinished(bool ok)
     }
     else
     {
-        QStatusBar* st=statusBar();
-        st->removeWidget(m_progressBar);
-        st->showMessage(tr("Ready"));
+        finishProgressBar();
     }
 }
-
 
 void MainWindow::slotUrlChanged(const QUrl &url)
 {
@@ -229,6 +225,9 @@ void MainWindow::slotUrlChanged(const QUrl &url)
 void MainWindow::slotProcessStarted()
 {
     print(tr("Launched successfully."));
+    startProgressBar();
+    m_progressBar->setMinimum(0);
+    m_progressBar->setMaximum(0);
 }
 
 void MainWindow::slotProcessOutput()
@@ -238,6 +237,8 @@ void MainWindow::slotProcessOutput()
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
         print(tr("Proc. Output: ")+buf,false);
+        QString s(buf);
+        captureOutputForStatusBar(s);
     }
 }
 
@@ -261,7 +262,7 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
     {
         print(tr("Process crashed. Output: "+code));
     }
-    m_web->setEnabled(true);
+    finishProgressBar();
 }
 
 void MainWindow::slotProcessError(QProcess::ProcessError error)
@@ -286,7 +287,7 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
             print(tr("Unknown error."));
             break;
     }
-    m_web->setEnabled(true);
+    startProgressBar();
 }
 
 void MainWindow::slotCreateTerminal()
@@ -360,10 +361,54 @@ int MainWindow::readEnvironmentValues()
 
 void MainWindow::print(QString s,bool newLine)
 {
-  if(newLine)
+  if(!s.endsWith("\n"))
     s+="\n";
   if(m_logstream)
     *m_logstream<<CURRENT_TIME()<<": "<<s;
   if(m_output)
     m_output->insertPlainText(s);
+}
+
+void MainWindow::captureOutputForStatusBar(QString output)
+{
+  // Capturar para modificar status bar
+
+  output.trimmed();
+
+  QRegExp rxReset(EXPREG_RESET);
+  QRegExp rxPass(EXPREG_A_PASS);
+  if(rxReset.exactMatch(output))
+  {
+    int minimum=rxReset.cap(1).toInt();
+    int maximum=rxReset.cap(2).toInt();
+    m_progressBar->setMinimum(minimum);
+    m_progressBar->setMaximum(maximum);
+    m_progressBar->setValue(minimum);
+  }
+  else if(rxPass.indexIn(output)!=-1)
+  {
+    print("goo");
+    int pass=rxPass.cap(1).toInt();
+    output.replace(rxPass,"");
+    qDebug()<<pass<<output;
+    m_progressBar->setValue(pass);
+    m_progressBar->setFormat("%p% "+output);
+  }
+}
+
+void MainWindow::startProgressBar()
+{
+    QStatusBar* st=statusBar();
+    st->clearMessage();
+    st->addWidget(m_progressBar,100);
+    m_progressBar->show();
+    m_web->setEnabled(false);
+}
+
+void MainWindow::finishProgressBar()
+{
+    QStatusBar* st=statusBar();
+    st->removeWidget(m_progressBar);
+    st->showMessage(tr("Ready"));
+    m_web->setEnabled(true);
 }
