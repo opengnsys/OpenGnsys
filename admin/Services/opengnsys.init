@@ -1,0 +1,99 @@
+#! /bin/sh
+
+##################################################################################################################
+####### Script de arranque de los servicios de OpenGnSys: Servidor ogAdmServer y Servidor de repositorio ogAdmRepo
+####### autor: jcxifre <jcxifre@unizar.es>
+####### basado en http://www.epilogue.org/~xef4/start-stop-example
+##################################################################################################################
+
+
+### BEGIN INIT INFO
+# Provides:          opengnsys
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      1
+# Short-Description: Servicios del sistema OpenGnSys
+# Description:       Servicios del sistema OpenGnSys:
+### END INIT INFO
+
+#
+# Definiciones globales
+#
+BASEDIR=/opt/opengnsys
+
+#
+# Servidor de OpenGnSys
+#
+SERVERNAME=ogAdmServer
+SERVERDAEMON=$BASEDIR/sbin/$SERVERNAME
+SERVERCFG=$BASEDIR/etc/$SERVERNAME.cfg
+SERVERLOG=$BASEDIR/log/$SERVERNAME.log
+SERVERDAEMON_OPTIONS="-f $SERVERCFG -l $SERVERLOG"
+
+#
+# Servidor de Repositorio
+#
+REPONAME=ogAdmRepo
+REPODAEMON=$BASEDIR/sbin/$REPONAME
+REPOCFG=$BASEDIR/etc/$REPONAME.cfg
+REPOLOG=$BASEDIR/log/$REPONAME.log
+REPODAEMON_OPTIONS="-f $REPOCFG -l $REPOLOG"
+
+set -e
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+
+# Read config file if it is present.
+if [ -r /etc/default/opengnsys ]
+then
+        . /etc/default/opengnsys
+fi
+
+arranca_demonios() {
+  if [ $RUN_OGADMSERVER = "yes" ]
+  then
+     echo -n "Iniciando demonio: "$SERVERNAME
+     start-stop-daemon --start --quiet --background --exec $SERVERDAEMON -- $SERVERDAEMON_OPTIONS
+     echo "."
+  fi
+  if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]
+  then
+     sleep 5 # Damos tiempo a que ogAdmServer este funcionando
+  fi
+  if [ $RUN_OGADMREPO = "yes" ]
+  then
+     echo -n "Iniciando demonio: "$REPONAME
+     start-stop-daemon --start --quiet  --background --exec $REPODAEMON -- $REPODAEMON_OPTIONS
+     echo "."
+  fi
+}
+
+para_demonios() {
+  echo -n "Parando demonio: "$REPONAME
+  start-stop-daemon --stop --quiet --oknodo --name $REPONAME
+  echo "."
+  echo -n "Parando demonio: "$SERVERNAME
+  start-stop-daemon --stop --quiet --oknodo --name $SERVERNAME
+  echo "."
+}
+
+case "$1" in
+  start)
+        arranca_demonios
+        ;;
+  stop)
+        para_demonios
+        ;;
+  restart)
+        para_demonios
+        arranca_demonios
+        ;;
+
+  *)
+        echo "Uso: opengnsys "$1" {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0
+

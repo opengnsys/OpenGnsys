@@ -1,0 +1,4 @@
+# RUN_OGADMSERVER run OpenGNSys Admin service.
+# RUN_OGADMREPO run OpenGNSys Repository Manager service.
+RUN_OGADMSERVER="yes"
+RUN_OGADMREPO="yes"

@@ -25,7 +25,7 @@ $(PROYECTO): $(OBJS)
 #	strip $(PROYECTO)		# Optimizacion
 
 install: $(PROYECTO)
-	cp $(PROYECTO) $(INSTALL_DIR)/bin
+	cp $(PROYECTO) $(INSTALL_DIR)/sbin
 	cp $(PROYECTO).cfg $(INSTALL_DIR)/etc
  
 clean:

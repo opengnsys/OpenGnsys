@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=$WORKDIR/installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftpd-hpa syslinux openbsd-inetd update-inetd build-essential cmake libmysqlclient15-dev qt4-qmake libqt4-dev )
+DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential cmake libmysqlclient15-dev qt4-qmake libqt4-dev )
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -412,7 +412,7 @@ EOF
 ####### Funciones para el manejo de Subversion
 #####################################################################
 
-svnCheckoutCode()
+function svnCheckoutCode()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "svnCheckoutCode(): invalid number of parameters"
@@ -431,6 +431,34 @@ svnCheckoutCode()
 	echoAndLog "svnCheckoutCode(): subversion code downloaded"
 	return 0
 }
+
+############################################################
+###  Detectar red
+############################################################
+
+function getNetworkSettings()
+{
+	# Variables globales definidas:
+	# - SERVERIP: IP local del servidor.
+	# - NETIP:    IP de la red.
+	# - NETMASK:  máscara de red.
+	# - NETBROAD: IP de difusión de la red.
+	# - ROUTERIP: IP del router.
+	# - DNSIP:    IP del servidor DNS.
+
+        echoAndLog "getNetworkSettings(): Detecting default network parameters."
+	SERVERIP=$(ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}')
+	NETMASK=$(ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | awk '{print $1}')
+	NETBROAD=$(ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | awk '{print $1}')
+	NETIP=$(netstat -r | grep $NETMASK | awk '{print $1}')
+	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
+	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf)
+	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
+		errorAndLog "getNetworkSettings(): Network not detected."
+		exit 1
+	fi
+}
+
 
 ############################################################
 ### Esqueleto para el Servicio pxe y contenedor tftpboot ###
@@ -473,16 +501,11 @@ function testPxe () {
 ## Configuracion servicio NFS
 ########################################################################
 
-function nfsConfigure (){
+function nfsConfigure ()
+{
         echoAndLog "nfsConfigure(): Sample NFS Configuration."
-        local net_ip net_mask VARS
-	VARS=$(route -n | awk '$2~/0\.0\.0\.0/ {print $1,$3}')
-	read -e net_ip net_mask <<<"$VARS"
-	if [ -z "$net_ip" -o -z "$net_mask" ]; then
-		echoAndLog "nfsConfigure(): Network not detected."
-		exit 1
-	fi
-        sed -e "s/NETIP/$net_ip/g" -e "s/NETMASK/$net_mask/g" $WORKDIR/opengnsys/server/NFS/exports  >> /etc/exports
+        sed -e "s/NETIP/$NETIP/g" -e "s/NETMASK/$NETMASK/g" $WORKDIR/opengnsys/server/NFS/exports  >> /etc/exports
+	/etc/init.d/nfs-kernel-server restart
 	exportfs -va
         echoAndLog "nfsConfigure(): Sample NFS Configured in file \"/etc/exports\"."
 }
@@ -492,11 +515,18 @@ function nfsConfigure (){
 ## Configuracion servicio DHCP
 ########################################################################
 
-function dhcpConfigure (){
+function dhcpConfigure()
+{
         echoAndLog "dhcpConfigure(): Sample DHCP Configuration."
-	#### PRUEBAS
-        cp $WORKDIR/opengnsys/server/DHCP/dhcpd.conf /etc/dhcp3/dhcpd.conf
-
+        sed -e "s/SERVERIP/$SERVERIP/g" \
+	    -e "s/NETIP/$NETIP/g" \
+	    -e "s/NETMASK/$NETMASK/g" \
+	    -e "s/NETBROAD/$NETBROAD/g" \
+	    -e "s/ROUTERIP/$ROUTERIP/g" \
+	    -e "s/DNSIP/$DNSIP/g" \
+	    $WORKDIR/opengnsys/server/DHCP/dhcpd.conf > /etc/dhcp3/dhcpd.conf
+	/etc/init.d/dhcp3-server restart
+        echoAndLog "dhcpConfigure(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
 }
 
 
@@ -504,6 +534,30 @@ function dhcpConfigure (){
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
+# Copiar ficheros del OpenGNSys Web Console.
+function installWebFiles()
+{
+	echoAndLog "installWebFiles(): Installing web files..."
+	cp -ar $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+	if [ $? != 0 ]; then
+		errorAndLog "installWebFiles(): Error copying web files."
+		exit 1
+	fi
+        find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	# Cambiar permisos para ficheros especiales.
+	if [ -f /etc/apache2/envvars ]; then
+		source /etc/apache2/envvars
+	else
+		APACHE_RUN_USER=www-data
+		APACHE_RUN_GROUP=www-data
+	fi
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/comandos/gestores/filescripts
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/icons
+	echoAndLog "installWebFiles(): Web files installed successfully."
+}
+
+# Configuración específica de Apache.
 function openGnsysInstallWebConsoleApacheConf()
 {
 	if [ $# -ne 2 ]; then
@@ -520,8 +574,7 @@ function openGnsysInstallWebConsoleApacheConf()
 		return 1
 	fi
 
-    [ -d $path_apache2_confd/sites-available ] || mkdir $path_apache2_confd/sites-available
-    [ -d $path_apache2_confd/sites-enabled ] || mkdir $path_apache2_confd/sites-enabled
+        mkdir -p $path_apache2_confd/{sites-available,sites-enabled}
 
 	echoAndLog "openGnsysInstallWebConsoleApacheConf(): creating apache2 config file.."
 
@@ -537,9 +590,8 @@ Alias /opengnsys ${path_web_console}
 </Directory>
 EOF
 
-
-	ln -s $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys.conf
-	ln -s $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys.conf
+	ln -fs $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
 	if [ $? -ne 0 ]; then
 		errorAndLog "openGnsysInstallWebConsoleApacheConf(): config file can't be linked to apache conf, verify your server installation"
 		return 1
@@ -562,12 +614,13 @@ function openGnsysInstallCreateDirs()
 	echoAndLog "openGnsysInstallCreateDirs(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
-	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,usuarios}
+	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,usuarios}
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
 	mkdir -p $path_opengnsys_base/log/clients
+	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
 	ln -fs /var/lib/tftpboot $path_opengnsys_base
@@ -603,9 +656,9 @@ function openGnsysCopyServerFiles () {
 		exit 1
 	fi
 
-    echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
+	echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
 
-    pushd $WORKDIR/opengnsys
+	pushd $WORKDIR/opengnsys
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -614,26 +667,35 @@ function openGnsysCopyServerFiles () {
 		fi
 		if [ -d "${SOURCES[$i]}" ]; then
 			echoAndLog "openGnsysCopyServerFiles(): copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
-			cp -pr "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
+			cp -ar "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 	done
-    popd
+	popd
 }
 
+####################################################################
+### Funciones de compilación de códifo fuente de servicios
+####################################################################
+
 # Compilar los servicios de OpenGNsys
-function servicesCompilation () {
+function servicesCompilation ()
+{
 	# Compilar OpenGNSys Server
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer
 	make && make install
+	popd
 	# Compilar OpenGNSys Repository Manager
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Repository Manager"
-	popd
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
 	make && make install
+	popd 
+	echoAndLog "servicesCompilation(): Copying init files"
+	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
+	update-rc.d opengnsys defaults
 	# Compilar OpenGNSys Client
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
-	popd
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
 	make && mv ogAdmClient ../../../client/nfsexport/bin
 	popd
@@ -649,7 +711,9 @@ function servicesCompilation () {
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysClientCreate () {
+function openGnsysClientCreate ()
+{
+	local OSDISTRIB OSCODENAME
 
 	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
@@ -659,12 +723,20 @@ function openGnsysClientCreate () {
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.sh $INSTALL_TARGET/client/lib/engine/bin
 
-	echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files."
-        $INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
+	OSDISRIB=$(lsb_release -i | awk -F: '{print $2}') 2>/dev/null
+	OSCODENAME=$(lsb_release -c | awk -F: '{print $2}') 2>/dev/null
+	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
+		echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
+        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v "$OSCODENAME"
+		echoAndLog "openGnsysClientCreate(): Loading udeb files for $OSDISTRIB $OSCODENAME."
+        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh "$OSCODENAME"
+	else
+		echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files."
+        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
 
-	echoAndLog "openGnsysClientCreate(): Loading udeb files."
-        $INSTALL_TARGET/bin/upgrade-clients-udeb.sh
-
+		echoAndLog "openGnsysClientCreate(): Loading udeb files."
+        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh
+	fi
 }
 
 
@@ -673,7 +745,14 @@ function openGnsysClientCreate () {
 ####### Proceso de instalación de OpenGNSys
 #####################################################################
 
-	
+
+# Detectar parámetros de red por defecto
+getNetworkSettings
+if [ $? -ne 0 ]; then
+	errorAndLog "Error reading default network settings."
+	exit 1
+fi
+
 # Actualizar repositorios
 apt-get update
 
@@ -770,15 +849,13 @@ if [ $? -eq 0 ]; then
 	fi
 fi
 
-# FIXME Configuración del web de OpenGNSys Admin
-echoAndLog "Installing web files..."
 # copiando paqinas web
-cp -pr $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+installWebFiles
 
 # creando configuracion de apache2
 openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
 if [ $? -ne 0 ]; then
-	errorAndLog "Error while creating hidra apache config"
+	errorAndLog "Error configuring Apache for OpenGNSYS Admin"
 	exit 1
 fi
 
