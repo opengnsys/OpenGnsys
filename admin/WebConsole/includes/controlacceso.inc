@@ -1,10 +1,10 @@
 <?
-$wer="http://10.1.15.3/WebCon/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="http://10.1.15.3/WebCon/acceso.php"; // P�ina de login de la aplicaci�
+$wer="http://10.1.15.4/WebConsole/pagerror.php"; // P�ina de redireccionamiento de errores
+$wac="http://10.1.15.4/WebConsole/acceso.php"; // P�ina de login de la aplicaci�
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
 $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexi� a la base de datos
-$ips="10.1.15.3"; // IP del servidor hidra
+$ips="10.1.15.4"; // IP del servidor hidra
 $prt="2008"; // Puerto de comunicaci� con el servidor
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
@@ -18,7 +18,6 @@ if ($cmd){
 if(!$resul)
 	Header("Location: ".$wac."?herror=4"); // Error de conexi� con servidor B.D.
 
-session_start(); // Activa variables de sesi�
 $_SESSION["widcentro"]=$idc; 
 $_SESSION["wnombrecentro"]=$nmc; 
 $_SESSION["wusuario"]=$usu; 
