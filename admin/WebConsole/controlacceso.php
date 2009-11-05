@@ -114,7 +114,7 @@ function toma_datos($cmd,$idcentro,$nombrecentro,$idioma,$usuario,$idtipousuario
 					o.style.visibility="hidden";
 				if(vez>5){
 					var w=window.top;
-					//w.location="frames.php";
+					w.location="frames.php";
 				}
 				vez++;
 				setTimeout("acceso();",300);
