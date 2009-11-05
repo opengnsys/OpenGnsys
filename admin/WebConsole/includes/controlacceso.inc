@@ -19,16 +19,16 @@ if(!$resul)
 	Header("Location: ".$wac."?herror=4"); // Error de conexi� con servidor B.D.
 
 session_start(); // Activa variables de sesi�
-$_SESSION["idcentro"]=$idc; 
-$_SESSION["nombrecentro"]=$nmc; 
-$_SESSION["usuario"]=$usu; 
-$_SESSION["idtipousuario"]=$tsu; 
-$_SESSION["idioma"]=$idi;
-$_SESSION["cadenaconexion"]=$cnx;
-$_SESSION["servidorhidra"]=$ips;
-$_SESSION["hidraport"]=$prt;
-$_SESSION["pagerror"]=$wer;
-$_SESSION["urlacceso"]=$wac;
+$_SESSION["widcentro"]=$idc; 
+$_SESSION["wnombrecentro"]=$nmc; 
+$_SESSION["wusuario"]=$usu; 
+$_SESSION["widtipousuario"]=$tsu; 
+$_SESSION["widioma"]=$idi;
+$_SESSION["wcadenaconexion"]=$cnx;
+$_SESSION["wservidorhidra"]=$ips;
+$_SESSION["whidraport"]=$prt;
+$_SESSION["wpagerror"]=$wer;
+$_SESSION["wurlacceso"]=$wac;
 
 // *************************************************************************************************************************************************
 //	Devuelve una objeto comando totalmente operativo (con la conexi� abierta)
