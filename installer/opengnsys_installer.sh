@@ -457,6 +457,15 @@ function getNetworkSettings()
 		errorAndLog "getNetworkSettings(): Network not detected."
 		exit 1
 	fi
+
+	# Variables de ejecución de Apache
+	# - APACHE_RUN_USER
+	# - APACHE_RUN_GROUP
+	if [ -f /etc/apache2/envvars ]; then
+		source /etc/apache2/envvars
+	fi
+	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
 }
 
 
@@ -487,7 +496,7 @@ EOF
         sleep 1
         testPxe
         ## damos perfimos de lectura a usuario web.
-        chown -R www-data:www-data ${basetftp}
+        chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP ${basetftp}
 }
 
 function testPxe () {
@@ -545,15 +554,10 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Cambiar permisos para ficheros especiales.
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
-	else
-		APACHE_RUN_USER=www-data
-		APACHE_RUN_GROUP=www-data
-	fi
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/comandos/gestores/filescripts
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/icons
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP \
+			$INSTALL_TARGET/www/includes \
+			$INSTALL_TARGET/www/comandos/gestores/filescripts \
+			$INSTALL_TARGET/www/images/icons
 	echoAndLog "installWebFiles(): Web files installed successfully."
 }
 
@@ -580,7 +584,7 @@ function openGnsysInstallWebConsoleApacheConf()
 
 	# genera configuración
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF
-# Hidra web interface configuration for Apache
+# OpenGNSys Web Console configuration for Apache
 
 Alias /opengnsys ${path_web_console}
 
@@ -614,7 +618,7 @@ function openGnsysInstallCreateDirs()
 	echoAndLog "openGnsysInstallCreateDirs(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
-	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,usuarios}
+	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,scripts,usuarios}
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
 	mkdir -p $path_opengnsys_base/etc
@@ -690,10 +694,6 @@ function servicesCompilation ()
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
 	make && make install
 	popd 
-	echoAndLog "servicesCompilation(): Copying init files"
-	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
-	update-rc.d opengnsys defaults
 	# Compilar OpenGNSys Client
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
@@ -723,6 +723,7 @@ function openGnsysClientCreate ()
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.sh $INSTALL_TARGET/client/lib/engine/bin
 
+	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
 	OSDISRIB=$(lsb_release -i | awk -F: '{print $2}') 2>/dev/null
 	OSCODENAME=$(lsb_release -c | awk -F: '{print $2}') 2>/dev/null
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
@@ -731,20 +732,37 @@ function openGnsysClientCreate ()
 		echoAndLog "openGnsysClientCreate(): Loading udeb files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh "$OSCODENAME"
 	else
-		echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files."
+		echoAndLog "openGnsysClientCreate(): Loading default Kernel and Initrd files."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
 
-		echoAndLog "openGnsysClientCreate(): Loading udeb files."
+		echoAndLog "openGnsysClientCreate(): Loading default udeb files."
         	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh
 	fi
 }
 
+
+# Configuración básica de servicios de OpenGNSys
+function openGnsysConfigure()
+{
+	echoAndLog "openGnsysConfigure(): Copying init files."
+	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
+	update-rc.d opengnsys defaults
+	echoAndLog "openGnsysConfigure(): Creating OpenGNSys config file in \"$INSTALL_TARGET/etc\"."
+        perl -pie "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
+        perl -pie "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
+        sed -e "s/SERVERIP/$SERVERIP/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	echoAndLog "openGnsysConfiguration(): Starting OpenGNSys services."
+	/etc/init.d/opengnsys start
+}
 
 
 #####################################################################
 ####### Proceso de instalación de OpenGNSys
 #####################################################################
 
+
+echoAndLog "OpenGNSys installation begins at $(date)"
 
 # Detectar parámetros de red por defecto
 getNetworkSettings
@@ -786,7 +804,6 @@ servicesCompilation
 
 # Configurando tftp
 tftpConfigure
-pxeTest
 
 # Configuración NFS
 nfsConfigure
@@ -817,14 +834,14 @@ if [ $? -ne 0 ]; then
 fi
 mysqlDbExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
 if [ $? -ne 0 ]; then
-	echoAndLog "Creating web console database"
+	echoAndLog "Creating Web Console database"
 	mysqlCreateDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
 	if [ $? -ne 0 ]; then
-		errorAndLog "Error while creating hidra database"
+		errorAndLog "Error while creating Web Console database"
 		exit 1
 	fi
 else
-	echoAndLog "Hidra database exists, ommiting creation"
+	echoAndLog "Web Console database exists, ommiting creation"
 fi
 
 mysqlCheckUserExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DB_USER}
@@ -832,7 +849,7 @@ if [ $? -ne 0 ]; then
 	echoAndLog "Creating user in database"
 	mysqlCreateAdminUserToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} ${OPENGNSYS_DB_USER} "${OPENGNSYS_DB_PASSWD}"
 	if [ $? -ne 0 ]; then
-		errorAndLog "Error while creating hidra user"
+		errorAndLog "Error while creating database user"
 		exit 1
 	fi
 
@@ -864,9 +881,9 @@ popd
 # Creando la estructura del cliente
 openGnsysClientCreate
 
-#rm -rf $WORKDIR
-echoAndLog "Process finalized!"
+# Configuración de servicios de OpenGNSys
+openGnsysConfigure
 
-
-
+rm -rf $WORKDIR
+echoAndLog "OpenGNSys installation finished at $(date)"
 
