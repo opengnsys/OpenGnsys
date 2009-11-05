@@ -1,6 +1,5 @@
-﻿<?
-// ***********************************************************************
-
+<?
+// *************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
@@ -8,7 +7,7 @@
 // Nombre del fichero: aulas.php
 // Descripción : 
 //		Administra grupos,aulas y ordenadores de un determinado Centro
-// **************************************************************************
+// ****************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");
