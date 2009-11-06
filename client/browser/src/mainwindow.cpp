@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
       m_logfile(0),m_logstream(0),m_numberTerminal(0)
 {
     // Graphic
-    //showFullScreen();
+    showFullScreen();
 
     setWindowTitle(tr("OpenGNSys Browser"));
 
