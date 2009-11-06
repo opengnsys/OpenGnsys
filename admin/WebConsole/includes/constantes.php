@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 // C�igo de los ambitos para comandos
 $AMBITO_CENTROS=0x01;

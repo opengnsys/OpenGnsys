@@ -1,4 +1,4 @@
-﻿<?
+<?
     include_once("../clases/SockHidra.php");
 		
 	$shidra=new SockHidra("192.168.0.100",2005); 

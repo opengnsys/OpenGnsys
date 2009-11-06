@@ -1,4 +1,4 @@
-﻿<?
+<?
 /*______________________________________________________________________
 	Cambia de posicion los extremos de una fecha. Devuelve una fecha con formato 
 	dd-mm-aaaa si el formato de entrada es aaaa-mm-dd y viseversa

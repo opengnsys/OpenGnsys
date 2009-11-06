@@ -1,4 +1,4 @@
-﻿<?
+<?
 include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/clases/Almanaque_".$idioma.".php");
 $hora=""; 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /*================================================================================
 	Clase para encriptar y desencriptar cadenas cadenas 

@@ -1,4 +1,4 @@
-﻿<?
+<?
 include_once("../includes/ctrlacc.php");
 
 include_once("../clases/AdoPhp.php");

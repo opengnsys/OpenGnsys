@@ -1,4 +1,4 @@
-﻿<?
+<?
 //_____________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_ordenadores_esp.php 

@@ -1,4 +1,4 @@
-﻿<?
+<?
 //________________________________________________________________________________________
 //
 //	Trocea en elementos de una matriz la cadena enviada como parametro separando por parametros

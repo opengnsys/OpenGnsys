@@ -1,4 +1,4 @@
-﻿<!---------------------------------------------------------------------------------------->
+<!---------------------------------------------------------------------------------------->
 <p align=center>
 <span align=center class=subcabeceras><? echo "Opciones de Ejecución"?></span>
 <FORM  align=center name="fdatosejecucion"> 

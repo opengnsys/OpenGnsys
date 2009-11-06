@@ -1,4 +1,4 @@
-﻿	<?
+	<?
 function nombreSO($tipopart,$tiposo,$nombreso){
 	switch($tipopart){
 					case "BIGDOS": 
