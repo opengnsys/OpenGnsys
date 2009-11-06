@@ -600,7 +600,8 @@ EOF
 		errorAndLog "openGnsysInstallWebConsoleApacheConf(): config file can't be linked to apache conf, verify your server installation"
 		return 1
 	else
-		echoAndLog "openGnsysInstallWebConsoleApacheConf(): config file created and linked, restart your apache daemon"
+		echoAndLog "openGnsysInstallWebConsoleApacheConf(): config file created and linked, restarting apache daemon"
+		/etc/init.d/apache2 restart
 		return 0
 	fi
 }
@@ -618,7 +619,7 @@ function openGnsysInstallCreateDirs()
 	echoAndLog "openGnsysInstallCreateDirs(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
-	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,scripts,usuarios}
+	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,usuarios}
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
 	mkdir -p $path_opengnsys_base/etc
@@ -748,9 +749,7 @@ function openGnsysConfigure()
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	sed -e "s/SERVERIP/$SERVERIP/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	echoAndLog "openGnsysConfigure(): Creating Web Console config file"
-	perl -pi -e "s/SERVERIP/$SERVERIP/g" \
-	         -e "s/OPENGNSYSURL/http:\/\/$SERVERIP\/opengnsys/g" \
-	         $INSTALL_TARGET/www/controlacceso.php
+	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/http:\/\/$SERVERIP\/opengnsys/g" $INSTALL_TARGET/www/controlacceso.php
 	echoAndLog "openGnsysConfiguration(): Starting OpenGNSys services."
 	/etc/init.d/opengnsys start
 }
@@ -883,6 +882,6 @@ openGnsysClientCreate
 # Configuración de servicios de OpenGNSys
 openGnsysConfigure
 
-rm -rf $WORKDIR
+#rm -rf $WORKDIR
 echoAndLog "OpenGNSys installation finished at $(date)"
 
