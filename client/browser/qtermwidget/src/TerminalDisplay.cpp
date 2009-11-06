@@ -24,7 +24,6 @@
 
 // Own
 #include "TerminalDisplay.h"
-#include "TerminalDisplay.moc"
 
 // Qt
 #include <QtGui/QApplication>

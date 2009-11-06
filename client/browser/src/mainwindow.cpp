@@ -16,8 +16,6 @@
 
 #include "qtermwidget.h"
 
-#include "mainwindow.moc"
-
 #define BUFFERSIZE 2048
 #define EXPREG_RESET "^\\[(\\d+),(\\d+)\\]\\n"
 #define EXPREG_A_PASS "^\\[(\\d+)\\]\\s"

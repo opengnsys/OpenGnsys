@@ -22,7 +22,6 @@
 
 // Own
 #include "Pty.h"
-#include "Pty.moc"
 
 // System
 #include <sys/types.h>

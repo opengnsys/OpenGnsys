@@ -21,7 +21,6 @@
 
 // Own
 #include "Filter.h"
-#include "Filter.moc"
 
 
 // System

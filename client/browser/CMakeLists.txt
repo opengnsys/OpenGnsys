@@ -21,7 +21,7 @@ include_directories(qtermwidget/src/ ${QT_INCLUDES} ${QT_QTWEBKIT_INCLUDE_DIR})
 
 add_subdirectory(qtermwidget)
 
-set(browser_SRCS main.cpp mainwindow.cpp)
+set(browser_SRCS src/main.cpp src/mainwindow.cpp)
 
 qt4_automoc(${browser_SRCS})
 

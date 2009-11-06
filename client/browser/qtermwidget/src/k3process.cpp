@@ -22,7 +22,6 @@
 
 
 #include "k3process.h"
-#include "k3process.moc"
 //#include <config.h>
 
 #include "k3processcontroller.h"

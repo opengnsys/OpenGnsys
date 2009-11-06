@@ -25,7 +25,6 @@
 
 // Own
 #include "Emulation.h"
-#include "Emulation.moc"
 
 // System
 #include <assert.h>

@@ -21,7 +21,6 @@
 
 // Own
 #include "ScreenWindow.h"
-#include "ScreenWindow.moc"
 
 // Qt
 #include <QtCore>

@@ -18,7 +18,6 @@
 						
 
 #include "qtermwidget.h"
-#include "qtermwidget.moc"
 
 #include "Session.h"
 #include "TerminalDisplay.h"

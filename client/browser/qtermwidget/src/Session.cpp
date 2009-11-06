@@ -24,7 +24,6 @@
 
 // Own
 #include "Session.h"
-#include "Session.moc"
 
 // Standard
 #include <assert.h>

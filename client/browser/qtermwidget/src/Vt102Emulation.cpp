@@ -22,7 +22,6 @@
 
 // Own
 #include "Vt102Emulation.h"
-#include "Vt102Emulation.moc"
 
 //#include <config-konsole.h>
 

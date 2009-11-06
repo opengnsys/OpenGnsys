@@ -20,7 +20,6 @@
 */
 
 #include "k3processcontroller.h"
-#include "k3processcontroller.moc"
 #include "k3process.h"
 
 //#include <config.h>
