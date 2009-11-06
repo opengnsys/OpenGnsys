@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=$WORKDIR/installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev )
+DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev )
 
 INSTALL_TARGET=/opt/opengnsys
 
