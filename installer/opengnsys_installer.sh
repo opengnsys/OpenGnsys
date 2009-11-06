@@ -447,9 +447,9 @@ function getNetworkSettings()
 	# - DNSIP:    IP del servidor DNS.
 
         echoAndLog "getNetworkSettings(): Detecting default network parameters."
-	SERVERIP=$(ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}')
-	NETMASK=$(ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | awk '{print $1}')
-	NETBROAD=$(ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | awk '{print $1}')
+	SERVERIP=$(LANG=C ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | head -n1 | awk '{print $1}')
+	NETMASK=$(LANG=C ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | head -n1 | awk '{print $1}')
+	NETBROAD=$(LANG=C ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | head -n1 | awk '{print $1}')
 	NETIP=$(netstat -r | grep $NETMASK | awk '{print $1}')
 	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf)
