@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=$WORKDIR/installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential cmake libmysqlclient15-dev qt4-qmake libqt4-dev )
+DEPENDENCIES=( subversion php5 mysql-server nfs-kernel-server dhcp3-server udpcast bittorrent apache2 php5 mysql-server php5-mysql tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev )
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -699,11 +699,6 @@ function servicesCompilation ()
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
 	make && mv ogAdmClient ../../../client/nfsexport/bin
 	popd
-	# Compilar OpenGNSys Client Browser
-	echoAndLog "servicesCompilation(): Compiling OpenGNSys Client Browser"
-	pushd $WORKDIR/opengnsys/client/browser
-	cmake CMakeLists.txt && make && mv browser ../nfsexport/bin
-	popd
 }
 
 
@@ -749,9 +744,13 @@ function openGnsysConfigure()
 	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
 	update-rc.d opengnsys defaults
 	echoAndLog "openGnsysConfigure(): Creating OpenGNSys config file in \"$INSTALL_TARGET/etc\"."
-        perl -pie "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
-        perl -pie "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-        sed -e "s/SERVERIP/$SERVERIP/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
+	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	sed -e "s/SERVERIP/$SERVERIP/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	echoAndLog "openGnsysConfigure(): Creating Web Console config file"
+	perl -pi -e "s/SERVERIP/$SERVERIP/g" \
+	         -e "s/OPENGNSYSURL/http:\/\/$SERVERIP\/opengnsys/g" \
+	         $INSTALL_TARGET/www/controlacceso.php
 	echoAndLog "openGnsysConfiguration(): Starting OpenGNSys services."
 	/etc/init.d/opengnsys start
 }

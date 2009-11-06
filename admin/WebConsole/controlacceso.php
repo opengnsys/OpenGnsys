@@ -22,10 +22,10 @@ if (isset($_POST["pss"])) $pss=$_POST["pss"];
 //========================================================================================================
 // Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
 $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexi� a la base de datos
-$ips="10.1.15.4"; // IP del servidor hidra
+$ips="SERVERIP"; // IP del servidor OpenGNSys
 $prt="2008"; // Puerto de comunicaci� con el servidor
-$wer="http://10.1.15.4/WebConsole/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="http://10.1.15.4/WebConsole/acceso.php"; // P�ina de login de la aplicaci�
+$wer="OPENGNSYSURL/pagerror.php"; // P�ina de redireccionamiento de errores
+$wac="OPENGNSYSURL/acceso.php"; // P�ina de login de la aplicaci�
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
 $resul=false;
