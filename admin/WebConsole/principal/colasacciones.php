@@ -336,6 +336,8 @@ if (isset($_POST["wrk_accionid"])) $wrk_accionid=$_POST["wrk_accionid"];
 if (isset($_POST["wrk_idTipoAccion"])) $wrk_idTipoAccion=$_POST["wrk_idTipoAccion"]; 
 if (isset($_POST["wrk_TipoAccion"])) $wrk_TipoAccion=$_POST["wrk_TipoAccion"]; 
 if (isset($_POST["wrk_NombreTipoAccion"])) $wrk_NombreTipoAccion=$_POST["wrk_NombreTipoAccion"]; 
+
+$dblock=' style="visibility:visible" ';
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -350,6 +352,7 @@ if (isset($_POST["wrk_NombreTipoAccion"])) $wrk_NombreTipoAccion=$_POST["wrk_Nom
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasacciones_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
+
 <?
 $flotante=new MenuContextual(); // Crea objeto MenuContextual
 $XMLcontextual=ContextualXMLComando(); // Crea contextual de las acciones
@@ -479,7 +482,7 @@ if($accionid>0){
 	echo '<span align=center class=subcabeceras>'.$textoaccion.':'.$NombreTipoAccion.'</span>&nbsp;&nbsp;<IMG src="'.$urlimg.'">&nbsp;&nbsp;&nbsp;<span class=notas><A href="javascript:ver_accionpadre('.$TipoAccion.');">Volver >></A></span>';
 }
 else{
-	echo '<span align=center class=subcabeceras><U>'.$TbMsg[11].':'.$textambito.'</U>,&nbsp'.$nombreambito.'</span>&nbsp;&nbsp;<IMG src="'.$urlimg.'"></span>';
+	echo '<span align=center class=subcabeceras><U>'.$TbMsg[11].':'.$textambito.'</U>,&nbsp;'.$nombreambito.'</span>&nbsp;&nbsp;<IMG src="'.$urlimg.'"></span>';
 }
 ?>
 <BR><BR>
@@ -691,8 +694,8 @@ function ListandoAcciones($cmd){
 				if($porcen>=$porcendesde && $porcen<=$porcenhasta){
 						$mulaccion.=$rs->campos["idaccion"].":"; // Formato idaccion:estado:resultado;
 						echo '<TR id="ACC_'.$rs->campos["idaccion"].'" name='.$rs->campos["tipoaccion"].' value='.$rs->campos["ambito"].' height=20>'.chr(13);
-						echo '<TD  align=center><IMG onclick=ver_notificaciones(this,0,'.$rs->campos["idaccion"].'); style="cursor:hand;display:block" src="../images/tsignos/contra.gif">';
-						echo '<IMG onclick=ver_notificaciones(this,1,'.$rs->campos["idaccion"].'); style="cursor:hand;display:none" src="../images/tsignos/desple.gif">';
+						echo '<TD  align=center><A href="#vernotcontra"><IMG border=0 onclick="ver_notificaciones(this,0,'.$rs->campos["idaccion"].');" style="display:block" src="../images/tsignos/contra.gif"></A>';
+						echo '<A href="#vernotdesple"><IMG border=0 onclick="ver_notificaciones(this,1,'.$rs->campos["idaccion"].');" style="display:none" src="../images/tsignos/desple.gif"></A>';
 						echo '</TD>'.chr(13);
 
 						switch($rs->campos["tipoaccion"]){
@@ -703,17 +706,17 @@ function ListandoAcciones($cmd){
 								$nombreaccion=$Datos["descripcion"];
 							  //  Visualización de los parametros de un comando
 								$HTMLparametros=infoparametros($cmd,$rs->campos["idaccion"],$rs->campos["parametros"],$Datos["visuparametros"],$ipesnotificadas);
-								echo '<TD align=center><IMG name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/comandos.gif" style="cursor:hand" oncontextmenu="resalta(this,'.$EJECUCION_COMANDO.','."'".$nombreaccion.".'".')"></TD>'.chr(13);
+								echo '<TD align=center><A href="#vernotcontra"><IMG border=0 name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/comandos.gif" oncontextmenu="resalta(this,'.$EJECUCION_COMANDO.','."'".$nombreaccion.".'".')"></A></TD>'.chr(13);
 								break;
 							case $EJECUCION_TAREA :
 								$HTMLparametros=infoparametrosTskWrk($cmd,$rs->campos["idaccion"],$rs->campos["parametros"]);
 								$nombreaccion=TomaDato($cmd,0,'tareas',$rs->campos["idtipoaccion"],'idtarea','descripcion');
-								echo '<TD align=center><IMG name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/tareas.gif" style="cursor:hand" oncontextmenu="resalta(this,'.$EJECUCION_TAREA.','."'".$nombreaccion.".'".')"></TD>'.chr(13);
+								echo '<TD align=center><A href="#vernotcontra"><IMG name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/tareas.gif" oncontextmenu="resalta(this,'.$EJECUCION_TAREA.','."'".$nombreaccion.".'".')"></A></TD>'.chr(13);
 								break;
 							case $EJECUCION_TRABAJO :
 								$HTMLparametros=infoparametrosTskWrk($cmd,$rs->campos["idaccion"],$rs->campos["parametros"]);
 								$nombreaccion=TomaDato($cmd,0,'trabajos',$rs->campos["idtipoaccion"],'idtrabajo','descripcion');
-								echo '<TD align=center><IMG name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/trabajos.gif" style="cursor:hand" oncontextmenu="resalta(this,'.$EJECUCION_TRABAJO.','."'".$nombreaccion.".'".')"></TD>'.chr(13);
+								echo '<TD align=center><A href="#accion"><IMG name="'.$rs->campos["idtipoaccion"].'" id='.$rs->campos["idaccion"].' src="../images/iconos/trabajos.gif" oncontextmenu="resalta(this,'.$EJECUCION_TRABAJO.','."'".$nombreaccion.".'".')"></A></TD>'.chr(13);
 								break;
 						}
 						echo '<TD align=center>&nbsp;'.$nombreaccion.'&nbsp;</TD>'.chr(13);
@@ -793,8 +796,10 @@ function ListandoAcciones($cmd){
 	Dibuja la tabla de parametros de una tarea o un trabajo
 ________________________________________________________________________________________________________*/
 function infoparametrosTskWrk($cmd,$idaccion,$parametros){
+	global $dblock;
+	
 	$HTMLparametros="";
-	$HTMLparametros.='<TR id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
+	$HTMLparametros.='<TR id="PAR_'.$idaccion.'"'.$dblock.'>'.chr(13);
 	$HTMLparametros.= '<TD>&nbsp;</TD>'.chr(13);
 	$HTMLparametros.=  '<TH align=center style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4; " >Nº</TH>'.chr(13);
 	$HTMLparametros.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4;"  colspan=10>Acción</TH>'.chr(13);
@@ -813,7 +818,7 @@ function infoparametrosTskWrk($cmd,$idaccion,$parametros){
 		if($rs->EOF) return("");
 		$valor=$rs->campos["descripcion"];
 		$rs->Cerrar();
-		$HTMLparametros.='<TR  id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
+		$HTMLparametros.='<TR  id="PAR_'.$idaccion.'"'.$dblock.'>'.chr(13);
 		$HTMLparametros.= '<TD>&nbsp;</TD>'.chr(13);
 		$HTMLparametros.=  '<TD align=center style="BACKGROUND-COLOR: #b5daad;" >'.($j+1).'</TD>'.chr(13);
 		$HTMLparametros.=  '<TD  style="BACKGROUND-COLOR: #b5daad;" colspan=10>'.$valor.'</TD>'.chr(13);
@@ -828,9 +833,10 @@ function infoparametros($cmd,$idaccion,$parametros,$visuparametros,$ipesnotifica
 	global  $tabla_parametros;
 	global  $cont_parametros;
 	global  $MAXLONVISUSCRIPT; // longitud Maxima de visualización del script
-
+	global $dblock;
+	
 	$HTMLparametros="";
-	$HTMLparametros.='<TR  id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
+	$HTMLparametros.='<TR  id="PAR_'.$idaccion.'"'.$dblock.'>'.chr(13);
 	$HTMLparametros.= '<TD>&nbsp;</TD>'.chr(13);
 	$HTMLparametros.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4; " colspan=3>Parameter</TH>'.chr(13);
 	$HTMLparametros.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4;"  colspan=8>Value</TH>'.chr(13);
@@ -845,7 +851,7 @@ function infoparametros($cmd,$idaccion,$parametros,$visuparametros,$ipesnotifica
 				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del parámetro en la tabla cargada previamentre con todos los parámetros
 				if ($posp>=0){
 					$auxtabla_parametros=$tabla_parametros[$posp][1];
-					$HTMLparametros.='<TR  id="PAR_'.$idaccion.'" style="display:none">'.chr(13);
+					$HTMLparametros.='<TR  id="PAR_'.$idaccion.'"'.$dblock.'>'.chr(13);
 					$HTMLparametros.= '<TD>&nbsp;</TD>'.chr(13);
 					$HTMLparametros.=  '<TD style="BACKGROUND-COLOR: #b5daad;" colspan=3>&nbsp;'.$auxtabla_parametros["descripcion"].'</TD>'.chr(13);
 					if($auxtabla_parametros["tipopa"]==1){
@@ -881,7 +887,8 @@ function notificaciones($cmd,$idaccion,$numnot,$TipoAccion,$parametros,$ipesnoti
 	global $NOTIFICADOR_ORDENADOR;
 	global $NOTIFICADOR_COMANDO;
 	global $NOTIFICADOR_TAREA;
-
+	global $dblock;
+	
 	$HTMLnotificaciones="";
 	$numnot=0;
 	$rs=new Recordset; 
@@ -919,7 +926,7 @@ function notificaciones($cmd,$idaccion,$numnot,$TipoAccion,$parametros,$ipesnoti
 	while (!$rs->EOF){
 			$numnot++;
 			if($numreg==0){
-				$HTMLnotificaciones.='<TR  id="NOT_'.$idaccion.'" style="display:none" >'.chr(13);
+				$HTMLnotificaciones.='<TR  id="NOT_'.$idaccion.'"'.$dblock.'>'.chr(13);
 				$HTMLnotificaciones.= '<TD>&nbsp;</TD>'.chr(13);
 				$HTMLnotificaciones.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4;">&nbsp;</TH>'.chr(13);
 				$HTMLnotificaciones.=  '<TH style="FONT-WEIGHT: 700;COLOR: #000000;BACKGROUND-COLOR: #D4D4D4;">'.$TbMsg[23].'</TH>'.chr(13);
@@ -940,7 +947,7 @@ function notificaciones($cmd,$idaccion,$numnot,$TipoAccion,$parametros,$ipesnoti
 						break;
 				}
 			}
-			$HTMLnotificaciones.='<TR id="NOT_'.$idaccion.'" style="display:none" height=20 value="'.$idaccion.'">'.chr(13);
+			$HTMLnotificaciones.='<TR id="NOT_'.$idaccion.'"'.$dblock.' height=20 value="'.$idaccion.'">'.chr(13);
 			$HTMLnotificaciones.='<TD>&nbsp;</TD>'.chr(13);
 			$HTMLnotificaciones.='<TD  style="BACKGROUND-COLOR: #E3D8C6;" align=center>';
 			$HTMLnotificaciones.='<IMG id="'.$rs->campos["accionid"].'" name="'.$rs->campos["idnotificacion"].'" value="'.$rs->campos["identificadornot"].'" oncontextmenu="resaltanot(this,'.$TipoNotificador.');" src='.$urlimg.'</TD>'.chr(13);
@@ -1262,7 +1269,7 @@ function CriteriosBusquedas(){
 	$HTMLCriterios.='<TR>'.chr(13);
 	$HTMLCriterios.='<TD>';
 	// Lupa
-	$HTMLCriterios.='<IMG src="../images/iconos/busquedas.gif" onclick="javascript:fdatos.submit()" style="cursor:hand" alt="Buscar">';
+	$HTMLCriterios.='<A href="#busca"><IMG border=0 src="../images/iconos/busquedas.gif" onclick="javascript:fdatos.submit()" alt="Buscar"></A>';
 	$HTMLCriterios.='</TD>';
 	$HTMLCriterios.='<TD>';
 		
@@ -1412,7 +1419,7 @@ function ContextualXMLComando(){
 	if($accionid==0){
 		$layerXML.='<ITEM';
 		$layerXML.=' alpulsar="eliminar_accion()"';
-		$layerXML.=' imgitem="../images/iconos/Eliminar.gif"';
+		$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
 		$layerXML.=' textoitem='.$TbMsg[46];
 		$layerXML.='></ITEM>';
 	}

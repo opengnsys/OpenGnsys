@@ -75,12 +75,12 @@ if ($resul){
 	if(empty($swc)){
 		echo '<SCRIPT language="javascript">'.chr(13);
 		echo 'var oHTML'.chr(13);
-		echo 'var cTBODY=document.all.tags("TBODY");'.chr(13);
+		echo 'var cTBODY=document.getElementsByTagName("TBODY");'.chr(13);
 		echo 'o=cTBODY.item(1);'.chr(13);
 		if ($opcion==$op_alta )
 			echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ',".$idtrabajo.",o.innerHTML);".chr(13);
 		else
-			echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ',".$idtrabajo.");".chr(13);
+			echo 'window.parent.'.$literal."(1,'".$cmd->DescripUltimoError()." ','".$descripcion."');".chr(13);
 		echo '</SCRIPT>';
 	}
 	else{

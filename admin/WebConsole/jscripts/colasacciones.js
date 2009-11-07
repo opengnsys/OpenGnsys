@@ -1,4 +1,4 @@
-﻿// *************************************************************************************************************************************************
+// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación:2003-2004
@@ -541,11 +541,16 @@ var NS=(navigator.appName=="Netscape");
 	}
 //________________________________________________________________________________________________________
 	function ver_notificaciones(o,sw,ida){
-		o=o.parentNode
-		o.childNodes[sw].style.display="none"
+		return;
+		
+		o=o.parentNode // Elemento HREF
+		o=o.parentNode // Elemento TD
+		var IMG=o.childNodes[0].childNodes[sw] // Imagen 
+		IMG.style.display="none"
 		sw++
 		if(sw>1)sw=0
-		o.childNodes[sw].style.display="block"
+
+		IMG.style.display="block"
 
 		while (o.tagName!="TBODY"){
 			o=o.parentNode
@@ -553,10 +558,18 @@ var NS=(navigator.appName=="Netscape");
 		var oTRs=o.getElementsByTagName('TR')
 		for(var i=0;i<oTRs.length;i++){
 			if(oTRs[i].getAttribute("id")=='NOT_'+ida || oTRs[i].getAttribute("id")=='PAR_'+ida)
+				if (oTRs[i].style.visibility=="hidden") oTRs[i].style.visibility="visible"
+				else
+					oTRs[i].style.visibility="hidden"
+		}
+		/*
+		for(var i=0;i<oTRs.length;i++){
+			if(oTRs[i].getAttribute("id")=='NOT_'+ida || oTRs[i].getAttribute("id")=='PAR_'+ida)
 				if (oTRs[i].style.display=="none") oTRs[i].style.display="block"
 				else
 					oTRs[i].style.display="none"
-		}
+		}		
+		*/
 	}
 //________________________________________________________________________________________________________
 	function vertabla_calendario(ofecha){

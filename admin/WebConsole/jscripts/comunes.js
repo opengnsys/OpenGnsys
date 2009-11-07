@@ -1,4 +1,4 @@
-﻿// *************************************************************************************************************************************************
+// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación:2003-2004
@@ -280,6 +280,7 @@ function resultado_mover(resul,descrierror,id){
 	}
 	var ncel=corte_currentNodo.CeldaVista;
 	var celdaHTML=ncel.parentNode.innerHTML; // Recupera celda del nodo
+	
 	if(IE)
 		var  patron = new RegExp("<TD width=16><SPAN><IMG","gi") 
 	else 

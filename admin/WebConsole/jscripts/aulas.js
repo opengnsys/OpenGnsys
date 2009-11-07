@@ -54,7 +54,6 @@ function resultado_cambiar_ordenadores(resul,descrierror,id){
 	var ncel=corte_currentNodo.CeldaVista;
 
 	var celdaHTML=ncel.parentNode.innerHTML; // Recupera celda del nodo
-		alert(celdaHTML)
 	if(IE)
 		var  patron = new RegExp("<TD width=16><SPAN><IMG","gi") 
 	else 
@@ -62,7 +61,6 @@ function resultado_cambiar_ordenadores(resul,descrierror,id){
 			var  patron = new RegExp("<TD width=\"16px\"><SPAN><IMG","gi") 
 
 	var p=celdaHTML.search(patron); 
-	alert(p)
 	if(p<0) return // Ha habido algn problema
 	var nwceldaHTML='<TABLE  border="0" cellspacing="0" cellpadding="0"><TBODY><TR height=16><TD width=3></TD>';
 	nwceldaHTML+=celdaHTML.substring(p);
