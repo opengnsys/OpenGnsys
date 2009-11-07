@@ -176,7 +176,7 @@ int ComandosPendientes(SOCKET ,char *);
 int procesaCOMANDOS(SOCKET ,char *);
 int DisponibilidadComandos(SOCKET ,char *);
 
-int InclusionClienteHIDRA(SOCKET,char *);
+int InclusionCliente(SOCKET,char *);
 int inclusion_srvRMB(char *,int);
 int inclusion_REPO(SOCKET,char *);
 int inclusion_cliWINLNX(SOCKET ,char *);

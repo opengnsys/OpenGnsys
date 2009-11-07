@@ -41,6 +41,7 @@ if  ($opcion!=$op_alta){
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_perfilsoftwares.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>

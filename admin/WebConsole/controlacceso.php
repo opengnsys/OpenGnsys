@@ -11,7 +11,7 @@ if(isset($_SESSION)){ 	// Si existe algua sesión ...
 	session_unset(); // Elimina variables
 	session_destroy(); // Destruye sesión
 }
-session_start(); // Activa variables de sesi�
+session_start(); // Activa variables de sesión
 
 include_once("./clases/AdoPhp.php");
 
@@ -20,12 +20,12 @@ $pss="";
 if (isset($_POST["usu"])) $usu=$_POST["usu"]; 
 if (isset($_POST["pss"])) $pss=$_POST["pss"]; 
 //========================================================================================================
-// Variables de sessi� de configuraci� de servidor y base de datos( Modificar aqu�para cambio global) 
-$cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexi� a la base de datos
-$ips="SERVERIP"; // IP del servidor OpenGNSys
-$prt="2008"; // Puerto de comunicaci� con el servidor
-$wer="OPENGNSYSURL/pagerror.php"; // P�ina de redireccionamiento de errores
-$wac="OPENGNSYSURL/acceso.php"; // P�ina de login de la aplicaci�
+// Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global) 
+$cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos
+$ips="10.1.15.4"; // IP del servidor de Administración
+$prt="2008"; // Puerto de comunicación con el servidor
+$wer="http://10.1.15.4/WebConsole/pagerror.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.4/WebConsole/acceso.php"; // Página de login de la aplicación
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
 $resul=false;
@@ -36,7 +36,7 @@ if ($cmd){
 	$resul=toma_datos($cmd,&$idc,&$nmc,&$idi,$usu,&$tsu,$pss);
 }
 if(!$resul)
-	Header("Location: ".$wac."?herror=4"); // Error de conexi� con servidor B.D.
+	Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D.
 
 $_SESSION["widcentro"]=$idc; 
 $_SESSION["wnombrecentro"]=$nmc; 
@@ -49,9 +49,9 @@ $_SESSION["whidraport"]=$prt;
 $_SESSION["wpagerror"]=$wer;
 $_SESSION["wurlacceso"]=$wac;
 // *************************************************************************************************************************************************
-//	Devuelve una objeto comando totalmente operativo (con la conexi� abierta)
+//	Devuelve una objeto comando totalmente operativo (con la conexión abierta)
 //	Parametros: 
-//		- cadenaconexion: Una cadena con los datos necesarios para la conexi�: nombre del servidor
+//		- cadenaconexion: Una cadena con los datos necesarios para la conexión: nombre del servidor
 //		usuario,password,base de datos,etc separados por coma
 //________________________________________________________________________________________________________
 function CreaComando($cadenaconexion){
@@ -64,9 +64,9 @@ function CreaComando($cadenaconexion){
 	return($cmd);
 }
 //________________________________________________________________________________________________________
-//	Busca datos del usuario que intenta acceder a la aplicaci� 
+//	Busca datos del usuario que intenta acceder a la aplicación 
 //		Parametros: 
-//		- cmd:Una comando ya operativo (con conexi� abierta)  
+//		- cmd:Una comando ya operativo (con conexión abierta)  
 //		- usuario: Nombre del usuario  
 //		- pasguor: Password del uuario  
 //
@@ -97,6 +97,7 @@ function toma_datos($cmd,$idcentro,$nombrecentro,$idioma,$usuario,$idtipousuario
 <HTML>
 	<TITLE> Administración web de aulas</TITLE>
 	<HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 	</HEAD>
 	<BODY>

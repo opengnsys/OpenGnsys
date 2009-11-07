@@ -23,6 +23,7 @@ $TbErr[4]="ATENCIÓN: Usted no tiene acceso a esta aplicación";
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="estilos.css">
 </HEAD>
 <SCRIPT LANGUAGE="JAVASCRIPT">

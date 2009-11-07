@@ -15,6 +15,7 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 <HTML>
 	<TITLE>Administración web de aulas</TITLE>
 	<HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
 		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 		<SCRIPT language="javascript">

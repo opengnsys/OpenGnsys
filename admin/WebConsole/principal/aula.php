@@ -48,6 +48,7 @@ if (!$cmd)
 ?>
 <HTML>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>

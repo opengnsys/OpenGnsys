@@ -6,7 +6,7 @@
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: Configurar.php
 // Descripción : 
-//		Implementaci� del comando "Configurar"
+//		Implementación del comando "Configurar"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -49,6 +49,7 @@ if (!$cmd)
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/Configurar.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
@@ -114,7 +115,7 @@ include_once("../includes/iframecomun.php");
 </BODY>
 </HTML>
 <?
-// *************************************************************************************************************************************************
+// ***********************************************************************************************************
 function tabla_configuraciones($cmd,$idcentro,$idambito,$ambito){
 	global $cadenaip;
 	global $AMBITO_AULAS;
@@ -372,7 +373,7 @@ function tabla_particiones($cmd,$idcentro,$idambito,$idconfiguracion,$cuenta){
   // Boton de insercion
 	$tablaHtml.= '<INPUT type=hidden id="ultpa_'.$idc.'" value='.$ultpa.'>';
 	$tablaHtml.= '<div align=center>';
-	$tablaHtml.= '<br><IMG style="cursor:hand" name="btanade_"'.$idc.'  src="../images/boton_annadir.gif" onclick="annadir_particion('.$idc.')" WIDTH="73" HEIGHT="22">';
+	$tablaHtml.= '<br><A href="#boton_add"><IMG border=0 name="btanade_"'.$idc.'  src="../images/boton_annadir.gif" onclick="annadir_particion('.$idc.')" WIDTH="73" HEIGHT="22"></A>';
 	$tablaHtml.= '</div><br>';
 	$tbconfigur.=$idc.";";
 	return($tablaHtml);
@@ -407,8 +408,8 @@ function Patrontabla_Particion(){
 		$opciones.="3=".$TbMsg[16]."";
 		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],0,100,"chgaccion").'&nbsp</TD>'.chr(13);
 		$tablaHtml.='</TR>'.chr(13);
-		$tablaHtml.='</TABLE>';
-		$tablaHtml.= '</TD></TR></TABLE>';
+		//$tablaHtml.='</TABLE>';
+		//$tablaHtml.= '</TD></TR></TABLE>';
 		return($tablaHtml);
 }
 ?>

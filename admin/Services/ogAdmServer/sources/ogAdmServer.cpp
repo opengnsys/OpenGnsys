@@ -191,9 +191,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 	if (trama.ejecutor=='1'){	// Debe ejecutar el servidor
 		INTROaFINCAD(parametros);
 		nombrefuncion=toma_parametro("nfn",parametros); 
-		resul=strcmp(nombrefuncion,"InclusionClienteHIDRA");
+		resul=strcmp(nombrefuncion,"InclusionCliente");
 		if(resul==0){
-			if(!InclusionClienteHIDRA(s,parametros))
+			if(!InclusionCliente(s,parametros))
 				respuesta_cortesia(s);
 			return;
 		}
@@ -701,7 +701,7 @@ int NoComandosPendientes(SOCKET s)
 	return(manda_comando(s,nwparametros));
 }
 // ________________________________________________________________________________________________________
-// Funcin: IInclusionClienteHIDRA
+// Funcin: InclusionCliente
 //
 //		Descripcin:
 //			Esta funcin incorpora el socket de un nuevo cliente a la tabla de sockets y le devuelve alguna de sus propiedades: nombre, 
@@ -710,7 +710,7 @@ int NoComandosPendientes(SOCKET s)
 //			- s: Socket del cliente
 //			- parametros: Parnetros de la trama recibida
 // ________________________________________________________________________________________________________
-int InclusionClienteHIDRA(SOCKET s,char *parametros)
+int InclusionCliente(SOCKET s,char *parametros)
 {
 	char ErrStr[200],sqlstr[1000];
 	Database db;
@@ -733,6 +733,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 
 	// Toma las propiedades del ordenador
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
+		RegistraLog("Error de conexión con la base de datos",false);
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}
@@ -740,6 +741,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 	sprintf(sqlstr,"SELECT ordenadores.idordenador,ordenadores.idaula,ordenadores.nombreordenador, ordenadores.idperfilhard, ordenadores.idconfiguracion,ordenadores.idparticion,servidoresrembo.ip AS ipservidorrembo,servidoresrembo.puertorepo, ordenadores.idmenu,ordenadores.cache FROM ordenadores INNER JOIN  servidoresrembo ON ordenadores.idservidorrembo = servidoresrembo.idservidorrembo  WHERE ordenadores.ip = '%s'",iph);
 
 	if(!db.Execute(sqlstr,tbl)){ // Error al consultar
+		RegistraLog("Error al ejecutar la consulta",false);
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}
@@ -757,6 +759,9 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 		idmenu=0;
 	}
 	else{
+	 //	sprintf(msglog,"Petición de Inclusión del CLiente:%s",iph);
+	//	RegistraLog(msglog,false);
+
 		if(!tbl.Get("idordenador",idordenador)){ // Toma dato
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				return(false);
@@ -847,7 +852,7 @@ int InclusionClienteHIDRA(SOCKET s,char *parametros)
 	inclusion_srvRMB(ipservidorrembo,puertorepo); // Actualiza tabla de servidores rembo
 
 	// Prepara la trama
-	lon=sprintf(nwparametros,"nfn=RESPUESTA_InclusionClienteHIDRA\r");
+	lon=sprintf(nwparametros,"nfn=RESPUESTA_InclusionCliente\r");
 	lon+=sprintf(nwparametros+lon,"ido=%d\r",idordenador);
 	lon+=sprintf(nwparametros+lon,"npc=%s\r",nombreordenador);
 	lon+=sprintf(nwparametros+lon,"ida=%d\r",idaula);
@@ -1069,7 +1074,7 @@ int RecuperaItem(SOCKET s,char *parametros)
 // ________________________________________________________________________________________________________
 int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 {
-	int pci,idtipohardware;
+	int idtipohardware;
 	int i,lon=0,idcentro,widcentro;
 	char *tbHardware[MAXHARDWARE]; 
 	int tbidhardware[MAXHARDWARE]; 
@@ -1111,7 +1116,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	for (i=0;i<lon;i++){
 		strcpy(ch,"=");// caracter delimitador "="
 		split_parametros(dualHardware,tbHardware[i],ch); // Nmero de particin
-		sprintf(sqlstr,"SELECT idtipohardware,pci,descripcion FROM tipohardwares WHERE nemonico='%s'",dualHardware[0]);
+		sprintf(sqlstr,"SELECT idtipohardware,descripcion FROM tipohardwares WHERE nemonico='%s'",dualHardware[0]);
 		if(!db.Execute(sqlstr,tbl)){ // Error al leer
 			db.GetErrorErrStr(ErrStr);
 			pthread_mutex_unlock(&guardia); 
@@ -1123,12 +1128,12 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 			return(false);
 		}
 		else{  //  Tipo de Hardware Existe
-			if(!tbl.Get("idtipohardware",idtipohardware)){ // Toma dato si es hardware pci
+			if(!tbl.Get("idtipohardware",idtipohardware)){ // Toma dato
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				pthread_mutex_unlock(&guardia); 
 				return(false);
 			}
-			if(!tbl.Get("descripcion",descripcion)){ // Toma dato si es hardware pci
+			if(!tbl.Get("descripcion",descripcion)){ // Toma dato
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				pthread_mutex_unlock(&guardia); 
 				return(false);
@@ -1166,7 +1171,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 				}					
 			}
 			else{
-				if(!tbl.Get("idhardware",tbidhardware[i])){ // Toma dato si es hardware pci
+				if(!tbl.Get("idhardware",tbidhardware[i])){ // Toma dato
 					tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 					pthread_mutex_unlock(&guardia); 
 					return(false);
@@ -1200,7 +1205,7 @@ int CuestrionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *t
 		return(false);
 	}		
 	while(!tbl.ISEOF()){ // Recorre acciones del menu
-		if(!tbl.Get("idhardware",tbidhardwareperfil[j++])){ // Toma dato si es hardware pci
+		if(!tbl.Get("idhardware",tbidhardwareperfil[j++])){ // Toma dato
 			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 			return(false);
 		}		

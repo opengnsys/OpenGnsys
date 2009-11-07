@@ -42,6 +42,7 @@ if (!$rs->Abrir())
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 <HTML>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="L_Iconos.js"></SCRIPT>

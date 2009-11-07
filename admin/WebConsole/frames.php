@@ -13,6 +13,7 @@ include_once("./includes/constantes.php");
 ?>
 <HTML>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <TITLE> Administración web de aulas</TITLE>
 </HEAD>
 <FRAMESET rows="25,*">

@@ -20,6 +20,7 @@ $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
 ?>
 	<HTML>
 	<HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</HEAD>
 	<BODY>
 <?	

@@ -61,6 +61,7 @@ if (!$resul)
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <STYLE TYPE="text/css"></STYLE>
 <SCRIPT language="javascript" src="./jscripts/RestaurarImagenOrdenador.js"></SCRIPT>

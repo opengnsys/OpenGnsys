@@ -66,7 +66,7 @@ char* Desencriptar(char *cadena)
 //		true si los argumentos pasados son correctos y false en caso contrario
 //	Especificaciones:
 //		La sintaxis de los argumentos es la siguiente
-//			-f	Archivo de configuración de hidrac
+//			-f	Archivo de configuración del cliente
 //			-l	Archivo de logs
 //			-d	Nivel de debuger (Mensages que se escribirán en el archivo de logs) 
 //______________________________________________________________________________________________________
@@ -162,12 +162,12 @@ int LeeFileConfiguracion()
 
 	//inicializar variables globales 
 	IPlocal[0]='\0';	// IP local
-	Servidorhidra[0]='\0';	// IP servidor Hidra
-	Puerto[0]='\0';	// Puerto de comunicaciones con el servidor hidra
+	Servidorhidra[0]='\0';	// IP servidor de Administración
+	Puerto[0]='\0';	// Puerto de comunicaciones con el servidor de administración
 	HIDRACHEIMAGENES[0]='\0';	// Path al directorio donde están las imágenes (en la caché)
-	HIDRASRVIMAGENES[0]='\0';	// Path al directorio hidra donde están las imágenes (en el repositorio)
-	HIDRASRVCMD[0]='\0';	// Path del directorio del repositorio donde se depositan los comandos para el cliente hidra
-	HIDRASCRIPTS[0]='\0';	// Path al directorio donde estan los scripts de hidra (en el cliente hidra)
+	HIDRASRVIMAGENES[0]='\0';	// Path al directorio donde están las imágenes (en el repositorio)
+	HIDRASRVCMD[0]='\0';	// Path del directorio del repositorio donde se depositan los comandos para el cliente
+	HIDRASCRIPTS[0]='\0';	// Path al directorio donde estan los scripts de interface con la API de funciones
 	
 	strcpy(ch,"\n");	// Carácter delimitador (salto de linea)
 	numlin=SplitParametros(lineas,buffer,ch); // Toma lineas del  fichero
@@ -249,12 +249,35 @@ void UltimoError(int herror,char*modulo)
 {
 	e.herror=herror;
 	if(herror>MAXERROR){
-		strcpy(e.msg,tbErrores[23]);
+		strcpy(e.msg,tbErrores[MAXERROR]);
 	}
 	else
 		strcpy(e.msg,tbErrores[herror]);	
 	strcpy(e.modulo,modulo);	
-	sprintf(msglog,"Error %d.-(%s) en modulo %s",e.herror,e.msg,e.modulo);
+	sprintf(msglog,"Error en el Servicio: %d.-(%s) en modulo %s",e.herror,e.msg,e.modulo);
+	Log(msglog);
+}
+
+//______________________________________________________________________________________________________
+// Función: UltimoErrorScript
+//
+//	 Descripción:
+// 		Almacena el último error producido al ejecutar un script de la API y lo registra en el log
+//	Parámetros:
+//		- herror: Código del error
+//		- msg: Descripción del error
+//		- modulo: Función donde se produjo el error
+//______________________________________________________________________________________________________
+void UltimoErrorScript(int herror,char*modulo)
+{
+	e.herror=herror;
+	if(herror>MAXERRORSCRIPT){
+		strcpy(e.msg,tbErrores[MAXERRORSCRIPT+1]);
+	}
+	else
+		strcpy(e.msg,tbErroresScripts[herror]);	
+	strcpy(e.modulo,modulo);	
+	sprintf(msglog,"Error al ejecutar Script %d.-(%s) en modulo %s",e.herror,e.msg,e.modulo);
 	Log(msglog);
 }
 //______________________________________________________________________________________________________
@@ -359,7 +382,7 @@ int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
 	int i,nargs;
     
 	if(ndebug>2){
-		sprintf(msglog,">>>EJECUCIÓN DEL comando %s",script);
+		sprintf(msglog,"Ejecución del script: %s",script);
 		Log(msglog);
 	}
     	
@@ -370,7 +393,7 @@ int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
     
 	if(ndebug>2){
 		for(i=0;i<nargs;i++){
-			sprintf(msglog,">>>PARAMETRO %d DEL comando %s",i,argumentos[i]);
+			sprintf(msglog,"Parámetro %d del script: %s",i,argumentos[i]);
 			Log(msglog);
 		}
 	}
@@ -406,115 +429,19 @@ int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
 		}
 		close (descr[LEER]);
 		if(ndebug>2){
-			sprintf(msglog,">>>Información DEVUELTA %s",salida);
+			sprintf(msglog,"Información devuelta %s",salida);
 			Log(msglog);
 		}
 		//kill(pid,SIGQUIT);
 		waitpid(pid,&estado,0);  
 		resul=WEXITSTATUS(estado);
 		if(ndebug>2){
-			sprintf(msglog,">>>Estatus de FINALIZACIÓN:%d",resul);
+			sprintf(msglog,"Estatus de finalización del script:%d",resul);
 			Log(msglog);
 		}   
 		return(resul);
 	}
 	return(-1); 
-}
-//______________________________________________________________________________________________________
-// Función: EjecutarScript
-//
-//	 Descripción:
-//		Ejecuta un script de la shell creando un proceso hijo para ello
-//	Parámetros:
-//		- script: Nombre del script de la  shell
-//		- parametros: Parámetros que se le pasarán al script
-//		- salida: Recoge la salida por pantalla que genera el script
-//		- swasci: Filtra la respuesta del script:
-//					 true=Elimina de la respuesta caracteres menores de asci 32
-//					 false= No los elimina					
-// 	Devuelve:
-//		Código de error de la ejecución. ( Ver tabla de código de errores en la documentación)
-//	Especificaciones:
-//		El parámetro salida recoge la salida por pantalla que se genera en la ejecución del script siempre que
-//		sea disinto de NULL, esto es, si al llamar a la función este parámetro es NULL no se recogerá dicha salida. 
-//______________________________________________________________________________________________________
-int nwEjecutarScript ( char *script,char * parametros,char *salida,int swasci)
-{
-	FILE *f;
-	int i,nargs,herror;
-	long lSize;
-	char wcmdshell[LONSTD],wfilecmdshell[LONSTDC];
-	
-	if(ndebug>2){
-		sprintf(msglog,">>>EJECUCIÓN DEL comando %s",script);
-		Log(msglog);
-	}
-    	
-	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
-	for(i=nargs;i<MAXARGS;i++){
-		argumentos[i]=NULL;
-	}
-    
-	if(ndebug>2){
-		for(i=0;i<nargs;i++){
-			sprintf(msglog,">>>PARAMETRO %d DEL comando %s",i,argumentos[i]);
-			Log(msglog);
-		}
-	}		
-	
-	// Elimina fichero de respuesta anterior
-	sprintf(wcmdshell,"rm %s/%s",HIDRASCRIPTS,"_ogAdmScriptRes_");
-	herror=system(wcmdshell);
-		
-	sprintf(wfilecmdshell,"%s/%s",HIDRASCRIPTS,"_ogAdmScriptCmd_");
-	f = fopen(wfilecmdshell,"wt");	// Abre fichero de script
-	if(f==NULL){
-		UltimoError(herror,"EjecutarScript()");	// Error de apertura del fichero de scripts
-		return(herror);	
-	}else{
-		lSize=strlen(parametros);
-		fwrite(parametros,1,lSize,f);	// Escribe el código a ejecutar
-		fclose(f);
-	}
-	// Permiso de ejecución
-	sprintf(wcmdshell,"/bin/chmod +x %s",wfilecmdshell);
-	herror=system(wcmdshell);
-	if(herror){
-		UltimoError(herror,"EjecutarScript()");	// Se ha producido algún error
-		return(herror);	
-	}
-	sprintf(wcmdshell,"%s",wfilecmdshell);
-	herror=system(wcmdshell);
-	
-	if(salida!=(char*)NULL){ // Si se espera respuesta
-		sprintf(wfilecmdshell,"%s/%s",HIDRASCRIPTS,"_ogAdmScriptRes_");
-		do{
-			sleep(2); // Tiempo de espera de ejecución
-			f = fopen(wfilecmdshell,"rt");	// Abre fichero de script
-			if(f!=NULL){
-				fseek (f , 0 , SEEK_END);
-				lSize= ftell(f);
-				rewind (f);
-				fread (salida,1,lSize,f); // Lee respuesta
-				fclose(f);
-				for(i=lSize-1;i>=0;i--){
-					if(salida[i]<32 && swasci) // Caracter Asci menor de 32
-						salida[i]='\0';
-				}
-				break;
-			}
-		}while(true);
-	}
-	
-	if(ndebug>2){
-		sprintf(msglog,">>>Información DEVUELTA %s",salida);
-		Log(msglog);
-	}
-	if(ndebug>2){
-		sprintf(msglog,">>>Estatus de FINALIZACIÓN:%d",herror);
-		Log(msglog);
-	} 
-	return(herror); 
 }
 //______________________________________________________________________________________________________
 // Función: ReservaMemoria
@@ -578,12 +505,12 @@ void TCPClose(SOCKET s){
 // Función: AbreConexionTCP
 //
 //	 Descripción:
-//		Abre la conexión entre el cliente y el servidor HIDRA
+//		Abre la conexión entre el cliente y el  servidor de administración
 //	Parámetros:
 //		- ips : La Dirección IP del servidor
 //		- port : Puerto para la comunicación
 // 	Devuelve:
-//		Un socket para comunicaciones por protocolo TCP con el servidor Hidra
+//		Un socket para comunicaciones por protocolo TCP con el servidor de administración
 //______________________________________________________________________________________________________
 int AbreConexionTCP()
 {
@@ -603,7 +530,7 @@ int AbreConexionTCP()
 				return(false);	
 			}
 		}
-		sleep(5); // Espera dos cinco antes de intentar una nueva conexión con el servidor Hidra
+		sleep(5); // Espera dos cinco antes de intentar una nueva conexión con el Servidor de Administración
 	}
 	return(true);
 }
@@ -611,7 +538,7 @@ int AbreConexionTCP()
 // Función: CierraConexionTCP
 //
 //	 Descripción:
-//		Cierra la conexión entre el cliente y el servidor HIDRA
+//		Cierra la conexión entre el cliente y el  servidor de administración
 //______________________________________________________________________________________________________
 void CierraConexionTCP()
 {
@@ -621,7 +548,7 @@ void CierraConexionTCP()
 // Función: EnviaTramasHidra
 //
 //	 Descripción:
-//		Envía una trama TCP al servidor Hidra
+//		Envía una trama TCP al Servidor de Administración
 //	Parámetros:
 //		s: socket TCP
 //		trama: contenido a  enviar
@@ -634,7 +561,7 @@ int EnviaTramasHidra(SOCKET s,TRAMA *trama)
 	
 	trama->arroba='@';	// cabecera de la trama
 	strcpy(trama->identificador,"JMMLCAMDJ");	// identificador de la trama
-	trama->ejecutor='1';	// Origen del envío  1=el servidor hidra  2=el cliente hidra 2=el repositorio de imágenes
+	trama->ejecutor='1';	// Origen del envío  1=el servidor de administración  2=el cliente  3=el repositorio de imágenes
 				
 	lon=strlen(trama->parametros);	// Compone la trama 
 	lon+=sprintf(trama->parametros+lon,"iph=%s\r",Propiedades.IPlocal);	// Ip del ordenador
@@ -645,7 +572,7 @@ int EnviaTramasHidra(SOCKET s,TRAMA *trama)
 // Función: RecibeTramasHidra
 //
 //	 Descripción:
-//		Recibe una trama TCP del servidor Hidra
+//		Recibe una trama TCP del servidor de Administración
 //	Parámetros:
 //		s: socket TCP
 //		trama: contenido a  enviar
@@ -756,7 +683,7 @@ int EnviaTramaRepo(SOCKET s,TRAMA* trama, char* iprepo,char *puertorepo)
 	 
 	trama->arroba='@';	// cabecera de la trama
 	strcpy(trama->identificador,"JMMLCAMDJ");	// identificador de la trama
-	trama->ejecutor='2';	// Origen del envío  1=el servidor hidra  2=el cliente hidra 3=el repositorio de imágenes
+	trama->ejecutor='2';	// Origen del envío  1=el servidor  2=el cliente  3=el repositorio de imágenes
 				
 	lon=strlen(trama->parametros); 	// Compone la trama
 	lon+=sprintf(trama->parametros+lon,"iph=%s\r",Propiedades.IPlocal);	// Ip local del ordenador
@@ -840,7 +767,7 @@ int ExisteFichero(char *nomfile)
 		UltimoError(15,"ExisteFichero()");
 		return(false);
 	}
-	sprintf(trama->parametros,"nfn=ExisteFichero\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el servidor HIDRA 
+	sprintf(trama->parametros,"nfn=ExisteFichero\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el  servidor de administración
 	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
 		res=RecibeTramaRepo(udpsock);
 		close(udpsock);
@@ -873,7 +800,7 @@ int RemoveFile(char *nomfile)
 		UltimoError(15,"RemoveFile()");
 		return(false);
 	}
-	sprintf(trama->parametros,"nfn=EliminaFichero\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el servidor HIDRA 
+	sprintf(trama->parametros,"nfn=EliminaFichero\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el  servidor de administración
 	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
 		res=RecibeTramaRepo(udpsock);
 		close(udpsock);
@@ -909,7 +836,7 @@ int LoadTextFile(char *nomfile)
 		UltimoError(15,"LoadTextFile()");
 		return(false);
 	}
-	sprintf(trama->parametros,"nfn=LeeFicheroTexto\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el servidor HIDRA 
+	sprintf(trama->parametros,"nfn=LeeFicheroTexto\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el  servidor de administración
 	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
 		res=RecibeTramaRepo(udpsock);
 		close(udpsock);
@@ -917,8 +844,8 @@ int LoadTextFile(char *nomfile)
 			if(GestionTramas(trama)){
 				txt=TomaParametro("txt",trama->parametros); // Toma contenido del fichero de  comandos
 				strcpy(trama->parametros,txt);
-				if(ndebug>3){
-					sprintf(msglog,">>>>ARCHIVO DE COMANDO:\r%s",trama->parametros);
+				if(ndebug>4){
+					sprintf(msglog,"Archivo de comando:\r%s",trama->parametros);
 					Log(msglog);
 				}
 				return(true); // Devuelve contrenido del fichero
@@ -942,7 +869,7 @@ int LoadTextFile(char *nomfile)
 // Función: ProcesaComandos
 //
 //	Descripción: 
-// 		Espera comando desde el servidor Hidra para ejecutarlos
+// 		Espera comando desde el Servidor de Administración para ejecutarlos
 //	Parámetros:
 //		Ninguno
 //	Devuelve:
@@ -953,14 +880,14 @@ int ProcesaComandos()
 		sprintf(filecmd,"/comandos/CMD_%s",Propiedades.IPlocal);	// Nombre del fichero de comandos		
 		if(ExisteFichero(filecmd))	// Borra fichero de comandos si previamente exista de anteriores procesos
 			RemoveFile(filecmd);
-		if(!DisponibilidadComandos(true)){	// Notifica  al servidor HIDRA su disponibilidad para recibir comandos
+		if(!DisponibilidadComandos(true)){	// Notifica  al servidor de Adminsitración su disponibilidad para recibir comandos
 			UltimoError(0,"ProcesaComandos()");	
 			return(false);	
 		}
 		PRCCMD=true;
 		while(PRCCMD){	// Bucle de espera de comandos interactivos
 			if(ExisteFichero(filecmd)){	// Busca fichero de comandos
-				Log("Comando recibido desde el servidor Hidra");
+				Log("Comando recibido desde el Servidor de Administración");
 				if(!LoadTextFile(filecmd)){	// Toma comando
 					UltimoError(1,"ProcesaComandos()");
 					return(false);
@@ -969,7 +896,7 @@ int ProcesaComandos()
 				Log("Procesa comandos pendientes");
 				ComandosPendientes(); // Bucle para procesar comandos pendientes
 				Log("Disponibilidad para comandos interactivos activada ...");				
-				if(!DisponibilidadComandos(true)){	// Notifica  al servidor HIDRA su disponibilidad para recibir comandos
+				if(!DisponibilidadComandos(true)){	// Notifica  al servidor de Administración su disponibilidad para recibir comandos
 					UltimoError(0,"ProcesaComandos()");	
 					return(false);
 				}
@@ -1029,7 +956,7 @@ int DisponibilidadComandos(int swdis)
 //		- trama : Una trama recibida
 //	Devuelve:
 //		true o false dependiendo del éxito en la ejecución del comandoo si se trata de una trama
-//		del servidor Hidra o bien del resultado de la petición de información al repositorio
+//		del Servidor de Administración o bien del resultado de la petición de información al repositorio
 // ________________________________________________________________________________________________________
 int GestionTramas(TRAMA *trama)
 {
@@ -1043,11 +970,11 @@ int GestionTramas(TRAMA *trama)
 		UltimoError(1,"GestionTramas()");
 		return(false);
 	}
-	if(ndebug>2){
-		sprintf(msglog,">>>>GESTION DE TRAMAS.-Función a ejecutar:%s",nombrefuncion);
+	if(ndebug>4){
+		sprintf(msglog,"Gestión de tramas.-Función a ejecutar:%s",nombrefuncion);
 		Log(msglog);
 	}
-	// Mensajes entre el cliente y el servidor Hidra		
+	// Mensajes entre el cliente y el Servidor de Administración
 	res=strcmp(nombrefuncion,"Apagar");
 	if(res==0)
 		return(Apagar(trama,nwtrama));
@@ -1060,9 +987,9 @@ int GestionTramas(TRAMA *trama)
 	if(res==0)
 		return(Reiniciar(trama,nwtrama));
 			
-	res=strcmp(nombrefuncion,"RESPUESTA_InclusionClienteHIDRA");
+	res=strcmp(nombrefuncion,"RESPUESTA_InclusionCliente");
 	if(res==0)
-		return(RESPUESTA_InclusionClienteHIDRA(trama));
+		return(RESPUESTA_InclusionCliente(trama));
 			
 	res=strcmp(nombrefuncion,"Actualizar");
 	if(res==0)
@@ -1127,13 +1054,13 @@ int GestionTramas(TRAMA *trama)
 // Función: Cortesia
 //
 //	 Descripción:
-//		 Respuesta estandar del servidor Hidra
+//		 Respuesta estandar del Servidor de Administración
 //	Parámetros:
 //		Ninguno
 // 	Devuelve:
 //		true siempre
 //	Especificaciones:
-//		Esta función se ejecuta de forma estandar para cerrar la conversación con el servidor Hidra 
+//		Esta función se ejecuta de forma estandar para cerrar la conversación con el Servidor de Administración
 //______________________________________________________________________________________________________
 int Cortesia(){
 	 return(true);
@@ -1174,29 +1101,28 @@ int TomaIPlocal()
 	sprintf(cmdshell,"%s/ogAdmIP",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);	
 	if(herror){
-		UltimoError(herror,"TomaIPlocal()"); // Se ha producido algún error
+		UltimoErrorScript(herror,"TomaIPlocal()"); // Se ha producido algún error
 		return(false);
 	}
 	return(true); 
 }
 //______________________________________________________________________________________________________
-// Función: InclusionClienteHIDRA
-//
+// Función: InclusionCliente
 //	 Descripción:
-//		Abre una sesión en el servidor Hidra y registra al cliente en el sistema
+//		Abre una sesión en el servidor de administración y registra al cliente en el sistema
 //	Parámetros:
 //		Ninguno
 // 	Devuelve:
 //		true si el registro ha tenido éxito o false en caso contrario
 //______________________________________________________________________________________________________
-int InclusionClienteHIDRA()
+int InclusionCliente()
 { 
 	int lon;	
 	char *parametroscfg;
 	
 	parametroscfg=(char*)ReservaMemoria(256);
 	if(!parametroscfg){
-		UltimoError(1,"InclusionClienteHIDRA()"); // No se pudo reservar memoria
+		UltimoError(1,"InclusionCliente()"); // No se pudo reservar memoria
 		return(false);
 	}
 	
@@ -1210,53 +1136,53 @@ int InclusionClienteHIDRA()
 	}
 	
 	if(!parametroscfg){
-		UltimoError(18,"InclusionClienteHIDRA()"); // No se pudo recuperar la configuración hardware
+		UltimoError(18,"InclusionCliente()"); // No se pudo recuperar la configuración hardware
 		return(false);
 	}
-	lon=sprintf(trama->parametros,"nfn=InclusionClienteHIDRA\r");	// Nombre de la función a ejecutar en el servidor HIDRA 
+	lon=sprintf(trama->parametros,"nfn=InclusionCliente\r");	// Nombre de la función a ejecutar en el servidor de Adminsitración 
 	lon+=sprintf(trama->parametros+lon,"cfg=%s\r",parametroscfg);	// Configuración de los Sistemas Operativos del cliente
 	if(AbreConexionTCP()){
-		Log("Enviando peticion de inclusion del cliente Hidra");
+		Log("Enviando peticion de inclusion al Servidor de Administración");
  		if(!EnviaTramasHidra(sock,trama)){
-			UltimoError(21,"InclusionClienteHIDRA()"); // No se pudo recuperar la configuración hardware
+			UltimoError(21,"InclusionCliente()"); // No se pudo recuperar la configuración hardware
 			return(false);
 		}
-		Log("Recibiendo respuesta del Servidor Hidra");
+		Log("Recibiendo respuesta del Servidor de Administración");
 		if(!RecibeTramasHidra(sock,trama)){
-			UltimoError(22,"InclusionClienteHIDRA()"); // No se pudo recuperar la configuración hardware
+			UltimoError(22,"InclusionCliente()"); // No se pudo recuperar la configuración hardware
 			return(false);
 		}
 		CierraConexionTCP();
 		if(!GestionTramas(trama)){	// Analiza la trama
-			UltimoError(0,"InclusionClienteHIDRA()");
+			UltimoError(0,"InclusionCliente()");
 			return(false);		
 		}
 		return(true);
 	}
 	else{
-		UltimoError(2,"InclusionClienteHIDRA()"); // No se pudo conectar con el servidor Hidra
+		UltimoError(2,"InclusionCliente()"); // No se pudo conectar con el servidor de administración
 		return(false);
 	}		
 	return(true);				
 }
 //______________________________________________________________________________________________________
-// Función: RESPUESTA_InclusionClienteHIDRA
+// Función: RESPUESTA_InclusionCliente
 //
 //	 Descripción:
-//  		Respuesta del servidor HIDRA a la petición de inicio enviando los datos identificativos del cliente y otras configuraciones
+//  		Respuesta del servidor de administración a la petición de inicio enviando los datos identificativos del cliente y otras configuraciones
 //	Parámetros:
-//		trama:	Trama recibida por el cliente desde el Servidor Hidra
+//		trama:	Trama recibida por el cliente desde el Servidor de Administración
 // 	Devuelve:
 //		true si el registro ha tenido éxito o false en caso contrario
 //______________________________________________________________________________________________________
-int RESPUESTA_InclusionClienteHIDRA(TRAMA *trama)
+int RESPUESTA_InclusionCliente(TRAMA *trama)
 {
 	strcpy(Propiedades.idordenador,TomaParametro("ido",trama->parametros));	// Identificador del ordenador
 	strcpy(Propiedades.nombreordenador,TomaParametro("npc",trama->parametros));	//  Nombre del ordenador
 	strcpy(Propiedades.idaula,TomaParametro("ida",trama->parametros));	//  Identificador del aula a la que pertenece
 	strcpy(Propiedades.idperfilhard,TomaParametro("ifh",trama->parametros));	// Identificador del perfil hardware del ordenador
-	strcpy(Propiedades.servidorhidra,TomaParametro("hrd",trama->parametros));	// Dirección IP del servidor Hidra
-	strcpy(Propiedades.puerto,TomaParametro("prt",trama->parametros));		// Puerto de comunicación con el servidor Hidra		
+	strcpy(Propiedades.servidorhidra,TomaParametro("hrd",trama->parametros));	// Dirección IP del servidor de Administración
+	strcpy(Propiedades.puerto,TomaParametro("prt",trama->parametros));		// Puerto de comunicación con el servidor de Administración
 	strcpy(Propiedades.iprepo,TomaParametro("ipr",trama->parametros));	// Dirección IP del repositorio
 	strcpy(Propiedades.puertorepo,TomaParametro("repr",trama->parametros));	// Puerto de comunicación con el repositorio
 
@@ -1299,13 +1225,13 @@ int RESPUESTA_InclusionClienteHIDRA(TRAMA *trama)
 // Función: ComandosPendientes
 //
 //	 Descripción:
-// 		 Búsqueda de acciones pendientes en el servidor HIDRA
+// 		 Búsqueda de acciones pendientes en el  servidor de administración
 //______________________________________________________________________________________________________
 int ComandosPendientes()
 {
 	CMDPTES=true;
 	while(CMDPTES){
-		sprintf(trama->parametros,"nfn=ComandosPendientes\r");	// Nombre de la función a ejecutar en el servidor HIDRA 
+		sprintf(trama->parametros,"nfn=ComandosPendientes\r");	// Nombre de la función a ejecutar en el  servidor de administración
 		if(AbreConexionTCP()){
 			if(!EnviaTramasHidra(sock,trama)){
 				UltimoError(21,"ComandosPendientes()"); // No se pudo recuperar la configuración hardware
@@ -1319,7 +1245,7 @@ int ComandosPendientes()
 			GestionTramas(trama);	// Analiza la trama
 		}
 		else{
-			UltimoError(2,"ComandosPendientes()"); // No se pudo conectar con el servidor Hidra
+			UltimoError(2,"ComandosPendientes()"); // No se pudo conectar con el servidor de Administración
 			return(false);
 		}
 	}
@@ -1388,7 +1314,7 @@ int Reiniciar(TRAMA *trama,TRAMA *nwtrama)
 // Función: Actualizar
 //
 //	 Descripción:
-//		Actualiza los datos de un ordenador  como si volviera a solicitar la entrada  en el sistema al servidor HIDRA
+//		Actualiza los datos de un ordenador  como si volviera a solicitar la entrada  en el sistema al  servidor de administración
 //	Parámetros:
 //		- trama: Trama recibida con las especificaciones del comando
 //		- nwtrama: Nueva trama a enviar al servidor con la respuesta de la acción, si ésta procede
@@ -1399,7 +1325,7 @@ int Actualizar()
 { 
 	int res;
 	
-	res=InclusionClienteHIDRA();
+	res=InclusionCliente();
 	return(res);
 }
 //______________________________________________________________________________________________________
@@ -1494,7 +1420,7 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
 	
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
-		UltimoError(herror,"CrearPerfil()");	 // Se ha producido algún error
+		UltimoErrorScript(herror,"CrearPerfil()");	 // Se ha producido algún error
 		return(false);
 	}
 	else
@@ -1546,7 +1472,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 		//char *wtipopar=TomaParametro("tpa",trama->parametros);	// Tipo de partición
 		char *wnemonico=TomaParametro("nem",trama->parametros);	// Nemonico del S.O.  contenido en la partición
 		//char *wswrestauraimg=TomaParametro("swr",trama->parametros);	// Indica si la imagen a restaurar contiene un S.O. distinto al actual
-		char *widsoftincremental=TomaParametro("icr",trama->parametros);	// Cadena con los identificadores de lsoftware incremental
+		//char *widsoftincremental=TomaParametro("icr",trama->parametros);	// Cadena con los identificadores de lsoftware incremental
 		char *wpathimagen=TomaParametro("pth",trama->parametros);	// Indica si la imagen se descargar de la caché(cache) o del servidor(net)
 		if(wpathimagen=='\0') wpathimagen="1";	// Por defecto de caché
 		
@@ -1557,8 +1483,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 		sprintf(compres,"gzip"); // Método de compresión		
 		
 		char *mettran=(char*)ReservaMemoria(10);
-		sprintf(mettran,""); // Método de transferencia en blanco
-
+		sprintf(mettran,"unicast"); // Método de transferencia por defecto
 						
 		int idxpath=atoi(wpathimagen);
 		if(!CACHEEXISTS) idxpath=2;	// Sin no existe cache siempre desde el servidor
@@ -1657,7 +1582,7 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 	
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
-		UltimoError(herror,"RestaurandoImagen()");	// Se ha producido algún error
+		UltimoErrorScript(herror,"RestaurandoImagen()");	// Se ha producido algún error
 		return(false);
 	}
 	else
@@ -1761,7 +1686,7 @@ int Particionando(char* disco,char* stxParticion,char* script)
 	}
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
-		UltimoError(herror,"Particionar()");	 // Se ha producido algún error
+		UltimoErrorScript(herror,"Particionar()");	 // Se ha producido algún error
 		return(false); 
     }
     else
@@ -1786,7 +1711,7 @@ int Formatear(char* disco,char* particion)
 	sprintf(parametros," %s %s %s","ogAdmDiskFormat",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
-	    UltimoError(herror,"Formatear()");	 // Se ha producido algún error
+	    UltimoErrorScript(herror,"Formatear()");	 // Se ha producido algún error
 		return(false); 
     }
 	return(true); 
@@ -1849,7 +1774,7 @@ char* LeeConfiguracion(char* disco)
 	sprintf(parametros," %s %s","ogAdmListPrimaryPartitions",disco);
 	herror=EjecutarScript(cmdshell,parametros,cadenaparticiones,true);
 	if(herror){
-	    UltimoError(herror,"LeeConfiguracion()");	 // Se ha producido algún error
+	    UltimoErrorScript(herror,"LeeConfiguracion()");	 // Se ha producido algún error
 		return(NULL); 
     }
 	struct s_Particiones *tbcfg[MAXPARTICIONES];
@@ -1918,9 +1843,8 @@ char* TomaNomSO(char*disco,int particion)
 	sprintf(cmdshell,"%s/ogAdmSoVer",HIDRASCRIPTS);	
 	sprintf(parametros," %s %s %d","ogAdmSoVer",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,infosopar,true);
-	
-	if(herror){
-	    UltimoError(herror,"TomaNomSO()");	 // Se ha producido algún error
+		if(herror){
+	    UltimoErrorScript(herror,"TomaNomSO()");	 // Se ha producido algún error
 		return(NULL); 
     }
     if(strlen(infosopar)==0) return(NULL); // NO Existe S.O. en la partición
@@ -1951,7 +1875,7 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	sprintf(cmdshell,"%s/ogAdmHardwareInfo",HIDRASCRIPTS);
 	herror=EjecutarScript(cmdshell,NULL,parametroshrd,false);
 	if(herror){
-	    UltimoError(herror,"InventarioHardware()");	// Se ha producido algún error
+	    UltimoErrorScript(herror,"InventarioHardware()");	// Se ha producido algún error
     }
     res=(herror==0); // Si se ha producido algún error el resultado de la ejecución de error
 
@@ -2023,7 +1947,7 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 		
 		herror=EjecutarScript(cmdshell,parametros,NULL,true);
 		if(herror){
-			UltimoError(herror,"ExecShell()");	// Se ha producido algún error
+			UltimoErrorScript(herror,"ExecShell()");	// Se ha producido algún error
 			res=false;	
 		}
 		else{
@@ -2031,7 +1955,7 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 			//int herror=EjecutarScript(cmdshell,NULL,NULL,true);
 			int herror=system(cmdshell);
 			if(herror){
-				UltimoError(herror,"ExecShell()");	// Se ha producido algún error
+				UltimoErrorScript(herror,"ExecShell()");	// Se ha producido algún error
 				res=false;	
 			}		
 		}
@@ -2084,7 +2008,7 @@ char* URLDecode(char *src)
 // Función: RespuestaEjecucionComando
 //
 //	Descripción: 
-// 		Envia una respuesta a una ejecucion de comando al servidor Hidra
+// 		Envia una respuesta a una ejecucion de comando al servidor de Administración
 //	Parámetros:
 //		- trama: Trama recibida con las especificaciones del comando
 //		- nwtrama: Nueva trama a enviar al servidor con la respuesta de la acción, si ésta procede
@@ -2107,7 +2031,7 @@ int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 			lon+=sprintf(nwtrama->parametros+lon,"der=%s\r",descrierror);	// Dscripcin del error si lo ha habido
 		}	
 		else{ // Algún error
-			lon+=sprintf(nwtrama->parametros+lon,"res=%s\r","2");	// Resultado de la ejecucin del comando		
+			lon+=sprintf(nwtrama->parametros+lon,"res=%s\r","2");	// Resultado de la ejecución del comando		
 			sprintf(descrierror,"Error.-(%s) en modulo %s",e.msg,e.modulo);
 			lon+=sprintf(nwtrama->parametros+lon,"der=%s\r",descrierror);	// Descripción del error si lo ha habido
 		}
@@ -2135,22 +2059,10 @@ int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 //***********************************************************************************************************************
 int  main(int argc, char *argv[])
 {
- 
-	//pid_t  pid;
-
-/*
-	ndebug=3;
-	strcpy(szPathFileLog,"hidrac_0.0.0.0.log");	
-	sprintf(cmdshell,"/var/EAC/hidra/scripts/hidraCreatePrimaryPartitions");
-	sprintf(parametros," %s %s %s","hidraCreatePrimaryPartitions","1","NTFS:3333333");
-	char* retorno=(char*)ReservaMemoria(2000);
-	int herror=EjecutarScript(cmdshell,parametros,retorno,true);
-	Log(retorno);
-	exit(herror);
-*/
-	strcpy(szPathFileCfg,"ogAdmClient.cfg");
+	//Archivos por defecto
+ 	strcpy(szPathFileCfg,"ogAdmClient.cfg");
 	strcpy(szPathFileLog,"ogAdmClient.log");
-	
+
 	// Validación de argumentos y lectura del fichero de configuración
 	if(!ValidacionParametros(argc,argv))
 		exit(EXIT_FAILURE);
@@ -2173,14 +2085,14 @@ int  main(int argc, char *argv[])
 	}
 	strcpy(Propiedades.IPlocal,IPlocal);	
 
-	Log("Abriendo sesión en el servidor Hidra");		
-	if(InclusionClienteHIDRA()){	// El cliente ha abierto sesión correctamente
+	Log("Abriendo sesión en el servidor de Administración");		
+	if(InclusionCliente()){	// El cliente ha abierto sesión correctamente
 		if(strcmp(Propiedades.idordenador,"0")==0){	// Ha habido algún problema al inciar sesión
 			UltimoError(0,"Main()");	
 			exit(EXIT_FAILURE);
 		}
-		Log("Cliente hidra iniciado");		
-		Log("Ejecución de comandos Autoexec");
+		Log("Cliente iniciado");		
+		Log("Ejecución de archivo Autoexec");
 		if(!AutoexecClienteHidra()){  // Ejecución fichero autoexec	
 			UltimoError(0,"Main()");	
 			exit(EXIT_FAILURE);

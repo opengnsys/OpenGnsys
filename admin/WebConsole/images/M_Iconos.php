@@ -174,6 +174,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
   <HTML>
   <HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <LINK rel="stylesheet" type="text/css" href="../estilos.css">
   <SCRIPT language="javascript" src="M_Iconos.js"></SCRIPT>
   </HEAD>

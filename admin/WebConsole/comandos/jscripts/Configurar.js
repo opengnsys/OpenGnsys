@@ -1,4 +1,4 @@
-﻿// *************************************************************************************************************************************************
+// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación:2003-2004
@@ -185,7 +185,7 @@ function chgpar(o){
 				despleacc.selectedIndex=1
 				break;
 		}
-		swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
+		swenvio.value=1; // marca la partición para ser tratada en el env� de trama  
 }
 //________________________________________________________________________________________________________
 function chgtipopar(o){
@@ -239,7 +239,7 @@ switch(parseInt(tipopar)){
 				break;
 	
 		}
-	swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
+	swenvio.value=1; // marca la partición para ser tratada en el env� de trama  
 }
 //________________________________________________________________________________________________________
 function chgtama(idc){
@@ -253,7 +253,7 @@ function chgtama(idc){
 				despleacc.selectedIndex=1;
 				var littiposo=oTDs[3].childNodes[0]
 				littiposo.value=1 // Marca como forzamente formaeable esta paticion
-				oTABLE.value=1; // marca la partici� para ser tratada en el env� de trama  
+				oTABLE.value=1; // marca la partición para ser tratada en el env� de trama  
 			}
 		}
 }
@@ -281,7 +281,7 @@ function chgaccion(o){
 		if(despletipopar.selectedIndex>3)
 			alert(TbMsg[7]);
 	}
-	swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
+	swenvio.value=1; // marca la partición para ser tratada en el env� de trama  
 }
 //________________________________________________________________________________________________________
 function annadir_particion(idc){
@@ -293,26 +293,25 @@ function annadir_particion(idc){
 	}
 	oTABLE=document.getElementById("tabla_contenidoparticion_"+idc) 
 	var oTDs=oTABLE.getElementsByTagName('TD') // LLega hasta TD ( punto de pivote )
-	textHtml=oTDs[0].innerHTML     //  Toma la rama a sustituir
-
+	textHtml=oTDs[0].innerHTML     //  Toma la tabla para añadir al final
 	oTABLE=document.getElementById("patron_contenidoparticion") 
-	var wpatrontablaparticion=oTABLE.innerHTML     //  Toma la rama a sustituir
+	var wpatrontablaparticion=oTABLE.innerHTML     //  Toma la linea patron que se incluye
 	oINPUT=document.getElementById("ultpa_"+idc) 
 	var wultpa=parseInt(oINPUT.value);
 	wultpa++;
 	oINPUT.value=wultpa;
 	ultpa=oINPUT.value;
 
-	var re = new RegExp ('_upa_', 'gi') ; // Reemplaza partici� y configuraci�
+	var re = new RegExp ('_upa_', 'gi') ; // Reemplaza partición y configuración
 	var rs =ultpa
 	var patrontablaparticion = wpatrontablaparticion.replace(re,rs) ;
 	wpatrontablaparticion=patrontablaparticion
-	var re = new RegExp ('_cfg_', 'gi') ;  // Reemplaza configuraci�
+	var re = new RegExp ('_cfg_', 'gi') ;  // Reemplaza configuración
 	var rs =idc
 	var patrontablaparticion = wpatrontablaparticion.replace(re,rs) ;
 	posb=textHtml.length
 	for (var posa=posb;posa>=0;posa--) {
-		if ("</TR>" == textHtml.substr(posa,5))	break; // Retrocede buscando etiqueta </TR>
+		if ("</TR>" == textHtml.substr(posa,5).toUpperCase())	break; // Retrocede buscando etiqueta </TR>
 	 }
 	var nwrama=textHtml.substr(0,posa+5) // Primer trozo
 	nwrama+=patrontablaparticion
@@ -333,10 +332,10 @@ function elimina_particion(o,idc){
 	var re = new RegExp (patron, 'gi') ;
 	var pos=textHtml.search(patron)
 	for (var posa=pos;posa>=0;posa--) {
-		if ("<TR" == textHtml.substr(posa,3))	break; // Retrocede buscando etiqueta <TR>
+		if ("<TR" == textHtml.substr(posa,3).toUpperCase())	break; // Retrocede buscando etiqueta <TR>
 	 }
 	for (var posb=pos;posb<textHtml.length;posb++) { // Avanza buscando etiqueta </TR>
-		if ("</TR>" == textHtml.substr(posb,5))	break;
+		if ("</TR>" == textHtml.substr(posb,5).toUpperCase())	break;
 	 }
 	 posb+=5
 	var nwrama=textHtml.substr(0,posa) // Primer trozo
@@ -344,7 +343,7 @@ function elimina_particion(o,idc){
 	oTDs[0].innerHTML=nwrama;
 
 	var swenvio=document.getElementById("tb_particiones_"+idc) 
-	swenvio.value=1; // marca la partici� para ser tratada en el env� de trama  
+	swenvio.value=1; // marca la partición para ser tratada en el env� de trama  
 }
 //________________________________________________________________________________________________________
 //	
@@ -376,19 +375,19 @@ function chgtotal(op){
 		var despleacc=oTDs[5].childNodes[0] // recupera el desplegable de accion
 		var despletipopar=oTDs[2].childNodes[0] // recupera el desplegable de tipos de particiones
 		var littiposo=oTDs[3].childNodes[0]
-		if(despletipopar.selectedIndex==0 || despletipopar.selectedIndex==5) // partici� est�vac�o es swap no puede llevarse a cabo ningn tipo de acci� sobre ella
+		if(despletipopar.selectedIndex==0 || despletipopar.selectedIndex==5) // partición est�vac�o es swap no puede llevarse a cabo ningn tipo de acci� sobre ella
 			continue
-		if (littiposo.value==1) // Est�partici� debe ser necesariamente formateada porque se ha cambiado el S.O. 
+		if (littiposo.value==1) // Est�partición debe ser necesariamente formateada porque se ha cambiado el S.O. 
 			continue
-		if(op==2){ // No tiene sentido ocultar esta partici� al no tratarse de un sistema Windows;
+		if(op==2){ // No tiene sentido ocultar esta partición al no tratarse de un sistema Windows;
 			if(despletipopar.selectedIndex>3)
 				continue
 		}
-		if(op==3){ //  No tiene sentido mostrar esta partici� al no tratarse de un sistema Windows;
+		if(op==3){ //  No tiene sentido mostrar esta partición al no tratarse de un sistema Windows;
 			if(despletipopar.selectedIndex>3)
 			continue
 		}
 		despleacc.selectedIndex=op; // Coloca la acci� en el desplegable
-		oTABLE.value=1; // marca la partici� para ser tratada en el env� de trama  
+		oTABLE.value=1; // marca la partición para ser tratada en el env� de trama  
 	}
 }

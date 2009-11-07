@@ -26,7 +26,7 @@
 #define LONGITUD_CONFIGURACION 1024	// Longitud mxima de las configuraciones de particin
 #define MAX_NUM_CSADDRS        20
 #define MAX_INTERFACE_LIST     20
-#define MAXCNX 5		// Mximos intentos de conexión al servidor HIDRA
+#define MAXCNX 5		// Máximos intentos de conexión al servidor de Administración
 #define MAXITEMS 100
 #define MAXHTMLMNU 4000
 #define MAXPARTICIONES 24
@@ -55,14 +55,14 @@ typedef  int  SOCKET;
 typedef struct{		// EstructUra de la trama recibida
 	char arroba;	// cabecera de la trama
 	char identificador[9];	// identificador de la trama
-	char ejecutor;	// ejecutor de la trama 1=el servidor hidra  2=el cliente hidra 3=el repositorio
+	char ejecutor;	// ejecutor de la trama 1=el servidor de admistración  2=el cliente 3=el repositorio
 	char parametros[LONGITUD_PARAMETROS]; // Contenido de la trama (par?etros)
 }TRAMA;
 
 TRAMA trama[1];
 
 char IPlocal[20];		// Ip local
-char Servidorhidra[20]; // IP servidor HIDRA
+char Servidorhidra[20]; // IP servidor de Administración
 char Puerto[20]; 		// Puerto Unicode
 
 char szPathFileCfg[128];
@@ -103,11 +103,11 @@ BOOL PROCESO=true;			// Indicador de la actividad del proceso principal
 BOOL CACHEEXISTS;			// Indica si existe cache
 
 char HIDRACHEIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en la caché)
-char HIDRASRVIMAGENES[LONSTDC];	// Path al directorio hidra donde están las imágenes (en el repositorio)
-char HIDRASRVCMD[LONSTDC];	// Path del directorio del repositorio donde se depositan los comandos para el cliente hidra
-char HIDRASCRIPTS[LONSTDC];	// Path al directorio donde están los scripts de hidra (en el cliente hidra)
+char HIDRASRVIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en el repositorio)
+char HIDRASRVCMD[LONSTDC];	// Path del directorio del repositorio donde se depositan los comandos para el cliente 
+char HIDRASCRIPTS[LONSTDC];	// Path al directorio donde están los scripts de la interface con la APi de funciones de OpenGnsys (en el cliente )
 
-int HIDRAVER;	// Versión Hidra
+int HIDRAVER;	// Versión de la apliación de Administración
 int TPAR ;	// Tamaño de la particin
 	
 SOCKET sock;	// Socket
@@ -194,7 +194,7 @@ BOOL aut = false; // Variable para controlar el acceso al menu de administracion
 
 char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecución de este módulo",\
 		"001-No hay memoria suficiente para el buffer",\
-		"002-No se puede establecer conexión con el servidor Hidra",\
+		"002-No se puede establecer conexión con el servidor de administración",\
 		"003-El fichero especificado no existe o bien no puede crearse o abrirse",\
 		"004-Comando Error",\
 		"005-El fichero est vacio",\
@@ -211,14 +211,25 @@ char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecuc
 		"016-No se ha podido comunicar con el repositorio",\
 		"017-No existe Menu principal",\
 		"018-No se ha podido recuperar la configuración hardware del ordenador",\
-		"019-El cliente no se ha podido incluir en el sistema por un fallo en la conexión con el Servidor Hidra",\
+		"019-El cliente no se ha podido incluir en el sistema por un fallo en la conexión con el Servidor de Administración",\
 		"020-No se ha podido crear la carpeta en el repositorio",\
-		"021-Error en el envío de tramas al servidor Hidra",\
-		"022-Error en la recepción de tramas desde el servidor Hidra",\
+		"021-Error en el envío de tramas al Servidor de Administración",\
+		"022-Error en la recepción de tramas desde el Servidor de Administración",\
 		"023-Error desconocido",\
 		};		
-		
-#define MAXERROR 23		// Error máximo cometido
+		#define MAXERROR 22		// Error máximo cometido
+
+char* tbErroresScripts[]={"000-Se han generado errores. No se puede continuar la ejecución de este módulo",\
+		"001-Formato de ejecución incorrecto.",\
+		"002-Fichero o dispositivo no encontrado",\
+		"003-Error en partición de disco",\
+		"004- Partición o fichero bloqueado",\
+		"005-Error al crear o restaurar una imagen",\
+		"006-Sin sistema operativo",\
+		"007- Programa o función no ejecutable",\
+		"008-Error desconocido",\
+		};		
+	#define MAXERRORSCRIPT 7		// Error máximo cometido
 
 // Prototipos de funciones
 char* Desencriptar(char *);
@@ -228,6 +239,8 @@ int CrearArchivoLog(char*);
 int LeeFileConfiguracion();
 void Log(char*);
 void UltimoError(int,char*);
+void UltimoErrorScript(int,char*);
+
 void INTROaFINCAD(char*);
 char* TomaParametro(char*,char*);
 int SplitParametros(char**,char*, char*);
@@ -259,8 +272,8 @@ int GestionTramas(TRAMA *);
 int Cortesia();
 int NoComandosPtes();
 int TomaIPlocal();
-int InclusionClienteHIDRA();
-int RESPUESTA_InclusionClienteHIDRA(TRAMA*);
+int InclusionCliente();
+int RESPUESTA_InclusionCliente(TRAMA*);
 int ComandosPendientes(void);
 int Arrancar(TRAMA *,TRAMA *);
 int Apagar(TRAMA*,TRAMA*);
