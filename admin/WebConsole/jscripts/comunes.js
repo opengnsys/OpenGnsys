@@ -283,8 +283,8 @@ function resultado_mover(resul,descrierror,id){
 	if(IE)
 		var  patron = new RegExp("<TD width=16><SPAN><IMG","gi") 
 	else 
-			if(NS)
-				var  patron = new RegExp("<TD width=\"16\"><SPAN><IMG","gi") 
+		if(NS)
+			var  patron = new RegExp("<TD width=\"16px\"><SPAN><IMG","gi") 
 
 	var p=celdaHTML.search(patron); 
 	if(p<0) return // Ha habido algn problema
