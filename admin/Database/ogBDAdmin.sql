@@ -1023,7 +1023,7 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
 
 INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES 
 (1, 'placas', '../images/iconos/placabase.gif', 'boa', 0),
-(2, 'Camaras web', '../images/iconos/camweb.gif', '', 0),
+(2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
 (3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 0),
 (4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
 (5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
@@ -1032,7 +1032,11 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 (9, 'Dispositivos de sonido', '../images/iconos/tsonido.gif', 'aud', 0),
 (10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
 (11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio', 0),
-(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/confihard.gif', 'cdr', 0);
+(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/confihard.gif', 'cdr', 0),
+(13, 'Controladores IDE', '../images/iconos/confihard.gif', 'ide', 0),
+(14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir', 0),
+(15, 'Controladores USB', '../images/iconos/confihard.gif', 'usb', 0),
+(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus', 0);
 
 -- --------------------------------------------------------
 

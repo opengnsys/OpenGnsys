@@ -1285,7 +1285,7 @@ int Apagar(TRAMA *trama,TRAMA *nwtrama)
 
 	sprintf(nwtrama->parametros,"nfn=RESPUESTA_Apagar\r");					
 	res=RespuestaEjecucionComando(trama,nwtrama,true);	
-	strcpy(cmdshell,"shutdown -h now");
+	strcpy(cmdshell,"poweroff");
 	system(cmdshell);
 	return(res);
 }
@@ -1306,7 +1306,7 @@ int Reiniciar(TRAMA *trama,TRAMA *nwtrama)
 	
 	sprintf(nwtrama->parametros,"nfn=RESPUESTA_Reiniciar\r");					
 	res=RespuestaEjecucionComando(trama,nwtrama,true);	
-	strcpy(cmdshell,"shutdown -r now");
+	strcpy(cmdshell,"reboot");
 	system(cmdshell);
 	return(res);
 }

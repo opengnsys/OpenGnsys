@@ -714,7 +714,7 @@ function openGnsysClientCreate ()
 	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
         find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-        chmod u+x $INSTALL_TARGET/client/admin/scripts/*
+        chmod +x $INSTALL_TARGET/client/admin/scripts/*
 	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
