@@ -225,7 +225,7 @@ mysqlGetRootPassword(){
 	echo ""
 	stty echo
 	if [ "$pass_mysql" == "$pass_mysql2" ] ;then
-		MYSQL_ROOT_PASSWORD=$pass_mysql 
+		MYSQL_ROOT_PASSWORD=$pass_mysql
 		echo "La clave es: ${MYSQL_ROOT_PASSWORD}"
 		return 0
 	else
@@ -694,7 +694,7 @@ function servicesCompilation ()
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
 	make && make install
-	popd 
+	popd
 	# Compilar OpenGNSys Client
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
@@ -714,6 +714,7 @@ function openGnsysClientCreate ()
 	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
         find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+        chmod u+x $INSTALL_TARGET/client/admin/scripts/*
 	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
