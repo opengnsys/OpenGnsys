@@ -718,11 +718,10 @@ function openGnsysClientCreate ()
 	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
-        cp -ar $WORKDIR/opengnsys/client/engine/*.sh $INSTALL_TARGET/client/lib/engine/bin
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISRIB=$(lsb_release -i | awk -F: '{print $2}') 2>/dev/null
-	OSCODENAME=$(lsb_release -c | awk -F: '{print $2}') 2>/dev/null
+	OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
+	OSCODENAME=$(lsb_release -c | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v "$OSCODENAME"

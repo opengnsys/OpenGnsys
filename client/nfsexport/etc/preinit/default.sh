@@ -5,7 +5,10 @@ ln -fs /opt/opengnsys/bin/bash /bin/bash
 
 set -a
 
-source /opt/opengnsys/lib/engine/bin/loadenviron.sh
+source /opt/opengnsys/etc/preinit/loadenviron.sh
+for f in fileslinks.sh loadudeb.sh mount.sh; do
+    $OGETC/preinit/$f
+done
 
 if [ -f $OGETC/init/$OG_IP.sh ]; then
     $OGETC/init/$OG_IP.sh

@@ -207,18 +207,22 @@ function agregarNuevoArranque
     #echo "::shutdown:/sbin/swapoff -a" >> inittab
 
     # Primero ejecutamos el dhcp
-    echo '#! /bin/sh' > $INITSCRIPT
-    echo 'set -e' >> $INITSCRIPT
-    echo 'mkdir -p /var/state/dhcp' >> $INITSCRIPT
-    echo '/sbin/dhclient' >> $INITSCRIPT
-
-    # Montamos NFS y ejecutamos el script con nombre nuestra ip
-    echo "DHCP_SERVER=\`grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> $INITSCRIPT
-    echo "IP=\`grep -h fixed-address /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1\`" >> $INITSCRIPT
-    echo "mkdir -p /opt/opengnsys" >> $INITSCRIPT
-    echo "mount -t nfs -onolock \$DHCP_SERVER:/opt/opengnsys/client /opt/opengnsys" >> $INITSCRIPT
-    echo "/opt/opengnsys/etc/preinit/default.sh" >> $INITSCRIPT
-
+    cat << FIN > $INITSCRIPT
+#! /bin/sh
+set -e
+if grep -q "ip=dhcp" /proc/cmdline; then
+    # Montar NFS.
+    mkdir -p /var/state/dhcp
+    /sbin/dhclient
+    DHCP_SERVER=\$(grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1)
+    mkdir -p /opt/opengnsys
+    mount -t nfs -onolock,ro \$DHCP_SERVER:/opt/opengnsys/client /opt/opengnsys
+else
+    # Modo off-line.
+    echo "Off-line mode."
+fi
+/opt/opengnsys/etc/preinit/default.sh
+FIN
     chmod +x $INITSCRIPT
 }
 
