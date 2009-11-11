@@ -365,20 +365,20 @@ function mysqlImportSqlFileToDb()
 function mysqlCreateDb()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlCreateDb(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local database=$2
 
-	echoAndLog "mysqlCreateDb(): creating database..."
+	echoAndLog "${FUNCNAME}(): creating database..."
 	mysqladmin -u root --password="${root_password}" create $database
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlCreateDb(): error while creating database $database"
+		errorAndLog "${FUNCNAME}(): error while creating database $database"
 		return 1
 	fi
-	errorAndLog "mysqlCreateDb(): database $database created"
+	echoAndLog "${FUNCNAME}(): database $database created"
 	return 0
 }
 
@@ -504,7 +504,7 @@ function getNetworkSettings()
 	NETBROAD=$(LANG=C ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | head -n1 | awk '{print $1}')
 	NETIP=$(netstat -r | grep $NETMASK | head -n1 | awk '{print $1}')
 	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
-	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf)
+	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
 	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
 		errorAndLog "getNetworkSettings(): Network not detected."
 		exit 1
@@ -668,7 +668,10 @@ function nfsAddExport()
 
 function dhcpConfigure()
 {
-        echoAndLog "dhcpConfigure(): Sample DHCP Configuration."
+        echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
+
+	backupFile /etc/dhcp3/dhcpd.conf
+
         sed -e "s/SERVERIP/$SERVERIP/g" \
 	    -e "s/NETIP/$NETIP/g" \
 	    -e "s/NETMASK/$NETMASK/g" \
@@ -676,8 +679,14 @@ function dhcpConfigure()
 	    -e "s/ROUTERIP/$ROUTERIP/g" \
 	    -e "s/DNSIP/$DNSIP/g" \
 	    $WORKDIR/opengnsys/server/DHCP/dhcpd.conf > /etc/dhcp3/dhcpd.conf
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
+		return 1
+	fi
+
 	/etc/init.d/dhcp3-server restart
-        echoAndLog "dhcpConfigure(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
+        echoAndLog "${FUNCNAME}(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
+	return 0
 }
 
 
@@ -793,10 +802,14 @@ function openGnsysCopyServerFiles () {
 
 	local SOURCES=( client/boot/initrd-generator \
                         client/boot/upgrade-clients-udeb.sh \
-                        client/boot/udeblist.conf )
+                        client/boot/udeblist.conf  \
+                        client/boot/udeblist-jaunty.conf  \
+                        client/boot/udeblist-karmic.conf )
 	local TARGETS=( bin/initrd-generator \
                         bin/upgrade-clients-udeb.sh \
-                        etc/udeblist.conf )
+                        etc/udeblist.conf \
+                        etc/udeblist-jaunty.conf  \
+                        etc/udeblist-karmic.conf )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
@@ -865,33 +878,62 @@ function servicesCompilation ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysClientCreate ()
+function openGnsysClientCreate()
 {
 	local OSDISTRIB OSCODENAME
 
-	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Client files."
+	local hayErrores=0
+
+	echoAndLog "${FUNCNAME}(): Copying OpenGNSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
         find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
         chmod +x $INSTALL_TARGET/client/admin/scripts/*
-	echoAndLog "openGnsysClientCreate(): Copying OpenGNSys Cloning Engine files."
+	echoAndLog "${FUNCNAME}(): Copying OpenGNSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while copying engine files"
+		hayErrores=1
+	fi
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
 	OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
 	OSCODENAME=$(lsb_release -c | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
-		echoAndLog "openGnsysClientCreate(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
+		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v "$OSCODENAME"
-		echoAndLog "openGnsysClientCreate(): Loading udeb files for $OSDISTRIB $OSCODENAME."
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGNSys Admin Client"
+			hayErrores=1
+		fi
+		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh "$OSCODENAME"
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGNSys Admin Client"
+			hayErrores=1
+		fi
 	else
-		echoAndLog "openGnsysClientCreate(): Loading default Kernel and Initrd files."
+		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
-
-		echoAndLog "openGnsysClientCreate(): Loading default udeb files."
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGNSys Admin Client"
+			hayErrores=1
+		fi
+		echoAndLog "${FUNCNAME}(): Loading default udeb files."
         	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGNSys Admin Client"
+			hayErrores=1
+		fi
 	fi
+
+	if [ $hayErrores -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): Client generation success."
+	else
+		errorAndLog "${FUNCNAME}(): Client generation with errors"
+	fi
+
+	return $hayErrores
 }
 
 
@@ -975,6 +1017,10 @@ fi
 
 # Configuración ejemplo DHCP
 dhcpConfigure
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while copying your dhcp server files!"
+	exit 1
+fi
 
 # Copiar ficheros de servicios OpenGNSys Server.
 openGnsysCopyServerFiles ${INSTALL_TARGET}
@@ -1045,6 +1091,10 @@ popd
 
 # Creando la estructura del cliente
 openGnsysClientCreate
+if [ $? -ne 0 ]; then
+	errorAndLog "Error creating clients"
+	exit 1
+fi
 
 # Configuración de servicios de OpenGNSys
 openGnsysConfigure
