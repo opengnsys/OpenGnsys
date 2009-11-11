@@ -1,7 +1,8 @@
 #!/bin/bash
 #/**
-#@file    loadudeb.sh
-#@brief   Script de inicio para cargar paquetes udeb en el cliente.
+#@file    metadevs.sh
+#@brief   Script de inicio para detectar metadispositivos LVM y RAID.
+#@todo    Pendiente detección de RAID.
 #@note    Desglose del script "loadenviron.sh".
 #@warning License: GNU GPLv3+
 #@version 0.9
@@ -12,11 +13,10 @@
 
 # Si está configurado OpenGNSys ...
 if [ -n "$OPENGNSYS" ]; then
-    # Cargar paquetes udeb.
-    echo "$MSG_LOADUDEBS"
-    for i in $OGLIB/udeb/*.udeb; do
-        udpkg -i "$i" >/dev/null || printf "$MSG_ERRLOADUDEB\n" $(basename $i)
-    done
+    echo "$MSG_DETECTLVMRAID"
+    # Detectar metadispositivos LVM.
+    vgchange -ay >/dev/null 2>&1
+    # FIXME Detectar metadispositivos RAID.
 else
     # FIXME Error: entorno de OpenGNSys no configurado.
     echo "Error: OpenGNSys environment is not configured."   # FIXME: definir mensaje.

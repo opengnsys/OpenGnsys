@@ -26,11 +26,6 @@ if [ -d $OPENGNSYS ]; then
     export PATH=$OGBIN:$OGAPI:$OGSCRIPTS:$PATH
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
-    export OGLOGFILE=$OGLOG/$OG_IP.log
-
-    # FIXME Pruebas para grupos de ordenadores
-    export OGGROUP=aula3
-
     #/// Cargar fichero de idioma.
     LANGFILE=$OGETC/lang.$LANG.conf
     if [ -f $LANGFILE ]; then
@@ -48,6 +43,12 @@ if [ -d $OPENGNSYS ]; then
     for i in $(typeset -F | cut -f3 -d" "); do
 	export -f $i
     done
+
+    # Fichero de registros.
+    export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
+    # FIXME Pruebas para grupos de ordenadores
+    #export OGGROUP=$(ogGetGroup)
+    export OGGROUP=aula3
 fi
 
 #/// Declaración de códigos de error.

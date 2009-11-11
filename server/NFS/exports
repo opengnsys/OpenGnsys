@@ -1,3 +1,3 @@
-/opt/opengnsys/client      NETIP/NETMASK (ro,no_subtree_check,no_root_squash,sync)
-/opt/opengnsys/images      NETIP/NETMASK (rw,no_subtree_check,no_root_squash,sync,crossmnt)
-/opt/opengnsys/log/clients NETIP/NETMASK (rw,no_subtree_check,no_root_squash,sync)
+/opt/opengnsys/client      NETIP/NETMASK(ro,no_subtree_check,no_root_squash,sync)
+/opt/opengnsys/images      NETIP/NETMASK(rw,no_subtree_check,no_root_squash,sync,crossmnt)
+/opt/opengnsys/log/clients NETIP/NETMASK(rw,no_subtree_check,no_root_squash,sync)

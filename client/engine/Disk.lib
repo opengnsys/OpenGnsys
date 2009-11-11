@@ -195,7 +195,7 @@ fi
 
 #/// Listar dispositivo para los discos duros (tipos: 3=hd, 8=sd).
 ALLDISKS=$(awk '($1==3 || $1==8) && $4!~/[0-9]/ {printf "/dev/%s ",$4}' /proc/partitions)
-VOLGROUPS=$(vgchange -ay &>/dev/null && vgs -a --noheadings | awk '{printf "/dev/%s ",$1}')
+VOLGROUPS=$(vgs -a --noheadings 2>/dev/null | awk '{printf "/dev/%s ",$1}')
 ALLDISKS="$ALLDISKS $VOLGROUPS"
 
 #/// Mostrar salidas segun el número de parametros.

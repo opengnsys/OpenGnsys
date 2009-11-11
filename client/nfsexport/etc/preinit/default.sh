@@ -6,7 +6,7 @@ ln -fs /opt/opengnsys/bin/bash /bin/bash
 set -a
 
 source /opt/opengnsys/etc/preinit/loadenviron.sh
-for f in fileslinks.sh loadudeb.sh mount.sh; do
+for f in fileslinks.sh loadudeb.sh metadevs.sh mount.sh; do
     $OGETC/preinit/$f
 done
 
