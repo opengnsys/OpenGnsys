@@ -950,9 +950,40 @@ function openGnsysConfigure()
 	sed -e "s/SERVERIP/$SERVERIP/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	echoAndLog "openGnsysConfigure(): Creating Web Console config file"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/http:\/\/$SERVERIP\/opengnsys/g" $INSTALL_TARGET/www/controlacceso.php
+	OPENGNSYS_CONSOLEURL=$(awk -F\" '$1~/\$wac/ {print $2}' $INSTALL_TARGET/www/controlacceso.php)
 	echoAndLog "openGnsysConfiguration(): Starting OpenGNSys services."
 	/etc/init.d/opengnsys start
 }
+
+
+#####################################################################
+#######  Función de resumen informativo de la instalación
+#####################################################################
+
+function installationSummary(){
+	echo
+	echoAndLog "OpenGNSys Installation Summary"
+	echo       "=============================="
+	echoAndLog "OpenGNSys installation directory: $INSTALL_TARGET"
+	echoAndLog "OpenGNSys repository directory:   $INSTALL_TARGET/images"
+	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
+	echoAndLog "DHCP configuracion file:          /etc/dhcp3/dhcpd.conf"
+	echoAndLog "NFS configuracion file:           /etc/exports"
+	echoAndLog "OpenGNSys Web Console URL:        $OPENGNSYS_CONSOLEURL"
+	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
+	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
+	echo
+	echoAndLog "Post-Installation Instructions:"
+	echo       "==============================="
+	echoAndLog "Review or edit all configuration files."
+	echoAndLog "Log-in as Web Console admin user."
+	echoAndLog " - Insert Organization data and Organization user."
+	echoAndLog "Log-in as Web Console organization user."
+	echoAndLog " - Insert OpenGNSys Server configuration data."
+	echoAndLog "Restart OpenGNSys services."
+echo
+}
+
 
 
 #####################################################################
@@ -1098,6 +1129,9 @@ fi
 
 # Configuración de servicios de OpenGNSys
 openGnsysConfigure
+
+# Mostrar sumario de la instalación e instrucciones de post-instalación.
+installationSummary
 
 #rm -rf $WORKDIR
 echoAndLog "OpenGNSys installation finished at $(date)"
