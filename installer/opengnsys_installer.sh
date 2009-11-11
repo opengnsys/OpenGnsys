@@ -7,10 +7,10 @@
 
 
 WORKDIR=/tmp/opengnsys_installer
-LOG_FILE=$WORKDIR/installation.log
+LOG_FILE=/tmp/opengnsys_installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev )
+DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget )
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -40,20 +40,20 @@ pushd $WORKDIR
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
-getDateTime()
+function getDateTime()
 {
         echo `date +%Y%m%d-%H%M%S`
 }
 
 # Escribe a fichero y muestra por pantalla
-echoAndLog()
+function echoAndLog()
 {
         echo $1
         FECHAHORA=`getDateTime`
         echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
-errorAndLog()
+function errorAndLog()
 {
         echo "ERROR: $1"
         FECHAHORA=`getDateTime`
@@ -61,14 +61,14 @@ errorAndLog()
 }
 
 # comprueba si el elemento pasado en $2 esta en el array $1
-isInArray()
+function isInArray()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "isInArray(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	echoAndLog "isInArray(): checking if $2 is in $1"
+	echoAndLog "${FUNCNAME}(): checking if $2 is in $1"
 	local deps
 	eval "deps=( \"\${$1[@]}\" )"
 	elemento=$2
@@ -84,7 +84,7 @@ isInArray()
 	done
 
 	if [ $is_in_array -ne 0 ]; then
-		echoAndLog "isInArray(): $elemento NOT found in array"
+		echoAndLog "${FUNCNAME}(): $elemento NOT found in array"
 	fi
 
 	return $is_in_array
@@ -95,7 +95,7 @@ isInArray()
 ####### Funciones de manejo de paquetes Debian
 #####################################################################
 
-checkPackage()
+function checkPackage()
 {
 	package=$1
 	if [ -z $package ]; then
@@ -116,7 +116,7 @@ checkPackage()
 # recibe array con dependencias
 # por referencia deja un array con las dependencias no resueltas
 # devuelve 1 si hay alguna dependencia no resuelta
-checkDependencies()
+function checkDependencies()
 {
 	if [ $# -ne 2 ]; then
 		errorAndLog "checkDependencies(): invalid number of parameters"
@@ -153,7 +153,7 @@ checkDependencies()
 }
 
 # Recibe un array con las dependencias y lo instala
-installDependencies()
+function installDependencies()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "installDependencies(): invalid number of parameters"
@@ -190,12 +190,42 @@ installDependencies()
 	echoAndLog "installDependencies(): dependencies installed"
 }
 
+# Hace un backup del fichero pasado por parámetro
+# deja un -last y uno para el día
+function backupFile()
+{
+	if [ $# -ne 1 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	local fichero=$1
+	local fecha=`date +%Y%m%d`
+
+	if [ ! -f $fichero ]; then
+		errorAndLog "${FUNCNAME}(): file $fichero doesn't exists"
+		return 1
+	fi
+
+	echoAndLog "${FUNCNAME}(): realizando backup de $fichero"
+
+	# realiza una copia de la última configuración como last
+	cp -p $fichero "${fichero}-LAST"
+
+	# si para el día no hay backup lo hace, sino no
+	if [ ! -f "${fichero}-${fecha}" ]; then
+		cp -p $fichero "${fichero}-${fecha}"
+	fi
+
+	echoAndLog "${FUNCNAME}(): backup realizado"
+}
+
 #####################################################################
 ####### Funciones para el manejo de bases de datos
 #####################################################################
 
 # This function set password to root
-mysqlSetRootPassword()
+function mysqlSetRootPassword()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "mysqlSetRootPassword(): invalid number of parameters"
@@ -214,7 +244,7 @@ mysqlSetRootPassword()
 }
 
 # Si el servicio mysql esta ya instalado cambia la variable de la clave del root por la ya existente
-mysqlGetRootPassword(){
+function mysqlGetRootPassword(){
 	local pass_mysql
 	local pass_mysql2
 	stty -echo
@@ -415,22 +445,44 @@ EOF
 function svnCheckoutCode()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "svnCheckoutCode(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local url=$1
 
-	echoAndLog "svnCheckoutCode(): downloading subversion code..."
+	echoAndLog "${FUNCNAME}(): downloading subversion code..."
 
 	/usr/bin/svn co "${url}" opengnsys
 	if [ $? -ne 0 ]; then
-		errorAndLog "svnCheckoutCode(): error getting code from ${url}, verify your user and password"
+		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
 	fi
-	echoAndLog "svnCheckoutCode(): subversion code downloaded"
+	echoAndLog "${FUNCNAME}(): subversion code downloaded"
 	return 0
 }
+
+
+function svnExportCode()
+{
+	if [ $# -ne 1 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	local url=$1
+
+	echoAndLog "${FUNCNAME}(): downloading subversion code..."
+
+	/usr/bin/svn export "${url}" opengnsys
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
+		return 1
+	fi
+	echoAndLog "${FUNCNAME}(): subversion code downloaded"
+	return 0
+}
+
 
 ############################################################
 ###  Detectar red
@@ -450,7 +502,7 @@ function getNetworkSettings()
 	SERVERIP=$(LANG=C ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | head -n1 | awk '{print $1}')
 	NETMASK=$(LANG=C ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | head -n1 | awk '{print $1}')
 	NETBROAD=$(LANG=C ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | head -n1 | awk '{print $1}')
-	NETIP=$(netstat -r | grep $NETMASK | awk '{print $1}')
+	NETIP=$(netstat -r | grep $NETMASK | head -n1 | awk '{print $1}')
 	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf)
 	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
@@ -510,15 +562,105 @@ function testPxe () {
 ## Configuracion servicio NFS
 ########################################################################
 
-function nfsConfigure ()
+# function nfsConfigure ()
+# {
+#         echoAndLog "${FUNCNAME}(): Sample NFS Configuration."
+#         sed -e "s/NETIP/$NETIP/g" -e "s/NETMASK/$NETMASK/g" $WORKDIR/opengnsys/server/NFS/exports  >> /etc/exports
+# 	/etc/init.d/nfs-kernel-server restart
+# 	exportfs -va
+#         echoAndLog "${FUNCNAME}(): Sample NFS Configured in file \"/etc/exports\"."
+# }
+
+# ADVERTENCIA: usa variables globales NETIP y NETMASK!
+function nfsConfigure()
 {
-        echoAndLog "nfsConfigure(): Sample NFS Configuration."
-        sed -e "s/NETIP/$NETIP/g" -e "s/NETMASK/$NETMASK/g" $WORKDIR/opengnsys/server/NFS/exports  >> /etc/exports
+	echoAndLog "${FUNCNAME}(): Config nfs server."
+
+	backupFile /etc/exports
+
+	nfsAddExport /opt/opengnsys/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding nfs client config"
+		return 1
+	fi
+
+	nfsAddExport /opt/opengnsys/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding nfs images config"
+		return 1
+	fi
+
+	nfsAddExport /opt/opengnsys/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding logging client config"
+		return 1
+	fi
+
 	/etc/init.d/nfs-kernel-server restart
+
 	exportfs -va
-        echoAndLog "nfsConfigure(): Sample NFS Configured in file \"/etc/exports\"."
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configure exports"
+		return 1
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
+	return 0
 }
 
+
+# ejemplos:
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
+#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
+function nfsAddExport()
+{
+	if [ $# -lt 2 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	if [ ! -f /etc/exports ]; then
+		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
+		return 1
+	fi
+
+	local export="${1}"
+	local contador=0
+	local cadenaexport
+
+	grep "^${export}" /etc/exports > /dev/null
+	if [ $? -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
+		return 0
+	fi
+
+	cadenaexport="${export}"
+	for parametro in $*
+	do
+		if [ $contador -gt 0 ]
+		then
+			host=`echo $parametro | awk -F: '{print $1}'`
+			options=`echo $parametro | awk -F: '{print $2}'`
+			if [ "${host}" == "" ]; then
+				errorAndLog "${FUNCNAME}(): host can't be empty"
+				return 1
+			fi
+			cadenaexport="${cadenaexport}\t${host}"
+
+			if [ "${options}" != "" ]; then
+				cadenaexport="${cadenaexport}(${options})"
+			fi
+		fi
+		let contador=contador+1
+	done
+
+	echo -en "$cadenaexport\n" >> /etc/exports
+
+	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
+
+	return 0
+}
 
 ########################################################################
 ## Configuracion servicio DHCP
@@ -685,21 +827,37 @@ function openGnsysCopyServerFiles () {
 # Compilar los servicios de OpenGNsys
 function servicesCompilation ()
 {
+	local hayErrores=0
+	
 	# Compilar OpenGNSys Server
-	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Server"
+	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer
 	make && make install
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGNSys Admin Server"
+		hayErrores=1
+	fi
 	popd
 	# Compilar OpenGNSys Repository Manager
-	echoAndLog "servicesCompilation(): Compiling OpenGNSys Repository Manager"
+	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
 	make && make install
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGNSys Repository Manager"
+		hayErrores=1
+	fi
 	popd
 	# Compilar OpenGNSys Client
 	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
 	make && mv ogAdmClient ../../../client/nfsexport/bin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGNSys Admin Client"
+		hayErrores=1
+	fi
 	popd
+
+	return $hayErrores
 }
 
 
@@ -791,7 +949,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Descarga del repositorio de código en directorio temporal
-svnCheckoutCode $SVN_URL
+#svnCheckoutCode $SVN_URL
+svnExportCode $SVN_URL
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while getting code from svn"
 	exit 1
@@ -799,12 +958,20 @@ fi
 
 # Compilar código fuente de los servicios de OpenGNSys.
 servicesCompilation
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while compiling OpenGnsys services"
+	exit 1
+fi
 
 # Configurando tftp
 tftpConfigure
 
 # Configuración NFS
 nfsConfigure
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while configuring nfs server!"
+	exit 1
+fi
 
 # Configuración ejemplo DHCP
 dhcpConfigure
