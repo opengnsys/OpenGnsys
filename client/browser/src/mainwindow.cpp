@@ -285,7 +285,7 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
             print(tr("Unknown error."));
             break;
     }
-    startProgressBar();
+    finishProgressBar();
 }
 
 void MainWindow::slotCreateTerminal()
@@ -370,8 +370,7 @@ void MainWindow::print(QString s,bool newLine)
 void MainWindow::captureOutputForStatusBar(QString output)
 {
   // Capturar para modificar status bar
-
-  output.trimmed();
+  output=output.trimmed();
 
   QRegExp rxReset(EXPREG_RESET);
   QRegExp rxPass(EXPREG_A_PASS);
@@ -385,7 +384,6 @@ void MainWindow::captureOutputForStatusBar(QString output)
   }
   else if(rxPass.indexIn(output)!=-1)
   {
-    print("goo");
     int pass=rxPass.cap(1).toInt();
     output.replace(rxPass,"");
     qDebug()<<pass<<output;
