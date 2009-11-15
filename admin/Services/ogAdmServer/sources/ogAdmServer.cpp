@@ -1270,6 +1270,204 @@ int CuestrionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *t
 //			- ipho: Identificador de la configuracin actual de las particiones del ordenador
 //			- ipho: Ipe del ordenador
 // ________________________________________________________________________________________________________
+int actualiza_software(Database db, Table tbl,char* hrd,char* ip,char*ido)
+{
+	int idtiposoftware;
+	int i,lon=0,idcentro,widcentro;
+	char *tbSoftware[MAXSOFTWARE]; 
+	int tbidsoftware[MAXSOFTWARE]; 
+	char *dualSoftware[2]; 
+	char ch[2]; // Carnter delimitador
+	char sqlstr[1000],ErrStr[200],descripcion[250],nombreordenador[250];
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ACCESO atnico A TRAVEZ DE OBJETO MUTEX a este trozo de cnigo 
+	pthread_mutex_lock(&guardia); 
+	
+	// Toma Centro 
+	sprintf(sqlstr,"SELECT aulas.idcentro,ordenadores.nombreordenador FROM aulas INNER JOIN ordenadores ON aulas.idaula=ordenadores.idaula WHERE ordenadores.idordenador=%s",ido);
+	if(!db.Execute(sqlstr,tbl)){ // Error al leer
+		db.GetErrorErrStr(ErrStr);
+		pthread_mutex_unlock(&guardia); 
+		return(false);
+	}		
+	if(!tbl.Get("idcentro",widcentro)){ // Toma dato 
+		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+		pthread_mutex_unlock(&guardia); 
+		return(false);
+	}			
+	idcentro=widcentro+0; // Bug Mysql
+
+	if(!tbl.Get("nombreordenador",nombreordenador)){ // Toma dato 
+		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+		pthread_mutex_unlock(&guardia); 
+		return(false);
+	}			
+	
+	if(lon>MAXSOFTWARE) lon=MAXSOFTWARE;
+		// Trocea la cadena de configuracin
+	strcpy(ch,"\n");// caracter delimitador 
+	lon=split_parametros(tbSoftware,hrd,ch);
+	
+	// Trocea las cadenas de parametros de particin
+	for (i=0;i<lon;i++){
+		strcpy(ch,"=");// caracter delimitador "="
+		split_parametros(dualSoftware,tbSoftware[i],ch); // Nmero de particin
+		sprintf(sqlstr,"SELECT idtiposoftware,descripcion FROM tiposoftwares WHERE nemonico='%s'",dualSoftware[0]);
+		if(!db.Execute(sqlstr,tbl)){ // Error al leer
+			db.GetErrorErrStr(ErrStr);
+			pthread_mutex_unlock(&guardia); 
+			return(false);
+		}		
+		if(tbl.ISEOF()){ //  Tipo de Software NO existente
+			RegistraLog("Existe un tipo de software que no está registrado. Se rechaza proceso de inventario",false);
+			pthread_mutex_unlock(&guardia); 
+			return(false);
+		}
+		else{  //  Tipo de Software Existe
+			if(!tbl.Get("idtiposoftware",idtiposoftware)){ // Toma dato
+				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+				pthread_mutex_unlock(&guardia); 
+				return(false);
+			}
+			if(!tbl.Get("descripcion",descripcion)){ // Toma dato
+				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+				pthread_mutex_unlock(&guardia); 
+				return(false);
+			}
+
+			sprintf(sqlstr,"SELECT idsoftware FROM softwares WHERE idtiposoftware=%d AND descripcion='%s'",idtiposoftware,dualSoftware[1]);
+			
+			// EJecuta consulta
+			if(!db.Execute(sqlstr,tbl)){ // Error al leer
+				db.GetErrorErrStr(ErrStr);
+				pthread_mutex_unlock(&guardia); 
+				return(false);
+			}	
+
+			if(tbl.ISEOF()){ //  Software NO existente
+				sprintf(sqlstr,"INSERT softwares (idtiposoftware,descripcion,idcentro,grupoid) VALUES(%d,'%s',%d,0)",idtiposoftware,dualSoftware[1],idcentro);
+				if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+					db.GetErrorErrStr(ErrStr);
+					pthread_mutex_unlock(&guardia); 
+					return(false);
+				}		
+				// Recupera el identificador del software	
+				sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
+				if(!db.Execute(sqlstr,tbl)){ // Error al leer
+					db.GetErrorErrStr(ErrStr);
+					pthread_mutex_unlock(&guardia); 
+					return(false);
+				}
+				if(!tbl.ISEOF()){ // Si existe registro
+					if(!tbl.Get("identificador",tbidsoftware[i])){
+							tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+							pthread_mutex_unlock(&guardia); 
+							return(false);
+					}
+				}					
+			}
+			else{
+				if(!tbl.Get("idsoftware",tbidsoftware[i])){ // Toma dato
+					tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+					pthread_mutex_unlock(&guardia); 
+					return(false);
+				}							
+			}
+		}	// Fin for 
+	}
+	 // Comprueba existencia de perfil software y actualización de éste para el ordenador
+	if(!CuestrionPerfilSoftware(db, tbl,idcentro,ido,tbidsoftware,i,nombreordenador)){
+		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+		pthread_mutex_unlock(&guardia); 
+		return(false);
+	}	
+	pthread_mutex_unlock(&guardia); 
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	return(true);
+}
+// ________________________________________________________________________________________________________
+// Funcin: CuestrionPerfilSoftware
+//________________________________________________________________________________________________________/
+int CuestrionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tbidsoftware,int i,char *nombreordenador){
+	char sqlstr[1000],ErrStr[200];
+	int tbidsoftwareperfil[MAXSOFTWARE]; 
+	int j=0;
+	int idperfilsoft;
+	// Busca perfil soft del ordenador
+	sprintf(sqlstr,"SELECT perfilessoft_softwares.idsoftware FROM ordenadores INNER JOIN perfilessoft ON ordenadores.idperfilsoft = perfilessoft.idperfilsoft	INNER JOIN perfilessoft_softwares ON perfilessoft_softwares.idperfilsoft = perfilessoft.idperfilsoft WHERE ordenadores.idordenador =%s",ido);
+	// EJecuta consulta
+	if(!db.Execute(sqlstr,tbl)){ // Error al leer
+		db.GetErrorErrStr(ErrStr);
+		return(false);
+	}		
+	while(!tbl.ISEOF()){ // Recorre acciones del menu
+		if(!tbl.Get("idsoftware",tbidsoftwareperfil[j++])){ // Toma dato
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return(false);
+		}		
+		tbl.MoveNext();
+	}
+	// Comprueba si el perfil del ordenador contiene todo el software enviado
+	int k,q,sw=false;
+	for(k=0;k<i;k++){ // Elemento software
+		for(q=0;q<j;q++){
+			if(tbidsoftware[k]==tbidsoftwareperfil[q]){
+				sw=true;
+				break;
+			}
+		}
+		if(!sw)	break;			
+	}
+	// La variable sw contiene false si se ha encontrado algún software que no está en el perfil software del ordenador
+	if(sw) return(true); // Todo el software está en el perfil actual
+	
+	// Crea perfil nuevo con todo el software inventariado
+	sprintf(sqlstr,"INSERT perfilessoft  (descripcion,idcentro,grupoid) VALUES('Perfil (%s)',%d,0)",nombreordenador,idcentro);
+	if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+		db.GetErrorErrStr(ErrStr);
+		return(false);
+	}		
+	// Recupera el identificador del software	
+	sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
+	if(!db.Execute(sqlstr,tbl)){ // Error al leer
+		db.GetErrorErrStr(ErrStr);
+		return(false);
+	}
+	if(!tbl.ISEOF()){ // Si existe registro
+		if(!tbl.Get("identificador",idperfilsoft)){
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return(false);
+		}
+	}	
+	for(k=0;k<i;k++){ // relaciona elementos softwares con el nuevo perfil software
+		sprintf(sqlstr,"INSERT perfilessoft_softwares  (idperfilsoft,idsoftware) VALUES(%d,%d)",idperfilsoft,tbidsoftware[k]);
+		if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+			db.GetErrorErrStr(ErrStr);
+			return(false);
+		}		
+	}				
+	sprintf(sqlstr,"UPDATE 	ordenadores SET idperfilsoft=%d WHERE idordenador=%s",idperfilsoft,ido);
+	if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+		db.GetErrorErrStr(ErrStr);
+		return(false);
+	}			
+	return(true);
+}
+// ________________________________________________________________________________________________________
+// Funcin: actualiza_configuracion
+//
+//		Descripcin:
+//			Esta funcin actualiza la base de datos con la configuracion de sistemas operativos y particiones de un ordenador
+//		Parnetros:
+//			- db: Objeto base de datos (ya operativo)
+//			- tbl: Objeto tabla
+//			- cfg: cadena con una configuracin
+//			- idcfgo: Identificador de la configuracin actual del ordenador
+//			- ipho: Identificador de la configuracin actual de las particiones del ordenador
+//			- ipho: Ipe del ordenador
+// ________________________________________________________________________________________________________
 int actualiza_configuracion(Database db, Table tbl,char* cfg,int idcfgo,int idprto,char* ipho)
 {
 	char sqlstr[1000],ErrStr[200];	
@@ -2730,6 +2928,45 @@ int RESPUESTA_TomaHardware(SOCKET s,char *parametros)
 	}
 	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
 		if(!actualiza_hardware(db,tbl,hrd,iph,ido)) // El ordenador ha cambiado de configuracin
+			return(false);
+	}
+	db.Close();
+	return(true);
+}
+// ________________________________________________________________________________________________________
+// Funcin: RESPUESTA_TomaSoftware
+//
+//		Descripcin:
+//			Esta funcin responde a un comando de Inventario Software.  Además actualiza  la base de datos.
+//		Parnetros:
+//			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
+//			- parametros: parametros del comando
+// ________________________________________________________________________________________________________
+int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
+{
+	char ErrStr[200];
+	Database db;
+	Table tbl;
+	
+	char *res,*der,*ids,*iph,*ido,*sft;
+
+	res=toma_parametro("res",parametros); // Toma resultado
+	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
+	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	iph=toma_parametro("iph",parametros); // Toma ip
+	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
+	
+	sft=toma_parametro("sft",parametros); // Toma configuracin
+	
+	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
+		db.GetErrorErrStr(ErrStr);
+		return(false);
+	}
+	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
+		return(false); // Error al registrar notificacion
+	}
+	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
+		if(!actualiza_software(db,tbl,sft,iph,ido)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
 	db.Close();

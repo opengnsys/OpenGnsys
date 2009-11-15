@@ -21,6 +21,7 @@
 #define ESCRIBIR	1
 
 #define LONGITUD_SCRIPTSALIDA 1024	// Longitud máima de la informacin devuelta por un script
+#define LONGITUD_SCRIPTSALIDALARGA 4024	// Longitud máima de la informacin devuelta por un script
 #define LONGITUD_PARAMETROS 4048	// Longitud m?ima de la informacin de la trama (parametros)
 #define LONGITUD_TRAMA LONGITUD_PARAMETROS+11	// Longitud m?ima de la trama completa
 #define LONGITUD_CONFIGURACION 1024	// Longitud mxima de las configuraciones de particin
@@ -293,6 +294,7 @@ int AutoexecClienteHidra(void);
 char* LeeConfiguracion(char*);
 char* TomaNomSO(char*,int);
 int InventarioHardware(TRAMA *,TRAMA *);
+int InventarioSoftware(TRAMA *,TRAMA *);
 int TomaConfiguracion(TRAMA *,TRAMA *);
 int RespuestaEjecucionComando(TRAMA* , TRAMA *, int);
 int ExecShell(TRAMA *,TRAMA *);

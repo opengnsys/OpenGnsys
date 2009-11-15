@@ -1,26 +1,30 @@
 <?
 // *************************************************************************************************************************************************
-// AplicaciÃ³n WEB: ogAdmWebCon
-// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-
-// Fecha CreaciÃ³n: AÃ±o 2003-2005
-// Fecha Ãšltima modificaciÃ³n: Abril-2005
+// Aplicación WEB: ogAdmWebCon
+// Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
+// Fecha Creación: Año 2003-2005
+// Fecha Última modificación: Abril-2005
 // Nombre del fichero: menumliente.php
-// DescripciÃ³n :
-//		Pagina del menu del cliente. Ã‰ste la solicita a travÃ©s de su browser local
+// Descripción :
+//		Pagina del menu del cliente. Éste la solicita a través de su browser local
 // *************************************************************************************************************************************************
 include_once("../clases/AdoPhp.php");
-include_once("../includes/controlacceso.inc");
+//========================================================================================================
+// Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global) 
+$cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos
+$ips="10.1.15.4"; // IP del servidor de Administración
+$prt="2008"; // Puerto de comunicación con el servidor
+$wer="http://10.1.15.4/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.4/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
 //________________________________________________________________________________________________________
 $iph="0.0.0.0";
 if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
 $_SESSION["ogCliente"]=$iph;
 //________________________________________________________________________________________________________
-$rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m enÃº
+$rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m enú
 ?>
 	<HTML>
 	<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</HEAD>
 	<BODY>
 <?	
@@ -28,18 +32,18 @@ $ITEMS_PUBLICOS=1;
 $ITEMS_PRIVADOS=2;
 
 if(!empty($rsmenu)){
-	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera menÃº pÃºblico
+	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera menú público
 	echo $codeHtml;
 }
 else
-	echo '<H1>NO SE HA DETCTADO NINGÃšN MENÃš PARA ESTE CLIENTE</H1>';	
+	echo '<H1>NO SE HA DETCTADO NINGÚN MENÚ PARA ESTE CLIENTE</H1>';	
 ?>
 	</BODY>
 	</HTML>
 <?
 //___________________________________________________________________________________________________
 //
-// Recupera MenÃº
+// Recupera Menú
 //___________________________________________________________________________________________________
 function RecuperaMenu($cmd,$iph){
 	$rs=new Recordset; 
@@ -60,7 +64,7 @@ function RecuperaMenu($cmd,$iph){
 }
 //___________________________________________________________________________________________________
 //
-// Muestra el menu pÃºblico
+// Muestra el menu público
 //___________________________________________________________________________________________________
 function GeneraMenu($rs,$tipo,$iph){	
 	global $ITEMS_PRIVADOS;
@@ -81,7 +85,7 @@ function GeneraMenu($rs,$tipo,$iph){
 		$mod=$smodalidad;
 	else
 		$mod=$modalidad;
-	//	Genera HTML de la pÃ¡gina en funciÃ³n de las propiedades del MenÃº del clioente
+	//	Genera HTML de la página en función de las propiedades del Menú del clioente
 	$codeHTML='<DIV style="POSITION:absolute;TOP:'.$coory.";LEFT:".$coorx.'">';
 	$codeHTML.='<TABLE cellspacing=3 cellpadding=3 align="center" border=0 >';
 	$codeHTML.='<TR>';

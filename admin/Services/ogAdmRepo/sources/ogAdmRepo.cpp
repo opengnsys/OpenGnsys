@@ -434,6 +434,10 @@ int gestiona_comando(TramaRepos *trmInfo)
 	if(resul==0)
 		return(RegistraComando(trmInfo));					
 			
+	resul=strcmp(nombrefuncion,"InventarioSoftware");
+	if(resul==0)
+		return(RegistraComando(trmInfo));		
+
 	resul=strcmp(nombrefuncion,"RestaurarImagen");
 	if(resul==0)
 		return(RegistraComando(trmInfo));		

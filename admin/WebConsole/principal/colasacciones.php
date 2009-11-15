@@ -51,6 +51,8 @@ if (isset($_GET["tipocola"])) $tipocola=$_GET["tipocola"];
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
 	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+
+$cmd->Conexion->SetUtf8();
 //________________________________________________________________________________________________________
 // Si entra por primera vez (criterios por defecto)
 if($ambito!="" && $idambito!="" && $nombreambito!="" && $tipocola!=""){ 

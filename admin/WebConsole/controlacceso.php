@@ -22,10 +22,10 @@ if (isset($_POST["pss"])) $pss=$_POST["pss"];
 //========================================================================================================
 // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global) 
 $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos
-$ips="SERVERIP"; // IP del servidor de Administración
+$ips="10.1.15.4"; // IP del servidor de Administración
 $prt="2008"; // Puerto de comunicación con el servidor
-$wer="OPENGNSYSURL/pagerror.php"; // Página de redireccionamiento de errores
-$wac="OPENGNSYSURL/acceso.php"; // Página de login de la aplicación
+$wer="http://10.1.15.4/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
+$wac="http://10.1.15.4/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
 $resul=false;

@@ -1024,6 +1024,10 @@ int GestionTramas(TRAMA *trama)
 	if(res==0)
 		return(InventarioHardware(trama,nwtrama));		
 		
+	res=strcmp(nombrefuncion,"InventarioSoftware");
+	if(res==0)
+		return(InventarioSoftware(trama,nwtrama));		
+
 	res=strcmp(nombrefuncion,"ParticionaryFormatear");
 	if(res==0)
 		return(ParticionaryFormatear(trama,nwtrama));				
@@ -1871,7 +1875,7 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	int herror,res;
 	char *parametroshrd;
 	
-	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
+	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDALARGA);
 	sprintf(cmdshell,"%s/ogAdmHardwareInfo",HIDRASCRIPTS);
 	herror=EjecutarScript(cmdshell,NULL,parametroshrd,false);
 	if(herror){
@@ -1882,6 +1886,45 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
   	int lon;
 	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_TomaHardware\r");		
 	lon+=sprintf(nwtrama->parametros+lon,"hrd=%s\r",parametroshrd);	
+	RespuestaEjecucionComando(trama,nwtrama,res);	
+	return(res);
+}
+//______________________________________________________________________________________________________
+// Función: InventarioSoftware
+//
+//	Descripción: 
+// 		Recupera la configuración de software del ordenador 
+//	Parámetros:
+//		- trama: Trama recibida con las especificaciones del comando
+//		- nwtrama: Nueva trama a enviar al servidor con la respuesta de la acción, si ésta procede
+// 	Devuelve:
+//		true si el proceso fue correcto o false en caso contrario
+//	Especificaciones:
+//		Lo que se envía al servidor es una cadena con el formato de salida del script que ejecuta
+//		está función. (Vease scripts hidraSoftwareInfo)
+// ________________________________________________________________________________________________________
+int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
+{
+	int herror,res;
+	char *parametrossft;
+	char *particion=TomaParametro("par",trama->parametros); // Toma partición
+
+	char *disco=(char*)ReservaMemoria(2);
+	sprintf(disco,"1"); // Siempre el disco 1
+
+	sprintf(cmdshell,"%s/ogAdmSoftwareInfo",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s","ogAdmSoftwareInfo",disco,particion);
+
+	parametrossft=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDALARGA);
+	herror=EjecutarScript(cmdshell,parametros,parametrossft,false);
+	if(herror){
+	    UltimoErrorScript(herror,"InventarioSoftware()");	// Se ha producido algún error
+    }
+    res=(herror==0); // Si se ha producido algún error el resultado de la ejecución de error
+
+  	int lon;
+	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_TomaSoftware\r");		
+	lon+=sprintf(nwtrama->parametros+lon,"sft=%s\r",parametrossft);	
 	RespuestaEjecucionComando(trama,nwtrama,res);	
 
 	return(res);
