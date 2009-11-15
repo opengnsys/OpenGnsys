@@ -171,7 +171,7 @@ int actualiza_configuracion(Database , Table ,char* ,int,int ,char* );
 int actualiza_hardware(Database , Table ,char* ,char* ,char*);
 int actualiza_software(Database , Table ,char* ,char*,char* ,char*);
 int CuestionPerfilHardware(Database , Table ,int ,char* ,int *,int ,char*);
-int CuestionPerfilSoftware(Database, Table ,int ,char* ,int *,int,char *);
+int CuestionPerfilSoftware(Database, Table ,int ,char* ,int *,int,char *,char*);
 
 void TomaParticiones(char*, char* ,int );
 int	Toma_menu(Database,Table,char*,int,int);

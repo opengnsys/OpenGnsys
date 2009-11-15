@@ -505,7 +505,6 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `mac` varchar(12) default NULL,
   `idaula` int(11) default NULL,
   `idperfilhard` int(11) default NULL,
-  `idperfilsoft` int(11) default NULL,
   `idservidordhcp` int(11) default NULL,
   `idservidorrembo` int(11) default NULL,
   `grupoid` int(11) default NULL,
@@ -538,6 +537,18 @@ CREATE TABLE IF NOT EXISTS `ordenador_imagen` (
 -- Volcar la base de datos para la tabla `ordenador_imagen`
 -- 
 
+-- --------------------------------------------------------
+
+-- 
+-- Estructura de tabla para la tabla `ordenador_imagen`
+-- 
+
+DROP TABLE IF EXISTS `ordenador_perfilsoft`;
+REATE TABLE `ordenador_perfilsoft` (
+  `idordenador` int(11) NOT NULL default '0',
+  `particion` int(11) NOT NULL default '0',
+  `idperfilsoft` int(11) NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

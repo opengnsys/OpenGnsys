@@ -75,7 +75,7 @@ switch($ambito){
 			<TH align=center>&nbsp;&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TD></TR>
+		</TR>
 			<?
 				echo tabla_configuraciones($cmd,$idambito);
 			?>
@@ -121,7 +121,6 @@ function tabla_configuraciones($cmd,$idordenador){
 			$tablaHtml.='<TD align=center>&nbsp;'.$particion.'&nbsp;</TD>'.chr(13);
 			$tablaHtml.='<TD>&nbsp;'.$nombreso.'&nbsp;</TD>'.chr(13);
 			$tiposo=$ValorParametros["tiposo"];
-			$tablaHtml.='<TD></TD>';
 			$tablaHtml.='</TR>'.chr(13);
 		}
 	}

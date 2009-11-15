@@ -13,7 +13,7 @@
 //
 //		Descripción:
 //			Esta funcin registra los evento de errores en un fichero log
-//		Parametros:
+//	 	Parametros:
 //			- msg : Mensage de error
 //			- swerrno: Switch que indica que recupere literal de error del sistema
 // ________________________________________________________________________________________________________
@@ -337,6 +337,12 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 		resul=strcmp(nombrefuncion,"RESPUESTA_TomaHardware");
 		if(resul==0){
 			RESPUESTA_TomaHardware(s,parametros);
+			respuesta_cortesia(s);
+			return;
+		}	
+		resul=strcmp(nombrefuncion,"RESPUESTA_TomaSoftware");
+		if(resul==0){
+			RESPUESTA_TomaSoftware(s,parametros);
 			respuesta_cortesia(s);
 			return;
 		}		
@@ -1351,7 +1357,7 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*
 		}	// Fin for 
 	}
 	 // Comprueba existencia de perfil software y actualización de éste para el ordenador
-	if(!CuestionPerfilSoftware(db, tbl,idcentro,ido,tbidsoftware,i,nombreordenador)){
+	if(!CuestionPerfilSoftware(db, tbl,idcentro,ido,tbidsoftware,i,nombreordenador,par)){
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		pthread_mutex_unlock(&guardia); 
 		return(false);
@@ -1363,19 +1369,19 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*
 // ________________________________________________________________________________________________________
 // Funcin: CuestionPerfilSoftware
 //________________________________________________________________________________________________________/
-int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tbidsoftware,int i,char *nombreordenador){
+int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tbidsoftware,int i,char *nombreordenador,char *particion){
 	char sqlstr[1000],ErrStr[200];
 	int tbidsoftwareperfil[MAXSOFTWARE]; 
 	int j=0;
 	int idperfilsoft;
 	// Busca perfil soft del ordenador
-	sprintf(sqlstr,"SELECT perfilessoft_softwares.idsoftware FROM ordenadores INNER JOIN perfilessoft ON ordenadores.idperfilsoft = perfilessoft.idperfilsoft	INNER JOIN perfilessoft_softwares ON perfilessoft_softwares.idperfilsoft = perfilessoft.idperfilsoft WHERE ordenadores.idordenador =%s",ido);
+	sprintf(sqlstr,"SELECT perfilessoft_softwares.idsoftware FROM ordenador_perfilsoft INNER JOIN perfilessoft ON ordenador_perfilsoft.idperfilsoft = perfilessoft.idperfilsoft INNER JOIN perfilessoft_softwares ON perfilessoft_softwares.idperfilsoft=perfilessoft.idperfilsoft WHERE ordenador_perfilsoft.idordenador =%s",ido);
 	// EJecuta consulta
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}		
-	while(!tbl.ISEOF()){ // Recorre acciones del menu
+	while(!tbl.ISEOF()){ // Recorre software del perfils
 		if(!tbl.Get("idsoftware",tbidsoftwareperfil[j++])){ // Toma dato
 			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 			return(false);
@@ -1384,15 +1390,18 @@ int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tb
 	}
 	// Comprueba si el perfil del ordenador contiene todo el software enviado
 	int k,q,sw=false;
-	for(k=0;k<i;k++){ // Elemento software
-		for(q=0;q<j;q++){
-			if(tbidsoftware[k]==tbidsoftwareperfil[q]){
-				sw=true;
-				break;
+	if(i==j){ // Si son el mismo número de componenetes software ...
+		for(k=0;k<i;k++){ // Elemento software
+			for(q=0;q<j;q++){
+				if(tbidsoftware[k]==tbidsoftwareperfil[q]){
+					sw=true;
+					break;
+				}
 			}
+			if(!sw)	break;			
 		}
-		if(!sw)	break;			
 	}
+	
 	// La variable sw contiene false si se ha encontrado algún software que no está en el perfil software del ordenador
 	if(sw) return(true); // Todo el software está en el perfil actual
 	
@@ -1420,12 +1429,29 @@ int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tb
 			db.GetErrorErrStr(ErrStr);
 			return(false);
 		}		
-	}				
-	sprintf(sqlstr,"UPDATE 	ordenadores SET idperfilsoft=%d WHERE idordenador=%s",idperfilsoft,ido);
-	if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+	}
+	// Busca si existe un perfil software para ese ordenador y esa partición	
+	sprintf(sqlstr,"SELECT idperfilsoft FROM ordenador_perfilsoft WHERE idordenador =%s AND particion=%s",ido,particion);
+	// Ejecuta consulta
+	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
 		return(false);
-	}			
+	}		
+	if(!tbl.ISEOF()){ // existe un perfilsoft que se cambia al nuevo
+		sprintf(sqlstr,"UPDATE 	ordenador_perfilsoft SET idperfilsoft=%d WHERE idordenador=%s AND particion=%s",idperfilsoft,ido,particion);
+		if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+			db.GetErrorErrStr(ErrStr);
+			return(false);
+		}			
+	}
+	else{
+		sprintf(sqlstr,"INSERT INTO ordenador_perfilsoft (idordenador,particion,idperfilsoft) VALUE (%s,%s,%d)",ido,particion,idperfilsoft);
+		if(!db.Execute(sqlstr,tbl)){ // Error al insertar
+			db.GetErrorErrStr(ErrStr);
+			return(false);
+		}			
+		
+	}
 	return(true);
 }
 // ________________________________________________________________________________________________________
