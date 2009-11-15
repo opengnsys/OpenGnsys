@@ -1180,7 +1180,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 		}	// Fin for 
 	}
 	 // Comprueba existencia de perfil hardware y actualización de éste para el ordenador
-	if(!CuestrionPerfilHardware(db, tbl,idcentro,ido,tbidhardware,i,nombreordenador)){
+	if(!CuestionPerfilHardware(db, tbl,idcentro,ido,tbidhardware,i,nombreordenador)){
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		pthread_mutex_unlock(&guardia); 
 		return(false);
@@ -1190,9 +1190,9 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: CuestrionPerfilHardware
+// Funcin: CuestionPerfilHardware
 //________________________________________________________________________________________________________/
-int CuestrionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *tbidhardware,int i,char *nombreordenador){
+int CuestionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *tbidhardware,int i,char *nombreordenador){
 	char sqlstr[1000],ErrStr[200];
 	int tbidhardwareperfil[MAXHARDWARE]; 
 	int j=0;
@@ -1270,15 +1270,14 @@ int CuestrionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *t
 //			- ipho: Identificador de la configuracin actual de las particiones del ordenador
 //			- ipho: Ipe del ordenador
 // ________________________________________________________________________________________________________
-int actualiza_software(Database db, Table tbl,char* hrd,char* ip,char*ido)
+int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*ido)
 {
-	int idtiposoftware;
+	int idtiposoftware=2; // Siempre tipo Aplicación
 	int i,lon=0,idcentro,widcentro;
 	char *tbSoftware[MAXSOFTWARE]; 
 	int tbidsoftware[MAXSOFTWARE]; 
-	char *dualSoftware[2]; 
 	char ch[2]; // Carnter delimitador
-	char sqlstr[1000],ErrStr[200],descripcion[250],nombreordenador[250];
+	char sqlstr[1000],ErrStr[200],nombreordenador[250];
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1308,36 +1307,11 @@ int actualiza_software(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	if(lon>MAXSOFTWARE) lon=MAXSOFTWARE;
 		// Trocea la cadena de configuracin
 	strcpy(ch,"\n");// caracter delimitador 
-	lon=split_parametros(tbSoftware,hrd,ch);
+	lon=split_parametros(tbSoftware,sft,ch);
 	
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
-		strcpy(ch,"=");// caracter delimitador "="
-		split_parametros(dualSoftware,tbSoftware[i],ch); // Nmero de particin
-		sprintf(sqlstr,"SELECT idtiposoftware,descripcion FROM tiposoftwares WHERE nemonico='%s'",dualSoftware[0]);
-		if(!db.Execute(sqlstr,tbl)){ // Error al leer
-			db.GetErrorErrStr(ErrStr);
-			pthread_mutex_unlock(&guardia); 
-			return(false);
-		}		
-		if(tbl.ISEOF()){ //  Tipo de Software NO existente
-			RegistraLog("Existe un tipo de software que no está registrado. Se rechaza proceso de inventario",false);
-			pthread_mutex_unlock(&guardia); 
-			return(false);
-		}
-		else{  //  Tipo de Software Existe
-			if(!tbl.Get("idtiposoftware",idtiposoftware)){ // Toma dato
-				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
-				pthread_mutex_unlock(&guardia); 
-				return(false);
-			}
-			if(!tbl.Get("descripcion",descripcion)){ // Toma dato
-				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
-				pthread_mutex_unlock(&guardia); 
-				return(false);
-			}
-
-			sprintf(sqlstr,"SELECT idsoftware FROM softwares WHERE idtiposoftware=%d AND descripcion='%s'",idtiposoftware,dualSoftware[1]);
+			sprintf(sqlstr,"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",tbSoftware[i]);
 			
 			// EJecuta consulta
 			if(!db.Execute(sqlstr,tbl)){ // Error al leer
@@ -1347,7 +1321,7 @@ int actualiza_software(Database db, Table tbl,char* hrd,char* ip,char*ido)
 			}	
 
 			if(tbl.ISEOF()){ //  Software NO existente
-				sprintf(sqlstr,"INSERT softwares (idtiposoftware,descripcion,idcentro,grupoid) VALUES(%d,'%s',%d,0)",idtiposoftware,dualSoftware[1],idcentro);
+				sprintf(sqlstr,"INSERT softwares (idtiposoftware,descripcion,idcentro,grupoid) VALUES(%d,'%s',%d,0)",idtiposoftware,tbSoftware[i],idcentro);
 				if(!db.Execute(sqlstr,tbl)){ // Error al insertar
 					db.GetErrorErrStr(ErrStr);
 					pthread_mutex_unlock(&guardia); 
@@ -1374,11 +1348,10 @@ int actualiza_software(Database db, Table tbl,char* hrd,char* ip,char*ido)
 					pthread_mutex_unlock(&guardia); 
 					return(false);
 				}							
-			}
 		}	// Fin for 
 	}
 	 // Comprueba existencia de perfil software y actualización de éste para el ordenador
-	if(!CuestrionPerfilSoftware(db, tbl,idcentro,ido,tbidsoftware,i,nombreordenador)){
+	if(!CuestionPerfilSoftware(db, tbl,idcentro,ido,tbidsoftware,i,nombreordenador)){
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		pthread_mutex_unlock(&guardia); 
 		return(false);
@@ -1388,9 +1361,9 @@ int actualiza_software(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: CuestrionPerfilSoftware
+// Funcin: CuestionPerfilSoftware
 //________________________________________________________________________________________________________/
-int CuestrionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tbidsoftware,int i,char *nombreordenador){
+int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tbidsoftware,int i,char *nombreordenador){
 	char sqlstr[1000],ErrStr[200];
 	int tbidsoftwareperfil[MAXSOFTWARE]; 
 	int j=0;
@@ -2948,7 +2921,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 	Database db;
 	Table tbl;
 	
-	char *res,*der,*ids,*iph,*ido,*sft;
+	char *res,*der,*ids,*iph,*ido,*sft,*par;
 
 	res=toma_parametro("res",parametros); // Toma resultado
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
@@ -2956,7 +2929,8 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
 	
-	sft=toma_parametro("sft",parametros); // Toma configuracin
+	sft=toma_parametro("sft",parametros); // Toma software
+	par=toma_parametro("par",parametros); // Toma partición
 	
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
 		db.GetErrorErrStr(ErrStr);
@@ -2966,7 +2940,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 		return(false); // Error al registrar notificacion
 	}
 	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
-		if(!actualiza_software(db,tbl,sft,iph,ido)) // El ordenador ha cambiado de configuracin
+		if(!actualiza_software(db,tbl,sft,par,iph,ido)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
 	db.Close();

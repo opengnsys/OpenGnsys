@@ -1925,6 +1925,7 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
   	int lon;
 	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_TomaSoftware\r");		
 	lon+=sprintf(nwtrama->parametros+lon,"sft=%s\r",parametrossft);	
+	lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",particion);	
 	RespuestaEjecucionComando(trama,nwtrama,res);	
 
 	return(res);
