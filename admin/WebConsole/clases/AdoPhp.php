@@ -177,6 +177,12 @@ class Conexion{
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
+		Establece una sistema UTF8 para las consultas
+	----------------------------------------------------------------------------------------------*/
+	function SetUtf8(){
+			mysql_query("SET NAMES 'utf8'");
+	}
+	/* -------------------------------------------------------------------------------------------
 		Revisa y detecta las condiciones que deben cumplir los datos necesarios para establecer 
 		conexiones
 
