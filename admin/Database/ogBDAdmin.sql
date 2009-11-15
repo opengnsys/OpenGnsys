@@ -328,7 +328,7 @@ CREATE TABLE IF NOT EXISTS `gruposordenadores` (
 -- 
 -- Estructura de tabla para la tabla `hardwares`
 -- 
-DROP TABLE IF EXISTS `hardwares`;
+DROP TABLE IF EXISTS `hardwares`;  
 CREATE TABLE IF NOT EXISTS `hardwares` (
   `idhardware` int(11) NOT NULL auto_increment,
   `idtipohardware` int(11) NOT NULL default '0',
@@ -505,6 +505,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `mac` varchar(12) default NULL,
   `idaula` int(11) default NULL,
   `idperfilhard` int(11) default NULL,
+  `idperfilsoft` int(11) default NULL,
   `idservidordhcp` int(11) default NULL,
   `idservidorrembo` int(11) default NULL,
   `grupoid` int(11) default NULL,
