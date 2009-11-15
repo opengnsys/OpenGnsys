@@ -181,11 +181,9 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `nfuncion1`, `nfuncion2`, `n
 (3, 'Restaurar Imagen', '', '', 'RestaurarImagen', 'RestaurarImagen', 'RestaurarImagen', '', '', '', '../comandos/RestaurarImagenAula.php', '../comandos/RestaurarImagenGrupoOrdenadores.php', '../comandos/RestaurarImagenOrdenador.php', 28, 'idi;par;iph', 'nfn;iph;par;idi;ifs;ifh;nem;idc;ida;swr', '', 1, '2', 1),
 (4, 'Generar Perfil Software', '', '', '', '', 'CrearPerfilSoftware', '', '', '', '', '', '../comandos/CrearPerfilSoftware.php', 16, 'ifs;ifh;par', 'nfn;iph;par;ifs;ifh;nem;', '', 1, '2', 1),
 (5, 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', '', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1),
-(12, 'Inventario Hardware', 'InventarioHardware', 'InventarioHardware', 'InventarioHardware', 'InventarioHardware', 'InventarioHardware', '', '../comandos/InventarioHardware.php', '../comandos/InventarioHardware.php', '../comandos/InventarioHardware.php', '../comandos/InventarioHardware.php', '../comandos/InventarioHardware.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1),
-(7, 'Ejecutar Script', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', '', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, '2', 1),
-(8, 'Particionar y formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Configurar.php', '../comandos/Configurar.php', '../comandos/Configurar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 1),
-(9, 'Particionar y Formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Particionar.php', '../comandos/Particionar.php', '../comandos/Particionar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 0),
-(10, 'Generar software Incremental', '', '', '', '', 'CrearSoftwareIncremental', '', '', '', '', '', '../comandos/CrearSoftIncremental.php', 16, 'ifs;ifh;par;icr', 'nfn;iph;par;ifs;ifh;nem;icr', '', 1, '2', 0),
+(12, 'Inventario Hardware', '', '', '', '', 'InventarioHardware', '', '', '', '', '', '../comandos/InventarioHardware.php', 16, 'iph', 'nfn;iph', '', 1, '2', 1),
+(13, 'Inventario Software', '', '', '', '', 'InventarioSoftware', '', '', '', '', '', '../comandos/InventarioSoftware.php', 16, 'iph;par', 'nfn;iph;par', '', 1, '2', 1),(7, 'Ejecutar Script', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', '', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, '2', 1),(8, 'Particionar y formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Configurar.php', '../comandos/Configurar.php', '../comandos/Configurar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 1),
+(9, 'Particionar y Formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Particionar.php', '../comandos/Particionar.php', '../comandos/Particionar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 0),(10, 'Generar software Incremental', '', '', '', '', 'CrearSoftwareIncremental', '', '', '', '', '', '../comandos/CrearSoftIncremental.php', 16, 'ifs;ifh;par;icr', 'nfn;iph;par;ifs;ifh;nem;icr', '', 1, '2', 0),
 (11, 'Activar Rembo Off Line', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', '', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0),
 (6, 'Tomar Configuracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', '', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0);
 
@@ -566,23 +564,23 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (1, 'iph', 'Ordenadores', '', '', '', 0),
 (2, 'nfn', 'Nombre de la funcin a ejecutar en el servidor o en el cliente rembo', '', '', '', 0),
 (3, 'eje', 'Ejecutor del comando (servidor o cliente rembo)', '', '', '', 0),
-(4, 'par', 'Particin', '', '', '', 0),
+(4, 'par', 'Partición', '', '', '', 0),
 (5, 'ifs', 'Perfil Software', 'idperfilsoft', 'perfilessoft', 'descripcion', 1),
 (6, 'ifh', 'Perfil Hardware', 'idperfilhard', 'perfileshard', 'descripcion', 1),
-(7, 'nem', 'Nemnico', '', '', '', 0),
+(7, 'nem', 'Nemónico', '', '', '', 0),
 (8, 'idc', 'Centro', 'idcentro', 'centros', '', 1),
 (9, 'ida', 'Aula', 'idaula', 'aulas', 'nombreaula', 1),
 (10, 'idi', 'Imagen', 'idimagen', 'imagenes', 'descripcion', 1),
-(11, 'mac', 'Direccin Mac', '', '', '', 0),
+(11, 'mac', 'Dirección Mac', '', '', '', 0),
 (12, 'cmd', 'Identificador de un comando dentro de una tarea', 'idtareacomando', 'tareas_comando', '', 1),
 (13, 'ppa', 'Particiones primarias', '', '', '', 0),
-(14, 'lpa', 'Particiones Lgicas', '', '', '', 0),
+(14, 'lpa', 'Particiones Lógicas', '', '', '', 0),
 (15, 'hdc', 'Particiones a formatear', '', '', '', 0),
-(16, 'tis', 'Ttulo del Script', '', '', '', 0),
-(17, 'scp', 'Cdigo rembo-C', '', '', '', 0),
-(18, 'dcr', 'Descripcin', '', '', '', 0),
+(16, 'tis', 'Título del Script', '', '', '', 0),
+(17, 'scp', 'Código bash', '', '', '', 0),
+(18, 'dcr', 'Descripción', '', '', '', 0),
 (19, 'icr', 'Software Incremental', 'idsoftincremental', 'softincrementales', 'descripcion', 1),
-(20, 'scp', 'Cdigo Rembo-C', '', '', '', 0);
+(20, 'scp', 'Código bash', '', '', '', 0);
 
 -- --------------------------------------------------------
 
