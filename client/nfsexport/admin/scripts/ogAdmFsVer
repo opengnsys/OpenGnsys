@@ -1,0 +1,6 @@
+#!/bin/bash
+# Error si no se reciben 2 parametros.
+[ $# != 2 ] &&  exit $OG_ERR_FORMAT
+DATOS=$(ogGetFsType $*) || exit $?
+[ -n "$DATOS" ] && echo $DATOS 
+exit 0
