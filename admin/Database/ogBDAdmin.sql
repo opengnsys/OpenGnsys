@@ -544,7 +544,7 @@ CREATE TABLE IF NOT EXISTS `ordenador_imagen` (
 -- 
 
 DROP TABLE IF EXISTS `ordenador_perfilsoft`;
-REATE TABLE `ordenador_perfilsoft` (
+CREATE TABLE `ordenador_perfilsoft` (
   `idordenador` int(11) NOT NULL default '0',
   `particion` int(11) NOT NULL default '0',
   `idperfilsoft` int(11) NOT NULL default '0'
