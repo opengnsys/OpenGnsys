@@ -313,7 +313,7 @@ char * TomaParametro(char* nombre_parametro,char *parametros)
 	int i=0;
 	char* pos;
 
-	for(i=0;i<LONGITUD_PARAMETROS-4;i++){ 
+	for(i=0;i<LONGITUD_PARAMETROS_TRAMA-4;i++){ 
 		if(parametros[i]==nombre_parametro[0]){
 			if(parametros[i+1]==nombre_parametro[1]){
 				if(parametros[i+2]==nombre_parametro[2]){
@@ -1362,38 +1362,13 @@ int CrearPerfilSoftware(TRAMA*trama,TRAMA*nwtrama)
 		
 		char filemasterboot[64];
 		sprintf(filemasterboot,"PS%s_PH%s.msb",widperfilsoft,widperfilhard);	// Idem para el sector de arranque MBR
-		
-		int nem=Nemonico(wnemonico);
-		switch(nem){
-			case 1: // MsDos
-				Log("Creando perfil software de un sistema MsDos ...");
-				res=CrearPerfil(NULL,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-				break;
-			case 2:// Fat32
-				Log("Creando perfil software de un sistema windows 98...");
-				res=CrearPerfil(NULL,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-				break;
-			case 3:// NTFS (Windows 2000)
-				Log("Creando perfil software de un sistema windows 2000...");
-				res=CrearPerfil(disco,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-				 break;
-			case 4:// NTFS (Windows XP)
-				Log("Creando perfil software de un sistema windows XP...");
-				res=CrearPerfil(disco,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-				break;
-			 case 5: // Linux
-				Log("Creando perfil software de un sistema Linux...");
-				res=CrearPerfil(disco,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-				break;
-		}
+		res=CrearPerfil(disco,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
 		Log("Finalizada la creacion del perfil software");
-		
 		int lon;
 		lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_CrearPerfilSoftware\r");	
 		lon+=sprintf(nwtrama->parametros+lon,"ifs=%s\r",widperfilsoft);		
 		lon+=sprintf(nwtrama->parametros+lon,"ifh=%s\r",widperfilhard);		
 		RespuestaEjecucionComando(trama,nwtrama,res);	
-		
 		return(res);	
 }
 //______________________________________________________________________________________________________
@@ -1412,8 +1387,7 @@ int CrearPerfilSoftware(TRAMA*trama,TRAMA*nwtrama)
 //______________________________________________________________________________________________________
 int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*iprepo)   
 {
-   	int herror;
-	
+	int herror;
 	sprintf(cmdshell,"%s/ogAdmCreatePerfilSoftware",HIDRASCRIPTS);
 	sprintf(parametros," %s %s %s %s %s %s gzip","ogAdmCreatePerfilSoftware",disco,particion,iprepo,"",fileimg);
 	
@@ -1507,42 +1481,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 			sprintf(fileperfil,"PS%s_PH%s",widperfilsoft,widperfilhard);	// Nombre del fichero del perfil creado	
 			char filemasterboot[64];
 			sprintf(filemasterboot,"PS%s_PH%s.msb",widperfilsoft,widperfilhard);	// Idem para el sector de arranque MBR			
-			int nem=Nemonico(wnemonico);
-			switch(nem){
-				case 1:
-					Log("Restaurando imagen MsDos...");
-					//res=Restaurar_MSDos(fileperfil,pathperfil,wparticion);
-					break;
-				case 2:
-					Log("Restaurando imagen Windows 98...");
-					char wgrupotrabajo[64];
-					sprintf(wgrupotrabajo,"GrupoAula_%s",Propiedades.idaula);
-					//res=Restaurar_Windows9x(fileperfil,pathperfil,wparticion,Propiedades.nombreordenador,wgrupotrabajo);
-					break;
-				case 3:
-					Log("Restaurar imagen Windows 2000...");
-					//res=Restaurar_WindowsNTFS(filemasterboot,fileperfil,pathperfil,wparticion,Propiedades.nombreordenador,"WINNT");
-					//if(widsoftincremental!="") 
-					//	res=0;
-						//RestaurarIncrementales(wparticion,"WINNT",widsoftincremental,widperfilsoft,widperfilhard,wnemonico);
-					break;
-				case 4:
-					Log("Restaurar imagen Windows XP...");
-					res=RestaurandoImagen(disco,compres,mettran,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-					//if(res){
-					//	RestaurandoMBR(disco,filemasterboot);
-						//if(res)
-						//	ParcheandoWindows(Propiedades.nombreordenador,"WINDOWS");					
-					//}
-					break;
-				case 5:
-					Log("Restaurar imagen Linux...");
-					res=RestaurandoImagen(disco,compres,mettran,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
-					//res=Restaurar_Linux(fileperfil, pathperfil,wparticion);
-					//if(wswrestauraimg=="O")
-					//	cambiaFstab("disk://0:",wparticion,wparticion);
-					break;
-			}
+			res=RestaurandoImagen(disco,compres,mettran,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
 			// Toma la nueva configuración
 			char *parametroscfg=LeeConfiguracion(disco);
 			Log("Finalizada la restauracion de imagen");
@@ -1553,8 +1492,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 			lon+=sprintf(nwtrama->parametros+lon,"idi=%s\r",widimagen);	
 			lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",wparticion);	
 			RespuestaEjecucionComando(trama,nwtrama,res);	
-			
-			return(true);		
+			return(res);		
 		}
 		return(false);
 }
@@ -1794,7 +1732,7 @@ char* LeeConfiguracion(char* disco)
 		sprintf(tbcfg[i]->numpart,"%d",i+1); // Número de partición
 		
 		for(j=0;j<ntiposo;j++){
-			if(strcmp(tiposos[j].tipopart,duplaparticion[0])==0 && strcmp(tiposos[j].tipopart,"LINUX-SWAP")!=0){
+			if(strcmp(tiposos[j].tipopart,duplaparticion[0])==0 && strcmp(tiposos[j].tipopart,"LINUX-SWAP")!=0 && strcmp(tiposos[j].tipopart,"EMPTY")!=0){
 				nomso=TomaNomSO(disco,i+1);
 				if(nomso!=NULL){ // Averigua qué sistema operativo está instalado en la partición
 					strcpy(tbcfg[i]->tiposo,tiposos[j].tiposo); // Nombre S.O.
@@ -1906,7 +1844,7 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 {
 	int herror,res;
-	char *parametrossft;
+	char *parametrossft,*infopar;
 	char *particion=TomaParametro("par",trama->parametros); // Toma partición
 
 	char *disco=(char*)ReservaMemoria(2);
@@ -1921,13 +1859,22 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	    UltimoErrorScript(herror,"InventarioSoftware()");	// Se ha producido algún error
     }
     res=(herror==0); // Si se ha producido algún error el resultado de la ejecución de error
-
-  	int lon;
+	// Toma tipo de partición
+		infopar=(char*)ReservaMemoria(16); //Tipo de partición
+		if(res && infopar){
+				sprintf(cmdshell,"%s/ogAdmFsVer",HIDRASCRIPTS);	
+				sprintf(parametros," %s %s %s","ogAdmFsVer",disco,particion);
+				herror=EjecutarScript(cmdshell,parametros,infopar,true);
+				if(herror){
+		    	UltimoErrorScript(herror,"InventarioSoftware()");	 // Se ha producido algún error
+  	  }
+	}
+  int lon;
 	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_TomaSoftware\r");		
 	lon+=sprintf(nwtrama->parametros+lon,"sft=%s\r",parametrossft);	
 	lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",particion);	
+	lon+=sprintf(nwtrama->parametros+lon,"tfs=%s\r",infopar);	
 	RespuestaEjecucionComando(trama,nwtrama,res);	
-
 	return(res);
 }
 //______________________________________________________________________________________________________

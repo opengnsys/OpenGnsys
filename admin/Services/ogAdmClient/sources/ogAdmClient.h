@@ -20,10 +20,10 @@
 #define LEER		0
 #define ESCRIBIR	1
 
-#define LONGITUD_SCRIPTSALIDA 1024	// Longitud máima de la informacin devuelta por un script
+#define LONGITUD_SCRIPTSALIDA 1024	// Longitud máxima de la informacin devuelta por un script
 #define LONGITUD_SCRIPTSALIDALARGA 4024	// Longitud máima de la informacin devuelta por un script
-#define LONGITUD_PARAMETROS 4048	// Longitud m?ima de la informacin de la trama (parametros)
-#define LONGITUD_TRAMA LONGITUD_PARAMETROS+11	// Longitud m?ima de la trama completa
+#define LONGITUD_PARAMETROS_TRAMA 4024	// Longitud máima de la informacin de la trama (parametros)
+#define LONGITUD_TRAMA LONGITUD_PARAMETROS_TRAMA+11	// Longitud máxima de la trama completa
 #define LONGITUD_CONFIGURACION 1024	// Longitud mxima de las configuraciones de particin
 #define MAX_NUM_CSADDRS        20
 #define MAX_INTERFACE_LIST     20
@@ -57,7 +57,7 @@ typedef struct{		// EstructUra de la trama recibida
 	char arroba;	// cabecera de la trama
 	char identificador[9];	// identificador de la trama
 	char ejecutor;	// ejecutor de la trama 1=el servidor de admistración  2=el cliente 3=el repositorio
-	char parametros[LONGITUD_PARAMETROS]; // Contenido de la trama (par?etros)
+	char parametros[LONGITUD_PARAMETROS_TRAMA]; // Contenido de la trama (par?etros)
 }TRAMA;
 
 TRAMA trama[1];
