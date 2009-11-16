@@ -69,14 +69,14 @@ function SubarbolXML_PerfilesHardwares($cmd,$idperfilhard){
 	global $TbMsg;
 	$cadenaXML="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT tipohardwares.pci,perfileshard.idperfilhard ,perfileshard.descripcion as pdescripcion, perfileshard.comentarios,hardwares.idhardware,hardwares.descripcion as hdescripcion,tipohardwares.urlimg,fabricantes.nombre as nombrefabricante FROM perfileshard  ";
+	$cmd->texto="SELECT tipohardwares.descripcion as tipohardware,perfileshard.idperfilhard ,perfileshard.descripcion as pdescripcion, perfileshard.comentarios,hardwares.idhardware,hardwares.descripcion as hdescripcion,tipohardwares.urlimg FROM perfileshard  ";
 	$cmd->texto.=" LEFT OUTER JOIN perfileshard_hardwares  ON perfileshard.idperfilhard=perfileshard_hardwares.idperfilhard";
 	$cmd->texto.=" LEFT OUTER JOIN hardwares  ON hardwares.idhardware=perfileshard_hardwares.idhardware";
-	$cmd->texto.=" LEFT OUTER JOIN fabricantes   ON fabricantes.codigo=hardwares.codigo1";
 	$cmd->texto.=" LEFT OUTER JOIN tipohardwares  ON hardwares.idtipohardware=tipohardwares.idtipohardware" ;
 	$cmd->texto.=" WHERE perfileshard.idperfilhard=".$idperfilhard;
 	$cmd->texto.=" ORDER by tipohardwares.idtipohardware,hardwares.descripcion";
 	$rs->Comando=&$cmd; 
+
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
 	$cadenaXML.='<PERFILESHARDWARES';
@@ -102,16 +102,10 @@ function SubarbolXML_PerfilesHardwares($cmd,$idperfilhard){
 				$swcompo=true;
 			}	
 
-			if ($rs->campos["pci"]>0)
-				$fabricante="(".trim($rs->campos["nombrefabricante"]).")";
-			else
-				$fabricante="";
-
-
 			$cadenaXML.='<PERFILHARDWARE';
 			// Atributos
 			$cadenaXML.=' imagenodo='.$rs->campos["urlimg"];
-			$cadenaXML.=' infonodo="'.$fabricante.$rs->campos["hdescripcion"].'"';
+			$cadenaXML.=' infonodo="('.$rs->campos["tipohardware"].") ".$rs->campos["hdescripcion"].'"';
 			$cadenaXML.='>';
 			$cadenaXML.='</PERFILHARDWARE>';
 		}

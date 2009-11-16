@@ -208,7 +208,7 @@ class ArbolVistaXML{
 		$atributosHTML=$this->gXML->TomaAtributoEspecial("clicksupimg",$clicksupimg,$atributosHTML);
 		if ($clicksupimg!="") $clicksupimg.=';';
 		if ($swh){ // El nodo tiene hijos
-			$arbol.='<A href="#"><IMG border=0 '.$estilo.' id="'.$imagenid.'" onclick="clickImagenSigno(this,' ."'".$this->baseurlimg."'".','.$nivel.');'.$clicksupimg.'"  src="'.$this->c_imgnivel[$nivel].'" width="16px" height="16px" value="'.$this->v_imgnivel[$nivel].'"></A></TD>';
+			$arbol.='<A href="#nodo"><IMG border=0 '.$estilo.' id="'.$imagenid.'" onclick="clickImagenSigno(this,' ."'".$this->baseurlimg."'".','.$nivel.');'.$clicksupimg.'"  src="'.$this->c_imgnivel[$nivel].'" width="16px" height="16px" value="'.$this->v_imgnivel[$nivel].'"></A></TD>';
 		}
 		else
 			$arbol.='<SPAN><IMG  '.$estilo.' id="'.$imagenid.'" src="'.$this->c_imgnivel[$nivel].'" width="16px" height="16px" value="'.$this->v_imgnivel[$nivel].'"></SPAN></TD>';
@@ -255,7 +255,7 @@ class ArbolVistaXML{
 		if (!$classnodo) $classnodo=$this->clasedefault;
 		
 		$arbol.='<TD  width="1024px"  '.$estilo.' class="'.$classnodo.'">';
-		$arbol.='<A href="#" class="'.$this->clasedefault. '" style="text-decoration: none"><SPAN id="'.$nodoid.'"  ';
+		$arbol.='<A href="#nodo" class="'.$this->clasedefault. '" style="text-decoration: none"><SPAN id="'.$nodoid.'"  ';
 		if($this->tipotabla<2){
 			$arbol.=' onclick="clickLiteralNodo(this ,' ."'".$this->baseurlimg."'".');';
 			$arbol.=" ".$clicksupnodo.'"'.$nodovalue.$mouseovernodo.$clickcontextualnodo;

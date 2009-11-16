@@ -160,22 +160,34 @@ function toma_propiedades($cmd,$ido){
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_perfiles($cmd,$idcentro,$tipopart,$particion){
+function HTMLSELECT_perfiles($cmd,$idcentro,$tipopart,$particion,$idordenador){
 	$SelectHtml="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT  perfilessoft.idperfilsoft,perfilessoft.descripcion,tiposos.nemonico 
+	/*
+	$cmd->texto="SELECT  imagenes.descripcion,perfilessoft.idperfilsoft,perfilessoft.descripcion as perfil,tiposos.nemonico 
 				FROM  tiposos 
 				INNER JOIN softwares ON tiposos.idtiposo = softwares.idtiposo 
 				INNER JOIN perfilessoft_softwares ON softwares.idsoftware = perfilessoft_softwares.idsoftware 
 				INNER JOIN perfilessoft ON  perfilessoft.idperfilsoft = perfilessoft_softwares.idperfilsoft 
+				INNER JOIN imagenes ON  perfilessoft.idperfilsoft = imagenes.idperfilsoft 
 				
 				WHERE perfilessoft.idcentro=".$idcentro;
+	*/
+	$cmd->texto="SELECT  imagenes.descripcion,ordenador_perfilsoft.idperfilsoft FROM  imagenes 
+				INNER JOIN perfilessoft ON  perfilessoft.idperfilsoft=imagenes.idperfilsoft
+				INNER JOIN ordenador_perfilsoft ON  ordenador_perfilsoft .idperfilsoft=perfilessoft.idperfilsoft
+				WHERE ordenador_perfilsoft.particion=".$particion."
+				 AND ordenador_perfilsoft.idordenador=".$idordenador." 
+				AND perfilessoft.idcentro=".$idcentro;
+
 	// Cuesti� partici� oculta
+	/*
 	 $swo=substr ($tipopart,0,1);
 	if($swo=="H") 
 		 $tipopart=substr ($tipopart,1,strlen($tipopart)-1);
 	$cmd->texto.=" AND (tiposos.tipopar = '".$tipopart."' OR tiposos.tipopar ='H".$tipopart."' )";
 	$cmd->texto.=" AND tiposos.tipopar = '".$tipopart."'";
+	*/
 	$rs->Comando=&$cmd; 
 
 	if (!$rs->Abrir()) return(0); // Error al abrir recordset
@@ -216,7 +228,7 @@ function tabla_configuraciones($cmd,$idordenador){
 			$tablaHtml.='<TD align=center>&nbsp;'.$particion.'&nbsp;</TD>'.chr(13);
 			$tablaHtml.='<TD>&nbsp;'.$nombreso.'&nbsp;</TD>'.chr(13);
 			$tiposo=$ValorParametros["tiposo"];
-			$tablaHtml.='<TD>'.HTMLSELECT_perfiles($cmd,$idcentro,$tipopart,$particion).'</TD>';
+			$tablaHtml.='<TD>'.HTMLSELECT_perfiles($cmd,$idcentro,$tipopart,$particion,$idordenador).'</TD>';
 			$tablaHtml.='</TR>'.chr(13);
 		}
 	}

@@ -120,6 +120,7 @@ function CreaArbol($cmd,$idcentro){
 	$cadenaXML.=SubarbolXML_grupos_perfilessoft($cmd,$idcentro,0);
 	$cadenaXML.='</PERFILES>';
 
+/*
 	$cadenaXML.='<SOFTINCREMENTALES';
 	// Atributos
 	$cadenaXML.=' imagenodo="../images/iconos/carpeta.gif"';
@@ -129,7 +130,7 @@ function CreaArbol($cmd,$idcentro){
 	$cadenaXML.='>';
 	$cadenaXML.=SubarbolXML_grupos_softincremental($cmd,$idcentro,0);
 	$cadenaXML.='</SOFTINCREMENTALES>';
-
+*/
 	$cadenaXML.='</SOFTWARES>';
 	return($cadenaXML);
 }

@@ -1,4 +1,4 @@
-﻿// *************************************************************************************************************************************************
+// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
@@ -62,13 +62,9 @@ function confirmar(){
 								var widparticion=valparticion[2]
 								if(idperfilhard==widperfilhard && idparticion==widparticion){
 									var desple_M=document.getElementById("desple_M_"+particion);
-									var desple_O=document.getElementById("desple_O_"+particion);
 									var  p_M=desple_M.selectedIndex
-									var  p_O=desple_O.selectedIndex
 									if(p_M>0)
 										perfiles+=valparticion[0]+"_M_"+desple_M.value+";"
-									if(p_O>0)
-										perfiles+=valparticion[0]+"_O_"+desple_O.value+";"
 									var opathrmb=document.getElementById("pathrmb_"+particion);
 									pathrmb+=opathrmb.value+";";
 								}
@@ -126,11 +122,9 @@ function comprobar_datos(){
 			op++;
 			var particion=ochecks[i].value
 			var desple_M=document.getElementById("desple_M_"+particion);
-			var desple_O=document.getElementById("desple_O_"+particion);
 			var valparticion=particion.split("_");
 			var  p_M=desple_M.selectedIndex
-			var  p_O=desple_O.selectedIndex
-			if (p_M==0 && p_O==0){  
+			if (p_M==0 ){  
 		     alert(TbMsg[0]+valparticion[0])
 			 desple_M.focus()
 	         return(false)
@@ -140,17 +134,6 @@ function comprobar_datos(){
 			if(p<1) {
 				alert(TbMsg[5]+valparticion[0])
 				 return(false);
-			}
-			if (p_M>0 && p_O>0){  
-		     alert(TbMsg[1]+valparticion[0])
-			 desple_O.focus()
-	         return(false)
-			}
-			if (p_O>0){  
-			     var resul=confirm(TbMsg[2]+valparticion[0]+"."+ TbMsg[3])
-				 desple_M.focus()
-			      if(!resul)
-					 return(false)
 			}
 		}
 	}

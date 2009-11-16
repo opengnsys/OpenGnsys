@@ -1232,7 +1232,7 @@ int CuestionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *tb
 	if(sw) return(true); // Todo el hardware está en el perfil actual
 	
 	// Crea perfil nuevo con todo el hardware inventariado
-	sprintf(sqlstr,"INSERT perfileshard  (descripcion,idcentro,grupoid) VALUES('Perfil (%s)',%d,0)",nombreordenador,idcentro);
+	sprintf(sqlstr,"INSERT perfileshard  (descripcion,idcentro,grupoid) VALUES('Perfil Hardware (%s)',%d,0)",nombreordenador,idcentro);
 	if(!db.Execute(sqlstr,tbl)){ // Error al insertar
 		db.GetErrorErrStr(ErrStr);
 		return(false);
@@ -1276,15 +1276,13 @@ int CuestionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *tb
 //			- ipho: Identificador de la configuracin actual de las particiones del ordenador
 //			- ipho: Ipe del ordenador
 // ________________________________________________________________________________________________________
-int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*ido)
+int actualiza_software(Database db, Table tbl,char* sft,char* par,char* tfs,char* ip,char*ido)
 {
-	int idtiposoftware=2; // Siempre tipo Aplicación
-	int i,lon=0,idcentro,widcentro;
+	int i,lon=0,idcentro,auxint,idtiposo;
 	char *tbSoftware[MAXSOFTWARE]; 
-	int tbidsoftware[MAXSOFTWARE]; 
-	char ch[2]; // Carnter delimitador
+	int tbidsoftware[MAXSOFTWARE];
+	char ch[2],descripso[50]; // Caracter delimitador y nombre del estandar sistema operativo
 	char sqlstr[1000],ErrStr[200],nombreordenador[250];
-
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ACCESO atnico A TRAVEZ DE OBJETO MUTEX a este trozo de cnigo 
@@ -1297,12 +1295,12 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*
 		pthread_mutex_unlock(&guardia); 
 		return(false);
 	}		
-	if(!tbl.Get("idcentro",widcentro)){ // Toma dato 
+	if(!tbl.Get("idcentro",auxint)){ // Toma dato 
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		pthread_mutex_unlock(&guardia); 
 		return(false);
 	}			
-	idcentro=widcentro+0; // Bug Mysql
+	idcentro=auxint+0; // Bug Mysql
 
 	if(!tbl.Get("nombreordenador",nombreordenador)){ // Toma dato 
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
@@ -1315,6 +1313,32 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*
 	strcpy(ch,"\n");// caracter delimitador 
 	lon=split_parametros(tbSoftware,sft,ch);
 	
+	// Incorpora el sistema Operativo de la partición
+	sprintf(sqlstr,"SELECT idtiposo,descripcion FROM tiposos WHERE tipopar ='%s'",tfs);
+	// Ejecuta consulta
+	if(!db.Execute(sqlstr,tbl)){ // Error al leer
+		db.GetErrorErrStr(ErrStr);
+		pthread_mutex_unlock(&guardia); 
+		return(false);
+	}	
+	if(tbl.ISEOF()){ //  Software NO existente
+		pthread_mutex_unlock(&guardia); 
+		return(false);
+	}	
+	else{
+		if(!tbl.Get("idtiposo",auxint)){
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			pthread_mutex_unlock(&guardia); 
+			return(false);
+		}
+		idtiposo=auxint+0; // Bug Mysql
+		if(!tbl.Get("descripcion",descripso)){
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			pthread_mutex_unlock(&guardia); 
+			return(false);
+		}	
+		tbSoftware[lon++]=descripso;
+	}	
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
 			sprintf(sqlstr,"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",tbSoftware[i]);
@@ -1325,9 +1349,12 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* ip,char*
 				pthread_mutex_unlock(&guardia); 
 				return(false);
 			}	
-
 			if(tbl.ISEOF()){ //  Software NO existente
-				sprintf(sqlstr,"INSERT softwares (idtiposoftware,descripcion,idcentro,grupoid) VALUES(%d,'%s',%d,0)",idtiposoftware,tbSoftware[i],idcentro);
+				if((lon-i)>1) // No es el último elemento que es el S.O. el idtiposoftware es 2 (Aplicaciones)
+					sprintf(sqlstr,"INSERT softwares (idtiposoftware,descripcion,idcentro,grupoid) VALUES(2,'%s',%d,0)",tbSoftware[i],idcentro);
+				else // Es el último elemento que es el S.O. el idtiposoftware es 1 (Sistemas operativos)
+					sprintf(sqlstr,"INSERT softwares (idtiposoftware,idtiposo,descripcion,idcentro,grupoid) VALUES(1,%d,'%s',%d,0)",idtiposo,tbSoftware[i],idcentro);
+				
 				if(!db.Execute(sqlstr,tbl)){ // Error al insertar
 					db.GetErrorErrStr(ErrStr);
 					pthread_mutex_unlock(&guardia); 
@@ -1406,7 +1433,7 @@ int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tb
 	if(sw) return(true); // Todo el software está en el perfil actual
 	
 	// Crea perfil nuevo con todo el software inventariado
-	sprintf(sqlstr,"INSERT perfilessoft  (descripcion,idcentro,grupoid) VALUES('Perfil (%s)',%d,0)",nombreordenador,idcentro);
+	sprintf(sqlstr,"INSERT perfilessoft  (descripcion,idcentro,grupoid) VALUES('Perfil Software (%s, Part:%s) ',%d,0)",nombreordenador,particion,idcentro);
 	if(!db.Execute(sqlstr,tbl)){ // Error al insertar
 		db.GetErrorErrStr(ErrStr);
 		return(false);
@@ -2947,7 +2974,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 	Database db;
 	Table tbl;
 	
-	char *res,*der,*ids,*iph,*ido,*sft,*par;
+	char *res,*der,*ids,*iph,*ido,*sft,*par,*tfs;
 
 	res=toma_parametro("res",parametros); // Toma resultado
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
@@ -2957,6 +2984,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 	
 	sft=toma_parametro("sft",parametros); // Toma software
 	par=toma_parametro("par",parametros); // Toma partición
+	tfs=toma_parametro("tfs",parametros); // Toma tipo partición
 	
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
 		db.GetErrorErrStr(ErrStr);
@@ -2966,7 +2994,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 		return(false); // Error al registrar notificacion
 	}
 	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
-		if(!actualiza_software(db,tbl,sft,par,iph,ido)) // El ordenador ha cambiado de configuracin
+		if(!actualiza_software(db,tbl,sft,par,tfs,iph,ido)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
 	db.Close();

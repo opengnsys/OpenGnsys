@@ -1032,13 +1032,13 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
 -- 
 
 INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES 
-(1, 'placas', '../images/iconos/placabase.gif', 'boa', 0),
+(1, 'Placas', '../images/iconos/placabase.gif', 'boa', 0),
 (2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
 (3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 0),
 (4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
 (5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
 (7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga', 0),
-(8, 'discos', '../images/iconos/discoduro.gif', 'dis', 0),
+(8, 'Discos', '../images/iconos/discoduro.gif', 'dis', 0),
 (9, 'Dispositivos de sonido', '../images/iconos/tsonido.gif', 'aud', 0),
 (10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
 (11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio', 0),
@@ -1085,25 +1085,29 @@ CREATE TABLE IF NOT EXISTS `tiposos` (
   `descripcionrmb` varchar(50) default NULL,
   `tipopar` varchar(50) default NULL,
   PRIMARY KEY  (`idtiposo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tiposos`
 -- 
 
-INSERT INTO `tiposos` (`idtiposo`, `descripcion`, `nemonico`, `descripcionrmb`, `tipopar`) VALUES 
-(1, 'Windows 98, Millenium', 'Win98', 'Windows 98 SE', 'FAT32'),
-(2, 'Windows 2000 (Home,Profesional,Server)', 'Win2K', 'Windows 2000', 'NTFS'),
-(3, 'Windows XP (Home,Profesional)', 'WinXP', 'Windows XP', 'NTFS'),
-(4, 'Linux Ext2', 'Linux', 'Linux', 'EXT2'),
-(5, 'Windows NT', 'WinNT', 'Windows NT', 'NTFS'),
-(6, 'Windows 2003 Server', 'W2003', 'Windows 2003', 'NTFS'),
-(7, 'MsDos, Windows 95', 'MsDos', 'MSDOS', 'BIGDOS'),
-(8, 'Espacio Libre', 'EMPTY', 'EMPTY', 'EXT'),
-(9, 'Linux Ext3', 'Linux', 'Linux', 'EXT3'),
-(10, 'Partición desconocida', 'UNKNOWN', 'Descononocida', 'UNKNOWN'),
-(11, 'Partición Caché', 'CACHE', 'Caché', 'CACHE'),
-(12, 'Partición VFAT', 'VFAT', 'VFAT', 'VFAT');
+INSERT INTO `tiposos` (`idtiposo`, `descripcion`, `nemonico`, `descripcionrmb`, `tipopar`)  VALUES 
+(1, 'MsDos, Windows FAT16', 'SO_FAT16', 'MSDOS', 'BIGDOS'),
+(2, 'Windows FAT32', 'W_FAT32', 'Windows 98 SE', 'FAT32'),
+(3, 'Windows NTFS', 'W_NTFS', 'Windows NTFS', 'NTFS'),
+(4, 'Linux Ext2', 'L_Ext2', 'Linux', 'EXT2'),
+(5, 'Linux Ext3', 'L_Ext3', 'Linux', 'EXT3'),
+(6, 'Linux Ext4', 'L_Ext4', 'Linux', 'EXT4'),
+(7, 'Partición VFAT', 'VFAT', 'Vfat', 'VFAT'),
+(8, 'Partición COMPAQDIAG', 'CMPQDIAG', 'COMPAQDIAG', 'COMPAQDIAG'),
+(9, 'Partición WIN-DYNAMIC', 'W_DYMIC', 'WIN-DYNAMIC', 'WIN-DYNAMIC'),
+(10, 'Partición LINUX-LVM', 'L-LVM', 'LINUX-LVM', 'LINUX-LVM'),
+(11, 'Partición SOLARIS', 'SOLARIS', 'SOLARIS', 'SOLARIS'),
+(12, 'Partición LINUX-RAID', 'L-RAID', 'LINUX-RAID', 'LINUX-RAID'),
+(13, 'Partición Extendioda', 'EXT', 'Extended', 'EXTENDED'),
+(14, 'Partición Caché', 'CACHE', 'Caché', 'CACHE'),
+(15, 'Partición desconocida', 'UNKNOWN', 'Descononocida', 'UNKNOWN'),
+(16, 'Espacio Libre', 'EMPTY', 'EMPTY', 'EMPTY');
 
 -- --------------------------------------------------------
 

@@ -1,4 +1,4 @@
-﻿// *************************************************************************************************************************************************
+// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
@@ -36,13 +36,9 @@ function confirmar(){
 			if(ochecks[i].checked){
 				var particion=ochecks[i].value
 				var desple_M=document.getElementById("desple_M_"+particion);
-				var desple_O=document.getElementById("desple_O_"+particion);
 				var  p_M=desple_M.selectedIndex
-				var  p_O=desple_O.selectedIndex
 				if(p_M>0)
 					perfiles+=particion+"_M_"+desple_M.value+";"
-				if(p_O>0)
-					perfiles+=particion+"_O_"+desple_O.value+";"
 				var opathrmb=document.getElementById("pathrmb_"+particion);
 				pathrmb+=opathrmb.value+";";
 			}
@@ -94,13 +90,11 @@ function comprobar_datos(){
 			op++;
 			var particion=ochecks[i].value
 			var desple_M=document.getElementById("desple_M_"+particion);
-			var desple_O=document.getElementById("desple_O_"+particion);
 			var  p_M=desple_M.selectedIndex
-			var  p_O=desple_O.selectedIndex
-			if (p_M==0 && p_O==0){  
-		     alert(TbMsg[0]+particion)
-			 desple_M.focus()
-	         return(false)
+			if (p_M==0){  
+		     		alert(TbMsg[0]+particion)
+			 	desple_M.focus()
+	         		return(false)
 			}
 			var desple_path=document.getElementById("pathrmb_"+particion);
 			var  p=desple_path.selectedIndex
@@ -108,21 +102,10 @@ function comprobar_datos(){
 				alert(TbMsg[5]+particion)
 				 return(false);
 			}
-			if (p_M>0 && p_O>0){  
-		     alert(TbMsg[1]+particion)
-			 desple_O.focus()
-	         return(false)
-			}
-			if (p_O>0){  
- 			     var resul=confirm(TbMsg[2]+particion+"."+ TbMsg[3])
-				 desple_M.focus()
-			      if(!resul)
-					 return(false)
-			}
 		}
 	}
 	if(op==0){
-	     alert(TbMsg[4])
+		 alert(TbMsg[4])
 		 return(false);
 	}
 	return(comprobar_datosejecucion())

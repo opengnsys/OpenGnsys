@@ -5,7 +5,7 @@
 //	Idioma: Español 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Generación de perfiles software';
+	$TbMsg[0]='Creación de Imagen';
 	$TbMsg[1]='Características del ordenador';
 	$TbMsg[2]='Nombre';
 	$TbMsg[3]='Dirección IP';
@@ -15,5 +15,5 @@
 	$TbMsg[7]='';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Nombre S.O.';
-	$TbMsg[10]='Perfiles software disponibles ';
+	$TbMsg[10]='Nombre de la Imagen ';
 ?>

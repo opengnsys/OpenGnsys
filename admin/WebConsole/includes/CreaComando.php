@@ -17,6 +17,7 @@ function CreaComando($cadenaconexion){
 	$cmd=new Comando;	
 	$cn->CadenaConexion($strcn[0],$strcn[1],$strcn[2],$strcn[3],$strcn[4]);
 	if (!$cn->Abrir()) return (false); 
+	$cn->SetUtf8();
 	$cmd->Conexion=&$cn; 
 	return($cmd);
 }

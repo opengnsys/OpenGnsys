@@ -32,7 +32,7 @@
 #define MAX_NUM_CSADDRS        20
 
 #define MAXHARDWARE 30 //	 mÁXIMOS ELEMENTOS HARDSWARE A DETECTAR
-#define MAXSOFTWARE 5 //	 mÁXIMOS ELEMENTOS SOFTWARE A DETECTAR
+#define MAXSOFTWARE 100 //	 mÁXIMOS ELEMENTOS SOFTWARE A DETECTAR
 
 #define PUERTOMINUSER 40000
 #define PUERTOMAXUSER 60000
@@ -169,7 +169,7 @@ int NoComandosPendientes(SOCKET);
 int Coloca_estado(char *,const char *,SOCKET);
 int actualiza_configuracion(Database , Table ,char* ,int,int ,char* );
 int actualiza_hardware(Database , Table ,char* ,char* ,char*);
-int actualiza_software(Database , Table ,char* ,char*,char* ,char*);
+int actualiza_software(Database , Table ,char* ,char*,char*,char* ,char*);
 int CuestionPerfilHardware(Database , Table ,int ,char* ,int *,int ,char*);
 int CuestionPerfilSoftware(Database, Table ,int ,char* ,int *,int,char *,char*);
 

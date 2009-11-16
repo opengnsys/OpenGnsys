@@ -262,7 +262,8 @@ function tabla_particiones($cmd,$idcentro,$idgrupo,$idperfilhard,$idparticion,$c
 	$tablaHtml.= '<TR>';
 	$tablaHtml.= '<TH  align=center>&nbsp;&nbsp;</TH>';
 	$tablaHtml.= '<TH  align=center>&nbsp;P&nbsp;</TH>';
-	$tablaHtml.= '<TH colspan=3 align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;path&nbsp;</TH>';
 	$tablaHtml.= '</TR>';
 	$auxsplit=split(";",$particion);
 	for($j=0;$j<sizeof($auxsplit)-1;$j++){
@@ -274,11 +275,18 @@ function tabla_particiones($cmd,$idcentro,$idgrupo,$idperfilhard,$idparticion,$c
 		$tablaHtml.='<TR >'.chr(13);
 		$tablaHtml.='<TD ><input onclick=seleccionar("'.$particion.'_'.$idperfilhard.'_'.$idparticion.'") type=checkbox name=particion_'.$particion.'_'.$idperfilhard.'_'.$idparticion.' value='.$particion.'_'.$idperfilhard.'_'.$idparticion.'></TD>'.chr(13);
 		$tablaHtml.='<TD ><b>&nbsp;'.$particion.'&nbsp;</b></TD>'.chr(13);
-		$tablaHtml.='<TD  align=center><b>&nbsp;('.$tipopart.") - </b>".$TbMsg[10].'</TD>';
-		$tablaHtml.='<TD  align=center>&nbsp;Path</TD>';
-		$tablaHtml.='<TD   align=center><b>&nbsp;('.$tipopart.") -</b> ".$TbMsg[11].'</TD>';
+			$idimagen=TomaImagen($cmd,$idgrupo,$idperfilhard,$idparticion,$particion,$cuenta);
+
+		$tablaHtml.='<TD  align=center>'. HTMLSELECT_Imagendis($cmd,$idcentro,$tipopart,$particion,true,$idimagen,$idgrupo,$idperfilhard,$idparticion,$cuenta).'</TD>';
+
+		$parametros="0=".chr(13);
+		$parametros.="1=cache".chr(13);
+		$parametros.="2=net";
+		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros, "pathrmb_".$particion.'_'.$idperfilhard.'_'.$idparticion,"estilodesple","",0,60).'</TD>';
+		$tablaHtml.= '<TD'.chr(13);
 		$tablaHtml.='</TR>'.chr(13);
 
+/*
 		$idimagen=TomaImagen($cmd,$idgrupo,$idperfilhard,$idparticion,$particion,$cuenta);
 
 		$tablaHtml.='<TR>'.chr(13);
@@ -294,6 +302,7 @@ function tabla_particiones($cmd,$idcentro,$idgrupo,$idperfilhard,$idparticion,$c
 
 		$tablaHtml.='<TD  align=center>'. HTMLSELECT_Imagendis($cmd,$idcentro,$tipopart,$particion,false,$idimagen,$idgrupo,$idperfilhard,$idparticion,$cuenta).'</TD>';
 		$tablaHtml.='</TR>'.chr(13);
+*/
 	}
 	$tablaHtml.='</TABLE>';
 	$tablaHtml.='<BR>';

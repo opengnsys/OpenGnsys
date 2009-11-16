@@ -256,12 +256,13 @@ function CreacontextualXMLImagen(){
 	$layerXML.=' swimg=1';
 	$layerXML.='>';
 
+/*
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="insertar_imagenincremental()"';
 	$layerXML.=' imgitem="../images/iconos/incremental.gif"';
 	$layerXML.=' textoitem='.$TbMsg[10];
 	$layerXML.='></ITEM>';
-
+*/
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="muestra_informacion()"';
 	$layerXML.=' textoitem='.$TbMsg[5];

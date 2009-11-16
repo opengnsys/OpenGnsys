@@ -141,7 +141,9 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 	$tablaHtml.= '<TR>';
 	$tablaHtml.= '<TH align=center>&nbsp;&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;P&nbsp;</TH>';
-	$tablaHtml.= '<TH colspan=4 align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;Path&nbsp;</TH>';
+	//$tablaHtml.= '<TH colspan=4 align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
 	$tablaHtml.= '</TR>';
 	$auxsplit=split(";",$particion);
 
@@ -153,15 +155,28 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP") continue;
 
 		$tablaHtml.='<TR >'.chr(13);
+		// selector checkbox
 		$tablaHtml.='<TD ><input onclick=seleccionar("'.$particion.'") type=checkbox name=particion_'.$particion.' value='.$particion.'></TD>'.chr(13);
+		// partición
 		$tablaHtml.='<TD ><b>&nbsp;'.$particion.'&nbsp;</b></TD>'.chr(13);
-		$tablaHtml.='<TD  align=center><b>&nbsp;('.$tipopart.") - </b>".$TbMsg[10].'</TD>';
-		$tablaHtml.='<TD  align=center>&nbsp;Path</TD>';
-		$tablaHtml.='<TD align=center><b>&nbsp;('.$tipopart.") -</b> ".$TbMsg[11].'</TD>';
-		$tablaHtml.='</TR>'.chr(13);
+		//$tablaHtml.='<TD  align=center><b>&nbsp;('.$tipopart.") - </b>".$TbMsg[10].'</TD>';
 
 		$idimagen=TomaImagen($cmd,$idordenador,$particion);
+		//imagen a elegir
+		$tablaHtml.='<TD  align=cente>'.HTMLSELECT_Imagendis($cmd,$idcentro,$tipopart,$particion,true,$idimagen,$idordenador).'</TD>';
 
+		//path
+		$parametros="0=".chr(13);
+		$parametros.="1=cache".chr(13);
+		$parametros.="2=net";
+		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros,"pathrmb_".$particion,"estilodesple","",0,60).'</TD>';
+
+		//$tablaHtml.='<TD align=center><b>&nbsp;('.$tipopart.") -</b> ".$TbMsg[11].'</TD>';
+		$tablaHtml.='</TR>'.chr(13);
+
+
+
+	/*
 		$tablaHtml.='<TR>'.chr(13);
 		$tablaHtml.='<TD></TD>'.chr(13);
 		$tablaHtml.='<TD></TD>'.chr(13);
@@ -171,9 +186,10 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 		$parametros.="1=cache".chr(13);
 		$parametros.="2=net";
 		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros,"pathrmb_".$particion,"estilodesple","",0,60).'</TD>';
-		
+	
 		$tablaHtml.='<TD  align=cente>'.HTMLSELECT_Imagendis($cmd,$idcentro,$tipopart,$particion,false,$idimagen,$idordenador).'</TD>';
 		$tablaHtml.='</TR>'.chr(13);
+	*/
 	}
 	$tablaHtml.='</TABLE>';
 	$tablaHtml.='<BR>';

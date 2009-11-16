@@ -934,10 +934,6 @@ int RESPUESTA_inclusionREPO(TRAMA *trama)
 //***************************************************************************************************************
 // PROGRAMA PRINCIPAL 
 //***************************************************************************************************************
-
-
-
-
 int main(int argc, char **argv)
 {
     SOCKET socket_s; // Socket donde escucha el repositorio
