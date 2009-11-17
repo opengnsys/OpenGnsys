@@ -794,7 +794,7 @@ function openGnsysInstallCreateDirs()
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
 function openGnsysCopyServerFiles () {
 	if [ $# -ne 1 ]; then
-		errorAndLog "openGnsysCopyServerFiles(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
@@ -804,29 +804,31 @@ function openGnsysCopyServerFiles () {
                         client/boot/upgrade-clients-udeb.sh \
                         client/boot/udeblist.conf  \
                         client/boot/udeblist-jaunty.conf  \
-                        client/boot/udeblist-karmic.conf )
+                        client/boot/udeblist-karmic.conf \
+                        server/PXE/pxelinux.cfg/default )
 	local TARGETS=( bin/initrd-generator \
                         bin/upgrade-clients-udeb.sh \
                         etc/udeblist.conf \
                         etc/udeblist-jaunty.conf  \
-                        etc/udeblist-karmic.conf )
+                        etc/udeblist-karmic.conf \
+                        tftpboot/pxelinux.cfg/default )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
-		errorAndLog "openGnsysCopyServerFiles(): inconsistent number of array items"
+		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
 		exit 1
 	fi
 
-	echoAndLog "openGnsysCopyServerFiles(): copying files to server directories"
+	echoAndLog "${FUNCNAME}(): copying files to server directories"
 
 	pushd $WORKDIR/opengnsys
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
-			echoAndLog "copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			echoAndLog "Copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -p "${SOURCES[$i]}" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 		if [ -d "${SOURCES[$i]}" ]; then
-			echoAndLog "openGnsysCopyServerFiles(): copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			echoAndLog "Copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -ar "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
 		fi
 	done
