@@ -1,4 +1,4 @@
 #!/bin/bash
 
-url=echo 'http://'$1'?iph='$2
+url=$(echo 'http://'$1'?iph='$2)
 browser -qws $url
