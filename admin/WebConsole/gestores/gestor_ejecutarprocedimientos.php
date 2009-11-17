@@ -55,7 +55,8 @@ if ($resul){
 	else{
 		echo '<SCRIPT language="javascript">'.chr(13);
 		echo 'alert("El item se ha ejecutado correctamente");'.chr(13);
-		echo 'location.href="../varios/menucliente.php?iph='.$_SESSION["ogCliente"].'";'.chr(13);
+		echo 'var wurl="../varios/menucliente.php?iph='.trim($_SESSION["ogCliente"]).'";';
+		echo 'location.href=wurl;';
 		echo '</SCRIPT>';
 	}
 }
@@ -68,7 +69,8 @@ else{
 	else{
 		echo '<SCRIPT language="javascript">'.chr(13);
 		echo 'alert("***ATENCIÓN:El item NO se ha podido ejecutar");'.chr(13);
-		echo 'location.href="../varios/menucliente.php?iph='.$_SESSION["ogCliente"].";".chr(13);
+		echo 'var wurl="../varios/menucliente.php?iph='.trim($_SESSION["ogCliente"]).'";';
+		echo 'location.href=wurl;';
 		echo '</SCRIPT>';
 	}
 }

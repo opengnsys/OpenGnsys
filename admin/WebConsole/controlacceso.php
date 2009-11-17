@@ -18,16 +18,28 @@ include_once("./clases/AdoPhp.php");
 $usu="";
 $pss="";
 $iph=""; // Switch menu cliente
+
 if (isset($_POST["usu"])) $usu=$_POST["usu"]; 
 if (isset($_POST["pss"])) $pss=$_POST["pss"]; 
 if (isset($_GET["iph"])) $iph=$_GET["iph"]; 
+
+/*
+//========================================================================================================
+// Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global) 
+$cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos
+$ips="SERVERIP"; // IP del servidor de Administración
+$prt="2008"; // Puerto de comunicación con el servidor
+$wer="OPENGNSYSURL/pagerror.php"; // Página de redireccionamiento de errores
+$wac="OPENGNSYSURL/acceso.php"; // Página de login de la aplicación
+//========================================================================================================
+*/
 //========================================================================================================
 // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global) 
 $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos
 $ips="10.1.15.3"; // IP del servidor de Administración
 $prt="2008"; // Puerto de comunicación con el servidor
-$wer="http::/localhost/WebConsole/pagerror.php"; // Página de redireccionamiento de errores
-$wac="http::/localhost/WebConsole/acceso.php"; // Página de login de la aplicación
+$wer="http://localhost/WebConsole/pagerror.php"; // Página de redireccionamiento de errores
+$wac="http://localhost/WebConsole/acceso.php"; // Página de login de la aplicación
 //========================================================================================================
 $cmd=CreaComando($cnx); // Crea objeto comando
 $resul=false;
@@ -37,7 +49,8 @@ $idi="";
 if(!empty($iph)){ // LLamada del browser del cliente
 	list($wip,$wusu,$wpwd,$wbd,$tbd)=split(";",$cnx);
 	$usu=$wusu;
-	$pss=$wpss;
+	$pss=$wpwd;
+	$_SESSION["ogCliente"]=$iph;
 }
 if ($cmd){
 	$resul=toma_datos($cmd,&$idc,&$nmc,&$idi,$usu,&$tsu,$pss);
@@ -45,9 +58,10 @@ if ($cmd){
 if(!$resul)
 	Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D.
 
-if(!empty($iph))
-	Header("Location:menubroser.php?iph= ".$iph); // Accede a la página de menus
-
+if(!empty($iph)){
+	$wurl="./varios/menucliente.php?iph=".trim($iph);
+	Header("Location:".$wurl); // Accede a la página de menus
+}
 $_SESSION["widcentro"]=$idc; 
 $_SESSION["wnombrecentro"]=$nmc; 
 $_SESSION["wusuario"]=$usu; 
@@ -58,6 +72,7 @@ $_SESSION["wservidorhidra"]=$ips;
 $_SESSION["whidraport"]=$prt;
 $_SESSION["wpagerror"]=$wer;
 $_SESSION["wurlacceso"]=$wac;
+
 // *************************************************************************************************************************************************
 //	Devuelve una objeto comando totalmente operativo (con la conexión abierta)
 //	Parametros: 

@@ -143,7 +143,7 @@ function CreaArbol($cmd,$idcentro){
 function SubarbolXML_Comandos($cmd){
 	$cadenaXML="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idcomando,descripcion,urlimg  FROM comandos order by descripcion";
+	$cmd->texto="SELECT idcomando,descripcion,urlimg  FROM comandos  Where activo=1 order by descripcion";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 

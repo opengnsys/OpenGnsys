@@ -362,17 +362,12 @@ INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUE
 (3, 'placabase.gif', 1, 'Placas base'),
 (4, 'tsonido.gif', 1, 'Tarjeta de sonido'),
 (5, 'camweb.gif', 1, 'Cmara web'),
-(6, 'logow98.pcx', 2, 'Logo Windows 98'),
-(7, 'logoredhat.pcx', 2, 'Logo Red Hat'),
-(8, 'logow2000.pcx', 2, 'logo Windows 2000'),
-(9, 'logoXP.pcx', 2, 'Logo Windows XP'),
-(10, 'logodebian.pcx', 2, 'Logo Debian'),
-(11, 'particionar.pcx', 2, 'Particionar'),
-(12, 'ordenadoroff.pcx', 2, 'Ordenador apagado'),
-(13, 'ordenadoron.pcx', 2, 'Ordenador encendido'),
-(14, 'rembooffline.pcx', 2, 'Rembo Offline'),
-(15, 'logolinux.pcx', 2, 'Logo General de Linux'),
-(16, 'lock64.pcx', 2, 'candado lock');
+(6, 'logoXP.jpg', 2, 'Logo Windows XP'),
+(7, 'logolinux.pcx', 2, 'Logo General de Linux'),
+(8, 'particionar.jpg', 2, 'Particionar'),
+(9, 'ordenadoroff.jpg', 2, 'Ordenador apagado'),
+(10, 'ordenadoron.jpg', 2, 'Ordenador encendido');
+
 
 -- --------------------------------------------------------
 

@@ -1,25 +1,26 @@
 <?
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Diciembre-2003
-// Fecha Última modificación: Febrero-2005
+// Aplicaciï¿½ WEB: ogAdmWebCon
+// Autor: Josï¿½Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaciï¿½: Diciembre-2003
+// Fecha ï¿½tima modificaciï¿½: Febrero-2005
 // Nombre del fichero: menucliente.php
-// Descripción :Este fichero implementa el menu del browser de los clientes
+// Descripciï¿½ :Este fichero implementa el menu del browser de los clientes
 // *************************************************************************************************************************************************
 $iph=""; // Switch menu cliente
 if (isset($_GET["iph"])) $iph=$_GET["iph"]; 
 
 if(!empty($iph)){
-	Header("Location:menubroser.php?iph= ".$iph); // Accede a la página de menus
+	Header("Location:../controlacceso.php?iph= ".$iph); // Accede a la pï¿½ina de menus
 	exit;
 }
 ?>
 <HTML>
 	<HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</HEAD>
 	<BODY>
-	<P>Error de acceso al menú del cliente.</P>
+	<H1>Error de acceso al menÃº del cliente.</H1>
 </BODY>
 </HTML>
 
