@@ -1,25 +1,23 @@
 <?
-// *************************************************************************************************************************************************
+// *************************************************************************
 // Aplicación WEB: ogAdmWebCon
-// Copyright 200-2005 José Manuel Alonso. Todos los derechos reservados.
-// Fecha Creación: Año 2003-2005
-// Fecha Última modificación: Abril-2005
-// Nombre del fichero: menumliente.php
-// Descripción :
-//		Pagina del menu del cliente. Éste la solicita a través de su browser local
-// *************************************************************************************************************************************************
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2006
+// Nombre del fichero: menubrowser.php
+// Descripción : 
+//		Muestra menu en el browser del cliente
+// ****************************************************************************
+include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
-//========================================================================================================
-// Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global) 
-$cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos
-$ips="10.1.15.4"; // IP del servidor de Administración
-$prt="2008"; // Puerto de comunicación con el servidor
-$wer="http://10.1.15.4/ogAdmWebCon/pagerror.php"; // Página de redireccionamiento de errores
-$wac="http://10.1.15.4/ogAdmWebCon/acceso.php"; // Página de login de la aplicación
+include_once("../includes/CreaComando.php");
+//________________________________________________________________________________________________________
+$cmd=CreaComando($cadenaconexion);
+if (!$cmd)
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexióncon servidor B.D.
 //________________________________________________________________________________________________________
 $iph="0.0.0.0";
 if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
-$_SESSION["ogCliente"]=$iph;
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m enú
 ?>
