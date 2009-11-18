@@ -15,7 +15,7 @@ then
 	echo "ogGenerateDoc: Genera Documentación Doxygen"
 	echo "sintaxis: ogGenerateDoc.sh str_PathCodigoFuente str_PathDestinoDocumentacion"
 	echo "sintaxis: ogGenerateDoc.sh /home/adv/workspace/opengnsys/trunk/clients/engine /opt/opengnsys/www/doc "
-	return
+	exit
 fi
 if [ $# = 2 ]
 then
