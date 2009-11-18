@@ -57,8 +57,8 @@ function ogDeleteFile () {
 local FILE
 #/// Comprobar que existe el fichero y borrarlo.
 FILE=$(ogGetPath "$@")
-[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
-rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 }
 
 
@@ -76,8 +76,8 @@ function ogDeleteTree () {
 local DIR
 #/// Comprobar que existe el directorio y borrarlo con su contenido.
 DIR=$(ogGetPath "$@")
-[ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
-rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+[ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 }
 
 
@@ -163,8 +163,8 @@ function ogGetParentPath () {
 local PARENT
 case $# in
     1)	PARENT="$(dirname "$1")" ;;
-    2)	PARENT="$1 $(dirname "$2")" ;;
-    3)	PARENT="$1 $2 $(dirname "$3")" ;;
+    2)	PARENT="$1 $(dirname "/$2")" ;;
+    3)	PARENT="$1 $2 $(dirname "/$3")" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
         return $? ;;
 esac
@@ -184,7 +184,7 @@ function ogMakeDir () {
 local PARENT DIR
 PARENT=$(ogGetParentPath "$@") || return $?
 DIR="$(basename "${!#}")"
-mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || reutrn $?
+mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 }
  
 

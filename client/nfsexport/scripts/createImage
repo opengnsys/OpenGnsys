@@ -14,14 +14,14 @@ echo "[0] $PROG: Origen=$PART, Destino=$IMGFILE"
 
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
-IMGDIR=$(ogGetParentPath "$3" "$4")
+IMGDIR=$(ogGetParentPath "$3" "/$4")
 # Si no existe, crear subdirectorio de la imagen.
 if [ $? != 0 ]; then
     echo "[5] Crear subdirectorio de la imagen \"$3 $(dirname "$4")."
-    ogMakeDir "$3" $(dirname "$4")
-    IMGDIR=$(ogGetParentPath "$3" "$4") || exit $?
+    ogMakeDir "$3" $(dirname "/$4")
+    IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $?
 fi
-IMGFILE="$IMGDIR/$(basename $4).img"
+IMGFILE=$IMGDIR/$(basename "/$4").img
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
     echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"."
