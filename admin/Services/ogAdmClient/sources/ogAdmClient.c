@@ -224,16 +224,17 @@ void Log(char* msg)
 	time (&rawtime);
 	timeinfo=gmtime(&rawtime);
 
-	/*
 	FILE* FLog;
 	FLog=fopen(szPathFileLog,"at"); // Archivo de log
 	if(FLog!=NULL)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	fclose(FLog);	
-	*/
+	
+	/*
 	// Lo muestra por consola
 	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	system(msgcon);
+	*/
 }
 //______________________________________________________________________________________________________
 // Función: UltimoError
@@ -1795,6 +1796,41 @@ char* TomaNomSO(char*disco,int particion)
    	return(sover[1]);
 }
 //______________________________________________________________________________________________________
+// Función: MuestraMenu
+//
+//	Descripción: 
+// 		Muestra menú del cliente
+//	Parámetros:
+//		ips: Dirección IP del servidor web  que implementa la consola de adminsitración
+//	  urp: Path o url de la página web que muestra el menu del cliente
+//		iph:	Dirección ip del cliente	
+//	Devuelve:
+//		Nada
+// ________________________________________________________________________________________________________
+int MuestraMenu(char*ips,char *urp,char *iph)
+{
+	pid_t  pid;
+	int herror,nargs,resul;
+
+
+	sprintf(cmdshell,"%s/ogAdmMenu",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s %s","ogAdmMenu",ips,urp,iph);	
+	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
+	if((pid=fork())==0){
+		/* Proceso hijo que ejecuta el script */
+		execv(cmdshell,argumentos);
+		//resul=execlp (script, script, argumentos[0],argumentos[1],NULL);    
+		exit(resul);   
+	}
+	else {
+		if (pid ==-1){
+			UltimoErrorScript(herror,"MuestraMenu()");	// Se ha producido algún error
+			return(false);	
+		}		
+	}
+	return(true);
+}
+//______________________________________________________________________________________________________
 // Función: InventarioHardware
 //
 //	Descripción: 
@@ -2091,9 +2127,10 @@ int  main(int argc, char *argv[])
 		Log("Procesa comandos pendientes");
 		ComandosPendientes(); // Bucle para procesar comandos pendientes
 		Log("Acciones pendientes procesadas");
+		MuestraMenu("10.1.15.3","WebConsole/varios/menubrowser.php",Propiedades.IPlocal);
 		Log("Disponibilidad para comandos interactivos activada ...");
 		ProcesaComandos(); // Bucle para procesar comando	s interactivos 
-		Log("Disponibilidad para comandos interactivos d	esactivada...");
+		Log("Disponibilidad para comandos interactivos desactivada...");
 	}
 	else{
 		UltimoError(0,"Main()");	
