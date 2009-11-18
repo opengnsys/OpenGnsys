@@ -1215,4 +1215,4 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `idambito`, `ididioma`, `idtipousuario`) VALUES 
 (1, 'usuog', 'passusuog', 'Usuario de la base de datos MySql', '', 0, 1, 1),
-(2,'usuadm','passusuadm','Usuario por defecto','',1,1,2);
+(2,'DEFAULTUSER','DEFAULTPASSWD','Usuario por defecto','',1,1,2);

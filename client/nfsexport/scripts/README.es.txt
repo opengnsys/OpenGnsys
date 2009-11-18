@@ -2,22 +2,32 @@ OpenGNSys Client (Scripts)    README
 ====================================
 
 
-Este directorio contiene algunos scripts de ejemplo que pueden
-utilizarse para realizar las operaciones más comunes de gestión
-de imágenes y arranque de clientes.
+Este directorio contiene algunos scripts de ejemplo que se utilizan
+por el cliente de la consola web de administración, para realizar
+las operaciones más comunes de gestión de clientes.
 
-Dichos scripts están desarrollados en BASH y utilizan las
-funciones básicas del motor de clonación.
+Dichos scripts están desarrollados en BASH y utilizan las funciones
+básicas del motor de clonación.
 
 OpenGNSys Client Cloning Engine incluye un completo conjunto de
-funiones para que le administrador pueda personalizar sus scripts
+funiones para que el administrador pueda personalizar sus scripts
 de gestión.  Sin embargo, estos ejemplos son completamente
 operativos y pueden ser utilizados directamente.
 
 
 Scripts distribuidos:
 
-- boot.sh            arranca un sistema operativo instalado.
-- create-image.sh    genera una imagen de un sistema operativo.
-- restore-image.sh   restaura una imagen de sistema operativo.
+- bootOs                   arranca un sistema operativo instalado.
+- createImage              genera una imagen de un sistema operativo.
+- createLogicalPartitions  define las particiones primarias del disco.
+- createPrimaryPartitions  define las particiones lógicas del disco.
+- formatFs                 formatea un sistema de archivos.
+- getFsType                muestra el tipo (mnemónico) de una partición.
+- getIpAddress             muestra la IP local del cliente.
+- getOsVersion             muestra la versión de sistema operativo instalado.
+- listHardwareInfo         lista los dispoisitivos del cliente.
+- listPrimaryPartitions    lista las particiones primarias de un disco.
+- listSoftwareInfo         lista el software de un sistema operativo.
+- menuBrowser              arranque el Browser con un menú preconfigurado.
+- restoreImage             restaura una imagen de sistema operativo.
 

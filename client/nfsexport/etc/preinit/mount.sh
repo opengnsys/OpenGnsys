@@ -3,6 +3,7 @@
 #@file    mount.sh
 #@brief   Script de inicio para montar repositorio de OpenGNSys por NFS.
 #@note    Desglose del script "loadenviron.sh".
+#@warning Este proceso se integrará en /oginit en versiones futuras.
 #@warning License: GNU GPLv3+
 #@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla

@@ -5,12 +5,10 @@
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -ne 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG REPO|CACHE imagen ndisco nparticion"
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion"
     exit $?
 fi
 
-# Iniciación de porcentaje para la barra de progreso del Browser.
-echo "[0,100]"
 echo "[0] $PROG: Origen=$IMGFILE, Destino=$PART"
 
 # Procesar parámetros de entrada

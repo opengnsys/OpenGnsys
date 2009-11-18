@@ -1,4 +1,12 @@
 #!/bin/bash
+# Scirpt de ejemplo para iniciar el browser del cliente con un menú predefinido
+# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+
+PROG="$(basename $0)"
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG param1 param2"
+    exit $?
+fi
 
 url="$2?iph=$3"
 browser -qws $url
