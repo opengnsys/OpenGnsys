@@ -700,10 +700,10 @@ function dhcpConfigure()
 # Copiar ficheros del OpenGNSys Web Console.
 function installWebFiles()
 {
-	echoAndLog "installWebFiles(): Installing web files..."
+	echoAndLog "${FUNCNAME}(): Installing web files..."
 	cp -ar $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
 	if [ $? != 0 ]; then
-		errorAndLog "installWebFiles(): Error copying web files."
+		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
@@ -711,15 +711,15 @@ function installWebFiles()
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP \
 			$INSTALL_TARGET/www/includes \
 			$INSTALL_TARGET/www/comandos/gestores/filescripts \
-			$INSTALL_TARGET/www/images/icons
-	echoAndLog "installWebFiles(): Web files installed successfully."
+			$INSTALL_TARGET/www/images/iconos
+	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 
 # Configuración específica de Apache.
 function openGnsysInstallWebConsoleApacheConf()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "openGnsysInstallWebConsoleApacheConf(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
@@ -728,13 +728,13 @@ function openGnsysInstallWebConsoleApacheConf()
 	local path_web_console=${path_opengnsys_base}/www
 
 	if [ ! -d $path_apache2_confd ]; then
-		errorAndLog "openGnsysInstallWebConsoleApacheConf(): path to apache2 conf.d can not found, verify your server installation"
+		errorAndLog "${FUNCNAME}(): path to apache2 conf.d can not found, verify your server installation"
 		return 1
 	fi
 
         mkdir -p $path_apache2_confd/{sites-available,sites-enabled}
 
-	echoAndLog "openGnsysInstallWebConsoleApacheConf(): creating apache2 config file.."
+	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
 	# genera configuración
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF
@@ -751,10 +751,10 @@ EOF
 	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys.conf
 	ln -fs $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
 	if [ $? -ne 0 ]; then
-		errorAndLog "openGnsysInstallWebConsoleApacheConf(): config file can't be linked to apache conf, verify your server installation"
+		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1
 	else
-		echoAndLog "openGnsysInstallWebConsoleApacheConf(): config file created and linked, restarting apache daemon"
+		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
 		/etc/init.d/apache2 restart
 		return 0
 	fi
@@ -764,13 +764,13 @@ EOF
 function openGnsysInstallCreateDirs()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "openGnsysInstallCreateDirs(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local path_opengnsys_base=$1
 
-	echoAndLog "openGnsysInstallCreateDirs(): creating directory paths in $path_opengnsys_base"
+	echoAndLog "${FUNCNAME}(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,usuarios}
@@ -786,11 +786,11 @@ function openGnsysInstallCreateDirs()
 	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 
 	if [ $? -ne 0 ]; then
-		errorAndLog "openGnsysInstallCreateDirs(): error while creating dirs. Do you have write permissions?"
+		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
 	fi
 
-	echoAndLog "openGnsysInstallCreateDirs(): directory paths created"
+	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0
 }
 
@@ -866,7 +866,7 @@ function servicesCompilation ()
 	fi
 	popd
 	# Compilar OpenGNSys Client
-	echoAndLog "servicesCompilation(): Compiling OpenGNSys Admin Client"
+	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
 	make && mv ogAdmClient ../../../client/nfsexport/bin
 	if [ $? -ne 0 ]; then
@@ -892,7 +892,6 @@ function openGnsysClientCreate()
 	echoAndLog "${FUNCNAME}(): Copying OpenGNSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
         find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-        chmod +x $INSTALL_TARGET/client/admin/scripts/*
 	echoAndLog "${FUNCNAME}(): Copying OpenGNSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
@@ -952,7 +951,7 @@ function openGnsysConfigure()
 	echoAndLog "openGnsysConfigure(): Creating OpenGNSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/$OPENGNSYSURL/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/$OPENGNSYS_CONSOLEURL/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	echoAndLog "openGnsysConfigure(): Creating Web Console config file"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/http:\/\/$SERVERIP\/opengnsys/g" $INSTALL_TARGET/www/controlacceso.php
 	OPENGNSYS_CONSOLEURL=$(awk -F\" '$1~/\$wac/ {print $2}' $INSTALL_TARGET/www/controlacceso.php)
