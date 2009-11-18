@@ -107,6 +107,7 @@ char HIDRACHEIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes
 char HIDRASRVIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en el repositorio)
 char HIDRASRVCMD[LONSTDC];	// Path del directorio del repositorio donde se depositan los comandos para el cliente 
 char HIDRASCRIPTS[LONSTDC];	// Path al directorio donde están los scripts de la interface con la APi de funciones de OpenGnsys (en el cliente )
+char URLMENU[LONSTDC]; // Url de la Aplicación Web 
 
 int HIDRAVER;	// Versión de la apliación de Administración
 int TPAR ;	// Tamaño de la particin

@@ -158,11 +158,13 @@ function Gestiona(){
 		$cmd->ParamSetValor("@parametros",$tbComandos["parametros"]);
 		$cmd->ParamSetValor("@accionid",0);
 		$cmd->ParamSetValor("@idnotificador",$tbComandos["idnotificador"]);
-		$cmd->texto="INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (@tipoaccion,@idtipoaccion,@cateaccion,@ambito,@idambito,@ambitskwrk,@fechahorareg,@estado,@resultado,@idcentro,@parametros,@accionid,@idnotificador)";
-		$resul=$cmd->Ejecutar();
-		if(!$resul) return(false);
-		$tbComandos["parametros"].="ids=".$cmd->Autonumerico().chr(13);
 
+		if (!isset($_SESSION["ogCliente"])){
+			$cmd->texto="INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (@tipoaccion,@idtipoaccion,@cateaccion,@ambito,@idambito,@ambitskwrk,@fechahorareg,@estado,@resultado,@idcentro,@parametros,@accionid,@idnotificador)";
+			$resul=$cmd->Ejecutar();
+			if(!$resul) return(false);
+			$tbComandos["parametros"].="ids=".$cmd->Autonumerico().chr(13);
+		}
 		$shidra=new SockHidra($servidorhidra,$hidraport); 
 		if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 			$shidra->envia_comando($tbComandos["parametros"]);

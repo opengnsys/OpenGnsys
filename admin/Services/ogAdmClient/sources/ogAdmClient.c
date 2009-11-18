@@ -174,7 +174,7 @@ int LeeFileConfiguracion()
 	for (i=0;i<numlin;i++){
 		strcpy(ch,"=");	// Caracter delimitador
 		SplitParametros(dualparametro,lineas[i],ch); // Toma nombre del parametros
-		resul=strcmp(dualparametro[0],"IPhidra");
+		resul=strcmp(dualparametro[0],"ServerIP");
 		if(resul==0) 
 			strcpy(Servidorhidra,dualparametro[1]);
 		else{
@@ -182,27 +182,16 @@ int LeeFileConfiguracion()
 			if(resul==0)
 				strcpy(Puerto,dualparametro[1]);
 			else{
-				resul=strcmp(dualparametro[0],"hidraCHEIMAGENES");
+				resul=strcmp(dualparametro[0],"ClientScripts");
 				if(resul==0)
-					strcpy(HIDRACHEIMAGENES,dualparametro[1]);
+					strcpy(HIDRASCRIPTS,dualparametro[1]);
 				else{
-					resul=strcmp(dualparametro[0],"hidraSRVIMAGENES");
+					resul=strcmp(dualparametro[0],"UrlMenu");
 					if(resul==0)
-						strcpy(HIDRASRVIMAGENES,dualparametro[1]);
-					else{
-						resul=strcmp(dualparametro[0],"hidraSRVCMD");
-						if(resul==0)
-							strcpy(HIDRASRVCMD,dualparametro[1]);
-						else{
-							resul=strcmp(dualparametro[0],"hidraSCRIPTS");
-							if(resul==0)
-								strcpy(HIDRASCRIPTS,dualparametro[1]);
-							else
-								return(false);
-						}
-					}
+						strcpy(URLMENU,dualparametro[1]);
+					else
+						return(false);
 				}
-				
 			}
 		}
 	}
@@ -224,17 +213,17 @@ void Log(char* msg)
 	time (&rawtime);
 	timeinfo=gmtime(&rawtime);
 
+/*
 	FILE* FLog;
 	FLog=fopen(szPathFileLog,"at"); // Archivo de log
 	if(FLog!=NULL)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	fclose(FLog);	
-	
-	/*
+*/
 	// Lo muestra por consola
 	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	system(msgcon);
-	*/
+	
 }
 //______________________________________________________________________________________________________
 // Función: UltimoError
@@ -1103,7 +1092,7 @@ int TomaIPlocal()
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/ogAdmIP",HIDRASCRIPTS);
+	sprintf(cmdshell,"%s/getIPAddress",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);	
 	if(herror){
 		UltimoErrorScript(herror,"TomaIPlocal()"); // Se ha producido algún error
@@ -1389,8 +1378,8 @@ int CrearPerfilSoftware(TRAMA*trama,TRAMA*nwtrama)
 int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*iprepo)   
 {
 	int herror;
-	sprintf(cmdshell,"%s/ogAdmCreatePerfilSoftware",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s %s gzip","ogAdmCreatePerfilSoftware",disco,particion,iprepo,"",fileimg);
+	sprintf(cmdshell,"%s/createImage",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s %s %s","createImage",disco,particion,"REPO",fileimg);
 	
 	if(ndebug>3){
 		sprintf(msglog,"Creando Perfil Software disco:%s, partición:%s, Repositorio:%s, Imagen:%s, Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,"");
@@ -1515,8 +1504,8 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/ogAdmRestoreImage",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s","ogAdmRestoreImage",disco,particion,iprepo,fileimg);
+	sprintf(cmdshell,"%s/restoreImage",HIDRASCRIPTS);
+	sprintf(parametros," %s %s %s %s %s","restoreImage",disco,particion,iprepo,fileimg);
 
 	if(ndebug>3){
 		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s",disco,particion,Propiedades.iprepo,fileimg);
@@ -1589,9 +1578,9 @@ int ParticionaryFormatear(TRAMA*trama,TRAMA*nwtrama)
 int Particionar(char* disco,char* PrParticion,char* LoParticion)
 {
 	if (strlen(PrParticion)>0){
-		if(Particionando(disco,PrParticion,"ogAdmCreatePrimaryPartitions")){	// Particiones Primarias
+		if(Particionando(disco,PrParticion,"createPrimaryPartitions")){	// Particiones Primarias
 			if (strlen(LoParticion)>0)
-				return(Particionando(disco,PrParticion,"ogAdmCreateLogicalPartitions"));	// Particiones Logicas
+				return(Particionando(disco,PrParticion,"createLogicalPartitions"));	// Particiones Logicas
 			else
 				return(true);
 		}
@@ -1599,7 +1588,7 @@ int Particionar(char* disco,char* PrParticion,char* LoParticion)
 			return(false);
 	}
 	if (strlen(LoParticion)>0)
-		return(Particionando(disco,PrParticion,"ogAdmCreateLogicalPartitions"));
+		return(Particionando(disco,PrParticion,"createLogicalPartitions"));
 	else
 		return(false);
 }
@@ -1650,8 +1639,8 @@ int Formatear(char* disco,char* particion)
 {
 	int herror;
 
-	sprintf(cmdshell,"%s/ogAdmDiskFormat",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s %s","ogAdmDiskFormat",disco,particion);
+	sprintf(cmdshell,"%s/FormatFs",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s %s","FormatFs",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 	    UltimoErrorScript(herror,"Formatear()");	 // Se ha producido algún error
@@ -1713,8 +1702,8 @@ char* LeeConfiguracion(char* disco)
 	char *nomso;
 	
 	cadenaparticiones=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
-	sprintf(cmdshell,"%s/ogAdmListPrimaryPartitions",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s","ogAdmListPrimaryPartitions",disco);
+	sprintf(cmdshell,"%s/listPrimaryPartitions",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s","listPrimaryPartitions",disco);
 	herror=EjecutarScript(cmdshell,parametros,cadenaparticiones,true);
 	if(herror){
 	    UltimoErrorScript(herror,"LeeConfiguracion()");	 // Se ha producido algún error
@@ -1783,8 +1772,8 @@ char* TomaNomSO(char*disco,int particion)
 	
 	infosopar=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA); // Información del S.O. de la partición
 	
-	sprintf(cmdshell,"%s/ogAdmSoVer",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s %d","ogAdmSoVer",disco,particion);
+	sprintf(cmdshell,"%s/getOsVersion",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s %d","getOsVersion",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,infosopar,true);
 		if(herror){
 	    UltimoErrorScript(herror,"TomaNomSO()");	 // Se ha producido algún error
@@ -1813,8 +1802,8 @@ int MuestraMenu(char*ips,char *urp,char *iph)
 	int herror,nargs,resul;
 
 
-	sprintf(cmdshell,"%s/ogAdmMenu",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s %s %s","ogAdmMenu",ips,urp,iph);	
+	sprintf(cmdshell,"%s/menuBrowser",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s %s","menuBrowser",ips,urp,iph);	
 	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
 	if((pid=fork())==0){
 		/* Proceso hijo que ejecuta el script */
@@ -1850,7 +1839,7 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	char *parametroshrd;
 	
 	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDALARGA);
-	sprintf(cmdshell,"%s/ogAdmHardwareInfo",HIDRASCRIPTS);
+	sprintf(cmdshell,"%s/listHardwareInfo",HIDRASCRIPTS);
 	herror=EjecutarScript(cmdshell,NULL,parametroshrd,false);
 	if(herror){
 	    UltimoErrorScript(herror,"InventarioHardware()");	// Se ha producido algún error
@@ -1886,8 +1875,8 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	char *disco=(char*)ReservaMemoria(2);
 	sprintf(disco,"1"); // Siempre el disco 1
 
-	sprintf(cmdshell,"%s/ogAdmSoftwareInfo",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s %s","ogAdmSoftwareInfo",disco,particion);
+	sprintf(cmdshell,"%s/listSoftwareInfo",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s","listSoftwareInfo",disco,particion);
 
 	parametrossft=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDALARGA);
 	herror=EjecutarScript(cmdshell,parametros,parametrossft,false);
@@ -1898,8 +1887,8 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	// Toma tipo de partición
 		infopar=(char*)ReservaMemoria(16); //Tipo de partición
 		if(res && infopar){
-				sprintf(cmdshell,"%s/ogAdmFsVer",HIDRASCRIPTS);	
-				sprintf(parametros," %s %s %s","ogAdmFsVer",disco,particion);
+				sprintf(cmdshell,"%s/getFsType",HIDRASCRIPTS);	
+				sprintf(parametros," %s %s %s","getFsType",disco,particion);
 				herror=EjecutarScript(cmdshell,parametros,infopar,true);
 				if(herror){
 		    	UltimoErrorScript(herror,"InventarioSoftware()");	 // Se ha producido algún error
@@ -2127,7 +2116,7 @@ int  main(int argc, char *argv[])
 		Log("Procesa comandos pendientes");
 		ComandosPendientes(); // Bucle para procesar comandos pendientes
 		Log("Acciones pendientes procesadas");
-		MuestraMenu("10.1.15.3","WebConsole/varios/menubrowser.php",Propiedades.IPlocal);
+		//MuestraMenu(Servidorhidra,URLMENU,Propiedades.IPlocal);
 		Log("Disponibilidad para comandos interactivos activada ...");
 		ProcesaComandos(); // Bucle para procesar comando	s interactivos 
 		Log("Disponibilidad para comandos interactivos desactivada...");
