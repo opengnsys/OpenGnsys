@@ -23,6 +23,8 @@ SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 OPENGNSYS_DATABASE=ogBDAdmin
 OPENGNSYS_DB_USER=usuog
 OPENGNSYS_DB_PASSWD=passusuog
+OPENGNSYS_DB_DEFAULTUSER=usadm
+OPENGNSYS_DB_DEFAULTPASSWD=passusuadm
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogBDAdmin.sql
 
 USUARIO=`whoami`
@@ -338,7 +340,7 @@ function mysqlCheckDbIsEmpty()
 function mysqlImportSqlFileToDb()
 {
 	if [ $# -ne 3 ]; then
-		errorAndLog "mysqlImportSqlFileToDb(): invalid number of parameters"
+		errorAndLog "${FNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
@@ -347,17 +349,18 @@ function mysqlImportSqlFileToDb()
 	local sqlfile=$3
 
 	if [ ! -f $sqlfile ]; then
-		errorAndLog "mysqlImportSqlFileToDb(): Unable to locate $sqlfile!!"
+		errorAndLog "${FUNCNAME}(): Unable to locate $sqlfile!!"
 		return 1
 	fi
 
-	echoAndLog "mysqlImportSqlFileToDb(): importing sql file to ${database}..."
+	echoAndLog "${FUNCNAME}(): importing sql file to ${database}..."
+	perl -p -i -e "s/SERVERIP/$SERVERIP/g" $sqlfile
 	mysql -uroot -p"${root_password}" "${database}" < $sqlfile
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlImportSqlFileToDb(): error while importing $sqlfile in database $database"
+		errorAndLog "${FUNCNAME}(): error while importing $sqlfile in database $database"
 		return 1
 	fi
-	echoAndLog "mysqlImportSqlFileToDb(): file imported to database $database"
+	echoAndLog "${FUNCNAME}(): file imported to database $database"
 	return 0
 }
 
@@ -974,15 +977,17 @@ function installationSummary(){
 	echoAndLog "OpenGNSys Web Console URL:        $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
+	echoAndLog "Web Console default user:         $OPENGNSYS_DB_DEFAULTUSER"
+	echoAndLog "Web Console default password:     $OPENGNSYS_DB_DEFAULTPASSWD"
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
 	echoAndLog "Review or edit all configuration files."
+	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Log-in as Web Console admin user."
-	echoAndLog " - Insert Organization data and Organization user."
+	echoAndLog " - Review default Organization data and default user."
 	echoAndLog "Log-in as Web Console organization user."
-	echoAndLog " - Insert OpenGNSys Server configuration data."
-	echoAndLog "Restart OpenGNSys services."
+	echoAndLog " - Insert OpenGNSys data (rooms, computers, etc)."
 echo
 }
 

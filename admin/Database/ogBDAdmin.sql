@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
 -- Volcar la base de datos para la tabla `centros`
 -- 
 INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
- (1,'Unidad organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnsys');
+ (1,'Unidad organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGNSys');
  
 
 -- --------------------------------------------------------
@@ -263,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
 -- Volcar la base de datos para la tabla `entidades`
 -- 
 INSERT INTO `entidades` (`identidad`,`nombreentidad`,`comentarios`,`iduniversidad`,`grupoid`) VALUES 
- (1,'Entidad (Default)','Esta Entidad se crea automáticamente se crea automáticamente en el proceso de instalación de OpenGnsys',1,0);
+ (1,'Entidad (Default)','Esta Entidad se crea automáticamente se crea automáticamente en el proceso de instalación de OpenGNSys',1,0);
 -- --------------------------------------------------------
 
 -- 
@@ -571,7 +571,7 @@ CREATE TABLE IF NOT EXISTS `parametros` (
 
 INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentificador`, `nomtabla`, `nomliteral`, `tipopa`) VALUES 
 (1, 'iph', 'Ordenadores', '', '', '', 0),
-(2, 'nfn', 'Nombre de la funcin a ejecutar en el servidor o en el cliente rembo', '', '', '', 0),
+(2, 'nfn', 'Nombre de la función a ejecutar en el servidor o en el cliente rembo', '', '', '', 0),
 (3, 'eje', 'Ejecutor del comando (servidor o cliente rembo)', '', '', '', 0),
 (4, 'par', 'Partición', '', '', '', 0),
 (5, 'ifs', 'Perfil Software', 'idperfilsoft', 'perfilessoft', 'descripcion', 1),
@@ -901,7 +901,7 @@ CREATE TABLE `servidoresrembo` (
 -- 
 
 INSERT INTO `servidoresrembo` (`idservidorrembo`,`nombreservidorrembo`,`ip`,`passguor`,`pathremboconf`,`pathrembod`,`pathpxe`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
- (1,'Servidor OenGnsys (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
+ (1,'Servidor OenGNSys (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
 
 -- --------------------------------------------------------
 
@@ -1031,16 +1031,16 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
 
 INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES 
 (1, 'Placas', '../images/iconos/placabase.gif', 'boa', 0),
-(2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
-(3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 0),
+(2, 'Dispositivos multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
+(3, 'Tarjetas de red', '../images/iconos/nic.gif', 'net', 0),
 (4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
 (5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
 (7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga', 0),
 (8, 'Discos', '../images/iconos/discoduro.gif', 'dis', 0),
 (9, 'Dispositivos de sonido', '../images/iconos/tsonido.gif', 'aud', 0),
 (10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
-(11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio', 0),
-(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/confihard.gif', 'cdr', 0),
+(11, 'Modelo y versión de la BIOS', '../images/iconos/confihard.gif', 'bio', 0),
+(12, 'Modelo de grabadora o grabadora de CD/DVD', '../images/iconos/confihard.gif', 'cdr', 0),
 (13, 'Controladores IDE', '../images/iconos/confihard.gif', 'ide', 0),
 (14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir', 0),
 (15, 'Controladores USB', '../images/iconos/confihard.gif', 'usb', 0),
@@ -1170,7 +1170,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
 -- 
 
 INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`) VALUES 
-(1, 'Universidad (Default)','Esta Universidad se crea automáticamentese crea automáticamente en el proceso de instalación de OpenGnsys');
+(1, 'Universidad (Default)','Esta Universidad se crea automáticamentese crea automáticamente en el proceso de instalación de OpenGNSys');
 
 -- --------------------------------------------------------
 
