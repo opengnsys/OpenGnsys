@@ -35,7 +35,7 @@
  */ 
  //======================================================================================================== 
  // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global)  
- $cnx="localhost;root;passroot;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos 
+ $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos 
  $ips="192.168.0.44"; // IP del servidor de Administración 
  $prt="2008"; // Puerto de comunicación con el servidor 
  $wer="http://localhost/WebConsole/pagerror.php"; // Página de redireccionamiento de errores 

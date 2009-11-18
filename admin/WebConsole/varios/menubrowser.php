@@ -11,7 +11,7 @@ $iph=""; // Switch menu cliente
 if (isset($_GET["iph"])) $iph=$_GET["iph"]; 
 
 if(!empty($iph)){
-	Header("Location:../controlacceso.php?iph= ".$iph); // Accede a la p�ina de menus
+	Header("Location:../controlacceso.php?iph=".$iph); // Accede a la p�ina de menus
 	exit;
 }
 ?>

@@ -89,11 +89,13 @@ function GeneraMenu($rs,$tipo,$iph){
 
 	//	Genera HTML de la p�ina en funci� de las propiedades del Men del clioente
 	//$codeHTML.='<DIV style="POSITION:absolute;TOP:'.$coory."px;LEFT:".$coorx.'px">';
+
+	$codeHTML.='<P align=center>';
+	$codeHTML.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 36px;">'.$titulo.'</SPAN>';
+	$codeHTML.='</P>';
+	
 	$codeHTML.='<TABLE cellspacing=1 cellpadding=1 align="center" border=0 >';
 	$codeHTML.='<TR>';
-	$codeHTML.='<TD align=center colspan="'.($mod*2).'" style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 36px;">'.$titulo.'</TD>';
-	$codeHTML.='</TR>';
-	$codeHTML.='<TR height=30>';
 	$codeHTML.='<TD colspan="'.($mod*2).'" >&nbsp;</TD>';
 	$codeHTML.='</TR>';
 	$codeHTML.='<TR>';
