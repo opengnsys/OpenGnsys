@@ -1092,7 +1092,7 @@ int TomaIPlocal()
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/getIPAddress",HIDRASCRIPTS);
+	sprintf(cmdshell,"%s/getIpAddress",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);	
 	if(herror){
 		UltimoErrorScript(herror,"TomaIPlocal()"); // Se ha producido algún error
@@ -1639,7 +1639,7 @@ int Formatear(char* disco,char* particion)
 {
 	int herror;
 
-	sprintf(cmdshell,"%s/FormatFs",HIDRASCRIPTS);	
+	sprintf(cmdshell,"%s/formatFs",HIDRASCRIPTS);	
 	sprintf(parametros," %s %s %s","FormatFs",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
@@ -1891,8 +1891,8 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 				sprintf(parametros," %s %s %s","getFsType",disco,particion);
 				herror=EjecutarScript(cmdshell,parametros,infopar,true);
 				if(herror){
-		    	UltimoErrorScript(herror,"InventarioSoftware()");	 // Se ha producido algún error
-  	  }
+		    		UltimoErrorScript(herror,"InventarioSoftware()");	 // Se ha producido algún error
+  	 			}
 	}
   int lon;
 	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_TomaSoftware\r");		
