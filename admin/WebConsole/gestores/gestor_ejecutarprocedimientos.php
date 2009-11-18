@@ -56,7 +56,7 @@ if ($resul){
 		echo '<SCRIPT language="javascript">'.chr(13);
 		echo 'alert("El item se ha ejecutado correctamente");'.chr(13);
 		echo 'var wurl="../varios/menucliente.php?iph='.trim($_SESSION["ogCliente"]).'";';
-		echo 'location.href=wurl;';
+		echo 'history.back();';
 		echo '</SCRIPT>';
 	}
 }
@@ -154,7 +154,7 @@ function Gestiona(){
 		$cmd->ParamSetValor("@ambito",$tbComandos["ambito"]);
 		$cmd->ParamSetValor("@idambito",$tbComandos["idambito"]);
 		$cmd->ParamSetValor("@ambitskwrk","");
-		$cmd->ParamSetValor("@fechahorareg",date("d/m/y H:i:s"));
+		$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
 		$cmd->ParamSetValor("@parametros",$tbComandos["parametros"]);
 		$cmd->ParamSetValor("@accionid",0);
 		$cmd->ParamSetValor("@idnotificador",$tbComandos["idnotificador"]);

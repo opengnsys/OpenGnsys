@@ -31,7 +31,9 @@ $ITEMS_PUBLICOS=1;
 $ITEMS_PRIVADOS=2;
 
 if(!empty($rsmenu)){
-	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera men pblico
+
+ 	$_SESSION["widcentro"]=$rsmenu->campos["idcentro"]; 
+ 	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera men pblico
 	echo $codeHtml;
 }
 else
@@ -46,7 +48,7 @@ else
 //___________________________________________________________________________________________________
 function RecuperaMenu($cmd,$iph){
 	$rs=new Recordset; 
-	$cmd->texto="SELECT menus.resolucion,menus.titulo,menus.coorx,menus.coory,menus.modalidad,
+	$cmd->texto="SELECT menus.idcentro,menus.resolucion,menus.titulo,menus.coorx,menus.coory,menus.modalidad,
 						menus.scoorx,menus.scoory,menus.smodalidad,menus.htmlmenupub,menus.htmlmenupri,
 						acciones_menus.tipoaccion,acciones_menus.idaccionmenu,acciones_menus.idtipoaccion,
 						acciones_menus.tipoitem,acciones_menus.descripitem,iconos.urlicono 
