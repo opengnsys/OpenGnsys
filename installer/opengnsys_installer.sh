@@ -10,7 +10,7 @@ WORKDIR=/tmp/opengnsys_installer
 LOG_FILE=/tmp/opengnsys_installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget )
+DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz)
 
 INSTALL_TARGET=/opt/opengnsys
 
@@ -843,7 +843,7 @@ function openGnsysCopyServerFiles () {
 function servicesCompilation ()
 {
 	local hayErrores=0
-	
+
 	# Compilar OpenGNSys Server
 	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer
