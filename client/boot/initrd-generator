@@ -210,17 +210,52 @@ function agregarNuevoArranque
     cat << FIN > $INITSCRIPT
 #! /bin/sh
 set -e
+#exportando variables 
+GLOBAL="cat /proc/cmdline"
+for i in \`\${GLOBAL}\`
+do
+	#export \$i
+	echo \$i | grep "=" > /dev/null && export \$i 
+done
+#configurar la red
 if grep -q "ip=dhcp" /proc/cmdline; then
-    # Montar NFS.
     mkdir -p /var/state/dhcp
     /sbin/dhclient
-    DHCP_SERVER=\$(grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1)
-    mkdir -p /opt/opengnsys
-    mount -t nfs -onolock,ro \$DHCP_SERVER:/opt/opengnsys/client /opt/opengnsys
-else
-    # Modo off-line.
-    echo "Off-line mode."
 fi
+echo Configurada la red \$ip
+#Modo de Trabajo del cliente, on line <> off lne
+status="\${status:-online}"
+echo "comprobando modo de trabajo \$status"
+case "\$status" in 
+   online) 
+	echo "online";	
+	if [ -z \$repo ]
+	then 
+    		SERVERIP=\$(grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1)
+	else
+    		SERVERIP=\$repo 
+	fi 
+	echo Preparando conexión con el Repositorio  \$SERVERIP
+	# determinar el paramtro de boot para los permisos de los montajes de imagenes.
+	BOOTMODE=\${boot:-"user"}
+        case "\$BOOTMODE" in
+            admin) MOUNTOPTS="rw,nolock" ;; 
+            user)  MOUNTOPTS="ro,nolock" ;; 
+            *)     # FIXME: Modo de arranque desconocido
+                   echo "$MSG_ERRBOOTMODE"
+                   MOUNTOPTS="ro,nolock" ;;
+        esac
+        # Montamos el resto de cosas necesarias
+	printf "$MSG_MOUNTREPO\n" $BOOTMODE;
+	mkdir -p /opt/opengnsys;
+    	mount -t nfs -onolock,ro \$SERVERIP:/opt/opengnsys/client /opt/opengnsys;
+        mount -t nfs -o nolock \$SERVERIP:/opt/opengnsys/log/clients /opt/opengnsys/log;
+        mount -t nfs -o "\$MOUNTOPTS" \$SERVERIP:/opt/opengnsys/images /opt/opengnsys/images;	
+    	;; 
+    offline)
+    	echo "Off-line mode.";
+	;;
+esac 
 /opt/opengnsys/etc/preinit/default.sh
 FIN
     chmod +x $INITSCRIPT
