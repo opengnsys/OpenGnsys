@@ -6,18 +6,29 @@
 // Fecha Creación: Diciembre-2003
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: acceso.php
-// Descripción : Presenta la pantalla de login de la aplicación
+// Descripción : Presenta la pantalla de login del operador
 // *************************************************************************************************************************************************
+
+session_start(); // Activa variables de sesi�
+
 $herror=0;
+$iph="";
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
+if (isset($_GET["iph"])) $iph=$_GET["iph"]; 
+
+$ITEMS_PUBLICOS=1;
+$ITEMS_PRIVADOS=2;
+if (isset($_SESSION["swop"])){
+	// Acceso al menu de adminitración del aula
+	$wurl="menucliente.php?iph=".$iph."&tip=".$ITEMS_PRIVADOS;
+	Header('Location:'.$wurl); 
+}
 
 $TbErr=array();
 $TbErr[0]="SIN ERRORES";
-$TbErr[1]="ATENCIÓN: Debe acceder a la aplicación a través de la pagina inicial";
-$TbErr[2]="ATENCIÓN: La Aplicación no tiene acceso al Servidor de Bases de Datos";
-$TbErr[3]="ATENCIÓN: Existen problemas para recuperar el registro, puede que haya sido eliminado";
-$TbErr[4]="ATENCIÓN: Usted no tiene acceso a esta aplicación";
+$TbErr[1]="ATENCIÓN: Usted no tiene acceso al menú de administración";
+$TbErr[2]="ERROR de conexión con el servidor de datos";
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -64,21 +75,18 @@ function PulsaEnter(oEvento){
 </SCRIPT>
 </HEAD>
 <BODY>
-<DIV style="POSITION:absolute;top:90;left:250">
-	<FORM action="controlacceso.php" name="fdatos" method="post">
+<DIV style="POSITION:absolute;top:20;left:150">
+	<FORM action="accesoperadores.php" name="fdatos" method="post">
+		<INPUT name="iph" type="hidden" value="<? echo $iph?>">
 		<DIV align="center">
-			<IMG src="./images/login_esp.jpg" width=500 >
+			<IMG src="../images/login_operador.png" width=500 >
 			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
 			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  style="POSITION:absolute;top:160px;left:365;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
-			<IMG onclick="confirmar()" src="./images/botonok.gif" style="POSITION:absolute;top:190;left:400;CURSOR: hand">
+			<IMG onclick="confirmar()" src="../images/botonok.png" style="POSITION:absolute;top:190;left:400;CURSOR: hand">
 		</DIV>
 	</FORM>
 </DIV>
 <?
-//________________________________________________________________________________________________________
-echo '<DIV  style="POSITION: absolute;LEFT: 20px;TOP:300px;visibility:hidden" height=300 width=300>';
-echo '<IFRAME scrolling=yes height=300 width=310 id="iframes_comodin" src="./nada.php"></IFRAME>';
-echo '</DIV>';
 //________________________________________________________________________________________________________
 // Posiciona cursor en campo usuario y muestra mensaje de error si lo hubiera
 echo '<SCRIPT LANGUAGE="javascript">';

@@ -22,7 +22,7 @@
  if (isset($_POST["usu"])) $usu=$_POST["usu"];  
  if (isset($_POST["pss"])) $pss=$_POST["pss"];  
  if (isset($_GET["iph"])) $iph=$_GET["iph"];  
-  
+ /* 
  //======================================================================================================== 
  // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global)  
  $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos 
@@ -31,15 +31,15 @@
  $wer="OPENGNSYSURL/pagerror.php"; // Página de redireccionamiento de errores 
  $wac="OPENGNSYSURL/acceso.php"; // Página de login de la aplicación 
  //======================================================================================================== 
-/* 
+*/ 
  //======================================================================================================== 
  // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global)  
  $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos 
- $ips="10.1.15.3"; // IP del servidor de Administración 
+ $ips="192.168.0.49"; // IP del servidor de Administración 
  $prt="2008"; // Puerto de comunicación con el servidor 
  $wer="http://localhost/WebConsole/pagerror.php"; // Página de redireccionamiento de errores 
  $wac="http://localhost/WebConsole/acceso.php"; // Página de login de la aplicación 
- */ 
+
  //======================================================================================================== 
  $cmd=CreaComando($cnx); // Crea objeto comando 
  $resul=false; 

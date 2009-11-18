@@ -16,8 +16,26 @@ $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
 	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�con servidor B.D.
 //________________________________________________________________________________________________________
+$ITEMS_PUBLICOS=1;
+$ITEMS_PRIVADOS=2;
 $iph="0.0.0.0";
+$tip=$ITEMS_PUBLICOS; // Tipo de items 1=Públicos 2=privados
+
 if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
+if (isset($_GET["tip"]))	$tip=$_GET["tip"]; 
+
+// Se asegura que la pagina se solicita desde la IP que viene
+global $HTTP_SERVER_VARS;
+if ($HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"] != ""){
+	$ipcliente = $HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"];
+}
+else{
+	$ipcliente = $HTTP_SERVER_VARS["REMOTE_ADDR"]; 
+}
+/*
+if($ipcliente!=$iph)
+	die("***ATENCION.- Usted no esta accediendo desde un ordenador permitido"); 
+*/
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
 ?>
@@ -27,20 +45,36 @@ $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
 	</HEAD>
 	<BODY>
 <?	
-$ITEMS_PUBLICOS=1;
-$ITEMS_PRIVADOS=2;
-
 if(!empty($rsmenu)){
-
- 	$_SESSION["widcentro"]=$rsmenu->campos["idcentro"]; 
- 	$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera men pblico
-	echo $codeHtml;
+	switch($tip){
+		case $ITEMS_PUBLICOS:
+			if($rsmenu->campos["htmlmenupub"])
+				$codeHtml=$rsmenu->campos["htmlmenupub"];
+			else{
+				$_SESSION["widcentro"]=$rsmenu->campos["idcentro"]; 
+				$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera men pblico
+			}
+			break;
+			
+		case $ITEMS_PRIVADOS:
+			if($rsmenu->campos["htmlmenupri"])
+				$codeHtml=$rsmenu->campos["htmlmenupri"];
+			else{
+				$_SESSION["widcentro"]=$rsmenu->campos["idcentro"]; 
+				$codeHtml=GeneraMenu($rsmenu,$ITEMS_PRIVADOS,$iph); // Genera men pblico
+			}
+			break;
+	}			
 }
-else
-	echo '<H1>NO SE HA DETEACTADO NINGÚN MENÚ PARA ESTE CLIENTE</H1>';	
+else{
+	$codeHtml='<P align=center>';
+	$codeHtml.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETEACTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
+	$codeHtml.='</P>';
+}
+echo $codeHtml;
 ?>
-	</BODY>
-	</HTML>
+</BODY>
+</HTML>
 <?
 //___________________________________________________________________________________________________
 //
@@ -69,6 +103,7 @@ function RecuperaMenu($cmd,$iph){
 // Muestra el menu pblico
 //___________________________________________________________________________________________________
 function GeneraMenu($rs,$tipo,$iph){	
+	global $ITEMS_PUBLICOS;
 	global $ITEMS_PRIVADOS;
 
 	$titulo=$rs->campos["titulo"]; 
@@ -82,7 +117,12 @@ function GeneraMenu($rs,$tipo,$iph){
 	$resolucion=$rs->campos["resolucion"]; 
 	$htmlmenupub=$rs->campos["htmlmenupub"]; 
 	$htmlmenupri=$rs->campos["htmlmenupri"]; 
+			
 
+	$UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
+	$UrlPagina=dirname($UrlPagina);
+	$UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
+			
 	if($tipo==$ITEMS_PRIVADOS)
 		$mod=$smodalidad;
 	else
@@ -92,11 +132,13 @@ function GeneraMenu($rs,$tipo,$iph){
 	//	Genera HTML de la p�ina en funci� de las propiedades del Men del clioente
 	//$codeHTML.='<DIV style="POSITION:absolute;TOP:'.$coory."px;LEFT:".$coorx.'px">';
 
-	$codeHTML.='<P align=center>';
-	$codeHTML.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 36px;">'.$titulo.'</SPAN>';
-	$codeHTML.='</P>';
+	$codeHTML.='<P align=left><IMG border=0 src="http://'.$UrlPaginaIconos.'/logoopengnsys.png" width=64><P>';
 	
-	$codeHTML.='<TABLE cellspacing=1 cellpadding=1 align="center" border=0 >';
+	$codeHTML.='<P align=center>';
+	$codeHTML.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 20px;"><U>'.$titulo.'</U></SPAN>';
+	$codeHTML.='</BR>';
+	
+	$codeHTML.='<TABLE cellspacing=4 cellpadding=0 align="center" border=0 >';
 	$codeHTML.='<TR>';
 	$codeHTML.='<TD colspan="'.($mod*2).'" >&nbsp;</TD>';
 	$codeHTML.='</TR>';
@@ -115,12 +157,8 @@ function GeneraMenu($rs,$tipo,$iph){
 			if(empty($urlicono))
 				$urlicono="defaultitem.gif"; 
 
-			$UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
-			$UrlPagina=dirname($UrlPagina);
-			$UrlPaginaIconos=dirname($UrlPagina)."/images/iconos/";
-
-			$codeHTML.='<TD align=center><IMG src="http://'.$UrlPaginaIconos.$urlicono.'"></TD>';
-			$codeHTML.='<TD style="font-family:sans-serif;color: #a71026"><A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'">'.$descripitem.'</A></TD>';
+			$codeHTML.='<TD align=center><A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'"><IMG border=0 src="http://'.$UrlPaginaIconos.'/'.$urlicono.'" width=64></A></TD>';
+			$codeHTML.='<TD style="font-family:Arial;color: #a71026;FONT-SIZE:14"><A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'">'.$descripitem.'</A></TD>';
 			$c++;
 			if($c%$mod==0){
 				$codeHTML.='</TR>';
@@ -132,6 +170,19 @@ function GeneraMenu($rs,$tipo,$iph){
 	$codeHTML.='</TR>';
 	$rs->Cerrar();
 	$codeHTML.='</TABLE>';
+	$codeHTML.='</P>';
+	$codeHTML.='<BR><BR>';
+	$codeHTML.='<P align=center>';
+
+	switch($tipo){
+		case $ITEMS_PUBLICOS:
+			$codeHTML.='<A href="acceso_operador.php?iph='.$iph.'"><SPAN style="COLOR: blue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 10px;">Administración</SPAN>';
+			break;
+		case $ITEMS_PRIVADOS:
+			$codeHTML.='<A href="menucliente.php?iph='.$iph.'"><SPAN style="COLOR: blue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 10px;">Volver</SPAN>';
+			break;
+	}			
+	$codeHTML.='</P>';
 	//$codeHTML.='</DIV>';
 	return($codeHTML);
 }

@@ -359,11 +359,11 @@ CREATE TABLE IF NOT EXISTS `iconos` (
 -- 
 
 INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUES 
-(1, 'vga.gif', 1, 'Tarjeta grfica'),
+(1, 'vga.gif', 1, 'Tarjeta gráfica'),
 (2, 'nic.gif', 1, 'Tarjeta de Red'),
 (3, 'placabase.gif', 1, 'Placas base'),
 (4, 'tsonido.gif', 1, 'Tarjeta de sonido'),
-(5, 'camweb.gif', 1, 'Cmara web'),
+(5, 'camweb.gif', 1, 'Cámara web'),
 (6, 'logoXP.png', 2, 'Logo Windows XP'),
 (7, 'logolinux.png', 2, 'Logo General de Linux'),
 (8, 'particionar.png', 2, 'Particionar'),
@@ -454,8 +454,8 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `smodalidad` tinyint(4) default NULL,
   `comentarios` text,
   `grupoid` int(11) NOT NULL default '0',
-  `htmlmenupub` varchar(250) default NULL,
-  `htmlmenupri` varchar(250) default NULL,
+  `htmlmenupub` varchar(4024) default NULL,
+  `htmlmenupri` varchar(4024) default NULL,
   `resolucion` tinyint(4) default NULL,
   PRIMARY KEY  (`idmenu`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;

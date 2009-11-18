@@ -148,9 +148,10 @@ if  ($opcion!=$op_alta){
 		<TR>
 			<TH align=center>&nbsp; <?echo $TbMsg[15]?>&nbsp;</TH>
 			<?if ($opcion==$op_eliminacion)
-				echo '<TD colspan=5 style="width:350">'.$htmlmenupub.'</TD>';
+					echo '<TD colspan=5 style="width:350">'.$htmlmenupub.'</TD>';
 				else
-					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupub style="width:350" type=text value="'.$htmlmenupub.'"></TD>';?>
+					echo '<TD colspan=5 ><TEXTAREA   class="formulariodatos" name=htmlmenupub rows=5 cols=70>'.$htmlmenupub.'</TEXTAREA></TD>';
+			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -188,9 +189,10 @@ if  ($opcion!=$op_alta){
 		<TR>
 			<TH align=center>&nbsp; <?echo $TbMsg[16]?>&nbsp;</TH>
 			<?if ($opcion==$op_eliminacion)
-				echo '<TD colspan=5 style="width:350">'.$htmlmenupri.'</TD>';
+					echo '<TD colspan=5 style="width:350">'.$htmlmenupri.'</TD>';
 				else
-					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupri style="width:350" type=text value="'.$htmlmenupri.'"></TD>';?>
+					echo '<TD colspan=5 ><TEXTAREA   class="formulariodatos" name=htmlmenupri rows=5 cols=70>'.$htmlmenupri.'</TEXTAREA></TD>';
+			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>

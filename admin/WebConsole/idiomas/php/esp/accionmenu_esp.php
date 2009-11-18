@@ -11,7 +11,7 @@
 	$TbMsg[3]='Tarea';
 	$TbMsg[4]='Trabajos';
 	$TbMsg[5]='Público';
-	$TbMsg[6]='Private';
+	$TbMsg[6]='Privado';
 	$TbMsg[7]='Items públicos ';
 	$TbMsg[8]='Items privados ';
 	$TbMsg[9]='Nombre del Menu';
