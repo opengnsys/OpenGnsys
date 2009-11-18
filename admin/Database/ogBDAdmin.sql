@@ -364,11 +364,11 @@ INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUE
 (3, 'placabase.gif', 1, 'Placas base'),
 (4, 'tsonido.gif', 1, 'Tarjeta de sonido'),
 (5, 'camweb.gif', 1, 'Cmara web'),
-(6, 'logoXP.jpg', 2, 'Logo Windows XP'),
-(7, 'logolinux.pcx', 2, 'Logo General de Linux'),
-(8, 'particionar.jpg', 2, 'Particionar'),
-(9, 'ordenadoroff.jpg', 2, 'Ordenador apagado'),
-(10, 'ordenadoron.jpg', 2, 'Ordenador encendido');
+(6, 'logoXP.png', 2, 'Logo Windows XP'),
+(7, 'logolinux.png', 2, 'Logo General de Linux'),
+(8, 'particionar.png', 2, 'Particionar'),
+(9, 'ordenadoroff.png', 2, 'Ordenador apagado'),
+(10, 'ordenadoron.png', 2, 'Ordenador encendido');
 
 
 -- --------------------------------------------------------
