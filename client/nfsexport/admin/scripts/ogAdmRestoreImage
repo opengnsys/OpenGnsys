@@ -1,4 +1,0 @@
-#!/bin/bash
-
-DATOS=$(ogRestoreImage  REPO  $4 $1 $2) || exit $?
-exit 0

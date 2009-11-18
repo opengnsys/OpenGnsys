@@ -1,0 +1,4 @@
+#!/bin/bash
+
+url="$2?iph=$3"
+browser -qws $url
