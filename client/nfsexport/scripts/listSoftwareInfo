@@ -1,8 +1,11 @@
 #!/bin/bash
 # Scirpt de ejemplo para almacenear en fichero temporal el listado de software.
 # (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+# Formato:  listSoftwareInfo [-r] ndisk npart
+#		-r   listado reducido (sin parches)
 
 PROG="$(basename $0)"
+REDUCED="no"
 if [ $# -ne 2 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion"
     exit $?
@@ -16,6 +19,10 @@ SERVERLOGDIR=$(mount | awk -v d=$OGLOG '
 # Fichero de listado:  soft-IP-ndisco-npart
 SOFTFILE="soft-$(ogGetIpAddress)-$1-$2"
 # Redirigir salida al fichero de listado.
-ogListSoftware "$1" "$2" >$OGLOG/$SOFTFILE || exit $?
+if [ "$REDUCED" = "no" ]; then
+    ogListSoftware "$1" "$2" >$OGLOG/$SOFTFILE || exit $?
+else
+    ogListSoftware "$1" "$2" | egrep -v "\(KB[0-9]{6}\)" >$OGLOG/$SOFTFILE || exit $?
+fi
 # Salid: camino del fichero de listado en el servidor de repositorio.
 echo $SERVERLOGDIR/$SOFTFILE

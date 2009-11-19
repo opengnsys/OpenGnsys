@@ -3,8 +3,8 @@
 # (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
 
 PROG="$(basename $0)"
-if [ $# -ne 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG param1 param2"
+if [ $# -ne 3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG IPservidor urlmenu Ipcliente"
     exit $?
 fi
 

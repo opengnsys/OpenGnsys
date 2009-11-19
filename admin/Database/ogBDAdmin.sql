@@ -904,7 +904,7 @@ CREATE TABLE `servidoresrembo` (
 -- 
 
 INSERT INTO `servidoresrembo` (`idservidorrembo`,`nombreservidorrembo`,`ip`,`passguor`,`pathremboconf`,`pathrembod`,`pathpxe`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
- (1,'Servidor OenGNSys (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
+ (1,'Servidor OpenGNSys (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
 
 -- --------------------------------------------------------
 
