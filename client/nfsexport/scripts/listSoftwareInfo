@@ -1,3 +1,15 @@
 #!/bin/bash
-ogListSoftware $1 $2
-exit 0
+# Scirpt de ejemplo para almacenear en fichero temporal el listado de software.
+# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+
+PROG="$(basename $0)"
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion"
+    exit $?
+fi
+
+# Fichero de listado de software (en el directorio de logs de clientes).
+LOGSDIR=$(awk '$1~/log/ {dir=$1} END {print dir}' /etc/exports)
+SOFTFILE="$LOGSDIR/soft-$(ogGetIpAddress)-$1-$2"
+# Redirigir salida al fichero de listado.
+ogListSoftware "$1" "$2" >$SOFTFILE

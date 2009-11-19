@@ -951,10 +951,10 @@ function openGnsysConfigure()
 	echoAndLog "openGnsysConfigure(): Creating OpenGNSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	echoAndLog "openGnsysConfigure(): Creating Web Console config file"
-	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/http:\/\/$SERVERIP\/opengnsys/g" $INSTALL_TARGET/www/controlacceso.php
-	OPENGNSYS_CONSOLEURL=$(awk -F\" '$1~/\$wac/ {print $2}' $INSTALL_TARGET/www/controlacceso.php)
-	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/$OPENGNSYS_CONSOLEURL/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
+	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
+	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
+	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	echoAndLog "openGnsysConfiguration(): Starting OpenGNSys services."
 	/etc/init.d/opengnsys start
 }
