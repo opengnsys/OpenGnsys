@@ -1311,8 +1311,24 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* tfs,char
 	if(lon>MAXSOFTWARE) lon=MAXSOFTWARE;
 		// Trocea la cadena de configuracin
 	strcpy(ch,"\n");// caracter delimitador 
-	lon=split_parametros(tbSoftware,sft,ch);
-	
+
+
+// Lee archivo de inventario software
+	FILE *Finv;
+	char *buffer;
+	long lSize;
+	Finv = fopen ( sft , "rb" ); // EL parametro sft contiene el path del archivo de inventario
+	if (Finv==NULL) return(false);
+	fseek (Finv , 0 , SEEK_END);  // Obtiene tamaño del fichero.
+	lSize = ftell (Finv);
+	rewind (Finv);
+	buffer = (char*) malloc (lSize);  // Toma memoria para el buffer de lectura.
+	if (buffer == NULL) return(false);
+	fread (buffer,1,lSize,Finv); 	// Lee contenido del fichero
+	fclose(Finv);
+// trocea las lineas
+	lon=split_parametros(tbSoftware,buffer,ch);
+
 	// Incorpora el sistema Operativo de la partición
 	sprintf(sqlstr,"SELECT idtiposo,descripcion FROM tiposos WHERE tipopar ='%s'",tfs);
 	// Ejecuta consulta
