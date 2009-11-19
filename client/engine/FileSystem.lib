@@ -855,3 +855,53 @@ then
 	mkfs.ext3 $1 -L CACHE
 fi
 }
+
+function ogGetFsSize () {
+#/**  @function ogGetFsSize: @brief Muestra el tamanio del sistema de archivos indicado, permite definir la unidad de medida, por defecto GB
+#@param  $1 int_diskEAC
+#@param $2 int_PartitionEAC
+#@param $3 str_UnidadMediada		parametro opcional, admite [ kB MB GB -default GB]
+#@return  cadena con int_TotalSize:int_DataSize:int_DataFree
+#@warning  Salidas de errores no determinada
+#@warning
+#@attention
+#@version 1.0	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+if [ $# = 0 ]
+then
+	echo "sintaxis: ogGetFsSize int_disco int_partition str_SizeOutput [ kB MB GB -default GB]-]" red
+	echo "devuelve int_size : int_data : int_free" red
+return
+fi
+if [ $# -ge 2 ]
+then
+	particion=`ogMount $1 $2 ` #1>/dev/null 2>&1
+	if [ -z $3 ]
+		then
+			unit=GB  # s B kB MB GB TB %
+		else
+			unit=$3
+	fi
+	case $unit in
+		kB)
+			factor="1.024";
+			valor=`df | grep  $particion | awk -F" " '{size=$2*1.024; used=$3*1.024; free=$4*1.024; printf "%d:%d:%d", size,used,free}'`
+		;;
+		MB)
+			factor="1.024/1000";
+			valor=`df | grep  $particion | awk -F" " '{size=$2*1.024/1000; used=$3*1.024/1000; free=$4*1.024/1000; printf "%d:%d:%d", size,used,free}'`
+		;;
+		GB)
+			factor="1.024/1000000";
+			valor=`df | grep $particion | awk -F" " '{size=$2*1.024/1000000; used=$3*1.024/1000000; free=$4*1.024/1000000; printf "%f:%f:%f", size,used,free}'`
+		;;
+	esac
+	#echo $valor
+	#NumberRound $valor
+	#valor=`NumberRound $valor`;
+	ogUnmount $1 $2 1>/dev/null 2>&1
+	echo $valor
+
+fi
+
+}
