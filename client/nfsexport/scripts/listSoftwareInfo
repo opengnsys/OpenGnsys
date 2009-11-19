@@ -26,3 +26,4 @@ else
 fi
 # Salid: camino del fichero de listado en el servidor de repositorio.
 echo $SERVERLOGDIR/$SOFTFILE
+
