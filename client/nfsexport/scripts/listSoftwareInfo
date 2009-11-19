@@ -8,8 +8,14 @@ if [ $# -ne 2 ]; then
     exit $?
 fi
 
-# Fichero de listado de software (en el directorio de logs de clientes).
-LOGSDIR=$(awk '$1~/log/ {dir=$1} END {print dir}' /etc/exports)
-SOFTFILE="$LOGSDIR/soft-$(ogGetIpAddress)-$1-$2"
+# Directorio del servidor donde se exportan los ficheros de registro.
+SERVERLOGDIR=$(mount | awk -v d=$OGLOG '
+				BEGIN {FS="[: ]"}
+				{if ($4==d) dir=$2}
+				END {print dir}')
+# Fichero de listado:  soft-IP-ndisco-npart
+SOFTFILE="soft-$(ogGetIpAddress)-$1-$2"
 # Redirigir salida al fichero de listado.
-ogListSoftware "$1" "$2" >$SOFTFILE
+ogListSoftware "$1" "$2" >$OGLOG/$SOFTFILE || exit $?
+# Salid: camino del fichero de listado en el servidor de repositorio.
+echo $SERVERLOGDIR/$SOFTFILE
