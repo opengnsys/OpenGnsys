@@ -38,12 +38,18 @@ if [ -d $OPENGNSYS ]; then
     #/// Cargar API de funciones.
     echo "$MSG_LOADAPI"
     for i in $OGAPI/*.lib; do
-        source $i 
+        source $i
     done
     for i in $(typeset -F | cut -f3 -d" "); do
 	export -f $i
     done
-
+    # Carga de las API testing
+    if [ "$engine" = "testing" ]
+    then
+    	for i in $OGAPI/*.testing; do
+        	source $i 
+    	done
+    fi
     # Fichero de registros.
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
     # FIXME Pruebas para grupos de ordenadores
