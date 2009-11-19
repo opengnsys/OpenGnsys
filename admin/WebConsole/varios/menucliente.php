@@ -140,7 +140,7 @@ function GeneraMenu($rs,$tipo,$iph){
 	
 	$codeHTML.='<TABLE cellspacing=4 cellpadding=0 align="center" border=0 >';
 	$codeHTML.='<TR>';
-	$codeHTML.='<TD colspan="'.($mod*2).'" >&nbsp;</TD>';
+	$codeHTML.='<TD colspan="'.(($mod*2)+1).'" >&nbsp;</TD>';
 	$codeHTML.='</TR>';
 	$codeHTML.='<TR>';
 
@@ -159,6 +159,10 @@ function GeneraMenu($rs,$tipo,$iph){
 
 			$codeHTML.='<TD align=center><A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'"><IMG border=0 src="http://'.$UrlPaginaIconos.'/'.$urlicono.'" width=64></A></TD>';
 			$codeHTML.='<TD style="font-family:Arial;color: #a71026;FONT-SIZE:14"><A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'">'.$descripitem.'</A></TD>';
+			if($mod>1){
+				//separación de columnas
+				$codeHTML.='<TD width=10>&nbsp;</TD>';
+			}
 			$c++;
 			if($c%$mod==0){
 				$codeHTML.='</TR>';

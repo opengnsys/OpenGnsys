@@ -350,26 +350,29 @@ CREATE TABLE IF NOT EXISTS `iconos` (
   `idicono` int(11) NOT NULL auto_increment,
   `urlicono` varchar(200) default NULL,
   `idtipoicono` int(11) default NULL,
-  `descripcion` varchar(50) default NULL,
+  `descripcion` varchar(250) default NULL,
   PRIMARY KEY  (`idicono`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
 
 -- 
 -- Volcar la base de datos para la tabla `iconos`
 -- 
 
 INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUES 
-(1, 'vga.gif', 1, 'Tarjeta gráfica'),
-(2, 'nic.gif', 1, 'Tarjeta de Red'),
-(3, 'placabase.gif', 1, 'Placas base'),
-(4, 'tsonido.gif', 1, 'Tarjeta de sonido'),
-(5, 'camweb.gif', 1, 'Cámara web'),
-(6, 'logoXP.png', 2, 'Logo Windows XP'),
-(7, 'logolinux.png', 2, 'Logo General de Linux'),
-(8, 'particionar.png', 2, 'Particionar'),
-(9, 'ordenadoroff.png', 2, 'Ordenador apagado'),
-(10, 'ordenadoron.png', 2, 'Ordenador encendido');
-
+ (1,'vga.gif',1,'Tarjeta gráfica'),
+ (2,'nic.gif',1,'Tarjeta de Red'),
+ (3,'placabase.gif',1,'Placas base'),
+ (4,'tsonido.gif',1,'Tarjeta de sonido'),
+ (5,'camweb.gif',1,'Cámara web'),
+ (6,'logoXP.png',2,'Logo Windows XP'),
+ (7,'logolinux.png',2,'Logo General de Linux'),
+ (8,'particionar.png',2,'Particionar'),
+ (9,'ordenadoroff.png',2,'Ordenador apagado'),
+ (10,'ordenadoron.png',2,'Ordenador encendido'),
+ (11,'usb.gif',1,'Mi icono usb'),
+ (12,'ide.gif',1,'Controladores IDE'),
+ (13,'dvdcd.gif',1,'Lectoras y grabadoras de DVD'),
+ (14,'audio.gif',1,'Dispositivos de audio');
 
 -- --------------------------------------------------------
 
@@ -1023,28 +1026,28 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
   `nemonico` char(3) NOT NULL,
   `pci` tinyint(1) NOT NULL,
   PRIMARY KEY  (`idtipohardware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tipohardwares`
 -- 
 
-INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES 
-(1, 'Placas', '../images/iconos/placabase.gif', 'boa', 0),
-(2, 'Dispositivos multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
-(3, 'Tarjetas de red', '../images/iconos/nic.gif', 'net', 0),
-(4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
-(5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
-(7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga', 0),
-(8, 'Discos', '../images/iconos/discoduro.gif', 'dis', 0),
-(9, 'Dispositivos de sonido', '../images/iconos/tsonido.gif', 'aud', 0),
-(10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
-(11, 'Modelo y versión de la BIOS', '../images/iconos/confihard.gif', 'bio', 0),
-(12, 'Modelo de grabadora o grabadora de CD/DVD', '../images/iconos/confihard.gif', 'cdr', 0),
-(13, 'Controladores IDE', '../images/iconos/confihard.gif', 'ide', 0),
-(14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir', 0),
-(15, 'Controladores USB', '../images/iconos/confihard.gif', 'usb', 0),
-(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus', 0);
+INSERT INTO `tipohardwares` (`idtipohardware`,`descripcion`,`urlimg`,`nemonico`,`pci`) VALUES 
+ (1,'Placas','../images/iconos/placabase.gif','boa',0),
+ (2,'Dispositivos Multimedia','../images/iconos/tsonido.gif','mul',0),
+ (3,'Tarjetas de Red','../images/iconos/nic.gif','net',0),
+ (4,'Microprocesadores','../images/iconos/micro.gif','cpu',0),
+ (5,'Memorias','../images/iconos/confihard.gif','mem',0),
+ (7,'Tarjetas gráficas','../images/iconos/vga.gif','vga',0),
+ (8,'Discos','../images/iconos/discoduro.gif','dis',0),
+ (9,'Dispositivos de sonido','../images/iconos/audio.gif','aud',0),
+ (10,'Marca y modelo del equipo','../images/iconos/confihard.gif','mod',0),
+ (11,'Modelo y version de la bios','../images/iconos/confihard.gif','bio',0),
+ (12,'Modelo de grabadora o  grabadora de CD/DVD','../images/iconos/dvdcd.gif','cdr',0),
+ (13,'Controladores IDE','../images/iconos/ide.gif','ide',0),
+ (14,'Controladores FireWire','../images/iconos/confihard.gif','fir',0),
+ (15,'Controladores USB','../images/iconos/usb.gif','usb',0),
+ (16,'Bus del Sistema','../images/iconos/confihard.gif','bus',0);
 
 -- --------------------------------------------------------
 

@@ -214,7 +214,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 				<?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
 					<TD><?echo $descripcion?></TD>
 				<?}else{?>
-					<TD><INPUT class=cajatexto name="descripcion" maxlength=50  style="width:150" value="<? echo $descripcion?>"></TD>
+					<TD><INPUT class=cajatexto name="descripcion" maxlength=250  style="width:250" value="<? echo $descripcion?>"></TD>
 				<?}?>
 			</TR>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -251,7 +251,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
              <TR>
              <?switch($opcion){
                    case $CONSULTAR:
-
+						  echo '<TD><img style="cursor:hand" SRC="../images/boton_insertar.gif" onclick="Cancelar()"></TD>';
 						  break;
 					case $ELIMINAR:
 							echo '<TD><img SRC="../images/boton_confirmar.gif" style="cursor:hand" onclick="Confirmar()"></TD>';

@@ -82,10 +82,15 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 				currentOp.style.borderRightColor="#ffffff"
 				currentOp.style.borderTopColor="#808080"
 				currentOp.style.borderLeftColor="#808080"
-				opadre.frames["frame_arbol"].document.location.href=href
-				opadre.frames["frame_contenidos"].document.location.href=href2
-		}
-		//________________________________________________________________________________________________________
+				if(op<11){
+					opadre.frames["frame_arbol"].document.location.href=href
+					opadre.frames["frame_contenidos"].document.location.href=href2
+				}
+				else
+					window.top.location.href="acceso.php";
+			}
+
+	//________________________________________________________________________________________________________
 		</SCRIPT>
 	</HEAD>
 	<BODY bgcolor="#d4d0c8">
@@ -124,12 +129,20 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 							<? }
 							else{
 									if($idtipousuario==$SUPERADMINISTRADOR){?>
-											<TD  onclick=eleccion(this,9) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;<IMG src="./images/iconos/administracion.gif">&nbsp;<?echo  $TbMsg[8] ?>&nbsp;</TD>
+											<TD  onclick=eleccion(this,9) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/administracion.gif">
+											<SPAN class=menupral ><?echo  $TbMsg[8] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-											<TD  onclick=eleccion(this,10) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;<IMG src="./images/iconos/iconos.gif">&nbsp;<?echo  $TbMsg[9] ?>&nbsp;</TD>
+											<TD  onclick=eleccion(this,10) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
+											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 									<?}?>
 							<?}?>
+							<TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">
+							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
+		
 
 						   </TR>
 						 </TABLE>

@@ -30,7 +30,7 @@ if (!$cmd) // Fallo conexión con servidor de datos
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 // Búsquedas 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
-$cmd->texto="SELECT * FROM iconos WHERE idicono>0 ";
+$cmd->texto="SELECT * FROM iconos WHERE idicono>0 order by idtipoicono,descripcion ";
 if (!empty($idtipoicono))	 // Tipo
 		$cmd->texto.=" AND idtipoicono=".$idtipoicono;
 
@@ -44,6 +44,10 @@ if (!$rs->Abrir())
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
+<SCRIPT language="javascript">
+var IE=(navigator.appName=="Microsoft Internet Explorer");
+var NS=(navigator.appName=="Netscape");
+</SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="L_Iconos.js"></SCRIPT>
 </HEAD>
@@ -73,17 +77,29 @@ if (!$rs->Abrir())
 <TABLE align="center" class="tabla_listados">
   <TR>
 	<TH align="center">A</TH>
+	<TH align="center">&nbsp;<? echo utf8_encode(Descripción)?>&nbsp;</TH>
 	<TH align="center">&nbsp;Nombre&nbsp;</TH>
-	<TH align="center">&nbsp;Tipo&nbsp;</TH>
-  </TR>
+	<TH align="center">&nbsp;</TH>
+	<TH align="center">&nbsp;T&nbsp;</TH>
+
+	</TR>
   <?
-	$TBtipo[1]="iconos web";
-	$TBtipo[2]="iconos items";
+	$TBtipo[1]="W";
+	$TBtipo[2]="I";
   while (!$rs->EOF){?>
 	<TR>
 		<TD  align=center><IMG  id=<?=$rs->campos["idicono"]?> style="cursor:hand" onclick="menu_contextual(this)" src="../images/iconos/administrar_off.gif"></TD>
+		<TD>&nbsp;<? echo basename($rs->campos["descripcion"])?>&nbsp;</TD>
 		<TD>&nbsp;<? echo basename($rs->campos["urlicono"])?>&nbsp;</TD>
-		<TD>&nbsp;<? echo $TBtipo[$rs->campos["idtipoicono"]] ?>&nbsp;</TD>
+		<TD align=center>&nbsp;<IMG src="./iconos/<? echo $rs->campos["urlicono"] ?>"
+
+		<? if ($rs->campos["idtipoicono"]==2) //icono item 
+			echo " width=64 ";
+		else
+			echo " width=16 ";
+		?>
+		>&nbsp;</TD>
+		<TD align=center>&nbsp;<? echo $TBtipo[$rs->campos["idtipoicono"]] ?>&nbsp;</TD>
   </TR>
    <?  $rs->Siguiente();}?>
 </TABLE>
