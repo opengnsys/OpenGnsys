@@ -826,7 +826,7 @@ function ogUnmountCache () {
 CACHELINUX=`ogFindCache`
 CACHEOG=`ogDevToDisk $CACHELINUX`
 #echo ogUnmountPartition $cacheeac
-ogUnmountPartition $CACHEOG
+ogUnmountFs $CACHEOG
 unset OGCAC
 }
 
@@ -846,7 +846,7 @@ then
 	cd /
 	ogUnmountCache
 	dev=`ogFindCache`
-	Msg "Iniciando el formateo de la particion CACHE, ubicada en $dev, y asignandole el label CACHE" red
+	exhe "Iniciando el formateo de la particion CACHE, ubicada en $dev, y asignandole el label CACHE"
 	mkfs.ext3 $dev -L CACHE
 	ogInfoCache
 fi
