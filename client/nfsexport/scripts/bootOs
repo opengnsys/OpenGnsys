@@ -19,7 +19,7 @@ NAME=${NAME:-"pc"}
 
 # Arrancar.
 echo "[5] Desmontar todos los sistemas operativos del disco."
-ogUnmountAll $1 | exit $?
+ogUnmountAll $1 2>/dev/null | exit $?
 case "$(ogGetOsType $1 $2)" in
     Windows)
         echo "20 Activar partición de Windows $PART."

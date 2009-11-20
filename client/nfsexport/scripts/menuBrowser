@@ -4,9 +4,9 @@
 
 PROG="$(basename $0)"
 if [ $# -ne 3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG IPservidor urlmenu Ipcliente"
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG IPservidor urlmenu ipcliente"
     exit $?
 fi
 
-url="$2?iph=$3"
+url="$2"
 browser -qws $url
