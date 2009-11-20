@@ -397,6 +397,10 @@ int gestiona_comando(TramaRepos *trmInfo)
 	if(resul==0)
 		return(RegistraComando(trmInfo));		
 	
+	resul=strcmp(nombrefuncion,"IniciarSesion");
+	if(resul==0)
+		return(RegistraComando(trmInfo));	
+			
 	resul=strcmp(nombrefuncion,"FicheroOperador");
 	if(resul==0)
 		return(FicheroOperador(trmInfo));

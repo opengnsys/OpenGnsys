@@ -977,6 +977,10 @@ int GestionTramas(TRAMA *trama)
 	if(res==0)
 		return(Reiniciar(trama,nwtrama));
 			
+	res=strcmp(nombrefuncion,"IniciarSesion");
+	if(res==0)
+		return(Reiniciar(trama,nwtrama));
+
 	res=strcmp(nombrefuncion,"RESPUESTA_InclusionCliente");
 	if(res==0)
 		return(RESPUESTA_InclusionCliente(trama));
@@ -1302,6 +1306,41 @@ int Reiniciar(TRAMA *trama,TRAMA *nwtrama)
 	res=RespuestaEjecucionComando(trama,nwtrama,true);	
 	strcpy(cmdshell,"reboot");
 	system(cmdshell);
+	return(res);
+}
+//______________________________________________________________________________________________________
+// Función: IniciSesion
+//
+//	 Descripción:
+//		Inicia Sesión en algún sistema operativo instalado en la máquina
+//	Parámetros:
+//		- trama: Trama recibida con las especificaciones del comando
+//		- nwtrama: Nueva trama a enviar al servidor con la respuesta de la acción, si ésta procede
+// 	Devuelve:
+//		true si el proceso fue correcto o false en caso contrario
+//		*** En ese proceso se devuelve correcto aún sabiendo que no se se sabe si va a funcionar
+//			pero esto evita que si se ha lanzado con seguimiento, la tarea no quede sin norificar.
+//______________________________________________________________________________________________________
+int IniciarSesion(TRAMA *trama,TRAMA *nwtrama)
+{
+	int res;
+	char *particion=TomaParametro("par",trama->parametros);
+
+	char *disco=(char*)ReservaMemoria(2);
+	sprintf(disco,"1"); // Siempre el disco 1
+	
+	sprintf(nwtrama->parametros,"nfn=RESPUESTA_IniciarSesion\r");					
+	res=RespuestaEjecucionComando(trama,nwtrama,true);	
+
+	int herror;
+	sprintf(cmdshell,"%s/bootFS",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s","bootFS",disco,particion);
+	
+	herror=EjecutarScript(cmdshell,parametros,NULL,true);
+	if(herror){
+		UltimoErrorScript(herror,"IniciarSesion()");	 // Se ha producido algún error
+		return(false);
+	}
 	return(res);
 }
 //______________________________________________________________________________________________________

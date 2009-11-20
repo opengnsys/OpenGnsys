@@ -6,7 +6,7 @@
 // Fecha Última modificación: Marzo-2005
 // Nombre del fichero: IniciarSesion.php
 // Descripción : 
-//		Implementaci� del comando "Iniciar Sesión"
+//		Implementación� del comando "Iniciar Sesión"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -108,7 +108,7 @@ if (!$resul)
 			<TH align=center>&nbsp;&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TD></TR>
+		</TR>
 			<?
 				echo tabla_configuraciones($cmd,$idordenador);
 			?>
@@ -158,52 +158,6 @@ function toma_propiedades($cmd,$ido){
 		return(false);
 }
 /*________________________________________________________________________________________________________
-	Crea la etiqueta html <SELECT> de los perfiles softwares
-________________________________________________________________________________________________________*/
-function HTMLSELECT_perfiles($cmd,$idcentro,$tipopart,$particion,$idordenador){
-	$SelectHtml="";
-	$rs=new Recordset; 
-	/*
-	$cmd->texto="SELECT  imagenes.descripcion,perfilessoft.idperfilsoft,perfilessoft.descripcion as perfil,tiposos.nemonico 
-				FROM  tiposos 
-				INNER JOIN softwares ON tiposos.idtiposo = softwares.idtiposo 
-				INNER JOIN perfilessoft_softwares ON softwares.idsoftware = perfilessoft_softwares.idsoftware 
-				INNER JOIN perfilessoft ON  perfilessoft.idperfilsoft = perfilessoft_softwares.idperfilsoft 
-				INNER JOIN imagenes ON  perfilessoft.idperfilsoft = imagenes.idperfilsoft 
-				
-				WHERE perfilessoft.idcentro=".$idcentro;
-	*/
-	$cmd->texto="SELECT  imagenes.descripcion,ordenador_perfilsoft.idperfilsoft FROM  imagenes 
-				INNER JOIN perfilessoft ON  perfilessoft.idperfilsoft=imagenes.idperfilsoft
-				INNER JOIN ordenador_perfilsoft ON  ordenador_perfilsoft .idperfilsoft=perfilessoft.idperfilsoft
-				WHERE ordenador_perfilsoft.particion=".$particion."
-				 AND ordenador_perfilsoft.idordenador=".$idordenador." 
-				AND perfilessoft.idcentro=".$idcentro;
-
-	// Cuesti� partici� oculta
-	/*
-	 $swo=substr ($tipopart,0,1);
-	if($swo=="H") 
-		 $tipopart=substr ($tipopart,1,strlen($tipopart)-1);
-	$cmd->texto.=" AND (tiposos.tipopar = '".$tipopart."' OR tiposos.tipopar ='H".$tipopart."' )";
-	$cmd->texto.=" AND tiposos.tipopar = '".$tipopart."'";
-	*/
-	$rs->Comando=&$cmd; 
-
-	if (!$rs->Abrir()) return(0); // Error al abrir recordset
-	$SelectHtml.= '<SELECT class="formulariodatos" id="desple_'.$particion.'" style="WIDTH: 300">';
-	$SelectHtml.= '    <OPTION value="0"></OPTION>';
-	$rs->Primero(); 
-	while (!$rs->EOF){
-		$SelectHtml.='<OPTION value="'.$rs->campos["idperfilsoft"].'">';
-		$SelectHtml.= $rs->campos["descripcion"].'</OPTION>';
-		$rs->Siguiente();
-	}
-	$SelectHtml.= '</SELECT>';
-	$rs->Cerrar();
-	return($SelectHtml);
-}
-/*________________________________________________________________________________________________________
 	Crea la tabla de configuraciones y perfiles a crear
 ________________________________________________________________________________________________________*/
 function tabla_configuraciones($cmd,$idordenador){
@@ -224,11 +178,10 @@ function tabla_configuraciones($cmd,$idordenador){
 		$nombreso=$ValorParametros["nombreso"]; // Toma nombre del sistema operativo
 		if(!empty($tiposo)){
 			$tablaHtml.='<TR>'.chr(13);
-			$tablaHtml.='<TD ><input type=checkbox name=particion_'.$particion.' value='.$particion.'></TD>'.chr(13);
+			$tablaHtml.='<TD ><input type="radio" name="particion"  value='.$particion.'></TD>'.chr(13);
 			$tablaHtml.='<TD align=center>&nbsp;'.$particion.'&nbsp;</TD>'.chr(13);
 			$tablaHtml.='<TD>&nbsp;'.$nombreso.'&nbsp;</TD>'.chr(13);
 			$tiposo=$ValorParametros["tiposo"];
-			$tablaHtml.='<TD>'.HTMLSELECT_perfiles($cmd,$idcentro,$tipopart,$particion,$idordenador).'</TD>';
 			$tablaHtml.='</TR>'.chr(13);
 		}
 	}

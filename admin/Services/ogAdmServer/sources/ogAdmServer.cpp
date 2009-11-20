@@ -291,6 +291,13 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 			respuesta_cortesia(s);
 			return;
 		}
+		
+		resul=strcmp(nombrefuncion,"RESPUESTA_IniciarSesion");
+		if(resul==0){
+			RESPUESTA_Reiniciar(s,parametros);
+			respuesta_cortesia(s);
+			return;
+		}		
 		resul=strcmp(nombrefuncion,"RESPUESTA_ExecShell");
 		if(resul==0){
 			RESPUESTA_ExecShell(s,parametros);

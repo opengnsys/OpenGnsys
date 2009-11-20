@@ -1,4 +1,4 @@
-﻿// *************************************************************************************************************************************************
+// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación:2003-2004
@@ -18,16 +18,14 @@ function confirmar(){
 		var idambito=document.fdatos.idambito.value;
 		tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT')
-		var perfiles=""
+		var particion;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
-				var particion=ochecks[i].value
-				desple=document.getElementById("desple_"+particion);
-				perfiles+=particion+"_"+desple.value+";"			
+				particion=ochecks[i].value
 			}
 		}
 		var wurl="./gestores/gestor_IniciarSesion.php"
-		wurl+="?cadenaip="+cadenaip+"&identificador="+identificador+"&nombrefuncion="+nombrefuncion+"&ejecutor="+ejecutor+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&perfiles="+perfiles
+		wurl+="?cadenaip="+cadenaip+"&identificador="+identificador+"&nombrefuncion="+nombrefuncion+"&ejecutor="+ejecutor+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&particion="+particion
 		wurl+="&" +compone_urlejecucion();
 		ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 		ifr.src=wurl; // LLama a la p�ina gestora
@@ -52,27 +50,19 @@ function comprobar_datos(){
 	for(var i=0;i<ochecks.length;i++){
 		if(ochecks[i].checked){
 			op++;
-			var particion=ochecks[i].value
-			desple=document.getElementById("desple_"+particion);
-			var  p=desple.selectedIndex
-			if (p==0){  
-		     alert(TbMsg[0])
-			 desple.focus()
-	         return(false)
-			}
 		}
 	}
 	if(op==0){
 	     alert(TbMsg[1])
 		 return(false);
 	}
-	return(comprobar_datosejecucion())
+	return(true)
 }
 //________________________________________________________________________________________________________
 //	
 //	Comprobar retorno
 //________________________________________________________________________________________________________
-function resultado_IniciarSesion(resul){
+function resultado_iniciarsesion(resul){
 	if (!resul){
 		alert(CTbMsg[1]);	
 		return
