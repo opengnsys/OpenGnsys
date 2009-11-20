@@ -140,7 +140,7 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 									<?}?>
 							<?}?>
 							<TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">
+							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
 		
 
