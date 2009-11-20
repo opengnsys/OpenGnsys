@@ -1323,25 +1323,51 @@ int Reiniciar(TRAMA *trama,TRAMA *nwtrama)
 //______________________________________________________________________________________________________
 int IniciarSesion(TRAMA *trama,TRAMA *nwtrama)
 {
-	int res;
+	int res,herror;
 	char *particion=TomaParametro("par",trama->parametros);
+	FILE* f;
+	long lSize;
 
 	char *disco=(char*)ReservaMemoria(2);
 	sprintf(disco,"1"); // Siempre el disco 1
-	
-	sprintf(nwtrama->parametros,"nfn=RESPUESTA_IniciarSesion\r");					
-	res=RespuestaEjecucionComando(trama,nwtrama,true);	
+	sprintf(parametros,"bootOs %s %s",disco,particion);
 
-	int herror;
-	sprintf(cmdshell,"%s/bootFS",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s %s","bootFS",disco,particion);
-	
-	herror=EjecutarScript(cmdshell,parametros,NULL,true);
-	if(herror){
-		UltimoErrorScript(herror,"IniciarSesion()");	 // Se ha producido algún error
-		return(false);
+	//sprintf(nwtrama->parametros,"nfn=RESPUESTA_IniciarSesion\r");					
+	//res=RespuestaEjecucionComando(trama,nwtrama,true);	
+	sprintf(cmdshell,"bootOs %s %s",disco,particion);
+	system(cmdshell);
+	return(res);
+
+/*
+
+	sprintf(filecmdshell,"%s/%s","/tmp","_hidrascript_");
+	f = fopen(filecmdshell,"wt");	// Abre fichero de script
+	if(f==NULL)
+		res=false; // Error de apertura del fichero de configuración
+	else{
+		lSize=strlen(parametros);
+		fwrite(parametros,1,lSize,f);	// Escribe el código a ejecutar
+		fclose(f);
+		
+		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
+		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
+		
+		herror=EjecutarScript(cmdshell,parametros,NULL,true);
+		if(herror){
+			UltimoErrorScript(herror,"IniciarSesion()");	// Se ha producido algún error
+			res=false;	
+		}
+		else{
+			sprintf(cmdshell,"%s",filecmdshell);	// Ejecución el fichero de script creado
+			int herror=system(cmdshell);
+			if(herror){
+				UltimoErrorScript(herror,"IniciarSesion()");	// Se ha producido algún error
+				res=false;	
+			}		
+		}
 	}
 	return(res);
+*/
 }
 //______________________________________________________________________________________________________
 // Función: Actualizar

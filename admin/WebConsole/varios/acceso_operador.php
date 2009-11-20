@@ -21,7 +21,7 @@ $ITEMS_PRIVADOS=2;
 
 if (isset($_SESSION["swop"])){
 	// Acceso al menu de adminitración del aula
-	$wurl="menucliente.phptip=".$ITEMS_PRIVADOS;
+	$wurl="menucliente.php?tip=".$ITEMS_PRIVADOS;
 	Header('Location:'.$wurl); 
 }
 

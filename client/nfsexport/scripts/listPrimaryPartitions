@@ -1,4 +1,3 @@
 #!/bin/bash
-DATOS=$(ogListPartitions $*) || exit $?
-[ -n "$DATOS" ] && echo $DATOS
-exit 0
+ogListPrimaryPartitions "$@"
+
