@@ -6,6 +6,7 @@ OGLOGFILE=${OGLOGFILE:-/var/log/opengnsys.log}
 OGLOGFILE=/var/log/opengnsys.log
 
 if [ -x "$OPENGNSYS/bin/ogAdmClient" ]; then
+    echo "$MSG_LAUNCHCLIENT"
     $OPENGNSYS/bin/ogAdmClient -f $OPENGNSYS/etc/ogAdmClient.cfg -l $OGLOGFILE
 fi
 
