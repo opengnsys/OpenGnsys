@@ -191,11 +191,7 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `nfuncion1`, `nfuncion2`, `n
 (11, 'Generar software Incremental', '', '', '', '', 'CrearSoftwareIncremental', '', '', '', '', '', '../comandos/CrearSoftIncremental.php', 16, 'ifs;ifh;par;icr', 'nfn;iph;par;ifs;ifh;nem;icr', '', 1, '2', 0),
 (12, 'Activar Rembo Off Line', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', '', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0),
 (13, 'Tomar Configuracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', '', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0),
-<<<<<<< .mine
-(14, 'Iniciar Sesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', '', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1);
-=======
 (14, 'Iniciar Sesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', '', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', 31, 'iph;par', 'nfn;iph;par', '', 1, '2', 1);
->>>>>>> .r599
 
 -- --------------------------------------------------------
 
