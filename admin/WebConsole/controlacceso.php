@@ -50,7 +50,6 @@
      list($wip,$wusu,$wpwd,$wbd,$tbd)=split(";",$cnx); 
      $usu=$wusu; 
      $pss=$wpwd; 
-     $_SESSION["ogCliente"]=$iph; 
  } 
  if ($cmd){ 
      $resul=toma_datos($cmd,&$idc,&$nmc,&$idi,$usu,&$tsu,$pss); 
@@ -59,9 +58,10 @@
      Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D. 
   
  if(!empty($iph)){ 
-     $wurl="./varios/menucliente.php?iph=".trim($iph); 
+     $wurl="./varios/menucliente.php"; 
      Header("Location:".$wurl); // Accede a la página de menus 
  } 
+ 
  $_SESSION["widcentro"]=$idc;  
  $_SESSION["wnombrecentro"]=$nmc;  
  $_SESSION["wusuario"]=$usu;  

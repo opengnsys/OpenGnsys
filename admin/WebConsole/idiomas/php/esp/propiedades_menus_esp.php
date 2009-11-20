@@ -20,7 +20,7 @@ $TbMsg[11]="Modalidad";
 $TbMsg[12]="Items privados del Menu";
 $TbMsg[13]="Menú simple";
 $TbMsg[14]="Menú doble";
-$TbMsg[15]="Html menú público";
-$TbMsg[16]="Html menú privado";
+$TbMsg[15]="Url menú público";
+$TbMsg[16]="Url menú privado";
 $TbMsg[17]="Resolución de pantalla";
 ?>

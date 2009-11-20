@@ -15,5 +15,5 @@
 	$TbMsg[7]='Reservas';
 	$TbMsg[8]='Administración';
 	$TbMsg[9]='Iconos';
-	$TbMsg[10]='Cerrar Sesión';
+	$TbMsg[10]='Salir';
 ?>

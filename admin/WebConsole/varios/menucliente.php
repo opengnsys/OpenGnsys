@@ -1,6 +1,6 @@
 <?
 // *************************************************************************
-// Aplicación� WEB: ogAdmWebCon
+// Aplicación WEB: ogAdmWebCon
 // Autor: Jos�Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creaci�: A� 2003-2004
 // Fecha �tima modificaci�: Marzo-2006
@@ -18,38 +18,23 @@ if (!$cmd)
 //________________________________________________________________________________________________________
 $ITEMS_PUBLICOS=1;
 $ITEMS_PRIVADOS=2;
-$iph="0.0.0.0";
-$tip=$ITEMS_PUBLICOS; // Tipo de items 1=Públicos 2=privados
 
-if (isset($_GET["iph"]))	$iph=$_GET["iph"]; 
+$tip=$ITEMS_PUBLICOS; // Tipo de items 1=Públicos 2=privados
 if (isset($_GET["tip"]))	$tip=$_GET["tip"]; 
 
-// Se asegura que la pagina se solicita desde la IP que viene
-global $HTTP_SERVER_VARS;
-if ($HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"] != ""){
-	$ipcliente = $HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"];
-}
-else{
-	$ipcliente = $HTTP_SERVER_VARS["REMOTE_ADDR"]; 
-}
-/*
-if($ipcliente!=$iph)
-	die("***ATENCION.- Usted no esta accediendo desde un ordenador permitido"); 
-*/
+$iph=tomaIP();
+if(empty($iph))
+	die("***ATENCION.- Usted no esta accediendo desde un ordenador permitido: Dirección IP=".$iph); 
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
-?>
-	<HTML>
-	<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	</HEAD>
-	<BODY>
-<?	
 if(!empty($rsmenu)){
 	switch($tip){
 		case $ITEMS_PUBLICOS:
-			if($rsmenu->campos["htmlmenupub"])
-				$codeHtml=$rsmenu->campos["htmlmenupub"];
+			if(!empty($rsmenu->campos["htmlmenupub"])){
+				$urlHtml=$rsmenu->campos["htmlmenupub"];
+				if(strtoupper(substr($urlHtml,0,7)!="HTTP://")) $urlHtml="http://".$urlHtml;
+				Header('Location: '.$urlHtml); // Url del menu personalizado
+			}
 			else{
 				$_SESSION["widcentro"]=$rsmenu->campos["idcentro"]; 
 				$codeHtml=GeneraMenu($rsmenu,$ITEMS_PUBLICOS,$iph); // Genera men pblico
@@ -57,8 +42,12 @@ if(!empty($rsmenu)){
 			break;
 			
 		case $ITEMS_PRIVADOS:
-			if($rsmenu->campos["htmlmenupri"])
-				$codeHtml=$rsmenu->campos["htmlmenupri"];
+			if(!empty($rsmenu->campos["htmlmenupri"])){
+				$urlHtml=$rsmenu->campos["htmlmenupri"];
+				
+				if(strtoupper(substr($urlHtml,0,7)!="HTTP://")) $urlHtml="http://".$urlHtml;
+				Header('Location: '.$urlHtml); // Url del menu personalizado
+			}
 			else{
 				$_SESSION["widcentro"]=$rsmenu->campos["idcentro"]; 
 				$codeHtml=GeneraMenu($rsmenu,$ITEMS_PRIVADOS,$iph); // Genera men pblico
@@ -68,13 +57,20 @@ if(!empty($rsmenu)){
 }
 else{
 	$codeHtml='<P align=center>';
-	$codeHtml.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETEACTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
+	$codeHtml.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETECTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
 	$codeHtml.='</P>';
 }
-echo $codeHtml;
 ?>
-</BODY>
-</HTML>
+	<HTML>
+	<HEAD>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	</HEAD>
+	<BODY>
+	<?
+		echo $codeHtml;
+	?>
+	</BODY>
+	</HTML>
 <?
 //___________________________________________________________________________________________________
 //
@@ -189,5 +185,19 @@ function GeneraMenu($rs,$tipo,$iph){
 	$codeHTML.='</P>';
 	//$codeHTML.='</DIV>';
 	return($codeHTML);
+}
+//___________________________________________________________________________________________________
+//
+// Redupera la ip del cliente web
+//___________________________________________________________________________________________________
+function tomaIP(){	
+	// Se asegura que la pagina se solicita desde la IP que viene
+	global $HTTP_SERVER_VARS;
+	if ($HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"] != "")
+		$ipcliente = $HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"];
+	else
+		$ipcliente = $HTTP_SERVER_VARS["REMOTE_ADDR"]; 
+
+	return($ipcliente);
 }
 ?>

@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `comandos` (
   `ejecutor` char(1) default NULL,
   `activo` tinyint(1) NOT NULL,
   PRIMARY KEY  (`idcomando`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
 
 -- 
 -- Volcar la base de datos para la tabla `comandos`
@@ -183,11 +183,15 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `nfuncion1`, `nfuncion2`, `n
 (3, 'Restaurar Imagen', '', '', 'RestaurarImagen', 'RestaurarImagen', 'RestaurarImagen', '', '', '', '../comandos/RestaurarImagenAula.php', '../comandos/RestaurarImagenGrupoOrdenadores.php', '../comandos/RestaurarImagenOrdenador.php', 28, 'idi;par;iph', 'nfn;iph;par;idi;ifs;ifh;nem;idc;ida;swr', '', 1, '2', 1),
 (4, 'Crear Imagen', '', '', '', '', 'CrearPerfilSoftware', '', '', '', '', '', '../comandos/CrearPerfilSoftware.php', 16, 'ifs;ifh;par', 'nfn;iph;par;ifs;ifh;nem;', '', 1, '2', 1),
 (5, 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', '', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1),
-(12, 'Inventario Hardware', '', '', '', '', 'InventarioHardware', '', '', '', '', '', '../comandos/InventarioHardware.php', 16, 'iph', 'nfn;iph', '', 1, '2', 1),
-(13, 'Inventario Software', '', '', '', '', 'InventarioSoftware', '', '', '', '', '', '../comandos/InventarioSoftware.php', 16, 'iph;par', 'nfn;iph;par', '', 1, '2', 1),(7, 'Ejecutar Script', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', '', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, '2', 1),(8, 'Particionar y formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Configurar.php', '../comandos/Configurar.php', '../comandos/Configurar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 1),
-(9, 'Particionar y Formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Particionar.php', '../comandos/Particionar.php', '../comandos/Particionar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 0),(10, 'Generar software Incremental', '', '', '', '', 'CrearSoftwareIncremental', '', '', '', '', '', '../comandos/CrearSoftIncremental.php', 16, 'ifs;ifh;par;icr', 'nfn;iph;par;ifs;ifh;nem;icr', '', 1, '2', 0),
-(11, 'Activar Rembo Off Line', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', '', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0),
-(6, 'Tomar Configuracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', '', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0);
+(6, 'Inventario Hardware', '', '', '', '', 'InventarioHardware', '', '', '', '', '', '../comandos/InventarioHardware.php', 16, 'iph', 'nfn;iph', '', 1, '2', 1),
+(7, 'Inventario Software', '', '', '', '', 'InventarioSoftware', '', '', '', '', '', '../comandos/InventarioSoftware.php', 16, 'iph;par', 'nfn;iph;par', '', 1, '2', 1),
+(8, 'Ejecutar Script', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', 'ExecShell', '', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', '../comandos/EjecutarScripts.php', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, '2', 1),
+(9, 'Particionar y formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Configurar.php', '../comandos/Configurar.php', '../comandos/Configurar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 1),
+(10, 'Particionar y Formatear', '', '', 'ParticionaryFormatear', 'ParticionaryFormatear', 'ParticionaryFormatear', '', '', '', '../comandos/Particionar.php', '../comandos/Particionar.php', '../comandos/Particionar.php', 28, 'iph;ppa;lpa;hdc', 'nfn;iph;ppa;lpa;hdc', '', 1, '2', 0),
+(11, 'Generar software Incremental', '', '', '', '', 'CrearSoftwareIncremental', '', '', '', '', '', '../comandos/CrearSoftIncremental.php', 16, 'ifs;ifh;par;icr', 'nfn;iph;par;ifs;ifh;nem;icr', '', 1, '2', 0),
+(12, 'Activar Rembo Off Line', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', 'RemboOffline', '', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', '../comandos/RemboOffline.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0),
+(13, 'Tomar Configuracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', 'TomaConfiguracion', '', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', '../comandos/TomaConfiguracion.php', 31, 'iph', 'nfn;iph', '', 1, '2', 0),
+(14, 'Iniciar Sesión', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', 'IniciarSesion', '', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', '../comandos/IniciarSesion.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1);
 
 -- --------------------------------------------------------
 
@@ -457,8 +461,8 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `smodalidad` tinyint(4) default NULL,
   `comentarios` text,
   `grupoid` int(11) NOT NULL default '0',
-  `htmlmenupub` varchar(4024) default NULL,
-  `htmlmenupri` varchar(4024) default NULL,
+  `htmlmenupub` varchar(250) default NULL,
+  `htmlmenupri` varchar(250) default NULL,
   `resolucion` tinyint(4) default NULL,
   PRIMARY KEY  (`idmenu`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;

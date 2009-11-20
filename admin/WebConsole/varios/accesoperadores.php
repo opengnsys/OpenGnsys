@@ -14,11 +14,9 @@ include_once("../includes/CreaComando.php");
   
 $usu=""; 
 $pss=""; 
-$iph=""; // Switch menu cliente 
   
 if (isset($_POST["usu"])) $usu=$_POST["usu"];  
 if (isset($_POST["pss"])) $pss=$_POST["pss"];  
-if (isset($_POST["iph"])) $iph=$_POST["iph"];  
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -45,7 +43,8 @@ if($idcentro!=$rs->campos["idambito"] && $rs->campos["idtipousuario"]!=1 ){
 	exit;
 }
 // Acceso al menu de adminitración del aula
-$wurl="menucliente.php?iph=".$iph."&tip=".$ITEMS_PRIVADOS;
+//$wurl="menucliente.php?iph=".$iph."&tip=".$ITEMS_PRIVADOS;
+$wurl="menucliente.php?tip=".$ITEMS_PRIVADOS;
 $_SESSION["swop"]=$usu; 
 Header('Location:'.$wurl); 
 exit;

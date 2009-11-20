@@ -12,16 +12,16 @@
 session_start(); // Activa variables de sesi�
 
 $herror=0;
-$iph="";
+
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
-if (isset($_GET["iph"])) $iph=$_GET["iph"]; 
 
 $ITEMS_PUBLICOS=1;
 $ITEMS_PRIVADOS=2;
+
 if (isset($_SESSION["swop"])){
 	// Acceso al menu de adminitración del aula
-	$wurl="menucliente.php?iph=".$iph."&tip=".$ITEMS_PRIVADOS;
+	$wurl="menucliente.phptip=".$ITEMS_PRIVADOS;
 	Header('Location:'.$wurl); 
 }
 
@@ -77,7 +77,6 @@ function PulsaEnter(oEvento){
 <BODY>
 <DIV style="POSITION:absolute;top:20;left:150">
 	<FORM action="accesoperadores.php" name="fdatos" method="post">
-		<INPUT name="iph" type="hidden" value="<? echo $iph?>">
 		<DIV align="center">
 			<IMG src="../images/login_operador.png" width=500 >
 			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
