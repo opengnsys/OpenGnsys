@@ -1,0 +1,3 @@
+#!/bin/bash
+RETORNO=$(bootOs $* 2>/dev/null) || exit $?
+exit 0

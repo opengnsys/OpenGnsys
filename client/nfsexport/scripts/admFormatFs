@@ -1,0 +1,4 @@
+#!/bin/bash
+RETORNO=$(formatFs $* 2>/dev/null) || exit $?
+exit 0
+
