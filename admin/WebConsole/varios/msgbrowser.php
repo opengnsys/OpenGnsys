@@ -30,6 +30,23 @@ else
 	<SCRIPT language="javascript">
 
 	</SCRIPT>
+	<STYLE TYPE="text/css">
+
+	.deepsea, .deepsea TD, .deepsea TH
+	{
+	background-color:#026afe;
+	color:#FFFFFF;
+	font-family: sans-serif;
+	font-weight:600; 
+	}
+
+	.tdtest{
+		background: url('../images/iconos/ventana.png');
+		witdh:400;
+		heigth: 300px;
+	} 
+
+	</STYLE>
 </HEAD>
 <BODY>
 <?
@@ -46,9 +63,9 @@ else
 	}
 	else{
 		echo '<BR><BR><BR>';
-		echo '<TABLE class="mensajebrowser" cellspacing=0 cellpadding=2 align=center border=0>';
+		echo '<TABLE CLASS="deepsea" cellspacing=0 cellpadding=2 align=center border=0>';
 		echo '<TR>';
-		echo '<TD align=center class="mensajebrowser">&nbsp;'.$mensaje.'&nbsp;</TD>';
+		echo '<TD height=20 >&nbsp;&nbsp;&nbsp;'.$mensaje.'&nbsp;&nbsp;&nbsp;</TD>';
 		echo '</TR>';
 		echo '</TABLE>';
 	}
