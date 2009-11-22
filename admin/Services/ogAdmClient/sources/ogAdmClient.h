@@ -307,5 +307,6 @@ int RespuestaEjecucionComando(TRAMA* , TRAMA *, int);
 int ExecShell(TRAMA *,TRAMA *);
 int ExecBash(char*);
 char* URLDecode(char*);
+char* URLEncode(char *);
 int MuestraMenu(char*);
-void MuestraMensaje(int);
+void MuestraMensaje(int,char*);

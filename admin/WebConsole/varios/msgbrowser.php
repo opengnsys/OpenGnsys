@@ -11,13 +11,16 @@
 $idioma="esp"; // Por defecto idoma español
 include_once("../idiomas/php/".$idioma."/msgbrowser_".$idioma.".php");
 
+$idx="";
 $msg="";
-if (isset($_GET["msg"])) $msg=$_GET["msg"];  // Recoge indice del mensaje
 
-if (isset($TbMsg[$msg]))
-	$mensaje=$TbMsg[$msg];
+if (isset($_GET["msg"])) $msg=$_GET["msg"];  // Recoge indice del mensaje
+if (isset($_GET["idx"])) $idx=$_GET["idx"];  // Recoge indice del mensaje
+
+if(!empty($msg))
+	$mensaje=UrlDecode($msg);
 else
-	$mensaje=$TbMsg[0]; // Mensaje erronéo
+	$mensaje=$TbMsg[$idx];
 ?>
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
@@ -29,11 +32,26 @@ else
 	</SCRIPT>
 </HEAD>
 <BODY>
-	<BR><BR><BR>
-	<TABLE class="mensajebrowser" cellspacing=0 cellpadding=2 align=center border=0>
-		<TR>
-			<TD align=center class="mensajebrowser">&nbsp;<? echo $mensaje?>&nbsp;</TD>
-		</TR>
-	</TABLE>
+<?
+	if(empty($idx) && empty($msg)) {
+		echo '<BR><BR><BR><BR><BR>';
+		echo '<TABLE cellspacing=0 cellpadding=2 align=center border=0>';
+		echo '<TR>';
+		echo '<TD align=center><IMG border=0 src="../images/iconos/logoopengnsys.png" width=64></TD>';
+		echo '<TD align=center>';
+		echo '<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 12px;">';
+		echo '&nbsp;&nbsp;Iniciando ...</TD>';
+		echo '</TR>';
+		echo '</TABLE>';
+	}
+	else{
+		echo '<BR><BR><BR>';
+		echo '<TABLE class="mensajebrowser" cellspacing=0 cellpadding=2 align=center border=0>';
+		echo '<TR>';
+		echo '<TD align=center class="mensajebrowser">&nbsp;'.$mensaje.'&nbsp;</TD>';
+		echo '</TR>';
+		echo '</TABLE>';
+	}
+?>
 </BODY>
 </HTML>

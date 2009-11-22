@@ -16,5 +16,20 @@ $TbMsg=array();
 	$TbMsg[6]='Creando Inventario Hardware, por favor espere...';
 	$TbMsg[7]='Creando Inventario Software, por favor espere...';
 	$TbMsg[8]='Ejecutando script bash, por favor espere...';
+	$TbMsg[9]='El proceso de creación de imagen ha terminado correctamente';
+	$TbMsg[10]='ATENCIÓN, ha habido algún error en el proceso de creación de imagen';
+	$TbMsg[11]='El proceso de restauración de imagen ha terminado correctamente';
+	$TbMsg[12]='ATENCIÓN, ha habido algún error en el proceso de restauración de imagen';
+	$TbMsg[13]='El proceso de particionado ha terminado correctamente';
+	$TbMsg[14]='ATENCIÓN, ha habido algún error en el proceso de particionado';
+	$TbMsg[15]='El proceso de formateado ha terminado correctamente';
+	$TbMsg[16]='ATENCIÓN, ha habido algún error en el proceso de formateado';
+	$TbMsg[17]='El proceso de Inventario Hardware ha terminado correctamente';
+	$TbMsg[18]='ATENCIÓN, ha habido algún error en el proceso de Inventario Hardware';
+	$TbMsg[19]='El proceso de Inventario Hardware ha terminado correctamente';
+	$TbMsg[20]='ATENCIÓN, ha habido algún error en el proceso de Inventario Hardware';
+	$TbMsg[21]='El proceso de jecuación del script bash ha terminado correctamente';
+	$TbMsg[22]='ATENCIÓN, ha habido algún error en el proceso de ejecución del script bash';
+
 
 ?>

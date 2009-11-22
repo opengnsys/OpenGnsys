@@ -1475,11 +1475,11 @@ int  IniciarSesion(TRAMA *trama,TRAMA *nwtrama)
 int Actualizar()
 { 
 	int res;
-	
-	kill(pidmenu,SIGQUIT);
-	MuestraMensaje(1);
+
+	MuestraMensaje(1,NULL);
 	res=InclusionCliente();
 	MuestraMenu(URLMENU);
+	//kill(pidmenu,SIGQUIT);
 	return(res);
 }
 //______________________________________________________________________________________________________
@@ -1542,11 +1542,19 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
 	sprintf(parametros,"%s %s %s %s %s","createImage",disco,particion,"REPO",fileimg);
 	
 	if(ndebug>3){
-		sprintf(msglog,"Creando Perfil Software disco:%s, partición:%s, Repositorio:%s, Imagen:%s, Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,"");
+		sprintf(msglog,"Creando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s, Ruta:%s",disco,particion,Propiedades.iprepo,fileimg,"");
 		Log(msglog);
 	}
-	
+
+	//Pantallas
+	MuestraMensaje(0,msglog);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
+	if(herror)
+		MuestraMensaje(10,NULL);
+	else
+		MuestraMensaje(9,NULL);
+	MuestraMenu(URLMENU);
+
 	if(herror){
 		UltimoErrorScript(herror,"CrearPerfil()");	 // Se ha producido algún error
 		return(false);
@@ -1630,8 +1638,10 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 			char fileperfil[64];
 			sprintf(fileperfil,"PS%s_PH%s",widperfilsoft,widperfilhard);	// Nombre del fichero del perfil creado	
 			char filemasterboot[64];
-			sprintf(filemasterboot,"PS%s_PH%s.msb",widperfilsoft,widperfilhard);	// Idem para el sector de arranque MBR			
+			sprintf(filemasterboot,"PS%s_PH%s.msb",widperfilsoft,widperfilhard);  // Idem para el sector de arranque MBR			
+
 			res=RestaurandoImagen(disco,compres,mettran,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
+			
 			// Toma la nueva configuración
 			char *parametroscfg=LeeConfiguracion(disco);
 			Log("Finalizada la restauracion de imagen");
@@ -1672,6 +1682,15 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 		Log(msglog);
 	}
 	
+	//Pantallas
+	MuestraMensaje(0,msglog);
+	herror=EjecutarScript(cmdshell,parametros,NULL,true);
+	if(herror) // Restauración correcta
+		MuestraMensaje(12,NULL);
+	else
+		MuestraMensaje(11,NULL);
+	MuestraMenu(URLMENU);
+
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 		UltimoErrorScript(herror,"RestaurandoImagen()");	// Se ha producido algún error
@@ -1680,7 +1699,6 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 	else
 		return(true); 
 }
-
 //______________________________________________________________________________________________________
 // Función: ParticionaryFormatear
 //
@@ -1704,16 +1722,31 @@ int ParticionaryFormatear(TRAMA*trama,TRAMA*nwtrama)
 	char *disco=(char*)ReservaMemoria(2);
 	sprintf(disco,"1"); // Siempre el disco 1
 	
+
 	Log("Creando o modificando tabla de particiones");
+	//Pantallas
+	MuestraMensaje(4,NULL);
 	res=Particionar(disco,PrimaryPartitions,LogicalPartitions); // Creando las particiones
+	if(res)
+		MuestraMensaje(13,NULL);
+	else
+		MuestraMensaje(14,NULL);
+
 	if(res){
 		strcpy(ch,";");	// Caracter delimitador
 		parfor=SplitParametros(parhdc,HDCleanPartition,ch);
 		for(i = 0; i<parfor; i++){ // Formateando particiones
+			//Pantallas
+			MuestraMensaje(5,NULL);
 			res=Formatear(disco,parhdc[i]);
+			if(res)
+				MuestraMensaje(15,NULL);
+			else
+				MuestraMensaje(16,NULL);
 			if(!res) break;
 		}
 	}
+	MuestraMenu(URLMENU);
 	Log("Finalizado el particionado y formateado de particiones");
 	parametroscfg=LeeConfiguracion(disco);	// Toma la nueva configuración
 	
@@ -1772,8 +1805,9 @@ int Particionando(char* disco,char* stxParticion,char* script)
 	
 	sprintf(cmdshell,"%s/%s",HIDRASCRIPTS,script);
 	sprintf(parametros," %s %s %s",script,disco,stxParticion);
+
+	sprintf(msglog,"Modificando tabla de particiones:%s disco:%s, cadena:%s",script,disco,stxParticion);
 	if(ndebug>1){
-		sprintf(msglog,"Modificando tabla de particiones:%s disco:%s, cadena:%s",script,disco,stxParticion);
 		Log(msglog);
 	}
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
@@ -1960,8 +1994,20 @@ int MuestraMenu(char *urp)
 {
 	int herror,nargs,resul;
 
-	sprintf(cmdshell,"%s/admMenuBrowser",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s","admMenuBrowser",urp);	
+	if(ndebug>0){
+		sprintf(msglog,"Url:%s",urp);
+		Log(msglog);
+	}
+
+	if(pidmenu>0)
+		kill(pidmenu,SIGQUIT); // Se carga el proceso hijo anterior y se queda sólo el actual 
+
+	//sprintf(cmdshell,"%s/admMenuBrowser",HIDRASCRIPTS);
+	//sprintf(parametros,"%s %s","admMenuBrowser",urp);	
+
+	sprintf(cmdshell,"/opt/opengnsys/bin/browser");
+	sprintf(parametros,"%s %s %s","browser","-qws",urp);	
+
 	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
 	if((pidmenu=fork())==0){
 		/* Proceso hijo que ejecuta el script */
@@ -1974,7 +2020,24 @@ int MuestraMenu(char *urp)
 			return(false);	
 		}		
 	}
+	sleep(5); // Espera 5 segundos con el mensaje en pantalla
 	return(true);
+}
+//______________________________________________________________________________________________________
+// Función: MuestraMensaje
+//
+//	Descripción: 
+// 		Envia una página al browser con un mensaje determinado
+//	Parámetros:
+//		- idx: Indice de la cadena del mensaje
+// ________________________________________________________________________________________________________
+void MuestraMensaje(int idx,char*msg){
+	if(msg)
+		sprintf(urlpag,"%s?msg=%s",URLMSG,URLEncode(msg)); // Url de la página de mensajes
+	else
+		sprintf(urlpag,"%s?idx=%d",URLMSG,idx); // Url de la página de mensajes
+
+	MuestraMenu(urlpag);
 }
 //______________________________________________________________________________________________________
 // Función: InventarioHardware
@@ -1997,7 +2060,16 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	
 	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
 	sprintf(cmdshell,"%s/admListHardwareInfo",HIDRASCRIPTS);
+
+	//Pantallas
+	MuestraMensaje(6,NULL);
 	herror=EjecutarScript(cmdshell,NULL,parametroshrd,true);
+	if(herror)
+		MuestraMensaje(18,NULL);
+	else
+		MuestraMensaje(17,NULL);
+	MuestraMenu(URLMENU);
+
 	if(herror){
 	    UltimoErrorScript(herror,"InventarioHardware()");	// Se ha producido algún error
     }
@@ -2037,7 +2109,16 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	sprintf(parametros,"%s %s %s","admListSoftwareInfo",disco,particion);
 
 	parametrossft=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
+
+	//Pantallas
+	MuestraMensaje(7,NULL);
 	herror=EjecutarScript(cmdshell,parametros,parametrossft,true);
+	if(herror)
+		MuestraMensaje(20,NULL);
+	else
+		MuestraMensaje(19,NULL);
+	MuestraMenu(URLMENU);
+
 	if(herror){
 	    UltimoErrorScript(herror,"InventarioSoftware()");	// Se ha producido algún error
     }
@@ -2105,7 +2186,15 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 	char* wscript=TomaParametro("scp",trama->parametros); 	// Código del script	
 	char* codigo=URLDecode(wscript);	// Decodifica el código recibido con formato URLCode
 	
-	res=ExecBash(codigo);	
+	//Pantallas
+	MuestraMensaje(8,NULL);
+	res=ExecBash(codigo);
+	if(res)
+		MuestraMensaje(21,NULL);
+	else
+		MuestraMensaje(22,NULL);
+	MuestraMenu(URLMENU);
+
 	if(!res){
 		UltimoErrorScript(10,"ExecShell()");	// Se ha producido algún error
 	}
@@ -2144,7 +2233,6 @@ int ExecBash(char*codigo){
 		fclose(f);
 		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
 		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
-		
 		herror=EjecutarScript(cmdshell,parametros,NULL,true);
 		if(herror){
 			UltimoErrorScript(herror,"ExecBash()");	// Se ha producido algún error
@@ -2195,6 +2283,34 @@ char* URLDecode(char *src)
 	return(cad);	
 }
 //______________________________________________________________________________________________________
+// Función: URLEncode
+//
+//	Descripción: 
+// 		Codifica una cadena en UrlEncode
+//	Parámetros:
+//		- src: La cadena a decodificar
+// 	Devuelve:
+//		La cadena decodificada
+// ________________________________________________________________________________________________________
+char* URLEncode(char *src)
+{
+	char *dest;
+	int i,j=0,lon;
+	
+	lon=strlen(src);
+	dest=(char*)ReservaMemoria(lon*2);	// Reserva buffer  para la cadena			
+	for(i=0;i<lon;i++){
+		if(src[i]==0x20){ // Espacio
+			dest[j++] = '%';	
+			dest[j++] = '2';
+			dest[j++] = '0';
+		}
+		else
+			dest[j++] = src[i];
+	}
+	return(dest);	
+}
+//______________________________________________________________________________________________________
 // Función: RespuestaEjecucionComando
 //
 //	Descripción: 
@@ -2243,23 +2359,12 @@ int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 		}
 		return(true);
 }
-//______________________________________________________________________________________________________
-// Función: MuestraMensaje
-//
-//	Descripción: 
-// 		Envia una página al browser con un mensaje determinado
-//	Parámetros:
-//		- idx: Indice de la cadena del mensaje
-// ________________________________________________________________________________________________________
-void MuestraMensaje(int idx){
-	sprintf(urlpag,"%s?msg=%d",URLMSG,idx); // Url de la página de mensajes
-	MuestraMenu(urlpag);
-}
 //***********************************************************************************************************************
 // PROGRAMA PRINCIPAL
 //***********************************************************************************************************************
 int  main(int argc, char *argv[])
 {
+	
 	//Archivos por defecto
  	strcpy(szPathFileCfg,"ogAdmClient.cfg");
 	strcpy(szPathFileLog,"ogAdmClient.log");
@@ -2284,8 +2389,9 @@ int  main(int argc, char *argv[])
 		UltimoError(0,"Main()");	
 		exit(EXIT_FAILURE);
 	}
+	MuestraMensaje(0,NULL);
+	sleep(2);
 	strcpy(Propiedades.IPlocal,IPlocal);	
-
 	Log("Abriendo sesión en el servidor de Administración");		
 	if(InclusionCliente()){	// El cliente ha abierto sesión correctamente
 		if(strcmp(Propiedades.idordenador,"0")==0){	// Ha habido algún problema al inciar sesión
