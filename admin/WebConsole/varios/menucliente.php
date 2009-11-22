@@ -61,7 +61,7 @@ if(!empty($rsmenu)){
 }
 else{
 	$codeHtml='<P align=center>';
-	$codeHtml.='<SPAN style="COLOR:#999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETECTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
+	$codeHtml.='<BR><BR><SPAN style="COLOR:#999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETECTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
 	$codeHtml.='</P>';
 }
 ?>
@@ -69,8 +69,8 @@ else{
 	<HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</HEAD>
-	<BODY>
-	<P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png" width=64><P>
+	<BODY  bgcolor=white background="../images/iconos/fondo800x600.png">
+	<P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png"><P>
 	<?
 		echo $codeHtml;
 	?>

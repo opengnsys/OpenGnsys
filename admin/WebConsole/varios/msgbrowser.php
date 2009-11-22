@@ -66,24 +66,21 @@ else
 </HEAD>
 <BODY>
 <?
-	if(empty($idx) && empty($msg)) {
-		echo '<BR><BR><BR><BR><BR>';
-		echo '<TABLE cellspacing=0 cellpadding=2 align=center border=0>';
-		echo '<TR>';
-		echo '<TD align=center><IMG border=0 src="../images/iconos/logoopengnsys.png" width=64></TD>';
-		echo '<TD align=center>';
-		echo '<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 12px;">';
-		echo '&nbsp;&nbsp;Iniciando ...</TD>';
-		echo '</TR>';
-		echo '</TABLE>';
-	}
-	else{
-		echo '<BR><BR><BR>';
-		echo '<TABLE  cellspacing=0 cellpadding=2 align=center border=0>';
-		echo '<TR><TD align=center class="tdbarra">Opengnsys Browser Message</TD><TR>';
-		echo '<TR><TD class="tdclien" valign=center >&nbsp;&nbsp;&nbsp;'.$mensaje.'&nbsp;&nbsp;&nbsp;</TD></TR>';
-		echo '</TABLE>';
-	}
+if(empty($idx) && empty($msg)) {
+	echo '<BR><BR><BR><BR><BR>';
+	echo '<TABLE cellspacing=0 cellpadding=2 align=center border=0>';
+	echo '<TR><TD align=center><IMG border=0 src="../images/iconos/logoopengnsys.png"></TD></TR>';
+	echo '<TR><TD align=center><SPAN style="COLOR: #999999;FONT-FAMILY: Arial;FONT-SIZE: 12px;">Iniciando...</TD></TR>';
+	echo '</TR>';
+	echo '</TABLE>';
+}
+else{
+	echo '<BR><BR><BR>';
+	echo '<TABLE  cellspacing=0 cellpadding=2 align=center border=0>';
+	echo '<TR><TD align=center class="tdbarra">Opengnsys Browser Message</TD><TR>';
+	echo '<TR><TD class="tdclien" valign=center >&nbsp;&nbsp;&nbsp;'.$mensaje.'&nbsp;&nbsp;&nbsp;</TD></TR>';
+	echo '</TABLE>';
+}
 ?>
 </BODY>
 </HTML>
