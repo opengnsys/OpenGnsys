@@ -1539,7 +1539,7 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
 {
 	int herror;
 
-	MuestraMensaje(0,msglog);
+	MuestraMensaje(2,NULL);
 	
 	sprintf(cmdshell,"%s/admCreateImage",HIDRASCRIPTS);
 	sprintf(parametros,"%s %s %s %s %s","createImage",disco,particion,"REPO",fileimg);
@@ -1675,7 +1675,6 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 {
    	int herror;
 	
-	//Pantallas
 	MuestraMensaje(3,NULL);
 
 	sprintf(cmdshell,"%s/admRestoreImage",HIDRASCRIPTS);
