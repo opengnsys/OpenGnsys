@@ -1,11 +1,11 @@
 <?
 // *************************************************************************
 // Aplicación WEB: ogAdmWebCon
-// Autor: Jos�Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Marzo-2006
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha útima modificación: Marzo-2006
 // Nombre del fichero: menubrowser.php
-// Descripci� : 
+// Descripción : 
 //		Muestra menu en el browser del cliente
 // ****************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -14,7 +14,7 @@ include_once("../includes/CreaComando.php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión servidor B.D.
 //________________________________________________________________________________________________________
 $ITEMS_PUBLICOS=1;
 $ITEMS_PRIVADOS=2;
@@ -25,6 +25,10 @@ if (isset($_GET["tip"]))	$tip=$_GET["tip"];
 $iph=tomaIP();
 if(empty($iph))
 	die("***ATENCION.- Usted no esta accediendo desde un ordenador permitido: Dirección IP=".$iph); 
+
+$UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
+$UrlPagina=dirname($UrlPagina);
+$UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
 if(!empty($rsmenu)){
@@ -57,7 +61,7 @@ if(!empty($rsmenu)){
 }
 else{
 	$codeHtml='<P align=center>';
-	$codeHtml.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETECTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
+	$codeHtml.='<SPAN style="COLOR:#999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">NO SE HA DETECTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
 	$codeHtml.='</P>';
 }
 ?>
@@ -66,6 +70,7 @@ else{
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	</HEAD>
 	<BODY>
+	<P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png" width=64><P>
 	<?
 		echo $codeHtml;
 	?>
@@ -101,6 +106,7 @@ function RecuperaMenu($cmd,$iph){
 function GeneraMenu($rs,$tipo,$iph){	
 	global $ITEMS_PUBLICOS;
 	global $ITEMS_PRIVADOS;
+	global $UrlPaginaIconos;
 
 	$titulo=$rs->campos["titulo"]; 
 	$coorx=$rs->campos["coorx"]; 
@@ -114,11 +120,6 @@ function GeneraMenu($rs,$tipo,$iph){
 	$htmlmenupub=$rs->campos["htmlmenupub"]; 
 	$htmlmenupri=$rs->campos["htmlmenupri"]; 
 			
-
-	$UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
-	$UrlPagina=dirname($UrlPagina);
-	$UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
-			
 	if($tipo==$ITEMS_PRIVADOS)
 		$mod=$smodalidad;
 	else
@@ -127,9 +128,6 @@ function GeneraMenu($rs,$tipo,$iph){
 
 	//	Genera HTML de la p�ina en funci� de las propiedades del Men del clioente
 	//$codeHTML.='<DIV style="POSITION:absolute;TOP:'.$coory."px;LEFT:".$coorx.'px">';
-
-	$codeHTML.='<P align=left><IMG border=0 src="http://'.$UrlPaginaIconos.'/logoopengnsys.png" width=64><P>';
-	
 	$codeHTML.='<P align=center>';
 	$codeHTML.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 20px;"><U>'.$titulo.'</U></SPAN>';
 	$codeHTML.='</BR>';

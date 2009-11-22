@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `accionid` int(11) default NULL,
   `idnotificador` int(11) default NULL,
   PRIMARY KEY  (`idaccion`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `acciones`
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `acciones_menus` (
   `descripitem` varchar(250) default NULL,
   `orden` tinyint(4) default NULL,
   PRIMARY KEY  (`idaccionmenu`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `acciones_menus`
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `horaresevini` tinyint(4) default NULL,
   `horaresevfin` tinyint(4) default NULL,
   PRIMARY KEY  (`idaula`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `aulas`
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `campus` (
   `cuadro_y` tinyint(3) default NULL,
   `cuadro_x` tinyint(3) default NULL,
   PRIMARY KEY  (`idcampus`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `campus`
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
   `identidad` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idcentro`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `centros`
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `comandos` (
   `ejecutor` char(1) default NULL,
   `activo` tinyint(1) NOT NULL,
   PRIMARY KEY  (`idcomando`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=15 ;
 
 -- 
 -- Volcar la base de datos para la tabla `comandos`
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `comandos_eng` (
   `interactivo` tinyint(1) default NULL,
   `ejecutor` char(1) default NULL,
   PRIMARY KEY  (`idcomando`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `comandos_eng`
@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS `configuraciones` (
   `descripcion` varchar(250) default NULL,
   `configuracion` text NOT NULL,
   PRIMARY KEY  (`idconfiguracion`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `configuraciones`
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
   `iduniversidad` int(11) default NULL,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`identidad`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `entidades`
@@ -279,7 +279,7 @@ CREATE TABLE IF NOT EXISTS `estatus` (
   `idestatus` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idestatus`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
 
 -- 
 -- Volcar la base de datos para la tabla `estatus`
@@ -308,7 +308,7 @@ CREATE TABLE IF NOT EXISTS `grupos` (
   `iduniversidad` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idgrupo`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `grupos`
@@ -329,7 +329,7 @@ CREATE TABLE IF NOT EXISTS `gruposordenadores` (
   `grupoid` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idgrupo`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Estructura de tabla para la tabla `hardwares`
@@ -342,7 +342,7 @@ CREATE TABLE IF NOT EXISTS `hardwares` (
   `idcentro` int(11) NOT NULL default '0',
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idhardware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 -- --------------------------------------------------------
 
 -- 
@@ -356,7 +356,7 @@ CREATE TABLE IF NOT EXISTS `iconos` (
   `idtipoicono` int(11) default NULL,
   `descripcion` varchar(250) default NULL,
   PRIMARY KEY  (`idicono`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=15 ;
 
 -- 
 -- Volcar la base de datos para la tabla `iconos`
@@ -390,7 +390,7 @@ CREATE TABLE IF NOT EXISTS `idiomas` (
   `descripcion` varchar(100) default NULL,
   `nemonico` char(3) default NULL,
   PRIMARY KEY  (`ididioma`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
 -- 
 -- Volcar la base de datos para la tabla `idiomas`
@@ -416,7 +416,7 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idimagen`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `imagenes`
@@ -433,7 +433,7 @@ DROP TABLE IF EXISTS `imagenes_softincremental`;
 CREATE TABLE IF NOT EXISTS `imagenes_softincremental` (
   `idimagen` int(11) NOT NULL default '0',
   `idsoftincremental` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- 
 -- Volcar la base de datos para la tabla `imagenes_softincremental`
@@ -465,7 +465,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `htmlmenupri` varchar(250) default NULL,
   `resolucion` tinyint(4) default NULL,
   PRIMARY KEY  (`idmenu`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `menus`
@@ -488,7 +488,7 @@ CREATE TABLE IF NOT EXISTS `notificaciones` (
   `descrinotificacion` text,
   `idaccion` int(11) default NULL,
   PRIMARY KEY  (`idnotificacion`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `notificaciones`
@@ -517,7 +517,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `idparticion` int(11) default NULL,
   `cache` int(11) default NULL,
   PRIMARY KEY  (`idordenador`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `ordenadores`
@@ -535,7 +535,7 @@ CREATE TABLE IF NOT EXISTS `ordenador_imagen` (
   `idordenador` int(11) NOT NULL default '0',
   `particion` int(11) NOT NULL default '0',
   `idimagen` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- 
 -- Volcar la base de datos para la tabla `ordenador_imagen`
@@ -552,7 +552,7 @@ CREATE TABLE `ordenador_perfilsoft` (
   `idordenador` int(11) NOT NULL default '0',
   `particion` int(11) NOT NULL default '0',
   `idperfilsoft` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -570,7 +570,7 @@ CREATE TABLE IF NOT EXISTS `parametros` (
   `nomliteral` varchar(250) default NULL,
   `tipopa` tinyint(1) default NULL,
   PRIMARY KEY  (`idparametro`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
 
 -- 
 -- Volcar la base de datos para la tabla `parametros`
@@ -609,7 +609,7 @@ CREATE TABLE IF NOT EXISTS `particiones` (
   `idparticion` int(11) NOT NULL auto_increment,
   `particion` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idparticion`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `particiones`
@@ -630,7 +630,7 @@ CREATE TABLE IF NOT EXISTS `perfileshard` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idperfilhard`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `perfileshard`
@@ -647,7 +647,7 @@ DROP TABLE IF EXISTS `perfileshard_hardwares`;
 CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
   `idperfilhard` int(11) NOT NULL default '0',
   `idhardware` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- 
 -- Volcar la base de datos para la tabla `perfileshard_hardwares`
@@ -666,7 +666,7 @@ CREATE TABLE IF NOT EXISTS `perfileshard_perfilessoft` (
   `idperfilhard` int(11) NOT NULL default '0',
   `idperfilsoft` int(11) NOT NULL default '0',
   PRIMARY KEY  (`idphardidpsoft`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `perfileshard_perfilessoft`
@@ -687,7 +687,7 @@ CREATE TABLE IF NOT EXISTS `perfilessoft` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idperfilsoft`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `perfilessoft`
@@ -704,7 +704,7 @@ DROP TABLE IF EXISTS `perfilessoft_softwares`;
 CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
   `idperfilsoft` int(11) NOT NULL default '0',
   `idsoftware` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- 
 -- Volcar la base de datos para la tabla `perfilessoft_softwares`
@@ -721,7 +721,7 @@ DROP TABLE IF EXISTS `phard_psoft_softincremental`;
 CREATE TABLE IF NOT EXISTS `phard_psoft_softincremental` (
   `idphardidpsoft` int(11) NOT NULL default '0',
   `idsoftincremental` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- 
 -- Volcar la base de datos para la tabla `phard_psoft_softincremental`
@@ -743,7 +743,7 @@ CREATE TABLE IF NOT EXISTS `procedimientos` (
   `comentarios` text,
   `grupoid` int(11) default '0',
   PRIMARY KEY  (`idprocedimiento`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `procedimientos`
@@ -764,7 +764,7 @@ CREATE TABLE IF NOT EXISTS `procedimientos_comandos` (
   `idcomando` int(11) NOT NULL default '0',
   `parametros` text,
   PRIMARY KEY  (`idprocedimientocomando`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `procedimientos_comandos`
@@ -800,7 +800,7 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
   `minutosfin` tinyint(4) default NULL,
   `suspendida` tinyint(1) default NULL,
   PRIMARY KEY  (`idprogramacion`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `programaciones`
@@ -829,7 +829,7 @@ CREATE TABLE IF NOT EXISTS `reservas` (
   `idtrabajo` int(11) default NULL,
   `estado` tinyint(4) default NULL,
   PRIMARY KEY  (`idreserva`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `reservas`
@@ -849,7 +849,7 @@ CREATE TABLE IF NOT EXISTS `reservastemporal` (
   `idreserva` int(11) NOT NULL default '0',
   `fecha` date NOT NULL default '0000-00-00',
   PRIMARY KEY  (`idreservatemporal`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `reservastemporal`
@@ -874,7 +874,7 @@ CREATE TABLE IF NOT EXISTS `servidoresdhcp` (
   `grupoid` int(11) default NULL,
   `comentarios` text,
   PRIMARY KEY  (`idservidordhcp`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `servidoresdhcp`
@@ -901,7 +901,7 @@ CREATE TABLE `servidoresrembo` (
   `comentarios` text,
   `puertorepo` int(11) NOT NULL,
   PRIMARY KEY  (`idservidorrembo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `servidoresrembo`
@@ -924,7 +924,7 @@ CREATE TABLE IF NOT EXISTS `softincrementales` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idsoftincremental`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `softincrementales`
@@ -941,7 +941,7 @@ DROP TABLE IF EXISTS `softincremental_softwares`;
 CREATE TABLE IF NOT EXISTS `softincremental_softwares` (
   `idsoftincremental` int(11) NOT NULL default '0',
   `idsoftware` int(11) NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- 
 -- Volcar la base de datos para la tabla `softincremental_softwares`
@@ -964,7 +964,7 @@ CREATE TABLE IF NOT EXISTS `softwares` (
   `idtiposo` int(11) default NULL,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idsoftware`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `softwares`
@@ -986,7 +986,7 @@ CREATE TABLE IF NOT EXISTS `tareas` (
   `comentarios` text,
   `grupoid` int(11) default '0',
   PRIMARY KEY  (`idtarea`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tareas`
@@ -1009,7 +1009,7 @@ CREATE TABLE IF NOT EXISTS `tareas_comandos` (
   `idambito` int(11) default NULL,
   `parametros` text,
   PRIMARY KEY  (`idtareacomando`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tareas_comandos`
@@ -1030,7 +1030,7 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
   `nemonico` char(3) NOT NULL,
   `pci` tinyint(1) NOT NULL,
   PRIMARY KEY  (`idtipohardware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tipohardwares`
@@ -1065,7 +1065,7 @@ CREATE TABLE IF NOT EXISTS `tiposoftwares` (
   `descripcion` varchar(250) NOT NULL default '',
   `urlimg` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idtiposoftware`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tiposoftwares`
@@ -1090,7 +1090,7 @@ CREATE TABLE IF NOT EXISTS `tiposos` (
   `descripcionrmb` varchar(50) default NULL,
   `tipopar` varchar(50) default NULL,
   PRIMARY KEY  (`idtiposo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
 
 -- 
 -- Volcar la base de datos para la tabla `tiposos`
@@ -1129,7 +1129,7 @@ CREATE TABLE IF NOT EXISTS `trabajos` (
   `comentarios` text,
   `grupoid` int(11) default NULL,
   PRIMARY KEY  (`idtrabajo`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `trabajos`
@@ -1151,7 +1151,7 @@ CREATE TABLE IF NOT EXISTS `trabajos_tareas` (
   `ambitskwrk` text,
   `parametros` text,
   PRIMARY KEY  (`idtrabajotarea`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `trabajos_tareas`
@@ -1170,7 +1170,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
   `nombreuniversidad` varchar(200) NOT NULL default '',
   `comentarios` text,
   PRIMARY KEY  (`iduniversidad`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- 
 -- Volcar la base de datos para la tabla `universidades`
@@ -1190,7 +1190,7 @@ CREATE TABLE IF NOT EXISTS `urlimagesitems` (
   `idurlimagesitems` int(11) NOT NULL auto_increment,
   `descripcion` varchar(250) NOT NULL default '',
   PRIMARY KEY  (`idurlimagesitems`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `urlimagesitems`
@@ -1214,7 +1214,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `ididioma` int(11) default NULL,
   `idtipousuario` tinyint(4) default NULL,
   PRIMARY KEY  (`idusuario`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- 
 -- Volcar la base de datos para la tabla `usuarios`

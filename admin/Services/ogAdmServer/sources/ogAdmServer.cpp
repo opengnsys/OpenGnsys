@@ -2,14 +2,14 @@
 // Aplicación HIDRA
 // Copyright 2003-2005 JosnManuel Alonso. Todos los derechos reservados.
 // Fichero: hidra.cpp
-//	Descripcin:
+//	Descripción:
 //		Este proyecto implementa el servicio hidra en un ordenador con plataforma windows NT. Este fichero aporta las funciones de 
 //		envn de comandos y recepcin de respuestas
 // ****************************************************************************************************************************************************
 #include "ogAdmServer.h"
 #include "encriptacion.c"
 // ________________________________________________________________________________________________________
-// Funcin: RegistraLog
+// Función: RegistraLog
 //
 //		Descripción:
 //			Esta funcin registra los evento de errores en un fichero log
@@ -31,9 +31,9 @@ void RegistraLog(const char *msg,int swerrno)
 }
 
 // ________________________________________________________________________________________________________
-// Funcin: TomaHora
+// Función: TomaHora
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin toma la hora actual  del sistema y devuelve una estructura conlos datos
 //		Parametros:
 //			- msg : Mensage de error
@@ -152,9 +152,9 @@ int TomaConfiguracion(char* pathfilecfg)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: GestionaConexion
+// Función: GestionaConexion
 //
-//		Descripcin:
+//		Descripción:
 //			Esta hebra es la encargada de comunicarse con los clientes  a travn del socket enviado como parnetro.
 //		Parametros:
 //			- lpParam : Socket usado
@@ -171,9 +171,9 @@ void * GestionaConexion(void* s)
 	return(s);
 }
 // ________________________________________________________________________________________________________
-// Funcin: gestiona_comando
+// Función: gestiona_comando
 //
-//		Descripcin:
+//		Descripción:
 //			Analiza el comando enviado por el servidor web y lo reenvia al cliente rembo o lo ejecuta n mismo
 //		Parametros:
 //			- s : Socket usado
@@ -278,9 +278,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 			return;
 		}
 
-		resul=strcmp(nombrefuncion,"RESPUESTA_RemboOffline");
+		resul=strcmp(nombrefuncion,"RESPUESTA_IniciarSesion");
 		if(resul==0){
-			RESPUESTA_RemboOffline(s,parametros);
+			RESPUESTA_IniciarSesion(s,parametros);
 			respuesta_cortesia(s);
 			return;
 		}
@@ -393,9 +393,9 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 	}
 }
 // ________________________________________________________________________________________________________
-// Funcin: manda_comando
+// Función: manda_comando
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin envia un comando por la red (TCP) desde el servidor hidra al servidor rembo que controla al cliente que lo ejecutarn
 //		Parametros:
 //			- sock : El socket del cliente
@@ -414,9 +414,9 @@ int manda_comando(SOCKET sock,char* parametros)
 	return(resul);
 }
 // ________________________________________________________________________________________________________
-// Funcin: manda_trama
+// Función: manda_trama
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin envia una trama por la red (TCP) 
 //		Parametros:
 //			- sock : El socket del host al que se dirige la trama
@@ -445,9 +445,9 @@ int manda_trama(SOCKET sock,TRAMA* trama)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: recibe_trama
+// Función: recibe_trama
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin recibe una trama por la red (TCP)
 //		Parametros:
 //			- sock : El socket del cliente
@@ -475,9 +475,9 @@ int recibe_trama(SOCKET sock,TRAMA* trama)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: hay_hueco
+// Función: hay_hueco
 // 
-// 		Descripcin:
+// 		Descripción:
 // 			Esta funcin devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
 // 			Parametros:
 // 				- idx:   Primer indice libre que se podrn utilizar
@@ -495,9 +495,9 @@ int hay_hueco(int *idx)
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: cliente_existente
+// Función: cliente_existente
 //
-//		 Descripcin:
+//		 Descripción:
 // 			Esta funcin devuelve true o false dependiendo de si el cliente estnya registrado en  la tabla de sockets
 //		Parametros:
 //				- ip : La ip del cliente a buscar
@@ -515,9 +515,9 @@ BOOLEAN cliente_existente(char *ip,int* idx)
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: hay_huecoservidorrembo
+// Función: hay_huecoservidorrembo
 // 
-// 		Descripcin:
+// 		Descripción:
 // 			Esta funcin devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo servidor rembo.
 // 		Parametros:
 // 			- idx:   Primer indice libre que se podrn utilizar
@@ -534,9 +534,9 @@ int hay_huecoservidorrembo(int *idx)
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: servidorrembo_existente
+// Función: servidorrembo_existente
 //
-//		Descripcin:
+//		Descripción:
 // 			Esta funcin devuelve true o false dependiendo de si el servidor estnya registrado en  la tabla de sockets
 //		Parametros:
 //				- ip : La ip delcliente a buscar
@@ -554,9 +554,9 @@ BOOLEAN servidorrembo_existente(char *ip,int* idx)
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: INTROaFINCAD
+// Función: INTROaFINCAD
 //
-//		Descripcin:
+//		Descripción:
 // 			Cambia INTROS por caracteres fin de cadena ('\0') en una cadena
 //		Parametros:
 //				- parametros : La cadena a explorar
@@ -570,9 +570,9 @@ void INTROaFINCAD(char* parametros)
 	}
 }
 // ________________________________________________________________________________________________________
-// Funcinn: FINCADaINTRO
+// Funciónn: FINCADaINTRO
 //
-//		Descripcinn?:
+//		Descripciónn?:
 // 			Cambia caracteres fin de cadena ('\0') por INTROS en una cadena
 //		Parametros:
 //				- parametros : La cadena a explorar
@@ -585,11 +585,11 @@ void FINCADaINTRO(char* a,char *b)
 	}
 }
 // ________________________________________________________________________________________________________
-// Funcin: cuenta_ipes
+// Función: cuenta_ipes
 //
-//		Descripcin:
+//		Descripción:
 // 			Cuenta las comas (caracter de separacion) de las cadenas de ipes
-//		Parnetros:
+//		Parámetros:
 //			- parametros : La cadena a explorar
 // ________________________________________________________________________________________________________
 int cuenta_ipes(char* iph)
@@ -602,12 +602,12 @@ int cuenta_ipes(char* iph)
 	return(cont);
 }
 // ________________________________________________________________________________________________________
-// Funcin: toma_parametro
+// Función: toma_parametro
 // 
-//		Descripcin:
+//		Descripción:
 // 			Esta funcin devuelve el valor de un parametro incluido en la trama.
 // 			El formato del protocolo es: "nombre_parametro=valor_parametro"
-// 		Parnetros:
+// 		Parámetros:
 // 			- nombre_parametro: Es el nombre del parnetro a recuperar
 // 			- parametros: Es la matriz que contiene todos los parnetros
 // ________________________________________________________________________________________________________
@@ -631,11 +631,11 @@ char * toma_parametro(const char* nombre_parametro,char *parametros)
 	return(NULL);
 }
 // ________________________________________________________________________________________________________
-// Funcin: split_parametros
+// Función: split_parametros
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin trocea una cadena segn un carnter delimitador, Devuelve el nmero de trozos
-// 		Parnetros:
+// 		Parámetros:
 // 			- trozos: Array de punteros a cadenas
 // 			- cadena: Cadena a trocear
 // 			- ch: Carnter delimitador
@@ -653,12 +653,12 @@ int split_parametros(char **trozos,char *cadena, char * ch){
 	return(w-1); // Devuelve el numero de trozos
 }
 // ________________________________________________________________________________________________________
-// Funcin: corte_iph
+// Función: corte_iph
 // 
-//		Descripcin:
+//		Descripción:
 // 			Esta funcin devuelve el valor del parametro iph incluido en la trama que debe ser el ltimo parnetro de la trama.
-// 	  Parnetros:
-// 			- parametros: Parnetros de la trama
+// 	  Parámetros:
+// 			- parametros: Parámetros de la trama
 // ________________________________________________________________________________________________________
 char* corte_iph(char *parametros)
 {
@@ -679,12 +679,47 @@ char* corte_iph(char *parametros)
 	}
 	return(NULL);
 }
+
 // ________________________________________________________________________________________________________
-// Funcin: respuesta_cortesia
+// Función: escaparComillas
 //
-//	 Descripcin:
+//	 Descripción:
+//		Escapa las comillas simples de una cadena
+// 	  Parámetros:
+// 		- s: Cadena de caracteres
+//	Devuelve:
+//		La cadena con las comillas escapadas "\'"
+// ________________________________________________________________________________________________________
+char* escaparComillas(char *cadena){
+
+	int lon,i,con=0;
+	char *cadenaescapada;
+	
+	lon=strlen(cadena);
+	for(i=0;i<lon;i++){ // Cuenta las comillas
+		if(cadena[i]==COMILLAS_SIMPES) con++;
+	}
+	if(con>0){ // Existen comillas
+		cadenaescapada = (char*) malloc (lon+con);  // Toma memoria para la cadena escapada.
+		if (cadenaescapada == NULL) return(NULL);
+		int ptr=0;
+		for(i=0;i<lon;i++){
+			if(cadena[i]==COMILLAS_SIMPES)
+				cadenaescapada[ptr++]=BARRA_INVERTIDA;
+			cadenaescapada[ptr++]=cadena[i];
+		}
+	}
+	else
+		cadenaescapada=cadena;
+
+	return(cadenaescapada);
+}
+// ________________________________________________________________________________________________________
+// Función: respuesta_cortesia
+//
+//	 Descripción:
 //		Envn respuesta de cortesn al cliente rembo
-// 	  Parnetros:
+// 	  Parámetros:
 // 			- s: Socket usado por el cliente para comunicarse con el servidor HIDRA
 // ________________________________________________________________________________________________________
 int respuesta_cortesia(SOCKET s)
@@ -697,11 +732,11 @@ int respuesta_cortesia(SOCKET s)
 	return(manda_comando(s,nwparametros));
 }
 // ________________________________________________________________________________________________________
-// Funcin: NoComandosPendientes
+// Función: NoComandosPendientes
 //
-//		Descripcin:
+//		Descripción:
 //			Envn respuesta de cortesn al cliente rembo
-// 	  Parnetros:
+// 	  Parámetros:
 // 			- s: Socket usado por el cliente para comunicarse con el servidor HIDRA
 // ________________________________________________________________________________________________________
 int NoComandosPendientes(SOCKET s)
@@ -714,14 +749,14 @@ int NoComandosPendientes(SOCKET s)
 	return(manda_comando(s,nwparametros));
 }
 // ________________________________________________________________________________________________________
-// Funcin: InclusionCliente
+// Función: InclusionCliente
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin incorpora el socket de un nuevo cliente a la tabla de sockets y le devuelve alguna de sus propiedades: nombre, 
 //			dentificador, perfil hardware , mens...
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del cliente
-//			- parametros: Parnetros de la trama recibida
+//			- parametros: Parámetros de la trama recibida
 // ________________________________________________________________________________________________________
 int InclusionCliente(SOCKET s,char *parametros)
 {
@@ -883,9 +918,9 @@ int InclusionCliente(SOCKET s,char *parametros)
 // ________________________________________________________________________________________________________
 // Función: Toma menu
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin toma los parametros del menu inicial del cliente rembo y se los envn en el proceso de inclusin
-//		Parnetros:
+//		Parámetros:
 //			- nwparametros: Cadena con los parnetros a enviar al cliente
 //			- idmenu: Identificador del men
 //			- lon : Longitud inicial de la cadena de parnetros
@@ -1004,13 +1039,13 @@ int Toma_menu(Database db, Table tbl,char* nwparametros,int idmenu,int lon)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin:RecuperaItem
+// Función:RecuperaItem
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin busca en la base de datos, los parametros de un items de un menu 
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del cliente
-//			- parametros: Parnetros de la trama recibida
+//			- parametros: Parámetros de la trama recibida
 // ________________________________________________________________________________________________________
 int RecuperaItem(SOCKET s,char *parametros)
 {
@@ -1021,7 +1056,7 @@ int RecuperaItem(SOCKET s,char *parametros)
 	int idtipoaccion,tipoaccion;
 
 	// Toma parnetros
-	ida=toma_parametro("ida",parametros); // Toma identificador de la accin
+	ida=toma_parametro("ida",parametros); // Toma identificador de la acción
 
 	//  Abre conexin con la base de datos
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
@@ -1035,11 +1070,11 @@ int RecuperaItem(SOCKET s,char *parametros)
 	}
 	if (tbl.ISEOF()) return(false);
 	
-	if(!tbl.Get("tipoaccion",tipoaccion)){ // Toma tipo de accin
+	if(!tbl.Get("tipoaccion",tipoaccion)){ // Toma tipo de acción
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		return(false);
 	}
-	if(!tbl.Get("idtipoaccion",idtipoaccion)){ // Toma identificador del tipo de accin
+	if(!tbl.Get("idtipoaccion",idtipoaccion)){ // Toma identificador del tipo de acción
 		tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 		return(false);
 	}
@@ -1073,11 +1108,11 @@ int RecuperaItem(SOCKET s,char *parametros)
 }
 
 // ________________________________________________________________________________________________________
-// Funcin: actualiza_configuracion
+// Función: actualiza_configuracion
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin actualiza la base de datos con la configuracion de sistemas operativos y particiones de un ordenador
-//		Parnetros:
+//		Parámetros:
 //			- db: Objeto base de datos (ya operativo)
 //			- tbl: Objeto tabla
 //			- cfg: cadena con una configuracin
@@ -1121,9 +1156,25 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	}			
 	
 	if(lon>MAXHARDWARE) lon=MAXHARDWARE;
-		// Trocea la cadena de configuracin
+
+	// Lee archivo de inventario hardware
+	FILE *Finv;
+	char *buffer;
+	long lSize;
+	Finv = fopen ( hrd , "rb" ); // EL parametro sft contiene el path del archivo de inventario
+	if (Finv==NULL) return(false);
+	fseek (Finv , 0 , SEEK_END);  // Obtiene tamaño del fichero.
+	lSize = ftell (Finv);
+	rewind (Finv);
+	buffer = (char*) malloc (lSize);  // Toma memoria para el buffer de lectura.
+	if (buffer == NULL) return(false);
+	fread (buffer,1,lSize,Finv); 	// Lee contenido del fichero
+	fclose(Finv);
+	buffer=escaparComillas(buffer);	
+		
+	// Trocea la cadena de configuración
 	strcpy(ch,"\n");// caracter delimitador 
-	lon=split_parametros(tbHardware,hrd,ch);
+	lon=split_parametros(tbHardware,buffer,ch);
 	
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
@@ -1203,7 +1254,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: CuestionPerfilHardware
+// Función: CuestionPerfilHardware
 //________________________________________________________________________________________________________/
 int CuestionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *tbidhardware,int i,char *nombreordenador){
 	char sqlstr[1000],ErrStr[200];
@@ -1271,11 +1322,11 @@ int CuestionPerfilHardware(Database db, Table tbl,int idcentro,char* ido,int *tb
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: actualiza_configuracion
+// Función: actualiza_configuracion
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin actualiza la base de datos con la configuracion de sistemas operativos y particiones de un ordenador
-//		Parnetros:
+//		Parámetros:
 //			- db: Objeto base de datos (ya operativo)
 //			- tbl: Objeto tabla
 //			- cfg: cadena con una configuracin
@@ -1333,6 +1384,7 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* tfs,char
 	if (buffer == NULL) return(false);
 	fread (buffer,1,lSize,Finv); 	// Lee contenido del fichero
 	fclose(Finv);
+	buffer=escaparComillas(buffer);
 // trocea las lineas
 	lon=split_parametros(tbSoftware,buffer,ch);
 
@@ -1417,7 +1469,7 @@ int actualiza_software(Database db, Table tbl,char* sft,char* par,char* tfs,char
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: CuestionPerfilSoftware
+// Función: CuestionPerfilSoftware
 //________________________________________________________________________________________________________/
 int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tbidsoftware,int i,char *nombreordenador,char *particion){
 	char sqlstr[1000],ErrStr[200];
@@ -1505,11 +1557,11 @@ int CuestionPerfilSoftware(Database db, Table tbl,int idcentro,char* ido,int *tb
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: actualiza_configuracion
+// Función: actualiza_configuracion
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin actualiza la base de datos con la configuracion de sistemas operativos y particiones de un ordenador
-//		Parnetros:
+//		Parámetros:
 //			- db: Objeto base de datos (ya operativo)
 //			- tbl: Objeto tabla
 //			- cfg: cadena con una configuracin
@@ -1612,12 +1664,12 @@ int actualiza_configuracion(Database db, Table tbl,char* cfg,int idcfgo,int idpr
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: TomaParticiones
+// Función: TomaParticiones
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin compone basndose en la cadena de configuracin que devuelve el ordenador, una cadena de particiones con 
 //			los valores "n0=PPPP;n1=PPPP..."  con las duplas:el nmero de particin y el tipo, separados por coma
-//		Parnetros:
+//		Parámetros:
 //			- cfg: Cadena de configuracin
 //			- parts: Cadena devuelta con el formato anterior descrito 
 //			- lonprt: Longitud mnmima para las cadenas 
@@ -1662,13 +1714,13 @@ void TomaParticiones(char* cfg, char* parts,int lonprt)
 	lon+=sprintf(parts+lon,"@prt");
 }
 // ________________________________________________________________________________________________________
-// Funcin: ComandosPendientes
+// Función: ComandosPendientes
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin busca en la base de datos,comandos pendientes de ejecutar por un  ordenador  concreto
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del cliente
-//			- parametros: Parnetros de la trama recibida
+//			- parametros: Parámetros de la trama recibida
 // ________________________________________________________________________________________________________
 int ComandosPendientes(SOCKET s,char *parametros)
 {
@@ -1694,13 +1746,13 @@ int ComandosPendientes(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: EjecutarItem
+// Función: EjecutarItem
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin ejecuta un item de un men concreto solicitado por algn cliente rembo
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del cliente
-//			- parametros: Parnetros de la trama recibida
+//			- parametros: Parámetros de la trama recibida
 // ________________________________________________________________________________________________________
 int EjecutarItem(SOCKET s,char *parametros)
 {
@@ -1785,11 +1837,11 @@ int EjecutarItem(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: DisponibilidadComandos
+// Función: DisponibilidadComandos
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin habilita a un clinte rembo para recibir o no, comandos iteractivos
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del cliente
 //			- parametros: Parmetros de la trama recibida
 // ________________________________________________________________________________________________________
@@ -1810,11 +1862,11 @@ int DisponibilidadComandos(SOCKET s,char *parametros)
 	return(resul);
 }
 // ________________________________________________________________________________________________________
-// Funcin: Coloca_estado
+// Función: Coloca_estado
 //
-//		Descripcin: 
+//		Descripción: 
 //			Esta funcin coloca el estado de un ordenador en la tabla de sockets
-//		Parnetros:
+//		Parámetros:
 //			- iph: Ip del ordenador
 //			- e: Nuevo estado
 //			- s: Socket usado por el cliente para comunicarse con el servidor HIDRA
@@ -1834,11 +1886,11 @@ int Coloca_estado(char *iph,const char *e,SOCKET s)
 	return(false);
 }
 // ________________________________________________________________________________________________________
-// Funcin: IgualIP
+// Función: IgualIP
 //
-//		 Descripcin: 
+//		 Descripción: 
 //			Comprueba si una cadena con una ipe estnincluidad en otra que  contienen varias direcciones ipes separas por punto y coma
-//		Parnetros:
+//		Parámetros:
 //			- cadenaiph: Cadena de IPes
 //			- ipcliente: Cadena de la ip a buscar
 // ________________________________________________________________________________________________________
@@ -1862,13 +1914,13 @@ BOOLEAN IgualIP(char *cadenaiph,char *ipcliente)
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: inclusion_srvRMB
+// Función: inclusion_srvRMB
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin incorpora el socket de un nuevo servidor rembo a la tabla de sockets
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del servidor rembo
-//			- parametros: Parnetros de la trama recibida
+//			- parametros: Parámetros de la trama recibida
 // ________________________________________________________________________________________________________
 int inclusion_srvRMB(char *iphsrvrmb,int puertorepo)
 {
@@ -1890,13 +1942,13 @@ int inclusion_srvRMB(char *iphsrvrmb,int puertorepo)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: inclusion_cliWINLNX
+// Función: inclusion_cliWINLNX
 //
-//		 Descripcin:
+//		 Descripción:
 //			Esta funcin incorpora el socket de un nuevo cliente rembo a la tabla de sockets
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del servidor rembo
-//			- parametros: Parnetros de la trama recibida
+//			- parametros: Parámetros de la trama recibida
 // ________________________________________________________________________________________________________
 int inclusion_cliWINLNX(SOCKET s,char *parametros)
 {
@@ -1924,9 +1976,9 @@ int inclusion_cliWINLNX(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: inclusion_REPO
+// Función: inclusion_REPO
 //
-//		 Descripcin:
+//		 Descripción:
 //			Esta funcin incorpora el socket de un nuevo repositorio hidra
 // ________________________________________________________________________________________________________
 int inclusion_REPO(SOCKET s,char *parametros)
@@ -1991,13 +2043,13 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	return(manda_trama(s,trama));
 }
 // ________________________________________________________________________________________________________
-// Funcin: Sondeo
+// Función: Sondeo
 //
-//		Descripcin: 
+//		Descripción: 
 //			Esta funcin recupera el estado de los ordenadores solicitados
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket del servidor web que envn el comando
-//			- parametros: Parnetros de la trama enviada por nte
+//			- parametros: Parámetros de la trama enviada por nte
 // ________________________________________________________________________________________________________
 int Sondeo(SOCKET s,char *parametros)
 {
@@ -2021,11 +2073,11 @@ int Sondeo(SOCKET s,char *parametros)
 	return(manda_comando(s,nwparametros));
 }
 // ________________________________________________________________________________________________________
-// Funcin: Actualizar
+// Función: Actualizar
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin actualiza la vista de ordenadores
-//		Parnetros:
+//		Parámetros:
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
 int Actualizar(char *parametros)
@@ -2065,11 +2117,11 @@ int Actualizar(char *parametros)
 	return(false);
 }
 // ________________________________________________________________________________________________________
-// Funcin: FicheroOperador
+// Función: FicheroOperador
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin envia al servidor datos de un operador para crear fichero de login
-//		Parnetros:
+//		Parámetros:
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
 int FicheroOperador(char *parametros)
@@ -2108,11 +2160,11 @@ int FicheroOperador(char *parametros)
 	return(resul);
 }
 // ________________________________________________________________________________________________________
-// Funcin: Conmutar
+// Función: Conmutar
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin conmuta un cliente rembo del modo NO administrado al modo admnistrado
-//		Parnetros:
+//		Parámetros:
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
 int Conmutar(char *parametros)
@@ -2163,11 +2215,11 @@ int Conmutar(char *parametros)
 	return(resul);
 }
 // ________________________________________________________________________________________________________
-// Funcin: PurgarTablaSockets
+// Función: PurgarTablaSockets
 //
-//		Descripcin:
+//		Descripción:
 //			Borra ordenadores de la tabla de sockets
-//		Parnetros:
+//		Parámetros:
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
 void PurgarTablaSockets(char *parametros)
@@ -2215,11 +2267,11 @@ int Arrancar(char *parametros)
 	return(false);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_Arrancar
+// Función: RESPUESTA_Arrancar
 //
-//		Descripcin:
+//		Descripción:
 //			Responde al comando Apagar 
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2235,7 +2287,7 @@ int RESPUESTA_Arrancar(SOCKET s,char *parametros)
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
 		db.GetErrorErrStr(ErrStr);
@@ -2248,11 +2300,11 @@ int RESPUESTA_Arrancar(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_Apagar
+// Función: RESPUESTA_Apagar
 //
-//		Descripcin:
+//		Descripción:
 //			Responde al comando Apagar 
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2268,7 +2320,7 @@ int RESPUESTA_Apagar(SOCKET s,char *parametros)
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
 		db.GetErrorErrStr(ErrStr);
@@ -2278,7 +2330,7 @@ int RESPUESTA_Apagar(SOCKET s,char *parametros)
 		return(false); // Error al registrar notificacion
 	}
 
-	if(strcmp(res,ACCION_FALLIDA)==0) return(TRUE); // Error en la ejecucin de la accin en el cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)==0) return(TRUE); // Error en la ejecucin de la acción en el cliente rembo
 
 	if (cliente_existente(iph,&i)) // Si ya existe la IP ...
 		borra_entrada(i);
@@ -2286,50 +2338,11 @@ int RESPUESTA_Apagar(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin:RESPUESTA_RemboOffline
+// Función: RESPUESTA_Reiniciar
 //
-//		Descripcin:
-//			Responde al comando Apagar 
-//		Parnetros:
-//			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
-//			- parametros: parametros del comando
-// ________________________________________________________________________________________________________
-int RESPUESTA_RemboOffline(SOCKET s,char *parametros)
-{
-	char ErrStr[200];
-	Database db;
-	Table tbl;
-	int i;
-
-	char *res,*der,*iph,*ido,*ids;
-
-	res=toma_parametro("res",parametros); // Toma resultado
-	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
-	iph=toma_parametro("iph",parametros); // Toma ip
-	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
-
-	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
-		db.GetErrorErrStr(ErrStr);
-		return(false);
-	}
-	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
-		return(false); // Error al registrar notificacion
-	}
-
-	if(strcmp(res,ACCION_FALLIDA)==0) return(TRUE); // Error en la ejecucin de la accin en el cliente rembo
-
-	if (cliente_existente(iph,&i)) // Si ya existe la IP ...
-		borra_entrada(i);
-	db.Close();
-	return(true);
-}
-// ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_Reiniciar
-//
-//		Descripcin:
+//		Descripción:
 //			Responde al comando Reiniciar 
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2346,7 +2359,7 @@ int RESPUESTA_Reiniciar(SOCKET s,char *parametros)
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
 		db.GetErrorErrStr(ErrStr);
@@ -2355,7 +2368,45 @@ int RESPUESTA_Reiniciar(SOCKET s,char *parametros)
 	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
 		return(false); // Error al registrar notificacion
 	}
-	if(strcmp(res,ACCION_FALLIDA)==0) return(TRUE); // Error en la ejecucin de la accin en el cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)==0) return(TRUE); // Error en la ejecucin de la acción en el cliente rembo
+
+	if (cliente_existente(iph,&i)) // Si ya existe la IP ...
+		borra_entrada(i);
+	db.Close();
+	return(true);
+}
+// ________________________________________________________________________________________________________
+// Función: RESPUESTA_Apagar
+//
+//		Descripción:
+//			Responde al comando Apagar 
+//		Parámetros:
+//			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
+//			- parametros: parametros del comando
+// ________________________________________________________________________________________________________
+int RESPUESTA_IniciarSesion(SOCKET s,char *parametros)
+{
+	char ErrStr[200];
+	Database db;
+	Table tbl;
+	int i;
+	char *res,*der,*iph,*ido,*ids;
+
+	res=toma_parametro("res",parametros); // Toma resultado
+	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
+	iph=toma_parametro("iph",parametros); // Toma ip
+	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
+
+	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
+		db.GetErrorErrStr(ErrStr);
+		return(false);
+	}
+	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
+		return(false); // Error al registrar notificacion
+	}
+
+	if(strcmp(res,ACCION_FALLIDA)==0) return(TRUE); // Error en la ejecucin de la acción en el cliente rembo
 
 	if (cliente_existente(iph,&i)) // Si ya existe la IP ...
 		borra_entrada(i);
@@ -2364,11 +2415,11 @@ int RESPUESTA_Reiniciar(SOCKET s,char *parametros)
 }
 // ________________________________________________________________________________________________________
 //
-// Funcin: borra_entrada
+// Función: borra_entrada
 //
-//		Descripcin:
+//		Descripción:
 //			 Borra la entrada de un ordenador en la tabla de socket
-//		Parnetros:
+//		Parámetros:
 //			- i: Indice dentro de la tabla
 // ________________________________________________________________________________________________________
 int borra_entrada(int i)
@@ -2384,11 +2435,11 @@ int borra_entrada(int i)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_ExecShell
+// Función: RESPUESTA_ExecShell
 //
-//		Descripcin:
+//		Descripción:
 //			Responde al comando Ejecutar script
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2415,7 +2466,7 @@ int RESPUESTA_ExecShell(SOCKET s,char *parametros)
 		return(false); // Error al registrar notificacion
 	}
 
-	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la acción del cliente rembo
 		if(!actualiza_configuracion(db,tbl,cfg,0,0,iph)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
@@ -2423,14 +2474,14 @@ int RESPUESTA_ExecShell(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RespuestaEstandar
+// Función: RespuestaEstandar
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin actualiza la base de datos con el resultado de la ejecucin de un comando con seguimiento
-//		Parnetros:
+//		Parámetros:
 //			- res: resultado de la ejecucin del comando
-//			- der: Descripcin del error si hubiese habido
-//			- ids: identificador de la accin notificada
+//			- der: Descripción del error si hubiese habido
+//			- ids: identificador de la acción notificada
 //			- ido: Identificador del ordenador que notifica
 //			- db: Objeto base de datos (operativo)
 //			- tbl: Objeto tabla
@@ -2459,18 +2510,18 @@ int RespuestaEstandar(char *res,char *der,char *ids,char* ido,Database db,Table 
 				pthread_mutex_unlock(&guardia); 
 		return(true);
 	}
-	if(!tbl.Get("parametros",parametros)){ // Toma parametros de la accin
+	if(!tbl.Get("parametros",parametros)){ // Toma parametros de la acción
 			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 					pthread_mutex_unlock(&guardia); 
 			return(false);
 	}
-	char resultado[2]; // comprueba si ya ha fallado la accin
-	if(!tbl.Get("resultado",resultado)){ // Toma resultado actual de la accin
+	char resultado[2]; // comprueba si ya ha fallado la acción
+	if(!tbl.Get("resultado",resultado)){ // Toma resultado actual de la acción
 			tbl.GetErrorErrStr(ErrStr); // error al recuperar el campo resultado
 					pthread_mutex_unlock(&guardia); 
 			return(false);
 	}
-	if(!tbl.Get("idaccion",idaccion)){ // Toma el identificador de la accin para tener el dato en formato "int"
+	if(!tbl.Get("idaccion",idaccion)){ // Toma el identificador de la acción para tener el dato en formato "int"
 			tbl.GetErrorErrStr(ErrStr); // error al recuperar el campo resultado
 					pthread_mutex_unlock(&guardia); 
 			return(false);
@@ -2506,7 +2557,7 @@ int RespuestaEstandar(char *res,char *der,char *ids,char* ido,Database db,Table 
 			return(false);
 		}
 	}
-	// Comprueba si la accin se ejecutncorrectamente para el ambito sumando notificaciones
+	// Comprueba si la acción se ejecutncorrectamente para el ambito sumando notificaciones
 	INTROaFINCAD(parametros);
 	iph=toma_parametro("iph",parametros); // Toma cadenaip
 	int tbnumipes=0,totalipes=1,lon;
@@ -2566,11 +2617,11 @@ int RespuestaEstandar(char *res,char *der,char *ids,char* ido,Database db,Table 
 	return(resul);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_CrearPerfilSoftware
+// Función: RESPUESTA_CrearPerfilSoftware
 //
-//		Descripcin:
+//		Descripción:
 //			Responde al comando Crear Perfil Software
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2598,7 +2649,7 @@ int RESPUESTA_CrearPerfilSoftware(SOCKET s,char *parametros)
 		return(false); // Error al registrar notificacion
 	}
 
-	if(strcmp(res,ACCION_FALLIDA)==0) { // Ha habido algn error en la ejecucin de la accin en el cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)==0) { // Ha habido algn error en la ejecucin de la acción en el cliente rembo
 		db.Close();
 		return(false);
 	}
@@ -2621,12 +2672,12 @@ int RESPUESTA_CrearPerfilSoftware(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_CrearSoftwareIncremental
+// Función: RESPUESTA_CrearSoftwareIncremental
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de creacin de un software incremental. Ademn actualiza  la base de datos insertando
 //			en su caso la nueva combinacin de perfil software con incremental.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2656,7 +2707,7 @@ int RESPUESTA_CrearSoftwareIncremental(SOCKET s,char *parametros)
 		return(false); // Error al registrar notificacion
 	}
 
-	if(strcmp(res,ACCION_FALLIDA)==0) { // Ha habido algn error en la ejecucin de la accin en el cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)==0) { // Ha habido algn error en la ejecucin de la acción en el cliente rembo
 		db.Close();
 		return(false);
 	}
@@ -2697,11 +2748,11 @@ int RESPUESTA_CrearSoftwareIncremental(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_RestaurarImagen
+// Función: RESPUESTA_RestaurarImagen
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de restauracin de una imagen. Ademn actualiza  la base de datos.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2733,7 +2784,7 @@ int RESPUESTA_RestaurarImagen(SOCKET s,char *parametros)
 	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
 		return(false); // Error al registrar notificacion
 	}
-	if(strcmp(res,ACCION_FALLIDA)==0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)==0) { // Ha habido algn error en la ejecucin de la acción del cliente rembo
 		db.Close();
 		return(false);
 	}
@@ -2744,11 +2795,11 @@ int RESPUESTA_RestaurarImagen(SOCKET s,char *parametros)
 	return(true);	
 }
 // ________________________________________________________________________________________________________
-// Funcin: Actualiza_ordenador_imagen
+// Función: Actualiza_ordenador_imagen
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin actualiza la tabla ordenador_imagen
-//		Parnetros:
+//		Parámetros:
 //			- par: particion
 //			- idi: identificador de la imagen ( 0 ninguna )
 //			- ido: identificador del ordenador
@@ -2800,11 +2851,11 @@ int Actualiza_ordenador_imagen(char *par,const char *idi,char *ido,Database db)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_ParticionaryFormatear
+// Función: RESPUESTA_ParticionaryFormatear
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de particionar y formatear.  Ademn actualiza  la base de datos.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2817,7 +2868,7 @@ int RESPUESTA_ParticionaryFormatear(SOCKET s,char *parametros)
 
 	res=toma_parametro("res",parametros); // Toma resultado
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
 	cfg=toma_parametro("cfg",parametros); // Toma configuracin
@@ -2833,7 +2884,7 @@ int RESPUESTA_ParticionaryFormatear(SOCKET s,char *parametros)
 	}
 	if(strcmp(res,ACCION_FALLIDA)==0){
 		db.Close(); 
-		 return(true); // Ha habido algn error en la ejecucin de la accin del cliente rembo
+		 return(true); // Ha habido algn error en la ejecucin de la acción del cliente rembo
 	}
 	if(!actualiza_configuracion(db,tbl,cfg,0,0,iph)) 	return(false); // Erro al actualiza la configuracin
 
@@ -2847,11 +2898,11 @@ int RESPUESTA_ParticionaryFormatear(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_Configurar
+// Función: RESPUESTA_Configurar
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de Configurar.  Ademn actualiza  la base de datos.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2871,7 +2922,7 @@ int RESPUESTA_Configurar(SOCKET s,char *parametros)
 	cfg=toma_parametro("cfg",parametros); // Toma configuracin
 	hdc=toma_parametro("hdc",parametros); // Toma participaciones a formatear
 
-	strcpy(gids,ids); // Guarda el identificador de la accin
+	strcpy(gids,ids); // Guarda el identificador de la acción
 	strcpy(gido,ido); // Guarda el identificador del ordenador
 
 	if(!db.Open(usuario,pasguor,datasource,catalog)){ // error de conexion
@@ -2884,7 +2935,7 @@ int RESPUESTA_Configurar(SOCKET s,char *parametros)
 
 	if(strcmp(res,ACCION_FALLIDA)==0){
 		db.Close();
-		 return(true); // Ha habido algn error en la ejecucin de la accin del cliente rembo
+		 return(true); // Ha habido algn error en la ejecucin de la acción del cliente rembo
 	}
 	if(!actualiza_configuracion(db,tbl,cfg,0,0,iph)) 	return(false); // Erro al actualiza la configuracin
 	
@@ -2906,11 +2957,11 @@ int RESPUESTA_Configurar(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_TomaConfiguracion
+// Función: RESPUESTA_TomaConfiguracion
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de Toma Comfiguracin.  Ademn actualiza  la base de datos.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2924,7 +2975,7 @@ int RESPUESTA_TomaConfiguracion(SOCKET s,char *parametros)
 
 	res=toma_parametro("res",parametros); // Toma resultado
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
 	cfg=toma_parametro("cfg",parametros); // Toma configuracin
@@ -2936,7 +2987,7 @@ int RESPUESTA_TomaConfiguracion(SOCKET s,char *parametros)
 	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
 		return(false); // Error al registrar notificacion
 	}
-	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la acción del cliente rembo
 		if(!actualiza_configuracion(db,tbl,cfg,0,0,iph)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
@@ -2944,11 +2995,11 @@ int RESPUESTA_TomaConfiguracion(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_TomaHardware
+// Función: RESPUESTA_TomaHardware
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de Toma HArdware.  Ademn actualiza  la base de datos.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -2962,7 +3013,7 @@ int RESPUESTA_TomaHardware(SOCKET s,char *parametros)
 
 	res=toma_parametro("res",parametros); // Toma resultado
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
 	
@@ -2975,7 +3026,7 @@ int RESPUESTA_TomaHardware(SOCKET s,char *parametros)
 	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
 		return(false); // Error al registrar notificacion
 	}
-	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la acción del cliente rembo
 		if(!actualiza_hardware(db,tbl,hrd,iph,ido)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
@@ -2983,11 +3034,11 @@ int RESPUESTA_TomaHardware(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: RESPUESTA_TomaSoftware
+// Función: RESPUESTA_TomaSoftware
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin responde a un comando de Inventario Software.  Además actualiza  la base de datos.
-//		Parnetros:
+//		Parámetros:
 //			- s: Socket que el cliente rembo usa para comunicarse con el servidor HIDRA
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -3001,7 +3052,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 
 	res=toma_parametro("res",parametros); // Toma resultado
 	der=toma_parametro("der",parametros); // Toma descripcin del error ( si hubiera habido)
-	ids=toma_parametro("ids",parametros); // Toma identificador de la accin
+	ids=toma_parametro("ids",parametros); // Toma identificador de la acción
 	iph=toma_parametro("iph",parametros); // Toma ip
 	ido=toma_parametro("ido",parametros); // Toma identificador del ordenador
 	
@@ -3016,7 +3067,7 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 	if(!RespuestaEstandar(res,der,ids,ido,db,tbl)){
 		return(false); // Error al registrar notificacion
 	}
-	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la accin del cliente rembo
+	if(strcmp(res,ACCION_FALLIDA)!=0) { // Ha habido algn error en la ejecucin de la acción del cliente rembo
 		if(!actualiza_software(db,tbl,sft,par,tfs,iph,ido)) // El ordenador ha cambiado de configuracin
 			return(false);
 	}
@@ -3024,15 +3075,15 @@ int RESPUESTA_TomaSoftware(SOCKET s,char *parametros)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: busca_comandos
+// Función: busca_comandos
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin busca en la base de datos,comandos pendientes de ejecutar	para el ordenador cocreto
-//		Parnetros:
+//		Parámetros:
 //			- iph: Direccin IP del ordenador
 //			- ido: Identificador del ordenador
-//			- parametros: parametros de la accin buscada
-//			- ids: Identificador de la accin
+//			- parametros: parametros de la acción buscada
+//			- ids: Identificador de la acción
 // ________________________________________________________________________________________________________
 int busca_comandos(char* iph,char *ido,char *parametros,int *ids)
 {
@@ -3062,7 +3113,7 @@ int busca_comandos(char* iph,char *ido,char *parametros,int *ids)
 		}
 
 		if(IgualIP(parametros,iph)){ // Si existe la IP en la cadena
-			if(!tbl.Get("idaccion",*ids)){ // Toma identificador de la accin
+			if(!tbl.Get("idaccion",*ids)){ // Toma identificador de la acción
 				tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 				return(false);
 			}
@@ -3141,7 +3192,7 @@ int comprueba_resultados(int idaccion,Database db){
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}
-	// Comprueba si ha finalizado esta accin e inserta su notificador correspondiente
+	// Comprueba si ha finalizado esta acción e inserta su notificador correspondiente
 	return(comprueba_finalizada(idaccion,finalaccion,db));
 }
 // ________________________________________________________________________________________________________
@@ -3234,11 +3285,11 @@ int comprueba_finalizada(int idaccion,char *resultado,Database db){
 	return(resul);
 }
 // ________________________________________________________________________________________________________
-// Funcin: EnviaServidoresRembo
+// Función: EnviaServidoresRembo
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin envia una  trama a un servidor rembo para que sus clientes ejecuten un comando
-//		Parnetros:
+//		Parámetros:
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
 void EnviaServidoresRembo(char * parametros)
@@ -3255,11 +3306,11 @@ void EnviaServidoresRembo(char * parametros)
 	}
 }
 // ________________________________________________________________________________________________________
-// Funcin: manda_comando_servidorrembo
+// Función: manda_comando_servidorrembo
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin envia una  trama a un servidor rembo para que sus clientes ejecuten un comando
-//		Parnetros:
+//		Parámetros:
 //			- ip_srvrbm: Direccin IP del servidor REMBO
 //			- parametros: parametros del comando
 // ________________________________________________________________________________________________________
@@ -3308,9 +3359,9 @@ SOCKET UDPConnect(char *ips)
 	return(socket_c);
 }
 //________________________________________________________________________________________________________
-// Funcin: envia_comandos
+// Función: envia_comandos
 //
-//		Descripcin: 
+//		Descripción: 
 //			Enva trama UDP
 // ________________________________________________________________________________________________________
 int envia_comandos(SOCKET s,TRAMA* trama, char* ipsrv,int puerto)
@@ -3335,9 +3386,9 @@ int envia_comandos(SOCKET s,TRAMA* trama, char* ipsrv,int puerto)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Funcin: DesmarcaServidoresRembo
+// Función: DesmarcaServidoresRembo
 //
-//	 Descripcin:
+//	 Descripción:
 //		Esta funcin desmarca la tabla completa de servidores rembo para iniciar la cuesation de envio
 // ________________________________________________________________________________________________________
 void DesmarcaServidoresRembo(void)
@@ -3349,11 +3400,11 @@ void DesmarcaServidoresRembo(void)
 	}
 }
 // ________________________________________________________________________________________________________
-// Funcin: MarcaServidoresRembo
+// Función: MarcaServidoresRembo
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin marca la tabla de servidores Rembo y coloca la ip del cliente en el buffer
-//		Parnetros:
+//		Parámetros:
 //			- ipsrvrmb: ip del servidor rembo
 //			- ipclrmb: ip del cliente rembo
 // ________________________________________________________________________________________________________
@@ -3371,11 +3422,11 @@ void MarcaServidoresRembo(char* ipsrvrmb,char*ipclrmb)
 	}
 }
 // ________________________________________________________________________________________________________
-// Funcin: TomaIPServidorRembo
+// Función: TomaIPServidorRembo
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin devuelve true o false dependiendo si el Servidor REMBO estnen la tabla  de servidores.
-//		Parnetros:
+//		Parámetros:
 //			- ip : La ip del servidor a buscar
 // ________________________________________________________________________________________________________
 BOOLEAN TomaIPServidorRembo(char *ip,int *p)
@@ -3395,11 +3446,11 @@ BOOLEAN TomaIPServidorRembo(char *ip,int *p)
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________
-// Funcin: AbreConexion
+// Función: AbreConexion
 //
-//		Descripcin: 
+//		Descripción: 
 //			Crea un socket y lo conecta a una interface de red. Devuelve el socket
-//		Parnetros:
+//		Parámetros:
 //			- ips : La direccin IP con la que se comunicarnel socket
 //			- port : Puerto para la  comunicacin
 // ________________________________________________________________________________________________________
@@ -3427,17 +3478,17 @@ SOCKET AbreConexion(char *ips,int port)
 	
 }
 // ________________________________________________________________________________________________________
-// Funcin: EjecutarTarea
+// Función: EjecutarTarea
 //
-//		Descripcin: 
-//			Registra una accin (Tarea) y la envn para su ejecucin 
-//		Parnetros:
+//		Descripción: 
+//			Registra una acción (Tarea) y la envn para su ejecucin 
+//		Parámetros:
 //			- idtarea : Identificador de la tarea
 //			- accionid: identificador del trabajo padre (si existe)
 //			- idnotificador:  identificador del trabajo_tarea incluido en trabajo padre (si existe)
 //			- idcentro: Centro propietario del trabjo padre (si existe este trabajo)
 //			- Database: una conexion ADO operativa
-//			- parametros: parnetros de la accin
+//			- parametros: parnetros de la acción
 // ________________________________________________________________________________________________________
 int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Database db,char* parametros )
 {
@@ -3539,7 +3590,7 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 		return(false);
 	}
 	accionid=0;
-	// Toma identificador dela accin
+	// Toma identificador dela acción
 	sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
@@ -3562,7 +3613,7 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 			 free(tbComandosparametros[i]);
 			return(false);
 		}
-		// Toma identificador dela accin
+		// Toma identificador dela acción
 		sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
 		if(!db.Execute(sqlstr,tbl)){ // Error al leer
 			db.GetErrorErrStr(ErrStr);
@@ -3582,11 +3633,11 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: manda peticin de inclusion
+// Función: manda peticin de inclusion
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin envia una tarea  por la red.
-//		Parnetros:
+//		Parámetros:
 //			- parametros: El contenido de la tarea
 // ________________________________________________________________________________________________________
 void envia_tarea(char* parametros)
@@ -3600,14 +3651,14 @@ void envia_tarea(char* parametros)
 	gestiona_comando(INVALID_SOCKET,trama);
 }
 // ________________________________________________________________________________________________________
-// Funcin: EjecutarTrabajo
+// Función: EjecutarTrabajo
 //
-//		Descripcin: 
-//			Registra una accin (Trabajo y la envn para su ejecucin 
-//		Parnetros:
+//		Descripción: 
+//			Registra una acción (Trabajo y la envn para su ejecucin 
+//		Parámetros:
 //			- idtrabajo : Identificador del trabajo
 //			- Database: una conexion ADO operativa
-//			- parametros: parnetros de la accin
+//			- parametros: parnetros de la acción
 // ________________________________________________________________________________________________________
 int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 {
@@ -3690,7 +3741,7 @@ int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 		return(false);
 	}
 	int accionid=0;
-	// Toma identificador dela accin
+	// Toma identificador dela acción
 	sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
@@ -3712,11 +3763,11 @@ int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: cuestion_nuevoordenador
+// Función: cuestion_nuevoordenador
 //
-//	 Descripcin:
+//	 Descripción:
 //		Esta funcin da de alta un ordenador  y un aula si el sistema estnconfigurado para ello
-//		Parnetros:
+//		Parámetros:
 //			- db: Objeto base de datos (ya operativo)
 //			- tbl: Objeto tabla
 //			- ido: identificador del ordenador que se darnde alta automnicamente( se devuelve)
@@ -3780,11 +3831,11 @@ int cuestion_nuevoordenador(Database db,Table tbl,int*ido,char *nau,char *nor,ch
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: alta_ordenador
+// Función: alta_ordenador
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin da de alta un ordenador
-//		Parnetros:
+//		Parámetros:
 //			- db: Objeto base de datos (ya operativo)
 //			- tbl: Objeto tabla
 //			- mac: MAC del ordenador
@@ -3812,7 +3863,7 @@ int alta_ordenador(Database db,Table tbl,int* ido,char *nor,char *iph,char*mac,i
 		return(false);
 	}
 	idordenador=0;
-	// Toma identificador dela accin
+	// Toma identificador dela acción
 	sprintf(sqlstr,"SELECT LAST_INSERT_ID() as identificador");
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
@@ -3828,11 +3879,11 @@ int alta_ordenador(Database db,Table tbl,int* ido,char *nor,char *iph,char*mac,i
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Funcin: Toma_idservidorres
+// Función: Toma_idservidorres
 //
-//		Descripcin:
+//		Descripción:
 //			Esta funcin devuelve los identificadores de los servidores rembo y dhcp de un determinado ordenador
-//		Parnetros:
+//		Parámetros:
 //				db: Objeto base de datos (ya operativo)
 //				tbl: Objeto tabla
 //				ipd: ip del servidor dhcp

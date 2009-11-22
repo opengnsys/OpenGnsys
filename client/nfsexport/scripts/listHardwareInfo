@@ -1,3 +1,23 @@
 #!/bin/bash
-ogListHardwareInfo 2>/dev/null
-exit 0
+# Scirpt de ejemplo para almacenear en fichero temporal el listado de hardware.
+# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+# Formato:  listHardwareInfo 
+
+PROG="$(basename $0)"
+if [ $# -ne 0 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG "
+    exit $?
+fi
+
+# Directorio del servidor donde se exportan los ficheros de registro.
+SERVERLOGDIR=$(mount | awk -v d=$OGLOG '
+				BEGIN {FS="[: ]"}
+				{if ($4==d) dir=$2}
+				END {print dir}')
+
+# Fichero de listado:  hard-IP
+HARDFILE="hard-$(ogGetIpAddress)"
+# Redirigir salida al fichero de listado.
+ogListHardwareInfo>$OGLOG/$HARDFILE || exit $?
+# Salida: camino del fichero de listado en el servidor de repositorio.
+echo $SERVERLOGDIR/$HARDFILE

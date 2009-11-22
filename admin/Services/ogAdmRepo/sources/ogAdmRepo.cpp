@@ -51,7 +51,7 @@ int TomaConfiguracion(char* pathfilecfg)
 	if(pathfilecfg==NULL) exit(EXIT_FAILURE);; // Nombre del fichero en blanco
 
 	Fconfig = fopen ( pathfilecfg , "rb" );
-	if (Fconfig==NULL)	exit(EXIT_FAILURE);;
+	if (Fconfig==NULL)	return(FALSE);
 	fseek (Fconfig , 0 , SEEK_END);  // Obtiene tamaño del fichero.
 	lSize = ftell (Fconfig);
 	rewind (Fconfig);

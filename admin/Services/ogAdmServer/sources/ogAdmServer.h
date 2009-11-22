@@ -37,14 +37,18 @@
 #define PUERTOMINUSER 40000
 #define PUERTOMAXUSER 60000
 
-#define LITAMBITO_CENTROS							"centros"
-#define LITAMBITO_GRUPOSAULAS					"gruposaulas"
-#define LITAMBITO_AULAS								"aulas"
-#define LITAMBITO_GRUPOSORDENADORES	"gruposordenadores"
-#define LITAMBITO_ORDENADORES				"ordenadores"
+#define COMILLAS_SIMPES 0x27 
+#define DOBLES_COMILLAS 0x22 
+#define BARRA_INVERTIDA 0x5c 
 
-#define ACCION_EXITOSA			"1" // Finalizada con exito
-#define ACCION_FALLIDA			"2" // Finalizada con errores
+#define LITAMBITO_CENTROS		"centros"
+#define LITAMBITO_GRUPOSAULAS		"gruposaulas"
+#define LITAMBITO_AULAS			"aulas"
+#define LITAMBITO_GRUPOSORDENADORES	"gruposordenadores"
+#define LITAMBITO_ORDENADORES		"ordenadores"
+
+#define ACCION_EXITOSA		"1" // Finalizada con exito
+#define ACCION_FALLIDA		"2" // Finalizada con errores
 #define ACCION_TERMINADA	"3" // Finalizada manualmente con indicacion de exito 
 #define ACCION_ABORTADA		"4" // Finalizada manualmente con indicacion de errores 
 #define ACCION_SINERRORES	"5" // Activa y sin ningn error
@@ -163,6 +167,7 @@ void FINCADaINTRO(char*,char*);
 int cuenta_ipes(char*);
 char * toma_parametro(const char*,char *);
 char * corte_iph(char *);
+char * escaparComillas(char*);
 
 int respuesta_cortesia(SOCKET );
 int NoComandosPendientes(SOCKET);
@@ -200,8 +205,8 @@ void PurgarTablaSockets(char *);
 int borra_entrada(int);
 int RESPUESTA_Arrancar(SOCKET ,char *);
 int RESPUESTA_Apagar(SOCKET ,char *);
-int RESPUESTA_RemboOffline(SOCKET ,char *);
 int RESPUESTA_Reiniciar(SOCKET ,char *);
+int RESPUESTA_IniciarSesion(SOCKET ,char *);
 int RESPUESTA_Actualizar(SOCKET,char *);
 int RESPUESTA_ExecShell(SOCKET ,char *);
 int RespuestaEstandar(char *,char *,char *,char*,Database, Table);

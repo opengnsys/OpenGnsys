@@ -3,10 +3,10 @@
 # (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
 
 PROG="$(basename $0)"
-if [ $# -ne 3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG IPservidor urlmenu ipcliente"
+if [ $# -ne 1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG urlmenu"
     exit $?
 fi
 
-url="$2"
+url="$1"
 browser -qws $url

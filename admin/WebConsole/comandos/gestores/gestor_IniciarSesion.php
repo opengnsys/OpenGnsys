@@ -102,8 +102,8 @@ function Gestiona($cmd){
 
 	$parametros=$ejecutor;
 	$parametros.="nfn=".$nombrefuncion.chr(13);
-	$parametros.="iph=".$cadenaip.chr(13);
 	$parametros.="par=".$particion.chr(13);
+	$parametros.="iph=".$cadenaip.chr(13);
 	$cmd->ParamSetValor("@parametros",$parametros);
 
 	return(CuestionAcciones($cmd,$shidra,$parametros));

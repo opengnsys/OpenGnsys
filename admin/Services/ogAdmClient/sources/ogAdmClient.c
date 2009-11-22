@@ -143,22 +143,22 @@ int LeeFileConfiguracion()
 	char * buffer,*lineas[100],*dualparametro[2];
 	char ch[2];
 	int i,numlin,resul;
-	FILE* Fconfig;
+	FILE* Fsalida;
 	
 	if(szPathFileCfg==NULL) return(false); // Nombre del fichero de configuración erróneo
 
-	Fconfig = fopen ( szPathFileCfg , "rb" );	// Abre  fichero de configuración
-	if (Fconfig==NULL)
+	Fsalida = fopen ( szPathFileCfg , "rb" );	// Abre  fichero de configuración
+	if (Fsalida==NULL)
 		return(false); // Error de apertura del fichero de configuración
-	fseek (Fconfig , 0 , SEEK_END);
-	lSize = ftell (Fconfig);	// Obtiene tamaño del fichero.
-	rewind (Fconfig);	// Coloca puntero de lectura al principio
+	fseek (Fsalida , 0 , SEEK_END);
+	lSize = ftell (Fsalida);	// Obtiene tamaño del fichero.
+	rewind (Fsalida);	// Coloca puntero de lectura al principio
 	
 	buffer =(char*)ReservaMemoria(lSize);	// Toma memoria para el buffer de lectura.
 	if (buffer == NULL)
 		return(false); // Error de reserva de memoria para buffer de lectura
-	fread (buffer,1,lSize,Fconfig);	// Lee contenido del fichero
-	fclose(Fconfig);
+	fread (buffer,1,lSize,Fsalida);	// Lee contenido del fichero
+	fclose(Fsalida);
 
 	//inicializar variables globales 
 	IPlocal[0]='\0';	// IP local
@@ -189,8 +189,13 @@ int LeeFileConfiguracion()
 					resul=strcmp(dualparametro[0],"UrlMenu");
 					if(resul==0)
 						strcpy(URLMENU,dualparametro[1]);
-					else
-						return(false);
+					else{
+						resul=strcmp(dualparametro[0],"UrlMsg");
+						if(resul==0)
+							strcpy(URLMSG,dualparametro[1]);
+						else
+							return(false);
+					}
 				}
 			}
 		}
@@ -219,10 +224,10 @@ void Log(char* msg)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	fclose(FLog);	
 	// Lo muestra por consola
-/*
+
 	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	system(msgcon);
-*/
+
 	
 }
 //______________________________________________________________________________________________________
@@ -262,7 +267,7 @@ void UltimoErrorScript(int herror,char*modulo)
 {
 	e.herror=herror;
 	if(herror>MAXERRORSCRIPT){
-		strcpy(e.msg,tbErrores[MAXERRORSCRIPT+1]);
+		strcpy(e.msg,tbErroresScripts[MAXERRORSCRIPT]);
 	}
 	else
 		strcpy(e.msg,tbErroresScripts[herror]);	
@@ -360,7 +365,7 @@ int SplitParametros(char **trozos,char *cadena, char * ch)
 //		El parámetro salida recoge la salida por pantalla que se genera en la ejecución del script siempre que
 //		sea disinto de NULL, esto es, si al llamar a la función este parámetro es NULL no se recogerá dicha salida. 
 //______________________________________________________________________________________________________
-int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
+int oldEjecutarScript ( char *script,char * parametros,char *salida,int swasci)
 {
 	int  descr[2];	/* Descriptores de E y S de la turbería */
 	int  bytesleidos;	/* Bytes leidos en el mensaje */
@@ -431,6 +436,119 @@ int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
 		}   
 		return(resul);
 	}
+	return(-1); 
+}
+//______________________________________________________________________________________________________
+// Función: EjecutarScript
+//
+//	 Descripción:
+//		Ejecuta un script de la shell creando un proceso hijo para ello
+//	Parámetros:
+//		- script: Nombre del script de la  shell
+//		- parametros: Parámetros que se le pasarán al script
+//		- salida: Recoge la salida por pantalla que genera el script
+//		- swasci: Filtra la respuesta del script:
+//					 true=Elimina de la respuesta caracteres menores de asci 32
+//					 false= No los elimina					
+// 	Devuelve:
+//		Código de error de la ejecución. ( Ver tabla de código de errores en la documentación)
+//	Especificaciones:
+//		El parámetro salida recoge la salida desde un fichero que se genera en la ejecución del script siempre que
+//		sea distinto de NULL, esto es, si al llamar a la función este parámetro es NULL no se recogerá dicha salida. 
+//______________________________________________________________________________________________________
+int EjecutarScript ( char *script,char * parametros,char *salida,int swasci)
+{
+	int  descr[2];	/* Descriptores de E y S de la turbería */
+	int resul,bytesleidos,estado;	
+	pid_t  pid;
+	pipe (descr);
+	int i,nargs;
+    FILE *Fretorno;
+    char buffer[512];
+    
+	if(ndebug>2){
+		sprintf(msglog,"Ejecución del script: %s",script);
+		Log(msglog);
+	}
+    	
+	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
+	for(i=nargs;i<MAXARGS;i++){
+		argumentos[i]=NULL;
+	}
+    
+	if(ndebug>2){
+		for(i=0;i<nargs;i++){
+			sprintf(msglog,"Parámetro %d del script: %s",i,argumentos[i]);
+			Log(msglog);
+		}
+	}
+	
+	if(salida!=(char*)NULL){ // Si se solicita retorno de información...
+		Fretorno = fopen("/tmp/retorno","w" );
+		if (Fretorno==NULL){
+			return(8); // Error en la eliminación del archivo temporal de intercambio"
+		}
+		fclose(Fretorno);
+	}	
+	
+	if((pid=fork())==0){
+		/* Proceso hijo que ejecuta el script */
+		close (descr[LEER]);
+		dup2 (descr[ESCRIBIR], 1);
+		close (descr[ESCRIBIR]);
+		resul=execv(script,argumentos);
+		//resul=execlp (script, script, argumentos[0],argumentos[1],NULL);    
+		exit(resul);   
+	}
+	else {
+		if (pid ==-1){
+			sprintf(msglog,"***Error en la creación del proceso hijo pid=%d",pid);
+			Log(msglog);
+			return(-1);
+		}
+		/* Proceso padre que lee la salida del script */
+		close (descr[ESCRIBIR]);
+		bytesleidos = read (descr[LEER], buffer, 512);
+		while(bytesleidos>0){
+			bytesleidos = read (descr[LEER], buffer, 512);
+		}
+		close (descr[LEER]);
+		if(salida!=(char*)NULL){ // Si se solicita retorno de información...			
+			FILE *Fretorno = fopen("/tmp/retorno","rb" );
+			long lSize;
+			if (Fretorno!=NULL){
+				fseek (Fretorno , 0 , SEEK_END);  // Obtiene tamaño del fichero.
+				lSize = ftell (Fretorno);
+				rewind (Fretorno);
+				if(lSize>LONGITUD_SCRIPTSALIDA){
+					lSize=LONGITUD_SCRIPTSALIDA;
+					Log("***Aviso, la información de salida excede de la longitud permitida. Puede haberse truncado");
+				}
+				fread (salida,1,lSize,Fretorno); 	// Lee contenido del fichero
+				for(i=lSize-1;i>=0;i--){
+					if(salida[i]<32 && swasci) // Caracter Asci menor de 32
+					salida[i]='\0';
+				}
+				fclose(Fretorno);
+			}
+			else
+				return(9); // Error en la eliminación del archivo temporal de intercambio"
+			
+		}
+
+		if(ndebug>2){
+			sprintf(msglog,"Información devuelta %s",salida);
+			Log(msglog);
+		}
+		//kill(pid,SIGQUIT);
+		waitpid(pid,&estado,0);  
+		resul=WEXITSTATUS(estado);
+		if(ndebug>2){
+			sprintf(msglog,"Estatus de finalización del script:%d",resul);
+			Log(msglog);
+		}   
+		return(resul);
+		}
 	return(-1); 
 }
 //______________________________________________________________________________________________________
@@ -979,7 +1097,7 @@ int GestionTramas(TRAMA *trama)
 			
 	res=strcmp(nombrefuncion,"IniciarSesion");
 	if(res==0)
-		return(Reiniciar(trama,nwtrama));
+		return(IniciarSesion(trama,nwtrama));
 
 	res=strcmp(nombrefuncion,"RESPUESTA_InclusionCliente");
 	if(res==0)
@@ -1096,7 +1214,7 @@ int TomaIPlocal()
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/getIpAddress",HIDRASCRIPTS);
+	sprintf(cmdshell,"%s/admGetIpAddress",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);	
 	if(herror){
 		UltimoErrorScript(herror,"TomaIPlocal()"); // Se ha producido algún error
@@ -1280,12 +1398,15 @@ int Arrancar(TRAMA *trama,TRAMA *nwtrama)
 int Apagar(TRAMA *trama,TRAMA *nwtrama)
 { 
 	int res;
-
+	
 	sprintf(nwtrama->parametros,"nfn=RESPUESTA_Apagar\r");					
 	res=RespuestaEjecucionComando(trama,nwtrama,true);	
-	strcpy(cmdshell,"poweroff");
-	system(cmdshell);
-	return(res);
+	sprintf(cmdshell,"poweroff");
+	res=ExecBash(cmdshell);	
+	if(!res){
+		UltimoErrorScript(10,"Reiniciar()");	// Se ha producido algún error
+	}	
+	return(res); 		
 }
 //______________________________________________________________________________________________________
 // Función: Reiniciar
@@ -1304,12 +1425,15 @@ int Reiniciar(TRAMA *trama,TRAMA *nwtrama)
 	
 	sprintf(nwtrama->parametros,"nfn=RESPUESTA_Reiniciar\r");					
 	res=RespuestaEjecucionComando(trama,nwtrama,true);	
-	strcpy(cmdshell,"reboot");
-	system(cmdshell);
-	return(res);
+	sprintf(cmdshell,"reboot");
+	res=ExecBash(cmdshell);	
+	if(!res){
+		UltimoErrorScript(10,"Reiniciar()");	// Se ha producido algún error
+	}	
+	return(res); 	
 }
 //______________________________________________________________________________________________________
-// Función: IniciSesion
+// Función: IniciarSesion
 //
 //	 Descripción:
 //		Inicia Sesión en algún sistema operativo instalado en la máquina
@@ -1321,53 +1445,21 @@ int Reiniciar(TRAMA *trama,TRAMA *nwtrama)
 //		*** En ese proceso se devuelve correcto aún sabiendo que no se se sabe si va a funcionar
 //			pero esto evita que si se ha lanzado con seguimiento, la tarea no quede sin norificar.
 //______________________________________________________________________________________________________
-int IniciarSesion(TRAMA *trama,TRAMA *nwtrama)
+int  IniciarSesion(TRAMA *trama,TRAMA *nwtrama)
 {
-	int res,herror;
+	int res;
 	char *particion=TomaParametro("par",trama->parametros);
-	FILE* f;
-	long lSize;
-
 	char *disco=(char*)ReservaMemoria(2);
 	sprintf(disco,"1"); // Siempre el disco 1
-	sprintf(parametros,"bootOs %s %s",disco,particion);
 
-	//sprintf(nwtrama->parametros,"nfn=RESPUESTA_IniciarSesion\r");					
-	//res=RespuestaEjecucionComando(trama,nwtrama,true);	
-	sprintf(cmdshell,"bootOs %s %s",disco,particion);
-	system(cmdshell);
-	return(res);
-
-/*
-
-	sprintf(filecmdshell,"%s/%s","/tmp","_hidrascript_");
-	f = fopen(filecmdshell,"wt");	// Abre fichero de script
-	if(f==NULL)
-		res=false; // Error de apertura del fichero de configuración
-	else{
-		lSize=strlen(parametros);
-		fwrite(parametros,1,lSize,f);	// Escribe el código a ejecutar
-		fclose(f);
-		
-		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
-		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
-		
-		herror=EjecutarScript(cmdshell,parametros,NULL,true);
-		if(herror){
-			UltimoErrorScript(herror,"IniciarSesion()");	// Se ha producido algún error
-			res=false;	
-		}
-		else{
-			sprintf(cmdshell,"%s",filecmdshell);	// Ejecución el fichero de script creado
-			int herror=system(cmdshell);
-			if(herror){
-				UltimoErrorScript(herror,"IniciarSesion()");	// Se ha producido algún error
-				res=false;	
-			}		
-		}
-	}
-	return(res);
-*/
+	sprintf(nwtrama->parametros,"nfn=RESPUESTA_IniciarSesion\r");					
+	res=RespuestaEjecucionComando(trama,nwtrama,true);
+	sprintf(cmdshell,"%s/admBootOs %s %s",HIDRASCRIPTS,disco,particion);
+	res=ExecBash(cmdshell);	
+	if(!res){
+		UltimoErrorScript(10,"IniciarSesion()");	// Se ha producido algún error
+	}	
+	return(res); 
 }
 //______________________________________________________________________________________________________
 // Función: Actualizar
@@ -1384,7 +1476,10 @@ int Actualizar()
 { 
 	int res;
 	
+	kill(pidmenu,SIGQUIT);
+	MuestraMensaje(1);
 	res=InclusionCliente();
+	MuestraMenu(URLMENU);
 	return(res);
 }
 //______________________________________________________________________________________________________
@@ -1443,7 +1538,7 @@ int CrearPerfilSoftware(TRAMA*trama,TRAMA*nwtrama)
 int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*iprepo)   
 {
 	int herror;
-	sprintf(cmdshell,"%s/createImage",HIDRASCRIPTS);
+	sprintf(cmdshell,"%s/admCreateImage",HIDRASCRIPTS);
 	sprintf(parametros,"%s %s %s %s %s","createImage",disco,particion,"REPO",fileimg);
 	
 	if(ndebug>3){
@@ -1569,8 +1664,8 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 {
    	int herror;
 	
-	sprintf(cmdshell,"%s/restoreImage",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s","restoreImage",disco,particion,iprepo,fileimg);
+	sprintf(cmdshell,"%s/admRestoreImage",HIDRASCRIPTS);
+	sprintf(parametros," %s %s %s %s %s","admRestoreImage","REPO",fileimg,disco,particion);
 
 	if(ndebug>3){
 		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s",disco,particion,Propiedades.iprepo,fileimg);
@@ -1643,9 +1738,9 @@ int ParticionaryFormatear(TRAMA*trama,TRAMA*nwtrama)
 int Particionar(char* disco,char* PrParticion,char* LoParticion)
 {
 	if (strlen(PrParticion)>0){
-		if(Particionando(disco,PrParticion,"createPrimaryPartitions")){	// Particiones Primarias
+		if(Particionando(disco,PrParticion,"admCreatePrimaryPartitions")){	// Particiones Primarias
 			if (strlen(LoParticion)>0)
-				return(Particionando(disco,PrParticion,"createLogicalPartitions"));	// Particiones Logicas
+				return(Particionando(disco,PrParticion,"admCreateLogicalPartitions"));	// Particiones Logicas
 			else
 				return(true);
 		}
@@ -1653,7 +1748,7 @@ int Particionar(char* disco,char* PrParticion,char* LoParticion)
 			return(false);
 	}
 	if (strlen(LoParticion)>0)
-		return(Particionando(disco,PrParticion,"createLogicalPartitions"));
+		return(Particionando(disco,PrParticion,"admCreateLogicalPartitions"));
 	else
 		return(false);
 }
@@ -1704,7 +1799,7 @@ int Formatear(char* disco,char* particion)
 {
 	int herror;
 
-	sprintf(cmdshell,"%s/formatFs",HIDRASCRIPTS);	
+	sprintf(cmdshell,"%s/admFormatFs",HIDRASCRIPTS);	
 	sprintf(parametros," %s %s %s","FormatFs",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
@@ -1767,8 +1862,8 @@ char* LeeConfiguracion(char* disco)
 	char *nomso;
 	
 	cadenaparticiones=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
-	sprintf(cmdshell,"%s/listPrimaryPartitions",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s","listPrimaryPartitions",disco);
+	sprintf(cmdshell,"%s/admListPrimaryPartitions",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s","admListPrimaryPartitions",disco);
 	herror=EjecutarScript(cmdshell,parametros,cadenaparticiones,true);
 	if(herror){
 	    UltimoErrorScript(herror,"LeeConfiguracion()");	 // Se ha producido algún error
@@ -1837,8 +1932,8 @@ char* TomaNomSO(char*disco,int particion)
 	
 	infosopar=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA); // Información del S.O. de la partición
 	
-	sprintf(cmdshell,"%s/getOsVersion",HIDRASCRIPTS);	
-	sprintf(parametros," %s %s %d","getOsVersion",disco,particion);
+	sprintf(cmdshell,"%s/admGetOsVersion",HIDRASCRIPTS);	
+	sprintf(parametros," %s %s %d","admGetOsVersion",disco,particion);
 	herror=EjecutarScript(cmdshell,parametros,infosopar,true);
 		if(herror){
 	    UltimoErrorScript(herror,"TomaNomSO()");	 // Se ha producido algún error
@@ -1861,23 +1956,20 @@ char* TomaNomSO(char*disco,int particion)
 //	Devuelve:
 //		Nada
 // ________________________________________________________________________________________________________
-int MuestraMenu(char*ips,char *urp,char *iph)
+int MuestraMenu(char *urp)
 {
-	pid_t  pid;
 	int herror,nargs,resul;
 
-
-	sprintf(cmdshell,"%s/menuBrowser",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s %s %s","menuBrowser",ips,urp,iph);	
+	sprintf(cmdshell,"%s/admMenuBrowser",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s","admMenuBrowser",urp);	
 	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
-	if((pid=fork())==0){
+	if((pidmenu=fork())==0){
 		/* Proceso hijo que ejecuta el script */
 		execv(cmdshell,argumentos);
-		//resul=execlp (script, script, argumentos[0],argumentos[1],NULL);    
 		exit(resul);   
 	}
 	else {
-		if (pid ==-1){
+		if (pidmenu ==-1){
 			UltimoErrorScript(herror,"MuestraMenu()");	// Se ha producido algún error
 			return(false);	
 		}		
@@ -1903,9 +1995,9 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	int herror,res;
 	char *parametroshrd;
 	
-	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDALARGA);
-	sprintf(cmdshell,"%s/listHardwareInfo",HIDRASCRIPTS);
-	herror=EjecutarScript(cmdshell,NULL,parametroshrd,false);
+	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
+	sprintf(cmdshell,"%s/admListHardwareInfo",HIDRASCRIPTS);
+	herror=EjecutarScript(cmdshell,NULL,parametroshrd,true);
 	if(herror){
 	    UltimoErrorScript(herror,"InventarioHardware()");	// Se ha producido algún error
     }
@@ -1936,15 +2028,16 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	int herror,res;
 	char *parametrossft,*infopar;
 	char *particion=TomaParametro("par",trama->parametros); // Toma partición
+	//char *tipo=TomaParametro("tpl",trama->parametros); // Toma tipo de listado 
 
 	char *disco=(char*)ReservaMemoria(2);
 	sprintf(disco,"1"); // Siempre el disco 1
 
-	sprintf(cmdshell,"%s/listSoftwareInfo",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s %s","listSoftwareInfo",disco,particion);
+	sprintf(cmdshell,"%s/admListSoftwareInfo",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s %s","admListSoftwareInfo",disco,particion);
 
-	parametrossft=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDALARGA);
-	herror=EjecutarScript(cmdshell,parametros,parametrossft,false);
+	parametrossft=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
+	herror=EjecutarScript(cmdshell,parametros,parametrossft,true);
 	if(herror){
 	    UltimoErrorScript(herror,"InventarioSoftware()");	// Se ha producido algún error
     }
@@ -1952,7 +2045,7 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	// Toma tipo de partición
 		infopar=(char*)ReservaMemoria(16); //Tipo de partición
 		if(res && infopar){
-				sprintf(cmdshell,"%s/getFsType",HIDRASCRIPTS);	
+				sprintf(cmdshell,"%s/admGetFsType",HIDRASCRIPTS);	
 				sprintf(parametros," %s %s %s","getFsType",disco,particion);
 				herror=EjecutarScript(cmdshell,parametros,infopar,true);
 				if(herror){
@@ -2007,12 +2100,39 @@ int TomaConfiguracion(TRAMA *trama,TRAMA *nwtrama)
 // ________________________________________________________________________________________________________
 int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 {
-	FILE* f;
-	long lSize;
-	int herror,res;
+	int res;
 
 	char* wscript=TomaParametro("scp",trama->parametros); 	// Código del script	
 	char* codigo=URLDecode(wscript);	// Decodifica el código recibido con formato URLCode
+	
+	res=ExecBash(codigo);	
+	if(!res){
+		UltimoErrorScript(10,"ExecShell()");	// Se ha producido algún error
+	}
+			
+	char *disco=(char*)ReservaMemoria(2);
+	sprintf(disco,"1"); // Siempre el disco 1
+	char* parametroscfg=LeeConfiguracion(disco);
+	int lon;			
+	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_ExecShell\r");	
+	lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);	
+	RespuestaEjecucionComando(trama,nwtrama,res);	
+	return(true);	
+}
+//______________________________________________________________________________________________________
+// Función: ExecBash
+//
+//	Descripción: 
+// 		Ejecuta código bash
+//	Parámetros:
+//		- codigo: Código a ejecutar
+// 	Devuelve:
+//		true si el proceso fue correcto o false en caso contrario
+// ________________________________________________________________________________________________________
+int ExecBash(char*codigo){
+	FILE* f;
+	long lSize;
+	int herror,res;
 	
 	sprintf(filecmdshell,"%s/%s","/tmp","_hidrascript_");
 	f = fopen(filecmdshell,"wt");	// Abre fichero de script
@@ -2022,13 +2142,12 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 		lSize=strlen(codigo);
 		fwrite(codigo,1,lSize,f);	// Escribe el código a ejecutar
 		fclose(f);
-		
 		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
 		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
 		
 		herror=EjecutarScript(cmdshell,parametros,NULL,true);
 		if(herror){
-			UltimoErrorScript(herror,"ExecShell()");	// Se ha producido algún error
+			UltimoErrorScript(herror,"ExecBash()");	// Se ha producido algún error
 			res=false;	
 		}
 		else{
@@ -2036,21 +2155,11 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 			//int herror=EjecutarScript(cmdshell,NULL,NULL,true);
 			int herror=system(cmdshell);
 			if(herror){
-				UltimoErrorScript(herror,"ExecShell()");	// Se ha producido algún error
+				UltimoErrorScript(herror,"ExecBash()");	// Se ha producido algún error
 				res=false;	
 			}		
 		}
 	}
-	
-	char *disco=(char*)ReservaMemoria(2);
-	sprintf(disco,"1"); // Siempre el disco 1
-	char* parametroscfg=LeeConfiguracion(disco);
-	int lon;			
-	
-	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_ExecShell\r");	
-	lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);	
-	RespuestaEjecucionComando(trama,nwtrama,res);	
-		
 	return(res);
 }
 //______________________________________________________________________________________________________
@@ -2134,7 +2243,18 @@ int RespuestaEjecucionComando(TRAMA* trama, TRAMA *nwtrama, int res)
 		}
 		return(true);
 }
-
+//______________________________________________________________________________________________________
+// Función: MuestraMensaje
+//
+//	Descripción: 
+// 		Envia una página al browser con un mensaje determinado
+//	Parámetros:
+//		- idx: Indice de la cadena del mensaje
+// ________________________________________________________________________________________________________
+void MuestraMensaje(int idx){
+	sprintf(urlpag,"%s?msg=%d",URLMSG,idx); // Url de la página de mensajes
+	MuestraMenu(urlpag);
+}
 //***********************************************************************************************************************
 // PROGRAMA PRINCIPAL
 //***********************************************************************************************************************
@@ -2181,7 +2301,7 @@ int  main(int argc, char *argv[])
 		Log("Procesa comandos pendientes");
 		ComandosPendientes(); // Bucle para procesar comandos pendientes
 		Log("Acciones pendientes procesadas");
-		MuestraMenu(Servidorhidra,URLMENU,Propiedades.IPlocal);
+		//MuestraMenu(URLMENU);
 		Log("Disponibilidad para comandos interactivos activada ...");
 		ProcesaComandos(); // Bucle para procesar comando	s interactivos 
 		Log("Disponibilidad para comandos interactivos desactivada...");

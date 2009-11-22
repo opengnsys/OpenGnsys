@@ -490,9 +490,9 @@ else{
 <BR><BR>
 <? if($accionid==0){?>
 		<TABLE  align=center class=filtros border=0 align=left cellPadding=2 cellSpacing=5 >
-		  <TR height=20 width=450 valign=baseline>
+		  <TR height=20 width=100% valign=baseline>
 			<TD width=70 onclick=eleccion(this,1)  onmouseout=desresaltar(this) onmouseover=resaltar(this) >
-				&nbsp;<IMG src="../images/iconos/eliminar.gif"'>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+				&nbsp;<A href="#op"><IMG border=0 src="../images/iconos/eliminar.gif"'></A>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
 			<TD width=85 onclick=eleccion(this,2) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>		
 				&nbsp;<IMG src="../images/iconos/reiniciar.gif"'>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
 			<TD width=75 onclick=eleccion(this,3) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>

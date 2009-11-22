@@ -1,4 +1,3 @@
 #!/bin/bash
-DATOS=$(ogGetOsVersion $*) || exit $?
-[ -n "$DATOS" ] && echo $DATOS 
-exit 0
+ogGetOsVersion "$@"
+

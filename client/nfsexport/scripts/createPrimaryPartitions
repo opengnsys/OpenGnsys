@@ -1,5 +1,3 @@
 #!/bin/bash
-DATOS=$(ogCreatePartitions $*) || exit $?
+ogCreatePartitions "$@"
 exit 0
-
-

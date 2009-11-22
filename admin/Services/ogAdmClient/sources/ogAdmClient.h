@@ -16,12 +16,12 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <time.h>
+#include <signal.h>
  
 #define LEER		0
 #define ESCRIBIR	1
 
-#define LONGITUD_SCRIPTSALIDA 1024	// Longitud máxima de la informacin devuelta por un script
-#define LONGITUD_SCRIPTSALIDALARGA 4024	// Longitud máima de la informacin devuelta por un script
+#define LONGITUD_SCRIPTSALIDA 4064	// Longitud máxima de la informacin devuelta por un script
 #define LONGITUD_PARAMETROS_TRAMA 4024	// Longitud máima de la informacin de la trama (parametros)
 #define LONGITUD_TRAMA LONGITUD_PARAMETROS_TRAMA+11	// Longitud máxima de la trama completa
 #define LONGITUD_CONFIGURACION 1024	// Longitud mxima de las configuraciones de particin
@@ -79,8 +79,7 @@ char* argumentos[MAXARGS];
 char msglog[LONSTD];
 char msgcon[LONSTD];
 char filecmdshell[LONSTDC];
-char filemenu[LONSTDC];
-char fileitem[LONSTDC];
+char urlpag[LONSTDC];
 char fileini[LONSTDC];
 char filecmd[LONSTDC];
 
@@ -107,7 +106,9 @@ char HIDRACHEIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes
 char HIDRASRVIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en el repositorio)
 char HIDRASRVCMD[LONSTDC];	// Path del directorio del repositorio donde se depositan los comandos para el cliente 
 char HIDRASCRIPTS[LONSTDC];	// Path al directorio donde están los scripts de la interface con la APi de funciones de OpenGnsys (en el cliente )
-char URLMENU[LONSTDC]; // Url de la Aplicación Web 
+char URLMENU[LONSTDC]; // Url de la pagina de menu para el browser
+char URLMSG[LONSTDC]; // Url de la página de mensajed para el browser
+
 
 int HIDRAVER;	// Versión de la apliación de Administración
 int TPAR ;	// Tamaño de la particin
@@ -193,6 +194,7 @@ BOOL CMDPTES;	// Indicador de comandos pendientes
 
 BOOL aut = false; // Variable para controlar el acceso al menu de administracion
 
+pid_t  pidmenu;
 
 char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecución de este módulo",\
 		"001-No hay memoria suficiente para el buffer",\
@@ -219,7 +221,7 @@ char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecuc
 		"022-Error en la recepción de tramas desde el Servidor de Administración",\
 		"023-Error desconocido",\
 		};		
-		#define MAXERROR 22		// Error máximo cometido
+		#define MAXERROR 23		// Error máximo cometido
 
 char* tbErroresScripts[]={"000-Se han generado errores. No se puede continuar la ejecución de este módulo",\
 		"001-Formato de ejecución incorrecto.",\
@@ -228,10 +230,13 @@ char* tbErroresScripts[]={"000-Se han generado errores. No se puede continuar la
 		"004- Partición o fichero bloqueado",\
 		"005-Error al crear o restaurar una imagen",\
 		"006-Sin sistema operativo",\
-		"007- Programa o función no ejecutable",\
-		"008-Error desconocido",\
+		"007-Programa o función no ejecutable",\
+		"008-Error en la eliminación del archivo temporal de intercambio",\
+		"009-Error en la lectura del archivo temporal de intercambio",\
+		"010-Error al ejecutar código de la shell",\
+		"011-Error desconocido",	
 		};		
-	#define MAXERRORSCRIPT 7		// Error máximo cometido
+	#define MAXERRORSCRIPT 11		// Error máximo cometido
 
 // Prototipos de funciones
 char* Desencriptar(char *);
@@ -280,6 +285,7 @@ int ComandosPendientes(void);
 int Arrancar(TRAMA *,TRAMA *);
 int Apagar(TRAMA*,TRAMA*);
 int Reiniciar(TRAMA*,TRAMA*);
+int IniciarSesion(TRAMA*,TRAMA*);
 int Actualizar();
 int CrearPerfilSoftware(TRAMA*,TRAMA*);
 int CrearPerfil(char*,char*,char*,char*,char*);
@@ -299,4 +305,7 @@ int InventarioSoftware(TRAMA *,TRAMA *);
 int TomaConfiguracion(TRAMA *,TRAMA *);
 int RespuestaEjecucionComando(TRAMA* , TRAMA *, int);
 int ExecShell(TRAMA *,TRAMA *);
+int ExecBash(char*);
 char* URLDecode(char*);
+int MuestraMenu(char*);
+void MuestraMensaje(int);

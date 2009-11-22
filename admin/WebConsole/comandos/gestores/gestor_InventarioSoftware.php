@@ -106,6 +106,7 @@ for($j=0;$j<sizeof($auxsplit)-1;$j++){
 			$parametros=$ejecutor;
 			$parametros.="nfn=".$nombrefuncion.chr(13);
 			$parametros.="par=".$particion.chr(13);
+			$parametros.="tpl=si".chr(13); // Tipo de listado reducido
 			$parametros.="iph=".$cadenaip.chr(13);
 
 			$cmd->ParamSetValor("@parametros",$parametros);
