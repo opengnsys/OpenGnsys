@@ -224,10 +224,10 @@ void Log(char* msg)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	fclose(FLog);	
 	// Lo muestra por consola
-
+/*
 	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	system(msgcon);
-
+*/
 	
 }
 //______________________________________________________________________________________________________
@@ -2301,7 +2301,7 @@ int  main(int argc, char *argv[])
 		Log("Procesa comandos pendientes");
 		ComandosPendientes(); // Bucle para procesar comandos pendientes
 		Log("Acciones pendientes procesadas");
-		//MuestraMenu(URLMENU);
+		MuestraMenu(URLMENU);
 		Log("Disponibilidad para comandos interactivos activada ...");
 		ProcesaComandos(); // Bucle para procesar comando	s interactivos 
 		Log("Disponibilidad para comandos interactivos desactivada...");
