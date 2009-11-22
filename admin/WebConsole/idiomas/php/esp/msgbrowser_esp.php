@@ -26,8 +26,8 @@ $TbMsg=array();
 	$TbMsg[16]='ATENCIÓN, ha habido algún error en el proceso de formateado';
 	$TbMsg[17]='El proceso de Inventario Hardware ha terminado correctamente';
 	$TbMsg[18]='ATENCIÓN, ha habido algún error en el proceso de Inventario Hardware';
-	$TbMsg[19]='El proceso de Inventario Hardware ha terminado correctamente';
-	$TbMsg[20]='ATENCIÓN, ha habido algún error en el proceso de Inventario Hardware';
+	$TbMsg[19]='El proceso de Inventario Software ha terminado correctamente';
+	$TbMsg[20]='ATENCIÓN, ha habido algún error en el proceso de Inventario Software';
 	$TbMsg[21]='El proceso de jecuación del script bash ha terminado correctamente';
 	$TbMsg[22]='ATENCIÓN, ha habido algún error en el proceso de ejecución del script bash';
 
