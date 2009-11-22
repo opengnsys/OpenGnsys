@@ -1,5 +1,5 @@
 #!/bin/bash
-RETORNO=$(createPrimaryPartitions $* 2>/dev/null) || exit $?
+#RETORNO=$(createPrimaryPartitions $* 2>/dev/null) || exit $?
 exit 0
 
 
