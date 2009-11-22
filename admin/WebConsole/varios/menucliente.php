@@ -89,7 +89,7 @@ function RecuperaMenu($cmd,$iph){
 						acciones_menus.tipoitem,acciones_menus.descripitem,iconos.urlicono 
 						FROM ordenadores
 						INNER JOIN menus ON menus.idmenu = ordenadores.idmenu 
-						INNER JOIN acciones_menus ON acciones_menus.idmenu = menus.idmenu
+						LEFT OUTER JOIN acciones_menus ON acciones_menus.idmenu = menus.idmenu
 						LEFT OUTER JOIN iconos ON iconos.idicono=acciones_menus.idurlimg
 						WHERE ordenadores.ip='".$iph."' ORDER by acciones_menus.orden";
 

@@ -40,12 +40,28 @@ else
 	font-weight:600; 
 	}
 
-	.tdtest{
-		background: url('../images/iconos/ventana.png');
-		witdh:400;
-		heigth: 300px;
+	.tdbarra{
+		background: url('../images/iconos/barraven.png');
+		color:#FFFFFF;
+		font-family: sans-serif;
+		font-size: 12px;
+		font-weight:300; 
+		BORDER-BOTTOM: #000000 1px solid;
+		BORDER-LEFT: #FFFFFF 1px solid;
+		BORDER-RIGHT: #000000 1px solid;
+		BORDER-TOP: #FFFFFF 1px solid;
 	} 
-
+	.tdclien{
+		background: url('../images/iconos/clienven.png');
+		color:#000000;
+		font-family: sans-serif;
+		font-size: 14px;
+		font-weight:300; 
+		BORDER-BOTTOM: #999999 1px solid;
+		BORDER-LEFT: #FFFFFF 1px solid;
+		BORDER-RIGHT: #999999 1px solid;
+		BORDER-TOP: #FFFFFF 1px solid;
+	} 
 	</STYLE>
 </HEAD>
 <BODY>
@@ -63,10 +79,9 @@ else
 	}
 	else{
 		echo '<BR><BR><BR>';
-		echo '<TABLE CLASS="deepsea" cellspacing=0 cellpadding=2 align=center border=0>';
-		echo '<TR>';
-		echo '<TD height=20 >&nbsp;&nbsp;&nbsp;'.$mensaje.'&nbsp;&nbsp;&nbsp;</TD>';
-		echo '</TR>';
+		echo '<TABLE  cellspacing=0 cellpadding=2 align=center border=0>';
+		echo '<TR><TD align=center class="tdbarra">Opengnsys Browser Message</TD><TR>';
+		echo '<TR><TD class="tdclien" valign=center >&nbsp;&nbsp;&nbsp;'.$mensaje.'&nbsp;&nbsp;&nbsp;</TD></TR>';
 		echo '</TABLE>';
 	}
 ?>
