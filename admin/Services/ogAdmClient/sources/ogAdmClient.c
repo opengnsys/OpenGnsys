@@ -1538,6 +1538,9 @@ int CrearPerfilSoftware(TRAMA*trama,TRAMA*nwtrama)
 int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*iprepo)   
 {
 	int herror;
+
+	MuestraMensaje(0,msglog);
+	
 	sprintf(cmdshell,"%s/admCreateImage",HIDRASCRIPTS);
 	sprintf(parametros,"%s %s %s %s %s","createImage",disco,particion,"REPO",fileimg);
 	
@@ -1546,8 +1549,6 @@ int CrearPerfil(char* disco,char* fileimg,char* pathimg,char* particion,char*ipr
 		Log(msglog);
 	}
 
-	//Pantallas
-	MuestraMensaje(0,msglog);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror)
 		MuestraMensaje(10,NULL);
@@ -1674,6 +1675,9 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 {
    	int herror;
 	
+	//Pantallas
+	MuestraMensaje(3,NULL);
+
 	sprintf(cmdshell,"%s/admRestoreImage",HIDRASCRIPTS);
 	sprintf(parametros," %s %s %s %s %s","admRestoreImage","REPO",fileimg,disco,particion);
 
@@ -1682,8 +1686,6 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 		Log(msglog);
 	}
 	
-	//Pantallas
-	MuestraMensaje(0,msglog);
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror) // Restauración correcta
 		MuestraMensaje(12,NULL);
@@ -1691,7 +1693,6 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 		MuestraMensaje(11,NULL);
 	MuestraMenu(URLMENU);
 
-	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror){
 		UltimoErrorScript(herror,"RestaurandoImagen()");	// Se ha producido algún error
 		return(false);
@@ -1994,7 +1995,7 @@ int MuestraMenu(char *urp)
 {
 	int herror,nargs,resul;
 
-	if(ndebug>0){
+	if(ndebug>4){
 		sprintf(msglog,"Url:%s",urp);
 		Log(msglog);
 	}
@@ -2036,7 +2037,6 @@ void MuestraMensaje(int idx,char*msg){
 		sprintf(urlpag,"%s?msg=%s",URLMSG,URLEncode(msg)); // Url de la página de mensajes
 	else
 		sprintf(urlpag,"%s?idx=%d",URLMSG,idx); // Url de la página de mensajes
-
 	MuestraMenu(urlpag);
 }
 //______________________________________________________________________________________________________
@@ -2057,15 +2057,16 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 {
 	int herror,res;
 	char *parametroshrd;
+
+	MuestraMensaje(6,NULL);
 	
 	parametroshrd=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
 	sprintf(cmdshell,"%s/admListHardwareInfo",HIDRASCRIPTS);
 
-	//Pantallas
-	MuestraMensaje(6,NULL);
 	herror=EjecutarScript(cmdshell,NULL,parametroshrd,true);
+	sprintf(msglog,"EL ERRRRRRRRRRRR es %d",herror);
 	if(herror)
-		MuestraMensaje(18,NULL);
+		MuestraMensaje(0,msglog);
 	else
 		MuestraMensaje(17,NULL);
 	MuestraMenu(URLMENU);
@@ -2105,13 +2106,13 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	char *disco=(char*)ReservaMemoria(2);
 	sprintf(disco,"1"); // Siempre el disco 1
 
+	MuestraMensaje(7,NULL);
+
 	sprintf(cmdshell,"%s/admListSoftwareInfo",HIDRASCRIPTS);
 	sprintf(parametros,"%s %s %s","admListSoftwareInfo",disco,particion);
 
 	parametrossft=(char*)ReservaMemoria(LONGITUD_SCRIPTSALIDA);
 
-	//Pantallas
-	MuestraMensaje(7,NULL);
 	herror=EjecutarScript(cmdshell,parametros,parametrossft,true);
 	if(herror)
 		MuestraMensaje(20,NULL);
