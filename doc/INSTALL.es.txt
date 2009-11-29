@@ -1,0 +1,42 @@
+Instalación de OpenGNSys Server v 0.9
+=====================================
+
+Notas iniciales
+
+Se presupone que el servidor de OpenGNSys va a ser instalado en un sistema operativo Ubuntu 9.04 Server de 32 bits.
+
+La instalación de OpenGNSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede descargarse directamente de la dirección: http://www.informatica.us.es:8080/opengnsys/browser/trunk/installer/opengnsys_installer.sh?format=txt
+
+Ejemplos de descarga con varias herramientas:
+
+    * Descargar con wget.
+	wget http://www.informatica.us.es:8080/opengnsys/browser/trunk/installer/opengnsys_installer.sh?format=txt -O opengnsys_installer.sh
+
+    * Descargar con curl.
+	curl http://www.informatica.us.es:8080/opengnsys/browser/trunk/installer/opengnsys_installer.sh?format=txt > opengnsys_installer.sh
+
+El script debe ser ejecutado como usuario root:
+	sudo bash opengnsys_installer.sh
+
+Se realizan los siguientes procesos:
+    * Obtenener los parámetros básicos de la red.
+    * Comprobar los paquetes instalados.
+    * Descargar e instalar las dependencias que faltan.
+    * Crear la estructura básica de directorios de OpenGNSys.
+    * Descargar el repositorio de código en un directorio temporal (/tmp/opengnsys_installer). Nota: en versiones futuras este proceso no será necesario.
+    * Compilar e instalar los servicios de OpenGNSys.
+    * Configuración básica de los serviciios de red DHCP, PXE y NFS a partir de los parámetros de conexión.
+    * Copiar ficheros complementarios de gestión del servidor.
+    * Crear la base de datos y configurar el servidor web de OpenGNSys Web Admin Console.
+    * Copiar los ficheros de las páginas web de Web Console.
+    * Copiar la estructura de directorios de OpenGNSys Client.
+    * Descargar y generar la imagen inicial Initrd y el Kernel de OpenGNSys Client (llamada al script initrd-generator).
+    * Descargar los paquetes Udeb de herramientas complementarias para OpenGNSys Client (llamada al script upgrade-clients-udeb.sh).
+    * Configuración básica de los serviciios de OpenGNsys a partir de los parámetros de red.
+
+Una vez finalizada la ejecución del instalador, puede empezarse a trabajar con el sistema:
+    * Configurar DHCP.
+    * Añadir datos en la consola de administración.
+    * Personalizar scripts de administración.
+    * Definir menús de inicio para los clientes.
+

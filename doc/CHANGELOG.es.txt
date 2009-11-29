@@ -1,0 +1,52 @@
+Lista de cambios incluidos en OpenGNSys 0.9
+===========================================
+
+Tickets resueltos en módulo OpenGNSys Cloning Engine:
+#13 	Automatizar tamaños de partición al generar una imagen
+#50 	Ayuda en las funciones
+#52 	funcion generacion documentacion doxygen para bash
+#58 	Utilizar formato de ayuda y función ogHelp
+#61 	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de particion en cuestión
+#71 	ogListPartitions falla con partición extendida
+#73 	Mensajes de error en particiones vacías
+#75 	Arrancar sistemas Linux en partición distinta a la original 
+
+Tickets resueltos en módulo OpenGNSys Client:
+#18 	Adaptar logs a standard syslog
+#40 	Incluir bash en el cliente initrd
+#41 	Usar kernel 2.6.30 o superior en los clientes (mejora)
+#55  	Incluir tune2fs y resize2fs en cliente Initrd
+#56 	Montar particiones ReiserFS en cliente Initrd
+#59 	añadir mkfs para los sitemas ext al cliente initrd
+#60 	default de preinit no inicia el sistema
+#67 	Cliente QT no importa NFS
+#68 	Cliente no encuentra el subdirectorio de logs
+#72 	Error en el browser al intentar cargar la libpng12.so.0
+
+Tickets resueltos en módulo OpenGNSys Web Console:
+#10 	Consola no detecta bien el inventario de hardware
+#25 	Interfaz web: Problemas con la creacion de entidades
+#34 	Unificar codificación de caracteres en interfaz web
+#42 	Error en menú opciones ordenador
+#66 	Configuración consola web
+
+Tickets resueltos en módulo OpenGNSys Repository Server:
+#74 	Fallo al ejecutar ogAdmServer
+#69 	Error al compilar el servidor de repositorio ogAdmRepo
+
+Tickets resueltos en módulo OpenGNSys Installer:
+#62 	Unificar los instaladores
+#79 	Especificaciones para incluir en el script de instalación la parte relativa al sistema de Administración
+#82 	Instalador no arranca ogAdmRepo
+#83 	Contraseña por defecto al instalar
+
+Tickets genéricos resueltos:
+#23 	Generar la iso de instalación sobre ubunto server 9.04
+#35 	Subversion: configuración saltos de línea
+#44 	Definición del proyecto OpenGNSys
+#47 	Manual de instalación de OpenGNSys
+#48 	Añadir GPL v3 a cada módulo del OpenGNSys
+#49 	Añadir Creative Commons al módulo de documentación del OpenGNSys
+#63 	En la página principal sólo se puede acceder al Roadmap
+#88 	adaptar el sistema para entornos donde exista servicios dhcp independientes o se quiera distribuir contenedores images y librerias
+
