@@ -161,7 +161,7 @@ ogFormatFs "$@"
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-08
-#*/
+#*/ ##
 function ogFormatFs () {
 
 # Variables locales
@@ -176,13 +176,13 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1 EXT4 \"DATA\""
     return
 fi
-#/// Error si no se reciben entre 2 y 4 parámetros.
+# Error si no se reciben entre 2 y 4 parámetros.
 [ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-#/// Obtener dispositivo y tipo de sisitema de archivos.
+# Obtener dispositivo y tipo de sisitema de archivos.
 PART="$(ogDiskToDev $1 $2)" || return $?
 TYPE="$(ogGetFsType $1 $2)" || return $?
 
-#/// Elegir tipo de formato segun el tipo de particion.
+# Elegir tipo de formato segun el tipo de particion.
 case "$3" in
     EXT2)      ID=83; PROG="mkfs.ext2";;
     EXT3)      ID=83; PROG="mkfs.ext3";;
@@ -201,7 +201,7 @@ case "$3" in
     HFAT12)    ID=11; PROG="mkdosfs"; PARAMS="-F 12" ;;
     *)         LABEL="$3" ;;
 esac
-#/// Si no se indica explícitamente, detectar el tipo de sistema de archivos.
+# Si no se indica explícitamente, detectar el tipo de sistema de archivos.
 if [ -z "$PROG" ]; then
     case "$TYPE" in
         EXT2)         PROG="mkfs.ext2";;
@@ -221,10 +221,10 @@ if [ -z "$PROG" ]; then
 else
     [ $TYPE == "$3" -o $ID == "$(ogGetPartitionId $1 $2)" ] || ogRaiseError $OG_ERR_PARTITION "$3 != $TYPE" || return $?
 fi
-#/// Comprobar consistencia entre id. de partición y tipo de sistema de archivos.
+# Comprobar consistencia entre id. de partición y tipo de sistema de archivos.
 [ -n "$PROG" ] || ogRaiseError $OG_ERR_PARTITION "$3 != $TYPE" || return $?
 
-#/// Etiquetas de particion.
+# Etiquetas de particion.
 if [ -z "$LABEL" ]; then
     [ "$4" != "CACHE" ] || ogRaiseError $OG_ERR_FORMAT "$MSG_RESERVEDVALUE: CACHE" || return $?
     [ -n "$4" ] && PARAMS="$PARAMS -L $4"
@@ -232,7 +232,7 @@ else
     PARAMS="$PARAMS -L $LABEL"
 fi
 
-#/// Error si la particion esta montada o está bloqueada.
+# Error si la particion esta montada o está bloqueada.
 if ogIsMounted $1 $2; then
     ogRaiseError $OG_ERR_PARTITION "$1 $2"       # Indicar nuevo error
     return $?
@@ -241,7 +241,7 @@ if ogIsLocked $1 $2; then
     ogRaiseError $OG_ERR_LOCKED "$1 $2"
     return $?
 fi
-#/// Formatear en modo uso exclusivo.
+# Formatear en modo uso exclusivo.
 ogLock $1 $2
 eval $PROG $PARAMS $PART 2>/dev/null
 ERRCODE=$?
@@ -267,22 +267,22 @@ return $ERRCODE
 #@version 0.9 - Primera adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-21
-#*/
+#*/ ##
 function ogGetFsType () {
 
 # Variables locales.
 local ID TYPE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1  =>  NTFS"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Detectar id. de tipo de partición y codificar al mnemonico.
+# Detectar id. de tipo de partición y codificar al mnemonico.
 DISK=$(ogDiskToDev "$1") || return $?
 ID=$(ogGetPartitionId "$1" "$2") || return $?
 case "$ID" in
@@ -325,20 +325,20 @@ echo $TYPE
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
-#*/
+#*/ ##
 function ogGetMountPoint () {
 
 # Variables locales
 local PART
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1  =>  /mnt/sda1"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-#/// Obtener partición.
+# Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
 echo $(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
@@ -354,7 +354,7 @@ echo $(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
-#*/
+#*/ ##
 function ogIsMounted () {
 
 #/// Si se solicita, mostrar ayuda.
@@ -363,7 +363,7 @@ if [ "$*" == "help" ]; then
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 test -n "$(ogGetMountPoint $1 $2)"
@@ -380,25 +380,25 @@ test -n "$(ogGetMountPoint $1 $2)"
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
-#*/
+#*/ ##
 function ogIsLocked () {
 
 # Variables locales
 local PART LOCKFILE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición.
+# Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-#/// Comprobar existencia del fichero de bloqueo.
+# Comprobar existencia del fichero de bloqueo.
 LOCKFILE="/var/lock/lock${PART//\//-}"
 test -f $LOCKFILE
 }
@@ -424,25 +424,25 @@ ogLockPartition "$@"
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
-#*/
+#*/ ##
 function ogLockPartition () {
 
 # Variables locales
 local PART LOCKFILE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición.
+# Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-#/// Crear archivo de bloqueo exclusivo.
+# Crear archivo de bloqueo exclusivo.
 LOCKFILE="/var/lock/lock${PART//\//-}"
 touch $LOCKFILE
 }
@@ -451,7 +451,7 @@ touch $LOCKFILE
 #/**
 #         ogMount int_ndisk int_npartition
 #@see     ogMountFs ogMountCache ogMountCdrom
-#*/
+#*/ ##
 function ogMount () {
 case "$*" in
     CACHE|cache)
@@ -475,34 +475,34 @@ esac
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
-#*/
+#*/ ##
 function ogMountFs () {
 
-#/// Variables locales
+# Variables locales
 local PART TYPE MNTDIR MOUNT PARAMS
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1  =>  /mnt/sda1"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición.
+# Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-#/// Comprobar si el sistema de archivos ya está montada.
+# Comprobar si el sistema de archivos ya está montada.
 MNTDIR="$(ogGetMountPoint $1 $2)"
-#/// Si no, montarla en un directorio de sistema
+# Si no, montarla en un directorio de sistema
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
     ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
-    #/// Crear punto de montaje.
+    # Crear punto de montaje.
     MNTDIR=${PART/dev/mnt}
     mkdir -p $MNTDIR
-    #/// Montar según el tipo de sitema de archivos.
+    # Montar según el tipo de sitema de archivos.
     TYPE="$(ogGetFsType $1 $2)" || return $?
     case "$TYPE" in
         CACHE)      MOUNT=mount ;;
@@ -563,25 +563,25 @@ echo $MNTDIR
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
-#*/
+#*/ ##
 function ogReduceFs () {
 
 # Variables locales
 local PART BLKS SIZE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición.
+# Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-#/// Redimensionar según el tipo de particion.
+# Redimensionar según el tipo de particion.
 case "$(ogGetFsType $1 $2)" in
     EXT[234])
         ogUnmount $1 $2 2>/dev/null
@@ -631,25 +631,25 @@ ogUnlockPartition "$@"
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
-#*/
+#*/ ##
 function ogUnlockPartition () {
 
 # Variables locales
 local PART LOCKFILE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición.
+# Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-#/// Borrar archivo de bloqueo exclusivo.
+# Borrar archivo de bloqueo exclusivo.
 LOCKFILE="/var/lock/lock${PART//\//-}"
 rm -f $LOCKFILE
 }
@@ -675,29 +675,29 @@ ogUnmountFs "$@"
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
-#*/
+#*/ ##
 function ogUnmountFs () {
 
 # Variables locales
 local PART MNTDIR
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" "$FUNCNAME 1 1"
     return
 fi
-#/// Error si no se reciben 2 parámetros.
+# Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición y punto de montaje.
+# Obtener partición y punto de montaje.
 PART="$(ogDiskToDev $1 $2)" || return $?
 MNTDIR="$(ogGetMountPoint $1 $2)"
 
-#/// Si está montada, desmontarla.
+# Si está montada, desmontarla.
 if [ -n "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
     ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
-    #/// Crear punto de montaje.
+    # Crear punto de montaje.
     umount $PART 2>/dev/null && rmdir $MNTDIR || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
 	# linea temporal durante desarrollo para testear nuevas herramientas con el cliente completo nfs
     if grep -q nfsroot /proc/cmdline; then
@@ -721,20 +721,20 @@ fi
 #@version 0.9 - Versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/10/07
-#*/
+#*/ ##
 function ogUnmountAll () {
 
 # Variables locales
 local DISK PART
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" "FUNCNAME 1"
     return
 fi
-#/// Error si no se recibe 1 parámetro.
+# Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener partición y punto de montaje.
+# Obtener partición y punto de montaje.
 DISK="$(ogDiskToDev $1)" || return $?
 for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
     case "$(ogGetFsType $1 $PART)" in

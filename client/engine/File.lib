@@ -17,7 +17,7 @@
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-20
-#*/
+#*/ ##
 function ogCopyFile () {
 
 # Variables locales.
@@ -25,7 +25,7 @@ local ARGS SOURCE TARGET
 
 ARGS="$@"
 case "$1" in
-    /*)     # Camino completo.          */ (necesario Doxygen)
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
         SOURCE=$(ogGetPath "$1")
         shift ;;
     [1-9]*) # ndisco npartición.
@@ -35,11 +35,11 @@ case "$1" in
         SOURCE=$(ogGetPath "$1" "$2")
         shift 2 ;;
 esac
-#/// Comprobar fichero origen y directorio destino.
+# Comprobar fichero origen y directorio destino.
 [ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
 TARGET=$(ogGetPath "$@")
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
-#/// Copiar fichero.
+# Copiar fichero.
 cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
 }
 
@@ -51,11 +51,11 @@ cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
-#*/
+#*/ ##
 function ogDeleteFile () {
 # Variables locales.
 local FILE
-#/// Comprobar que existe el fichero y borrarlo.
+# Comprobar que existe el fichero y borrarlo.
 FILE=$(ogGetPath "$@")
 [ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
@@ -69,12 +69,12 @@ rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
-#*/
+#*/ ##
 function ogDeleteTree () {
 
 # Variables locales.
 local DIR
-#/// Comprobar que existe el directorio y borrarlo con su contenido.
+# Comprobar que existe el directorio y borrarlo con su contenido.
 DIR=$(ogGetPath "$@")
 [ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
@@ -99,13 +99,13 @@ rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
-#*/
+#*/ ##
 function ogGetPath () {
 
 # Variables locales.
 local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32" \
@@ -114,7 +114,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-#/// Procesar camino según el número de parámetros.
+# Procesar camino según el número de parámetros.
 case $# in
     1)	FILE="$1" ;;
     2)	case "$1" in
@@ -132,20 +132,21 @@ case $# in
         return $? ;;
 esac
 
-#/// Eliminar caracteres \c / iniciales, finales y duplicados.
+# Eliminar caracteres \c / iniciales, finales y duplicados.
 CURRENTDIR="$PWD"
+        # /* (comentario Doxygen)
 FILE="$(echo $FILE|sed -e 's/\(\/\)*\1/\//g' -e 's/^\///' -e 's/\/$//')"
 PREVFILE=""
 FILEPATH="/"
 while [ "$FILE" != "$PREVFILE" ]; do
-    #/// Busca el nombre correcto en el directorio actual.
+    # Busca el nombre correcto en el directorio actual.
     cd "$FILEPATH"
-    FILEPATH="${FILEPATH}/$(ls -A | grep -i -m1 "^${FILE%%/*}$")" || return $?     # */ (necesario Doxygen)
+    FILEPATH="${FILEPATH}/$(ls -A | grep -i -m1 "^${FILE%%/*}$")" || return $?
     PREVFILE="$FILE"
     FILE="${FILE#*/}"
 done
-           # */ (necesario Doxygen)
-#/// Muestra el camino Linux, quitando el \c / inicial duplicado.
+        # (comentario Doxygen) */
+# Muestra el camino Linux, quitando el / inicial duplicado.
 [ "$FILEPATH" != "/" ] && echo ${FILEPATH#/}
 cd $CURRENTDIR
 }
@@ -158,7 +159,7 @@ cd $CURRENTDIR
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
-#*/
+#*/ ##
 function ogGetParentPath () {
 local PARENT
 case $# in
@@ -179,7 +180,7 @@ ogGetPath $PARENT
 #@version 0.9 - Pruebas con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
-#*/
+#*/ ##
 function ogMakeDir () {
 local PARENT DIR
 PARENT=$(ogGetParentPath "$@") || return $?

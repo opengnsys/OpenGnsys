@@ -6,18 +6,36 @@
 #####################################################################
 
 
+
+# Sólo ejecutable por usuario root
+if [ "$(whoami)" != 'root' ]
+then
+        echo "ERROR: this program must run under root privileges!!"
+        exit 1
+fi
+
+# Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
+pushd $(dirname $0) >/dev/null
+PROGRAMDIR=$PWD
+popd >/dev/null
+if [ -d "$PROGRAMDIR/../installer" ]; then
+    USESVN=0
+else
+    USESVN=1
+    SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
+fi
+
 WORKDIR=/tmp/opengnsys_installer
+mkdir -p $WORKDIR
+pushd $WORKDIR
+
+INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_installation.log
 
 # Array con las dependencias
 DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz)
 
-INSTALL_TARGET=/opt/opengnsys
-
 MYSQL_ROOT_PASSWORD="passwordroot"
-
-# conexión al svn
-SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 
 # Datos de base de datos
 OPENGNSYS_DATABASE=ogBDAdmin
@@ -27,17 +45,7 @@ OPENGNSYS_DB_DEFAULTUSER=opengnsys
 OPENGNSYS_DB_DEFAULTPASSWD=opengnsys
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogBDAdmin.sql
 
-USUARIO=`whoami`
 
-if [ $USUARIO != 'root' ]
-then
-        echo "ERROR: this program must run under root privileges!!"
-        exit 1
-fi
-
-
-mkdir -p $WORKDIR
-pushd $WORKDIR
 
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
@@ -823,7 +831,7 @@ function openGnsysCopyServerFiles () {
 
 	echoAndLog "${FUNCNAME}(): copying files to server directories"
 
-	pushd $WORKDIR/opengnsys
+	[ $USESVN ] && pushd $WORKDIR/opengnsys
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -1027,12 +1035,16 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Descarga del repositorio de código en directorio temporal
-#svnCheckoutCode $SVN_URL
-svnExportCode $SVN_URL
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while getting code from svn"
-	exit 1
+# Si es necesario, descarga el repositorio de código en directorio temporal
+if [ $USESVN ]; then
+	#svnCheckoutCode $SVN_URL
+	svnExportCode $SVN_URL
+	if [ $? -ne 0 ]; then
+		errorAndLog "Error while getting code from svn"
+		exit 1
+	fi
+else
+	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
 # Compilar código fuente de los servicios de OpenGNSys.

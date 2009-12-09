@@ -109,7 +109,7 @@ return $CODE
 
 
 #/**
-#         ogHelp ["function" ["format" ["example" ... ]]]
+#         ogHelp ["str_function" ["str_format" ["str_example" ... ]]]
 #@brief   Muestra mensaje de ayuda para una función determinda.
 #@arg  \c str_function Nombre de la función.
 #@arg  \c str_format   Formato de ejecución de la función.
@@ -132,7 +132,7 @@ FUNC="${1:-${FUNCNAME[${#FUNCNAME[*]}-1]}}"
 MSG="MSG_HELP_$FUNC"
 ogEcho help "$MSG_FUNCTION $FUNC: ${!MSG}"
 [ -n "$2" ] && ogEcho help "    $MSG_FORMAT: $2"
-#/// Mostrar ejemplos.
+#/// Mostrar ejemplos (si existen).
 shift 2
 while [ $# -gt 0 ]; do
     ogEcho help "    $MSG_EXAMPLE: $1"

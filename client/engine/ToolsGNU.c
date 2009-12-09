@@ -12,26 +12,42 @@
 function awk () {
 }
 
-
-function parted () {
+function chntpw () {
 }
-
-
-
-function fdisk () {
-}
-
 
 function egrep () {
+}
+
+function fdisk () {
 }
 
 function grep () {
 }
 
+function kexec () {
+}
 
-function partprobe () {
+function lshw () {
+}
+
+function mount () {
 }
 
 function ms-sys () {
 }
+
+function parted () {
 }
+
+function partimage () {
+}
+
+function partprobe () {
+}
+
+function sfdisk () {
+}
+
+function umount () {
+}
+

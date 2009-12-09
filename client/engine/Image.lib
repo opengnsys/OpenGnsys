@@ -28,7 +28,7 @@
 #@version 0.9 - Versión en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/10/07
-#*/
+#*/ ##
 function ogCreateImage () {
 
 # Variables locales
@@ -96,7 +96,7 @@ return $ERRCODE
 #@version 0.1 - Primera versión muy en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/11
-#*/
+#*/ ##
 function ogGetImageSize () {
 
 # Variables locales
@@ -148,7 +148,7 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 #@version 0.1 - Primera versión muy en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/10
-#*/
+#*/ ##
 function ogRestoreImage () {
 
 # Variables locales
