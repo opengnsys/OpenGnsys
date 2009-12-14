@@ -34,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(m_web);
 
+    readEnvironmentValues();
+
     // Output
     m_output->setReadOnly(true);
 
@@ -58,7 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
     dock->setWidget(m_tabs);
 
     // Y el dock al mainwindow
-    addDockWidget(Qt::BottomDockWidgetArea,dock);
+    if(m_env.contains("boot") && m_env["boot"] == "admin")
+      addDockWidget(Qt::BottomDockWidgetArea,dock);
 
     // Top Dock
     dock=new QDockWidget();
@@ -74,7 +77,8 @@ MainWindow::MainWindow(QWidget *parent)
     dock->setWidget(m_webBar);
 
     // dock al mainwindow
-    addDockWidget(Qt::TopDockWidgetArea,dock);
+    if(m_env.contains("boot") && m_env["boot"] == "admin")
+      addDockWidget(Qt::TopDockWidgetArea,dock);
 
     // Status bar
     QStatusBar* st=statusBar();
@@ -107,9 +111,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Dock signals
     connect(button,SIGNAL(clicked()),this,SLOT(slotCreateTerminal()));
     connect(m_webBar,SIGNAL(returnPressed()),this,SLOT(slotWebBarReturnPressed()));
-
-    if(!readEnvironmentValues())
-        print(tr("Any environment variable/s didn't be setted."));
 
     if(m_env.contains("OGLOGFILE") && m_env["OGLOGFILE"]!="")
     {
@@ -234,7 +235,7 @@ void MainWindow::slotProcessOutput()
     char buf[BUFFERSIZE];
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
-        print(tr("Proc. Output: ")+buf,false);
+        print(tr("Proc. Output: ")+buf);
         QString s(buf);
         captureOutputForStatusBar(s);
     }
@@ -357,7 +358,7 @@ int MainWindow::readEnvironmentValues()
     return ret;
 }
 
-void MainWindow::print(QString s,bool newLine)
+void MainWindow::print(QString s)
 {
   if(!s.endsWith("\n"))
     s+="\n";
@@ -386,7 +387,6 @@ void MainWindow::captureOutputForStatusBar(QString output)
   {
     int pass=rxPass.cap(1).toInt();
     output.replace(rxPass,"");
-    qDebug()<<pass<<output;
     m_progressBar->setValue(pass);
     m_progressBar->setFormat("%p% "+output);
   }

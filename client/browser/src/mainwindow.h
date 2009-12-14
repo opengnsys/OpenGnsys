@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #define PROTOCOL "command:"
-#define ENVIRONMENT "OGLOGFILE"
+#define ENVIRONMENT "OGLOGFILE,boot"
 //#define ENVIRONMENT "OGIP,OGSERVER,OGLOG"
 
 #include <QWidget>
@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow
     //Functions
     protected:
         int readEnvironmentValues();
-        void print(QString s,bool newLine=true);
+        void print(QString s);
         void captureOutputForStatusBar(QString output);
         void startProgressBar();
         void finishProgressBar();

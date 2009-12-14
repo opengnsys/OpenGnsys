@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -fv browser browser_d libqtermwidget.a libqtermwidget_d.a Makefile
+rm -rfv .moc .objs_d .objs
+rm -fv qtermwidget/Makefile qtermwidget/src/Makefile{,.Debug,.Release}
+rm -fv src/Makefile{,.Debug,.Release}
