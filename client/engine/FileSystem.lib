@@ -12,8 +12,8 @@
 #/**
 #         ogCheckFs int_ndisk int_npartition
 #@brief   Comprueba el estado de un sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -25,8 +25,8 @@
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-07
 #*/
-function ogCheckFs () {
-
+function ogCheckFs ()
+{
 # Variables locales.
 local PART TYPE PROG PARAMS
 
@@ -74,8 +74,8 @@ return $ERRCODE
 #/**
 #         ogExtendFs int_ndisk int_npartition
 #@brief   Extiende un sistema de archivos al tamaño de su partición.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
@@ -85,8 +85,8 @@ return $ERRCODE
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/
-function ogExtendFs () {
-
+function ogExtendFs ()
+{
 # Variables locales.
 local PART PROG PARAMS
 
@@ -139,7 +139,8 @@ return $ERRCODE
 #         ogFormat int_ndisk int_npartition
 #@see     ogFormatFs
 #*/
-function ogFormat () {
+function ogFormat ()
+{
 ogFormatFs "$@"
 }
 
@@ -147,10 +148,10 @@ ogFormatFs "$@"
 #/**
 #         ogFoarmatFs int_ndisk int_npartition [type_fstype] [str_label]
 #@brief   Formatea un sistema de ficheros según el tipo de su partición.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
-#@arg  \c type_fstype    mnemónico de sistema de ficheros a formatear
-#@arg  \c str_label      etiqueta de volumen (opcional)
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   type_fstype    mnemónico de sistema de ficheros a formatear
+#@param   str_label      etiqueta de volumen (opcional)
 #@return  (por determinar)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -162,12 +163,12 @@ ogFormatFs "$@"
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-08
 #*/ ##
-function ogFormatFs () {
-
+function ogFormatFs ()
+{
 # Variables locales
 local PART ID TYPE LABEL PROG PARAMS ERRCODE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_label]" \
            "$FUNCNAME 1 1" \
@@ -258,8 +259,8 @@ return $ERRCODE
 #/**
 #         ogGetFsType int_ndisk int_npartition
 #@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Mnemonico
 #@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
@@ -300,8 +301,8 @@ case "$ID" in
      42)	TYPE="WIN-DYNAMIC" ;;
      82)	TYPE="LINUX-SWAP" ;;
      83)	TYPE="$(parted -s $DISK print | awk -v var=$2 '{if ($1==var) {print toupper($6)}}')"
-            TYPE=${TYPE:-"EXT3"}
-            ;;
+                TYPE=${TYPE:-"EXT3"}
+                ;;
      8e)	TYPE="LINUX-LVM" ;;
      a7)	TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
      bf)	TYPE="SOLARIS" ;;
@@ -316,8 +317,8 @@ echo $TYPE
 #/**
 #         ogGetMountPoint int_ndisk int_npartition
 #@brief   Devuelve el punto de montaje de un sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Punto de montaje
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -326,8 +327,8 @@ echo $TYPE
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
 #*/ ##
-function ogGetMountPoint () {
-
+function ogGetMountPoint ()
+{
 # Variables locales
 local PART
 # Si se solicita, mostrar ayuda.
@@ -348,16 +349,16 @@ echo $(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 #/**
 #         ogIsMounted int_ndisk int_npartition
 #@brief   Comprueba si un sistema de archivos está montado.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Código de salida: 0 - sin montar, 1 - montado.
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
 #*/ ##
-function ogIsMounted () {
-
-#/// Si se solicita, mostrar ayuda.
+function ogIsMounted ()
+{
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "if $FUNCNAME 1 1; then ... ; fi"
@@ -373,16 +374,16 @@ test -n "$(ogGetMountPoint $1 $2)"
 #/**
 #         ogIsLocked int_ndisk int_npartition
 #@brief   Comprueba si una partición está bloqueada por una operación de uso exclusivo.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Código de salida: 0 - sin bloquear, 1 - bloqueada.
 #@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/ ##
-function ogIsLocked () {
-
+function ogIsLocked ()
+{
 # Variables locales
 local PART LOCKFILE
 
@@ -408,15 +409,16 @@ test -f $LOCKFILE
 #         ogLock int_ndisk int_npartition
 #@see     ogLockPartition
 #*/
-function ogLock () {
+function ogLock ()
+{
 ogLockPartition "$@"
 }
 
 #/**
 #         ogLockPartition int_ndisk int_npartition
 #@brief   Genera un fichero de bloqueo para una partición en uso exlusivo.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -425,8 +427,8 @@ ogLockPartition "$@"
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/ ##
-function ogLockPartition () {
-
+function ogLockPartition ()
+{
 # Variables locales
 local PART LOCKFILE
 
@@ -452,7 +454,8 @@ touch $LOCKFILE
 #         ogMount int_ndisk int_npartition
 #@see     ogMountFs ogMountCache ogMountCdrom
 #*/ ##
-function ogMount () {
+function ogMount ()
+{
 case "$*" in
     CACHE|cache)
         ogMountCache ;;
@@ -466,8 +469,8 @@ esac
 #/**
 #         ogMountFs int_ndisk int_npartition
 #@brief   Monta un sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Punto de montaje
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -476,8 +479,8 @@ esac
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
 #*/ ##
-function ogMountFs () {
-
+function ogMountFs ()
+{
 # Variables locales
 local PART TYPE MNTDIR MOUNT PARAMS
 
@@ -535,7 +538,8 @@ echo $MNTDIR
 
 #####  PRUEBAS
 # Montar CDROM
-function ogMountCdrom () {
+function ogMountCdrom ()
+{
 local DEV MNTDIR
 DEV="/dev/cdrom"            # Por defecto
 MNTDIR=$(mount | awk -v D=$DEV '{if ($1==D) {print $3}}')
@@ -551,8 +555,8 @@ echo $MNTDIR
 #/**
 #         ogReduceFs int_ndisk int_npartition
 #@brief   Reduce el tamaño del sistema de archivos, sin tener en cuenta el espacio libre.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  tamañoKB
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -564,8 +568,8 @@ echo $MNTDIR
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/ ##
-function ogReduceFs () {
-
+function ogReduceFs ()
+{
 # Variables locales
 local PART BLKS SIZE
 
@@ -615,15 +619,16 @@ echo $[SIZE*1024]
 #         ogUnlock int_ndisk int_npartition
 #@see     ogUnlockPartition
 #*/
-function ogUnlock () {
+function ogUnlock ()
+{
 ogUnlockPartition "$@"
 }
 
 #/**
 #         ogUnlockPartition int_ndisk int_npartition
 #@brief   Elimina el fichero de bloqueo para una particion.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -632,8 +637,8 @@ ogUnlockPartition "$@"
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
 #*/ ##
-function ogUnlockPartition () {
-
+function ogUnlockPartition ()
+{
 # Variables locales
 local PART LOCKFILE
 
@@ -659,15 +664,16 @@ rm -f $LOCKFILE
 #         ogUnmount int_ndisk int_npartition
 #@see     ogUnmountFs
 #*/
-function ogUnmount () {
+function ogUnmount ()
+{
 ogUnmountFs "$@"
 }
 
 #/**
 #         ogUnmountFs int_ndisk int_npartition
 #@brief   Desmonta un sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Nada
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -676,8 +682,8 @@ ogUnmountFs "$@"
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
 #*/ ##
-function ogUnmountFs () {
-
+function ogUnmountFs ()
+{
 # Variables locales
 local PART MNTDIR
 
@@ -713,7 +719,7 @@ fi
 #/**
 #         ogUnmountAll int_ndisk
 #@brief   Desmonta todos los sistema de archivos de un disco, excepto el caché local.
-#@arg  \c int_ndisk      nº de orden del disco
+#@param   int_ndisk      nº de orden del disco
 #@return  Nada
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -722,8 +728,8 @@ fi
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/10/07
 #*/ ##
-function ogUnmountAll () {
-
+function ogUnmountAll ()
+{
 # Variables locales
 local DISK PART
 # Si se solicita, mostrar ayuda.

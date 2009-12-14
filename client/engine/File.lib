@@ -18,8 +18,8 @@
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-20
 #*/ ##
-function ogCopyFile () {
-
+function ogCopyFile ()
+{
 # Variables locales.
 local ARGS SOURCE TARGET
 
@@ -52,7 +52,8 @@ cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
 #*/ ##
-function ogDeleteFile () {
+function ogDeleteFile ()
+{
 # Variables locales.
 local FILE
 # Comprobar que existe el fichero y borrarlo.
@@ -70,8 +71,8 @@ rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
 #*/ ##
-function ogDeleteTree () {
-
+function ogDeleteTree ()
+{
 # Variables locales.
 local DIR
 # Comprobar que existe el directorio y borrarlo con su contenido.
@@ -84,10 +85,10 @@ rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #/**
 #         ogGetPath [ str_repo | int_ndisk int_npartition ] path_filepath
 #@brief   Inicia el proceso de arranque de un sistema de archivos.
-#@arg  \c filepath   camino del fichero (independiente de mayúsculas)
-#@arg  \c repo       repositorio de ficheros
-#@arg  \c ndisk      nº de orden del disco
-#@arg  \c npartition nº de orden de la partición
+#@param   path_filepath   camino del fichero (independiente de mayúsculas)
+#@param   str_repo        repositorio de ficheros
+#@param   int_ndisk       nº de orden del disco
+#@param   int_npartition  nº de orden de la partición
 #@return  path_file - camino completo real del fichero.
 #@note    repo = { REPO, CACHE, CDROM }
 #@note    Requisitos: \c grep \c sed
@@ -100,8 +101,8 @@ rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
 #*/ ##
-function ogGetPath () {
-
+function ogGetPath ()
+{
 # Variables locales.
 local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
 
@@ -160,10 +161,11 @@ cd $CURRENTDIR
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
 #*/ ##
-function ogGetParentPath () {
+function ogGetParentPath ()
+{
 local PARENT
 case $# in
-    1)	PARENT="$(dirname "$1")" ;;
+    1)	PARENT=$(dirname "$1") ;;
     2)	PARENT="$1 $(dirname "/$2")" ;;
     3)	PARENT="$1 $2 $(dirname "/$3")" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
@@ -181,7 +183,8 @@ ogGetPath $PARENT
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
 #*/ ##
-function ogMakeDir () {
+function ogMakeDir ()
+{
 local PARENT DIR
 PARENT=$(ogGetParentPath "$@") || return $?
 DIR="$(basename "${!#}")"
@@ -192,10 +195,10 @@ mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #/**
 #         ogNewPath [ str_repo | int_ndisk int_npartition ] path_filepath
 #@brief   Crea el directorio especificado
-#@arg  \c filepath   camino del fichero (independiente de mayÃºsculas)
-#@arg  \c repo       repositorio de ficheros
-#@arg  \c ndisk      nÂº de orden del disco
-#@arg  \c npartition nÂº de orden de la particiÃ³n
+#@param   path_filepath   camino del fichero (independiente de mayúsculas)
+#@param   str_repo        repositorio de ficheros
+#@param   int_ndisk       nº de orden del disco
+#@param   int_npartition  nº de orden de la partición
 #@return  file - camino completo real del directorio creado
 #@note    repo = { REPO, CACHE }
 #@note    Requisitos: \c grep \c sed
@@ -208,8 +211,8 @@ mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@author  obtenido de ogGetPath de Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
 #*/
-function ogNewPath () {
-
+function ogNewPath ()
+{
 # Variables locales.
 local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
 

@@ -12,8 +12,8 @@
 #/**
 #         ogGetOsVersion int_ndisk int_npartition
 #@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  OSType:OSVersion
 #@note    TipoSistema = { Linux, Windows }
 #@note    Requisitos: awk, head, chroot
@@ -24,29 +24,29 @@
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
 #*/ ##
-function ogGetOsVersion () {
-
+function ogGetOsVersion ()
+{
 # Variables locales.
 local MNTDIR TYPE VERSION FILE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME"
     return
 fi
-#/// Error si no se reciben 2 parametros.
+# Error si no se reciben 2 parametros.
 [ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Montar la particion, si no lo estaba previamente.
 MNTDIR=$(ogMount $1 $2) || return $?
 
-#/// Elección del tipo de sistema operativo.
+# Elección del tipo de sistema operativo.
 case "$(ogGetFsType $1 $2)" in
     EXT[234] | REISERFS | REISER4)
         TYPE="Linux"
-        #/// Para Linux: leer descripción.
+        # Para Linux: leer descripción.
         VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
-        #/// Si no se puede obtener, buscar en ficheros del sistema.
+        # Si no se puede obtener, buscar en ficheros del sistema.
         if [ -z "$VERSION" ]; then
             FILE="$MNTDIR/etc/lsb-release"
             [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
@@ -59,12 +59,12 @@ case "$(ogGetFsType $1 $2)" in
         ;;
     NTFS | HTNFS | FAT32 | HFAT32)
         TYPE="Windows"
-        #/// Para Windows: leer la version del registro.
+        # Para Windows: leer la version del registro.
         VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
         ;;
 esac
 
-#/// Mostrar resultado y salir sin errores.
+# Mostrar resultado y salir sin errores.
 [ -n "$VERSION" ] && echo "$TYPE:$VERSION"
 return 0
 }
@@ -73,13 +73,14 @@ return 0
 #/**
 #         ogGetOsType int_ndisk int_npartition
 #@brief   Devuelve el tipo del sistema operativo instalado.
-#@arg  \c int_ndisk      nº de orden del disco
-#@arg  \c int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  OSType
 #@note    OSType = { Linux, Windows }
 #@see     ogGetOsVersion
 #*/ ##
-function ogGetOsType () {
+function ogGetOsType ()
+{
 ogGetOsVersion "$@" | cut -sf1 -d:
 }
 
@@ -95,15 +96,15 @@ ogGetOsVersion "$@" | cut -sf1 -d:
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-28
 #*/ ##
-function ogListHardwareInfo () {
-
-#/// Si se solicita, mostrar ayuda.
+function ogListHardwareInfo ()
+{
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME"
     return
 fi
 
-#/// Recopilación de disposibivos procesando la salida de \c lshw
+# Recopilación de disposibivos procesando la salida de \c lshw
 ogEcho info "$MSG_HARDWAREINVENTORY}"
 lshw | awk 'BEGIN {type="mod";}
 	/product:/ {sub(/ *product: */,"");  prod=$0;}
@@ -132,14 +133,16 @@ lshw | awk 'BEGIN {type="mod";}
 	END 	   {if (type!="" && prod!="")
                     print type"="vend,prod,size,vers;}
       '
-# */ (necesario para Doxygen)
+# */ (comentario para Doxygen)
 }
 
 
 #/**
-#         ogListSoftware
+#         ogListSoftware int_ndisk int_npartition
 #@brief   Lista el inventario de software instalado en un sistema operativo.
-#@return  programa versión
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  programa versión ...
 #@warning Se ignoran los parámetros de entrada.
 #@note    Requisitos: ...
 #@todo    Detectar software en Linux
@@ -147,20 +150,20 @@ lshw | awk 'BEGIN {type="mod";}
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/ ##
-function ogListSoftware () {
-
+function ogListSoftware ()
+{
 # Variables locales.
 local MNTDIR TYPE DPKGDIR RPMDIR KEYS k PROG VERS
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME 1 1"
     return
 fi
-#/// Error si no se reciben 2 parametros.
+# Error si no se reciben 2 parametros.
 [ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Obtener tipo de sistema de archivos y montarlo.
+# Obtener tipo de sistema de archivos y montarlo.
 TYPE=$(ogGetFsType $1 $2) || return $?
 MNTDIR=$(ogMount $1 $2) || return $?
 

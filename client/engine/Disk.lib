@@ -10,11 +10,11 @@
 
 
 #/**
-#         ogCreatePartitions ndisk parttype:partsize ...
+#         ogCreatePartitions int_ndisk str_parttype:int_partsize ...
 #@brief   Define el conjunto de particiones de un disco.
-#@arg \c  int_ndisk      nº de orden del disco
-#@arg \c  str_parttype   mnemónico del tipo de partición
-#@arg \c  int_partsize   tamaño de la partición (en KB)
+#@param   int_ndisk      nº de orden del disco
+#@param   str_parttype   mnemónico del tipo de partición
+#@param   int_partsize   tamaño de la partición (en KB)
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
@@ -26,8 +26,8 @@
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/09
 #*/ ##
-function ogCreatePartitions () {
-
+function ogCreatePartitions ()
+{
 # Variables locales.
 local DISK PART SECTORS START SIZE TYPE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
@@ -57,41 +57,24 @@ trap "rm -f $tmpsfdisk" 1 2 3 9 15
 echo "unit: sectors" >$tmpsfdisk
 echo                >>$tmpsfdisk
 
-#/// Generar fichero de entrada para "sfdisk" con las particiones.
+# Generar fichero de entrada para "sfdisk" con las particiones.
 while [ $# -gt 0 ]; do
-    #/// Leer formato de cada parámetro - Tipo:Tamaño
+    # Leer formato de cada parámetro - Tipo:Tamaño
     TYPE="${1%%:*}"
     SIZE="${1#*:}"
     [ -z "$SIZE" ] && ogRaiseError $OG_ERR_FORMAT && return $?
-    #/// Convertir en sectores de 512 B.
+    # Convertir en sectores de 512 B.
     SIZE=$[SIZE*2]
     [ $SIZE -eq 0 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-    #/// Obtener identificador de tipo de partición.
-    case "$TYPE" in
-        EMPTY)      ID=0  ;;
-        EXTENDED)   ID=5
-                    [ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-                    EXTSTART=$START
-                    EXTSIZE=$SIZE
-                    ;;
-        EXT[234]|REISERFS|REISER4|XFS|JFS)
-                    ID=83 ;;
-        LINUX-SWAP) ID=82 ;;
-        LINUX-LVM)  ID=8e ;;
-        LINUX-RAID) ID=fd ;;
-        SOLARIS)    ID=bf ;;
-        NTFS|EXFAT) ID=7  ;;
-        HNTFS)	    ID=17 ;;
-        FAT32)	    ID=b  ;;
-        HFAT32)     ID=1b ;;
-        FAT16)	    ID=6  ;;
-        HFAT16)     ID=16 ;;
-        FAT12)	    ID=1  ;;
-        HFAT12)     ID=11 ;;
-        CACHE)      ID=ca ;;
-        *)          ogRaiseError $OG_ERR_PARTITION "$TYPE"
-                    return $? ;;
-    esac
+    # Obtener identificador de tipo de partición.
+    ID=$(ogFsToId "$TYPE")
+    [ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+    # Comprobar si la partición es extendida.
+    if [ $ID = 5 ]; then
+        [ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+        EXTSTART=$START
+        EXTSIZE=$SIZE
+    fi
     # Incluir particiones lógicas dentro de la partición extendida.
     if [ $PART = 5 ]; then
         [ -z "$EXTSTART" ] && ogRaiseError $OG_ERR_FORMAT && return $?
@@ -100,7 +83,7 @@ while [ $# -gt 0 ]; do
     fi
     # Generar datos para la partición.
     echo "$DISK$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
-    #/// Error si se supera el nº total de sectores.
+    # Error si se supera el nº total de sectores.
     START=$[START+SIZE]
     [ $START -gt $SECTORS ] && ogRaiseError $OG_ERR_FORMAT && return $?
     PART=$[PART+1]
@@ -125,11 +108,11 @@ rm -f $tmpsfdisk
 
 
 #/**
-#         ogDevToDisk device
+#         ogDevToDisk path_device
 #@brief   Devuelve el nº de orden de dicso (y partición) correspondiente al nombre de fichero de dispositivo.
-#@arg \c  path_device Camino del fichero de dispositivo.
-#@return  ndisk (para dispositivo de disco)
-#@return  ndisk npartition (para dispositivo de partición).
+#@param   path_device Camino del fichero de dispositivo.
+#@return  int_ndisk (para dispositivo de disco)
+#@return  int_ndisk int_npartition (para dispositivo de partición).
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Dispositivo no detectado.
 #@note    Requisitos: awk
@@ -137,8 +120,8 @@ rm -f $tmpsfdisk
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-07-20
 #*/ ##
-function ogDevToDisk () {
-
+function ogDevToDisk ()
+{
 # Variables locales.
 local d n
 # Si se solicita, mostrar ayuda.
@@ -150,7 +133,7 @@ fi
 
 # Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-#/// Error si no es fichero de bloques.
+# Error si no es fichero de bloques.
 [ -b "$1" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
 
 # Procesa todos los discos para devolver su nº de orden y de partición.
@@ -165,10 +148,10 @@ return $OG_ERR_NOTFOUND
 
 
 #/**
-#         ogDiskToDev [ndisk [npartition]]
+#         ogDiskToDev [int_ndisk [int_npartition]]
 #@brief   Devuelve la equivalencia entre el nº de orden del dispositivo (dicso o partición) y el nombre de fichero de dispositivo correspondiente.
-#@arg \c  int_ndisk      nº de orden del disco
-#@arg \c  int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Para 0 parametros: Devuelve los nombres de ficheros  de los dispositivos sata/ata/usb linux encontrados.
 #@return  Para 1 parametros: Devuelve la ruta del disco duro indicado.
 #@return  Para 2 parametros: Devuelve la ruta de la particion indicada.
@@ -179,8 +162,8 @@ return $OG_ERR_NOTFOUND
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-07-20
 #*/ ##
-function ogDiskToDev () {
-
+function ogDiskToDev ()
+{
 # Variables locales
 local ALLDISKS VOLGROUPS DISK PART
 
@@ -236,9 +219,57 @@ esac
 
 
 #/**
-#         ogGetPartitionActive ndisk
+#         ogFsToId str_fstype
+#@brief   Devuelve el identificador de partición correspondiente a un tipo de sistema de archivos.
+#@param   str_fstype  mnemónico de tipo de sistema de archivos
+#@return  int_idpart  nº identificador de tipo de partición.
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@version 0.9 - Primera versión para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2009-12-14
+#*/ ##
+function ogFsToId ()
+{
+# Variables locales
+local ID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_fstype" "$FUNCNAME EXT3  =>  83"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Asociar id. de partición para su mnemónico de sistema de archivos.
+case "$1" in
+    EMPTY)      ID=0  ;;
+    FAT12)      ID=1  ;;
+    EXTENDED)   ID=5  ;;
+    FAT16)      ID=6  ;;
+    NTFS|EXFAT) ID=7  ;;
+    FAT32)      ID=b  ;;
+    HFAT12)     ID=11 ;;
+    HFAT16)     ID=16 ;;
+    HNTFS)      ID=17 ;;
+    HFAT32)     ID=1b ;;
+    LINUX-SWAP) ID=82 ;;
+    EXT[234]|REISERFS|REISER4|XFS|JFS)
+                ID=83 ;;
+    LINUX-LVM)  ID=8e ;;
+    SOLARIS)    ID=bf ;;
+    CACHE)      ID=ca ;;
+    LINUX-RAID) ID=fd ;;
+    *)          ID="" ;;
+esac
+echo $ID
+}
+
+
+#/**
+#         ogGetPartitionActive int_ndisk
 #@brief   Muestra que particion de un disco esta marcada como de activa.
-#@arg \c  int_ndisk      nº de orden del disco
+#@param   int_ndisk      nº de orden del disco
 #@return  Nº de partición activa
 #@exception OG_ERR_FORMAT Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
@@ -248,8 +279,8 @@ esac
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
-function ogGetPartitionActive () {
-
+function ogGetPartitionActive ()
+{
 # Variables locales
 local DISK
 
@@ -268,10 +299,10 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 
 
 #/**
-#         ogGetPartitionId ndisk npartition
+#         ogGetPartitionId int_ndisk int_npartition
 #@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
-#@arg \c  int_ndisk      nº de orden del disco
-#@arg \c  int_npartition nº de orden de la partición
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
 #@return  Identificador de tipo de partición.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
@@ -280,8 +311,8 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    25/03/2009
 #*/ ##
-function ogGetPartitionId () {
-
+function ogGetPartitionId ()
+{
 # Variables locales.
 local DISK PART
 
@@ -302,11 +333,11 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 
 
 #/**
-#         ogGetPartitionSize ndisk npartition
+#         ogGetPartitionSize int_ndisk int_npartition
 #@brief   Muestra el tamano en KB de una particion determinada.
-#@arg \c  int_ndisk      nº de orden del disco
-#@arg \c  int_npartition nº de orden de la partición
-#@return  tamañoKB
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  int_partsize - Tamaño en KB de la partición.
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: sfdisk, awk
@@ -314,8 +345,8 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
-function ogGetPartitionSize () {
-
+function ogGetPartitionSize ()
+{
 # Variables locales.
 local PART
 
@@ -347,8 +378,8 @@ esac
 #/**
 #         ogListPartitions int_ndisk
 #@brief   Lista las particiones definidas en un disco.
-#@arg \c  int_ndisk  nº de orden del disco
-#@return  tipo:tamanoKB ...
+#@param   int_ndisk  nº de orden del disco
+#@return  str_parttype:int_partsize ...
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: \c parted \c awk
@@ -358,21 +389,21 @@ esac
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
-function ogListPartitions () {
-
+function ogListPartitions ()
+{
 # Variables locales.
 local DISK PART NPARTS TYPE SIZE
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
            "$FUNCNAME 1  =>  NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
 fi
-#/// Error si no se recibe 1 parámetro.
+# Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FORMAT" || return $?
 
-#/// Procesar la salida de \c parted .
+# Procesar la salida de \c parted .
 DISK="$(ogDiskToDev $1)" || return $?
 NPARTS=$(ogGetPartitionsNumber $1)
 for (( PART = 1; PART <= NPARTS; PART++ )); do
@@ -391,11 +422,11 @@ echo
 #/**
 #         ogListPrimaryPartitions int_ndisk
 #@brief   Metafunción que lista las particiones primarias no vacías definidas en un disco.
-#@arg \c  int_ndisk  nº de orden del disco
+#@param   int_ndisk  nº de orden del disco
 #@see     ogListPartitions
 #*/ ##
-function ogListPrimaryPartitions () {
-
+function ogListPrimaryPartitions ()
+{
 # Variables locales.
 local PARTS
 
@@ -407,11 +438,11 @@ echo $PARTS | cut -sf1-4 -d" " | sed 's/\( EMPTY:0\)*$//'
 #/**
 #         ogListLogicalPartitions int_ndisk
 #@brief   Metafunción que lista las particiones lógicas definidas en un disco.
-#@arg \c  int_ndisk  nº de orden del disco
+#@param   int_ndisk  nº de orden del disco
 #@see     ogListPartitions
 #*/ ##
-function ogListLogicalPartitions () {
-
+function ogListLogicalPartitions
+() {
 # Variables locales.
 local PARTS
 
@@ -421,11 +452,11 @@ echo $PARTS | cut -sf5- -d" "
 
 
 #/**
-#         ogSetPartitionActive ndisk npartition
+#         ogSetPartitionActive int_ndisk int_npartition
 #@brief   Establece cual es la partición activa de un disco.
-#@arg \c  int_ndisk      nº de orden del disco
-#@arg \c  int_npartition nº de orden de la partición
-#@return  Nada.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  (nada).
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o partición no corresponden con un dispositivo.
 #@note    Requisitos: parted
@@ -433,8 +464,8 @@ echo $PARTS | cut -sf5- -d" "
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/17
 #*/ ##
-function ogSetPartitionActive () {
-
+function ogSetPartitionActive ()
+{
 # Variables locales
 local DISK PART
 
@@ -455,11 +486,11 @@ parted -s $DISK set $2 boot on 2>/dev/null
 
 
 #/**
-#         ogSetPartitionSize ndisk npartition size
+#         ogSetPartitionSize int_ndisk int_npartition int_size
 #@brief   Muestra el tamano en KB de una particion determinada.
-#@arg \c  int_ndisk      nº de orden del disco
-#@arg \c  int_npartition nº de orden de la partición
-#@arg \c  int_size       tamaño de la partición (en KB)
+#@param  int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   int_size       tamaño de la partición (en KB)
 #@return  (nada)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
@@ -469,8 +500,8 @@ parted -s $DISK set $2 boot on 2>/dev/null
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
-function ogSetPartitionSize () {
-
+function ogSetPartitionSize ()
+{
 # Variables locales.
 local DISK PART SIZE
 
@@ -496,7 +527,7 @@ sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTIT
 #/**
 #         ogUpdatePartitionTable
 #@brief   Fuerza al kernel releer la tabla de particiones de los discos duros
-#@arg \c  no requiere
+#@param   no requiere
 #@return  informacion propia de la herramienta
 #@note    Requisitos: \c partprobe
 #@warning pendiente estructurar la funcion a opengnsys
@@ -504,7 +535,8 @@ sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTIT
 #@note	 funcion importada de EAC
 #*/
 
-function ogUpdatePartitionTable () {
+function ogUpdatePartitionTable ()
+{
 echo "Forzando al kernel la lectura de la tabla de particiones"
 list=`partprobe -s | cut -f1 -d: ` 2>/dev/null
 echo $list > /tmp/disk
@@ -515,7 +547,7 @@ echo $list > /tmp/disk
 
 function ogGetPartitionsNumber () {
 #/**  @function ogGetPartitionsNumber: @brief detecta el numero de particiones del disco duro indicado.
-#@param  int_numdisk   (indentificado EAC del disco)
+#@param   int_numdisk   (indentificado EAC del disco)
 #@return  devuelve el numero paritiones del disco duro indicado
 #@warning  Salidas de errores no determinada
 #@attention Requisitos: parted
@@ -602,41 +634,23 @@ function ogSetPartitionId() {
 # Variables locales
 local DISK PART ID
 
-#/// Si se solicita, mostrar ayuda.
+# Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
            "$FUNCNAME 1 1 10000000"
     return
 fi
-#/// Error si no se reciben 3 parámetros.
+# Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-#/// Sustituye nº de disco por su dispositivo.
+# Sustituye nº de disco por su dispositivo.
 DISK=`ogDiskToDev $1` || return $?
 PART=`ogDiskToDev $1 $2` || return $?
 
-#/// Elección del tipo de partición.
-case "$3" in
-    EMPTY)      ID=0  ;;
-    FAT12)      ID=1  ;;
-    EXTENDED)   ID=5  ;;
-    FAT16)      ID=6  ;;
-    NTFS|EXFAT) ID=7  ;;
-    FAT32)      ID=b  ;;
-    HFAT12)     ID=11 ;;
-    HFAT16)     ID=16 ;;
-    HNTFS)      ID=17 ;;
-    HFAT32)     ID=1b ;;
-    LINUX-SWAP) ID=82 ;;
-    LINUX-LVM)  ID=8e ;;
-    EXT[234]|REISERFS|REISER4|XFS|JFS)
-                ID=83 ;;
-    SOLARIS)    ID=bf ;;
-    CACHE)      ID=ca ;;
-    LINUX-RAID) ID=fd ;;
-    *)          ogRaiseError $OG_ERR_PARTITION "$TYPE"
-                return $? ;;
-esac
+# Elección del tipo de partición.
+ID=$(ogFsToId "$3")
+[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+
 echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 }
 

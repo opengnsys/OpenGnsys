@@ -10,10 +10,10 @@
 
 
 #/**
-#         ogEcho [loglevel] message...
+#         ogEcho [str_loglevel] "str_message..."
 #@brief   Muestra mensajes en consola y lo registra en fichero de incidencias.
-#@arg  \c str_loglevel nivel de registro de incidencias.
-#@arg  \c str_message  mensaje (puede recibir más de 1 parámetro.
+#@param   str_loglevel nivel de registro de incidencias.
+#@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
 #@version 0.9 - Primera versión para OpenGNSys
@@ -25,7 +25,7 @@ function ogEcho () {
 # Variables locales
 local LOGLEVEL LOGFILE DATETIME
 
-#/// Selección del nivel de registro (opcional).
+# Selección del nivel de registro (opcional).
 case "$1" in
      help)    shift ;;
      info)    LOGLEVEL=$1; shift ;;
@@ -33,10 +33,9 @@ case "$1" in
      error)   LOGLEVEL=$1; shift ;;
      *)       ;;
 esac
- 
-#/// Registro de incidencias.
-#[ -w "$OGLOGFILE" ] && LOGFILE="-f $OGLOGFILE"
-#DATETIME=$(date +"%F %T")    # pendiente en cliente Initrd
+# Pendiente en cliente Initrd.
+#DATETIME=$(date +"%F %T")
+
 if [ -n "$LOGLEVEL" ]; then
     logger -s -t "OpenGNSys $LOGLEVEL" $LOGFILE "$DATETIME $*"
 else
@@ -47,15 +46,16 @@ fi
 
 ##### PRUEBAS
 #         ogGetHostname
-function ogGetHostname () {
+function ogGetHostname ()
+{
 local HOST
-#/// Tomar nombre de la variable \c HOSTNAME
+# Tomar nombre de la variable \c HOSTNAME
 HOST="$HOSTNAME"
-#/// Si no, tomar del DHCP, opción \c host-name
+# Si no, tomar del DHCP, opción \c host-name
 [ -z "$HOST" ] && HOST=$(awk -F\" '/option host-name/ {gsub(/;/,""); host=$2}
                                    END {print host}
                                   ' /var/lib/dhcp3/dhclient.leases)
-#/// Si no, tomar del parámetro del kernel \c hostname
+# Si no, tomar del parámetro del kernel \c hostname
 [ -z "$HOST" ] && HOST=$(awk 'BEGIN {RS=""; FS="="}
                               $1~/hostname/ {print $2}' /proc/cmdline)
 [ "$HOSTNAME" != "$HOST" ] && export HOSTNAME="$HOST"
@@ -63,7 +63,8 @@ echo $HOST
 }
 
 #         ogGetIpAddress
-function ogGetIpAddress () {
+function ogGetIpAddress ()
+{
 local IP
 IP=$(awk '/fixed-address/ {gsub(/;/,""); host=$2}
           END {print host}
@@ -73,10 +74,10 @@ echo $IP;
 
 
 #/**
-#         ogRaiseError errcode ["errmessage" ...]
+#         ogRaiseError int_errcode ["str_errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.
-#@arg  \c int_errcode    código de error.
-#@arg  \c str_errmessage mensajes complementarios de error.
+#@param   int_errcode    código de error.
+#@param   str_errmessage mensajes complementarios de error.
 #@return  Mensaje de error.
 #@warning No definidas
 #@note    Mensajes internacionales del fichero de idiomas.
@@ -89,7 +90,7 @@ function ogRaiseError () {
 # Variables locales
 local MSG CODE
 
-#/// Obtener código y mensaje de error.
+# Obtener código y mensaje de error.
 CODE=$1
 case "$CODE" in
      $OG_ERR_FORMAT)    MSG="$MSG_ERR_FORMAT \"$2\"" ;;
@@ -102,7 +103,7 @@ case "$CODE" in
      *)                 MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 
-#/// Mostrar mensaje de error y salir con el código indicado.
+# Mostrar mensaje de error y salir con el código indicado.
 ogEcho error "${FUNCNAME[1]}: $MSG" >&2
 return $CODE
 }
@@ -111,10 +112,10 @@ return $CODE
 #/**
 #         ogHelp ["str_function" ["str_format" ["str_example" ... ]]]
 #@brief   Muestra mensaje de ayuda para una función determinda.
-#@arg  \c str_function Nombre de la función.
-#@arg  \c str_format   Formato de ejecución de la función.
-#@arg  \c str_example  Ejemplo de ejecución de la función.
-#@return  Salida de ayuda.
+#@param   str_function Nombre de la función.
+#@param   str_format   Formato de ejecución de la función.
+#@param   str_example  Ejemplo de ejecución de la función.
+#@return  str_help - Salida de ayuda.
 #@note    Si no se indican parámetros, la función se toma de la variable \c $FUNCNAME
 #@note    La descripción de la función se toma de la variable compuesta por \c MSG_FUNC_$función incluida en el fichero de idiomas.
 #@note    Pueden especificarse varios mensajes con ejemplos.
@@ -127,12 +128,12 @@ function ogHelp () {
 # Variables locales.
 local FUNC MSG
 
-#/// Mostrar función, descripción y formato.
+# Mostrar función, descripción y formato.
 FUNC="${1:-${FUNCNAME[${#FUNCNAME[*]}-1]}}"
 MSG="MSG_HELP_$FUNC"
 ogEcho help "$MSG_FUNCTION $FUNC: ${!MSG}"
 [ -n "$2" ] && ogEcho help "    $MSG_FORMAT: $2"
-#/// Mostrar ejemplos (si existen).
+# Mostrar ejemplos (si existen).
 shift 2
 while [ $# -gt 0 ]; do
     ogEcho help "    $MSG_EXAMPLE: $1"
