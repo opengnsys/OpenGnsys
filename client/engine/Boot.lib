@@ -382,11 +382,7 @@ fi
 # Error si no se reciben 1 parámetros.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-		echo $?
-# Identificamos el disco
-PART=`ogDiskToDev $1`
-# Error si no el disco no exite.
-[ -n "$PART" ]  || ogRaiseError $OG_ERR_NOTFOUND || return $?
+PART="$(ogDiskToDev $1)" || return $?
 ms-sys -z -f $PART
 ms-sys -m -f $PART
 }
