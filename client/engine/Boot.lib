@@ -355,25 +355,38 @@ ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV H
 }
 
 
-function ogNewMbrXP () {
-#/**  @function NewMbrXP: @brief Genera un nuevo Master Boot Record en el disco duro indicado, compatible con los SO tipo Windows
-#@param  $1 obligatorio   int_numdisk
+
+#/**
+#         ogNewMbrXP int_ndisk
+#@brief   Genera un nuevo Master Boot Record en el disco duro indicado, compatible con los SO tipo Windows
+#@arg  \c int_ndisk      nº de orden del disco
 #@return  salida del programa my-sys
-#@warning    no definidos
-#@attention Requisitos:  my-sys, compilado ubicado en /var/EAC/admin/source
-#@note
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
-#*/
-#
-if [ $# = 0 ]
-then
-	Msg "sintaxis: ogNewMbrXP int_disco " red
-return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+function ogNewMbrXP () {
+# Variables locales.
+local PART
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk " \
+           "$FUNCNAME 1 "
+    return
 fi
-if [ $# = 1 ]
-then
-	particion=`ogDiskToDev $1`
-	ms-sys -z -f $particion
-	ms-sys -m -f $particion
-fi
+# Error si no se reciben 1 parámetros.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+		echo $?
+# Identificamos el disco
+PART=`ogDiskToDev $1`
+# Error si no el disco no exite.
+[ -n "$PART" ]  || ogRaiseError $OG_ERR_NOTFOUND || return $?
+ms-sys -z -f $PART
+ms-sys -m -f $PART
 }
