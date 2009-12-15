@@ -28,10 +28,10 @@ cat > /tmp/doxyfile << EOF
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "OpenGNSys"
+PROJECT_NAME           = "Proyecto OpenGnSys"
 PROJECT_NUMBER         = 1.0
 OUTPUT_DIRECTORY       = $2
-CREATE_SUBDIRS         = YES
+CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = Spanish
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
