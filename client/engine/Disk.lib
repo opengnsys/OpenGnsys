@@ -441,8 +441,8 @@ echo $PARTS | cut -sf1-4 -d" " | sed 's/\( EMPTY:0\)*$//'
 #@param   int_ndisk  nº de orden del disco
 #@see     ogListPartitions
 #*/ ##
-function ogListLogicalPartitions
-() {
+function ogListLogicalPartitions ()
+{
 # Variables locales.
 local PARTS
 
