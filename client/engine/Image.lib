@@ -40,7 +40,7 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1 REPO /aula1/winxp"
     return
 fi
-# Error si no se reciben menos de 2 parámetros.
+# Error si no se reciben 4 parámetros.
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
 PART="$(ogDiskToDev $1 $2)" || return $?
