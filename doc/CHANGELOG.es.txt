@@ -1,7 +1,7 @@
-Lista de cambios incluidos en OpenGNSys 0.9
+Lista de cambios incluidos en OpenGnSys 0.9
 ===========================================
 
-Tickets resueltos en módulo OpenGNSys Cloning Engine:
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #13 	Automatizar tamaños de partición al generar una imagen
 #50 	Ayuda en las funciones
 #52 	funcion generacion documentacion doxygen para bash
@@ -11,7 +11,7 @@ Tickets resueltos en módulo OpenGNSys Cloning Engine:
 #73 	Mensajes de error en particiones vacías
 #75 	Arrancar sistemas Linux en partición distinta a la original 
 
-Tickets resueltos en módulo OpenGNSys Client:
+Tickets resueltos en módulo OpenGnSys Client:
 #18 	Adaptar logs a standard syslog
 #40 	Incluir bash en el cliente initrd
 #41 	Usar kernel 2.6.30 o superior en los clientes (mejora)
@@ -23,22 +23,23 @@ Tickets resueltos en módulo OpenGNSys Client:
 #68 	Cliente no encuentra el subdirectorio de logs
 #72 	Error en el browser al intentar cargar la libpng12.so.0
 
-Tickets resueltos en módulo OpenGNSys Web Console:
+Tickets resueltos en módulo OpenGnSys Web Console:
 #10 	Consola no detecta bien el inventario de hardware
 #25 	Interfaz web: Problemas con la creacion de entidades
 #34 	Unificar codificación de caracteres en interfaz web
 #42 	Error en menú opciones ordenador
 #66 	Configuración consola web
 
-Tickets resueltos en módulo OpenGNSys Repository Server:
+Tickets resueltos en módulo OpenGnSys Repository Server:
 #74 	Fallo al ejecutar ogAdmServer
 #69 	Error al compilar el servidor de repositorio ogAdmRepo
 
-Tickets resueltos en módulo OpenGNSys Installer:
+Tickets resueltos en módulo OpenGnSys Installer:
 #62 	Unificar los instaladores
 #79 	Especificaciones para incluir en el script de instalación la parte relativa al sistema de Administración
 #82 	Instalador no arranca ogAdmRepo
 #83 	Contraseña por defecto al instalar
+#102    Fallo en el instalador
 
 Tickets genéricos resueltos:
 #23 	Generar la iso de instalación sobre ubunto server 9.04

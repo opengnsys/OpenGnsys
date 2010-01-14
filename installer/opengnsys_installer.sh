@@ -22,8 +22,6 @@ else
     USESVN=1
     SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 fi
-	echo $0.$PROGRAMDIR.$USESVN.
-	exit
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -804,16 +802,17 @@ function openGnsysCopyServerFiles () {
 
 	echoAndLog "${FUNCNAME}(): copying files to server directories"
 
-	[ $USESVN -eq 1 ] && pushd $WORKDIR/opengnsys
+	pushd $WORKDIR/opengnsys
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
 			echoAndLog "Copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -p "${SOURCES[$i]}" "${path_opengnsys_base}/${TARGETS[$i]}"
-		fi
-		if [ -d "${SOURCES[$i]}" ]; then
+		elif [ -d "${SOURCES[$i]}" ]; then
 			echoAndLog "Copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
-			cp -ar "${SOURCES[$i]}/*" "${path_opengnsys_base}/${TARGETS[$i]}"
+			cp -a "${SOURCES[$i]}"/* "${path_opengnsys_base}/${TARGETS[$i]}"
+        else
+			echoAndLog "Warning: Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 		fi
 	done
 	popd
@@ -949,7 +948,7 @@ function installationSummary(){
 	echo
 	echoAndLog "OpenGnSys Installation Summary"
 	echo       "=============================="
-	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt)" 2>/dev/null
+	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
