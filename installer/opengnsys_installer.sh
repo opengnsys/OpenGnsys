@@ -15,15 +15,15 @@ then
 fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
-pushd $(dirname $0) >/dev/null
-PROGRAMDIR=$PWD
-popd >/dev/null
+PROGRAMDIR=$(readlink -e $(dirname "$0"))
 if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
     SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
 fi
+	echo $0.$PROGRAMDIR.$USESVN.
+	exit
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -453,27 +453,6 @@ EOF
 ####### Funciones para el manejo de Subversion
 #####################################################################
 
-function svnCheckoutCode()
-{
-	if [ $# -ne 1 ]; then
-		errorAndLog "${FUNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
-
-	local url=$1
-
-	echoAndLog "${FUNCNAME}(): downloading subversion code..."
-
-	/usr/bin/svn co "${url}" opengnsys
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
-		return 1
-	fi
-	echoAndLog "${FUNCNAME}(): subversion code downloaded"
-	return 0
-}
-
-
 function svnExportCode()
 {
 	if [ $# -ne 1 ]; then
@@ -485,7 +464,7 @@ function svnExportCode()
 
 	echoAndLog "${FUNCNAME}(): downloading subversion code..."
 
-	/usr/bin/svn export "${url}" opengnsys
+	svn export "${url}" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
@@ -572,15 +551,6 @@ function testPxe () {
 ########################################################################
 ## Configuracion servicio NFS
 ########################################################################
-
-# function nfsConfigure ()
-# {
-#         echoAndLog "${FUNCNAME}(): Sample NFS Configuration."
-#         sed -e "s/NETIP/$NETIP/g" -e "s/NETMASK/$NETMASK/g" $WORKDIR/opengnsys/server/NFS/exports  >> /etc/exports
-# 	/etc/init.d/nfs-kernel-server restart
-# 	exportfs -va
-#         echoAndLog "${FUNCNAME}(): Sample NFS Configured in file \"/etc/exports\"."
-# }
 
 # ADVERTENCIA: usa variables globales NETIP y NETMASK!
 function nfsConfigure()
@@ -705,7 +675,7 @@ function dhcpConfigure()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Copiar ficheros del OpenGNSys Web Console.
+# Copiar ficheros del OpenGnSys Web Console.
 function installWebFiles()
 {
 	echoAndLog "${FUNCNAME}(): Installing web files..."
@@ -746,7 +716,7 @@ function openGnsysInstallWebConsoleApacheConf()
 
 	# genera configuración
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF
-# OpenGNSys Web Console configuration for Apache
+# OpenGnSys Web Console configuration for Apache
 
 Alias /opengnsys ${path_web_console}
 
@@ -784,6 +754,7 @@ function openGnsysInstallCreateDirs()
 	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,usuarios}
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
+	mkdir -p $path_opengnsys_base/doc
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
 	mkdir -p $path_opengnsys_base/log/clients
@@ -816,13 +787,15 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist.conf  \
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
-                        server/PXE/pxelinux.cfg/default )
+                        server/PXE/pxelinux.cfg/default \
+                        doc )
 	local TARGETS=( bin/initrd-generator \
                         bin/upgrade-clients-udeb.sh \
                         etc/udeblist.conf \
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
-                        tftpboot/pxelinux.cfg/default )
+                        tftpboot/pxelinux.cfg/default \
+                        doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
@@ -831,7 +804,7 @@ function openGnsysCopyServerFiles () {
 
 	echoAndLog "${FUNCNAME}(): copying files to server directories"
 
-	[ $USESVN ] && pushd $WORKDIR/opengnsys
+	[ $USESVN -eq 1 ] && pushd $WORKDIR/opengnsys
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
@@ -855,30 +828,30 @@ function servicesCompilation ()
 {
 	local hayErrores=0
 
-	# Compilar OpenGNSys Server
-	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Admin Server"
+	# Compilar OpenGnSys Server
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer
 	make && make install
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGNSys Admin Server"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGNSys Repository Manager
-	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Repository Manager"
+	# Compilar OpenGnSys Repository Manager
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
 	make && make install
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGNSys Repository Manager"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGNSys Client
-	echoAndLog "${FUNCNAME}(): Compiling OpenGNSys Admin Client"
+	# Compilar OpenGnSys Client
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
 	make && mv ogAdmClient ../../../client/nfsexport/bin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGNSys Admin Client"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Client"
 		hayErrores=1
 	fi
 	popd
@@ -897,10 +870,10 @@ function openGnsysClientCreate()
 
 	local hayErrores=0
 
-	echoAndLog "${FUNCNAME}(): Copying OpenGNSys Client files."
+	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
         cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
         find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	echoAndLog "${FUNCNAME}(): Copying OpenGNSys Cloning Engine files."
+	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
         cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
@@ -915,26 +888,26 @@ function openGnsysClientCreate()
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v "$OSCODENAME"
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGNSys Admin Client"
+			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh "$OSCODENAME"
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGNSys Admin Client"
+			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 	else
 		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGNSys Admin Client"
+			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 		echoAndLog "${FUNCNAME}(): Loading default udeb files."
         	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGNSys Admin Client"
+			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 	fi
@@ -949,21 +922,21 @@ function openGnsysClientCreate()
 }
 
 
-# Configuración básica de servicios de OpenGNSys
+# Configuración básica de servicios de OpenGnSys
 function openGnsysConfigure()
 {
 	echoAndLog "openGnsysConfigure(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
 	update-rc.d opengnsys defaults
-	echoAndLog "openGnsysConfigure(): Creating OpenGNSys config file in \"$INSTALL_TARGET/etc\"."
+	echoAndLog "openGnsysConfigure(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
 	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
 	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-	echoAndLog "openGnsysConfiguration(): Starting OpenGNSys services."
+	echoAndLog "openGnsysConfiguration(): Starting OpenGnSys services."
 	/etc/init.d/opengnsys start
 }
 
@@ -974,14 +947,15 @@ function openGnsysConfigure()
 
 function installationSummary(){
 	echo
-	echoAndLog "OpenGNSys Installation Summary"
+	echoAndLog "OpenGnSys Installation Summary"
 	echo       "=============================="
-	echoAndLog "OpenGNSys installation directory: $INSTALL_TARGET"
-	echoAndLog "OpenGNSys repository directory:   $INSTALL_TARGET/images"
+	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt)" 2>/dev/null
+	echoAndLog "Installation directory:           $INSTALL_TARGET"
+	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
 	echoAndLog "DHCP configuracion file:          /etc/dhcp3/dhcpd.conf"
 	echoAndLog "NFS configuracion file:           /etc/exports"
-	echoAndLog "OpenGNSys Web Console URL:        $OPENGNSYS_CONSOLEURL"
+	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
 	echoAndLog "Web Console default user:         $OPENGNSYS_DB_DEFAULTUSER"
@@ -994,18 +968,18 @@ function installationSummary(){
 	echoAndLog "Log-in as Web Console admin user."
 	echoAndLog " - Review default Organization data and default user."
 	echoAndLog "Log-in as Web Console organization user."
-	echoAndLog " - Insert OpenGNSys data (rooms, computers, etc)."
+	echoAndLog " - Insert OpenGnSys data (rooms, computers, etc)."
 echo
 }
 
 
 
 #####################################################################
-####### Proceso de instalación de OpenGNSys
+####### Proceso de instalación de OpenGnSys
 #####################################################################
 
 
-echoAndLog "OpenGNSys installation begins at $(date)"
+echoAndLog "OpenGnSys installation begins at $(date)"
 
 # Detectar parámetros de red por defecto
 getNetworkSettings
@@ -1028,7 +1002,7 @@ if [ $? -ne 0 ]; then
 	fi
 fi
 
-# Arbol de directorios de OpenGNSys.
+# Arbol de directorios de OpenGnSys.
 openGnsysInstallCreateDirs ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while creating directory paths!"
@@ -1036,8 +1010,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Si es necesario, descarga el repositorio de código en directorio temporal
-if [ $USESVN ]; then
-	#svnCheckoutCode $SVN_URL
+if [ $USESVN -eq 1 ]; then
 	svnExportCode $SVN_URL
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while getting code from svn"
@@ -1047,7 +1020,7 @@ else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
-# Compilar código fuente de los servicios de OpenGNSys.
+# Compilar código fuente de los servicios de OpenGnSys.
 servicesCompilation
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while compiling OpenGnsys services"
@@ -1071,14 +1044,14 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Copiar ficheros de servicios OpenGNSys Server.
+# Copiar ficheros de servicios OpenGnSys Server.
 openGnsysCopyServerFiles ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
 fi
 
-# Instalar Base de datos de OpenGNSys Admin.
+# Instalar Base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
@@ -1132,7 +1105,7 @@ installWebFiles
 # creando configuracion de apache2
 openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
 if [ $? -ne 0 ]; then
-	errorAndLog "Error configuring Apache for OpenGNSYS Admin"
+	errorAndLog "Error configuring Apache for OpenGnSYS Admin"
 	exit 1
 fi
 
@@ -1145,12 +1118,12 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Configuración de servicios de OpenGNSys
+# Configuración de servicios de OpenGnSys
 openGnsysConfigure
 
 # Mostrar sumario de la instalación e instrucciones de post-instalación.
 installationSummary
 
 #rm -rf $WORKDIR
-echoAndLog "OpenGNSys installation finished at $(date)"
+echoAndLog "OpenGnSys installation finished at $(date)"
 
