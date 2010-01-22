@@ -1,0 +1,49 @@
+Instalación y Actualización de OpenGnSys
+========================
+
+
+Instalación inicial
+-------------------
+
+Descargar una versión completa y desccomprimir el fichero "opengnsys-version.tar.gz":
+        tar xvzf opengnsys-version.tar.gz
+        cd opengnsys-version/installer
+
+O bien, descargar el instalador desde la última reversión del repositorio:
+        svn export svn://www.informatica.us.es:3690/trunk/installer/opengnsys_installer.sh
+
+Ejecutar el instalador como root:
+        sudo ./opengnsys_installer.sh 
+
+
+Actaulización de ficheros
+-------------------------
+
+AVISO: es recomendable hacer copia de seguridad del servidor antes de actualizar.
+
+Descargar el fichero opengnsys-version.tar.gz y descomprimirlo:
+        tar xvzf opengnsys-version.tar.gz
+        cd opengnsys-version/installer
+
+O bien, descargar el actualizador desde la última revisión del repositorio:
+        svn export svn://www.informatica.us.es:3690/trunk/installer/opengnsys_update.sh
+
+Ejecutar el programa de actualización como root:
+        sudo ./opengnsys_installer.sh 
+
+NOTA: el programa de actualización no modifica ficheros de configuración, no actualiza la bases de datos, no modifica ficheros de imágenes, ni recompila los servicios principales de OpenGnSys.
+
+
+Desinstalar OpenGNSys
+---------------------
+
+   1. Hacemos copia de datos sql de la base de datos ogBDAdmin opengnsys.
+   2. Eliminamos la base de datos ogBDAdmin
+   3. Eliminar mysql: sudo aptitude --purge remove mysql-server
+   4. Parar los servicios og: /etc/init.d/opengnsys stop 
+Desinstalando OpenGNSys
+
+   1. Hacemos copia de datos sql de la base de datos ogBDAdmin opengnsys.
+   2. Eliminamos la base de datos ogBDAdmin
+   3. Eliminar mysql: sudo aptitude --purge remove mysql-server
+   4. Parar los servicios og: /etc/init.d/opengnsys stop 
