@@ -150,7 +150,7 @@ function svnExportCode()
 
 	echoAndLog "${FUNCNAME}(): downloading subversion code..."
 
-	svn export "${url}" opengnsys
+	svn checkout "${url}" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
