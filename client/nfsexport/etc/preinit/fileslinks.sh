@@ -25,12 +25,9 @@ if [ -n "$OPENGNSYS" ]; then
 
     # Datos de dispositivos PCI en /etc
     ln -fs $OGLIB/pci.ids /etc
-
-    # Incluimos el modulo del raton
-    #insmod $OGLIB/modules/psmouse.ko
 else
     # FIXME Error: entorno de OpenGNSys no configurado.
-    echo "Error: OpenGNSys environment is not configured."   # FIXME: definir mensaje.
+    echo "Error: OpenGnSys environment is not configured."   # FIXME: definir mensaje.
     exit 1
 fi
 
