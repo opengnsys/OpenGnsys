@@ -9,8 +9,6 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
-echo "[0] $PROG: Origen=$IMGFILE, Destino=$PART"
-
 # Procesar parámetros de entrada
 IMGFILE=$(ogGetPath "$1" "$2.img")
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
@@ -32,9 +30,11 @@ if [ -z "$IMGFILE" ]; then
     exit $?
 fi
 PART=$(ogDiskToDev "$3" "$4") || exit $?
+echo "[20] $PROG: Origen=$IMGFILE, Destino=$PART"
+
 
 # Restaurar la imagen.
-echo "[20] Restaurar imagen"
+echo "[25] Restaurar imagen"
 ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 echo "[80] Extender sistema de archivos."

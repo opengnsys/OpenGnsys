@@ -9,7 +9,6 @@ if [ $# -ne 2 ]; then
 fi
 
 # Iniciación de porcentaje de la barra de progreso del Browser.
-echo "[0,100]"
 echo "[0] Inicio del proceso de arranque."
 
 # Procesos previos.

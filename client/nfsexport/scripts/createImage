@@ -9,9 +9,6 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
-# Mostrar información.
-echo "[0] $PROG: Origen=$PART, Destino=$IMGFILE"
-
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
 IMGDIR=$(ogGetParentPath "$3" "/$4")
@@ -27,11 +24,13 @@ if [ -f "$IMGFILE" ]; then
     echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"."
     mv "$IMGFILE" "$IMGFILE.ant"
 fi
+# Mostrar información.
+echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
 
 # Obtener tamaño de la partición.
 SIZE=$(ogGetPartitionSize "$1" "$2")
 # Reducir el sistema de archvios.
-echo "[15]: Reducir sistema de archivos."
+echo "[20]: Reducir sistema de archivos."
 REDSIZE=$(ogReduceFs $1 $2) || REDSIZE=$[SIZE+1]
 if [ $REDSIZE -lt $SIZE ]; then
     echo "[25] Redimensionar partición a $REDSIZE KB."
