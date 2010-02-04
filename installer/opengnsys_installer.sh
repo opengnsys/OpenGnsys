@@ -31,7 +31,7 @@ INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz)
+DEPENDENCIES=( subversion apache2 libapache2-mod-bt php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz)
 
 MYSQL_ROOT_PASSWORD="passwordroot"
 
@@ -711,6 +711,9 @@ function openGnsysInstallWebConsoleApacheConf()
         mkdir -p $path_apache2_confd/{sites-available,sites-enabled}
 
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
+
+    # Habilitar módulo bt (tracker bittorent)
+    a2enmod bt
 
 	# genera configuración
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF

@@ -32,7 +32,9 @@ Tickets resueltos en módulo OpenGnSys Client:
 #67 	Cliente QT no importa NFS
 #68 	Cliente no encuentra el subdirectorio de logs
 #72 	Error en el browser al intentar cargar la libpng12.so.0
-#84	oginit considera siempre al servidor dhcp como si fuese el servidor opengnsys
+#84 oginit considera siempre al servidor dhcp como si fuese el servidor opengnsys
+#105    El browser del cliente no detecta algunos ratones
+#106    Añadir al busybox del initrd soporte de configuración de red
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #10 	Consola no detecta bien el inventario de hardware
@@ -61,6 +63,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #94 	Problema proceso instalación en tar.gz (descarga svn)
 #102	Fallo en el instalador
 #103	ogAdmClient.cfg no compatible con el instalacion (lineas en blanco al final)
+#107    Actualizador da error si no se ha eliminado el directorio de /tmp
 
 Tickets genéricos resueltos:
 #21	Elección de nombre para el proyecto
