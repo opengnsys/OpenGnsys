@@ -18,7 +18,11 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #85	ogCreateImage no crea los subdirectorios del path indicado
 #86	ogRestoreImage siempre añade a la imagen pasada como parámetro la subcadena ".img"
 #87	engine no se adapta a la sintaxis doxygen
+#98 	ogGetParent no devuelve salida correcta para el argumento CACHE
 #101	trunk Disk.lib error linea 445
+#109	ogSetPartitionId no modifica bien el identificador de la partición
+#110	ogCreatePartitions no llama a ogTypeToId
+#111	ogFormatFS no reconoce el tipo de partiticion CACHE
 
 Tickets resueltos en módulo OpenGnSys Client:
 #11 	Páginas de inicio estilo rembo
@@ -34,24 +38,24 @@ Tickets resueltos en módulo OpenGnSys Client:
 #72 	Error en el browser al intentar cargar la libpng12.so.0
 #84 oginit considera siempre al servidor dhcp como si fuese el servidor opengnsys
 #105    El browser del cliente no detecta algunos ratones
-#106    Añadir al busybox del initrd soporte de configuración de red
+#106    Añadir al busybox del initrd soporte de configuración de red (no se resolverá)
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #10 	Consola no detecta bien el inventario de hardware
-#19	Integrar las bases de datos
-#20	Creación de scripts de instalación
+#19	Integrar las bases de datos (tarea)
+#20	Creación de scripts de instalación (no se ressolverá)
 #25 	Interfaz web: Problemas con la creacion de entidades
 #34 	Unificar codificación de caracteres en interfaz web
-#42 	Error en menú opciones ordenador
+#42 	Error en menú opciones ordenador (tarea)
 #66 	Configuración consola web
-#76	Problemas al crear tareas y trabajos nuevos
-#78	No funciona la consola web
+#76	Problemas al crear tareas y trabajos nuevos (tarea)
+#78	No funciona la consola web (tarea)
 #80 	puerto por defecto del servidor opengnsys en el web admin
 #97	Instalador no deja bien configurado controlacceso.php
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #74 	Fallo al ejecutar ogAdmServer
-#69 	Error al compilar el servidor de repositorio ogAdmRepo
+#69 	Error al compilar el servidor de repositorio ogAdmRepo (tarea)
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #53	revertir el opengnsys_instaler.sh a la versión de Luis (181)
@@ -63,6 +67,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #94 	Problema proceso instalación en tar.gz (descarga svn)
 #102	Fallo en el instalador
 #103	ogAdmClient.cfg no compatible con el instalacion (lineas en blanco al final)
+#104	el instalador no configura bien el dhcp, nfs-export
 #107    Actualizador da error si no se ha eliminado el directorio de /tmp
 
 Tickets genéricos resueltos:
@@ -71,11 +76,11 @@ Tickets genéricos resueltos:
 #23 	Generar la iso de instalación sobre ubunto server 9.04
 #28	instalar la macro include
 #35 	Subversion: configuración saltos de línea
-#44 	Definición del proyecto OpenGNSys
+#44 	Definición del proyecto OpenGnSys
 #45	Propuesta Añadir un componente: Proyecto
-#47 	Manual de instalación de OpenGNSys
-#48 	Añadir GPL v3 a cada módulo del OpenGNSys
-#49 	Añadir Creative Commons al módulo de documentación del OpenGNSys
+#47 	Manual de instalación de OpenGnSys (tarea)
+#48 	Añadir GPL v3 a cada módulo del OpenGnSys
+#49 	Añadir Creative Commons al módulo de documentación del OpenGnSys
 #63 	En la página principal sólo se puede acceder al Roadmap
 #88 	Adaptar el sistema para entornos donde exista servicios dhcp independientes o se quiera distribuir contenedores images y librerias
 

@@ -486,15 +486,22 @@ function getNetworkSettings()
 	# - ROUTERIP: IP del router.
 	# - DNSIP:    IP del servidor DNS.
 
-        echoAndLog "getNetworkSettings(): Detecting default network parameters."
-	SERVERIP=$(LANG=C ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | head -n1 | awk '{print $1}')
-	NETMASK=$(LANG=C ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | head -n1 | awk '{print $1}')
-	NETBROAD=$(LANG=C ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | head -n1 | awk '{print $1}')
-	NETIP=$(netstat -r | grep $NETMASK | head -n1 | awk '{print $1}')
+	local MAINDEV
+
+        echoAndLog "${FUNCNAME}(): Detecting default network parameters."
+	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
+	if [ -z "$MAINDEV" ]; then
+		errorAndLog "${FUNCNAME}(): Network device not detected."
+		exit 1
+	fi
+	SERVERIP=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+	NETMASK=$(LANG=C ifconfig $MAINDEV | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
+	NETBROAD=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {print ($6)}')
+	NETIP=$(netstat -nr | grep $MAINDEV | awk '$1!~/0\.0\.0\.0/ {print $1}')
 	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
 	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
-		errorAndLog "getNetworkSettings(): Network not detected."
+		errorAndLog "${FUNCNAME}(): Network not detected."
 		exit 1
 	fi
 
