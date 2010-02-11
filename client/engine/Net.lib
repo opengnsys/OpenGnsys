@@ -20,13 +20,13 @@
 function ogGetHostname ()
 {
 local HOST
-# Tomar nombre de la variable \c HOSTNAME
+# Tomar nombre de la variable HOSTNAME
 HOST="$HOSTNAME"
-# Si no, tomar del DHCP, opción \c host-name
+# Si no, tomar del DHCP, opción host-name       /* (comentario para Doxygen)
 [ -z "$HOST" ] && HOST=$(awk -F\" '/option host-name/ {gsub(/;/,""); host=$2}
                                    END {print host}
                                   ' /var/lib/dhcp3/dhclient.leases)
-# Si no, tomar del parámetro del kernel \c hostname
+# Si no, leer el parámetro del kernel hostname  (comentario para Doxygen) */
 [ -z "$HOST" ] && HOST=$(awk 'BEGIN {RS=""; FS="="}
                               $1~/hostname/ {print $2}' /proc/cmdline)
 [ "$HOSTNAME" != "$HOST" ] && export HOSTNAME="$HOST"
@@ -45,9 +45,9 @@ echo $HOST
 function ogGetIpAddress ()
 {
 local IP
-# Obtener direcciones IP.
+# Obtener direcciones IP.        /* (comentario para Doxygen)
 IP=$(ip -o addr show | awk '$2!~/lo/ && $3~/inet$/ {sub (/\/.*/, ""); printf ("%s ", $4)}')
-# Mostrar sólo la primera.
+# Mostrar sólo la primera.       (comentario para Doxygen) */
 echo ${IP%% *}
 }
 

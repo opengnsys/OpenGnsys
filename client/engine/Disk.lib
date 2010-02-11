@@ -202,9 +202,10 @@ case $# in
         if [ -b "$PART" ]; then
             echo "$PART"
         elif [ -n "$VOLGROUPS" ]; then
-            # Comprobar si volumen lógico.
+            # Comprobar si volumen lógico.      /* (comentario Doxygen)
             PART=$(lvscan -a 2>/dev/null | grep "'$DISK/" | awk -v n=$2 -F\' '{if (NR==n) print $2}')
             [ -e "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+            #                                   (comentario Doxygen) */
             echo "$PART"
         else
             ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
@@ -364,10 +365,8 @@ DISK="$(ogDiskToDev $1)" || return $?
 PART="$(ogDiskToDev $1 $2)" || return $?
 case "$(ogGetPartitionId $1 $2)" in
     5|f)  # Procesar detección de tamaño de partición Extendida.
-                # /* (comentario Doxygen)
           sfdisk -l $DISK 2>/dev/null | \
                     awk -v p=$PART '{if ($1==p) {sub (/\*/,""); print $5} }'
-                # (comentario Doxygen) */
           ;;
     *)    sfdisk -s $PART
           ;;
