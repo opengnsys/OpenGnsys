@@ -19,6 +19,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #86	ogRestoreImage siempre añade a la imagen pasada como parámetro la subcadena ".img"
 #87	engine no se adapta a la sintaxis doxygen
 #98 	ogGetParent no devuelve salida correcta para el argumento CACHE
+#99 	ogGetIpAddress obtiene la ip a partir del leases obtenido del dhcp
 #101	trunk Disk.lib error linea 445
 #109	ogSetPartitionId no modifica bien el identificador de la partición
 #110	ogCreatePartitions no llama a ogTypeToId
@@ -47,8 +48,10 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #25 	Interfaz web: Problemas con la creacion de entidades
 #34 	Unificar codificación de caracteres en interfaz web
 #42 	Error en menú opciones ordenador (tarea)
+#54 	Gestión de usuarios
 #66 	Configuración consola web
 #76	Problemas al crear tareas y trabajos nuevos (tarea)
+#77 	No se pueden añadir comandos a tareas, trabajos, etc. (tarea)
 #78	No funciona la consola web (tarea)
 #80 	puerto por defecto del servidor opengnsys en el web admin
 #97	Instalador no deja bien configurado controlacceso.php
