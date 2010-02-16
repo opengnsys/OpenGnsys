@@ -166,24 +166,13 @@ function svnExportCode()
 
 function getNetworkSettings()
 {
-	# Variables globales definidas:
-	# - SERVERIP: IP local del servidor.
-	# - NETIP:    IP de la red.
-	# - NETMASK:  máscara de red.
-	# - NETBROAD: IP de difusión de la red.
-	# - ROUTERIP: IP del router.
-	# - DNSIP:    IP del servidor DNS.
+        local MAINDEV
 
-        echoAndLog "getNetworkSettings(): Detecting default network parameters."
-	SERVERIP=$(LANG=C ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | head -n1 | awk '{print $1}')
-	NETMASK=$(LANG=C ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | head -n1 | awk '{print $1}')
-	NETBROAD=$(LANG=C ifconfig | grep 'Bcast:'| grep -v '127.0.0.1' | cut -d: -f3 | head -n1 | awk '{print $1}')
-	NETIP=$(netstat -r | grep $NETMASK | head -n1 | awk '{print $1}')
-	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
-	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
-	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
-		errorAndLog "getNetworkSettings(): Network not detected."
-		exit 1
+ 	echoAndLog "getNetworkSettings(): Detecting default network parameters."
+	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
+	if [ -z "$MAINDEV" ]; then
+ 		errorAndLog "${FUNCNAME}(): Network device not detected."
+		return 1
 	fi
 
 	# Variables de ejecución de Apache
@@ -218,6 +207,22 @@ function updateWebFiles()
 			$INSTALL_TARGET/www/comandos/gestores/filescripts \
 			$INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
+}
+
+
+# Crear documentación Doxygen para la consola web.
+function makeDoxygenFiles()
+{
+	echoAndLog "${FUNCNAME}(): Making Doxygen web files..."
+	$WORKDIR/opengnsys/installer/ogGenerateDoc.sh \
+			$WORKDIR/opengnsys/client/engine $INSTALL_TARGET/www
+	if [ ! -d "$INSTALL_TARGET/www/html" ]; then
+		errorAndLog "${FUNCNAME}(): unable to create Doxygen web files."
+		return 1
+	fi
+ 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
+	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
 
 
@@ -417,6 +422,8 @@ if [ $? -ne 0 ]; then
     errorAndLog "Error updating OpenGnSys Web Admin files"
 	exit 1
 fi
+# Generar páginas Doxygen para instalar en el web
+makeDoxygenFiles
 
 # Creando la estructura del cliente
 recompileClient

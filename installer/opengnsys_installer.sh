@@ -746,6 +746,22 @@ EOF
 	fi
 }
 
+# Crear documentación Doxygen para la consola web.
+function makeDoxygenFiles()
+{
+	echoAndLog "${FUNCNAME}(): Making Doxygen web files..."
+	$WORKDIR/opengnsys/installer/ogGenerateDoc.sh \
+			$WORKDIR/opengnsys/client/engine $INSTALL_TARGET/www
+	if [ ! -d "$INSTALL_TARGET/www/html" ]; then
+		errorAndLog "${FUNCNAME}(): unable to create Doxygen web files."
+	return 1
+	fi
+	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
+	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
+}
+
+
 # Crea la estructura base de la instalación de opengnsys
 function openGnsysInstallCreateDirs()
 {
@@ -1110,6 +1126,8 @@ fi
 
 # copiando paqinas web
 installWebFiles
+# Generar páqinas web de documentación de la API
+makeDoxygenFiles
 
 # creando configuracion de apache2
 openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
