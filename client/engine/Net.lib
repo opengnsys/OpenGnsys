@@ -46,7 +46,7 @@ function ogGetIpAddress ()
 {
 local IP
 # Obtener direcciones IP.        /* (comentario para Doxygen)
-IP=$(ip -o addr show | awk '$2!~/lo/ && $3~/inet$/ {sub (/\/.*/, ""); printf ("%s ", $4)}')
+IP=$(ip address show | awk '$2!~/lo/ { readline; if ($1~/inet$/) {sub (/\/.*/, ""); printf ("%s ", $2)}}')
 # Mostrar sólo la primera.       (comentario para Doxygen) */
 echo ${IP%% *}
 }
