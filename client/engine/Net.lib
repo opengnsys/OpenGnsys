@@ -64,7 +64,7 @@ function ogGetMacAddress ()
 {
 local MAC
 # Obtener direcciones Ethernet.
-MAC=$(ip -o addr show | awk '$2!~/lo/ && /ether/ {printf ("%s ", toupper($11))}')
+MAC=$(ip address show | awk '$2!~/lo/ {readline; if ($1~/ether/) printf ("%s ", toupper($2));}')
 # Mostrar sólo la primera.
 echo ${MAC%% *}
 }
