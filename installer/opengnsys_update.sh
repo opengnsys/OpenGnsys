@@ -369,7 +369,7 @@ function updateClient()
 
 
 #####################################################################
-####### Proceso de actualizción de OpenGnSys
+####### Proceso de actualización de OpenGnSys
 #####################################################################
 
 
@@ -431,6 +431,12 @@ updateClient
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"
 	exit 1
+fi
+
+# Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
+if [ -r /tmp/dstate ]
+then
+    rm /tmp/dstate
 fi
 
 #rm -rf $WORKDIR

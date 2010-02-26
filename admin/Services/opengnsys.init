@@ -45,9 +45,9 @@ REPODAEMON_OPTIONS="-f $REPOCFG -l $REPOLOG"
 # Opciones Bittorrent
 #
 
-BTTRACK=/usr/bin/bttrack.bittornado
+BTTRACK=/usr/bin/bttrack.bittorrent
 BTSEEDER=/usr/bin/btlaunchmany.bittornado
-BTTRACKPORT=1234
+BTTRACKPORT=6969
 BTTRACKDFILE=/tmp/dstate
 BTTRACKLOG=/opt/opengnsys/log/bttrack.log
 BTINTERVAL=30
