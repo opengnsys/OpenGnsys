@@ -445,6 +445,10 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
+# Actualizamos el fichero que arranca los servicios de OpenGnSys
+
+updateServicesStart
+
 # Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
 if [ -r /tmp/dstate ]
 then
