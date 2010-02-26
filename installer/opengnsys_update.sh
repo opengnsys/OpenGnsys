@@ -190,6 +190,18 @@ function getNetworkSettings()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
+# Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
+
+function updateServicesStart(){
+	echoAndLog "${FUNCNAME}(): Updating /etc/init.d/opengnsys ..."
+    cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
+	if [ $? != 0 ]; then
+		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
+		exit 1
+	fi
+	echoAndLog "${FUNCNAME}(): /etc/init.d/opengnsys updated successfully."
+}
+
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
