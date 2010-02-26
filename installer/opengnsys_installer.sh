@@ -719,8 +719,6 @@ function openGnsysInstallWebConsoleApacheConf()
 
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
-    # Habilitar módulo bt (tracker bittorent)
-    a2enmod bt
 
 	# genera configuración
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF
