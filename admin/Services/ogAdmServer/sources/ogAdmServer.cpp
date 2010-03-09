@@ -1176,10 +1176,22 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	strcpy(ch,"\n");// caracter delimitador 
 	lon=split_parametros(tbHardware,buffer,ch);
 	
+	for (i=0;i<lon;i++){
+		sprintf(msglog,"Linea de inventario: %s",tbHardware[i]);
+		RegistraLog(msglog,false);
+	}
+	
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
 		strcpy(ch,"=");// caracter delimitador "="
-		split_parametros(dualHardware,tbHardware[i],ch); // Nmero de particin
+		split_parametros(dualHardware,tbHardware[i],ch); 
+		
+		sprintf(msglog,"nemonico: %s",dualHardware[0]);
+		RegistraLog(msglog,false);
+		sprintf(msglog,"valor: %s",dualHardware[1]);
+		RegistraLog(msglog,false);
+		
+		
 		sprintf(sqlstr,"SELECT idtipohardware,descripcion FROM tipohardwares WHERE nemonico='%s'",dualHardware[0]);
 		if(!db.Execute(sqlstr,tbl)){ // Error al leer
 			db.GetErrorErrStr(ErrStr);
@@ -1187,7 +1199,7 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 			return(false);
 		}		
 		if(tbl.ISEOF()){ //  Tipo de Hardware NO existente
-			sprintf(msglog,"Existe un tipo de hardware que no está registrado (nemónico:%s). Se rechaza proceso de inventario",dualHardware[0]);
+			sprintf(msglog,"Existe un tipo de hardware que no está registrado (nemónico:%s). Se rechaza proceso de inventario:%s",dualHardware[0]);
 			RegistraLog(msglog,false);
 			pthread_mutex_unlock(&guardia); 
 			return(false);
