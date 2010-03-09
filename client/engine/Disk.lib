@@ -10,6 +10,52 @@
 
 
 #/**
+#         ogCreateCache int_partsize
+#@brief   Define la caché local en la partición 4 del disco 1
+#@param   int_partsize   tamaño de la partición (en KB)
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@note    Requisitos: sfdisk, parted, awk, sed
+#@version 0.91 - Definición de caché enp OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/03/09
+#*/ ##
+function ogCreateCache ()
+{
+# Variables locales.
+local DISK SECTORS CYLS START END SIZE
+# Error si no se recibe 1 parámetro.
+[ $# -eq 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+DISK=$(ogDiskToDev 1) || return $?
+PART="${DISK}4"
+SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
+CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
+END=$[SECTORS/CYLS*CYLS-1]
+SIZE=$(echo $1|awk '{print $0*2}')      # En sectores de 512 B.
+START=$[END-SIZE+1]
+ENDPART3=$(sfdisk -us -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
+# Error si tamaño 0 o si mayor que la mitad del disco o si pisa la partición 3.
+if [ $SIZE -eq 0 -o $SIZE -ge $[END/2] -o $START -le $ENDPART3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$1" || return $?
+fi
+
+# Crear plantilla de particionado, modificando partición 4 para caché local.
+tmpsfdisk=/tmp/sfdiskout$$
+trap "rm -f $tmpsfdisk" 1 2 3 9 15
+sfdisk -d $DISK | sed "s;$PART.*$;$PART : start=$START, size=$SIZE, Id=ca;" >$tmpsfdisk
+
+# Desmontar todos los sistemas de archivos del disco.
+ogUnmountAll 1 2>/dev/null
+# Si la tabla de particiones no es valida, volver a generarla.
+[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
+# Definir particiones y notificar al kernel.
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && sfdisk -R $DISK
+rm -f $tmpsfdisk
+}
+
+
+#/**
 #         ogCreatePartitions int_ndisk str_parttype:int_partsize ...
 #@brief   Define el conjunto de particiones de un disco.
 #@param   int_ndisk      nº de orden del disco
@@ -25,11 +71,14 @@
 #@version 0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/09
+#@version 0.91 - Corrección del redondeo del tamaño del disco.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/03/09
 #*/ ##
 function ogCreatePartitions ()
 {
 # Variables locales.
-local DISK PART SECTORS START SIZE TYPE EXTSTART EXTSIZE tmpsfdisk
+local DISK PART SECTORS CYLS START SIZE TYPE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -39,13 +88,13 @@ fi
 # Error si no se reciben menos de 2 parámetros.
 [ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Desmontar todos los sistemas de archivos del disco.
 DISK="$(ogDiskToDev $1)" || return $?
-ogUnmountAll $1
 shift
 
-# Nº total de sectores, para evitar desbordamiento
+# Nº total de sectores, para evitar desbordamiento (evitar redondeo).
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
+CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
+SECTORS=$[SECTORS/CYLS*CYLS-1]
 # Sector de inicio de la particon (la 1ª empieza en el sector 63).
 START=63
 PART=1
@@ -99,6 +148,8 @@ if [ $PART = 5 -a -n "$EXTSTART" ]; then
     echo "${DISK}5 : start=$EXTSTART, size=$EXTSIZE, Id=0" >>$tmpsfdisk
 fi
 
+# Desmontar todos los sistemas de archivos del disco.
+ogUnmountAll $1
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
