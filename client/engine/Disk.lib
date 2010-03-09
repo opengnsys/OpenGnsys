@@ -71,6 +71,7 @@ rm -f $tmpsfdisk
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
 #@attention Pueden definirse particiones vacías de tipo \c EMPTY
+#@attention No puede definirse partición de cache y no se modifica si existe.
 #@note    Requisitos: sfdisk, parted, partprobe, awk
 #@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
 #@version 0.9 - Primera versión para OpenGNSys
@@ -83,7 +84,7 @@ rm -f $tmpsfdisk
 function ogCreatePartitions ()
 {
 # Variables locales.
-local DISK PART SECTORS CYLS START SIZE TYPE EXTSTART EXTSIZE tmpsfdisk
+local DISK PART SECTORS CYLS START SIZE TYPE CACHESIZE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -93,14 +94,18 @@ fi
 # Error si no se reciben menos de 2 parámetros.
 [ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-DISK="$(ogDiskToDev $1)" || return $?
-shift
-
+# Desmontar todos los sistemas de archivos del disco.
+DISK=$(ogDiskToDev "$1") || return $?
+ogUnmountAll $1
 # Nº total de sectores, para evitar desbordamiento (evitar redondeo).
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 SECTORS=$[SECTORS/CYLS*CYLS-1]
-# Sector de inicio de la particon (la 1ª empieza en el sector 63).
+# Se recalcula el nº de sectores del disco 1, si existe partición de caché.
+CACHESIZE=$(ogGetCacheSize 2>/dev/null)
+[ $1 == 1 -a -n "$CACHESIZE" ] && SECTORS=$[SECTORS-$CACHESIZE*2]
+ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
+# Sector de inicio (la partición 1 empieza en el sector 63).
 START=63
 PART=1
 
@@ -112,14 +117,20 @@ echo "unit: sectors" >$tmpsfdisk
 echo                >>$tmpsfdisk
 
 # Generar fichero de entrada para "sfdisk" con las particiones.
+shift
 while [ $# -gt 0 ]; do
+    # Conservar los datos de la partición de caché.
+    if [ -n "$CACHESIZE" -a $PART == 4 ]; then
+        echo "$DISK$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
+        PART=$[PART+1]
+    fi
     # Leer formato de cada parámetro - Tipo:Tamaño
     TYPE="${1%%:*}"
+    [ "$TYPE" != "CACHE" ] || ogRaiseError $OG_ERR_FORMAT "$TYPE" || return $?
     SIZE="${1#*:}"
-    [ -z "$SIZE" ] && ogRaiseError $OG_ERR_FORMAT && return $?
     # Convertir en sectores de 512 B.
-    SIZE=$[SIZE*2]
-    [ $SIZE -eq 0 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+    SIZE=$(echo $SIZE|awk '{print $0*2}')      # (solución error de sintaxis)
+    [ $SIZE -ne 0 ] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
     # Obtener identificador de tipo de partición.
     ID=$(ogFsToId "$TYPE")
     [ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
@@ -139,13 +150,17 @@ while [ $# -gt 0 ]; do
     echo "$DISK$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
     # Error si se supera el nº total de sectores.
     START=$[START+SIZE]
-    [ $START -gt $SECTORS ] && ogRaiseError $OG_ERR_FORMAT && return $?
+    [ $START -le $SECTORS ] || ogRaiseError $OG_ERR_FORMAT "$[START/2] > $[SECTORS/2]" || return $?
     PART=$[PART+1]
     shift
 done
-# Si no se indican las 4 particiones primarias, definirlas como vacías.
+# Si no se indican las 4 particiones primarias, definirlas como vacías, conservando la partición de caché.
 while [ $PART -le 4 ]; do
-    echo "$DISK$PART : start=0, size=0, Id=0" >>$tmpsfdisk
+    if [ -n "$CACHESIZE" -a $PART == 4 ]; then
+        echo "$DISK$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
+    else
+        echo "$DISK$PART : start=0, size=0, Id=0" >>$tmpsfdisk
+    fi
     PART=$[PART+1]
 done
 # Si se define partición extendida sin lógicas, crear particion 5 vacía.
@@ -153,8 +168,6 @@ if [ $PART = 5 -a -n "$EXTSTART" ]; then
     echo "${DISK}5 : start=$EXTSTART, size=$EXTSIZE, Id=0" >>$tmpsfdisk
 fi
 
-# Desmontar todos los sistemas de archivos del disco.
-ogUnmountAll $1
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
