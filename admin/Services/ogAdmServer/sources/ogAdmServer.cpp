@@ -1187,7 +1187,8 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 			return(false);
 		}		
 		if(tbl.ISEOF()){ //  Tipo de Hardware NO existente
-			RegistraLog("Existe un tipo de hardware que no está registrado. Se rechaza proceso de inventario",false);
+			sprintf(msglog,"Existe un tipo de hardware que no está registrado (nemónico:%s). Se rechaza proceso de inventario:%s",dualHardware[0]);
+			RegistraLog(msglog,false);
 			pthread_mutex_unlock(&guardia); 
 			return(false);
 		}
