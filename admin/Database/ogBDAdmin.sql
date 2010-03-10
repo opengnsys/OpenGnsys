@@ -1223,3 +1223,24 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `idambito`, `ididioma`, `idtipousuario`) VALUES 
 (1, 'usuog', 'passusuog', 'Usuario de la base de datos MySql', '', 0, 1, 1),
 (2,'DEFAULTUSER','DEFAULTPASSWD','Usuario por defecto','',1,1,2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `entornos`
+--
+
+DROP TABLE IF EXISTS `entornos`;
+CREATE TABLE IF NOT EXISTS `entornos` (
+  `identorno` int(11) NOT NULL auto_increment,
+  `ipserveradm` varchar(50) NOT NULL,
+  `portserveradm` int(20) NOT NULL,
+  `protoclonacion` varchar(50) NOT NULL,
+  PRIMARY KEY  (`identorno`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+--
+-- Volcar la base de datos para la tabla `entornos`
+--
+INSERT INTO `entornos` (`identorno`,`ipserveradm`,`portserveradm`,`protoclonacion`) VALUES 
+ (1,'SERVERIP','2008','TORRENT');
