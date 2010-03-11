@@ -23,7 +23,7 @@
 function ogCreateCache ()
 {
 # Variables locales.
-local DISK SECTORS CYLS START END SIZE ENDPART3
+local DISK PART SECTORS CYLS START END SIZE ENDPART3
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME 10000000"
@@ -33,7 +33,7 @@ fi
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 DISK=$(ogDiskToDev 1) || return $?
-PART="${DISK}4"
+PART="4"
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 END=$[SECTORS/CYLS*CYLS-1]
@@ -45,18 +45,12 @@ if [ $SIZE -eq 0 -o $SIZE -ge $[END/2] -o $START -le $ENDPART3 ]; then
     ogRaiseError $OG_ERR_FORMAT "$1" || return $?
 fi
 
-# Crear plantilla de particionado, modificando partición 4 para caché local.
-tmpsfdisk=/tmp/sfdiskout$$
-trap "rm -f $tmpsfdisk" 1 2 3 9 15
-sfdisk -d $DISK | sed "s;$PART.*$;$PART : start=$START, size=$SIZE, Id=ca;" >$tmpsfdisk
-
 # Desmontar todos los sistemas de archivos del disco.
 ogUnmountAll 1 2>/dev/null
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
-sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && sfdisk -R $DISK
-rm -f $tmpsfdisk
+sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,ca" 2>/dev/null && sfdisk -R $DISK
 }
 
 
@@ -173,6 +167,39 @@ fi
 # Definir particiones y notificar al kernel.
 sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && sfdisk -R $DISK
 rm -f $tmpsfdisk
+}
+
+
+#/**
+#         ogDeleteCache
+#@brief   Elimina la partición de caché local.
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@note    Requisitos: sfdisk, parted, awk, sed
+#@version 0.91 - Definición de caché local.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/03/11
+#*/ ##
+function ogDeleteCache ()
+{
+# Variables locales.
+local DISK PART
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+# Error si no se encuentra partición de caché.
+read DISK PART <<<"$(ogDevToDisk $(ogFindCache) 2>/dev/null)"
+[ -n "$DISK" -a -n "$PART" ] || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $OG_ERR_PARTITION
+DISK=$(ogDiskToDev $DISK)
+
+# Desmontar todos los sistemas de archivos del disco.
+ogUnmountAll 1 2>/dev/null
+# Si la tabla de particiones no es valida, volver a generarla.
+[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
+# Eliminar (poner a 0) la partición de caché.
+sfdisk -f $DISK -N$PART <<<"0,0,0" 2>/dev/null && sfdisk -R $DISK
 }
 
 
