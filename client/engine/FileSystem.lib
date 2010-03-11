@@ -136,12 +136,15 @@ return $ERRCODE
 
 
 #/**
-#         ogFormat int_ndisk int_npartition
-#@see     ogFormatFs
+#         ogFormat int_ndisk int_npartition | CACHE
+#@see     ogFormatFs ogFormatCache
 #*/
 function ogFormat ()
 {
-ogFormatFs "$@"
+case "$*" in
+    CACHE|cache)  ogFormatCache ;;
+    *)            ogFormatFs "$@" ;;
+esac
 }
 
 
@@ -837,29 +840,38 @@ unset OGCAC
 }
 
 
-function ogFormatCache () {
-#/**  @function ogFormatCache: @brief Formatea la Cache EAC y le asigna el label CACHE
-#@param  No requiere
-#@return   la propia del mkfs.ext3
-#@warning
+#/**
+#         ogFormatCache
+#@brief   Formatea el sistema de ficheros para la caché local.
+#@return  (por determinar)
+#@warning Prueba con formato Reiser.
 #@attention
-#@note
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
-#*/
+#@note    El sistema de archivos de la caché se queda montado.
+#@version 0.1 - Definición inicial para el Proyecto EAC
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
+#@version 0.91 - Creación caché local.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-03-11
+#*/ ##
+function ogFormatCache ()
+{
+# Variables locales.
+local DEV MNTDIR
 
-if [ $# = 0 ]
-then
-	cd /
-	ogUnmountCache
-	dev=`ogFindCache`
-	exhe "Iniciando el formateo de la particion CACHE, ubicada en $dev, y asignandole el label CACHE"
-	mkfs.ext3 $dev -L CACHE
-	ogInfoCache
-fi
-if [ $# = 1 ]
-then
-	mkfs.ext3 $1 -L CACHE
-fi
+# Error si no hay definida partición de caché.
+DEV=`ogFindCache`
+[ -n "$DEV" ] || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+
+# Formatear sistema de ficheros.
+ogUnmountCache 2>/dev/null
+           # Orden para formateo Reiser 3
+mkfs.reiserfs -f $DEV -l "CACHE" 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+           # Orden para formateo XFS
+           #mkfs.xfs $DEV -L "CACHE" || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+# Crear estructura básica
+MNTDIR=$(ogMountCache)
+mkdir -p $MNTDIR/$OGIMG
 }
 
 function ogGetFsSize () {
