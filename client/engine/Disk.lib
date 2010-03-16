@@ -10,51 +10,6 @@
 
 
 #/**
-#         ogCreateCache int_partsize
-#@brief   Define la caché local en la partición 4 del disco 1
-#@param   int_partsize   tamaño de la partición (en KB)
-#@return  (nada, por determinar)
-#@exception OG_ERR_FORMAT   formato incorrecto.
-#@note    Requisitos: sfdisk, parted, awk, sed
-#@version 0.91 - Definición de caché local.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2010/03/09
-#*/ ##
-function ogCreateCache ()
-{
-# Variables locales.
-local DISK PART SECTORS CYLS START END SIZE ENDPART3
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME 10000000"
-    return
-fi
-# Error si no se recibe 1 parámetro.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-DISK=$(ogDiskToDev 1) || return $?
-PART="4"
-SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
-CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-END=$[SECTORS/CYLS*CYLS-1]
-SIZE=$(echo $1|awk '{print $0*2}')      # En sectores de 512 B.
-START=$[END-SIZE+1]
-ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
-# Error si tamaño 0 o si mayor que la mitad del disco o si pisa la partición 3.
-if [ $SIZE -eq 0 -o $SIZE -ge $[END/2] -o $START -le $ENDPART3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$1" || return $?
-fi
-
-# Desmontar todos los sistemas de archivos del disco.
-ogUnmountAll 1 2>/dev/null
-# Si la tabla de particiones no es valida, volver a generarla.
-[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
-# Definir particiones y notificar al kernel.
-sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,ca" 2>/dev/null && sfdisk -R $DISK
-}
-
-
-#/**
 #         ogCreatePartitions int_ndisk str_parttype:int_partsize ...
 #@brief   Define el conjunto de particiones de un disco.
 #@param   int_ndisk      nº de orden del disco
@@ -165,41 +120,8 @@ fi
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
-sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && sfdisk -R $DISK
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
 rm -f $tmpsfdisk
-}
-
-
-#/**
-#         ogDeleteCache
-#@brief   Elimina la partición de caché local.
-#@return  (nada, por determinar)
-#@exception OG_ERR_FORMAT   formato incorrecto.
-#@note    Requisitos: sfdisk, parted, awk, sed
-#@version 0.91 - Definición de caché local.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2010/03/11
-#*/ ##
-function ogDeleteCache ()
-{
-# Variables locales.
-local DISK PART
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME"
-    return
-fi
-# Error si no se encuentra partición de caché.
-read DISK PART <<<"$(ogDevToDisk $(ogFindCache) 2>/dev/null)"
-[ -n "$DISK" -a -n "$PART" ] || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $OG_ERR_PARTITION
-DISK=$(ogDiskToDev $DISK)
-
-# Desmontar todos los sistemas de archivos del disco.
-ogUnmountAll 1 2>/dev/null
-# Si la tabla de particiones no es valida, volver a generarla.
-[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
-# Eliminar (poner a 0) la partición de caché.
-sfdisk -f $DISK -N$PART <<<"0,0,0" 2>/dev/null && sfdisk -R $DISK
 }
 
 
@@ -360,67 +282,6 @@ case "$1" in
     *)          ID="" ;;
 esac
 echo $ID
-}
-
-
-#/**
-#         ogGetCacheSize
-#@brief   Devuelve el tamaño definido para la partición de caché.
-#@return  int_partsize   tamaño de la partición (en KB)
-#@exception OG_ERR_PARTITION  No existe partición de caché.
-#@version 0.91 - Definición de caché local.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2010/03/09
-#*/ ##
-function ogGetCacheSize ()
-{
-# Variables locales
-local PART
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME  =>  10000000"
-    return
-fi
-# Error si no se encuentra partición de caché.
-PART=$(ogDevToDisk $(ogFindCache) 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $OG_ERR_PARTITION
-
-# Devuelve tamaño de la partición de caché.
-ogGetPartitionSize $PART
-}
-
-
-#/**
-#         ogGetCacheSpace
-#@brief   Devuelve el espacio de disco disponible para la partición de caché.
-#@return  int_size   tamaño disponible (en KB)
-#@note    El espacio disponible es el que hay entre el límite superior de la partición 3 del disco 1 y el final de dicho disco, y no puede ser superior a la mitad de dicho disco.
-#@version 0.91 - Definición de caché local.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2010/03/09
-#*/ ##
-function ogGetCacheSpace ()
-{
-
-# Variables locales.
-local DISK SECTORS CYLS ENDPART3
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME  =>  23165386"
-    return
-fi
-
-DISK=$(ogDiskToDev 1) || return $?
-SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
-CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-SECTORS=$[SECTORS/CYLS*CYLS-1]
-ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
-# Mostrar espacio libre en KB (1 KB = 2 sectores)
-if [ $ENDPART3 -gt $[SECTORS/2] ]; then
-    echo $[(SECTORS-ENDPART3)/2]
-else
-    echo $[SECTORS/4]
-fi
 }
 
 
@@ -662,7 +523,7 @@ local DISK PART SIZE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_size" \
            "$FUNCNAME 1 1 10000000"
     return
 fi
@@ -791,8 +652,8 @@ local DISK PART ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-           "$FUNCNAME 1 1 10000000"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
+           "$FUNCNAME 1 1 NTFS"
     return
 fi
 # Error si no se reciben 3 parámetros.
