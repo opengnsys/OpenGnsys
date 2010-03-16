@@ -16,7 +16,7 @@
 #@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-23
 #*/
@@ -37,7 +37,7 @@ esac
 #DATETIME=$(date +"%F %T")
 
 if [ -n "$LOGLEVEL" ]; then
-    logger -s -t "OpenGNSys $LOGLEVEL" $LOGFILE "$DATETIME $*"
+    logger -s -t "OpenGnSys $LOGLEVEL" $LOGFILE "$DATETIME $*"
 else
     echo "$*"
 fi
@@ -52,7 +52,7 @@ fi
 #@return  Mensaje de error.
 #@warning No definidas
 #@note    Mensajes internacionales del fichero de idiomas.
-#@version 0.9 - Primera versión para OpenGNSys.
+#@version 0.9 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-21
 #*/ 
@@ -90,7 +90,7 @@ return $CODE
 #@note    Si no se indican parámetros, la función se toma de la variable \c $FUNCNAME
 #@note    La descripción de la función se toma de la variable compuesta por \c MSG_FUNC_$función incluida en el fichero de idiomas.
 #@note    Pueden especificarse varios mensajes con ejemplos.
-#@version 0.9 - Primera versión para OpenGNSys.
+#@version 0.9 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-27
 #*/

@@ -753,7 +753,7 @@ function makeDoxygenFiles()
 			$WORKDIR/opengnsys/client/engine $INSTALL_TARGET/www
 	if [ ! -d "$INSTALL_TARGET/www/html" ]; then
 		errorAndLog "${FUNCNAME}(): unable to create Doxygen web files."
-	return 1
+		return 1
 	fi
 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api

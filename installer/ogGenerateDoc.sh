@@ -19,7 +19,9 @@ then
 fi
 if [ $# = 2 ]
 then
-mkdir -p $2
+mkdir -p "$2"
+VERSION=$(cat $(dirname "$0")/../doc/VERSION.txt) 2>/dev/null
+VERSION=${VERSION:-"1.0 beta"}
 cat > /tmp/doxyfile << EOF
 # Doxyfile 1.5.6
 # Fichero para documentar codigo shellscripts linux.
@@ -29,7 +31,7 @@ cat > /tmp/doxyfile << EOF
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Proyecto OpenGnSys"
-PROJECT_NUMBER         = 1.0
+PROJECT_NUMBER         = $VERSION
 OUTPUT_DIRECTORY       = $2
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = Spanish
