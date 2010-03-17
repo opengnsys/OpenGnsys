@@ -1,0 +1,45 @@
+#!/bin/bash
+# Scirpt de iniciación de la caché local de disco.
+# (puede usarse como base para el programa de restauración de imágenes usado por OpenGnSys Admin).
+# Versión: 0.91, 2009/03/17, - Ramón Gómez, Universidad de Sevilla
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+if [ $# -ne 1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG tamaño"
+    exit $?
+fi
+
+# Si tamaño=0, borrar caché.
+if [ $1 == 0 ]; then
+    echo "[10] Trabajar sin caché local."
+    ogUnmountCache 2>/dev/null
+    ogDeleteCache
+else
+    # Si no existe caché o si cambia su tamaño, crearla.
+    SIZE=$(ogGetCacheSize 2>/dev/null)
+    if [ "$1" != "$SIZE" ]; then
+        echo "[10] Crar partición de caché local."
+        ogUnmountCache 2>/dev/null
+        ogCreateCache "$1" || return $?
+    fi
+    # Si caché no montada y no formateada, formatear.
+    CACHE=$(ogFindCache) || return $?
+    #if ogIsFormated $CACHE; then              # API 1.0
+    if ! ogIsMounted $CACHE && [ "$(ogGetFsType $CACHE)" != "CACHE" ]; then
+        echo "[50] Formatear caché local."
+        ogFormatCache
+    fi
+    echo "[70] Montar caché local."
+    ogMountCache
+    # Si error al montar, chequear sistema de archivos y volver a montar.
+    if [ $? != 0 ]; then
+        echo "[80] Comprobar y montar caché local."
+        ogCheckFs $CACHE
+        ogMountCache || return $?
+    fi
+fi
+# Duración del proceso.
+TIME=$[SECONDS-TIME1]
+echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+

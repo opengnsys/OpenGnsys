@@ -25,6 +25,7 @@ Scripts distribuidos:
 - getFsType                muestra el tipo (mnemónico) de una partición.
 - getIpAddress             muestra la IP local del cliente.
 - getOsVersion             muestra la versión de sistema operativo instalado.
+- initCache                inicia o define la caché local.
 - listHardwareInfo         lista los dispoisitivos del cliente.
 - listPrimaryPartitions    lista las particiones primarias de un disco.
 - listSoftwareInfo         lista el software de un sistema operativo.
