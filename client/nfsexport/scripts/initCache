@@ -25,8 +25,7 @@ else
     fi
     # Si caché no montada y no formateada, formatear.
     CACHE=$(ogFindCache) || return $?
-    #if ogIsFormated $CACHE; then              # API 1.0
-    if ! ogIsMounted $CACHE && [ "$(ogGetFsType $CACHE)" != "CACHE" ]; then
+    if ! ogIsFormated $CACHE; then
         echo "[50] Formatear caché local."
         ogFormatCache
     fi

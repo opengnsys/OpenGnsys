@@ -75,7 +75,7 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se encuentra partición de caché.
 read NDISK NPART <<<"$(ogFindCache)"
-[ -n "$NDISK" -a -n "$NPART" ] || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+[ -n "$NDISK" -a -n "$NPART" ] || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
 DISK=$(ogDiskToDev $NDISK)
 
 # Desmontar todos los sistemas de archivos del disco.
@@ -146,7 +146,7 @@ if [ "$*" == "help" ]; then
 fi
 
 # Error si no hay definida partición de caché.
-DEV=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+DEV=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
 DEV=$(ogDiskToDev $DEV) || return $?
 
 # Formatear sistema de ficheros.
@@ -181,7 +181,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se encuentra partición de caché.
-PART=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+PART=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
 
 # Devuelve tamaño de la partición de caché.
 ogGetPartitionSize $PART
@@ -243,7 +243,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-OGCAC=$(ogMountFs $(ogFindCache) 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+OGCAC=$(ogMountFs $(ogFindCache) 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
 echo $OGCAC
 export OGCAC
 }
@@ -264,13 +264,17 @@ export OGCAC
 #*/ ##
 function ogUnmountCache ()
 {
+# Variables locales.
+local CACHE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME"
     return
 fi
 
-unset OGCAC
-ogUnmountFs $(ogFindCache) 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE"
+CACHE=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE"
+ogUnmountFs $CACHE
+# Borrar enlace simbólico de /mnt/ParticiónCache.
+rm -f $(ogDiskToDev $CACHE | sed 's/dev/mnt/')
 }
 

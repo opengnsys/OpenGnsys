@@ -350,6 +350,34 @@ echo $(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
 
 
 #/**
+#         ogIsFormated int_ndisk int_npartition
+#@brief   Comprueba si un sistema de archivos está formateado.
+#@param   int_ndisk      nº de orden del disco o volumen.
+#@param   int_npartition nº de orden del sistema de archivos.
+#@return  int_code       Código de salida
+#@version 0.91 - Adaptación inicial para comprobar que existe caché.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-03-18
+#*/ ##
+function ogIsFormated ()
+{
+# Variables locales
+local DISK
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "if $FUNCNAME 1 1; then ... ; fi"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+DISK=$(ogDiskToDev "$1")
+test -n "$(parted -sm $DISK print 2>/dev/null | \
+                      awk -F: -v sf="$2" '{if ($1==sf) print $5}')"
+}
+
+
+#/**
 #         ogIsMounted int_ndisk int_npartition
 #@brief   Comprueba si un sistema de archivos está montado.
 #@param   int_ndisk      nº de orden del disco
@@ -505,11 +533,15 @@ MNTDIR="$(ogGetMountPoint $1 $2)"
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
     ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
-    # Crear punto de montaje.
+    # Crear punto de montaje o enlace símbolico para Caché local.
     MNTDIR=${PART/dev/mnt}
-    mkdir -p $MNTDIR
-    # Montar según el tipo de sitema de archivos.
     TYPE="$(ogGetFsType $1 $2)" || return $?
+    if [ "$TYPE" == "CACHE" -a -n "$OGCAC" ]; then
+        ln -fs $OGCAC $MNTDIR
+    else
+        mkdir -p $MNTDIR
+    fi
+    # Montar según el tipo de sitema de archivos.
     case "$TYPE" in
         CACHE)      MOUNT=mount ;;
         EXT[234])   MOUNT=mount ;;
@@ -704,10 +736,11 @@ MNTDIR="$(ogGetMountPoint $1 $2)"
 
 # Si está montada, desmontarla.
 if [ -n "$MNTDIR" ]; then
-    # Error si la particion esta bloqueada.
+    # Error si la particion está bloqueada.
     ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
-    # Crear punto de montaje.
-    umount $PART 2>/dev/null && rmdir $MNTDIR || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
+    # Desmontar y borrar punto de montaje.
+    umount $PART 2>/dev/null || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
+    rmdir $MNTDIR 2>/dev/null || rm -f $MNTDIR 2>/dev/null
 	# linea temporal durante desarrollo para testear nuevas herramientas con el cliente completo nfs
     if grep -q nfsroot /proc/cmdline; then
 		cat /etc/mtab | grep -v $PART > /var/tmp/mtab.temporal && cp /var/tmp/mtab.temporal /var/tmp/mtab && rm /var/tmp/mtab.temporal
