@@ -42,6 +42,10 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 				opadre.frames["frame_contenidos"].document.location.href="nada.php"
 				var href;
 				var 	href2="nada.php"
+				var 	href3="./api/tree.html"
+				var 	href4="./api/main.html"
+				var 	href5="./api/index.html"
+
 				switch(op){
 					case 1: 
 						href="./principal/aulas.php"
@@ -86,9 +90,15 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 					opadre.frames["frame_arbol"].document.location.href=href
 					opadre.frames["frame_contenidos"].document.location.href=href2
 				}
-				else
-					window.top.location.href="acceso.php";
-			}
+				else{
+					if(op==11){
+						window.top.location.href="acceso.php";
+					}
+					else{
+						opadre.frames["frame_contenidos"].document.location.href=href4
+					}	
+				}
+		}
 
 	//________________________________________________________________________________________________________
 		</SCRIPT>
@@ -139,6 +149,11 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 									<?}?>
 							<?}?>
+
+							<TD  onclick=eleccion(this,12) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;
+							<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
+								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 							<TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
