@@ -78,6 +78,9 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 							href="./images/L_Iconos.php"
 							href2="./images/M_Iconos.php"
 							break;
+					case 13:
+							href="./principal/usuarios.php"
+							break;
 				}
 				var oldOp=currentOp
 				currentOp=o;
@@ -86,17 +89,19 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 				currentOp.style.borderRightColor="#ffffff"
 				currentOp.style.borderTopColor="#808080"
 				currentOp.style.borderLeftColor="#808080"
-				if(op<11){
+				if(op<20){
 					opadre.frames["frame_arbol"].document.location.href=href
 					opadre.frames["frame_contenidos"].document.location.href=href2
 				}
 				else{
-					if(op==11){
-						window.top.location.href="acceso.php";
-					}
-					else{
-						opadre.frames["frame_contenidos"].document.location.href=href4
-					}	
+						switch(op){
+							case 21: 				
+									window.top.location.href="acceso.php";
+									break;
+							case 22: 		
+									opadre.frames["frame_contenidos"].document.location.href=href4
+									break;
+						}
 				}
 		}
 
@@ -143,6 +148,13 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/administracion.gif">
 											<SPAN class=menupral ><?echo  $TbMsg[8] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+											<TD  onclick=eleccion(this,13) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/administradores.gif">
+											<SPAN class=menupral ><?echo  $TbMsg[12] ?></SPAN></A>&nbsp;</TD>
+
+										<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
 											<TD  onclick=eleccion(this,10) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
 											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
@@ -150,11 +162,11 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 									<?}?>
 							<?}?>
 
-							<TD  onclick=eleccion(this,12) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+							<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-							<TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+							<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
 		
