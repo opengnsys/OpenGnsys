@@ -16,4 +16,6 @@
 	$TbMsg[8]='Administración';
 	$TbMsg[9]='Iconos';
 	$TbMsg[10]='Salir';
+	$TbMsg[11]='Ayuda';
+	$TbMsg[12]='Administradores';
 ?>
