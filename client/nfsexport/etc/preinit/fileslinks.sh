@@ -20,8 +20,8 @@ if [ -n "$OPENGNSYS" ]; then
     mkdir -p /var/lock
 
     # FIXME Necesario temporalmente
-    mkdir -p /usr/local/Trolltech/QtEmbedded-4.5.1/lib/
-    ln -fs $OGLIB/fonts /usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts
+    mkdir -p /usr/local/QtEmbedded-4.6.2/lib/
+    ln -fs $OGLIB/fonts /usr/local/QtEmbedded-4.6.2/lib/fonts
 
     # Datos de dispositivos PCI en /etc
     ln -fs $OGLIB/pci.ids /etc
