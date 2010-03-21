@@ -19,10 +19,10 @@ MOC_DIR 	= ../.moc
 
 OBJECTS_DIR = ../.objs
 TARGET 	= browser
-LIBS 		+= -L.. -lqtermwidget
+LIBS 		+= -L../qtermwidget -lqtermwidget
 
-SOURCES 	= main.cpp core.cpp config.cpp browser.cpp adminbrowser.cpp logfile.cpp
+SOURCES 	= main.cpp mainwindow.cpp
 
-HEADERS = core.h config.h browser.h adminbrowser.h logfile.h
+HEADERS = mainwindow.h
 
 INCLUDEPATH 	= ../qtermwidget/src

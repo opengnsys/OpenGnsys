@@ -191,7 +191,7 @@ void MainWindow::slotWebLoadFinished(bool ok)
     // If any error ocurred, show a pop up
     // Sometimes when the url hasn't got a dot, i.e /var/www/pageweb,
     // the return value is always true so we check the bytes received too
-    if(ok == false || m_web->page()->totalBytes() == 0)
+    if(ok == false)
     {
         QMessageBox msgBox;
         msgBox.setText(tr("The web page couldn't load. What do you want to do?"));
