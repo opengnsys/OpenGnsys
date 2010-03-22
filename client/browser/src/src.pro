@@ -1,7 +1,7 @@
 TEMPLATE	= app
 DESTDIR 	= ..
 
-CONFIG		+= qt debug_and_release warn_on build_all static
+CONFIG		+= qt release warn_on build_all
 
 QT += core gui webkit
 
@@ -19,7 +19,7 @@ MOC_DIR 	= ../.moc
 
 OBJECTS_DIR = ../.objs
 TARGET 	= browser
-LIBS 		+= -L../qtermwidget -lqtermwidget
+LIBS 		+= -L.. -lqtermwidget
 
 SOURCES 	= main.cpp mainwindow.cpp
 
