@@ -205,14 +205,18 @@ function updateServicesStart(){
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
+        local ERRCODE
 	echoAndLog "${FUNCNAME}(): Updating web files..."
-    backupFile $INSTALL_TARGET/www/controlacceso.php
+        backupFile $INSTALL_TARGET/www/controlacceso.php
+        mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET/www
-	if [ $? != 0 ]; then
+        ERRCODE=$?
+        mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
+	if [ $ERRCODE != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating web files."
 		exit 1
 	fi
-    restoreFile $INSTALL_TARGET/www/controlacceso.php
+        restoreFile $INSTALL_TARGET/www/controlacceso.php
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP \
 			$INSTALL_TARGET/www/includes \
