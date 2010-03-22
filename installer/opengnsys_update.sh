@@ -209,7 +209,7 @@ function updateWebFiles()
 	echoAndLog "${FUNCNAME}(): Updating web files..."
         backupFile $INSTALL_TARGET/www/controlacceso.php
         mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET/www
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
         ERRCODE=$?
         mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
 	if [ $ERRCODE != 0 ]; then
@@ -237,6 +237,7 @@ function makeDoxygenFiles()
 		return 1
 	fi
  	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
+        rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
