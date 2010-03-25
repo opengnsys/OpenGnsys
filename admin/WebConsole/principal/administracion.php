@@ -1,13 +1,13 @@
-<?
-// *************************************************************************************************************************************************
-// Aplicaci� WEB: ogAdmWebCon
-// Autor: Jos�Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�: A� 2003-2004
-// Fecha �tima modificaci�: Febrero-2005
+<? 
+// *********************************************************************************************************
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
 // Nombre del fichero: administracion.php
-// Descripci� : 
-//		Administra tablas varias : ADMINISTRACION,Campus,Instituciones,iconos, etc ...
-// *************************************************************************************************************************************************
+// Descripción : 
+//		 Presenta opciones de admistración de la Aplicación
+// **********************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");
@@ -42,6 +42,11 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea e
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/administracion_'.$idioma.'.js"></SCRIPT>'?>
+
+	<SCRIPT language="javascript">
+
+	</SCRIPT>	
+
 </HEAD>
 <BODY OnContextMenu="return false">
 <?
@@ -53,6 +58,8 @@ $flotante=new MenuContextual();			// Crea objeto MenuContextual
  $XMLcontextual=CreacontextualXMLUniversidades();
  echo $flotante->CreaMenuContextual($XMLcontextual);
  $XMLcontextual=CreacontextualXMLUsuarios();
+ echo $flotante->CreaMenuContextual($XMLcontextual);
+ $XMLcontextual=CreacontextualXMLAdministradores();
  echo $flotante->CreaMenuContextual($XMLcontextual);
  $XMLcontextual=CreacontextualXMLGruposEntidades();
  echo $flotante->CreaMenuContextual($XMLcontextual);
@@ -111,7 +118,7 @@ function SubarbolXML_universidades($cmd){
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreuniversidad"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_UNIVERSIDADES;
 		$cadenaXML.='>';
-		SubarbolXML_superadministradores($cmd,$rs->campos["iduniversidad"],0);
+		SubarbolXML_usuarios($cmd,$rs->campos["iduniversidad"],0);
 		SubarbolXML_universidades_entidades($cmd,$rs->campos["iduniversidad"],0);
 		$cadenaXML.='</UNIVERSIDAD>';
 		$rs->Siguiente();
@@ -119,20 +126,40 @@ function SubarbolXML_universidades($cmd){
 	$rs->Cerrar();
 }
 //________________________________________________________________________________________________________
+function SubarbolXML_usuarios($cmd){
+	global $TbMsg;
+	global $cadenaXML;
+
+		$cadenaXML.='<USUARIOS';
+		// Atributos			
+		$cadenaXML.=' imagenodo="../images/iconos/usuarioslog.gif"';
+		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_administradores'" .')"';
+		$cadenaXML.=' infonodo="'.$TbMsg[11].'"';
+		$cadenaXML.=' nodoid='.$LITAMBITO_USUARIOS;
+		$cadenaXML.='>';
+		SubarbolXML_superadministradores($cmd);
+		$cadenaXML.='</USUARIOS>';
+}
+//________________________________________________________________________________________________________
 function SubarbolXML_superadministradores($cmd){
 	global $TbMsg;
 	global $LITAMBITO_USUARIOS;
 	global $cadenaXML;
 	global $SUPERADMINISTRADOR;
+	global $ADMINISTRADOR;
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idusuario,nombre FROM usuarios WHERE idtipousuario=".$SUPERADMINISTRADOR." ORDER by nombre";
+	$cmd->texto="SELECT idusuario,nombre,idtipousuario FROM usuarios WHERE idtipousuario=".$SUPERADMINISTRADOR." OR idtipousuario=".$ADMINISTRADOR." ORDER by idtipousuario,nombre";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
 	while (!$rs->EOF){
 		$cadenaXML.='<USUARIO';
-		// Atributos			
+		// Atributos	
+	if($rs->campos["idtipousuario"]==$SUPERADMINISTRADOR)
 		$cadenaXML.=' imagenodo="../images/iconos/superadministradores.gif"';
+	else
+		$cadenaXML.=' imagenodo="../images/iconos/administradores.gif"';
+
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_USUARIOS."'" .')"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombre"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_USUARIOS.'-'.$rs->campos["idusuario"];
@@ -218,7 +245,10 @@ function SubarbolXML_administradores($cmd,$idambito){
 	global $cadenaXML;
 	global $ADMINISTRADOR;
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idusuario,nombre FROM usuarios WHERE idtipousuario=".$ADMINISTRADOR." AND idambito=".$idambito." ORDER by nombre";
+	$cmd->texto="SELECT usuarios.idusuario,usuarios.nombre FROM usuarios 
+							INNER JOIN administradores_centros ON administradores_centros.idusuario=usuarios.idusuario 
+							WHERE administradores_centros.idcentro=".$idambito." ORDER by usuarios.nombre";
+
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -243,10 +273,11 @@ function CreacontextualXMLUniversidades(){
 	global $AMBITO_GRUPOSENTIDADES;
 	global $LITAMBITO_UNIVERSIDADES;
 	global $SUPERADMINISTRADOR;
+	global $ADMINISTRADOR;
 	global $TbMsg;
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' idctx="flo_'.$LITAMBITO_UNIVERSIDADES.'"';
-	$layerXML.=' maxanchu=170';
+	$layerXML.=' maxanchu=160';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
@@ -274,6 +305,51 @@ function CreacontextualXMLUniversidades(){
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
+	// Modificar Universidad 
+	$wLeft=140;
+	$wTop=115;
+	$wWidth=550;
+	$wHeight=280;
+	$wpages="../propiedades/propiedades_universidades.php";
+	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
+	$layerXML.=' textoitem='.$TbMsg[4];
+	$layerXML.=' imgitem="../images/iconos/propiedades.gif"';
+	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
+	// Variables de  entorno 
+	$wLeft=140;
+	$wTop=115;
+	$wWidth=550;
+	$wHeight=280;
+	$wpages="../propiedades/propiedades_entornos.php";
+	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
+	$layerXML.=' textoitem='.$TbMsg[10];
+	$layerXML.=' imgitem="../images/iconos/entornos.gif"';
+	$layerXML.='></ITEM>';
+
+	$layerXML.='</MENUCONTEXTUAL>';
+	return($layerXML);
+}
+//________________________________________________________________________________________________________
+function CreacontextualXMLUsuarios(){
+	global $ADMINISTRADOR;
+	global $TbMsg;
+	global $SUPERADMINISTRADOR;
+
+	$layerXML='<MENUCONTEXTUAL';
+	$layerXML.=' idctx="flo_administradores"';
+	$layerXML.=' maxanchu=155';
+	$layerXML.=' swimg=1';
+	$layerXML.=' clase="menu_contextual"';
+	$layerXML.='>';
+
 	// Crear superadministrador
 	$wLeft=140;
 	$wTop=115;
@@ -290,24 +366,24 @@ function CreacontextualXMLUniversidades(){
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
-	// Modificar Universidad 
+	// Crear administrador
 	$wLeft=140;
 	$wTop=115;
-	$wWidth=550;
-	$wHeight=280;
-	$wpages="../propiedades/propiedades_universidades.php";
+	$wWidth=400;
+	$wHeight=320;
+	$wpages="../propiedades/propiedades_usuarios.php?idtipousuario=".$ADMINISTRADOR;
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
-	$layerXML.=' textoitem='.$TbMsg[4];
-	$layerXML.=' imgitem="../images/iconos/propiedades.gif"';
+	$layerXML.=' alpulsar="insertar('.$wParam.',0,3)"';
+	$layerXML.=' imgitem="../images/iconos/administradores.gif"';
+	$layerXML.=' textoitem='.$TbMsg[9];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
 //________________________________________________________________________________________________________
-function CreacontextualXMLUsuarios(){
+function CreacontextualXMLAdministradores(){
 	global $LITAMBITO_USUARIOS;
 	global $TbMsg;
 
@@ -401,7 +477,7 @@ function CreacontextualXMLEntidades(){
 
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' idctx="flo_'.$LITAMBITO_ENTIDADES.'"';
-	$layerXML.=' maxanchu=170';
+	$layerXML.=' maxanchu=160';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
@@ -457,17 +533,11 @@ function CreacontextualXMLCentros(){
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
 
-	// Crear superadministrador
-	$wLeft=140;
-	$wTop=115;
-	$wWidth=400;
-	$wHeight=320;
-	$wpages="../propiedades/propiedades_usuarios.php?idtipousuario=".$ADMINISTRADOR;
-	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+	// Asignar administrador
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar('.$wParam.',0,3)"';
+	$layerXML.=' alpulsar="Asignar()"';
 	$layerXML.=' imgitem="../images/iconos/administradores.gif"';
-	$layerXML.=' textoitem='.$TbMsg[9];
+	$layerXML.=' textoitem='.$TbMsg[12];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';

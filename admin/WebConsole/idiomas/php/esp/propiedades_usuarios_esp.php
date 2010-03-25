@@ -16,4 +16,7 @@ $TbMsg[7]="Nombre completo";
 $TbMsg[8]="E-mail";
 $TbMsg[9]="Unidad organizativa";
 $TbMsg[10]="Idioma ";
+$TbMsg[11]="SuperAdministrador ";
+$TbMsg[12]="Administrador";
+$TbMsg[13]="Operador";
 ?>

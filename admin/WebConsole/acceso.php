@@ -11,8 +11,11 @@ if(isset($_SESSION)){ 	// Si existe algua sesión ...
 	session_unset(); // Elimina variables
 	session_destroy(); // Destruye sesión
 }
+
+include_once("controlacceso.php");
+
 $herror=0;
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
-Header("Location: acceso_esp.php?herror=".$herror); // Redireccionamiento a la página de inicio en el idioma por defecto
+Header("Location: acceso_".$idi.".php?herror=".$herror); // Redireccionamiento a la página de inicio en el idioma por defecto
 ?>

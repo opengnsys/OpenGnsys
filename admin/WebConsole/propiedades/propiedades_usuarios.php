@@ -49,12 +49,15 @@ if  ($opcion!=$op_alta){
 switch($idtipousuario){
 	case $SUPERADMINISTRADOR:
 			$urlimg="../images/iconos/superadministradores.gif";
+			$litusu=$TbMsg[11];
 			break;
 	case $ADMINISTRADOR:
 			$urlimg="../images/iconos/administradores.gif";
+			$litusu=$TbMsg[12];
 			break;
 	case $OPERADOR:
 			$urlimg="../images/iconos/operadores.gif";
+			$litusu=$TbMsg[13];
 			break;
 }
 //________________________________________________________________________________________________________
@@ -79,7 +82,7 @@ switch($idtipousuario){
 			echo '<INPUT type=hidden name=pasguor value='.$pasguor.'>';
 		}
 	?>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
+	<P align=center class=cabeceras><?echo $TbMsg[4]." (".$litusu.")"?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->

@@ -1,5 +1,5 @@
 <?
-// *************************************************************************************************************************************************
+// *********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 
@@ -7,7 +7,16 @@
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: acceso.php
 // Descripción : Presenta la pantalla de login de la aplicación
-// *************************************************************************************************************************************************
+// ********************************************************************************************************
+include_once("controlacceso.php");
+include_once("./includes/CreaComando.php");
+include_once("./clases/AdoPhp.php");
+include_once("./includes/HTMLSELECT.php");
+//________________________________________________________________________________________________________
+$cmd=CreaComando($cnx); // Crea objeto comando 
+if (!$cmd)
+   	die("Error de acceso");
+//________________________________________________________________________________________________________
 $herror=0;
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
@@ -44,6 +53,12 @@ function comprobar_datos(){
 		document.fdatos.pss.focus()
 		return(false)
 	}
+	var  p=document.fdatos.idcentro.selectedIndex
+	if (p==0){  
+		var res=confirm("ATENCIÓN: No ha introducido ninguna Unidad Organizativa. NO tendrá acceso al sistema a menos que sea adminstrador general de la Aplicación. ¿Desea acceder con este perfil?");
+	if(!res)
+		return(false)
+	}
 	return(true)
 }
 //______________________________________________________________________________________________________
@@ -65,12 +80,23 @@ function PulsaEnter(oEvento){
 </HEAD>
 <BODY>
 <DIV style="POSITION:absolute;top:90;left:250">
-	<FORM action="controlacceso.php" name="fdatos" method="post">
+	<FORM action="controlpostacceso.php" name="fdatos" method="post">
 		<DIV align="center">
 			<IMG src="./images/login_esp.jpg" width=500 >
-			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
-			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  style="POSITION:absolute;top:160px;left:365;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
-			<IMG onclick="confirmar()" src="./images/botonok.gif" style="POSITION:absolute;top:190;left:400;CURSOR: hand">
+			<INPUT onkeypress="PulsaEnter(event)" name="usu"  
+							style="POSITION:absolute;top:125px;left:365px;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
+			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  
+							style="POSITION:absolute;top:160px;left:365;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
+			
+			<DIV	style="POSITION:absolute;top:180px;left:265;COLOR: #F9F9F9; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
+				<P>Unidad Organizativa<BR>
+			<?
+
+					echo HTMLSELECT($cmd,0,'centros',$idcentro,'idcentro','nombrecentro',220);
+			?>
+			</P></DIV>
+
+			<IMG onclick="confirmar()" src="./images/botonok.gif" style="POSITION:absolute;top:240;left:400;CURSOR: hand">
 		</DIV>
 	</FORM>
 </DIV>

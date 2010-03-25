@@ -30,7 +30,7 @@ if (isset($_SESSION["whidraport"]))	$hidraport = $_SESSION["whidraport"];
 if (isset($_SESSION["wpagerror"]))	$pagerror = $_SESSION["wpagerror"];
 if (isset($_SESSION["wurlacceso"]))	$urlacceso = $_SESSION["wurlacceso"];
 
-// Comprueba el valor de las variables de sesión�
+// Comprueba el valor de las variables de sesión
 $swacc=empty($cadenaconexion) || empty($servidorhidra) || empty($hidraport) || empty($usuario) || empty($idtipousuario);
 //===============================================================================================
 if ($swacc){ // Error en alguna variable de sesión

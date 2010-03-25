@@ -7,4 +7,10 @@
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero administracion.php
 // *************************************************************************************************************************************************
-
+	function Asignar(){
+		reset_contextual(-1,-1) // Oculta menu contextual
+		var identificador=currentNodo.toma_identificador()
+		var literal=currentNodo.toma_infonodo()
+		var wurl="../varios/administradores_centros.php?idcentro="+identificador+"&nombrecentro="+literal
+		window.open(wurl,"frame_contenidos");
+	}

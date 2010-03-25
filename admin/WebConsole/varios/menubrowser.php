@@ -1,12 +1,14 @@
 <?
-// *************************************************************************************************************************************************
-// Aplicaci� WEB: ogAdmWebCon
-// Autor: Jos�Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�: Diciembre-2003
-// Fecha �tima modificaci�: Febrero-2005
-// Nombre del fichero: menucliente.php
-// Descripci� :Este fichero implementa el menu del browser de los clientes
-// *************************************************************************************************************************************************
+// *************************************************************************
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha útima modificación: Marzo-2006
+// Nombre del fichero: menubrowser.php
+// Descripción : 
+//		Este fichero implementa el menu del browser de los clientes
+// ****************************************************************************
+
 // Recupera la IP del ordenador que solicita la página
 $iph=tomaIP();
 if(!empty($iph)){

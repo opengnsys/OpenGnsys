@@ -15,5 +15,8 @@
 	$TbMsg[7]='"Eliminar grupo de Entidades"';
 	$TbMsg[8]='"Nueva unidad organizativa"';
 	$TbMsg[9]='"Nuevo Administrador"';
+	$TbMsg[10]='"Variables de entorno"';
+	$TbMsg[11]='"Usuarios"';
+	$TbMsg[12]='"Asignar Adminstradores"';
 	
 ?>
