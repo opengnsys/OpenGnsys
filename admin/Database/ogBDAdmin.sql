@@ -1210,7 +1210,6 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `pasguor` varchar(50) NOT NULL default '',
   `nombre` varchar(200) default NULL,
   `email` varchar(200) default NULL,
-  `idambito` int(11) default NULL,
   `ididioma` int(11) default NULL,
   `idtipousuario` tinyint(4) default NULL,
   PRIMARY KEY  (`idusuario`)
@@ -1244,3 +1243,25 @@ CREATE TABLE IF NOT EXISTS `entornos` (
 --
 INSERT INTO `entornos` (`identorno`,`ipserveradm`,`portserveradm`,`protoclonacion`) VALUES 
  (1,'SERVERIP','2008','TORRENT');
+
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `administradores_centros`
+--
+
+DROP TABLE IF EXISTS `administradores_centros`;
+CREATE TABLE IF NOT EXISTS `administradores_centros` (
+  `idadministradorcentro` int(11) NOT NULL AUTO_INCREMENT,
+  `idusuario` int(11) NOT NULL DEFAULT '0',
+  `idcentro` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`idadministradorcentro`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+--
+-- Volcar la base de datos para la tabla `administradores_centros`
+--
+
+
+
