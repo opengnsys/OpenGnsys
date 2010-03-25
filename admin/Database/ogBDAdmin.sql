@@ -1219,9 +1219,9 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 -- Volcar la base de datos para la tabla `usuarios`
 -- 
 
-INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `idambito`, `ididioma`, `idtipousuario`) VALUES 
-(1, 'usuog', 'passusuog', 'Usuario de la base de datos MySql', '', 0, 1, 1),
-(2,'DEFAULTUSER','DEFAULTPASSWD','Usuario por defecto','',1,1,2);
+INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`) VALUES 
+(1, 'usuog', 'passusuog', 'Usuario de la base de datos MySql', '', 1, 1),
+(2,'DEFAULTUSER','DEFAULTPASSWD','Usuario por defecto','',1,2);
 
 -- --------------------------------------------------------
 
@@ -1262,6 +1262,7 @@ CREATE TABLE IF NOT EXISTS `administradores_centros` (
 --
 -- Volcar la base de datos para la tabla `administradores_centros`
 --
+INSERT INTO `administradores_centros` (`idadministradorcentro`,`idusuario`, `idcentro`) VALUES (1,2,1);
 
 
 
