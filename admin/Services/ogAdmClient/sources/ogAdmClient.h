@@ -219,9 +219,10 @@ char* tbErrores[]={"000-Se han generado errores. No se puede continuar la ejecuc
 		"020-No se ha podido crear la carpeta en el repositorio",\
 		"021-Error en el envío de tramas al Servidor de Administración",\
 		"022-Error en la recepción de tramas desde el Servidor de Administración",\
-		"023-Error desconocido",\
+		"023-Error al crear Proceso Hijo para  mostrar Menú",\
+		"024-Error desconocido",\
 		};		
-		#define MAXERROR 23		// Error máximo cometido
+		#define MAXERROR 24		// Error máximo cometido
 
 char* tbErroresScripts[]={"000-Se han generado errores. No se puede continuar la ejecución de este módulo",\
 		"001-Formato de ejecución incorrecto.",\

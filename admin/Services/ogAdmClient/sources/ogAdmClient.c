@@ -1992,7 +1992,7 @@ char* TomaNomSO(char*disco,int particion)
 // ________________________________________________________________________________________________________
 int MuestraMenu(char *urp)
 {
-	int herror,nargs,resul;
+	int nargs,resul;
 
 	if(ndebug>4){
 		sprintf(msglog,"Url:%s",urp);
@@ -2011,16 +2011,15 @@ int MuestraMenu(char *urp)
 	nargs=SplitParametros(argumentos,parametros," "); // Crea matriz de los argumentos del scripts
 	if((pidmenu=fork())==0){
 		/* Proceso hijo que ejecuta el script */
-		execv(cmdshell,argumentos);
+		resul=execv(cmdshell,argumentos);
 		exit(resul);   
 	}
 	else {
 		if (pidmenu ==-1){
-			UltimoErrorScript(herror,"MuestraMenu()");	// Se ha producido algún error
+			UltimoErrorScript(23,"MuestraMenu()");	// Se ha producido algún error
 			return(false);	
 		}		
 	}
-	sleep(5); // Espera 5 segundos con el mensaje en pantalla
 	return(true);
 }
 //______________________________________________________________________________________________________
