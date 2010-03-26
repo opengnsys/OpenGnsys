@@ -147,7 +147,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE usuarios SET usuario=@usuario,pasguor=@pasguor,nombre=@nombre,email=@email,idambito=@idambito,ididioma=@ididioma WHERE idusuario=@idusuario";
+			$cmd->texto="UPDATE usuarios SET usuario=@usuario,pasguor=@pasguor,nombre=@nombre,email=@email,ididioma=@ididioma WHERE idusuario=@idusuario";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
