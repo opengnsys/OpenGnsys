@@ -8,11 +8,10 @@
 // Descripción : 
 //		Este fichero implementa el menu del browser de los clientes
 // ****************************************************************************
-
 // Recupera la IP del ordenador que solicita la página
 $iph=tomaIP();
 if(!empty($iph)){
-	Header("Location:../controlacceso.php?iph=".$iph); // Accede a la p�ina de menus
+	Header("Location:../controlpostacceso.php?iph=".$iph); // Accede a la p�ina de menus
 	exit;
 }
 ?>
