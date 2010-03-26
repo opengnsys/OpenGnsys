@@ -128,7 +128,7 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,idambito,ididioma,idtipousuario ) VALUES (@usuario,@pasguor,@nombre,@email,@idambito,@ididioma,@idtipousuario);";
+			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,ididioma,idtipousuario ) VALUES (@usuario,@pasguor,@nombre,@email,@ididioma,@idtipousuario);";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idusuario=$cmd->Autonumerico();
