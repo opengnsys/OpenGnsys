@@ -38,9 +38,10 @@
 	$TbMsg[30]='"Confirmadas"';
 	$TbMsg[31]='"Pendientes"';
 	$TbMsg[32]='"Denegadas"';
-	$TbMsg[33]='"Conmutar"';
+	$TbMsg[33]='"Consola remota"';
 	$TbMsg[34]='"Programación reservas"';
 	$TbMsg[35]='"Operadores"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Añadir nuevo Operador"';
+	$TbMsg[39]='"Eco de Consola"';
 ?>

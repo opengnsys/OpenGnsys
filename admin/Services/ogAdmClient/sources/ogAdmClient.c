@@ -1107,6 +1107,10 @@ int GestionTramas(TRAMA *trama)
 	if(res==0)
 		return(Actualizar());		
 		
+	res=strcmp(nombrefuncion,"ConsolaRemota");
+	if(res==0)
+		return(ConsolaRemota(trama,nwtrama));	
+
 	res=strcmp(nombrefuncion,"NoComandosPtes");
 	if(res==0)
 		return(NoComandosPtes());
@@ -2062,7 +2066,7 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
 	sprintf(cmdshell,"%s/admListHardwareInfo",HIDRASCRIPTS);
 
 	herror=EjecutarScript(cmdshell,NULL,parametroshrd,true);
-	sprintf(msglog,"EL ERRRRRRRRRRRR es %d",herror);
+
 	if(herror)
 		MuestraMensaje(0,msglog);
 	else
@@ -2206,6 +2210,50 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 	lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);	
 	RespuestaEjecucionComando(trama,nwtrama,res);	
 	return(true);	
+}
+//______________________________________________________________________________________________________
+// Función: ConsolaRemota
+//
+//	Descripción: 
+// 		Ejecuta un comando de la Shell y envia el eco al servidor (Consola remota)
+//	Parámetros:
+//		- trama: Trama recibida con las especificaciones del comando
+//		- nwtrama: Nueva trama a enviar al servidor con la respuesta de la acción, si ésta procede
+// 	Devuelve:
+//		true si el proceso fue correcto o false en caso contrario
+// ________________________________________________________________________________________________________
+int ConsolaRemota(TRAMA *trama,TRAMA *nwtrama)
+{
+	FILE* f;
+	long lSize;
+	int herror,res;
+
+	char* comando=TomaParametro("cmd",trama->parametros); 	// Código del comando	
+	sprintf(filecmdshell,"%s/%s","/tmp","_hidrascript_");
+	f = fopen(filecmdshell,"wt");	// Abre fichero de script
+	if(f==NULL)
+		res=false; // Error de apertura del fichero de configuración
+	else{
+		lSize=strlen(comando);
+		fwrite(comando,1,lSize,f);	// Escribe el código a ejecutar
+		fclose(f);
+		sprintf(cmdshell,"/bin/chmod");	// Da permiso de ejecución al fichero
+		sprintf(parametros," %s %s %s","/bin/chmod","+x",filecmdshell);
+		herror=EjecutarScript(cmdshell,parametros,NULL,true);
+		if(herror){
+			UltimoErrorScript(herror,"ConsolaRemota()");	// Se ha producido algún error
+			res=false;	
+		}
+		else{
+				sprintf(cmdshell,"%s/remoteConsole",HIDRASCRIPTS);
+				herror=EjecutarScript(cmdshell,NULL,NULL,true);
+				if(herror){
+					UltimoErrorScript(herror,"ExecBash()");	// Se ha producido algún error
+					res=false;	
+				}	
+		}
+	}
+	return(res);
 }
 //______________________________________________________________________________________________________
 // Función: ExecBash

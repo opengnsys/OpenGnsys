@@ -126,6 +126,7 @@ $ACCION_FINALIZADA='2'; // Acci� finalizada
 //  ocurria una excepci� al llamar a la p�ina por GET.
 
 $fileparam="../includes/PRM_".$usuario;
+$pathfileco="/opt/opengnsys/log/clients"; // Path del    fichero de eco de consola 
 
 // M�ima longitud de los parametros enviados entre p�inas
 $MAXLONPRM=16000;

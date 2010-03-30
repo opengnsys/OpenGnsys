@@ -7,6 +7,8 @@
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero aulas.php
 // *************************************************************************************************************************************************
+var TBcon=new Array() // Array para eco de consolas
+var Conlitambito=null
 //________________________________________________________________________________________________________
 //	
 //		Copia al buffer un nodo de ordenador para moverlo posteriormente
@@ -86,15 +88,34 @@ function actualizar_ordenadores(){
 //	
 //	Conmuta el estado de los ordenadores(Modo Administrado reinici�dolos) 
 //________________________________________________________________________________________________________
-function conmutar_ordenadores(){
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var resul=window.confirm(TbMsg[4]);
-	if (!resul)return
+function consola_remota(){
+	reset_contextual(-1,-1)
+
 	var idambito=currentNodo.toma_identificador()
 	var litambito=currentNodo.toma_sufijo()
-	var whref="conmutar.php?litambito="+litambito+"&idambito="+idambito
-	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=whref; // LLama a la p�ina gestora
+	var nomambito=currentNodo.toma_infonodo()
+	var whref="../principal/consolaremota.php?litambito="+litambito+"&idambito="+idambito+"&nomambito="+nomambito
+	window.open(whref,"frame_contenidos")
+	Conlitambito=litambito;
+}
+//________________________________________________________________________________________________________
+//	
+//	Abre una ventana para  mostrar el eco de una consola
+//________________________________________________________________________________________________________
+function eco_remoto(){
+	reset_contextual(-1,-1)
+ 	if(Conlitambito==LITAMBITO_ORDENADORES){
+			alert(TbMsg[5]);
+		 return;
+	}
+	var idambito=currentNodo.toma_identificador()
+	var litambito=currentNodo.toma_sufijo()
+	var nomambito=currentNodo.toma_infonodo()
+	var whref="../principal/ecoremoto.php?litambito="+litambito+"&idambito="+idambito+"&nomambito="+nomambito
+	var idw=currentNodo.toma_identificador()
+	if(TBcon[idambito])
+		TBcon[idw].close();
+	TBcon[idw] = window.open(whref,"w-"+litambito+"-"+idambito,"width=720,height=640 ");
 }
 //________________________________________________________________________________________________________
 //	

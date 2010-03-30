@@ -236,11 +236,18 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 			respuesta_cortesia(s);
 			return;
 		}
+		resul=strcmp(nombrefuncion,"EcoConsola");
+		if(resul==0){
+			EcoConsola(s,parametros);
+			return;
+		}
+
 		resul=strcmp(nombrefuncion,"Sondeo");
 		if(resul==0){
 			Sondeo(s,parametros);
 			return;
 		}
+
 		resul=strcmp(nombrefuncion,"Arrancar");
 		if(resul==0){
 			Arrancar(parametros);
@@ -264,6 +271,12 @@ void gestiona_comando(SOCKET s,TRAMA trama)
 			return;
 		}
 	
+		resul=strcmp(nombrefuncion,"ConsolaRemota");
+		if(resul==0){
+			ConsolaRemota(parametros);
+			return;
+		}
+
 		resul=strcmp(nombrefuncion,"RESPUESTA_Arrancar");
 		if(resul==0){
 			RESPUESTA_Arrancar(s,parametros);
@@ -1176,20 +1189,22 @@ int actualiza_hardware(Database db, Table tbl,char* hrd,char* ip,char*ido)
 	strcpy(ch,"\n");// caracter delimitador 
 	lon=split_parametros(tbHardware,buffer,ch);
 	
+	/*
 	for (i=0;i<lon;i++){
 		sprintf(msglog,"Linea de inventario: %s",tbHardware[i]);
 		RegistraLog(msglog,false);
 	}
+	*/
 	
 	// Trocea las cadenas de parametros de particin
 	for (i=0;i<lon;i++){
 		strcpy(ch,"=");// caracter delimitador "="
 		split_parametros(dualHardware,tbHardware[i],ch); 
 		
-		sprintf(msglog,"nemonico: %s",dualHardware[0]);
-		RegistraLog(msglog,false);
-		sprintf(msglog,"valor: %s",dualHardware[1]);
-		RegistraLog(msglog,false);
+		//sprintf(msglog,"nemonico: %s",dualHardware[0]);
+		//RegistraLog(msglog,false);
+		//sprintf(msglog,"valor: %s",dualHardware[1]);
+		//RegistraLog(msglog,false);
 		
 		
 		sprintf(sqlstr,"SELECT idtipohardware,descripcion FROM tipohardwares WHERE nemonico='%s'",dualHardware[0]);
@@ -2056,6 +2071,57 @@ int inclusion_REPO(SOCKET s,char *parametros)
 	return(manda_trama(s,trama));
 }
 // ________________________________________________________________________________________________________
+// Función: EcoConsola
+//
+//		Descripción: 
+//			Esta función devuelve el eco de una consola remota
+//		Parámetros:
+//			- s: Socket del servidor web que envía el comando
+//			- parametros: Parámetros de la trama enviada
+// ________________________________________________________________________________________________________
+int EcoConsola(SOCKET s,char *parametros)
+{
+	char *iph,*pfe;
+	char nwparametros[LONGITUD_PARAMETROS];
+
+	iph=toma_parametro("iph",parametros); // Toma ip
+	pfe=toma_parametro("pfe",parametros); // Toma path al archivo de eco
+	sprintf(ecofile,"%s/eco-%s",pfe,iph);
+
+// Lee archivo de eco
+	FILE *Finv;
+	char *buffer;
+	long lSize;
+	Finv = fopen (ecofile,"rt"); 
+/*
+	if (Finv==NULL){
+		sprintf(msglog,"No se encuentra archivo %s conteniendo el eco del ordenador cuya dirección IP es:%s",ecofile,iph);
+		RegistraLog(msglog,false);
+		return(FALSE);
+	}		
+*/
+	fseek (Finv , 0 , SEEK_END);  // Obtiene tamaño del fichero.
+	lSize = ftell (Finv);
+	rewind (Finv);
+	buffer = (char*) malloc (lSize);  // Toma memoria para el buffer de lectura.
+	if (buffer == NULL){
+		sprintf(msglog,"NO se ha podido reservar memoria para leer archivo de eco %s",ecofile);
+		RegistraLog(msglog,false);
+		return(FALSE);
+	}
+	fread (buffer,1,lSize,Finv); 	// Lee contenido del fichero
+	fclose(Finv);
+	Finv = fopen (ecofile,"wt"); 
+	fclose(Finv);
+	buffer[lSize]='\0';
+	buffer=escaparComillas(buffer);	
+
+  nwparametros[0]='\0';
+	strcat(nwparametros,"eco="); // Compone retorno eco (Pantalla de consola remota)
+	strcat(nwparametros,buffer); 
+	return(manda_comando(s,nwparametros));
+}
+// ________________________________________________________________________________________________________
 // Función: Sondeo
 //
 //		Descripción: 
@@ -2115,6 +2181,49 @@ int Actualizar(char *parametros)
 							manda_comando(tbsockets[i].sock,(char*)trama->parametros);
 						}
 						borra_entrada(i);
+					}
+				}
+			}
+		}
+	}
+	int j;
+	for (j=0;j<MAXIMOS_SRVRMB;j++){
+		if (strcmp(rmb,tbsocketsSRVRMB[j].ip)==0){ // Si existe la IP ...
+			FINCADaINTRO(parametros,iph);
+			return(manda_trama_servidorrembo(rmb,parametros,tbsocketsSRVRMB[j].puertorepo));
+		}
+	}
+	return(false);
+}
+// ________________________________________________________________________________________________________
+// Función: ConsolaRemota
+//
+//		Descripción:
+//			Esta función implementa la consola remota 
+//		Parámetros:
+//			- parametros: parametros del comando
+// ________________________________________________________________________________________________________
+int ConsolaRemota(char *parametros)
+{
+	TRAMA *trama=(TRAMA*)malloc(LONGITUD_TRAMA);
+	if(!trama)return(false);
+	int i,estado_cliente,lon;
+	char *iph,*rmb;
+
+	iph=toma_parametro("iph",parametros); // Toma ip
+	rmb=toma_parametro("rmb",parametros); // Toma ipe del servidor rembo
+	for (i=0;i<MAXIMOS_SOCKETS;i++){
+		if (strncmp(tbsockets[i].ip,"\0",1)!=0){ // Si es un cliente activo
+			if (IgualIP(iph,tbsockets[i].ip)){ // Si existe la IP en la cadena
+				estado_cliente=strcmp(tbsockets[i].estado,CLIENTE_OCUPADO);
+				if(estado_cliente!=0){ // Cliente NO OCUPADO ...
+					estado_cliente=strcmp(tbsockets[i].estado,CLIENTE_INICIANDO);
+					if(estado_cliente!=0){ // Cliente NO INICIANDO ...
+						estado_cliente=strcmp(tbsockets[i].estado,CLIENTE_REMBO);
+						if(estado_cliente!=0){ // Cliente windows o linux ...
+							lon=sprintf(trama->parametros,"nfn=ConsolaRemota\r");
+							manda_comando(tbsockets[i].sock,(char*)trama->parametros);
+						}
 					}
 				}
 			}

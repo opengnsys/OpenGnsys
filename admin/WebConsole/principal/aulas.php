@@ -287,9 +287,12 @@ function ContextualXMLCentros(){
 	$layerXML.=' textoitem='.$TbMsg[2];
 	$layerXML.='></ITEM>';
 
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="conmutar_ordenadores()"';
-	$layerXML.=' imgitem="../images/iconos/hidra.gif"';
+	$layerXML.=' alpulsar="consola_remota()"';
+	$layerXML.=' imgitem="../images/iconos/shell.gif"';
 	$layerXML.=' textoitem='.$TbMsg[33];
 	$layerXML.='></ITEM>';
 
@@ -383,9 +386,12 @@ function ContextualXMLGruposAulas(){
 	$layerXML.=' textoitem='.$TbMsg[2];
 	$layerXML.='></ITEM>';
 
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="conmutar_ordenadores()"';
-	$layerXML.=' imgitem="../images/iconos/hidra.gif"';
+	$layerXML.=' alpulsar="consola_remota()"';
+	$layerXML.=' imgitem="../images/iconos/shell.gif"';
 	$layerXML.=' textoitem='.$TbMsg[33];
 	$layerXML.='></ITEM>';
 
@@ -508,9 +514,12 @@ function ContextualXMLAulas(){
 	$layerXML.=' textoitem='.$TbMsg[2];
 	$layerXML.='></ITEM>';
 
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="conmutar_ordenadores()"';
-	$layerXML.=' imgitem="../images/iconos/hidra.gif"';
+	$layerXML.=' alpulsar="consola_remota()"';
+	$layerXML.=' imgitem="../images/iconos/shell.gif"';
 	$layerXML.=' textoitem='.$TbMsg[33];
 	$layerXML.='></ITEM>';
 
@@ -694,9 +703,12 @@ function ContextualXMLGruposOrdenadores(){
 	$layerXML.=' textoitem='.$TbMsg[2];
 	$layerXML.='></ITEM>';
 
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="conmutar_ordenadores()"';
-	$layerXML.=' imgitem="../images/iconos/hidra.gif"';
+	$layerXML.=' alpulsar="consola_remota()"';
+	$layerXML.=' imgitem="../images/iconos/shell.gif"';
 	$layerXML.=' textoitem='.$TbMsg[33];
 	$layerXML.='></ITEM>';
 
@@ -791,10 +803,19 @@ function ContextualXMLOrdenadores(){
 	$layerXML.=' textoitem='.$TbMsg[2];
 	$layerXML.='></ITEM>';
 
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
 	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="conmutar_ordenadores()"';
-	$layerXML.=' imgitem="../images/iconos/hidra.gif"';
+	$layerXML.=' alpulsar="consola_remota()"';
+	$layerXML.=' imgitem="../images/iconos/shell.gif"';
 	$layerXML.=' textoitem='.$TbMsg[33];
+	$layerXML.='></ITEM>';
+
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="eco_remoto()"';
+	$layerXML.=' imgitem="../images/iconos/ecocon.gif"';
+	$layerXML.=' textoitem='.$TbMsg[39];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';

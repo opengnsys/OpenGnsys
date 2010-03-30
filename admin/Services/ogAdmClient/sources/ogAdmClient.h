@@ -306,6 +306,7 @@ int InventarioSoftware(TRAMA *,TRAMA *);
 int TomaConfiguracion(TRAMA *,TRAMA *);
 int RespuestaEjecucionComando(TRAMA* , TRAMA *, int);
 int ExecShell(TRAMA *,TRAMA *);
+int ConsolaRemota(TRAMA *,TRAMA *);
 int ExecBash(char*);
 char* URLDecode(char*);
 char* URLEncode(char *);

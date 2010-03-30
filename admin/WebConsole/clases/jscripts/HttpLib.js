@@ -1,10 +1,11 @@
-// ************************************************************************************************//
-// Aplicación WEB: Realtab
-//		Descripción: Aplicación web para gestión de Tablaturas y acordes de guitarra
-// 	Copyright 2009 José Manuel Alonso. Todos los derechos reservados.
-// 	Fecha: Junio 2008
-//  Fichero: Clase para llamar páginas web usando metodología AJAX
-// *************************************************************************************************//
+// ********************************************************************************
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Febrero-2005
+// Nombre del fichero: consolaremota.php
+// Descripción : Clase para llamar páginas web usando metodología AJAX
+// ********************************************************************************
 var _url;
 var _fun;
 var oXMLHttpRequest;
@@ -17,14 +18,16 @@ var oXMLHttpRequest;
 //		url			// Url de la página a la que se llama
 //		fun			// Función a la que se llama despues de descargarse la página
 //____________________________________________________________________________
-function CallPage(url,fun){
+function CallPage(url,prm,fun,met){
 	 _url=url;
 	 _fun=fun;
+
 	if (window.XMLHttpRequest) {
 		oXMLHttpRequest= new XMLHttpRequest();
 		oXMLHttpRequest.onreadystatechange = procesaoXMLHttpRequest;
-		oXMLHttpRequest.open("GET",_url, true);
-		oXMLHttpRequest.send(null);    
+		oXMLHttpRequest.open("POST",_url, true);
+		oXMLHttpRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
+		oXMLHttpRequest.send(prm);    
 	} else if (window.ActiveXObject) {
 		isIE = true;
 		try {
@@ -38,8 +41,9 @@ function CallPage(url,fun){
 		}
 		if (oXMLHttpRequest) {
 			oXMLHttpRequest.onreadystatechange =procesaoXMLHttpRequest;
-			oXMLHttpRequest.open("GET",_url, true);
-			oXMLHttpRequest.send();
+			oXMLHttpRequest.open("POST",_url, true);
+			oXMLHttpRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
+			oXMLHttpRequest.send(prm);
 		}
 	}
 }
@@ -52,3 +56,4 @@ function CallPage(url,fun){
 		 } 
 	}
 }
+

@@ -410,6 +410,11 @@ int gestiona_comando(TramaRepos *trmInfo)
 		return(RegistraComando(trmInfo));
 	}
 
+	resul=strcmp(nombrefuncion,"ConsolaRemota");
+	if(resul==0){
+		return(RegistraComando(trmInfo));
+	}
+
 	resul=strcmp(nombrefuncion,"IconoItem");
 	if(resul==0)
 		return(IconoItem(trmInfo));		
@@ -480,19 +485,19 @@ int RegistraComando(TramaRepos *trmInfo)
 	lon=strlen((char*)&trmInfo->trama);	
 	
 	//sprintf(msglog,"Registra comandos %s",(char*)&trmInfo->trama);
-	RegistraLog(msglog,false);
+	//RegistraLog(msglog,false);
 	
 	for(i=0;i<numipes;i++){
 		strcpy(nomfilecmd,PathComandos);
 		strcat(nomfilecmd,"/CMD_");
 		strcat(nomfilecmd,ipes[i]);
 		//sprintf(msglog,"Crea fichero de comandos %s",nomfilecmd);
-		RegistraLog(msglog,false);
+		//RegistraLog(msglog,false);
 		
 		Fcomandos=fopen( nomfilecmd,"w");
 		if(!Fcomandos) return(false);
 		//sprintf(msglog,"Fichero creado %s",nomfilecmd);
-		RegistraLog(msglog,false);
+		//RegistraLog(msglog,false);
 		
 		fwrite((char*)&trmInfo->trama,lon,1,Fcomandos);
 		fclose(Fcomandos);

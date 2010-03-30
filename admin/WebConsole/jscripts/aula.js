@@ -61,15 +61,12 @@ function actualizar_ordenadores(){
 }
 //________________________________________________________________________________________________________
 //	
-//	Conmuta el estado de los ordenadores(Modo Administrado reiniciándolos) 
+//	Muestra pantalla de Consola remota
 //________________________________________________________________________________________________________
-function conmutar_ordenadores(){
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var resul=window.confirm(TbMsg[4]);
-	if (!resul)return
-	var whref="conmutar.php?litambito="+litambito+"&idambito="+idambito
-	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	ifr.src=whref; // LLama a la página gestora
+function consola_remota(){
+	reset_contextual(-1,-1)
+	var whref="../principal/consolaremota.php?litambito="+litambito+"&idambito="+idambito+"&nomambito="+nombreambito
+	location.href=whref;
 }
 //________________________________________________________________________________________________________
 //	
