@@ -104,6 +104,10 @@ function consola_remota(){
 //________________________________________________________________________________________________________
 function eco_remoto(){
 	reset_contextual(-1,-1)
+ 	if(Conlitambito==null){
+			alert(TbMsg[6]);
+		 return;
+	}
  	if(Conlitambito==LITAMBITO_ORDENADORES){
 			alert(TbMsg[5]);
 		 return;
@@ -112,10 +116,10 @@ function eco_remoto(){
 	var litambito=currentNodo.toma_sufijo()
 	var nomambito=currentNodo.toma_infonodo()
 	var whref="../principal/ecoremoto.php?litambito="+litambito+"&idambito="+idambito+"&nomambito="+nomambito
-	var idw=currentNodo.toma_identificador()
+	var nomw="w_"+litambito+"_"+idambito
 	if(TBcon[idambito])
-		TBcon[idw].close();
-	TBcon[idw] = window.open(whref,"w-"+litambito+"-"+idambito,"width=720,height=640 ");
+		TBcon[idambito].close();
+	TBcon[idambito] = window.open(whref,nomw,"width=720,height=640");
 }
 //________________________________________________________________________________________________________
 //	
