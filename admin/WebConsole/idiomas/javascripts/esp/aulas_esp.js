@@ -10,4 +10,5 @@ TbMsg[2]="ATENCIÓN: Este ámbito será purgado. ¿ Está seguro ?";
 TbMsg[3]="ATENCIÓN: Los items de menús de este ámbito serán renovados. ¿ Está seguro ?";
 TbMsg[4]=" ATENCIÓN: Este ámbito será conmutado. ¿ Está seguro ?";
 TbMsg[5]=" ATENCIÓN: La consola remota ya está activada para este ámbito. Haga el seguimiento en la propia pantalla de comandos/scripts";
+TbMsg[6]=" ATENCIÓN: Debe seleccionar la opción 'Consola remota' previamente";
 
