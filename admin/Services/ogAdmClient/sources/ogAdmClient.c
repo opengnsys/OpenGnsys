@@ -1013,7 +1013,7 @@ int ProcesaComandos()
 					return(false);
 				}
 			}
-			sleep(5);	// Espera 5 segundos antes de volver a esperar comandos
+			sleep(1);	// Espera 1 segundo antes de volver a esperar comandos
 		}
 		return(true);
 }
