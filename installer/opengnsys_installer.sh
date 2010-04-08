@@ -255,24 +255,27 @@ function mysqlSetRootPassword()
 function mysqlGetRootPassword(){
 	local pass_mysql
 	local pass_mysql2
-	stty -echo
-	echo "Existe un servicio mysql ya instalado"
-	read -p  "Insertar clave de root de Mysql: " pass_mysql
-	echo ""
-	read -p "Confirmar clave:" pass_mysql2
-	echo ""
-	stty echo
-	if [ "$pass_mysql" == "$pass_mysql2" ] ;then
-		MYSQL_ROOT_PASSWORD=$pass_mysql
-		echo "La clave es: ${MYSQL_ROOT_PASSWORD}"
-		return 0
-	else
-		echo "Las claves no coinciden no se configura la clave del servidor de base de datos."
-		echo "las operaciones con la base de datos daran error"
-		return 1
+        # Comprobar si MySQL está instalado con la clave de root por defecto.
+        if mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): Using default mysql root password."
+        else
+	        stty -echo
+	        echo "Existe un servicio mysql ya instalado"
+	        read -p  "Insertar clave de root de Mysql: " pass_mysql
+	        echo ""
+	        read -p "Confirmar clave:" pass_mysql2
+	        echo ""
+	        stty echo
+	        if [ "$pass_mysql" == "$pass_mysql2" ] ;then
+		        MYSQL_ROOT_PASSWORD=$pass_mysql
+		        echo "La clave es: ${MYSQL_ROOT_PASSWORD}"
+		        return 0
+	        else
+	        	echo "Las claves no coinciden no se configura la clave del servidor de base de datos."
+	        	echo "las operaciones con la base de datos daran error"
+	        	return 1
+	        fi
 	fi
-
-
 }
 
 # comprueba si puede conectar con mysql con el usuario root
@@ -1005,6 +1008,9 @@ echo
 
 echoAndLog "OpenGnSys installation begins at $(date)"
 
+# Detener servicios de OpenGnSys, si están activos previamente.
+[ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
+
 # Detectar parámetros de red por defecto
 getNetworkSettings
 if [ $? -ne 0 ]; then
@@ -1081,7 +1087,6 @@ if [ $? -eq 0 ]; then
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 else
 	mysqlGetRootPassword
-
 fi
 
 mysqlTestConnection ${MYSQL_ROOT_PASSWORD}
