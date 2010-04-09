@@ -37,6 +37,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5); // Crea e
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/administracion.js"></SCRIPT>
+	<SCRIPT language="javascript" src="../jscripts/administracion_usuarios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
@@ -163,7 +164,9 @@ function SubarbolXML_superadministradores($cmd){
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_USUARIOS."'" .')"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombre"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_USUARIOS.'-'.$rs->campos["idusuario"];
-		$cadenaXML.='></USUARIO>';
+		$cadenaXML.='>';
+		SubarbolXML_centros_asignados($cmd,$rs->campos["idusuario"]);		
+		$cadenaXML.='</USUARIO>';
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
@@ -264,6 +267,33 @@ function SubarbolXML_administradores($cmd,$idambito){
 	}
 	$rs->Cerrar();
 }
+
+//________________________________________________________________________________________________________
+function SubarbolXML_centros_asignados($cmd,$idambito){
+	global $TbMsg;
+	global $LITAMBITO_CENTROS;
+	global $cadenaXML;
+	global $ADMINISTRADOR;
+	$rs=new Recordset; 
+	$cmd->texto="SELECT centros.idcentro,centros.nombrecentro FROM centros 
+							INNER JOIN administradores_centros ON administradores_centros.idcentro=centros.idcentro 
+							WHERE administradores_centros.idusuario=".$idambito." ORDER by centros.nombrecentro";
+
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
+	$rs->Primero(); 
+	while (!$rs->EOF){
+		$cadenaXML.='<CENTRO';
+		// Atributos			
+		$cadenaXML.=' imagenodo="../images/iconos/centros.gif"';
+		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_CENTROS."'" .')"';
+		$cadenaXML.=' infonodo="'.$rs->campos["nombrecentro"].'"';
+		$cadenaXML.=' nodoid='.$LITAMBITO_CENTROS.'-'.$rs->campos["idcentro"];
+		$cadenaXML.='></CENTRO>';
+		$rs->Siguiente();
+	}
+	$rs->Cerrar();
+}
 //________________________________________________________________________________________________________
 //
 //	Mens Contextuales
@@ -288,6 +318,9 @@ function CreacontextualXMLUniversidades(){
 	$layerXML.=' imgitem="../images/iconos/carpeta.gif"';
 	$layerXML.=' textoitem='.$TbMsg[1];
 	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
 
 	// Crear entidades
 	$wLeft=140;
@@ -345,10 +378,11 @@ function CreacontextualXMLUsuarios(){
 
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' idctx="flo_administradores"';
-	$layerXML.=' maxanchu=155';
+	$layerXML.=' maxanchu=170';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
+
 
 	// Crear superadministrador
 	$wLeft=140;
@@ -389,10 +423,22 @@ function CreacontextualXMLAdministradores(){
 
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' idctx="flo_'.$LITAMBITO_USUARIOS.'"';
-	$layerXML.=' maxanchu=90';
+	$layerXML.=' maxanchu=120';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
+
+	
+	// Asignar usuarios
+
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="Asignar_Usuario()"';
+	$layerXML.=' imgitem="../images/iconos/centros.gif"';
+	$layerXML.=' textoitem='.$TbMsg[13];
+	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
 
 	// Modificar usuarios
 	$wLeft=140;
@@ -528,7 +574,7 @@ function CreacontextualXMLCentros(){
 
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' idctx="flo_'.$LITAMBITO_CENTROS.'"';
-	$layerXML.=' maxanchu=140';
+	$layerXML.=' maxanchu=160';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';

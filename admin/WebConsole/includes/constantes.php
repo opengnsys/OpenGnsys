@@ -156,4 +156,7 @@ $SUPERADMINISTRADOR=1; // administrador de la Aplicación
 $ADMINISTRADOR=2; // administrador de Centro
 $OPERADOR=3; // operador de aula
 
+//Opciones para el uso de repositorios centralizados
+$CON_REPOSITORIO=1;
+$SIN_REPOSITORIO=0;
 ?>

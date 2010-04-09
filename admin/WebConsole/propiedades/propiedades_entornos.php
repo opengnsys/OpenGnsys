@@ -27,6 +27,7 @@ $identorno=1;
 $ipserveradm="";
 $portserveradm="";
 $protoclonacion="";
+$repositorio="";
 
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
@@ -55,13 +56,18 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_entornos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
+	<SCRIPT language="javascript" >
+
+	</SCRIPT>
+
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_entornos_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
-<FORM  name="fdatos"> 
-	<INPUT type=hidden name=identorno value=<?=$identorno?>>
+<FORM  name="fdatos" action="../gestores/gestor_entornos.php" method="post">
+	<INPUT type=hidden name="identorno" value="<? echo $identorno?>">
+	<INPUT type=hidden name="opcion" value="<? echo $opcion?>">
 
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
@@ -107,6 +113,26 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
+			<?if ($opcion==$op_eliminacion)
+					echo '<TD style="width:300"><IMG src="'.$tbimg[$repositorio].'">&nbsp;&nbsp;('.$TbMsg[8+$repositorio].')</TD>';
+			else{
+					echo '<TD>';
+					echo '<INPUT  name=repositorio type=radio value="'.$CON_REPOSITORIO.'"';
+					if ($repositorio==1) echo " checked ";
+					echo ">".$TbMsg[9];
+
+					echo '<INPUT  name=repositorio type=radio value="'.$SIN_REPOSITORIO.'"';
+					if ($repositorio==0) echo " checked ";
+					echo ">".$TbMsg[10];
+					echo '</TD>';
+			}
+			?>
+		</TR>	
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
 </DIV>
@@ -114,9 +140,7 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
-//________________________________________________________________________________________________________
-include_once("../includes/iframecomun.php");
-//________________________________________________________________________________________________________
+
 ?>
 </BODY>
 </HTML>
@@ -133,7 +157,7 @@ function TomaPropiedades($cmd,$id){
 	global $ipserveradm;
 	global $portserveradm;
 	global $protoclonacion;
-	
+	global $repositorio;
 
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM entornos WHERE identorno=".$id;
@@ -145,7 +169,8 @@ function TomaPropiedades($cmd,$id){
 		$ipserveradm=$rs->campos["ipserveradm"];
 		$portserveradm=$rs->campos["portserveradm"];
 		$protoclonacion=$rs->campos["protoclonacion"];
-		
+		$repositorio=$rs->campos["repositorio"];		
+
 		$rs->Cerrar();
 		return(true);
 	}

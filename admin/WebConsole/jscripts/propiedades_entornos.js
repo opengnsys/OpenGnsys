@@ -8,6 +8,7 @@
 //		Este fichero implementa las funciones javascript del fichero propiedades_entornos.php
 // *************************************************************************************************************************************************
 var currentHora=null;
+
 var wpadre=window.parent; // Toma frame padre
 var farbol=wpadre.frames["frame_arbol"];
 //________________________________________________________________________________________________________
@@ -26,55 +27,13 @@ function cancelar(){
 //			- descrierror: Descripción del error en su caso
 //			- lit: Nuevo nombre del grupo
 //________________________________________________________________________________________________________
-function resultado_modificar_entornos(resul,descrierror,lit){
-	if(resul>0)
-		alert(CTbMsg[5]);
-	else
-		alerty("Error");
-	selfclose();
-}
-//________________________________________________________________________________________________________
-function selfclose(){
-	document.location.href="../nada.php";
-}
-//________________________________________________________________________________________________________
-//	
-//	Esta función desabilita la marca de un checkbox en opcion "bajas"
-//________________________________________________________________________________________________________
- function desabilita(o) {
-	var b
-    b=o.checked
-    o.checked=!b
- }
 //________________________________________________________________________________________________________
 //	
 //	Confirma la edición 
 //________________________________________________________________________________________________________
 function confirmar(op){
-	var opcion=op;
-	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
-	var wurl="../gestores/gestor_entornos.php?opcion="+opcion
-	if (opcion!=op_eliminacion){
-		if(!comprobar_datos()) return
-		var valor
-		var o
-		var nit=document.forms[0].elements.length // Prepara la cadena de parámetros metodo get
-		for (i=0;i<nit;i++){
-			o=document.forms[0].elements[i]
-			valor=o.value
-			if (valor=="on") {
-					if(o.checked ) 
-						valor=1; 
-					else 
-						valor=0
-			}
-			wurl+="&"+o.name+"="+valor
-		}
-	}
-	else{
-		wurl+="&identorno="+document.fdatos.identorno.value
-	}
-	ifr.src=wurl; // LLama a la página gestora
+	if(!comprobar_datos()) 	return
+	document.fdatos.submit();
 }
 //________________________________________________________________________________________________________
 //	
@@ -89,6 +48,11 @@ function comprobar_datos(){
 	if (document.fdatos.portserveradm.value=="") {
 		alert(TbMsg[1]);
 		document.fdatos.portserveradm.focus();
+		return(false);
+	}
+	if (document.fdatos.repositorio.checked==false && document.fdatos.repositorio.checked==false) {
+		alert(TbMsg[2]);
+		document.fdatos.xrepositorio[0].focus();
 		return(false);
 	}
 	return(true);

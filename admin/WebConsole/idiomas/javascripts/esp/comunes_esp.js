@@ -12,3 +12,4 @@ CTbMsg[4]="El registro ha sido insertado correctamente";
 CTbMsg[5]="El registro ha sido modificado correctamente";
 CTbMsg[6]="El registro ha sido eliminado correctamente";
 CTbMsg[7]="ATENCIÓN: No hay ningún elemento pendiente de ser movido a este grupo";
+CTbMsg[8]="ATENCIÓN: Ha habido algún error en el proceso de inserción o modificación del registro";

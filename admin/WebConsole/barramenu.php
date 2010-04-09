@@ -149,12 +149,6 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 											<SPAN class=menupral ><?echo  $TbMsg[8] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
-											<TD  onclick=eleccion(this,13) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/administradores.gif">
-											<SPAN class=menupral ><?echo  $TbMsg[12] ?></SPAN></A>&nbsp;</TD>
-
-										<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-
 											<TD  onclick=eleccion(this,10) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
 											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
