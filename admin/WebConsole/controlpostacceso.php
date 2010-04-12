@@ -54,10 +54,16 @@ include_once("./clases/AdoPhp.php");
  $_SESSION["widtipousuario"]=$tsu;  
  $_SESSION["widioma"]=$idi; 
  $_SESSION["wcadenaconexion"]=$cnx; 
- $_SESSION["wservidorhidra"]=$ips; 
- $_SESSION["whidraport"]=$prt; 
  $_SESSION["wpagerror"]=$wer; 
  $_SESSION["wurlacceso"]=$wac; 
+
+// Variables de entorno
+ $resul=toma_entorno($cmd,&$ips,&$prt); 
+ if(!$resul) 
+     Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D. 
+
+ $_SESSION["wservidorhidra"]=$ips; 
+ $_SESSION["whidraport"]=$prt; 
 
 /*
 echo "<BR>Cadena=".$_SESSION["wcadenaconexion"];
@@ -117,6 +123,27 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
 				}
     } 
     return(false); 
+ } 
+//________________________________________________________________________________________________________ 
+ //    Busca datos de configuración del sistema  
+ //        Parametros:  
+ //        - cmd:Una comando ya operativo (con conexión abierta)   
+ //        - ips: Dirección IP del servidor de administración   
+ //        - prt: Puerto de comunicaciones
+ // 
+ //    Devuelve datos generales de configuración del sistema
+ //_______________________________________________________________________________________________________ 
+ function toma_entorno($cmd,$ips,$prt){ 
+ 	$rs=new Recordset;  
+	$cmd->texto="SELECT * FROM entornos"; 
+  $rs->Comando=&$cmd; 
+	//echo $cmd->texto;
+	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
+  if(!$rs->EOF){
+	  $ips=$rs->campos["ipserveradm"]; 
+	  $prt=$rs->campos["portserveradm"]; 
+	}
+  return(true); 
  } 
  //_______________________________________________________________________________________________________ 
 ?> 
