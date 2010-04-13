@@ -27,7 +27,7 @@
 function ogGetOsVersion ()
 {
 # Variables locales.
-local MNTDIR TYPE VERSION FILE
+local MNTDIR TYPE DISTRIB VERSION FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -50,10 +50,12 @@ case "$(ogGetFsType $1 $2)" in
         if [ -z "$VERSION" ]; then
             FILE="$MNTDIR/etc/lsb-release"
             [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
-            FILE="$MNTDIR/etc/redhat-release"
-            [ -r $FILE ] && VERSION="$(head -1 $FILE)"
-            FILE="$MNTDIR/etc/SuSE-release"
-            [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+            for DISTRIB in redhat SuSE mandrake; do
+                FILE="$MNTDIR/etc/${DISTRIB}-release"
+                [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+            done
+            FILE="$MNTDIR/etc/arch-release"
+            [ -r $FILE ] && VERSION="Arch Linux"
         fi
         [ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
         ;;
@@ -202,6 +204,12 @@ case "$TYPE" in
                    awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
                    sort | uniq
            	#    rm -f ${RPMDIR}/__db.*
+        fi
+        # Procesar paquetes pacman.
+        PACMANDIR="${MNTDIR}/var/lib/pacman/local"
+        if [ -r $PACMANDIR ]; then
+            # FIXME Separar nombre y versión de los paquetes
+            ls -A $PACMANDIR
         fi
         ;;
     NTFS|HNTFS|FAT32|HFAT32)

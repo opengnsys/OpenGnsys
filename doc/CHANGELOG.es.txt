@@ -24,6 +24,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #109	ogSetPartitionId no modifica bien el identificador de la partición
 #110	ogCreatePartitions no llama a ogTypeToId
 #111	ogFormatFS no reconoce el tipo de partiticion CACHE
+#121    ogCreatePartitions revision 813
 
 Tickets resueltos en módulo OpenGnSys Client:
 #11 	Páginas de inicio estilo rembo
@@ -40,6 +41,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #84 oginit considera siempre al servidor dhcp como si fuese el servidor opengnsys
 #105    El browser del cliente no detecta algunos ratones
 #106    Añadir al busybox del initrd soporte de configuración de red (no se resolverá)
+#118    Funcion ogGetIpAddress no obtiene la ip adecuadamente
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #10 	Consola no detecta bien el inventario de hardware
@@ -55,10 +57,15 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #78	No funciona la consola web (tarea)
 #80 	puerto por defecto del servidor opengnsys en el web admin
 #97	Instalador no deja bien configurado controlacceso.php
+#113    Incluir ayuda Doxygen en la consola web
+#119    Mensaje de aviso en el browser al elegir opción de menú
+#120    Inventario Hardware: Error tipo de hardware no registrado
+#124    Error al crear usuarios
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #74 	Fallo al ejecutar ogAdmServer
 #69 	Error al compilar el servidor de repositorio ogAdmRepo (tarea)
+#114    Hora incorrecta en logs de ogAdmServer y ogAdmRepo
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #53	revertir el opengnsys_instaler.sh a la versión de Luis (181)
@@ -68,10 +75,12 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #82 	Instalador no arranca ogAdmRepo
 #83 	Contraseña por defecto al instalar
 #94 	Problema proceso instalación en tar.gz (descarga svn)
+#95     Petición de clave rootMySQL en reintento de instalación tar.gz
 #102	Fallo en el instalador
 #103	ogAdmClient.cfg no compatible con el instalacion (lineas en blanco al final)
 #104	el instalador no configura bien el dhcp, nfs-export
 #107    Actualizador da error si no se ha eliminado el directorio de /tmp
+#123    Creación de usuarios por defecto en el instalador
 
 Tickets genéricos resueltos:
 #21	Elección de nombre para el proyecto
