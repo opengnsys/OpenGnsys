@@ -73,7 +73,7 @@ function ntfs-3g ()
 {
 if [ "$1" = install ]
      then
-		 install http://tuxera.com/opensource/ntfs-3g-2009.11.14.tgz
+		 install http://tuxera.com/opensource/ntfs-3g-2010.3.6.tgz
      else
     	 return
 fi
