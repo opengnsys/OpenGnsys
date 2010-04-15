@@ -1235,15 +1235,16 @@ CREATE TABLE IF NOT EXISTS `entornos` (
   `ipserveradm` varchar(50) NOT NULL,
   `portserveradm` int(20) NOT NULL,
   `protoclonacion` varchar(50) NOT NULL,
+  `repositorio` tinyint(4) NOT NULL,
   PRIMARY KEY  (`identorno`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Volcar la base de datos para la tabla `entornos`
 --
-INSERT INTO `entornos` (`identorno`,`ipserveradm`,`portserveradm`,`protoclonacion`) VALUES 
- (1,'SERVERIP','2008','TORRENT');
 
+INSERT INTO `entornos` (`identorno`, `ipserveradm`, `portserveradm`, `protoclonacion`, `repositorio`) VALUES
+(1, '10.1.15.7', 2008, 'TORRENT', 1);
 
 -- --------------------------------------------------------
 
