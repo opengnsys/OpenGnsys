@@ -1244,7 +1244,7 @@ CREATE TABLE IF NOT EXISTS `entornos` (
 --
 
 INSERT INTO `entornos` (`identorno`, `ipserveradm`, `portserveradm`, `protoclonacion`, `repositorio`) VALUES
-(1, '10.1.15.7', 2008, 'TORRENT', 1);
+(1, 'SERVERIP', 2008, 'TORRENT', 1);
 
 -- --------------------------------------------------------
 
