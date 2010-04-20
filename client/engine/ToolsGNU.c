@@ -33,7 +33,7 @@ function mbuffer ()
 {
 	if [ "$1" = install ]
 	then
-		install http://www.maier-komor.de/software/mbuffer/mbuffer-20091122.tgz
+		install http://www.maier-komor.de/software/mbuffer/mbuffer-20100327.tgz
 	else
 		return
 	fi
