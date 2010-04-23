@@ -43,7 +43,7 @@ function ms-sys ()
 {
 	if [ "$1" = install ]
 	then
-		install http://downloads.sourceforge.net/project/ms-sys/ms-sys%20development/2.1.4/ms-sys-2.1.4.tar.gz
+		install http://downloads.sourceforge.net/project/ms-sys/ms-sys%20development/2.1.5/ms-sys-2.1.5.tar.gz
 	else
 		return
 	fi
@@ -63,7 +63,7 @@ function udpcast ()
 {
 	if [ "$1" = install ]
 	then
-		install http://udpcast.linux.lu/download/udpcast-20091031.tar.gz
+		install http://udpcast.linux.lu/download/udpcast-20100130.tar.gz
 	else
 		return
 	fi
