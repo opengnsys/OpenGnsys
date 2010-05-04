@@ -28,7 +28,6 @@ include_once("./includes/constantes.php");
 			}
 			?>
 		<FRAME SRC="nada.php" frameborder=1  NAME="frame_contenidos">
-		</FRAMESET>
-	</FRAMESET>	
-</FRAMESET>
+	</FRAMESET>
+</FRAMESET>	
 </HTML>
