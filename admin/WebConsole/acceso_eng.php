@@ -26,7 +26,6 @@ $TbErr[3]="WARNING: There are some problem to recovery the record, must be it is
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="estilos.css">
-</HEAD>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 //________________________________________________________________________________________________________
 function confirmar(){
