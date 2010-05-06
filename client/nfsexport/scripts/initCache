@@ -21,21 +21,21 @@ else
     if [ "$1" != "$SIZE" ]; then
         echo "[10] Crar partición de caché local."
         ogUnmountCache 2>/dev/null
-        ogCreateCache "$1" || return $?
+        ogCreateCache "$1"
     fi
     # Si caché no montada y no formateada, formatear.
-    CACHE=$(ogFindCache) || return $?
+    CACHE=$(ogFindCache) || exit $?
     if ! ogIsFormated $CACHE; then
         echo "[50] Formatear caché local."
         ogFormatCache
     fi
     echo "[70] Montar caché local."
-    ogMountCache
+    ogMountCache 2>/dev/null
     # Si error al montar, chequear sistema de archivos y volver a montar.
     if [ $? != 0 ]; then
         echo "[80] Comprobar y montar caché local."
         ogCheckFs $CACHE
-        ogMountCache || return $?
+        ogMountCache || exit $?
     fi
 fi
 # Duración del proceso.
