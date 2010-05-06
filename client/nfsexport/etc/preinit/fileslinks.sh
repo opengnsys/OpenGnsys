@@ -26,7 +26,7 @@ if [ -n "$OPENGNSYS" ]; then
     ln -fs $OGLIB/fonts $QTLIBS
 
     # TEMPORAL: corregir biblioteca dinámica para "partprobe".
-    ln -s $(find /lib -type f -name libparted*.so.*) $(grep libparted $OGBIN/partprobe) 2>/dev/null
+    ln -s $(find /lib -type f -name "libparted*.so.*") /lib/$(grep libparted $OGBIN/partprobe) 2>/dev/null
 
     # Datos de dispositivos PCI en /etc
     ln -fs $OGLIB/pci.ids /etc
