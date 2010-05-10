@@ -58,12 +58,14 @@ include_once("./clases/AdoPhp.php");
  $_SESSION["wurlacceso"]=$wac; 
 
 // Variables de entorno
- $resul=toma_entorno($cmd,&$ips,&$prt); 
+ $resul=toma_entorno($cmd,&$ips,&$prt,&$pclo,&$rep); 
  if(!$resul) 
      Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D. 
 
  $_SESSION["wservidorhidra"]=$ips; 
  $_SESSION["whidraport"]=$prt; 
+ $_SESSION["protclonacion"]=$pclo; 
+ $_SESSION["repcentralizado"]=$rep; 
 
 /*
 echo "<BR>Cadena=".$_SESSION["wcadenaconexion"];
@@ -130,10 +132,12 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
  //        - cmd:Una comando ya operativo (con conexión abierta)   
  //        - ips: Dirección IP del servidor de administración   
  //        - prt: Puerto de comunicaciones
+ //        - pclo: Protocolo de clonación
+ //	   - rep: Uso de repositorio centralizado
  // 
  //    Devuelve datos generales de configuración del sistema
  //_______________________________________________________________________________________________________ 
- function toma_entorno($cmd,$ips,$prt){ 
+ function toma_entorno($cmd,$ips,$prt,$pclo,$rep){ 
  	$rs=new Recordset;  
 	$cmd->texto="SELECT * FROM entornos"; 
   $rs->Comando=&$cmd; 
@@ -141,7 +145,10 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
 	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
   if(!$rs->EOF){
 	  $ips=$rs->campos["ipserveradm"]; 
-	  $prt=$rs->campos["portserveradm"]; 
+	  $prt=$rs->campos["portserveradm"];
+	  $pclo=$rs->campos["protoclonacion"];
+	  $rep=$rs->campos["repositorio"];
+
 	}
   return(true); 
  } 

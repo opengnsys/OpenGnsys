@@ -5,7 +5,7 @@ function enviaping(){
 	var wurl="ecoconsola.php";
 	var prm="idambito="+idambito+"&litambito="+litambito;
 	CallPage(wurl,prm,"retorno","POST");
-	setTimeout("enviaping();",1000); 
+
 }
 //______________________________________________________________________________________________________
 function retorno(iHTML){
@@ -15,6 +15,7 @@ function retorno(iHTML){
 		//setTimeout('conmuta("hidden");',300);
 		conmuta("hidden");
 	}
+	setTimeout("enviaping();",5000); 
 }
 //______________________________________________________________________________________________________
 function conmuta(estado){

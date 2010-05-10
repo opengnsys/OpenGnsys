@@ -98,7 +98,7 @@ typedef char  BYTE;
 typedef  int  SOCKET;
 // __________________________________________________________________________________________________________
 
-char szPathFileLog[128],szPathFileCfg[128],ecofile[250],msglog[250];
+char szPathFileLog[512],szPathFileCfg[512],ecofile[512],msglog[512];
 FILE *FLog,*Fconfig;
 char AulaUp[2];
 int aulaup;	// Switch para permitir  que un ordenador se de de alta autom�icamente en un aula existenta
@@ -192,6 +192,7 @@ int inclusion_cliWINLNX(SOCKET ,char *);
 
 int Sondeo(SOCKET ,char *);
 int EcoConsola(SOCKET ,char *);
+int enviaEcoConsola(SOCKET ,const char *);
 int Arrancar(char *);
 int Actualizar(char *);
 int FicheroOperador(char *);
@@ -230,7 +231,7 @@ int InsertaNotificaciones(int,int,int,char *,Database);
 int comprueba_resultados(int ,Database );
 int comprueba_finalizada(int ,char *,Database );
 
-void EnviaServidoresRembo(char*);
+void EnviaServidoresRembo(char*,int);
 void DesmarcaServidoresRembo(void);
 void MarcaServidoresRembo(char*,char*);
 
@@ -243,8 +244,10 @@ int EjecutarTrabajo(int ,Database,char *  );
 int cuestion_nuevoordenador(Database,Table ,int*,char *,char *,char *,char *,char*,char*,char*);
 int alta_ordenador(Database db,Table tbl,int*,char *,char *,char*,int,int,int);
 int Toma_idservidorres(Database ,Table ,char*,char*,int*,int*);
-
+int tomaIpRepoPort(char *,char *,char *);
 void cambiacarac(char *,char , char );
 int TomaConfiguracion(char* );
 int split_parametros(char **,char *, char *);
 struct tm * TomaHora();
+unsigned int TomaEnvio();
+int recibeFichero(char *,char *,char *,char *);

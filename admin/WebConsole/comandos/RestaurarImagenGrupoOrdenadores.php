@@ -264,6 +264,7 @@ function tabla_particiones($cmd,$idcentro,$idgrupo,$idperfilhard,$idparticion,$c
 	$tablaHtml.= '<TH  align=center>&nbsp;P&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;path&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;Repositorios centralizados&nbsp;</TH>';
 	$tablaHtml.= '</TR>';
 	$auxsplit=split(";",$particion);
 	for($j=0;$j<sizeof($auxsplit)-1;$j++){
@@ -281,11 +282,18 @@ function tabla_particiones($cmd,$idcentro,$idgrupo,$idperfilhard,$idparticion,$c
 
 		$parametros="0=".chr(13);
 		$parametros.="1=cache".chr(13);
-		$parametros.="2=net";
+		$parametros.="2=repositorio";
 		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros, "pathrmb_".$particion.'_'.$idperfilhard.'_'.$idparticion,"estilodesple","",0,60).'</TD>';
 		$tablaHtml.= '<TD'.chr(13);
-		$tablaHtml.='</TR>'.chr(13);
+		
 
+		//Clonación
+		$metodos="UNICAST=UNICAST".chr(13);
+		$metodos.="MULTICAST=MULTICAST".chr(13);
+		$metodos.="TORRENT=TORRENT";
+		$tablaHtml.='<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$particion.'_'.$idperfilhard.'_'.$idparticion,"estilodesple","",$_SESSION["protclonacion"],150).'</TD>';
+		
+		$tablaHtml.='</TR>'.chr(13);
 /*
 		$idimagen=TomaImagen($cmd,$idgrupo,$idperfilhard,$idparticion,$particion,$cuenta);
 

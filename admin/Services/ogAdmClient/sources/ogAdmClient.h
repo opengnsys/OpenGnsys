@@ -147,7 +147,8 @@ struct s_Propiedades {
 	char iprepo[16];								// Direción IP repositorio	
 	char puertorepo[16];								// Puerto	
 	char idperfilhard[16];					// Identificador del perfil hardware
-	char IPlocal[16];						// Ip local
+	char IPlocal[16];
+	char cache[16];						// Tamaño de la cache
 } Propiedades;	  // Estructura con los datos del odenador
 	
 struct s_Particiones{
@@ -169,6 +170,9 @@ struct tiposo {
   char *tiposo;
   char *nombreso;  
 };	
+
+char* tbPathImg[]={"CLIEN","CACHE","REPO"};
+
 struct tiposo tiposos[] = {
 		{"BIGDOS", "MsDos","MsDos"},
 		{"NTFS","Windows NT Platafom","Windows 2000,XP,2003"},
@@ -266,7 +270,7 @@ int TCPWrite(SOCKET ,TRAMA*);
 int TCPRead(SOCKET ,TRAMA*);
 SOCKET UDPConnect();
 int EnviaTramaRepo(SOCKET,TRAMA*,char*,char*);
-int RecibeTramaRepo(SOCKET);
+int RecibeTramaRepo(SOCKET,int);
 
 long CreateTextFile(char*,char*);
 int ExisteFichero(char*);
@@ -292,7 +296,8 @@ int CrearPerfilSoftware(TRAMA*,TRAMA*);
 int CrearPerfil(char*,char*,char*,char*,char*);
 int Nemonico(char*);
 int RestaurarImagen(TRAMA*,TRAMA*);
-int RestaurandoImagen(char*,char*,char*,char*,char*,char*,char*); 
+int RestaurandoImagen(char* ,char *,char* ,char *,char *,char *,char*);
+
 int ParticionaryFormatear(TRAMA*,TRAMA*);
 int Particionar(char*,char*,char* );
 int Particionando(char*,char*,char*);
@@ -312,3 +317,4 @@ char* URLDecode(char*);
 char* URLEncode(char *);
 int MuestraMenu(char*);
 void MuestraMensaje(int,char*);
+int cuestionCache(char*);

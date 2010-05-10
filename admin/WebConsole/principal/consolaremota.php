@@ -38,7 +38,7 @@ if (isset($_GET["nomambito"])) $nomambito=$_GET["nomambito"];
 <SCRIPT language="javascript" src="../jscripts/ecoremoto.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 <SCRIPT language="javascript">
-	var vez=0;
+
 //______________________________________________________________________________________________________
 function PulsaEnter(oEvento){ 
     var iAscii; 
@@ -68,6 +68,8 @@ function confirmar(){
 	var wurl="shellconsola.php";
 	var prm="idambito="+idambito+"&litambito="+litambito+"&comando="+cmd;
 	conmuta("visible");
+	var diveco=document.getElementById("diveco");
+	diveco.innerHTML="<PRE>&nbsp;</PRE>";
 	CallPage(wurl,prm,"resultado","POST");
 }
 //______________________________________________________________________________________________________
@@ -78,10 +80,7 @@ function resultado(iHTML){
 	}
 	var litambito=document.fdatos.litambito.value;
  	if(litambito==LITAMBITO_ORDENADORES){
-		if(vez==0){ // Activa el eco sólo la primera vez que se  envia comandos
-			vez++;
-			setTimeout("enviaping();",1000);
-		} 
+		setTimeout("enviaping();",1000); 
 	}
 	else{
 		setTimeout('conmuta("hidden");',1000);

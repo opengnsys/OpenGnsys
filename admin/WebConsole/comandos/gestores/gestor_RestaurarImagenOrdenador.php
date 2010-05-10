@@ -25,6 +25,7 @@ $idambito=0;
 $cadenaip="";
 $perfiles="";
 $pathrmb="";
+$protclona="";
 
 if (isset($_GET["identificador"]))	$identificador=$_GET["identificador"]; 
 if (isset($_GET["nombrefuncion"]))	$nombrefuncion=$_GET["nombrefuncion"]; 
@@ -35,6 +36,7 @@ if (isset($_GET["idambito"]))	$idambito=$_GET["idambito"];
 if (isset($_GET["cadenaip"]))	$cadenaip=$_GET["cadenaip"]; 
 if (isset($_GET["perfiles"]))	$perfiles=$_GET["perfiles"]; 
 if (isset($_GET["pathrmb"]))	$pathrmb=$_GET["pathrmb"]; 
+if (isset($_GET["protclona"]))	$protclona=$_GET["protclona"];
 
 include_once("../../includes/cuestionaccionescab.php");
 
@@ -89,6 +91,7 @@ function Gestiona($cmd){
 	global $idambito;
 	global $perfiles;
 	global $pathrmb;
+	global $protclona;
 	global $EJECUCION_COMANDO;
 	global $PROCESOS;
 	global $servidorhidra;
@@ -96,6 +99,7 @@ function Gestiona($cmd){
 
 	$auxsplit=split(";",$perfiles); // Toma las distintas particiones con sus perfiles
 	$auxpsplit=split(";",$pathrmb); // Toma los distintas path de imagens
+	$auxcsplit=split(";",$protclona); //Toma el protocolo de clonación de las imágenes
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
 	
 	$cmd->CreaParametro("@tipoaccion",$EJECUCION_COMANDO,1);
@@ -135,6 +139,7 @@ function Gestiona($cmd){
 			$parametros.="swr=".$swresimg.chr(13);
 			$parametros.="icr=".CuestionIncrementales($cmd,$idperfilhard,$idperfilsoft,$idimagen).chr(13);
 			$parametros.="pth=".$auxpsplit[$j].chr(13);
+			$parametros.="mcl=".$auxcsplit[$j].chr(13);
 			$parametros.="iph=".$cadenaip.chr(13);
 			$cmd->ParamSetValor("@parametros",$parametros);
 			if(!CuestionAcciones($cmd,$shidra,$parametros)) return(false);

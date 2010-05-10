@@ -18,6 +18,13 @@ var farbol=wpadre.frames["frame_arbol"];
 function cancelar(){
 	selfclose();
 }
+//
+//________________________________________________________________________________________________________
+//
+function selfclose(){
+	document.location.href="../nada.php";
+}
+//
 //________________________________________________________________________________________________________
 //	
 //		Devuelve el resultado de modificar algún dato de un registro

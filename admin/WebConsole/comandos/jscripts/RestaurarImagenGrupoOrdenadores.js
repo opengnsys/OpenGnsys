@@ -54,6 +54,7 @@ function confirmar(){
 				var ochecks=document.fdatos.getElementsByTagName("INPUT")
 				var perfiles=""
 				var pathrmb="";
+				var $protclona="";
 				for(var i=0;i<ochecks.length;i++){
 							if(ochecks[i].checked){
 								var particion=ochecks[i].value
@@ -67,11 +68,13 @@ function confirmar(){
 										perfiles+=valparticion[0]+"_M_"+desple_M.value+";"
 									var opathrmb=document.getElementById("pathrmb_"+particion);
 									pathrmb+=opathrmb.value+";";
+									var protclon=document.getElementById("protoclonacion_"+particion);
+									protclona+=protclon.value+";";
 								}
 						}
 				}
 				if(perfiles!=""){
-					parametros+="cadenaip="+cadenaip+'%0D'+"identificador="+identificador+'%0D'+"nombrefuncion="+nombrefuncion+'%0D'+"ejecutor="+ejecutor+'%0D'+"tipotrama="+tipotrama+'%0D'+"ambito="+ambito+'%0D'+"idambito="+idambito+'%0D'+"pathrmb="+pathrmb+'%0D'+"perfiles="+perfiles
+					parametros+="cadenaip="+cadenaip+'%0D'+"identificador="+identificador+'%0D'+"nombrefuncion="+nombrefuncion+'%0D'+"ejecutor="+ejecutor+'%0D'+"tipotrama="+tipotrama+'%0D'+"ambito="+ambito+'%0D'+"idambito="+idambito+'%0D'+"pathrmb="+pathrmb+'%0D'+"protclona="+protclona+'%0D'+"perfiles="+perfiles
 					parametros+='%09';
 				}
 		}

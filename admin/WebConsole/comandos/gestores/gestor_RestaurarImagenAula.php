@@ -25,6 +25,7 @@ $idambito=0;
 $cadenaip="";
 $perfiles="";
 $pathrmb="";
+$protclona="";
 
 $parametros="";
 if (isset($_GET["parametros"]))	$parametros=$_GET["parametros"]; 
@@ -47,6 +48,7 @@ if ($cmd){
 			$cadenaip=$ValorParametros["cadenaip"]; 
 			$perfiles=$ValorParametros["perfiles"]; 
 			$pathrmb=$ValorParametros["pathrmb"]; 
+			$protclona=$ValorParametros["protclona"];
 			$resul=false;
 			$resul=Gestiona($cmd);
 			if(!$resul) break;
@@ -95,6 +97,7 @@ function Gestiona($cmd){
 	global $idambito;
 	global $perfiles;
 	global $pathrmb;
+	global $protclona;
 	global $EJECUCION_COMANDO;
 	global $PROCESOS;
 	global $servidorhidra;
@@ -103,6 +106,7 @@ function Gestiona($cmd){
 	$swvez=true;
 	$auxsplit=split(";",$perfiles); // Toma las distintas particiones con sus perfiles
 	$auxpsplit=split(";",$pathrmb); // Toma los distintas path de imagens
+	$auxcsplit=split(";",$protclona); //Toma el protocolo de clonación de las imágenes
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
 	
 	$cmd->CreaParametro("@tipoaccion",$EJECUCION_COMANDO,1);
@@ -141,6 +145,7 @@ function Gestiona($cmd){
 			$parametros.="icr=".CuestionIncrementales($cmd,$idperfilhard,$idperfilsoft,$idimagen).chr(13);;
 			$parametros.="tpa=".$tipopar.chr(13);
 			$parametros.="pth=".$auxpsplit[$j].chr(13);
+			$parametros.="mcl=".$auxcsplit[$j].chr(13);
 			$parametros.="iph=".$cadenaip.chr(13);
 			$cmd->ParamSetValor("@parametros",$parametros);
 			if(!CuestionAcciones($cmd,$shidra,$parametros)) return(false);

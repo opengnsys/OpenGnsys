@@ -22,10 +22,13 @@
 #include "Database.h"
 #include "encriptacion.h"
 
-#define LONGITUD_PARAMETROS 4048	// Longitud m?ima de la informacin de la trama (parametros)
-#define LONGITUD_TRAMA		LONGITUD_PARAMETROS+8	// Longitud m?ima de la trama completa
+
+#define LONGITUD_PARAMETROS 4000	// Longitud mínima de la información de la trama (parametros)
+#define LONGITUD_CABECERATRAMA	11 // Longitud mínima de la trama completa
+#define LONGITUD_TRAMA LONGITUD_PARAMETROS+LONGITUD_CABECERATRAMA	// Longitud mínima de la trama completa
 
 #define MAXIMOS_CLIENTES  4000 // M?imo numero de clientes rembo controlados por el servidor rembo
+#define MAXIMAS_MULSESIONES 1000 // Máximo numero de sesiones multicast activas simultaneamente
 #define MAXCNX 5		// Mximos intentos de conexin al servidor HIDRA
 #define PUERTO_WAKEUP			9	// Puerto por defecto del wake up
 
@@ -73,6 +76,7 @@ char IPlocal[20];		// Ip local
 char servidorhidra[20]; // IP servidor HIDRA
 char Puerto[20]; 		// Puerto Unicode
 int puerto;	// Puerto
+char reposcripts[512];	// Path al directorio donde están los scripts
 
 char filecmdshell[250];
 char cmdshell[512];
@@ -85,6 +89,11 @@ char datasource[20];
 char catalog[50];
 int puertorepo;	// Puerto
 
+struct s_inisesionMulticast{ // Estructura usada para guardar información sesiones multicast
+	char ides[32]; // Identificador sesión multicast
+	char *ipes; // Ipes de los clientes necesarios para la sesión
+};
+struct s_inisesionMulticast tbsmul[MAXIMAS_MULSESIONES];
 //______________________________________________________
 static pthread_mutex_t guardia; // Controla acceso exclusivo de hebras 
 //______________________________________________________
@@ -116,6 +125,7 @@ int IconoItem(TramaRepos *);
 bool ExisteFichero(TramaRepos *);
 bool EliminaFichero(TramaRepos *);
 bool LeeFicheroTexto(TramaRepos *);
+bool mandaFichero(TramaRepos *);
 int gestiona_comando(TramaRepos *);
 bool respuesta_peticion(TramaRepos *,const char*,char*,char*);
 SOCKET Abre_conexion(char *,int);
@@ -129,3 +139,8 @@ int Apagar(TramaRepos *);
 char * Buffer(int );
 int TomaPuertoLibre(int *);
 void NwGestionaServicioRepositorio(TramaRepos *);
+bool sesionMulticast(TramaRepos *);
+bool iniSesionMulticast(char *,char *,char *);
+int hay_hueco(int *idx);
+int cuenta_ipes(char*);
+int IgualIP(char *,char *);

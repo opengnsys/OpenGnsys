@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `comandos` (
 INSERT INTO `comandos` (`idcomando`, `descripcion`, `nfuncion1`, `nfuncion2`, `nfuncion4`, `nfuncion8`, `nfuncion10`, `urlimg`, `urlamb1`, `urlamb2`, `urlamb4`, `urlamb8`, `urlamb10`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `interactivo`, `ejecutor`, `activo`) VALUES 
 (1, 'Arrancar', 'Arrancar', 'Arrancar', 'Arrancar', 'Arrancar', 'Arrancar', '', '../comandos/Arrancar.php', '../comandos/Arrancar.php', '../comandos/Arrancar.php', '../comandos/Arrancar.php', '../comandos/Arrancar.php', 31, 'iph', 'nfn;iph;mac', '', 1, '1', 1),
 (2, 'Apagar', 'Apagar', 'Apagar', 'Apagar', 'Apagar', 'Apagar', '', '../comandos/Apagar.php', '../comandos/Apagar.php', '../comandos/Apagar.php', '../comandos/Apagar.php', '../comandos/Apagar.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1),
-(3, 'Restaurar Imagen', '', '', 'RestaurarImagen', 'RestaurarImagen', 'RestaurarImagen', '', '', '', '../comandos/RestaurarImagenAula.php', '../comandos/RestaurarImagenGrupoOrdenadores.php', '../comandos/RestaurarImagenOrdenador.php', 28, 'idi;par;iph', 'nfn;iph;par;idi;ifs;ifh;nem;idc;ida;swr', '', 1, '2', 1),
+(3, 'Restaurar Imagen', '', '', 'RestaurarImagen', 'RestaurarImagen', 'RestaurarImagen', '', '', '', '../comandos/RestaurarImagenAula.php', '../comandos/RestaurarImagenGrupoOrdenadores.php', '../comandos/RestaurarImagenOrdenador.php', 28, 'idi;par;iph;mcl', 'nfn;iph;par;idi;ifs;ifh;nem;idc;ida;swr', '', 1, '2', 1),
 (4, 'Crear Imagen', '', '', '', '', 'CrearPerfilSoftware', '', '', '', '', '', '../comandos/CrearPerfilSoftware.php', 16, 'ifs;ifh;par', 'nfn;iph;par;ifs;ifh;nem;', '', 1, '2', 1),
 (5, 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', 'Reiniciar', '', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', '../comandos/Reiniciar.php', 31, 'iph', 'nfn;iph', '', 1, '2', 1),
 (6, 'Inventario Hardware', '', '', '', '', 'InventarioHardware', '', '', '', '', '', '../comandos/InventarioHardware.php', 16, 'iph', 'nfn;iph', '', 1, '2', 1),
@@ -596,7 +596,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (17, 'scp', 'Código bash', '', '', '', 0),
 (18, 'dcr', 'Descripción', '', '', '', 0),
 (19, 'icr', 'Software Incremental', 'idsoftincremental', 'softincrementales', 'descripcion', 1),
-(20, 'scp', 'Código bash', '', '', '', 0);
+(20, 'mcl', 'Protocolo de clonación', '', '', '', 0);
 
 -- --------------------------------------------------------
 

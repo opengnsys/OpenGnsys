@@ -80,6 +80,8 @@ int TomaConfiguracion(char* pathfilecfg)
 		resul=strcmp(dualparametro[0],"Puerto");
 		if(resul==0) strcpy(Puerto,dualparametro[1]);
 		
+		resul=strcmp(dualparametro[0],"RepoScripts");
+		if(resul==0) strcpy(reposcripts,dualparametro[1]);
 	}
 	if(IPlocal[0]==(char)NULL){
 		RegistraLog("IPlocal, NO se ha definido este parámetro",false);
@@ -95,6 +97,10 @@ int TomaConfiguracion(char* pathfilecfg)
 	}
 	puerto=atoi(Puerto);
 
+	if(reposcripts[0]==(char)NULL){
+		RegistraLog("RepoScripts, NO se ha definido este parámetro",false);
+		exit(EXIT_FAILURE);;
+	}
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -430,6 +436,14 @@ int gestiona_comando(TramaRepos *trmInfo)
 	resul=strcmp(nombrefuncion,"LeeFicheroTexto");
 	if(resul==0)
 		return(LeeFicheroTexto(trmInfo));
+
+	resul=strcmp(nombrefuncion,"mandaFichero");
+	if(resul==0)
+		return(mandaFichero(trmInfo));
+
+	resul=strcmp(nombrefuncion,"sesionMulticast");
+	if(resul==0)
+		return(sesionMulticast(trmInfo));
 
 	resul=strcmp(nombrefuncion,"ExecShell");
 	if(resul==0)
@@ -835,15 +849,188 @@ bool LeeFicheroTexto(TramaRepos *trmInfo)
 			strcpy(swf,"0");
 		}
 		else{				
-			rewind (f);								// Coloca al principio el puntero de lectura
-			fread (texto,1,lSize,f); 	// Lee el contenido del fichero
+			rewind (f); // Coloca al principio el puntero de lectura
+			fread (texto,1,lSize,f); // Lee el contenido del fichero
 			strcpy(swf,"1");
 			fclose(f);
 		}
 	}
 	return(respuesta_peticion(trmInfo,"Respuesta_LeeFicheroTexto",swf,texto));
 }
+//______________________________________________________________________________________________________
+// Función: mandaFichero
+//
+//	Descripción:
+//		Envía un fichero por la red
+//	Parámetros:
+//		- trmInfo : Trama recibida
+//	Devuelve:
+//		true siempre aunque escribe en log si hay error
+// ________________________________________________________________________________________________________
+bool mandaFichero(TramaRepos *trmInfo)
+{
+	char *b,*l;
+	FILE *f;
+	int blk,lsize,ret;
 
+	char *nomfile=toma_parametro("nfl",trmInfo->trama.parametros); // Toma nombre completo del archivo
+	f = fopen(nomfile,"rb");
+	blk=0;
+	b=&trmInfo->trama.arroba; // Puntero al comienzo de la trama para colocar el bloque leido
+	l=b+sizeof(blk); // Puntero después del dato bloque para colocar los bytes leidos
+	if(f){ // El fichero no existe
+		while(!feof(f)){
+			blk++;
+			memcpy(b,&blk,sizeof(blk));
+			lsize=fread (trmInfo->trama.parametros,1,LONGITUD_PARAMETROS-1,f); // Lee el contenido del fichero
+			memcpy(l,&lsize,sizeof(lsize));
+			ret=sendto(trmInfo->sck,(char*)&trmInfo->trama,lsize+LONGITUD_CABECERATRAMA,0,\
+					(struct sockaddr*)&trmInfo->cliente,trmInfo->sockaddrsize);
+			ret = recvfrom(trmInfo->sck,(char *)&trmInfo->trama,LONGITUD_TRAMA,0,(struct sockaddr*)&trmInfo->cliente,&trmInfo->sockaddrsize);
+		}
+		fclose(f);
+	}
+	blk++;
+	memcpy(b,&blk,sizeof(blk));
+	lsize=0;
+	memcpy(l,&lsize,sizeof(lsize));
+	trmInfo->trama.parametros[0]=(char)NULL;
+	ret=sendto(trmInfo->sck,(char*)&trmInfo->trama,lsize+LONGITUD_CABECERATRAMA,0,\
+			(struct sockaddr*)&trmInfo->cliente,trmInfo->sockaddrsize);
+	return(true);
+}
+//_______________________________________________________________________________________________________________
+//
+// Comprueba si debe comenzar una sesión multicast para envio de imagenes
+//_______________________________________________________________________________________________________________
+bool sesionMulticast(TramaRepos *trmInfo)
+{
+	char *ide,*iph,*nip,cmdshell[512];
+	int res;
+
+	ide=toma_parametro("ide",trmInfo->trama.parametros); // Identificador sesiónmulticast
+	iph=toma_parametro("iph",trmInfo->trama.parametros); // Dirección ip cliente
+	nip=toma_parametro("nip",trmInfo->trama.parametros); // Clientes necesarios para iniciar sesión
+
+	if(iniSesionMulticast(iph,ide,nip)){
+		sprintf(cmdshell,"%s/sesionMulticast",reposcripts);
+		res=system(cmdshell);
+		if(res>0)
+			RegistraLog("*** Ha habido algún problema al iniciar sesión multicast",false);
+	}
+	return(true);
+}
+// ________________________________________________________________________________________________________
+// Función: cliente_existente
+//
+//		 Descripción:
+// 			Devuelve true o false dependiendo de si se está esperando comenzar una sesioón multicast
+//		Parametros:
+//				- ip : La ip del cliente a incorporar a la sesión
+//				- ide: Identificador de la sesión
+// ________________________________________________________________________________________________________
+bool iniSesionMulticast(char *iph,char *ide,char *nip)
+{
+	int i,numipes,sw,idx;
+
+	sw=false;
+	for (i=0;i<MAXIMAS_MULSESIONES;i++){
+		if (strcmp(ide,tbsmul[i].ides)==0){ // Si existe la sesión y está esperando activarse
+			if (!IgualIP(iph,tbsmul[i].ipes)){ // Si NO existe la IP en la cadena
+				 strcat( tbsmul[i].ipes,";");
+				 strcat( tbsmul[i].ipes,iph); // Añade IP del cliente
+			}
+			idx=i;
+			sw=true;
+			break;
+		}
+	}
+	if(!sw){ // No existe la entrada de la sesión
+		if (!hay_hueco(&idx)){ // Busca hueco para el nuevo cliente
+			RegistraLog("*** No hay hueco para nueva sesión multicast",false);
+			return(false); // No hay huecos
+		}
+		strcpy(tbsmul[idx].ides,ide);// Copia identificador de la sesión
+		tbsmul[idx].ipes=Buffer(16*(atoi(nip)+1));  // Toma memoria para el buffer de lectura.
+		if (tbsmul[idx].ipes == NULL) return(false);
+		strcpy(tbsmul[idx].ipes,iph); // Copia primer cliente de la sesión multicast
+	}
+
+	numipes=cuenta_ipes(tbsmul[idx].ipes); // Número de ipes a los que enviar la trama multicast
+	if(numipes==atoi(nip)){
+		tbsmul[idx].ides[0]=(char)NULL; // Libera sesión de la tabla de sesiones
+		free(tbsmul[idx].ipes);
+		tbsmul[idx].ipes=NULL;
+		return(TRUE); // Que de comienzo la transmisión multicast
+	}
+	else
+		return(FALSE); // Aún no están preparados todos los clientes para la transmisión
+}
+// ________________________________________________________________________________________________________
+// Función: hay_hueco
+//
+// 		Descripción:
+// 			Esta funcin devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
+// 			Parametros:
+// 				- idx:   Primer indice libre que se podrn utilizar
+// ________________________________________________________________________________________________________
+int hay_hueco(int *idx)
+{
+	int i;
+
+	for (i=0;i<MAXIMAS_MULSESIONES;i++){
+		if (strncmp(tbsmul[i].ides,"\0",1)==0){ // Hay un hueco
+			*idx=i;
+			return(TRUE);
+		}
+	}
+	return(FALSE);
+}
+// ________________________________________________________________________________________________________
+// Función: cuenta_ipes
+//
+//		Descripción:
+// 			Cuenta las comas (caracter de separacion) de las cadenas de ipes
+//		Parámetros:
+//			- parametros : La cadena a explorar
+// ________________________________________________________________________________________________________
+int cuenta_ipes(char* iph)
+{
+	int lon,i,cont=1;
+	lon=strlen(iph);
+	for(i=0;i<lon;i++){
+		if(iph[i]==';') cont++;
+	}
+	return(cont);
+}
+// ________________________________________________________________________________________________________
+// Función: IgualIP
+//
+//		 Descripción:
+//			Comprueba si una cadena con una ipe estnincluidad en otra que  contienen varias direcciones ipes separas por punto y coma
+//		Parámetros:
+//			- cadenaiph: Cadena de IPes
+//			- ipcliente: Cadena de la ip a buscar
+// ________________________________________________________________________________________________________
+int IgualIP(char *cadenaiph,char *ipcliente)
+{
+	char *posa,*posb;
+	int lon;
+
+	posa=strstr(cadenaiph,ipcliente);
+	if(posa==NULL) return(FALSE); // No existe la IP en la cadena
+	posb=posa; // Iguala direcciones
+	while(TRUE){
+		posb++;
+		if(*posb==';') break;
+		if(*posb=='\0') break;
+		if(*posb=='\r') break;
+	}
+	lon=strlen(ipcliente);
+	if((posb-posa)==lon) return(TRUE); // IP encontrada !!!!
+
+	return(FALSE);
+}
 //_________________________________________________________________________________________________
 //	Funcin: Buffer
 //
@@ -987,6 +1174,11 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	
+	for (i=0;i<MAXIMAS_MULSESIONES;i++){
+		tbsmul[i].ides[0]=(char)NULL; // Inicializa identificadores de sesiones multicast
+		tbsmul[i].ipes=(char)NULL;
+	}
+
 	RegistraLog("***Inicio de sesion***",false);
 
 	socket_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // Crea socket para UDP
@@ -1033,6 +1225,7 @@ int main(int argc, char **argv)
         		pthread_detach(hThread);	
         		*/
    				NwGestionaServicioRepositorio(trmInfo);
+   				close(trmInfo->sck);
 			}
 		}
 	}

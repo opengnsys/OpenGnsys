@@ -143,6 +143,7 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 	$tablaHtml.= '<TH align=center>&nbsp;P&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;Path&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;Repositorios centralizados&nbsp;</TH>';
 	//$tablaHtml.= '<TH colspan=4 align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
 	$tablaHtml.= '</TR>';
 	$auxsplit=split(";",$particion);
@@ -168,9 +169,16 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 		//path
 		$parametros="0=".chr(13);
 		$parametros.="1=cache".chr(13);
-		$parametros.="2=net";
+		$parametros.="2=repositorio";
 		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros,"pathrmb_".$particion,"estilodesple","",0,60).'</TD>';
 
+
+		//Clonación
+		$metodos="UNICAST=UNICAST".chr(13);
+		$metodos.="MULTICAST=MULTICAST".chr(13);
+		$metodos.="TORRENT=TORRENT";
+		$tablaHtml.='<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$particion,"estilodesple","",$_SESSION["protclonacion"],150).'</TD>';
+					
 		//$tablaHtml.='<TD align=center><b>&nbsp;('.$tipopart.") -</b> ".$TbMsg[11].'</TD>';
 		$tablaHtml.='</TR>'.chr(13);
 

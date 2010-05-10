@@ -223,11 +223,12 @@ void Log(char* msg)
 	if(FLog!=NULL)
 		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	fclose(FLog);	
-	// Lo muestra por consola
-/*
+
+// Lo muestra por consola
+
 	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
 	system(msgcon);
-*/
+
 	
 }
 //______________________________________________________________________________________________________
@@ -811,13 +812,14 @@ int EnviaTramaRepo(SOCKET s,TRAMA* trama, char* iprepo,char *puertorepo)
 // Función: RecibeTramaRepo
 //
 //	 Descripción:
-//		Recibe una trama UDP de su repositorio de imágenes
+//		Recibe una trama UDP por la red
 //	Parámetros:
 //		s: socket UDP con el que se envío anteriormente una trama al repositorio
+//		sw: Si es true se desencripta la trama, en caso contrario no
 // 	Devuelve:
 //		true si la receción ha sido correcta o false en caso contrario
 //______________________________________________________________________________________________________
-int RecibeTramaRepo(SOCKET s)
+int RecibeTramaRepo(SOCKET s,int sw)
 {
 	int ret;
 	struct sockaddr_in addrRepo;
@@ -825,7 +827,8 @@ int RecibeTramaRepo(SOCKET s)
 	socklen_t iAddrSize = sizeof(addrRepo);
 	ret = recvfrom(s,(char *)trama, LONGITUD_TRAMA,0,(struct sockaddr *)&addrRepo,&iAddrSize);
 	if (ret != SOCKET_ERROR){
-		Desencriptar((char*)trama);	// Desencripta la trama
+		if(sw)
+			Desencriptar((char*)trama);	// Desencripta la trama
 		return(true);
 	}
 	return(false);
@@ -877,7 +880,7 @@ int ExisteFichero(char *nomfile)
 	}
 	sprintf(trama->parametros,"nfn=ExisteFichero\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el  servidor de administración
 	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
-		res=RecibeTramaRepo(udpsock);
+		res=RecibeTramaRepo(udpsock,TRUE);
 		close(udpsock);
 		if(res)
 			return(GestionTramas(trama));
@@ -910,7 +913,7 @@ int RemoveFile(char *nomfile)
 	}
 	sprintf(trama->parametros,"nfn=EliminaFichero\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el  servidor de administración
 	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
-		res=RecibeTramaRepo(udpsock);
+		res=RecibeTramaRepo(udpsock,TRUE);
 		close(udpsock);
 		if(res)
 			return(GestionTramas(trama));
@@ -946,7 +949,7 @@ int LoadTextFile(char *nomfile)
 	}
 	sprintf(trama->parametros,"nfn=LeeFicheroTexto\rnfl=%s\r",nomfile);	// Nombre de la función a ejecutar en el  servidor de administración
 	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
-		res=RecibeTramaRepo(udpsock);
+		res=RecibeTramaRepo(udpsock,TRUE);
 		close(udpsock);
 		if(res){
 			if(GestionTramas(trama)){
@@ -972,6 +975,98 @@ int LoadTextFile(char *nomfile)
 		UltimoError(16,"LoadTextFile()");
 		return(false);
 	}
+}
+//______________________________________________________________________________________________________
+// Función: recibeFichero
+//
+//	Descripción:
+//		Se trae un fichero del repositorio y lo coloca en el diretorio /tmp
+//	Parámetros:
+//		- nomfile : Nombre del fichero
+//	Devuelve:
+//		true si el proceso es correcto y false en caso contrario
+//	Especificaciones:
+//		En los parametros de la trama se copian el contenido del del archivo de comandos
+// ________________________________________________________________________________________________________
+int recibeFichero(char *nomfilesrc, char *nomfiledst)
+{
+	SOCKET udpsock;
+	int blk,lsize,res;
+	char *b,*l;
+	FILE *f;
+
+	udpsock=UDPConnect();
+	if (udpsock == INVALID_SOCKET){
+		UltimoError(15,"recibeFichero()");
+		return(false);
+	}
+
+	f=fopen(nomfiledst,"wb");
+	if(!f){
+		Log("*** No se ha podido crear archivo");
+		return(false);
+	}
+
+	sprintf(trama->parametros,"nfn=mandaFichero\rnfl=%s\r",nomfilesrc);	// Nombre de la función a ejecutar en el  servidor de administración
+	if(EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo)){
+		b=&trama->arroba; // Puntero al comienzo de la trama para colocar el bloque leido
+		l=b+sizeof(blk); // Puntero después del dato bloque para colocar los bytes leidos
+		do{
+			res=RecibeTramaRepo(udpsock,FALSE);
+			if(res){
+				memcpy(&blk,b,sizeof(blk));
+				memcpy(&lsize,l,sizeof(lsize));
+				if(lsize>0)
+					lsize=fwrite (trama->parametros,1,lsize,f); // Escribe contenido en el fichero
+				else{
+					fclose(f);
+					close(udpsock);
+					return(true);
+				}
+			}
+			else{
+				Log("*** Error de recepción de archivo");
+				break;
+			}
+			EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo); // Confirmación;
+		}while(lsize>0);
+		fclose(f);
+	}
+	else{
+		UltimoError(16,"recibeFichero()");
+		fclose(f);
+		return(false);
+	}
+	close(udpsock);
+	return(true);
+}
+//______________________________________________________________________________________________________
+// Función: sesionMulticast
+//
+//	Descripción:
+//		Notifica a su repositorio que esta preparado para recibir datos por multicast
+//	Parámetros:
+//		- sm : identificador de la sesión multicast
+//		- numipes : Número de ordenadores necesarios para comenzar la sesión
+//	Devuelve:
+//		true si el archivo existe o false en caso contrario
+// ________________________________________________________________________________________________________
+int sesionMulticast(char *sm,char *nipes)
+{
+	SOCKET udpsock;
+	int res;
+
+	udpsock=UDPConnect();
+	if (udpsock == INVALID_SOCKET){
+		UltimoError(15,"sesionMulticast()");
+		return(false);
+	}
+	sprintf(trama->parametros,"nfn=sesionMulticast\ride=%s\riph=%s\rnip=%s\r",sm,IPlocal,nipes);	// Nombre de la función a ejecutar en el  servidor de administración
+	res=EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo);
+	close(udpsock);
+	if(!res)
+		UltimoError(16,"sesionMulticast()");
+	return(res);
 }
 //______________________________________________________________________________________________________
 // Función: ProcesaComandos
@@ -1071,6 +1166,7 @@ int GestionTramas(TRAMA *trama)
 	TRAMA *nwtrama=NULL;
 	int res;
 	char *nombrefuncion;
+
 	INTROaFINCAD(trama->parametros);
 	nombrefuncion=TomaParametro("nfn",trama->parametros); 
 	nwtrama=(TRAMA*)ReservaMemoria(LONGITUD_TRAMA);	// Reserva buffer  para la trama	devuelta		
@@ -1078,7 +1174,7 @@ int GestionTramas(TRAMA *trama)
 		UltimoError(1,"GestionTramas()");
 		return(false);
 	}
-	if(ndebug>4){
+	if(ndebug>6){
 		sprintf(msglog,"Gestión de tramas.-Función a ejecutar:%s",nombrefuncion);
 		Log(msglog);
 	}
@@ -1166,9 +1262,7 @@ int GestionTramas(TRAMA *trama)
 		res=atoi(TomaParametro("res",trama->parametros));
 		return(res);
 	}			
-
-	UltimoError(4,"GestionTramas()");
-	return(false);	
+	return(true);
 }
 //______________________________________________________________________________________________________
 // Función: Cortesia
@@ -1224,6 +1318,43 @@ int TomaIPlocal()
 		UltimoErrorScript(herror,"TomaIPlocal()"); // Se ha producido algún error
 		return(false);
 	}
+	return(true); 
+}
+//______________________________________________________________________________________________________
+// Función: cuestionCache
+//
+//	 Descripción:
+//		Procesa la cache en caso de existir.
+//	Parámetros:
+//		Ninguno
+// 	Devuelve:
+//		true o false dependiendo de si se ha ejecutado correctamente el script de configuración
+//	Especificaciones:
+//		
+//______________________________________________________________________________________________________
+int cuestionCache(char* tamcache)
+{
+   	int herror;
+	
+	if(ndebug>3){
+		sprintf(msglog,"Tamaño de la cache: %s",tamcache);
+		Log(msglog);
+	}
+
+	sprintf(cmdshell,"%s/initCache",HIDRASCRIPTS);
+	sprintf(parametros,"%s %s","initCache",tamcache);
+
+
+	herror=EjecutarScript (cmdshell,parametros,NULL,true);	
+	if(herror){
+		UltimoErrorScript(herror,"cuestionCache()"); // Se ha producido algún error
+		return(false);
+	}
+	if(tamcache>0)
+	 CACHEEXISTS=true;
+	else
+	 CACHEEXISTS=false;
+
 	return(true); 
 }
 //______________________________________________________________________________________________________
@@ -1304,7 +1435,8 @@ int RESPUESTA_InclusionCliente(TRAMA *trama)
 	strcpy(Propiedades.servidorhidra,TomaParametro("hrd",trama->parametros));	// Dirección IP del servidor de Administración
 	strcpy(Propiedades.puerto,TomaParametro("prt",trama->parametros));		// Puerto de comunicación con el servidor de Administración
 	strcpy(Propiedades.iprepo,TomaParametro("ipr",trama->parametros));	// Dirección IP del repositorio
-	strcpy(Propiedades.puertorepo,TomaParametro("repr",trama->parametros));	// Puerto de comunicación con el repositorio
+	strcpy(Propiedades.puertorepo,TomaParametro("rep",trama->parametros));	// Puerto de comunicación con el repositorio
+	strcpy(Propiedades.cache,TomaParametro("che",trama->parametros));	// Tamaño de la cache
 
 	// Guarda items del menú
 	char* cabmenu=TomaParametro("cmn",trama->parametros);
@@ -1482,6 +1614,7 @@ int Actualizar()
 
 	MuestraMensaje(1,NULL);
 	res=InclusionCliente();
+	//cuestionCache(Propiedades.cache);
 	MuestraMenu(URLMENU);
 	//kill(pidmenu,SIGQUIT);
 	return(res);
@@ -1605,61 +1738,39 @@ int Nemonico(char* nem)
 int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 {
 		int res=0;
-		char *wparticion=TomaParametro("par",trama->parametros);	// partición de donde se crear el perfil
-		char *widimagen=TomaParametro("idi",trama->parametros);	// Identificador de la imagen		
-		char *widperfilsoft=TomaParametro("ifs",trama->parametros);	// Perfil software a crear
-		char *widperfilhard=TomaParametro("ifh",trama->parametros);	// Perfil hardware del  ordenador
-		//char *widcentro=TomaParametro("idc",trama->parametros);	// Identificador del Centro
-		//char *wtipopar=TomaParametro("tpa",trama->parametros);	// Tipo de partición
-		char *wnemonico=TomaParametro("nem",trama->parametros);	// Nemonico del S.O.  contenido en la partición
-		//char *wswrestauraimg=TomaParametro("swr",trama->parametros);	// Indica si la imagen a restaurar contiene un S.O. distinto al actual
-		//char *widsoftincremental=TomaParametro("icr",trama->parametros);	// Cadena con los identificadores de lsoftware incremental
-		char *wpathimagen=TomaParametro("pth",trama->parametros);	// Indica si la imagen se descargar de la caché(cache) o del servidor(net)
-		if(wpathimagen=='\0') wpathimagen="1";	// Por defecto de caché
-		
+		int idxpath;
+
 		char *disco=(char*)ReservaMemoria(2);
-		sprintf(disco,"1"); // Siempre el disco 1		
-					
-		char *compres=(char*)ReservaMemoria(10);
-		sprintf(compres,"gzip"); // Método de compresión		
-		
-		char *mettran=(char*)ReservaMemoria(10);
-		sprintf(mettran,"unicast"); // Método de transferencia por defecto
-						
-		int idxpath=atoi(wpathimagen);
+		sprintf(disco,"1"); // Siempre el disco 1	
+
+		char *wparticion=TomaParametro("par",trama->parametros); // partición de donde se crear el perfil
+		char *widimagen=TomaParametro("idi",trama->parametros);	// Identificador de la imagen		
+		char *widperfilsoft=TomaParametro("ifs",trama->parametros); // Perfil software
+		char *widperfilhard=TomaParametro("ifh",trama->parametros); // Perfil hardware
+		char *wpathimagen=TomaParametro("pth",trama->parametros); // Indica si la imagen se descargar de la caché o del repositorio
+		char *wprotclona=TomaParametro("mcl",trama->parametros); // Protocolo de clonacion
+		char *widenvio=TomaParametro("ide",trama->parametros); // Identificador del envio
+		char *wnipes=TomaParametro("nip",trama->parametros); // Ipes de los clientes
+
+		if(wpathimagen=='\0') wpathimagen="1";	// Por defecto de caché
+		idxpath=atoi(wpathimagen);
 		if(!CACHEEXISTS) idxpath=2;	// Sin no existe cache siempre desde el servidor
-		//if(wswrestauraimg=="O")
-		//	res=reparticiona((int)wparticion,wtipopar);	// Reparticiona si la imagen va a una partición distinta a la original
-		if(res==0){
-			char pathperfil[250];
-			if(idxpath==2){
-				sprintf(pathperfil,"%s/%s",HIDRASRVIMAGENES,wnemonico);	
-			}
-			else{
-				if(idxpath==1){
-					sprintf(pathperfil,"%s/%s",HIDRACHEIMAGENES,wnemonico);					
-				}
-			}
-			char fileperfil[64];
-			sprintf(fileperfil,"PS%s_PH%s",widperfilsoft,widperfilhard);	// Nombre del fichero del perfil creado	
-			char filemasterboot[64];
-			sprintf(filemasterboot,"PS%s_PH%s.msb",widperfilsoft,widperfilhard);  // Idem para el sector de arranque MBR			
 
-			res=RestaurandoImagen(disco,compres,mettran,fileperfil,pathperfil,wparticion,Propiedades.iprepo);
+		char fileperfil[64];
+		sprintf(fileperfil,"PS%s_PH%s",widperfilsoft,widperfilhard);	// Nombre del fichero del perfil creado	
+		res=RestaurandoImagen(disco,fileperfil,wparticion,tbPathImg[idxpath],wprotclona,widenvio,wnipes);
 			
-			// Toma la nueva configuración
-			char *parametroscfg=LeeConfiguracion(disco);
-			Log("Finalizada la restauracion de imagen");
+		// Toma la nueva configuración
+		char *parametroscfg=LeeConfiguracion(disco);
+		Log("Finalizada la restauracion de imagen");
 
-			int lon;			
-			lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_RestaurarImagen\r");	
-			lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);		
-			lon+=sprintf(nwtrama->parametros+lon,"idi=%s\r",widimagen);	
-			lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",wparticion);	
-			RespuestaEjecucionComando(trama,nwtrama,res);	
-			return(res);		
-		}
-		return(false);
+		int lon;			
+		lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_RestaurarImagen\r");	
+		lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);		
+		lon+=sprintf(nwtrama->parametros+lon,"idi=%s\r",widimagen);	
+		lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",wparticion);	
+		RespuestaEjecucionComando(trama,nwtrama,res);	
+		return(res);		
 }
 //______________________________________________________________________________________________________
 // Función: RestaurandoImagen
@@ -1675,19 +1786,14 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 // 	Devuelve:
 //		true si el proceso fue correcto o false en caso contrario
 //____________________________________________________________________________________________________
-int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char* pathimg,char* particion,char*iprepo)   
+int RestaurandoImagen(char* disco,char *fileimg,char* particion,char *pathImg,char *protclona,char* idenvio,char *nipes)
 {
    	int herror;
 	
 	MuestraMensaje(3,NULL);
 
 	sprintf(cmdshell,"%s/admRestoreImage",HIDRASCRIPTS);
-	sprintf(parametros," %s %s %s %s %s","admRestoreImage","REPO",fileimg,disco,particion);
-
-	if(ndebug>3){
-		sprintf(msglog,"Restaurando Imagen disco:%s, partición:%s, Repositorio:%s, Imagen:%s",disco,particion,Propiedades.iprepo,fileimg);
-		Log(msglog);
-	}
+	sprintf(parametros," %s %s %s %s %s %s %s %s","admRestoreImage",pathImg,fileimg,disco,particion,protclona,idenvio,nipes);
 	
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror) // Restauración correcta
@@ -1700,8 +1806,13 @@ int RestaurandoImagen(char* disco,char* compres,char* mettran,char* fileimg,char
 		UltimoErrorScript(herror,"RestaurandoImagen()");	// Se ha producido algún error
 		return(false);
 	}
-	else
+	else{
+		if(strcmp(protclona,"MULTICAST")==0){
+			if(!sesionMulticast(idenvio,nipes))
+				Log("***Error en el proceso de preparación de transferencia multicast");
+		}
 		return(true); 
+	}
 }
 //______________________________________________________________________________________________________
 // Función: ParticionaryFormatear
@@ -1996,6 +2107,8 @@ char* TomaNomSO(char*disco,int particion)
 // ________________________________________________________________________________________________________
 int MuestraMenu(char *urp)
 {
+	return(true);
+
 	int nargs,resul;
 
 	if(ndebug>4){
@@ -2081,6 +2194,9 @@ int InventarioHardware(TRAMA *trama,TRAMA *nwtrama)
   	int lon;
 	lon=sprintf(nwtrama->parametros,"nfn=RESPUESTA_TomaHardware\r");		
 	lon+=sprintf(nwtrama->parametros+lon,"hrd=%s\r",parametroshrd);	
+	lon+=sprintf(nwtrama->parametros+lon,"ipr=%s\r",Propiedades.iprepo);
+	lon+=sprintf(nwtrama->parametros+lon,"rep=%s\r",Propiedades.puertorepo);
+
 	RespuestaEjecucionComando(trama,nwtrama,res);	
 	return(res);
 }
@@ -2141,6 +2257,9 @@ int InventarioSoftware(TRAMA *trama,TRAMA *nwtrama)
 	lon+=sprintf(nwtrama->parametros+lon,"sft=%s\r",parametrossft);	
 	lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",particion);	
 	lon+=sprintf(nwtrama->parametros+lon,"tfs=%s\r",infopar);	
+	lon+=sprintf(nwtrama->parametros+lon,"ipr=%s\r",Propiedades.iprepo);
+	lon+=sprintf(nwtrama->parametros+lon,"rep=%s\r",Propiedades.puertorepo);
+
 	RespuestaEjecucionComando(trama,nwtrama,res);	
 	return(res);
 }
@@ -2220,19 +2339,19 @@ int ExecShell(TRAMA *trama,TRAMA *nwtrama)
 //		- trama: Trama recibida con las especificaciones del comando
 //		- nwtrama: Nueva trama a enviar al servidor con la respuesta de la acción, si ésta procede
 // 	Devuelve:
-//		true si el proceso fue correcto o false en caso contrario
+//		true siempre
 // ________________________________________________________________________________________________________
 int ConsolaRemota(TRAMA *trama,TRAMA *nwtrama)
 {
 	FILE* f;
 	long lSize;
-	int herror,res;
+	int herror;
 
 	char* comando=TomaParametro("cmd",trama->parametros); 	// Código del comando	
 	sprintf(filecmdshell,"%s/%s","/tmp","_hidrascript_");
 	f = fopen(filecmdshell,"wt");	// Abre fichero de script
 	if(f==NULL)
-		res=false; // Error de apertura del fichero de configuración
+		Log("*** No se puede crear fichero temporal para ejecutar la consola remota");
 	else{
 		lSize=strlen(comando);
 		fwrite(comando,1,lSize,f);	// Escribe el código a ejecutar
@@ -2242,18 +2361,16 @@ int ConsolaRemota(TRAMA *trama,TRAMA *nwtrama)
 		herror=EjecutarScript(cmdshell,parametros,NULL,true);
 		if(herror){
 			UltimoErrorScript(herror,"ConsolaRemota()");	// Se ha producido algún error
-			res=false;	
 		}
 		else{
 				sprintf(cmdshell,"%s/remoteConsole",HIDRASCRIPTS);
 				herror=EjecutarScript(cmdshell,NULL,NULL,true);
 				if(herror){
 					UltimoErrorScript(herror,"ExecBash()");	// Se ha producido algún error
-					res=false;	
 				}	
 		}
 	}
-	return(res);
+	return(true);
 }
 //______________________________________________________________________________________________________
 // Función: ExecBash
@@ -2445,7 +2562,13 @@ int  main(int argc, char *argv[])
 			UltimoError(0,"Main()");	
 			exit(EXIT_FAILURE);
 		}
-		Log("Cliente iniciado");		
+		Log("Cliente iniciado");
+
+		if(!cuestionCache(Propiedades.cache)){ // Procesa la cache	
+			UltimoError(0,"Main()");	
+			exit(EXIT_FAILURE);
+		}
+	
 		Log("Ejecución de archivo Autoexec");
 		if(!AutoexecClienteHidra()){  // Ejecución fichero autoexec	
 			UltimoError(0,"Main()");	

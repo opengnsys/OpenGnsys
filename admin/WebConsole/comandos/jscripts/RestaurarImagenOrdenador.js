@@ -32,6 +32,7 @@ function confirmar(){
 		var ochecks=document.fdatos.getElementsByTagName("INPUT")
 		var perfiles=""
 		var pathrmb="";
+		var protclona="";
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				var particion=ochecks[i].value
@@ -41,10 +42,13 @@ function confirmar(){
 					perfiles+=particion+"_M_"+desple_M.value+";"
 				var opathrmb=document.getElementById("pathrmb_"+particion);
 				pathrmb+=opathrmb.value+";";
+				var protclon=document.getElementById("protoclonacion_"+particion);
+				protclona+=protclon.value+";";
+
 			}
 		}
 		var wurl="./gestores/gestor_RestaurarImagenOrdenador.php"
-		wurl+="?cadenaip="+cadenaip+"&identificador="+identificador+"&nombrefuncion="+nombrefuncion+"&ejecutor="+ejecutor+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&pathrmb="+pathrmb+'%0D'+"&perfiles="+perfiles
+		wurl+="?cadenaip="+cadenaip+"&identificador="+identificador+"&nombrefuncion="+nombrefuncion+"&ejecutor="+ejecutor+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&pathrmb="+pathrmb+"&protclona="+protclona+'%0D'+"&perfiles="+perfiles
 		wurl+="&" +compone_urlejecucion();
 		ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 		ifr.src=wurl; // LLama a la página gestora
