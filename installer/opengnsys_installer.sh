@@ -500,8 +500,7 @@ function getNetworkSettings()
 	SERVERIP=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
 	NETMASK=$(LANG=C ifconfig $MAINDEV | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
 	NETBROAD=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {print ($6)}')
-	NETIP=$(netstat -nr | grep $MAINDEV | awk '$1!~/0\.0\.0\.0/ {print $1}')
-	NETIP=${NETIP%% *}
+	NETIP=$(netstat -nr | grep $MAINDEV | awk '$1!~/0\.0\.0\.0/ {if (n=="") n=$1} END {print n}')
 	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
 	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
