@@ -4,13 +4,14 @@
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
-if [ $# -ne 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion"
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"
     exit $?
 fi
 
 # Procesar parámetros de entrada
 IMGFILE=$(ogGetPath "$1" "$2.img")
+PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     IMGDIR=$(ogGetParentPath "$1" "$2")
     # Si no existe el directorio de la imagen, crearlo.
@@ -19,11 +20,26 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         ogMakeDir "$1" "${2%/*}" || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
     fi
     IMGDIR=$(ogGetParentPath "$1" "$2") || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
-    if [ -z "$IMGFILE" ]; then
-        echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
-        ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
-        IMGFILE=$(ogGetPath "cache" "$2.img")
-    fi
+    # Procesar protocolos de transferencia.
+    case "$PROTO" in
+        UNICAST|unicast)
+            # Copiar fichero del repositorio al caché local.
+            if [ -z "$IMGFILE" ]; then
+                echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
+                ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
+                IMGFILE=$(ogGetPath "cache" "$2.img")
+            fi
+            ;;
+        MULTICAST|multicast)
+            # Proceso Multicast.
+            ;;
+        TORRENT|torrent)
+            # Proceso Torrent.
+            ;;
+        *)  # Protocolo desconocido.
+            ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"
+            exit $?
+    esac
 fi
 if [ -z "$IMGFILE" ]; then
     ogRaiseError $OG_ERR_NOTFOUND "$1, $2"

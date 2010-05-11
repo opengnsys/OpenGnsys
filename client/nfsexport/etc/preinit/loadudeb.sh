@@ -17,9 +17,11 @@ if [ -n "$OPENGNSYS" ]; then
     for i in $OGLIB/udeb/*.udeb; do
         udpkg -i "$i" >/dev/null || printf "$MSG_ERRLOADUDEB\n" $(basename $i)
     done
+    # TEMPORAL: corregir biblioteca dinámica para "partprobe".
+    ln -s $(find /lib -type f -name "libparted*.so.*") /lib/$(grep libparted $OGBIN/partprobe) 2>/dev/null
 else
-    # FIXME Error: entorno de OpenGNSys no configurado.
-    echo "Error: OpenGNSys environment is not configured."   # FIXME: definir mensaje.
+    # FIXME Error: entorno de OpenGnSys no configurado.
+    echo "Error: OpenGnSys environment is not configured."   # FIXME: definir mensaje.
     exit 1
 fi
 
