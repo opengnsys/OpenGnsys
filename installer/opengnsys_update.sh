@@ -279,12 +279,14 @@ function updateServerFiles () {
                         client/boot/udeblist.conf  \
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
+                        client/boot/udeblist-lucid.conf \
                         doc )
 	local TARGETS=( bin/initrd-generator \
                         bin/upgrade-clients-udeb.sh \
                         etc/udeblist.conf \
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
+                        etc/udeblist-lucid.conf \
                         doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then

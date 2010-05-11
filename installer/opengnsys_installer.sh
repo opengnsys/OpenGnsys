@@ -812,6 +812,7 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist.conf  \
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
+                        client/boot/udeblist-lucid.conf \
                         server/PXE/pxelinux.cfg/default \
                         doc )
 	local TARGETS=( bin/initrd-generator \
@@ -819,6 +820,7 @@ function openGnsysCopyServerFiles () {
                         etc/udeblist.conf \
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
+                        etc/udeblist-lucid.conf \
                         tftpboot/pxelinux.cfg/default \
                         doc )
 
