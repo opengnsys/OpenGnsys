@@ -28,7 +28,7 @@ if [ -z "$PACKAGES_INSTALL" ]; then
 fi
 
 #/// Crear configuración para apt-get 
-echo "deb http://es.archive.ubuntu.com/ubuntu/ $DISTRIB main/debian-installer" >$UDEBLIST
+echo "deb http://archive.ubuntu.com/ubuntu/ $DISTRIB main/debian-installer" >$UDEBLIST
 mkdir -p $TMPUDEB/partial
 rm -f $TMPUDEB/*.udeb
 

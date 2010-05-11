@@ -111,7 +111,7 @@ function checkPackage()
 		exit 1
 	fi
 	echoAndLog "checkPackage(): checking if package $package exists"
-	dpkg -L $package &>/dev/null
+	dpkg -s $package | grep Status | grep -qw install &>/dev/null
 	if [ $? -eq 0 ]; then
 		echoAndLog "checkPackage(): package $package exists"
 		return 0

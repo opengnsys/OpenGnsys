@@ -119,7 +119,8 @@ function installDependencies ()
 		echoAndLog "${FUNCNAME}(): no deps needed."
     else
         while [ $# -gt 0 ]; do
-            if ! dpkg -s $1 &>/dev/null; then
+            dpkg -s $1 | grep Status | grep -qw install &>/dev/null
+            if [ $? -ne 0 ]; then
                 INSTALLDEPS="$INSTALLDEPS $1"
             fi
             shift
