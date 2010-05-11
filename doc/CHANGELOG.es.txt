@@ -1,5 +1,27 @@
-Lista de cambios incluidos en OpenGnSys 0.9
-===========================================
+LISTA DE CAMBIOS	CHANGELOG.es.ext
+========================================
+
+
+Lista de cambios incluidos en OpenGnSys 0.9.1
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#108	ogRestoreImage: Comprobación si la imagen cabe en la partición errónea
+
+Tickets resueltos en módulo OpenGnSys Client:
+#96	Repositorios lentos de descarga del initrd.gz
+#133	Verificar script para iniciar caché local
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#137	Fallo de Opengnsys Intaller (configuración DHCP)
+#144	Fallo de Opengnsys Intaller 2 (configuración MySQL)
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console
+#130	Integrar la gestión de caché local en la consola web
+
+
+Lista de cambios incluidos hasta OpenGnSys 0.9
+----------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #9	No lista bien particiones lógicas
