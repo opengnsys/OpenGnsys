@@ -537,6 +537,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Usar \c sfdisk para redefinir el tamaño.
 sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+partprobe 2>/dev/null
 }
 
 
