@@ -226,8 +226,8 @@ void Log(char* msg)
 
 // Lo muestra por consola
 
-	sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
-	system(msgcon);
+	//sprintf(msgcon,"echo '%02d/%02d/%d %02d:%02d ***%s'\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
+	//system(msgcon);
 
 	
 }
