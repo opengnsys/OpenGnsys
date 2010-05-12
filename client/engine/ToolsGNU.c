@@ -33,7 +33,7 @@ function mbuffer ()
 {
 	if [ "$1" = install ]
 	then
-		install http://www.maier-komor.de/software/mbuffer/mbuffer-20100327.tgz
+		install "http://www.maier-komor.de/software/mbuffer/mbuffer-20100327.tgz"
 	else
 		return
 	fi
@@ -43,7 +43,7 @@ function ms-sys ()
 {
 	if [ "$1" = install ]
 	then
-		install http://downloads.sourceforge.net/project/ms-sys/ms-sys%20development/2.1.5/ms-sys-2.1.5.tar.gz
+		install "http://downloads.sourceforge.net/project/ms-sys/ms-sys%20development/2.1.5/ms-sys-2.1.5.tar.gz"
 	else
 		return
 	fi
@@ -53,7 +53,7 @@ function ctorrent ()
 {
 	if [ "$1" = install ]
 	then
-		install http://sourceforge.net/projects/dtorrent/files/dtorrent/3.3.2/ctorrent-dnh3.3.2.tar.gz/download
+		install "http://sourceforge.net/projects/dtorrent/files/dtorrent/3.3.2/ctorrent-dnh3.3.2.tar.gz/download"
 	else
 		return
 	fi
@@ -63,7 +63,7 @@ function udpcast ()
 {
 	if [ "$1" = install ]
 	then
-		install http://udpcast.linux.lu/download/udpcast-20100130.tar.gz
+		install "http://udpcast.linux.lu/download/udpcast-20100130.tar.gz"
 	else
 		return
 	fi
@@ -73,7 +73,7 @@ function ntfs-3g ()
 {
 if [ "$1" = install ]
      then
-		 install http://tuxera.com/opensource/ntfs-3g-2010.3.6.tgz
+		 install "http://tuxera.com/opensource/ntfs-3g-2010.3.6.tgz"
      else
     	 return
 fi
@@ -82,7 +82,7 @@ fi
 
 function partitionsaving ()
 {
-echo  http://damien.guibouret.free.fr/savepart.zip
+echo  "http://damien.guibouret.free.fr/savepart.zip"
 
 }
 
