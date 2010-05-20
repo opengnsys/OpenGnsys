@@ -10,7 +10,7 @@ if [ $# -ne 4 ]; then
 fi
 
 # Si el repositorio es CACHE comprobamos que exista
-[ $3 == "CACHE" -o $3 == "cache" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| exit $?
+[ $3 == "REPO" -o $3 == "repo" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| exit $?
 
 
 # Obtener información de los parámetros de entrada.
