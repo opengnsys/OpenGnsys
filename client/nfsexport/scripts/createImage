@@ -9,6 +9,10 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
+# Si el repositorio es CACHE comprobamos que exista
+[ $3 == "CACHE" -o $3 == "cache" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| exit $?
+
+
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
 IMGDIR=$(ogGetParentPath "$3" "/$4")
@@ -38,6 +42,8 @@ if [ $REDSIZE -lt $SIZE ]; then
 fi
 # Crear la imagen.
 echo "[40] Crear imagen."
+#ejemplo test herramienta de clonacion
+#ogCreateImage "$@" partclone lzop
 ogCreateImage "$@"
 EXITCODE=$?
 # Restaurar tamaño.
@@ -47,6 +53,13 @@ if [ $REDSIZE -lt $SIZE ]; then
     echo "[90] Extender sistema de archivos."
     ogExtendFs $1 $2
 fi
+
+# Creamos fichero torrent. si REPO tracker=ipREPO, si CACHE tracker=ipLocal
+[ "$3" == "REPO" ] && IPTORRENT=`mount | grep ":/opt/opengnsys/images" | cut -f1 -d:` \
+           || IPTORRENT=`ogGetIpAddress`
+echo "[95] Crear torrent $3 $4 $IPTORRENT"
+ogCreateTorrent "$3" "$4" "$IPTORRENT"
+
 TIME=$[SECONDS-TIME1]
 echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
 exit $EXITCODE
