@@ -1,0 +1,605 @@
+#!/bin/bash
+#/**
+#@file    Protocol.lib
+#@brief   Librería o clase Protocol
+#@class   FileTransfer
+#@brief   Funciones para transmisión de datos
+#@version 0.91
+#@warning License: GNU GPLv3+
+#*/
+
+
+
+#/**
+#         ogMcastSessionCheck [session]
+#@brief   Controla los parámetros de una sessión multicast
+#@param   str_session   
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+ogMcastSessionCheck ()
+{
+echo "en pruebas"
+#sessionSERVER  PORTBASE:METHOD:ADDRESS:BITRATE:NCLINTS:MAXTIME:TOOLCLONE:COMPRESSOR
+#sessionCLIENT  PORTBASE:TOOLCLONE:COMPRESSOR
+#PORTBASE: 9000 (incluye el 9001), 9002 (incluye el 9003), 9004
+#METHOD: full-duplex half-duplex brodcast
+#ADDRESS: Dirección habilitada para la transferencia. 339.194.ip2.ip3
+#BITRATE: 90M   80M   70M
+#NCLIENTS:
+#MAXTIME:
+#TOOLCLONE:
+#COMPRESSOR:
+}
+
+
+#/**
+#         ogMcastSessionList
+#@brief   Lista las sessiones abiertas multicast.
+#@param   (en pruebas) 
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+ogMcastSessionList()
+{
+echo "en preubas"
+#puertos a utilizar 9000 - 9008 => se definen 10 sesiones
+#lsof -i -nP | grep 900 | awk '{print $9}' | awk -F: '{print $2}' | uniq
+}
+
+#/**
+#         ogMcastSessionDelete
+#@brief   Libera una session Mulitcast.
+#@param   (en pruebas) 
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+ogMcastSessionDelete()
+{
+echo "en pruebas"
+}
+
+
+#/**
+#         ogGenerateSintaxMcast
+#@brief   Función para generar la instruccion de ejucción la transferencia de datos multicast
+#@param 1 Tipo de operacion [ SENDPARTITION RECEIVERPARTITION SENDFILE RECEIVERFILE ] 
+#@param 2 Sesión Mulitcast 
+#@param 3 Dispositivo (opcion PARTITION) o fichero(opcion FILE) a ser enviado.
+#@param 4 Tools de clonación (opcion PARTITION)
+#@param 5 Tools de compresion (opcion PARTITION) 
+#@return  instrucción para ser ejecutada.
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+#/**
+#         
+
+
+function ogGenerateSintaxMcast ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" -o "$2" == "help" ]; then
+    ogHelp "$FUNCNAME SENDPARTITION      str_sessionSERVER     str_device str_tools str_level" \
+		   "$FUNCNAME RECEIVERPARTITION  str_sessionCLIENT     str_device str_tools str_level "\
+		   "$FUNCNAME SENDFILE           str_sessionSERVER     str_file "\
+		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file "
+    return
+fi
+
+## Introducir control de errores en parametros.
+
+
+#Obtenemos los datos de la sesión multicast
+# Pendiente para ser procesado y/o proporcionado por ogMcastSessionCheck
+PORTBASE=`echo $2 | awk -F: '{print $1}'`
+[ -z $PORTBASE ] && PORTBASE=9000
+METHOD=`echo $2 | awk -F: '{print $2}'`
+[ -z $METHOD ] && METHOD=full-duplex
+ADDRESS=`echo $2 | awk -F: '{print $3}'`
+[ -z $ADDRESS ] && ADDRESS=prueba
+BITRATE=`echo $2 | awk -F: '{print $4}'`
+[ -z $BITRATE ] && BITRATE=70M
+NCLIENTS=`echo $2 | awk -F: '{print $5}'`
+[ -z $NCLIENTS ] && NCLIENTS=100
+MAXTIME=`echo $2 | awk -F: '{print $6}'`
+[ -z $MAXTIME ] && MAXTIME=360
+# Valores estandar no configurables.
+CERROR="8x8/128"
+
+
+DEVICE=`echo $3`
+TOOL=`echo $4`
+LEVEL=`echo $5`
+
+# opción del usuo de tuberia intermedia en memoria mbuffer.
+which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -m 20M' " 
+
+# Generamos la instrucción base de multicast -Envio,Recepcion-
+SINTAXSERVER="udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME "
+SINTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
+
+
+case "$1" in
+   SENDPARTITION)
+        PROG1=`ogGenerateSintaxForCreateImage $DEVICE " " $TOOL $LEVEL | awk -F"|" '{print $1 "|" $3}' | tr -d ">"`
+		echo "$PROG1 | $SINTAXSERVER"
+	;;
+    RECEIVERPARTITION)
+		COMPRESSOR=`ogGenerateSintaxForRestoreImage " " $DEVICE $TOOL $LEVEL | awk -F\| '{print $1}'`
+		TOOLS=`ogGenerateSintaxForRestoreImage " " $DEVICE $TOOL $LEVEL | awk -F\| '{print $3}'`
+		echo "$SINTAXCLIENT | $COMPRESSOR | $TOOLS "
+	;;
+	SENDFILE)
+		echo "$SINTAXSERVER --file $3"
+    ;;
+    RECEIVERFILE)
+		echo "$SINTAXCLIENT --file $3"
+    ;;
+   *)
+   ;;
+esac
+}
+
+
+
+#/**
+#         ogMcastSendFile [ str_repo | int_ndisk int_npart ] /Relative_path_file  sessionMulticast
+#@brief   Envía un fichero por multicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param (2 parámetros)  $1 path_aboluto_fichero  $2 sesionMcast
+#@param (3 parámetros)  $1 Contenedor REPO|CACHE $2 path_absoluto_fichero $3 sesionMulticast
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero $4 sesionMulticast
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+#/**
+# 
+
+function ogMcastSendFile ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET COMMAND
+#ARGS usado para controlar ubicación de la sesion multicast
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] /Relative_path_file sesionMcast" \
+           "$FUNCNAME  1 1 /aula1/winxp.img sesionMcast" \
+           "$FUNCNAME  REPO /aula1/ubuntu.iso sesionMcast" \
+           "$FUNCNAME  CACHE /aula1/winxp.img sesionMcast" \
+           "$FUNCNAME  /opt/opengnsys/images/aula1/hd500.vmx sesionMcast"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+        SOURCE=$(ogGetPath "$1")
+		ARG=2
+		;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        ARG=4
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        ARG=3
+        ;;
+esac
+
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# -ne "$ARG" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+# Comprobar fichero origen
+[ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+
+#TODO echo Abriendo puerto para pasar parametros de control al cliente.
+#TODO opcion netcat, netpipes, o un fichero mcast con la info final.
+SESSION=${!ARG}
+# llamando a la funcion con param1 session $SESSION y param2 $SOURCE
+COMMAND=`ogGenerateSintaxMcast "SENDFILE" "$SESSION" "$SOURCE"`
+echo $COMMAND
+eval $COMMAND
+}
+
+
+
+#/**
+#         ogMcastReceiverFile  sesion Multicast [ str_repo | int_ndisk int_npart ] /Relative_path_file
+#@brief   Recibe un fichero multicast   ORIGEN(sesionmulticast) DESTINO(fichero)
+#@param (2 parámetros)  $1 sesionMcastCLIENT $2 path_aboluto_fichero_destino  
+#@param (3 parámetros)  $1 sesionMcastCLIENT $2 Contenedor REPO|CACHE $3 path_absoluto_fichero_destino
+#@param (4 parámetros)  $1 sesionMcastCLIENT $2 disk $3 particion $4 path_absoluto_fichero_destino
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+#/**
+# 
+
+ogMcastReceiverFile ()
+{
+# nota el nombre del fichero debe tener su extension si es img nombre.img
+#Origen
+#$1 puerto de entrada
+
+# Destino
+# un parametro $2 path absoulo.
+# dos parametros $2 CACHE|REPO  y $3 path absoulto(dentro de imagenes)
+# tres parametros $2 disk $3 particion $4 directorio absoluto de la particion.
+
+# Variables locales.
+local ARGS ARG TARGETDIR TARGETFILE
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_portMcast] [ [Relative_path_file] | [str_REPOSITORY path_file] |  [int_ndisk int_npart path_file ]  ]" \
+           "$FUNCNAME 9000 /aula1/winxp/file" \
+           "$FUNCNAME 9000 CACHE /aula1/winxp/file" \
+           "$FUNCNAME 9000 1 1 /Descargas/file" 
+          
+
+    return
+fi
+
+ARGS="$@"
+case "$2" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+    	TARGETDIR=$(ogGetParentPath "$2")
+		ARG=2
+		echo $TARGETDIR
+	;;
+    [1-9]*) # ndisco npartición.
+    	TARGETDIR=$(ogGetParentPath "$2" "$3" "$4")
+        ARG=4
+        echo $TARGETDIR
+    ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+    	TARGETDIR=$(ogGetParentPath "$2" "$3")
+        ARG=3
+        echo $TARGETDIR
+    ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ "$#" -ne "$ARG" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+#obtenemos el nombre del fichero a descargar.
+TARGETFILE=`basename ${!ARG}`
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogGenerateSintaxMcast RECEIVERFILE "$1" $TARGETDIR/$TARGETFILE `
+echo $COMMAND
+eval $COMMAND
+}
+
+
+
+#/**
+#         ogMcastSendPartition
+#@brief   Función para enviar el contenido de una partición a multiples particiones remotas.
+#@param
+#@param
+#@param
+#@return
+#@exception
+#@note
+#@todo:
+#@version 0.1 - Integración para OpenGNSys.
+#@author
+#@date
+#*/ ##
+
+ogMcastSendPartition ()
+{
+
+# Variables locales
+local PART  ERRCODE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+PART=$(ogDiskToDev "$1" "$2") || return $?
+if ogIsLocked $1 $2; then
+    ogRaiseError $OG_ERR_LOCKED "$1,$2"
+    return $?
+fi
+
+
+echo "en pruebas"
+
+}
+
+
+#/**
+#         ogMcastRestorePartition
+#@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por multicast.
+#@param
+#@param
+#@param
+#@return
+#@exception
+#@note
+#@todo:
+#@version 0.1 - Integración para OpenGNSys.
+#@author
+#@date
+#*/ ##
+ogMcastRestorePartition ()
+{
+echo "en pruebas"
+}
+
+
+
+
+
+
+
+
+#/**
+#         ogCreateTorrent  [ str_repo | int_ndisk int_npart ] Relative_path_file
+#@brief   Función para crear el fichero torrent.
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
+#@note
+#@todo: Abriendo puerto para pasar parametros de control al cliente.
+#@version 0.1 - Integración para OpenGNSys.
+#@author
+#@date
+#*/ ##
+
+ogCreateTorrent ()
+{
+# Variables locales.
+local ARGS ARG SOURCE IPTORRENT
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file IpBttrack" \           "$FUNCNAME 1 1 /aula1/winxp 10.1.15.23" \
+       "$FUNCNAME REPO /aula1/winxp 10.1.15.45"
+
+    return
+fi
+
+# Error si se quiere crear el fichero en cache y no existe
+[ "$1" != "CACHE" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| return $?
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1.img")
+        ARG=2
+		;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3.img")
+        ARG=4
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+           SOURCE=$(ogGetPath "$1" "$2.img")
+        ARG=3
+        ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# -eq "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+
+# Error si no existe la imagen
+[ $SOURCE ] ||  ogRaiseError $OG_ERR_NOTFOUND || return $?
+
+[ -r $SOURCE.torrent ] && mv "$SOURCE.torrent" "$SOURCE.torrent.ant" && echo "Esperamos que se refresque el servidor" && sleep 20
+
+IPTORRENT="${!#}"
+# Si ponemos el path completo cuando creamos el fichero torrent da error
+cd `dirname $SOURCE`
+echo ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
+ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
+
+}
+
+#/**
+#         ogStartTracker
+#@brief   Inicia el tracker
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
+#@note
+#@version 0.1 - Integración para OpenGNSys.
+#@author
+#@date
+#*/ ##
+ogStartTracker ()
+{
+	echo " bug2: usar el tracker del bittornado. "
+	echo " solucion bug2: apt-get autoremove bittorrent python-bittorrent "
+	echo "soulución bug2: apt-get install bittornado. "
+	echo "#Paso 2: iniciar track "
+local TESTBTT
+TESTBTT=`ps aux | grep bttrack | egrep -v grep | wc -l`
+if [ "$TESTBTT" == "0" ]; then
+	bttrack --reannounce_interval 10 --port 6969 --dfile /root/dstate --logfile /root/bttracker.log --save_dfile_interval 10 --timeout_downloaders_interval 10 2>/dev/null &
+else
+	echo "bttrack iniciado"
+fi
+
+}
+
+ogShareTorrent ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file" \
+           "$FUNCNAME 1 1 /aula1/winxp" \
+           "$FUNCNAME REPO /aula1/winxp"
+
+    return
+fi
+
+# Error si se quiere compartir un fichero en cache y no existe la cache
+[ "$1" != "CACHE" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| return $?
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1.img")
+           ARG=1
+		;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3.img")
+        ARG=3
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+           SOURCE=$(ogGetPath "$1" "$2.img" 2>/dev/null)
+        ARG=2
+        ;;
+esac
+
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# -ne "$ARG" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+# Comprobar fichero origen
+[ -n "$SOURCE.torrent" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+
+echo ctorrent $SOURCE.torrent -d
+ctorrent $SOURCE.torrent -d
+
+}
+
+
+ogTorrentReceiverFile ()
+{
+# obligatorio disponer de cache
+# origen destino.
+#origen es el .torrent
+# origen: REPO /file.torrent
+# Si REPO, (nfs, http) copiamos a CACHE.
+
+# destino es el fichero final.
+# destino: CACHE /file
+# destino: disk part /file
+
+# Variables locales.
+    local ARGS ARG SOURCEDIR SOURCEFILE TARGETDIR TARGETFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file" \
+           "$FUNCNAME REPO /aula1/winxp.torrent CACHE /aula1/winxp" \
+           "$FUNCNAME REPO /aula1/winxp.torrent 1 1 /iso" 
+fi
+# Comprobamos que existe Cache
+`ogFindCache > /dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE" || return $?
+
+# guardamos torrent. controlamos tamaño del fichero y comprobamos con cache.
+ogCopyFile $1 $2 $3 $4
+
+
+}
+
+ogReceiveTorrent ()
+{
+# Variables locales.
+    local ARGS ARG TARGETDIR TARGETFILE
+
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file" \
+           "$FUNCNAME 1 1 /aula1/winxp" \
+           "$FUNCNAME REPO /aula1/winxp" \
+           "$FUNCNAME /mnt/sda2/winxp"
+
+
+    return
+fi
+
+# Comprobamos que existe Cache
+`ogFindCache > /dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE" || return $?
+
+ARGS="$*"
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+    TARGETDIR=$(ogGetParentPath "$1")
+        ARG=1
+		;;
+    [1-9]*) # ndisco npartición.
+    TARGETDIR=$(ogGetParentPath "$1" "$2" "$3")
+        ARG=3
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+    TARGETDIR=$(ogGetParentPath "$1" "$2")
+        ARG=2
+        ;;
+esac
+#echo $TARGETDIR
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ "$#" -ne "$ARG" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+#obtenemos el nombre del fichero a descargar.
+TARGETFILE=`basename ${!ARG}`
+CACHE=`ogMountCache`
+
+# Error si no existe el fichero torrent
+[ -r $TARGETDIR/$TARGETFILE.img.torrent ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
+[ -d ${CACHE}/$OGIMG ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
+
+TimeToWaitForCloseAfterDownload=20  # tiempo que deseamos que el cliente este como semilla, despues de la descarga.
+
+# Si el fichero ya se ha bajado antes de iniciar el ctorrent no se ejecuta el comando kill, siguen encendido siempre
+# Comprobamos si se ha descargado antes, si es asi nos salimos
+Total=`ctorrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -c $TARGETDIR/$TARGETFILE.img.torrent|tail -n1|cut -f2 -d\(`
+[ $Total == "100%)" ] &&  return 0
+
+echo "ctorrent -X 'sleep $TimeToWaitForCloseAfterDownload; kill -9 \$(pidof ctorrent)' $TARGETDIR/$TARGETFILE.img.torrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -b ${CACHE}/$OGIMG/$TARGETFILE.bf -C 100"
+ctorrent -X "sleep $TimeToWaitForCloseAfterDownload; kill -9 \$(pidof ctorrent)" $TARGETDIR/$TARGETFILE.img.torrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -b ${CACHE}/$OGIMG/$TARGETFILE.bf -C 100
+
+[ -r ${CACHE}/$OGIMG/$TARGETFILE.bf ] && rm ${CACHE}/$OGIMG/$TARGETFILE.bf
+}
