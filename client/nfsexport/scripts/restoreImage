@@ -5,7 +5,7 @@
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
     exit $?
 fi
 
@@ -31,10 +31,20 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             fi
             ;;
         MULTICAST|multicast)
-            # Proceso Multicast.
+            if [ -z "$IMGFILE" ]; then
+            	echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
+            	PORTBASE=`echo $6 | cut -f1 -d:`
+           		echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:"CACHE" "$2.img" " 
+           		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img"
+           		IMGFILE=$(ogGetPath "cache" "$2.img")
+            fi
             ;;
         TORRENT|torrent)
-            # Proceso Torrent.
+        		echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
+            	ogCopyFile "repo" "$2.img.torrent" "$IMGDIR" || exit $?
+        		echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
+           		ogTorrentStart "CACHE" "$2.img.torrent" "seeder:60:360"           		
+           		IMGFILE=$(ogGetPath "cache" "$2.img")            
             ;;
         *)  # Protocolo desconocido.
             ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"

@@ -1,0 +1,31 @@
+#!/bin/bash
+export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys/client}"
+    export OGBIN=$OPENGNSYS/bin
+    export OGETC=$OPENGNSYS/etc
+    export OGLIB=$OPENGNSYS/lib
+    export OGAPI=$OGLIB/engine/bin
+    export OGSCRIPTS=$OPENGNSYS/scripts
+    export OGIMG=$OPENGNSYS/images
+    export OGCAC=$OPENGNSYS/cache
+    export OGLOG=$OPENGNSYS/log
+
+    for i in $OGAPI/*.lib; do
+        . $i
+    done
+    
+     if [ "$engine" = "testing" ]
+    then
+    	for i in $OGAPI/*.testing; do
+        	. $i 
+    	done
+    fi
+    
+export OG_ERR_FORMAT=1		# Formato de ejecución incorrecto.
+export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
+export OG_ERR_PARTITION=3	# Error en partición de disco.
+export OG_ERR_LOCKED=4		# Partición o fichero bloqueado.
+export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
+export OG_ERR_NOTOS=6		# Sin sistema operativo.
+export OG_ERR_NOTEXEC=7		# Programa o función no ejecutable.
+
+ogMcastSendFile $1 $2

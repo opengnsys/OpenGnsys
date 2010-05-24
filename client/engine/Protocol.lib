@@ -11,68 +11,6 @@
 
 
 #/**
-#         ogMcastSessionCheck [session]
-#@brief   Controla los parámetros de una sessión multicast
-#@param   str_session   
-#@return  (nada, por determinar)
-#@exception OG_ERR_FORMAT     formato incorrecto.
-#@note    Requisitos: 
-#@version 0.91 - Definición de FileTransfer
-#@author  Antonio Doblas Viso, Universidad de Málaga
-#@date    2010/05/09
-#*/ ##
-ogMcastSessionCheck ()
-{
-echo "en pruebas"
-#sessionSERVER  PORTBASE:METHOD:ADDRESS:BITRATE:NCLINTS:MAXTIME:TOOLCLONE:COMPRESSOR
-#sessionCLIENT  PORTBASE:TOOLCLONE:COMPRESSOR
-#PORTBASE: 9000 (incluye el 9001), 9002 (incluye el 9003), 9004
-#METHOD: full-duplex half-duplex brodcast
-#ADDRESS: Dirección habilitada para la transferencia. 339.194.ip2.ip3
-#BITRATE: 90M   80M   70M
-#NCLIENTS:
-#MAXTIME:
-#TOOLCLONE:
-#COMPRESSOR:
-}
-
-
-#/**
-#         ogMcastSessionList
-#@brief   Lista las sessiones abiertas multicast.
-#@param   (en pruebas) 
-#@return  (nada, por determinar)
-#@exception OG_ERR_FORMAT     formato incorrecto.
-#@note    Requisitos: 
-#@version 0.91 - Definición de FileTransfer
-#@author  Antonio Doblas Viso, Universidad de Málaga
-#@date    2010/05/09
-#*/ ##
-ogMcastSessionList()
-{
-echo "en preubas"
-#puertos a utilizar 9000 - 9008 => se definen 10 sesiones
-#lsof -i -nP | grep 900 | awk '{print $9}' | awk -F: '{print $2}' | uniq
-}
-
-#/**
-#         ogMcastSessionDelete
-#@brief   Libera una session Mulitcast.
-#@param   (en pruebas) 
-#@return  (nada, por determinar)
-#@exception OG_ERR_FORMAT     formato incorrecto.
-#@note    Requisitos: 
-#@version 0.91 - Definición de FileTransfer
-#@author  Antonio Doblas Viso, Universidad de Málaga
-#@date    2010/05/09
-#*/ ##
-ogMcastSessionDelete()
-{
-echo "en pruebas"
-}
-
-
-#/**
 #         ogGenerateSintaxMcast
 #@brief   Función para generar la instruccion de ejucción la transferencia de datos multicast
 #@param 1 Tipo de operacion [ SENDPARTITION RECEIVERPARTITION SENDFILE RECEIVERFILE ] 
@@ -297,7 +235,221 @@ echo $COMMAND
 eval $COMMAND
 }
 
+###########################################3
+############## funciones torrent
 
+#/**
+#         ogCreateTorrent  [ str_repo | int_ndisk int_npart ] Relative_path_file
+#@brief   Función para crear el fichero torrent.
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
+#@note
+#@todo: Abriendo puerto para pasar parametros de control al cliente.
+#@version 0.1 - Integración para OpenGNSys.
+#@author        Antonio J. Doblas Viso. Universidad de Málaga
+#@date
+#@version 0.2 - Integración para btlaunch.
+#@author        Irina . Univesidad de Sevilla.
+#@date
+#*/ ##
+
+ogCreateTorrent ()
+{
+# Variables locales.
+local ARGS ARG SOURCE IPTORRENT
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file IpBttrack" \           "$FUNCNAME 1 1 /aula1/winxp 10.1.15.23" \
+       "$FUNCNAME REPO /aula1/winxp 10.1.15.45"
+
+    return
+fi
+
+# Error si se quiere crear el fichero en cache y no existe
+[ "$1" != "CACHE" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| return $?
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1.img")
+        ARG=2
+		;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3.img")
+        ARG=4
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+           SOURCE=$(ogGetPath "$1" "$2.img")
+        ARG=3
+        ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# -eq "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+
+# Error si no existe la imagen
+[ $SOURCE ] ||  ogRaiseError $OG_ERR_NOTFOUND || return $?
+
+[ -r $SOURCE.torrent ] && mv "$SOURCE.torrent" "$SOURCE.torrent.ant" && echo "Esperamos que se refresque el servidor" && sleep 20
+
+IPTORRENT="${!#}"
+# Si ponemos el path completo cuando creamos el fichero torrent da error
+cd `dirname $SOURCE`
+echo ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
+ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
+
+}
+
+
+#/**
+#         ogTorrentStart  [ str_repo | int_ndisk int_npart ] Relative_path_file | SessionProtocol
+#@brief   Función iniciar P2P - requiere un tracker y los ficheros .torrent.
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@return
+#@note
+#@todo: 
+#@version 0.1 - Integración para OpenGNSys.
+#@author        Antonio J. Doblas Viso. Universidad de Málaga
+#@date
+#@version 0.2 - Chequeo del tamaño de imagen descargado.
+#@author        Irina . Univesidad de Sevilla.
+#@date
+#*/ ##
+
+ogTorrentStart ()
+{
+#protocoloTORRENT
+#mode=seeder|leecher  -> seedear mientras descarga
+#timeAfter -> tiempo de seeder desdpues de la descarga
+#timeServer -> cuando el equipo ya tenía la imagen.
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1")
+           ARG=1
+           SESSION=$2
+     ;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3")
+           ARG=3
+           SESSION=$4
+     ;;
+    *) # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2" 2>/dev/null)
+        ARG=2
+        SESSION=$3
+        ;;
+esac
+
+ctorrent -x ${SOURCE}; [ $? -eq 0 ] ||  ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+
+TARGET=`echo $SOURCE | awk -F.torrent '{print $1}'`
+DIRSOURCE=`ogGetParentPath $SOURCE`
+cd $DIRSOURCE
+
+#analizando SESSION
+MODE=`echo $SESSION | cut -f1 -d:`
+TIMECLIENT=`echo $SESSION | cut -f2 -d:`
+TIMESERVER=`echo $SESSION | cut -f3 -d:`
+
+#comprobamos si tenemos la imagen completa
+#echo " ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\( "
+TOTAL=`ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\(`
+if [ "$TOTAL" == "100%)" ]
+then
+    TIMECLIENT=$TIMESERVER
+fi
+
+if [ "$MODE" == "seeder" ]
+then 
+   echo "ctorrent ${SOURCE} -X 'sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)' -C 100"
+   ctorrent ${SOURCE} -X "sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)" -C 100
+fi
+
+if [ "$MODE" == "leecher" ]
+then
+   echo "ctorrent ${SOURCE} -X 'sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
+   ctorrent ${SOURCE} -X "sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)" -C 100 -U 0
+fi
+cd /tmp
+}
+
+
+
+############################################################
+##################### FUNCIONES MULTICAST EN DESARROLLO ##########
+
+
+#/**
+#         ogMcastSessionCheck [session]
+#@brief   Controla los parámetros de una sessión multicast
+#@param   str_session   
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+ogMcastSessionCheck ()
+{
+echo "en pruebas"
+#sessionSERVER  PORTBASE:METHOD:ADDRESS:BITRATE:NCLINTS:MAXTIME:TOOLCLONE:COMPRESSOR
+#sessionCLIENT  PORTBASE:TOOLCLONE:COMPRESSOR
+#PORTBASE: 9000 (incluye el 9001), 9002 (incluye el 9003), 9004
+#METHOD: full-duplex half-duplex brodcast
+#ADDRESS: Dirección habilitada para la transferencia. 339.194.ip2.ip3
+#BITRATE: 90M   80M   70M
+#NCLIENTS:
+#MAXTIME:
+#TOOLCLONE:
+#COMPRESSOR:
+}
+
+
+#/**
+#         ogMcastSessionList
+#@brief   Lista las sessiones abiertas multicast.
+#@param   (en pruebas) 
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+ogMcastSessionList()
+{
+echo "en preubas"
+#puertos a utilizar 9000 - 9008 => se definen 10 sesiones
+#lsof -i -nP | grep 900 | awk '{print $9}' | awk -F: '{print $2}' | uniq
+}
+
+#/**
+#         ogMcastSessionDelete
+#@brief   Libera una session Mulitcast.
+#@param   (en pruebas) 
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note    Requisitos: 
+#@version 0.91 - Definición de FileTransfer
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+ogMcastSessionDelete()
+{
+echo "en pruebas"
+}
 
 #/**
 #         ogMcastSendPartition
@@ -360,80 +512,8 @@ ogMcastRestorePartition ()
 echo "en pruebas"
 }
 
-
-
-
-
-
-
-
-#/**
-#         ogCreateTorrent  [ str_repo | int_ndisk int_npart ] Relative_path_file
-#@brief   Función para crear el fichero torrent.
-#@param   str_pathDirectory  str_Relative_path_file
-#@param  int_disk    int_partition   str_Relative_path_file
-#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
-#@return
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
-#@note
-#@todo: Abriendo puerto para pasar parametros de control al cliente.
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
-#*/ ##
-
-ogCreateTorrent ()
-{
-# Variables locales.
-local ARGS ARG SOURCE IPTORRENT
-
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file IpBttrack" \           "$FUNCNAME 1 1 /aula1/winxp 10.1.15.23" \
-       "$FUNCNAME REPO /aula1/winxp 10.1.15.45"
-
-    return
-fi
-
-# Error si se quiere crear el fichero en cache y no existe
-[ "$1" != "CACHE" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| return $?
-
-case "$1" in
-    /*)     # Camino completo.          */ (Comentrio Doxygen)
-           SOURCE=$(ogGetPath "$1.img")
-        ARG=2
-		;;
-    [1-9]*) # ndisco npartición.
-           SOURCE=$(ogGetPath "$1" "$2" "$3.img")
-        ARG=4
-        ;;
-    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
-           SOURCE=$(ogGetPath "$1" "$2.img")
-        ARG=3
-        ;;
-esac
-
-# Error si no se reciben los argumentos ARG necesarios según la opcion.
-[ $# -eq "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-
-# Error si no existe la imagen
-[ $SOURCE ] ||  ogRaiseError $OG_ERR_NOTFOUND || return $?
-
-[ -r $SOURCE.torrent ] && mv "$SOURCE.torrent" "$SOURCE.torrent.ant" && echo "Esperamos que se refresque el servidor" && sleep 20
-
-IPTORRENT="${!#}"
-# Si ponemos el path completo cuando creamos el fichero torrent da error
-cd `dirname $SOURCE`
-echo ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
-ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
-
-}
-
+########################## FUNCIONES TORRENT EN DESARROLLO
+##################################################
 #/**
 #         ogStartTracker
 #@brief   Inicia el tracker
