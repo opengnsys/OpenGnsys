@@ -1,14 +1,14 @@
-// ****************************************************************************************************************************************************
-// Aplicación HIDRA
-// Copyright 2003-2005 JosnManuel Alonso. Todos los derechos reservados.
-// Fichero: hidra.cpp
-//	Descripción:
-//		Este proyecto implementa el servicio hidra en un ordenador con plataforma windows NT. Este fichero aporta las funciones de 
-//		envn de comandos y recepcin de respuestas
-// ****************************************************************************************************************************************************
+// *************************************************************************
+// Aplicación: OPENGNSYS
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2003-2004
+// Fecha Última modificación: Marzo-2006
+// Nombre del fichero: ogAdmServer.php
+// Descripción : 
+//		
+// ****************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
-
 // ________________________________________________________________________________________________________
 // Función: TomaEnvio
 //
