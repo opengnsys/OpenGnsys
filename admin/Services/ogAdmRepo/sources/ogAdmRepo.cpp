@@ -7,39 +7,14 @@
 //		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Repositorio.
 // ****************************************************************************************************************************************************
 #include "ogAdmRepo.h"
-#include "encriptacion.c"
-// ________________________________________________________________________________________________________
-// Funcin�:RegistraLog
-//
-//		Descripcin�:
-//			Esta funcin� registra los evento de errores en un fichero log
-//		Parametros:
-//			- msg : Mensage de error
-//			- swerrno: Switch que indica que recupere literal de error del sistema
-// ________________________________________________________________________________________________________
-void RegistraLog(const char *msg,int swerrno)
-{
-	time_t rawtime;
-	struct tm * timeinfo;
-
-	time ( &rawtime );
-	timeinfo = gmtime(&rawtime);
-
-	FLog=fopen(szPathFileLog,"at");
-	if(swerrno)
-		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s:%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg,strerror(errno));
-	else
-		fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
-	fclose(FLog);
-}
-
+#include "ogAdmLib.c"
 //________________________________________________________________________________________________________
-// Funcinn: TomaConfiguracion
+// Función: TomaConfiguracion
 //
-//		Descripcinn:
-//		Esta funcinn lee el fichero de configuracinn del programa
-//		Parametros:
-//				- pathfilecfg : Ruta al fichero de configuracinn
+//		Descripción:
+//			Esta función lee el fichero de configuracinn del programa
+//		Parámetros:
+//			- pathfilecfg : Ruta al fichero de configuración
 //________________________________________________________________________________________________________
 int TomaConfiguracion(char* pathfilecfg)
 {
@@ -48,15 +23,18 @@ int TomaConfiguracion(char* pathfilecfg)
 	char ch[2];
 	int i,numlin,resul;
 
-	if(pathfilecfg==NULL) exit(EXIT_FAILURE);; // Nombre del fichero en blanco
+	if(pathfilecfg==NULL)
+		exit(EXIT_FAILURE);; // Nombre del fichero en blanco
 
 	Fconfig = fopen ( pathfilecfg , "rb" );
-	if (Fconfig==NULL)	return(FALSE);
+	if (Fconfig==NULL)
+		return(FALSE);
 	fseek (Fconfig , 0 , SEEK_END);  // Obtiene tamaño del fichero.
 	lSize = ftell (Fconfig);
 	rewind (Fconfig);
 	buffer = (char*) malloc (lSize);  // Toma memoria para el buffer de lectura.
-	if (buffer == NULL)	 	exit(EXIT_FAILURE);;
+	if (buffer == NULL)
+		exit(EXIT_FAILURE);;
 	fread (buffer,1,lSize,Fconfig); 	// Lee contenido del fichero
 	fclose(Fconfig);
 
@@ -65,11 +43,11 @@ int TomaConfiguracion(char* pathfilecfg)
 	servidorhidra[0]=(char)NULL;
 	Puerto[0]=(char)NULL;
 	
-	strcpy(ch,"\n");// caracter delimitador ( salto de linea)
+	strcpy(ch,"\n");// carácter delimitador ( salto de línea)
 	numlin=split_parametros(lineas,buffer,ch);
 	for (i=0;i<numlin;i++){
-		strcpy(ch,"=");// caracter delimitador
-		split_parametros(dualparametro,lineas[i],ch); // Toma primer nombre del parametros
+		strcpy(ch,"=");// carácter delimitador
+		split_parametros(dualparametro,lineas[i],ch); // Toma primer nombre del parámetro
 
 		resul=strcmp(dualparametro[0],"IPlocal");
 		if(resul==0) strcpy(IPlocal,dualparametro[1]);
@@ -103,102 +81,19 @@ int TomaConfiguracion(char* pathfilecfg)
 	}
 	return(TRUE);
 }
-// ________________________________________________________________________________________________________
-// Funcinn: INTROaFINCAD
-//
-//		Descripcinn?:
-// 			Cambia INTROS por caracteres fin de cadena ('\0') en una cadena
-//		Parametros:
-//				- parametros : La cadena a explorar
-// ________________________________________________________________________________________________________
-void INTROaFINCAD(char* parametros)
-{
-	int lon,i;
-	lon=strlen(parametros);
-	for(i=0;i<lon;i++){ // Cambia los INTROS por NULOS
-		if(parametros[i]=='\r') parametros[i]='\0';
-	}
-}
-// ________________________________________________________________________________________________________
-// Funcinn: INTROaFINCAD
-//
-//		Descripcinn?:
-// 			Cambia INTROS por caracteres fin de cadena ('\0') en una cadena
-//		Parametros:
-//				- parametros : La cadena a explorar
-// ________________________________________________________________________________________________________
-void FINCADaINTRO(char* a,char *b)
-{
-	char *i;
-	for(i=a;i<b;i++){ // Cambia los NULOS por INTROS
-		if(*i=='\0') *i='\r';
-	}
-}
-// ________________________________________________________________________________________________________
-// Funcinn: toma_parametro
-// 
-//		Descripcinn?:
-// 			Esta funci? devuelve el valor de un parametro incluido en la trmInfo.
-// 			El formato del protocolo es: "nombre_parametro=valor_parametro"
-// 		Par?etros:
-// 			- nombre_parametro: Es el nombre del par?etro a recuperar
-// 			- parametros: Es la matriz que contiene todos los par?etros
-// ________________________________________________________________________________________________________
-char * toma_parametro(const char* nombre_parametro,char *parametros)
-{
-	int i=0;
-	char* pos;
-
-	for(i=0;i<LONGITUD_PARAMETROS-4;i++){ 
-		if(parametros[i]==nombre_parametro[0]){
-			if(parametros[i+1]==nombre_parametro[1]){
-				if(parametros[i+2]==nombre_parametro[2]){
-					if(parametros[i+3]=='='){
-						pos=&parametros[i+4];
-						return(pos);
-					}
-				}
-			}
-		}
-	}
-	return(NULL);
-}
-// ________________________________________________________________________________________________________
-// Funci�: split_parametros
-//
-//		Descripción:
-//			Esta funci� trocea una cadena segn un car�ter delimitador, Devuelve el nmero de trozos
-// 		Par�etros:
-// 			- trozos: Array de punteros a cadenas
-// 			- cadena: Cadena a trocear
-// 			- ch: Car�ter delimitador
-// ________________________________________________________________________________________________________
-int split_parametros(char **trozos,char *cadena, char * ch){
-	int i=0;
-	char* token;
-
-	token= strtok(cadena,ch); // Trocea segn delimitador
-	while( token != NULL ){
-		trozos[i++]=token;
-		token=strtok(NULL,ch); // Siguiente token
-	}
-	trozos[i++]=token; 
-	return(i-1); // Devuelve el numero de trozos
-}
 //_______________________________________________________________________________________________________________
+// Función: ClienteExistente
 //
-// Comprueba si la IP del cliente est?a en la base de datos de Hidra
-// parámetros:
+//	Descripción:
+// 		Comprueba si la IP del cliente est?a en la base de datos de Hidra
+// 	parámetros:
 //		trmInfo: Puntero a la estructura de control de la conversacin DHCP
-//		ipmac: IP o MAC del cliente que ha abierto la hebra
-//		sw: Si vale 1 o 2 o 3 el parmetro anterior ser una IP en caso contrario ser una MAC
-//
 //	Devuelve:
 //		true: Si el cliente est en la base de datos
 //		false: En caso contrario
 // 
 //  Comentarios:
-//		Slo se procesarn mensages dhcp de clientes hidra.
+//		Sólo se procesarn mensajes dhcp de clientes hidra.
 //_______________________________________________________________________________________________________________
 int ClienteExistente(TramaRepos *trmInfo)
 {
@@ -206,8 +101,8 @@ int ClienteExistente(TramaRepos *trmInfo)
 	Database db;
 	Table tbl;
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// ACCESO atnico A TRAVEZ DE OBJETO MUTEX a este trozo de cnigo 
+	/////////////////////////////////////////////////////////////////
+	// ACCESO único A TRAVES DE OBJETO MUTEX a este trozo de código
 	pthread_mutex_lock(&guardia); 
 	
 	if(strcmp(servidorhidra,inet_ntoa(trmInfo->cliente.sin_addr))==0){ // Se trata del servidor hidra
@@ -237,14 +132,16 @@ int ClienteExistente(TramaRepos *trmInfo)
 	}
 	db.Close();
 	pthread_mutex_unlock(&guardia); 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////
 	return(true);
 }
 //___________________________________________________________________________________________________
-// Funcin: inclusion_REPO
+// Función: inclusion_REPO
 //
-//		Descripcin: 
-//			 Abre una sesin en el servidor Hidra
+//		Parámetros:
+//			 Ninguno
+//		Descripción:
+//			 Abre una sesión en el servidor Hidra
 //___________________________________________________________________________________________________
 int inclusion_REPO()
 { 
@@ -259,7 +156,7 @@ int inclusion_REPO()
 	lon=sprintf(trama->parametros,"nfn=inclusion_REPO\r");	// Nombre de la funcin a ejecutar en el servidor HIDRA 
 	lon+=sprintf(trama->parametros+lon,"iph=%s\r",IPlocal);	// Ip del ordenador
 
-	sock=Abre_conexion(servidorhidra,puerto);
+	sock=AbreConexion(servidorhidra,puerto);
 	if(sock==INVALID_SOCKET) {
 		sprintf(msglog,"Error al crear socket del Repositorio");
 		RegistraLog(msglog,false);
@@ -273,36 +170,15 @@ int inclusion_REPO()
 	}
 	return(true);
 }
-// ________________________________________________________________________________________________________
-// Funcin: Abre_conexion
-//
-//		Descripcin: 
-//			Crea un socket y lo conecta a un servidor
-//		parámetros:
-//			- ips : La direccin IP del servidor
-//			- port : Puerto para la comunicacin
-//		Devuelve:
-//			- El socket o nulo dependiendo de si se ha establecido la comunicacin
-// ________________________________________________________________________________________________________
-SOCKET Abre_conexion(char *ips,int wpuerto)
-{
-    struct sockaddr_in server;
-	SOCKET s;
-	// Crea el socket y se intenta conectar
-	s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (s == INVALID_SOCKET){
-		return (INVALID_SOCKET);
-	}
-	server.sin_family = AF_INET;
-	server.sin_port = htons((short)wpuerto);
-	server.sin_addr.s_addr = inet_addr(ips);
-	if (connect(s, (struct sockaddr *)&server, sizeof(server)) == INVALID_SOCKET)
-		return (INVALID_SOCKET);
-	return(s); // Conectado
-}
+
 //___________________________________________________________________________________________________
+// Función: envia_tramas
 //
-//  Enva tramas al servidor HIDRA 
+//		Descripción:
+//  		Envía tramas al servidor HIDRA
+//		Parámetros:
+//			s: Socket de la conexión
+//			trama: Trama a enviar
 //___________________________________________________________________________________________________
 int envia_tramas(SOCKET s,TRAMA *trama)
 {
@@ -327,31 +203,15 @@ int envia_tramas(SOCKET s,TRAMA *trama)
 	}
 	return(true);
 }
-//___________________________________________________________________________________________________
-//
-// Recibe tramas desde el servidor HIDRA
-//___________________________________________________________________________________________________
-int recibe_tramas(SOCKET s,TRAMA *trama)
-{
-	int ret;
 
-	ret = recv(s,(char*)trama,LONGITUD_TRAMA,0);
-	if (ret == 0) // Conexin cerrada por parte del cliente (Graceful close)
-		return (false);
-	else{ 
-		if (ret == SOCKET_ERROR){
-			return (false);
-		}
-		else{ // Datos recibidos
-			Desencriptar((char*)trama);
-			trama->parametros[ret-11]=(char)NULL; // Coloca caracter fin de cadena en trama
-			return(true);
-		}
-	}
-}
 //_______________________________________________________________________________________________________________
 //
-// Gestiona la conexion con un cliente que sea Hidra para el servicio de repositorio
+// Función: GestionaServicioRepositorio
+//
+//		Descripción:
+// 			Gestiona la conexion con un cliente que sea Hidra para el servicio de repositorio
+//		Parámetros:
+//			lpParam: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
 LPVOID GestionaServicioRepositorio(LPVOID lpParam)
 {
@@ -367,7 +227,12 @@ LPVOID GestionaServicioRepositorio(LPVOID lpParam)
 }
 //_______________________________________________________________________________________________________________
 //
-// Gestiona la conexion con un cliente que sea Hidra para el servicio de repositorio
+// Función: NwGestionaServicioRepositorio
+//
+//		Descripción:
+// 			Gestiona la conexion con un cliente que sea Hidra para el servicio de repositorio
+//		Parámetros:
+//			trmInfo: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
 void NwGestionaServicioRepositorio(TramaRepos * trmInfo)
 {
@@ -380,7 +245,12 @@ void NwGestionaServicioRepositorio(TramaRepos * trmInfo)
 }
 //_______________________________________________________________________________________________________________
 //
-// Gestiona la conexion con un cliente que sea Hidra para el servicio de repositorio
+// Función: gestiona_comando
+//
+//		Descripción:
+// 			Gestiona la conexion con un cliente que sea Hidra para el servicio de repositorio
+//		Parámetros:
+//			trmInfo: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
 int gestiona_comando(TramaRepos *trmInfo)
 {
@@ -476,10 +346,12 @@ int gestiona_comando(TramaRepos *trmInfo)
 	return(false);	
 }
 //_____________________________________________________________________________________________________________
-// Funcinn: RegistraComando
+// Función: RegistraComando
 //
-//	 Descripcinn:
+//	 Descripción:
 //		Crea un fichero de comando para cada cliente hidra
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_____________________________________________________________________________________________________________
 int RegistraComando(TramaRepos *trmInfo)
 {
@@ -519,18 +391,18 @@ int RegistraComando(TramaRepos *trmInfo)
 	return(true);
 }
 //_____________________________________________________________________________________________________________
-// Funcin: Arrancar
+// Función: Arrancar
 //
 //	 Descripcinn:
-//		Esta funcinn enciende un ordenadores
-//	Parámetros de entrada:
-//		- parametros: Cadena con las mac de los ordenadores que se van a arrancar separadas por punto y coma
+//		Esta función enciende un ordenador
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_____________________________________________________________________________________________________________
 int Arrancar(TramaRepos *trmInfo)
 {
 	int i,nummacs;
 	char* macs[MAXIMOS_CLIENTES];
-	char ch[2]; // Caracter delimitador
+	char ch[2]; // Carácter delimitador
 
 	char *mac=toma_parametro("mac",trmInfo->trama.parametros); // Toma Mac
 	strcpy(ch,";");// caracter delimitador
@@ -541,7 +413,7 @@ int Arrancar(TramaRepos *trmInfo)
 	return(RegistraComando(trmInfo));
 }
 //_____________________________________________________________________________________________________________
-// Funcinn: levanta
+// Función: levanta
 //
 // Descripcion:
 //    Enciende el ordenador cuya MAC se pasa como parámetro
@@ -550,7 +422,7 @@ int Arrancar(TramaRepos *trmInfo)
 //_____________________________________________________________________________________________________________
 int levanta(char * mac)
 {
-	BOOL          bOpt;
+	BOOLEAN          bOpt;
 	SOCKET		  s;
     sockaddr_in   local;
 	int	ret;
@@ -579,7 +451,7 @@ int levanta(char * mac)
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________________
-// Funcinn: Wake_Up
+// Función: Wake_Up
 //
 //	 Descripcion:
 //		Enciende el ordenador cuya MAC se pasa como parámetro
@@ -619,10 +491,9 @@ int Wake_Up(SOCKET s,char * mac)
 //		Descripcion:
 //			Convierte a binario una direccinn mac desde una cadena de longitud 12
 //
-//		Parámetros de entrada:
+//		Parámetros:
 //			- cadena : Cadena con el contenido de la mac
-//		Parámetros de salida:
-//			- numero : la direccinn mac convertida a binario (6 bytes)
+//			- numero : la dirección mac convertida a binario (6 bytes) (salida)
 //_____________________________________________________________________________________________________________
 void PasaHexBin( char *cadena,char *numero)
 {
@@ -651,12 +522,12 @@ void PasaHexBin( char *cadena,char *numero)
 	}
 }
 //_____________________________________________________________________________________________________________
-// Funcinn: FicheroOperador
+// Función: FicheroOperador
 //
-//	 Descripcinn:
+//	 Descripción:
 //		Crea un fichero para que un operador de aula o administrador de centro pueda entrar en el menú privado de los clientes rembo
-//	Parámetros de entrada:
-//		- parametros: Parámetros del comando
+//	Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_____________________________________________________________________________________________________________
 int FicheroOperador(TramaRepos *trmInfo)
 {
@@ -696,12 +567,12 @@ int FicheroOperador(TramaRepos *trmInfo)
 	return(true);
 }
 //_____________________________________________________________________________________________________________
-// Funcinn: FicheroOperador
+// Función: IconoItem
 //
-//	 Descripcinn:
+//	 Descripción:
 //		Crea un fichero para que un operador de aula o administrador de centro pueda entrar en el menú privado de los clientes rembo
-//	Parámetros de entrada:
-//		- parametros: Parámetros del comando
+//	Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_____________________________________________________________________________________________________________
 int IconoItem(TramaRepos *trmInfo)
 {
@@ -735,9 +606,14 @@ int IconoItem(TramaRepos *trmInfo)
 }
 //_______________________________________________________________________________________________________________
 //
-// Comprueba si existe un fichero
+// Función: ExisteFichero
+//
+//	 Descripción:
+// 		Comprueba si existe un fichero
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
-bool ExisteFichero(TramaRepos *trmInfo)
+BOOLEAN ExisteFichero(TramaRepos *trmInfo)
 {
 	FILE *f;
 	char swf[2];
@@ -755,10 +631,14 @@ bool ExisteFichero(TramaRepos *trmInfo)
 	return(respuesta_peticion(trmInfo,"Respuesta_ExisteFichero",swf,nomfile));
 }
 //_______________________________________________________________________________________________________________
+// Función: respuesta_clienteHidra
 //
-// Envia respuesta a peticin de comando
+//	 Descripción:
+// 		Envia respuesta a petición de comando
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
-bool respuesta_clienteHidra(TramaRepos *trmInfo)
+BOOLEAN respuesta_clienteHidra(TramaRepos *trmInfo)
 {
 	int ret;
 	//MandaRespuesta
@@ -771,10 +651,17 @@ bool respuesta_clienteHidra(TramaRepos *trmInfo)
 	return(true);	
 }
 //_______________________________________________________________________________________________________________
+// Función: respuesta_peticion
 //
-// Envia respuesta a peticin de comando
+//	 Descripción:
+// 		Envia respuesta a petición de comando
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
+//		LitRes: Nombre de la función a ejecutar en el cliente en respuesta a una petición
+//		swf: Respuesta de la petición
+//		txt: Nombre del fichero implicado en la petición
 //_______________________________________________________________________________________________________________
-bool respuesta_peticion(TramaRepos *trmInfo,const char *LitRes,char* swf,char*txt)
+BOOLEAN respuesta_peticion(TramaRepos *trmInfo,const char *LitRes,char* swf,char*txt)
 {
 	int lon,ret;
 	TRAMA *trama=(TRAMA*)malloc(LONGITUD_TRAMA);
@@ -799,9 +686,14 @@ bool respuesta_peticion(TramaRepos *trmInfo,const char *LitRes,char* swf,char*tx
 }
 //_______________________________________________________________________________________________________________
 //
-// Comprueba si existe un fichero
+// Función: EliminaFichero
+//
+//	 Descripción:
+// 		Comprueba si existe un fichero
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
-bool EliminaFichero(TramaRepos *trmInfo)
+BOOLEAN EliminaFichero(TramaRepos *trmInfo)
 {
 	char swf[2];
 	char cmdshell[512];
@@ -819,10 +711,14 @@ bool EliminaFichero(TramaRepos *trmInfo)
 	return(respuesta_peticion(trmInfo,"Respuesta_EliminaFichero",swf,nomfile));
 }
 //_______________________________________________________________________________________________________________
+// Función: LeeFicheroTexto
 //
-// Comprueba si existe un fichero
+//	 Descripción:
+// 		Comprueba si existe un fichero
+//	 Parámetros:
+//		trmInfo: Puntero a una estructura del tipo TramaRepos
 //_______________________________________________________________________________________________________________
-bool LeeFicheroTexto(TramaRepos *trmInfo)
+BOOLEAN LeeFicheroTexto(TramaRepos *trmInfo)
 {
 	char *texto;
 	long lSize;
@@ -867,7 +763,7 @@ bool LeeFicheroTexto(TramaRepos *trmInfo)
 //	Devuelve:
 //		true siempre aunque escribe en log si hay error
 // ________________________________________________________________________________________________________
-bool mandaFichero(TramaRepos *trmInfo)
+BOOLEAN mandaFichero(TramaRepos *trmInfo)
 {
 	char *b,*l;
 	FILE *f;
@@ -900,10 +796,14 @@ bool mandaFichero(TramaRepos *trmInfo)
 	return(true);
 }
 //_______________________________________________________________________________________________________________
+// Función: sesionMulticast
 //
-// Comprueba si debe comenzar una sesión multicast para envio de imagenes
+//		Descripción:
+//    		Comprueba si debe comenzar una sesión multicast para envio de imagenes
+//		Parámetros:
+//			- trmInfo : Trama recibida
 //_______________________________________________________________________________________________________________
-bool sesionMulticast(TramaRepos *trmInfo)
+BOOLEAN sesionMulticast(TramaRepos *trmInfo)
 {
 	char *ide,*iph,*nip,cmdshell[512];
 	int res;
@@ -921,15 +821,16 @@ bool sesionMulticast(TramaRepos *trmInfo)
 	return(true);
 }
 // ________________________________________________________________________________________________________
-// Función: cliente_existente
+// Función: iniSesionMulticast
 //
-//		 Descripción:
+//		Descripción:
 // 			Devuelve true o false dependiendo de si se está esperando comenzar una sesioón multicast
-//		Parametros:
-//				- ip : La ip del cliente a incorporar a la sesión
-//				- ide: Identificador de la sesión
+//		Parámetros:
+//			- iph : La ip del cliente a incorporar a la sesión
+//			- ide: Identificador de la sesión
+//			- nip: Número de ordenadores
 // ________________________________________________________________________________________________________
-bool iniSesionMulticast(char *iph,char *ide,char *nip)
+BOOLEAN iniSesionMulticast(char *iph,char *ide,char *nip)
 {
 	int i,numipes,sw,idx;
 
@@ -970,9 +871,9 @@ bool iniSesionMulticast(char *iph,char *ide,char *nip)
 // Función: hay_hueco
 //
 // 		Descripción:
-// 			Esta funcin devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
-// 			Parametros:
-// 				- idx:   Primer indice libre que se podrn utilizar
+// 			Esta función devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
+// 		Parametros:
+// 			- idx:   Primer indice libre que se podrn utilizar
 // ________________________________________________________________________________________________________
 int hay_hueco(int *idx)
 {
@@ -986,57 +887,14 @@ int hay_hueco(int *idx)
 	}
 	return(FALSE);
 }
-// ________________________________________________________________________________________________________
-// Función: cuenta_ipes
-//
-//		Descripción:
-// 			Cuenta las comas (caracter de separacion) de las cadenas de ipes
-//		Parámetros:
-//			- parametros : La cadena a explorar
-// ________________________________________________________________________________________________________
-int cuenta_ipes(char* iph)
-{
-	int lon,i,cont=1;
-	lon=strlen(iph);
-	for(i=0;i<lon;i++){
-		if(iph[i]==';') cont++;
-	}
-	return(cont);
-}
-// ________________________________________________________________________________________________________
-// Función: IgualIP
-//
-//		 Descripción:
-//			Comprueba si una cadena con una ipe estnincluidad en otra que  contienen varias direcciones ipes separas por punto y coma
-//		Parámetros:
-//			- cadenaiph: Cadena de IPes
-//			- ipcliente: Cadena de la ip a buscar
-// ________________________________________________________________________________________________________
-int IgualIP(char *cadenaiph,char *ipcliente)
-{
-	char *posa,*posb;
-	int lon;
 
-	posa=strstr(cadenaiph,ipcliente);
-	if(posa==NULL) return(FALSE); // No existe la IP en la cadena
-	posb=posa; // Iguala direcciones
-	while(TRUE){
-		posb++;
-		if(*posb==';') break;
-		if(*posb=='\0') break;
-		if(*posb=='\r') break;
-	}
-	lon=strlen(ipcliente);
-	if((posb-posa)==lon) return(TRUE); // IP encontrada !!!!
 
-	return(FALSE);
-}
 //_________________________________________________________________________________________________
-//	Funcin: Buffer
+//	Función: Buffer
 //
-//	Descripcin:
+//	Descripción:
 // 		Reserva memoria  
-//	parámetros:
+//	Parámetros:
 //		- l: 	Longitud en bytes de la reserva
 //	Devuelve:
 //		Un puntero a la memoria reservada
@@ -1054,7 +912,12 @@ char * Buffer(int l)
 }
 //_______________________________________________________________________________________________________________
 //
-// Crea un socket en un puerto determinado para la conversacin UDP con el repositorio
+// Función: TomaPuertoLibre
+//
+//	  Descripción:
+//  	Crea un socket en un puerto determinado para la conversación UDP con el repositorio
+//	  Parámetros:
+//		 - puerto: 	Puerto para la creación del socket
 // 
 //_______________________________________________________________________________________________________________
 int TomaPuertoLibre(int * puerto)
@@ -1085,11 +948,12 @@ int TomaPuertoLibre(int * puerto)
 	return(true);
 }
 //________________________________________________________________________________________________________
-// Funcinn: TomaRestoConfiguracion;
+// Función: RESPUESTA_inclusionREPO
 //
-//		Descripcinn:
-//		Esta funcinn lee la trama respuesta de inclusin del repositorio hidra
-
+//		Descripción:
+//			Esta función lee la trama respuesta de inclusión del repositorio hidra
+//	    Parámetros:
+//		    - trama: trama a leer
 //________________________________________________________________________________________________________
 int RESPUESTA_inclusionREPO(TRAMA *trama)
 {
@@ -1146,7 +1010,7 @@ int main(int argc, char **argv)
                    if (argv[i+1]!=NULL)
                        strcpy(szPathFileCfg, argv[i+1]);
 				else{
-					RegistraLog("Fallo en los parámetros: Debe especificar el fichero de configuracin del servicio",false);
+					RegistraLog("Fallo en los parámetros: Debe especificar el fichero de configuración del servicio",false);
 					exit(EXIT_FAILURE);
 				}
                    break;
@@ -1159,7 +1023,7 @@ int main(int argc, char **argv)
 				}
                    break;
                default:
-                   	RegistraLog("Fallo de sintaxis en los parámetros: Debe especificar -f nombre_del_fichero_de_configuracin_del_servicio -l nombre_del_fichero_de_log_del_servicio",false);
+                   	RegistraLog("Fallo de sintaxis en los parámetros: Debe especificar -f nombre_del_fichero_de_configuracion_del_servicio -l nombre_del_fichero_de_log_del_servicio",false);
 					exit(EXIT_FAILURE);
                    break;
            }

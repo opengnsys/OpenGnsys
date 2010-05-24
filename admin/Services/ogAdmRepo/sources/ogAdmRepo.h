@@ -20,55 +20,27 @@
 #include <pthread.h>
 #include <signal.h>
 #include "Database.h"
-#include "encriptacion.h"
+#include "ogAdmLib.h"
 
 
-#define LONGITUD_PARAMETROS 4000	// Longitud mínima de la información de la trama (parametros)
-#define LONGITUD_CABECERATRAMA	11 // Longitud mínima de la trama completa
-#define LONGITUD_TRAMA LONGITUD_PARAMETROS+LONGITUD_CABECERATRAMA	// Longitud mínima de la trama completa
-
-#define MAXIMOS_CLIENTES  4000 // M?imo numero de clientes rembo controlados por el servidor rembo
+#define MAXIMOS_CLIENTES  4000 // Máximo número de clientes rembo controlados por el servidor rembo
 #define MAXIMAS_MULSESIONES 1000 // Máximo numero de sesiones multicast activas simultaneamente
-#define MAXCNX 5		// Mximos intentos de conexin al servidor HIDRA
 #define PUERTO_WAKEUP			9	// Puerto por defecto del wake up
 
-#define PUERTOMINUSER 20000
-#define PUERTOMAXUSER 60000
 
-#define LEER		0
-#define ESCRIBIR	1
 
-#define TRUE 1
-#define FALSE 0
-
-#define true 1
-#define false 0
-
-#define SOCKET_ERROR            (-1)
-#define INVALID_SOCKET  (SOCKET)(~0)
-
-typedef unsigned long DWORD;
-typedef unsigned short  WORD;
-typedef  int  BOOL;
-typedef char  BYTE;
-typedef  int  SOCKET;
 typedef  void* LPVOID;
 
-typedef struct{		// EstructUra de la trama recibida
-	char arroba;	// cabecera de la trama
-	char identificador[9];	// identificador de la trama
-	char ejecutor;	// ejecutor de la trama 1=el servidor rembo  2=el cliente rembo
-	char parametros[LONGITUD_PARAMETROS]; // Contenido de la trama (par?etros)
-}TRAMA;
 
-// Estructura para trabajar en cada hebra con el cliente en cuestion
+
+// Estructura para trabajar en cada hebra con el cliente en cuestión
 struct  TramaRepos{
 	SOCKET sck;
 	struct sockaddr_in cliente;
 	socklen_t sockaddrsize;
 	TRAMA trama;
 };
-char szPathFileCfg[128],szPathFileLog[128];
+
 FILE *FLog,*Fconfig;
 SOCKET sClient;
 
@@ -103,15 +75,14 @@ char PathPXE[250]; // path al directorio PXE
 
 char PathComandos[250]; // path al directorio donde se depositan los comandos para los clientes
 char PathUsuarios[250]; // path al directorio donde se depositan los ficheros de login de los operadores
-char PathIconos[250]; // path al directorio donde se depositan los iconos de los items de los mens
+char PathIconos[250]; // path al directorio donde se depositan los iconos de los items de los menús
 
 // Prototipos de funciones
-void RegistraLog(const char *,int );
-int split_parametros(char **,char *, char * );
+
+
 int TomaConfiguracion(char* );
-void INTROaFINCAD(char* );
-void FINCADaINTRO(char*,char*);
-char * toma_parametro(const char* ,char *);
+
+
 int ClienteExistente(TramaRepos *);
 LPVOID GestionaServicioRepositorio(LPVOID);
 int	Actualizar(TramaRepos*);
@@ -122,13 +93,13 @@ int levanta(char *);
 int FicheroOperador(TramaRepos *);
 int IconoItem(TramaRepos *);
 
-bool ExisteFichero(TramaRepos *);
-bool EliminaFichero(TramaRepos *);
-bool LeeFicheroTexto(TramaRepos *);
-bool mandaFichero(TramaRepos *);
+BOOLEAN ExisteFichero(TramaRepos *);
+BOOLEAN EliminaFichero(TramaRepos *);
+BOOLEAN LeeFicheroTexto(TramaRepos *);
+BOOLEAN mandaFichero(TramaRepos *);
 int gestiona_comando(TramaRepos *);
-bool respuesta_peticion(TramaRepos *,const char*,char*,char*);
-SOCKET Abre_conexion(char *,int);
+BOOLEAN respuesta_peticion(TramaRepos *,const char*,char*,char*);
+
 int envia_tramas(SOCKET,TRAMA *);
 int recibe_tramas(SOCKET ,TRAMA *);
 int inclusion_REPO();
@@ -139,8 +110,8 @@ int Apagar(TramaRepos *);
 char * Buffer(int );
 int TomaPuertoLibre(int *);
 void NwGestionaServicioRepositorio(TramaRepos *);
-bool sesionMulticast(TramaRepos *);
-bool iniSesionMulticast(char *,char *,char *);
+BOOLEAN sesionMulticast(TramaRepos *);
+BOOLEAN iniSesionMulticast(char *,char *,char *);
 int hay_hueco(int *idx);
-int cuenta_ipes(char*);
-int IgualIP(char *,char *);
+
+
