@@ -14,7 +14,6 @@ OPCS := -O0 -g -Wall	# Depuracion
 # Ficheros objetos
 OBJS := sources/ogAdmClient.o
 
-
 all: $(PROYECTO)
 
 $(PROYECTO): $(OBJS)
@@ -28,6 +27,6 @@ sources/%.o: sources/%.cpp
 	g++ $(OPCS) -c -o"$@" "$<"
 
 sources/%.o: sources/%.c
-	gcc $(OPCS) -c -o"$@" "$<"
+	gcc $(OPCS) -I ../includes -c -o"$@" "$<"
 
 
