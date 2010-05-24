@@ -15,7 +15,7 @@ CPPFLAGS := $(CFLAGS)
 LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
 
 # Ficheros objetos
-OBJS := ../includes/Database.o ../includes/encriptacion.o sources/ogAdmRepo.o 
+OBJS := ../includes/Database.o  sources/ogAdmRepo.o 
 
 
 all: $(PROYECTO)
@@ -35,9 +35,9 @@ uninstall: clean
 	rm -f /usr/local/sbin/$(PROYECTO) /usr/local/etc/$(PROYECTO).cfg
 
 sources/%.o: sources/%.cpp
-	g++ $(CPPFLAGS) -c -o"$@" "$<"
+	g++ $(CPPFLAGS) -I ../includes -c -o"$@" "$<"
 
 sources/%.o: sources/%.c
-	gcc $(CFLAGS) -c -o"$@" "$<"
+	gcc $(CFLAGS) -I ../includes -c -o"$@" "$<"
 
 
