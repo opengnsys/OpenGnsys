@@ -17,48 +17,24 @@
 #include <ctype.h>
 #include <time.h>
 #include <signal.h>
- 
-#define LEER		0
-#define ESCRIBIR	1
+#include "ogAdmLib.h"
+
 
 #define LONGITUD_SCRIPTSALIDA 4064	// Longitud máxima de la informacin devuelta por un script
-#define LONGITUD_PARAMETROS_TRAMA 4024	// Longitud máima de la informacin de la trama (parametros)
-#define LONGITUD_TRAMA LONGITUD_PARAMETROS_TRAMA+11	// Longitud máxima de la trama completa
-#define LONGITUD_CONFIGURACION 1024	// Longitud mxima de las configuraciones de particin
-#define MAX_NUM_CSADDRS        20
-#define MAX_INTERFACE_LIST     20
-#define MAXCNX 5		// Máximos intentos de conexión al servidor de Administración
+#define LONGITUD_PARAMETROS_TRAMA 4024	// Longitud máxima de la información de la trama (parametros)
+
+#define LONGITUD_CONFIGURACION 1024	// Longitud máxima de las configuraciones de partición
+
+
 #define MAXITEMS 100
 #define MAXHTMLMNU 4000
 #define MAXPARTICIONES 24
-#define MAXINFOSO 5 // Numero máximo de nemonicos enla inforamción del S.O. de una partición 
+#define MAXINFOSO 5 // Numero máximo de nemónicos enla inforamción del S.O. de una partición
 #define MAXARGS 16 // Numero máximo de argumentos enviados a un scripts 
 #define LONSTD 512 // Longitud de memoria estandar 
 #define LONSTDC 256 // Longitud de memoria estandar corta
 
-#define PUERTOMINUSER 20000
-#define PUERTOMAXUSER 60000
 
-#define TRUE 1
-#define FALSE 0
-
-#define true 1
-#define false 0
-
-#define SOCKET_ERROR            (-1)
-#define INVALID_SOCKET  (SOCKET)(~0)
-
-typedef unsigned short  WORD;
-typedef  int  BOOL;
-typedef char  BYTE;
-typedef  int  SOCKET;
-
-typedef struct{		// EstructUra de la trama recibida
-	char arroba;	// cabecera de la trama
-	char identificador[9];	// identificador de la trama
-	char ejecutor;	// ejecutor de la trama 1=el servidor de admistración  2=el cliente 3=el repositorio
-	char parametros[LONGITUD_PARAMETROS_TRAMA]; // Contenido de la trama (par?etros)
-}TRAMA;
 
 TRAMA trama[1];
 
@@ -66,8 +42,7 @@ char IPlocal[20];		// Ip local
 char Servidorhidra[20]; // IP servidor de Administración
 char Puerto[20]; 		// Puerto Unicode
 
-char szPathFileCfg[128];
-char szPathFileLog[128];
+
 
 //___________________________________________________________________________________________________
 // Variables y estructuras
@@ -99,8 +74,8 @@ int Win2K=3;
 int WinXP=4; 
 int Linux=5;
 	 	
-BOOL PROCESO=true;			// Indicador de la actividad del proceso principal
-BOOL CACHEEXISTS;			// Indica si existe cache
+BOOLEAN PROCESO=true;			// Indicador de la actividad del proceso principal
+BOOLEAN CACHEEXISTS;			// Indica si existe cache
 
 char HIDRACHEIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en la caché)
 char HIDRASRVIMAGENES[LONSTDC];	// Path al directorio donde están las imágenes (en el repositorio)
@@ -111,31 +86,31 @@ char URLMSG[LONSTDC]; // Url de la página de mensajed para el browser
 
 
 int HIDRAVER;	// Versión de la apliación de Administración
-int TPAR ;	// Tamaño de la particin
+int TPAR ;	// Tamaño de la partición
 	
 SOCKET sock;	// Socket
 
 struct s_CabMnu {
-	char resolucion[2];			 // Resolucin de pantalla
-	char titulo[LONSTDC];						// Titulo del menu
+	char resolucion[2];			 // Resolución de pantalla
+	char titulo[LONSTDC];						// Título del menú
 	char coorx[4];					// Coordenada x
 	char coory[4];					// Coordenada y
-	char modalidad[2];		// modalidad ( numero de items por linea )
-	char scoorx[4];				// Coordenada x // Menu privado
+	char modalidad[2];		// modalidad ( número de items por línea )
+	char scoorx[4];				// Coordenada x // Menú privado
 	char scoory[4];				// Coordenada y
-	char smodalidad[LONSTDC];		// modalidad ( numero de items por linea )
-	char htmmenupub[64];	// Nombre del fichero que contiene el html del menu (público)
-	char htmmenupri[64];		// Nombre del fichero que contiene el html del menu (privado)
+	char smodalidad[LONSTDC];		// modalidad ( número de items por línea )
+	char htmmenupub[64];	// Nombre del fichero que contiene el html del menú (público)
+	char htmmenupri[64];		// Nombre del fichero que contiene el html del menú (privado)
 } CabMnu;  // Estructura con los datos de los menús
 	
-BOOL swmnu=false; // Indicador de menu asignado
+BOOLEAN swmnu=false; // Indicador de menú asignado
 	
 struct s_Item{
 	char idaccionmenu[16];	// Identificador del item a ejecutar
-	char urlimg[64];	// Nombre de la imagen de fonfo del botn
+	char urlimg[64];	// Nombre de la imagen de fondo del botón
 	char literal[LONSTDC];	// Literal del item
-	char tipoitem[2];	// Tipo de otem ( público o privado)
-	char tipoaccion[2];	// Tipo de accin que ejecuta el item
+	char tipoitem[2];	// Tipo de item ( público o privado)
+	char tipoaccion[2];	// Tipo de acción que ejecuta el item
 } ;
 	
 struct s_Propiedades {
@@ -144,7 +119,7 @@ struct s_Propiedades {
 	char idaula[16];								// Identificador del aula
 	char servidorhidra[64];				// IP  del servidor HUDRA
 	char puerto[16];								// Puerto
-	char iprepo[16];								// Direción IP repositorio	
+	char iprepo[16];								// Dirección IP repositorio
 	char puertorepo[16];								// Puerto	
 	char idperfilhard[16];					// Identificador del perfil hardware
 	char IPlocal[16];
@@ -153,16 +128,16 @@ struct s_Propiedades {
 	
 struct s_Particiones{
 	char tiposo[64];				// Tipo de sistema operativo 
-	char tipopart[16];			// Tipo de particin
-	char tamapart[16];  		// Tamao de la particin
-	char numpart[5];  		// Nmero de la particin
+	char tipopart[16];			// Tipo de partición
+	char tamapart[16];  		// Tamao de la partición
+	char numpart[5];  		// Nmero de la partición
 	char nombreso[64];    // Nombre del S.O.
 };
 	
 struct s_Hardware{
 	char nemonico[4];				// Tipo de sistema operativo 
 	char tipo[45];			// Tipo de hardware
-	char codigovalor[256];  		// Codigo o descripcion
+	char codigovalor[256];  		// Código o descripción
 }
 ;	
 struct tiposo {
@@ -191,12 +166,12 @@ int ntiposo = sizeof (tiposos) / sizeof (struct tiposo);
 struct s_Item tbMenu[MAXITEMS];			// Tabla con los items del menu
 int contitems;			// Contador items del menu
 	
-BOOL PRCCMD;		// Indicador de comandos interactivos
-BOOL CMDPTES;	// Indicador de comandos pendientes
+BOOLEAN PRCCMD;		// Indicador de comandos interactivos
+BOOLEAN CMDPTES;	// Indicador de comandos pendientes
 	
-//char modulo[64];	// Nombre de la funcin donde se produce el error
+//char modulo[64];	// Nombre de la función donde se produce el error
 
-BOOL aut = false; // Variable para controlar el acceso al menu de administracion
+BOOLEAN aut = false; // Variable para controlar el acceso al menú de administración
 
 pid_t  pidmenu;
 
@@ -253,21 +228,18 @@ void Log(char*);
 void UltimoError(int,char*);
 void UltimoErrorScript(int,char*);
 
-void INTROaFINCAD(char*);
-char* TomaParametro(char*,char*);
-int SplitParametros(char**,char*, char*);
-
 int EjecutarScript (char*,char* ,char*,int);
 char* ReservaMemoria(int);
+int EjecutarCodigo (char*,char* ,char*,int);
 
 SOCKET TCPConnect(char *,char* );
 void TCPClose(SOCKET);
 int AbreConexionTCP(void);
 void CierraConexionTCP(void);
 int EnviaTramasHidra(SOCKET,TRAMA*);
-int RecibeTramasHidra(SOCKET,TRAMA*);
+
 int TCPWrite(SOCKET ,TRAMA*);
-int TCPRead(SOCKET ,TRAMA*);
+
 SOCKET UDPConnect();
 int EnviaTramaRepo(SOCKET,TRAMA*,char*,char*);
 int RecibeTramaRepo(SOCKET,int);
