@@ -116,7 +116,8 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 						<TABLE  class=menupral align=left cellPadding=1 cellSpacing=0 >
 						  <TR valign=baseline>
 							<TD width=10><IMG src="./images/iconos/pomo.gif"></TD>
-							<? if($idtipousuario!=$SUPERADMINISTRADOR){?>
+							
+								<? if($idtipousuario!=$SUPERADMINISTRADOR){?>
 								<TD  onclick=eleccion(this,1)  onmouseout=desresaltar(this) onmouseover=resaltar(this) >
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/centros.gif">&nbsp;<SPAN class="menupral"><?echo $TbMsg[0]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
@@ -132,9 +133,16 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 								<TD  onclick=eleccion(this,5) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confisoft.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[4] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+								<? if($_SESSION["repcentralizado"]==0) {?>
+
 								<TD  onclick=eleccion(this,6) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/servidores.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[5] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+								<?}?>								
+
 								<TD  onclick=eleccion(this,7) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/menus.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[6] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
@@ -153,6 +161,18 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
 											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+											<? if($_SESSION["repcentralizado"]==1) {?>
+											<TD  onclick=eleccion(this,6) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/servidores.gif">
+											<SPAN class=menupral ><?echo  $TbMsg[5] ?></SPAN></A>&nbsp;</TD>
+											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+											<?}?>
+
+
+
+											
 									<?}?>
 							<?}?>
 

@@ -12,6 +12,9 @@ include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");
 include_once("../clases/AdoPhp.php");
+include_once("../includes/TomaDato.php");
+include_once("../includes/HTMLSELECT.php");
+include_once("../includes/HTMLCTESELECT.php");
 include_once("../idiomas/php/".$idioma."/propiedades_servidoresrembo_".$idioma.".php"); 
 //________________________________________________________________________________________________________
 $opcion=0;
@@ -25,7 +28,9 @@ $pathrembod="/opt/opengnsys/admin";
 $pathpxe="/opt/opengnsys/tftpboot/pxelinux.cfg";
 $grupoid=0;
 $comentarios="";
-$ordenadores=0; // N�mero de ordenador a los que da servicio
+$ordenadores=0; // Numero de ordenador a los que da servicio
+
+$idcentro=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idservidorrembo"])) $idservidorrembo=$_GET["idservidorrembo"]; 
@@ -34,16 +39,16 @@ if (isset($_GET["identificador"])) $idservidorrembo=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�n con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexion con servidor B.D.
 if  ($opcion!=$op_alta){
 	$resul=TomaPropiedades($cmd,$idservidorrembo);
 	if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci�n de datos.
+		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperacion de datos.
 }
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
+<TITLE>Administracion web de aulas</TITLE>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
@@ -111,7 +116,23 @@ if  ($opcion!=$op_alta){
 			else	
 				echo'<TD><INPUT  class="formulariodatos" name=pathpxe type=text style="width:200" value="'.$pathpxe.'"></TD>';
 			?>
-		</TR>		
+		</TR>	
+
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->  
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+			
+					echo '<TD colspan=1>'.TomaDato($cmd,0,'centros',$idcentro,'idcentro','nombrecentro').'</TD>';						
+					
+				else
+					echo '<TD colspan=1>'.HTMLSELECT($cmd,0,'centros',$idcentro,'idcentro','nombrecentro',200).'</TD>';
+			?>
+		</TR>
+	
+	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
@@ -142,7 +163,7 @@ include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
 //	Recupera los datos de un servidor rembo
 //		Parametros: 
-//		- cmd: Una comando ya operativo (con conexi�n abierta)  
+//		- cmd: Una comando ya operativo (con conexion abierta)  
 //		- id: El identificador del servidor
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
@@ -153,6 +174,8 @@ function TomaPropiedades($cmd,$id){
 	global $pathrembod;
 	global $pathpxe;
 	global $ordenadores;
+	
+	global $idcentro;
 
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM servidoresrembo WHERE idservidorrembo=".$id;
@@ -166,6 +189,9 @@ function TomaPropiedades($cmd,$id){
 		$puertorepo=$rs->campos["puertorepo"];
 		$pathrembod=$rs->campos["pathrembod"];
 		$pathpxe=$rs->campos["pathpxe"];
+		
+		$idcentro=$rs->campos["idcentro"];	
+		
 		$rs->Cerrar();
 		$cmd->texto="SELECT count(*) as numordenadores FROM ordenadores WHERE idservidorrembo=".$id;
 		$rs->Comando=&$cmd; 

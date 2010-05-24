@@ -16,4 +16,5 @@ $TbMsg[7]="Comentarios";
 $TbMsg[8]="Puerto clientes"; 
 $TbMsg[9]="Directorio Base"; 
 $TbMsg[10]="Directorio PXE"; 
+$TbMsg[11]="Unidad organizativa"; 
 ?>

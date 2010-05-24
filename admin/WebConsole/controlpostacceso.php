@@ -133,7 +133,7 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
  //        - ips: Dirección IP del servidor de administración   
  //        - prt: Puerto de comunicaciones
  //        - pclo: Protocolo de clonación
- //	   - rep: Uso de repositorio centralizado
+ //	     - rep: Uso de repositorio centralizado
  // 
  //    Devuelve datos generales de configuración del sistema
  //_______________________________________________________________________________________________________ 

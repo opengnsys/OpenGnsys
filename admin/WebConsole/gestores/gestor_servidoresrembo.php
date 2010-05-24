@@ -27,6 +27,8 @@ $pathremboconf="";
 $pathrembod="";
 $pathpxe="";
 
+$idcentro=0;
+
 $grupoid=0;
 $puertorepo="";
 $comentarios="";
@@ -45,6 +47,8 @@ if (isset($_GET["pathrembod"])) $pathrembod=$_GET["pathrembod"];
 if (isset($_GET["pathpxe"])) $pathpxe=$_GET["pathpxe"]; 
 if (isset($_GET["puertorepo"])) $puertorepo=$_GET["puertorepo"];
 if (isset($_GET["comentarios"])) $comentarios=$_GET["comentarios"];
+
+if (isset($_GET["idcentro"])) $idcentro=$_GET["idcentro"];
 
 $tablanodo=""; // Arbol para nodos insertados
 
@@ -126,6 +130,8 @@ function Gestiona(){
 
 	global	$tablanodo;
 
+
+
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idcentro",$idcentro,1);
 
@@ -138,6 +144,8 @@ function Gestiona(){
 	$cmd->CreaParametro("@pathpxe",$pathpxe,0);
 	$cmd->CreaParametro("@puertorepo",$puertorepo,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
+
+
 
 	switch($opcion){
 		case $op_alta :
