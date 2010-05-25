@@ -119,7 +119,7 @@ function installDependencies ()
 		echoAndLog "${FUNCNAME}(): no deps needed."
     else
         while [ $# -gt 0 ]; do
-            dpkg -s $1 | grep Status | grep -qw install &>/dev/null
+            dpkg -s $1 &>/dev/null | grep Status | grep -qw install
             if [ $? -ne 0 ]; then
                 INSTALLDEPS="$INSTALLDEPS $1"
             fi
@@ -195,7 +195,7 @@ function getNetworkSettings()
 
 function updateServicesStart(){
 	echoAndLog "${FUNCNAME}(): Updating /etc/init.d/opengnsys ..."
-    cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
 	if [ $? != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
 		exit 1
@@ -302,7 +302,7 @@ function updateServerFiles () {
 		rsync --exclude .svn -irplt "${SOURCES[$i]}" "${INSTALL_TARGET}/${TARGETS[$i]}"
 	done
 	popd >/dev/null
-    echoAndLog "${FUNCNAME}(): server files updated successfully."
+	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
 
 ####################################################################
@@ -351,26 +351,26 @@ function updateClient()
 	OSCODENAME=$(lsb_release -c | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v "$OSCODENAME"
+        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh "$OSCODENAME"
+        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh $OSCODENAME 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 	else
 		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
+        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 		echoAndLog "${FUNCNAME}(): Loading default udeb files."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh
+        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
 			hayErrores=1
@@ -432,14 +432,14 @@ fi
 # Copiando ficheros complementarios del servidor
 updateServerFiles
 if [ $? -ne 0 ]; then
-    errorAndLog "Error updating OpenGnSys Server files"
+	errorAndLog "Error updating OpenGnSys Server files"
 	exit 1
 fi
 
 # Copiando paqinas web
 updateWebFiles
 if [ $? -ne 0 ]; then
-    errorAndLog "Error updating OpenGnSys Web Admin files"
+	errorAndLog "Error updating OpenGnSys Web Admin files"
 	exit 1
 fi
 # Generar páginas Doxygen para instalar en el web
@@ -454,7 +454,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Actualizamos el fichero que arranca los servicios de OpenGnSys
-
 updateServicesStart
 
 # Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes

@@ -112,7 +112,7 @@ function checkPackage()
 		exit 1
 	fi
 	echoAndLog "checkPackage(): checking if package $package exists"
-	dpkg -s $package | grep Status | grep -qw install &>/dev/null
+	dpkg -s $package &>/dev/null | grep Status | grep -qw install
 	if [ $? -eq 0 ]; then
 		echoAndLog "checkPackage(): package $package exists"
 		return 0
@@ -915,26 +915,26 @@ function openGnsysClientCreate()
 	OSCODENAME=$(lsb_release -c | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v "$OSCODENAME"
+        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh "$OSCODENAME"
+        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh $OSCODENAME 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 	else
 		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot/
+        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
 			hayErrores=1
 		fi
 		echoAndLog "${FUNCNAME}(): Loading default udeb files."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh
+        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh 2>&1 | tee -a $LOG_FILE
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
 			hayErrores=1
