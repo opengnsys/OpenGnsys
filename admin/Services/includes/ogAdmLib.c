@@ -141,18 +141,19 @@ void RegistraLog(const char *msg, int swerrno) {
 	fclose(FLog);
 
 	// Lo muestra por consola
-	printf("%02d/%02d/%d %02d:%02d ***%s\n", timeinfo->tm_mday,
+	/*printf("%02d/%02d/%d %02d:%02d ***%s\n", timeinfo->tm_mday,
 			timeinfo->tm_mon + 1,
 			timeinfo->tm_year + 1900,
 			timeinfo->tm_hour,
 			timeinfo->tm_min,
 			msg);
+	*/
 }
 // ________________________________________________________________________________________________________
 // Función: TomaHora
 //
 //		Descripción:
-//			Esta funcin toma la hora actual  del sistema y devuelve una estructura conlos datos
+//			Esta función toma la hora actual  del sistema y devuelve una estructura conlos datos
 // ________________________________________________________________________________________________________
 struct tm * TomaHora() {
 	time_t rawtime;

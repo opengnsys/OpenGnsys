@@ -3,9 +3,9 @@
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Año 2003-2004
 // Fecha Última modificación: Marzo-2006
-// Nombre del fichero: ogAdmServer.php
+// Nombre del fichero: ogAdmServer.cpp
 // Descripción : 
-//		
+//		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Servidor.
 // ****************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
@@ -4303,7 +4303,7 @@ int tomaIpRepoPort(char *iph, char *ipr, char *rep) {
 	return (true);
 }
 //************************************************************************************************************************************************
-// PROGRAMA PRINCIPAL ( SERVICIO)
+// PROGRAMA PRINCIPAL (SERVICIO)
 //***************************************************************************************************************************************************
 int main(int argc, char *argv[]) {
 	SOCKET socket_s; // Socket donde escucha el servidor

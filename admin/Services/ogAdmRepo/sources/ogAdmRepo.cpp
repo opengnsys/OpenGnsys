@@ -2,7 +2,7 @@
 //	Aplicación OpenGNSys
 //	Autor: José Manuel Alonso.
 //	Licencia: Open Source 
-//	Fichero: ogAdmServer.cpp
+//	Fichero: ogAdmRepo.cpp
 //	Descripción:
 //		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Repositorio.
 // ****************************************************************************************************************************************************

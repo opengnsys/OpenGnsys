@@ -1931,8 +1931,6 @@ char* TomaNomSO(char*disco,int particion)
 // ________________________________________________________________________________________________________
 int MuestraMenu(char *urp)
 {
-	return(true);
-
 	int nargs,resul;
 
 	if(ndebug>4){

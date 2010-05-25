@@ -2,7 +2,7 @@
 //	Aplicación OpenGNSys
 //	Autor: José Manuel Alonso.
 //	Licencia: Open Source 
-//	Fichero: ogAdmServer.cpp
+//	Fichero: ogAdmServer.h
 //	Descripción:
 //		Este módulo de la aplicación OpenGNSys implementa las comunicaciones con el Servidor.
 // ****************************************************************************************************************************************************
@@ -22,85 +22,27 @@
 #include "Database.h"
 #include "ogAdmLib.h"
 
-#define MAXCMD_PARAMETROS  200  // Máximo número de parámetros de una trama de comandos
-#define MAXIMOS_SOCKETS    4000 // Máximo número de conexiones con ordenadores clientes
-#define MAXIMOS_SRVRMB		200 // Máximo número de servidores rembo
-#define MAXLON_PARAMETROSIPH  3000 // Máxima longitud de un parametro iph
-
-
-
-#define MAXHARDWARE 128 //	 MÁXIMOS ELEMENTOS HARDSWARE A DETECTAR
-#define MAXSOFTWARE 2048 //	 MÁXIMOS ELEMENTOS SOFTWARE A DETECTAR
-
-
-
-#define COMILLAS_SIMPES 0x27 
-#define DOBLES_COMILLAS 0x22 
-#define BARRA_INVERTIDA 0x5c 
-
-#define LITAMBITO_CENTROS		"centros"
-#define LITAMBITO_GRUPOSAULAS		"gruposaulas"
-#define LITAMBITO_AULAS			"aulas"
-#define LITAMBITO_GRUPOSORDENADORES	"gruposordenadores"
-#define LITAMBITO_ORDENADORES		"ordenadores"
-
-#define ACCION_EXITOSA		"1" // Finalizada con éxito
-#define ACCION_FALLIDA		"2" // Finalizada con errores
-#define ACCION_TERMINADA	"3" // Finalizada manualmente con indicación de éxito
-#define ACCION_ABORTADA		"4" // Finalizada manualmente con indicación de errores
-#define ACCION_SINERRORES	"5" // Activa y sin ningn error
-#define ACCION_CONERRORES	"6" // Activa y con algn error
-
-#define ACCION_DETENIDA		"0" // Acción momentanemente parada
-#define ACCION_INICIADA			"1" // Acción activa
-#define ACCION_FINALIZADA 	"2" // Acción finalizada
-
-#define PROCESOS 0x01
-
-#define EJECUCION_PROCEDIMIENTO	0x0000 // Acción Procedimiento
-#define EJECUCION_COMANDO	0x0001 // Acción Comando
-#define EJECUCION_TAREA		0x0002 // Acción Tarea
-#define EJECUCION_TRABAJO		0x0003 // Acción Trabajo
-
-#define EJECUTOR_servidorHIDRA	0x0001 // Ejecutor Servidor hidra
-#define EJECUTOR_clienteREMBO	0x0002 // Ejecutor cliente rembo
-#define EJECUTOR_servidorREMBO	0x0003 // Ejecutor Servidor rembo
-
-#define CLIENTE_REMBO	"RMB" // Sistema operativo Rembo
-#define CLIENTE_OCUPADO	"BSY" // Cliente ocupado
-#define CLIENTE_APAGADO	"OFF" // Cliente apagado
-#define CLIENTE_INICIANDO	"INI" // Cliente iniciando
-
 #define AUTOINCORPORACION_OFF	0x0000 // Los ordenadores no se pueden dar de alta autmáticamente
 #define AUTOINCORPORACION_ONA	0x0001 // Los ordenadores se pueden dar de alta automáticamente si existe el aula
 #define AUTOINCORPORACION_ONX	0x0002 // Los ordenadores se pueden dar de alta automáticamente y si no existe el aula la crea
-
-
-
-
-
-
-
-
 
 char ecofile[512],msglog[512];
 FILE *FLog,*Fconfig;
 char AulaUp[2];
 int aulaup;	// Switch para permitir  que un ordenador se de de alta automáticamente en un aula existenta
-						// Valores:
-						//	0: El ordenador No se da de alta automáticamente en un aula
-						//	1: El ordenador se da de alta en un aula si existe
-						//	2: El ordenador se da de alta en un aula si existe y si no existe la crea para darse de alta
+			// Valores:
+			//	0: El ordenador No se da de alta automáticamente en un aula
+			//	1: El ordenador se da de alta en un aula si existe
+			//	2: El ordenador se da de alta en un aula si existe y si no existe la crea para darse de alta
 
-char IPlocal[20];		// Ip local
-char servidorhidra[20]; 		// IP servidor HIDRA
-char Puerto[20]; 		// Puerto Unicode
-int puerto;				// Puerto
+char IPlocal[20]; // Ip local
+char servidorhidra[20]; // IP servidor HIDRA
+char Puerto[20]; // Puerto Unicode
+int puerto; // Puerto
 char usuario[20];
 char pasguor[20];
 char datasource[20];
 char catalog[50];
-
 
 
 struct s_socketCLRMB{ // Estructura usada para guardar información de los clientes
@@ -128,25 +70,15 @@ void* GestionaConexion(void*);
 void gestiona_comando(SOCKET s,TRAMA trama);
 int manda_comando(SOCKET sock,char* parametros);
 int manda_trama(SOCKET sock,TRAMA* trama);
-
 int manda_trama_servidorrembo(char* ,char *,int);
-
 SOCKET UDPConnect(char *);
 int envia_comandos(SOCKET ,TRAMA* , char* ,int);
-
-
 int hay_hueco(int *);
 BOOLEAN cliente_existente(char *,int*);
 int hay_huecoservidorrembo(int *);
 BOOLEAN servidorrembo_existente(char *,int*);
-
-
-
-
-
 char * corte_iph(char *);
 char * escaparComillas(char*);
-
 int respuesta_cortesia(SOCKET );
 int NoComandosPendientes(SOCKET);
 int Coloca_estado(char *,const char *,SOCKET);
@@ -178,9 +110,6 @@ int IconoItem(TRAMA*);
 int Conmutar(char *);
 int ConsolaRemota(char *);
 int RenovarItems(char *);
-
-
-
 
 void PurgarTablaSockets(char *);
 int borra_entrada(int);
@@ -225,7 +154,6 @@ int Toma_idservidorres(Database ,Table ,char*,char*,int*,int*);
 int tomaIpRepoPort(char *,char *,char *);
 void cambiacarac(char *,char , char );
 int TomaConfiguracion(char* );
-
 
 unsigned int TomaEnvio();
 int recibeFichero(char *,char *,char *,char *);

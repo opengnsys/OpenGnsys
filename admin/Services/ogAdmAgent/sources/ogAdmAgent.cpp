@@ -1,209 +1,130 @@
 // *************************************************************************
-// AplicaciÛn: OPENGNSYS
-// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha CreaciÛn: AÒo 2003-2004
-// Fecha ⁄ltima modificaciÛn: Marzo-2006
-// Nombre del fichero: ogAdmServer.php
-// DescripciÛn : 
+// Aplicaci√≥n: OPENGNSYS
+// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaci√≥n: A√±o 2003-2004
+// Fecha √öltima modificaci√≥n: Marzo-2006
+// Nombre del fichero: ogAdmAgent.cpp
+// Descripci√≥n :
 //		
 // ****************************************************************************
 #include "ogAdmAgent.h"
 #include "ogAdmLib.c"
-// _____________________________________________________________________________________________________________
-// FunciÛn: inicializa
+
+//________________________________________________________________________________________________________
 //
-//		DescripciÛn:
-//			Esta funciÛn nicializa variables
-// _____________________________________________________________________________________________________________
-void inicializa()
-{
-	dias_meses[1]=31;
-	dias_meses[2]=28;
-	dias_meses[3]=31;
-	dias_meses[4]=30;
-	dias_meses[5]=31;
-	dias_meses[6]=30;
-	dias_meses[7]=31;
-	dias_meses[8]=31;
-	dias_meses[9]=30;
-	dias_meses[10]=31;
-	dias_meses[11]=30;
-	dias_meses[12]=31;
-
-// aÒos tamaÒo 1 bytes
-	HEX_annos[1]=0x01; 
-	HEX_annos[2]=0x02; 
-	HEX_annos[3]=0x04; 
-	HEX_annos[4]=0x08; 
-	HEX_annos[5]=0x10; 
-	HEX_annos[6]=0x20; 
-	HEX_annos[7]=0x40; 
-	HEX_annos[8]=0x80; 
-
-	// mese tamaÒo 2 bytes
-	HEX_meses[1]=0x0001; 
-	HEX_meses[2]=0x0002;
-	HEX_meses[3]=0x0004;
-	HEX_meses[4]=0x0008;
-	HEX_meses[5]=0x0010;
-	HEX_meses[6]=0x0020;
-	HEX_meses[7]=0x0040;
-	HEX_meses[8]=0x0080;
-	HEX_meses[9]=0x0100;
-	HEX_meses[10]=0x0200;
-	HEX_meses[11]=0x0400;
-	HEX_meses[12]=0x0800;
-
-	// dias tamaÒo 4 bytes
-	HEX_dias[1]=0x00000001;
-	HEX_dias[2]=0x00000002; 
-	HEX_dias[3]=0x00000004; 
-	HEX_dias[4]=0x00000008; 
-	HEX_dias[5]=0x00000010; 
-	HEX_dias[6]=0x00000020; 
-	HEX_dias[7]=0x00000040; 
-	HEX_dias[8]=0x00000080;
-	HEX_dias[9]=0x00000100; 
-	HEX_dias[10]=0x00000200; 
-	HEX_dias[11]=0x00000400; 
-	HEX_dias[12]=0x00000800; 
-	HEX_dias[13]=0x00001000;
-	HEX_dias[14]=0x00002000;
-	HEX_dias[15]=0x00004000;
-	HEX_dias[16]=0x00008000;
-	HEX_dias[17]=0x00010000;
-	HEX_dias[18]=0x00020000;
-	HEX_dias[19]=0x00040000;
-	HEX_dias[20]=0x00080000;
-	HEX_dias[21]=0x00100000;
-	HEX_dias[22]=0x00200000;
-	HEX_dias[23]=0x00400000;
-	HEX_dias[24]=0x00800000;
-	HEX_dias[25]=0x01000000;
-	HEX_dias[26]=0x02000000;
-	HEX_dias[27]=0x04000000;
-	HEX_dias[28]=0x08000000;
-	HEX_dias[29]=0x10000000;
-	HEX_dias[30]=0x20000000;
-	HEX_dias[31]=0x40000000;
-
-	// horas tamaÒo 2 bytes
-	HEX_horas[0]=0x0001;
-	HEX_horas[1]=0x0002; 
-	HEX_horas[2]=0x0004;
-	HEX_horas[3]=0x0008;
-	
-	HEX_horas[4]=0x0010; 
-	HEX_horas[5]=0x0020; 
-	HEX_horas[6]=0x0040; 
-	HEX_horas[7]=0x0080;
-
-	HEX_horas[8]=0x0100; 
-	HEX_horas[9]=0x0200; 
-	HEX_horas[10]=0x0400; 
-	HEX_horas[11]=0x0800;
-
-	// dia de la semana (L,M,X...) tamaÒo 1 bytes
-	HEX_diasemana[1]=0x01;
-	HEX_diasemana[2]=0x02;
-	HEX_diasemana[3]=0x04;
-	HEX_diasemana[4]=0x08;
-	HEX_diasemana[5]=0x10;
-	HEX_diasemana[6]=0x20;
-	HEX_diasemana[7]=0x40;
-
-	// semana tamaÒo 1 bytes
-	HEX_semanas[1]=0x01; 
-	HEX_semanas[2]=0x02; 
-	HEX_semanas[3]=0x04; 
-	HEX_semanas[4]=0x08; 
-	HEX_semanas[5]=0x10; 
-	HEX_semanas[6]=0x20; 
-}
-// _____________________________________________________________________________________________________________
-// FunciÛn: RegistraLog
+// Funci√≥n: TomaConfiguracion
 //
-//		DescripciÛn:
-//			Esta funciÛn registra los evento de errores en un fichero log
-//		Parametros:
-//			- msg : Mensage de error
-//			- swerrno: Switch que indica que recupere literal de error del sistema
-// _____________________________________________________________________________________________________________
-void RegistraLog(char *msg,int swerrno)
-{
-	time_t rawtime;
-	struct tm * timeinfo;
-	char MsgHerror[1000];
+//		Descripci√≥n:
+//			Esta funci√≥n lee el fichero de configuraci√≥n del programa hidralinuxcli y toma los par√°metros
+//		Par√°metros:
+//				- pathfilecfg : Ruta al fichero de configuraci√≥n
+//________________________________________________________________________________________________________
+int TomaConfiguracion(char* pathfilecfg) {
+	long lSize;
+	char * buffer, *lineas[100], *dualparametro[2];
+	char ch[2];
+	int i, numlin, resul;
 
-	time ( &rawtime );
-	timeinfo = gmtime(&rawtime);
+	if (pathfilecfg == NULL)
+		return (FALSE); // Nombre del fichero en blanco
 
-	FLog=fopen( "hidraagent.log","at");
-	if(swerrno){
-	//	fprintf (FLog,"%02d/%02d/%d %02d:%02d ***%s:%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year,timeinfo->tm_hour,timeinfo->tm_min,msg,strerror(errno));
-		sprintf (MsgHerror,"%02d/%02d/%d %02d:%02d ***%s:%d\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year,timeinfo->tm_hour,timeinfo->tm_min,msg,WSAGetLastError());
+	Fconfig = fopen(pathfilecfg, "rb");
+	if (Fconfig == NULL)
+		return (FALSE);
+	fseek(Fconfig, 0, SEEK_END); // Obtiene tama√±o del fichero.
+	lSize = ftell(Fconfig);
+	rewind(Fconfig);
+	buffer = (char*) malloc(lSize); // Toma memoria para el buffer de lectura.
+	if (buffer == NULL)
+		return (FALSE);
+	fread(buffer, 1, lSize, Fconfig); // Lee contenido del fichero
+	fclose(Fconfig);
+
+	//inicializar
+	IPlocal[0] = (char) NULL;
+	servidorhidra[0] = (char) NULL;
+	Puerto[0] = (char) NULL;
+
+	usuario[0] = (char) NULL;
+	pasguor[0] = (char) NULL;
+	datasource[0] = (char) NULL;
+	catalog[0] = (char) NULL;
+
+	strcpy(ch, "\n");// caracter delimitador (salto de linea)
+	numlin = split_parametros(lineas, buffer, ch);
+	for (i = 0; i < numlin; i++) {
+		strcpy(ch, "=");// caracter delimitador
+		split_parametros(dualparametro, lineas[i], ch); // Toma primer nombre del parametro
+
+		resul = strcmp(dualparametro[0], "IPhidra");
+		if (resul == 0)
+			strcpy(IPlocal, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "IPhidra");
+		if (resul == 0)
+			strcpy(servidorhidra, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "Puerto");
+		if (resul == 0)
+			strcpy(Puerto, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "Usuario");
+		if (resul == 0)
+			strcpy(usuario, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "PassWord");
+		if (resul == 0)
+			strcpy(pasguor, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "DataSource");
+		if (resul == 0)
+			strcpy(datasource, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "Catalog");
+		if (resul == 0)
+			strcpy(catalog, dualparametro[1]);
 	}
-	else{
-		sprintf (MsgHerror,"%02d/%02d/%d %02d:%02d ***%s\n",timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,timeinfo->tm_hour,timeinfo->tm_min,msg);
+	if (IPlocal[0] == (char) NULL) {
+		RegistraLog("IPlocal, NO se ha definido este par√°metro", false);
+		return (FALSE);
 	}
-	fprintf (FLog,MsgHerror);
-	AddToMessageLog((LPTSTR)MsgHerror);
-	fclose(FLog);
+	if (servidorhidra[0] == (char) NULL) {
+		RegistraLog("IPhidra, NO se ha definido este par√°metro", false);
+		return (FALSE);
+	}
+	if (Puerto[0] == (char) NULL) {
+		RegistraLog("Puerto, NO se ha definido este par√°metro", false);
+		return (FALSE);
+	}
+	puerto = atoi(Puerto);
+
+	if (usuario[0] == (char) NULL) {
+		RegistraLog("Usuario, NO se ha definido este par√°metro", false);
+		return (FALSE);
+	}
+	if (pasguor[0] == (char) NULL) {
+		RegistraLog("PassWord, NO se ha definido este par√°metro", false);
+		return (FALSE);
+	}
+	if (datasource[0] == (char) NULL) {
+		RegistraLog("DataSource, NO se ha definido este par√°metro", false);
+		return (FALSE);
+	}
+	if (catalog[0] == (char) NULL) {
+		RegistraLog("Catalog, NO se ha definido este par√°metro", false);
+		return (FALSE);
+	}
+	return (TRUE);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: TomaParametrosReg
+// Funci√≥n: busca_accion
 //
-//		DescripciÛn:
-//			Esta funciÛn toma los par·metros de conexiÛn del registro
-// _____________________________________________________________________________________________________________
-int TomaParametrosReg()
-{
-	if(!ReadRegistryString(HIVE,BASE,"servidorhidra",servidorhidra,20))
-		strcpy(servidorhidra,SERVIDORHIDRA);
-
-	if(!ReadRegistryInteger(HIVE,BASE,"puerto",(DWORD *)&puerto))
-		puerto=PUERTO_DEFAULT;
-
-	if(!ReadRegistryString(HIVE,BASE,"usuario",usuario,20))
-		strcpy(usuario,USUARIO);
-	Desencriptar(usuario);
-
-	if(!ReadRegistryString(HIVE,BASE,"pasguor",pasguor,20))
-		strcpy(pasguor,PASGUOR);
-	Desencriptar(pasguor);
-
-	if(!ReadRegistryString(HIVE,BASE,"datasource",datasource,20))
-		strcpy(datasource,DATASOURCE);
-
-	if(!ReadRegistryString(HIVE,BASE,"catalog",catalog,50))
-		strcpy(catalog,CATALOG);
-
-	sprintf(cadenaconexion,CADENACONEXION,catalog,datasource); // Crea cadena de conexiÛn
-
-	return(TRUE);
-}
-// _____________________________________________________________________________________________________________
-//
-// FunciÛn: GestionaProgramacion
-//
-//		DescripciÛn:
-//			Esta funciÛn es la encargada de leer la base de datos y comprobar si	existe alguna acciÛn o reserva programada
+//		 Descripci√≥n:
+//			Esta Funci√≥n busca en la base de datos, acciones programadas
 //		Parametros:
-//			- pst : Estructura con la configuraciÛn de fecha y hora del sistema
-// _____________________________________________________________________________________________________________
-int GestionaProgramacion(SYSTEMTIME pst){
-	busca_accion(pst.wDay,pst.wMonth,pst.wYear,pst.wHour,pst.wMinute,pst.wDayOfWeek );
-	return(0);
-}
-// _____________________________________________________________________________________________________________
-// FunciÛn: busca_accion
-//
-//		 DescripciÛn:
-//			Esta funciÛn busca en la base de datos,acciones programadas
-//		Parametros:
-//			- dia : Dia actual del mes
+//			- dia : D√≠a actual del mes
 //			- mes : mes en curso
-//			- anno : AÒo en curso
+//			- anno : A√±o en curso
 //			- hora : Hora actual
 //			- minutos : Minutos actuales
 //			- diasemana : Dia de la semana 1=lunes,2=martes ... ( 0 Domingo)
@@ -217,7 +138,7 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 	BYTE swampm,bitsemana;
 	int tipoaccion,identificador;
 	int ordsem,ordulsem,ordiasem_1,maxdias;
-	anno=anno-2003; // AÒo de comienzo es 2004
+	anno=anno-2003; // A√±o de comienzo es 2004
 	if(hora>11){
 		hora-=12;
 		swampm=1; // Es pm
@@ -227,10 +148,10 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 
 	if(diasemana==0) diasemana=7; // El domingo
 
-	// Cuestion semanas
+	// Cuesti√≥n semanas
 	ordiasem_1=DiadelaSemana(1,mes,anno+2003);
-	ordsem=SemanadelMes(ordiasem_1,dia); // Calcula el numero de la semana
-	if (mes!=2) // Toma el ultimo dia de ese mes
+	ordsem=SemanadelMes(ordiasem_1,dia); // Calcula el n√∫mero de la semana
+	if (mes!=2) // Toma el √∫ltimo d√≠a de ese mes
 		maxdias=dias_meses[mes];
 	else{
 		if (bisiesto(anno+2003))
@@ -238,15 +159,15 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 		else
 			maxdias=28;
 	}
-	ordulsem=SemanadelMes(ordiasem_1,maxdias); // Calcula el numero de ultima semana
+	ordulsem=SemanadelMes(ordiasem_1,maxdias); // Calcula el n√∫mero de √∫ltima semana
 
 	bitsemana=HEX_semanas[ordsem];
-	if(ordsem==ordulsem) // Si es la ultima semana del mes
+	if(ordsem==ordulsem) // Si es la √∫ltima semana del mes
 		bitsemana|=HEX_semanas[6];
 
-	if(!db.Open(usuario,pasguor,cadenaconexion)){ // error de conexion
-		db.GetErrorErrStr(ErrStr);
-		return(false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) { // error de conexion
+			db.GetErrorErrStr(ErrStr);
+			return (false);
 	}
 	sprintf(sqlstr,"SELECT DISTINCT tipoaccion,identificador FROM programaciones WHERE  suspendida=0 AND (annos & %d <> 0) AND (meses & %d<>0) AND ((diario & %d<>0) OR (dias & %d<>0) OR (semanas & %d<>0)) AND (horas & %d<>0) AND ampm=%d AND minutos=%d",HEX_annos[anno],HEX_meses[mes],HEX_dias[dia],HEX_diasemana[diasemana],bitsemana,HEX_horas[hora],swampm,minutos);
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
@@ -256,9 +177,9 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 	if(tbl.ISEOF()){
 		return(true);  // No hay acciones programadas
 	}
-	if(!wdb.Open(usuario,pasguor,cadenaconexion)){ // error de conexion
-		wdb.GetErrorErrStr(ErrStr);
-		return(false);
+	if (!wdb.Open(usuario, pasguor, datasource, catalog)) { // error de conexion
+			db.GetErrorErrStr(ErrStr);
+			return (false);
 	}
 	while(!tbl.ISEOF()){ // Busca entre todas las programaciones 
 		if(!tbl.Get("tipoaccion",tipoaccion)){ // Toma dato
@@ -269,16 +190,16 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 			return(false);
 		}
-		if(tipoaccion==EJECUCION_TAREA){ // Es una programaciÛn de una tarea
+		if(tipoaccion==EJECUCION_TAREA){ // Es una programaci√≥n de una tarea
 			EjecutarTarea(identificador,0,0,0,wdb,parametros);
 		}
 		else{
 			if(tipoaccion==EJECUCION_TRABAJO){
-				EjecutarTrabajo(identificador,wdb,parametros); // Es una programaciÛn de un trabajo
+				EjecutarTrabajo(identificador,wdb,parametros); // Es una programaci√≥n de un trabajo
 			}
 			else{
 				if(tipoaccion==EJECUCION_RESERVA){
-					EjecutarReserva(identificador,wdb,parametros); // Es una programaciÛn de un trabajo
+					EjecutarReserva(identificador,wdb,parametros); // Es una programaci√≥n de un trabajo
 				}
 			}
 		}
@@ -287,25 +208,25 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 	return(true);  
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: bisiesto
+// Funci√≥n: bisiesto
 //
-//		DescripciÛn:
-//			Esta funciÛn devuelve true si el aÒo pasado como par·metro es bisiesto y false si no lo es
+//		Descripci√≥n:
+//			Esta Funci√≥n devuelve true si el a√±o pasado como par√°metro es bisiesto y false si no lo es
 //		Parametros:
-//			- anob : un aÒo en formato aaaa
+//			- anob : un a√±o en formato aaaa
 // _____________________________________________________________________________________________________________
 bool bisiesto(WORD anob){
 	return(anob%4==0);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: DiadelaSemana
+// Funci√≥n: DiadelaSemana
 //
-//		DescripciÛn:
-//			Esta funciÛn devuelve el n˙mero del dÌa de la semana: 1=Lunes, 2=m·rtes ... 6=s·bado  7=domingo de una fecha determinada
+//		Descripci√≥n:
+//			Esta Funci√≥n devuelve el n√∫mero del d√≠a de la semana: 1=Lunes, 2=martes ... 6=s√°bado  7=domingo de una fecha determinada
 //		Parametros:
-//			- dia : Un dia
+//			- dia : Un d√≠a
 //			- mes : Un mes
-//			- anno : Un aÒo
+//			- anno : Un a√±o
 // _____________________________________________________________________________________________________________
 int DiadelaSemana(WORD dia,WORD mes,WORD anno)
 {
@@ -334,12 +255,12 @@ int DiadelaSemana(WORD dia,WORD mes,WORD anno)
 	return(orddiasem);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: DiadelaSemana
+// Funci√≥n: SemanadelMes
 //
-//		DescripciÛn:
-//			Esta funciÛn devuelve el n˙mero de semana perteneciente a un dÌa de ese mes
-//		Parametros:
-//			- ordiasem_1 : Orden semenal (1,2...) del dia del primer dia del mes que se pasa como par·metro
+//		Descripci√≥n:
+//			Esta Funci√≥n devuelve el n√∫mero de semana perteneciente a un d√≠a de ese mes
+//		Par√°metros:
+//			- ordiasem_1 : Orden semenal (1,2...) del dia del primer dia del mes que se pasa como par√°metro
 //			- diames : El mes concreto
 // _____________________________________________________________________________________________________________
 int SemanadelMes(int ordiasem_1,int diames)
@@ -353,9 +274,9 @@ int SemanadelMes(int ordiasem_1,int diames)
 	return(cociente);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: Pausa
+// Funci√≥n: Pausa
 //
-//		DescripciÛn:
+//		Descripci√≥n:
 //			Hace una pausa en segundos
 //		Parametros:
 //			- s : Segundos de pausa
@@ -371,14 +292,14 @@ void Pausa(int s)
 	}while(seg<s);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: EjecutarTrabajo
+// Funci√≥n: EjecutarTrabajo
 //
-//		DescripciÛn: 
-//			Registra una acciÛn (Trabajo y la envÌa para su ejecuciÛn 
-//		Par·metros:
+//		Descripci√≥n:
+//			Registra una acci√≥n (Trabajo y la env√≠a para su ejecuci√≥n
+//		Par√°metros:
 //			- idtrabajo : Identificador del trabajo
-//			- Database: una conexion ADO operativa
-//			- parametros: par·metros de la acciÛn
+//			- db: una conexion ADO operativa
+//			- parametros: Par√°metros de la acci√≥n
 // _____________________________________________________________________________________________________________
 int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 {
@@ -392,8 +313,8 @@ int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 	char *tbTareasparametros[100],*tbTareasambitoambitskwrk[100];
 	char ambitskwrk[500];
 
-	ambitrabajo[0]=(char)NULL; // InicializaciÛn
-	strcpy(paramtrabajo,"tsk="); // InicializaciÛn
+	ambitrabajo[0]=(char)NULL; // Inicializaci√≥n
+	strcpy(paramtrabajo,"tsk="); // Inicializaci√≥n
 
 	// recupera el identificador del Centro propietario de la tarea
 	sprintf(sqlstr,"SELECT idcentro FROM trabajos WHERE idtrabajo=%d",idtrabajo);
@@ -460,18 +381,21 @@ int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 	lon=strlen(paramtrabajo);
 	paramtrabajo[lon-1]=(char)NULL; // Quita la coma final
 
-	char _fechahorareg[100];
-    SYSTEMTIME st;
-    GetLocalTime(&st);
-	sprintf(_fechahorareg,"%d/%d/%d %d:%d:%d",st.wDay,st.wMonth,st.wYear,st.wHour,st.wMinute,st.wSecond);
+	char fechareg[100];
 
-	sprintf(sqlstr,"INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (%d,%d,%d,0,0,'%s','%s','%s','%s',%d,'%s',0,0)",EJECUCION_TRABAJO,idtrabajo,PROCESOS,ambitrabajo,_fechahorareg,ACCION_INICIADA,ACCION_SINERRORES,idcentro,paramtrabajo);
+
+	struct tm* st;
+	st = TomaHora();
+	sprintf(fechareg, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
+				st->tm_mday, st->tm_hour, st->tm_min, st->tm_sec);
+
+	sprintf(sqlstr,"INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (%d,%d,%d,0,0,'%s','%s','%s','%s',%d,'%s',0,0)",EJECUCION_TRABAJO,idtrabajo,PROCESOS,ambitrabajo,fechareg,ACCION_INICIADA,ACCION_SINERRORES,idcentro,paramtrabajo);
 	if(!db.Execute(sqlstr)){ // Error al insertar
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}
 	int accionid=0;
-	// Toma identificador dela acciÛn
+	// Toma identificador de la acci√≥n
 	sprintf(sqlstr,"SELECT @@identity as identificador");
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
@@ -497,17 +421,17 @@ int EjecutarTrabajo(int idtrabajo,Database db,char*parametros )
 	return(true);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: EjecutarTarea
+// Funci√≥n: EjecutarTarea
 //
-//		DescripciÛn: 
-//			Registra una acciÛn (Tarea) y la envÌa para su ejecuciÛn 
-//		Par·metros:
+//		Descripci√≥n:
+//			Registra una acci√≥n (Tarea) y la env√≠a para su ejecuci√≥n
+//		Par√°metros:
 //			- idtarea : Identificador de la tarea
 //			- accionid: identificador del trabajo padre (si existe)
 //			- idnotificador:  identificador del trabajo_tarea incluido en trabajo padre (si existe)
 //			- idcentro: Centro propietario del trabjo padre (si existe este trabajo)
-//			- Database: una conexion ADO operativa
-//			- parametros: par·metros de la acciÛn
+//			- db: una conexion ADO operativa
+//			- parametros: Par√°metros de la acci√≥n
 // _____________________________________________________________________________________________________________
 int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Database db,char *parametros )
 {
@@ -520,8 +444,8 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 	int  tbComandosidcomando[100],tbComandosambito[100],tbComandosidnotificador[100],tbComandosidambito[100];
 	char *tbComandosparametros[100];
 
-	ambitarea[0]=(char)NULL; // InicializaciÛn
-	strcpy(paramtarea,"cmd="); // InicializaciÛn
+	ambitarea[0]=(char)NULL; // Inicializaci√≥n
+	strcpy(paramtarea,"cmd="); // Inicializaci√≥n
 	if(idcentro==0){
 		// recupera el identificador del Centro propietario de la tarea
 		sprintf(sqlstr,"SELECT idcentro FROM tareas WHERE idtarea=%d",idtarea);
@@ -597,18 +521,21 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 	lon=strlen(paramtarea);
 	paramtarea[lon-1]=(char)NULL; // Quita la coma final
 
-	char _fechahorareg[100];
-    SYSTEMTIME st;
-    GetLocalTime(&st);
-	sprintf(_fechahorareg,"%d/%d/%d %d:%d:%d",st.wDay,st.wMonth,st.wYear,st.wHour,st.wMinute,st.wSecond);
+	char fechareg[100];
 
-	sprintf(sqlstr,"INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (%d,%d,%d,0,0,'%s','%s','%s','%s',%d,'%s',%d,%d)",EJECUCION_TAREA,idtarea,PROCESOS,ambitarea,_fechahorareg,ACCION_INICIADA,ACCION_SINERRORES,idcentro,paramtarea,accionid,idnotificador);
+
+	struct tm* st;
+    st = TomaHora();
+    sprintf(fechareg, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
+    			st->tm_mday, st->tm_hour, st->tm_min, st->tm_sec);
+
+	sprintf(sqlstr,"INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (%d,%d,%d,0,0,'%s','%s','%s','%s',%d,'%s',%d,%d)",EJECUCION_TAREA,idtarea,PROCESOS,ambitarea,fechareg,ACCION_INICIADA,ACCION_SINERRORES,idcentro,paramtarea,accionid,idnotificador);
 	if(!db.Execute(sqlstr)){ // Error al insertar
 		db.GetErrorErrStr(ErrStr);
 		return(false);
 	}
 	accionid=0;
-	// Toma identificador dela acciÛn
+	// Toma identificador de la acci√≥n
 	sprintf(sqlstr,"SELECT @@identity as identificador");
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
@@ -623,16 +550,18 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 	int i;
 	// Insertar acciones:comandos
 	for (i=0;i<cont_comandos;i++){
-	    GetLocalTime(&st);
-		sprintf(_fechahorareg,"%d/%d/%d %d:%d:%d",st.wDay,st.wMonth,st.wYear,st.wHour,st.wMinute,st.wSecond);
-		sprintf(sqlstr,"INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (%d,%d,%d,%d,%d,'%s','%s','%s',%d,'%s',%d,%d)",EJECUCION_COMANDO,tbComandosidcomando[i],PROCESOS,tbComandosambito[i],tbComandosidambito[i],_fechahorareg,ACCION_EXITOSA,ACCION_SINERRORES,idcentro,tbComandosparametros[i],accionid,tbComandosidnotificador[i]);	
+		st = TomaHora();
+		sprintf(fechareg, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon
+						+ 1, st->tm_mday, st->tm_hour, st->tm_min, st->tm_sec);
+
+		sprintf(sqlstr,"INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (%d,%d,%d,%d,%d,'%s','%s','%s',%d,'%s',%d,%d)",EJECUCION_COMANDO,tbComandosidcomando[i],PROCESOS,tbComandosambito[i],tbComandosidambito[i],fechareg,ACCION_EXITOSA,ACCION_SINERRORES,idcentro,tbComandosparametros[i],accionid,tbComandosidnotificador[i]);
 		if(!db.Execute(sqlstr)){ // Error al insertar
 			db.GetErrorErrStr(ErrStr);
 			free(tbComandosparametros[i]);
 			return(false);
 		}
 
-		// Toma identificador dela acciÛn
+		// Toma identificador dela acci√≥n
 		sprintf(sqlstr,"SELECT @@identity as identificador");
 		if(!db.Execute(sqlstr,tbl)){ // Error al leer
 			db.GetErrorErrStr(ErrStr);
@@ -646,21 +575,21 @@ int EjecutarTarea(int idtarea,int accionid,int idnotificador,int idcentro,Databa
 			}
 		}
 		sprintf(pids,"ids=%d\r",accionidcmd);
-		strcat(tbComandosparametros[i],pids); // Le aÒade el identificador de la accion
+		strcat(tbComandosparametros[i],pids); // Le a√±ade el identificador de la acci√≥n
 		envia_comando(tbComandosparametros[i]);
 		free(tbComandosparametros[i]);
 	}
 	return(true);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: EjecutarReserva
+// Funci√≥n: EjecutarReserva
 //
-//		DescripciÛn: 
-//			Registra una acciÛn (Tarea) y la envÌa para su ejecuciÛn 
-//		Par·metros:
+//		Descripci√≥n:
+//			Registra una acci√≥n (Tarea) y la env√≠a para su ejecuci√≥n
+//		Par√°metros:
 //			- idreserva : Identificador de la reserva
-//			- Database: una conexion ADO operativa
-//			- parametros: par·metros de la acciÛn
+//			- db: una conexion ADO operativa
+//			- parametros: Par√°metros de la acci√≥n
 // _____________________________________________________________________________________________________________
 int EjecutarReserva(int idreserva,Database db,char*parametros )
 {
@@ -694,12 +623,12 @@ int EjecutarReserva(int idreserva,Database db,char*parametros )
 	return(true);
 }
 // _____________________________________________________________________________________________________________
-// FunciÛn: envia_comando
+// Funci√≥n: envia_comando
 //
-//		DescripciÛn: 
-//			Envia un comando a la red. Para ello es necesario teneriniciado el servicio hidra.
-//		Par·metros:
-//			- parametros: par·metros del comando
+//		Descripci√≥n:
+//			Env√≠a un comando a la red. Para ello es necesario tener iniciado el servicio hidra.
+//		Par√°metros:
+//			- parametros: Par√°metros del comando
 // _____________________________________________________________________________________________________________
 int envia_comando(char* parametros)
 {
@@ -716,42 +645,13 @@ int envia_comando(char* parametros)
 	strcpy(trama.parametros,(char*)&parametros[1]);
     return(manda_trama(sClient,&trama));
 }
-// _____________________________________________________________________________________________________________
-// FunciÛn: AbreConexion
-//
-//		DescripciÛn: 
-//			Crea un socket y lo conecta a una interface de red. Devuelve el socket
-//		Par·metros:
-//			- ips : La direcciÛn IP con la que se comunicar· el socket
-//			- port : Puerto para la  comunicaciÛn
-// _____________________________________________________________________________________________________________
-SOCKET AbreConexion(char *ips,int port)
-{
-    struct sockaddr_in server;
-    struct hostent *host = NULL;
-	SOCKET s;
 
-	// Crea el socket y se intenta conectar
-	s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (s == SOCKET_ERROR){
-		return (SOCKET)NULL;
-	}
-	server.sin_family = AF_INET;
-	server.sin_port = htons((short)port);
-	server.sin_addr.s_addr = inet_addr(ips);
-
-	if (connect(s, (struct sockaddr *)&server, sizeof(server)) == SOCKET_ERROR){
-		RegistraLog("***AGENT***connect() fallo:",true);
-		return (SOCKET)NULL;
-	}
-	return(s);
-}
 /// _____________________________________________________________________________________________________________
-// FunciÛn: manda_trama
+// Funci√≥n: manda_trama
 //
-//		DescripciÛn:
-//			Esta funciÛn envia una trama por la red (TCP) 
-//		Parametros:
+//		Descripci√≥n:
+//			Esta Funci√≥n env√≠a una trama por la red (TCP)
+//		Par√°metros:
 //			- sock : El socket del host al que se dirige la trama
 //			- trama: El contenido de la trama
 /// _____________________________________________________________________________________________________________
@@ -777,17 +677,69 @@ int manda_trama(SOCKET sock,TRAMA* trama)
 	return(TRUE);
 }
 //******************************************************************************************************************************************
-// PROGRAMA PRINCIPAL ( SERVICIO)
+// PROGRAMA PRINCIPAL
 //******************************************************************************************************************************************
+int main(int argc, char *argv[]) {
 
-main()
+	struct tm* st;
+
+	strcpy(szPathFileCfg, "ogAdmAgent.cfg");
+	strcpy(szPathFileLog, "ogAdmAgent.log");
+	int i;
+	for (i = 1; (i + 1) < argc; i += 2) {
+		if (argv[i][0] == '-') {
+			switch (tolower(argv[i][1])) {
+			case 'f':
+				if (argv[i + 1] != NULL)
+					strcpy(szPathFileCfg, argv[i + 1]);
+				else {
+					RegistraLog(
+							"Fallo en los par√°metros: Debe especificar el fichero de configuraci√≥n del servicio",
+							false);
+					exit(EXIT_FAILURE);
+				}
+				break;
+			case 'l':
+				if (argv[i + 1] != NULL)
+					strcpy(szPathFileLog, argv[i + 1]);
+				else {
+					RegistraLog(
+							"Fallo en los par√°metros: Debe especificar el fichero de log para el servicio",
+							false);
+					exit(EXIT_FAILURE);
+				}
+				break;
+			default:
+				RegistraLog(
+						"Fallo de sintaxis en los par√°metros: Debe especificar -f nombre_del_fichero_de_configuraci√≥n_del_servicio",
+						false);
+				exit(EXIT_FAILURE);
+				break;
+			}
+		}
+	}
+	if (szPathFileCfg == NULL) {
+		printf("***Error. No se ha especificado fichero de configuraci√≥n\n");
+		exit(EXIT_FAILURE);
+	}
+	if (!TomaConfiguracion(szPathFileCfg)) { // Toma parametros de configuraci√≥n
+		RegistraLog(
+				"El fichero de configuraci√≥n contiene un error de sintaxis",
+				false);
+		exit(EXIT_FAILURE);
+	}
+
+	int pseg;
 
 	while (TRUE){ 
-		GetLocalTime(&st);
-		pseg=1000*(65-st.wSecond); // Calcula milisegundos de inactividad de la hebra
-		Sleep(pseg);
+		st = TomaHora();
+		//pseg=1000*(65-st->tm_sec); // Calcula milisegundos de inactividad de la hebra
+		pseg=65-st->tm_sec; // Calcula segundos de inactividad de la hebra
+		sleep(pseg);
+
 		// Toma la hora
-		GetLocalTime(&st);
-        GestionaProgramacion(st);
+		st = TomaHora();
+		busca_accion(st->tm_mday,st->tm_mon,st->tm_year,st->tm_hour,st->tm_min,st->tm_wday );
 	}
+}
 	

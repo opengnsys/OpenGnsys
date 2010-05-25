@@ -1,13 +1,12 @@
-// *************************************************************************
-// Aplicación: OPENGNSYS
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2003-2004
-// Fecha Última modificación: Marzo-2006
-// Nombre del fichero: ogAdmServer.php
-// Descripción : 
-//		Este fichero aporta las funciones de localización y ejecución de tareas, trabajos o reservas. 
-//		Necesita el servicio ogAdmServer para su envio a la red.
-// *********************************************************************************************************************************************************
+//*****************************************************************************
+//	AplicaciÃ³n OpenGNSys
+//	Autor: JosÃ© Manuel Alonso.
+//	Licencia: Open Source
+//	Fichero: ogAdmAgent.h
+//	DescripciÃ³n:
+//		Fichero de cabebera del mÃ³dulo de la aplicaciÃ³n OpenGNSys que implementa
+//		las comunicaciones con el Servidor.
+// ****************************************************************************
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -25,70 +24,38 @@
 #include "ogAdmLib.h"
 
 
+FILE *FLog,*Fconfig;
 
-#define SERVIDORHIDRA	"127.0.0.1" // Servidor Hidra
-#define PUERTO_DEFAULT	2003	// Puerto por defecto
-#define USUARIO "usuhidra" // Usuario por defecto
-#define PASGUOR "passusuhidra" // Password por defecto
-#define DATASOURCE	"127.0.0.1" // Servidor de base de datos
-#define CATALOG	"BDHidra" // Base de datos
-#define CADENACONEXION "Provider=SQLOLEDB.1;Initial Catalog=%s;Data Source=%s;Packet Size=4096;"
-
-#define LONGITUD_PARAMETROS 4000	// Longitud máxima de la información de la trama (parametros)
-
-#define PROCESOS 0x01
-
-#define ACCION_EXITOSA			"1" // Finalizada con exito
-#define ACCION_FALLIDA			"2" // Finalizada con errores
-#define ACCION_TERMINADA		"3" // Finalizada manualmente con indicacion de exito 
-#define ACCION_ABORTADA		"4" // Finalizada manualmente con indicacion de errores 
-#define ACCION_SINERRORES	"5" // Activa y sin ningún error
-#define ACCION_CONERRORES	"6" // Activa y con algún error
-
-#define ACCION_DETENIDA		"0" // Acción momentanemente parada
-#define ACCION_INICIADA		"1" // Acción activa
-#define ACCION_FINALIZADA	 	"2" // Accion finalizada
-
-#define EJECUCION_COMANDO	0x0001 // Accion Comando
-#define EJECUCION_TAREA		0x0002 // Accion Tarea
-#define EJECUCION_TRABAJO	0x0003 // Accion Trabajo
-#define EJECUCION_RESERVA	0x0004 // Reserva de aulas
-
-#define CHKREGISTRY(f) if (!(f)) { return 0;}
-#define HIVE HKEY_LOCAL_MACHINE				// Rama del registro donde estarán los parametros de conexión
-#define BASEKEY "SOFTWARE\\Alonsoft"	// Key del registro para parametros de conexión
-#define BASE "SOFTWARE\\Alonsoft\\Hidra"	// SubKey del registro para parametros de conexión
-
-char servidorhidra[20];
-int puerto;	// Puerto
+char IPlocal[20]; // Ip local
+char servidorhidra[20]; // IP servidor HIDRA
+char Puerto[20]; // Puerto Unicode
+int puerto; // Puerto
 char usuario[20];
 char pasguor[20];
 char datasource[20];
 char catalog[50];
-char cadenaconexion[1024];
 
-FILE *FLog; // Fichero de log
+BYTE HEX_annos[]={0,0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
-BYTE	HEX_annos[9];
-WORD	HEX_meses[13];
-LONG	HEX_dias[32];
-WORD	HEX_horas[13];
-BYTE	HEX_diasemana[8];
-BYTE	HEX_semanas[7]; 
+WORD HEX_meses[]={0,0x0001,0x0002,0x0004,0x0008,0x0010,0x0020,0x0040,0x0080,0x0100,0x0200,0x0400,0x0800};
 
-WORD	dias_meses[13];
+int	HEX_dias[]={0,0x00000001,0x00000002,0x00000004,0x00000008,0x00000010,0x00000020,0x00000040,0x00000080,0x00000100,0x00000200,
+		0x00000400,0x00000800,0x00001000,0x00002000,0x00004000,0x00008000,0x00010000,0x00020000,0x00040000,0x00080000,
+		0x00100000,0x00200000,0x00400000,0x00800000,0x01000000,0x02000000,0x04000000,0x08000000,0x10000000,0x20000000,0x40000000};
 
-typedef struct{		// Estructura de la trama recibida
-		char arroba;	// Caracter arroba siempre
-		char identificador[9];	// Identificador de la trama, siempre JMMLCAMDJ:
-		char ejecutor;	// Identificador del encargado de ejecutar la función ( 1= Servidor  2=Cliente rembo:
-		char parametros[LONGITUD_PARAMETROS]; // Contenido de la trama (parámetros)
-}TRAMA;
+WORD	HEX_horas[]={0x0001,0x0002,0x0004,0x0008,0x0010,0x0020,0x0040,0x0080,0x0100,0x0200,0x0400,0x0800 };
+
+BYTE	HEX_diasemana[]={0,0x01,0x02,0x04,0x08,0x10,0x20,0x40};
+
+BYTE	HEX_semanas[]={0,0x01,0x02,0x04,0x08,0x10,0x20};
+
+WORD	dias_meses[]={0,31,28,31,30,31,30,31,31,30,31,30,31};
+
 
 // Prototipo de funciones
 void inicializa(void);
 void Pausa(int);
-int GestionaProgramacion(SYSTEMTIME);
+
 int busca_accion(WORD ,WORD ,WORD ,WORD ,WORD,WORD );
 int busca_reserva(WORD ,WORD ,WORD ,WORD ,WORD,WORD );
 
