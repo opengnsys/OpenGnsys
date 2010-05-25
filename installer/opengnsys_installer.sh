@@ -33,9 +33,10 @@ LOG_FILE=/tmp/opengnsys_installation.log
 # Array con las dependencias
 DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz bittornado )
 
-MYSQL_ROOT_PASSWORD="passwordroot"
 
 # Datos de base de datos
+MYSQL_ROOT_PASSWORD="passwordroot"
+
 OPENGNSYS_DATABASE=ogBDAdmin
 OPENGNSYS_DB_USER=usuog
 OPENGNSYS_DB_PASSWD=passusuog
