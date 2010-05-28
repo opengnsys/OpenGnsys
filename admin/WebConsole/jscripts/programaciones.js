@@ -26,12 +26,15 @@ var currenthorasfin=null;
 var swpz=false
 //___________________________________________________________________________________________________________
 function ItemSeleccionado(o){
-	return(o.style.backgroundColor==rojo) 
+	if(o==null) return(false);
+	if(o.getAttribute("selitem")==1) return(true);
+	return(false);
 }
 //___________________________________________________________________________________________________________
 function Marca(o){
 	o.style.color=blanco 
 	o.style.backgroundColor=rojo 
+	o.setAttribute("selitem",1);
 }
 //___________________________________________________________________________________________________________
 function Resalta(o){
@@ -42,6 +45,7 @@ function Resalta(o){
 function Desmarca(o){
 	o.style.color=colororiginal
 	o.style.backgroundColor=fondooriginal
+	o.setAttribute("selitem",0);
 }
 //___________________________________________________________________________________________________________
 function TH_clic(o){
@@ -78,8 +82,10 @@ function clic(o,sw){
 			}
 
 	}
-	if(!sw)
+
+	if(!sw){
 		cuestionesclic(o)
+	}
 }
 //___________________________________________________________________________________________________________
 function cuestionesclic(o){
@@ -87,6 +93,7 @@ function cuestionesclic(o){
 	if (idtb=="tabla_meses" || idtb=="tabla_annos")
 		cuestion_opciones();
 	if (!swpz){
+			activa("bt_insertar");
 			activa("bt_cancelar");
 			swpz=!swpz;
 		}
@@ -107,20 +114,20 @@ function TBSource(o){
 }
 //___________________________________________________________________________________________________________
 function activa(idbt){
-	bt=document.getElementById(idbt);
-	bt.style.cursor="hand"
+	var bt=document.getElementById(idbt);
+	bt.style.visibility="visible"
 	bt.style.color=negro;
 }
 //___________________________________________________________________________________________________________
 function desactiva(idbt){
-	bt=document.getElementById(idbt);
-	bt.style.cursor="default"
+	var bt=document.getElementById(idbt);
+	bt.style.visibility="hidden"
 	bt.style.color=gris;
 }
 //___________________________________________________________________________________________________________
 function habilitado(idbt){
-	bt=document.getElementById(idbt);
-	if (bt.style.cursor=="hand") return true
+	var bt=document.getElementById(idbt);
+	if (bt.style.visibility=="visible")	 return true;
 	return false
 }
 //___________________________________________________________________________________________________________
@@ -195,8 +202,10 @@ function elimina_programacion(){
 }
 //___________________________________________________________________________________________________________
 function alta_programacion(ida,tia){
-	if (habilitado("bt_insertar"))
+
+	if (habilitado("bt_insertar")){
 		gestor_programacion(ida,tia,0,op_alta) 
+	}
 }
 //___________________________________________________________________________________________________________
 function duplicar_programacion(){
@@ -226,9 +235,11 @@ function gestor_programacion(ida,tia,idr,swop){
 	}
 	fm=document.getElementById("fechasmultiples");
 	if (fm.style.visibility == "visible"){ // Activada opciones múltiples
+		
 		wdiario=valor_HEX("tabla_diasmes");
 		wdias=valor_HEX("tabla_dias");
 		wsemanas=valor_HEX("tabla_semanas");
+			
 		if (wdiario==0 && wdias==0 && wsemanas==0 ){
 			alert(TbMsg[2]);
 			return
@@ -243,13 +254,16 @@ function gestor_programacion(ida,tia,idr,swop){
 		wdias=0
 		wsemanas=0
    }
+
 	whoras=valor_HEX("tabla_horas");
+
 	if (whoras==0){
 		if(wtipoaccion!=EJECUCION_RESERVA){
 			alert(TbMsg[4]);
 			return
 		}
 	}
+
 	if(wtipoaccion==EJECUCION_RESERVA){
 		whorasini=valor_HEX("tabla_horasini");
 		if (whorasini==0){
@@ -346,8 +360,15 @@ function valor_HEX(idtb){
 	for (i=0;i<filas;i++){
 		columnas=otb.rows[i].cells.length
 		for (j=0;j<columnas;j++){
-			if (ItemSeleccionado(otb.rows[i].cells[j]))
-				aux=aux | otb.rows[i].cells[j].value
+			if(otb.rows[i].cells[j].tagName=="TD" && otb.rows[i].cells[j].childNodes.length>0){
+				if(otb.rows[i].cells[j].childNodes[0].tagName=="A"){
+					var oSPAN=otb.rows[i].cells[j].childNodes[0].childNodes[0];
+					if (ItemSeleccionado(oSPAN)){
+						aux=aux | oSPAN.getAttribute("value")
+						
+					}
+				}
+			}
 		}
 	}
 	return(aux)
@@ -363,13 +384,18 @@ function valor_item(idtb){
 	for (i=0;i<filas;i++){
 		columnas=otb.rows[i].cells.length
 		for (j=0;j<columnas;j++){
-			if (ItemSeleccionado(otb.rows[i].cells[j])){
-				if (sw==0){
-					valor=otb.rows[i].cells[j].getAttribute("id");
-					sw++;
+			if(otb.rows[i].cells[j].tagName=="TD" && otb.rows[i].cells[j].childNodes.length>0){
+				if(otb.rows[i].cells[j].childNodes[0].tagName=="A"){			
+					var oSPAN=otb.rows[i].cells[j].childNodes[0].childNodes[0];
+					if (ItemSeleccionado(oSPAN)){
+						if (sw==0){
+							valor=oSPAN.getAttribute("id");
+							sw++;
+						}
+						else
+							return(-1);
+					}
 				}
-				else
-					return(-1);
 			}
 		}
 	}
@@ -387,9 +413,14 @@ function opcion_simple(idtb){
 	for (i=0;i<filas;i++){
 		columnas=otb.rows[i].cells.length
 		for (j=0;j<columnas;j++){
-			if (ItemSeleccionado(otb.rows[i].cells[j])){
-				conta++;
-				if (conta>1) return(false);
+			if(otb.rows[i].cells[j].tagName=="TD" && otb.rows[i].cells[j].childNodes.length>0){
+				if(otb.rows[i].cells[j].childNodes[0].tagName=="A"){				
+					var oSPAN=otb.rows[i].cells[j].childNodes[0].childNodes[0];
+					if (ItemSeleccionado(oSPAN)){
+						conta++;
+						if (conta>1) return(false);
+					}
+				}
 			}
 		}
 	}
@@ -559,8 +590,13 @@ function desmarcando_tabla(otb){
 	for (var i=0;i<filas;i++){
 		columnas=otb.rows[i].cells.length
 		for (var j=0;j<columnas;j++){
-			if (ItemSeleccionado(otb.rows[i].cells[j]))
-				Desmarca(otb.rows[i].cells[j])
+			if(otb.rows[i].cells[j].tagName=="TD" && otb.rows[i].cells[j].childNodes.length>0){
+				if(otb.rows[i].cells[j].childNodes[0].tagName=="A"){
+					var oSPAN=otb.rows[i].cells[j].childNodes[0].childNodes[0];
+					if (ItemSeleccionado(oSPAN))
+						Desmarca(oSPAN)
+				}
+			}
 		}
 	}
 }
@@ -570,9 +606,11 @@ function desmarcando_tabla(otb){
 function programacion_metelista(valor,texto){
 	var lista=document.getElementById("lista_programaciones");
 	var e=document.createElement("OPTION");
+
 	e.value=valor;
 	e.text=texto;
-	lista.add(e);
+
+	lista.appendChild(e);
 }
 //___________________________________________________________________________________________________________
 //	Llama a una página dentro del IFRAME que recupera una programacion
@@ -680,15 +718,20 @@ function marca_item(idtabla,vhex){
 	for (i=0;i<filas;i++){
 		columnas=otb.rows[i].cells.length
 		for (j=0;j<columnas;j++){
-			if (otb.rows[i].cells[j].value & vhex){
-					Marca(otb.rows[i].cells[j]);
-					if (idtabla=="tabla_horas")
-						currenthoras=otb.rows[i].cells[j]
-					if (idtabla=="tabla_horasini")
-						currenthorasini=otb.rows[i].cells[j]
-					if (idtabla=="tabla_horasfin")
-						currenthorasfin=otb.rows[i].cells[j]
-			}
+			if(otb.rows[i].cells[j].tagName=="TD" && otb.rows[i].cells[j].childNodes.length>0){
+				if(otb.rows[i].cells[j].childNodes[0].tagName=="A"){
+					var oSPAN=otb.rows[i].cells[j].childNodes[0].childNodes[0];
+					if (oSPAN.getAttribute("value") & vhex){
+							Marca(oSPAN);
+							if (idtabla=="tabla_horas")
+								currenthoras=oSPAN
+							if (idtabla=="tabla_horasini")
+								currenthorasini=oSPAN
+							if (idtabla=="tabla_horasfin")
+								currenthorasfin=oSPAN
+					}
+				}
+			}		
 		}
 	}
 }

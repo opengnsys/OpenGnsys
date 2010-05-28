@@ -43,14 +43,14 @@ class Calendario{
 		$this->nombre_mes[11]=array ("Noviembre",0x0400);
 		$this->nombre_mes[12]=array ("Diciembre",0x0800);
 
-		$this->numero_annos[1]=array ("2004",0x01); // tamaño 1 bytes
-		$this->numero_annos[2]=array ("2005",0x02); 
-		$this->numero_annos[3]=array ("2006",0x04); 
-		$this->numero_annos[4]=array ("2007",0x08); 
-		$this->numero_annos[5]=array ("2008",0x10); 
-		$this->numero_annos[6]=array ("2009",0x20); 
-		$this->numero_annos[7]=array ("2010",0x40); 
-		$this->numero_annos[8]=array ("2011",0x80); 
+		$this->numero_annos[1]=array ("2010",0x01); // tamaño 1 bytes
+		$this->numero_annos[2]=array ("2011",0x02); 
+		$this->numero_annos[3]=array ("2012",0x04); 
+		$this->numero_annos[4]=array ("2013",0x08); 
+		$this->numero_annos[5]=array ("2014",0x10); 
+		$this->numero_annos[6]=array ("2015",0x20); 
+		$this->numero_annos[7]=array ("2016",0x40); 
+		$this->numero_annos[8]=array ("2017",0x80); 
 
 		$this->dias_meses[1]=31;
 		$this->dias_meses[2]=28;

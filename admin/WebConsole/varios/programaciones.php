@@ -220,20 +220,20 @@ $mialmanaque= new Almanaque("tabla_meses");
 					<TD valign=top width="80">
 						<TABLE  border=0 class=tablaprogramacion border=0 cellPadding=1 cellSpacing=6  width="103">
 							<TR>
-								<TD  class=botonprogramacion id=bt_insertar style="cursor:hand;" onclick="alta_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">Añadir</TD>
+								<TD align=center class=botonprogramacion ><A href="#Añadir"><SPAN id=bt_insertar style="visibility:visible;color:#bbbcb9" onclick="alta_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">Añadir</SPAN></A></TD>
 							</TR>
 							<TR>
-								<TD class=botonprogramacion id=bt_modificar style="color:#bbbcb9" onclick="modifica_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">Modificar</TD>
+								<TD  align=center class=botonprogramacion ><A href="#Modificar"><SPAN id=bt_modificar style="visibility:visible;color:#bbbcb9" onclick="modifica_programacion(<?=$identificador?>,<?=$tipoaccion?>)" align=center height="17" width="83">Modificar</SPAN></A></TD>
 							</TR>
 
-								<TD class=botonprogramacion id=bt_duplicar style="color:#bbbcb9" onclick="duplicar_programacion()" align=center height="17" width="83">Duplicar</TD>
+								<TD align=center class=botonprogramacion ><A href="#Duplicar"><SPAN id=bt_duplicar style="visibility:visible;color:#bbbcb9" onclick="duplicar_programacion()" align=center height="17" width="83">Duplicar</SPAN></A></TD>
 							</TR>
 
 							<TR>
-								<TD  class=botonprogramacion id=bt_eliminar style="color:#bbbcb9" onclick="elimina_programacion()"align=center height="17" width="83">Eliminar</TD>
+								<TD align=center class=botonprogramacion ><A href="#Eliminar"><SPAN id=bt_eliminar style="color:#bbbcb9;visibility:visible" onclick="elimina_programacion()"align=center height="17" width="83">Eliminar</SPAN></A></TD>
 							</TR>
 							<TR>
-								<TD  class=botonprogramacion id=bt_cancelar style="color:#bbbcb9" onclick="cancela_programacion()" align=center height="17" width="83">Cancelar</TD>
+								<TD align=center class=botonprogramacion ><A href="#Cancelar"><SPAN id=bt_cancelar style="visibility:visible;color:#bbbcb9" onclick="cancela_programacion()" align=center height="17" width="83">Cancelar</SPAN></A></TD>
 							</TR>
 						</TABLE>
 					</TD>

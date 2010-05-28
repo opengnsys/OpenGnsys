@@ -38,7 +38,7 @@ $retorno=$mialmanaque->MesAnno($pidmes,$pidanno);
 	var objr=document.getElementById("mesanno_retorno");
 	var objvitem=document.getElementById("vitem_retorno");
 	cadecalendario=objr.innerHTML;
-	vitem=objvitem.innerText;
+	vitem=objvitem.innerHTML;
 	window.parent.cambia_mesanno(cadecalendario,vitem);
 </SCRIPT>
 </BODY>

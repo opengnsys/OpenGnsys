@@ -72,14 +72,14 @@ class Almanaque{
 		$this->semanas[5]=array ("5ª",0x10);
 		$this->semanas[6]=array ("Última",0x20);
 
-		$this->numero_annos[1]=array ("2004",0x01); // tamaño 1 bytes
-		$this->numero_annos[2]=array ("2005",0x02); 
-		$this->numero_annos[3]=array ("2006",0x04); 
-		$this->numero_annos[4]=array ("2007",0x08); 
-		$this->numero_annos[5]=array ("2008",0x10); 
-		$this->numero_annos[6]=array ("2009",0x20); 
-		$this->numero_annos[7]=array ("2010",0x40); 
-		$this->numero_annos[8]=array ("2011",0x80); 
+		$this->numero_annos[1]=array ("2010",0x01); // tamaño 1 bytes
+		$this->numero_annos[2]=array ("2011",0x02); 
+		$this->numero_annos[3]=array ("2012",0x04); 
+		$this->numero_annos[4]=array ("2013",0x08); 
+		$this->numero_annos[5]=array ("2014",0x10); 
+		$this->numero_annos[6]=array ("2015",0x20); 
+		$this->numero_annos[7]=array ("2016",0x40); 
+		$this->numero_annos[8]=array ("2017",0x80); 
 
 		$this->numero_dias[1]=0x00000001; // tamaño 4 bytes
 		$this->numero_dias[2]=0x00000002; 
@@ -179,9 +179,9 @@ class Almanaque{
 	function Annos($ano_desde,$ano_hasta){
 		$HTML_calendario='<TABLE id="tabla_annos" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH style="cursor:hand" onclick="TH_'.$this->onclick.'">Años</TH></TR>'.chr(13); // Literal años
+		$HTML_calendario.='<TH><A href="#annotb"><SPAN onclick="TH_'.$this->onclick.'">Años</SPAN></A></TH></TR>'.chr(13); // Literal años
 		for ($i=1;$i<7;$i++){
-			$HTML_calendario.='<TR><TD id="'.$this->numero_annos[$i][0].'" value="'.$this->numero_annos[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_annos[$i][0].'</TD></TR>'.chr(13);
+			$HTML_calendario.='<TR><TD><A href="#annotb"><SPAN id="'.$this->numero_annos[$i][0].'" value="'.$this->numero_annos[$i][1].'" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_annos[$i][0].'</SPAN></A></TD></TR>'.chr(13);
 		}
 		$HTML_calendario.='</TABLE>'.chr(13);
 		return($HTML_calendario);
@@ -200,7 +200,7 @@ class Almanaque{
 
 		$HTML_calendario='<TABLE id="tabla_mesanno" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=7 style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[$mes][0].'</TH></TR>'.chr(13); // Nombre del mes
+		$HTML_calendario.='<TH colspan=7><A href="#MesAnno"><SPAN onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[$mes][0].'</SPAN></A></TH></TR>'.chr(13); // Nombre del mes
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<8;$i++)
 			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // Días de la semana
@@ -209,7 +209,7 @@ class Almanaque{
 			$HTML_calendario.='<TD></TD>'.chr(13); // Relleno primeros dias de la semana
 		$sm=$ds; // Control salto de semana
 		for ($i=1;$i<=$this->dias_meses[$mes]+$swbi;$i++){
-			$HTML_calendario.='<TD id="'.$i.'/'.$mes.'/'.$anno.'" value="'.$this->numero_dias[$i].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$i.'</TD>'.chr(13);
+			$HTML_calendario.='<TD><A href="#MesAnno"><SPAN id="'.$i.'/'.$mes.'/'.$anno.'" value="'.$this->numero_dias[$i].'" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$i.'</SPAN></A></TD>'.chr(13);
 			if ($sm%7==0){
 				$HTML_calendario.='</TR><TR>'.chr(13);
 				$sm=0;
@@ -225,10 +225,11 @@ class Almanaque{
 	function Meses(){
 		$HTML_calendario='<TABLE id="tabla_meses" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=2 style="cursor:hand" onclick="TH_'.$this->onclick.'">Meses</TH></TR>'.chr(13); // Literal meses
+		$HTML_calendario.='<TH colspan=2><A href="#Meses"><SPAN onclick="TH_'.$this->onclick.'">Meses</SPAN></A></TH></TR>'.chr(13); // Literal meses
 		for ($i=1;$i<13;$i++){
-			$HTML_calendario.='<TR><TD id="'.$i.'" value="'.$this->nombre_mes[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_mes[$i++][0].'</TD>'.chr(13);
-			$HTML_calendario.='<TD id="'.$i.'" value="'.$this->nombre_mes[$i][1].'"style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_mes[$i][0].'</TD></TR>'.chr(13);
+			$HTML_calendario.='<TR><TD><A href="#Meses"><SPAN id="'.$i.'" value="'.$this->nombre_mes[$i][1].'" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_mes[$i++][0].'</SPAN></A></TD>'.chr(13);
+
+			$HTML_calendario.='<TD><A href="#Meses"><SPAN id="'.$i.'" value="'.$this->nombre_mes[$i][1].'" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_mes[$i][0].'</SPAN></A></TD></TR>'.chr(13);
 		}
 		$HTML_calendario.='</TABLE>'.chr(13);
 		return($HTML_calendario);
@@ -239,9 +240,9 @@ class Almanaque{
 	function Dias(){
 		$HTML_calendario='<TABLE id="tabla_dias" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH  colspan=7 style="cursor:hand" onclick="TH_'.$this->onclick.'">Día</TH><TR>'.chr(13); // Literal Días
+		$HTML_calendario.='<TH colspan=7><A href="#Dias"><SPAN onclick="TH_'.$this->onclick.'">Día</SPAN></A></TH><TR>'.chr(13); // Literal Días
 		for ($i=1;$i<8;$i++){
-			$HTML_calendario.='<TD id="'.$i.'" value="'.$this->nombre_dia[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_dia[$i][0].'</TD>'.chr(13);
+			$HTML_calendario.='<TD><A href="#Dias"><SPAN id="'.$i.'" value="'.$this->nombre_dia[$i][1].'"  onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_dia[$i][0].'</SPAN></A></TD>'.chr(13);
 		}
 		$HTML_calendario.='</TR></TABLE>'.chr(13);
 		return($HTML_calendario);
@@ -252,9 +253,9 @@ class Almanaque{
 	function Semanas(){
 		$HTML_calendario='<TABLE id="tabla_semanas" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH  colspan=7 style="cursor:hand" onclick="TH_'.$this->onclick.'">Semana</TH><TR>'.chr(13); // Literal Semenas
+		$HTML_calendario.='<TH  colspan=7><A href="#Semana"><SPAN onclick="TH_'.$this->onclick.'">Semana</SPAN></A></TH><TR>'.chr(13); // Literal Semenas
 		for ($i=1;$i<7;$i++){
-			$HTML_calendario.='<TD id="'.$i.'" value="'.$this->semanas[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->semanas[$i][0].'&nbsp;</TD>'.chr(13);
+			$HTML_calendario.='<TD><A href="#Semanas"><SPAN id="'.$i.'" value="'.$this->semanas[$i][1].'" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->semanas[$i][0].'&nbsp;</SPAN></A></TD>'.chr(13);
 		}
 		$HTML_calendario.='</TR></TABLE>'.chr(13);
 		return($HTML_calendario);
@@ -265,11 +266,11 @@ class Almanaque{
 	function DiasMes(){
 		$HTML_calendario='<TABLE id="tabla_diasmes" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=8 style="cursor:hand" onclick="TH_'.$this->onclick.'">Día de mes</TH><TR>'.chr(13); // Literal Día
+		$HTML_calendario.='<TH colspan=8><A href="#DiasMes"><SPAN onclick="TH_'.$this->onclick.'">Día de mes</SPAN></A></TH><TR>'.chr(13); // Literal Día
 		$HTML_calendario.='<TR>'.chr(13);
 		$sd=1; // Control salto de fila
 		for ($i=1;$i<32;$i++){
-				$HTML_calendario.='<TD id="'.$i.'" value="'.$this->numero_dias[$i].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$i.'</TD>'.chr(13);
+				$HTML_calendario.='<TD><A href="#DiasMes"><SPAN id="'.$i.'" value="'.$this->numero_dias[$i].'"  onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$i.'</SPAN></A></TD>'.chr(13);
 				if ($sd%8==0){
 					$HTML_calendario.='</TR><TR>'.chr(13);
 					$sd=0;
@@ -286,13 +287,13 @@ class Almanaque{
 
 		$HTML_calendario='<TABLE  id="tabla_horas" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=12 style="cursor:hand" onclick="TH_'.$this->onclick.'">Hora ejecución de la acción </TH>';
+		$HTML_calendario.='<TH colspan=12><A href="#Horas"><SPAN onclick="TH_'.$this->onclick.'">Hora ejecución de la acción</SPAN></A></TH>';
 		$HTML_calendario.='<TH>Mod</TH>';
 		$HTML_calendario.='<TH>Min.</TH>';
 		//$HTML_calendario.='<TH>Seg.</TH></TR>';
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<13;$i++)
-			$HTML_calendario.='<TD align=center id="'.$this->numero_horas[$i][0].'"  value="'.$this->numero_horas[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_horas[$i][0].'</TD>'.chr(13);
+			$HTML_calendario.='<TD align=center><A href="#Horas"><SPAN id="'.$this->numero_horas[$i][0].'"  value="'.$this->numero_horas[$i][1].'"  onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_horas[$i][0].'</SPAN></A></TD>'.chr(13);
 
 		$HTML_calendario.='<TD align=center>';
 		$HTML_calendario.= '<SELECT class="estilodesple" id="ampm">'.chr(13);
@@ -321,12 +322,12 @@ ________________________________________________________________________________
 		
 		$HTML_calendario='<TABLE  id="'.$nombretabla.'" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=12 style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$literal.' </TH>';
+		$HTML_calendario.='<TH colspan=12><A href="#HorasReserva"><SPAN onclick="TH_'.$this->onclick.'">'.$literal.'</SPAN></A></TH>';
 		$HTML_calendario.='<TH>Mod</TH>';
 		$HTML_calendario.='<TH>Min.</TH>';
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<13;$i++)
-			$HTML_calendario.='<TD align=center id="'.$this->numero_horas[$i][0].'"  value="'.$this->numero_horas[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_horas[$i][0].'</TD>'.chr(13);
+			$HTML_calendario.='<TD align=center><A href="#HorasReserva"><SPAN id="'.$this->numero_horas[$i][0].'"  value="'.$this->numero_horas[$i][1].'"  onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_horas[$i][0].'</SPAN></A></TD>'.chr(13);
 
 		$HTML_calendario.='<TD align=center>';
 		$HTML_calendario.= '<SELECT class="estilodesple" id="'.$nombreampm.'">'.chr(13);
@@ -360,7 +361,7 @@ ________________________________________________________________________________
 		for ($i=1;$i<97;$i++){
 			if($currentminutos==0) $currenthorario.="0";
 
-			$HTML_calendario.='<TD align=center id="'.$currenthorario.'"  style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$currenthorario.'</TD>'.chr(13);
+			$HTML_calendario.='<TD align=center><A href="#Horas_Completas"><SPAN id="'.$currenthorario.'" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$currenthorario.'</SPAN></A></TD>'.chr(13);
 			$currentminutos+=15;
 			if($currentminutos==60) {
 				$currenthora++;

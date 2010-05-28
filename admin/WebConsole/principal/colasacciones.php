@@ -632,6 +632,8 @@ function ListandoAcciones($cmd){
 	if($ClausulaWhere!="") 	$cmd->texto.=" WHERE  (".$ClausulaWhere.")";
 	$cmd->texto.=" ORDER BY acciones.idaccion desc ";
 
+	echo $cmd->texto;
+
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero(); 
