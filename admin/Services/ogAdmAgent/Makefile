@@ -1,7 +1,7 @@
 # makefile
 
 # Nombre del proyecto
-PROYECTO := ogAdmServer
+PROYECTO := ogAdmAgent
 
 # Directorio de instalación
 INSTALL_DIR := /opt/opengnsys
@@ -15,7 +15,7 @@ CPPFLAGS := $(CFLAGS)
 LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
 
 # Ficheros objetos
-OBJS := ../includes/Database.o sources/ogAdmServer.o 
+OBJS := ../includes/Database.o sources/ogAdmAgent.o 
 
 
 all: $(PROYECTO)

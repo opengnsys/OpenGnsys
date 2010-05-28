@@ -138,7 +138,7 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 	BYTE swampm,bitsemana;
 	int tipoaccion,identificador;
 	int ordsem,ordulsem,ordiasem_1,maxdias;
-	anno=anno-2003; // Año de comienzo es 2004
+	anno=anno-2009; // Año de comienzo es 2004
 	if(hora>11){
 		hora-=12;
 		swampm=1; // Es pm
@@ -149,12 +149,12 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 	if(diasemana==0) diasemana=7; // El domingo
 
 	// Cuestión semanas
-	ordiasem_1=DiadelaSemana(1,mes,anno+2003);
+	ordiasem_1=DiadelaSemana(1,mes,anno+2009);
 	ordsem=SemanadelMes(ordiasem_1,dia); // Calcula el número de la semana
 	if (mes!=2) // Toma el último día de ese mes
 		maxdias=dias_meses[mes];
 	else{
-		if (bisiesto(anno+2003))
+		if (bisiesto(anno+2009))
 			maxdias=29;
 		else
 			maxdias=28;
@@ -169,7 +169,22 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 			db.GetErrorErrStr(ErrStr);
 			return (false);
 	}
-	sprintf(sqlstr,"SELECT DISTINCT tipoaccion,identificador FROM programaciones WHERE  suspendida=0 AND (annos & %d <> 0) AND (meses & %d<>0) AND ((diario & %d<>0) OR (dias & %d<>0) OR (semanas & %d<>0)) AND (horas & %d<>0) AND ampm=%d AND minutos=%d",HEX_annos[anno],HEX_meses[mes],HEX_dias[dia],HEX_diasemana[diasemana],bitsemana,HEX_horas[hora],swampm,minutos);
+	sprintf(sqlstr,"SELECT DISTINCT tipoaccion,identificador FROM programaciones WHERE "\
+					" suspendida=0 "\
+					" AND (annos & %d <> 0) "\
+					" AND (meses & %d<>0) "\
+					" AND ((diario & %d<>0) OR (dias & %d<>0) OR (semanas & %d<>0))"\
+					" AND (horas & %d<>0) AND ampm=%d AND minutos=%d",\
+					HEX_annos[anno],\
+					HEX_meses[mes],\
+					HEX_dias[dia],\
+					HEX_diasemana[diasemana],
+					bitsemana,\
+					HEX_horas[hora],\
+					swampm,minutos);
+
+	RegistraLog(sqlstr,false);
+
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
 		return(false);
@@ -730,7 +745,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	int pseg;
-
 	while (TRUE){ 
 		st = TomaHora();
 		//pseg=1000*(65-st->tm_sec); // Calcula milisegundos de inactividad de la hebra
@@ -739,7 +753,7 @@ int main(int argc, char *argv[]) {
 
 		// Toma la hora
 		st = TomaHora();
-		busca_accion(st->tm_mday,st->tm_mon,st->tm_year,st->tm_hour,st->tm_min,st->tm_wday );
+		busca_accion(st->tm_mday,st->tm_mon+1,st->tm_year+1900,st->tm_hour,st->tm_min,st->tm_wday );
 	}
 }
 	

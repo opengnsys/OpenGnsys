@@ -158,7 +158,7 @@ void RegistraLog(const char *msg, int swerrno) {
 struct tm * TomaHora() {
 	time_t rawtime;
 	time(&rawtime);
-	return (gmtime(&rawtime));
+	return (localtime(&rawtime));
 }
 
 
