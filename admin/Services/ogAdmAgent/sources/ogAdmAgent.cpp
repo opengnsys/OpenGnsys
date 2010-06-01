@@ -183,8 +183,6 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 					HEX_horas[hora],\
 					swampm,minutos);
 
-	RegistraLog(sqlstr,false);
-
 	if(!db.Execute(sqlstr,tbl)){ // Error al leer
 		db.GetErrorErrStr(ErrStr);
 		return(false);
