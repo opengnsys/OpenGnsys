@@ -875,6 +875,15 @@ function servicesCompilation ()
 		hayErrores=1
 	fi
 	popd
+	# Compilar OpenGnSys Agent
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Agent"
+	pushd $WORKDIR/opengnsys/admin/Services/ogAdmAgent
+	make && make install
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
+		hayErrores=1
+	fi
+	popd	
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
@@ -961,6 +970,7 @@ function openGnsysConfigure()
 	echoAndLog "openGnsysConfigure(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
 	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
 	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php

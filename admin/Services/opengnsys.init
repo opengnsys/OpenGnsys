@@ -1,7 +1,11 @@
 #! /bin/sh
 
 ##################################################################################################################
-####### Script de arranque de los servicios de OpenGnSys: Servidor ogAdmServer, Servidor de repositorio ogAdmRepo,
+####### Script de arranque de los servicios	OpenGnSys:
+#######		Servidor ogAdmServer, 
+#######		Servidor de repositorio ogAdmRepo,
+#######		Servidor ogAdmAgent, para tareas programadas
+#######	
 ####### Tracker Bittorrent y seeder de imagenes por Bittorrent
 ####### autor: jcxifre <jcxifre@unizar.es>
 ####### basado en http://www.epilogue.org/~xef4/start-stop-example
@@ -40,6 +44,15 @@ REPODAEMON=$BASEDIR/sbin/$REPONAME
 REPOCFG=$BASEDIR/etc/$REPONAME.cfg
 REPOLOG=$BASEDIR/log/$REPONAME.log
 REPODAEMON_OPTIONS="-f $REPOCFG -l $REPOLOG"
+
+#
+# Servidor ogAdmAgent
+#
+AGENTNAME=ogAdmAgent
+AGENTDAEMON=$BASEDIR/sbin/$AGENTNAME
+AGENTCFG=$BASEDIR/etc/$AGENTNAME.cfg
+AGENTLOG=$BASEDIR/log/$AGENTNAME.log
+AGENTDAEMON_OPTIONS="-f $AGENTCFG -l $AGENTLOG"
 
 #
 # Opciones Bittorrent
@@ -84,6 +97,13 @@ arranca_demonios() {
      start-stop-daemon --start --quiet  --background --exec $REPODAEMON -- $REPODAEMON_OPTIONS
      echo "."
   fi
+  if [ $RUN_OGADMAGENT = "yes" ]
+  then
+     echo -n "Iniciando demonio: "$AGENTNAME
+     start-stop-daemon --start --quiet  --background --exec $AGENTDAEMON -- $AGENTDAEMON_OPTIONS
+     echo "."
+  fi
+  
   if [ $RUN_BTTRACKER = "yes" ]
   then
      echo -n "Iniciando demonio: "$BTTRACK
@@ -98,7 +118,6 @@ arranca_demonios() {
   fi
 
 }
-
 para_demonios() {
   if [ -e $BTSEEDERPID ]
   then

@@ -1,8 +1,10 @@
 # RUN_OGADMSERVER run OpenGNSys Admin service.
 # RUN_OGADMREPO run OpenGNSys Repository Manager service.
+# RUN_OGADMAGENT run OpenGNSys Agent service.
 # RUN_BTTRACKER run Bittorrent Tracker
 # RUN_BTSEEDER starts seeding of selected torrent files
 RUN_OGADMSERVER="yes"
 RUN_OGADMREPO="yes"
+RUN_OGADMAGENT="yes"
 RUN_BTTRACKER="yes"
 RUN_BTSEEDER="yes"
