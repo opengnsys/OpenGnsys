@@ -4,7 +4,7 @@
 #@brief   Librería o clase Cache
 #@class   Cache
 #@brief   Funciones para gestión de la caché local de disco.
-#@version 0.91
+#@version 0.9.1
 #@warning License: GNU GPLv3+
 #*/
 
@@ -16,14 +16,19 @@
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@note    Requisitos: sfdisk, parted, awk, sed
-#@version 0.91 - Definición de caché local.
+#$warning El tamaño de caché debe estar entre 50 MB y la mitad del disco.
+#$warning La caché no puede solaparse con las particiones de datos.
+#@version 0.9.1 - Definición de caché local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
+#@version 0.9.2 - Corrección definición de límites.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/06/01
 #*/ ##
 function ogCreateCache ()
 {
 # Variables locales.
-local DISK PART SECTORS CYLS START END SIZE ENDPART3
+local DISK PART SECTORS CYLS START END SIZE MINSIZE MAXSIZE ENDPART3
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_partsize" "$FUNCNAME 10000000"
@@ -36,12 +41,14 @@ DISK=$(ogDiskToDev 1) || return $?
 PART="4"
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-END=$[SECTORS/CYLS*CYLS-1]
+END=$[SECTORS/CYLS*CYLS-1]              # Sector final del disco
 SIZE=$(echo $1|awk '{print $0*2}')      # En sectores de 512 B.
 START=$[END-SIZE+1]
 ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
-# Error si tamaño 0 o si mayor que la mitad del disco o si pisa la partición 3.
-if [ $SIZE -eq 0 -o $SIZE -ge $[END/2] -o $START -le $ENDPART3 ]; then
+# Error si tamaño no está entre límites permitidos o si se solapa con la partición 3.
+MINSIZE=100000                          # Error de formateo si tamaño < 50 MB.
+MAXSIZE=$[END/2]                        # No permitir tamaño > mitad del disco.
+if [ $SIZE -lt $MINSIZE -o $SIZE -gt $MAXSIZE -o $START -le $ENDPART3 ]; then
     ogRaiseError $OG_ERR_FORMAT "$1" || return $?
 fi
 
