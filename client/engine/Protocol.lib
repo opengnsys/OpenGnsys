@@ -250,7 +250,6 @@ eval $COMMAND
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
 #@note
-#@todo: Abriendo puerto para pasar parametros de control al cliente.
 #@version 0.1 - Integración para OpenGNSys.
 #@author        Antonio J. Doblas Viso. Universidad de Málaga
 #@date
@@ -311,7 +310,7 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 
 #/**
 #         ogTorrentStart  [ str_repo | int_ndisk int_npart ] Relative_path_file | SessionProtocol
-#@brief   Función iniciar P2P - requiere un tracker y los ficheros .torrent.
+#@brief   Función iniciar P2P - requiere un tracker para todos los modos, y un seeder para los modos peer y leecher y los ficheros .torrent.
 #@param   str_pathDirectory  str_Relative_path_file
 #@param  int_disk    int_partition   str_Relative_path_file
 #@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
@@ -324,14 +323,26 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 #@version 0.2 - Chequeo del tamaño de imagen descargado.
 #@author        Irina . Univesidad de Sevilla.
 #@date
+#@version 0.3 - Control de los modos de operación, y estado de descarga.
+#@author        Antonio J. Doblas Viso. Univesidad de Málaga.
+#@date
 #*/ ##
+#Lee el fichero torrent y descarga o comparte el fichero destino en el mismo subdirectorio.
+# Parametros para el orgien del fichero file.df.torrent
+# 1 camino completo al fichero
+# 1 2   Contenedor /fichero relativo
+# 1 2 3  disco particion y /fichero relativo.
+#protocoloTORRENT    mode:time
+# posicion 2, 3, 4
+#mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, 
+#mode=peer    -> seedear mientras descarga
+#mode=leecher  -> NO seedear mientras descarga
+#time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
 
 ogTorrentStart ()
 {
-#protocoloTORRENT
-#mode=seeder|leecher  -> seedear mientras descarga
-#timeAfter -> tiempo de seeder desdpues de la descarga
-#timeServer -> cuando el equipo ya tenía la imagen.
+#TODO ayuda
+#TODO: control parametros.
 
 case "$1" in
     /*)     # Camino completo.          */ (Comentrio Doxygen)
@@ -359,28 +370,69 @@ cd $DIRSOURCE
 
 #analizando SESSION
 MODE=`echo $SESSION | cut -f1 -d:`
-TIMECLIENT=`echo $SESSION | cut -f2 -d:`
-TIMESERVER=`echo $SESSION | cut -f3 -d:`
+TIME=`echo $SESSION | cut -f2 -d:`
 
-#comprobamos si tenemos la imagen completa
-#echo " ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\( "
-TOTAL=`ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\(`
-if [ "$TOTAL" == "100%)" ]
+
+#echo $MODE $TIME 
+#echo ${SOURCE}.bf  ${TARGET} 
+
+# si No fichero .bf, y Si fichero destino    imagen ya descargada y su chequeo fue comprobado en su descarga inicial.
+if [ ! -f ${SOURCE}.bf -a -f ${TARGET} ]
 then
-    TIMECLIENT=$TIMESERVER
+  echo "imagen ya descargada"
+  case "$MODE" in 
+	seeder|SEEDER)
+		(sleep $TIME && kill -9 `pidof ctorrent`) &
+		echo "MODE seeder ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
+		ctorrent ${SOURCE}
+  esac
+  return 0
 fi
 
-if [ "$MODE" == "seeder" ]
-then 
-   echo "ctorrent ${SOURCE} -X 'sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)' -C 100"
-   ctorrent ${SOURCE} -X "sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)" -C 100
-fi
-
-if [ "$MODE" == "leecher" ]
+#Si no existe bf ni fichero destino         descarga inicial.
+if [ ! -f ${SOURCE}.bf -a ! -f ${TARGET} ]
 then
-   echo "ctorrent ${SOURCE} -X 'sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
-   ctorrent ${SOURCE} -X "sleep $TIMECLIENT; kill -9 \$(pidof ctorrent)" -C 100 -U 0
+	OPTION=DOWNLOAD
+    echo "descarga inicial" 
+fi 
+
+# Si fichero bf           descarga anterior no completada -.
+if [ -f ${SOURCE}.bf -a -f ${TARGET} ]
+then       
+        echo Continuar con Descargar inicial no terminada.
+        OPTION=DOWNLOAD
 fi
+
+case "$OPTION" in
+	download|DOWNLOAD)
+        if [ "$MODE" == "peer" ]
+        then 
+			echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
+            ctorrent -f -X "sleep $TIME; kill -9 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
+        fi
+
+        if [ "$MODE" == "leecher" ]
+        then
+          echo "ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
+          ctorrent ${SOURCE} -X "sleep $TIME; kill -9 \$(pidof ctorrent)" -C 100 -U 0
+        fi
+;;
+esac
+
+if [ "$OPTION" == "DOWNLOAD" ]
+then
+ 	echo "comprobando el fichero descargado"
+ 	echo " ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\( "
+ 	TOTAL=`ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\(`
+ 	if [ "$TOTAL" == "100%)" ]
+ 	then
+    	 return 0
+ 	else 
+    	 return 1
+ 	fi
+ 
+ fi
+ 
 cd /tmp
 }
 

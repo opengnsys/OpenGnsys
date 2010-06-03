@@ -35,7 +35,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             	echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
             	PORTBASE=`echo $6 | cut -f1 -d:`
            		echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:"CACHE" "$2.img" " 
-           		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img"
+           		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img" || exit $?
            		IMGFILE=$(ogGetPath "cache" "$2.img")
             fi
             ;;
@@ -43,7 +43,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         		echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
             	ogCopyFile "repo" "$2.img.torrent" "$IMGDIR" || exit $?
         		echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
-           		ogTorrentStart "CACHE" "$2.img.torrent" "seeder:60:360"           		
+           		ogTorrentStart "CACHE" "$2.img.torrent" "peer:60" || exit $?        		
            		IMGFILE=$(ogGetPath "cache" "$2.img")            
             ;;
         *)  # Protocolo desconocido.
