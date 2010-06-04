@@ -153,7 +153,7 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 		$particion=$dual[0]; // Toma la partici�
 		$tipopart=$dual[1]; // Toma la partici�
 
-		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP") continue;
+		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP"  || $tipopart== "CACHE") continue;
 
 		$tablaHtml.='<TR >'.chr(13);
 		// selector checkbox

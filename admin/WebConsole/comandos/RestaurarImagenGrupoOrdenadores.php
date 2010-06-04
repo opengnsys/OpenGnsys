@@ -271,7 +271,7 @@ function tabla_particiones($cmd,$idcentro,$idgrupo,$idperfilhard,$idparticion,$c
 		$dual=split("=",$auxsplit[$j]);
 		$particion=$dual[0]; // Toma la partición
 		$tipopart=$dual[1]; // Toma la partición
-		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP") continue;
+		if($tipopart== "EMPTY" ||  $tipopart== "LINUX-SWAP"  || $tipopart== "CACHE") continue;
 
 		$tablaHtml.='<TR >'.chr(13);
 		$tablaHtml.='<TD ><input onclick=seleccionar("'.$particion.'_'.$idperfilhard.'_'.$idparticion.'") type=checkbox name=particion_'.$particion.'_'.$idperfilhard.'_'.$idparticion.' value='.$particion.'_'.$idperfilhard.'_'.$idparticion.'></TD>'.chr(13);

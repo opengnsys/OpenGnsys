@@ -121,11 +121,14 @@ function tabla_configuraciones($cmd,$idcentro,$idordenador){
 			$tiposo=$ValorParametros["tiposo"];
 			$tipopart=$ValorParametros["tipopart"];
 			$tamapart=$ValorParametros["tamapart"];
-			$tablaHtml.='<TR>'.chr(13);
-			$tablaHtml.='<TD align=center>&nbsp;'.$particion.'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='<TD>&nbsp;'. nombreSO($tipopart,$tiposo,$nombreso).'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='<TD align=rigth>&nbsp;'. formatomiles( $tamapart).'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='</TR>'.chr(13);
+			$nomso=nombreSO($tipopart,$tiposo,$nombreso);
+			if($nomso!="CACHE"){
+				$tablaHtml.='<TR>'.chr(13);
+				$tablaHtml.='<TD align=center>&nbsp;'.$particion.'&nbsp;</TD>'.chr(13);
+				$tablaHtml.='<TD>&nbsp;'. $nomso.'&nbsp;</TD>'.chr(13);
+				$tablaHtml.='<TD align=rigth>&nbsp;'. formatomiles( $tamapart).'&nbsp;</TD>'.chr(13);
+				$tablaHtml.='</TR>'.chr(13);
+			}
 	}
 	$tablaHtml.='</TABLE>';
 	return($tablaHtml);
