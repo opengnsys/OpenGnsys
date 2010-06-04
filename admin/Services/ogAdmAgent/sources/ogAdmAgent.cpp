@@ -218,6 +218,7 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 		}
 		tbl.MoveNext();
 	}
+	db.Close();
 	return(true);  
 }
 // _____________________________________________________________________________________________________________
