@@ -1,4 +1,16 @@
 #!/bin/bash
+
+
+
+#Este scripts llama directamente a la función ogMcastSendFile $1 $2
+#1 path absoluto del fichero.
+#2 la session multicast.
+#         ogMcastSendFile [ str_repo | int_ndisk int_npart ] /Relative_path_file  sessionMulticast
+#@brief   Envía un fichero por multicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param (2 parámetros)  $1 path_aboluto_fichero  $2 sesionMcast
+
+
+
 export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys/client}"
     export OGBIN=$OPENGNSYS/bin
     export OGETC=$OPENGNSYS/etc
@@ -20,6 +32,8 @@ export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys/client}"
     	done
     fi
     
+ 
+ 
 export OG_ERR_FORMAT=1		# Formato de ejecución incorrecto.
 export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
 export OG_ERR_PARTITION=3	# Error en partición de disco.
@@ -27,5 +41,16 @@ export OG_ERR_LOCKED=4		# Partición o fichero bloqueado.
 export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
 export OG_ERR_NOTOS=6		# Sin sistema operativo.
 export OG_ERR_NOTEXEC=7		# Programa o función no ejecutable.
+
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "sendFileMcast /absolute_path_file sesionMcast" \
+            "sendFileMcast  /opt/opengnsys/images/aula1/hd500.vmx 9000:full-duplex:239.194.17.2:70M:20:300"
+   exit 0
+fi
+
+# los demas errores controlados por la funcion ogMcastSendFile
 
 ogMcastSendFile $1 $2
