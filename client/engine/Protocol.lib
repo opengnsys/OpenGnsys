@@ -631,7 +631,7 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 
 
 ############################################################
-##################### FUNCIONES MULTICAST EN DESARROLLO ##########
+### FUNCIONES MULTICAST EN DESARROLLO ##########
 
 
 #/**
