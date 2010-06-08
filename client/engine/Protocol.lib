@@ -196,7 +196,7 @@ PORTBASE=${SESSION[0]}
 ogCheckStringInGroup ${SESSION[0]} "9000 9002 9004 9006 9008 9010" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || ERROR=1 #return $?
 if [ $MODE == "server" ]
 then    
-	ogCheckStringInGroup ${SESSION[1]} "full-duplex half-duplex broadcast" || ogRaiseError $OG_ERR_FORMAT "McastSession method ${SESSION[1]}" || ERROR=1 #return $?
+	ogCheckStringInGroup ${SESSION[1]} "full-duplex FULL-DUPLEX half-duplex HALF-DUPLEX broadcast BROADCAST" || ogRaiseError $OG_ERR_FORMAT "McastSession method ${SESSION[1]}" || ERROR=1 #return $?
 	METHOD=${SESSION[1]}
 	ogCheckIpAddress ${SESSION[2]}  || ogRaiseError $OG_ERR_FORMAT "McastSession address ${SESSION[2]}" || ERROR=1 #return $?
 	ADDRESS=${SESSION[2]}
@@ -388,11 +388,173 @@ eval $COMMAND
 }
 
 
-
-
-
 ##########################################
 ############## funciones torrent
+#/**
+#         ogTorrentStart  [ str_repo | int_ndisk int_npart ] Relative_path_file.torrent | SessionProtocol
+#@brief   Función iniciar P2P - requiere un tracker para todos los modos, y un seeder para los modos peer y leecher y los ficheros .torrent.
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@param (2 parámetros)  $1 path_aboluto_fichero_torrent  $2 Parametros_Session_Torrent  
+#@param (3 parámetros)  $1 Contenedor CACHE $2 path_absoluto_fichero_Torrent $3 Parametros_Session_Torrent
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero_Torrent 4$ Parametros_Session_Torrent
+
+#@return
+#@note
+#@todo: 
+#@version 0.1 - Integración para OpenGNSys.
+#@author        Antonio J. Doblas Viso. Universidad de Málaga
+#@date
+#@version 0.2 - Chequeo del tamaño de imagen descargado.
+#@author        Irina . Univesidad de Sevilla.
+#@date
+#@version 0.3 - Control de los modos de operación, y estado de descarga.
+#@author        Antonio J. Doblas Viso. Univesidad de Málaga.
+#@date
+#@version 0.4 - Enviadando señal (2) a ctorrent permiendo la comunicación final con tracker
+#@author        Antonio J. Doblas Viso. Univesidad de Málaga.
+#@date
+#*/ ##
+
+#protocoloTORRENT    mode:time
+#mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, 
+#mode=peer    -> seedear mientras descarga
+#mode=leecher  -> NO seedear mientras descarga
+#time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
+
+ogTorrentStart ()
+{
+
+# Variables locales.
+local ARGS ARG TARGETDIR TARGETFILE SESSION ERROR
+ERROR=0
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME $FUNCNAME [ str_repo] [ [Relative_path_fileTORRENT] | [str_REPOSITORY path_fileTORRENT] |  [int_ndisk int_npart path_fileTORRENT ]  ] SessionTorrent" \
+           "$FUNCNAME CACHE /PS1_PH1.img.torrent seeder:10000" \
+           "$FUNCNAME /opt/opengnsys/cache/linux.iso peer:60" \
+           "$FUNCNAME 1 1 /linux.iso.torrent leecher:60" 
+    return
+fi
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1")
+           ARG=2
+     ;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3")
+           ARG=4
+     ;;
+    *) # Otros: Solo cache (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2" 2>/dev/null)
+        ARG=3
+     ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
+
+#controlar source, que no se haga al repo.
+if [ $ARG == "3" ]
+then
+    ogCheckStringInGroup "$1" "CACHE cache" || ogRaiseError $OG_ERR_FORMAT "La descarga torrent solo se hace desde local, copia el torrent a la cache y realiza la operación desde esa ubicación" || return $?
+fi
+if [ $ARG == "2" ]
+then
+    if `ogCheckStringInReg "$1" "^/opt/opengnsys/images"` 
+    then
+    	ogRaiseError $OG_ERR_FORMAT "La descarga torrent solo se hace desde local, copia el torrent a la cache y realiza la operación desde esa ubicación" 
+    	return $?
+	fi
+fi
+
+#controlar el source, para que sea un torrent.
+ctorrent -x ${SOURCE} &> /dev/null; [ $? -eq 0 ] ||  ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+
+TARGET=`echo $SOURCE | awk -F.torrent '{print $1}'`
+DIRSOURCE=`ogGetParentPath $SOURCE`
+cd $DIRSOURCE
+
+
+
+SESSION=${!ARG}
+OIFS=$IFS; IFS=':' ; SESSION=($SESSION); IFS=$OIFS
+[[ ${#SESSION[*]} == 2 ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session Torrent no completa:  modo:tiempo" || ERROR=1# return $?
+#controlamos el modo de operación del cliente-
+ogCheckStringInGroup ${SESSION[0]} "seeder SEEDER peer PEER leecher LEECHER" || ogRaiseError $OG_ERR_FORMAT "valor modo Torrent no valido ${SESSION[0]}" || ERROR=1 #return $?
+MODE=${SESSION[0]}
+#contolamos el tiempo para el seeder o una vez descargada la imagen como peer o leecher.
+ogCheckStringInReg ${SESSION[1]} "^[0-9]{1,10}$" || ogRaiseError $OG_ERR_FORMAT "valor tiempo no valido ${SESSION[1]}" || ERROR=1 # return $?
+TIME=${SESSION[1]}
+# si ha habido error en el control de parametros error.
+[ "$ERROR" == "1" ] && return 1
+
+
+#SINTAXSEEDER="echo MODE seeder ctorrent ; (sleep \$TIME && kill -9 \`pidof ctorrent\`) & ; ctorrent \${SOURCE}"
+
+# si No fichero .bf, y Si fichero destino    imagen ya descargada y su chequeo fue comprobado en su descarga inicial.
+if [ ! -f ${SOURCE}.bf -a -f ${TARGET} ]
+then
+  echo "imagen ya descargada"
+  case "$MODE" in 
+	seeder|SEEDER)
+		echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
+		(sleep $TIME && kill -2 `pidof ctorrent`) &
+		ctorrent -f ${SOURCE}		
+  esac
+  return 0
+fi
+
+#Si no existe bf ni fichero destino         descarga inicial.
+if [ ! -f ${SOURCE}.bf -a ! -f ${TARGET} ]
+then
+	OPTION=DOWNLOAD
+    echo "descarga inicial" 
+fi 
+
+# Si fichero bf           descarga anterior no completada -.
+if [ -f ${SOURCE}.bf -a -f ${TARGET} ]
+then       
+        echo Continuar con Descargar inicial no terminada.
+        OPTION=DOWNLOAD
+fi
+
+if [ "$OPTION" == "DOWNLOAD" ]
+then
+	case "$MODE" in
+        peer|PEER)
+        	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
+            ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
+        ;;
+        leecher|LEECHER)
+           	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
+         	ctorrent ${SOURCE} -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 -U 0
+        ;;
+        seeder|SEEDER)
+        	echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
+           	ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
+		;;
+	esac
+fi
+if [ "$OPTION" == "DOWNLOAD" ]
+then
+ 	echo "comprobando el fichero descargado. Espere: "
+ 	#echo " ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\( "
+ 	TOTAL=`ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\(`
+ 	if [ "$TOTAL" == "100%)" ]
+ 	then
+    	 return 0
+ 	else 
+    	 return 1
+ 	fi
+ 
+ fi
+ 
+cd /tmp
+}
 
 #/**
 #         ogCreateTorrent  [ str_repo | int_ndisk int_npart ] Relative_path_file
@@ -464,133 +626,7 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 }
 
 
-#/**
-#         ogTorrentStart  [ str_repo | int_ndisk int_npart ] Relative_path_file | SessionProtocol
-#@brief   Función iniciar P2P - requiere un tracker para todos los modos, y un seeder para los modos peer y leecher y los ficheros .torrent.
-#@param   str_pathDirectory  str_Relative_path_file
-#@param  int_disk    int_partition   str_Relative_path_file
-#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
-#@return
-#@note
-#@todo: 
-#@version 0.1 - Integración para OpenGNSys.
-#@author        Antonio J. Doblas Viso. Universidad de Málaga
-#@date
-#@version 0.2 - Chequeo del tamaño de imagen descargado.
-#@author        Irina . Univesidad de Sevilla.
-#@date
-#@version 0.3 - Control de los modos de operación, y estado de descarga.
-#@author        Antonio J. Doblas Viso. Univesidad de Málaga.
-#@date
-#*/ ##
-#Lee el fichero torrent y descarga o comparte el fichero destino en el mismo subdirectorio.
-# Parametros para el orgien del fichero file.df.torrent
-# 1 camino completo al fichero
-# 1 2   Contenedor /fichero relativo
-# 1 2 3  disco particion y /fichero relativo.
-#protocoloTORRENT    mode:time
-# posicion 2, 3, 4
-#mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, 
-#mode=peer    -> seedear mientras descarga
-#mode=leecher  -> NO seedear mientras descarga
-#time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
 
-ogTorrentStart ()
-{
-#TODO ayuda
-#TODO: control parametros.
-
-case "$1" in
-    /*)     # Camino completo.          */ (Comentrio Doxygen)
-           SOURCE=$(ogGetPath "$1")
-           ARG=1
-           SESSION=$2
-     ;;
-    [1-9]*) # ndisco npartición.
-           SOURCE=$(ogGetPath "$1" "$2" "$3")
-           ARG=3
-           SESSION=$4
-     ;;
-    *) # Otros: repo, cache, cdrom (no se permiten caminos relativos).
-        SOURCE=$(ogGetPath "$1" "$2" 2>/dev/null)
-        ARG=2
-        SESSION=$3
-        ;;
-esac
-
-ctorrent -x ${SOURCE}; [ $? -eq 0 ] ||  ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
-
-TARGET=`echo $SOURCE | awk -F.torrent '{print $1}'`
-DIRSOURCE=`ogGetParentPath $SOURCE`
-cd $DIRSOURCE
-
-#analizando SESSION
-MODE=`echo $SESSION | cut -f1 -d:`
-TIME=`echo $SESSION | cut -f2 -d:`
-
-
-#echo $MODE $TIME 
-#echo ${SOURCE}.bf  ${TARGET} 
-
-# si No fichero .bf, y Si fichero destino    imagen ya descargada y su chequeo fue comprobado en su descarga inicial.
-if [ ! -f ${SOURCE}.bf -a -f ${TARGET} ]
-then
-  echo "imagen ya descargada"
-  case "$MODE" in 
-	seeder|SEEDER)
-		(sleep $TIME && kill -9 `pidof ctorrent`) &
-		echo "MODE seeder ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
-		ctorrent ${SOURCE}
-  esac
-  return 0
-fi
-
-#Si no existe bf ni fichero destino         descarga inicial.
-if [ ! -f ${SOURCE}.bf -a ! -f ${TARGET} ]
-then
-	OPTION=DOWNLOAD
-    echo "descarga inicial" 
-fi 
-
-# Si fichero bf           descarga anterior no completada -.
-if [ -f ${SOURCE}.bf -a -f ${TARGET} ]
-then       
-        echo Continuar con Descargar inicial no terminada.
-        OPTION=DOWNLOAD
-fi
-
-case "$OPTION" in
-	download|DOWNLOAD)
-        if [ "$MODE" == "peer" ]
-        then 
-			echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
-            ctorrent -f -X "sleep $TIME; kill -9 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
-        fi
-
-        if [ "$MODE" == "leecher" ]
-        then
-          echo "ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
-          ctorrent ${SOURCE} -X "sleep $TIME; kill -9 \$(pidof ctorrent)" -C 100 -U 0
-        fi
-;;
-esac
-
-if [ "$OPTION" == "DOWNLOAD" ]
-then
- 	echo "comprobando el fichero descargado"
- 	echo " ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\( "
- 	TOTAL=`ctorrent -s $TARGET -c $SOURCE | tail -n1 | cut -f2 -d\(`
- 	if [ "$TOTAL" == "100%)" ]
- 	then
-    	 return 0
- 	else 
-    	 return 1
- 	fi
- 
- fi
- 
-cd /tmp
-}
 
 
 
