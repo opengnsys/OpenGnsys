@@ -16,8 +16,8 @@
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@note    Requisitos: sfdisk, parted, awk, sed
-#$warning El tamaño de caché debe estar entre 50 MB y la mitad del disco.
-#$warning La caché no puede solaparse con las particiones de datos.
+#@warning El tamaño de caché debe estar entre 50 MB y la mitad del disco.
+#@warning La caché no puede solaparse con las particiones de datos.
 #@version 0.9.1 - Definición de caché local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
