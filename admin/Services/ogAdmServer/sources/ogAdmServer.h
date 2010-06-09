@@ -132,7 +132,7 @@ int RESPUESTA_TomaSoftware(SOCKET ,char *);
 int	RESPUESTA_inclusionREPO(TRAMA*);
 
 int Actualiza_ordenador_imagen(char *,const char *,char *,Database);
-
+int Actualiza_ordenador_perfil(char *,char *, char*, Database);
 int busca_comandos(char* ,char*,char *,int *);
 int InsertaNotificaciones(int,int,int,char *,Database);
 int comprueba_resultados(int ,Database );

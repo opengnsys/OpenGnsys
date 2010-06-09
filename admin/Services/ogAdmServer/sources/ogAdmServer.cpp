@@ -2922,7 +2922,7 @@ int RESPUESTA_CrearSoftwareIncremental(SOCKET s, char *parametros) {
 // ________________________________________________________________________________________________________
 int RESPUESTA_RestaurarImagen(SOCKET s, char *parametros) {
 	char ErrStr[200], gido[20];
-	char *res, *der, *ids, *iph, *ido, *idi, *par, *cfg;
+	char *res, *der, *ids, *iph, *ido, *idi, *par, *ifs,*cfg;
 	Database db;
 	Table tbl;
 
@@ -2940,6 +2940,7 @@ int RESPUESTA_RestaurarImagen(SOCKET s, char *parametros) {
 	ido = toma_parametro("ido", parametros); // Toma identificador del ordenador
 	cfg = toma_parametro("cfg", parametros); // Toma configuracin
 	par = toma_parametro("par", parametros); // particion
+	ifs = toma_parametro("ifs", parametros); // Identificador del perfil software
 	idi = toma_parametro("idi", parametros); // identificador de la imagen
 
 	strcpy(gido, ido); // Guarda el identificador del ordenador
@@ -2956,6 +2957,9 @@ int RESPUESTA_RestaurarImagen(SOCKET s, char *parametros) {
 		return (false); // Erro al actualiza la configuracin
 	if (!Actualiza_ordenador_imagen(par, idi, gido, db))
 		return (false);
+	if (Actualiza_ordenador_perfil(gido,par,ifs,db))
+		return (false);
+
 	db.Close();
 	return (true);
 }
@@ -2970,8 +2974,7 @@ int RESPUESTA_RestaurarImagen(SOCKET s, char *parametros) {
 //			- ido: identificador del ordenador
 //			- db: Conexión ADO operativa
 // ________________________________________________________________________________________________________
-int Actualiza_ordenador_imagen(char *par, const char *idi, char *ido,
-		Database db) {
+int Actualiza_ordenador_imagen(char *par, const char *idi, char *ido,Database db) {
 	char ErrStr[200], sqlstr[1000];
 	Table tbl;
 	int idimagen, idimagenres;
@@ -3018,6 +3021,53 @@ int Actualiza_ordenador_imagen(char *par, const char *idi, char *ido,
 				sqlstr,
 				"INSERT INTO ordenador_imagen (idordenador,particion,idimagen) VALUES(%s,%s,%s)",
 				ido, par, idi);
+		if (!db.Execute(sqlstr)) { // Error al insertar
+			db.GetErrorErrStr(ErrStr);
+			return (false);
+		}
+	}
+	return (true);
+}
+// ________________________________________________________________________________________________________
+// Función: Actualiza_ordenador_perfil
+//
+//		Descripción:
+//			Esta función actualiza la tabla ordenador_perfilsof
+//		Parámetros:
+//			- par: partición
+//			- ido: identificador de la imagen ( 0 ninguna )
+//			- ips: identificador del ordenador
+//			- db: Conexión ADO operativa
+// ________________________________________________________________________________________________________
+int Actualiza_ordenador_perfil(char *ido,char *par,char *ifs,Database db)
+{
+	char ErrStr[200], sqlstr[1000];
+	Table tbl;
+	int idperfilsoft;
+
+	sprintf(sqlstr,
+				"SELECT idperfilsoft FROM ordenador_perfilsoft"\
+				" WHERE idordenador = %s AND particion=%s",ido,par);
+
+	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
+		db.GetErrorErrStr(ErrStr);
+		return (false);
+	}
+	if (!tbl.ISEOF()) { // Existe registro
+		if (!tbl.Get("idperfilsoft", idperfilsoft)) {
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return (false);
+		}
+		if (idperfilsoft != atoi(ifs)) {
+			sprintf(sqlstr,	"Update ordenador_perfilsoft set idperfilsoft=%s WHERE idordenador=%s AND particion=%s",ifs, ido, par);
+			if (!db.Execute(sqlstr)) { // Error al actualizar
+				db.GetErrorErrStr(ErrStr);
+				return (false);
+			}
+		}
+	}
+	else{ // No existe el registro
+		sprintf(sqlstr,	"INSERT INTO ordenador_perfilsoft (idordenador,particion,idperfilsoft) VALUES(%s,%s,%s)",ido, par, ifs);
 		if (!db.Execute(sqlstr)) { // Error al insertar
 			db.GetErrorErrStr(ErrStr);
 			return (false);

@@ -1158,7 +1158,7 @@ int NoComandosPtes(){
 int TomaIPlocal()
 {
    	int herror;
-	
+
 	sprintf(cmdshell,"%s/admGetIpAddress",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);
 	RegistraLog(msglog,false);
@@ -1623,6 +1623,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 		lon+=sprintf(nwtrama->parametros+lon,"cfg=%s\r",parametroscfg);		
 		lon+=sprintf(nwtrama->parametros+lon,"idi=%s\r",widimagen);	
 		lon+=sprintf(nwtrama->parametros+lon,"par=%s\r",wparticion);	
+		lon+=sprintf(nwtrama->parametros+lon,"ifs=%s\r",widperfilsoft);
 		RespuestaEjecucionComando(trama,nwtrama,res);	
 		return(res);		
 }
