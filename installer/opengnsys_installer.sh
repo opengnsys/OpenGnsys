@@ -108,16 +108,16 @@ function checkPackage()
 {
 	package=$1
 	if [ -z $package ]; then
-		errorAndLog "checkPackage(): parameter required"
+		errorAndLog "${FUNCNAME}(): parameter required"
 		exit 1
 	fi
-	echoAndLog "checkPackage(): checking if package $package exists"
+	echoAndLog "${FUNCNAME}(): checking if package $package exists"
 	dpkg -s $package &>/dev/null | grep Status | grep -qw install
 	if [ $? -eq 0 ]; then
-		echoAndLog "checkPackage(): package $package exists"
+		echoAndLog "${FUNCNAME}(): package $package exists"
 		return 0
 	else
-		echoAndLog "checkPackage(): package $package doesn't exists"
+		echoAndLog "${FUNCNAME}(): package $package doesn't exists"
 		return 1
 	fi
 }
@@ -128,11 +128,11 @@ function checkPackage()
 function checkDependencies()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "checkDependencies(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	echoAndLog "checkDependencies(): checking dependences"
+	echoAndLog "${FUNCNAME}(): checking dependences"
 	uncompletedeps=0
 
 	# copia local del array del parametro 1
@@ -157,7 +157,7 @@ function checkDependencies()
 	done
 
 	# retorna el numero de paquetes no resueltos
-	echoAndLog "checkDependencies(): dependencies uncompleted: $uncompletedeps"
+	echoAndLog "${FUNCNAME}(): dependencies uncompleted: $uncompletedeps"
 	return $uncompletedeps
 }
 
@@ -814,6 +814,9 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
                         client/boot/udeblist-lucid.conf \
+                        client/nfsexport/bin/udp-sender \
+                        client/nfsexport/bin/udp-receiver \
+                        client/nfsexport/scripts/sendFileMcast \
                         server/PXE/pxelinux.cfg/default \
                         doc )
 	local TARGETS=( bin/initrd-generator \
@@ -822,6 +825,9 @@ function openGnsysCopyServerFiles () {
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
                         etc/udeblist-lucid.conf \
+                        bin/udp-sender \
+                        bin/udp-receiver \
+                        bin/sendFileMcast \
                         tftpboot/pxelinux.cfg/default \
                         doc )
 
