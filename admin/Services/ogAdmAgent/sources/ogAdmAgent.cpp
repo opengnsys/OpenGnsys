@@ -188,9 +188,11 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 		return(false);
 	}
 	if(tbl.ISEOF()){
+		db.Close();
 		return(true);  // No hay acciones programadas
 	}
 	if (!wdb.Open(usuario, pasguor, datasource, catalog)) { // error de conexion
+			db.Close();
 			db.GetErrorErrStr(ErrStr);
 			return (false);
 	}
@@ -218,6 +220,7 @@ int busca_accion(WORD dia,WORD mes,WORD anno,WORD hora,WORD minutos,WORD diasema
 		}
 		tbl.MoveNext();
 	}
+	wdb.Close();
 	db.Close();
 	return(true);  
 }
