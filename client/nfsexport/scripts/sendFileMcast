@@ -32,7 +32,7 @@ export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys/client}"
     	done
     fi
     
- 
+export PATH=$PATH:/opt/opengnsys/bin 
  
 export OG_ERR_FORMAT=1		# Formato de ejecución incorrecto.
 export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
