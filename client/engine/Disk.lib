@@ -26,7 +26,7 @@
 #@version 0.9 - Primera versión para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/09
-#@version 0.91 - Corrección del redondeo del tamaño del disco.
+#@version 0.9.1 - Corrección del redondeo del tamaño del disco.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
 #*/ ##
@@ -51,8 +51,8 @@ SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 SECTORS=$[SECTORS/CYLS*CYLS-1]
 # Se recalcula el nº de sectores del disco 1, si existe partición de caché.
-CACHESIZE=$(ogGetCacheSize 2>/dev/null)
-[ $1 == 1 -a -n "$CACHESIZE" ] && SECTORS=$[SECTORS-$CACHESIZE*2]
+CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
+[ $1 == 1 -a -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
 # Sector de inicio (la partición 1 empieza en el sector 63).
 START=63

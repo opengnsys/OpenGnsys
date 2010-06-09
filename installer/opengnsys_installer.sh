@@ -1144,6 +1144,17 @@ if [ $? -eq 0 ]; then
 		errorAndLog "Unable to locate $WORKDIR/$OPENGNSYS_DB_CREATION_FILE!!"
 		exit 1
 	fi
+else
+	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
+	INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
+	REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
+	OPENGNSYS_DB_UPDADE_FILE="opengnsys/admin/Database/ogBDAdmin-$INSTVERSION-$REPOVERSION.sql"
+ 	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE ]; then
+ 		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
+ 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE
+ 	else
+ 		echoAndLog "Database unchanged."
+ 	fi
 fi
 
 # copiando paqinas web
