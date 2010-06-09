@@ -114,16 +114,21 @@ struct s_Item{
 } ;
 	
 struct s_Propiedades {
-	char idordenador[16];				 // Identificador del ordenador
-	char nombreordenador[64];		 // Nombre del ordenador
-	char idaula[16];								// Identificador del aula
-	char servidorhidra[64];				// IP  del servidor HUDRA
-	char puerto[16];								// Puerto
-	char iprepo[16];								// Dirección IP repositorio
-	char puertorepo[16];								// Puerto	
-	char idperfilhard[16];					// Identificador del perfil hardware
-	char IPlocal[16];
-	char cache[16];						// Tamaño de la cache
+	char idordenador[16]; // Identificador del ordenador
+	char nombreordenador[64]; // Nombre del ordenador
+	char idaula[16]; // Identificador del aula
+	char servidorhidra[16]; // IP  del servidor Opengnsys
+	char puerto[16]; // Puerto
+	char iprepo[16]; // Dirección IP repositorio
+	char puertorepo[16]; // Puerto
+	char idperfilhard[16]; // Identificador del perfil hardware
+	char IPlocal[16]; // Dirección IP del cliente
+	char cache[16]; // Tamaño de la cache
+	char ipmulticast[16]; // Dirección IP multicast
+	char pormulticast[16]; // Puerto multicast
+	char modmulticast[16]; // Modo de transmisión multicast
+	char velmulticast[16]; // Velocidad de transmisión multicast
+
 } Propiedades;	  // Estructura con los datos del odenador
 	
 struct s_Particiones{
@@ -147,6 +152,7 @@ struct tiposo {
 };	
 
 char* tbPathImg[]={"CLIEN","CACHE","REPO"};
+char* tbmodmul[]={"","half-duplex","full-duplex"};
 
 struct tiposo tiposos[] = {
 		{"BIGDOS", "MsDos","MsDos"},
@@ -268,7 +274,7 @@ int CrearPerfilSoftware(TRAMA*,TRAMA*);
 int CrearPerfil(char*,char*,char*,char*,char*);
 int Nemonico(char*);
 int RestaurarImagen(TRAMA*,TRAMA*);
-int RestaurandoImagen(char* ,char *,char* ,char *,char *,char *,char*);
+int RestaurandoImagen(char* ,char *,char* ,char *,char *,char *,char *);
 
 int ParticionaryFormatear(TRAMA*,TRAMA*);
 int Particionar(char*,char*,char* );
@@ -290,3 +296,4 @@ char* URLEncode(char *);
 int MuestraMenu(char*);
 void MuestraMensaje(int,char*);
 int cuestionCache(char*);
+int sesionMulticast(char *,char *,char *);

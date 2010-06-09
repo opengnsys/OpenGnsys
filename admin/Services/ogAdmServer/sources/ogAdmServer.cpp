@@ -13,7 +13,7 @@
 // Función: TomaEnvio
 //
 //		Descripción:
-//			Toma la hora actual  del sistema para identificar envios
+//			Toma la hora actual  del sistema para identificar envios multicast
 //		Parámetros:
 //			Ninguno
 // ________________________________________________________________________________________________________
@@ -546,7 +546,6 @@ BOOLEAN servidorrembo_existente(char *ip, int* idx) {
 	return (FALSE);
 }
 
-
 // ________________________________________________________________________________________________________
 // Función: corte_iph
 // 
@@ -659,9 +658,10 @@ int InclusionCliente(SOCKET s, char *parametros) {
 	char *iph, *cfg, *mac, *nau, *nor, *ipr, *ipd;
 	int i, lon, glon, idx, resul, puertorepo;
 	char nwparametros[LONGITUD_PARAMETROS];
-	char ipservidordhcp[16], ipservidorrembo[16], nombreordenador[100];
+	char ipservidordhcp[16], ipservidorrembo[16], nombreordenador[100],
+			ipmulticast[16];
 	int idordenador, idaula, idconfiguracion, idparticion, idperfilhard,
-			idmenu, cache;
+			idmenu, cache, pormulticast, modmulticast, velmulticast;
 
 	// Toma parámetros
 	iph = toma_parametro("iph", parametros); // Toma ip
@@ -681,8 +681,13 @@ int InclusionCliente(SOCKET s, char *parametros) {
 	// Recupera los datos del ordenador
 	sprintf(
 			sqlstr,
-			"SELECT ordenadores.idordenador,ordenadores.idaula,ordenadores.nombreordenador, ordenadores.idperfilhard, ordenadores.idconfiguracion,ordenadores.idparticion,servidoresrembo.ip AS ipservidorrembo,servidoresrembo.puertorepo, ordenadores.idmenu,ordenadores.cache FROM ordenadores INNER JOIN  servidoresrembo ON ordenadores.idservidorrembo = servidoresrembo.idservidorrembo  WHERE ordenadores.ip = '%s'",
-			iph);
+			"SELECT ordenadores.idordenador,ordenadores.idaula,ordenadores.nombreordenador, ordenadores.idperfilhard,"
+				" ordenadores.idconfiguracion,ordenadores.idparticion,"
+				" servidoresrembo.ip AS ipservidorrembo,servidoresrembo.puertorepo,"
+				" ordenadores.idmenu,ordenadores.cache,ordenadores.ipmul,ordenadores.pormul,ordenadores.modomul,ordenadores.velmul"
+				" FROM ordenadores"
+				" INNER JOIN  servidoresrembo ON ordenadores.idservidorrembo = servidoresrembo.idservidorrembo"
+				" WHERE ordenadores.ip = '%s'", iph);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
 		RegistraLog("Error al ejecutar la consulta", false);
@@ -769,6 +774,22 @@ int InclusionCliente(SOCKET s, char *parametros) {
 			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
 			return (false);
 		}
+		if (!tbl.Get("ipmul", ipmulticast)) { // Toma dato
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return (false);
+		}
+		if (!tbl.Get("pormul", pormulticast)) { // Toma dato
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return (false);
+		}
+		if (!tbl.Get("modomul", modmulticast)) { // Toma dato
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return (false);
+		}
+		if (!tbl.Get("velmul", velmulticast)) { // Toma dato
+			tbl.GetErrorErrStr(ErrStr); // error al acceder al registro
+			return (false);
+		}
 		resul = actualiza_configuracion(db, tbl, cfg, idconfiguracion,
 				idparticion, iph); // Actualiza la configuración del ordenador
 		if (!resul) {
@@ -805,6 +826,11 @@ int InclusionCliente(SOCKET s, char *parametros) {
 	lon += sprintf(nwparametros + lon, "che=%d\r", cache);
 	lon += sprintf(nwparametros + lon, "ipr=%s\r", ipservidorrembo);
 	lon += sprintf(nwparametros + lon, "rep=%d\r", puertorepo);
+	lon += sprintf(nwparametros + lon, "ipm=%s\r", ipmulticast);
+	lon += sprintf(nwparametros + lon, "pom=%d\r", pormulticast);
+	lon += sprintf(nwparametros + lon, "mom=%d\r", modmulticast);
+	lon += sprintf(nwparametros + lon, "vlm=%d\r", velmulticast);
+
 	glon = lon;
 	if (!Toma_menu(db, tbl, nwparametros, idmenu, lon))
 		nwparametros[glon] = (char) NULL;
@@ -2050,7 +2076,7 @@ int EcoConsola(SOCKET s, char *parametros) {
 	sprintf(nomfilesrc, "%s/eco-%s", pfe, iph); // Nombre del fichero destino
 	sprintf(nomfiledst, "/tmp/eco-%s", iph); // Nombre del fichero destino
 	if (!recibeFichero(ipr, rep, nomfilesrc, nomfiledst)) {
-		return(enviaEcoConsola(s,"Sin eco o error de sintaxis")); // NO se ha podido recuperar el fichero de eco
+		return (enviaEcoConsola(s, "Sin eco o error de sintaxis")); // NO se ha podido recuperar el fichero de eco
 	}
 	// Lee archivo de eco
 	FILE *Finv;
@@ -2060,23 +2086,24 @@ int EcoConsola(SOCKET s, char *parametros) {
 	fseek(Finv, 0, SEEK_END); // Obtiene tamaño del fichero.
 	lSize = ftell(Finv);
 	rewind(Finv);
-	if(lSize>0){
+	if (lSize > 0) {
 		buffer = (char*) malloc(lSize + 1); // Toma memoria para el buffer de lectura.
 		if (buffer == NULL) {
-			sprintf(msglog,
-				"NO se ha podido reservar memoria para leer archivo de eco %s",
-				nomfilesrc);
+			sprintf(
+					msglog,
+					"NO se ha podido reservar memoria para leer archivo de eco %s",
+					nomfilesrc);
 			RegistraLog(msglog, false);
-			return(enviaEcoConsola(s,msglog));
+			return (enviaEcoConsola(s, msglog));
 		}
 		fread(buffer, 1, lSize, Finv); // Lee contenido del fichero
 		fclose(Finv);
 		buffer[lSize] = '\0';
 		buffer = escaparComillas(buffer);
-		return(enviaEcoConsola(s,buffer));
+		return (enviaEcoConsola(s, buffer));
 	}
-	return(enviaEcoConsola(s,"Sin eco o error de sintaxis"));
-	return(true);
+	return (enviaEcoConsola(s, "Sin eco o error de sintaxis"));
+	return (true);
 }
 // ________________________________________________________________________________________________________
 // Función: enviaEcoConsola
@@ -2087,17 +2114,16 @@ int EcoConsola(SOCKET s, char *parametros) {
 //			- s: Socket del servidor web que envía el comando
 //			- eco: Salida de consola
 // ________________________________________________________________________________________________________
-int enviaEcoConsola(SOCKET s,const char *eco)
-{
+int enviaEcoConsola(SOCKET s, const char *eco) {
 	char nwparametros[LONGITUD_PARAMETROS];
 	int res;
 
 	nwparametros[0] = '\0';
 	strcat(nwparametros, "eco="); // Compone retorno eco (Pantalla de consola remota)
 	strcat(nwparametros, eco);
-	res=manda_comando(s, nwparametros);
+	res = manda_comando(s, nwparametros);
 	close(s);
-	return(res);
+	return (res);
 }
 // ________________________________________________________________________________________________________
 // Función: Sondeo
@@ -3590,8 +3616,8 @@ void EnviaServidoresRembo(char * parametros, int cont) {
 	int i, lon;
 	char paux[20];
 
-	sprintf(paux, "ide=%u\r", TomaEnvio());
-	strcat(parametros, paux); // identificador de envio
+	sprintf(paux, "ide=%d\r", TomaEnvio());
+	strcat(parametros, paux); // Identificador de la sesión multicast
 
 	sprintf(paux, "nip=%d\r", cont);
 	strcat(parametros, paux); // Contador de clientes a los que se envía la trama

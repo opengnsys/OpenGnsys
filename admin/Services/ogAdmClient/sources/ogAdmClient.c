@@ -101,6 +101,9 @@ int LeeFileConfiguracion()
 	
 	if(szPathFileCfg==NULL) return(false); // Nombre del fichero de configuración erróneo
 
+	if(ndebug>5)
+		RegistraLog("Abre fichero de configuración", false);
+
 	Fsalida = fopen ( szPathFileCfg , "rb" );	// Abre  fichero de configuración
 	if (Fsalida==NULL)
 		return(false); // Error de apertura del fichero de configuración
@@ -108,6 +111,8 @@ int LeeFileConfiguracion()
 	lSize = ftell (Fsalida);	// Obtiene tamaño del fichero.
 	rewind (Fsalida);	// Coloca puntero de lectura al principio
 	
+	if(ndebug>5)
+		RegistraLog("Lee fichero de configuración", false);
 	buffer =(char*)ReservaMemoria(lSize);	// Toma memoria para el buffer de lectura.
 	if (buffer == NULL)
 		return(false); // Error de reserva de memoria para buffer de lectura
@@ -125,34 +130,56 @@ int LeeFileConfiguracion()
 	
 	strcpy(ch,"\n");	// Carácter delimitador (salto de linea)
 	numlin=split_parametros(lineas,buffer,ch); // Toma lineas del  fichero
+	if(ndebug>5)
+		RegistraLog("Lee parámetros del fichero de configuración", false);
 	for (i=0;i<numlin;i++){
 		strcpy(ch,"=");	// Caracter delimitador
 		split_parametros(dualparametro,lineas[i],ch); // Toma nombre del parámetros
-		resul=strcmp(dualparametro[0],"ServerIP");
-		if(resul==0) 
-			strcpy(Servidorhidra,dualparametro[1]);
-		else{
-			resul=strcmp(dualparametro[0],"Puerto");
-			if(resul==0)
-				strcpy(Puerto,dualparametro[1]);
-			else{
-				resul=strcmp(dualparametro[0],"ClientScripts");
-				if(resul==0)
-					strcpy(HIDRASCRIPTS,dualparametro[1]);
-				else{
-					resul=strcmp(dualparametro[0],"UrlMenu");
-					if(resul==0)
-						strcpy(URLMENU,dualparametro[1]);
-					else{
-						resul=strcmp(dualparametro[0],"UrlMsg");
-						if(resul==0)
-							strcpy(URLMSG,dualparametro[1]);
-						else
-							return(false);
-					}
-				}
-			}
+		if(ndebug>5){
+			sprintf(msglog," Parámetro %s del fichero de configuración",dualparametro[0]);
+			RegistraLog(msglog,false);
+			sprintf(msglog," Valor del parámetro %s del fichero de configuración:%s",dualparametro[0],dualparametro[0]);
+			RegistraLog(msglog,false);
 		}
+		resul = strcmp(dualparametro[0], "ServerIP");
+		if (resul == 0)
+			strcpy(Servidorhidra, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "Puerto");
+		if (resul == 0)
+			strcpy(Puerto, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "ClientScripts");
+		if (resul == 0)
+			strcpy(HIDRASCRIPTS, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "UrlMenu");
+		if (resul == 0)
+			strcpy(URLMENU, dualparametro[1]);
+
+		resul = strcmp(dualparametro[0], "UrlMsg");
+		if (resul == 0)
+			strcpy(URLMSG, dualparametro[1]);
+	}
+	if (Servidorhidra[0] == '\0') {
+			RegistraLog("ServerIP, NO se ha definido este parámetro", false);
+			return (FALSE);
+	}
+	if (Puerto[0] == '\0') {
+			RegistraLog("Puerto, NO se ha definido este parámetro", false);
+			return (FALSE);
+	}
+	if (HIDRASCRIPTS[0] == '\0') {
+			RegistraLog("HIDRASCRIPTS, NO se ha definido este parámetro", false);
+			return (FALSE);
+	}
+	if (URLMENU[0] == '\0') {
+			RegistraLog("URLMENU, NO se ha definido este parámetro", false);
+			return (FALSE);
+	}
+	if (URLMSG[0] == '\0') {
+			RegistraLog("URLMSG, NO se ha definido este parámetro", false);
+			return (FALSE);
 	}
 	return(true);
 }
@@ -856,22 +883,32 @@ int recibeFichero(char *nomfilesrc, char *nomfiledst)
 //	Descripción:
 //		Notifica a su repositorio que esta preparado para recibir datos por multicast
 //	Parámetros:
-//		- sm : identificador de la sesión multicast
 //		- nipes : Número de ordenadores necesarios para comenzar la sesión
 //	Devuelve:
 //		true si el archivo existe o false en caso contrario
 // ________________________________________________________________________________________________________
-int sesionMulticast(char *sm,char *nipes)
+int sesionMulticast(char *fileimg,char *nipes,char *ide)
 {
 	SOCKET udpsock;
-	int res;
+	int res,lon;
 
 	udpsock=UDPConnect();
 	if (udpsock == INVALID_SOCKET){
 		UltimoError(15,"sesionMulticast()");
 		return(false);
 	}
-	sprintf(trama->parametros,"nfn=sesionMulticast\ride=%s\riph=%s\rnip=%s\r",sm,IPlocal,nipes);	// Nombre de la función a ejecutar en el  servidor de administración
+	int modo=atoi(Propiedades.modmulticast);
+
+	lon = sprintf(trama->parametros, "nfn=sesionMulticast\r");
+	lon += sprintf(trama->parametros + lon, "img=%s\r", fileimg);
+	lon += sprintf(trama->parametros + lon, "ipm=%s\r", Propiedades.ipmulticast);
+	lon += sprintf(trama->parametros + lon, "pom=%s\r", Propiedades.pormulticast);
+	lon += sprintf(trama->parametros + lon, "mom=%s\r", tbmodmul[modo]);
+	lon += sprintf(trama->parametros + lon, "vlm=%s\r", Propiedades.velmulticast);
+	lon += sprintf(trama->parametros + lon, "iph=%s\r", Propiedades.IPlocal);
+	lon += sprintf(trama->parametros + lon, "nip=%s\r", nipes);
+	lon += sprintf(trama->parametros + lon, "ide=%s\r", ide);
+
 	res=EnviaTramaRepo(udpsock,trama,Propiedades.iprepo,Propiedades.puertorepo);
 	close(udpsock);
 	if(!res)
@@ -1121,8 +1158,6 @@ int NoComandosPtes(){
 int TomaIPlocal()
 {
    	int herror;
-	//strcpy(IPlocal,"10.1.15.9");
-	//return(true);
 	
 	sprintf(cmdshell,"%s/admGetIpAddress",HIDRASCRIPTS);
 	herror=EjecutarScript (cmdshell,NULL,IPlocal,true);
@@ -1250,6 +1285,11 @@ int RESPUESTA_InclusionCliente(TRAMA *trama)
 	strcpy(Propiedades.iprepo,toma_parametro("ipr",trama->parametros));	// Dirección IP del repositorio
 	strcpy(Propiedades.puertorepo,toma_parametro("rep",trama->parametros));	// Puerto de comunicación con el repositorio
 	strcpy(Propiedades.cache,toma_parametro("che",trama->parametros));	// Tamaño de la cache
+
+	strcpy(Propiedades.ipmulticast,toma_parametro("ipm",trama->parametros)); // Dirección IP multicast
+	strcpy(Propiedades.pormulticast,toma_parametro("pom",trama->parametros)); // Puerto multicast
+	strcpy(Propiedades.modmulticast,toma_parametro("mom",trama->parametros));	// Modo de transmisión multicast
+	strcpy(Propiedades.velmulticast,toma_parametro("vlm",trama->parametros));	// Velocidad de transmisión multicast
 
 	// Guarda items del menú
 	char* cabmenu=toma_parametro("cmn",trama->parametros);
@@ -1563,8 +1603,8 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 		char *widperfilhard=toma_parametro("ifh",trama->parametros); // Perfil hardware
 		char *wpathimagen=toma_parametro("pth",trama->parametros); // Indica si la imagen se descargar de la caché o del repositorio
 		char *wprotclona=toma_parametro("mcl",trama->parametros); // Protocolo de clonacion
-		char *widenvio=toma_parametro("ide",trama->parametros); // Identificador del envio
-		char *wnipes=toma_parametro("nip",trama->parametros); // Ipes de los clientes
+		char *wnipes=toma_parametro("nip",trama->parametros); // Numero de clientes de la sesión multicast
+		char *wide=toma_parametro("ide",trama->parametros); // Identificador sesión multicast
 
 		if(wpathimagen=='\0') wpathimagen="1";	// Por defecto de caché
 		idxpath=atoi(wpathimagen);
@@ -1572,7 +1612,7 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 
 		char fileperfil[64];
 		sprintf(fileperfil,"PS%s_PH%s",widperfilsoft,widperfilhard);	// Nombre del fichero del perfil creado	
-		res=RestaurandoImagen(disco,fileperfil,wparticion,tbPathImg[idxpath],wprotclona,widenvio,wnipes);
+		res=RestaurandoImagen(disco,fileperfil,wparticion,tbPathImg[idxpath],wprotclona,wnipes,wide);
 			
 		// Toma la nueva configuración
 		char *parametroscfg=LeeConfiguracion(disco);
@@ -1597,19 +1637,19 @@ int RestaurarImagen(TRAMA*trama,TRAMA*nwtrama)
 //		-particion	Partición a clonar
 //		-pathImg	Ruta de la imagen
 //		-protclona  Protocolo de clonación para la imagen
-//		-idenvio	Identificador de la sesión Multicast
 //      -nipes      Número de ordenadores
+//      -ide      Identificador de la sesión multicast (Es la hora en segundos del momento del envío del comando)
 // 	Devuelve:
 //		true si el proceso fue correcto o false en caso contrario
 //____________________________________________________________________________________________________
-int RestaurandoImagen(char* disco,char *fileimg,char* particion,char *pathImg,char *protclona,char* idenvio,char *nipes)
+int RestaurandoImagen(char* disco,char *fileimg,char* particion,char *pathImg,char *protclona,char *nipes,char *ide)
 {
    	int herror;
 	
 	MuestraMensaje(3,NULL);
 
 	sprintf(cmdshell,"%s/admRestoreImage",HIDRASCRIPTS);
-	sprintf(parametros,"%s %s %s %s %s %s %s %s","admRestoreImage",pathImg,fileimg,disco,particion,protclona,idenvio,nipes);
+	sprintf(parametros,"%s %s %s %s %s %s %s","admRestoreImage",pathImg,fileimg,disco,particion,protclona,Propiedades.pormulticast);
 	
 	herror=EjecutarScript(cmdshell,parametros,NULL,true);
 	if(herror) // Restauración correcta
@@ -1624,7 +1664,7 @@ int RestaurandoImagen(char* disco,char *fileimg,char* particion,char *pathImg,ch
 	}
 	else{
 		if(strcmp(protclona,"MULTICAST")==0){
-			if(!sesionMulticast(idenvio,nipes))
+			if(!sesionMulticast(fileimg,nipes,ide))
 				RegistraLog("***Error en el proceso de preparación de transferencia multicast", false);
 		}
 		return(true); 
@@ -2357,18 +2397,28 @@ int  main(int argc, char *argv[])
 	strcpy(szPathFileLog,"ogAdmClient.log");
 
 	// Validación de argumentos y lectura del fichero de configuración
+	if(ndebug>5)
+		RegistraLog("ValidacionParametros", false);
+
 	if(!ValidacionParametros(argc,argv))
 		exit(EXIT_FAILURE);
 	else{	
+		if(ndebug>5)
+			RegistraLog("CrearArchivoLog", false);
 		if(!CrearArchivoLog(szPathFileLog))
 			exit(EXIT_FAILURE);
-		else
+		else{
+			if(ndebug>5)
+				RegistraLog("LeeFileConfiguracion", false);
 			if(!LeeFileConfiguracion(szPathFileCfg)){ // Toma parámetros de configuración
 				UltimoError(13,"Main()");	
 				exit(EXIT_FAILURE);
 			}
+		}
 	}
-	// Guarda datos básicos del cliente	
+	if(ndebug>5)
+		RegistraLog("Guarda datos básicos del cliente", false);
+
 	strcpy(Propiedades.servidorhidra,Servidorhidra);	
 	strcpy(Propiedades.puerto,Puerto);	
 	strcpy(Propiedades.idordenador,"0");

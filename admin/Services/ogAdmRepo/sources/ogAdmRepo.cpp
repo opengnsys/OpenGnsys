@@ -805,15 +805,20 @@ BOOLEAN mandaFichero(TramaRepos *trmInfo)
 //_______________________________________________________________________________________________________________
 BOOLEAN sesionMulticast(TramaRepos *trmInfo)
 {
-	char *ide,*iph,*nip,cmdshell[512];
+	char *img,*ipm,*pom,*mom,*vlm,*iph,*nip,*ide,cmdshell[512];
 	int res;
 
-	ide=toma_parametro("ide",trmInfo->trama.parametros); // Identificador sesiónmulticast
+	img=toma_parametro("img",trmInfo->trama.parametros); // Nombre del fichero (Imagen)
+	ipm=toma_parametro("ipm",trmInfo->trama.parametros); // Dirección IP multicast
+	pom=toma_parametro("pom",trmInfo->trama.parametros); // Puerto multicast
+	mom=toma_parametro("mom",trmInfo->trama.parametros); // Modo transmisión multicast
+	vlm=toma_parametro("vlm",trmInfo->trama.parametros); // Velocidad transmisión multicast
 	iph=toma_parametro("iph",trmInfo->trama.parametros); // Dirección ip cliente
 	nip=toma_parametro("nip",trmInfo->trama.parametros); // Clientes necesarios para iniciar sesión
+	ide=toma_parametro("ide",trmInfo->trama.parametros); // Identificador dela sesión multicast
 
 	if(iniSesionMulticast(iph,ide,nip)){
-		sprintf(cmdshell,"%s/sesionMulticast",reposcripts);
+		sprintf(cmdshell,"%s/senFileMcast %s \"%s:%s:%s:%sM:%s:%s\"",reposcripts,img,pom,mom,ipm,vlm,nip,"0");
 		res=system(cmdshell);
 		if(res>0)
 			RegistraLog("*** Ha habido algún problema al iniciar sesión multicast",false);
@@ -827,7 +832,7 @@ BOOLEAN sesionMulticast(TramaRepos *trmInfo)
 // 			Devuelve true o false dependiendo de si se está esperando comenzar una sesioón multicast
 //		Parámetros:
 //			- iph : La ip del cliente a incorporar a la sesión
-//			- ide: Identificador de la sesión
+//			- ide: Identificador de la sesión (Puerto multicast)
 //			- nip: Número de ordenadores
 // ________________________________________________________________________________________________________
 BOOLEAN iniSesionMulticast(char *iph,char *ide,char *nip)
