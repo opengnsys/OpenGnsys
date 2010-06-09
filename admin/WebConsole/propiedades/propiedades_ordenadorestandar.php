@@ -12,6 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
+include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_ordenadorestandar_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -21,9 +22,10 @@ $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 $idaula=0;
 $nombreaula="";
 $idordenador=0; 
-$nombreordenador="";
-$ip="";
-$mac="";
+$modomul="";
+$ipmul="";
+$pormul="";
+$velmul="";
 $cache="";
 $idperfilhard=0;
 $idservidordhcp=0;
@@ -58,24 +60,35 @@ if  ($opcion!=$op_alta){
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[2]?>&nbsp;</TD>
-			<?
-				echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
-			?>
-			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
-		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[3]?>&nbsp;</TD>
 			<?
-				echo '<TD><INPUT class="formulariodatos" name=ip  type=text value="'.$ip.'"></TD>';
+				echo '<TD><INPUT class="formulariodatos" name=ipmul  type=text value="'.$ipmul.'"></TD>';
+
 			?>
-		</TR>
+			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
+		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[4]?>&nbsp;</TD>
 			<?
-				echo '<TD><INPUT class="formulariodatos" name=mac  type=text value="'. $mac.'"></TD>';
+				echo '<TD><INPUT class="formulariodatos" name=pormul  type=text value="'. $pormul.'"></TD>';
+			?>
+		</TR>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+			<?
+				echo '<TD><INPUT class="formulariodatos" name=velmul  type=text value="'. $velmul.'"></TD>';
+			?>
+		</TR>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[2]?>&nbsp;</TD>
+			<?
+				$metodos="0=".chr(13);
+				$metodos.="1=Half-Duplex".chr(13);
+				$metodos.="2=Full-Duplex";
+				echo '<TD>'.HTMLCTESELECT($metodos,"modomul","estilodesple","",$modomul,100).'</TD>'.chr(13);
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -101,23 +114,23 @@ if  ($opcion!=$op_alta){
 		</TR>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
+		<!--TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
 			<?
 				echo '<TD colspan=3><INPUT class="formulariodatos" name=numorde  type=text value=0 style="width:250"></TD>';
 			?>
-		</TR>
+		</TR-->
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
 	<TABLE border=0 align=center>
-		<TR>
+		<!--TR>
 			<TD width=20>&nbsp;</TD>
 			<TD colspan=3 align=left ><SPAN class=notas><I><?echo $TbMsg[9]?><br><br><?echo $TbMsg[10]?></I></SPAN></TD>
 			<TD width=20>&nbsp;</TD></TR>
 		<TR>
 			<TD colspan=5 width=20>&nbsp;</TD>
-		</TR>
+		</TR-->
 		<TR>
 			<TD width=20>&nbsp;</TD>
 			<TD align=right><A href=#><IMG border=0 src="../images/boton_cancelar.gif" style="cursor:hand"  onclick="cancelar()"></A></TD>
@@ -141,17 +154,19 @@ include_once("../includes/iframecomun.php");
 //		- id: El identificador del ordenador estandar 
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
-	global $nombreordenador;
-	global $ip;
-	global $mac;
+	global $modomul;
+	global $ipmul;
+	global $pormul;
+	global $velmul;
 	global $cache;
 	global $idperfilhard;
 	global $idservidordhcp;
 	global $idservidorrembo;
 
-	$wnombreordenador="";
-	$wip="";
-	$wmac="";
+	$wmodomul="";
+	$wipmul="";
+	$wpormul="";
+	$wvelmul="";
 	$wcache="";
 	$widperfilhard=0;
 	$widservidordhcp=0;
@@ -163,50 +178,63 @@ function TomaPropiedades($cmd,$id){
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	if ($rs->EOF) return(false);
 	$rs->Primero(); 
-	$nombreordenador=$rs->campos["nombreordenador"];
-	$ip=$rs->campos["ip"];
-	$mac=$rs->campos["mac"];
+	$modomul=$rs->campos["modomul"];
+	$ipmul=$rs->campos["ipmul"];
+	$pormul=$rs->campos["pormul"];
+	$velmul=$rs->campos["velmul"];
 	$cache=$rs->campos["cache"];
 	$idperfilhard=$rs->campos["idperfilhard"];
 	$idservidordhcp=$rs->campos["idservidordhcp"];
 	$idservidorrembo=$rs->campos["idservidorrembo"];
 
 	while(!$rs->EOF){
-		$wnombreordenador=$rs->campos["nombreordenador"];
-		$wip=$rs->campos["ip"];
-		$wmac=$rs->campos["mac"];
+		$wmodomul=$rs->campos["modomul"];
+		$wipmul=$rs->campos["ipmul"];
+		$wpormul=$rs->campos["pormul"];
+		$wvelmul=$rs->campos["velmul"];
 		$wcache=$rs->campos["cache"];
 		$widperfilhard=$rs->campos["idperfilhard"];
 		$widservidordhcp=$rs->campos["idservidordhcp"];
 		$widservidorrembo=$rs->campos["idservidorrembo"];
 	
-		if(strlen($wnombreordenador)!=strlen($nombreordenador))
-			$nombreordenador="";
+		if(strlen($wmodomul)!=strlen($modomul))
+			$modomul="";
 		else{
-			for($i=0;$i<strlen($nombreordenador);$i++){
-				if(substr($nombreordenador,$i,1)!=substr($wnombreordenador,$i,1)){
-					//$nombreordenador=substr($nombreordenador,0,$i);
-					$nombreordenador="";
+			for($i=0;$i<strlen($modomul);$i++){
+				if(substr($modomul,$i,1)!=substr($wmodomul,$i,1)){
+					//$modomul=substr($modomul,0,$i);
+					$modomul="";
 					break;
 				}
 			}
 		}
-		if(strlen($wip)!=strlen($ip))
-			$ip="";
+		if(strlen($wipmul)!=strlen($ipmul))
+			$ipmul="";
 		else{
-			for($i=0;$i<strlen($ip);$i++){
-				if(substr($ip,$i,1)!=substr($wip,$i,1)){
-					$ip="";
+			for($i=0;$i<strlen($ipmul);$i++){
+				if(substr($ipmul,$i,1)!=substr($wipmul,$i,1)){
+					$ipmul="";
 					break;
 				}
 			}
 		}
-		if(strlen($wmac)!=strlen($mac))
-			$mac="";
+		if(strlen($wpormul)!=strlen($pormul))
+			$pormul="";
 		else{
-			for($i=0;$i<strlen($mac);$i++){
-				if(substr($mac,$i,1)!=substr($wmac,$i,1)){
-					$mac="";
+			for($i=0;$i<strlen($pormul);$i++){
+				if(substr($pormul,$i,1)!=substr($wpormul,$i,1)){
+					$pormul="";
+					break;
+				}
+			}
+		}
+
+		if(strlen($wvelmul)!=strlen($velmul))
+			$velmul="";
+		else{
+			for($i=0;$i<strlen($velmul);$i++){
+				if(substr($velmul,$i,1)!=substr($wvelmul,$i,1)){
+					$velmul="";
 					break;
 				}
 			}

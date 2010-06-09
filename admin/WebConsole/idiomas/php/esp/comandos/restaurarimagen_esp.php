@@ -14,7 +14,9 @@
 	$TbMsg[6]='Ámbito';
 	$TbMsg[7]='Datos a suministrar';
 	$TbMsg[8]='Nombre S.O.';
-	$TbMsg[9]='Imagen a restaurar';
+	$TbMsg[9]='Imagen';
 	$TbMsg[10]='Restaurar (Mismo tipo de partición)';
 	$TbMsg[11]='Restaurar (Otro tipo de partición)';
+	$TbMsg[12]='Origen';
+	$TbMsg[13]='Protocolo';
 ?>

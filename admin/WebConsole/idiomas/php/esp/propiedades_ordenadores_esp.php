@@ -18,4 +18,9 @@ $TbMsg[9]="Servidor Dhcp";
 $TbMsg[10]="Servidor OpenGnsys ";
 $TbMsg[11]="Menu";
 $TbMsg[12]="Tamaño Caché";
+$TbMsg[13]="Modo Multicast";
+$TbMsg[14]="IP Multicast";
+$TbMsg[15]="Puerto Multicast";
+$TbMsg[16]="Velocidad Multicast";
+$TbMsg[17]="PARÁMETROS MULTICAST";
 ?>

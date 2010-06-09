@@ -13,6 +13,7 @@ include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/HTMLSELECT.php");
+include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_ordenadores_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -29,6 +30,10 @@ $idservidorrembo=0;
 $idmenu=0;
 $idaula=0;
 $cache="";
+$modomul="";
+$ipmul="";
+$pormul="";
+$velmul="";
 $grupoid=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros 
@@ -61,12 +66,11 @@ if  ($opcion!=$op_alta){
 	<INPUT type=hidden name=idordenador value=<?=$idordenador?>>
 	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
 	<INPUT type=hidden name=idaula value=<?=$idaula?>>
-
 	
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
 			<?
@@ -77,7 +81,7 @@ if  ($opcion!=$op_alta){
 			?>
 			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
 		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
 			<?
@@ -87,7 +91,7 @@ if  ($opcion!=$op_alta){
 					echo '<TD><INPUT class="formulariodatos" name=ip  type=text value="'.$ip.'"></TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
 			<?
@@ -97,7 +101,7 @@ if  ($opcion!=$op_alta){
 					echo '<TD><INPUT class="formulariodatos" name=mac  type=text value="'. $mac.'"></TD>';
 			?>
 		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
 			<?
@@ -107,7 +111,7 @@ if  ($opcion!=$op_alta){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion',250).'</TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
 			<?
@@ -117,7 +121,7 @@ if  ($opcion!=$op_alta){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'servidoresrembo',$idservidorrembo,'idservidorrembo','nombreservidorrembo',250).'</TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
 			<?
@@ -127,7 +131,7 @@ if  ($opcion!=$op_alta){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion',250).'</TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
 			<?
@@ -137,7 +141,57 @@ if  ($opcion!=$op_alta){
 					echo '<TD colspan=3><INPUT style="width=250" class="formulariodatos" name=cache  type=text value="'. $cache.'"></TD>';
 			?>
 		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TD height=40 style="background-color:white;color:#999999" colspan=4 align=center><B>&nbsp;<?echo $TbMsg[17]?>&nbsp;</B></TD>
+		</TR>	
+<!----------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$ipmul.'</TD>';
+				else
+					echo '<TD colspan=3><INPUT class="formulariodatos" name=ipmul  type=text value="'.$ipmul.'"></TD>';
+			?>
+		</TR>
+<!----------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[15]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$pormul.'</TD>';
+				else
+					echo '<TD colspan=3><INPUT class="formulariodatos" name=pormul  type=text value="'.$pormul.'"></TD>';
+			?>
+		</TR>
+<!----------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$velmul.'</TD>';
+				else
+					echo '<TD colspan=3><INPUT class="formulariodatos" name=velmul  type=text value="'.$velmul.'"></TD>';
+			?>
+		</TR>
+<!----------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion){
+					$metodos[0]="";
+					$metodos[1]="Half-Duplex";
+					$metodos[2]="Full-Duple";
+					echo '<TD colspan=3>'.$metodos[$modomul].'</TD>';
+				}else{
+					$metodos="0=".chr(13);
+					$metodos.="1=Half-Duplex".chr(13);
+					$metodos.="2=Full-Duplex";
+					echo '<TD colspan=3>'.HTMLCTESELECT($metodos,"modomul","estilodesple","",$modomul,150).'</TD>';
+				}			
+			?>
+		</TR>
 	</TABLE>
 </FORM>
 </DIV>
@@ -168,6 +222,10 @@ function TomaPropiedades($cmd,$id){
 	global $idservidorrembo;
 	global $idmenu;
 	global $cache;
+	global $modomul;
+	global $ipmul;
+	global $pormul;
+	global $velmul;
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$id;
 	$rs->Comando=&$cmd; 
@@ -182,6 +240,10 @@ function TomaPropiedades($cmd,$id){
 		$idservidorrembo=$rs->campos["idservidorrembo"];
 		$idmenu=$rs->campos["idmenu"];
 		$cache=$rs->campos["cache"];
+		$modomul=$rs->campos["modomul"];
+		$ipmul=$rs->campos["ipmul"];
+		$pormul=$rs->campos["pormul"];
+		$velmul=$rs->campos["velmul"];
 		$rs->Cerrar();
 		return(true);
 	}

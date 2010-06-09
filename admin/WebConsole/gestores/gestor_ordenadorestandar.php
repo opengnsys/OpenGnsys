@@ -14,9 +14,10 @@ include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 //________________________________________________________________________________________________________
 $idaula=0;
-$nombreordenador="";
-$ip="";
-$mac="";
+$modomul=0;
+$ipmul="";
+$pormul=0;
+$velmul=0;
 $cache=0;
 $idperfilhard=0;
 $idservidordhcp=0;
@@ -24,9 +25,10 @@ $idservidorrembo=0;
 $numorde=0;
 
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"];
-if (isset($_GET["nombreordenador"])) $nombreordenador=$_GET["nombreordenador"];
-if (isset($_GET["ip"])) $ip=$_GET["ip"];
-if (isset($_GET["mac"])) $mac=$_GET["mac"];
+if (isset($_GET["modomul"])) $modomul=$_GET["modomul"];
+if (isset($_GET["ipmul"])) $ipmul=$_GET["ipmul"];
+if (isset($_GET["pormul"])) $pormul=$_GET["pormul"];
+if (isset($_GET["velmul"])) $velmul=$_GET["velmul"];
 if (isset($_GET["cache"])) $cache=$_GET["cache"];
 if (isset($_GET["idperfilhard"])) $idperfilhard=$_GET["idperfilhard"];
 if (isset($_GET["idservidordhcp"])) $idservidordhcp=$_GET["idservidordhcp"];
@@ -70,9 +72,10 @@ else{
 function Gestiona(){
 	global	$cmd;
 	global $idaula;
-	global $nombreordenador;
-	global $ip;
-	global $mac;
+	global $modomul;
+	global $ipmul;
+	global $pormul;
+	global $velmul;
 	global $cache;
 	global $idaula;
 	global $idperfilhard;
@@ -81,47 +84,49 @@ function Gestiona(){
 	global $numorde;
 
 	if($numorde>0){ 
-		$auxIP=split("[.]",$ip);
-		$swip=false;
-		$litnwip="";
-		$nwip=0;
+		$auxIP=split("[.]",$ipmul);
+		$swipmul=false;
+		$litnwipmul="";
+		$nwipmul=0;
 		if(isset($auxIP[3])){
-			$nwip=$auxIP[3];
-			if(empty($nwip)) $nwip=0;
-			$litnwip=$auxIP[0].".".$auxIP[1].".".$auxIP[2].".";
-			$swip=true;
+			$nwipmul=$auxIP[3];
+			if(empty($nwipmul)) $nwipmul=0;
+			$litnwipmul=$auxIP[0].".".$auxIP[1].".".$auxIP[2].".";
+			$swipmul=true;
 		}
 		$swnom=false;
-		if(substr($nombreordenador,strlen($nombreordenador)-1,1)=="$"){
+		if(substr($modomul,strlen($modomul)-1,1)=="$"){
 			$swnom=true;
-			$nombreordenador=substr($nombreordenador,0,strlen($nombreordenador)-1);
+			$modomul=substr($modomul,0,strlen($modomul)-1);
 		}
 		$cmd->CreaParametro("@grupoid",0,1);
 		$cmd->CreaParametro("@idaula",$idaula,1);
-		$cmd->CreaParametro("@nombreordenador",$nombreordenador,0);
-		$cmd->CreaParametro("@ip",$ip,0);
-		$cmd->CreaParametro("@mac",$mac,0);
+		$cmd->CreaParametro("@modomul",$modomul,0);
+		$cmd->CreaParametro("@ipmul",$ipmul,0);
+		$cmd->CreaParametro("@pormul",$pormul,1);
+		$cmd->CreaParametro("@velmul",$velmul,1);
 		$cmd->CreaParametro("@cache",$cache,1);
 		$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 		$cmd->CreaParametro("@idservidordhcp",$idservidordhcp,1);
 		$cmd->CreaParametro("@idservidorrembo",$idservidorrembo,1);
 
 		for($i=0;$i<$numorde;$i++){
-			if($swip)
-				$cmd->ParamSetValor("@ip",$litnwip.$nwip);
-			if($swnom && $swip)
-				$cmd->ParamSetValor("@nombreordenador",$nombreordenador.$nwip);
-			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,cache,idperfilhard,idservidordhcp,idservidorrembo,idaula,grupoid,idconfiguracion) VALUES (@nombreordenador,@ip,@mac,@cache,@idperfilhard,@idservidordhcp,@idservidorrembo,@idaula,@grupoid,0)";
-			if($swip) $nwip++;
+			if($swipmul)
+				$cmd->ParamSetValor("@ipmul",$litnwipmul.$nwipmul);
+			if($swnom && $swipmul)
+				$cmd->ParamSetValor("@modomul",$modomul.$nwipmul);
+			$cmd->texto="INSERT INTO ordenadores(modomul,ipmul,pormul,velmul,cache,idperfilhard,idservidordhcp,idservidorrembo,idaula,grupoid,idconfiguracion) VALUES (@modomul,@ipmul,@pormul,@velmul,@cache,@idperfilhard,@idservidordhcp,@idservidorrembo,@idaula,@grupoid,0)";
+			if($swipmul) $nwipmul++;
 			$resul=$cmd->Ejecutar();
 			if (!$resul) return(false);
 		}
 	}
 	else{
 		$strsql="UPDATE ordenadores SET ";
-		if (!empty($nombreordenador))	$strsql.=" nombreordenador='".$nombreordenador."',";
-		if (!empty($ip))	$strsql.=" ip='".$ip."',";
-		if (!empty($mac))	$strsql.=" mac='".$mac."',";
+		if (!empty($modomul))	$strsql.=" modomul='".$modomul."',";
+		if (!empty($ipmul))	$strsql.=" ipmul='".$ipmul."',";
+		if (!empty($pormul))	$strsql.=" pormul='".$pormul."',";
+		if (!empty($velmul))	$strsql.=" velmul='".$velmul."',";
 		$strsql.=" cache='".$cache."',";
 		if ($idperfilhard>0)	$strsql.=" idperfilhard=".$idperfilhard.",";
 		if ($idservidordhcp>0)	$strsql.=" idservidordhcp=".$idservidordhcp.",";

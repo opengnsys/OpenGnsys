@@ -138,6 +138,11 @@ function comprobar_datos(){
 				alert(TbMsg[5]+valparticion[0])
 				 return(false);
 			}
+			var desple_P=document.getElementById("protoclonacion_"+particion);
+			if(desple_P.value=="TORRENT" || desple_P.value=="MULTICAST"){
+				if(desple_path.value!=1)
+					alert(TbMsg[6]+particion) // Debe existir caché
+			}
 		}
 	}
 	if(op==0){

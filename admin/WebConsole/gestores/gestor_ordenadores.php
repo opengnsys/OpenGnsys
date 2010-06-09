@@ -31,6 +31,10 @@ $idservidorrembo=0;
 $idmenu=0;
 $idimagen=0;
 $cache=0;
+$modomul=0;
+$ipmul="";
+$pormul=0;
+$velmul=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"];
@@ -45,6 +49,10 @@ if (isset($_GET["idservidordhcp"])) $idservidordhcp=$_GET["idservidordhcp"];
 if (isset($_GET["idservidorrembo"])) $idservidorrembo=$_GET["idservidorrembo"];
 if (isset($_GET["idmenu"])) $idmenu=$_GET["idmenu"];
 if (isset($_GET["cache"])) $cache=$_GET["cache"];
+if (isset($_GET["modomul"])) $modomul=$_GET["modomul"];
+if (isset($_GET["ipmul"])) $ipmul=$_GET["ipmul"];
+if (isset($_GET["pormul"])) $pormul=$_GET["pormul"];
+if (isset($_GET["velmul"])) $velmul=$_GET["velmul"];
 
 if(empty($cache)) $cache=0;
 
@@ -137,6 +145,10 @@ function Gestiona(){
 	global $idservidorrembo;
 	global $idmenu;
 	global $cache;
+	global $modomul;
+	global $ipmul;
+	global $pormul;
+	global $velmul;
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -155,10 +167,19 @@ function Gestiona(){
 	$cmd->CreaParametro("@idservidorrembo",$idservidorrembo,1);
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@cache",$cache,1);
-	
+	$cmd->CreaParametro("@modomul",$modomul,0);
+	$cmd->CreaParametro("@dipmul",$ipmul,0);
+	$cmd->CreaParametro("@pormul",$pormul,1);
+	$cmd->CreaParametro("@velmul",$velmul,1);	
+
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idservidordhcp,idservidorrembo,idmenu,idaula,grupoid,idconfiguracion,cache) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idservidordhcp,@idservidorrembo,@idmenu,@idaula,@grupoid,0,@cache)";
+			$cmd->texto="INSERT INTO ordenadores
+									(nombreordenador,ip,mac,idperfilhard,idservidordhcp,idservidorrembo,
+									idmenu,idaula,grupoid,idconfiguracion,cache,modomul,ipmul,pormul,velmul) 
+							VALUES
+									(@nombreordenador,@ip,@mac,@idperfilhard,@idservidordhcp,@idservidorrembo,
+									@idmenu,@idaula,@grupoid,0,@cache,@modomul,@dipmul,@pormul,@velmul)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idordenador=$cmd->Autonumerico();
@@ -170,7 +191,13 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,idservidordhcp=@idservidordhcp,idservidorrembo=@idservidorrembo,idmenu=@idmenu,cache=@cache	WHERE idordenador=@idordenador";
+			$cmd->texto="UPDATE ordenadores SET
+										nombreordenador=@nombreordenador,ip=@ip,mac=@mac,
+										idperfilhard=@idperfilhard,idservidordhcp=@idservidordhcp,
+										idservidorrembo=@idservidorrembo,idmenu=@idmenu,cache=@cache,
+										modomul=@modomul,ipmul=@dipmul,pormul=@pormul,velmul=@velmul
+							WHERE
+										idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :

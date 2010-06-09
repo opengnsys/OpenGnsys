@@ -142,8 +142,8 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 	$tablaHtml.= '<TH align=center>&nbsp;&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;P&nbsp;</TH>';
 	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;Path&nbsp;</TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;Repositorios centralizados&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>';
+	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[13].'&nbsp;</TH>';
 	//$tablaHtml.= '<TH colspan=4 align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
 	$tablaHtml.= '</TR>';
 	$auxsplit=split(";",$particion);
@@ -167,10 +167,14 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 		$tablaHtml.='<TD  align=cente>'.HTMLSELECT_Imagendis($cmd,$idcentro,$tipopart,$particion,true,$idimagen,$idordenador).'</TD>';
 
 		//path
+		if($_SESSION["protclonacion"]!="UNICAST")
+			 $ppd=1;
+		else
+			 $ppd=2;
 		$parametros="0=".chr(13);
 		$parametros.="1=cache".chr(13);
 		$parametros.="2=repositorio";
-		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros,"pathrmb_".$particion,"estilodesple","",0,60).'</TD>';
+		$tablaHtml.= '<TD>'.HTMLCTESELECT($parametros,"pathrmb_".$particion,"estilodesple","",$ppd,100).'</TD>';
 
 
 		//Clonación
@@ -181,9 +185,6 @@ function tabla_particiones($cmd,$idcentro,$idordenador){
 					
 		//$tablaHtml.='<TD align=center><b>&nbsp;('.$tipopart.") -</b> ".$TbMsg[11].'</TD>';
 		$tablaHtml.='</TR>'.chr(13);
-
-
-
 	/*
 		$tablaHtml.='<TR>'.chr(13);
 		$tablaHtml.='<TD></TD>'.chr(13);
