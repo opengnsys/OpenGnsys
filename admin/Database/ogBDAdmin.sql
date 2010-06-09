@@ -503,21 +503,25 @@ CREATE TABLE IF NOT EXISTS `notificaciones` (
 
 DROP TABLE IF EXISTS `ordenadores`;
 CREATE TABLE IF NOT EXISTS `ordenadores` (
-  `idordenador` int(11) NOT NULL auto_increment,
-  `nombreordenador` varchar(100) default NULL,
-  `ip` varchar(50) NOT NULL default '',
-  `mac` varchar(12) default NULL,
-  `idaula` int(11) default NULL,
-  `idperfilhard` int(11) default NULL,
-  `idservidordhcp` int(11) default NULL,
-  `idservidorrembo` int(11) default NULL,
-  `grupoid` int(11) default NULL,
-  `idconfiguracion` int(11) default NULL,
-  `idmenu` int(11) default NULL,
-  `idparticion` int(11) default NULL,
-  `cache` int(11) default NULL,
-  PRIMARY KEY  (`idordenador`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+  `idordenador` int(11) NOT NULL AUTO_INCREMENT,
+  `nombreordenador` varchar(100) DEFAULT NULL,
+  `ip` varchar(16) NOT NULL,
+  `mac` varchar(12) DEFAULT NULL,
+  `idaula` int(11) DEFAULT NULL,
+  `idperfilhard` int(11) DEFAULT NULL,
+  `idservidordhcp` int(11) DEFAULT NULL,
+  `idservidorrembo` int(11) DEFAULT NULL,
+  `grupoid` int(11) DEFAULT NULL,
+  `idconfiguracion` int(11) DEFAULT NULL,
+  `idmenu` int(11) DEFAULT NULL,
+  `idparticion` int(11) DEFAULT NULL,
+  `cache` int(11) DEFAULT NULL,
+  `modomul` tinyint(4) NOT NULL,
+  `ipmul` varchar(16) NOT NULL,
+  `pormul` int(11) NOT NULL,
+  `velmul` smallint(6) NOT NULL,
+  PRIMARY KEY (`idordenador`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- 
 -- Volcar la base de datos para la tabla `ordenadores`
