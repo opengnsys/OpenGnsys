@@ -55,7 +55,13 @@ function nombreSO($tipopart,$tiposo,$nombreso){
 						break;
 					case "CACHE": 
 						if(empty($tiposo))
-							$nombreso='<span style="COLOR:green">CACHE</span>';
+							//$nombreso='<span style="COLOR:green">CACHE</span>';
+							$nombreso='CACHE';
+						break;
+					case "EMPTY": 
+						if(empty($tiposo))
+							//$nombreso='<span style="COLOR:green">EMPTY</span>';
+							$nombreso='EMPTY';
 						break;
 					case "LINUX-SWAP": 
 						$nombreso='<span style="COLOR:blue">Linux-swap</span>';

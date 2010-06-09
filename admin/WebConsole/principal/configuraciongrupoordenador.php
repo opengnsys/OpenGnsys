@@ -191,7 +191,7 @@ function tabla_ConfiguracionGrupo($cmd,$idcentro,$idgrupo,$idconfiguracion,$cuen
 		$tipopart=$ValorParametros["tipopart"];
 		$tamapart=$ValorParametros["tamapart"];
 		$nomso=nombreSO($tipopart,$tiposo,$nombreso);
-		if($nomso!="CACHE"){
+		if($nomso!="CACHE" && $nomso!="EMPTY"){
 			$tablaHtml.='<TR>'.chr(13);
 			$tablaHtml.='<TD align=center>&nbsp;'.$particion.'&nbsp;</TD>'.chr(13);
 			$tablaHtml.='<TD>&nbsp;'.$nomso.'&nbsp;</TD>'.chr(13);
