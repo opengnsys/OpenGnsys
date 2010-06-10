@@ -818,7 +818,7 @@ BOOLEAN sesionMulticast(TramaRepos *trmInfo)
 	ide=toma_parametro("ide",trmInfo->trama.parametros); // Identificador dela sesión multicast
 
 	if(iniSesionMulticast(iph,ide,nip)){
-		sprintf(cmdshell,"%s/senFileMcast %s \"%s:%s:%s:%sM:%s:%s\"",reposcripts,img,pom,mom,ipm,vlm,nip,"0");
+		sprintf(cmdshell,"%s/sendFileMcast %s \"%s:%s:%s:%sM:%s:%s\"",reposcripts,img,pom,mom,ipm,vlm,nip,"0");
 		res=system(cmdshell);
 		if(res>0)
 			RegistraLog("*** Ha habido algún problema al iniciar sesión multicast",false);
