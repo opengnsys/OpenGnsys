@@ -133,6 +133,9 @@ para_demonios() {
 	echo "."
     rm $BTTRACKPID > /dev/null
   fi  
+  echo -n "Parando demonio: "$AGENTNAME
+  start-stop-daemon --stop --quiet --oknodo --name $AGENTNAME
+  echo "."
   echo -n "Parando demonio: "$REPONAME
   start-stop-daemon --stop --quiet --oknodo --name $REPONAME
   echo "."
