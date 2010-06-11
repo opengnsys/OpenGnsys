@@ -1,7 +1,10 @@
 #!/bin/bash
+# Generador de ficheros "kernel" e "initrd.gz" para arranque de cliente OpenGnSys
 
-DIST="jaunty"
-URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-i386/current/images/netboot/ubuntu-installer/i386
+DIST="jaunty"			# Distribución Ubuntu por defecto
+ARCH=$(arch)			# Arquitectura del sistema: i386 (32 bits), amd64 (64 bits)
+ARCH=${ARCH/x86_64/amd64}
+URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
 if [ "$TMP" = "" ] ; then TMP=/tmp ; fi
 TMPINITRD=$TMP/initrd
 NEWROOT=$TMPINITRD/newroot
@@ -18,8 +21,8 @@ function parsearParametros
         case $1 in
             ("-d")
             shift
-                #URL=http://ftp.nl.debian.org/debian/dists/testing/main/installer-i386/current/images/netboot/debian-installer/i386/
-                URL=http://people.debian.org/~joeyh/d-i/images/daily/netboot/debian-installer/i386/
+                #URL=http://people.debian.org/~joeyh/d-i/images/daily/netboot/debian-installer/i386/
+                URL=http://ftp.nl.debian.org/debian/dists/testing/main/installer-$ARCH/current/images/netboot/debian-installer/$ARCH/
             ;;
             ("-v")
             shift
@@ -28,7 +31,7 @@ function parsearParametros
                 return -1
             else
                 DIST=$1
-                URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-i386/current/images/netboot/ubuntu-installer/i386
+                URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
                 shift
             fi
             ;;
