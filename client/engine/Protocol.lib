@@ -188,7 +188,7 @@ echo "$1" | grep "SEND" > /dev/null && MODE=server || MODE=client
 #TODO: diferenciamos o no???? 
 #controlamos todos los parametros de la sessión multicast.
 #Dejo para el cliente como 6, pero solo necesita el primero.
-[ $MODE == "client" ] && SESSIONPARM=6 || SESSIONPARM=6
+[ $MODE == "client" ] && SESSIONPARM=1 || SESSIONPARM=6
 OIFS=$IFS; IFS=':' ; SESSION=($2); IFS=$OIFS
 [[ ${#SESSION[*]} == $SESSIONPARM ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session multicast no completa" || ERROR=1# return $?
 #controlamos el PORTBASE de la sesion. Comun.-
