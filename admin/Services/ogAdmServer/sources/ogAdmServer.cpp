@@ -46,11 +46,12 @@ int TomaConfiguracion(char* pathfilecfg) {
 	fseek(Fconfig, 0, SEEK_END); // Obtiene tamaño del fichero.
 	lSize = ftell(Fconfig);
 	rewind(Fconfig);
-	buffer = (char*) malloc(lSize); // Toma memoria para el buffer de lectura.
+	buffer = (char*) malloc(lSize + 1); // Toma memoria para el buffer de lectura.
 	if (buffer == NULL)
 		return (FALSE);
 	fread(buffer, 1, lSize, Fconfig); // Lee contenido del fichero
 	fclose(Fconfig);
+	buffer[lSize] = '\0';               // Forzar carácter de fin de cadena.
 
 	//inicializar
 	IPlocal[0] = (char) NULL;
@@ -1105,11 +1106,12 @@ int actualiza_hardware(Database db, Table tbl, char* hrd, char* ip, char*ido) {
 	if (lSize == 0)
 		return (false);
 	rewind(Finv);
-	buffer = (char*) malloc(lSize); // Toma memoria para el buffer de lectura.
+	buffer = (char*) malloc(lSize + 1); // Toma memoria para el buffer de lectura.
 	if (buffer == NULL)
 		return (false);
 	fread(buffer, 1, lSize, Finv); // Lee contenido del fichero
 	fclose(Finv);
+	buffer[lSize] = '\0';               // Forzar carácter de fin de cadena.
 	buffer = escaparComillas(buffer);
 
 	// Trocea la cadena de configuración
@@ -1372,11 +1374,12 @@ int actualiza_software(Database db, Table tbl, char* sft, char* par, char* tfs,
 	fseek(Finv, 0, SEEK_END); // Obtiene tamaño del fichero.
 	lSize = ftell(Finv);
 	rewind(Finv);
-	buffer = (char*) malloc(lSize); // Toma memoria para el buffer de lectura.
+	buffer = (char*) malloc(lSize + 1); // Toma memoria para el buffer de lectura.
 	if (buffer == NULL)
 		return (false);
 	fread(buffer, 1, lSize, Finv); // Lee contenido del fichero
 	fclose(Finv);
+	buffer[lSize] = '\0';               // Forzar carácter de fin de cadena.
 	buffer = escaparComillas(buffer);
 	// trocea las líneas
 	lon = split_parametros(tbSoftware, buffer, ch);
