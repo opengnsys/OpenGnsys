@@ -36,7 +36,7 @@ if(!empty($rsmenu)){
 		case $ITEMS_PUBLICOS:
 			if(!empty($rsmenu->campos["htmlmenupub"])){
 				$urlHtml=$rsmenu->campos["htmlmenupub"];
-				if(strtoupper(substr($urlHtml,0,7)!="HTTP://")) $urlHtml="http://".$urlHtml;
+				if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
 				Header('Location: '.$urlHtml); // Url del menu personalizado
 			}
 			else{
@@ -49,7 +49,7 @@ if(!empty($rsmenu)){
 			if(!empty($rsmenu->campos["htmlmenupri"])){
 				$urlHtml=$rsmenu->campos["htmlmenupri"];
 				
-				if(strtoupper(substr($urlHtml,0,7)!="HTTP://")) $urlHtml="http://".$urlHtml;
+				if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
 				Header('Location: '.$urlHtml); // Url del menu personalizado
 			}
 			else{
@@ -190,11 +190,11 @@ function GeneraMenu($rs,$tipo,$iph){
 //___________________________________________________________________________________________________
 function tomaIP(){	
 	// Se asegura que la pagina se solicita desde la IP que viene
-	global $HTTP_SERVER_VARS;
-	if ($HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"] != "")
-		$ipcliente = $HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"];
+	global $_SERVER;
+	if ($_SERVER["HTTP_X_FORWARDED_FOR"] != "")
+		$ipcliente = $_SERVER["HTTP_X_FORWARDED_FOR"];
 	else
-		$ipcliente = $HTTP_SERVER_VARS["REMOTE_ADDR"]; 
+		$ipcliente = $_SERVER["REMOTE_ADDR"]; 
 
 	return($ipcliente);
 }

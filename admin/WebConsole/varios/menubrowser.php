@@ -71,11 +71,11 @@ function PulsaEnter(oEvento){
 //___________________________________________________________________________________________________
 function tomaIP(){	
 	// Se asegura que la pagina se solicita desde la IP que viene
-	global $HTTP_SERVER_VARS;
-	if ($HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"] != "")
-		$ipcliente = $HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"];
+	global $_SERVER;
+	if ($_SERVER["HTTP_X_FORWARDED_FOR"] != "")
+		$ipcliente = $_SERVER["HTTP_X_FORWARDED_FOR"];
 	else
-		$ipcliente = $HTTP_SERVER_VARS["REMOTE_ADDR"];
+		$ipcliente = $_SERVER["REMOTE_ADDR"];
 		
 	return($ipcliente);
 }
