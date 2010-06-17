@@ -50,6 +50,12 @@ if [ -d $OPENGNSYS ]; then
         	source $i 
     	done
     fi
+    # Añadir dependencia de arquitectura
+    ARCH=$(ogGetArch)
+    if [ -n "$ARCH" ]; then
+        export PATH=$OGBIN/$ARCH:$PATH
+        export LD_LIBRARY_PATH=$OGLIB/$ARCH:$LD_LIBRARY_PATH
+    fi
     # Fichero de registros.
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
     # FIXME Pruebas para grupos de ordenadores
