@@ -19,11 +19,14 @@ if [ -n "$OPENGNSYS" ]; then
     # Crear directorio de bloqueos
     mkdir -p /var/lock
 
-    # FIXME Directorio de tipos de letras para el browser.
-    QTLIBS=$(grep qt_libspath $OGBIN/browser 2>/dev/null | cut -f2 -d=)
-    QTLIBS=${QTLIBS:-"/usr/local/QtEmbedded-4.6.2/lib"}
-    mkdir -p $QTLIBS
-    ln -fs $OGLIB/fonts $QTLIBS
+    # Directorio de tipos de letras para el browser.
+    #QTLIBS=$(grep qt_libspath $OGBIN/browser 2>/dev/null | cut -f2 -d=)
+    QTVERS="/usr/local/QtEmbedded-4.6.2"
+    QTDIR="${QTVERS%-*}"
+    mkdir -p $QTDIR
+    ln -fs $QTDIR $QTVERS
+    mkdir -p $QTDIR/lib
+    ln -fs $OGLIB/fonts $QTDIR/lib
 
     # Datos de dispositivos PCI en /etc
     ln -fs $OGLIB/pci.ids /etc
