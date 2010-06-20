@@ -3,6 +3,8 @@
 
 DIST="jaunty"			# Distribución Ubuntu por defecto
 ARCH=$(arch)			# Arquitectura del sistema: i386 (32 bits), amd64 (64 bits)
+ARCH=${ARCH:-"$(uname -m)"}	# Corrección para Ubuntu Jaunty.
+ARCH=${ARCH/i[4-6]86/i386}
 ARCH=${ARCH/x86_64/amd64}
 URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
 if [ "$TMP" = "" ] ; then TMP=/tmp ; fi
@@ -264,6 +266,18 @@ FIN
     chmod +x $INITSCRIPT
 }
 
+# Función para corregir problemas detectados con módulos del kernel.
+function configurarModulos
+{
+    cd $NEWROOT/lib/modules/*
+
+    case "$DIST" in
+        lucid)  # Corregir problema de frame-buffer en Lucid.
+                perl -p -i -e 's/vga16fb/vesafb/g' modules.alias ;;
+        *)      ;;
+    esac
+}
+
 function comprimir
 {
     cd $NEWROOT
@@ -291,5 +305,6 @@ descargar
 descomprimir
 #purgarFicherosDebian
 agregarNuevoArranque
+configurarModulos
 comprimir
 finalizar
