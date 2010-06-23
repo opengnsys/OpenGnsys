@@ -17,24 +17,29 @@ NAME=$(ogGetHostname)
 NAME=${NAME:-"pc"}
 
 # Arrancar.
-echo "[5] Desmontar todos los sistemas operativos del disco."
-ogUnmountAll $1 2>/dev/null | exit $?
+echo "[10] Desmontar todos los sistemas de archivos."
+sync
+for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
+    ogUnmountAll $i 2>/dev/null
+done
+echo "[20] Desmontar cache local."
+ogUnmountCache
 case "$(ogGetOsType $1 $2)" in
     Windows)
-        echo "20 Activar partición de Windows $PART."
+        echo "30 Activar partición de Windows $PART."
         ogSetPartitionActive $1 $2
-        ogEcho info "$PROG: Comprobar sistema de archivos."
+        echo "40 Comprobar sistema de archivos."
         ogCheckFs $1 $2
         NAME=$(ogGetHostname)
-        echo "[30] Asignar nombre Windows \"$NAME\"."
+        echo "[50] Asignar nombre Windows \"$NAME\"."
         ogSetWindowsName $1 $2 "$NAME"
         ;;
     Linux)
-        echo "[20] Asignar nombre Linux \"$NAME\"."
+        echo "[30] Asignar nombre Linux \"$NAME\"."
         ETC=$(ogGetPath $1 $2 /etc)
         [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
         if [ -f "$ETC/fstab" ]; then
-            echo "[30] Actaualizar fstab con partición raíz \"$PART\"."
+            echo "[50] Actaualizar fstab con partición raíz \"$PART\"."
             awk -v P="$PART " '{ if ($2=="/") {sub(/^.*$/, P, $1)}
                                  print } ' $ETC/fstab >/tmp/fstab
             mv /tmp/fstab $ETC/fstab

@@ -1,4 +1,4 @@
-OpenGNSys Client (Scripts)    README
+OpenGnSys Client (Scripts)    README
 ====================================
 
 
@@ -9,7 +9,7 @@ las operaciones más comunes de gestión de clientes.
 Dichos scripts están desarrollados en BASH y utilizan las funciones
 básicas del motor de clonación.
 
-OpenGNSys Client Cloning Engine incluye un completo conjunto de
+OpenGnSys Client Cloning Engine incluye un completo conjunto de
 funiones para que el administrador pueda personalizar sus scripts
 de gestión.  Sin embargo, estos ejemplos son completamente
 operativos y pueden ser utilizados directamente.
@@ -30,5 +30,7 @@ Scripts distribuidos:
 - listPrimaryPartitions    lista las particiones primarias de un disco.
 - listSoftwareInfo         lista el software de un sistema operativo.
 - menuBrowser              arranque el Browser con un menú preconfigurado.
+- poweroff                 desmonta los sistemas de archivos y apaga el equipo.
+- reboot                   desmonta los sistemas de archivos y reinicia el equipo.
 - restoreImage             restaura una imagen de sistema operativo.
 
