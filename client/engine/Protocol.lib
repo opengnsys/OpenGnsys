@@ -137,7 +137,7 @@ return 1
 
 
 #/**
-#         ogGenerateSintaxMcast
+#         ogMcastSintax
 #@brief   Función para generar la instrucción de ejucción la transferencia de datos multicast
 #@param 1 Tipo de operación [ SENDPARTITION RECEIVERPARTITION SENDFILE RECEIVERFILE ] 
 #@param 2 Sesión Mulicast 
@@ -156,7 +156,7 @@ return 1
 #         
 
 
-function ogGenerateSintaxMcast ()
+function ogMcastSintax ()
 {
 
 local ISUDPCAST PARM SESSION SESSIONPARM MODE PORTBASE PERROR
@@ -168,7 +168,11 @@ if [ "$*" == "help" -o "$2" == "help" ]; then
     ogHelp "$FUNCNAME SENDPARTITION      str_sessionSERVER     str_device str_tools str_level" \
 		   "$FUNCNAME RECEIVERPARTITION  str_sessionCLIENT     str_device str_tools str_level "\
 		   "$FUNCNAME SENDFILE           str_sessionSERVER     str_file "\
-		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file "
+		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file " \
+		   "sessionServer sintax:      portbase:mcastaddres:method:speed:nclients:ntimeWaitingUntilNclients " \
+		   "sessionServer example:     9000:239.194.17.36:80M:50:60 " \
+		   "sessionClient sintax:      portbase " \
+		   "sessionClient example:     9000 "
     return
 fi
 PERROR=0
@@ -245,7 +249,7 @@ SINTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
 
 case "$1" in
 SENDPARTITION)
-		PROG1=`ogCreateImageSintax $DEVICE " " $TOOL $LEVEL | awk -F"|" '{print $1 $3}' | tr -d ">"`
+		PROG1=`ogCreateImageSintax $DEVICE " " $TOOL $LEVEL | awk -F"|" '{print $1 "|" $3}' | tr -d ">"`
 		echo "$PROG1 | $SINTAXSERVER"
 	;;
     RECEIVERPARTITION)
@@ -326,7 +330,7 @@ ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file
 
 SESSION=${!ARG}
 # llamando a la funcion con param1 session $SESSION y param2 $SOURCE
-COMMAND=`ogGenerateSintaxMcast "SENDFILE" "$SESSION" "$SOURCE"`
+COMMAND=`ogMcastSintax "SENDFILE" "$SESSION" "$SOURCE"`
 echo $COMMAND
 eval $COMMAND
 }
@@ -388,7 +392,88 @@ esac
 TARGETFILE=`basename ${!ARG}`
 
 #generamos la instrucción a ejecutar.  
-COMMAND=`ogGenerateSintaxMcast RECEIVERFILE "$1" $TARGETDIR/$TARGETFILE `
+COMMAND=`ogMcastSintax RECEIVERFILE "$1" $TARGETDIR/$TARGETFILE `
+echo $COMMAND
+eval $COMMAND
+}
+
+#/**
+#         ogMcastSendPartition
+#@brief   Función para enviar el contenido de una partición a multiples particiones remotas.
+#@param
+#@param
+#@param
+#@return
+#@exception
+#@note
+#@todo: ogIsLocked siempre devuelve 1. crear ticket
+#@version 0.1 - Integración para OpenGNSys.
+#@author
+#@date
+#*/ ##
+
+ogMcastSendPartition ()
+{
+
+# Variables locales
+local PART   COMMAND
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionMulticastSERVER tools compresor" \
+           "$FUNCNAME 1 1 9000:full-duplex:239.194.37.31:50:20:2 partclone lzop"
+    return
+fi
+# Error si no se reciben 5 parámetros.
+[ "$#" == 5 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#chequeamos la particion.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+#ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
+ogUnmount $1 $2
+
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogMcastSintax SENDPARTITION "$3" $PART $4 $5`
+echo $COMMAND
+eval $COMMAND
+}
+
+#/**
+#         ogMcastReceiverPartition
+#@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por multicast.
+#@param
+#@param
+#@param
+#@return
+#@exception
+#@note
+#@todo:
+#@version 0.1 - Integración para OpenGNSys.
+#@author
+#@date
+#*/ ##
+ogMcastReceiverPartition ()
+{
+# Variables locales
+local PART   COMMAND
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionMulticastCLIENT tools compresor" \
+           "$FUNCNAME 1 1 9000 partclone lzop"
+    return
+fi
+# Error si no se reciben 5 parámetros.
+[ "$#" == 5 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#chequeamos la particion.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+#ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
+ogUnmount $1 $2
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogMcastSintax RECEIVERPARTITION "$3" $PART $4 $5`
 echo $COMMAND
 eval $COMMAND
 }
@@ -701,66 +786,9 @@ ogMcastSessionDelete()
 echo "en pruebas"
 }
 
-#/**
-#         ogMcastSendPartition
-#@brief   Función para enviar el contenido de una partición a multiples particiones remotas.
-#@param
-#@param
-#@param
-#@return
-#@exception
-#@note
-#@todo:
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
-#*/ ##
-
-ogMcastSendPartition ()
-{
-
-# Variables locales
-local PART  ERRCODE
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart " \
-           "$FUNCNAME 1 1 "
-    return
-fi
-# Error si no se reciben 2 parámetros.
-[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-
-PART=$(ogDiskToDev "$1" "$2") || return $?
-if ogIsLocked $1 $2; then
-    ogRaiseError $OG_ERR_LOCKED "$1,$2"
-    return $?
-fi
 
 
-echo "en pruebas"
 
-}
-
-
-#/**
-#         ogMcastRestorePartition
-#@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por multicast.
-#@param
-#@param
-#@param
-#@return
-#@exception
-#@note
-#@todo:
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
-#*/ ##
-ogMcastRestorePartition ()
-{
-echo "en pruebas"
-}
 
 ########################## FUNCIONES TORRENT EN DESARROLLO
 ##################################################
