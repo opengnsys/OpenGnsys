@@ -23,8 +23,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     # Procesar protocolos de transferencia.
     case "$PROTO" in
         UNICAST|unicast)
-            # Copiar fichero del repositorio al caché local.
-            if [ -z "$IMGFILE" ]; then
+            # Copiar fichero del repositorio al caché, si no existe en caché o es anterior.
+            if [ -z "$IMGFILE" -o $(ogIsNewerFile "repo" "$2.img" "$IMGFILE") ]; then
                 echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
                 ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
                 IMGFILE=$(ogGetPath "cache" "$2.img")
@@ -32,19 +32,19 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             ;;
         MULTICAST|multicast)
             if [ -z "$IMGFILE" ]; then
-            	echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
-            	PORTBASE=`echo $6 | cut -f1 -d:`
-           		echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:"CACHE" "$2.img" " 
-           		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img" || exit $?
-           		IMGFILE=$(ogGetPath "cache" "$2.img")
+                echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
+                PORTBASE=`echo $6 | cut -f1 -d:`
+                echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:"CACHE" "$2.img" " 
+                ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img" || exit $?
+                IMGFILE=$(ogGetPath "cache" "$2.img")
             fi
             ;;
         TORRENT|torrent)
-        		echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
-            	ogCopyFile "repo" "$2.img.torrent" "$IMGDIR" || exit $?
-        		echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
-           		ogTorrentStart "CACHE" "$2.img.torrent" "peer:60" || exit $?        		
-           		IMGFILE=$(ogGetPath "cache" "$2.img")            
+                echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
+                ogCopyFile "repo" "$2.img.torrent" "$IMGDIR" || exit $?
+                echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
+                ogTorrentStart "CACHE" "$2.img.torrent" "peer:60" || exit $?        		
+                IMGFILE=$(ogGetPath "cache" "$2.img")            
             ;;
         *)  # Protocolo desconocido.
             ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"
@@ -56,11 +56,10 @@ if [ -z "$IMGFILE" ]; then
     exit $?
 fi
 PART=$(ogDiskToDev "$3" "$4") || exit $?
-echo "[20] $PROG: Origen=$IMGFILE, Destino=$PART"
 
 
 # Restaurar la imagen.
-echo "[25] Restaurar imagen"
+echo "[40] Restaurar imagen $IMGFILE en $PART"
 ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 echo "[80] Extender sistema de archivos."
