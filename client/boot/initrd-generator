@@ -193,7 +193,11 @@ function agregarNuevoArranque
     cd $NEWROOT
 
     cd etc/
+    # Script de arranque de OpenGnSys Client.
     perl -i -p -e "s/\/sbin\/debian-installer\$/${CHROOTINITSCRIPT//\//\/}/" inittab
+    # Impedir usar shell en terminales 2 y 3
+    #    (NOTA: comentar la siguiente línea para sistemas en pruebas).
+    #perl -n -i -e "print unless /^tty[23]/" inittab
 
     # Script inicial que ejecuta el resto de scripts de /etc/rcS.d/
     #echo "#! /bin/sh" >> rc
@@ -230,35 +234,38 @@ fi
 echo Configurada la red \$ip
 #Modo de Trabajo del cliente, on line <> off lne
 status="\${status:-online}"
-echo "comprobando modo de trabajo \$status"
+echo "Comprobando modo de trabajo \$status"
 case "\$status" in 
-   online) 
-	echo "online";	
+    online) 
 	if [ -z \$repo ]
 	then 
     		SERVERIP=\$(grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1)
 	else
     		SERVERIP=\$repo 
 	fi 
-	echo Preparando conexión con el Repositorio  \$SERVERIP
+	echo "Preparando conexión con el Repositorio  \$SERVERIP"
 	# determinar el paramtro de boot para los permisos de los montajes de imagenes.
 	BOOTMODE=\${boot:-"user"}
         case "\$BOOTMODE" in
-            admin) MOUNTOPTS="rw,nolock" ;; 
-            user)  MOUNTOPTS="ro,nolock" ;; 
+            admin) MOUNTOPTS="rw" ;; 
+            user)  MOUNTOPTS="ro" ;; 
             *)     # FIXME: Modo de arranque desconocido
-                   echo "$MSG_ERRBOOTMODE"
-                   MOUNTOPTS="ro,nolock" ;;
+                   echo "\$MSG_ERRBOOTMODE"
+                   MOUNTOPTS="ro" ;;
         esac
         # Montamos el resto de cosas necesarias
-	printf "$MSG_MOUNTREPO\n" $BOOTMODE;
-	mkdir -p /opt/opengnsys;
-    	mount -t nfs -onolock,ro \$SERVERIP:/opt/opengnsys/client /opt/opengnsys;
-        mount -t nfs -o nolock \$SERVERIP:/opt/opengnsys/log/clients /opt/opengnsys/log;
-        mount -t nfs -o "\$MOUNTOPTS" \$SERVERIP:/opt/opengnsys/images /opt/opengnsys/images;	
+        echo "Montar repo en modo \$BOOTMODE"
+        mkdir -p /opt/opengnsys
+        DEFAULTOPTS="nolock"
+        if \$(mount | grep -q " /opt/opengnsys "); then
+            DEFAULTOPTS="remount,\$DEFAULTOPTS"
+        fi
+        mount -t nfs -o "\$DEFAULTOPTS,ro" \$SERVERIP:/opt/opengnsys/client /opt/opengnsys
+        mount -t nfs -o "\$DEFAULTOPTS,rw" \$SERVERIP:/opt/opengnsys/log/clients /opt/opengnsys/log
+        mount -t nfs -o "\$DEFAULTOPTS,\$MOUNTOPTS" \$SERVERIP:/opt/opengnsys/images /opt/opengnsys/images
     	;; 
     offline)
-    	echo "Off-line mode.";
+    	echo "Off-line mode."
 	;;
 esac 
 /opt/opengnsys/etc/preinit/default.sh
