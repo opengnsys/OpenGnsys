@@ -24,7 +24,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     case "$PROTO" in
         UNICAST|unicast)
             # Copiar fichero del repositorio al caché, si no existe en caché o es anterior.
-            if [ -z "$IMGFILE" -o $(ogIsNewerFile "repo" "$2.img" "$IMGFILE") ]; then
+            if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.img" "$IMGFILE") ]; then
                 echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
                 ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
                 IMGFILE=$(ogGetPath "cache" "$2.img")
