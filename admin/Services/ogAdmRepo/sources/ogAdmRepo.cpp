@@ -645,7 +645,7 @@ BOOLEAN respuesta_clienteHidra(TramaRepos *trmInfo)
 	Encriptar((char*)&trmInfo->trama);
 	ret=sendto(trmInfo->sck,(char*)&trmInfo->trama,strlen(trmInfo->trama.parametros)+11,0,(struct sockaddr*)&trmInfo->cliente,trmInfo->sockaddrsize);
 	if (ret == SOCKET_ERROR){
-		RegistraLog("***sendto() fallo al enviar respuesta modulo respuesta_clienteHidra() :",true);
+		RegistraLog("sendto() fallo al enviar respuesta modulo respuesta_clienteHidra() :",true);
 		return(false);
 	}
 	return(true);	
@@ -679,7 +679,7 @@ BOOLEAN respuesta_peticion(TramaRepos *trmInfo,const char *LitRes,char* swf,char
 	Encriptar((char*)trama);
 	ret=sendto(trmInfo->sck,(char*)trama,lon+11,0,(struct sockaddr*)&trmInfo->cliente,trmInfo->sockaddrsize);
 	if (ret == SOCKET_ERROR){
-		RegistraLog("***sendto() fallo al enviar respuesta a peticin de comando:",true);
+		RegistraLog("sendto() fallo al enviar respuesta a peticin de comando:",true);
 		return(false);
 	}
 	return(true);	
@@ -821,7 +821,7 @@ BOOLEAN sesionMulticast(TramaRepos *trmInfo)
 		sprintf(cmdshell,"%s/sendFileMcast %s \"%s:%s:%s:%sM:%s:%s\"",reposcripts,img,pom,mom,ipm,vlm,nip,"0");
 		res=system(cmdshell);
 		if(res>0)
-			RegistraLog("*** Ha habido algún problema al iniciar sesión multicast",false);
+			RegistraLog(" Ha habido algún problema al iniciar sesión multicast",false);
 	}
 	return(true);
 }
@@ -853,7 +853,7 @@ BOOLEAN iniSesionMulticast(char *iph,char *ide,char *nip)
 	}
 	if(!sw){ // No existe la entrada de la sesión
 		if (!hay_hueco(&idx)){ // Busca hueco para el nuevo cliente
-			RegistraLog("*** No hay hueco para nueva sesión multicast",false);
+			RegistraLog(" No hay hueco para nueva sesión multicast",false);
 			return(false); // No hay huecos
 		}
 		strcpy(tbsmul[idx].ides,ide);// Copia identificador de la sesión
@@ -909,7 +909,7 @@ char * Buffer(int l)
 	char *buf;
 	buf=(char*)malloc(l);
 	if(buf==NULL){
-		RegistraLog("*** fallo de reserva de memoria en modulo Buffer()",true);
+		RegistraLog(" fallo de reserva de memoria en modulo Buffer()",true);
 		return(false);
 	}
 	memset(buf,0,l);	
@@ -1048,14 +1048,14 @@ int main(int argc, char **argv)
 		tbsmul[i].ipes=(char)NULL;
 	}
 
-	RegistraLog("***Inicio de sesion***",false);
+	RegistraLog("Inicio de sesion***",false);
 
 	socket_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // Crea socket para UDP
 	if (socket_s == SOCKET_ERROR){
-		RegistraLog("***Error al crear socket para servicio del Repositorio:",true);
+		RegistraLog("Error al crear socket para servicio del Repositorio:",true);
 		exit(EXIT_FAILURE);
 	}
-	RegistraLog("***Creando Socket para comunicaciones***",false);
+	RegistraLog("Creando Socket para comunicaciones***",false);
 	
 	local.sin_addr.s_addr = inet_addr(IPlocal);// selecciona interface
 	local.sin_family = AF_INET;	
@@ -1063,14 +1063,14 @@ int main(int argc, char **argv)
 
 	// Enlaza socket
 	if (bind(socket_s,(struct sockaddr *)&local,sizeof(local)) == SOCKET_ERROR){
-		RegistraLog("***Error al enlazar socket con interface para servicio de Repositorio Hidra",true);
+		RegistraLog("Error al enlazar socket con interface para servicio de Repositorio Hidra",true);
 		exit(EXIT_FAILURE);;
 	}
-	RegistraLog("***Enlazado Socket para comunicaciones***",false);
+	RegistraLog("Enlazado Socket para comunicaciones***",false);
 	while(true){
 		trmInfo = (TramaRepos*)malloc(sizeof(TramaRepos)); // Crea estructura de control para hebra
         if (trmInfo == NULL){
-			RegistraLog("***Fallo al crear estructura de control para protocolo REPO",false);
+			RegistraLog("Fallo al crear estructura de control para protocolo REPO",false);
 			exit(EXIT_FAILURE);;
         }
 		// Inicializa trmInfo
@@ -1080,7 +1080,7 @@ int main(int argc, char **argv)
 		// Espera trmInfos Repositorio
 		ret = recvfrom(trmInfo->sck,(char *)&trmInfo->trama, sizeof(trmInfo->trama),0,(struct sockaddr *)&trmInfo->cliente, &trmInfo->sockaddrsize);
 		if (ret == SOCKET_ERROR){
-			RegistraLog("***Error al recibir mensaje de cliente hidra. Se para el servicio de repositorio",true);
+			RegistraLog("Error al recibir mensaje de cliente hidra. Se para el servicio de repositorio",true);
 			exit(EXIT_FAILURE);
 		}
 		else{
@@ -1088,7 +1088,7 @@ int main(int argc, char **argv)
 				/*
 				resul=pthread_create(&hThread,NULL,GestionaServicioRepositorio,(LPVOID)trmInfo);
 				if(resul!=0){
-					RegistraLog("***Fallo al crear la hebra cliente de repositorio Hidra",false);
+					RegistraLog("Fallo al crear la hebra cliente de repositorio Hidra",false);
 		    		exit(EXIT_FAILURE);
         		}
         		pthread_detach(hThread);	

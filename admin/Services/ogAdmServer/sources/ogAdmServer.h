@@ -44,6 +44,7 @@ char pasguor[20];
 char datasource[20];
 char catalog[50];
 
+int swcSocket;
 
 struct s_socketCLRMB{ // Estructura usada para guardar información de los clientes
 	char ip[16]; // IP del cliente

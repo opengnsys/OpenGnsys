@@ -219,7 +219,6 @@ void gestiona_comando(SOCKET s, TRAMA trama) {
 		resul = strcmp(nombrefuncion, "DisponibilidadComandos");
 		if (resul == 0) {
 			DisponibilidadComandos(s, parametros);
-			respuesta_cortesia(s);
 			return;
 		}
 		resul = strcmp(nombrefuncion, "EcoConsola");
@@ -374,12 +373,12 @@ void gestiona_comando(SOCKET s, TRAMA trama) {
 					estado_cliente = strcmp(tbsockets[i].estado, CLIENTE_REMBO);
 					if (estado_cliente == 0) { // Cliente Rembo ...
 						strcpy(tbsockets[i].estado, CLIENTE_OCUPADO);
-						contOG++;
-						MarcaServidoresRembo(tbsockets[i].ipsrvrmb,
-								tbsockets[i].ip);
+						//contOG++;
+						//MarcaServidoresRembo(tbsockets[i].ipsrvrmb,tbsockets[i].ip);
+						manda_comando(tbsockets[i].sock, parametros);
+						close(tbsockets[i].sock);
 					} else {
-						estado_cliente = strcmp(tbsockets[i].estado,
-								CLIENTE_OCUPADO);
+						estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_OCUPADO);
 						if (estado_cliente != 0) { // Cliente Windows(Windows98,Windows2000,windows XP...) y Linux
 							strcpy(tbsockets[i].estado, CLIENTE_OCUPADO);
 							manda_comando(tbsockets[i].sock, parametros);
@@ -391,7 +390,7 @@ void gestiona_comando(SOCKET s, TRAMA trama) {
 				}
 			}
 		}
-		EnviaServidoresRembo(parametros, contOG);
+		//EnviaServidoresRembo(parametros, contOG);
 	}
 }
 // ________________________________________________________________________________________________________
@@ -434,7 +433,7 @@ int manda_trama(SOCKET sock, TRAMA* trama) {
 		if (ret == 0) {
 			break;
 		} else if (ret == SOCKET_ERROR) {
-			RegistraLog("***send() fallo en hebra cliente", true);
+			RegistraLog("send() fallo en hebra cliente", true);
 			return (FALSE);
 		}
 		nLeft -= ret;
@@ -460,7 +459,7 @@ int recibe_trama(SOCKET sock, TRAMA* trama) {
 			break;
 		else {
 			if (ret == SOCKET_ERROR) {
-				RegistraLog("***recv() fallo en recepcion trama", true);
+				RegistraLog("recv() fallo en recepcion trama", true);
 				return (FALSE);
 			} else
 				// Datos recibidos
@@ -1902,6 +1901,7 @@ int DisponibilidadComandos(SOCKET s, char *parametros) {
 		if (cliente_existente(iph, &i)) // Si ya existe la IP ...
 			resul = borra_entrada(i); // Cliente apagado
 	}
+	swcSocket=true;
 	return (resul);
 }
 // ________________________________________________________________________________________________________
@@ -2170,33 +2170,30 @@ int Actualizar(char *parametros) {
 	if (!trama)
 		return (false);
 	int i, estado_cliente, lon;
-	char *iph, *rmb;
+	char *iph;
+	//char *rmb;
 
 	iph = toma_parametro("iph", parametros); // Toma ip
-	rmb = toma_parametro("rmb", parametros); // Toma ipe del servidor rembo
+	//rmb = toma_parametro("rmb", parametros); // Toma ipe del servidor rembo
 	for (i = 0; i < MAXIMOS_SOCKETS; i++) {
 		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
 			if (IgualIP(iph, tbsockets[i].ip)) { // Si existe la IP en la cadena
 				estado_cliente = strcmp(tbsockets[i].estado, CLIENTE_OCUPADO);
 				if (estado_cliente != 0) { // Cliente NO OCUPADO ...
-					estado_cliente = strcmp(tbsockets[i].estado,
-							CLIENTE_INICIANDO);
+					estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_INICIANDO);
 					if (estado_cliente != 0) { // Cliente NO INICIANDO ...
-						estado_cliente = strcmp(tbsockets[i].estado,
-								CLIENTE_REMBO);
-						if (estado_cliente != 0) { // Cliente windows o linux ...
-							lon
-									= sprintf(trama->parametros,
-											"nfn=Actualizar\r");
-							manda_comando(tbsockets[i].sock,
-									(char*) trama->parametros);
-						}
+						//estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_REMBO);
+						//if (estado_cliente != 0) { // Cliente windows o linux ...
+						lon	= sprintf(trama->parametros,"nfn=Actualizar\r");
+						manda_comando(tbsockets[i].sock,(char*) trama->parametros);
+						//}
 						borra_entrada(i);
 					}
 				}
 			}
 		}
 	}
+	/*
 	int j;
 	for (j = 0; j < MAXIMOS_SRVRMB; j++) {
 		if (strcmp(rmb, tbsocketsSRVRMB[j].ip) == 0) { // Si existe la IP ...
@@ -2205,7 +2202,8 @@ int Actualizar(char *parametros) {
 					tbsocketsSRVRMB[j].puertorepo));
 		}
 	}
-	return (false);
+	*/
+	return (true);
 }
 // ________________________________________________________________________________________________________
 // Función: ConsolaRemota
@@ -3298,7 +3296,7 @@ int recibeFichero(char *ipr, char *rep, char *nomfilesrc, char *nomfiledst) {
 
 	f = fopen(nomfiledst, "wb");
 	if (!f) {
-		RegistraLog("*** No se ha podido crear archivo", false);
+		RegistraLog(" No se ha podido crear archivo", false);
 		close(udpsock);
 		return (false);
 	}
@@ -3321,7 +3319,7 @@ int recibeFichero(char *ipr, char *rep, char *nomfilesrc, char *nomfiledst) {
 					return (true);
 				}
 			} else {
-				RegistraLog("*** Error de recepción de archivo", false);
+				RegistraLog(" Error de recepción de archivo", false);
 				break;
 			}
 			envia_comandos(udpsock, &trama, ipr, atoi(rep));
@@ -3771,7 +3769,7 @@ int envia_comandos(SOCKET s, TRAMA* trama, char* ipsrv, int puerto) {
 	ret = sendto(s, (char *) trama, lon, 0, (struct sockaddr *) &addrRepo,
 			sizeof(addrRepo));
 	if (ret == SOCKET_ERROR) {
-		RegistraLog("***send() fallo en envío al repositorio", true);
+		RegistraLog("send() fallo en envío al repositorio", true);
 		return (FALSE);
 	}
 	return true;
@@ -4445,11 +4443,11 @@ int main(int argc, char *argv[]) {
 		tbsockets[i].ip[0] = '\0'; // Inicializa IP
 		tbsockets[i].sock = INVALID_SOCKET; // Inicializa Socket
 	}
-	RegistraLog("***Inicio de sesion***", false);
+	RegistraLog("Inicio de sesion***", false);
 
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket
 	if (socket_s == SOCKET_ERROR) {
-		RegistraLog("***socket() fallo:", true);
+		RegistraLog("socket() fallo:", true);
 	}
 	local.sin_addr.s_addr = htonl(INADDR_ANY); // selecciona interface
 	local.sin_family = AF_INET;
@@ -4457,7 +4455,7 @@ int main(int argc, char *argv[]) {
 
 	if (bind(socket_s, (struct sockaddr *) &local, // Enlaza socket
 			sizeof(local)) == SOCKET_ERROR) {
-		RegistraLog("***bind() fallo:", true);
+		RegistraLog("bind() fallo:", true);
 		exit(EXIT_FAILURE);
 	}
 
@@ -4467,18 +4465,20 @@ int main(int argc, char *argv[]) {
 	while (true) { // Bucle para escuchar peticiones de clientes
 		socket_c = accept(socket_s, (struct sockaddr *) &cliente, &iAddrSize);
 		if (socket_c == INVALID_SOCKET) {
-			RegistraLog("***accept() fallo:", true);
+			RegistraLog("accept() fallo:", true);
 			break;
 		}
+		swcSocket=true;
 		//resul=pthread_create(&hThread,NULL,GestionaConexion,(void*)&socket_c);
 		GestionaConexion(&socket_c);
 		/*if(resul!=0){2
-		 RegistraLog("***Fallo al crear la hebra cliente",false);
+		 RegistraLog("Fallo al crear la hebra cliente",false);
 		 break;
 		 }
 		 */
 		//pthread_detach(hThread);
-		close(socket_c); // Cierra la conexión con el servidor hidra
+		if(!swcSocket)
+			close(socket_c); // Cierra la conexión sólo cuando el cliente no espera comandos interactivos
 	}
 	close(socket_s);
 	exit(EXIT_SUCCESS);

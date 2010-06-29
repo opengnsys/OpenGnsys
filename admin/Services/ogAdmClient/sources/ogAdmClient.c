@@ -927,6 +927,45 @@ int sesionMulticast(char *fileimg,char *nipes,char *ide)
 // ________________________________________________________________________________________________________
 int ProcesaComandos()
 {
+	int lon;
+
+	while(TRUE){
+		lon=sprintf(trama->parametros,"nfn=DisponibilidadComandos\r");
+		lon+=sprintf(trama->parametros+lon,"swd=1\r");	// Disponible
+
+		if(AbreConexionTCP()){
+			if(!EnviaTramasHidra(sock,trama)){
+				UltimoError(21,"ProcesaComandos()"); // No se pudo enviar trama
+				return(false);
+			}
+			if(!recibe_tramas(sock,trama)){
+				UltimoError(22,"ProcesaComandos()"); // No se pudo recuperar trama
+				return(false);
+			}
+			CierraConexionTCP();
+			GestionTramas(trama);	// Analiza procesa la trama
+		}
+		else{
+			UltimoError(2,"ProcesaComandos()");
+			return(false);
+		}
+	}
+	return(true);
+}
+//______________________________________________________________________________________________________
+// Función: ProcesaComandos
+//
+//	Descripción:
+// 		Espera comando desde el Servidor de Administración para ejecutarlos
+//	Parámetros:
+//		Ninguno
+//	Devuelve:
+//		true si el archivo se ha eliminado correctamente o false en caso contrario
+// ________________________________________________________________________________________________________
+/*
+int ProcesaComandos()
+
+{
 		sprintf(filecmd,"/comandos/CMD_%s",Propiedades.IPlocal);	// Nombre del fichero de comandos		
 		if(ExisteFichero(filecmd))	// Borra fichero de comandos si previamente exista de anteriores procesos
 			RemoveFile(filecmd);
@@ -959,6 +998,8 @@ int ProcesaComandos()
 		}
 		return(true);
 }
+*/
+
 //______________________________________________________________________________________________________
 // Función: DisponibilidadComandos
 //
@@ -969,6 +1010,7 @@ int ProcesaComandos()
 //	Devuelve:
 //		true si el proceso es correcto y false en caso contrario
 // ________________________________________________________________________________________________________
+/*
 int DisponibilidadComandos(int swdis)
 {
 		int lon;
@@ -997,6 +1039,7 @@ int DisponibilidadComandos(int swdis)
 		}
 		return(true);
 }
+*/
 //______________________________________________________________________________________________________
 // Función: GestionTramas
 //
