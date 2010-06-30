@@ -1092,6 +1092,10 @@ int GestionTramas(TRAMA *trama)
 	res=strcmp(nombrefuncion,"Actualizar");
 	if(res==0)
 		return(Actualizar());		
+
+	res=strcmp(nombrefuncion,"Sondeo");
+	if(res==0)
+		return(Sondeo());
 		
 	res=strcmp(nombrefuncion,"ConsolaRemota");
 	if(res==0)
@@ -1515,6 +1519,21 @@ int Actualizar()
 	MuestraMenu(URLMENU);
 	//kill(pidmenu,SIGQUIT);
 	return(res);
+}
+//______________________________________________________________________________________________________
+// Función: Sondeo
+//
+//	 Descripción:
+//		Sondea a los clientes para comprobar su estatus
+//	Parámetros:
+//       Ninguno
+// 	Devuelve:
+//		true si el proceso fue correcto o false en caso contrario
+//______________________________________________________________________________________________________
+int Sondeo()
+{
+	//MuestraMensaje(23,NULL);
+	return(true);
 }
 //______________________________________________________________________________________________________
 // Función: CrearPerfilSoftware

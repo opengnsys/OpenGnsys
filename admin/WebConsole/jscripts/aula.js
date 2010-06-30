@@ -7,12 +7,173 @@
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero aulas.php
 // *************************************************************************************************************************************************
-var litambito="";
-var idambito="";
-var nombreambito="";
-var currentObj=null;
-var wpadre=window.parent; // Toma frame padre
-var farbol=wpadre.frames["frame_arbol"];
+//________________________________________________________________________________________________________
+
+var cadenaip;
+//________________________________________________________________________________________________________
+
+	function NodoAux(){
+		this.idambito=0;								
+		this.ambito=0;
+		this.litambito=null; 
+		this.nombreambito=null;
+
+		this.toma_identificador= function(){
+			return(idambito);
+		}
+		this.toma_sufijo= function(){
+			return(litambito);
+		}
+		this.toma_infonodo= function(){
+			return(nombreambito);
+		}
+		// Fin de la clase
+}
+currentNodo=new NodoAux();
+//________________________________________________________________________________________________________
+function nwmenucontextual(o,idmnctx){
+	var menuctx=document.getElementById(idmnctx); // Toma objeto DIV
+	muestra_contextual(ClickX,ClickY,menuctx) // muestra menu
+	Toma_Datos(o);
+}
+//________________________________________________________________________________________________________
+//	
+//	Toma datos
+//________________________________________________________________________________________________________
+function Toma_Datos(o){
+	var identificador=o.getAttribute("nod");
+	litambito=identificador.split("-")[0];
+	idambito=identificador.split("-")[1];
+	nombreambito=o.getAttribute("value");
+	currentNodo.idambito=idambito;
+	currentNodo.litambito=litambito;
+	currentNodo.nombreambito=nombreambito;
+}
+//________________________________________________________________________________________________________
+function wactualizar_ordenadores(o){
+	Toma_Datos(o);
+ 	actualizar_ordenadores();
+}
+//________________________________________________________________________________________________________
+//	
+//	Refresca la visualizaci� del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
+//________________________________________________________________________________________________________
+function Sondeo(ipes){
+	cadenaip=ipes;
+	reset_contextual(-1,-1) // Oculta menu contextual
+	var wurl="../principal/sondeo.php";
+	var prm="cadenaip="+cadenaip+"&sw=1"; // La primera vez se manda sondeo a los clientes
+	CallPage(wurl,prm,"retornoSondeo","POST");
+	setTimeout("respuestaSondeo();",100); 	
+}
+//______________________________________________________________________________________________________
+function retornoSondeo(resul){
+	/*
+	if(resul==1)
+ 		alert(TbMsg[11]);
+	else
+		alert(TbMsg[12]);
+*/
+}
+//________________________________________________________________________________________________________
+function respuestaSondeo(){
+	var wurl="../principal/sondeo.php";
+	var prm="cadenaip="+cadenaip+"&sw=2"; // La primera vez se manda sondeo a los clientes
+	CallPage(wurl,prm,"retornorespuestaSondeo","POST");
+	setTimeout("respuestaSondeo();",5000); 	
+}
+//______________________________________________________________________________________________________
+function retornorespuestaSondeo(resul){
+	if(resul.length>0){
+		var ip=""; // Dirección IP del ordenador
+		var so=""; // Sistema operativo activo
+		var objOrd=null; // Objeto ordenador
+		var imgOrd="";
+		var cadena=resul.split(";"); // Trocea la cadena devuelta por el servidor de adminsitración
+		for (var i=0;i<cadena.length;i++){
+			var dual=cadena[i].split("/");
+			ip=dual[0];
+			so=dual[1];
+			objOrd=document.getElementById(ip);
+			tbobjOrd=getElementsByAttribute(document.body, "img","ip",ip);
+			if(tbobjOrd.length>0){ // Si existe el objeto
+				objOrd=tbobjOrd[0];
+				imgOrd=soIMG(so); // Toma url de la imagen según su s.o.
+				if(objOrd.sondeo!=so){ // Si es distinto al que tiene ...se cambia la imagen
+					objOrd.src="../images/"+imgOrd;
+					objOrd.sondeo=imgOrd;
+				}
+			}		
+		}
+	}
+}
+//______________________________________________________________________________________________________
+function soIMG(so)
+{
+	var MimgOrdenador="";
+	switch(so){
+				case 'INI':
+								MimgOrdenador="ordenador_INI.gif";  // Cliente ocupado
+								break;
+				case 'BSY':
+								MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
+								break;
+				case 'OPG':
+								MimgOrdenador="ordenador_RMB.gif";  // Cliente Rembo
+								break;
+				case 'RMB':
+								MimgOrdenador="ordenador_RMB.gif";  // Cliente Rembo
+								break;
+				case 'WS2': 
+								MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
+								break;
+				case 'W2K':
+								MimgOrdenador="ordenador_W2K.gif"; // Windows 2000
+								break;
+				case 'WXP':
+								MimgOrdenador="ordenador_WXP.gif"; // Windows XP
+								break;
+				case 'WNT':
+								MimgOrdenador="ordenador_WNT.gif"; // Windows NT
+								break;
+				case 'W95':
+								MimgOrdenador="ordenador_W95.gif"; // Windows 95
+								break;
+				case 'W98':
+								MimgOrdenador="ordenador_W98.gif"; // Windows 98
+								break;
+				case 'WML':
+								MimgOrdenador="ordenador_WML.gif"; // Windows Millenium
+								break;
+				case 'LNX':
+								MimgOrdenador="ordenador_LNX.gif"; // Linux
+				default:
+								MimgOrdenador="ordenador_OFF.gif"; // Linux
+								break;
+	}
+	return(MimgOrdenador);
+}
+//______________________________________________________________________________________________________
+//	Copyright Robert Nyman, http://www.robertnyman.com
+//	Free to use if this text is included
+//______________________________________________________________________________________________________
+function getElementsByAttribute(oElm, strTagName, strAttributeName, strAttributeValue){
+	var arrElements = (strTagName == "*" && oElm.all)? oElm.all : oElm.getElementsByTagName(strTagName);
+	var arrReturnElements = new Array();
+	var oAttributeValue = (typeof strAttributeValue != "undefined")? new RegExp("(^|\\s)" + strAttributeValue + "(\\s|$)") : null;
+	var oCurrent;
+	var oAttribute;
+	for(var i=0; i<arrElements.length; i++){
+		oCurrent = arrElements[i];
+		oAttribute = oCurrent.getAttribute && oCurrent.getAttribute(strAttributeName);
+		if(typeof oAttribute == "string" && oAttribute.length > 0){
+			if(typeof strAttributeValue == "undefined" || (oAttributeValue && oAttributeValue.test(oAttribute))){
+				arrReturnElements.push(oCurrent);
+			}
+		}
+	}
+	return arrReturnElements;
+}
 //________________________________________________________________________________________________________
 //	
 //	Muestra el formulario de captura de datos para modificación
@@ -229,4 +390,5 @@ function incorporarordenador(){
 	var whref="../varios/incorporaordenadores.php?idaula="+idambito+"&nombreaula="+nombreambito
 	window.open(whref,"frame_contenidos")
 }
+
 	

@@ -191,7 +191,35 @@ char * toma_parametro(const char* nombre_parametro,char *parametros)
 	}
 	return(NULL);
 }
+//______________________________________________________________________________________________________
+// Función: copiaParametro
+//
+//	Descripción:
+// 		Devuelve una copia del valor de un parámetro
+//	Parámetros:
+//		- ptrTrama: contenido del mensaje
+//		- parametro: Nombre del parámetro
+// 	Devuelve:
+//		Un puntero a la cadena que contiene el valor del parámetro
+// ________________________________________________________________________________________________________
+char* copia_parametro(const char*nombre,char *parametros)
+{
+	int lon;
+	char *prm,*buffer;
 
+	prm=toma_parametro(nombre,parametros); // Toma parámetro
+	if(prm)
+		lon=strlen(prm);
+	else
+		return(NULL);
+
+	buffer = (char*) malloc(lon); // Toma memoria
+	if (buffer == NULL) { // No hay memoria suficiente para el buffer
+		return (NULL);
+	}
+	strcpy(buffer,prm);
+	return(buffer);
+}
 // ________________________________________________________________________________________________________
 // Función: split_parametros
 //

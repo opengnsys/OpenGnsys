@@ -1890,15 +1890,27 @@ int EjecutarItem(SOCKET s, char *parametros) {
 // ________________________________________________________________________________________________________
 int DisponibilidadComandos(SOCKET s, char *parametros) {
 	char *iph, *swd;
-	int resul = 0, i;
+	int resul, i;
 
 	iph = toma_parametro("iph", parametros); // Toma ip
 	swd = toma_parametro("swd", parametros); // Toma switch de diponibilidad
 
-	if (strcmp(swd, "1") == 0) // Cliente disponible
-		resul = Coloca_estado(iph, CLIENTE_REMBO, s);
-	else {
-		if (cliente_existente(iph, &i)) // Si ya existe la IP ...
+	if (strcmp(swd, "1") == 0){ // Cliente disponible
+		if (cliente_existente(iph, &i)) { // Si ya existe la IP ...
+			resul = Coloca_estado(iph, CLIENTE_REMBO, s);
+		}
+		else {
+			if (hay_hueco(&i)) { // Busca hueco para el nuevo cliente
+				strcpy(tbsockets[i].ip, iph);// Copia IP
+				tbsockets[i].sock = s; // Guarda el socket
+				strcpy(tbsockets[i].estado, CLIENTE_REMBO); // Actualiza el estado del cliente
+			}
+			else
+				return (false); // No hay huecos
+		}
+	}
+	else{
+		if (cliente_existente(iph, &i))  // Si ya existe la IP ...
 			resul = borra_entrada(i); // Cliente apagado
 	}
 	swcSocket=true;
@@ -2138,11 +2150,17 @@ int enviaEcoConsola(SOCKET s, const char *eco) {
 //			- parametros: Parámetros de la trama enviada
 // ________________________________________________________________________________________________________
 int Sondeo(SOCKET s, char *parametros) {
-	char *iph;
+	char *iph,*sws;
 	char nwparametros[LONGITUD_PARAMETROS];
 	int j;
 
-	iph = toma_parametro("iph", parametros); // Toma ip
+	iph = copia_parametro("iph", parametros); // Toma ip
+	sws = toma_parametro("sws", parametros); // swtich de sondeo "S": sondeo a clientes "T": Lectura de tabla sockets
+	if (sws){ // Sondeo previo a clientes
+		if (strcmp(sws, "S") == 0) // Sondeo previo a clientes
+			Sondear(iph);
+	}
+	// Devuelve estado de la tabla de sockets
 	nwparametros[0] = '\0';
 	strcat(nwparametros, "tso="); // Compone retorno tso ( sistemas operativos de los clientes )
 	for (j = 0; j < MAXIMOS_SOCKETS; j++) {
@@ -2156,6 +2174,35 @@ int Sondeo(SOCKET s, char *parametros) {
 		}
 	}
 	return (manda_comando(s, nwparametros));
+}
+// ________________________________________________________________________________________________________
+// Función: Sondeo
+//
+//		Descripción:
+//			Esta función hace un sondeo a los clientes para comprobar su estatus
+//		Parámetros:
+//			- iph: cadena con las ipes
+// ________________________________________________________________________________________________________
+int Sondear(char *iph)
+{
+	char parametros[32];
+	int i,estado_cliente;
+	for (i = 0; i < MAXIMOS_SOCKETS; i++) {
+		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
+			if (IgualIP(iph, tbsockets[i].ip)) { // Si existe la IP en la cadena
+				estado_cliente = strcmp(tbsockets[i].estado, CLIENTE_OCUPADO);
+				if (estado_cliente != 0) { // Cliente NO OCUPADO ...
+					estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_INICIANDO);
+					if (estado_cliente != 0) { // Cliente NO INICIANDO ...
+						strcpy(parametros,"nfn=Sondeo\r");
+						manda_comando(tbsockets[i].sock,parametros);
+						borra_entrada(i);
+					}
+				}
+			}
+		}
+	}
+	return (true);
 }
 // ________________________________________________________________________________________________________
 // Función: Actualizar

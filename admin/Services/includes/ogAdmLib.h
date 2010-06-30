@@ -1,5 +1,5 @@
 
-
+#define LONPRM 512
 #define LONGITUD_PARAMETROS 4000	// Longitud mínima de la información de la trama (parametros)
 #define LONGITUD_CABECERATRAMA	11 // Longitud mínima de la trama completa
 #define LONGITUD_TRAMA LONGITUD_PARAMETROS+LONGITUD_CABECERATRAMA	// Longitud mínima de la trama completa
@@ -97,6 +97,7 @@ int IgualIP(char *,char *);
 void RegistraLog(const char *,int);
 struct tm * TomaHora();
 char * toma_parametro(const char* ,char *);
+char* copia_parametro(const char*,char *);
 int SplitParametros(char**,char*, char*);
 int recibe_trama(SOCKET sock,TRAMA* trama);
 char* Encriptar(char *);

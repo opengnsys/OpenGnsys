@@ -56,6 +56,7 @@ if (!$cmd)
 <SCRIPT language="javascript" src="../jscripts/aula.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
+<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 <? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/aulas_'.$idioma.'.js"></SCRIPT>'?>
 <BODY OnContextMenu="return false">
@@ -102,6 +103,9 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
 ?>
+<SCRIPT language="javascript">
+	Sondeo('<?php echo $cadenaip?>');
+</SCRIPT>
 </BODY>
 </HTML>
 <?
@@ -231,75 +235,19 @@ function pintaordenadores(){
 	global $servidorhidra,$hidraport;
 	global $TbMsg;
 
-	$shidra=new SockHidra($servidorhidra,$hidraport); 
-	$parametros="1"; // Ejecutor
-	$parametros.="nfn=Sondeo".chr(13);
-	$parametros.="iph=".$cadenaip.chr(13);
-
-	$resul=$shidra->conectar(); // Se ha establecido la conexióncon el servidor hidra
-	if($resul){
-		$resul=$shidra->envia_comando($parametros);
-		$trama=$shidra->recibe_respuesta();
-		$parametros=substr($trama,$LONCABECERA,strlen($trama)-$LONCABECERA);
-		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
-		$trama_notificacion=$ValorParametros["tso"];
-		$shidra->desconectar();
-	}
-	for($i=0;$i<$k;$i++){ // Vuelve a recorrer los datos de ordenadores para crear HTML
-		$patron=$Mip[$i].'/';
-		$pos=EnCadena($trama_notificacion,$patron);
-		if($pos>-1){
-			$tiposo=substr($trama_notificacion,$pos+strlen($patron),3);
-			switch($tiposo){
-				case 'INI':
-								$MimgOrdenador[$i]="ordenador_INI.gif";  // Cliente ocupado
-								break;
-				case 'BSY':
-								$MimgOrdenador[$i]="ordenador_BSY.gif";  // Cliente ocupado
-								break;
-				case 'RMB':
-								$MimgOrdenador[$i]="ordenador_RMB.gif";  // Cliente Rembo
-								break;
-				case 'WS2': 
-								$MimgOrdenador[$i]="ordenador_WS2.gif"; // Windows Server 2003
-								break;
-				case 'W2K':
-								$MimgOrdenador[$i]="ordenador_W2K.gif"; // Windows 2000
-								break;
-				case 'WXP':
-								$MimgOrdenador[$i]="ordenador_WXP.gif"; // Windows XP
-								break;
-				case 'WNT':
-								$MimgOrdenador[$i]="ordenador_WNT.gif"; // Windows NT
-								break;
-				case 'W95':
-								$MimgOrdenador[$i]="ordenador_W95.gif"; // Windows 95
-								break;
-				case 'W98':
-								$MimgOrdenador[$i]="ordenador_W98.gif"; // Windows 98
-								break;
-				case 'WML':
-								$MimgOrdenador[$i]="ordenador_WML.gif"; // Windows Millenium
-								break;
-				case 'LNX':
-								$MimgOrdenador[$i]="ordenador_LNX.gif"; // Linux
-								break;
-			}
-		}
-	}
 	$ntr=0; // Numero de ordenadores por fila
 	if ($nombreaula!=""){
 		echo '<DIV>';
 		echo '<p align=center class=cabeceras><A href="#"><img  border=0 id="'.$LITAMBITO_AULAS.'-'.$idaula.'" value="'.$nombreaula.'" src="../images/iconos/aula.gif" onclick="veraulas(this);" oncontextmenu="menucontextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')" ></A>&nbsp;&nbsp;'.$TbMsg[23].'</br><span id="'.$LITAMBITO_AULAS.'-'.$idaula.'" class=subcabeceras>'.$nombreaula.'</span></p>';
 	}
-	echo '<TABLE style="BORDER-BOTTOM: #d4d0c8 1px solid;BORDER-LEFT: #d4d0c8 1px solid;BORDER-RIGHT: #d4d0c8 1px solid;BORDER-TOP: #d4d0c8 1px solid" align=center><TR>';
+echo '<TABLE style="BORDER-BOTTOM: #d4d0c8 1px solid;BORDER-LEFT: #d4d0c8 1px solid;BORDER-RIGHT: #d4d0c8 1px solid;BORDER-TOP: #d4d0c8 1px solid" align=center><TR>';
 	for($i=0;$i<$k;$i++){ // Vuelve a recorrer los datos de ordenadores para crear HTML
 		$ntr++;
 		echo '<TD>';
 		echo '<table border=0>';
 		echo '<tr>';
 		echo '	<td align=center width=70 height=40>';
-		echo '	<a href="#"><img  id="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'" border=0   value="'.$Mnombreordenador[$i].'" src="../images/'.$MimgOrdenador[$i].'" oncontextmenu="menucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></A>';
+		echo '	<a href="#"><img sondeo="" ip="'.$Mip[$i].'" id="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'" border=0   value="'.$Mnombreordenador[$i].'" src="../images/'.$MimgOrdenador[$i].'" oncontextmenu="menucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></A>';
 		echo '	</td>';
 		echo '</tr>';
 		echo '<tr>';

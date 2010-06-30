@@ -270,6 +270,7 @@ int Apagar(TRAMA*,TRAMA*);
 int Reiniciar(TRAMA*,TRAMA*);
 int IniciarSesion(TRAMA*,TRAMA*);
 int Actualizar();
+int Sondeo();
 int CrearPerfilSoftware(TRAMA*,TRAMA*);
 int CrearPerfil(char*,char*,char*,char*,char*);
 int Nemonico(char*);

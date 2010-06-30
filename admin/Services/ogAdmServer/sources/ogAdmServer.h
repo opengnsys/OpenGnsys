@@ -102,6 +102,7 @@ int inclusion_REPO(SOCKET,char *);
 int inclusion_cliWINLNX(SOCKET ,char *);
 
 int Sondeo(SOCKET ,char *);
+int Sondear(char *);
 int EcoConsola(SOCKET ,char *);
 int enviaEcoConsola(SOCKET ,const char *);
 int Arrancar(char *);
