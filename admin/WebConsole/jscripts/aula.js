@@ -233,13 +233,20 @@ function consola_remota(){
 //	
 //	Resetea la visualización del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
 //________________________________________________________________________________________________________
-function purgar_ordenadores(){
+function purgar_ordenadores(sw){
 	reset_contextual(-1,-1) // Oculta menu contextual
 	var resul=window.confirm(TbMsg[2]);
 	if (!resul)return
 	var whref="purgar.php?litambito="+litambito+"&idambito="+idambito
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	ifr.src=whref; // LLama a la página gestora
+	var whref=parent.frames["frame_contenidos"].location.href;
+	var wurl=whref.split("/");
+	var ne=wurl.length
+	var pag=wurl[ne-1];
+	if(pag.indexOf("aula")==0){ // En el frame de la derecha aparece la pagina de aula
+		parent.frames["frame_contenidos"].location.reload(true);
+	}
 }
 //________________________________________________________________________________________________________
 //	
@@ -249,14 +256,14 @@ function veraulas(o){
 	Toma_Datos(o);
 	var whref="aula.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
 	 window.open(whref,"frame_contenidos")
-	farbol.DespliegaNodo(litambito,idambito);
+	//farbol.DespliegaNodo(litambito,idambito);
 }
 //________________________________________________________________________________________________________
 function menucontextual(o,idmnctx){
 	var menuctx=document.getElementById(idmnctx); // Toma objeto DIV
 	muestra_contextual(ClickX,ClickY,menuctx) // muestra menu
 	Toma_Datos(o);
-	farbol.DespliegaNodo(litambito,idambito);
+	//farbol.DespliegaNodo(litambito,idambito);
 }
 //________________________________________________________________________________________________________
 //	

@@ -2158,7 +2158,7 @@ int Sondeo(SOCKET s, char *parametros) {
 	sws = toma_parametro("sws", parametros); // swtich de sondeo "S": sondeo a clientes "T": Lectura de tabla sockets
 	if (sws){ // Sondeo previo a clientes
 		if (strcmp(sws, "S") == 0) // Sondeo previo a clientes
-			Sondear(iph);
+			Sondear(iph,false);
 	}
 	// Devuelve estado de la tabla de sockets
 	nwparametros[0] = '\0';
@@ -2182,8 +2182,9 @@ int Sondeo(SOCKET s, char *parametros) {
 //			Esta función hace un sondeo a los clientes para comprobar su estatus
 //		Parámetros:
 //			- iph: cadena con las ipes
+//			- sws: switch de sondeo 1= sólo clientes inactivos 2=todos (ocuopados, iniciados y activos)
 // ________________________________________________________________________________________________________
-int Sondear(char *iph)
+int Sondear(char *iph,int sws)
 {
 	char parametros[32];
 	int i,estado_cliente;
@@ -2191,9 +2192,9 @@ int Sondear(char *iph)
 		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
 			if (IgualIP(iph, tbsockets[i].ip)) { // Si existe la IP en la cadena
 				estado_cliente = strcmp(tbsockets[i].estado, CLIENTE_OCUPADO);
-				if (estado_cliente != 0) { // Cliente NO OCUPADO ...
+				if (estado_cliente != 0 || sws) { // Cliente NO OCUPADO ...
 					estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_INICIANDO);
-					if (estado_cliente != 0) { // Cliente NO INICIANDO ...
+					if (estado_cliente != 0 || sws) { // Cliente NO INICIANDO ...
 						strcpy(parametros,"nfn=Sondeo\r");
 						manda_comando(tbsockets[i].sock,parametros);
 						borra_entrada(i);
@@ -2410,17 +2411,11 @@ int Conmutar(char *parametros) {
 //			- parametros: parámetros del comando
 // ________________________________________________________________________________________________________
 void PurgarTablaSockets(char *parametros) {
-	int i;
+
 	char *iph;
 
-	iph = toma_parametro("iph", parametros); // Toma ip
-	for (i = 0; i < MAXIMOS_SOCKETS; i++) {
-		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
-			if (IgualIP(iph, tbsockets[i].ip)) { // Si existe la IP en la cadena
-				borra_entrada(i);
-			}
-		}
-	}
+	iph = copia_parametro("iph", parametros); // Toma ip
+	Sondear(iph,true);
 }
 // _____________________________________________________________________________________________________________
 // Función: Arrancar

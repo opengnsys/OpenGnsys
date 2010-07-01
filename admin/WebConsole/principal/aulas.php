@@ -141,6 +141,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 		$cadenaXML.=' imagenodo="../images/iconos/aula.gif"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreaula"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_AULAS.'-'.$rs->campos["idaula"];
+		$cadenaXML.=' clicksupnodo="ver_aulas()"';
 		$cadenaXML.='>';
 		$cadenaXML.=SubarbolXML_aulas_ordenadores($cmd,$rs->campos["idaula"],0);
 		$cadenaXML.=SubarbolXML_aulas_operadores($cmd,$rs->campos["idaula"],&$cc);
@@ -450,6 +451,7 @@ function ContextualXMLAulas(){
 	$layerXML.=' maxanchu=190';
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
+
 	$layerXML.='>';
 
 	$layerXML.='<ITEM';

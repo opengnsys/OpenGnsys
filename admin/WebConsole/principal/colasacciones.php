@@ -697,6 +697,7 @@ function ListandoAcciones($cmd){
 	
 				if($porcen>=$porcendesde && $porcen<=$porcenhasta){
 						$mulaccion.=$rs->campos["idaccion"].":"; // Formato idaccion:estado:resultado;
+						echo '<TR height="8"><TD style="BACKGROUND-COLOR: #63676b;" colspan=12></TD></TR>';
 						echo '<TR id="ACC_'.$rs->campos["idaccion"].'" name='.$rs->campos["tipoaccion"].' value='.$rs->campos["ambito"].' height=20>'.chr(13);
 						echo '<TD  align=center><A href="#vernotcontra"><IMG border=0 onclick="ver_notificaciones(this,0,'.$rs->campos["idaccion"].');" style="display:block" src="../images/tsignos/contra.gif"></A>';
 						echo '<A href="#vernotdesple"><IMG border=0 onclick="ver_notificaciones(this,1,'.$rs->campos["idaccion"].');" style="display:none" src="../images/tsignos/desple.gif"></A>';

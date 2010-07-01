@@ -131,9 +131,17 @@ function purgar_ordenadores(){
 	if (!resul)return
 	var idambito=currentNodo.toma_identificador()
 	var litambito=currentNodo.toma_sufijo()
+	var nombreambito=currentNodo.toma_infonodo();
 	var whref="purgar.php?litambito="+litambito+"&idambito="+idambito
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	ifr.src=whref; // LLama a la p�ina gestora
+	var whref=parent.frames["frame_contenidos"].location.href;
+	var wurl=whref.split("/");
+	var ne=wurl.length
+	var pag=wurl[ne-1];
+	if(pag.indexOf("aula")==0){ // En el frame de la derecha aparece la pagina de aula
+		parent.frames["frame_contenidos"].location.reload(true);
+	}
 }
 //________________________________________________________________________________________________________
 //	

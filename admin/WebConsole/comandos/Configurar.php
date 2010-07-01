@@ -269,6 +269,7 @@ function tabla_particiones($cmd,$idcentro,$idambito,$idconfiguracion,$cuenta){
 		$particion=$ValorParametros["numpart"]; // Toma la partici�
 		$p=$particion;
 		$tipopart=$ValorParametros["tipopart"]; // Toma tama� la partici�
+if($tipopart=="CACHE" || $tipopart=="EMPTY") continue;
 		$tamapart=$ValorParametros["tamapart"]; // Toma tama� la partici�
 		$nombreso=$ValorParametros["nombreso"]; // Toma nombre del sistema operativo
 		$tiposo=$ValorParametros["tiposo"];
@@ -355,16 +356,15 @@ function tabla_particiones($cmd,$idcentro,$idambito,$idconfiguracion,$cuenta){
 		$opciones.="4=EXT2".chr(13);
 		$opciones.="5=EXT3".chr(13);
 		$opciones.="6=EXT4".chr(13);
-		$opciones.="7=LINUX-SWAP".chr(13);
-		$opciones.="8=CACHE";
+		$opciones.="7=LINUX-SWAP";
 
 		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"tipospar_".$p."_".$idc,"estilodesple","EMPTY",$codpar,100,"chgtipopar").'</TD>'.chr(13);
 		$tablaHtml.='<TD><span id=tiposo_'.$p."_".$idc.' value=0>&nbsp;'.$nombreso.'&nbsp;</span></TD>'.chr(13);
-		$tablaHtml.='<TD align=center>&nbsp<input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value='.$tamapart.' >&nbsp</TD>'.chr(13);
+		$tablaHtml.='<TD align=center><input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value='.$tamapart.' ></TD>'.chr(13);
 		$opciones="1=".$TbMsg[14]."".chr(13);
 		$opciones.="2=".$TbMsg[15]."".chr(13);
 		$opciones.="3=".$TbMsg[16]."";
-		$tablaHtml.='<TD>&nbsp'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],$valocul,100,"chgaccion").'&nbsp</TD>'.chr(13);
+		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],$valocul,100,"chgaccion").'</TD>'.chr(13);
 		$tablaHtml.='</TR>'.chr(13);
 	}
 	$tablaHtml.='</TABLE>';
@@ -402,7 +402,7 @@ function Patrontabla_Particion(){
 		$opciones.="7=LINUX-SWAP";
 		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"tipospar_".$p."_".$idc,"estilodesple","EMPTY",0,100,"chgtipopar").'</TD>'.chr(13);
 		$tablaHtml.='<TD><span id=tiposo_'.$p."_".$idc.' value=0>&nbsp;<span style="COLOR:red">'.$TbMsg[17].'</span>&nbsp;</span></TD>'.chr(13);
-		$tablaHtml.='<TD align=center>&nbsp<input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value=0 >&nbsp</TD>'.chr(13);
+		$tablaHtml.='<TD align=center><input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value=0 ></TD>'.chr(13);
 		$opciones="1=".$TbMsg[14]."".chr(13);
 		$opciones.="2=".$TbMsg[15]."".chr(13);
 		$opciones.="3=".$TbMsg[16]."";
