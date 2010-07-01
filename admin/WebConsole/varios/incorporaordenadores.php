@@ -30,7 +30,8 @@ if (isset($_POST["contenido"])) $contenido=$_POST["contenido"];
 if (isset($_POST["idaula"])) $idaula=$_POST["idaula"]; 
 if (isset($_POST["nombreaula"])) $nombreaula=$_POST["nombreaula"]; 
 
-$resul=0;
+$resul=false;
+$ordDup="";
 
 if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	$resul=procesaLineas($cmd,$idaula,$contenido);
@@ -78,9 +79,9 @@ else{
  </FORM>
 <TABLE align=center>
 	<TR>
-		<TD><IMG src="../images/boton_cancelar.gif" style="cursor:hand"  onclick=""></TD>
+		<TD><A href="#aceptar"><IMG border=0 src="../images/boton_confirmar.gif"  onclick="document.fdatos.submit();"></A></TD>
 		<TD width=20></TD>
-		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="javascript:document.fdatos.submit();"></TD>
+		<TD><A href="#cancelar"><IMG border=0 src="../images/boton_cancelar.gif"  onclick=""></A></TD>
 	</TR>
 </TABLE>
 <?
@@ -89,6 +90,8 @@ else{
 echo '<SCRIPT LANGUAGE="javascript">';
 if (!empty($resul))
 	echo "	alert('".$TbMsg[$resul]."');";
+if (!empty($ordDup))
+	echo "	alert('".$TbMsg[9]."\\n".$ordDup."');";
 echo '</SCRIPT>';
 //________________________________________________________________________________________________________
 ?>
@@ -161,6 +164,7 @@ function procesaLineas($cmd,$idaula,$buffer){
 }
 //________________________________________________________________________________________________________
 function Inserta($cmd,$idaula,$nombre,$lamac,$laip){
+	global $ordDup;
 	$grupoid=0;
 	$nombreordenador=trim($nombre);
 	$ip=trim($laip);
@@ -169,6 +173,11 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip){
 	for($i=0;$i<strlen($auxmac);$i++)
 		if(substr($auxmac,$i,1)!=":")
 			$mac.=substr($auxmac,$i,1);
+
+	if(!existeOrdenador($cmd,$nombreordenador,$mac,$ip)){
+		$ordDup.="Nombre=".$nombre.",Mac=".$mac.",Dirección ip=".$ip." \\n";
+		return(true);	
+	}	
 	$idperfilhard=0;
 	$idservidordhcp=0;
 	$idservidorrembo=0;
@@ -195,5 +204,24 @@ function salvafichero_POST($ficheroPost,$ficheroLocal){
 	if (file_exists($ficheroLocal)) // Borra el fichero si existe
         unlink($ficheroLocal);
 	return(move_uploaded_file($ficheroPost,$ficheroLocal)); // salva el fichero
+}
+//________________________________________________________________________________________________________
+//	Recupera los datos de un ordenador
+//		Parametros: 
+//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- ip: Dirección IP
+//________________________________________________________________________________________________________
+function existeOrdenador($cmd,$nombre,$MAC,$IP){
+	$rs=new Recordset; 
+	$cmd->texto="SELECT * FROM ordenadores WHERE nombre='".$nombre."' OR mac='".$MAC."' OR ip='".$IP."'";
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF){
+		$rs->Cerrar();
+		return(true);
+	}
+	else
+		return(false);
 }
 ?>
