@@ -10,6 +10,7 @@
 //________________________________________________________________________________________________________
 
 var cadenaip;
+var Conlitambito=null
 //________________________________________________________________________________________________________
 
 	function NodoAux(){
@@ -228,6 +229,30 @@ function consola_remota(){
 	reset_contextual(-1,-1)
 	var whref="../principal/consolaremota.php?litambito="+litambito+"&idambito="+idambito+"&nomambito="+nombreambito
 	location.href=whref;
+	Conlitambito=litambito;
+}
+//________________________________________________________________________________________________________
+//	
+//	Abre una ventana para  mostrar el eco de una consola
+//________________________________________________________________________________________________________
+function eco_remoto(){
+	reset_contextual(-1,-1)
+ 	if(Conlitambito==null){
+			alert(TbMsg[6]);
+		 return;
+	}
+ 	if(Conlitambito==LITAMBITO_ORDENADORES){
+			alert(TbMsg[5]);
+		 return;
+	}
+	var idambito=currentNodo.toma_identificador()
+	var litambito=currentNodo.toma_sufijo()
+	var nomambito=currentNodo.toma_infonodo()
+	var whref="../principal/ecoremoto.php?litambito="+litambito+"&idambito="+idambito+"&nomambito="+nomambito
+	var nomw="w_"+litambito+"_"+idambito
+	if(TBcon[idambito])
+		TBcon[idambito].close();
+	TBcon[idambito] = window.open(whref,nomw,"width=720,height=640");
 }
 //________________________________________________________________________________________________________
 //	

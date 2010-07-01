@@ -74,6 +74,7 @@ if($cmd){
 				$parametros.="nfn=".$nombrefuncion.chr(13);
 				$cadenaip=substr($cadenaip,0,strlen($cadenaip)-1); // Quita la coma
 				$parametros.="iph=".$cadenaip.chr(13);
+				$parametros.="pfe=".$pathfileco.chr(13);
 				$parametros.="rmb=".$ipservidorrembo.chr(13);
 				$resul=manda_trama();
 				$ipservidorrembo=trim($rs->campos["ip"]); // toma ip servidor rembo
@@ -88,10 +89,10 @@ if($cmd){
 		$parametros=$ejecutor;
 		$parametros.="nfn=".$nombrefuncion.chr(13);
 		$parametros.="cmd=".$comando.chr(13);
+		$parametros.="pfe=".$pathfileco.chr(13);
 		$cadenaip=substr($cadenaip,0,strlen($cadenaip)-1); // Quita la coma
 		$parametros.="iph=".$cadenaip.chr(13);
 		$parametros.="rmb=".$ipservidorrembo.chr(13);
-
 		$resul=manda_trama();
 	}
 }
