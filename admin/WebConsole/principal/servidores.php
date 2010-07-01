@@ -6,7 +6,7 @@
 // Fecha Última modificación: Febrero-2005
 // Nombre del fichero: servidores.php
 // Descripción : 
-//		Administra los servidores dhcp y rembo de un determinado Centro
+//		Administra los servidores opengnsys de un determinado Centro
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -16,6 +16,7 @@ include_once("../clases/MenuContextual.php");
 include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/servidores_".$idioma.".php");
+
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -48,21 +49,14 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,2,0,5);
 echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
 
-// Crea contextual de servidores rembo
+// Crea contextual de servidores opengnsys
 $XMLcontextual=CreacontextualXMLServidoresRembo(); 
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=CreacontextualXMLGruposServidoresRembo(); // Grupos de servidores
 echo $flotante->CreaMenuContextual($XMLcontextual);
-$XMLcontextual=CreacontextualXMLServidorRembo(); // Servidor rembo
+$XMLcontextual=CreacontextualXMLServidorRembo(); // Servidor opengnsys
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
-// Crea contextual de servidores dhcp
-$XMLcontextual=CreacontextualXMLServidoresdhcp();
-echo $flotante->CreaMenuContextual($XMLcontextual);
-$XMLcontextual=CreacontextualXMLGruposServidoresdhcp(); // Grupos de servidores
-echo $flotante->CreaMenuContextual($XMLcontextual);
-$XMLcontextual=CreacontextualXMLServidorDhcp(); // Servidor dhcp
-echo $flotante->CreaMenuContextual($XMLcontextual);
 //________________________________________________________________________________________________________
 include_once("../includes/iframecomun.php");
 //________________________________________________________________________________________________________
@@ -71,7 +65,7 @@ include_once("../includes/iframecomun.php");
 </HTML>
 <?
 // *************************************************************************************************************************************************
-//	Devuelve una cadena con formato XML de toda la información de los servidores rembo y dhcp de un Centro concreto
+//	Devuelve una cadena con formato XML de toda la información de los servidores opengnsys de un Centro concreto
 //	Parametros: 
 //		- cmd:Una comando ya operativo ( con conexión abierta)  
 //		- idcentro: El identificador del centro
@@ -111,9 +105,13 @@ function SubarbolXML_grupos_servidoresrembo($cmd,$idcentro,$grupoid){
 	global $LITAMBITO_GRUPOSSERVIDORESREMBO;
 	global $AMBITO_GRUPOSSERVIDORESREMBO;
 	global $LITAMBITO_SERVIDORESREMBO;
+	global $ADMINISTRADOR;
 	$cadenaXML="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idgrupo,nombregrupo,grupoid FROM grupos WHERE grupoid=".$grupoid." AND idcentro=".$idcentro." AND tipo=".$AMBITO_GRUPOSSERVIDORESREMBO." ORDER BY nombregrupo";
+	$cmd->texto="SELECT idgrupo,nombregrupo,grupoid FROM grupos WHERE grupoid=".$grupoid." AND tipo=".$AMBITO_GRUPOSSERVIDORESREMBO;
+	if($idtipousuario==$ADMINISTRADOR)
+		$cmd->texto.=" AND idcentro=".$idcentro;
+	$cmd->texto.=" ORDER BY nombregrupo";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -130,7 +128,10 @@ function SubarbolXML_grupos_servidoresrembo($cmd,$idcentro,$grupoid){
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
-	$cmd->texto="SELECT idservidorrembo,nombreservidorrembo FROM servidoresrembo WHERE grupoid=".$grupoid." AND idcentro=".$idcentro." order by idservidorrembo desc" ;
+	$cmd->texto="SELECT idservidorrembo,nombreservidorrembo FROM servidoresrembo WHERE grupoid=".$grupoid;
+	if($idtipousuario==$ADMINISTRADOR)
+		$cmd->texto.=" AND idcentro=".$idcentro;
+	$cmd->texto.=" order by idservidorrembo desc" ;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -143,63 +144,6 @@ function SubarbolXML_grupos_servidoresrembo($cmd,$idcentro,$grupoid){
 		$cadenaXML.=' nodoid='.$LITAMBITO_SERVIDORESREMBO.'-'.$rs->campos["idservidorrembo"];
 		$cadenaXML.='>';
 		$cadenaXML.='</SERVIDORREMBO>';
-		$rs->Siguiente();
-	}
-	$rs->Cerrar();
-	return($cadenaXML);
-}
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function SubarbolServidoresDhcpXML($cmd,$idcentro){
-	global $TbMsg;
-	global $LITAMBITO_SERVIDORESDHCP;
-	$cadenaXML='<SERVIDORESDHCP';
-	// Atributos		
-	$cadenaXML.=' imagenodo="../images/iconos/servidoresdhcp.gif"';
-	$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_Raiz".$LITAMBITO_SERVIDORESDHCP."'" .')"';
-	$cadenaXML.=' nodoid=Raiz'.$LITAMBITO_SERVIDORESDHCP;
-	$cadenaXML.=' infonodo='.$TbMsg[13];
-	$cadenaXML.='>';
-	$cadenaXML.=SubarbolXML_grupos_servidoresdhcp($cmd,$idcentro,0);
-	$cadenaXML.='</SERVIDORESDHCP>';
-	return($cadenaXML);
-}
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function SubarbolXML_grupos_servidoresdhcp($cmd,$idcentro,$grupoid){
-	global $LITAMBITO_GRUPOSSERVIDORESDHCP;
-	global $AMBITO_GRUPOSSERVIDORESDHCP;
-	global $LITAMBITO_SERVIDORESDHCP;
-	$cadenaXML="";
-	$rs=new Recordset; 
-	$cmd->texto="SELECT idgrupo,nombregrupo,grupoid FROM grupos WHERE grupoid=".$grupoid." AND idcentro=".$idcentro." AND tipo=".$AMBITO_GRUPOSSERVIDORESDHCP." ORDER BY nombregrupo";
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
-	$rs->Primero(); 
-	while (!$rs->EOF){
-		$cadenaXML.='<GRUPOSSERVIDORESDHCP ';
-		// Atributos		
-		$cadenaXML.=' imagenodo="../images/iconos/carpeta.gif"';
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,'. " 'flo_".$LITAMBITO_GRUPOSSERVIDORESDHCP."'" .');"';
-		$cadenaXML.=' infonodo="'.$rs->campos["nombregrupo"].'"';
-		$cadenaXML.=' nodoid='.$LITAMBITO_GRUPOSSERVIDORESDHCP.'-'.$rs->campos["idgrupo"];
-		$cadenaXML.='>';
-		$cadenaXML.=SubarbolXML_grupos_servidoresdhcp($cmd,$idcentro,$rs->campos["idgrupo"]);
-		$cadenaXML.='</GRUPOSSERVIDORESDHCP>';
-		$rs->Siguiente();
-	}
-	$rs->Cerrar();
-	$cmd->texto="SELECT idservidordhcp,nombreservidordhcp FROM servidoresdhcp WHERE grupoid=".$grupoid." AND idcentro=".$idcentro." order by idservidordhcp desc" ;
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
-	$rs->Primero(); 
-	while (!$rs->EOF){
-		$cadenaXML.='<SERVIDORDHCP';
-		// Atributos			
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_SERVIDORESDHCP."'" .')"';
-		$cadenaXML.=' imagenodo="../images/iconos/servidordhcp.gif" ';
-		$cadenaXML.=' infonodo="'.$rs->campos["nombreservidordhcp"].'"';
-		$cadenaXML.=' nodoid='.$LITAMBITO_SERVIDORESDHCP.'-'.$rs->campos["idservidordhcp"];
-		$cadenaXML.='>';
-		$cadenaXML.='</SERVIDORDHCP>';
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
@@ -371,169 +315,5 @@ function CreacontextualXMLServidorRembo(){
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
-//________________________________________________________________________________________________________
-function CreacontextualXMLServidoresDhcp(){
-	global $AMBITO_SERVIDORESDHCP;
-	global $AMBITO_GRUPOSSERVIDORESDHCP;
-	global $LITAMBITO_GRUPOSSERVIDORESDHCP;
-	global $LITAMBITO_SERVIDORESDHCP;
-	global $TbMsg;
 
-	$layerXML='<MENUCONTEXTUAL';
-	$layerXML.=' idctx="flo_Raiz'.$LITAMBITO_SERVIDORESDHCP.'"';
-	$layerXML.=' maxanchu=190';
-	$layerXML.=' swimg=1';
-	$layerXML.=' clase="menu_contextual"';
-	$layerXML.='>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar_grupos('.$AMBITO_GRUPOSSERVIDORESDHCP.',' . "'".$LITAMBITO_GRUPOSSERVIDORESDHCP."'" . ')"';
-	$layerXML.=' imgitem="../images/iconos/carpeta.gif"';
-	$layerXML.=' textoitem='.$TbMsg[9];
-	$layerXML.='></ITEM>';
-
-	$wLeft=140;
-	$wTop=115; 
-	$wWidth=550;
-	$wHeight=280;
-	$wpages="../propiedades/propiedades_servidoresdhcp.php";
-	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar('.$wParam.')"';
-	$layerXML.=' imgitem="../images/iconos/aula.gif"';
-	$layerXML.=' textoitem='.$TbMsg[10];
-	$layerXML.='></ITEM>';
-	
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$wParam="../gestores/gestor_servidoresdhcp.php";
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="colocar('."'".$wParam."'".','.$AMBITO_SERVIDORESDHCP.')"';
-
-	$layerXML.=' imgitem="../images/iconos/colocar.gif"';
-	$layerXML.=' textoitem='.$TbMsg[2];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='</MENUCONTEXTUAL>';
-	return($layerXML);
-}
-//________________________________________________________________________________________________________
-function CreacontextualXMLGruposServidoresDhcp(){
-	global $AMBITO_SERVIDORESDHCP;
-	global $AMBITO_GRUPOSSERVIDORESDHCP;
-	global $LITAMBITO_GRUPOSSERVIDORESDHCP;
-	global $TbMsg;
-
-	$layerXML='<MENUCONTEXTUAL';
-	$layerXML.=' idctx="flo_'.$LITAMBITO_GRUPOSSERVIDORESDHCP.'"';
-	$layerXML.=' maxanchu=180';
-	$layerXML.=' swimg=1';
-	$layerXML.=' clase="menu_contextual"';
-	$layerXML.='>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar_grupos('.$AMBITO_GRUPOSSERVIDORESDHCP.',' ."'".$LITAMBITO_GRUPOSSERVIDORESDHCP."'". ')"';
-	$layerXML.=' imgitem="../images/iconos/carpeta.gif"';
-	$layerXML.=' textoitem='.$TbMsg[9];
-	$layerXML.='></ITEM>';
-	
-	$wLeft=140;
-	$wTop=115;
-	$wWidth=550;
-	$wHeight=280;
-	$wpages="../propiedades/propiedades_servidoresdhcp.php";
-	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="insertar('.$wParam.')"';
-	$layerXML.=' imgitem="../images/iconos/aula.gif"';
-	$layerXML.=' textoitem='.$TbMsg[10];
-	$layerXML.='></ITEM>';
-	
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$wParam="../gestores/gestor_servidoresdhcp.php";
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="colocar('."'".$wParam."'".','.$AMBITO_SERVIDORESDHCP.')"';
-	$layerXML.=' imgitem="../images/iconos/colocar.gif"';
-	$layerXML.=' textoitem='.$TbMsg[2];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="modificar_grupos()"';
-	$layerXML.=' imgitem="../images/iconos/modificar.gif"';
-	$layerXML.=' textoitem='.$TbMsg[7];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="eliminar_grupos()"';
-	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
-	$layerXML.=' textoitem='.$TbMsg[4];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='</MENUCONTEXTUAL>';
-	return($layerXML);
-}
-//________________________________________________________________________________________________________
-function CreacontextualXMLServidorDhcp(){
-	global $AMBITO_SERVIDORESDHCP;
-	global $LITAMBITO_SERVIDORESDHCP;
-	global $TbMsg;
-
-	$layerXML='<MENUCONTEXTUAL';
-	$layerXML.=' idctx="flo_'.$LITAMBITO_SERVIDORESDHCP.'"';
-	$layerXML.=' maxanchu=160';
-	$layerXML.=' swimg=1';
-	$layerXML.=' clase="menu_contextual"';
-	$layerXML.='>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="muestra_inforServidordhcp()"';
-	$layerXML.=' textoitem='.$TbMsg[5];
-	$layerXML.=' imgitem="../images/iconos/informacion.gif"';
-	$layerXML.='></ITEM>';
-
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="mover('.$AMBITO_SERVIDORESDHCP.')"';
-	$layerXML.=' imgitem="../images/iconos/mover.gif"';
-	$layerXML.=' textoitem='.$TbMsg[6];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$wLeft=140;
-	$wTop=115;
-	$wWidth=550;
-	$wHeight=280;
-	$wpages="../propiedades/propiedades_servidoresdhcp.php";
-	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
-
-	$layerXML.=' textoitem='.$TbMsg[7];
-	$layerXML.=' imgitem="../images/iconos/propiedades.gif"';
-	$layerXML.='></ITEM>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="eliminar('.$wParam.')"';
-	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
-	$layerXML.=' textoitem='.$TbMsg[11];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='</MENUCONTEXTUAL>';
-	return($layerXML);
-}
 ?>

@@ -11,8 +11,8 @@
  //======================================================================================================== 
  // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global)  
  $cnx="localhost;usuog;passusuog;ogBDAdmin;mysql"; // Cadena de conexión a la base de datos 
- $wer="OPENGNSYSURL/pagerror.php"; // Página de redireccionamiento de errores 
- $wac="OPENGNSYSURL/acceso.php"; // Página de login de la aplicación 
+ $wer="http://10.1.15.250/opengnsys/pagerror.php"; // Página de redireccionamiento de errores 
+ $wac="http://10.1.15.250/opengnsys/acceso.php"; // Página de login de la aplicación 
  $idi="esp"; // Idioma por defecto 
  //======================================================================================================== 
 ?>
