@@ -701,8 +701,8 @@ BOOLEAN EliminaFichero(TramaRepos *trmInfo)
 	char pathfile[250];
 	
 	char *nomfile=toma_parametro("nfl",trmInfo->trama.parametros); // Toma nombre funcin
-	sprintf(pathfile,"%s%s",PathHidra,nomfile);
-	sprintf(cmdshell,"rm -f %s",pathfile);
+	//sprintf(pathfile,"%s%s",PathHidra,nomfile);
+	sprintf(cmdshell,"rm -f %s",nomfile);
 	res=system(cmdshell);
 	if(res==0)
 		strcpy(swf,"1");

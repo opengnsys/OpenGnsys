@@ -695,7 +695,9 @@ int InclusionCliente(SOCKET s, char *parametros) {
 		return (false);
 	}
 	if (tbl.ISEOF()) { // Si No existe registro
-		RegistraLog("Cliente No encontrado, se rechaza la petición", false);
+		sprintf(msglog,"Cliente No encontrado (Dirección IP=%s), se rechaza la petición a menos que esté activado la autoincorporación de clientes",iph);
+		RegistraLog(msglog,false);
+
 		if (aulaup == AUTOINCORPORACION_OFF) // No está activada la incorporación automática
 			return (false);
 		if (!cuestion_nuevoordenador(db, tbl, &idordenador, nau, nor, iph, mac,
@@ -2088,7 +2090,7 @@ int EcoConsola(SOCKET s, char *parametros) {
 		close(s); //NO se ha podido recuperar el repositorio del ordenador
 		return (false);
 	}
-	sprintf(nomfilesrc, "%s/eco-%s", pfe, iph); // Nombre del fichero destino
+	sprintf(nomfilesrc, "%s/eco-%s", pfe, iph); // Nombre del fichero origen
 	sprintf(nomfiledst, "/tmp/eco-%s", iph); // Nombre del fichero destino
 	if (!recibeFichero(ipr, rep, nomfilesrc, nomfiledst)) {
 		return (enviaEcoConsola(s, "Sin eco o error de sintaxis")); // NO se ha podido recuperar el fichero de eco
@@ -2117,7 +2119,7 @@ int EcoConsola(SOCKET s, char *parametros) {
 		buffer = escaparComillas(buffer);
 		return (enviaEcoConsola(s, buffer));
 	}
-	return (enviaEcoConsola(s, "Sin eco o error de sintaxis"));
+	return (enviaEcoConsola(s, " "));// Envia espacio en blanco
 	return (true);
 }
 // ________________________________________________________________________________________________________
@@ -2219,10 +2221,8 @@ int Actualizar(char *parametros) {
 		return (false);
 	int i, estado_cliente, lon;
 	char *iph;
-	//char *rmb;
 
 	iph = toma_parametro("iph", parametros); // Toma ip
-	//rmb = toma_parametro("rmb", parametros); // Toma ipe del servidor rembo
 	for (i = 0; i < MAXIMOS_SOCKETS; i++) {
 		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
 			if (IgualIP(iph, tbsockets[i].ip)) { // Si existe la IP en la cadena
@@ -2230,27 +2230,14 @@ int Actualizar(char *parametros) {
 				if (estado_cliente != 0) { // Cliente NO OCUPADO ...
 					estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_INICIANDO);
 					if (estado_cliente != 0) { // Cliente NO INICIANDO ...
-						//estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_REMBO);
-						//if (estado_cliente != 0) { // Cliente windows o linux ...
 						lon	= sprintf(trama->parametros,"nfn=Actualizar\r");
 						manda_comando(tbsockets[i].sock,(char*) trama->parametros);
-						//}
 						borra_entrada(i);
 					}
 				}
 			}
 		}
 	}
-	/*
-	int j;
-	for (j = 0; j < MAXIMOS_SRVRMB; j++) {
-		if (strcmp(rmb, tbsocketsSRVRMB[j].ip) == 0) { // Si existe la IP ...
-			FINCADaINTRO(parametros, iph);
-			return (manda_trama_servidorrembo(rmb, parametros,
-					tbsocketsSRVRMB[j].puertorepo));
-		}
-	}
-	*/
 	return (true);
 }
 // ________________________________________________________________________________________________________
@@ -2266,40 +2253,32 @@ int ConsolaRemota(char *parametros) {
 	if (!trama)
 		return (false);
 	int i, estado_cliente, lon;
-	char *iph, *rmb;
+	char *iph,*cmd,*pfe;
 
-	iph = toma_parametro("iph", parametros); // Toma ip
-	rmb = toma_parametro("rmb", parametros); // Toma ipe del servidor rembo
+	iph = copia_parametro("iph", parametros); // Toma ip
+	cmd = copia_parametro("cmd", parametros); // Toma ip
+
+	char ipr[16],nomfilesrc[512],rep[16];
+	if (!tomaIpRepoPort(iph, ipr, rep)) {
+		return (false);
+	}
+	pfe = toma_parametro("pfe", parametros); // Toma path al archivo de eco
+	sprintf(nomfilesrc, "%s/eco-%s", pfe, iph); // Nombre del fichero destino
+	EliminaFicheroRemoto(ipr, rep, nomfilesrc);
+
 	for (i = 0; i < MAXIMOS_SOCKETS; i++) {
 		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
 			if (IgualIP(iph, tbsockets[i].ip)) { // Si existe la IP en la cadena
-				estado_cliente = strcmp(tbsockets[i].estado, CLIENTE_OCUPADO);
-				if (estado_cliente != 0) { // Cliente NO OCUPADO ...
-					estado_cliente = strcmp(tbsockets[i].estado,
-							CLIENTE_INICIANDO);
-					if (estado_cliente != 0) { // Cliente NO INICIANDO ...
-						estado_cliente = strcmp(tbsockets[i].estado,
-								CLIENTE_REMBO);
-						if (estado_cliente != 0) { // Cliente windows o linux ...
-							lon = sprintf(trama->parametros,
-									"nfn=ConsolaRemota\r");
-							manda_comando(tbsockets[i].sock,
-									(char*) trama->parametros);
-						}
-					}
+				estado_cliente = strcmp(tbsockets[i].estado,CLIENTE_REMBO);
+				if (estado_cliente== 0) { // Cliente Opengnsys
+					lon = sprintf(trama->parametros,"nfn=ConsolaRemota\r");
+					lon += sprintf(trama->parametros + lon, "cmd=%s\r", cmd);
+					manda_comando(tbsockets[i].sock,(char*) trama->parametros);
 				}
 			}
 		}
 	}
-	int j;
-	for (j = 0; j < MAXIMOS_SRVRMB; j++) {
-		if (strcmp(rmb, tbsocketsSRVRMB[j].ip) == 0) { // Si existe la IP ...
-			FINCADaINTRO(parametros, iph);
-			return (manda_trama_servidorrembo(rmb, parametros,
-					tbsocketsSRVRMB[j].puertorepo));
-		}
-	}
-	return (false);
+	return (true);
 }
 // ________________________________________________________________________________________________________
 // Función: FicheroOperador
@@ -3307,6 +3286,39 @@ int RESPUESTA_TomaHardware(SOCKET s, char *parametros) {
 	return (true);
 }
 //______________________________________________________________________________________________________
+// Función: RemoveFile
+//
+//	Descripción:
+//		Elimina un fichero del repositorio
+//	Parámetros:
+//		- nomfile : Nombre del fichero
+//	Devuelve:
+//		true si el archivo se ha eliminado correctamente o false en caso contrario
+// ________________________________________________________________________________________________________
+int EliminaFicheroRemoto(char *ipr, char *rep, char *nomfilesrc)
+{
+	SOCKET udpsock;
+	int ret;
+	struct sockaddr_in addrRepo;
+	socklen_t iAddrSize = sizeof(addrRepo);
+	TRAMA trama;
+
+	udpsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (udpsock == SOCKET_ERROR) {
+		RegistraLog("*** No se ha podido crear socket para comunicación con el repositorio en módulo EliminaFicheroRemoto",true);
+		return (false);
+	}
+	sprintf(trama.parametros, "nfn=EliminaFichero\rnfl=%s\r", nomfilesrc); // Nombre de la función a ejecutar en el  servidor de administración
+	if (envia_comandos(udpsock, &trama, ipr, atoi(rep))) {
+		ret = recvfrom(udpsock, (char *) &trama, LONGITUD_TRAMA, 0,	(struct sockaddr *) &addrRepo, &iAddrSize);
+	}
+	else {
+		RegistraLog("*** Error de envío de trama al repositorio en módulo EliminaFicheroRemoto",false);
+	}
+	close(udpsock);
+	return (true);
+}
+//______________________________________________________________________________________________________
 // Función: recibeFichero
 //
 //	Descripción:
@@ -3360,7 +3372,8 @@ int recibeFichero(char *ipr, char *rep, char *nomfilesrc, char *nomfiledst) {
 					close(udpsock);
 					return (true);
 				}
-			} else {
+			}
+			else {
 				RegistraLog(" Error de recepción de archivo", false);
 				break;
 			}

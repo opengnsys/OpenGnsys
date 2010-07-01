@@ -111,6 +111,7 @@ int FicheroOperador(char *);
 int IconoItem(TRAMA*);
 int Conmutar(char *);
 int ConsolaRemota(char *);
+int EliminaFicheroRemoto(char*,char*,char*);
 int RenovarItems(char *);
 
 void PurgarTablaSockets(char *);
