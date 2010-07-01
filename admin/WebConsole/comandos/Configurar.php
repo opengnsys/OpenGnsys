@@ -253,122 +253,139 @@ function tabla_particiones($cmd,$idcentro,$idambito,$idconfiguracion,$cuenta){
 		$configuracion=$rs->campos["configuracion"];
 	$rs->Cerrar();
 	$auxsplit=split("\t",$configuracion);
-	$tablaHtml.= '<TABLE align=center  id=tabla_contenidoparticion_'.$idc.'  value=0><TR><TD>';
-	$tablaHtml.= '<TABLE id=tb_particiones_'.$idc.' class=tabla_listados_sin  align=center value=0 cellPadding=1 cellSpacing=1 >';
-	$tablaHtml.= '<TR>';
-	$tablaHtml.= '<TH align=center ><IMG src="../images/iconos/eliminar.gif"></TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp</TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>';
-	$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>';
-	$tablaHtml.= '</TR>';
-	$ultpa=0;
-	for($j=0;$j<sizeof($auxsplit)-1;$j++){
-		$ValorParametros=extrae_parametros($auxsplit[$j],chr(10),'=');
-		$particion=$ValorParametros["numpart"]; // Toma la partici�
-		$p=$particion;
-		$tipopart=$ValorParametros["tipopart"]; // Toma tama� la partici�
-if($tipopart=="CACHE" || $tipopart=="EMPTY") continue;
-		$tamapart=$ValorParametros["tamapart"]; // Toma tama� la partici�
-		$nombreso=$ValorParametros["nombreso"]; // Toma nombre del sistema operativo
-		$tiposo=$ValorParametros["tiposo"];
-		$valocul=0;
-		$codpar=0;
-		switch($tipopart){
-					case "EMPTY": 
-						$codpar=0;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red"> Espacio sin particionar !!</span>';
-						break;
-					case "EXT": 
-						$codpar=0;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red"> Partici� extendida !!</span>';
-						break;
-					case "BIGDOS": 
-						$codpar=1;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Msdos</span>';
-						break;
-					case "FAT32":
-						$codpar=2;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Windows 98, Millenium</span>';
-						break;
-					case "HFAT32":
-						$codpar=2;
-						$valocul=2;
-						if(empty($tiposo))
+	$tablaHtml.= '<TABLE align=center  id=tabla_contenidoparticion_'.$idc.'  value=0>';
+	$tablaHtml.='<TR>';
+	$tablaHtml.='	<TD>';
+		$tablaHtml.= '<TABLE id=tb_particiones_'.$idc.' class=tabla_listados_sin  align=center value=0 cellPadding=1 cellSpacing=1 >';
+		$tablaHtml.= '<TR>';
+		$tablaHtml.= '<TH align=center ><IMG src="../images/iconos/eliminar.gif"></TH>';
+		$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
+		$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp</TH>';
+		$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
+		$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>';
+		$tablaHtml.= '<TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>';
+		$tablaHtml.= '</TR>';
+		$ultpa=0;
+		for($j=0;$j<8;$j++){
+			$ValorParametros=extrae_parametros($auxsplit[$j],chr(10),'=');
+			$particion=$ValorParametros["numpart"]; // Toma la partición
+			if(!empty($particion)){
+				$p=$particion;
+				$tipopart=$ValorParametros["tipopart"]; // Toma tipo la partición
+				if($tipopart=="CACHE" || $tipopart=="EMPTY") continue;
+				$tamapart=$ValorParametros["tamapart"]; // Toma tamaño la partición
+				$nombreso=$ValorParametros["nombreso"]; // Toma nombre del sistema operativo
+				$tiposo=$ValorParametros["tiposo"];
+				$ultpa=$p; // Valor de la ultima particion de esa configuración
+			}
+			else{
+				$p=$j+1;
+				$tipopart="EMPTY"; // Toma tipo la partición
+				$tamapart=0; // Toma tamaño la partición
+				$nombreso=""; // Toma nombre del sistema operativo
+				$tiposo="";
+			}
+			$valocul=0;
+			$codpar=0;
+			switch($tipopart){
+						case "EMPTY": 
+							$codpar=0;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red"> Espacio sin particionar !!</span>';
+							break;
+						case "EXT": 
+							$codpar=0;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red"> partición extendida !!</span>';
+							break;
+						case "BIGDOS": 
+							$codpar=1;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Msdos</span>';
+							break;
+						case "FAT32":
+							$codpar=2;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Windows 98, Millenium</span>';
+							break;
+						case "HFAT32":
+							$codpar=2;
+							$valocul=2;
+							if(empty($tiposo))
 								$nombreso='<span style="COLOR:red">Windows 98, Millenium<span style="COLOR:green;font-weight:600">&nbsp;('.$TbMsg[7].')</span></span>';
-						else
-								$nombreso.='<span style="COLOR:green;font-weight:600">&nbsp;(Partici� oculta)</span>';
-						break;
-					case "NTFS":
-						$codpar=3;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003</span>';
-						break;
-					case "HNTFS":
-						$codpar=3;
-						$valocul=2;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003<span style="COLOR:green;font-weight:600">&nbsp;('.$TbMsg[7].')</span></span>';
-						else
-							$nombreso.='<span style="COLOR:green;font-weight:600">&nbsp;('.$TbMsg[7].')</span>';
-						break;
-					case "EXT2":
-						$codpar=4;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Linux</span>';
-						break;
-					case "EXT3":
-						$codpar=5;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Linux</span>';
-						break;
-					case "EXT4":
-						$codpar=6;
-						if(empty($tiposo))
-							$nombreso='<span style="COLOR:red">Linux</span>';
-						break;
-					case "LINUX-SWAP": 
-						$codpar=7;
-						$nombreso='<span style="COLOR:blue">Linux-swap</span>';
-						break;
-					case "CACHE": 
-						$codpar=8;
-						$nombreso='<span style="COLOR:blue">CACHE</span>';
-						break;
-		}
-		$ultpa=$p; // Valor de la ultima particion de esa configuraci�
-		$tablaHtml.='<TR id=TRparticion_'.$p."_".$idc.'>'.chr(13);
-		$tablaHtml.='<TD><input type=checkbox onclick="elimina_particion(this,'.$idc.')" id=eliminarparticion_'.$p."_".$idc.' value=0></TD>'.chr(13);
-		$opciones="";
-		for($i=1;$i<8;$i++){
-			 $opciones.=$i."=".$i.chr(13);
-		}
-		$opciones.="8=8";
-		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"numpar_".$p."_".$idc,"estilodesple","",$p,35,"chgpar").'</TD>'.chr(13);
-		$opciones="1=BIGDOS".chr(13);
-		$opciones.="2=FAT32".chr(13);
-		$opciones.="3=NTFS".chr(13);
-		$opciones.="4=EXT2".chr(13);
-		$opciones.="5=EXT3".chr(13);
-		$opciones.="6=EXT4".chr(13);
-		$opciones.="7=LINUX-SWAP";
+							else
+								$nombreso.='<span style="COLOR:green;font-weight:600">&nbsp;(partición oculta)</span>';
+							break;
+						case "NTFS":
+							$codpar=3;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003</span>';
+							break;
+						case "HNTFS":
+							$codpar=3;
+							$valocul=2;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Windows XP, Windows 2000, Windows 2003<span style="COLOR:green;font-weight:600">&nbsp;('.$TbMsg[7].')</span></span>';
+							else
+								$nombreso.='<span style="COLOR:green;font-weight:600">&nbsp;('.$TbMsg[7].')</span>';
+							break;
+						case "EXT2":
+							$codpar=4;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Linux</span>';
+							break;
+						case "EXT3":
+							$codpar=5;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Linux</span>';
+							break;
+						case "EXT4":
+							$codpar=6;
+							if(empty($tiposo))
+								$nombreso='<span style="COLOR:red">Linux</span>';
+							break;
+						case "LINUX-SWAP": 
+							$codpar=7;
+							$nombreso='<span style="COLOR:blue">Linux-swap</span>';
+							break;
+						case "CACHE": 
+							$codpar=8;
+							$nombreso='<span style="COLOR:blue">CACHE</span>';
+							break;
+			}
 
-		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"tipospar_".$p."_".$idc,"estilodesple","EMPTY",$codpar,100,"chgtipopar").'</TD>'.chr(13);
-		$tablaHtml.='<TD><span id=tiposo_'.$p."_".$idc.' value=0>&nbsp;'.$nombreso.'&nbsp;</span></TD>'.chr(13);
-		$tablaHtml.='<TD align=center><input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value='.$tamapart.' ></TD>'.chr(13);
-		$opciones="1=".$TbMsg[14]."".chr(13);
-		$opciones.="2=".$TbMsg[15]."".chr(13);
-		$opciones.="3=".$TbMsg[16]."";
-		$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],$valocul,100,"chgaccion").'</TD>'.chr(13);
-		$tablaHtml.='</TR>'.chr(13);
-	}
-	$tablaHtml.='</TABLE>';
-	$tablaHtml.= '</TD></TR></TABLE>';
+			$tablaHtml.='<TR id="TRparticion_'.$p."_".$idc.'"';
+			if($tipopart=="EMPTY")
+				$tablaHtml.=' style="visibility:hidden"';
+			$tablaHtml.='>';
+			$tablaHtml.='<TD><input type=checkbox onclick="elimina_particion(this,'.$idc.')" id=eliminarparticion_'.$p."_".$idc.' value=0></TD>'.chr(13);
+			$opciones="";
+			for($i=1;$i<8;$i++){
+				 $opciones.=$i."=".$i.chr(13);
+			}
+			$opciones.="8=8";
+			$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"numpar_".$p."_".$idc,"estilodesple","",$p,35,"chgpar").'</TD>'.chr(13);
+			$opciones="1=BIGDOS".chr(13);
+			$opciones.="2=FAT32".chr(13);
+			$opciones.="3=NTFS".chr(13);
+			$opciones.="4=EXT2".chr(13);
+			$opciones.="5=EXT3".chr(13);
+			$opciones.="6=EXT4".chr(13);
+			$opciones.="7=LINUX-SWAP";
+
+			$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"tipospar_".$p."_".$idc,"estilodesple","EMPTY",$codpar,100,"chgtipopar").'</TD>'.chr(13);
+			$tablaHtml.='<TD><span id=tiposo_'.$p."_".$idc.' value=0>&nbsp;'.$nombreso.'&nbsp;</span></TD>'.chr(13);
+			$tablaHtml.='<TD align=center><input type=text onchange="chgtama('.$idc.')" id="tamano_'.$p."_".$idc.'" style="width=70" value='.$tamapart.' ></TD>'.chr(13);
+			$opciones="1=".$TbMsg[14]."".chr(13);
+			$opciones.="2=".$TbMsg[15]."".chr(13);
+			$opciones.="3=".$TbMsg[16]."";
+			$tablaHtml.='<TD>'.HTMLCTESELECT($opciones,"acciones_".$p."_".$idc,"estilodesple",$TbMsg[13],$valocul,100,"chgaccion").'</TD>'.chr(13);
+			$tablaHtml.='</TR>'.chr(13);
+		}
+		$tablaHtml.='</TABLE>';
+	$tablaHtml.= '</TD>';
+	$tablaHtml.= '</TR>';
+	$tablaHtml.= '</TABLE>';
 
   // Boton de insercion
 	$tablaHtml.= '<INPUT type=hidden id="ultpa_'.$idc.'" value='.$ultpa.'>';

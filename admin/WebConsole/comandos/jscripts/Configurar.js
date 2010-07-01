@@ -43,6 +43,7 @@ var currentimgconfiguracion=null;
 				var tbparticiones=new Array(9);
 				for(var i=0;i<9;i++) tbparticiones[i]=null // Inicializa matriz
 				for(var i=1;i<oTRs.length;i++){ // recorre TR's de las particiones
+					if(oTRs[i].style.visibility=="hidden") continue
 					var oTDs=oTRs[i].getElementsByTagName('TD') // Numero de particiones 
 					var desplepar=oTDs[1].childNodes[0] // recupera el desplegable de particiones
 					var despletipopar=oTDs[2].childNodes[0] // recupera el desplegable de tipo de accion
@@ -94,6 +95,7 @@ var currentimgconfiguracion=null;
 			otbp[i]=null
 		}
 		for(var i=1;i<oTRs.length;i++){ // recorre TR's de las particiones
+			if(oTRs[i].style.visibility=="hidden") continue
 			var oTDs=oTRs[i].getElementsByTagName('TD')
 			var desplepar=oTDs[1].childNodes[0]
 			var p=desplepar.selectedIndex
@@ -285,22 +287,39 @@ function chgaccion(o){
 }
 //________________________________________________________________________________________________________
 function annadir_particion(idc){
+
+	oINPUT=document.getElementById("ultpa_"+idc) 
+	var wultpa=parseInt(oINPUT.value); // Toma el valor de la última partición existente
+	wultpa++; // Incrementa en uno este valor para posteriores inserciones
+	oINPUT.value=wultpa; // Actualiza este valor en el campo oculto
+	var ultpa=oINPUT.value; // Crear variable javascript de trabajo con este valor
+	var oTR=document.getElementById("TRparticion_"+ultpa+"_"+idc) 
+	if(oTR){
+		oTR.style.visibility="visible";
+	}
+	return;
+
+
+	// Antiguo código
 	var oTABLE=document.getElementById("tb_particiones_"+idc) 
 	var oTRs=oTABLE.getElementsByTagName('TR') // Numero de particiones
-	if(parseInt(oTRs.length)>7){
+	if(parseInt(oTRs.length)>7){ // E número de particiones no puede ser mayor de 7
 		alert(TbMsg[8]);
 		return;
 	}
+
 	oTABLE=document.getElementById("tabla_contenidoparticion_"+idc) 
 	var oTDs=oTABLE.getElementsByTagName('TD') // LLega hasta TD ( punto de pivote )
 	textHtml=oTDs[0].innerHTML     //  Toma la tabla para añadir al final
+
+	// Toma código html de la tabla modelo
 	oTABLE=document.getElementById("patron_contenidoparticion") 
-	var wpatrontablaparticion=oTABLE.innerHTML     //  Toma la linea patron que se incluye
+	var wpatrontablaparticion=oTABLE.innerHTML
 	oINPUT=document.getElementById("ultpa_"+idc) 
-	var wultpa=parseInt(oINPUT.value);
-	wultpa++;
-	oINPUT.value=wultpa;
-	ultpa=oINPUT.value;
+	var wultpa=parseInt(oINPUT.value); // Toma el valor de la última partición existente
+	wultpa++; // Incrementa en uno este valor para posteriores inserciones
+	oINPUT.value=wultpa; // Actualiza este valor en el campo oculto
+	var ultpa=oINPUT.value; // Crear variable javascript de trabajo con este valor
 
 	var re = new RegExp ('_upa_', 'gi') ; // Reemplaza partición y configuración
 	var rs =ultpa
@@ -315,8 +334,9 @@ function annadir_particion(idc){
 	 }
 	var nwrama=textHtml.substr(0,posa+5) // Primer trozo
 	nwrama+=patrontablaparticion
+	alert(patrontablaparticion);
 	nwrama+=textHtml.substr(posa,textHtml.length-posa) // Segundo trozo
-	oTDs[0].innerHTML=nwrama;
+	oTDs[0].innerHTML=nwrama; // Actualiza todo el nuevo código de la tabla
 	var oDESPLE=document.getElementById("numpar_"+ultpa+"_"+idc)  // Selecciona item creado
 	var ise=wultpa-1
 	if (ise>3 && ise<7) ise-=1
