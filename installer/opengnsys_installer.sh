@@ -814,10 +814,8 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
                         client/boot/udeblist-lucid.conf \
-                        client/nfsexport/bin/udp-sender \
-                        client/nfsexport/bin/udp-receiver \
-                        client/nfsexport/scripts/sendFileMcast \
                         server/PXE/pxelinux.cfg/default \
+                        repoman/bin \
                         doc )
 	local TARGETS=( bin/initrd-generator \
                         bin/upgrade-clients-udeb.sh \
@@ -825,10 +823,8 @@ function openGnsysCopyServerFiles () {
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
                         etc/udeblist-lucid.conf \
-                        bin/udp-sender \
-                        bin/udp-receiver \
-                        bin/sendFileMcast \
                         tftpboot/pxelinux.cfg/default \
+                        bin \
                         doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then

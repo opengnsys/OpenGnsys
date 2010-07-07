@@ -1,0 +1,32 @@
+#!/bin/bash
+#@brief   Envía un fichero por multicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param   path_file      Camino completo del fichero a enviar
+#@param   str_session    Datos de sesión (Puerto:Duplex:IP:Mpbs:Nclientes:Timeout)
+
+
+PROG=$(basename $0)
+ 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    echo "Formato: $PROG fichero datosMulticast"
+    echo "Ejemplo: $PROG /opt/opengnsys/images/PS1_PH1.img 9000:full-duplex:239.194.17.2:70M:20:300"
+    exit 0
+fi
+# Error si no se reciben 2 parámetros.
+if [ $# -ne 2 ]; then
+    echo "Error: Formato: $PROG fichero datosMulticast" >&2
+    exit 1
+fi
+
+# Parámetros de sesión separado por ":".
+OIFS=$IFS; IFS=':'
+read -e PORTBASE METHOD ADDRESS BITRATE NCLIENTS MAXTIME <<<"$2"
+IFS=$OIFS
+
+# FIXME  Comprobación consistencia de parámetros.
+
+# Envío de fichero por Multicast.
+which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
+udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$1"
+
+
