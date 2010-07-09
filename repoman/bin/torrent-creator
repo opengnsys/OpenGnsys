@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#Version 0.3   Ejecución desde cron cada minuto, 
+# Trabaja sólo con la primera imagen que tenga asociado un fichero .doTorrent
+##  echo "  * * * * * 	 root	/opt/opengnsys/bin/torrent-creator" > /etc/cron.d/torrent-creator.cron
+
+
+# Variables.
+PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+PATH=$PATH:$OPENGNSYS/bin
+OGIMG="$OPENGNSYS/images"
+source $OPENGNSYS/etc/ogAdmRepo.cfg
+TRACKERURL="http://$IPlocal:6969/announce"
+LOGFILE="$OPENGNSYS/log/$PROG.log"
+
+if [ "$(pgrep "$PROG")" != "$$" ]; then
+	echo "`date` : Proceso ya en ejecución" >> $LOGFILE
+	exit
+fi
+
+# Directorio de imágenes.
+pushd $OGIMG >/dev/null
+
+# Procesar ficheros de imágenes.
+trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
+for IMG in *.img; do
+	# Saltar al siguiente si no existe el fichero.
+	[ -f "$IMG" ] || continue
+	# Comprobar si ya existe el fichero Torrent para esa imagen.
+	TORRENT="$IMG.torrent"
+	if [ -f "$TORRENT"  ]; then
+		FILESIZE="$(ls -l $IMG | awk '{print $5}')"
+		read -e TORRFILE TORRSIZE <<<"$(ctorrent -x $TORRENT | awk '$1~/<1>/ {print $2,$3}')"
+		[ "$(basename $IMG)" = "$TORRFILE" -a "[$FILESIZE]" = "$TORRSIZE" ] && continue
+	fi
+	# Crear fichero Torrent.
+	echo "`date` : Inicio creación de fichero $TORRENT" >> $LOGFILE
+	rm -f "$TORRENT"
+	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT"
+	if [ -f "$TORRENT"  ]; then
+		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE
+	else
+		echo "`date` : ERROR en creación de fichero $TORRENT" >> $LOGFILE
+	fi
+done
+	
+popd >/dev/null
+

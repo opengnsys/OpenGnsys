@@ -18,7 +18,7 @@ fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
-DEPS="rsync gcc"
+DEPS="rsync gcc ctorrent"
 if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
