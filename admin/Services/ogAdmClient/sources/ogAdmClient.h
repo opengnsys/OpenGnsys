@@ -155,9 +155,10 @@ char* tbPathImg[]={"CLIEN","CACHE","REPO"};
 char* tbmodmul[]={"","half-duplex","full-duplex"};
 
 struct tiposo tiposos[] = {
-		{"BIGDOS", "MsDos","MsDos"},
 		{"NTFS","Windows NT Platafom","Windows 2000,XP,2003"},
 		{"HNTFS","Windows NT Platafom","Windows 2000,XP,2003"},
+		{"FAT16","Windows","Windos 98,SE,Millenium"},			
+		{"HFAT16","Windows","Windos 98,SE,Millenium"},			
 		{"FAT32","Windows","Windos 98,SE,Millenium"},			
 		{"HFAT32","Windows","Windos 98,SE,Millenium"},			
 		{"EXT","Extendida","Extendida"},
@@ -167,8 +168,6 @@ struct tiposo tiposos[] = {
 		{"REISERFS","Linux","Linux"},	
 		{"JFS","Linux","Linux"},	
 		{"XFS","Linux","Linux"},	
-		{"VFAT","VFAT","VFAT"},	
-		{"HVFAT","VFAT","VFAT"},	
 		{"CACHE","CACHE","CACHE"},			
 		{"UNKNOWN","UNKNOWN","UNKNOWN"},			
 		{"EMPTY","Libre","Libre"},
