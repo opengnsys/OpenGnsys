@@ -304,6 +304,8 @@ function updateServerFiles () {
 		rsync --exclude .svn -irplt "${SOURCES[$i]}" "${INSTALL_TARGET}/${TARGETS[$i]}"
 	done
 	popd >/dev/null
+	echoAndLog "${FUNCNAME}(): updating cron files"
+	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
 

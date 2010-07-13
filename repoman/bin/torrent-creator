@@ -1,23 +1,23 @@
 #!/bin/bash
-
+# Genera los ficheros .torrent de las imágenes almacenadas en el repositorio.
 #Version 0.3   Ejecución desde cron cada minuto, 
-# Trabaja sólo con la primera imagen que tenga asociado un fichero .doTorrent
-##  echo "  * * * * * 	 root	/opt/opengnsys/bin/torrent-creator" > /etc/cron.d/torrent-creator.cron
+##  echo "* * * * *   root   /opt/opengnsys/bin/torrent-creator" > /etc/cron.d/torrentcreator
 
+
+# Comprobar si el proceso ya está en ejecución.
+PROG=$(basename $0)
+[ "$(pgrep "$PROG")" != "$$" ] && exit
 
 # Variables.
-PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 PATH=$PATH:$OPENGNSYS/bin
 OGIMG="$OPENGNSYS/images"
-source $OPENGNSYS/etc/ogAdmRepo.cfg
-TRACKERURL="http://$IPlocal:6969/announce"
+REPOCFG="$OPENGNSYS/etc/ogAdmRepo.cfg"
 LOGFILE="$OPENGNSYS/log/$PROG.log"
-
-if [ "$(pgrep "$PROG")" != "$$" ]; then
-	echo "`date` : Proceso ya en ejecución" >> $LOGFILE
-	exit
-fi
+# Error si no está bien configurado el repositorio de imágenes.
+[ -d $OGIMG -a -f $REPOCFG ] || exit 1
+source $REPOCFG
+TRACKERURL="http://$IPlocal:6969/announce"
 
 # Directorio de imágenes.
 pushd $OGIMG >/dev/null

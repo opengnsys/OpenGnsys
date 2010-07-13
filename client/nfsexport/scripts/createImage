@@ -54,12 +54,6 @@ if [ $REDSIZE -lt $SIZE ]; then
     ogExtendFs $1 $2
 fi
 
-# Creamos fichero torrent. si REPO tracker=ipREPO, si CACHE tracker=ipLocal
-[ "$3" == "REPO" ] && IPTORRENT=`mount | grep ":/opt/opengnsys/images" | cut -f1 -d:` \
-           || IPTORRENT=`ogGetIpAddress`
-echo "[95] Crear torrent $3 $4 $IPTORRENT"
-ogCreateTorrent "$3" "$4" "$IPTORRENT"
-
 TIME=$[SECONDS-TIME1]
 echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
 exit $EXITCODE

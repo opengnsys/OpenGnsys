@@ -965,11 +965,13 @@ function openGnsysClientCreate()
 # Configuración básica de servicios de OpenGnSys
 function openGnsysConfigure()
 {
-	echoAndLog "openGnsysConfigure(): Copying init files."
+	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
 	update-rc.d opengnsys defaults
-	echoAndLog "openGnsysConfigure(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
+	echoAndLog "${FUNCNAME}(): Creating cron files."
+	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
@@ -977,7 +979,7 @@ function openGnsysConfigure()
 	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
 	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-	echoAndLog "openGnsysConfiguration(): Starting OpenGnSys services."
+	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	/etc/init.d/opengnsys start
 }
 
