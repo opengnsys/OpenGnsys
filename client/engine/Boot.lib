@@ -338,7 +338,7 @@ local PART MNTDIR NAME
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_name" \
            "$FUNCNAME 1 1 PRACTICA-PC"
     return
 fi
@@ -351,11 +351,50 @@ MNTDIR=$(ogMount $1 $2) 2>/dev/null
 NAME="$3"
 
 # Modificar datos de los valores de registro.
-ogSetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$NAME"
-ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$NAME"
-ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NAME"
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\NV Hostname' "$NAME" 2>/dev/null
 }
 
+
+#/**
+#         ogSetWinlogonUser int_ndisk int_npartition str_username
+#@brief   Establece el nombre de usuario por defecto en la entrada de Windows.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_username   nombre de usuario por defecto
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9.2 - Adaptación a OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-20
+#*/ ##
+function ogSetWinlogonUser ()
+{
+# Variables locales.
+local PART MNTDIR NAME
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_username" \
+           "$FUNCNAME 1 1 USUARIO"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Montar el sistema de archivos.
+MNTDIR=$(ogMount $1 $2) 2>/dev/null
+[ -z "$MNTDIR" ] && ogRaiseError OG_ERR_PARTITION "$1, $2" && return $?
+NAME="$3"
+
+# Modificar datos en el registro.
+ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName' "$3"
+}
 
 
 #/**
