@@ -224,11 +224,14 @@ FIN
 #@version 0.9 - Primera adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
+#@version 0.9.2 - Soporta partición /boot independiente.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-20
 #*/ ##
 function ogLinuxBootParameters ()
 {
 # Variables locales.
-local MNTDIR CONF
+local MNTDIR CONFDIR CONFFILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -244,9 +247,11 @@ MNTDIR=$(ogMount $1 $2) 2>/dev/null
 [ -z "$MNTDIR" ] && ogRaiseError OG_ERR_PARTITION "$1, $2" && return $?
 
 # Fichero de configuración de GRUB.
-CONF="$MNTDIR/boot/grub/menu.lst"
-[ ! -e $CONF ] && CONF="$MNTDIR/boot/grub/grub.cfg"
-[ ! -e $CONF ] && ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" && return $?
+CONFDIR=$MNTDIR                               # Partición de arranque /boot.
+[ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Partición raíz con directorio boot.
+CONFFILE="$CONFDIR/grub/menu.lst"
+[ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/grub.cfg"
+[ ! -e $CONFFILE ] && ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" && return $?
 
 # Toma del fichero de configuracion los valores del kernel, initrd
 #       y parámetros de arranque usando las cláusulas por defecto
@@ -263,7 +268,7 @@ awk 'BEGIN {cont=-1;}
                         }
      $1~/^initrd/       {if (def==cont) init=$2}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}
-    ' $CONF
+    ' $CONFFILE
 # */ (comentario Doxygen)
 }
 

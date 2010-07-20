@@ -15,6 +15,7 @@ echo "[0] Inicio del proceso de arranque."
 PART=$(ogDiskToDev "$1" "$2") || exit $?
 NAME=$(ogGetHostname)
 NAME=${NAME:-"pc"}
+OSTYPE=$(ogGetOsType $1 $2)
 
 # Arrancar.
 echo "[10] Desmontar todos los sistemas de archivos."
@@ -24,7 +25,7 @@ for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
 done
 echo "[20] Desmontar cache local."
 ogUnmountCache
-case "$(ogGetOsType $1 $2)" in
+case "$OSTYPE" in
     Windows)
         echo "30 Activar partición de Windows $PART."
         ogSetPartitionActive $1 $2
