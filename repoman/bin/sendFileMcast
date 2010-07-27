@@ -5,17 +5,30 @@
 
 
 PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+OGIMG=$OPENGNSYS/images
+OGBIN=$OPENGNSYS/bin
+PATH=$PATH:$OGBIN
  
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    echo "Formato: $PROG fichero datosMulticast"
+    echo "Formato: $PROG fichero|nombreImagen datosMulticast"
     echo "Ejemplo: $PROG /opt/opengnsys/images/PS1_PH1.img 9000:full-duplex:239.194.17.2:70M:20:300"
+    echo "Ejemplo: $PROG PS1_PH1 9000:full:239.194.17.2:70M:20:300"
     exit 0
 fi
 # Error si no se reciben 2 parámetros.
 if [ $# -ne 2 ]; then
-    echo "Error: Formato: $PROG fichero datosMulticast" >&2
+    echo "$PROG Error: Formato: $PROG fichero datosMulticast" >&2
     exit 1
+fi
+
+# Fichero de imagen (camino completo o nombre de imagen sin extensión).
+FICH="$1"
+[ "${FICH:0:1}" != "/" ] && FICH="$OGIMG/$1.img"
+if [ ! -f $FICH ]; then
+    echo "$PROG Error: Fichero \"$FICH\" no accesible" >&2
+    exit 2
 fi
 
 # Parámetros de sesión separado por ":".
@@ -24,17 +37,20 @@ PARAMS=$(echo $2 | \
 		 tolower($2)~/^(half)(-duplex)?$/ {print "half-duplex"}
 		 tolower($2)~/^(full)(-duplex)?$/ {print "full-duplex"}
 		 $3~/^[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$/ {print $3}
-		 $4~/^[0-9]*[mM]/ {print $4}
+		 $4~/^[0-9]*[mM]/ {print toupper($4)}
 		 $5~/^[0-9]*/ {print $5}
-		 $6~/^[0-9]*/ {print "$6"}
+		 $6~/^[0-9]*/ {print $6}
 		')
 read -e PORTBASE METHOD ADDRESS BITRATE NCLIENTS MAXTIME <<< $PARAMS
+if [ -z "$MAXTIME" ]; then
+    echo "$PROG Error: Datos de sesión incorrectos: \"$2\"" >&2
+    exit 1
+fi
 
 # Valores estandar no configurables.
 CERROR="8x8/128"
 
 # Envío de fichero por Multicast.
 which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
-udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$1"
-
+udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-addr $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$1"
 
