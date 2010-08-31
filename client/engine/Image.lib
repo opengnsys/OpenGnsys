@@ -25,7 +25,12 @@
 #@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
 #@warning En pruebas iniciales
 #@todo    Comprobaciones, control de errores, definir parámetros, etc.
-#@version 0.9 - Versión en pruebas para OpenGNSys
+#@version 0.1 -  Integracion para Opengnsys  -  HIDRA:CrearImagen{EXT3, NTFS}.sh;  EAC: CreateImageFromPartition () en Deploy.lib
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/05/13
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Version en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/10/07
 #*/ ##
@@ -146,7 +151,12 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 #@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
 #@warning En pruebas iniciales
 #@todo    Comprobar incongruencias partición-imagen, control de errores, definir parámetros, caché/repositorio, etc.
-#@version 0.1 - Primera versión muy en pruebas para OpenGNSys
+#@version 0.1 -  Integracion para Opengnsys  -  HIDRA:RestaurarImagen{EXT3, NTFS}.sh;  EAC: RestorePartitionFromImage() en Deploy.lib
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/05/13
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version muy en pruebas para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/10
 #*/ ##

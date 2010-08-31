@@ -81,7 +81,10 @@ return $ERRCODE
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Partición desconocida o no accesible.
 #@note    Requisitos: *resize*
-#@version 0.9 - Primera adaptación para OpenGNSys.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   EnlargeFileSystem() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 0.9 - Primera adaptacion para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/
@@ -149,7 +152,7 @@ esac
 
 
 #/**
-#         ogFoarmatFs int_ndisk int_npartition [type_fstype] [str_label]
+#         ogFormatFs int_ndisk int_npartition [type_fstype] [str_label]
 #@brief   Formatea un sistema de ficheros según el tipo de su partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
@@ -268,7 +271,10 @@ return $ERRCODE
 #@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
-#@version 0.9 - Primera adaptación para OpenGNSys.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 0.9 - Primera adaptacion para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-21
 #*/ ##
@@ -506,7 +512,10 @@ esac
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de particion desconocido o no se puede montar.
-#@version 0.9 - Primera versión para OpenGNSys.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   MountPartition() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 0.9 - Primera version para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
 #*/ ##
@@ -599,7 +608,10 @@ echo $MNTDIR
 #@warning En Windows, se borran los ficheros pagefile.sys e hiberfile.sys
 #@warning El sistema de archivos se amplía al mínimo + 1 KB.
 #@note    Requisitos:	*resize*
-#@version 0.9 - Primera versión para OpenGNSys.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   ReduceFileSystem() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 0.9 - Primera version para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/ ##
@@ -713,7 +725,10 @@ ogUnmountFs "$@"
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@warning La partición no está previamente montada o no se puede desmontar.
-#@version 0.9 - Primera versión para OpenGNSys.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  UmountPartition() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 0.9 - Primera version para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
 #*/ ##
@@ -788,8 +803,6 @@ for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
 done
 }
 
-
-function ogGetFsSize () {
 #/**  @function ogGetFsSize: @brief Muestra el tamanio del sistema de archivos indicado, permite definir la unidad de medida, por defecto GB
 #@param  $1 int_diskEAC
 #@param $2 int_PartitionEAC
@@ -798,8 +811,11 @@ function ogGetFsSize () {
 #@warning  Salidas de errores no determinada
 #@warning
 #@attention
-#@version 1.0	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  SizeFileSystem() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
 #*/
+function ogGetFsSize () {
 if [ $# = 0 ]
 then
 	echo "sintaxis: ogGetFsSize int_disco int_partition str_SizeOutput [ kB MB GB -default GB]-]" red

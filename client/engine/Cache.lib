@@ -102,10 +102,12 @@ rm -f /dev/disk/by-label/CACHE
 #@param   No requiere parametros
 #@return  int_ndisk int_npart - devuelve el par nº de disco-nº de partición .
 #@warning Si no hay cache no devuelve nada
-#@version 0.1 - Versión adaptada del Proyecto EAC.
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@Date    27/10/2008
-#@version 0.91 - Adaptación a la caché local de OpenGnSys.
+#@version 0.1 - Integracion para Opengnsys - EAC: FindCache() en ATA.lib -  HIDRA: DetectarCache.sh
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/06/19
+#@author  Antonio J. Doblas Viso. Universidad de Malaga 
+#@Date    2008/10/27
+#@version 0.91 - Adaptacion a la cache local de OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/16
 #*/ ##
@@ -135,10 +137,10 @@ ogDevToDisk $PART 2>/dev/null
 #@warning Prueba con formato Reiser.
 #@attention
 #@note    El sistema de archivos de la caché se queda montado.
-#@version 0.1 - Versión adaptada del Proyecto EAC.
+#@version 0.1 -  Integracion para Opengnsys  - EAC: FormatCache() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
-#@version 0.91 - Creación caché local.
+#@date   2008/10/27
+#@version 0.91 - Creacion cache local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-03-11
 #*/ ##
@@ -173,7 +175,10 @@ mkdir -p $MNTDIR/$OGIMG
 #@brief   Devuelve el tamaño definido para la partición de caché.
 #@return  int_partsize   tamaño de la partición (en KB)
 #@exception OG_ERR_PARTITION  No existe partición de caché.
-#@version 0.91 - Definición de caché local.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: InfoCache() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date   2008/10/27
+#@version 0.91 - Definicion de cache local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
 #*/ ##
@@ -200,7 +205,10 @@ ogGetPartitionSize $PART
 #@brief   Devuelve el espacio de disco disponible para la partición de caché.
 #@return  int_size   tamaño disponible (en KB)
 #@note    El espacio disponible es el que hay entre el límite superior de la partición 3 del disco 1 y el final de dicho disco, y no puede ser superior a la mitad de dicho disco.
-#@version 0.91 - Definición de caché local.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: InfoCache() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date   2008/10/27
+#@version 0.91 - Definicion de cache local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
 #*/ ##
@@ -235,10 +243,12 @@ fi
 #@param   sin parametros
 #@return  path_mountpoint - Punto de montaje del sistema de archivos de cache.
 #@warning Salidas de errores no determinada
-#@version 0.1 - Versión adaptada del Proyecto EAC.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: MountCache() en FileSystem.lib - HIDRA: MontarCache.sh
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2008/06/19
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@Date    27/10/2008
-#@version 0.91 - Adaptación a la caché local de OpenGnSys.
+#@Date    2008/10/27
+#@version 0.91 - Adaptacion a la cache local de OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/16
 #*/ ##
@@ -262,10 +272,10 @@ export OGCAC
 #@param   sin parametros
 #@return  nada
 #@warning Salidas de errores no determinada
-#@version 0.1 - Versión adaptada del Proyecto EAC.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: UmountCache() en FileSystem.lib 
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@Date    27/10/2008
-#@version 0.91 - Adaptación a la caché local de OpenGnSys.
+#@Date    2008/10/27
+#@version 0.91 - Adaptacion a la cache local de OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/16
 #*/ ##

@@ -164,6 +164,11 @@ rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@warning En caso de error, sólo devuelve el código y no da mensajes.
 #@todo    Terminar de definir parámetros para acceso a repositorios.
+#@version 0.1 -  Integracion para Opengnsys  -  HIDRA: CaminoWindows.sh; EAC: GetPath(), FormatSintaxSpacePath(), FormatSintaxBackSlashPath (),  en FileSystem.lib 
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/10/10
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
 #@version 0.9 - Pruebas con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
@@ -322,6 +327,11 @@ ogCalculateChecksum "$FILE" > "$FILE.sum"
 #         ogMakeDir [ str_repo | int_ndisk int_npartition ] path_dirpath
 #@brief   Metafunción que crea un subdirectorio vacío en un dispositivo.
 #@see     ogGetParentPath
+#@version 0.1 -  Integracion para Opengnsys  -   HIDRA: CrearDirectorio.sh, EAC: MkdirPath() en FileSystem.lib
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/10/10
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
 #@version 0.9 - Pruebas con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29

@@ -20,10 +20,10 @@
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
 #@note    En Linux, debe arrancarse la partición del directorio \c /boot
-#@version 0.1 - Integración para OpenGNSys.
-#@author  Antonio J. Doblas Viso, Universidad de Málaga
+#@version 0.1 - Integracion para OpenGNSys. - EAC: HDboot(); BootLinuxEX() en Boot.lib  
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008-10-27
-#@version 0.9 - Adaptación para OpenGNSys.
+#@version 0.9 - Adaptacion para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
 #*/ ##

@@ -134,9 +134,12 @@ rm -f $tmpsfdisk
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Dispositivo no detectado.
 #@note    Requisitos: awk
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: DiskEAC() en ATA.lib 
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
-#@date    2009-07-20
+#@date    2009/07/20
 #*/ ##
 function ogDevToDisk ()
 {
@@ -176,7 +179,12 @@ return $OG_ERR_NOTFOUND
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Dispositivo no detectado.
 #@note    Requisitos: awk, lvm
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: Disk() en ATA.lib;  HIDRA: DetectarDiscos.sh
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/06/19
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-07-20
 #*/ ##
@@ -243,7 +251,10 @@ esac
 #@param   str_fstype  mnemónico de tipo de sistema de archivos
 #@return  int_idpart  nº identificador de tipo de partición.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: TypeFS () en ATA.lib 
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-12-14
 #*/ ##
@@ -293,9 +304,9 @@ echo $ID
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    Requisitos: parted
 #@todo    Queda definir formato para atributos (arranque, oculta, ...).
-#@version 0.9 - Primera versión compatible con OpenGNSys.
+#@version 0.9 - Primera version compatible con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
+#@date    2009/09/17
 #*/ ##
 function ogGetPartitionActive ()
 {
@@ -359,7 +370,10 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: sfdisk, awk
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: SizePartition () en ATA.lib 
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
@@ -476,7 +490,10 @@ echo $PARTS | cut -sf5- -d" "
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o partición no corresponden con un dispositivo.
 #@note    Requisitos: parted
-#@version 0.9 - Primera versión compatible con OpenGNSys.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: SetPartitionActive() en ATA.lib
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version compatible con OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/17
 #*/ ##
@@ -548,8 +565,9 @@ partprobe 2>/dev/null
 #@return  informacion propia de la herramienta
 #@note    Requisitos: \c partprobe
 #@warning pendiente estructurar la funcion a opengnsys
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
-#@note	 funcion importada de EAC
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: UpdatePartitionTable() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
 #*/
 
 function ogUpdatePartitionTable ()
@@ -561,16 +579,20 @@ echo $list > /tmp/disk
 
 
 
-
-function ogGetPartitionsNumber () {
 #/**  @function ogGetPartitionsNumber: @brief detecta el numero de particiones del disco duro indicado.
 #@param   int_numdisk   (indentificado EAC del disco)
 #@return  devuelve el numero paritiones del disco duro indicado
 #@warning  Salidas de errores no determinada
 #@attention Requisitos: parted
 #@note	  Notas sin especificar
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  DetectNumberPartition () en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    Date: 27/10/2008
+#@version 1.0 - Uso de sfdisk Primera version para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/07/24
 #*/
+function ogGetPartitionsNumber () {
            #local disco totalpart
            #disco=`ogDiskToDev $1`
            #totalpart=`parted $disco print | egrep ^" [0123456789] " -c`
@@ -582,7 +604,6 @@ sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK"
 }
 
 
-function ogDiskToRelativeDev () {
 #/**  @function ogDiskToRelativeDev: @brief Traduce los ID de discos o particiones EAC a ID Linux relativos, es decir 1 1 => sda1
 #@param  Admite 1 parametro:   $1  int_numdisk
 #@param  Admite 2 parametro:   $1   int_numdisk                    $2  int_partition
@@ -591,9 +612,11 @@ function ogDiskToRelativeDev () {
 #@warning  No definidas
 #@attention
 #@note	  Notas sin especificar
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  IdPartition en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
 #*/
-
+function ogDiskToRelativeDev () {
 if [ $# = 0 ]
 then
 	Msg "Info: Traduce el identificador del dispositivo EAC a dispositivo linux \n" info
@@ -607,8 +630,6 @@ PART=$(ogDiskToDev|cut -f$1 -d' ')$2
 echo $PART | cut -f3 -d \/
 }
 
-
-function ogDeletePartitionTable () {
 #/**  @function ogDeletePartitionTable: @brief Borra la tabla de particiones del disco.
 #@param $1 opcion A (identificador LINUX) 	str_ID_linux (/dev/sda)
 #@param $1 opcion B (Identifiador EAC)  		int_numdiskEAC(1)
@@ -616,8 +637,11 @@ function ogDeletePartitionTable () {
 #@warning    no definidos
 #@attention
 #@note
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  DeletePartitionTable () en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
 #*/
+function ogDeletePartitionTable () {
 if [ $# = 0 ]
 then
 	Msg "sintaxis1: ogDeletePartitionTable int_disk" red
@@ -634,8 +658,6 @@ echo -ne "o\nw" | fdisk $dev
 }
 
 
-
-function ogSetPartitionId() {
 #/**  @function ogSetPartitionId: @brief Cambia el identificador de la particion, pero no su sistema de archivos.
 #@param  $1 int_numdiskEAC
 #@param  $2 int_numpartitionEAC
@@ -645,9 +667,11 @@ function ogSetPartitionId() {
 #@warning    Identifica por nombre del sistema de archivos no por número
 #@attention Requisitos:  fdisk
 #@note
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
 #*/
-
+function ogSetPartitionId() {
 # Variables locales
 local DISK PART ID
 
@@ -672,15 +696,17 @@ echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 }
 
 
-function ogDeletePartitionsLabels () {
 #/**  @function ogDeletePartitionsLabels: @brief Elimina la informacion que tiene el kernel del cliente og sobre los labels de los sistemas de archivos
 #@param  No requiere
 #@return   Nada
 #@warning
 #@attention Requisitos:  comando interno linux rm
 #@note
-#@version 0.1       Date: 27/10/2008                 Author Antonio J. Doblas Viso. Universidad de Malaga
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   DeletePartitionTable()  en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
 #*/
+function ogDeletePartitionsLabels () {
 rm /dev/disk/by-label/*    # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
 }
 
