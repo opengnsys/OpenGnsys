@@ -20,7 +20,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=svn://www.informatica.us.es:3690/opengnsys/trunk
+    SVN_URL=http://www.opengnsys.es/svn/trunk
 fi
 
 WORKDIR=/tmp/opengnsys_installer
