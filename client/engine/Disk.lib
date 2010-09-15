@@ -296,6 +296,39 @@ echo $ID
 }
 
 
+#/**
+#         ogGetDiskSize int_ndisk
+#@brief   Muestra el tamaño en KB de un disco.
+#@param   int_ndisk   nº de orden del disco
+#@return  int_size  - Tamaño en KB del disco.
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un
+dispositivo).
+#@note    Requisitos: sfdisk, awk
+#@version 0.9.2 - Primera version para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/09/15
+#*/ ##
+function ogGetDiskSize ()
+{
+# Variables locales.
+local DISK
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \ "$FUNCNAME 1  =>
+244198584"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener el tamaño de la partición.
+DISK="$(ogDiskToDev $1)" || return $?
+sfdisk -s $DISK
+}
+
+
 #         ogGetPartitionActive int_ndisk
 #@brief   Muestra que particion de un disco esta marcada como de activa.
 #@param   int_ndisk   nº de orden del disco
@@ -380,7 +413,7 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 function ogGetPartitionSize ()
 {
 # Variables locales.
-local PART
+local DISK PART
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
