@@ -25,5 +25,6 @@ else
     ogListSoftware "$1" "$2" | egrep -v "\(KB[0-9]{6}\)" >$OGLOG/$SOFTFILE || exit $?
 fi
 # Salid: camino del fichero de listado en el servidor de repositorio.
-echo $SERVERLOGDIR/$SOFTFILE
+#echo $SERVERLOGDIR/$SOFTFILE
+echo $OGLOG/$SOFTFILE
 

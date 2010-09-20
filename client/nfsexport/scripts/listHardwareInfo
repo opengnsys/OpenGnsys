@@ -20,4 +20,5 @@ HARDFILE="hard-$(ogGetIpAddress)"
 # Redirigir salida al fichero de listado.
 ogListHardwareInfo>$OGLOG/$HARDFILE || exit $?
 # Salida: camino del fichero de listado en el servidor de repositorio.
-echo $SERVERLOGDIR/$HARDFILE
+#echo $SERVERLOGDIR/$HARDFILE
+echo $OGLOG/$HARDFILE
