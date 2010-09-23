@@ -17,8 +17,7 @@
 #include "qtermwidget.h"
 
 #define BUFFERSIZE 2048
-#define EXPREG_RESET "^\\[(\\d+),(\\d+)\\]\\n"
-#define EXPREG_A_PASS "^\\[(\\d+)\\]\\s"
+#define REGEXP_STRING "^\\[(\\d+)\\]"
 
 #define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yy hh:mm:ss")
 
@@ -48,12 +47,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     // TabWidget
     m_tabs=new QTabWidget(dock);
-    QPushButton *button=new QPushButton(tr("&New Term"));
+    QPushButton *button=new QPushButton(tr("&Nueva Terminal"));
     button->setFocusPolicy(Qt::TabFocus);
     m_tabs->setCornerWidget(button);
     m_tabs->setFocusPolicy(Qt::NoFocus);
 
-    m_tabs->addTab(m_output,tr("Output"));
+    m_tabs->addTab(m_output,tr("Salida"));
     slotCreateTerminal();
 
     // Las pestanyas al dock
@@ -84,6 +83,8 @@ MainWindow::MainWindow(QWidget *parent)
     QStatusBar* st=statusBar();
     st->setSizeGripEnabled(false);
     m_progressBar=new QProgressBar(this);
+    m_progressBar->setMinimum(0);
+    m_progressBar->setMaximum(100);
 
     m_web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
@@ -119,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent)
                     QIODevice::Append))
         {
             delete file;
-            print(tr("The log file couldn't be opened: ")+m_env["OGLOGFILE"]+".");
+            print(tr("El fichero de log no ha podido ser abierto: ")+m_env["OGLOGFILE"]+".");
         }
         else
         {
@@ -149,23 +150,27 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     // Si ya hay un proceso ejectuandose
     if(m_process->state()!=QProcess::NotRunning)
     {
-      print(tr("There is a process running. Please wait a moment."));
+      print(tr("Hay otro proceso en ejecución. Por favor espere."));
       return;
     }
  
     QString urlString = url.toString();
-    // Si es un link del tipo PROTOCOL lo ejecutamos
-    if(urlString.startsWith(PROTOCOL))
+    // Si es un link del tipo COMMAND lo ejecutamos
+    if(urlString.startsWith(COMMAND))
     {
-        urlString=urlString.remove(0,QString(PROTOCOL).length());
-        QStringList list=urlString.split(" ",QString::SkipEmptyParts);
-        QString program=list.takeFirst();
-        m_process->setReadChannel(QProcess::StandardOutput);
-        // Le ponemos el mismo entorno que tiene el browser ahora mismo
-        m_process->setEnvironment(QProcess::systemEnvironment());
-        m_process->start(program,list);
-        print(tr("Launching the command: ")+program+" "+list.join(" ")+".");
-        startProgressBar();
+        executeCommand(urlString.remove(0,QString(COMMAND).length()));
+    }
+    else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
+    {
+        QMessageBox msgBox;
+        msgBox.setText(tr("La acción puede tardar varios minutos. Por favor no apague el ordenador."));
+        msgBox.setInformativeText(tr("¿Estás seguro que quieres continuar?"));
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        if (msgBox.exec() == QMessageBox::Ok)
+        {
+            executeCommand(urlString.remove(0,QString(COMMAND_WITH_CONFIRMATION).length()));
+        }
     }
     else
     {
@@ -176,9 +181,7 @@ void MainWindow::slotLinkHandle(const QUrl &url)
 void MainWindow::slotWebLoadStarted()
 {
     startProgressBar();
-    m_progressBar->setFormat("%p% Loading");
-    m_progressBar->setMinimum(0);
-    m_progressBar->setMaximum(100);
+    m_progressBar->setFormat("%p% Cargando");
 }
 
 void MainWindow::slotWebLoadProgress(int progress)
@@ -194,9 +197,9 @@ void MainWindow::slotWebLoadFinished(bool ok)
     if(ok == false)
     {
         QMessageBox msgBox;
-        msgBox.setText(tr("The web page couldn't load. What do you want to do?"));
+        msgBox.setText(tr("La pagina web no pudo ser cargada. ¿Qué quieres hacer?"));
 
-        QPushButton *reloadButton = msgBox.addButton(tr("Reload"), QMessageBox::ActionRole);
+        QPushButton *reloadButton = msgBox.addButton(tr("Recargar"), QMessageBox::ActionRole);
         msgBox.addButton(QMessageBox::Abort);
 
         msgBox.exec();
@@ -223,10 +226,8 @@ void MainWindow::slotUrlChanged(const QUrl &url)
 
 void MainWindow::slotProcessStarted()
 {
-    print(tr("Launched successfully."));
+    print(tr("Lanzado satisfactoriamente."));
     startProgressBar();
-    m_progressBar->setMinimum(0);
-    m_progressBar->setMaximum(0);
 }
 
 void MainWindow::slotProcessOutput()
@@ -255,11 +256,11 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
 {
     if(status==QProcess::NormalExit)
     {
-        print(tr("Process fisnished correctly. Return value: ")+QString::number(code));
+        print(tr("Proceso acabado correctamente. Valor de retorno: ")+QString::number(code));
     }
     else
     {
-        print(tr("Process crashed. Output: "+code));
+        print(tr("El proceso falló inesperadamente. Output: "+code));
     }
     finishProgressBar();
 }
@@ -269,7 +270,7 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
     switch(error)
     {
         case QProcess::FailedToStart:
-            print(tr("Impossible to launch the process."));
+            print(tr("Imposible lanzar el proceso."));
             break;
         case QProcess::WriteError:
             print(tr("Write error happened in the process."));
@@ -373,22 +374,13 @@ void MainWindow::captureOutputForStatusBar(QString output)
   // Capturar para modificar status bar
   output=output.trimmed();
 
-  QRegExp rxReset(EXPREG_RESET);
-  QRegExp rxPass(EXPREG_A_PASS);
-  if(rxReset.exactMatch(output))
+  QRegExp regexp(REGEXP_STRING);
+  if(regexp.indexIn(output) != -1)
   {
-    int minimum=rxReset.cap(1).toInt();
-    int maximum=rxReset.cap(2).toInt();
-    m_progressBar->setMinimum(minimum);
-    m_progressBar->setMaximum(maximum);
-    m_progressBar->setValue(minimum);
-  }
-  else if(rxPass.indexIn(output)!=-1)
-  {
-    int pass=rxPass.cap(1).toInt();
-    output.replace(rxPass,"");
+    int pass=regexp.cap(1).toInt();
+    output.replace(regexp,"");
     m_progressBar->setValue(pass);
-    m_progressBar->setFormat("%p% "+output);
+    m_progressBar->setFormat("%p%"+output);
   }
 }
 
@@ -407,4 +399,17 @@ void MainWindow::finishProgressBar()
     st->removeWidget(m_progressBar);
     st->showMessage(tr("Ready"));
     m_web->setEnabled(true);
+}
+
+
+void MainWindow::executeCommand(QString &string)
+{
+    QStringList list=string.split(" ",QString::SkipEmptyParts);
+    QString program=list.takeFirst();
+    m_process->setReadChannel(QProcess::StandardOutput);
+    // Le ponemos el mismo entorno que tiene el browser ahora mismo
+    m_process->setEnvironment(QProcess::systemEnvironment());
+    m_process->start(program,list);
+    print(tr("Lanzando el comando: ")+program+" "+list.join(" ")+".");
+    startProgressBar();
 }

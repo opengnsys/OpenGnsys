@@ -1,7 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define PROTOCOL "command:"
+#define COMMAND "command:"
+#define COMMAND_WITH_CONFIRMATION "commandwithconfirmation:"
 #define ENVIRONMENT "OGLOGFILE,boot"
 //#define ENVIRONMENT "OGIP,OGSERVER,OGLOG"
 
@@ -60,6 +61,7 @@ class MainWindow : public QMainWindow
         void captureOutputForStatusBar(QString output);
         void startProgressBar();
         void finishProgressBar();
+        void executeCommand(QString &string);
 
 
     protected:
