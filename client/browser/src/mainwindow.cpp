@@ -150,7 +150,7 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     // Si ya hay un proceso ejectuandose
     if(m_process->state()!=QProcess::NotRunning)
     {
-      print(tr("Hay otro proceso en ejecuciÃ³n. Por favor espere."));
+      print(tr("Hay otro proceso en ejecución. Por favor espere."));
       return;
     }
  
@@ -163,8 +163,8 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
     {
         QMessageBox msgBox;
-        msgBox.setText(tr("La acciÃ³n puede tardar varios minutos. Por favor no apague el ordenador."));
-        msgBox.setInformativeText(tr("Â¿EstÃ¡s seguro que quieres continuar?"));
+        msgBox.setText(tr("La siguiente acción puede tardar varios minutos. Mientras se realiza no podrá usar el ordenador."));
+        msgBox.setInformativeText(tr("¿Estás seguro de que quieres continuar?"));
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Ok);
         if (msgBox.exec() == QMessageBox::Ok)
@@ -197,7 +197,7 @@ void MainWindow::slotWebLoadFinished(bool ok)
     if(ok == false)
     {
         QMessageBox msgBox;
-        msgBox.setText(tr("La pagina web no pudo ser cargada. Â¿QuÃ© quieres hacer?"));
+        msgBox.setText(tr("La pagina web no pudo ser cargada. ¿Qué quieres hacer?"));
 
         QPushButton *reloadButton = msgBox.addButton(tr("Recargar"), QMessageBox::ActionRole);
         msgBox.addButton(QMessageBox::Abort);
@@ -260,7 +260,7 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
     }
     else
     {
-        print(tr("El proceso fallÃ³ inesperadamente. Output: "+code));
+        print(tr("El proceso falló inesperadamente. Output: "+code));
     }
     finishProgressBar();
 }
@@ -397,7 +397,7 @@ void MainWindow::finishProgressBar()
 {
     QStatusBar* st=statusBar();
     st->removeWidget(m_progressBar);
-    st->showMessage(tr("Ready"));
+    st->showMessage(tr("Listo"));
     m_web->setEnabled(true);
 }
 
