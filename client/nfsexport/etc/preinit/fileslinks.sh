@@ -21,7 +21,7 @@ if [ -n "$OPENGNSYS" ]; then
 
     # Directorio de tipos de letras para el browser.
     #QTLIBS=$(grep qt_libspath $OGBIN/browser 2>/dev/null | cut -f2 -d=)
-    QTVERS="/usr/local/QtEmbedded-4.6.2"
+    QTVERS="/usr/local/QtEmbedded-4.6.3"
     QTDIR="${QTVERS%-*}"
     mkdir -p $QTDIR
     ln -fs $QTDIR $QTVERS

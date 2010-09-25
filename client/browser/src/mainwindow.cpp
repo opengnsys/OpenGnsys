@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <QProgressBar>
 #include <QTabWidget>
+#include <QWebView>
 #include <QLineEdit>
 
 #include "qtermwidget.h"
