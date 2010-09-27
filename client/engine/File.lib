@@ -34,7 +34,7 @@ fi
 # Comprobar que existe el fichero y devolver sus datos.
 FILE=$(ogGetPath "$@")
 [ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
-md5sum "$FILE" 2>&1 | cut -f1-2 -d" "
+md5sum "$FILE" 2>&1 | cut -f1 -d" "
 }
 
 

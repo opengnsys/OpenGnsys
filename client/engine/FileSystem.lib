@@ -601,12 +601,12 @@ echo $MNTDIR
 #@brief   Reduce el tamaño del sistema de archivos, sin tener en cuenta el espacio libre.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@return  tamañoKB
+#@return  int_tamañoKB - tamaño en KB
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Partición desconocida o no accesible.
 #@warning En Windows, se borran los ficheros pagefile.sys e hiberfile.sys
-#@warning El sistema de archivos se amplía al mínimo + 1 KB.
+#@warning El sistema de archivos se amplía al mínimo + 10%.
 #@note    Requisitos:	*resize*
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:   ReduceFileSystem() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
@@ -614,6 +614,9 @@ echo $MNTDIR
 #@version 0.9 - Primera version para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
+#@version 0.9.2 - Añadir un 10% al tamaño mínimo requerido.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-09-27
 #*/ ##
 function ogReduceFs ()
 {
@@ -640,7 +643,7 @@ case "$(ogGetFsType $1 $2)" in
         BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')
         # Traduce el num. en sectores de 512B a tamano en MB.
         SIZE=$(resize2fs -P $PART 2>/dev/null | \
-		       awk -v B=$BLKS '/minimum size/ {print int($7*B/2048+1000)}')
+		       awk -v B=$BLKS '/minimum size/ {print int($7*1.1*B/2048)}')
         resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 	    ;;
 #    REISERFS)		# Usar "resize_reiserfs"
@@ -650,7 +653,7 @@ case "$(ogGetFsType $1 $2)" in
         ogDeleteFile $1 $2 hiberfile.sys
         ogUnmount $1 $2 2>/dev/null
         # NTFS: Obtiene tamaño mínimo en MB.
-        SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print $8+1000}')
+        SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print int($8*1.1)}')
         ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 	    ;;
