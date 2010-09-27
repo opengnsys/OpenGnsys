@@ -302,8 +302,7 @@ echo $ID
 #@param   int_ndisk   nº de orden del disco
 #@return  int_size  - Tamaño en KB del disco.
 #@exception OG_ERR_FORMAT   formato incorrecto.
-#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un
-dispositivo).
+#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: sfdisk, awk
 #@version 0.9.2 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
@@ -316,8 +315,7 @@ local DISK
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \ "$FUNCNAME 1  =>
-244198584"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \ "$FUNCNAME 1  => 244198584"
     return
 fi
 # Error si no se recibe 1 parámetro.
