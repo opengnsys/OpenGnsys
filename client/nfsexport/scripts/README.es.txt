@@ -17,7 +17,9 @@ operativos y pueden ser utilizados directamente.
 
 Scripts distribuidos:
 
+- bootLinux                arranca un sistema Linux con partición de inicio.
 - bootOs                   arranca un sistema operativo instalado.
+- bootWindows              arranca un sistema Windows con partición de inicio.
 - createImage              genera una imagen de un sistema operativo.
 - createLogicalPartitions  define las particiones primarias del disco.
 - createPrimaryPartitions  define las particiones lógicas del disco.

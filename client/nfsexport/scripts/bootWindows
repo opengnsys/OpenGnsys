@@ -1,0 +1,30 @@
+#!/bin/bash
+# Scirpt de ejemplo para iniciar Windows con partición de arranque.
+# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+
+PROG="$(basename $0)"
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion"
+    exit $?
+fi
+
+echo "[0] Inicio del proceso de arranque."
+PART=$(ogDiskToDev "$1" "$2") || exit $?
+
+echo "[10] Desmontar todos los sistemas de archivos."
+sync
+for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
+    ogUnmountAll $i 2>/dev/null
+done
+echo "[30] Activar particion de Windows $PART."
+ogSetPartitionActive $1 $2
+echo "[50] Asignar nombre Windows \"$NAME\"."
+NAME=$(ogGetHostname)
+NAME=${NAME:-"pc"}
+ogSetWindowsName $1 $2 "$NAME"
+echo "[70] Desmontar cache local."
+ogUnmountCache
+
+echo "[90] Arrancar sistema operativo."
+ogBoot $1 $2
+

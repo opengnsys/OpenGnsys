@@ -10,6 +10,7 @@ if [ $# -lt 4 ]; then
 fi
 
 # Procesar parámetros de entrada
+echo "[0] Inicio del proceso de restauracion de imagen."
 IMGFILE=$(ogGetPath "$1" "$2.img")
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
@@ -25,14 +26,14 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         UNICAST|unicast)
             # Copiar fichero del repositorio al caché, si no existe en caché o es anterior.
             if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.img" "$IMGFILE") ]; then
-                echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
+                echo "[10] Copiando imagen \"$2\" del repositorio a cache local"
                 ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
                 IMGFILE=$(ogGetPath "cache" "$2.img")
             fi
             ;;
         MULTICAST|multicast)
             if [ -z "$IMGFILE" ]; then
-                echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
+                echo "[10] Copiando imagen multicast \"$2\" del repositorio a cache local"
                 PORTBASE=`echo $6 | cut -f1 -d:`
                 echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:"CACHE" "$2.img" " 
                 ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img" || exit $?
@@ -40,9 +41,9 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             fi
             ;;
         TORRENT|torrent)
-                echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
+                echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a cache local"
                 ogCopyFile "repo" "$2.img.torrent" "$IMGDIR" || exit $?
-                echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
+                echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a cache local"
                 ogTorrentStart "CACHE" "$2.img.torrent" "peer:60" || exit $?        		
                 IMGFILE=$(ogGetPath "cache" "$2.img")            
             ;;
@@ -64,13 +65,14 @@ ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 echo "[80] Extender sistema de archivos."
 ogExtendFs $3 $4
-# Cambiar nombre en sistemas Windows.
+# Cambiar nombre en sistemas Windows y quitar usuario de acceso por defecto.
 if [ "$(ogGetOsType $3 $4)" = "Windows" ]; then
+    echo "[90] Cambiar nombre Windows a \"$HOST\" y usuario de acceso."
     HOST=$(ogGetHostname)
-    HOST=${HOST:-"UNKNOWN"}
-    echo "[90] Cambiar nombre Windows a \"$HOST\"."
+    HOST=${HOST:-"pc"}
     ogSetWindowsName $3 $4 "$HOST"
+    ogSetWinlogonUser $3 $4 " "
 fi
 TIME=$[SECONDS-TIME1]
-echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 

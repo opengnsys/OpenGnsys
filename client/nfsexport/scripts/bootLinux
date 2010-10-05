@@ -1,0 +1,35 @@
+#!/bin/bash
+# Scirpt de ejemplo para iniciar Linux desde partición de arranque.
+# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+
+PROG="$(basename $0)"
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion"
+    exit $?
+fi
+
+echo "[0] Inicio del proceso de arranque."
+PART=$(ogDiskToDev "$1" "$2") || exit $?
+
+echo "[10] Desmontar todos los sistemas de archivos."
+sync
+for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
+    ogUnmountAll $i 2>/dev/null
+done
+ETC=$(ogGetPath $1 $2 /etc)
+if [ -n "$ETC" ]; then
+    echo "[30] Asignar nombre Linux \"$NAME\"."
+    NAME=$(ogGetHostname)
+    NAME=${NAME:-"pc"}
+    echo "$NAME" >$ETC/hostname 2>/dev/null
+    echo "[50] Actaualizar fstab con particion raiz \"$PART\"."
+    awk -v P="$PART " '{ if ($2=="/") {sub(/^.*$/, P, $1)}
+                         print } ' $ETC/fstab >/tmp/fstab
+    mv /tmp/fstab $ETC/fstab
+fi
+echo "[70] Desmontar cache local."
+ogUnmountCache
+
+echo "[90] Arrancar sistema operativo."
+ogBoot $1 $2
+

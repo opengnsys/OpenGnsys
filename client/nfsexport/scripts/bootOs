@@ -8,30 +8,23 @@ if [ $# -ne 2 ]; then
     exit $?
 fi
 
-# Iniciación de porcentaje de la barra de progreso del Browser.
 echo "[0] Inicio del proceso de arranque."
-
-# Procesos previos.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
 NAME=$(ogGetHostname)
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $1 $2)
 
-# Arrancar.
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
     ogUnmountAll $i 2>/dev/null
 done
-echo "[20] Desmontar cache local."
-ogUnmountCache
 case "$OSTYPE" in
     Windows)
-        echo "30 Activar partición de Windows $PART."
+        echo "[30] Activar particion de Windows $PART."
         ogSetPartitionActive $1 $2
-        echo "40 Comprobar sistema de archivos."
+        echo "[40] Comprobar sistema de archivos."
         ogCheckFs $1 $2
-        NAME=$(ogGetHostname)
         echo "[50] Asignar nombre Windows \"$NAME\" y usuario por defecto."
         ogSetWindowsName $1 $2 "$NAME"
         ogSetWinlogonUser $1 $2 " "
@@ -41,13 +34,15 @@ case "$OSTYPE" in
         ETC=$(ogGetPath $1 $2 /etc)
         [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
         if [ -f "$ETC/fstab" ]; then
-            echo "[50] Actaualizar fstab con partición raíz \"$PART\"."
+            echo "[50] Actaualizar fstab con particion raiz \"$PART\"."
             awk -v P="$PART " '{ if ($2=="/") {sub(/^.*$/, P, $1)}
                                  print } ' $ETC/fstab >/tmp/fstab
             mv /tmp/fstab $ETC/fstab
         fi
         ;;
 esac
+echo "[70] Desmontar cache local."
+ogUnmountCache
 echo "[90] Arrancar sistema operativo."
 ogBoot $1 $2
 

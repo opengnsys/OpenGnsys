@@ -9,6 +9,7 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
+echo "[0] Inicio del proceso de creacion de imagen."
 # Si el repositorio es CACHE comprobamos que exista
 [ $3 == "REPO" -o $3 == "repo" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| exit $?
 
@@ -37,7 +38,7 @@ SIZE=$(ogGetPartitionSize "$1" "$2")
 echo "[20]: Reducir sistema de archivos."
 REDSIZE=$(ogReduceFs $1 $2) || REDSIZE=$[SIZE+1]
 if [ $REDSIZE -lt $SIZE ]; then
-    echo "[25] Redimensionar partición a $REDSIZE KB."
+    echo "[25] Redimensionar particion a $REDSIZE KB."
     ogSetPartitionSize $1 $2 $REDSIZE
 fi
 # Crear la imagen.
@@ -48,13 +49,13 @@ ogCreateImage "$@"
 EXITCODE=$?
 # Restaurar tamaño.
 if [ $REDSIZE -lt $SIZE ]; then
-    echo "[85] Redimensionar partición a $SIZE KB."
+    echo "[85] Redimensionar particion a $SIZE KB."
     ogSetPartitionSize $1 $2 $SIZE
     echo "[90] Extender sistema de archivos."
     ogExtendFs $1 $2
 fi
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 exit $EXITCODE
 
