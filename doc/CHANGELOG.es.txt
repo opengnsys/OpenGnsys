@@ -2,6 +2,54 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 0.9.2pre
+------------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#159	No reconoce Ubuntu 10.04
+#165	funcion torrent no migrada correctamente desde el branch
+#166	Errores Particionando y Formateando
+#172	Protocol.lib Error control nº parámetros sesión multicast de cliente
+#178	Adaptar funciones de generación y restauración de imágenes monolíticas
+#191	ogReduceFs con ntfs, tamaño auxiliar mínimo depende del tamaño total de datos
+#216	Incluir histórico al engine, adaptarlo a doxygen
+
+Tickets resueltos en módulo OpenGnSys Client:
+#90	Error carga de librerias udeb desde un ubuntu64-server
+#152	createImage
+#153	Instalador error con Ubuntu Lucid 64
+#154	Integración de los errores de initrd-generator en opengnsys_installation.log
+#155	Controlar tamaño mínimo de la caché
+#156	ogClient no encuentra ni el kernel ni el initrd
+#161	El cliente no acepta las solicitud de reboot y reiniciar del servicio ogADMClient
+#169	No se detectan discos en placas nuevas
+#173	Arranque de cliente lento al crear enlaces simbólicos
+#174	Algunos binarios no se ejecutan en clientes de 64 bits
+#176	No se ve el vídeo en cliente basado en Ubuntu Lucid
+#181	Parámetro eliminación cache
+#229	Mensaje de confirmación para ejecutar algunas acciones en el Browser
+
+Tickets resueltos en módulo OpenGnSys Server:
+#117	Añadir IP o MAC del cliente rechazado
+#146	Fallo echo consola
+#187	Mayor información en los logs de los servicios
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console
+#122	Consola Web: Errores en comando "Particionar y Formatear"
+#148	La consola no permite clonar la partición de recuperación de Windows 7
+#158	controlar inconsistencias
+#160	Problemas particionando y formateando desde consola
+#175	Consola Web: No se ven los servidores OpenGnSys
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#100	oginstaller gestor torrent
+#150	Fallo de Opengnsys Intaller (si MySQL ya instalado)
+#171	binarios y scripts para multicast
+
+Tickets genéricos resueltos:
+#129	Decidir entre NFS y NBD.
+
+
 Lista de cambios incluidos en OpenGnSys 0.9.1
 ---------------------------------------------
 
