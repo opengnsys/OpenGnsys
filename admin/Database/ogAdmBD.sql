@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS `entornos` (
 --
 
 INSERT INTO `entornos` (`identorno`, `ipserveradm`, `portserveradm`, `protoclonacion`) VALUES
-(1, '10.1.15.3', 2009, 'MULTICAST');
+(1, 'SERVERIP', 2009, 'UNICAST');
 
 -- --------------------------------------------------------
 
