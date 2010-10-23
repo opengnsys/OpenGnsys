@@ -1,0 +1,12 @@
+#!/bin/bash
+#_______________________________________________________________________________________________________________________________
+#
+# PARAMETROS RECIBIDOS DESDE EL CLIENTE:
+# $1 disco
+# $2 par=Número de particion
+# $3 Nombre canónico de la imagen
+# $4 Dirección del repositorio
+#_______________________________________________________________________________________________________________________________
+
+#ogRestoreImage REPO $3 $1 $2 UNICAST
+exit 0

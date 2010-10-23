@@ -1,0 +1,81 @@
+#!/bin/bash
+
+#_______________________________________________________________________________________________________________________________
+#
+# Formato de entrada:
+# $1 disco
+# $2 par=Número de particion#cod=Código de partición#sfi=Sistema de ficheros#tam=Tamaño de la partición#ope=Operación$
+#_______________________________________________________________________________________________________________________________
+
+particiones=$(echo $2 | awk '{n=split($0,sep,"$");print n}')
+
+declare -a TBP
+declare -a TBF
+for ((par=1;par<$particiones;par++)); 
+	do
+		TBP[$par]=$(echo $2 | awk -v p=$par '{
+							n=split($0,sep,"$");
+							split(sep[p],dua,"#");
+							split(dua[1],prm,"=");
+							par=prm[2];
+							split(dua[2],prm,"=");
+							cpt=prm[2];
+							split(dua[3],prm,"=");
+							sfi=prm[2];
+							split(dua[4],prm,"=");
+							tam=prm[2];																					
+							split(dua[5],prm,"=");
+							ope=prm[2];									
+							printf("%s %x %s %s %s",par,cpt,sfi,tam,ope);
+						}')
+	done
+	
+# Prepara cadena de particiones _______________________________________
+cP=""
+for ((par=1;par<$particiones;par++)); 
+	do
+		cfg=${TBP[$par]} 	
+
+		cP=$cP$(echo $cfg | awk '{
+							n=split($0,prm," ");
+							par=prm[1];
+							cpt=prm[2];
+							sfi=prm[3];
+							tam=prm[4];																					
+							ope=prm[5];		
+							if(ope==1)
+								printf("%s:%s ",sfi,tam);
+							else{
+								if(ope==2)
+									printf("H%s:%s ",sfi,tam);
+								else
+									printf("%s:%s ",sfi,tam);						
+							}
+						}')
+						
+		TBF[$par]=$(echo $cfg | awk '{
+							n=split($0,prm," ");
+							sfi=prm[3];
+							ope=prm[5];		
+							if(ope==1)
+								printf("%s",sfi);
+							else
+								printf("EMPTY");	
+						}')						
+						
+	done	
+	ogCreatePartitions $1 $cP	
+							
+# Formatear _______________________________________
+	
+for ((par=1;par<$particiones;par++)); 
+	do
+	sfi=${TBF[$par]}
+	if [ $sfi == "EMPTY" ]; then
+		TBF[$par]=" "
+	else
+		ogFormatFs $1 $par $sfi
+	fi
+	
+	done	
+

@@ -1,0 +1,3 @@
+#!/bin/bash
+file=$(listHardwareInfo)
+cp $file $1
