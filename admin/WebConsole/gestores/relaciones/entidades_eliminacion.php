@@ -11,7 +11,8 @@
 //		-	cmd:Una comando ya operativo (con conexión abierta)  
 //		-	identificador: El identificador por el que se eliminará el entidad
 //		-	nombreid: Nombre del campo identificador del registro 
-//		-	swid: Indica 0= El identificador es tipo alfanumérico	1= EI identificador es tipo numérico ( valor por defecto) *************************************************************************************************************************************************
+//		-	swid: Indica 0= El identificador es tipo alfanumérico	1= EI identificador es tipo numérico ( valor por defecto)
+// *************************************************************************************************************************************************
 function	EliminaEntidad($cmd,$identificador,$nombreid,$swid=1){
 	if (empty($identificador)) return(true);
 	if($swid==0)
