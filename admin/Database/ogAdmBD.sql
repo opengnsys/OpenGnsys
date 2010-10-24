@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS `entornos` (
 --
 
 INSERT INTO `entornos` (`identorno`, `ipserveradm`, `portserveradm`, `protoclonacion`) VALUES
-(1, 'SERVERIP', 2009, 'UNICAST');
+(1, 'SERVERIP', 2008, 'UNICAST');
 
 -- --------------------------------------------------------
 
@@ -666,6 +666,10 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
   `puertorepo` int(11) NOT NULL,
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`pathrepoconf`,`pathrepod`,`pathpxe`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
+ (1,'Repositrorio (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
+
 
 -- --------------------------------------------------------
 
