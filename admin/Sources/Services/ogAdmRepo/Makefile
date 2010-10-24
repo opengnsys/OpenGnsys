@@ -15,7 +15,7 @@ CPPFLAGS := $(CFLAGS)
 LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
 
 # Ficheros objetos
-OBJS := ../includes/Database.o ../includes/encriptacion.o sources/ogAdmRepo.o 
+OBJS := ../../Includes/Database.o sources/ogAdmServer.o 
 
 
 all: $(PROYECTO)
