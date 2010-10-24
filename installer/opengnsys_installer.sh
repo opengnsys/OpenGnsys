@@ -37,14 +37,12 @@ DEPENDENCIES=( subversion apache2 php5 mysql-server php5-mysql nfs-kernel-server
 # Datos de base de datos
 MYSQL_ROOT_PASSWORD="passwordroot"
 
-OPENGNSYS_DATABASE=ogBDAdmin
+OPENGNSYS_DATABASE=ogAdmBD
 OPENGNSYS_DB_USER=usuog
 OPENGNSYS_DB_PASSWD=passusuog
 OPENGNSYS_DB_DEFAULTUSER=opengnsys
 OPENGNSYS_DB_DEFAULTPASSWD=opengnsys
-OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogBDAdmin.sql
-
-
+OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
@@ -696,8 +694,6 @@ function installWebFiles()
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP \
-			$INSTALL_TARGET/www/includes \
-			$INSTALL_TARGET/www/comandos/gestores/filescripts \
 			$INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
@@ -777,7 +773,6 @@ function openGnsysInstallCreateDirs()
 	echoAndLog "${FUNCNAME}(): creating directory paths in $path_opengnsys_base"
 
 	mkdir -p $path_opengnsys_base
-	mkdir -p $path_opengnsys_base/admin/{autoexec,comandos,menus,usuarios}
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
 	mkdir -p $path_opengnsys_base/doc
@@ -861,7 +856,7 @@ function servicesCompilation ()
 
 	# Compilar OpenGnSys Server
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Server"
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmServer
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
 	make && make install
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
@@ -870,7 +865,7 @@ function servicesCompilation ()
 	popd
 	# Compilar OpenGnSys Repository Manager
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Repository Manager"
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmRepo
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
 	make && make install
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
@@ -879,7 +874,7 @@ function servicesCompilation ()
 	popd
 	# Compilar OpenGnSys Agent
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Agent"
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmAgent
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
 	make && make install
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
@@ -888,8 +883,8 @@ function servicesCompilation ()
 	popd	
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Client"
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
-	make && mv ogAdmClient ../../../client/nfsexport/bin
+	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
+	make && mv ogAdmClient ../../../../client/nfsexport/bin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Client"
 		hayErrores=1
@@ -899,6 +894,31 @@ function servicesCompilation ()
 	return $hayErrores
 }
 
+####################################################################
+### Funciones de copia de la Interface de administración
+####################################################################
+
+# Copiar carpeta de Interface
+function InterfaceAdm ()
+{
+	local hayErrores=0
+	local pathIntAdm=$INSTALL_TARGET/client/interfaceAdm
+	
+	# Crear carpeta Interface
+	mkdir $pathIntAdm
+	# Copiar carpeta
+	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder"
+	pushd $WORKDIR/opengnsys/admin/Interface
+	chmod +x *
+	mv * /$pathIntAdm
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while copying Administration Interface Folder"
+		hayErrores=1
+	fi
+	popd
+
+	return $hayErrores
+}
 
 ####################################################################
 ### Funciones instalacion cliente opengnsys
@@ -966,8 +986,8 @@ function openGnsysClientCreate()
 function openGnsysConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Copying init files."
-	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.default /etc/default/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -978,7 +998,7 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
 	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
-	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Services/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	/etc/init.d/opengnsys start
 }
@@ -1020,7 +1040,6 @@ echo
 #####################################################################
 ####### Proceso de instalación de OpenGnSys
 #####################################################################
-
 
 echoAndLog "OpenGnSys installation begins at $(date)"
 
@@ -1070,6 +1089,13 @@ fi
 servicesCompilation
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while compiling OpenGnsys services"
+	exit 1
+fi
+
+# Copiar carpeta Interface entre administración y motor de clonación.
+InterfaceAdm
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while copying Interface Administration"
 	exit 1
 fi
 
