@@ -60,7 +60,7 @@ else
 	<INPUT type=hidden name=ordenadores value="<? echo $ordenadores?>">
 	
 	<INPUT type=hidden name=gidmenu value="<? echo $gidmenu?>">
-	<INPUT type=text name=gidprocedimiento value="<? echo $gidprocedimiento?>">
+	<INPUT type=hidden name=gidprocedimiento value="<? echo $gidprocedimiento?>">
 	<INPUT type=hidden name=gidrepositorio value="<? echo $gidrepositorio?>">
 	<INPUT type=hidden name=gidperfilhard value="<? echo $gidperfilhard?>">
 	<INPUT type=hidden name=gcache value="<? echo $gcache?>">
