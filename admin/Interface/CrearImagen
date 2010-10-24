@@ -8,5 +8,5 @@
 # $3 Nombre canónico de la imagen
 # $4 Dirección del repositorio
 #_______________________________________________________________________________________________________________________________
-#createImage $1 $2 REPO $3
-exit 0
+createImage $1 $2 REPO $3
+

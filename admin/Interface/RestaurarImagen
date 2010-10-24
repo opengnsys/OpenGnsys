@@ -8,5 +8,5 @@
 # $4 Dirección del repositorio
 #_______________________________________________________________________________________________________________________________
 
-#ogRestoreImage REPO $3 $1 $2 UNICAST
-exit 0
+ogRestoreImage REPO $3 $1 $2 UNICAST
+
