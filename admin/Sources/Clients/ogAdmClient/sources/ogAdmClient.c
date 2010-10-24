@@ -1084,12 +1084,11 @@ BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 	}
 	nfn=copiaParametro("nfn",ptrTrama);
 	ids=copiaParametro("ids",ptrTrama);
-
+	par=copiaParametro("par",ptrTrama);
+	
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_IniciarSesion");
 	respuestaEjecucionComando(ptrTrama,0,ids);
-
-	par=copiaParametro("par",ptrTrama);
 
 	sprintf(interface,"%s/%s",pathinterface,nfn);
 	sprintf(parametros,"%s %s",nfn,par);

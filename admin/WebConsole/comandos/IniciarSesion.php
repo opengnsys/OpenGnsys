@@ -123,15 +123,16 @@ function tabla_configuraciones($cmd,$idordenador){
 	global $idcentro;
 	$tablaHtml="";
 	$cmd->texto="SELECT ordenadores_particiones.idnombreso,ordenadores_particiones.numpar,ordenadores_particiones.tamano,nombresos.nombreso,tipospar.tipopar,
-												imagenes.descripcion as imagen,perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
-												FROM ordenadores
-												INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-												LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-												INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
-												LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-												LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-												LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
-												WHERE ordenadores.idordenador=$idordenador ORDER BY ordenadores_particiones.numpar";
+				imagenes.descripcion as imagen,perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
+				FROM ordenadores
+				INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+				LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
+				INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+				LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
+				LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
+				LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
+				WHERE ordenadores.idordenador=".$idordenador." AND tipospar.clonable=1 ORDER BY ordenadores_particiones.numpar";
+				
 	$rs->Comando=&$cmd; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
