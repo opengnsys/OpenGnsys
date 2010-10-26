@@ -902,20 +902,15 @@ function servicesCompilation ()
 function InterfaceAdm ()
 {
 	local hayErrores=0
-	local pathIntAdm=$INSTALL_TARGET/client/interfaceAdm
 	
-	# Crear carpeta Interface
-	mkdir $pathIntAdm
-	# Copiar carpeta
+	# Crear carpeta y copiar Interface
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder"
-	pushd $WORKDIR/opengnsys/admin/Interface
-	chmod +x *
-	mv * /$pathIntAdm
+	cp -ar $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client/interfaceAdm
+	chmod -R +x $INSTALL_TARGET/client/interfaceAdm
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while copying Administration Interface Folder"
 		hayErrores=1
 	fi
-	popd
 
 	return $hayErrores
 }
