@@ -2,8 +2,15 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
-Lista de cambios incluidos en OpenGnSys 0.9.2pre
-------------------------------------------------
+Lista de cambios que serán incluidos en OpenGnSys 0.10
+------------------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#240	Error instalación limpia rev. 1326
+
+
+Lista de cambios incluidos en OpenGnSys 0.9.2
+---------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #159	No reconoce Ubuntu 10.04

@@ -40,8 +40,6 @@ MYSQL_ROOT_PASSWORD="passwordroot"
 OPENGNSYS_DATABASE=ogAdmBD
 OPENGNSYS_DB_USER=usuog
 OPENGNSYS_DB_PASSWD=passusuog
-OPENGNSYS_DB_DEFAULTUSER=opengnsys
-OPENGNSYS_DB_DEFAULTPASSWD=opengnsys
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 
 #####################################################################
@@ -362,7 +360,6 @@ function mysqlImportSqlFileToDb()
 	fi
 
 	echoAndLog "${FUNCNAME}(): importing sql file to ${database}..."
-	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DEFAULTUSER/$OPENGNSYS_DB_DEFAULTUSER/g; s/DEFAULTPASSWD/$OPENGNSYS_DB_DEFAULTPASSWD/g" $sqlfile
 	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $sqlfile
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while importing $sqlfile in database $database"
@@ -1016,17 +1013,15 @@ function installationSummary(){
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
-	echoAndLog "Web Console default user:         $OPENGNSYS_DB_DEFAULTUSER"
-	echoAndLog "Web Console default password:     $OPENGNSYS_DB_DEFAULTPASSWD"
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Log-in as Web Console admin user."
-	echoAndLog " - Review default Organization data and default user."
+	echoAndLog " - Review default Organization data and assign default user."
 	echoAndLog "Log-in as Web Console organization user."
-	echoAndLog " - Insert OpenGnSys data (rooms, computers, etc)."
+	echoAndLog " - Insert OpenGnSys data (rooms, computers, menus, etc)."
 echo
 }
 
