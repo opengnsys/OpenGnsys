@@ -806,6 +806,7 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
                         client/boot/udeblist-lucid.conf \
+                        client/boot/udeblist-maverick.conf \
                         server/PXE/pxelinux.cfg/default \
                         repoman/bin \
                         doc )
@@ -815,6 +816,7 @@ function openGnsysCopyServerFiles () {
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
                         etc/udeblist-lucid.conf \
+                        etc/udeblist-maverick.conf \
                         tftpboot/pxelinux.cfg/default \
                         bin \
                         doc )
@@ -934,8 +936,8 @@ function openGnsysClientCreate()
 	fi
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-	OSCODENAME=$(lsb_release -c | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+	OSCODENAME=$(lsb_release -cs 2>/dev/null)
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE

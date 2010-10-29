@@ -1,8 +1,9 @@
 #!/bin/bash
 # Generador de ficheros "kernel" e "initrd.gz" para arranque de cliente OpenGnSys
 
-DIST="jaunty"			# Distribución Ubuntu por defecto
-ARCH=$(arch)			# Arquitectura del sistema: i386 (32 bits), amd64 (64 bits)
+test "$(lsb_release -is 2>/dev/null)" == "Ubuntu" && DIST="(lsb_release -cs)"
+DIST=${DIST:-"lucid"}		# Si no se detecta, distribución Ubuntu por defecto.
+ARCH=$(arch)			# Arquitectura del sistema: i386 (32 bits), amd64 (64 bits).
 ARCH=${ARCH:-"$(uname -m)"}	# Corrección para Ubuntu Jaunty.
 ARCH=${ARCH/i[4-6]86/i386}
 ARCH=${ARCH/x86_64/amd64}

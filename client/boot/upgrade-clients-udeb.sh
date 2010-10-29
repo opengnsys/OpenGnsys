@@ -9,7 +9,9 @@
 # Variables
 PROG="$(basename $0)"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-DISTRIB=${1:-"jaunty"}
+test "$(lsb_release -is 2>/dev/null)" == "Ubuntu" && DEFDISTRIB="(lsb_release -cs)"
+DEFDISTRIB=${DEFDISTRIB:-"lucid"}
+DISTRIB=${1:-"$DEFDISTRIB"}		# Si no se indica, usar distribución por defecto.
 CFGFILE="$OPENGNSYS/etc/udeblist${1:+"-$1"}.conf"
 OGUDEB="$OPENGNSYS/client/lib/udeb"
 TMPUDEB="/tmp/udeb"
