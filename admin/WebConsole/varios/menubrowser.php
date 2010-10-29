@@ -76,6 +76,8 @@ function tomaIP(){
 		$ipcliente = $HTTP_SERVER_VARS["HTTP_X_FORWARDED_FOR"];
 	else
 		$ipcliente = $HTTP_SERVER_VARS["REMOTE_ADDR"];
+	if (empty ($ipcliente))
+		$ipcliente = $_SERVER["REMOTE_ADDR"];
 		
 	return($ipcliente);
 }
