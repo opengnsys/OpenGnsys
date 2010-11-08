@@ -25,7 +25,8 @@ fi
 if test $DROP; then
     mysql -u root -p"$MYSQLROOT" <<<"DROP DATABASE ogBDAdmin;" 2>/dev/null
     mysql -u root -p"$MYSQLROOT" <<<"DROP DATABASE ogAdmBD;" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP USER usuog;" 2>/dev/null
+    mysql -u root -p"$MYSQLROOT" <<<"DROP USER 'usuog';" 2>/dev/null
+    mysql -u root -p"$MYSQLROOT" <<<"DROP USER 'usuog'@'localhost';" 2>/dev/null
 fi
 # Eliminar ficheros.
 echo "Deleting OpenGnSys files."

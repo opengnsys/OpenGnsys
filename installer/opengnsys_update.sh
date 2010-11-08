@@ -226,6 +226,24 @@ function updateWebFiles()
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
 
+# Copiar carpeta de Interface 
+function updateInterfaceAdm () 
+{ 
+	local hayErrores=0 
+         
+	# Crear carpeta y copiar Interface 
+	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder" 
+	mv $INSTALL_TARGET/client/interfaceAdm $INSTALL_TARGET/client/Interface
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client
+	ERRCODE=$?
+	mv $INSTALL_TARGET/client/Interface $INSTALL_TARGET/client/interfaceAdm
+	if [ $? -ne 0 ]; then 
+		echoAndLog "${FUNCNAME}(): error while updating admin interface" 
+		exit 1
+	fi 
+	chmod -R +x $INSTALL_TARGET/client/interfaceAdm 
+	echoAndLog "${FUNCNAME}(): Admin interface updated successfully."
+} 
 
 # Crear documentación Doxygen para la consola web.
 function makeDoxygenFiles()
@@ -250,7 +268,6 @@ function createDirs()
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
 
 	mkdir -p ${INSTALL_TARGET}
-	mkdir -p ${INSTALL_TARGET}/admin/{autoexec,comandos,menus,usuarios}
 	mkdir -p ${INSTALL_TARGET}/bin
 	mkdir -p ${INSTALL_TARGET}/client
 	mkdir -p ${INSTALL_TARGET}/doc
@@ -281,6 +298,7 @@ function updateServerFiles () {
                         client/boot/udeblist-jaunty.conf  \
                         client/boot/udeblist-karmic.conf \
                         client/boot/udeblist-lucid.conf \
+                        client/boot/udeblist-maverick.conf \
                         repoman/bin \
                         doc )
 	local TARGETS=( bin/initrd-generator \
@@ -289,6 +307,7 @@ function updateServerFiles () {
                         etc/udeblist-jaunty.conf  \
                         etc/udeblist-karmic.conf \
                         etc/udeblist-lucid.conf \
+                        etc/udeblist-maverick.conf \
                         bin \
                         doc )
 
@@ -318,7 +337,7 @@ function recompileClient ()
 {
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): recompiling OpenGnSys Client"
-	pushd $WORKDIR/opengnsys/admin/Services/ogAdmClient
+	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
 	make && mv ogAdmClient ../../../client/nfsexport/bin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Client"
@@ -351,8 +370,8 @@ function updateClient()
 	fi
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-	OSCODENAME=$(lsb_release -c | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
+	OSDISTRIB=$(lsb_release -is) 2>/dev/null
+	OSCODENAME=$(lsb_release -cs) 2>/dev/null
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
@@ -456,6 +475,7 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"
 	exit 1
 fi
+updateInterfaceAdm
 
 # Actualizamos el fichero que arranca los servicios de OpenGnSys
 updateServicesStart
