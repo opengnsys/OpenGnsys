@@ -27,16 +27,17 @@ if [ -d $OPENGNSYS ]; then
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
     #/// Cargar fichero de idioma.
+    echo "$MSG_LOADAPI"
     LANGFILE=$OGETC/lang.$LANG.conf
     if [ -f $LANGFILE ]; then
 	source $LANGFILE
-	#for i in $(grep "^[a-zA-Z].*=" $LANGFILE | cut -f1 -d=); do
 	for i in $(awk -F= '{if (NF==2) print $1}' $LANGFILE); do
 	    export $i
 	done
     fi
+    # Cargar mapa de teclado.
+    loadkeys ${LANG%_*} >/dev/null
     #/// Cargar API de funciones.
-    echo "$MSG_LOADAPI"
     for i in $OGAPI/*.lib; do
         source $i
     done
