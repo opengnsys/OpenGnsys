@@ -360,6 +360,7 @@ function mysqlImportSqlFileToDb()
 	fi
 
 	echoAndLog "${FUNCNAME}(): importing sql file to ${database}..."
+	perl -pi -e "s/SERVERIP/$SERVERIP/g" ${sqlfile}
 	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $sqlfile
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while importing $sqlfile in database $database"
