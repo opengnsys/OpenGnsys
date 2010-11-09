@@ -905,7 +905,6 @@ function InterfaceAdm ()
 	# Crear carpeta y copiar Interface
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder"
 	cp -ar $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client/interfaceAdm
-	chmod -R +x $INSTALL_TARGET/client/interfaceAdm
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while copying Administration Interface Folder"
 		hayErrores=1
