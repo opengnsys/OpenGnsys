@@ -989,9 +989,13 @@ function openGnsysConfigure()
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
+	chown root:root $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
+	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
 	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
 	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
+	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso.php
+	chmod 600 $INSTALL_TARGET/www/controlacceso.php
 	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	/etc/init.d/opengnsys start
