@@ -10,8 +10,8 @@ if [ $# -lt 4 ]; then
 fi
 
 # Procesar parámetros de entrada
-echo "[0] Inicio del proceso de restauracion de imagen."
-IMGFILE=$(ogGetPath "$1" "$2.img")
+IMGTYPE=$(ogGetImageType "$1" "$2")
+IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     IMGDIR=$(ogGetParentPath "$1" "$2")
@@ -24,28 +24,32 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     # Procesar protocolos de transferencia.
     case "$PROTO" in
         UNICAST|unicast)
-            # Copiar fichero del repositorio al caché, si no existe en caché o es anterior.
-            if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.img" "$IMGFILE") ]; then
-                echo "[10] Copiando imagen \"$2\" del repositorio a cache local"
-                ogCopyFile "repo" "$2.img" "$IMGDIR" || exit $?
-                IMGFILE=$(ogGetPath "cache" "$2.img")
+            # Copiar fichero del repositorio al caché local.
+            IMGTYPE=$(ogGetImageType "repo" "$2")
+            IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
+            if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.$IMGTYPE" "$IMGFILE") ]; then
+                echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
+                ogCopyFile "repo" "$2.$IMGTYPE" "$IMGDIR" || exit $?
+                IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
             fi
             ;;
         MULTICAST|multicast)
             if [ -z "$IMGFILE" ]; then
-                echo "[10] Copiando imagen multicast \"$2\" del repositorio a cache local"
-                PORTBASE=`echo $6 | cut -f1 -d:`
-                echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:"CACHE" "$2.img" " 
-                ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.img" || exit $?
-                IMGFILE=$(ogGetPath "cache" "$2.img")
+            	echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
+		IMGTYPE=$(ogGetImageType "repo" "$2")
+            	PORTBASE=`echo $6 | cut -f1 -d:`
+      		echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:CACHE $2.$IMGTYPE" 
+      		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.$IMGTYPE" || exit $?
+      		IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
             fi
             ;;
         TORRENT|torrent)
-                echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a cache local"
-                ogCopyFile "repo" "$2.img.torrent" "$IMGDIR" || exit $?
-                echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a cache local"
-                ogTorrentStart "CACHE" "$2.img.torrent" "peer:60" || exit $?        		
-                IMGFILE=$(ogGetPath "cache" "$2.img")            
+		echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
+		IMGTYPE=$(ogGetImageType "repo" "$2")
+            	ogCopyFile "repo" "$2.$IMGTYPE.torrent" "$IMGDIR" || exit $?
+   		echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
+     		ogTorrentStart "CACHE" "$2.$IMGTYPE.torrent" "peer:60" || exit $?        		
+     		IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")            
             ;;
         *)  # Protocolo desconocido.
             ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"
@@ -58,18 +62,17 @@ if [ -z "$IMGFILE" ]; then
 fi
 PART=$(ogDiskToDev "$3" "$4") || exit $?
 
-
 # Restaurar la imagen.
-echo "[40] Restaurar imagen $IMGFILE en $PART"
+echo "[40] Restaurar imagen en $PART"
 ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 echo "[80] Extender sistema de archivos."
 ogExtendFs $3 $4
 # Cambiar nombre en sistemas Windows y quitar usuario de acceso por defecto.
 if [ "$(ogGetOsType $3 $4)" = "Windows" ]; then
-    echo "[90] Cambiar nombre Windows a \"$HOST\" y usuario de acceso."
     HOST=$(ogGetHostname)
     HOST=${HOST:-"pc"}
+    echo "[90] Cambiar nombre Windows a \"$HOST\" y usuario de acceso."
     ogSetWindowsName $3 $4 "$HOST"
     ogSetWinlogonUser $3 $4 " "
 fi

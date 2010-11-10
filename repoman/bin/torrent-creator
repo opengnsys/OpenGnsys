@@ -24,7 +24,7 @@ pushd $OGIMG >/dev/null
 
 # Procesar ficheros de imágenes.
 trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
-for IMG in *.img; do
+for IMG in *.{img,pgz}; do
 	# Saltar al siguiente si no existe el fichero.
 	[ -f "$IMG" ] || continue
 	# Comprobar si ya existe el fichero Torrent para esa imagen.

@@ -30,7 +30,7 @@
 #@Date    2008/05/13
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Version en pruebas para OpenGNSys
+#@version 0.9 - Versión en pruebas para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/10/07
 #*/ ##
@@ -46,7 +46,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 4 parámetros.
-[ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# -ne 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
 PART="$(ogDiskToDev $1 $2)" || return $?
 if ogIsLocked $1 $2; then
@@ -55,7 +55,7 @@ if ogIsLocked $1 $2; then
 fi
 IMGDIR=$(ogGetParentPath "$3" "$4")
 [ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$3 $(dirname $4)" || return $?
-IMGFILE="$IMGDIR/$(basename "$4").img"
+IMGFILE="$IMGDIR/$(basename "$4").pgz"
 ogUnmount $1 $2 2>/dev/null
 
 ogLock $1 $2 || return $?
@@ -63,14 +63,21 @@ trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
 
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
-    EXT[234]|REISERFS|XFS|JFS)
-        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
+    EXT[234])
+        #partclone.extfs -c -C -F -s $PART | gzip -c > "$IMGFILE"    # Muestra progreso
+        partclone.extfs -c -C -s $PART | gzip -c > "$IMGFILE"
+        ;;
+    REISERFS|XFS|JFS)
+        partclone.dd -c -C -s $PART | gzip -c > "$IMGFILE"
         ;;
     NTFS|HNTFS)
-        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
+        partclone.ntfs -c -C -s $PART | gzip -c > "$IMGFILE"
         ;;
     FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 save $PART "$IMGFILE"
+        partclone.fat -c -C -s $PART | gzip -c > "$IMGFILE"
+        ;;
+    HFS|HFS+)
+        partclone.hfsp -c -C -s $PART | gzip -c > "$IMGFILE"
         ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
         return $? ;;
@@ -88,11 +95,43 @@ return $ERRCODE
 
 
 #/**
+#         ogGetImageFs str_repo path_image
+#@brief   Devuelve el tipo de sistema de archivos almacenado en un fichero de imagen.
+#@param   str_repo    repositorio de imágenes o caché local
+#@param   path_image  camino de la imagen
+#@return  str_imgtype - mnemónico del tipo de sistema de archivos
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND fichero de imagen no encontrado.
+#@todo    Comprobar salidas para todos los tipos de sistemas de archivos.
+#/**
+function ogGetImageFs ()
+{
+local IMGFILE IMGTYPE
+IMGTYPE=$(ogGetImageType "$1" "$2")
+IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE") || return $?
+[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+case "$IMGTYPE" in
+    img) # Partimage.
+         partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
+                awk '/^Filesystem/ {sub(/\.\.+/," "); if ($2=="ntfs") print NTFS;
+                                                      else { sub(/fs$/,""); print toupper($2);} }'
+         ;;
+    pgz) # Partclone / GZip
+         gzip -dc "$IMGFILE" | partclone.chkimg -C -s - 2>&1 | \
+                awk '/^File system/ {if ($2=="EXTFS") print "EXT3"; else print $3;}'
+         ;;
+    *)   # Error si el fichero de imagen no es accesible.
+         ogRaiseError OG_ERR_NOTFOUND "$IMGFILE"
+         return $?  ;;
+esac
+}
+
+
 #         ogGetImageSize str_repo path_image
 #@brief   Devuelve el tamaño del sistema de archivos almacenado en un fichero de imagen.
 #@param   str_repo    repositorio de imágenes o caché local
 #@param   path_image  camino de la imagen
-#@return  tamaño (en KB)
+#@return  int_size  - tamaño (en KB)
 #@exception OG_ERR_FORMAT   formato incorrecto.
 #@exception OG_ERR_NOTFOUND fichero de imagen no encontrado.
 #*/
@@ -105,7 +144,7 @@ return $ERRCODE
 function ogGetImageSize ()
 {
 # Variables locales
-local IMGFILE
+local IMGFILE IMGTYPE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -114,14 +153,23 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben menos de 2 parámetros.
-[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-# Error si el fichero de imagen no es accesible.
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
-[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
-
+[ $# -ne 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 # Devuelve el tamaño de la imagen en KB.
-partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
-        awk '/Partition size/ {sub(/\.\.+/," "); printf "%d\n",$3*1024*1024;}'
+IMGTYPE=$(ogGetImageType "$1" "$2")
+IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
+case "$IMGTYPE" in
+    img) # Partimage.
+         partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
+                awk '/Partition size/ {sub(/\.\.+/," "); ps=$3} END {print ps*1024*1024;}'
+         ;;
+    pgz) # Partclone / GZip
+         gzip -dc "$IMGFILE" | partclone.chkimg -C -s - 2>&1 | \
+                awk -F: '/Block size/ {bs=$2} /Used block/ {ub=$2} END {print bs*ub/1024}'
+         ;;
+    *)   # Error si el fichero de imagen no es accesible.
+         ogRaiseError OG_ERR_NOTFOUND "$IMGFILE"
+         return $?  ;;
+esac
 }
 
 
@@ -129,13 +177,13 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 # Obtener tipo de imagen 
 function ogGetImageType ()
 {
-local IMGFILE
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
-[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
-partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
-        awk '/^Filesystem/ {sub(/\.\.+/," "); sub(/fs$/,""); print toupper($2);}'
+local IMGFILE IMGTYPE EXT
+for EXT in img pgz; do
+     IMGFILE=$(ogGetPath "$1" "$2.$EXT")
+     [ -r "$IMGFILE" ] && IMGTYPE="$EXT"
+done
+echo $IMGTYPE
 }
-
 
 #/**
 #         ogRestoreImage str_repo path_image int_ndisk int_npartition
@@ -149,21 +197,20 @@ partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
 #@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
 #@exception OG_ERR_LOCKED   partición bloqueada por otra operación.
 #@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
-#@warning En pruebas iniciales
 #@todo    Comprobar incongruencias partición-imagen, control de errores, definir parámetros, caché/repositorio, etc.
-#@version 0.1 -  Integracion para Opengnsys  -  HIDRA:RestaurarImagen{EXT3, NTFS}.sh;  EAC: RestorePartitionFromImage() en Deploy.lib
+#@version 0.1 -  Integracion para Opengnsys  - HIDRA:RestaurarImagen{EXT3, NTFS}.sh;  EAC: RestorePartitionFromImage() en Deploy.lib
 #@author Ramon Gomez, ETSII Universidad de Sevilla 
 #@Date    2008/05/13
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version muy en pruebas para OpenGNSys
+#@version 0.9 - Primera version muy en pruebas para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/10
 #*/ ##
 function ogRestoreImage ()
 {
 # Variables locales
-local PART PARTSIZE IMGFILE IMGSIZE
+local PART PARTSIZE IMGFILE IMGTYPE IMGSIZE FSTYPE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -175,7 +222,8 @@ fi
 [ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 # Procesar parámetros.
 PART="$(ogDiskToDev "$3" "$4")" || return $?
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
+IMGTYPE=$(ogGetImageType "$1" "$2")
+IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 # Error si la imagen no cabe en la particion.
 IMGSIZE=$(ogGetImageSize "$1" "$2")
@@ -194,21 +242,21 @@ ogUnmount $3 $4 2>/dev/null || return $?
 ogLock $3 $4 || return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
-# Restaurar según el tipo de sistema de archivos.
+# Restaurar según el tipo de imagen.
+# Atención: no se comprueba el tipo de sistema de archivos.
 # Atención: no se comprueba incongruencia entre partición e imagen.
-TYPE="$(ogGetFsType $3 $4)"
-case "$TYPE" in
-    EXT[234]|REISERFS|XFS|JFS)
-        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
-        ;;
-    NTFS|HNTFS)
-        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
-        ;;
-    FAT16|FAT32|HFAT16|HFAT32)
-        partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
-        ;;
-    *)  ogRaiseError $OG_ERR_FORMAT
-        return $? ;;
+#FSTYPE="$(ogGetFsType $3 $4)"
+case "$IMGTYPE" in
+    img) # Partimage
+         partimage -M -f3 -o -d -V0 -B gui=no -c -z1 --volume=0 restore $PART "$IMGFILE"
+         ;;
+    pgz) # Partclone / GZip
+         #gzip -dc "$IMGFILE" | partclone.restore -C -F -o "$PART"   # Muestra progreso
+         gzip -dc "$IMGFILE" | partclone.restore -C -o "$PART"
+         ;;
+    *)   # Error si imagen no accesible o de tipo desconocido.
+         ogRaiseError $OG_ERR_FORMAT
+         return $? ;;
 esac
 ERRCODE=$?
 if [ $ERRCODE != 0 ]; then

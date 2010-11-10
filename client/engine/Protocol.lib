@@ -18,7 +18,7 @@
 #@return  1 si NO pertenece al grupo
 #@exception OG_ERR_FORMAT     formato incorrecto.
 #@note    
-#@TODO: 
+#@todo 
 #@version 0.91 - Definición de 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
@@ -48,9 +48,6 @@ done
 return 1
 } 
 
-
-
-
 #/**
 #         ogCheckStringInReg
 #@brief   Función para determinar si el elemento contiene una "expresión regular"
@@ -60,7 +57,7 @@ return 1
 #@return  1 si NO coincide con la expresión
 #@exception OG_ERR_FORMAT     formato incorrecto.
 #@note    
-#@TODO: 
+#@todo 
 #@version 0.91 - Definición de 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
@@ -97,7 +94,7 @@ REG=$2
 #@return  1 si NO es una dirección válida
 #@exception OG_ERR_FORMAT     formato incorrecto.
 #@note    
-#@TODO: 
+#@todo 
 #@version 0.91 - Definición de 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
@@ -147,7 +144,7 @@ return 1
 #@return  instrucción para ser ejecutada.
 #@exception OG_ERR_FORMAT     formato incorrecto.
 #@note    Requisitos: upd-cast 2009
-#@TODO: localvar  check versionudp
+#@todo    localvar  check versionudp
 #@version 0.91 - Definición de FileTransfer
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
@@ -169,10 +166,10 @@ if [ "$*" == "help" -o "$2" == "help" ]; then
 		   "$FUNCNAME RECEIVERPARTITION  str_sessionCLIENT     str_device str_tools str_level "\
 		   "$FUNCNAME SENDFILE           str_sessionSERVER     str_file "\
 		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file " \
-		   "sessionServer syntax:      portbase:mcastaddres:method:speed:nclients:ntimeWaitingUntilNclients " \
-		   "sessionServer example:     9000:239.194.17.36:80M:50:60 " \
-		   "sessionClient syntax:      portbase " \
-		   "sessionClient example:     9000 "
+                   "sessionServer syntax:        portbase:mcastaddres:method:speed:nclients:ntimeWaitingUntilNclients " \
+                   "sessionServer example:       9000:239.194.17.36:80M:50:60 " \
+                   "sessionClient syntax:        portbase " \
+                   "sessionClient example:       9000 "
     return
 fi
 PERROR=0
@@ -618,7 +615,7 @@ then
 	case "$MODE" in
         peer|PEER)
         	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
-            ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
+            ctorrent -v -f -X "sleep 15; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf >> $OGLOGFILE
         ;;
         leecher|LEECHER)
            	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
@@ -670,7 +667,7 @@ cd /tmp
 ogCreateTorrent ()
 {
 # Variables locales.
-local ARGS ARG SOURCE IPTORRENT
+local ARGS ARG SOURCE EXT IPTORRENT
 
 
 # Si se solicita, mostrar ayuda.
@@ -694,7 +691,8 @@ case "$1" in
         ARG=4
         ;;
     *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
-           SOURCE=$(ogGetPath "$1" "$2.img")
+	EXT=$(ogGetImageType "$1" "$2")
+        SOURCE=$(ogGetPath "$1" "$2.$EXT")
         ARG=3
         ;;
 esac
@@ -827,7 +825,7 @@ fi
 ogShareTorrent ()
 {
 # Variables locales.
-local ARGS SOURCE TARGET
+local ARGS SOURCE EXT TARGET
 
 
 # Si se solicita, mostrar ayuda.
@@ -852,7 +850,8 @@ case "$1" in
         ARG=3
         ;;
     *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
-           SOURCE=$(ogGetPath "$1" "$2.img" 2>/dev/null)
+	EXT=$(ogGetImageType "$1" "$2")
+        SOURCE=$(ogGetPath "$1" "$2.$EXT" 2>/dev/null)
         ARG=2
         ;;
 esac
@@ -932,11 +931,13 @@ case "$1" in
         ARG=3
         ;;
     *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+    EXT=$(ogGetImageType "$1" "$2")
     TARGETDIR=$(ogGetParentPath "$1" "$2")
         ARG=2
         ;;
 esac
 #echo $TARGETDIR
+EXT=${EXT:-"img"}
 
 # Error si no se reciben los argumentos ARG necesarios según la opcion.
 [ "$#" -ne "$ARG" ] && ogRaiseError $OG_ERR_FORMAT && return $?
@@ -946,18 +947,18 @@ TARGETFILE=`basename ${!ARG}`
 CACHE=`ogMountCache`
 
 # Error si no existe el fichero torrent
-[ -r $TARGETDIR/$TARGETFILE.img.torrent ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
+[ -r $TARGETDIR/$TARGETFILE.$EXT.torrent ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
 [ -d ${CACHE}/$OGIMG ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
 
 TimeToWaitForCloseAfterDownload=20  # tiempo que deseamos que el cliente este como semilla, despues de la descarga.
 
 # Si el fichero ya se ha bajado antes de iniciar el ctorrent no se ejecuta el comando kill, siguen encendido siempre
 # Comprobamos si se ha descargado antes, si es asi nos salimos
-Total=`ctorrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -c $TARGETDIR/$TARGETFILE.img.torrent|tail -n1|cut -f2 -d\(`
+Total=`ctorrent -s ${CACHE}/$OGIMG/${TARGETFILE}.$EXT -c $TARGETDIR/$TARGETFILE.$EXT.torrent|tail -n1|cut -f2 -d\(`
 [ $Total == "100%)" ] &&  return 0
 
-echo "ctorrent -X 'sleep $TimeToWaitForCloseAfterDownload; kill -9 \$(pidof ctorrent)' $TARGETDIR/$TARGETFILE.img.torrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -b ${CACHE}/$OGIMG/$TARGETFILE.bf -C 100"
-ctorrent -X "sleep $TimeToWaitForCloseAfterDownload; kill -9 \$(pidof ctorrent)" $TARGETDIR/$TARGETFILE.img.torrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -b ${CACHE}/$OGIMG/$TARGETFILE.bf -C 100
+#echo "ctorrent -X 'sleep $TimeToWaitForCloseAfterDownload; kill -9 \$(pidof ctorrent)' $TARGETDIR/$TARGETFILE.img.torrent -s ${CACHE}/$OGIMG/${TARGETFILE}.img -b ${CACHE}/$OGIMG/$TARGETFILE.bf -C 100"
+ctorrent -X "sleep $TimeToWaitForCloseAfterDownload; kill -9 \$(pidof ctorrent)" $TARGETDIR/$TARGETFILE.$EXT.torrent -s ${CACHE}/$OGIMG/${TARGETFILE}.$EXT -b ${CACHE}/$OGIMG/$TARGETFILE.bf -C 100
 
 [ -r ${CACHE}/$OGIMG/$TARGETFILE.bf ] && rm ${CACHE}/$OGIMG/$TARGETFILE.bf
 }

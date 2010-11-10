@@ -9,7 +9,6 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
-echo "[0] Inicio del proceso de creacion de imagen."
 # Si el repositorio es CACHE comprobamos que exista
 [ $3 == "REPO" -o $3 == "repo" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| exit $?
 
@@ -23,11 +22,12 @@ if [ $? != 0 ]; then
     ogMakeDir "$3" $(dirname "/$4")
     IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $?
 fi
-IMGFILE=$IMGDIR/$(basename "/$4").img
+IMGFILE=$IMGDIR/$(basename "/$4").pgz
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
     echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"."
     mv "$IMGFILE" "$IMGFILE.ant"
+    mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
 fi
 # Mostrar información.
 echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
@@ -43,8 +43,6 @@ if [ $REDSIZE -lt $SIZE ]; then
 fi
 # Crear la imagen.
 echo "[40] Crear imagen."
-#ejemplo test herramienta de clonacion
-#ogCreateImage "$@" partclone lzop
 ogCreateImage "$@"
 EXITCODE=$?
 # Restaurar tamaño.
