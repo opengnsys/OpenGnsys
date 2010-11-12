@@ -30,9 +30,15 @@ if test $DROP; then
 fi
 # Eliminar ficheros.
 echo "Deleting OpenGnSys files."
-rm -fr /opt/opengnsys
+for dir in /opt/opengnsys/*; do
+    if [ "$dir" != "/opt/opengnsys/images" ]; then
+        rm -fr "$dir"
+    fi
+done
 rm -f /etc/init.d/opengnsys /etc/default/opengnsys
-echo "Post-installation tasks:"
+# Tareas manuales a realizar después de desinstalar.
+echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"
 echo "     (DHCP, PXE, TFTP, NFS, Apache, MySQL)."
+echo "- Delete repository directory \"/opt/opengnsys/images\""
 
