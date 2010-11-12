@@ -37,7 +37,7 @@ if(!empty($rsmenu)){
 		case $ITEMS_PUBLICOS:
 			if(!empty($rsmenu->campos["htmlmenupub"])){
 				$urlHtml=$rsmenu->campos["htmlmenupub"];
-				if(strtoupper(substr($urlHtml,0,7)!="HTTP://")) $urlHtml="http://".$urlHtml;
+				if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
 				Header('Location: '.$urlHtml); // Url del menu personalizado
 			}
 			else{
@@ -50,7 +50,7 @@ if(!empty($rsmenu)){
 			if(!empty($rsmenu->campos["htmlmenupri"])){
 				$urlHtml=$rsmenu->campos["htmlmenupri"];
 				
-				if(strtoupper(substr($urlHtml,0,7)!="HTTP://")) $urlHtml="http://".$urlHtml;
+				if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
 				Header('Location: '.$urlHtml); // Url del menu personalizado
 			}
 			else{
