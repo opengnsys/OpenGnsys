@@ -418,7 +418,7 @@ BOOLEAN cuestionCache(char* tam)
 int cargaPaginaWeb(char *url)
 {
 	int resul=0;
-	char* argumentos[3];
+	char* argumentos[4];
 	char modulo[] = "cargaPaginaWeb()";
 
 	if(pidbash>0)
@@ -428,10 +428,10 @@ int cargaPaginaWeb(char *url)
 		kill(pidbrowser,SIGQUIT); // Destruye el proceso hijo anterior y se queda sólo el actual
 
 	sprintf(interface,"/opt/opengnsys/bin/browser");
-	sprintf(parametros,"%s %s %s","browser","-qws",url);
+	sprintf(parametros,"browser -qws %s",url);
 
 	splitCadena(argumentos,parametros,' '); // Crea matriz de los argumentos del scripts
-
+	argumentos[3]=NULL;
 	if((pidbrowser=fork())==0){
 		/* Proceso hijo que ejecuta el script */
 		resul=execv(interface,argumentos);
