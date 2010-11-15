@@ -13,20 +13,27 @@ PATH=$PATH:$OGBIN
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     echo "Formato: $PROG fichero|nombreImagen datosMulticast"
-    echo "Ejemplo: $PROG /opt/opengnsys/images/PS1_PH1.img 9000:full-duplex:239.194.17.2:70M:20:300"
-    echo "Ejemplo: $PROG PS1_PH1 9000:full:239.194.17.2:70M:20:300"
+    echo "Ejemplo: $PROG /opt/opengnsys/images/imagen1.pgz 9000:full-duplex:239.194.17.2:70M:20:120"
+    echo "Ejemplo: $PROG imagen1 9000:full:239.194.17.2:70M:20:120"
     exit 0
 fi
 # Error si no se reciben 2 parámetros.
 if [ $# -ne 2 ]; then
-    echo "$PROG Error: Formato: $PROG fichero datosMulticast" >&2
+    echo "$PROG Error: Formato: $PROG fichero|nombreImagen datosMulticast" >&2
     exit 1
 fi
 
 # Fichero de imagen (camino completo o nombre de imagen sin extensión).
 FICH="$1"
-[ "${FICH:0:1}" != "/" ] && FICH="$OGIMG/$1.img"
-if [ ! -f $FICH ]; then
+if [ "${FICH:0:1}" != "/" ]; then
+    for EXT in pgz img; do
+        FICHIMG="$OGIMG/$FICH.$EXT"
+        [ -r "$FICHIMG" ] && break
+    done
+else
+    FICHIMG="$FICH"
+fi
+if [ ! -f $FICHIMG]; then
     echo "$PROG Error: Fichero \"$FICH\" no accesible" >&2
     exit 2
 fi
@@ -52,5 +59,5 @@ CERROR="8x8/128"
 
 # Envío de fichero por Multicast.
 which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
-udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$1"
+udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG"
 
