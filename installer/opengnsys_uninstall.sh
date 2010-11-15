@@ -2,13 +2,15 @@
 # Desinstalación de OpenGnSys.
 
 
-# Variables.
-OPENGNSYS="/opt/opengnsys"    # Directorio de OpenGnSys
-OGIMG="images"                # Directorio de imágenes del repositorio
+####  AVISO: Editar configuración de acceso.
 MYSQLROOT="passwordroot"      # Clave de root de MySQL
 DATABASE="ogAdmBD"            # Base de datos de administración
 OLDDATABASE="ogBDAdmin"       # Antigua base de datos
 DBUSER="usuog"                # Usuario de acceso a la base de datos
+
+# Variables.
+OPENGNSYS="/opt/opengnsys"    # Directorio de OpenGnSys
+OGIMG="images"                # Directorio de imágenes del repositorio
 
 # Parar servicio.
 echo "Uninstalling OpenGnSys services."
@@ -47,5 +49,5 @@ rm -f /etc/init.d/opengnsys /etc/default/opengnsys
 echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"
 echo "     (DHCP, PXE, TFTP, NFS, Apache, MySQL)."
-echo "- Delete repository directory \"$OGIMG\""
+echo "- Delete repository directory \"$OPENGNSYS/$OGIMG\""
 

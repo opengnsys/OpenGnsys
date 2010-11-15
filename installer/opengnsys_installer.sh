@@ -7,6 +7,13 @@
 
 
 
+####  AVISO: Editar configuración de acceso por defecto
+MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
+OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
+OPENGNSYS_DB_USER="usuog"		# Usuario de acceso
+OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario
+
+
 # Sólo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]
 then
@@ -33,12 +40,7 @@ LOG_FILE=/tmp/opengnsys_installation.log
 # Array con las dependencias
 DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent )
 
-# Datos de base de datos
-MYSQL_ROOT_PASSWORD="passwordroot"
-
-OPENGNSYS_DATABASE=ogAdmBD
-OPENGNSYS_DB_USER=usuog
-OPENGNSYS_DB_PASSWD=passusuog
+# Base de datos
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/$OPENGNSYS_DATABASE.sql
 
 
@@ -987,7 +989,7 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	perl -pi -e "s/SERVERIP/$SERVERIP/g s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
+	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
 	chown root:root $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
 	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
