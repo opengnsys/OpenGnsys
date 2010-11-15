@@ -915,5 +915,5 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 --
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`) VALUES
-(1, 'usuog', 'passusuog', 'Usuario de la base de datos MySql', '', 1, 1);
+(1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1);
 

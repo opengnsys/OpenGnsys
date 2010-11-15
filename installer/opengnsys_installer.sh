@@ -352,9 +352,11 @@ function mysqlImportSqlFileToDb()
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
-	local sqlfile=$3
+	local root_password="$1"
+	local database="$2"
+	local sqlfile="$3"
+	local tmpfile=$(mktemp)
+	local status
 
 	if [ ! -f $sqlfile ]; then
 		errorAndLog "${FUNCNAME}(): Unable to locate $sqlfile!!"
@@ -362,9 +364,13 @@ function mysqlImportSqlFileToDb()
 	fi
 
 	echoAndLog "${FUNCNAME}(): importing sql file to ${database}..."
-	perl -pi -e "s/SERVERIP/$SERVERIP/g" $sqlfile
-	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $sqlfile
-	if [ $? -ne 0 ]; then
+	chmod 600 $tmpfile
+	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
+	    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
+	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $tmpfile
+	status=$?
+	rm -f $tmpfile
+	if [ $status -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while importing $sqlfile in database $database"
 		return 1
 	fi
