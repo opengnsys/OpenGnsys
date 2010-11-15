@@ -33,7 +33,7 @@ if [ "${FICH:0:1}" != "/" ]; then
 else
     FICHIMG="$FICH"
 fi
-if [ ! -f $FICHIMG]; then
+if [ ! -f "$FICHIMG" ]; then
     echo "$PROG Error: Fichero \"$FICH\" no accesible" >&2
     exit 2
 fi
