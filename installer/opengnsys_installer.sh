@@ -985,14 +985,14 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
-	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
+	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
+	perl -pi -e "s/SERVERIP/$SERVERIP/g s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
 	chown root:root $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
 	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
 	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
-	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
+	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso.php
 	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
