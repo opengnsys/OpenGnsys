@@ -23,11 +23,8 @@ case "$OSTYPE" in
     Windows)
         echo "[30] Activar particion de Windows $PART."
         ogSetPartitionActive $1 $2
-        echo "[40] Comprobar sistema de archivos."
-        ogCheckFs $1 $2
         echo "[50] Asignar nombre Windows \"$NAME\" y usuario por defecto."
         ogSetWindowsName $1 $2 "$NAME"
-        ogSetWinlogonUser $1 $2 " "
         ;;
     Linux)
         echo "[30] Asignar nombre Linux \"$NAME\"."
