@@ -33,14 +33,14 @@ LOG_FILE=/tmp/opengnsys_installation.log
 # Array con las dependencias
 DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent )
 
-
 # Datos de base de datos
 MYSQL_ROOT_PASSWORD="passwordroot"
 
 OPENGNSYS_DATABASE=ogAdmBD
 OPENGNSYS_DB_USER=usuog
 OPENGNSYS_DB_PASSWD=passusuog
-OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
+OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/$OPENGNSYS_DATABASE.sql
+
 
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
@@ -360,7 +360,7 @@ function mysqlImportSqlFileToDb()
 	fi
 
 	echoAndLog "${FUNCNAME}(): importing sql file to ${database}..."
-	perl -pi -e "s/SERVERIP/$SERVERIP/g" ${sqlfile}
+	perl -pi -e "s/SERVERIP/$SERVERIP/g" $sqlfile
 	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $sqlfile
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while importing $sqlfile in database $database"
@@ -691,8 +691,7 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP \
-			$INSTALL_TARGET/www/images/iconos
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 
@@ -1168,7 +1167,7 @@ else
 	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
 	INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
 	REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-	OPENGNSYS_DB_UPDADE_FILE="opengnsys/admin/Database/ogBDAdmin-$INSTVERSION-$REPOVERSION.sql"
+	OPENGNSYS_DB_UPDADE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
  	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
  		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE

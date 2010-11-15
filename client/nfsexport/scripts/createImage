@@ -10,8 +10,12 @@ if [ $# -ne 4 ]; then
 fi
 
 # Si el repositorio es CACHE comprobamos que exista
-[ $3 == "REPO" -o $3 == "repo" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| exit $?
-
+if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
+    if ! $(ogFindCache >/dev/null); then
+        ogRaiseError $OG_ERR_NOTFOUND "CACHE"
+        exit $?
+    fi
+fi
 
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
@@ -32,28 +36,14 @@ fi
 # Mostrar información.
 echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
 
-# Obtener tamaño de la partición.
-SIZE=$(ogGetPartitionSize "$1" "$2")
-# Reducir el sistema de archvios.
-echo "[20]: Reducir sistema de archivos."
-REDSIZE=$(ogReduceFs $1 $2) || REDSIZE=$[SIZE+1]
-if [ $REDSIZE -lt $SIZE ]; then
-    echo "[25] Redimensionar particion a $REDSIZE KB."
-    ogSetPartitionSize $1 $2 $REDSIZE
-fi
 # Crear la imagen.
-echo "[40] Crear imagen."
-ogCreateImage "$@"
-EXITCODE=$?
-# Restaurar tamaño.
-if [ $REDSIZE -lt $SIZE ]; then
-    echo "[85] Redimensionar particion a $SIZE KB."
-    ogSetPartitionSize $1 $2 $SIZE
-    echo "[90] Extender sistema de archivos."
-    ogExtendFs $1 $2
-fi
+echo "[20] Crear imagen."
+ogCreateImage "$@" || exit $?
+
+# Comprobar consistencia del sistema de archivos.
+echo "[80] Crear imagen."
+ogCheckFs $1 $2
 
 TIME=$[SECONDS-TIME1]
 echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
-exit $EXITCODE
 
