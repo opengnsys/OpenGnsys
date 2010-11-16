@@ -43,10 +43,8 @@ fi
 # Error si no se reciben menos de 2 parámetros.
 [ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Desmontar todos los sistemas de archivos del disco.
-DISK=$(ogDiskToDev "$1") || return $?
-ogUnmountAll $1
 # Nº total de sectores, para evitar desbordamiento (evitar redondeo).
+DISK=$(ogDiskToDev "$1") || return $?
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 SECTORS=$[SECTORS/CYLS*CYLS-1]
@@ -117,6 +115,10 @@ done
 if [ $PART = 5 -a -n "$EXTSTART" ]; then
     echo "${DISK}5 : start=$EXTSTART, size=$EXTSIZE, Id=0" >>$tmpsfdisk
 fi
+
+# Desmontar los sistemas de archivos del disco antes de realizar las operaciones.
+ogUnmountAll $1
+[ -n "$CACHESIZE" ] && ogUnmountCache
 
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
