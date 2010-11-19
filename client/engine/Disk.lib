@@ -33,7 +33,7 @@
 function ogCreatePartitions ()
 {
 # Variables locales.
-local DISK PART SECTORS CYLS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PART SECTORS CYLS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -44,13 +44,14 @@ fi
 [ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Nº total de sectores, para evitar desbordamiento (evitar redondeo).
-DISK=$(ogDiskToDev "$1") || return $?
+ND="$1"
+DISK=$(ogDiskToDev "$ND") || return $?
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 SECTORS=$[SECTORS/CYLS*CYLS-1]
 # Se recalcula el nº de sectores del disco 1, si existe partición de caché.
 CACHEPART=$(ogFindCache 2>/dev/null)
-[ "$1" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
+[ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
 # Sector de inicio (la partición 1 empieza en el sector 63).
@@ -68,7 +69,7 @@ echo                >>$tmpsfdisk
 shift
 while [ $# -gt 0 ]; do
     # Conservar los datos de la partición de caché.
-    if [ "$1 $PART" = "$CACHEPART" -a -n "$CACHESIZE" ]; then
+    if [ "$ND $PART" == "$CACHEPART" -a -n "$CACHESIZE" ]; then
         echo "$DISK$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
         PART=$[PART+1]
     fi
@@ -104,7 +105,7 @@ while [ $# -gt 0 ]; do
 done
 # Si no se indican las 4 particiones primarias, definirlas como vacías, conservando la partición de caché.
 while [ $PART -le 4 ]; do
-    if [ "$1 $PART" = "$CACHEPART" -a -n "$CACHESIZE" ]; then
+    if [ "$ND $PART" == "$CACHEPART" -a -n "$CACHESIZE" ]; then
         echo "$DISK$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
     else
         echo "$DISK$PART : start=0, size=0, Id=0" >>$tmpsfdisk
@@ -117,14 +118,15 @@ if [ $PART = 5 -a -n "$EXTSTART" ]; then
 fi
 
 # Desmontar los sistemas de archivos del disco antes de realizar las operaciones.
-ogUnmountAll $1
-[ -n "$CACHESIZE" ] && ogUnmountCache
+ogUnmountAll $ND 2>/dev/null
+[ -n "$CACHESIZE" ] && ogUnmountCache 2>/dev/null
 
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
 sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
 rm -f $tmpsfdisk
+[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
 }
 
 

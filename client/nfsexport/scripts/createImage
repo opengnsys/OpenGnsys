@@ -36,13 +36,13 @@ fi
 # Mostrar información.
 echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
 
-# Crear la imagen.
-echo "[20] Crear imagen."
-ogCreateImage "$@" || exit $?
-
 # Comprobar consistencia del sistema de archivos.
-echo "[80] Crear imagen."
+echo "[20] Comprobar sistema de archivos."
 ogCheckFs $1 $2
+
+# Crear la imagen.
+echo "[30] Crear imagen."
+ogCreateImage $1 "$2" $3 $4 || exit $?
 
 TIME=$[SECONDS-TIME1]
 echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
