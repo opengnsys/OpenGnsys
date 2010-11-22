@@ -8,10 +8,10 @@
 #@date    2009-10-10
 #*/
 
-# FIXME Temporal
+# Idioma por defecto.
 export LANG="${LANG:-es_ES}"
 
-#/// Directorios del projecto OpenGNSys.
+# Directorios del projecto OpenGnSys.
 export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys}"
 if [ -d $OPENGNSYS ]; then
     export OGBIN=$OPENGNSYS/bin
@@ -26,8 +26,7 @@ if [ -d $OPENGNSYS ]; then
     export PATH=$OGBIN:$OGAPI:$OGSCRIPTS:$PATH
     export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
 
-    #/// Cargar fichero de idioma.
-    echo "$MSG_LOADAPI"
+    # Cargar fichero de idioma.
     LANGFILE=$OGETC/lang.$LANG.conf
     if [ -f $LANGFILE ]; then
 	source $LANGFILE
@@ -35,9 +34,10 @@ if [ -d $OPENGNSYS ]; then
 	    export $i
 	done
     fi
+    echo "$MSG_LOADAPI"
     # Cargar mapa de teclado.
     loadkeys ${LANG%_*} >/dev/null
-    #/// Cargar API de funciones.
+    # Cargar API de funciones.
     for i in $OGAPI/*.lib; do
         source $i
     done
@@ -61,10 +61,10 @@ if [ -d $OPENGNSYS ]; then
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
     # FIXME Pruebas para grupos de ordenadores
     #export OGGROUP=$(ogGetGroup)
-    export OGGROUP=aula3
+    export OGGROUP="$group"
 fi
 
-#/// Declaración de códigos de error.
+# Declaración de códigos de error.
 export OG_ERR_FORMAT=1		# Formato de ejecución incorrecto.
 export OG_ERR_NOTFOUND=2	# Fichero o dispositivo no encontrado.
 export OG_ERR_PARTITION=3	# Error en partición de disco.
