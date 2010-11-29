@@ -74,7 +74,7 @@ if [ "$(ogGetOsType $3 $4)" = "Windows" ]; then
     HOST=${HOST:-"pc"}
     echo "[90] Cambiar nombre Windows a \"$HOST\" y usuario de acceso."
     ogSetWindowsName $3 $4 "$HOST"
-    ogSetWinlogonUser $3 $4 " "
+    #ogSetWinlogonUser $3 $4 " "	# Descomentar para cambiar usuario de inicio.
 fi
 TIME=$[SECONDS-TIME1]
 echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
