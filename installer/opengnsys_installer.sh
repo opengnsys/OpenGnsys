@@ -815,7 +815,8 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist-karmic.conf \
                         client/boot/udeblist-lucid.conf \
                         client/boot/udeblist-maverick.conf \
-                        server/PXE/pxelinux.cfg/default \
+                        server/PXE/pxelinux.cfg \
+                        server/bin \
                         repoman/bin \
                         doc )
 	local TARGETS=( bin/initrd-generator \
@@ -825,7 +826,8 @@ function openGnsysCopyServerFiles () {
                         etc/udeblist-karmic.conf \
                         etc/udeblist-lucid.conf \
                         etc/udeblist-maverick.conf \
-                        tftpboot/pxelinux.cfg/default \
+                        tftpboot/pxelinux.cfg \
+                        bin \
                         bin \
                         doc )
 
@@ -841,7 +843,7 @@ function openGnsysCopyServerFiles () {
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -f "${SOURCES[$i]}" ]; then
 			echoAndLog "Copying ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
-			cp -p "${SOURCES[$i]}" "${path_opengnsys_base}/${TARGETS[$i]}"
+			cp -a "${SOURCES[$i]}" "${path_opengnsys_base}/${TARGETS[$i]}"
 		elif [ -d "${SOURCES[$i]}" ]; then
 			echoAndLog "Copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -a "${SOURCES[$i]}"/* "${path_opengnsys_base}/${TARGETS[$i]}"

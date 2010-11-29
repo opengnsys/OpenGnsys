@@ -1,9 +1,9 @@
 #!/bin/bash
-# listclientmode.sh: Lista la plantilla de arranque PXE para los clientes, 
+# listclientmode: Lista la plantilla de arranque PXE para los clientes, 
 #	ya sea un equipo o un aula.
 # Nota: Si no existe un enlace entre el fichero PXE con la Ethernet del equipo y su
 #	 archivo plantilla, se considera que la plantilla por omisión es "default".
-# Uso: listclienmode.sh NombrePC | NombreAula
+# Uso:	listclienmode NombrePC | NombreAula
 # Autores: Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 
 

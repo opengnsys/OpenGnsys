@@ -1,9 +1,9 @@
 #!/bin/bash
-# setclientmode.sh: Configura el archivo de arranque de PXE para los clientes, 
+# setclientmode: Configura el archivo de arranque de PXE para los clientes,
 #	ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla. 
 # Nota: El archivo PXE por defecto "default" se deja en modo de ejecución "user" 
 #	y se eliminan los enlaces para equipos con la plantilla por defecto.
-# Uso: clienmode.sh NombrePlatilla { NombrePC | NombreAula }
+# Uso:	clienmode NombrePlatilla { NombrePC | NombreAula }
 # Autores: Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 
 
