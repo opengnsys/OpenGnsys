@@ -32,7 +32,6 @@ fi
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
-pushd $WORKDIR
 
 INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_installation.log
@@ -466,13 +465,13 @@ function svnExportCode()
 		exit 1
 	fi
 
-	local url=$1
+	local url="$1"
 
 	echoAndLog "${FUNCNAME}(): downloading subversion code..."
 
-	svn export "${url}" opengnsys
+	svn export --force "$url" opengnsys
 	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
+		errorAndLog "${FUNCNAME}(): error getting OpenGnSys code from $url"
 		return 1
 	fi
 	echoAndLog "${FUNCNAME}(): subversion code downloaded"
@@ -1047,6 +1046,7 @@ echo
 #####################################################################
 
 echoAndLog "OpenGnSys installation begins at $(date)"
+pushd $WORKDIR
 
 # Detener servicios de OpenGnSys, si están activos previamente.
 [ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
