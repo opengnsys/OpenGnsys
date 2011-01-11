@@ -26,11 +26,19 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         UNICAST|unicast)
             # Copiar fichero del repositorio al caché local.
             IMGTYPE=$(ogGetImageType "repo" "$2")
-            IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
+            IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
             if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.$IMGTYPE" "$IMGFILE") ]; then
                 echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
-                ogCopyFile "repo" "$2.$IMGTYPE" "$IMGDIR" || exit $?
+                ogCopyFile "repo" "$2.$IMGTYPE" "$IMGDIR"
+            fi
+            # Comprobar si existe el fichero en caché y no en el repositorio.
+            if [ -z "$IMGFILE" ]; then
+                IMGTYPE=$(ogGetImageType "cache" "$2")
                 IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
+                if [ -z "$IMGFILE" ]; then
+                    ogRaiseError $OG_ERR_NOTFOUND "cache, $2.$IMGTYPE"
+                    exit $?
+                fi
             fi
             ;;
         MULTICAST|multicast)
