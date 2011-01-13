@@ -4,7 +4,7 @@
 #@brief    Librería o clase Net
 #@class    Net
 #@brief    Funciones básicas de red.
-#@version  1.0
+#@version  0.10
 #@warning  License: GNU GPLv3+
 #*/
 
@@ -13,7 +13,7 @@
 #         ogGetHostname
 #@brief   Muestra el nombre del cliente.
 #@return  str_host - nombre de máquina
-#@version 1.0 - Integración en OpenGnSys 1.0
+#@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-02-11
 #*/ ##
@@ -38,7 +38,7 @@ echo $HOST
 #         ogGetIpAddress
 #@brief   Muestra la dirección IP del sistema
 #@return  str_ip - Dirección IP
-#@version 1.0 - Integración en OpenGnSys 1.0
+#@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-02-11
 #*/ ##
@@ -56,7 +56,7 @@ echo ${IP%% *}
 #         ogGetMacAddress
 #@brief   Muestra la dirección Ethernet del cliente.
 #@return  str_ether - Dirección Ethernet
-#@version 1.0 - Integración en OpenGnSys 1.0
+#@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-02-11
 #*/ ##
@@ -68,4 +68,35 @@ MAC=$(ip address show | awk '$2!~/lo/ {readline; if ($1~/ether/) printf ("%s ", 
 # Mostrar sólo la primera.
 echo ${MAC%% *}
 }
+
+
+#/**
+#         ogGetRepoIp
+#@brief   Muestra la dirección IP del repositorio de datos.
+#@return  str_ip - Dirección IP
+#@version 0.10 - Integración en OpenGnSys 0.10
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-01-13
+#*/ ##
+function ogGetRepoIp ()
+{
+# Obtener direcciones IP.
+[ -n "$OGIMG" ] && mount | grep " $OGIMG .* nfs " | cut -f1 -d:
+}
+
+
+#/**
+#         ogGetServerIp
+#@brief   Muestra la dirección IP del Servidor de OpenGnSys.
+#@return  str_ip - Dirección IP
+#@version 0.10 - Integración en OpenGnSys 0.10
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-01-13
+#*/ ##
+function ogGetServerIp ()
+{
+# Obtener direcciones IP.
+[ -n "$OPENGNSYS" ] && mount | grep " $OPENGNSYS .* nfs " | cut -f1 -d:
+}
+
 
