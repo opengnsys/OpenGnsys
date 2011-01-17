@@ -49,7 +49,7 @@ fi
 #@brief   Devuelve el mensaje y el código de error correspondiente.
 #@param   int_errcode    código de error.
 #@param   str_errmessage mensajes complementarios de error.
-#@return  Mensaje de error.
+#@return  str_message - Mensaje de error.
 #@warning No definidas
 #@note    Mensajes internacionales del fichero de idiomas.
 #@version 0.9 - Primera versión para OpenGnSys.
@@ -84,6 +84,50 @@ return $CODE
 
 
 #/**
+#         ogGetCaller
+#@brief   Devuelve nombre del programa o script ejecutor (padre).
+#@param   No.
+#@return  str_name - Nombre del programa ejecutor.
+#@version 0.10 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-01-17
+#*/
+function ogGetCaller () {
+
+# Obtener el nombre del programa o del script que ha llamado al proceso actual.
+basename $(ps | grep $PPID | \
+                awk -v P=$PPID '{if ($1==P) {
+                                   if ($5~/bash/ && $6!="") print $6
+                                   else print $5; } }')
+}
+
+
+#/**
+#         ogIsRepoLocked
+#@brief   Comprueba si el repositorio está siendo usado (tiene ficheros abiertos).
+#@param   No.
+#@return  Código de salida: 0 - sin bloquear (libre), 1 - bloqueado.
+#@version 0.10 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-01-17
+#*/
+function ogIsRepoLocked () {
+
+# Variables locales.
+local f FILES
+
+# No hacer nada, si no está definido el punto de montaje del repositorio.
+[ -z "$OGIMG" ] && return
+
+# Comprobar si alguno de los ficheros abiertos por los procesos activos está en el
+# punto de montaje del repositorio de imágenes.
+FILES=$(for f in /proc/[0-9]*/fd/*; do readlink -f "$f"; done | grep "^$OGIMG")
+[ -n "$FILES" ]
+}
+
+
+
+#/**
 #         ogHelp ["str_function" ["str_format" ["str_example" ... ]]]
 #@brief   Muestra mensaje de ayuda para una función determinda.
 #@param   str_function Nombre de la función.
@@ -114,4 +158,3 @@ while [ $# -gt 0 ]; do
     shift
 done
 }
-
