@@ -166,8 +166,8 @@ if [ "$*" == "help" -o "$2" == "help" ]; then
 		   "$FUNCNAME RECEIVERPARTITION  str_sessionCLIENT     str_device str_tools str_level "\
 		   "$FUNCNAME SENDFILE           str_sessionSERVER     str_file "\
 		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file " \
-                   "sessionServer syntax:        portbase:mcastaddres:method:speed:nclients:ntimeWaitingUntilNclients " \
-                   "sessionServer example:       9000:239.194.17.36:80M:50:60 " \
+                   "sessionServer syntax:        portbase:method:mcastaddress:speed:nclients:ntimeWaitingUntilNclients " \
+                   "sessionServer example:       9000:full-duplex|half-duplex|broadcast:239.194.17.36:80M:50:60 " \
                    "sessionClient syntax:        portbase " \
                    "sessionClient example:       9000 "
     return
@@ -237,10 +237,10 @@ fi
 CERROR="8x8/128"
 
 # opción del usuo de tuberia intermedia en memoria mbuffer.
-which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -m 20M' " 
+which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' " 
 
 # Generamos la instrucción base de multicast -Envio,Recepcion-
-SYNTAXSERVER="udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME "
+SYNTAXSERVER="udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME "
 SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
 
 
@@ -418,7 +418,7 @@ local PART   COMMAND
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionMulticastSERVER tools compresor" \
-           "$FUNCNAME 1 1 9000:full-duplex:239.194.37.31:50:20:2 partclone lzop"
+           "$FUNCNAME 1 1 9000:full-duplex:239.194.37.31:50M:20:2 partclone lzop"
     return
 fi
 # Error si no se reciben 5 parámetros.
