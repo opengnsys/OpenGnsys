@@ -1,7 +1,7 @@
 #!/bin/bash
 # Generador de ficheros "kernel" e "initrd.gz" para arranque de cliente OpenGnSys
 
-test "$(lsb_release -is 2>/dev/null)" == "Ubuntu" && DIST="(lsb_release -cs)"
+test "$(lsb_release -is 2>/dev/null)" == "Ubuntu" && DIST="$(lsb_release -cs)"
 DIST=${DIST:-"lucid"}		# Si no se detecta, distribución Ubuntu por defecto.
 ARCH=$(arch)			# Arquitectura del sistema: i386 (32 bits), amd64 (64 bits).
 ARCH=${ARCH:-"$(uname -m)"}	# Corrección para Ubuntu Jaunty.
@@ -217,32 +217,35 @@ function agregarNuevoArranque
     #echo "::shutdown:/sbin/swapoff -a" >> inittab
 
     # Primero ejecutamos el dhcp
+    VERSION=$(cat /opt/opengnsys/doc/VERSION.txt 2>/dev/null)
+    VERSION=${VERSION:-"OpenGnSys"}
     cat << FIN > $INITSCRIPT
 #! /bin/sh
+echo
+echo "Arranque cliente $VERSION"
+echo
 set -e
-#exportando variables 
-GLOBAL="cat /proc/cmdline"
-for i in \`\${GLOBAL}\`
+# Exportando variables 
+for i in \$(cat /proc/cmdline);
 do
-	#export \$i
-	echo \$i | grep "=" > /dev/null && export \$i 
+	echo \$i | grep -q "=" && export \$i 
 done
-#configurar la red
-if grep -q "ip=dhcp" /proc/cmdline; then
+# Configurar la red
+if [ "\$ip" == "dhcp" ]; then
+    echo "Configurando red por DHCP"
     mkdir -p /var/state/dhcp
-    /sbin/dhclient
+    /sbin/dhclient 2>/dev/null
 fi
-echo Configurada la red \$ip
-#Modo de Trabajo del cliente, on line <> off lne
+# Modo de trabajo del cliente: on-line/off-line
 status="\${status:-online}"
 echo "Comprobando modo de trabajo \$status"
 case "\$status" in 
     online) 
-	if [ -z \$repo ]
+	if [ -z "\$repo" ]
 	then 
     		SERVERIP=\$(grep -h dhcp-server-identifier /var/lib/dhcp3/dhclient.* | sed 's/[^0-9]*\(.*\);/\1/' | head -1)
 	else
-    		SERVERIP=\$repo 
+		SERVERIP="\$repo"
 	fi 
 	echo "Preparando conexión con el Repositorio  \$SERVERIP"
 	# determinar el paramtro de boot para los permisos de los montajes de imagenes.
@@ -250,14 +253,14 @@ case "\$status" in
         case "\$BOOTMODE" in
             admin) MOUNTOPTS="rw" ;; 
             user)  MOUNTOPTS="ro" ;; 
-            *)     # FIXME: Modo de arranque desconocido
-                   echo "\$MSG_ERRBOOTMODE"
+            *)     echo "Aviso: Modo de arranque desconocido."
+                   BOOTMODE="user"
                    MOUNTOPTS="ro" ;;
         esac
         # Montamos el resto de cosas necesarias
         echo "Montar repo en modo \$BOOTMODE"
         mkdir -p /opt/opengnsys
-        DEFAULTOPTS="nolock"
+        DEFAULTOPTS="nolock,proto=tcp"
         if \$(mount | grep -q " /opt/opengnsys "); then
             DEFAULTOPTS="remount,\$DEFAULTOPTS"
         fi
