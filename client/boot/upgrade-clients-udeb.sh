@@ -9,15 +9,15 @@
 # Variables
 PROG="$(basename $0)"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-test "$(lsb_release -is 2>/dev/null)" == "Ubuntu" && DEFDISTRIB="(lsb_release -cs)"
+test "$(lsb_release -is 2>/dev/null)" == "Ubuntu" && DEFDISTRIB="$(lsb_release -cs)"
 DEFDISTRIB=${DEFDISTRIB:-"lucid"}
 DISTRIB=${1:-"$DEFDISTRIB"}		# Si no se indica, usar distribución por defecto.
-CFGFILE="$OPENGNSYS/etc/udeblist${1:+"-$1"}.conf"
+CFGFILE="$OPENGNSYS/etc/udeblist-$DISTRIB.conf"
 OGUDEB="$OPENGNSYS/client/lib/udeb"
 TMPUDEB="/tmp/udeb"
 UDEBLIST="/etc/apt/sources.list.d/udeb.list"
 
-#/// Comprobar fichero de configuración.
+# Comprobar fichero de configuración.
 if [ ! -f "$CFGFILE" ]; then
     echo "$PROG: No existe el fichero de configuración \"$CFGFILE\"" >&2
     exit 1
@@ -29,12 +29,12 @@ if [ -z "$PACKAGES_INSTALL" ]; then
     exit 2
 fi
 
-#/// Crear configuración para apt-get 
-echo "deb http://archive.ubuntu.com/ubuntu/ $DISTRIB main/debian-installer" >$UDEBLIST
+# Crear configuración para apt-get 
+echo "deb http://archive.ubuntu.com/ubuntu/ $DISTRIB main/debian-installer universe/debian-installer" >$UDEBLIST
 mkdir -p $TMPUDEB/partial
 rm -f $TMPUDEB/*.udeb
 
-#/// Descargar paquetes udeb, borrar los descartables y moverlos al NFS.
+# Descargar paquetes udeb, borrar los descartables y moverlos al NFS.
 apt-get update
 apt-get install -y -o dir::cache::archives=$TMPUDEB -d $PACKAGES_INSTALL
 for i in $PACKAGES_REMOVE; do
