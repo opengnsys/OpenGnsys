@@ -7,7 +7,7 @@ ARCH=$(arch)			# Arquitectura del sistema: i386 (32 bits), amd64 (64 bits).
 ARCH=${ARCH:-"$(uname -m)"}	# Corrección para Ubuntu Jaunty.
 ARCH=${ARCH/i[4-6]86/i386}
 ARCH=${ARCH/x86_64/amd64}
-URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
+URL=http://archive.ubuntu.com/ubuntu/dists/$DIST-updates/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
 if [ "$TMP" = "" ] ; then TMP=/tmp ; fi
 TMPINITRD=$TMP/initrd
 NEWROOT=$TMPINITRD/newroot
@@ -34,7 +34,7 @@ function parsearParametros
                 return -1
             else
                 DIST=$1
-                URL=http://archive.ubuntu.com/ubuntu/dists/$DIST/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
+                URL=http://archive.ubuntu.com/ubuntu/dists/$DIST-updates/main/installer-$ARCH/current/images/netboot/ubuntu-installer/$ARCH
                 shift
             fi
             ;;
@@ -65,27 +65,20 @@ function descargar
     mkdir -p $TMPINITRD
     cd $TMPINITRD
 
-    # Borramos el initrd anterior si existe
-    if [ -f initrd.gz ]; then rm initrd.gz; fi
+    # Ficheros a descargar: Initrd y Kernel (si está habilitado).
+    FILES="initrd.gz"
+    [ $LINUX ] && FILES="$FILES linux"
 
-    # Nos lo descargamos
-    wget $URL/initrd.gz
-    if [ $? = 1 ] ; then
-        echo Error no se ha podido descarga el initrd.gz
-        exit -1
-    fi
-
-    # Si la opcion de descargar el nucleo tambien esta habilitado nos lo descargamos
-    if [ $LINUX ] ; then
-        if [ -f linux ] ; then
-            rm linux
+    for f in $FILES; do
+        # Borrar fichero anterior
+        [ -f "$f" ] && rm -f $f
+        # Descargar fichero (intentar primero actualizaciones).
+        wget $URL/$f || wget ${URL/-updates/}/$f
+        if [ $? != 0 ] ; then
+            echo "Error no se ha podido descarga el initrd.gz"
+            exit 1
         fi
-        wget $URL/linux
-        if [ $? = 1 ] ; then
-            echo Error no se ha podido descargar el nucleo linux
-            exit -1
-        fi
-    fi
+    done
 }
 
 # Descomprimimos el initrd

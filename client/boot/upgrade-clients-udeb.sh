@@ -16,6 +16,7 @@ CFGFILE="$OPENGNSYS/etc/udeblist-$DISTRIB.conf"
 OGUDEB="$OPENGNSYS/client/lib/udeb"
 TMPUDEB="/tmp/udeb"
 UDEBLIST="/etc/apt/sources.list.d/udeb.list"
+KERNELVERS=$(strings $OPENGNSYS/tftpboot/linux | awk '/2.6.*generic/ {print $1}')
 
 # Comprobar fichero de configuración.
 if [ ! -f "$CFGFILE" ]; then
@@ -23,7 +24,9 @@ if [ ! -f "$CFGFILE" ]; then
     exit 1
 fi
 PACKAGES_INSTALL=$(awk -F: '$1~/install/ {print $2}' $CFGFILE)
+PACKAGES_INSTALL=${PACKAGES_INSTALL//KERNELVERS/$KERNELVERS}
 PACKAGES_REMOVE=$(awk -F: '$1~/remove/ {print $2}' $CFGFILE)
+PACKAGES_REMOVE=${PACKAGES_REMOVE//KERNELVERS/$KERNELVERS}
 if [ -z "$PACKAGES_INSTALL" ]; then
     echo "$PROG: No hay paquetes para descargar." >&2
     exit 2
@@ -31,6 +34,7 @@ fi
 
 # Crear configuración para apt-get 
 echo "deb http://archive.ubuntu.com/ubuntu/ $DISTRIB main/debian-installer universe/debian-installer" >$UDEBLIST
+echo "deb http://archive.ubuntu.com/ubuntu/ $DISTRIB-updates main/debian-installer universe/debian-installer" >>$UDEBLIST
 mkdir -p $TMPUDEB/partial
 rm -f $TMPUDEB/*.udeb
 
