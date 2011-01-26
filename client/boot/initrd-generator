@@ -74,8 +74,8 @@ function descargar
         [ -f "$f" ] && rm -f $f
         # Descargar fichero (intentar primero actualizaciones).
         wget $URL/$f || wget ${URL/-updates/}/$f
-        if [ $? != 0 ] ; then
-            echo "Error no se ha podido descarga el initrd.gz"
+        if [ $? != 0 ]; then
+            echo "Error no se ha podido descargar el fichero $f"
             exit 1
         fi
     done
