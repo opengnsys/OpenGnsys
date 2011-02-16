@@ -8,8 +8,8 @@ DIRS :=
 LIBS := -static
 
 # Opciones de compilacion
-OPCS := -O0 -g -Wall	# Depuracion
-#OPCS := -O3 -Wall	# Optimizacion
+OPCS := -m32 -O0 -g -Wall	# Depuracion
+#OPCS := -m32 -O3 -Wall		# Optimizacion
 
 # Ficheros objetos
 OBJS := sources/ogAdmClient.o
@@ -17,7 +17,7 @@ OBJS := sources/ogAdmClient.o
 all: $(PROYECTO)
 
 $(PROYECTO): $(OBJS)
-	g++ $(DIRS) $(LIBS) $(OBJS) -o $(PROYECTO)
+	g++ $(OPCS) $(DIRS) $(LIBS) $(OBJS) -o $(PROYECTO)
 #	strip $(PROYECTO)	# Optimizacion
 
 clean:
