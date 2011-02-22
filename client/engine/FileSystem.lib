@@ -309,11 +309,13 @@ case "$ID" in
      1[bc])	TYPE="HFAT32" ;;
      42)	TYPE="WIN-DYNAMIC" ;;
      82)	TYPE="LINUX-SWAP" ;;
-     83)	TYPE="$(parted -s $DISK print | awk -v var=$2 '{if ($1==var) {print toupper($6)}}')"
+     83)	TYPE="$(parted -sm $DISK print 2>/dev/null | \
+                            awk -F: -v fs=$2 '{if ($1==fs) {print toupper($5)}}')"
                 TYPE=${TYPE:-"EXT3"}
                 ;;
      8e)	TYPE="LINUX-LVM" ;;
      a7)	TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
+     af)	TYPE="HFS" ;;
      bf)	TYPE="SOLARIS" ;;
      ca)	TYPE="CACHE" ;;
      fd)	TYPE="LINUX-RAID" ;;
@@ -379,7 +381,7 @@ fi
 
 DISK=$(ogDiskToDev "$1")
 test -n "$(parted -sm $DISK print 2>/dev/null | \
-                      awk -F: -v sf="$2" '{if ($1==sf) print $5}')"
+                      awk -F: -v fs=$2 '{if ($1==fs) print $5}')"
 }
 
 

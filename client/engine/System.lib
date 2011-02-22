@@ -121,7 +121,7 @@ local f FILES
 
 # Comprobar si alguno de los ficheros abiertos por los procesos activos está en el
 # punto de montaje del repositorio de imágenes.
-FILES=$(for f in /proc/[0-9]*/fd/*; do readlink -f "$f"; done | grep "^$OGIMG")
+FILES=$(for f in /proc/[0-9]*/fd/*; do readlink -f "$f"; done | grep "^$OGIMG")   # */ (comentario Doxygen)
 [ -n "$FILES" ]
 }
 
