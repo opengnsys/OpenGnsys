@@ -37,7 +37,7 @@
 function ogCreateImage ()
 {
 # Variables locales
-local PART PROGRAM IMGDIR IMGFILE ERRCODE
+local PART PROGRAM IMGDIR IMGFILE IMGTYPE ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -48,19 +48,27 @@ fi
 # Error si no se reciben 4 parámetros.
 [ $# -ne 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
 
+# Comprobar que no está bloqueada ni la partición, ni la imagen.
 PART="$(ogDiskToDev $1 $2)" || return $?
 if ogIsLocked $1 $2; then
-    ogRaiseError $OG_ERR_LOCKED "$1,$2"
+    ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION $1, $2"
     return $?
 fi
+IMGTYPE="pgz"                   # Partclone / GZip
 IMGDIR=$(ogGetParentPath "$3" "$4")
 [ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$3 $(dirname $4)" || return $?
-IMGFILE="$IMGDIR/$(basename "$4").pgz"
+IMGFILE="$IMGDIR/$(basename "$4").$IMGTYPE"
+if ogIsImageLocked "$IMGFILE"; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $3, $4"
+    return $?
+fi
+# Desmontar partición, bloquear partición e imagen.
 ogUnmount $1 $2 2>/dev/null
-
 ogLock $1 $2 || return $?
-trap "ogUnlock $1 $2; rm -f $IMGFILE" 1 2 3 6 9
+ogLockImage "$3" "$4.$IMGTYPE" || return $?
 
+# Crear Imagen.
+trap "ogUnlock $1 $2; ogUnlockImage "$3" "$4.$IMGTYPE"; rm -f $IMGFILE" 1 2 3 6 9
 TYPE="$(ogGetFsType $1 $2)"
 case "$TYPE" in
     EXT[234])   
@@ -76,15 +84,17 @@ case "$TYPE" in
     *)  ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
         return $? ;;
 esac
-
 $PROGRAM -c -C -F -s $PART | mbuffer -q -m 70% | gzip -c > "$IMGFILE"
+
 # Controlar salida de error y desbloquear partición.
 ERRCODE=$?
 if [ $ERRCODE != 0 ]; then
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
     rm -f "$IMGFILE"
 fi
+# Desbloquear partición e imagen.
 ogUnlock $1 $2
+ogUnlockImage "$3" "$4.$IMGTYPE"
 return $ERRCODE
 }
 
@@ -180,6 +190,63 @@ done
 echo $IMGTYPE
 }
 
+# Comprobar si el fichero de bloqueo para una imagen.
+function ogIsImageLocked ()
+{
+# Variables locales
+local IMGDIR
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
+           "if $FUNCNAME /opt/opengnsys/images/aula1/winxp.img; then ...; fi" \
+           "if $FUNCNAME REPO /aula1/winxp.img; then ...; fi"
+    return
+fi
+# Comprobar si existe el fichero de bloqueo.
+test -n "$(ogGetPath $@.lock)"
+}
+
+# Bloquear imagen para creación.
+function ogLockImage ()
+{
+# Variables locales
+local IMGDIR
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
+           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
+           "$FUNCNAME REPO /aula1/winxp.img"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+# Comprobar que existe directorio de imagen
+IMGDIR=$(ogGetParentPath $@) || return $?
+# Crear fichero de bloqueo.
+touch $IMGDIR/$(basename "${!#}").lock
+}
+
+# Desbloquear imagen (borrar fichero de bloqueo).
+function ogUnlockImage ()
+{
+# Variables locales
+local IMGDIR
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
+           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
+           "$FUNCNAME REPO /aula1/winxp.img"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+# Borrar fichero de bloqueo para la imagen.
+rm -f $(ogGetPath $@.lock)
+}
+
 #/**
 #         ogRestoreImage str_repo path_image int_ndisk int_npartition
 #@brief   Restaura una imagen de sistema de archivos en una partición.
@@ -228,11 +295,16 @@ if [ $IMGSIZE -gt $PARTSIZE ]; then
     return $?
 fi
 
-# Comprobar el bloqueo de la partición, desmontarla y bloquearla.
-if ogIsLocked $3 $4; then
-    ogRaiseError $OG_ERR_LOCKED "$3,$4"
+# Comprobar el bloqueo de la imagen y de la partición.
+if ogIsImageLocked "$IMGFILE"; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $1, $2.$IMGTYPE"
     return $?
 fi
+if ogIsLocked $3 $4; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION $3, $4"
+    return $?
+fi
+# Desmontar y bloquear partición.
 ogUnmount $3 $4 2>/dev/null || return $?
 ogLock $3 $4 || return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9

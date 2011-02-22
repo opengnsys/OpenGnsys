@@ -9,6 +9,7 @@ source /opt/opengnsys/etc/preinit/loadenviron.sh
 for f in fileslinks.sh loadudeb.sh loadmodules.sh metadevs.sh; do
     $OGETC/preinit/$f
 done
+unset f
 
 if [ -f $OGETC/init/$OG_IP.sh ]; then
     $OGETC/init/$OG_IP.sh
