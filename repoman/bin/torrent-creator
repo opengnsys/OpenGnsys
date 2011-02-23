@@ -39,6 +39,13 @@ for IMG in *.{img,pgz}; do
 	# Crear fichero Torrent.
 	echo "`date` : Inicio creación de fichero $TORRENT" >> $LOGFILE
 	rm -f "$TORRENT"
+	##### ADV v. 1.0 23/02/2011
+	rm -f $IMG.sum
+	DATASUM=`md5sum "$IMG" | cut -f1 -d" "` 
+	echo $DATASUM > $IMG.sum
+	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATASUM
+	#### ADV v. 1.0 23/02/2011
+	
 	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT"
 	if [ -f "$TORRENT"  ]; then
 		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE
