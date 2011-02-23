@@ -7,11 +7,17 @@
 
 
 
-####  AVISO: Editar configuración de acceso por defecto
+####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
 OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
 OPENGNSYS_DB_USER="usuog"		# Usuario de acceso
 OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario
+
+####  AVISO: NO EDITAR. 
+#### configuración de acceso smb para clientes OG.
+OPENGNSYS_CLIENT_USER="opengnsys"		# Nombre del usuario
+OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario opengnsys
+
 
 
 # Sólo ejecutable por usuario root
@@ -27,7 +33,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://www.opengnsys.es/svn/trunk
+    SVN_URL=http://www.opengnsys.es/svn/branches/version1.0
 fi
 
 WORKDIR=/tmp/opengnsys_installer
@@ -37,7 +43,7 @@ INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_installation.log
 
 # Array con las dependencias
-DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent )
+DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap subversion schroot squashfs-tools )
 
 # Base de datos
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
@@ -540,11 +546,16 @@ function tftpConfigure() {
         # prepamos el directorio de la configuracion de pxe
         mkdir -p ${basetftp}/pxelinux.cfg
         cat > ${basetftp}/pxelinux.cfg/default <<EOF
-DEFAULT pxe
-
-LABEL pxe
-KERNEL linux
-APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on
+DEFAULT syslinux/vesamenu.c32 
+MENU TITLE Aplicacion GNSYS 
+ 
+LABEL 1 
+MENU LABEL 1 
+KERNEL syslinux/chain.c32 
+APPEND hd0 
+ 
+PROMPT 0 
+TIMEOUT 10 
 EOF
         # comprobamos el servicio tftp
         sleep 1
@@ -559,6 +570,7 @@ function testPxe () {
         tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echo "servidor tftp OK" || echo "servidor tftp KO"
         cd /
 }
+
 
 ########################################################################
 ## Configuracion servicio NFS
@@ -586,6 +598,12 @@ function nfsConfigure()
 	nfsAddExport /opt/opengnsys/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while adding logging client config"
+		return 1
+	fi
+
+	nfsAddExport /var/lib/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the pxe ogclient"
 		return 1
 	fi
 
@@ -654,6 +672,60 @@ function nfsAddExport()
 
 	return 0
 }
+
+
+########################################################################
+## Configuracion servicio SMB
+########################################################################
+function smbConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Config smb server."
+
+	backupFile /etc/samba/smb.conf
+	
+cat >> /etc/samba/smb.conf <<EOF
+[tftpboot]
+   comment = el directorio fisico ogclient debe estar como escritura
+   writeable = no
+   read only = yes
+   #locking = no
+   path = /var/lib/tftpboot
+   guest ok = no
+
+[ogclient]
+   comment = client
+   read only = yes
+   locking = no
+   path = /opt/opengnsys/client
+   guest ok = no
+
+[oglog]
+   comment = log
+   read only = no
+   writeable = yes
+   path = /opt/opengnsys/log/clients
+   guest ok = no
+
+[ogimages]
+   comment = images
+   read only = no
+   writeable = yes
+   locking = no
+   path = /opt/opengnsys/images
+   guest ok = no
+EOF
+
+	service smbd restart
+	
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configure smb"
+		return 1
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added SAMBA configuration to file \"/etc/samba/smb.conf\"."
+	return 0
+}
+
 
 ########################################################################
 ## Configuracion servicio DHCP
@@ -747,6 +819,7 @@ EOF
 		return 0
 	fi
 }
+
 
 # Crear documentación Doxygen para la consola web.
 function makeDoxygenFiles()
@@ -990,9 +1063,11 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux /opt/opengnsys/sbin/
 	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
@@ -1114,6 +1189,15 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
+# Configuración SMB
+smbConfigure
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while configuring nfs server!"
+	exit 1
+fi
+
+
+
 # Configuración ejemplo DHCP
 dhcpConfigure
 if [ $? -ne 0 ]; then
@@ -1206,6 +1290,36 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error creating clients"
 	exit 1
 fi
+
+# integrando xajax a la consola web
+unzip /opt/opengnsys/www/xajax_0.5_standard.zip -d /opt/opengnsys/www/xajax
+
+#anadiendo usuario opengnsys al sistema sin login
+useradd opengnsys
+
+#anadiendo usuario opengnsys a samba"
+echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
+
+#descargando cliente ogclient
+wget http://www.opengnsys.es/downloads/20 -O /tmp/ogpart1.tgz
+wget http://www.opengnsys.es/downloads/21 -O /tmp/ogpart2.tgz
+wget http://www.opengnsys.es/downloads/22 -O /tmp/ogpart3.tgz
+cat /tmp/ogpart1.tgz /tmp/ogpart2.tgz /tmp/ogpart3.tgz > /tmp/ogclient.tgz	
+tar xzvf /tmp/ogclient.tgz -C /opt/opengnsys/tftpboot/
+	
+
+
+#definiendo permisos
+chown -R :$OPENGNSYS_CLIENT_USER /opt/opengnsys/log/clients
+chown -R :$OPENGNSYS_CLIENT_USER /opt/opengnsys/images
+chmod -R 775 /opt/opengnsys/log/clients
+chmod -R 775 /opt/opengnsys/images
+chown -R :$OPENGNSYS_CLIENT_USER /var/lib/tftpboot/ogclient
+chmod -R 755 /var/lib/tftpboot/ogclient
+chown -R :$APACHE_RUN_GROUP /var/lib/tftpboot/pxelinux.cfg
+chmod -R 775 /var/lib/tftpboot/pxelinux.cfg
+
+	
 
 # Configuración de servicios de OpenGnSys
 openGnsysConfigure

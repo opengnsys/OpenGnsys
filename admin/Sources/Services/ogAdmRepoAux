@@ -1,0 +1,26 @@
+#!/bin/bash
+PARM=`cat`
+
+
+PARM1=$(echo $PARM | cut -f1 -d" ")
+PARM2=$(echo $PARM | cut -f2 -d" ")
+PARM3=$(echo $PARM | cut -f3 -d" ")
+PARM4=$(echo $PARM | cut -f4 -d" ")
+
+echo $PARM
+echo $PARM1
+echo $PARM2
+echo $PARM3
+echo $PARM4
+
+case $PARM1 in
+	START_MULTICAST)
+	#1 START_MULTICAST
+	#2 fichero a enviar
+	FILE=/opt/opengnsys/images$PARM2
+	MCASTOPT=$PARM3
+	#3 opciones protocolo multicast
+	echo "/opt/opengnsys/bin/SendFileMcast $FILE $MCASTOPT"
+	/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT
+	;;
+esac 
