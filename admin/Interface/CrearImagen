@@ -4,9 +4,16 @@
 #
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE:
 # $1 disco
-# $2 par=Número de particion
-# $3 Nombre canónico de la imagen
-# $4 Dirección del repositorio
+# $2 par=Nï¿½mero de particion
+# $3 Nombre canï¿½nico de la imagen
+# $4 Direcciï¿½n del repositorio
 #_______________________________________________________________________________________________________________________________
-createImage "$1" "$2" "REPO" "$3"
+if [ "$engine" == "testing" ]
+then
+	echo $* >>  $OGLOGFILE
+	 createImage "$1" "$2" "REPO" "$3" &>> $OGLOGFILE || exit $?
+else
+	createImage "$1" "$2" "REPO" "$3"
+fi
+
 
