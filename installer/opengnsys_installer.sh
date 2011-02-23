@@ -1291,6 +1291,10 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
+# Configuración de servicios de OpenGnSys
+openGnsysConfigure
+
+
 # integrando xajax a la consola web
 unzip /opt/opengnsys/www/xajax_0.5_standard.zip -d /opt/opengnsys/www/xajax
 
@@ -1321,8 +1325,7 @@ chmod -R 775 /var/lib/tftpboot/pxelinux.cfg
 
 	
 
-# Configuración de servicios de OpenGnSys
-openGnsysConfigure
+
 
 # Mostrar sumario de la instalación e instrucciones de post-instalación.
 installationSummary
