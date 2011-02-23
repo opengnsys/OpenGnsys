@@ -1,0 +1,12 @@
+function ogGetIpAddress ()
+{
+ echo $IPV4ADDR
+}
+
+
+function ogRequestRepo ()
+{
+REPOAUXPORT=$((cat /opt/opengnsys/etc/ogAdmClient.cfg | grep PUERTO | cut -f2 -d"="`+ 1))
+echo ogRequestRepo $1 $2 $3
+hose $repo $REPOAUXPORT --out sh -c "echo $1 $2 $3"
+}

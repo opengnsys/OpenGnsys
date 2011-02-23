@@ -1,0 +1,31 @@
+function ogMountCache ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  ==>  /mnt/sda4"
+    return
+fi
+
+ogMountFs $(ogFindCache) 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
+}
+
+
+function ogUnmountCache ()
+{
+# Variables locales.
+local CACHE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+
+CACHE=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE"
+ogIsMounted $CACHE || return 0
+ogUnmountFs $CACHE
+# Borrar enlace simbÃ³lico de /mnt/ParticiÃ³nCache.
+rm -f $(ogDiskToDev $CACHE | sed 's/dev/mnt/')
+}
+
+
+
