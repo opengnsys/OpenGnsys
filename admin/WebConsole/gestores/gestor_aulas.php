@@ -41,7 +41,12 @@ $modomul=0;
 $ipmul="";
 $pormul=0;
 $velmul=0;
-	
+############## ADV
+$router=0;
+$netmask=0;
+$modp2p=0;
+$timep2p=0;
+############ ADV
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
 
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
@@ -66,6 +71,12 @@ if (isset($_POST["modomul"])) $modomul=$_POST["modomul"];
 if (isset($_POST["ipmul"])) $ipmul=$_POST["ipmul"]; 
 if (isset($_POST["pormul"])) $pormul=$_POST["pormul"]; 
 if (isset($_POST["velmul"])) $velmul=$_POST["velmul"]; 
+############## ADV
+if (isset($_POST["router"])) $router=$_POST["router"];
+if (isset($_POST["netmask"])) $netmask=$_POST["netmask"]; 
+if (isset($_POST["modp2p"])) $modp2p=$_POST["modp2p"]; 
+if (isset($_POST["timep2p"])) $timep2p=$_POST["timep2p"]; 
+################# ADV
 
 $gidmenu=0;
 $gidproautoexec=0;
@@ -166,12 +177,20 @@ function Gestiona(){
 	global	$ipmul;
 	global	$pormul;
 	global	$velmul;
-	
+######################### ADV	
+	global  $router;
+	global	$netmask;
+	global  $modp2p;
+	global  $timep2p;
+########################## ADV
+
 	global	$op_alta;
 	global	$op_modificacion;
 	global	$op_eliminacion;
 	global	$tablanodo;
 
+
+	
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idcentro",$idcentro,1);
 
@@ -194,13 +213,19 @@ function Gestiona(){
 	$cmd->CreaParametro("@ipmul",$ipmul,0);
 	$cmd->CreaParametro("@pormul",$pormul,1);
 	$cmd->CreaParametro("@velmul",$velmul,1);
+############ ADV
+	$cmd->CreaParametro("@netmask",$netmask,0);
+	$cmd->CreaParametro("@router",$router,0);
+	$cmd->CreaParametro("@modp2p",$modp2p,0);
+	$cmd->CreaParametro("@timep2p",$timep2p,1);
+############### ADV
 
 	switch($opcion){
 		case $op_alta :
 			$cmd->texto="INSERT INTO aulas(idcentro,grupoid,nombreaula,urlfoto,cagnon,pizarra,ubicacion,comentarios,
-			puestos,horaresevini,horaresevfin,modomul,ipmul,pormul,velmul) 
+			puestos,horaresevini,horaresevfin,modomul,ipmul,pormul,velmul,router,netmask,modp2p,timep2p) 
 			VALUES (@idcentro,@grupoid,@nombreaula,@urlfoto,@cagnon,@pizarra,@ubicacion,@comentarios,
-			@puestos,@horaresevini,@horaresevfin,@modomul,@ipmul,@pormul,@velmul)";
+			@puestos,@horaresevini,@horaresevfin,@modomul,@ipmul,@pormul,@velmul,@router,@netmask,@modp2p,@timep2p)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idaula=$cmd->Autonumerico();
@@ -214,7 +239,7 @@ function Gestiona(){
 		case $op_modificacion:
 			$cmd->texto="UPDATE aulas SET nombreaula=@nombreaula,urlfoto=@urlfoto,cagnon=@cagnon,pizarra=@pizarra,
 			ubicacion=@ubicacion,comentarios=@comentarios,puestos=@puestos,horaresevini=@horaresevini,
-			horaresevfin=@horaresevfin,modomul=@modomul,ipmul=@ipmul,pormul=@pormul,velmul=@velmul WHERE idaula=@idaula";
+			horaresevfin=@horaresevfin,modomul=@modomul,ipmul=@ipmul,pormul=@pormul,velmul=@velmul,router=@router,netmask=@netmask,modp2p=@modp2p,timep2p=@timep2p WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta

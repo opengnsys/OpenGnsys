@@ -300,6 +300,8 @@ function ContextualXMLAulas(){
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
+	
+
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="actualizar_ordenadores(this)"';
@@ -419,6 +421,18 @@ function ContextualXMLOrdenadores(){
 	
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_log('.$AMBITO_ORDENADORES.')"';
+	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
+	$layerXML.=' textoitem="Log"';
+	$layerXML.='></ITEM>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_log_seguimiento('.$AMBITO_ORDENADORES.')"';
+	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
+	$layerXML.=' textoitem="Log_seguimiento"';
+	$layerXML.='></ITEM>';
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="actualizar_ordenadores()"';

@@ -14,6 +14,7 @@ include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/HTMLSELECT.php");
+include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_ordenadores_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -31,6 +32,10 @@ $idprocedimiento=0;
 $idaula=0;
 $cache="";
 $grupoid=0;
+######################## ADV
+$netiface="";
+$netdriver="";
+########################### ADV
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros 
 if (isset($_GET["idordenador"])) $idordenador=$_GET["idordenador"]; 
@@ -146,8 +151,32 @@ if  ($opcion!=$op_alta){
 				else	
 					echo '<TD colspan=3><INPUT style="width=250" class="formulariodatos" name=cache  type=text value="'. $cache.'"></TD>';
 			?>
-		</TR>	
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-----ADV -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center&nbsp;> P2P Modo: &nbsp;</TD>
+			<?
+				echo '<TD colspan=3>';
+				$iface="eth0=eth0".chr(13);
+				$iface.="eth1=eth1".chr(13);
+				$iface.="eth2=eth2";
+				echo HTMLCTESELECT($iface,"netiface","estilodesple","",$netiface,100).'</TD>';
+			?>
+		</TR>				
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		
+		<TR>
+			<TH align=center>&nbsp;> Driver de Red: &nbsp;</TD>
+			<?
+				echo '<TD colspan=3>';
+				$driver="generic=generic";
+				echo HTMLCTESELECT($driver,"netdriver","estilodesple","",$netdriver,100).'</TD>';
+			?>
+		</TR>
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
 	</TABLE>
 </FORM>
 </DIV>
@@ -186,6 +215,8 @@ function TomaPropiedades($cmd,$id){
 	global $idmenu;
 	global $idprocedimiento;
 	global $cache;
+	global $netiface;
+	global $netdriver;
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$id;
 	$rs->Comando=&$cmd; 
@@ -200,6 +231,8 @@ function TomaPropiedades($cmd,$id){
 		$idmenu=$rs->campos["idmenu"];
 		$idprocedimiento=$rs->campos["idproautoexec"];
 		$cache=$rs->campos["cache"];
+		$netiface=$rs->campos["netiface"];
+		$netdriver=$rs->campos["netdriver"];
 		$rs->Cerrar();
 		return(true);
 	}

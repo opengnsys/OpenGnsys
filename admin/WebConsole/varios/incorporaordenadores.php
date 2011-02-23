@@ -146,7 +146,8 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 		return(true);	
 	}			
 	$idperfilhard=0;
-	$idrepositorio=0;
+## ADV: modificacion para asignar a los ordenadores, cuando se crean desde "incorpoar ordenadores" el repositorio "default"
+	$idrepositorio=1;
 	$idconfiguracion=0;
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idaula",$idaula,1);

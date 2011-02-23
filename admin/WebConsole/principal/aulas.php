@@ -83,6 +83,11 @@ $XMLcontextual=ContextualXMLComandos($LITAMBITO_GRUPOSORDENADORES,$AMBITO_GRUPOS
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_ORDENADORES,$AMBITO_ORDENADORES);
 echo $flotante->CreaMenuContextual($XMLcontextual);
+
+// Crea submenu contextual de clase de gestion de arranque pxe
+$XMLcontextual=ContextualXMLNetBoot();  // Crea submenu contextual de acciones
+echo $flotante->CreaMenuContextual($XMLcontextual);
+
 //___________________________________________________________________________________________________
 ?>
 </BODY>
@@ -342,6 +347,8 @@ function ContextualXMLGruposAulas(){
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
 
+
+
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_aulas()"';
 	$layerXML.=' textoitem='.$TbMsg[1];
@@ -353,6 +360,12 @@ function ContextualXMLGruposAulas(){
 	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
 	$layerXML.=' textoitem='.$TbMsg[6];
 	$layerXML.='></ITEM>';
+
+        $layerXML.='<ITEM';
+        $layerXML.=' subflotante="flo_netboot"';
+        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+        $layerXML.=' textoitem="NetBoot Gestion"';
+        $layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>'; 
@@ -455,6 +468,12 @@ function ContextualXMLAulas(){
 	$layerXML.=' swimg=1';
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
+
+        $layerXML.='<ITEM';
+        $layerXML.=' subflotante="flo_netboot"';
+        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+        $layerXML.=' textoitem="NetBoot Gestion"';
+        $layerXML.='></ITEM>';
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_aulas()"';
@@ -646,6 +665,12 @@ function ContextualXMLGruposOrdenadores(){
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
 
+        $layerXML.='<ITEM';
+        $layerXML.=' subflotante="flo_netboot"';
+        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+        $layerXML.=' textoitem="NetBoot Gestion"';
+        $layerXML.='></ITEM>';
+        
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_aulas()"';
 	$layerXML.=' textoitem='.$TbMsg[1];
@@ -772,6 +797,13 @@ function ContextualXMLOrdenadores(){
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_log('.$AMBITO_ORDENADORES.')"';
+	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
+	$layerXML.=' textoitem="Log"';
+	$layerXML.='></ITEM>';
+
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="mover_ordenador()"';
@@ -887,4 +919,38 @@ function ContextualXMLComandos($litambito,$ambito){
 	return($finallayerXML);
 	}
 }
+
+function ContextualXMLNetBoot(){
+        #global $TbMsg;
+        #global $EJECUCION_COMANDO;
+        #global $EJECUCION_TAREA;
+        #global $EJECUCION_TRABAJO;
+
+        $layerXML='<MENUCONTEXTUAL';
+        $layerXML.=' idctx="flo_netboot"';
+        $layerXML.=' maxanchu=190';
+        $layerXML.=' swimg=1';
+        $layerXML.=' clase="menu_contextual"';
+        $layerXML.='>';
+
+
+//adv compatiblidad Gestor de arranque remoto
+        $layerXML.='<ITEM';
+        $layerXML.=' alpulsar="ver_boot()"';
+        $layerXML.=' textoitem="NetBoot AVANZADO"';
+        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+        $layerXML.='></ITEM>';
+//adv compatiblidad Gestor de arranque remoto
+//adv compatiblidad Configurador de Startpages
+  //      $layerXML.='<ITEM';
+  //      $layerXML.=' alpulsar="ver_startpages()"';
+  //      $layerXML.=' textoitem="Gestor Startpages"';
+  //      $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+  //      $layerXML.='></ITEM>';
+//adv compatiblidad Configurador de Startpages
+
+        $layerXML.='</MENUCONTEXTUAL>';
+        return($layerXML);
+}
+
 ?>
