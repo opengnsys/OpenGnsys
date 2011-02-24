@@ -16,12 +16,6 @@ MODULESDIR=/lib/modules/$(uname -r)/kernel
 
 # Módulo del ratón.
 insmod $MODULESDIR/drivers/input/mouse/psmouse.ko 2>/dev/null
-# Módulos de discos.
-for m in $MODULESDIR/drivers/ata/*.ko; do
-    insmod $m 2>/dev/null
-done
-# Módulos de sistemas de archivos.
-for f in reiserfs jfs xfs hfs hfsplus; do
-    insmod $MODULESDIR/fs/$f/$f.ko 2>/dev/null
-done
+
+
 

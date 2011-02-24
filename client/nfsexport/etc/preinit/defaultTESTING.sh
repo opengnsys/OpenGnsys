@@ -5,10 +5,9 @@
 
 set -a
 
-#source /opt/opengnsys/etc/preinit/loadenviron.sh
-source /opt/opengnsys/etc/preinit/loadenvironTESTING.sh
-#for f in fileslinks.sh loadudeb.sh loadmodules.sh metadevs.sh; do
-for f in loadmodulesTESTING.sh; do
+source /opt/opengnsys/etc/preinit/loadenviron.sh
+
+for f in loadmodules.sh; do
     $OGETC/preinit/$f
 done
 
@@ -18,8 +17,8 @@ if [ -f $OGETC/init/$OG_IP.sh ]; then
 elif [ -f $OGETC/init/$OGGROUP.sh ]; then
     $OGETC/init/$OGGROUP.sh
 
-elif [ -f $OGETC/init/defaultTESTING.sh ]; then
-    $OGETC/init/defaultTESTING.sh
+elif [ -f $OGETC/init/default.sh ]; then
+    $OGETC/init/default.sh
 
 else
     echo "No se ha encontrado script de inicio"

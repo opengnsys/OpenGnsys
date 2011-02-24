@@ -12,5 +12,6 @@ done
 echo "[50] Desmontar cache local."
 ogUnmountCache
 echo "[70] Reiniciar el equipo."
-/sbin/poweroff
+ethtool -s $DEVICE wol g	
+busybox poweroff
 

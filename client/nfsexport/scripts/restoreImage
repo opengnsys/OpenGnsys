@@ -10,7 +10,7 @@ if [ $# -lt 4 ]; then
 fi
 
 # Procesar parámetros de entrada
-IMGTYPE=$(ogGetImageType "$1" "$2")
+IMGTYPE="img"
 IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
@@ -25,7 +25,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
     case "$PROTO" in
         UNICAST|unicast)
             # Copiar fichero del repositorio al caché local.
-            IMGTYPE=$(ogGetImageType "repo" "$2")
+            #IMGTYPE=$(ogGetImageType "repo" "$2")
             IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
             if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.$IMGTYPE" "$IMGFILE") ]; then
                 echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
@@ -33,7 +33,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             fi
             # Comprobar si existe el fichero en caché y no en el repositorio.
             if [ -z "$IMGFILE" ]; then
-                IMGTYPE=$(ogGetImageType "cache" "$2")
+                #IMGTYPE=$(ogGetImageType "cache" "$2")
                 IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
                 if [ -z "$IMGFILE" ]; then
                     ogRaiseError $OG_ERR_NOTFOUND "cache, $2.$IMGTYPE"
@@ -44,7 +44,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         MULTICAST|multicast)
             if [ -z "$IMGFILE" ]; then
             	echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
-		IMGTYPE=$(ogGetImageType "repo" "$2")
+				#IMGTYPE=$(ogGetImageType "repo" "$2")
             	PORTBASE=`echo $6 | cut -f1 -d:`
       		echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:CACHE $2.$IMGTYPE" 
       		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.$IMGTYPE" || exit $?
@@ -53,7 +53,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             ;;
         TORRENT|torrent)
 		echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
-		IMGTYPE=$(ogGetImageType "repo" "$2")
+		#IMGTYPE=$(ogGetImageType "repo" "$2")
             	ogCopyFile "repo" "$2.$IMGTYPE.torrent" "$IMGDIR" || exit $?
    		echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
      		ogTorrentStart "CACHE" "$2.$IMGTYPE.torrent" "peer:60" || exit $?        		

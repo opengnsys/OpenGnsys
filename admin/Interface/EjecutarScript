@@ -1,16 +1,10 @@
 #!/bin/bash
-if [ "$engine" == "testing" ]
-	then
-	echo -e >>  $OGLOGFILE
-	echo "Contenido de la ejecucion: *****************************" >>  $OGLOGFILE
-	cat  $1 >> $OGLOGFILE
-	echo -e >>  $OGLOGFILE
-	echo -e >>  $OGLOGFILE
-	echo "Salida: *****************************" >>  $OGLOGFILE
-	chmod +x $1
-	$1 &>> $OGLOGFILE || exit $?
-	echo "Fin: *****************************" >>  $OGLOGFILE
-else
-	chmod +x $1
-	$1 || exit $?
-fi
+
+echo -e >>  $OGLOGFILE
+echo "Contenido de la ejecucion: *****************************" >>  $OGLOGFILE
+cat  $1 >> $OGLOGFILE
+echo -e >>  $OGLOGFILE
+echo -e >>  $OGLOGFILE
+echo "Salida: *****************************" >>  $OGLOGFILE
+chmod +x $1
+$1 &>> $OGLOGFILE || exit $?

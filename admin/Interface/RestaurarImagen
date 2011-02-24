@@ -8,11 +8,14 @@
 # $4 Direcci�n del repositorio
 #_______________________________________________________________________________________________________________________________
 
-if [ "$engine" == "testing" ]
+echo $* >>  $OGLOGFILE
+echo $* >>  $OGLOGFILE
+if [ -f createImage$ogengine ]
 then
-	echo $* >>  $OGLOGFILE
-	restoreImage REPO $3 $1 $2 UNICAST &>> $OGLOGFILE || exit $?
+	restoreImage$ogengine REPO $3 $1 $2 UNICAST &>> $OGLOGFILE || exit $?
 else
-	ogRestoreImage REPO $3 $1 $2 UNICAST
+	restoreImage REPO $3 $1 $2 UNICAST &>> $OGLOGFILE || exit $?
 fi
+
+
 

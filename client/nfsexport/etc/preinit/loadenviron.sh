@@ -23,8 +23,15 @@ if [ -d $OPENGNSYS ]; then
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
 
-    export PATH=$OGBIN:$OGAPI:$OGSCRIPTS:$PATH
-    export LD_LIBRARY_PATH=$OGLIB:$LD_LIBRARY_PATH
+	export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/og2fs/2ndfs/opt/drbl/sbin
+    export PATH=$OGSCRIPTS:$PATH:$OGAPI:$OGBIN
+   
+    GLOBAL="cat /proc/cmdline"
+	for i in `${GLOBAL}`
+	do
+		echo $i | grep "=" > /dev/null && export $i
+	done
+   
 
     # Cargar fichero de idioma.
     LANGFILE=$OGETC/lang.$LANG.conf
@@ -35,30 +42,30 @@ if [ -d $OPENGNSYS ]; then
 	done
     fi
     echo "$MSG_LOADAPI"
+
     # Cargar mapa de teclado.
     loadkeys ${LANG%_*} >/dev/null
+
     # Cargar API de funciones.
     for i in $OGAPI/*.lib; do
         source $i
     done
+
     for i in $(typeset -F | cut -f3 -d" "); do
 	export -f $i
     done
-    # Carga de las API testing
-    if [ "$engine" = "testing" ]
+
+    # Carga de las API segun engine
+    if [ -n "$ogengine" ]
     then
-    	for i in $OGAPI/*.testing; do
-        	source $i 
+    	for i in $OGAPI/*.$ogengine; do
+        	[ -f $i ] && source $i 
     	done
     fi
-    # Añadir dependencia de arquitectura
-    ARCH=$(ogGetArch)
-    if [ -n "$ARCH" ]; then
-        export PATH=$OGBIN/$ARCH:$PATH
-        export LD_LIBRARY_PATH=$OGLIB/$ARCH:$LD_LIBRARY_PATH
-    fi
+   
     # Fichero de registros.
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
+    
     # FIXME Pruebas para grupos de ordenadores
     #export OGGROUP=$(ogGetGroup)
     export OGGROUP="$group"

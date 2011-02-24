@@ -951,8 +951,8 @@ INSERT INTO `itemboot` (`label`, `kernel`, `append`) VALUES
 ('1_localboot', 'LOCALBOOT 0', ' '),
 ('11', 'KERNEL syslinux/chain.c32', 'APPEND hd0 1'),
 ('12', 'KERNEL syslinux/chain.c32', 'APPEND hd0 2'),
-('ogClientUser', 'KERNEL ogclient/vmlinuz-2.6.32-21-generic-pae', 'APPEND initrd=ogclient/initrd.img-2.6.32-21-generic-pae ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb engine=testing ogactiveadmin=false'),
-('ogClientAdmin', 'KERNEL ogclient/vmlinuz-2.6.32-21-generic-pae', 'APPEND initrd=ogclient/initrd.img-2.6.32-21-generic-pae ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb engine=testing ogactiveadmin=true'),
+('ogClientUser', 'KERNEL ogclient/vmlinuz-2.6.32-21-generic-pae', 'APPEND initrd=ogclient/initrd.img-2.6.32-21-generic-pae ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false'),
+('ogClientAdmin', 'KERNEL ogclient/vmlinuz-2.6.32-21-generic-pae', 'APPEND initrd=ogclient/initrd.img-2.6.32-21-generic-pae ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true'),
 ('ogInitrdUser', 'KERNEL linux', 'APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=user '),
 ('ogInitrdAdmin', 'KERNEL linux', 'APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin ');
 

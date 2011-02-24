@@ -8,12 +8,25 @@
 # $3 Nombre can�nico de la imagen
 # $4 Direcci�n del repositorio
 #_______________________________________________________________________________________________________________________________
-if [ "$engine" == "testing" ]
-then
-	echo $* >>  $OGLOGFILE
-	 createImage "$1" "$2" "REPO" "$3" &>> $OGLOGFILE || exit $?
-else
-	createImage "$1" "$2" "REPO" "$3"
+echo $* >>  $OGLOGFILE
+
+umount /opt/opengnsys/images
+
+if [ "$ogprotocol" == "nfs" ]
+then 
+	mount.nfs ${ROOTSERVER}:/opt/opengnsys/images /opt/opengnsys/images -o nolock
+fi
+	
+if [ "$ogprotocol" == "smb" ]
+then 
+	echo "montando smb"
+	mount.cifs //${ROOTSERVER}/ogimages /opt/opengnsys/images -o user=opengnsys,pass=og
 fi
 
+if [ -f createImage$ogengine ]
+then
+	createImage$ogengine "$1" "$2" "REPO" "$3" &>> $OGLOGFILE || exit $?
+else
+	createImage "$1" "$2" "REPO" "$3" &>> $OGLOGFILE || exit $?
+fi
 
