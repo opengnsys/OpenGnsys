@@ -73,11 +73,14 @@ echo "<meta http-equiv='Refresh' content='2;URL=./verlogseguimiento.php?nombreor
 	$handle = popen("tail " . $fp ." 2>&1", 'r');
     while(!feof($handle)) {
     $buffer = fgets($handle);
-    echo "$buffer<br/>\n";
+     echo "$buffer";
     ob_flush();
     flush();
 }
 pclose($handle);
+	
+	
+	
 	
 ?>
 </TEXTAREA>

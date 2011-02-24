@@ -29,9 +29,47 @@ form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idpa
 }
 
 function codeParticionado(form){
-alert("codeParticionado(form)");
-form.codigo.value="ogUnmountCache \n ogUnmountAll 1 \n initCache "  + form.size4.value +" \n ogListPartitions 1 \n ogCreatePartitions 1 " + form.part1.value  + ":" + form.size1.value + " \n ogListPartitions 1"; 
-//
-// ;
-// + " " + form.part2.value + ":" + form.size2.value + " " + form.part3.value + ":" + form.size3.value + " ogListPartitions 1";
+var value1;
+var value2;
+var value3;
+if (form.check1.checked) {
+	if (form.part1.value == "CUSTOM" ) {value1 = form.part1custom.value}
+	else {value1 = form.part1.value};
+	if (form.size1.value == "CUSTOM")  {value1 += ":" + form.size1custom.value}
+	else {value1 += ":" + form.size1.value}; 
+}
+else
+{
+   value1 = "EMPTY:1"
+}
+if (form.check2.checked) {
+	if (form.part2.value == "CUSTOM" ) {value2 = form.part2custom.value}
+	else {value2 = form.part2.value};
+	if (form.size2.value == "CUSTOM")  {value2 += ":" + form.size2custom.value}
+	else {value2 += ":" + form.size2.value}; 
+}
+else
+{
+   value2 = "EMPTY:1"
+}
+if (form.check3.checked) {
+	if (form.part3.value == "CUSTOM" ) {value3 = form.part3custom.value}
+	else {value3 = form.part3.value};
+	if (form.size3.value == "CUSTOM")  {value3 += ":" + form.size3custom.value}
+	else {value3 += ":" + form.size3.value}; 
+}
+else
+{
+   value3 = "EMPTY:1"
+}
+form.codigo.value="\
+ogUnmountCache \n \
+ogUnmountAll 1 \n \
+ogDeletePartitionTable 1  \n \
+ogUpdatePartitionTable 1 \n \
+initCache "  + form.size4.value +" \n \
+ogListPartitions 1 \n \
+ogCreatePartitions 1 " + value1 + " " + value2 + " " + value3 + " \n \
+ogSetPartitionActive 1 1 \n \
+ogListPartitions 1"; 
 }

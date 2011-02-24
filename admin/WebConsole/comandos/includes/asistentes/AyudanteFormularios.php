@@ -97,6 +97,11 @@ function htmlOPTION_equipos($cmd,$idambito)
 	return($SelectHtml);	
 }
 
+
+
+
+
+
 function htmlOPTION_images($cmd)
 {
 	$SelectHtml="";
@@ -177,6 +182,73 @@ function htmlOPTION_typepartnotcache($cmd)
 	return($SelectHtml);	
 }
 
+
+function htmlForm_typepart($cmd,$numpar)
+{
+	$SelectHtml="";
+	$cmd->texto='SELECT DISTINCT tipopar FROM tipospar JOIN ordenadores_particiones ON ordenadores_particiones.codpar = tipospar.codpar WHERE numpar = ' .$numpar;
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+
+	if ($rs->Abrir()){
+		$rs->Primero(); 
+		while (!$rs->EOF){
+			$SelectHtml.='<OPTION value="'.$rs->campos["tipopar"] . '" ';
+			$SelectHtml.='>';
+			$SelectHtml.= $rs->campos["tipopar"] .'</OPTION>';
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	}
+	return($SelectHtml);	
+}
+
+
+
+
+
+
+
+function htmlForm_typepartnotcacheEngine10()
+{
+$SelectHtml="";
+$SelectHtml.='<OPTION value="FAT12"> FAT12 </OPTION>';
+$SelectHtml.='<OPTION value="FAT16"> FAT16 </OPTION>';
+$SelectHtml.='<OPTION value="FAT32"> FAT32 </OPTION>';
+$SelectHtml.='<OPTION value="NTFS"> NTFS </OPTION>';
+$SelectHtml.='<OPTION value="EXT2"> EXT2 </OPTION>';
+$SelectHtml.='<OPTION value="EXT3"> EXT3 </OPTION>';
+$SelectHtml.='<OPTION value="EXT4"> EXT4 </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-SWAP"> LINUX-SWAP </OPTION>';
+$SelectHtml.='<OPTION value="REISERFS"> REISERFS </OPTION>';
+$SelectHtml.='<OPTION value="REISER4"> RESISER4 </OPTION>';
+$SelectHtml.='<OPTION value="XFS"> XFS </OPTION>';
+$SelectHtml.='<OPTION value="JFS"> JFS </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-RAID"> LINUX-RAID </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-LVM"> LINUX-LVM </OPTION>';
+return($SelectHtml);
+}
+
+
+function htmlForm_sizepart($cmd,$numpar)
+{
+	$SelectHtml="";
+	$cmd->texto='SELECT DISTINCT tamano FROM ordenadores_particiones WHERE numpar = ' .$numpar . ' AND NOT tamano = 0';
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+
+	if ($rs->Abrir()){
+		$rs->Primero(); 
+		while (!$rs->EOF){
+			$SelectHtml.='<OPTION value="'.$rs->campos["tamano"] . '" ';
+			$SelectHtml.='>';
+			$SelectHtml.= $rs->campos["tamano"] .'</OPTION>';
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	}
+	return($SelectHtml);	
+}
 
 function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 {
