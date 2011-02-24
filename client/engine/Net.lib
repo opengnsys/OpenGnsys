@@ -35,6 +35,24 @@ echo $HOST
 
 
 #/**
+#         ogGetNetInterface
+#@brief   Muestra la interfaz de red del sistema
+#@return  str_interfaz - interfaz de red
+#@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
+#@note    Usa las variables utilizadas por el initrd "/etc/net-ethX.conf
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011-02-24
+#*/ ##
+function ogGetNetInterface ()
+{
+	 echo $DEVICE
+
+}
+
+
+
+
+#/**
 #         ogGetIpAddress
 #@brief   Muestra la dirección IP del sistema
 #@return  str_ip - Dirección IP
@@ -42,7 +60,7 @@ echo $HOST
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-02-11
 #@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
-#@note    Usa las variables utilizadas por el initrd "/etc/net-ethx
+#@note    Usa las variables utilizadas por el initrd "/etc/net-ethX.conf
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011-02-24
 #*/ ##
@@ -86,11 +104,22 @@ echo ${MAC%% *}
 #@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-01-13
+#@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
+#@note   Comprobacion segun protocolo de conexion al Repo
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011-02-24
 #*/ ##
 function ogGetRepoIp ()
 {
-# Obtener direcciones IP.
-[ -n "$OGIMG" ] && mount | grep " $OGIMG .* nfs " | cut -f1 -d:
+# Obtener direcciones IP, segun el protocolo de montaje
+case $ogprotocol in
+	nfs)
+		[ -n "$OGIMG" ] && mount | grep " $OGIMG .* nfs " | cut -f1 -d:
+	;;
+	smb)
+	   [ -n "$OGIMG" ] && mount | grep ogimages | awk -F"addr=" '{print $2}' | cut -f1 -d","
+	;;
+esac
 }
 
 
@@ -101,11 +130,22 @@ function ogGetRepoIp ()
 #@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-01-13
+#@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
+#@note   Comprobacion segun protocolo de conexion al Repo
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011-02-24
 #*/ ##
 function ogGetServerIp ()
 {
 # Obtener direcciones IP.
-[ -n "$OPENGNSYS" ] && mount | grep " $OPENGNSYS .* nfs " | cut -f1 -d:
+case $ogprotocol in
+	nfs)
+		[ -n "$OPENGNSYS" ] && mount | grep " $OPENGNSYS .* nfs " | cut -f1 -d:
+	;;
+	smb)
+	   [ -n "$OGIMG" ] && mount | grep ogclient | awk -F"addr=" '{print $2}' | cut -f1 -d","
+	;;
+esac
 }
 
 
