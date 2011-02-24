@@ -251,6 +251,9 @@ fi
 #@version 0.91 - Adaptacion a la cache local de OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/16
+#@version 1.0 - Correccion multiples montajes de cache.
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2011/02/24
 #*/ ##
 function ogMountCache ()
 {
@@ -260,9 +263,8 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-OGCAC=$(ogMountFs $(ogFindCache) 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
-echo $OGCAC
-export OGCAC
+ogMountFs $(ogFindCache) 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
+
 }
 
 
@@ -278,6 +280,9 @@ export OGCAC
 #@version 0.91 - Adaptacion a la cache local de OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/16
+#@version 1.0 - Correccion multiples montajes de cache.
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2011/02/24
 #*/ ##
 function ogUnmountCache ()
 {
@@ -290,6 +295,7 @@ if [ "$*" == "help" ]; then
 fi
 
 CACHE=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE"
+ogIsMounted $CACHE || return 0
 ogUnmountFs $CACHE
 # Borrar enlace simbólico de /mnt/ParticiónCache.
 rm -f $(ogDiskToDev $CACHE | sed 's/dev/mnt/')
