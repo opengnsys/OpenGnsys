@@ -125,7 +125,7 @@ while (!$rs->EOF)
 			$netmask=netmask2cidr($netmask);
 		}
 
-		$iseac=substr_count($rs->campos["append"] , "engine=testing");
+		$iseac=substr_count($rs->campos["append"] , "boot=oginit");
 		$isinitrd=substr_count($rs->campos["append"] , "initrd.gz");
 		
 		if ($iseac > 0)

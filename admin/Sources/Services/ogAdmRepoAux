@@ -20,7 +20,7 @@ case $PARM1 in
 	FILE=/opt/opengnsys/images$PARM2
 	MCASTOPT=$PARM3
 	#3 opciones protocolo multicast
-	echo "/opt/opengnsys/bin/SendFileMcast $FILE $MCASTOPT"
+	echo "/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT"
 	/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT
 	;;
 esac 
