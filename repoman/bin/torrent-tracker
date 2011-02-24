@@ -13,7 +13,7 @@ BTTRACK_OPTIONS=" --save_dfile_interval $BTINTERVAL --timeout_downloaders_interv
 BTTRACKPID="/var/run/bttrack.pid"
 BTSEEDERPID="/var/run/btseeder.pid"
 
-##########################################################
+###################  #######################################
 
 pkill bttrack
 rm $BTTRACKDFILE
