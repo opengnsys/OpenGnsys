@@ -41,14 +41,23 @@ echo $HOST
 #@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-02-11
+#@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
+#@note    Usa las variables utilizadas por el initrd "/etc/net-ethx
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011-02-24
 #*/ ##
 function ogGetIpAddress ()
 {
 local IP
-# Obtener direcciones IP.        /* (comentario para Doxygen)
-IP=$(ip address show | awk '$2!~/lo/ { readline; if ($1~/inet$/) {sub (/\/.*/, ""); printf ("%s ", $2)}}')
-# Mostrar sólo la primera.       (comentario para Doxygen) */
-echo ${IP%% *}
+if [ -n $IPV4ADDR ]
+then
+	 echo $IPV4ADDR
+else
+	# Obtener direcciones IP.        /* (comentario para Doxygen)
+	IP=$(ip address show | awk '$2!~/lo/ { readline; if ($1~/inet$/) {sub (/\/.*/, ""); printf ("%s ", $2)}}')
+	# Mostrar sólo la primera.       (comentario para Doxygen) */
+	echo ${IP%% *}
+fi
 }
 
 
