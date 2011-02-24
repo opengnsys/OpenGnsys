@@ -1,5 +1,11 @@
-DEFAULT pxe
-
-LABEL pxe
-KERNEL linux
-APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=user
+DEFAULT syslinux/vesamenu.c32 
+MENU TITLE Aplicacion OpenGnsys 
+ 
+LABEL 1 
+MENU LABEL 1 
+KERNEL syslinux/chain.c32 
+APPEND hd0 
+ 
+PROMPT 0 
+TIMEOUT 10 
+ 
