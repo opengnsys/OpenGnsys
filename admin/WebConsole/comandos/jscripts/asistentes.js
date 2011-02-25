@@ -9,12 +9,10 @@
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
-//alert("codeCloneRemotePartition(form)");
 form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " 1 " + form.PartOrigen.value + "  " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " 1 " + form.PartOrigen.value + " " + form.tool.value + " " + form.compresor.value;
 }
 
 function codeDeployImage(form){
-alert("codeDeployImage(form)");
 switch (form.idmetodo.value)
 {
 case "MULTICAST":
