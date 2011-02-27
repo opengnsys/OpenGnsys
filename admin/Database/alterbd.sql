@@ -81,7 +81,7 @@ INSERT INTO `menuboot_itemboot` (`labelmenu`, `labelitem`, `default`) VALUES
 
 
 --
--- Estructura de tabla para la tabla `comandos`
+-- Estructura de tabla para la tabla `asistentes`
 --
 
 CREATE TABLE IF NOT EXISTS `asistentes` (
@@ -100,21 +100,7 @@ CREATE TABLE IF NOT EXISTS `asistentes` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
 
 
-
-INSERT INTO `ogAdmBD`.`asistentes` (
-`idcomando` ,
-`descripcion` ,
-`pagina` ,
-`gestor` ,
-`funcion` ,
-`urlimg` ,
-`aplicambito` ,
-`visuparametros` ,
-`parametros` ,
-`comentarios` ,
-`activo`
-)
-VALUES 
+INSERT INTO `asistentes` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`) VALUES
 ('1', 'Asistente Clonacion Particiones Remotas', '../asistentes/AsistenteCloneRemotePartition.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
 ('2', 'Asistente "Deploy" de Imagenes', '../asistentes/AsistenteDeployImage.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
 ('3', 'Asistente "UpdateCache" con Imagenes', '../asistentes/AsistenteUpdateCache.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
