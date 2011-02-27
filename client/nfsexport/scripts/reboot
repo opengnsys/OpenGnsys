@@ -12,6 +12,6 @@ done
 echo "[50] Desmontar cache local."
 ogUnmountCache
 echo "[90] Reiniciar el equipo."
-ethtool -s eth0 wol g	
-busybox reboot
+ethtool -s $DEVICE wol g
+(sleep 5 && busybox reboot) &
 

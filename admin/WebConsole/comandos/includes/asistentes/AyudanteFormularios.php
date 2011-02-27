@@ -6,11 +6,17 @@
 function htmlForm_mcast($cmd,$ambito,$idambito)
 {
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if ($ambito=4) 
+if ($ambito == 4) 
 {
 $cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas where aulas.idaula=' . $idambito ;
 }
-if ($ambito=16)
+
+if ($ambito == 8) 
+{
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
+}
+
+if ($ambito == 16)
 {
 $cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
 }
@@ -50,11 +56,17 @@ if ($rs->Abrir()){
 function htmlForm_p2p($cmd,$ambito,$idambito)
 {
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if ($ambito=4) 
+if ($ambito == 4) 
 {
 $cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas where aulas.idaula=' . $idambito ;
 }
-if ($ambito=16)
+if ($ambito == 8) 
+{
+$cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
+}
+
+
+if ($ambito == 16)
 {
 $cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
 }
@@ -74,14 +86,27 @@ return($SelectHtml);
 }
 
 
-function htmlOPTION_equipos($cmd,$idambito)
+function htmlOPTION_equipos($cmd,$ambito,$idambito)
 {
+
+//if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
+if ($ambito == 4)
+{
+$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaula=' . $idambito ;
+}
+
+if ($ambito == 8) 
+{
+$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where grupoid=' . $idambito ;
+}
+if ($ambito == 16)
+{
+$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaula=' . $idambito ;
+}
+
 	$SelectHtml="";
-	$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaula=' . $idambito ;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-	//$SelectHtml.= '<SELECT class="formulariodatos" name="nombre" id="identificador" style="WIDTH:220" onChange="xajax_ListarParticionesXip(this.value);"    >';
-	//$SelectHtml.= '    <OPTION value="0"></OPTION>';
 
 	if ($rs->Abrir()){
 		$rs->Primero(); 
@@ -115,7 +140,7 @@ function htmlOPTION_images($cmd)
 		while (!$rs->EOF){
 			$SelectHtml.='<OPTION value="'.$rs->campos["nombreca"] . '" ';
 			$SelectHtml.='>';
-			$SelectHtml.= $rs->campos["nombreca"] .'</OPTION>';
+			$SelectHtml.= $rs->campos["descripcion"] .'</OPTION>';
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();
@@ -193,9 +218,19 @@ function htmlForm_typepart($cmd,$numpar)
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			$SelectHtml.='<OPTION value="'.$rs->campos["tipopar"] . '" ';
+			if ( $rs->campos["tipopar"] == "LINUX" )
+			{
+			$valor="EXT4";
+			$valormostrar="LINUX:EXT[2:3:4]";
+			}
+			else
+			{
+			$valor=$rs->campos["tipopar"];
+			$valormostrar=$rs->campos["tipopar"];
+			}
+			$SelectHtml.='<OPTION value="'.$valor . '" ';
 			$SelectHtml.='>';
-			$SelectHtml.= $rs->campos["tipopar"] .'</OPTION>';
+			$SelectHtml.= $valormostrar .'</OPTION>';
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();
@@ -216,9 +251,9 @@ $SelectHtml.='<OPTION value="FAT12"> FAT12 </OPTION>';
 $SelectHtml.='<OPTION value="FAT16"> FAT16 </OPTION>';
 $SelectHtml.='<OPTION value="FAT32"> FAT32 </OPTION>';
 $SelectHtml.='<OPTION value="NTFS"> NTFS </OPTION>';
-$SelectHtml.='<OPTION value="EXT2"> EXT2 </OPTION>';
-$SelectHtml.='<OPTION value="EXT3"> EXT3 </OPTION>';
-$SelectHtml.='<OPTION value="EXT4"> EXT4 </OPTION>';
+#$SelectHtml.='<OPTION value="EXT2"> EXT2 </OPTION>';
+#$SelectHtml.='<OPTION value="EXT3"> EXT3 </OPTION>';
+$SelectHtml.='<OPTION value="EXT4"> LINUX:EXT[2:3:4] </OPTION>';
 $SelectHtml.='<OPTION value="LINUX-SWAP"> LINUX-SWAP </OPTION>';
 $SelectHtml.='<OPTION value="REISERFS"> REISERFS </OPTION>';
 $SelectHtml.='<OPTION value="REISER4"> RESISER4 </OPTION>';

@@ -370,7 +370,7 @@ function ver_boot(){
 	var whref="boot.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito
 	 window.open(whref,"frame_contenidos")
 }
-function ver_startpages(){
+function ver_ubicarordenadores(){
 	reset_contextual(-1,-1) // Oculta menu contextual
 	var idambito=currentNodo.toma_identificador();
 	var litambito=currentNodo.toma_sufijo();
@@ -378,7 +378,7 @@ function ver_startpages(){
 	//alert(idambito);
 	//alert('nombreambito' + nombreambito);
 	//alert('litambito' + litambito);
-	var whref="./startpages/startpage.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito
+	var whref="ubicarordenadores.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito
 	 window.open(whref,"frame_contenidos")
 }
 	

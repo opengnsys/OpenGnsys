@@ -67,5 +67,9 @@
 
 <TD > <input type="checkbox" name="check4" value="check4" onclick="if (this.form.check4.checked) { this.form.part4.disabled=false; this.form.size4.disabled=false } else { this.form.part4.disabled=true; this.form.size4.disabled=true }" /> <br> Particion 4 </TD>
 <TD> <INPUT type="label" readonly size="8" name="part4" disabled="true" value="CACHE"></TD>
-<TD ><INPUT type="text" style="width:100" name="size4" disabled="true" value="0"></TD>
+<TD><select name="size4" id="size4" style="WIDTH:220" disabled="true" >
+		<option value="0"> Sin modificar tamanio </option>
+		<?php echo ''. htmlForm_sizepart($cmd,4)  .''; ?>		
+</select>
+
 </TR>

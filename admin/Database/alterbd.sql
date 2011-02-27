@@ -79,7 +79,29 @@ INSERT INTO `menuboot_itemboot` (`labelmenu`, `labelitem`, `default`) VALUES
 ('pxeADMIN', 'ogClientAdmin', 0);
 
 
-INSERT INTO `ogAdmBD`.`comandos` (
+
+--
+-- Estructura de tabla para la tabla `comandos`
+--
+
+CREATE TABLE IF NOT EXISTS `asistentes` (
+  `idcomando` int(11) NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(250) NOT NULL DEFAULT '',
+  `pagina` varchar(256) NOT NULL,
+  `gestor` varchar(256) NOT NULL,
+  `funcion` varchar(64) NOT NULL,
+  `urlimg` varchar(250) DEFAULT NULL,
+  `aplicambito` tinyint(4) DEFAULT NULL,
+  `visuparametros` varchar(250) DEFAULT NULL,
+  `parametros` varchar(250) DEFAULT NULL,
+  `comentarios` text,
+  `activo` tinyint(1) NOT NULL,
+  PRIMARY KEY (`idcomando`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+
+
+
+INSERT INTO `ogAdmBD`.`asistentes` (
 `idcomando` ,
 `descripcion` ,
 `pagina` ,
@@ -93,11 +115,11 @@ INSERT INTO `ogAdmBD`.`comandos` (
 `activo`
 )
 VALUES 
-('11', 'Asistente Clonacion Particiones Remotas', '../comandos/AsistenteCloneRemotePartition.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
-('12', 'Asistente "Deploy" de Imagenes', '../comandos/AsistenteDeployImage.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
-('13', 'Asistente "UpdateCache" con Imagenes', '../comandos/AsistenteUpdateCache.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
-('14', 'Asistente Restauracion de Imagenes', '../comandos/AsistenteRestoreImage.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
-('15', 'Asistente Particionado', '../comandos/AsistenteParticionado.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1');
+('1', 'Asistente Clonacion Particiones Remotas', '../asistentes/AsistenteCloneRemotePartition.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
+('2', 'Asistente "Deploy" de Imagenes', '../asistentes/AsistenteDeployImage.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
+('3', 'Asistente "UpdateCache" con Imagenes', '../asistentes/AsistenteUpdateCache.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
+('4', 'Asistente Restauracion de Imagenes', '../asistentes/AsistenteRestoreImage.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
+('5', 'Asistente Particionado', '../asistentes/AsistenteParticionado.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1');
 
 
 
