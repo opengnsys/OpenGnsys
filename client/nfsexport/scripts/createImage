@@ -47,8 +47,9 @@ echo "[25]: Calculando la reduccion del sistema de archivos DISK:$1 PARTITION:$2
 ogReduceFs $1 $2 || exit 1
 
 # Crear la imagen.
-echo "[30] Crear imagen."
-ogCreateImage $1 "$2" $3 $4 || exit $?
+echo "[30] Crear imagen. partclone lzop  30% mas rapido que con gzip"
+ogCreateImage $1 "$2" $3 $4 partclone lzop || exit $?
+#ogCreateImage $1 "$2" $3 $4 || exit $?
 
 echo "[90] Extender sistema de archivos."
 ogExtendFs $1 $2
