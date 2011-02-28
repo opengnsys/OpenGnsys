@@ -1310,6 +1310,8 @@ wget http://www.opengnsys.es/downloads/21 -O /tmp/ogpart2.tgz
 wget http://www.opengnsys.es/downloads/22 -O /tmp/ogpart3.tgz
 cat /tmp/ogpart1.tgz /tmp/ogpart2.tgz /tmp/ogpart3.tgz > /tmp/ogclient.tgz	
 tar xzvf /tmp/ogclient.tgz -C /opt/opengnsys/tftpboot/
+cp -v /var/lib/tftpboot/ogclient/vmlinuz-2.6.32-21-generic-pae /var/lib/tftpboot/ogclient/ogvmlinuz
+cp -v /var/lib/tftpboot/ogclient/initrd.img-2.6.32-21-generic-pae /var/lib/tftpboot/ogclient/oginitrd.img 
 	
 
 
