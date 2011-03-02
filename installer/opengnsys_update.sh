@@ -6,6 +6,9 @@
 #@version 0.9 - basado en opengnsys_installer.sh
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2010/01/27
+#@version 1.0 - adaptación a OpenGnSys 1.0
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2011/03/02
 #*/
 
 
@@ -18,12 +21,12 @@ fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
-DEPS="rsync gcc ctorrent"
+DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://www.opengnsys.es/svn/trunk
+    SVN_URL=http://www.opengnsys.es/svn/branches/version1.0
     DEPS="$DEPS subversion"
 fi
 
@@ -117,22 +120,22 @@ function installDependencies ()
 {
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
-    else
-        while [ $# -gt 0 ]; do
-            dpkg -s $1 &>/dev/null | grep Status | grep -qw install
-            if [ $? -ne 0 ]; then
-                INSTALLDEPS="$INSTALLDEPS $1"
-            fi
-            shift
-        done
-        if [ -n "$INSTALLDEPS" ]; then
-            apt-get update && apt-get install $INSTALLDEPS
-        	if [ $? -ne 0 ]; then
-        		errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
-	    	return 1
-        	fi
-        fi
-    fi
+	else
+		while [ $# -gt 0 ]; do
+			dpkg -s $1 &>/dev/null | grep Status | grep -qw install
+			if [ $? -ne 0 ]; then
+				INSTALLDEPS="$INSTALLDEPS $1"
+			fi
+			shift
+		done
+		if [ -n "$INSTALLDEPS" ]; then
+			apt-get update && apt-get install $INSTALLDEPS
+			if [ $? -ne 0 ]; then
+				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
+				return 1
+			fi
+		fi
+	fi
 }
 
 
@@ -213,6 +216,7 @@ function updateWebFiles()
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
         ERRCODE=$?
         mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
+	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	if [ $ERRCODE != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating web files."
 		exit 1
@@ -292,22 +296,11 @@ function createDirs()
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
 function updateServerFiles () {
 
-	local SOURCES=( client/boot/initrd-generator \
-                        client/boot/upgrade-clients-udeb.sh \
-                        client/boot/udeblist.conf  \
-                        client/boot/udeblist-jaunty.conf  \
-                        client/boot/udeblist-karmic.conf \
-                        client/boot/udeblist-lucid.conf \
-                        client/boot/udeblist-maverick.conf \
-                        repoman/bin \
+	# No copiar ficheros del antiguo cliente Initrd
+	local SOURCES=( repoman/bin \
+			server/bin \
                         doc )
-	local TARGETS=( bin/initrd-generator \
-                        bin/upgrade-clients-udeb.sh \
-                        etc/udeblist.conf \
-                        etc/udeblist-jaunty.conf  \
-                        etc/udeblist-karmic.conf \
-                        etc/udeblist-lucid.conf \
-                        etc/udeblist-maverick.conf \
+	local TARGETS=( bin \
                         bin \
                         doc )
 
@@ -338,7 +331,7 @@ function recompileClient ()
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): recompiling OpenGnSys Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient ../../../client/nfsexport/bin
+	make && mv ogAdmClient ../../../client/shared/bin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Client"
 		hayErrores=1
@@ -353,7 +346,8 @@ function recompileClient ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function updateClient()
+# Actualizar antiguo cliente Initrd.
+function updateOldClient()
 {
 	local OSDISTRIB OSCODENAME
 
@@ -409,6 +403,32 @@ function updateClient()
 	return $hayErrores
 }
 
+# Actualizar nuevo cliente para OpenGnSys 1.0
+function updateClient()
+{
+	local DOWNLOADURL=http://www.opengnsys.es/downloads
+	local tmpfile=/tmp/ogclient.tgz
+
+	echoAndLog "${FUNCNAME}(): Loading Client"
+	# Descargar y descomprimir cliente ogclient
+	wget $DOWNLOADURL/20 -O $tmpfile
+	wget $DOWNLOADURL/21 -O - >> $tmpfile
+	wget $DOWNLOADURL/22 -O - >> $tmpfile
+	if [ ! -s $tmpfile ]; then
+		errorAndLog "${FUNCNAME}(): Error loading client files"
+		return 1
+	fi
+	echoAndLog "${FUNCNAME}(): Extranting Client files"
+	tar xzvf $tmpfile -C $INSTALL_TARGET/tftpboot
+	rm -f $tmpfile
+	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
+	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	# Establecer los permisos.
+	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
+	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
+	echoAndLog "${FUNCNAME}(): Client update successfully"
+}
 
 
 #####################################################################
@@ -470,6 +490,8 @@ makeDoxygenFiles
 
 # Creando la estructura del cliente
 recompileClient
+# NO se actualiza el antiguo cliente Initrd
+#updateOldClient
 updateClient
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"

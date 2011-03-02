@@ -27,6 +27,16 @@ then
         exit 1
 fi
 
+# Detectar sistema operativo del servidor (debe soportar LSB).
+OSDISTRIB=$(lsb_release -is 2>/dev/null)
+# Array con las dependencias que deben estar instaladas, según de la distribución detectada.
+case "$OSDISTRIB" in
+	Ubuntu) DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+		;;
+	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
+		exit 1 ;;
+esac
+
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 if [ -d "$PROGRAMDIR/../installer" ]; then
@@ -41,9 +51,6 @@ mkdir -p $WORKDIR
 
 INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_installation.log
-
-# Array con las dependencias
-DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap subversion schroot squashfs-tools )
 
 # Base de datos
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
@@ -684,7 +691,7 @@ function smbConfigure()
 	backupFile /etc/samba/smb.conf
 	
 	# Copiar plantailla de recursos para OpenGnSys
-        sed -e "s/OPENGNSYSDIR/$INSTALL_TARGET/g" \
+        sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/samba/smb-og.conf
 	# Configurar y recargar Samba"
 	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
@@ -953,7 +960,7 @@ function servicesCompilation ()
 ####################################################################
 
 # Copiar carpeta de Interface
-function InterfaceAdm ()
+function copyInterfaceAdm ()
 {
 	local hayErrores=0
 	
@@ -975,7 +982,7 @@ function InterfaceAdm ()
 # Crear antiguo cliente initrd para OpenGnSys 0.10
 function openGnsysOldClientCreate()
 {
-	local OSDISTRIB OSCODENAME
+	local OSCODENAME
 
 	local hayErrores=0
 
@@ -991,7 +998,6 @@ function openGnsysOldClientCreate()
 	fi
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISTRIB=$(lsb_release -is 2>/dev/null)
 	OSCODENAME=$(lsb_release -cs 2>/dev/null)
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
@@ -1176,9 +1182,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # Copiar carpeta Interface entre administración y motor de clonación.
-InterfaceAdm
+copyInterfaceAdm
 if [ $? -ne 0 ]; then
-	errorAndLog "Error while copying Interface Administration"
+	errorAndLog "Error while copying Administration Interface"
 	exit 1
 fi
 
@@ -1192,10 +1198,10 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Configuración SMB
+# Configuración Samba
 smbConfigure
 if [ $? -ne 0 ]; then
-	errorAndLog "Error while configuring nfs server!"
+	errorAndLog "Error while configuring Samba server!"
 	exit 1
 fi
 
