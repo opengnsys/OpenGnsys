@@ -8,5 +8,20 @@
 # $3 Nombre canónico de la imagen
 # $4 Dirección del repositorio
 #_______________________________________________________________________________________________________________________________
+
+# Error si llamada no se realliza desde OpenGnSys Client.
+PATH=$PATH:$(dirname $0)
+PROG=$(basename $0)
+CALLER=$(ogGetCaller)
+if [ "$CALLER" != "ogAdmClient" ]; then
+    ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+    exit $?
+fi
+
+# Si modo "user"; activar repositorio para escritura, crear imagen y activar para lectura.
+[ "$boot" == "user" ] && CambiarAcceso admin
 createImage "$1" "$2" "REPO" "$3"
+RETVAL=$?
+[ "$boot" == "user" ] && CambiarAcceso user
+exit $RETVAL
 
