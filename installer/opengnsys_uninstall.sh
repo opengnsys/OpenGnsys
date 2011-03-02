@@ -45,9 +45,12 @@ for dir in $OPENGNSYS/*; do
     fi
 done
 rm -f /etc/init.d/opengnsys /etc/default/opengnsys
+# Comentar recursos de OpenGnSys en Samba.
+perl -pi -e "s/^ *include \= \/etc\/samba\/smb-og.conf/\;   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
+/etc/init.d/smbd restart
 # Tareas manuales a realizar después de desinstalar.
 echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"
-echo "     (DHCP, PXE, TFTP, NFS, Apache, MySQL)."
+echo "     (DHCP, PXE, TFTP, NFS/Samba, Apache, MySQL)."
 echo "- Delete repository directory \"$OPENGNSYS/$OGIMG\""
 

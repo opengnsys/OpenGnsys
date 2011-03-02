@@ -859,25 +859,19 @@ function openGnsysCopyServerFiles () {
 
 	local path_opengnsys_base=$1
 
-	local SOURCES=( client/boot/initrd-generator \
-                        client/boot/upgrade-clients-udeb.sh \
-                        client/boot/udeblist.conf  \
-                        client/boot/udeblist-jaunty.conf  \
-                        client/boot/udeblist-karmic.conf \
-                        client/boot/udeblist-lucid.conf \
-                        client/boot/udeblist-maverick.conf \
-                        server/tftpboot/pxelinux.cfg \
+	# No se copian los ficheros del cliente antiguo:
+	# - client/boot/initrd-generator ==> /opt/opengnsys/bin
+        # - client/boot/upgrade-clients-udeb.sh ==> /opt/opengnsys/bin
+        # - client/boot/udeblist.conf ==> /opt/opengnsys/etc
+        # - client/boot/udeblist-jaunty.conf ==> /opt/opengnsys/etc
+        # - client/boot/udeblist-karmic.conf ==> /opt/opengnsys/etc
+        # - client/boot/udeblist-lucid.conf ==> /opt/opengnsys/etc
+        # - client/boot/udeblist-maverick.conf ==> /opt/opengnsys/etc
+	local SOURCES=( server/tftpboot/pxelinux.cfg \
                         server/bin \
                         repoman/bin \
                         doc )
-	local TARGETS=( bin/initrd-generator \
-                        bin/upgrade-clients-udeb.sh \
-                        etc/udeblist.conf \
-                        etc/udeblist-jaunty.conf  \
-                        etc/udeblist-karmic.conf \
-                        etc/udeblist-lucid.conf \
-                        etc/udeblist-maverick.conf \
-                        tftpboot/pxelinux.cfg \
+	local TARGETS=( tftpboot/pxelinux.cfg \
                         bin \
                         bin \
                         doc )
@@ -944,7 +938,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient ../../../../client/nfsexport/bin
+	make && mv ogAdmClient ../../../../client/shared/bin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Client"
 		hayErrores=1
@@ -986,7 +980,7 @@ function openGnsysOldClientCreate()
 	local hayErrores=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-        cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
+        cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
         find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
         mkdir -p $INSTALL_TARGET/client/lib/engine/bin
@@ -1292,10 +1286,10 @@ fi
 popd
 
 # Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
-openGnsysOldClientCreate
-if [ $? -ne 0 ]; then
-	errorAndLog "Warning: cannot create old initrd client"
-fi
+#openGnsysOldClientCreate
+#if [ $? -ne 0 ]; then
+#	errorAndLog "Warning: cannot create old initrd client"
+#fi
 # Crear la estructura del cliente de OpenGnSys 1.0
 openGnsysClientCreate
 if [ $? -ne 0 ]; then

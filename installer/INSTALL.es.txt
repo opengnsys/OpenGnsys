@@ -10,7 +10,7 @@ Descargar una versión completa y desccomprimir el fichero "opengnsys-version.ta
         cd opengnsys-version/installer
 
 O bien, descargar el instalador desde la última reversión del repositorio:
-        svn export http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh
+        svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh
 
 Ejecutar el instalador como root:
         sudo ./opengnsys_installer.sh 
@@ -26,7 +26,7 @@ Descargar el fichero opengnsys-version.tar.gz y descomprimirlo:
         cd opengnsys-version/installer
 
 O bien, descargar el actualizador desde la última revisión del repositorio:
-        svn export http://www.opengnsys.es/svn/trunk/installer/opengnsys_update.sh
+        svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_update.sh
 
 Ejecutar el programa de actualización como root:
         sudo ./opengnsys_installer.sh 

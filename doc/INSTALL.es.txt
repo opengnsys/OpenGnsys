@@ -25,14 +25,13 @@ Se realizan los siguientes procesos:
     * Crear la estructura básica de directorios de OpenGnSys.
     * Descargar el repositorio de código en un directorio temporal (/tmp/opengnsys_installer). Nota: en versiones futuras este proceso no será necesario.
     * Compilar e instalar los servicios de OpenGnSys.
-    * Configuración básica de los serviciios de red DHCP, PXE y NFS a partir de los parámetros de conexión.
+    * Configuración básica de los serviciios de red DHCP, PXE y NFS/Samba a partir de las plantillas de configuración
     * Copiar ficheros complementarios de gestión del servidor.
     * Crear la base de datos y configurar el servidor web de OpenGnSys Web Admin Console.
     * Copiar los ficheros de las páginas web de Web Console.
     * Copiar la estructura de directorios de OpenGnSys Client.
-    * Descargar y generar la imagen inicial Initrd y el Kernel de OpenGnSys Client (llamada al script initrd-generator).
-    * Descargar los paquetes Udeb de herramientas complementarias para OpenGnSys Client (llamada al script upgrade-clients-udeb.sh).
-    * Configuración básica de los serviciios de OpenGNsys a partir de los parámetros de red.
+    * Descargar la imagen inicial de OpenGnSys Client.
+    * Configuración básica de los serviciios de OpenGnSys a partir de los parámetros de red.
 
 Una vez finalizada la ejecución del instalador, puede empezarse a trabajar con el sistema:
     * Configurar DHCP.
