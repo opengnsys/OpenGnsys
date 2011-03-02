@@ -168,10 +168,10 @@ function checkDependencies()
 function installDependencies()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "installDependencies(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
-	echoAndLog "installDependencies(): installing uncompleted dependencies"
+	echoAndLog "${FUNCNAME}(): installing uncompleted dependencies"
 
 	# copia local del array del parametro 1
 	local deps
@@ -184,22 +184,22 @@ function installDependencies()
 	done
 
 	if [ -z "${string_deps}" ]; then
-		errorAndLog "installDependencies(): array of dependeces is empty"
+		errorAndLog "${FUNCNAME}(): array of dependeces is empty"
 		exit 1
 	fi
 
 	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 	export DEBIAN_FRONTEND=noninteractive
 
-	echoAndLog "installDependencies(): now ${string_deps} will be installed"
+	echoAndLog "${FUNCNAME}(): now ${string_deps} will be installed"
 	apt-get -y install --force-yes ${string_deps}
 	if [ $? -ne 0 ]; then
-		errorAndLog "installDependencies(): error installing dependencies"
+		errorAndLog "${FUNCNAME}(): error installing dependencies"
 		return 1
 	fi
 
 	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND
-	echoAndLog "installDependencies(): dependencies installed"
+	echoAndLog "${FUNCNAME}(): dependencies installed"
 }
 
 # Hace un backup del fichero pasado por parámetro
@@ -240,18 +240,18 @@ function backupFile()
 function mysqlSetRootPassword()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "mysqlSetRootPassword(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_mysql=$1
-	echoAndLog "mysqlSetRootPassword(): setting root password in MySQL server"
+	echoAndLog "${FUNCNAME}(): setting root password in MySQL server"
 	/usr/bin/mysqladmin -u root password ${root_mysql}
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlSetRootPassword(): error while setting root password in MySQL server"
+		errorAndLog "${FUNCNAME}(): error while setting root password in MySQL server"
 		return 1
 	fi
-	echoAndLog "mysqlSetRootPassword(): root password saved!"
+	echoAndLog "${FUNCNAME}(): root password saved!"
 	return 0
 }
 
@@ -675,54 +675,31 @@ function nfsAddExport()
 
 
 ########################################################################
-## Configuracion servicio SMB
+## Configuracion servicio Samba
 ########################################################################
 function smbConfigure()
 {
-	echoAndLog "${FUNCNAME}(): Config smb server."
+	echoAndLog "${FUNCNAME}(): Configure Samba server."
 
 	backupFile /etc/samba/smb.conf
 	
-cat >> /etc/samba/smb.conf <<EOF
-[tftpboot]
-   comment = el directorio fisico ogclient debe estar como escritura
-   writeable = no
-   read only = yes
-   #locking = no
-   path = /var/lib/tftpboot
-   guest ok = no
-
-[ogclient]
-   comment = client
-   read only = yes
-   locking = no
-   path = /opt/opengnsys/client
-   guest ok = no
-
-[oglog]
-   comment = log
-   read only = no
-   writeable = yes
-   path = /opt/opengnsys/log/clients
-   guest ok = no
-
-[ogimages]
-   comment = images
-   read only = no
-   writeable = yes
-   locking = no
-   path = /opt/opengnsys/images
-   guest ok = no
-EOF
-
-	service smbd restart
-	
+	# Copiar plantailla de recursos para OpenGnSys
+        sed -e "s/OPENGNSYSDIR/$INSTALL_TARGET/g" \
+		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/smb/smb-og.conf
+	# Configurar y recargar Samba"
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/smb\/smb-og.conf/" /etc/samba/smb.conf
+	/etc/init.d/smbd restart
 	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configure smb"
+		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
 	fi
+	# Crear usuario de acceso a los recursos y establecer permisos.
+	useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
+	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
 
-	echoAndLog "${FUNCNAME}(): Added SAMBA configuration to file \"/etc/samba/smb.conf\"."
+	echoAndLog "${FUNCNAME}(): Added Samba configuration."
 	return 0
 }
 
@@ -743,7 +720,7 @@ function dhcpConfigure()
 	    -e "s/NETBROAD/$NETBROAD/g" \
 	    -e "s/ROUTERIP/$ROUTERIP/g" \
 	    -e "s/DNSIP/$DNSIP/g" \
-	    $WORKDIR/opengnsys/server/DHCP/dhcpd.conf > /etc/dhcp3/dhcpd.conf
+	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd.conf
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
 		return 1
@@ -769,6 +746,8 @@ function installWebFiles()
 		exit 1
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	# Descomprimir XAJAX.
+	unzip $WORKDIR/opengnsys/admin/WebConsole/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
@@ -887,7 +866,7 @@ function openGnsysCopyServerFiles () {
                         client/boot/udeblist-karmic.conf \
                         client/boot/udeblist-lucid.conf \
                         client/boot/udeblist-maverick.conf \
-                        server/PXE/pxelinux.cfg \
+                        server/tftpboot/pxelinux.cfg \
                         server/bin \
                         repoman/bin \
                         doc )
@@ -999,7 +978,8 @@ function InterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysClientCreate()
+# Crear antiguo cliente initrd para OpenGnSys 0.10
+function openGnsysOldClientCreate()
 {
 	local OSDISTRIB OSCODENAME
 
@@ -1048,12 +1028,40 @@ function openGnsysClientCreate()
 	fi
 
 	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): Client generation success."
+		echoAndLog "${FUNCNAME}(): Old client generation success."
 	else
-		errorAndLog "${FUNCNAME}(): Client generation with errors"
+		errorAndLog "${FUNCNAME}(): Old client generation with errors"
 	fi
 
 	return $hayErrores
+}
+
+
+# Crear nuevo cliente OpenGnSys 1.0
+function openGnsysClientCreate()
+{
+	local DOWNLOADURL=http://www.opengnsys.es/downloads
+	local tmpfile=/tmp/ogclient.tgz
+
+	echoAndLog "${FUNCNAME}(): Loading Client"
+	# Descargar y descomprimir cliente ogclient
+	wget $DOWNLOADURL/20 -O $tmpfile
+	wget $DOWNLOADURL/21 -O - >> $tmpfile
+	wget $DOWNLOADURL/22 -O - >> $tmpfile
+	if [ ! -s $tmpfile ]; then
+		errorAndLog "${FUNCNAME}(): Error loading client files"
+		return 1
+	fi
+	echoAndLog "${FUNCNAME}(): Extranting Client files"
+	tar xzvf $tmpfile -C $INSTALL_TARGET/tftpboot
+	rm -f $tmpfile
+	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
+	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
+	# Establecer los permisos.
+	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
+	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
+	echoAndLog "${FUNCNAME}(): Client generation success"
 }
 
 
@@ -1089,16 +1097,17 @@ function openGnsysConfigure()
 #######  Función de resumen informativo de la instalación
 #####################################################################
 
-function installationSummary(){
+function installationSummary()
+{
 	echo
 	echoAndLog "OpenGnSys Installation Summary"
 	echo       "=============================="
 	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
 	echoAndLog "DHCP configuracion file:          /etc/dhcp3/dhcpd.conf"
-	echoAndLog "NFS configuracion file:           /etc/exports"
+	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
+	echoAndLog "Samba configuracion directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
@@ -1196,8 +1205,6 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-
-
 # Configuración ejemplo DHCP
 dhcpConfigure
 if [ $? -ne 0 ]; then
@@ -1284,50 +1291,20 @@ fi
 
 popd
 
-# Creando la estructura del cliente
+# Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
+openGnsysOldClientCreate
+if [ $? -ne 0 ]; then
+	errorAndLog "Warning: cannot create old initrd client"
+fi
+# Crear la estructura del cliente de OpenGnSys 1.0
 openGnsysClientCreate
 if [ $? -ne 0 ]; then
-	errorAndLog "Error creating clients"
+	errorAndLog "Error creating client"
 	exit 1
 fi
 
 # Configuración de servicios de OpenGnSys
 openGnsysConfigure
-
-
-# integrando xajax a la consola web
-unzip /opt/opengnsys/www/xajax_0.5_standard.zip -d /opt/opengnsys/www/xajax
-
-#anadiendo usuario opengnsys al sistema sin login
-useradd opengnsys
-
-#anadiendo usuario opengnsys a samba"
-echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
-
-#descargando cliente ogclient
-wget http://www.opengnsys.es/downloads/20 -O /tmp/ogpart1.tgz
-wget http://www.opengnsys.es/downloads/21 -O /tmp/ogpart2.tgz
-wget http://www.opengnsys.es/downloads/22 -O /tmp/ogpart3.tgz
-cat /tmp/ogpart1.tgz /tmp/ogpart2.tgz /tmp/ogpart3.tgz > /tmp/ogclient.tgz	
-tar xzvf /tmp/ogclient.tgz -C /opt/opengnsys/tftpboot/
-cp -v /var/lib/tftpboot/ogclient/vmlinuz-2.6.32-21-generic-pae /var/lib/tftpboot/ogclient/ogvmlinuz
-cp -v /var/lib/tftpboot/ogclient/initrd.img-2.6.32-21-generic-pae /var/lib/tftpboot/ogclient/oginitrd.img 
-	
-
-
-#definiendo permisos
-chown -R :$OPENGNSYS_CLIENT_USER /opt/opengnsys/log/clients
-chown -R :$OPENGNSYS_CLIENT_USER /opt/opengnsys/images
-chmod -R 775 /opt/opengnsys/log/clients
-chmod -R 775 /opt/opengnsys/images
-chown -R :$OPENGNSYS_CLIENT_USER /var/lib/tftpboot/ogclient
-chmod -R 755 /var/lib/tftpboot/ogclient
-chown -R :$APACHE_RUN_GROUP /var/lib/tftpboot/pxelinux.cfg
-chmod -R 775 /var/lib/tftpboot/pxelinux.cfg
-
-	
-
-
 
 # Mostrar sumario de la instalación e instrucciones de post-instalación.
 installationSummary
