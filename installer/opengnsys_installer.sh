@@ -685,9 +685,9 @@ function smbConfigure()
 	
 	# Copiar plantailla de recursos para OpenGnSys
         sed -e "s/OPENGNSYSDIR/$INSTALL_TARGET/g" \
-		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/smb/smb-og.conf
+		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/samba/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/smb\/smb-og.conf/" /etc/samba/smb.conf
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
 	/etc/init.d/smbd restart
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
@@ -747,7 +747,7 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Descomprimir XAJAX.
-	unzip $WORKDIR/opengnsys/admin/WebConsole/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	unzip $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
