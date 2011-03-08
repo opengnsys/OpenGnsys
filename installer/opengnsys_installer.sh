@@ -979,7 +979,7 @@ function copyInterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysClientCopyFiles()
+function openGnsysCopyClientFiles()
 {
 	local hayErrores=0
 
@@ -1018,7 +1018,7 @@ function openGnsysOldClientCreate()
 
 	local hayErrores=0
 
-#sustituido en la funcion openGnsysClientCopyFiles
+#sustituido en la funcion openGnsysCopyClientFiles
 	#echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
     #    cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
     #    find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
@@ -1029,7 +1029,7 @@ function openGnsysOldClientCreate()
 	#	errorAndLog "${FUNCNAME}(): error while copying engine files"
 	#	hayErrores=1
 	#fi
-# #sustituido en la funcion openGnsysClientCopyFiles
+# #sustituido en la funcion openGnsysCopyClientFiles
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
 	OSCODENAME=$(lsb_release -cs 2>/dev/null)
@@ -1327,7 +1327,7 @@ popd
 
 
 # Crear la estructura de los accesos al servidor desde el cliente (shared)
-openGnsysClientCopyFiles
+openGnsysCopyClientFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
