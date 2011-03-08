@@ -984,16 +984,16 @@ function openGnsysCopyClientFiles()
 	local hayErrores=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-    cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
-    if [ $? -ne 0 ]; then
+	cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		hayErrores=1
 	fi
-    find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
-    mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-    cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
+	cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		hayErrores=1
@@ -1017,19 +1017,6 @@ function openGnsysOldClientCreate()
 	local OSCODENAME
 
 	local hayErrores=0
-
-#sustituido en la funcion openGnsysCopyClientFiles
-	#echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-    #    cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
-    #    find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	#echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
-    #    mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-    #    cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
-	#if [ $? -ne 0 ]; then
-	#	errorAndLog "${FUNCNAME}(): error while copying engine files"
-	#	hayErrores=1
-	#fi
-# #sustituido en la funcion openGnsysCopyClientFiles
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
 	OSCODENAME=$(lsb_release -cs 2>/dev/null)
@@ -1139,9 +1126,9 @@ function installationSummary()
 	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "DHCP configuracion file:          /etc/dhcp3/dhcpd.conf"
-	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
-	echoAndLog "Samba configuracion directory:    /etc/samba"
+	echoAndLog "DHCP configuration file:          /etc/dhcp3/dhcpd.conf"
+	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
+	echoAndLog "Samba configuration directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
@@ -1226,11 +1213,12 @@ fi
 tftpConfigure
 
 # Configuración NFS
-nfsConfigure
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while configuring nfs server!"
-	exit 1
-fi
+#### (descomentar las siguientes líneas para exportar servicios por NFS)
+#nfsConfigure
+#if [ $? -ne 0 ]; then
+#	errorAndLog "Error while configuring nfs server!"
+#	exit 1
+#fi
 
 # Configuración Samba
 smbConfigure
@@ -1333,6 +1321,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
+#### (descomentar las siguientes líneas para generar cliente initrd)
 #openGnsysOldClientCreate
 #if [ $? -ne 0 ]; then
 #	errorAndLog "Warning: cannot create old initrd client"
