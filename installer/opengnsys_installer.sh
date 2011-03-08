@@ -979,6 +979,38 @@ function copyInterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
+function openGnsysClientCopyFiles()
+{
+	local hayErrores=0
+
+	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
+    cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+    if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while copying client estructure"
+		hayErrores=1
+	fi
+    find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	
+	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
+    mkdir -p $INSTALL_TARGET/client/lib/engine/bin
+    cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while copying engine files"
+		hayErrores=1
+	fi
+	
+	if [ $hayErrores -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): client copy files success."
+	else
+		errorAndLog "${FUNCNAME}(): client copy files with errors"
+	fi
+
+	return $hayErrores
+}
+
+
+
+
 # Crear antiguo cliente initrd para OpenGnSys 0.10
 function openGnsysOldClientCreate()
 {
@@ -986,16 +1018,18 @@ function openGnsysOldClientCreate()
 
 	local hayErrores=0
 
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-        cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
-        find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
-        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-        cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while copying engine files"
-		hayErrores=1
-	fi
+#sustituido en la funcion openGnsysClientCopyFiles
+	#echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
+    #    cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+    #    find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	#echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
+    #    mkdir -p $INSTALL_TARGET/client/lib/engine/bin
+    #    cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	#if [ $? -ne 0 ]; then
+	#	errorAndLog "${FUNCNAME}(): error while copying engine files"
+	#	hayErrores=1
+	#fi
+# #sustituido en la funcion openGnsysClientCopyFiles
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
 	OSCODENAME=$(lsb_release -cs 2>/dev/null)
@@ -1291,11 +1325,19 @@ fi
 
 popd
 
+
+# Crear la estructura de los accesos al servidor desde el cliente (shared)
+openGnsysClientCopyFiles
+if [ $? -ne 0 ]; then
+	errorAndLog "Error creating client structure"
+fi
+
 # Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
 #openGnsysOldClientCreate
 #if [ $? -ne 0 ]; then
 #	errorAndLog "Warning: cannot create old initrd client"
 #fi
+
 # Crear la estructura del cliente de OpenGnSys 1.0
 openGnsysClientCreate
 if [ $? -ne 0 ]; then
