@@ -1,3 +1,11 @@
+[tftpboot]
+   comment = el directorio fisico ogclient debe estar como escritura
+   writeable = no
+   read only = yes
+   #locking = no
+   path = /var/lib/tftpboot
+   guest ok = no
+
 [ogboot]
    comment = OpenGnSys Boot
    writeable = no
