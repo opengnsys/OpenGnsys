@@ -1062,20 +1062,19 @@ function openGnsysOldClientCreate()
 function openGnsysClientCreate()
 {
 	local DOWNLOADURL=http://www.opengnsys.es/downloads
-	local tmpfile=/tmp/ogclient.tgz
+	local FILENAME=ogclient-1.0-lucid-32bit.tar.gz
+	local TMPFILE=/tmp/$FILENAME
 
 	echoAndLog "${FUNCNAME}(): Loading Client"
 	# Descargar y descomprimir cliente ogclient
-	wget $DOWNLOADURL/20 -O $tmpfile
-	wget $DOWNLOADURL/21 -O - >> $tmpfile
-	wget $DOWNLOADURL/22 -O - >> $tmpfile
-	if [ ! -s $tmpfile ]; then
-		errorAndLog "${FUNCNAME}(): Error loading client files"
+	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
+	if [ ! -s $TMPFILE ]; then
+		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
 	echoAndLog "${FUNCNAME}(): Extranting Client files"
-	tar xzvf $tmpfile -C $INSTALL_TARGET/tftpboot
-	rm -f $tmpfile
+	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
+	rm -f $TMPFILE
 	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
 	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
