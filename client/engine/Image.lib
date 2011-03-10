@@ -4,66 +4,10 @@
 #@brief   Librería o clase Image
 #@class   Image
 #@brief   Funciones para creación, restauración y clonación de imágenes de sistemas.
-#@version 0.9
+#@version 1.0
 #@warning License: GNU GPLv3+
 #*/
 
-# Bloquear imagen para creación.
-function ogLockImage ()
-{
-# Variables locales
-local IMGDIR
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
-           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
-           "$FUNCNAME REPO /aula1/winxp.img"
-    return
-fi
-# Error si no se reciben 1 o 2 parámetros.
-[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-# Comprobar que existe directorio de imagen
-IMGDIR=$(ogGetParentPath $@) || return $?
-# Crear fichero de bloqueo.
-touch $IMGDIR/$(basename "${!#}").lock
-}
-
-# Desbloquear imagen (borrar fichero de bloqueo).
-function ogUnlockImage ()
-{
-# Variables locales
-local IMGDIR
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
-           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
-           "$FUNCNAME REPO /aula1/winxp.img"
-    return
-fi
-# Error si no se reciben 1 o 2 parámetros.
-[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
-# Borrar fichero de bloqueo para la imagen.
-rm -f $(ogGetPath $@.lock)
-}
-
-# Comprobar si el fichero de bloqueo para una imagen.
-function ogIsImageLocked ()
-{
-# Variables locales
-local IMGDIR
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
-           "if $FUNCNAME /opt/opengnsys/images/aula1/winxp.img; then ...; fi" \
-           "if $FUNCNAME REPO /aula1/winxp.img; then ...; fi"
-    return
-fi
-# Comprobar si existe el fichero de bloqueo.
-test -n "$(ogGetPath $@.lock)"
-}
 
 
 function ogPartcloneSyntax ()
@@ -360,10 +304,108 @@ return $ERRCODE
 }
 
 
+#/**
+#         ogCreateMbrImage int_ndisk str_repo path_image
+#@brief   Crea una imagen a partir del sector de arranque de un disco.
+#@param   int_ndisk    nº de orden del disco
+#@param   str_repo     repositorio de imágenes (remoto o caché local)
+#@param   path_image   camino de la imagen (sin extensión)
+#@return  (nada, por determinar)
+#@note    repo = { REPO, CACHE }
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
+#@version 0.9 - Versión en pruebas para OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/01/12
+#@version 1.0 - Adaptación a OpenGnSys 1.0
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011/03/10
+#*/ ##
+function ogCreateMbrImage ()
+{
+# Variables locales
+local DISK IMGDIR IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+           "$FUNCNAME 1 REPO /aula1/mbr"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+DISK=$(ogDiskToDev "$1") || return $?
+IMGDIR=$(ogGetParentPath "$2" "$3")
+[ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$2 $(dirname $3)" || return $?
+IMGFILE="$IMGDIR/$(basename "$3").mbr"
+
+# Crear imagen del MBR.
+dd if="$DISK" of="$IMGFILE" bs=512 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
+}
 
 
+#/**
+#         ogIsImageLocked [str_repo] path_image
+#@brief   Comprueba si una imagen está bloqueada para uso exclusivo.
+#@param   str_repo     repositorio de imágenes (opcional)
+#@param   path_image   camino de la imagen (sin extensión)
+#@return  Código de salida: 0 - sin bloquear, 1 - bloqueada.
+#@note    repo = { REPO, CACHE }
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@version 1.0 - Adaptación a OpenGnSys 1.0
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011/03/10
+#*/ ##
+function ogIsImageLocked ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
+           "if $FUNCNAME /opt/opengnsys/images/aula1/winxp.img; then ...; fi" \
+           "if $FUNCNAME REPO /aula1/winxp.img; then ...; fi"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+# Comprobar si existe el fichero de bloqueo.
+test -n "$(ogGetPath $@.lock)"
+}
 
 
+#/**
+#         ogLockImage [str_repo] path_image
+#@brief   Bloquea una imagen para uso exclusivo.
+#@param   str_repo     repositorio de imágenes (opcional)
+#@param   path_image   camino de la imagen (sin extensión)
+#@return  Nada.
+#@note    Se genera un fichero con extensión .lock
+#@note    repo = { REPO, CACHE }
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@version 1.0 - Adaptación a OpenGnSys 1.0
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011/03/10
+#*/ ##
+function ogLockImage ()
+{
+# Variables locales
+local IMGDIR
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
+           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
+           "$FUNCNAME REPO /aula1/winxp.img"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+# Comprobar que existe directorio de imagen
+IMGDIR=$(ogGetParentPath $@) || return $?
+# Crear fichero de bloqueo.
+touch $IMGDIR/$(basename "${!#}").lock
+}
 
 
 #/**
@@ -443,6 +485,75 @@ if [ $ERRCODE != 0 ]; then
 fi
 ogUnlock $3 $4
 return $ERRCODE
+}
+
+
+#/**
+#         ogRestoreMbrImage str_repo path_image int_ndisk
+#@brief   Restaura la imagen del sector de arranque de un disco.
+#@param   str_repo     repositorio de imágenes o caché local
+#@param   path_image   camino de la imagen
+#@param   int_ndisk    nº de orden del disco
+#@return  (por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
+#@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
+#@version 0.9 - Primera versión en pruebas.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/01/12
+#@version 1.0 - Adaptación a OpenGnSys 1.0
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011/03/10
+#*/ ##
+function ogRestoreMbrImage ()
+{
+# Variables locales
+local DISK IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
+           "$FUNCNAME REPO /aula1/mbr 1"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+# Procesar parámetros.
+DISK=$(ogDiskToDev "$3") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
+[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+
+# Restaurar imagen del MBR.
+dd if="$IMGFILE" of="$DISK" bs=512 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
+}
+
+
+#/**
+#         ogUnlockImage [str_repo] path_image
+#@brief   Desbloquea una imagen con uso exclusivo.
+#@param   str_repo     repositorio de imágenes (opcional)
+#@param   path_image   camino de la imagen (sin extensión)
+#@return  Nada.
+#@note    repo = { REPO, CACHE }
+#@note    Se elimina el fichero de bloqueo con extensión .lock
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@version 1.0 - Adaptación a OpenGnSys 1.0
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011/03/10
+#*/ ##
+function ogUnlockImage ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
+           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
+           "$FUNCNAME REPO /aula1/winxp.img"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+# Borrar fichero de bloqueo para la imagen.
+rm -f $(ogGetPath $@.lock)
 }
 
 
@@ -662,15 +773,3 @@ case "$IMGTYPE" in
 esac
 }
 
-
-#### PRUEBAS
-# Obtener tipo de imagen 
-function ogGetImageTypeUS ()
-{
-local IMGFILE IMGTYPE EXT
-for EXT in img pgz; do
-     IMGFILE=$(ogGetPath "$1" "$2.$EXT")
-     [ -r "$IMGFILE" ] && IMGTYPE="$EXT"
-done
-echo $IMGTYPE
-}
