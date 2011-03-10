@@ -206,6 +206,37 @@ function updateServicesStart(){
 	echoAndLog "${FUNCNAME}(): /etc/init.d/opengnsys updated successfully."
 }
 
+# Actualizar cliente OpenGnSys
+function openGnsysCopyClientFiles()
+{
+	local hayErrores=0
+
+	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
+	#cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while updating client structure"
+		hayErrores=1
+	fi
+	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	
+	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
+	#mkdir -p $INSTALL_TARGET/client/lib/engine/bin
+	#cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while updating engine files"
+		hayErrores=1
+	fi
+	
+	if [ $hayErrores -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): client  files update success."
+	else
+		errorAndLog "${FUNCNAME}(): client files update with errors"
+	fi
+
+	return $hayErrores
+}
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
@@ -259,8 +290,9 @@ function makeDoxygenFiles()
 		errorAndLog "${FUNCNAME}(): unable to create Doxygen web files."
 		return 1
 	fi
+	rm -fr "$INSTALL_TARGET/www/api"
  	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
-        rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
+    rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
@@ -478,6 +510,9 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Server files"
 	exit 1
 fi
+
+# Actualizando cliente
+openGnsysCopyClientFiles
 
 # Copiando paqinas web
 updateWebFiles
