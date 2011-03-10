@@ -24,46 +24,24 @@
 				<option value="lzop"> lzop </option>
 				<option value="gzip"> gzip </option>
 		</select>
+			<br />		
+	
+		<br />
+		Elige el metodo de transferencia
+		<select name="idmetodo" id="idmetodo" style="WIDTH:220";">
+			<option value="MULTICAST"> MULTICAST </option>
+			<option value="UNICAST"> UNICAST </option> 			
+		</select>
+		<br />
 	</td>
 	
-	<td class="op_net_1">
+	<td class="op_mcast">
 		<?php  echo ''. htmlForm_mcast($cmd,$ambito,$idambito).'';   ?>
 	</td>
 	
-	<td class="op_tools">
+	<td class="op_unicast">
+		<?php  echo ''. htmlForm_unicast($cmd,$ambito,$idambito).'';   ?>
 	</td>
-	
-	<td class="op_target"></td>
-	
-	<td class="op_tools"></td>
-</tr>
-<tr>
-	<td class="op_basic">		
-		
-	</td>
-	<td class="op_net_1"></td>
-	
-
-	<td class="op_net_1">
-
-	
-	</td>
-	<td class="op_target"></td>
-	<td class="op_tools"></td>
-</tr>
-<tr>
-	<td class="op_basic"></td>
-	<td class="op_net_1"></td>
-	<td class="op_net_1"></td>
-	<td class="op_target"></td>
-	<td class="op_tools"></td>
-</tr>
-<tr>
-	<td class="op_basic"></td>
-	<td class="op_net_1"></td>
-	<td class="op_net_1"></td>
-	<td class="op_target"></td>
-	<td class="op_tools"></td>
 </tr>
 
 

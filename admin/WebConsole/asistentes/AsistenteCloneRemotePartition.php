@@ -93,7 +93,7 @@ switch($ambito){
 		
 			<tr> 
 				<th><INPUT TYPE="button" NAME="GenerarInstruccion" Value="Generar InstruccionOG" onClick="codeCloneRemotePartition(this.form)"> 	</th>
-				<td><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
+				<td colspan="5"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
 						</table>	
 	</form>	

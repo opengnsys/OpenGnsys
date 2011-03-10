@@ -86,6 +86,44 @@ return($SelectHtml);
 }
 
 
+function htmlForm_unicast($cmd,$ambito,$idambito)
+{
+
+//if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
+if ($ambito == 4)
+{
+$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaula=' . $idambito ;
+}
+
+if ($ambito == 8) 
+{
+$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where grupoid=' . $idambito ;
+}
+if ($ambito == 16)
+{
+$cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaula=' . $idambito ;
+}
+
+	$SelectHtml="";
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+
+	if ($rs->Abrir()){
+		$rs->Primero(); 
+		while (!$rs->EOF){
+		   $ucastclient.= $rs->campos["ip"] . ":" ;
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	}
+		$SelectHtml.='Puerto Unicast      :<input type="text" size="8" name="ucastport" value="8000" /> <br />';
+		$SelectHtml.='Clientes Posibles   :<input type="text" size="98" name="ucastclient" value="' . $ucastclient . '" /> <br />';
+		
+	return($SelectHtml);	
+}
+
+
+
 function htmlOPTION_equipos($cmd,$ambito,$idambito)
 {
 

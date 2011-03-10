@@ -41,12 +41,12 @@ COMPRESOR=$8
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 1 ]; then
-	echo "cloneRemoteFromMaster ipmaster disk init session disk part tool comp"
+	echo "cloneRemoteFromMaster ipmaster disk init [MULTICAST|UNICAST] session disk part tool comp"
 	exit 1
 fi
 
-if [  $# -lt 5  ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ TORRENT|UNICAST | MULTICAST:npuerto ]" 
+if [  $# -lt 6  ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ipMaster SOURCE_disco SOURCE_particion [MULTICAT|UNICAST] SESSION TARGER_disck TARGET_partition" 
     exit $?
 fi
 
@@ -68,26 +68,33 @@ MASTERIP=$1
 
 # contendor origen (disco particion o file)
 
+PROTOCOL=$4
+# Controlamos si multicast o unicast.
+case $PROTOCOL in 
+ 	MULTICAST|multicast)
+		SESSIONMCASTSERVER=$5
+		SESSIONMCASTCLIENT=`echo $5 | awk -F: '{print $1}'`
+	;;
+	UNICAST|unicast) 
+		SESSIONUCASTSERVER=$5
+    	SESSIONUCASTCLIENT=`echo $5 | awk -F: '{print $1}'`:$MASTERIP
+	;;
+esac
 
-# IP destino: session multicast.
-SESSIONMCASTSERVER=$4
-SESSIONMCASTCLIENT=`echo $4 | awk -F: '{print $1}'`
 
 # contenedor destino (disco particion)
-DISKTARGET=$5
-PARTTARGET=$6
+DISKTARGET=$6
+PARTTARGET=$7
 
 #herramienta de compresión.
-TOOLCLONE=$7
-COMPRESOR=$8
+TOOLCLONE=$8
+COMPRESOR=$9
 
 
 ###IMG=$(ogGetPath $2 $3.img)
 ###echo $IMG
 
 # Check command in Master (sendFile or sendPartition)
-####if [ -n $IMG ]
-
 
 case $MASTERIP in
 	$HOSTIP)
@@ -144,9 +151,20 @@ case $MASTERIP in
 				fi
 				echo "[25] ofreciendo informacion a los clientes-slaves"
 				faucet 4000 --out echo "$TOOLCLONE $COMPRESOR $REDSIZE" &
-				echo "[30] Enviando multicast "
-				echo ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR 
- 				ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR 
+				
+				echo "[30] Enviando $PROTOCOL "
+				case $PROTOCOL in
+					MULTICAST|multicast)
+						echo ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR 
+ 						ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR 
+ 					;;
+ 					UNICAST|unicast)
+ 						sleep 60
+ 						echo "ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
+ 						ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR 
+ 					;;
+ 				esac	
+ 				
  				if [ $REDSIZE -lt $SIZE ]; then
    					echo "[85] Redimensionar partición a $SIZE KB."
    		 			ogSetPartitionSize $2 $3 $SIZE
@@ -163,8 +181,11 @@ case $MASTERIP in
 				REDSIZE=$(ogGetImageSize $2 $3)
 				echo "[25] ofreciendo informacion a los clientes-slaves: $TOOLCLONE $COMPRESOR $REDSIZE"
 				faucet 4000 --out echo "$TOOLCLONE $COMPRESOR $REDSIZE" &
-				echo "[30] Enviando multicast: ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
+				
+				echo "[30] Enviando $PROTOCOL:"
+				echo "ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
 				ogMcastSendFile  $2 $3.img $SESSIONMCASTSERVER
+				
 				pkill faucet	
 		;;
 		esac
@@ -189,10 +210,20 @@ case $MASTERIP in
 		# comprobamos que el tamaño de a imagen es menor que la del cliente.
 		SIZEPARTTARGET=$(ogGetPartitionSize $DISKTARGET $PARTTARGET)
 		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
- 		then
-			echo -n "[30] Iniciando CLIENTE MULTICAST: "
-			echo ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR 
-			ogMcastReceiverPartition "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR" 
+ 		then	
+			echo "[30] Iniciando Cliente $PROTOCOL "
+				case $PROTOCOL in
+					MULTICAST|multicast)
+						echo ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR 
+						ogMcastReceiverPartition "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR" 
+		 					;;
+ 					UNICAST|unicast)
+ 						echo ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR
+ 						ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR 
+ 					;;
+ 				esac
+			
+			
 			echo "[90] Extender sistema de archivos"
 			ogExtendFs $DISKTARGET $PARTTARGET
 			# Cambiar nombre en sistemas Windows.
