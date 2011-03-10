@@ -198,7 +198,7 @@ function getNetworkSettings()
 
 function updateServicesStart(){
 	echoAndLog "${FUNCNAME}(): Updating /etc/init.d/opengnsys ..."
-	cp -p $WORKDIR/opengnsys/admin/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	if [ $? != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
 		exit 1
