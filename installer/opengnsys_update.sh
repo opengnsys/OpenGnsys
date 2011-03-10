@@ -254,11 +254,9 @@ function updateWebFiles()
 	fi
         restoreFile $INSTALL_TARGET/www/controlacceso.php
 	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP \
-			$INSTALL_TARGET/www/includes \
-			$INSTALL_TARGET/www/comandos/gestores/filescripts \
-			$INSTALL_TARGET/www/images/iconos
+    chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
+	
 }
 
 # Copiar carpeta de Interface 
@@ -363,7 +361,7 @@ function recompileClient ()
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): recompiling OpenGnSys Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient ../../../client/shared/bin
+	make && mv ogAdmClient $INSTALL_TARGET/client/bin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Client"
 		hayErrores=1
