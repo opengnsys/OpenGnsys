@@ -442,12 +442,12 @@ function updateClient()
 
 	echoAndLog "${FUNCNAME}(): Loading Client"
 	# Descargar y descomprimir cliente ogclient
-	wget $DOWNLOADURL/20 -O $TMPFILE
+	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
 	if [ ! -s $TMPFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
-	echoAndLog "${FUNCNAME}(): Extranting Client files"
+	echoAndLog "${FUNCNAME}(): Extracting Client files"
 	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
 	rm -f $TMPFILE
 	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
