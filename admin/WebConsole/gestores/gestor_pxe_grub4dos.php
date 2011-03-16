@@ -44,6 +44,8 @@ function ogBootServer($cmd,$optboot,$hostname)
 global $cmd;
 global $hostname;
 global $optboot;
+global $retrun;
+$return="\n";
 $cmd->CreaParametro("@optboot",$optboot,0);
 $cmd->CreaParametro("@hostname",$hostname,0);
 $cmd->texto="update ordenadores set arranque=@optboot where nombreordenador=@hostname";
@@ -79,8 +81,8 @@ $rs->Cerrar();
 
 	#02.1 obtenemos nombre fichero mac
 	$mac=  substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-	$macfile="01-" . str_replace(":","-",strtolower($mac));	
-	$nombre_archivo="/var/lib/tftpboot/pxelinux.cfg/" . $macfile;
+	$macfile="01-" . str_replace(":","-",strtoupper($mac));	
+	$nombre_archivo="/var/lib/tftpboot/menu.lst/" . $macfile;
 
 
 ########## Escribimos el fichero mac
@@ -90,8 +92,8 @@ if (!$gestion=fopen($nombre_archivo, 'w+'))
 	return;
 }	
 # cuales son los parametros del menu
-fwrite($gestion, "DEFAULT syslinux/vesamenu.c32 \n");
-fwrite($gestion, "MENU TITLE Aplicacion OpenGnsys \n");
+fwrite($gestion, "color white/blue black/light-gray \n");
+
 
 $cmd->texto="SELECT itemboot.label, itemboot.kernel, 
 			itemboot.append, menuboot.timeout, menuboot.prompt,
@@ -109,48 +111,48 @@ while (!$rs->EOF)
 		fwrite($gestion, " \n");     
 		fwrite($gestion, "LABEL " .  $rs->campos['label'] . " \n");
 		fwrite($gestion, "MENU LABEL " . $rs->campos['label'] . " \n");
-		if ( $rs->campos["default"] == true)
-		{
-			fwrite($gestion, "MENU DEFAULT \n");
-		}
+		#if ( $rs->campos["default"] == true)
+		#{
+		#	fwrite($gestion, "MENU DEFAULT \n");
+		#}
 		
 		
 		# set netmask cird para ogclient
-		$isnfsroot=substr_count($rs->campos["append"] , "boot=oginit");
-		if ($isnfsroot > 0)
+		$isogclient=substr_count($rs->campos["label"] , "og");
+		if ($isogclient > 0)
 		{
 			$netmask=$netmask;
+			$kernel=$rs->campos["kernel"];
+			$append=$rs->campos["append"];
+			fwrite($gestion,"keeppxe \n");
+			fwrite($gestion, $rs->campos["kernel"] . " " .  $infohost . " \n");
+			fwrite($gestion, $rs->campos["append"] . " \n"); 
+			fwrite($gestion,"savedefault \n");
+			fwrite($gestion,"boot \n");
+					
+          #  fwrite($gestion,"APPEND keeppxe --config-file='pxe detect; default 0; timeout 0; hiddenmenu; title cache; fallback 1; find --set-root /boot/ogvmlinuz; kernel /boot/ogvmlinuz ro boot=oginit vga=788 irqpoll acpi=on " . $infohost . " ogprotocol=smb og2nd=sqfs ; initrd /boot/oginitrd.img; boot; title net; kernel (pd)/ogclient/vmlinuz ro boot=oginit vga=788 irqpoll acpi=on " . $infohost . " ogprotocol=smb og2nd=sqfs; initrd (pd)/ogclient/oginitrd.img; boot' \n");
+		#	keeppxe
+		#	kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true  IP=172.17.9.204:172.17.9.249:172.17.9.254:255.255.255.0:cte204:eth0:none repo=172.17.9.249
+		#	initrd (pd)/ogclient/oginitrd.img
+		#	savedault
+		#	boot
+			
+			
 		}	
 		else
 		{
 			$netmask=netmask2cidr($netmask);
-		}
-
-		$iseac=substr_count($rs->campos["append"] , "boot=oginit");
-		$isinitrd=substr_count($rs->campos["append"] , "initrd.gz");
-		
-		if ($iseac > 0)
-		{
-			$kernel=$rs->campos["kernel"];
-			$append=$rs->campos["append"];
-			fwrite($gestion,"KERNEL grub.exe \n");
-            fwrite($gestion,"APPEND keeppxe --config-file='pxe detect; default 0; timeout 0; hiddenmenu; title cache; fallback 1; find --set-root /boot/ogvmlinuz; kernel /boot/ogvmlinuz ro boot=oginit vga=788 irqpoll acpi=on " . $infohost . " ogprotocol=smb og2nd=sqfs ; initrd /boot/oginitrd.img; boot; title net; kernel (pd)/ogclient/vmlinuz ro boot=oginit vga=788 irqpoll acpi=on " . $infohost . " ogprotocol=smb og2nd=sqfs; initrd (pd)/ogclient/oginitrd.img; boot' \n");
-		}
-
-		elseif ($isinitrd > 0)
-		{
-		fwrite($gestion, $rs->campos["kernel"] . " \n");
-		$append=$rs->campos["append"];
-		fwrite($gestion, $append . " repo=" . $repo . " \n");
-		}
-		else
-		{
-			fwrite($gestion, $rs->campos["kernel"] . " \n");
+			fwrite($gestion, $rs->campos["kernel"] . $return );
 			fwrite($gestion, $rs->campos["append"] . " \n"); 
+			
 		}
 
-		$prompt=$rs->campos["prompt"];
-		$timeout=$rs->campos["timeout"];
+		
+
+	
+
+	#	$prompt=$rs->campos["prompt"];
+	#	$timeout=$rs->campos["timeout"];
 
 		$rs->Siguiente();
 }
