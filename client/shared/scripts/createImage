@@ -1,6 +1,6 @@
 #!/bin/bash
-# create-image.sh - Scirpt de ejemplo para crear una imagen de un sistema de archivos.
-# (puede usarse como base para el programa de creación de imágenes usado por OpenGNSys Admin).
+# createImage - Scirpt de ejemplo para crear una imagen de un sistema de archivos.
+# (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -8,6 +8,11 @@ if [ $# -ne 4 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen"
     exit $?
 fi
+
+# Valores por defecto
+IMGPROG="partclone"
+IMGCOMP="lzop"
+IMGEXT="img"
 
 # Si el repositorio es CACHE comprobamos que exista
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
@@ -26,7 +31,7 @@ if [ $? != 0 ]; then
     ogMakeDir "$3" $(dirname "/$4")
     IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $?
 fi
-IMGFILE=$IMGDIR/$(basename "/$4").img
+IMGFILE=$IMGDIR/$(basename "/$4").$IMGEXT
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
     echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"."
@@ -38,17 +43,15 @@ echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
 
 # Comprobar consistencia del sistema de archivos.
 echo "[20] Comprobar sistema de archivos."
+ogUnmount $1 $2
 ogCheckFs $1 $2
 
-echo "[21] Desmontando particion."
-ogUnmount $1 $2
-
-echo "[25]: Calculando la reduccion del sistema de archivos DISK:$1 PARTITION:$2"
+echo "[30]: Reducir sistema de archivos."
 ogReduceFs $1 $2 || exit 1
 
 # Crear la imagen.
-echo "[30] Crear imagen. partclone lzop  30% mas rapido que con gzip"
-ogCreateImage $1 "$2" $3 $4 partclone lzop || exit $?
+echo "[40] Crear imagen."
+ogCreateImage $1 "$2" $3 $4 "$IMGPROG" "$IMGCOMP" || exit $?
 #ogCreateImage $1 "$2" $3 $4 || exit $?
 
 echo "[90] Extender sistema de archivos."
