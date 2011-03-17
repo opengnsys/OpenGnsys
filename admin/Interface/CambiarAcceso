@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#_______________________________________________________________________________________________________________________________
+#
+# PARAMETROS RECIBIDOS DESDE EL CLIENTE
+# $1 modo  (admin, user)
+#_______________________________________________________________________________________________________________________________
+
+# Error si llamada no se realliza desde OpenGnSys Client.
+PROG=$(basename $0)
+CALLER=$(ogGetCaller)
+if [ "$CALLER" != "CrearImagen" -a "$CALLER" != "ConsolaRemota" ]; then
+    ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+    exit $?
+fi
+
+# Salir si el repositorio está bloquedo (tiene ficheros abiertos).
+REPOIP=$(ogGetRepoIp)
+if [ -z "$REPOIP" ]; then
+	ogRaiseError $OG_ERR_NOTFOUND "repo no montado"
+	exit $?
+fi
+if ogIsRepoLocked; then
+	ogRaiseError $OG_ERR_LOCKED "repo $REPOIP"
+	exit $?
+fi
+
+# Comprobar protocolo y modo de acceso.
+protocol=${protocol:-"smb"}
+case "$protocol" in
+	nfs|smb) ;;
+	*)	ogRaiseError $OG_ERR_FORMAT "protocolo desconocido $protocol"
+		exit $? ;;
+esac
+case "$1" in
+	admin)	MODE="rw,nolock" ;;
+	user)	MODE="ro,nolock" ;;
+	*)	ogRaiseError $OG_ERR_FORMAT "modo desconocido $1"
+		exit $? ;;
+esac
+
+# Desmontar repositorio y volver a montarlo con el modo adecuado.
+umount $OGIMG
+ogEcho info "$PROG: Montar repositorio $REPO por $protocol en modo $1"
+case "$protocol" in
+	nfs)	mount -t nfs -o $MODE $REPOIP:$OGIMG $OGIMG ;;
+	smb)	mount -t cifs //${ROOTSERVER}/ogimages $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=og ;;
+esac
+
