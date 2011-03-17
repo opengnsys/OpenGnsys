@@ -19,7 +19,7 @@ if [ $ogactiveadmin == "true" ]; then
 	printf "$MSG_MOUNTREPO\n" "$protocol" "$boot"
 	case "$protocol" in
 		nfs)	mount.nfs ${ROOTSERVER}:$OGIMG $OGIMG -o rw,nolock ;;
-		smb)	mount.cifs //${ROOTSERVER}/ogimages $OGIMG -o rw,relatime,serverino,acl,username=opengnsys,password=og ;;
+		smb)	mount.cifs //${ROOTSERVER}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=og ;;
 	esac
 fi
 

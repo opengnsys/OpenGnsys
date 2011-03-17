@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Para que no haya problemas con el interprete
-#ln -fs /opt/opengnsys/bin/bash /bin/bash
-
+# Cargar entorno de OpenGnSys
 set -a
-
 source /opt/opengnsys/etc/preinit/loadenviron.sh
 
-for f in loadmodules.sh; do
-    $OGETC/preinit/$f
+# Scripts de inicio.
+for f in loadmodules mountrepo; do
+    $OGETC/preinit/$f.sh
 done
+unset f
 
+# Cargar cliente.
 if [ -f $OGETC/init/$OG_IP.sh ]; then
     $OGETC/init/$OG_IP.sh
 
