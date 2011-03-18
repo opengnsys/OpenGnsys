@@ -27,7 +27,7 @@ function	EliminaPerfilessoft($cmd,$identificador,$nombreid,$swid=1){
 		$cmd->texto="UPDATE imagenes SET idperfilsoft=0 WHERE idperfilsoft=".$rs->campos["idperfilsoft"];
 		$resul=$cmd->Ejecutar();
 		if ($resul){
-			$cmd->texto="DELETE  FROM perfileshard_perfilessoft  WHERE idperfilsoft=".$rs->campos["idperfilsoft"];
+			$cmd->texto="DELETE  FROM perfilessoft_softwares  WHERE idperfilsoft=".$rs->campos["idperfilsoft"];
 			$resul=$cmd->Ejecutar();
 		}
 		if (!$resul){
