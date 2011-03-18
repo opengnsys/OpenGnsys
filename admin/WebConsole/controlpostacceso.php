@@ -16,9 +16,9 @@ include_once("./clases/AdoPhp.php");
  $idc=0; 
  $iph=""; // Switch menu cliente 
   
- if (isset($_POST["usu"])) $usu=$_POST["usu"];  
- if (isset($_POST["pss"])) $pss=$_POST["pss"];  
- if (isset($_POST["idcentro"])) $idc=$_POST["idcentro"]; 
+ if (isset($_POST["usu"])) $usu=mysql_escape_string($_POST["usu"]);  
+ if (isset($_POST["pss"])) $pss=mysql_escape_string($_POST["pss"]);  
+ if (isset($_POST["idcentro"])) $idc=mysql_escape_string($_POST["idcentro"]); 
 
  if (isset($_GET["iph"])) $iph=$_GET["iph"];  
 //________________________________________________________________________________________________________
