@@ -13,17 +13,17 @@ $TbMsg[4]="Ordenadores";
 
 $TbMsg[5]="Nombre";
 $TbMsg[6]="Ubicación";
-$TbMsg[7]="Canón";
+$TbMsg[7]="Cañón";
 $TbMsg[8]="Pizarra";
 $TbMsg[9]="Puestos";
-$TbMsg[10]="Url Imagen";
-$TbMsg[11]="Menu";
+$TbMsg[10]="URL Imagen";
+$TbMsg[11]="Menú";
 $TbMsg[12]="Comentarios";
 $TbMsg[13]="Ordenadores";
 
 $TbMsg[14]="Nombre";
 $TbMsg[15]="Dirección IP";
-$TbMsg[16]="Dirección Mac";
+$TbMsg[16]="Dirección MAC";
 $TbMsg[17]="Perfil Hardware";
 
 $TbMsg[18]="DESAGRUPAR SEGÚN VALORES DISTINTOS DE:";
@@ -32,7 +32,7 @@ $TbMsg[19]="Datos a suministrar";
 $TbMsg[20]='Partición';
 $TbMsg[21]='S.O. Instalado';
 $TbMsg[22]='Tamaño';
-$TbMsg[23]='Datos de configuration';
+$TbMsg[23]='Datos de configuración';
 $TbMsg[24]='Tipo';
 $TbMsg[25]='Imagen';
 $TbMsg[26]='Perfil Software';

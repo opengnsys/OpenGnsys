@@ -16,6 +16,6 @@ $TbMsg[7]="Dirección MAC";
 $TbMsg[8]="Perfil Hardware";
 $TbMsg[9]="Autoexec";
 $TbMsg[10]="Repositorio";
-$TbMsg[11]="Menu";
-$TbMsg[12]="Tamaño Caché";
+$TbMsg[11]="Menú";
+$TbMsg[12]="Tamaño Caché (KB)";
 ?>

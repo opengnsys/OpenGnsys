@@ -7,7 +7,7 @@
 	$TbMsg=array();
 	$TbMsg[0]='"Nuevo grupo de menús"';
 	$TbMsg[1]='"Definir nuevo menú"';
-	$TbMsg[2]='"Colocar menu"';
+	$TbMsg[2]='"Colocar menú"';
 	$TbMsg[3]='"Renombrar"';
 	$TbMsg[4]='"Eliminar grupo de menús"';
 	$TbMsg[5]='"Información Menú"';
