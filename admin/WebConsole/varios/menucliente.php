@@ -61,10 +61,14 @@ if(!empty($rsmenu)){
 	}			
 }
 else{
-	$codeHtml='<P align=center>';
-	$codeHtml.='<BR><BR><SPAN style="COLOR:#999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 16px;">
-	NO SE HA DETECTADO NINGÚN MENÚ PARA ESTE CLIENTE</SPAN>';
-	$codeHtml.='</P>';
+	$codeHtml='<div align="center" style="font-family: Arial, Helvetica, sans-serif;">';
+	$codeHtml.='<p style="color:#999999; font-size: 16px; margin: 2em;">';
+	$codeHtml.='  NO SE HA DETECTADO NING&Uacute;N MEN&Uacute; PARA ESTE CLIENTE';
+	$codeHtml.='</p>';
+	$codeHtml.='<p style="font-size: 14px; margin: 2em;">';
+	$codeHtml.='  <a href="command:poweroff">Apagar el equipo</a>';
+	$codeHtml.='</p>';
+	$codeHtml.='</div>';
 }
 ?>
 	<HTML>
