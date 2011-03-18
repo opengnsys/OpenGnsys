@@ -7,9 +7,9 @@
 	$TbMsg=array();
 	$TbMsg[0]='Acciones';
 	$TbMsg[1]='Procedimientos';
-	$TbMsg[2]='Information sobre Procedimientos';
+	$TbMsg[2]='Información sobre Procedimientos';
 	$TbMsg[3]='Tareas';
-	$TbMsg[4]='Information sobre Tareas';
+	$TbMsg[4]='Información sobre Tareas';
 	$TbMsg[5]='Información';
 	$TbMsg[6]='Sin parámetros';	
 ?>
