@@ -287,8 +287,8 @@ class Comando{
 		"No se ha producido ningn error",
 		"001 : Comando Error - No se ha establecido el texto del comando",
 		"002 : Comando Error - No se ha establecido la conexióndel comando",
-		"003 : Comando Error - No se ha abierto la conexi�",
-		"004 : Comando Error - La sentencia SQl del comando no es correcta",
+		"003 : Comando Error - No se ha abierto la conexion",
+		"004 : Comando Error - La sentencia SQL del comando no es correcta",
 		"005 : Comando Error - No se ha podido recuperar el valor @@identity de la ltima clave insertada",
 	);	
 	/*--------------------------------------------------------------------------------------------*/
@@ -468,9 +468,9 @@ class Recordset{
 		"No se ha producido ningn error",
 		"001 : Recordset Error - Comando no establecido",
 		"002 : Recordset Error - No se ha establecido la conexióndel comando",
-		"003 : Recordset Error - No se ha abierto la conexi�",
+		"003 : Recordset Error - No se ha abierto la conexion",
 		"004 : Recordset Error - No se pudo abrir la consulta",
-		"005 : Recordset Error - La sentencia SQl del comando no contiene la clausula SELECT",
+		"005 : Recordset Error - La sentencia SQL del comando no contiene la clausula SELECT",
 		"006 : Recordset Error - No se puede liberar la consulta",
 	);	
 	/*--------------------------------------------------------------------------------------------*/
