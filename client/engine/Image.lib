@@ -588,7 +588,7 @@ fi
 #comprobando que el parametro uno es un file.
 [ -f $1 ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
 
-local TOOLS COMPRESSOR IMGFILE FILEHEAD FS SIZE PARTIMAGEINFO PARTCLONEINFO NTFSCLONEINFO IMGDETECT
+local TOOLS COMPRESSOR IMGFILE FILEHEAD FS SIZE SIZEFACTOR PARTIMAGEINFO PARTCLONEINFO NTFSCLONEINFO IMGDETECT
 IMGDETECT="FALSE"
 
 IMGFILE=$1
@@ -605,7 +605,8 @@ then
 	then
 		TOOLS=PARTCLONE
 		FS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($8);}')
-		SIZE=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); printf "%d\n", $11*1024*1024;}')
+		echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1048576 || SIZEFACTOR=1024
+		SIZE=$(echo $PARTCLONEINFO | awk -v FACTOR=$SIZEFACTOR '{gsub(/\: /,"\n"); printf "%d\n", $11*FACTOR;}')
 		IMGDETECT="TRUE"
 	fi
 fi
