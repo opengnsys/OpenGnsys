@@ -346,6 +346,43 @@ dd if="$DISK" of="$IMGFILE" bs=512 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IM
 
 
 #/**
+#         ogCreateBootLoaderImage int_ndisk str_repo path_image
+#@brief   Crea una imagen del boot loader a partir del sector de arranque de un disco.
+#@param   int_ndisk    nº de orden del disco
+#@param   str_repo     repositorio de imágenes (remoto o caché local)
+#@param   path_image   camino de la imagen (sin extensión)
+#@return  (nada, por determinar)
+#@note    repo = { REPO, CACHE }
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
+#@version 1.0 - Adaptacion de ogCreateMbrImage para guardar solo el Boot Loader
+#@author  Juan Carlos Xifre, SICUZ Universidad de Zaragoza
+#@date    2011/03/21
+#*/ ##
+function ogCreateBootLoaderImage ()
+{
+# Variables locales
+local DISK IMGDIR IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+           "$FUNCNAME 1 REPO /aula1/mbr"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+
+DISK=$(ogDiskToDev "$1") || return $?
+IMGDIR=$(ogGetParentPath "$2" "$3")
+[ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$2 $(dirname $3)" || return $?
+IMGFILE="$IMGDIR/$(basename "$3").mbr"
+
+# Crear imagen del Boot Loader dentro del MBR.
+dd if="$DISK" of="$IMGFILE" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
+}
+
+#/**
 #         ogIsImageLocked [str_repo] path_image
 #@brief   Comprueba si una imagen está bloqueada para uso exclusivo.
 #@param   str_repo     repositorio de imágenes (opcional)
@@ -526,6 +563,41 @@ IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
 dd if="$IMGFILE" of="$DISK" bs=512 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
 }
 
+
+#/**
+#         ogRestoreBootLoaderImage str_repo path_image int_ndisk
+#@brief   Restaura la imagen del boot loader del sector de arranque de un disco.
+#@param   str_repo     repositorio de imágenes o caché local
+#@param   path_image   camino de la imagen
+#@param   int_ndisk    nº de orden del disco
+#@return  (por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
+#@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
+#@version 1.0 - Adaptacion de ogRestoreMbrImage para restaurar solo el Boot Loader
+#@author  Juan Carlos Xifre, SICUZ Universidad de Zaragoza
+#@date    2011/03/21
+#*/ ##
+function ogRestoreBootLoaderImage ()
+{
+# Variables locales
+local DISK IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
+           "$FUNCNAME REPO /aula1/mbr 1"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+# Procesar parámetros.
+DISK=$(ogDiskToDev "$3") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
+[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+
+# Restaurar imagen del MBR.
+dd if="$IMGFILE" of="$DISK" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
+}
 
 #/**
 #         ogUnlockImage [str_repo] path_image
