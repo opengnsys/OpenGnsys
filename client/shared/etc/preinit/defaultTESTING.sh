@@ -5,7 +5,7 @@ set -a
 source /opt/opengnsys/etc/preinit/loadenviron.sh
 
 # Scripts de inicio.
-for f in loadmodules mountrepo; do
+for f in fileslinks loadmodules mountrepo; do
     $OGETC/preinit/$f.sh
 done
 unset f

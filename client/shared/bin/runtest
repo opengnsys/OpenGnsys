@@ -1,0 +1,246 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+import os
+import subprocess
+import doctest
+import re
+
+FIRST_SCRIPT = 'prepare'
+LAST_SCRIPT = 'cleanup'
+
+PRE_EXTENSION = '.pre'
+POST_EXTENSION = '.post'
+
+PYTHON_TEST_EXTENSION = '.pytest'
+BASH_TEST_EXTENSION = '.shtest'
+
+
+class RunTest:
+    '''Runs the tests'''
+
+    def __init__(self):
+        self.path = os.path.abspath('.')
+
+        # Only no-hide files
+        self.all_files = [filename for filename in os.listdir(self.path)
+                if filename[0] != '.' and os.path.isfile(filename)]
+
+        self.all_files = sorted(self.all_files)
+
+        self.python_tests = []
+        self.bash_tests = []
+        self.script_tests = []
+        self.first_script = ''
+        self.last_script = ''
+        self.pre_scripts = []
+        self.post_scripts = []
+
+        for filename in self.all_files:
+            if filename.endswith(PYTHON_TEST_EXTENSION):
+                self.python_tests.append(filename)
+
+            elif filename.endswith(BASH_TEST_EXTENSION):
+                self.bash_tests.append(filename)
+
+            elif os.access(filename, os.X_OK):
+                basename, extension = os.path.splitext(filename)
+                if basename == FIRST_SCRIPT:
+                    if self.first_script:
+                        raise MoreThanOneFirstScript()
+                    self.first_script = filename
+                elif basename == LAST_SCRIPT:
+                    if self.last_script:
+                        raise MoreThanOneLastScript()
+                    self.last_script = filename
+                elif extension == PRE_EXTENSION:
+                    self.pre_scripts.append(filename)
+                elif extension == POST_EXTENSION:
+                    self.post_scripts.append(filename)
+                else:
+                    self.script_tests.append(filename)
+
+        self.fails = 0
+
+    def run_script(self, script):
+        '''Run a script test'''
+        path_script = os.path.join(self.path, script)
+        proc = subprocess.Popen((path_script), shell=True, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+        return_value = proc.wait()
+        if return_value != 0:
+            self.fails += 1
+            stdout, stderr = proc.communicate()
+            print("*******************************************************")
+            print("Error %d in %s:" % (return_value, script))
+            print(stdout.decode(), end='')
+            print(stderr.decode(), end='')
+
+        return return_value
+
+    def run_bash_test(self, script):
+        '''Run bash test'''
+        #import pdb; pdb.set_trace()
+        path_script = os.path.join(self.path, script)
+        errors = 0
+        test_no = 0
+
+        for command, result, line in read_bash_tests(path_script):
+            test_no += 1
+            try:
+                proc = subprocess.Popen((command.split()), stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT, shell=True)
+                stdout = proc.communicate()[0]
+            except OSError as exc:
+                print('File "%s" line %d:' % (script, line))
+                print('Failed example:')
+                print('    ' + command)
+                print("Exception was raised:")
+                print("    ", end="")
+                print(exc)
+                print("*******************************************************")
+                errors += 1
+
+            else:
+                if result != stdout.decode():
+                    print('File "%s" line %d:' % (script, line))
+                    print('Failed example:')
+                    print('    ' + command)
+                    print("Expected:")
+                    for l in result.split('\n')[:-1]:
+                        print('    ' + l)
+                    print("Got:")
+                    for l in stdout.decode().split('\n')[:-1]:
+                        print('    ' + l)
+                    errors += 1
+                    print("*******************************************************")
+
+        if errors != 0:
+            print("%d items had failures:" % errors)
+            print("    %d of %d in %s" % (errors, test_no, script))
+            print("***Test failed***")
+        else:
+            print("%3d tests PASSED in %s" % (test_no, script))
+
+        return errors
+
+
+    def run_pre_test(self, test):
+        '''Run the pre-test of a test'''
+        pre_test = test + PRE_EXTENSION
+        return_value = 0
+        if pre_test in self.pre_scripts:
+            return_value = self.run_script(pre_test)
+            if return_value:
+                print("No running: %s %s" % (test, test + POST_EXTENSION))
+
+        return return_value
+
+    def run_post_test(self, test):
+        '''Run the post-test of a test'''
+        post_test = test + POST_EXTENSION
+        if post_test in self.post_scripts:
+            return self.run_script(post_test)
+
+    def run_tests(self):
+        '''Run the tests in the correct order'''
+        if self.first_script:
+            if self.run_script(self.first_script) != 0:
+                print('*Error in prepare script. Aborting.*')
+                return self.show_errors()
+
+        all_tests = sorted(self.script_tests + self.python_tests + self.bash_tests)
+        for test in all_tests:
+            if self.run_pre_test(test) != 0:
+                continue
+
+            if test in self.script_tests:
+                self.run_script(test)
+            elif test in self.bash_tests:
+                fails = self.run_bash_test(test)
+                self.fails += fails
+            elif test in self.python_tests:
+                fails, n_tests = doctest.testfile(test, module_relative=False)
+                self.fails += fails
+
+            self.run_post_test(test)
+
+        if self.last_script:
+            self.run_script(self.last_script)
+
+        return self.show_errors()
+
+    def show_errors(self):
+        '''Show the total errors'''
+        if self.fails:
+            print("*******************************************************")
+            print("Total errors: %d" % self.fails)
+
+        return self.fails
+
+class MoreThanOneFirstScript(Exception):
+    def __init__(self):
+        super(MoreThanOneFirstScript, self).__init__(
+                "More than one %s script" % FIRST_SCRIPT)
+
+class MoreThanOneLastScript(Exception):
+    def __init__(self):
+        super(MoreThanOneLastScript, self).__init__(
+                "More than one %s script" % LAST_SCRIPT)
+
+
+def read_bash_tests(file_name):
+    '''Iterator that yields the found tests'''
+    fd = open(file_name)
+    command = ''
+    result = ''
+    tests = []
+    line_no = 0
+    command_line = 0
+    command_re = re.compile("^\$ (.*)\n")
+
+    for line in fd.readlines():
+        line_no += 1
+
+        match = command_re.match(line)
+        if match:
+            # Is it a command?
+            if command:
+                # If it is a command but we have a previous command to send
+                yield (command, result, command_line)
+                result = ''
+
+            command = match.group(1)
+            command_line = line_no
+
+        elif command:
+            # If not a command but we have a previous command
+            if line != "\n":
+                # It's a part of the result
+                if line == "<BLANKLINE>\n":
+                    result += '\n'
+                else:
+                    result += line
+                
+            else:
+                # Or it's the end of the result, yielding
+
+                yield (command, result, command_line)
+                command = ''
+                result = ''
+
+
+        else:
+            # This line is a comment
+            pass
+
+    if command:
+        # Cheking if the last command was sent
+        yield (command, result, command_line)
+
+    fd.close()
+
+
+if __name__ == "__main__":
+    r = RunTest()
+    r.run_tests()

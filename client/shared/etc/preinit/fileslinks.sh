@@ -2,34 +2,35 @@
 #/**
 #@file    fileslinks.sh
 #@brief   Script de inicio para copiar ficheros y deinir enlaces simbólicos.
-#@note    Desglose del script "loadenviron.sh".
 #@warning License: GNU GPLv3+
 #@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-10
+#@version 1.0
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-03-21
 #*/
 
 
-# Si está configurado OpenGNSys ...
+# Si está configurado OpenGnSys ...
 if [ -n "$OPENGNSYS" ]; then
     echo "$MSG_MAKELINKS"
-    # Para tener /bin/bash y no haya problemas
-    ln -fs $OGBIN/bash /bin/bash
+
+    # Shell BASH por defecto (para usar "runtest")
+    ln -fs /bin/bash /bin/sh
 
     # Crear directorio de bloqueos
     mkdir -p /var/lock
 
     # Directorio de tipos de letras para el browser.
     #QTLIBS=$(grep qt_libspath $OGBIN/browser 2>/dev/null | cut -f2 -d=)
-    QTVERS="/usr/local/QtEmbedded-4.6.3"
-    QTDIR="${QTVERS%-*}"
-    mkdir -p $QTDIR
-    ln -fs $QTDIR $QTVERS
-    mkdir -p $QTDIR/lib
-    ln -fs $OGLIB/fonts $QTDIR/lib
+    #QTVERS="/usr/local/QtEmbedded-4.6.3"
+    #QTDIR="${QTVERS%-*}"
+    #mkdir -p $QTDIR
+    #ln -fs $QTDIR $QTVERS
+    #mkdir -p $QTDIR/lib
+    #ln -fs $OGLIB/fonts $QTDIR/lib
 
-    # Datos de dispositivos PCI en /etc
-    ln -fs $OGLIB/pci.ids /etc
 else
     # FIXME Error: entorno de OpenGNSys no configurado.
     echo "Error: OpenGnSys environment is not configured."   # FIXME: definir mensaje.
