@@ -88,8 +88,8 @@ class RunTest:
         for command, result, line in read_bash_tests(path_script):
             test_no += 1
             try:
-                proc = subprocess.Popen((command.split()), stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT, shell=True)
+                proc = subprocess.Popen(('/bin/bash', '-c', command),
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 stdout = proc.communicate()[0]
             except OSError as exc:
                 print('File "%s" line %d:' % (script, line))
