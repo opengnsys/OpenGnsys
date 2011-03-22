@@ -295,7 +295,7 @@ void MainWindow::slotCreateTerminal()
 {
     QTermWidget* console = new QTermWidget(1,this);
     QFont font = QApplication::font();
-    font.setFamily("Terminus");
+    font.setFamily("Courier");
     font.setPointSize(12);
     
     console->setTerminalFont(font);
