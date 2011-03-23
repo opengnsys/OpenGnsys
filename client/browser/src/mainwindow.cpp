@@ -237,8 +237,8 @@ void MainWindow::slotProcessOutput()
     char buf[BUFFERSIZE];
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
-        print(tr("Proc. Output: ")+buf);
         QString s(buf);
+        print(tr("Proc. Output: ")+s);
         captureOutputForStatusBar(s);
     }
 }
@@ -249,7 +249,8 @@ void MainWindow::slotProcessErrorOutput()
     char buf[BUFFERSIZE];
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
-        print(tr("Proc. Error: ")+buf);
+        QString s(buf);
+        print(tr("Proc. Error: ")+s);
     }
 }
 
