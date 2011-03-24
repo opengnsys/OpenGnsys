@@ -148,7 +148,7 @@ switch($ambito){
 
 	<P align=center class=cabeceras>Ubicador Ordenadores<BR>
 	<SPAN align=center class=subcabeceras> <?php echo "nombre ambito:" . $nombreambito . " identificador ambito: " . $idambito . $litambito; ?> </SPAN>
-	<SPAN <input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </SPAN> </P>
+	<input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </P>
 	
 	
 	

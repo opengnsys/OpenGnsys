@@ -123,7 +123,7 @@ switch($litambito){
 
 	<P align=center class=cabeceras>Gestión Arranque Avanzado<BR>
 	<SPAN align=center class=subcabeceras> <?php echo $nombreambito; ?> </SPAN>
-	<SPAN <input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </SPAN> </P>
+	<input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </P>
 	
 	
 	
