@@ -83,7 +83,7 @@ function backupFile()
 		return 1
 	fi
 
-    echoAndLog "${FUNCNAME}(): Making $fichero back-up"
+	echoAndLog "${FUNCNAME}(): Making $fichero back-up"
 
 	# realiza una copia de la última configuración como last
 	cp -p $fichero "${fichero}-LAST"
@@ -104,7 +104,7 @@ function restoreFile()
 
 	local fichero=$1
 
-    echoAndLog "${FUNCNAME}(): restoring $fichero file"
+	echoAndLog "${FUNCNAME}(): restoring file $fichero"
 	if [ -f "${fichero}-LAST" ]; then
 		cp -p "$fichero-LAST" "$fichero"
 	fi
@@ -122,14 +122,14 @@ function installDependencies ()
 		echoAndLog "${FUNCNAME}(): no deps needed."
 	else
 		while [ $# -gt 0 ]; do
-			dpkg -s $1 &>/dev/null | grep Status | grep -qw install
+			dpkg -s $1 2>/dev/null | grep -q "Status: install ok"
 			if [ $? -ne 0 ]; then
 				INSTALLDEPS="$INSTALLDEPS $1"
 			fi
 			shift
 		done
 		if [ -n "$INSTALLDEPS" ]; then
-			apt-get update && apt-get install $INSTALLDEPS
+			apt-get update && apt-get -y install --force-yes $INSTALLDEPS
 			if [ $? -ne 0 ]; then
 				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
 				return 1
@@ -212,7 +212,6 @@ function openGnsysCopyClientFiles()
 	local hayErrores=0
 
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
-	#cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
@@ -221,8 +220,6 @@ function openGnsysCopyClientFiles()
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
-	#mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-	#cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
@@ -254,7 +251,7 @@ function updateWebFiles()
 	fi
         restoreFile $INSTALL_TARGET/www/controlacceso.php
 	# Cambiar permisos para ficheros especiales.
-    chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 	
 }
@@ -537,9 +534,8 @@ updateInterfaceAdm
 updateServicesStart
 
 # Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
-if [ -r /tmp/dstate ]
-then
-    rm /tmp/dstate
+if [ -f /tmp/dstate ]; then
+	rm -f /tmp/dstate
 fi
 
 #rm -rf $WORKDIR
