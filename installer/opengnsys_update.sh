@@ -101,7 +101,7 @@ function restoreFile()
 
 	local fichero=$1
 
-    echoAndLog "${FUNCNAME}(): restoring $fichero file"
+	echoAndLog "${FUNCNAME}(): restoring file $fichero"
 	if [ -f "${fichero}-LAST" ]; then
 		cp -p "$fichero-LAST" "$fichero"
 	fi
@@ -117,22 +117,22 @@ function installDependencies ()
 {
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
-    else
-        while [ $# -gt 0 ]; do
-            dpkg -s $1 &>/dev/null | grep Status | grep -qw install
-            if [ $? -ne 0 ]; then
-                INSTALLDEPS="$INSTALLDEPS $1"
-            fi
-            shift
-        done
-        if [ -n "$INSTALLDEPS" ]; then
-            apt-get update && apt-get install $INSTALLDEPS
-        	if [ $? -ne 0 ]; then
-        		errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
-	    	return 1
-        	fi
-        fi
-    fi
+	else
+		while [ $# -gt 0 ]; do
+			dpkg -s $1 2>/dev/null | grep -q "Status: install ok"
+			if [ $? -ne 0 ]; then
+				INSTALLDEPS="$INSTALLDEPS $1"
+			fi
+			shift
+		done
+		if [ -n "$INSTALLDEPS" ]; then
+			apt-get update && apt-get -y install --force-yes $INSTALLDEPS
+			if [ $? -ne 0 ]; then
+				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
+			return 1
+			fi
+		fi
+	fi
 }
 
 
