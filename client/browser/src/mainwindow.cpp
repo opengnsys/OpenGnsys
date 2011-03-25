@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Graphic
     showFullScreen();
 
-    setWindowTitle(tr("OpenGNSys Browser"));
+    setWindowTitle(tr("OpenGnSys Browser"));
 
     setCentralWidget(m_web);
 
@@ -164,8 +164,8 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
     {
         QMessageBox msgBox;
-        msgBox.setText(tr("La siguiente acción puede tardar varios minutos. Mientras se realiza no podrá usar el ordenador."));
-        msgBox.setInformativeText(tr("¿Estás seguro de que quieres continuar?"));
+        msgBox.setText(tr("¡ATENCIÓN! La siguiente acción puede modificar datos o tardar varios minutos. El equipo no podrá ser utilizado durante su ejecución."));
+        msgBox.setInformativeText(tr("¿Continuar?"));
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Ok);
         if (msgBox.exec() == QMessageBox::Ok)
