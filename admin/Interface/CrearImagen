@@ -22,7 +22,9 @@ if [ "$CALLER" != "ogAdmClient" ]; then
 fi
 
 # Valor por defecto para el repositorio.
-REPO=${4:-"repo"}
+REPO=${4:-"REPO"}
+[ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 
 # Si cleinte no está en modo "admin"; activar repositorio para escritura,
 #    crear imagen y activar para lectura.
