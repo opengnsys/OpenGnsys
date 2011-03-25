@@ -1,32 +1,38 @@
 #!/bin/bash
 
-#_______________________________________________________________________________________________________________________________
+#___________________________________________________
 #
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE:
-# $1 disco
-# $2 par=N�mero de particion
-# $3 Nombre can�nico de la imagen
-# $4 Direcci�n del repositorio
-#_______________________________________________________________________________________________________________________________
-echo $* >>  $OGLOGFILE
+# $1 Número de disco
+# $2 Número de particion
+# $3 Nombre canónico de la imagen (sin extensión)
+# $4 Dirección del repositorio (REPO, por defecto)
+#___________________________________________________
 
-umount /opt/opengnsys/images
+# Registro de ejecución
+echo $* >> $OGLOGFILE
 
-if [ "$ogprotocol" == "nfs" ]
-then 
-	mount.nfs ${ROOTSERVER}:/opt/opengnsys/images /opt/opengnsys/images -o nolock
-fi
-	
-if [ "$ogprotocol" == "smb" ]
-then 
-	echo "montando smb"
-	mount.cifs //${ROOTSERVER}/ogimages /opt/opengnsys/images -o user=opengnsys,pass=og
+# Solo ejecutable por OpenGnSys Client.
+PATH=$PATH:$(dirname $0)
+PROG=$(basename $0)
+CALLER=$(ogGetCaller)
+if [ "$CALLER" != "ogAdmClient" ]; then
+	ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+	exit $?
 fi
 
-if [ -f createImage$ogengine ]
-then
-	createImage$ogengine "$1" "$2" "REPO" "$3" &>> $OGLOGFILE || exit $?
+# Valor por defecto para el repositorio.
+REPO=${4:-"repo"}
+
+# Si cleinte no está en modo "admin"; activar repositorio para escritura,
+#    crear imagen y activar para lectura.
+[ "$boot" != "admin" ] && CambiarAcceso admin
+if [ -f createImage$ogengine ]; then
+	createImage$ogengine "$1" "$2" "$REPO" "$3" &>> $OGLOGFILE
 else
-	createImage "$1" "$2" "REPO" "$3" &>> $OGLOGFILE || exit $?
+	createImage "$1" "$2" "$REPO" "$3" &>> $OGLOGFILE
 fi
+RETVAL=$?
+[ "$boot" != "admin" ] && CambiarAcceso user
+exit $RETVAL
 

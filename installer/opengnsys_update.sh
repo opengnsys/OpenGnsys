@@ -275,6 +275,8 @@ function updateInterfaceAdm ()
 		exit 1
 	fi 
 	chmod -R +x $INSTALL_TARGET/client/interfaceAdm 
+	chown root:root $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
+	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	echoAndLog "${FUNCNAME}(): Admin interface updated successfully."
 } 
 
