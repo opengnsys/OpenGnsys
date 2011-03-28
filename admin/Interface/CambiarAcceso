@@ -26,10 +26,10 @@ if ogIsRepoLocked; then
 fi
 
 # Comprobar protocolo y modo de acceso.
-protocol=${protocol:-"smb"}
-case "$protocol" in
+PROTO=${ogprotocol:-"smb"}
+case "$PROTO" in
 	nfs|smb) ;;
-	*)	ogRaiseError $OG_ERR_FORMAT "protocolo desconocido $protocol"
+	*)	ogRaiseError $OG_ERR_FORMAT "protocolo desconocido $PROTO"
 		exit $? ;;
 esac
 case "$1" in
@@ -42,8 +42,8 @@ esac
 # Desmontar repositorio y volver a montarlo con el modo adecuado.
 umount $OGIMG
 ogEcho info "$PROG: Montar repositorio $REPO por $protocol en modo $1"
-case "$protocol" in
-	nfs)	mount -t nfs -o $MODE $REPOIP:$OGIMG $OGIMG ;;
-	smb)	mount -t cifs //${ROOTSERVER}/ogimages $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=og ;;
+case "$PROTO" in
+	nfs)	mount -t nfs $REPOIP:$OGIMG $OGIMG -o $MODE ;;
+	smb)	mount -t cifs //$REPOIP/ogimages $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=og ;;
 esac
 

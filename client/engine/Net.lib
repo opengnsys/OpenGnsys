@@ -112,14 +112,12 @@ echo ${MAC%% *}
 function ogGetRepoIp ()
 {
 # Obtener direcciones IP, segun el protocolo de montaje
-case $ogprotocol in
-	nfs)
-		[ -n "$OGIMG" ] && mount | grep " $OGIMG .* nfs " | cut -f1 -d:
-	;;
-	smb)
-	   [ -n "$OGIMG" ] && mount | grep ogimages | awk -F"addr=" '{print $2}' | cut -f1 -d","
-	;;
-esac
+if [ -n "$OGIMG" ]; then
+    case "$ogprotocol" in
+        nfs)  mount | grep " on $OGIMG " | cut -f1 -d: ;;
+        smb)  mount | grep " on $OGIMG " | cut -f3 -d/ ;;
+    esac
+fi
 }
 
 
@@ -138,14 +136,11 @@ esac
 function ogGetServerIp ()
 {
 # Obtener direcciones IP.
-case $ogprotocol in
-	nfs)
-		[ -n "$OPENGNSYS" ] && mount | grep " $OPENGNSYS .* nfs " | cut -f1 -d:
-	;;
-	smb)
-	   [ -n "$OGIMG" ] && mount | grep ogclient | awk -F"addr=" '{print $2}' | cut -f1 -d","
-	;;
-esac
+if [ -n "$PENGNSYS" ]; then
+    case "$ogprotocol" in
+        nfs)  mount | grep " on $OPENGNSYS " | cut -f1 -d: ;;
+        smb)  mount | grep " on $OPENGNSYS " | cut -f3 -d/ ;;
+    esac
+fi
 }
-
 

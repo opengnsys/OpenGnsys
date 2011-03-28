@@ -971,7 +971,7 @@ function copyInterfaceAdm ()
 		echoAndLog "${FUNCNAME}(): error while copying Administration Interface Folder"
 		hayErrores=1
 	fi
-	chown root:root $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
+	chown $OPENGNSYS_CLIENT_USER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 
 	return $hayErrores
