@@ -23,15 +23,15 @@ function validate_expr(value, epx) {
 }
 
 function validate_number(value) {
-	return validate_expr(value, "^\d*$");
+	return validate_expr(value, "^\\d*$");
 }
 
 function validate_alphanum(value) {
-	return validate_expr(value, "^\w*$");
+	return validate_expr(value, "^\\w*$");
 }
 
 function validate_notnull(value) {
-	return validate_expr(value, "^.+$") && !validate_expr(value, "^\s*0\s*$");
+	return validate_expr(value, "^.+$") && !validate_expr(value, "^\\s*0\\s*$");
 }
 
 function validate_number_notnull(value) {
