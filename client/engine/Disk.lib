@@ -124,7 +124,7 @@ ogUnmountAll $ND 2>/dev/null
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
-sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe $DISK
 rm -f $tmpsfdisk
 [ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
 }
@@ -609,9 +609,10 @@ partprobe 2>/dev/null
 
 function ogUpdatePartitionTable ()
 {
-echo "Forzando al kernel la lectura de la tabla de particiones"
-list=`partprobe -s | cut -f1 -d: ` 2>/dev/null
-echo $list > /tmp/disk
+for i in `ogDiskToDev`
+do 
+	partprobe $i
+done
 }
 
 
