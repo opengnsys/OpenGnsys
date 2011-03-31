@@ -1,0 +1,85 @@
+€jemplo de test de funciones de bloqueo de particiones e imagenes
+=================================================================
+# Funciones de bloqueo
+
+$ ogLock 1 1
+$ ls /var/lock/lock-dev-sda1
+/var/lock/lock-dev-sda1
+
+$ if ogIsLocked 1 1; then echo si; else echo no; fi
+si
+
+$ ls /var/lock/lock-dev-sda1
+/var/lock/lock-dev-sda1
+
+$ ogUnlock 1 1
+$ if ogIsLocked 1 1; then echo si; else echo no; fi
+no
+
+$ ogLockPartition 1 1
+$ if ogIsLocked 1 1; then echo si; else echo no; fi
+si
+
+$ ogUnlockPartition 1 1
+$ if ogIsLocked 1 1; then echo si; else echo no; fi
+no
+
+
+
+
+# Es necesario desmontar para probar ogCheck
+$ ogUnmount 1 1 >/dev/null 2>&1
+
+$ ogLock 1 1
+
+$ ogCheckFs 1 1
+OpenGnSys error:  ogCheckFs:  "1 1"
+
+$ ogUnlock 1 1
+
+$ ogCheckFs 1 1 >/dev/null 2>&1; echo $?
+0
+
+
+# Bloqueo del repositorio
+
+$ ogIsRepoLocked; echo $?
+1
+
+# FALTA: test bloqueo repo cuando esta bloqueado
+
+# bloqueo de imagenes
+
+
+
+# Creo una imagen ficticia 
+$ touch $OGIMG/_test_.img
+
+$ ogLockImage REPO _test_
+$ ls $OGIMG/_test_.lock
+/opt/opengnsys/images/_test_.lock
+
+$ if ogIsImageLocked REPO _test_ ; then echo si; else echo no; fi
+si
+
+$ ogUnlockImage REPO _test_
+$ if ogIsImageLocked REPO _test_ ; then echo si; else echo no; fi
+no
+
+$ rm $OGIMG/_test_.*
+
+# Comprobando los errores (FALTA)
+$ ogLock
+OpenGnSys error:  ogLockPartition:  ""
+
+
+$ ogLock 1 10
+OpenGnSys error:  ogDiskToDev:  ""
+
+
+$ ogIsLocked
+OpenGnSys error:  ogIsLocked:  ""
+
+$ ogIsLocked 1 10
+OpenGnSys error:  ogDiskToDev:  ""
+
