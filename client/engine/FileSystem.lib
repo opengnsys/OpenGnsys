@@ -311,7 +311,12 @@ case "$ID" in
      82)	TYPE="LINUX-SWAP" ;;
      83)	TYPE="$(parted -sm $DISK print 2>/dev/null | \
                             awk -F: -v fs=$2 '{if ($1==fs) {print toupper($5)}}')"
-                TYPE=${TYPE:-"EXT3"}
+                # Si el tipo no es válido para partición Linux, Ext3 por defecto.
+                case "$TYPE" in
+                     EXT[234]|REISERFS|REISER4|BTRFS|JFS|XFS)
+                         ;;
+                     *)  TYPE="EXT3" ;;
+                esac
                 ;;
      8e)	TYPE="LINUX-LVM" ;;
      a7)	TYPE="CACHE" ;;         # (compatibilidad con Brutalix)

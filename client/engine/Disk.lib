@@ -728,7 +728,7 @@ PART=`ogDiskToDev $1 $2` || return $?
 
 # Elección del tipo de partición.
 ID=$(ogFsToId "$3")
-[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$3" || return $?
 
 echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 }
