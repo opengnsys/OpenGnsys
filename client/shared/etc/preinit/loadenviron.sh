@@ -23,18 +23,16 @@ if [ -d $OPENGNSYS ]; then
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
 
-	export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/og2fs/2ndfs/opt/drbl/sbin
+    export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/og2fs/2ndfs/opt/drbl/sbin
     export PATH=$OGSCRIPTS:$PATH:$OGAPI:$OGBIN
    
-    GLOBAL="cat /proc/cmdline"
-	for i in `${GLOBAL}`
-	do
-		echo $i | grep "=" > /dev/null && export $i
-	done
+    # Exportar parámetros del kernel.
+    for i in $(cat /proc/cmdline); do
+        echo $i | grep -q "=" && export $i
+    done
    
-
     # Cargar fichero de idioma.
-    LANGFILE=$OGETC/lang.$LANG.conf
+    LANGFILE=$OGETC/lang.${LANG%@*}.conf
     if [ -f $LANGFILE ]; then
 	source $LANGFILE
 	for i in $(awk -F= '{if (NF==2) print $1}' $LANGFILE); do
@@ -59,7 +57,7 @@ if [ -d $OPENGNSYS ]; then
     if [ -n "$ogengine" ]
     then
     	for i in $OGAPI/*.$ogengine; do
-        	[ -f $i ] && source $i 
+            [ -f $i ] && source $i 
     	done
     fi
    
@@ -79,5 +77,4 @@ export OG_ERR_LOCKED=4		# Partición o fichero bloqueado.
 export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
 export OG_ERR_NOTOS=6		# Sin sistema operativo.
 export OG_ERR_NOTEXEC=7		# Programa o función no ejecutable.
-
 
