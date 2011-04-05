@@ -353,7 +353,7 @@ fi
 # Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-echo $(mount | awk -v P=$PART '{if ($1==P) {print $3}}')
+mount | awk -v P=$PART '{if ($1==P) {print $3}}'
 }
 
 
@@ -571,12 +571,14 @@ if [ -z "$MNTDIR" ]; then
             return $OG_ERR_PARTITION
             ;;
     esac
-    $MOUNT $PARAMS $PART $MNTDIR || $MOUNT $PARAMS $PART $MNTDIR -o force,remove_hiberfile || ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
-	# linea temporal durante desarrollo para poder usar el cliente completo nfs y testeas nuevas herramientas.
+    $MOUNT $PARAMS $PART $MNTDIR 2>/dev/null || \
+               $MOUNT $PARAMS $PART $MNTDIR -o force,remove_hiberfile 2>/dev/null || \
+               ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
+    # linea temporal durante desarrollo para poder usar el cliente completo nfs y testeas nuevas herramientas.
     if grep -q nfsroot /proc/cmdline; then
-		echo "$PART $MNTDIR" >> /etc/mtab
-	fi
-	# fin linea temporal.
+        echo "$PART $MNTDIR" >> /etc/mtab
+    fi
+    # fin linea temporal.
 fi
 echo $MNTDIR
 }
