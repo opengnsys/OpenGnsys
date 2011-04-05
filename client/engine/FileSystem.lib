@@ -543,7 +543,10 @@ MNTDIR="$(ogGetMountPoint $1 $2)"
 # Si no, montarla en un directorio de sistema
 if [ -z "$MNTDIR" ]; then
     # Error si la particion esta bloqueada.
-    ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
+    if ogIsLocked $1 $2; then
+        ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $1 $2"
+        return $?
+    fi
     # Crear punto de montaje o enlace símbolico para Caché local.
     MNTDIR=${PART/dev/mnt}
     TYPE="$(ogGetFsType $1 $2)" || return $?
@@ -823,15 +826,18 @@ MNTDIR="$(ogGetMountPoint $1 $2)"
 # Si está montada, desmontarla.
 if [ -n "$MNTDIR" ]; then
     # Error si la particion está bloqueada.
-    ogIsLocked $1 $2 && ogRaiseError $OG_ERR_LOCKED "$1 $2" && return $?
+    if ogIsLocked $1 $2; then
+        ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION $1, $2"
+        return $?
+    fi
     # Desmontar y borrar punto de montaje.
-    umount $PART 2>/dev/null || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1,$2\""
+    umount $PART 2>/dev/null || ogEcho warning "$FUNCNAME: $MSG_DONTUNMOUNT: \"$1, $2\""
     rmdir $MNTDIR 2>/dev/null || rm -f $MNTDIR 2>/dev/null
-	# linea temporal durante desarrollo para testear nuevas herramientas con el cliente completo nfs
+    # linea temporal durante desarrollo para testear nuevas herramientas con el cliente completo nfs
     if grep -q nfsroot /proc/cmdline; then
-		cat /etc/mtab | grep -v $PART > /var/tmp/mtab.temporal && cp /var/tmp/mtab.temporal /var/tmp/mtab && rm /var/tmp/mtab.temporal
-	fi
-	# fin linea temporal.
+        grep -v $PART /etc/mtab > /var/tmp/mtab.temporal && cp /var/tmp/mtab.temporal /var/tmp/mtab && rm /var/tmp/mtab.temporal
+    fi
+    # fin linea temporal.
 else
     ogEcho warning "$MSG_DONTMOUNT: \"$1,$2\""
 fi
