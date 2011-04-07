@@ -23,13 +23,9 @@ if [ -n "$OPENGNSYS" ]; then
     mkdir -p /var/lock
 
     # Directorio de tipos de letras para el browser.
-    #QTLIBS=$(grep qt_libspath $OGBIN/browser 2>/dev/null | cut -f2 -d=)
-    #QTVERS="/usr/local/QtEmbedded-4.6.3"
-    #QTDIR="${QTVERS%-*}"
-    #mkdir -p $QTDIR
-    #ln -fs $QTDIR $QTVERS
-    #mkdir -p $QTDIR/lib
-    #ln -fs $OGLIB/fonts $QTDIR/lib
+    QTDIR="/usr/local"
+    mkdir -p $QTDIR/lib
+    ln -fs $OGLIB/fonts $QTDIR/lib
 
 else
     # FIXME Error: entorno de OpenGNSys no configurado.

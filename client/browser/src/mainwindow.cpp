@@ -164,8 +164,10 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
     {
         QMessageBox msgBox;
-        msgBox.setText(tr("¡ATENCIÓN! La siguiente acción puede modificar datos o tardar varios minutos. El equipo no podrá ser utilizado durante su ejecución."));
-        msgBox.setInformativeText(tr("¿Continuar?"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setWindowTitle(tr("AVISO"));
+        msgBox.setTextFormat(Qt::RichText);
+        msgBox.setText(tr("La siguiente acci&oacute;n puede modificar datos o tardar varios minutos. El equipo no podr&aacute; ser utilizado durante su ejecuci&oacute;n."));
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Ok);
         if (msgBox.exec() == QMessageBox::Ok)
@@ -238,7 +240,7 @@ void MainWindow::slotProcessOutput()
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
         QString s(buf);
-        print(tr("Proc. Output: ")+s);
+        print(tr("Proc. stdout: ")+s);
         captureOutputForStatusBar(s);
     }
 }
@@ -250,7 +252,7 @@ void MainWindow::slotProcessErrorOutput()
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
         QString s(buf);
-        print(tr("Proc. Error: ")+s);
+        print(tr("Proc. stderr: ")+s);
     }
 }
 
