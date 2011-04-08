@@ -1,1 +1,0 @@
-/var/lib/tftpboot/              *(ro,no_subtree_check,no_root_squash,sync)
