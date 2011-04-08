@@ -1,0 +1,25 @@
+#!/bin/sh -e
+# initramfs hook for watershed
+
+PREREQ="udev"
+
+# Output pre-requisites
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+
+. /usr/share/initramfs-tools/hook-functions
+
+# default statedir
+mkdir -p ${DESTDIR}/var/run/watershed
+
+copy_exec /lib/udev/watershed /lib/udev

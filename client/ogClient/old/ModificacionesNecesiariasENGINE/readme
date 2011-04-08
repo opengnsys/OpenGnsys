@@ -1,0 +1,27 @@
+Moverse al etc del cliente.
+cd /opt/opengnsys/client/etc
+
+preinit/default
+     modificamos el sha-bang a /bin/bash
+     eliminamos enlace del bash
+     Ejecute solo el loadmodules del for
+     
+preinit/loaenviron
+     comentamos el LD_PATH
+     export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/og2fs/opt/drbl/sbin
+     
+     
+dejar en bin solo el browser y el ogadmcliente
+
+/var/lib/tftboot/pxelinux.cfg/default
+DEFAULT pxe2
+LABEL pxe
+KERNEL linux
+APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin
+LABEL pxe2
+KERNEL vmlinuz-2.6.32-21-generic-pae
+APPEND initrd=initrd-2.6.32-21-generic-pae ip=dhcp rootdelay=0 boot=og engine=testing rootmnt=/opt/og2fs vga=788
+
+
+parametro boot: reservado INCOMPATIBLE CON BOOT=ADMIN
+temporalmente: init/default.sh  => export boot=admin

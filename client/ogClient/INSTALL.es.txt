@@ -1,0 +1,46 @@
+########## INSTALACION ##################################
+
+###  NOTA principal: utilizar el usuario root para este proceso ####
+1. Comprobar la conexión a internet, sobre todo si usas proxy. El hecho de que te funcione apt-get no significa que tengas el proxy configurado.
+1. Descargar del subversion la estrucutura del cliente.
+
+# reubicacion al trunk/client/boot
+
+Proceso:
+0. Si ya tenemos un /var/lib/tftpboot/ogclient lo renombramos por si acaso.
+1. Descargar del subversion la rama ogClient.
+3. Ejecutar el instalador: 
+
+mv /opt/opengnsys/tftpboot/ogclient/ /opt/opengnsys/tftpboot/ogclientTrunk;
+svn checkout http://www.opengnsys.es/svn/branches/ogClient /tmp/opengnsys_installer/opengnsys/installer/ogClient;
+svn checkout http://www.opengnsys.es/svn/branches/version1.0/client/shared/ /tmp/opengnsys_installer/opengnsys/client/shared;
+svn checkout http://www.opengnsys.es/svn/branches/version1.0/client/engine/ /tmp/opengnsys_installer/opengnsys/client/engine;
+find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
+/tmp/opengnsys_installer/opengnsys/installer/ogClient/ogClientGeneratorV2.sh;
+
+
+
+NOTA: el proceso tardará un buen rato, dependiendo de nuestras circustancias.
+NOTA: crea un kernel, initrd, ogclient.img en /var/lib/tftpboot/ogclient
+NOTA: el ogclient.img es el Segundo sistema de archivos en formato fichero bloques emulando a disco con partición primaria.
+NOTA: el ogclient.sqfs es el Segundo sistema de archivos (partición primaria del img) en formato squashfs. Se usará con el parámetro og2nd=sqfs
+NOTA: los logs de instalación estarán en /tmp/opengnsys_installation.log
+
+
+  NOTA A RECORDAR:
+  NOTA ACLARATORIA: $OGSCRITPS(reboot,poweroff) antes de /sbin/{reboot,poweroff}	
+     
+ ################## Descripcion de la estrucutra de ogClient.
+ los directorios old y serverstrucutre son antiguos, pero no borrarlos.
+ INSTALL.es.txt    : este mismo archivo.
+ ogInstaller.lib   : son todas las funciones de instalacion del instalador oficial de opengnys. Algunas de ellas son utilizadas. Crear ticket para separar las funciones de iinstalacion del proceso de instalacion.
+ ogClientManager.lib: son las funicones especificas para la instalacion del ogclient. estan escritas en orden de que son llamadas por el instalador, (ogClientGeneratorV2.sh)
+ ogClientGeneratorV2.sh. Es el guión de ejecución del isntalador.
+ 
+ 
+
+  ############ ERROR PRINCIPAL 2 #######
+ necesita que en el equipo donde se ejecuta el scripts, disponga de la estrucutra /opt/opengnsys/client
+ sobre todo los lib/fonts, el lib/pci.ids  el bin/browser y el bin/ogAdmClient
+ 
+ 
