@@ -210,7 +210,7 @@ void MainWindow::slotWebLoadFinished(bool ok)
         msgBox.setText(tr("La p&aacute;gina no se puede cargar."));
 
         QPushButton *reloadButton = msgBox.addButton(tr("Recargar"), QMessageBox::ActionRole);
-        msgBox.addButton(tr("Abortar"), QMessageBox::Abort);
+        msgBox.addButton(tr("Abortar"), QMessageBox::RejectRole);
 
         msgBox.exec();
 
