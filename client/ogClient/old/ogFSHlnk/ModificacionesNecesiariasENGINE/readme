@@ -1,0 +1,20 @@
+preinit/default
+     eliminamos enlace del bash
+     Ejecute solo el loadmodules del for
+     
+preinit/loaenviron
+     comentamos el LD_PATH
+     
+
+/var/lib/tftboot/pxelinux.cfg/default
+DEFAULT pxe2
+LABEL pxe
+KERNEL linux
+APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin
+LABEL pxe2
+KERNEL vmlinuz-2.6.32-21-generic-pae
+APPEND initrd=initrd-2.6.32-21-generic-pae ip=dhcp rootdelay=0 boot=og engine=testing rootmnt=/opt/og2fs vga=788
+
+
+parametro boot: reservado INCOMPATIBLE CON BOOT=ADMIN
+temporalmente: init/default.sh  => export boot=admin

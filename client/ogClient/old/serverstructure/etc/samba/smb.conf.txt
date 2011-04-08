@@ -1,0 +1,29 @@
+[tftpboot]
+   comment = el directorio fisico ogclient debe estar como escritura
+   writeable = no
+   read only = yes
+   #locking = no
+   path = /var/lib/tftpboot
+   guest ok = no
+
+[ogclient]
+   comment = client
+   read only = yes
+   locking = no
+   path = /opt/opengnsys/client
+   guest ok = no
+
+[oglog]
+   comment = log
+   read only = yes
+   locking = no
+   path = /opt/opengnsys/log/clients
+   guest ok = no
+
+[ogimages]
+   comment = images
+   read only = no
+   writeable = yes
+   locking = no
+   path = /opt/opengnsys/images
+   guest ok = no

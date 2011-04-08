@@ -1,0 +1,18 @@
+DEFAULT pxe-2.6.32-21-generic-pae
+
+LABEL pxe
+KERNEL linux
+APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin
+
+LABEL pxe-2.6.32-21-generic-pae
+KERNEL ogclient/vmlinuz-2.6.32-21-generic-pae
+APPEND initrd=ogclient/initrd.img-2.6.32-21-generic-pae ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=nfs  engine=testing
+
+
+#NOTA: parametro boot: reservado para oginit       INCOMPATIBLE CON BOOT=ADMIN
+#NOTA: reposerver=$IPREPO correspondería a tu servidor Repositorio OG
+#ogrepo=172.17.32.242
+#ip:
+#og2nd=sqfs        =>sqfs, img
+#ogprotocol=nfs    => nfs, smb
+#engine=testing    => activa las libreias testing de cada universidad.
