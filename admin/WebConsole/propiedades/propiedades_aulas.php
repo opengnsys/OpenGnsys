@@ -329,7 +329,7 @@ else
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$cache.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cache style="width:100" type=text value='.$cache.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cache style="width:100" type=text  readonly value=0></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
