@@ -1,63 +1,63 @@
 
-Estructura de Ficheros de OpenGNSys
-===================================
+Estructura de Ficheros de OpenGnSys 1.0
+=======================================
 
 
-Estructura de directorios de OpenGNSys Client
+Estructura de directorios de OpenGnSys Client
 ---------------------------------------------
 
 /opt/opengnsys
   bin (ro) - utilidades asociadas.
-  cache (rw) - directorio donde esta montado la particion de cache
+  cache (rw) - directorio donde se monta el sistema de archivos de caché.
   etc (ro) - configuración.
     preinit (ro) - scripts de carga del sistema.
     init (ro) - scripts de arranque.
-    startpages (ro) - paginas webs de inicio
-  images (normal=ro, admin=rw) - imágenes de arranque.
+  images (user=ro, admin=rw) - repositorio de imágenes.
   lib (ro) - librerías de las utilidades.
     engine/bin (ro) - librerías de funciones del motor de clonación.
     modules (ro) - módulos extra del kernel.
-  log (rw) - registros de incidencias (enlazado en /var/log/opengnsys).
+  log (rw) - ficheros de registro de incidencias.
 
 
-Servicios de OpenGNSys Server:
+Servicios de OpenGnSys Server:
 ------------------------------
 - Syslog - gestión de logs de servidores y clientes.
-- NFS
 - DHCP
 - PXE
 - TFTP
+- Samba
 - Base de datos
 - Servidor de órdenes
 
 
-Estructura de directorios de OpenGNSys Server:
+Estructura de directorios de OpenGnSys Server:
 ----------------------------------------------
 
 /opt/opengnsys
   bin - binarios del servidor.
-  client - exporta por NFS la estructura de directorios del cliente.
-  etc - configuración (enlazado en /etc/opengnsys).
+  client - exporta en remoto la estructura de directorios del cliente.
+  etc - ficheros de configuración.
   lib - librerías de las utilidades.
-  log - registros de incidencias (enlazado en /var/log/opengnsys).
-  tftpboot - enlace simbólico a /var/lib/tftpboot (o donde corresponda).
+  log - ficheros de registro de incidencias.
+  tftpboot - arranque remoto de clientes (enlace a /var/lib/tftpboot).
 
 NOTA: páginas de manuales y documentación se copian a los directorios estándares del sistema operativo.
 
 
-Estructura de directorios de OpenGNSys Repository Manager
+Estructura de directorios de OpenGnSys Repository Manager
 ---------------------------------------------------------
 
 /opt/opengnsys
   bin - binarios del servidor.
-  etc - configuración (enlazado en /etc/opengnsys).
+  etc - ficheros de configuración.
   images - imágenes de sistemas de archivos.
-  log - registros de incidencias (enlazado en /var/log/opengnsys).
+  log - ficheros de registro de incidencias.
 
 
 
-Relación NFS
-------------
+Relación de sistemas de ficheros en red
+---------------------------------------
+
 Server: exporta /opt/opengnsys/client -> Client: importa /opt/opengnsys
 Server: exporta /opt/opengnsys/log/client -> Client: importa /opt/opengnsys/log
 RepoMan: exporta /opt/opengnsys/images -> Client: importa /opt/opengnsys/images
