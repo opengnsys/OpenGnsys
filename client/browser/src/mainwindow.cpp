@@ -156,27 +156,31 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     }
  
     QString urlString = url.toString();
-    // Si es un link del tipo COMMAND lo ejecutamos
     if(urlString.startsWith(COMMAND))
     {
+        // Si es link de tipo COMMAND, ejecutar.
         executeCommand(urlString.remove(0,QString(COMMAND).length()));
     }
     else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
     {
+        // Si es link de tipo COMMAND_WITH_CONFIRMATION, pedir confirmación de ejecutar.
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setWindowTitle(tr("AVISO"));
         msgBox.setTextFormat(Qt::RichText);
         msgBox.setText(tr("La siguiente acci&oacute;n puede modificar datos o tardar varios minutos. El equipo no podr&aacute; ser utilizado durante su ejecuci&oacute;n."));
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        if (msgBox.exec() == QMessageBox::Ok)
+        QPushButton *execButton = msgBox.addButton(tr("Ejecutar"), QMessageBox::ActionRole);
+        msgBox.addButton(tr("Cancelar"), QMessageBox::RejectRole);
+        msgBox.setDefaultButton(execButton);
+        msgBox.exec();
+        if (msgBox.clickedButton() == execButton)
         {
             executeCommand(urlString.remove(0,QString(COMMAND_WITH_CONFIRMATION).length()));
         }
     }
     else
     {
+        // Si es otro link, cargar página web.
         m_web->load(url);
     }
 }
@@ -200,10 +204,13 @@ void MainWindow::slotWebLoadFinished(bool ok)
     if(ok == false)
     {
         QMessageBox msgBox;
-        msgBox.setText(tr("La pagina web no pudo ser cargada. ¿Qué quieres hacer?"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setWindowTitle(tr("AVISO"));
+        msgBox.setTextFormat(Qt::RichText);
+        msgBox.setText(tr("La p&aacute;gina no se puede cargar."));
 
         QPushButton *reloadButton = msgBox.addButton(tr("Recargar"), QMessageBox::ActionRole);
-        msgBox.addButton(QMessageBox::Abort);
+        msgBox.addButton(tr("Abortar"), QMessageBox::Abort);
 
         msgBox.exec();
 
@@ -252,7 +259,10 @@ void MainWindow::slotProcessErrorOutput()
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
         QString s(buf);
-        print(tr("Proc. stderr: ")+s);
+        m_output->insertPlainText(tr("Proc. stderr: "));
+        m_output->setTextColor(QColor(Qt::darkBlue));
+        print(s);
+        m_output->setTextColor(QColor(Qt::black));
     }
 }
 
@@ -264,23 +274,24 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
     }
     else
     {
-        print(tr("El proceso falló inesperadamente. Output: "+code));
+        print(tr("El proceso ha fallado inesperadamente. Salida: "+code));
     }
     finishProgressBar();
 }
 
 void MainWindow::slotProcessError(QProcess::ProcessError error)
 {
+    m_output->setTextColor(QColor(Qt::darkRed));
     switch(error)
     {
         case QProcess::FailedToStart:
             print(tr("Imposible lanzar el proceso."));
             break;
         case QProcess::WriteError:
-            print(tr("Write error happened in the process."));
+            print(tr("Error de escritura en el proceso."));
             break;
         case QProcess::ReadError:
-            print(tr("Read error happened in the process."));
+            print(tr("Error de lectura del proceso."));
             break;
         // No capturo crashed porque la pillo por finished
         case QProcess::Crashed:
@@ -288,10 +299,11 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
             break;
         case QProcess::UnknownError:
         default:
-            print(tr("Unknown error."));
+            print(tr("Error desconocido."));
             break;
     }
     finishProgressBar();
+    m_output->setTextColor(QColor(Qt::black));
 }
 
 void MainWindow::slotCreateTerminal()
@@ -414,6 +426,9 @@ void MainWindow::executeCommand(QString &string)
     // Le ponemos el mismo entorno que tiene el browser ahora mismo
     m_process->setEnvironment(QProcess::systemEnvironment());
     m_process->start(program,list);
-    print(tr("Lanzando el comando: ")+program+" "+list.join(" ")+".");
+    m_output->insertPlainText(tr("Lanzando el comando: "));
+    m_output->setTextColor(QColor(Qt::darkGreen));
+    print(program+" "+list.join(" "));
+    m_output->setTextColor(QColor(Qt::black));
     startProgressBar();
 }
