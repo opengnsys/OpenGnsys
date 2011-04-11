@@ -12,6 +12,15 @@
 #*/
 
 
+####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
+OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
+OPENGNSYS_DBUSER="usuog"		# Usuario de acceso
+OPENGNSYS_DBPASSWORD="passusuog"	# Clave del usuario
+
+####  AVISO: NO Editar variables de acceso desde el cliente
+OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
+
+
 # Sólo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]
 then
@@ -41,9 +50,10 @@ LOG_FILE=/tmp/opengnsys_update.log
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
+
 function getDateTime()
 {
-        echo `date +%Y%m%d-%H%M%S`
+        date "+%Y%m%d-%H%M%S"
 }
 
 # Escribe a fichero y muestra por pantalla
@@ -108,6 +118,46 @@ function restoreFile()
 	if [ -f "${fichero}-LAST" ]; then
 		cp -p "$fichero-LAST" "$fichero"
 	fi
+}
+
+
+#####################################################################
+####### Funciones de acceso a base de datos
+#####################################################################
+
+# Actualizar la base datos
+function importSqlFile()
+{
+        if [ $# -ne 4 ]; then
+                errorAndLog "${FNCNAME}(): invalid number of parameters"
+                exit 1
+        fi
+
+        local dbuser="$1"
+        local dbpassword="$2"
+        local database="$3"
+        local sqlfile="$4"
+        local tmpfile=$(mktemp)
+        local status
+
+        if [ ! -r $sqlfile ]; then
+                errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
+                return 1
+        fi
+
+        echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
+        chmod 600 $tmpfile
+        sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
+            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
+        mysql -u$dbuser -p"$dbpassword" --default-character-set=utf8 "$database" < $tmpfile
+	status=$?
+	rm -f $tmpfile
+	if [ $status -ne 0 ]; then
+                errorAndLog "${FUNCNAME}(): error importing $sqlfile in database $database"
+                return 1
+        fi
+        echoAndLog "${FUNCNAME}(): file imported to database $database"
+        return 0
 }
 
 
@@ -207,7 +257,7 @@ function updateServicesStart(){
 }
 
 # Actualizar cliente OpenGnSys
-function openGnsysCopyClientFiles()
+function updateClientFiles()
 {
 	local hayErrores=0
 
@@ -272,7 +322,7 @@ function updateInterfaceAdm ()
 		exit 1
 	fi 
 	chmod -R +x $INSTALL_TARGET/client/interfaceAdm 
-	chown root:root $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
+	chown :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	echoAndLog "${FUNCNAME}(): Admin interface updated successfully."
 } 
@@ -342,7 +392,7 @@ function updateServerFiles () {
 	pushd $WORKDIR/opengnsys >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
-		rsync --exclude .svn -irplt "${SOURCES[$i]}" "${INSTALL_TARGET}/${TARGETS[$i]}"
+		rsync --exclude .svn -irplt "${SOURCES[$i]}" $(dirname "${INSTALL_TARGET}/${TARGETS[$i]}")
 	done
 	popd >/dev/null
 	echoAndLog "${FUNCNAME}(): updating cron files"
@@ -450,11 +500,11 @@ function updateClient()
 	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
 	rm -f $TMPFILE
 	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
-	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
-	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
-	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
 	echoAndLog "${FUNCNAME}(): Client update successfully"
 }
 
@@ -500,17 +550,29 @@ else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
-# Copiando ficheros complementarios del servidor
+# Si existe fichero de actualización de la base de datos; aplicar cambios.
+INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
+REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
+OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
+	echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
+	importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
+else
+	echoAndLog "Database unchanged."
+fi
+
+# Actualizar ficheros complementarios del servidor
 updateServerFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Server files"
 	exit 1
 fi
 
-# Actualizando cliente
-openGnsysCopyClientFiles
+# Actualizar ficheros del cliente
+updateClientFiles
+updateInterfaceAdm
 
-# Copiando paqinas web
+# Actualizar páqinas web
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Web Admin files"
@@ -528,7 +590,6 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"
 	exit 1
 fi
-updateInterfaceAdm
 
 # Actualizamos el fichero que arranca los servicios de OpenGnSys
 updateServicesStart

@@ -1291,10 +1291,10 @@ else
 	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
 	INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
 	REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-	OPENGNSYS_DB_UPDADE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
- 	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE ]; then
+	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+ 	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
- 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE
+ 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
  	else
  		echoAndLog "Database unchanged."
  	fi
