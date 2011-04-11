@@ -99,11 +99,11 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `modomul` tinyint(4) NOT NULL,
   `ipmul` varchar(16) NOT NULL,
   `pormul` int(11) NOT NULL,
-  `velmul` smallint(6) NOT NULL,
+  `velmul` smallint(6) NOT NULL DEFAULT '70',
   `router` VARCHAR( 30 ),
   `netmask` VARCHAR( 30 ),
   `dns` VARCHAR (30),
-  `modp2p` enum('seeder','peer','leecher') DEFAULT 'seeder',
+  `modp2p` enum('seeder','peer','leecher') DEFAULT 'peer',
   `timep2p` INT(11) NOT NULL DEFAULT '60',
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
