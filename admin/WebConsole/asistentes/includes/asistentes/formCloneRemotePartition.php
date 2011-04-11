@@ -4,7 +4,7 @@
 <tr>
 	<td class="op_basic">
 	    Elige equipo MASTER:
-		<select name="ipMaster" id="ipMaster" style="WIDTH:220" onChange="xajax_ListarParticionesXip(this.value);">
+		<select name="ipMaster" id="ipMaster" style="WIDTH:220" onChange="xajax_ListarOrigenMaster(this.value);">
 				<option value="">-- Elige equipo Master--</option>
 				<?php echo ''.htmlOPTION_equipos($cmd,$ambito,$idambito).'';   ?>
 		</select>		
