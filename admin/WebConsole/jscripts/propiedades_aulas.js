@@ -102,8 +102,15 @@ function comprobar_datos(){
 
 	var form = document.fdatos;
 	return validate (form.nombreaula, validate_notnull, 0) &&
-	       validate (form.puestos, validate_notnull, 1) &&
-	       validate (form.velmul, validate_number, 4);
+	       validate (form.puestos, validate_number_notnull, 1) &&
+	       validate (form.router, validate_ipadress_notnull, 4) &&
+		   validate (form.netmask, validate_ipadress_notnull, 5) && 
+	       validate (form.modp2p, validate_notnull, 6) &&
+		   validate (form.timep2p, validate_number_notnull, 7) &&
+		   validate (form.modomul, validate_notnull, 8) &&
+		   validate (form.ipmul, validate_ipadress_notnull, 9) &&
+		   validate (form.pormul, validate_notnull, 10) &&
+	       validate (form.velmul, validate_number_notnull, 11);
 
 	return(true);
 }

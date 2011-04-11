@@ -42,6 +42,17 @@ function validate_alphanum_notnull(value) {
 	return validate_number(value) && validate_notnull(value);
 }
 
+
+function validate_ipadress(value) {
+	return validate_expr(value, "^\\d+\\.\\d+\.\\d+\\.\\d+$");
+}
+
+function validate_ipadress_notnull(value) {
+	return validate_ipadress(value) && validate_notnull(value);
+}
+
+
+
 function validation_highlight(field) {
 	field.focus();
 	field.style.border = "1px solid red";
