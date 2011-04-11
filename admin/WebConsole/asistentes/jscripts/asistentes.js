@@ -79,8 +79,16 @@ precache="ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4`
 }
 else
 {
-precache="ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1  \n ogUpdatePartitionTable 1 \n initCache "  + form.size4.value + " ";
-//alert(precache);
+	if (form.size4.value == "CUSTOM")  
+	{ 
+		cachesize = form.size4custom.value; 
+	}
+	else 
+	{
+		cachesize = form.size4.value;
+	} 
+	precache="ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1  \n ogUpdatePartitionTable 1 \n initCache "  + cachesize + " ";
+	//alert(precache);
 }
 
 
