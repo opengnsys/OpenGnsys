@@ -27,6 +27,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #345	Importar "runtest" para la versión 1.0 (mejora)
 #334	OgClient - admin problemas al escribir en el repo
 #336	Regenerar el cliente ogclient-1.0-lucid-32bit.tar.gz
+#360	Importar herramientas de generación del cliente desde la rama ogClient (mejora)
 
 Tickets resueltos en módulo OpenGnSys Server:
 #350	ogAdmAgent no se inicia
@@ -56,8 +57,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #313	Instalador: no genera la estrucutra para el cliente
 #316	Error en opengnsys_update.sh al copiar archivos de servicios
 #335	Error en opengnsys_update.sh al descomprimir cliente
-
-Tickets genéricos resueltos:
+#361	Actualizador debe aplicar cambios en la estructura de base de datos
 
 
 Lista de cambios incluidos en OpenGnSys 0.10
