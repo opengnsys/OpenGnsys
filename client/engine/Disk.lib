@@ -75,14 +75,13 @@ while [ $# -gt 0 ]; do
     fi
     # Leer formato de cada parámetro - Tipo:Tamaño
     TYPE="${1%%:*}"
-    [ "$TYPE" != "CACHE" ] || ogRaiseError $OG_ERR_FORMAT "$TYPE" || return $?
     SIZE="${1#*:}"
-    # Convertir en sectores de 512 B.
-    SIZE=$(echo $SIZE|awk '{print $0*2}')      # (solución error de sintaxis)
-    [ $SIZE -ne 0 ] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
-    # Obtener identificador de tipo de partición.
+    # Obtener identificador de tipo de partición válido.
     ID=$(ogFsToId "$TYPE")
-    [ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+    [ "$TYPE" != "CACHE" -a -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+    # Comprobar tamaño numérico y convertir en sectores de 512 B.
+    [[ "$SIZE" == *([0-9]) ]] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
+    SIZE=$[SIZE*2]
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
         [ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
