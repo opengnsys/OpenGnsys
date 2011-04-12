@@ -23,9 +23,9 @@ Tickets resueltos en módulo OpenGnSys Client:
 #243	Browser incluye terminal con letra monospace y barra de estado en UTF-8 (mejora)
 #303	Integracion proceso arranque cliente versión 1.0
 #304 	Integracion interface adm versión 1.0
-#314 	smb punto acceso 2nd FileSystem del cliente [tftpboot] [ogboot]
+#314 	SMB punto acceso 2nd FileSystem del cliente [tftpboot] [ogboot]
 #345	Importar "runtest" para la versión 1.0 (mejora)
-#334	OgClient - admin problemas al escribir en el repo
+#334	OgClient en modo admin: problemas al escribir en el repo
 #336	Regenerar el cliente ogclient-1.0-lucid-32bit.tar.gz
 #360	Importar herramientas de generación del cliente desde la rama ogClient (mejora)
 
@@ -34,22 +34,26 @@ Tickets resueltos en módulo OpenGnSys Server:
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #188	Al restaurar por torrent el BitFile no se crea siempre
-#300	integracion bin del repo
+#300	Integración binarios del repo
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #126	Integración de consola Web con bittorent (mejora)
 #138	Configurar parámetros de red en cliente
 #185	Aproximación a la gestión log de los clientes (mejora)
 #248	La consola web no muestra datos del repositorio hasta que no se asigna
-#258	Consola Web: Error al eliminar un perfil de software
-#266	Consola web: Información unidades de la caché
-#268	Consola Web: error texto de formularios
-#301	Integracion modulos web versión 1.0
-#302	Integracion base de datos version 1.0
+#258	Error al eliminar un perfil de software
+#266	Información unidades en tamaño de la caché
+#268	Erratas en texto de formularios
+#301	Integración modulos web versión 1.0
+#302	Integración base de datos version 1.0
+#306	Asistente Clonacion Particiones Remotas: no genera codigo
 #310	Instalar: no genera las propiedades del repositorio por defecto en la consola (duplicado de #248)
 #338	Validación de formularios de la consola web
 #339	Añadir opción de apagado en cliente sin menú asociado (mejora)
-#349	Boton de confirmacion en gestor de arranque
+#349	Botón de confirmación en gestor de arranque
+#359	Ocultar los comandos inacabados en la consola web
+#363	Asistente particionado no permite valores personalizados para la caché
+#364	Asistente particionado no recupera valores iniciales si se pulsa en personalizar
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #299	Instalador para la versión 1.0
@@ -58,6 +62,8 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #316	Error en opengnsys_update.sh al copiar archivos de servicios
 #335	Error en opengnsys_update.sh al descomprimir cliente
 #361	Actualizador debe aplicar cambios en la estructura de base de datos
+
+Tickets genéricos resueltos:
 
 
 Lista de cambios incluidos en OpenGnSys 0.10
