@@ -50,7 +50,7 @@ if (form.check1.checked) {
 }
 else
 {
-   value1 = "EMPTY:1"
+   value1 = "EMPTY:0"
 }
 if (form.check2.checked) {
 	if (form.part2.value == "CUSTOM" ) {value2 = form.part2custom.value}
@@ -60,7 +60,7 @@ if (form.check2.checked) {
 }
 else
 {
-   value2 = "EMPTY:1"
+   value2 = "EMPTY:0"
 }
 if (form.check3.checked) {
 	if (form.part3.value == "CUSTOM" ) {value3 = form.part3custom.value}
@@ -70,7 +70,7 @@ if (form.check3.checked) {
 }
 else
 {
-   value3 = "EMPTY:1"
+   value3 = "EMPTY:0"
 }
 
 if (form.size4.value == "0") {

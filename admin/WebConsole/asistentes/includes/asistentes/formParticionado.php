@@ -1,13 +1,13 @@
 
 
 <TR>
-<TD >  Particion </TD>
+<TD > Partici&oacute;n </TD>
 <TD > Tipo </TD>
-<TD > Tamano KB </TD>
+<TD > Tama&ntilde;o KB </TD>
 </TR>
 
 <TR>
-<TD > <input type="checkbox" name="check1" value="check1" onclick="if (this.form.check1.checked) { this.form.part1.disabled=false; this.form.size1.disabled=false } else { this.form.part1.disabled=true; this.form.size1.disabled=true; this.form.part1custom.disabled=true; this.form.size1custom.disabled=true }" /> <br> Particion 1 </TD>
+<TD > <input type="checkbox" name="check1" value="check1" onclick="if (this.form.check1.checked) { this.form.part1.disabled=false; this.form.size1.disabled=false } else { this.form.part1.disabled=true; this.form.size1.disabled=true; this.form.part1custom.disabled=true; this.form.size1custom.disabled=true }" /> <br> Partici&oacute;n 1 </TD>
 <TD>
 <select name="part1" id="part1" style="WIDTH:220" disabled="true" onclick="if (this.form.part1.options[this.form.part1.selectedIndex].value == 'CUSTOM') { this.form.part1custom.disabled=false; this.form.part1.disabled=true }" >
 	<?php echo ''. htmlForm_typepart($cmd,1)  .''; ?> 
@@ -23,10 +23,10 @@
 		<option value="CUSTOM"> Personalizar </option>
 </select>
 <br >
-<INPUT type="text" style="width:100" name="size1custom" value="1" disabled="true"></TD>
+<INPUT type="text" style="width:100" name="size1custom" value="0" disabled="true"></TD>
 </TR>
 
-<TD > <input type="checkbox" name="check2" value="check2" onclick="if (this.form.check2.checked) { this.form.part2.disabled=false; this.form.size2.disabled=false } else { this.form.part2.disabled=true; this.form.size2.disabled=true; this.form.part2custom.disabled=true; this.form.size2custom.disabled=true }" /> <br> Particion 2 </TD>
+<TD > <input type="checkbox" name="check2" value="check2" onclick="if (this.form.check2.checked) { this.form.part2.disabled=false; this.form.size2.disabled=false } else { this.form.part2.disabled=true; this.form.size2.disabled=true; this.form.part2custom.disabled=true; this.form.size2custom.disabled=true }" /> <br> Partici&oacute;n 2 </TD>
 <TD><select name="part2" id="part2" style="WIDTH:220" disabled="true" onclick="if (this.form.part2.options[this.form.part2.selectedIndex].value == 'CUSTOM') { this.form.part2custom.disabled=false; this.form.part2.disabled=true }" >
 		<?php echo ''. htmlForm_typepart($cmd,2)  .''; ?>
 		<option value="CUSTOM"> Personalizar </option>
@@ -41,11 +41,11 @@
 		<option value="CUSTOM"> Personalizar </option>
 </select>
 <br >
-<INPUT type="text" style="width:100" name="size2custom" value="1" disabled="true"></TD>
+<INPUT type="text" style="width:100" name="size2custom" value="0" disabled="true"></TD>
 </TR>
 
 
-<TD > <input type="checkbox" name="check3" value="check3" onclick="if (this.form.check3.checked) { this.form.part3.disabled=false; this.form.size3.disabled=false } else { this.form.part3.disabled=true; this.form.size3.disabled=true; this.form.part3custom.disabled=true; this.form.size3custom.disabled=true }" /> <br> Particion 3 </TD>
+<TD > <input type="checkbox" name="check3" value="check3" onclick="if (this.form.check3.checked) { this.form.part3.disabled=false; this.form.size3.disabled=false } else { this.form.part3.disabled=true; this.form.size3.disabled=true; this.form.part3custom.disabled=true; this.form.size3custom.disabled=true }" /> <br> Partici&oacute;n 3 </TD>
 <TD><select name="part3" id="part3" style="WIDTH:220" disabled="true" onclick="if (this.form.part3.options[this.form.part3.selectedIndex].value == 'CUSTOM') { this.form.part3custom.disabled=false; this.form.part3.disabled=true }" >
 		<?php echo ''. htmlForm_typepart($cmd,3)  .''; ?>
 		<option value="CUSTOM"> Personalizar </option>
@@ -60,15 +60,15 @@
 		<option value="CUSTOM"> Personalizar </option>
 </select>
 <br >
-<INPUT type="text" style="width:100" name="size3custom" value="1" disabled="true"></TD>
+<INPUT type="text" style="width:100" name="size3custom" value="0" disabled="true"></TD>
 </TR>
 
 <TR>
 
-<TD > <input type="checkbox" name="check4" value="check4" onclick="if (this.form.check4.checked) { this.form.part4.disabled=false; this.form.size4.disabled=false } else { this.form.part4.disabled=true; this.form.size4.disabled=true }" /> <br> Particion 4 </TD>
+<TD > <input type="checkbox" name="check4" value="check4" onclick="if (this.form.check4.checked) { this.form.part4.disabled=false; this.form.size4.disabled=false } else { this.form.part4.disabled=true; this.form.size4.disabled=true }" /> <br> Partici&oacute;n 4 </TD>
 <TD> <INPUT type="label" readonly size="8" name="part4" disabled="true" value="CACHE"></TD>
 <TD><select name="size4" id="size4" style="WIDTH:220" disabled="true" onclick="if (this.form.size4.options[this.form.size4.selectedIndex].value == 'CUSTOM') { this.form.size4custom.disabled=false; this.form.size4.disabled=true }" > 
-		<option value="0"> Sin modificar tamanio </option>
+		<option value="0"> Sin modificar tama&ntilde;o </option>
 		<?php echo ''. htmlForm_sizepart($cmd,4)  .''; ?>
 		<option value="CUSTOM"> Personalizar </option>		
 </select>
