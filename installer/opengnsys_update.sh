@@ -31,11 +31,12 @@ fi
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
+OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://www.opengnsys.es/svn/branches/version1.0
+    SVN_URL=http://$OPENGNSYS_SERVER/svn/branches/version1.0
     DEPS="$DEPS subversion"
 fi
 
@@ -218,11 +219,19 @@ function svnExportCode()
 ###  Detectar red
 ############################################################
 
+# Comprobar si existe conexión.
+function checkNetworkConnection()
+{
+	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
+	wget --spider -q $OPENGNSYS_SERVER
+}
+
+# Obtener los parámetros de red de la interfaz por defecto.
 function getNetworkSettings()
 {
         local MAINDEV
 
- 	echoAndLog "getNetworkSettings(): Detecting default network parameters."
+ 	echoAndLog "$FUNCNAME(): Detecting default network parameters."
 	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
 	if [ -z "$MAINDEV" ]; then
  		errorAndLog "${FUNCNAME}(): Network device not detected."
@@ -525,7 +534,15 @@ fi
 
 pushd $WORKDIR
 
-# Detectar parámetros de red por defecto
+# Comprobar si hay conexión y detectar parámetros de red por defecto.
+checkNetworkConnection
+if [ $? -ne 0 ]; then
+	errorAndLog "Error connecting to server. Causes:"
+	errorAndLog " - Network is unreachable, review devices parameters."
+	errorAndLog " - You are inside a private network, configure the proxy service."
+	errorAndLog " - Server is temporally down, try agian later."
+	exit 1
+fi
 getNetworkSettings
 if [ $? -ne 0 ]; then
 	errorAndLog "Error reading default network settings."

@@ -71,6 +71,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #316	Error en opengnsys_update.sh al copiar archivos de servicios
 #335	Error en opengnsys_update.sh al descomprimir cliente
 #361	Actualizador debe aplicar cambios en la estructura de base de datos
+#365	Comprobar conectividad http y svn en el instalador
 
 Tickets genéricos resueltos:
 

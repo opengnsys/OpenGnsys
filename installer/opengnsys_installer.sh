@@ -39,11 +39,12 @@ esac
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
+OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://www.opengnsys.es/svn/branches/version1.0
+    SVN_URL=http://$OPENGNSYS_SERVER/svn/branches/version1.0
 fi
 
 WORKDIR=/tmp/opengnsys_installer
@@ -496,6 +497,14 @@ function svnExportCode()
 ###  Detectar red
 ############################################################
 
+# Comprobar si existe conexión.
+function checkNetworkConnection()
+{
+	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
+	wget --spider -q $OPENGNSYS_SERVER
+}
+
+# Obtener los parámetros de red de la interfaz por defecto.
 function getNetworkSettings()
 {
 	# Variables globales definidas:
@@ -1157,7 +1166,15 @@ pushd $WORKDIR
 # Detener servicios de OpenGnSys, si están activos previamente.
 [ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
-# Detectar parámetros de red por defecto
+# Comprobar si hay conexión y detectar parámetros de red por defecto.
+checkNetworkConnection
+if [ $? -ne 0 ]; then
+	errorAndLog "Error connecting to server. Causes:"
+	errorAndLog " - Network is unreachable, review devices parameters."
+	errorAndLog " - You are inside a private network, configure the proxy service."
+	errorAndLog " - Server is temporally down, try agian later."
+	exit 1
+fi
 getNetworkSettings
 if [ $? -ne 0 ]; then
 	errorAndLog "Error reading default network settings."
