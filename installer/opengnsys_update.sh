@@ -331,7 +331,7 @@ function updateInterfaceAdm ()
 		exit 1
 	fi 
 	chmod -R +x $INSTALL_TARGET/client/interfaceAdm 
-	chown :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
+	chown $OPENGNSYS_CLIENTUSER:$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	echoAndLog "${FUNCNAME}(): Admin interface updated successfully."
 } 
