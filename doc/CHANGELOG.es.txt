@@ -6,10 +6,13 @@ Lista de cambios incluidos en OpenGnSys 1.0
 -------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#64	Selección de aplicaciones de clonación
+#264	Error al crear la caché
+#286	Parámetro debug para el engine
 #291	Creación de imagenes desde el modo user
-#298	Tratamientos de bloqueos de imágenes para solucionar problemas de concurrencia
+#298	Tratamientos de bloqueos de imágenes para solucionar problemas de concurrencia (mejora)
 #305	Integración engine version 1.0
-#309	Integración create/restoreImage Trunk y Testing: .img
+#309	Integración create/restoreImage Trunk y Testing: extensión .img
 #337	Scripts cliente: reboot|poweroff sleep antes de llamar a Busybox (no se resolverá)
 #342	ogGetImageInfo() Partclone size MB GB
 #353	Bloqueos: fallos en la detección en ogCreateImage, ogRestoreImage, etc
@@ -18,11 +21,16 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #358	ogCreateCache e initCache: No comprueba si se está usando la cuarta partición (no se resolverá)
 
 Tickets resueltos en módulo OpenGnSys Client:
+#93	Gestionar una estructura de directorios Linux debootstrap para enlazarlo al Initrd
 #131	Generar paquetes deb para el cliente (no se resolverá)
+#162	Optimizar el uso del fichero-disco con particiones para su uso en entorno virtualizado (mejora)
 #163	Incluir en el cliente la clave autorizada rsa ssh del servidor
+#189	Añadir las variables de entorno y Engine en las consolas tty2-tty7 y remotas
 #243	Browser incluye terminal con letra monospace y barra de estado en UTF-8 (mejora)
-#303	Integracion proceso arranque cliente versión 1.0
-#304 	Integracion interface adm versión 1.0
+#288	Integración modulo netboot
+#294	Integración activacion wol del cliente
+#303	Integración proceso arranque cliente versión 1.0
+#304 	Integración interface adm versión 1.0
 #314 	SMB punto acceso 2nd FileSystem del cliente [tftpboot] [ogboot]
 #345	Importar "runtest" para la versión 1.0 (mejora)
 #334	OgClient en modo admin: problemas al escribir en el repo
@@ -46,7 +54,8 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #268	Erratas en texto de formularios
 #301	Integración modulos web versión 1.0
 #302	Integración base de datos version 1.0
-#306	Asistente Clonacion Particiones Remotas: no genera codigo
+#306	Asistente Clonacion Particiones Remotas no genera código
+#307	Asistente Deploy de Imagenes no muestra nombres de imágenes
 #310	Instalar: no genera las propiedades del repositorio por defecto en la consola (duplicado de #248)
 #338	Validación de formularios de la consola web
 #339	Añadir opción de apagado en cliente sin menú asociado (mejora)
@@ -96,6 +105,7 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 #184	tracker no gestiona el enjambre
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#91	Incorporar equipos desde fichero dhcp.conf
 #177	Consola web: No se pueden borrar usuarios
 #190	Error en incorporarordenadores.php
 #241	El cliente no responde en local con la nueva consola web
