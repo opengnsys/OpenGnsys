@@ -40,7 +40,7 @@ function ListarOrigenMaster($ip){
 			 $SelectHtml='<select name="PartOrigen"> <option value="">--Particion a Enviar--</option>';
 			$rs->Primero(); 
 			while (!$rs->EOF){
-				$SelectHtml.='<OPTION value="'.$rs->campos["PART"];
+				$SelectHtml.='<OPTION value="'.$rs->campos["PART"].'"';				
 				$SelectHtml.='>';
 				$SelectHtml.= $rs->campos["OS"].'</OPTION>';
 				$rs->Siguiente();
