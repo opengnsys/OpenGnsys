@@ -495,7 +495,7 @@ function updateOldClient()
 function updateClient()
 {
 	local DOWNLOADURL=http://www.opengnsys.es/downloads
-	local FILENAME=ogclient-1.0-lucid-32bit.tar.gz
+	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
 	local TMPFILE=/tmp/$FILENAME
 
 	echoAndLog "${FUNCNAME}(): Loading Client"
