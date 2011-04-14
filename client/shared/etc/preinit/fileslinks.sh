@@ -22,10 +22,10 @@ if [ -n "$OPENGNSYS" ]; then
     # Crear directorio de bloqueos
     mkdir -p /var/lock
 
-    # Directorio de tipos de letras para el browser.
+#    # Directorio de tipos de letras para el browser.
     QTDIR="/usr/local"
-    mkdir -p $QTDIR/lib
-    ln -fs $OGLIB/fonts $QTDIR/lib
+ #   mkdir -p $QTDIR/lib
+  #  ln -fs $OGLIB/fonts $QTDIR/lib
 
 else
     # FIXME Error: entorno de OpenGNSys no configurado.
