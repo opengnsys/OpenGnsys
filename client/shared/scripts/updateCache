@@ -22,13 +22,17 @@ fi
 REPOSITORIO=$1
 PROTOCOLO=$3
 OPTPROTOCOLO=$4
-echo $REPOSITORIO $PROTOCOLO $OPTPROTOCOLO
+REPOIP=$(ogGetRepoIp)
+echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 # Si el repositorio local CACHE no existe salimos.
 if ! $(ogFindCache >/dev/null); then
         ogRaiseError $OG_ERR_NOTFOUND "CACHE"
         exit $?
 fi
 
+#Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-
+#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
+ogUpdateCacheIsNecesary $1 $2 || exit 0
 
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
@@ -52,33 +56,35 @@ if [ $? != 0 ]; then
 fi
 
 
-echo "ogCopyFile $1 $2.torrent absolute $OGCAC$OGIMG"
-ogCopyFile $1 $2.torrent $OGCAC$OGIMG
-#TODO: comprobar que el tracker definido en el fichero es correcto.
+
+
 case "$PROTOCOLO" in
 	torrent | TORRENT )
-	#[ -z $OPTPROTOCOLO ] && OPTPROTOCOL=leecher:10
-	echo "ogTorrentStart CACHE $2.torrent $4"
-	ogTorrentStart CACHE $2.torrent $4
+		echo "ogCopyFile $1 $2.torrent absolute $OGCAC$OGIMG"
+		ogCopyFile $1 $2.torrent $OGCAC$OGIMG
+		#TODO: comprobar que el tracker definido en el fichero es correcto.
+    	#TODO comprobar que el fichero torrent está en cache
+		echo "ogTorrentStart CACHE $2.torrent $4"
+		ogTorrentStart CACHE $2.torrent $4
 	;;
 	multicast | MULTICAST )
-	echo "determinando puerto principal y auxiliar."
-	PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
-	let PORTAUX=$PORT+1
-	echo "comprobando que el servidor está activo"
-	if (nmap -n -sU -p $PORTAUX $repo | grep open)
-	then 
-	   ogMcastReceiverFile $PORT CACHE $2
-	else
-	   echo "solicita la apertura:  hose $repo 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
-	   hose $repo 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
-	   #echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
-	   sleep 30
-	   ogMcastReceiverFile $PORT CACHE $2	   
-	fi
+		echo "determinando puerto principal y auxiliar."
+		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
+		let PORTAUX=$PORT+1
+		echo "comprobando puerto $PORTAUX en $REPOIP (sesion multicast en puerto $PORT) "
+		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
+		then 
+	   		ogMcastReceiverFile $PORT CACHE $2
+		else
+	   		echo "solicita la apertura:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
+	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
+	   		sleep 30
+	   		ogMcastReceiverFile $PORT CACHE $2	   
+		fi
 	;;
 	unicast | UNICAST )
-	echo "unicast"
+		echo "unicast"
 	;;
 esac
 
