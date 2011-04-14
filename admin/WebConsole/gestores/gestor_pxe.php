@@ -71,7 +71,7 @@ $rs->Primero();
 			. $router . ":" 
 			. $netmask .":" 
 			. $hostname .":" 
-			. $netiface . ":none repo="
+			. $netiface . ":none ogrepo="
 			. $repo; 
 $rs->Cerrar();
 
@@ -137,7 +137,7 @@ while (!$rs->EOF)
 		elseif ($isinitrd > 0)
 		{
 		$append=$rs->campos["append"];
-		fwrite($gestion, $append . " repo=" . $repo . " \n");
+		fwrite($gestion, $append . " ogrepo=" . $repo . " \n");
 		}
 		else
 		{
