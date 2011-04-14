@@ -71,17 +71,28 @@ case "$PROTOCOLO" in
 		echo "determinando puerto principal y auxiliar."
 		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
 		let PORTAUX=$PORT+1
+        #TODO: ticket 379
+		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
+		sleep $NUMBER
+		#FIN TODO
 		echo "comprobando puerto $PORTAUX en $REPOIP (sesion multicast en puerto $PORT) "
 		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 		then 
 	   		ogMcastReceiverFile $PORT CACHE $2
 		else
+		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
 	   		echo "solicita la apertura:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
 	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
-	   		sleep 30
-	   		ogMcastReceiverFile $PORT CACHE $2	   
-		fi
+	   		sleep 10
+	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
+	   		then 
+	   			ogMcastReceiverFile $PORT CACHE $2	   
+			else
+			    echo "la peticion ha fallado: hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+	   		    exit 1
+	   		fi
+		fi	
 	;;
 	unicast | UNICAST )
 		echo "unicast"

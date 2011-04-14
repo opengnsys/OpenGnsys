@@ -19,7 +19,7 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben 2 parámetros.
 if [ $# -ne 2 ]; then
-    echo "$PROG Error: Formato: $PROG fichero|nombreImagen datosMulticast" >&2
+    echo "$PROG Error: Formato: $PROG fichero|nombreImagen datosMulticast" 
     exit 1
 fi
 
@@ -34,7 +34,7 @@ else
     FICHIMG="$FICH"
 fi
 if [ ! -f "$FICHIMG" ]; then
-    echo "$PROG Error: Fichero \"$FICH\" no accesible" >&2
+    echo "$PROG Error: Fichero \"$FICH\" no accesible" 
     exit 2
 fi
 
@@ -50,8 +50,8 @@ PARAMS=$(echo $2 | \
 		')
 read -e PORTBASE METHOD ADDRESS BITRATE NCLIENTS MAXTIME <<< $PARAMS
 if [ -z "$MAXTIME" ]; then
-    echo "$PROG Error: Datos de sesión incorrectos: \"$2\"" >&2
-    exit 1
+    echo "$PROG Error: Datos de sesión incorrectos: \"$2\"" 
+    exit 3
 fi
 
 # Valores estandar no configurables.
@@ -62,6 +62,6 @@ which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'"
 ##### ADV v. 1.0 23/02/2011
 #version 0.10 # udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG"
 #/opt/opengnsys/bin/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" --log /opt/opengnsys/log/ogAdmRepoMcast.log
-/opt/opengnsys/bin/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" >> /opt/opengnsys/log/ogAdmRepoMcast.log
+/opt/opengnsys/bin/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
 
 ##### ADV v. 1.0  23/02/2011
