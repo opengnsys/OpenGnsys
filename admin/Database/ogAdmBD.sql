@@ -976,7 +976,7 @@ INSERT INTO `itemboot` (`label`, `kernel`, `append`) VALUES
 ('11', 'KERNEL syslinux/chain.c32', 'APPEND hd0 1'),
 ('12', 'KERNEL syslinux/chain.c32', 'APPEND hd0 2'),
 ('ogClientUser', 'KERNEL ogclient/ogvmlinuz', 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false'),
-('ogClientAdmin', 'KERNEL ogclient/ogvmlinuz', 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true'),
+('ogClientAdmin', 'KERNEL ogclient/ogvmlinuz', 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true'),
 ('ogInitrdUser', 'KERNEL linux', 'APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=user '),
 ('ogInitrdAdmin', 'KERNEL linux', 'APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin ');
 

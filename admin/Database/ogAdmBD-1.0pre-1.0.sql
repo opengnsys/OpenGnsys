@@ -19,3 +19,6 @@ ADD PRIMARY KEY ( `idcomando` , `descripcion` ) ;
 UPDATE `ogAdmBD`.`comandos` SET `activo` = '0' WHERE `comandos`.`idcomando` =10;
 
 UPDATE `ogAdmBD`.`asistentes` SET `idcomando` = '8' ;
+
+
+UPDATE `ogAdmBD`.`itemboot` SET `append` = 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true' WHERE `itemboot`.`label` = 'ogClientAdmin';
