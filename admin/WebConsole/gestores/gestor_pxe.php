@@ -65,7 +65,7 @@ $rs->Primero();
 	$router=$rs->campos["router"];
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
-	$infohost=" IP=" 
+	$infohost=" ip=" 
 			. $ip . ":"
 			. $repo .":" 
 			. $router . ":" 
