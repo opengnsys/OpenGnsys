@@ -21,5 +21,9 @@ case $PARM1 in
 		MCASTOPT=$PARM3
 		echo "/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT" >> $REPOLOG
 		/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT >> $REPOLOG
+		echo $? >> $REPOLOG
+	;;
+	default)
+	    echo "Solicitud con parametros: -  $PARM  - no realizada: No registrada o con errores" >> $REPOLOG
 	;;
 esac
