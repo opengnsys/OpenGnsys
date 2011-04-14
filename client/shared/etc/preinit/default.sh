@@ -1,4 +1,4 @@
-#!/opt/opengnsys/bin/bash
+#!/bin/bash
 
 # Cargar entorno de OpenGnSys
 set -a
