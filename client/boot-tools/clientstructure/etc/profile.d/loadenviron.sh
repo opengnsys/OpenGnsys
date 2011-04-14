@@ -57,6 +57,9 @@ if [ -d $OPENGNSYS ]; then
         	source $i 
     	done
     fi
+    
+    source /tmp/net-eth* 2>/dev/null
+    
     # Añadir dependencia de arquitectura
     ARCH=$(ogGetArch)
     if [ -n "$ARCH" ]; then

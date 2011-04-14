@@ -294,7 +294,7 @@ IP=$IPOPTS
                         break;
                 fi
 
-                case ${IP} in
+            case ${IP} in
 		    none|off)
 			# Do nothing
 			;;

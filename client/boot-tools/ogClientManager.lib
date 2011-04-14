@@ -1,7 +1,7 @@
 
 ogClientVar()
 {
-export SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/installer/ogClient
+export SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 export SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 export SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 
@@ -232,9 +232,16 @@ cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/lib/fonts
 mkdir -p $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/
 mkdir -p $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/
 mkdir -p $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/
-ln -fs $OGCLIENTMOUNT/usr/local/lib/fonts /usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts
-ln -fs $OGCLIENTMOUNT/usr/local/lib/fonts /usr/local/QtEmbedded-4.6.2/lib/fonts
-ln -fs $OGCLIENTMOUNT/usr/local/lib/fonts /usr/local/QtEmbedded-4.6.3/lib/fonts
+#ln -fs $OGCLIENTMOUNT/usr/local/lib/fonts /usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts
+#ln -fs $OGCLIENTMOUNT/usr/local/lib/fonts /usr/local/QtEmbedded-4.6.2/lib/fonts
+#ln -fs $OGCLIENTMOUNT/usr/local/lib/fonts /usr/local/QtEmbedded-4.6.3/lib/fonts
+cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts 
+cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/fonts 
+cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/fonts
+
+
+
+
 if [ $? -ne 0 ]
 then 
 	errorAndLog "$FUNCNAME(): Linking Browser fonts : ERROR"

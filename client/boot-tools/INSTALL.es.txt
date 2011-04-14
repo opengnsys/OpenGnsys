@@ -4,19 +4,20 @@
 1. Comprobar la conexión a internet, sobre todo si usas proxy. El hecho de que te funcione apt-get no significa que tengas el proxy configurado.
 1. Descargar del subversion la estrucutura del cliente.
 
-# reubicacion al trunk/client/boot
+# reubicacion al trunk/client/boot-tools
 
 Proceso:
 0. Si ya tenemos un /var/lib/tftpboot/ogclient lo renombramos por si acaso.
 1. Descargar del subversion la rama ogClient.
 3. Ejecutar el instalador: 
 
+URLSVNBASE="http://www.opengnsys.es/svn/branches/version1.0/client"
 mv /opt/opengnsys/tftpboot/ogclient/ /opt/opengnsys/tftpboot/ogclientTrunk;
-svn checkout http://www.opengnsys.es/svn/branches/ogClient /tmp/opengnsys_installer/opengnsys/installer/ogClient;
-svn checkout http://www.opengnsys.es/svn/branches/version1.0/client/shared/ /tmp/opengnsys_installer/opengnsys/client/shared;
-svn checkout http://www.opengnsys.es/svn/branches/version1.0/client/engine/ /tmp/opengnsys_installer/opengnsys/client/engine;
+svn checkout ${URLSVNBASE}/boot-tools /tmp/opengnsys_installer/opengnsys/client/boot-tools;
+svn checkout ${URLSVNBASE}/shared/ /tmp/opengnsys_installer/opengnsys/client/shared;
+svn checkout ${URLSVNBASE}/engine/ /tmp/opengnsys_installer/opengnsys/client/engine;
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
-/tmp/opengnsys_installer/opengnsys/installer/ogClient/ogClientGeneratorV2.sh;
+/tmp/opengnsys_installer/opengnsys/client/boot-tools/ogClientGeneratorV2.sh;
 
 
 

@@ -41,8 +41,11 @@ mountroot ()
 	. /scripts/functions
 	. /scripts/ogfunctions
 
+	sleep 2
+
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before get OG variables: y/N "
     [ $? == 0 ] && sh || echo " "
+
 
 	set -a
 	log_success_msg "Checking kernel parameters"

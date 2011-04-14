@@ -7,7 +7,7 @@
 #::askfirst:/bin/sh
 # Start an "askfirst" shell on /dev/tty2-4
 #tty1::respawn:/sbin/getty 38400 tty1
-tty1::respawn:/opt/opengnsys/etc/preinit/defaultTESTING.sh
+tty1::respawn:/opt/opengnsys/etc/preinit/default.sh
 tty2::respawn:/sbin/getty 38400 tty2
 tty3::respawn:/sbin/getty 38400 tty3
 tty4::respawn:/sbin/getty 38400 tty4

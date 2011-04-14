@@ -156,7 +156,7 @@ ogClient2ndSqfs
 
 ##################### FASE 9. algunos detallas del pxe
 #dejamos ficheros de ejemplo para el pxe y el nfs
-ogClientConfpxe
+#ogClientConfpxe
 ##################### FIN FASE 9. algunos detallas del pxe
 
 
