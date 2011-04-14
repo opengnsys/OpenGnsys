@@ -242,7 +242,6 @@ case "$TYPE" in
 esac
 }
 
-function ogInfoCache () {
 #/**  @function ogInfoCache: @brief muestra la informacion de la CACHE.
 #@param  sin parametros
 #@return  texto que se almacena en $IP.-InfoCache.  punto_montaje, tama?oTotal, TamanioOcupado, TaminioLibre, imagenes dentro de la cahce
@@ -251,6 +250,7 @@ function ogInfoCache () {
 #@attention
 #@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
 #*/
+function ogInfoCache () {
 if ogMountCache
 then
 	info=`df -h | grep $OGCAC`
