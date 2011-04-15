@@ -17,7 +17,7 @@ Proceso de instalación
 2. Ejecutar el instalador: 
 
 mv /opt/opengnsys/tftpboot/ogclient /opt/opengnsys/tftpboot/ogclient-old;
-svn checkout http://www.opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys;
+svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys;
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 /tmp/opengnsys_installer/opengnsys/client/boot-tools/ogClientGeneratorV2.sh;
 
