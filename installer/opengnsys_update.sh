@@ -23,7 +23,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://www.opengnsys.es/svn/trunk
+    SVN_URL="http://www.opengnsys.es/svn/tags/opengnsys-0.10"
     DEPS="$DEPS subversion"
 fi
 
