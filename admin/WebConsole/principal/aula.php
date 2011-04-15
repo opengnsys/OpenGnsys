@@ -111,6 +111,13 @@ $XMLcontextual=ContextualXMLComandos($LITAMBITO_AULAS,$AMBITO_AULAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_ORDENADORES,$AMBITO_ORDENADORES);
 echo $flotante->CreaMenuContextual($XMLcontextual);
+
+// Crea contextual de los asistentes para los distintosn ámbitos
+$XMLcontextual=ContextualXMLAsistentes($LITAMBITO_AULAS,$AMBITO_AULAS);
+echo $flotante->CreaMenuContextual($XMLcontextual);
+$XMLcontextual=ContextualXMLAsistentes($LITAMBITO_ORDENADORES,$AMBITO_ORDENADORES);
+echo $flotante->CreaMenuContextual($XMLcontextual);
+
 ?>
 <SCRIPT language="javascript">
 	Sondeo();
@@ -300,6 +307,8 @@ function ContextualXMLAulas(){
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
+	
+
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="actualizar_ordenadores(this)"';
@@ -329,6 +338,12 @@ function ContextualXMLAulas(){
 	$layerXML.=' subflotante="flo_comandos_'.$LITAMBITO_AULAS.'"';
 	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
 	$layerXML.=' textoitem='.$TbMsg[5];
+	$layerXML.='></ITEM>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' subflotante="flo_asistentes_'.$LITAMBITO_AULAS.'"';
+	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
+	$layerXML.=' textoitem=Asistentes';
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<ITEM';
@@ -419,6 +434,18 @@ function ContextualXMLOrdenadores(){
 	
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_log('.$AMBITO_ORDENADORES.')"';
+	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
+	$layerXML.=' textoitem="Log"';
+	$layerXML.='></ITEM>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_log_seguimiento('.$AMBITO_ORDENADORES.')"';
+	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
+	$layerXML.=' textoitem="Log_seguimiento"';
+	$layerXML.='></ITEM>';
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="actualizar_ordenadores()"';
@@ -455,6 +482,13 @@ function ContextualXMLOrdenadores(){
 	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
 	$layerXML.=' textoitem='.$TbMsg[5];
 	$layerXML.='></ITEM>';
+	
+	$layerXML.='<ITEM';
+	$layerXML.=' subflotante="flo_asistentes_'.$LITAMBITO_ORDENADORES.'"';
+	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
+	$layerXML.=' textoitem=Asistentes';
+	$layerXML.='></ITEM>';
+	
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="confirmarprocedimiento('.$AMBITO_ORDENADORES.')"';
@@ -518,6 +552,39 @@ function ContextualXMLComandos($litambito,$ambito){
 	$layerXML.='</MENUCONTEXTUAL>';
 	$prelayerXML='<MENUCONTEXTUAL';
 	$prelayerXML.=' idctx="flo_comandos_'.$litambito.'"';
+	$prelayerXML.=' maxanchu='.$maxlongdescri*7;
+	$prelayerXML.=' clase="menu_contextual"';
+	$prelayerXML.='>';
+	$finallayerXML=$prelayerXML.$layerXML;
+	return($finallayerXML);
+	}
+}
+
+
+function ContextualXMLAsistentes($litambito,$ambito){
+	global $cmd;
+ 	$maxlongdescri=0;
+	$rs=new Recordset; 
+	$cmd->texto="SELECT idcomando,descripcion,pagina,gestor,funcion 
+							FROM asistentes 
+							WHERE activo=1 AND aplicambito & ".$ambito.">0 
+							ORDER BY descripcion";
+	$rs->Comando=&$cmd; 
+	if ($rs->Abrir()){
+		$layerXML="";
+		$rs->Primero(); 
+		while (!$rs->EOF){
+			$layerXML.='<ITEM';
+			$layerXML.=' alpulsar="confirmarcomando('."'".$ambito."'".','.$rs->campos["idcomando"].',\''.$rs->campos["descripcion"].'\',\''.$rs->campos["pagina"]. '\',\''.$rs->campos["gestor"]. '\',\''.$rs->campos["funcion"]. '\')"';
+			$layerXML.=' textoitem="'.$rs->campos["descripcion"].'"';
+			$layerXML.='></ITEM>';
+			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la Descripción de mayor longitud
+				$maxlongdescri=strlen($rs->campos["descripcion"]);
+			$rs->Siguiente();
+		}
+	$layerXML.='</MENUCONTEXTUAL>';
+	$prelayerXML='<MENUCONTEXTUAL';
+	$prelayerXML.=' idctx="flo_asistentes_'.$litambito.'"';
 	$prelayerXML.=' maxanchu='.$maxlongdescri*7;
 	$prelayerXML.=' clase="menu_contextual"';
 	$prelayerXML.='>';

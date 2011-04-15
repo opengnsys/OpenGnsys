@@ -1,0 +1,157 @@
+#!/bin/bash
+# Descripcion: Crea un test no destructivo de la libreria Disk.lib conficurandolo
+#	para un cliente concreto.
+# 	Se ejecuta en el servidor y el test creado se utiliza en el cliente
+#	Los datos los toma de la base de administración. 
+# Uso: creaTestDisk1 NombreCliente
+#
+# Falta: la bd no tiene información de las particiones lógicas (el script sí esta preparado para ellas)
+#	la bd no tiene datos del tamaño del disco
+
+
+# Variables.
+PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+TESTDIR="$OPENGNSYS/client/lib/engine/tests/NoModify"
+TESTFILE="$TESTDIR/Disk1-$1.shtest "
+# Control básico de errores.
+if [ $# -ne 1 ]; then
+        echo "$PROG: Error de ejecución"
+        echo "Formato: $PROG NOMBRE_PC"
+        exit 1
+fi
+
+# Obtener datos de acceso a la Base de datos.
+source $SERVERCONF
+
+# Comprobar si se recibe nombre de aula o de equipo.
+PARTICIONES=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+   "SELECT ordenadores_particiones.numpar, tipospar.tipopar, ordenadores_particiones.tamano 
+	FROM tipospar INNER JOIN ordenadores_particiones INNER JOIN ordenadores 
+	WHERE tipospar.codpar=ordenadores_particiones.codpar 
+	AND ordenadores.idordenador=ordenadores_particiones.idordenador 
+	AND nombreordenador='$1' 
+	ORDER By ordenadores_particiones.numpar;")
+# Si la cadena esta vacia, error
+if [ -z "$PARTICIONES" ]; then
+	echo "El equipo $1 no existe en la base de datos"
+	exit 2
+fi
+
+# Ejemplo para añadir partitiones lógicas
+#PARTICIONES="$PARTICIONES 5 LINUX-SWAP 1999999"
+PRI=$( echo ${PARTICIONES%%\ 5\ *}|awk '{print $2"_"$3" "$5"_"$6" "$8"_"$9" "$11"_"$12}' |sed s/\ _//g |sed s/\ //g)
+
+if $(echo $PARTICIONES |grep " 5 " >/dev/null); then
+   LOG=$( echo ${PARTICIONES##*\ 5\ }|awk '{print $1"_"$2" "$4"_"$5" "$7"_"$8" "$10"_"$11" "}' |sed s/\ _//g |sed s/\ //g)
+else
+   LOG=""
+fi
+AUX=$(echo  $PARTICIONES| wc -w)
+let NUMPART=AUX/3
+P1SIZE=$(echo $PARTICIONES|cut -d\  -f3)
+P1TYPE=$(echo $PARTICIONES|cut -d\  -f2)
+case "$P1TYPE" in
+    EMPTY)      P1ID=0  ;;
+    FAT12)      P1ID=1  ;;
+    EXTENDED)   P1ID=5  ;;
+    FAT16)      P1ID=6  ;;
+    NTFS|EXFAT) P1ID=7  ;;
+    FAT32)      P1ID=b  ;;
+    HFAT12)     P1ID=11 ;;
+    HFAT16)     P1ID=16 ;;
+    HNTFS)      P1ID=17 ;;
+    HFAT32)     P1ID=1b ;;
+    LINUX-SWAP) P1ID=82 ;;
+    EXT[234]|REISERFS|REISER4|XFS|JFS)
+                P1ID=83 ;;
+    LINUX-LVM)  P1ID=8e ;;
+    SOLARIS)    P1ID=bf ;;
+    CACHE)      P1ID=ca ;;
+    LINUX-RAP1ID) P1ID=fd ;;
+    *)          P1ID="" ;;
+esac
+
+cat > $TESTFILE << EOF
+Ejemplo de test funciones de particionado no destrutivo
+=======================================================
+
+# Desmontamos antes de empezar 
+$ ogUnmountAll 1 2>/dev/null
+
+$ ogUnmountCache 2>/dev/null
+
+# Cambio de formato
+
+$ ogDevToDisk /dev/sda
+1 
+
+$ ogDevToDisk /dev/sda1
+1 1
+
+$ ogDiskToDev
+/dev/sda
+
+$ ogDiskToDev 1
+/dev/sda
+
+$ ogDiskToDev 1 1
+/dev/sda1
+
+$ ogFsToId NTFS
+7
+
+$ ogFsToId EXT4
+83
+
+
+# Tamaño de disco  (cuando haya informacion en la base de datos)
+
+#$ ogGetDiskSize 1
+#312571224
+
+# Tamaño de la particion
+
+$ ogGetPartitionSize 1 1
+$P1SIZE
+
+# Información de  las particiones
+$ ogListPartitions 1 | tr : _ | sed s/EXT[234]/LINUX/g | sed s/\ //g
+$PRI$LOG
+$ ogListPrimaryPartitions 1 | tr : _ | sed s/EXT[234]/LINUX/g | sed s/\ //g
+$PRI
+
+$ ogListLogicalPartitions 1 | tr : _ | sed s/EXT[234]/LINUX/g
+$LOG
+
+$ ogGetPartitionsNumber
+$NUMPART
+
+# Partición activa
+
+$ ogSetPartitionActive 1 2 >/dev/null
+$ ogGetPartitionActive 1
+2
+
+$ ogSetPartitionActive 1 1 >/dev/null
+$ ogGetPartitionActive 1
+1
+
+
+# Tipo de particiones
+
+$ ogGetPartitionId 1 1 
+$P1ID
+
+
+# Montamos la cache al final
+$ ogMountCache >/dev/null 2>&1
+
+
+EOF
+
+
+
+echo "Test creado en $TESTFILE"
+echo "Las particiones logicas hay que incluirlas a mano, porque no hay información de las mismas en la base de datos."

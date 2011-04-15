@@ -1,0 +1,4 @@
+deb http://ftp.us.debian.org/debian lenny main contrib non-free
+
+deb http://security.debian.org/ lenny/updates main contrib non-free
+deb-src http://security.debian.org/ lenny/updates main contrib non-free

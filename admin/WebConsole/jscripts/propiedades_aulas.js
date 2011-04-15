@@ -84,24 +84,37 @@ function confirmar(op){
 //	Comprobar_datos 
 //________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.nombreaula.value=="") {
-		alert(TbMsg[0]);
-		document.fdatos.nombreaula.focus();
-		return(false);
+	function validate (field, validator, msgi) {
+		if (!validator (field.value)) {
+			alert(TbMsg[msgi]);
+			validation_highlight (field);
+			return false;
+		}
+		return true;
 	}
-	if (document.fdatos.puestos.value=="" || document.fdatos.puestos.value=="0") {
-		alert(TbMsg[1]);
-		document.fdatos.puestos.focus();
-		return(false);
-	}
+
 	if (parseInt(document.fdatos.horaresevini.value)>parseInt(document.fdatos.horaresevfin.value)) {
 		alert(TbMsg[3]);
-		document.fdatos.horaresevini.focus();
+		validation_highlight (document.fdatos.horaresevini);
+		validation_highlight (document.fdatos.horaresevfin);
 		return(false);
 	}
 
+	var form = document.fdatos;
+	return validate (form.nombreaula, validate_notnull, 0) &&
+	       validate (form.puestos, validate_number_notnull, 1) &&
+	       validate (form.router, validate_ipadress_notnull, 4) &&
+		   validate (form.netmask, validate_ipadress_notnull, 5) && 
+	       validate (form.modp2p, validate_notnull, 6) &&
+		   validate (form.timep2p, validate_number_notnull, 7) &&
+		   validate (form.modomul, validate_notnull, 8) &&
+		   validate (form.ipmul, validate_ipadress_notnull, 9) &&
+		   validate (form.pormul, validate_notnull, 10) &&
+	       validate (form.velmul, validate_number_notnull, 11);
+
 	return(true);
 }
+
 //________________________________________________________________________________________________________
 	function vertabla_horas(ohora){
 		currentHora=ohora;

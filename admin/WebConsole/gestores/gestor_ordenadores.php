@@ -31,6 +31,10 @@ $idmenu=0;
 $idprocedimiento=0;
 $idimagen=0;
 $cache=0;
+#### ADV
+$netiface="";
+$netdriver="";
+### ADV
 
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
@@ -47,6 +51,9 @@ if (isset($_POST["idprocedimiento"])) $idprocedimiento=$_POST["idprocedimiento"]
 if (isset($_POST["cache"])) $cache=$_POST["cache"];
 
 if(empty($cache)) $cache=0;
+
+if (isset($_POST["netiface"])) $netiface=$_POST["netiface"];
+if (isset($_POST["netdriver"])) $netdriver=$_POST["netdriver"];
 
 $tablanodo=""; // Arbol para nodos insertados
 //________________________________________________________________________________________________________
@@ -138,6 +145,8 @@ function Gestiona(){
 	global $idmenu;
 	global $idprocedimiento;
 	global $cache;
+	global $netiface;
+	global $netdriver;
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -156,12 +165,15 @@ function Gestiona(){
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idprocedimiento",$idprocedimiento,1);
 	$cmd->CreaParametro("@cache",$cache,1);
+	$cmd->CreaParametro("@netiface",$netiface,0);
+	$cmd->CreaParametro("@netdriver",$netdriver,0);
 	
+
 	switch($opcion){
 		case $op_alta :
 			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
-			idmenu,idproautoexec,idaula,grupoid,cache) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
-			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache)";
+			idmenu,idproautoexec,idaula,grupoid,cache,netiface,netdriver) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
+			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache,@netiface,@netdriver)";
 
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
@@ -176,7 +188,7 @@ function Gestiona(){
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache
+			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache,netiface=@netiface,netdriver=@netdriver 
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;

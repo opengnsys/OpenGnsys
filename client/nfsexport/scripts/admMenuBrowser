@@ -1,3 +1,0 @@
-#!/bin/bash
-RETORNO=$(menuBrowser $* 2>/dev/null) || exit $?
-exit 0

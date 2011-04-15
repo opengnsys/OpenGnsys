@@ -3,10 +3,19 @@
 #
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE:
 # $1 disco
-# $2 par=Número de particion
-# $3 Nombre canónico de la imagen
-# $4 Dirección del repositorio
+# $2 par=Nï¿½mero de particion
+# $3 Nombre canï¿½nico de la imagen
+# $4 Direcciï¿½n del repositorio
 #_______________________________________________________________________________________________________________________________
 
-ogRestoreImage REPO $3 $1 $2 UNICAST
+echo $* >>  $OGLOGFILE
+echo $* >>  $OGLOGFILE
+if [ -f createImage$ogengine ]
+then
+	restoreImage$ogengine REPO $3 $1 $2 UNICAST &>> $OGLOGFILE || exit $?
+else
+	restoreImage REPO $3 $1 $2 UNICAST &>> $OGLOGFILE || exit $?
+fi
+
+
 

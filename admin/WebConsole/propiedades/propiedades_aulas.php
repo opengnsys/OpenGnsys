@@ -47,6 +47,7 @@ else
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
+	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_aulas.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_aulas_'.$idioma.'.js"></SCRIPT>'?>
@@ -167,7 +168,62 @@ else
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----ADV  -------------------------------------router-------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
+			<TH align=center&nbsp;><?echo $TbMsg[28]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$router.'</TD>';
+				else
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=router style="width:100" type=text value='.$router.'></TD>';
+			?>
+		</TR>				
+<!-----ADV -----------------------------netmask--------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center&nbsp;><?echo $TbMsg[29]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$netmask.'</TD>';
+				else
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=netmask style="width:100" type=text value='.$netmask.'></TD>';
+			?>
+		</TR>				
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+<!-----ADV --------------------------p2pmodo------------------------------------------------------------------------------------------------------------------------------------------------------>
+		<TR>
+			<TH align=center&nbsp;><?echo $TbMsg[26]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$modp2p.'</TD>';
+				else
+					echo '<TD colspan=3>';
+					$p2pmetodos="peer=peer".chr(13);
+					$p2pmetodos.="leecher=leecher".chr(13);
+					$p2pmetodos.="seeder=seeder";
+					echo HTMLCTESELECT($p2pmetodos,"modp2p","estilodesple","",$modp2p,100).'</TD>';
+			?>
+		</TR>				
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+<!----------------------------p2p tiempo semillero--------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<TR>
+			<TH align=center&nbsp;><?echo $TbMsg[27]?>&nbsp;</TD>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$timep2p.'</TD>';
+				else
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=timep2p style="width:100" type=text value='.$timep2p.'></TD>';
+			?>
+		</TR>				
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+					
+
+
+
+
+	<TR>
 			<TH align=center&nbsp;><?echo $TbMsg[22]?>&nbsp;</TD>
 			<?
 				if ($opcion==$op_eliminacion){
@@ -201,7 +257,15 @@ else
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$pormul.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=pormul style="width:100" type=text value='.$pormul.'></TD>';
+					echo '<TD colspan=3>';
+					$pormulmetodos="9000=9000".chr(13);
+					$pormulmetodos.="9002=9002".chr(13);
+					$pormulmetodos.="9004=9004".chr(13);
+					$pormulmetodos.="9006=9006".chr(13);
+					$pormulmetodos.="9010=9010".chr(13);
+					$pormulmetodos.="9012=9012".chr(13);
+					$pormulmetodos.="9014=9014";
+					echo HTMLCTESELECT($pormulmetodos,"pormul","estilodesple","",$pormul,100).'</TD>';
 			?>
 		</TR>				
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -265,7 +329,7 @@ else
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$cache.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cache style="width:100" type=text value='.$cache.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cache style="width:100" type=text  readonly value=0></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -314,7 +378,12 @@ function TomaPropiedades($cmd,$ida)
 	global $gidrepositorio;
 	global $gidperfilhard;
 	global $gcache;
-	
+###################### ADV	
+	global $router;
+	global $netmask;
+	global $modp2p;
+	global $timep2p;
+###################### ADV
 	global $modomul;
 	global $ipmul;
 	global $pormul;
@@ -332,6 +401,12 @@ function TomaPropiedades($cmd,$ida)
 	$horaresevini=0;
 	$horaresevfin=0;
 	$grupoid=0;	
+## ADV #########################################
+	$router=0;
+	$netmask=0;
+    $modp2p=0;
+	$timep2p=0;
+### ADV	 ########################################
 	$modomul=0;
 	$ipmul=0;
 	$pormul=0;
@@ -348,6 +423,8 @@ function TomaPropiedades($cmd,$ida)
 	$gidrepositorio=0;
 	$gidperfilhard=0;
 	$gcache=0;
+	
+
 	
 	$rs=new Recordset; 
 	$cmd->texto="SELECT count( * ) AS numordenadores, aulas.* , 
@@ -387,6 +464,12 @@ function TomaPropiedades($cmd,$ida)
 		$ipmul=$rs->campos["ipmul"];
 		$pormul=$rs->campos["pormul"];
 		$velmul=$rs->campos["velmul"];
+#################### ADV		
+		$router=$rs->campos["router"];
+		$netmask=$rs->campos["netmask"];
+		$modp2p=$rs->campos["modp2p"];
+		$timep2p=$rs->campos["timep2p"];
+###################### ADV
 
 		$ordenadores=$rs->campos["numordenadores"];
 		$idmenu=$rs->campos["idmenus"];

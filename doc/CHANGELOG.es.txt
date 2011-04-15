@@ -2,11 +2,133 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
-Lista de cambios que serán incluidos en OpenGnSys 0.10
-------------------------------------------------------
+Lista de cambios incluidos en OpenGnSys 1.0
+-------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#64	Selección de aplicaciones de clonación
+#264	Error al crear la caché
+#286	Parámetro debug para el engine
+#291	Creación de imagenes desde el modo user
+#298	Tratamientos de bloqueos de imágenes para solucionar problemas de concurrencia (mejora)
+#305	Integración engine version 1.0
+#309	Integración create/restoreImage Trunk y Testing: extensión .img
+#337	Scripts cliente: reboot|poweroff sleep antes de llamar a Busybox (no se resolverá)
+#342	ogGetImageInfo() Partclone size MB GB
+#353	Bloqueos: fallos en la detección en ogCreateImage, ogRestoreImage, etc
+#354	Bloqueos mejoras: funciones repetidas (no se resolverá)
+#355	Error al cambiar partición de NTFS a EXT[234]
+#358	ogCreateCache e initCache: No comprueba si se está usando la cuarta partición (no se resolverá)
+#369	Reducir posibles errores en transferencia multicast
+
+Tickets resueltos en módulo OpenGnSys Client:
+#93	Gestionar una estructura de directorios Linux debootstrap para enlazarlo al Initrd
+#131	Generar paquetes deb para el cliente (no se resolverá)
+#162	Optimizar el uso del fichero-disco con particiones para su uso en entorno virtualizado (mejora)
+#163	Incluir en el cliente la clave autorizada rsa ssh del servidor
+#189	Añadir las variables de entorno y Engine en las consolas tty2-tty7 y remotas
+#243	Browser incluye terminal con letra monospace y barra de estado en UTF-8 (mejora)
+#288	Integración modulo netboot
+#294	Integración activacion wol del cliente
+#303	Integración proceso arranque cliente versión 1.0
+#304 	Integración interface adm versión 1.0
+#314 	SMB punto acceso 2nd FileSystem del cliente [tftpboot] [ogboot]
+#345	Importar "runtest" para la versión 1.0 (mejora)
+#334	OgClient en modo admin: problemas al escribir en el repo
+#336	Regenerar el cliente ogclient-1.0-lucid-32bit.tar.gz
+#360	Importar herramientas de generación del cliente desde la rama ogClient (mejora)
+#368	Generar nuevo cliente como boot-tools
+
+Tickets resueltos en módulo OpenGnSys Server:
+#350	ogAdmAgent no se inicia
+
+Tickets resueltos en módulo OpenGnSys Repository Server:
+#188	Al restaurar por torrent el BitFile no se crea siempre
+#300	Integración binarios del repo
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#126	Integración de consola Web con bittorent (mejora)
+#138	Configurar parámetros de red en cliente
+#185	Aproximación a la gestión log de los clientes (mejora)
+#248	La consola web no muestra datos del repositorio hasta que no se asigna
+#258	Error al eliminar un perfil de software
+#266	Información unidades en tamaño de la caché
+#268	Erratas en texto de formularios
+#301	Integración modulos web versión 1.0
+#302	Integración base de datos version 1.0
+#306	Asistente Clonacion Particiones Remotas no genera código
+#307	Asistente Deploy de Imagenes no muestra nombres de imágenes
+#310	Instalar: no genera las propiedades del repositorio por defecto en la consola (duplicado de #248)
+#338	Validación de formularios de la consola web
+#339	Añadir opción de apagado en cliente sin menú asociado (mejora)
+#349	Botón de confirmación en gestor de arranque
+#359	Ocultar los comandos inacabados en la consola web
+#363	Asistente particionado no permite valores personalizados para la caché
+#364	Asistente particionado no recupera valores iniciales si se pulsa en personalizar
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#299	Instalador para la versión 1.0
+#312	instalador: torrent-tracker no se se instala
+#313	Instalador: no genera la estrucutra para el cliente
+#316	Error en opengnsys_update.sh al copiar archivos de servicios
+#335	Error en opengnsys_update.sh al descomprimir cliente
+#361	Actualizador debe aplicar cambios en la estructura de base de datos
+#365	Comprobar conectividad http y svn en el instalador
+
+Tickets genéricos resueltos:
+#362	Convertir versión 1.0 en rama principal de desarrollo
+
+
+Lista de cambios incluidos en OpenGnSys 0.10
+--------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#182	Clonación remota partición a partición
+#257	ogCreatePartitions: Al crear o modificar las particiones desaparece la cache
+#261	restoreImage de un XP cambia usuario inicio sesión a HOSTNAME
+#269	No crea correctamente la imagen con Partclone en Pentium IV
+#271	Multicast ttl enrutadores Cisco
+#276	Error de CRC al restaurar imágenes con Partclone
+#292	Error de CRC al restaurar o crear imagen (duplicado de #276)
+#290	ogReduceFs en Ext[234]
+#293	createImageTesting incluye el redimensionado de la particion origen pero luego no la expande
+#297	Error al detectar tipo de partición Linux marcada como activa
+
+Tickets resueltos en módulo OpenGnSys Client:
+#112	Problema al arrancar Windows en discos SATA2
+#237	Sustituir Partimage
+#250	En ocasiones el cliente no arranca el browser gráfico
+#255	ogClient: Si falla alguna comprobación inicial, se para el ogClient
+#267	Cliente no arranca con CD en la primera unidad óptica (no se resolverá)
+#275	Generador de cliente Initrd no detecta versión de Ubuntu
+
+Tickets resueltos en módulo OpenGnSys Server:
+#260	Gestionar plantillas PXE mediante scripts
+
+Tickets resueltos en módulo OpenGnSys Repository Server:
+#184	tracker no gestiona el enjambre
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#91	Incorporar equipos desde fichero dhcp.conf
+#177	Consola web: No se pueden borrar usuarios
+#190	Error en incorporarordenadores.php
+#241	El cliente no responde en local con la nueva consola web
+#247	La consola web muestra la cadena SERVERIP en el repositorio por defecto
+#251 	El cliente no carga su menú personalizado definido en la consola web
+#254	Consola Web: particionar y formatear
+#259	Consola Web: información de un repositorio
+#282 	Gestión web de log
+#283	Gestor de activacion/desactivacion modulos web
+#284 	Modulo web: propiedades aula/equipos combo box para elementos netboot
+#285	Modulo web: propiedades aula/equipos combo box para elementos netboot
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #240	Error instalación limpia rev. 1326
+#242	Completar instalación por defecto basada en Ubuntu 10.04 Lucid
+#246	El instalador debe proteger ficheros de configuración
+#249	Desinstalador borra contenido repositorio por defecto
+#253	El instalador debe parchear los ficheros de configuración para configurar acceso a base datos
+#262	Error de ejecución del instalador en 2ª instalación consecutiva mediante Subversion
 
 
 Lista de cambios incluidos en OpenGnSys 0.9.2

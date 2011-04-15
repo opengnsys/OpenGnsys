@@ -1,27 +1,40 @@
 #!/bin/bash
 
-#_______________________________________________________________________________________________________________________________
+#___________________________________________________
 #
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE:
-# $1 disco
-# $2 par=N鷐ero de particion
-# $3 Nombre can髇ico de la imagen
-# $4 Direcci髇 del repositorio
-#_______________________________________________________________________________________________________________________________
+# $1 N煤mero de disco
+# $2 N煤mero de particion
+# $3 Nombre can贸nico de la imagen (sin extensi贸n)
+# $4 Direcci贸n del repositorio (REPO, por defecto)
+#___________________________________________________
 
-# Error si llamada no se realliza desde OpenGnSys Client.
+# Registro de ejecuci贸n
+echo $* >> $OGLOGFILE
+
+# Solo ejecutable por OpenGnSys Client.
 PATH=$PATH:$(dirname $0)
 PROG=$(basename $0)
 CALLER=$(ogGetCaller)
 if [ "$CALLER" != "ogAdmClient" ]; then
-    ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
-    exit $?
+	ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+	exit $?
 fi
 
-# Si modo "user"; activar repositorio para escritura, crear imagen y activar para lectura.
-[ "$boot" == "user" ] && CambiarAcceso admin
-createImage "$1" "$2" "REPO" "$3"
+# Valor por defecto para el repositorio.
+REPO=${4:-"REPO"}
+[ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+
+# Si cleinte no est谩 en modo "admin"; activar repositorio para escritura,
+#    crear imagen y activar para lectura.
+[ "$boot" != "admin" ] && CambiarAcceso admin
+if [ -f createImage$ogengine ]; then
+	createImage$ogengine "$1" "$2" "$REPO" "$3" &>> $OGLOGFILE
+else
+	createImage "$1" "$2" "$REPO" "$3" &>> $OGLOGFILE
+fi
 RETVAL=$?
-[ "$boot" == "user" ] && CambiarAcceso user
+[ "$boot" != "admin" ] && CambiarAcceso user
 exit $RETVAL
 

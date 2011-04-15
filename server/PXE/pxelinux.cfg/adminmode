@@ -1,5 +1,0 @@
-DEFAULT pxe
-
-LABEL pxe
-KERNEL linux
-APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin

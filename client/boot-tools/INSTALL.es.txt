@@ -1,0 +1,46 @@
+OpenGnSys Client boot-tools   INSTALL.es.txt
+============================================
+
+
+Requisitos iniciales
+--------------------
+
+- Utilizar el usuario "root" para ejecutar el proceso de generación del cliente.
+- Comprobar la conexión a Internet, sobre todo si usas proxy (el hecho de que funcione apt-get no significa que tengas el proxy configurado).
+
+
+Proceso de instalación
+----------------------
+
+0. Si ya tenemos configurado TFTP, renombrar el directorio /var/lib/tftpboot/ogclient.
+1. Descargar del Subversion las herramientas del cliente
+2. Ejecutar el instalador: 
+
+mv /opt/opengnsys/tftpboot/ogclient /opt/opengnsys/tftpboot/ogclient-old;
+svn checkout http://www.opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys;
+find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
+/tmp/opengnsys_installer/opengnsys/client/boot-tools/ogClientGeneratorV2.sh;
+
+
+NOTAS:
+- el proceso tardará un buen rato, dependiendo de nuestras circustancias.
+- crea un kernel, initrd, ogclient.img en /var/lib/tftpboot/ogclient
+- el ogclient.img es el Segundo sistema de archivos en formato fichero bloques emulando a disco con partición primaria.
+- el ogclient.sqfs es el Segundo sistema de archivos (partición primaria del img) en formato squashfs. Se usará con el parámetro og2nd=sqfs
+- los logs de instalación estarán en /tmp/opengnsys_installation.log
+
+NOTA ACLARATORIA: $OGSCRITPS(reboot,poweroff) antes de /sbin/{reboot,poweroff}	
+     
+
+Descripción de la estrucutra de boot-tools
+------------------------------------------
+
+- INSTALL.es.txt          este mismo archivo.
+- ogInstaller.lib         son todas las funciones del instalador oficial de OpenGnSys.
+                          Algunas de ellas son utilizadas en la generación del cliente
+                          (crear ticket para separar las funciones necesarias).
+- ogClientManager.lib     son las funicones especificas para la instalacion del cliente;
+                          están escritas en orden de que son llamadas por el instalador.
+- ogClientGeneratorV2.sh  es el guión de ejecución del isntalador.
+ 
+

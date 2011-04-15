@@ -1,0 +1,82 @@
+#!/bin/bash
+# Descripcion: Crea un test DESTRUCTIVO de los bloqueos de particiones y de imagenes
+#       Se ejecuta en el servidor y el test creado se utiliza en el cliente
+# 	La imagen de prueba puede sufrir daños
+# Uso: creaTestLock2 NombreImagen
+
+# Variables.
+PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+TESTDIR="$OPENGNSYS/client/lib/engine/tests/Modify"
+TESTFILE="$TESTDIR/Lock2-img$1.shtest "
+# Control básico de errores.
+if [ $# -ne 1 ]; then
+        echo "$PROG: Error de ejecución"
+        echo "Formato: $PROG NOMBRE_IMAGEN"
+	echo "	La imagen de prueba puede sufrir daños"
+        exit 1
+fi
+
+IMG=$1
+
+cat > $TESTFILE << EOF
+Test de bloqueos Destructivos
+=============================================================================
+# Bloqueo de particiones
+$ ogUnmountAll 1 2>/dev/null
+
+$ ogLock 1 1
+
+$ ogExtendFs 1 1
+OpenGnSys error:  ogExtendFs:  "1 1"
+
+
+$ ogFormatFs 1 1
+OpenGnSys error:  ogFormatFs:  "1 1"
+
+#############################################################################
+# Los dos comandos siguientes dan error. Los comentamos por ahora
+#############################################################################
+#$ ogMount 1 1
+
+#$ ogUnmount 1 1; df|grep sda1
+
+$ ogUnlock 1 1
+
+$ ogExtendFs 1 1 >/dev/null 2>&1; echo $?
+0
+
+$ ogFormatFs 1 1  >/dev/null 2>&1; echo $?
+0
+
+$ ogMount 1 1
+/mnt/sda1
+
+$ ogUnmount 1 1; df|grep sda1
+
+# Bloqueo de imagenes
+#############################################################################
+# Los tres comandos siguientes dan error. Los comentamos por ahora
+#############################################################################
+#$ ogLockImage REPO  $IMG
+
+#$ ogRestoreImage REPO $IMG 1 1 >/dev/null 2>&1; echo $?
+
+#$ ogCreateImage 1 1 REPO $IMG >/dev/null 2>&1; echo $?
+
+
+$ ogUnlockImage REPO $IMG
+
+# Lo mismo con la imagen desbloqueada.
+
+$ ogRestoreImage REPO $IMG 1 1 >/dev/null 2>&1; echo $?
+0
+
+$ ogCreateImage 1 1 REPO $IMG >/dev/null 2>&1; echo $?
+0
+EOF
+
+echo "Test creado en $TESTFILE"
+echo "     La imagen de $IMG prueba puede quedar dañada despues de realizar el test"
+echo "     Hay cinco comandos comentados porque por ahora dan error"

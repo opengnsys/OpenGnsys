@@ -29,6 +29,12 @@ $TbMsg[20]="Autoexec";
 $TbMsg[21]="";
 $TbMsg[22]="Modo Multicast";
 $TbMsg[23]="IP Multicast";
-$TbMsg[24]="Puerto";
-$TbMsg[25]="Velocidad";	
+$TbMsg[24]="Puerto Multicast";
+$TbMsg[25]="Velocidad Multicast";
+$TbMsg[26]="Modo P2P -semillero durante la descarga-";
+$TbMsg[27]="Tiempo P2P -semillero despues de descarga-";
+$TbMsg[28]="Direccion gateway del aula";
+$TbMsg[29]="Mascara de red del aula";
+	
+
 ?>

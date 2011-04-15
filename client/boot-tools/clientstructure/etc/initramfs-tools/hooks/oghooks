@@ -1,0 +1,58 @@
+#!/bin/sh -e
+# initramfs hook for OpenGnsys
+
+#@file    oghooks
+#@brief   configuración initrd para OpenGnSys
+#@warning 
+#@version 0.9 - estrucura opengnsys, bash-static, unionfs, atheros
+#@author  Antonio J. Doblas Viso.
+#@date    2010/05/24
+#*/
+
+PREREQ="og"
+
+# Output pre-requisites
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+
+. /usr/share/initramfs-tools/hook-functions
+
+mkdir -p ${DESTDIR}/scripts/og-top
+mkdir -p ${DESTDIR}/scripts/og-premount
+mkdir -p ${DESTDIR}/scripts/og-bottom
+mkdir -p ${DESTDIR}/mnt/
+mkdir -p ${DESTDIR}/net/
+mkdir -p ${DESTDIR}/usr
+mkdir -p ${DESTDIR}/var/lock
+mkdir -p ${DESTDIR}/var/log
+mkdir -p ${DESTDIR}/opt/opengnsys;
+mkdir -p ${DESTDIR}/ogboot;
+mkdir -p ${DESTDIR}/boot;
+
+# Insert basic binaries
+copy_exec /bin/bash-static /bin/bash
+copy_exec /usr/bin/unionfs-fuse
+copy_exec /sbin/mount.cifs
+
+
+# Insert OpenGnsys Engine
+#mkdir -p ${DESTDIR}/opt/opengnsys/lib/engine
+#cp -prv /opt/opengnsys/client/lib/engine ${DESTDIR}/opt/opengnsys/lib/engine
+
+#rm -fr ${DESTDIR}/lib/modules/2.6.32-21-generic-pae/kernel/drivers/net/atl*
+manual_add_modules cifs
+manual_add_modules smbfs
+manual_add_modules atl1e
+manual_add_modules squashfs
+
+

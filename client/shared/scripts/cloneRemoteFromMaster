@@ -1,0 +1,246 @@
+#!/bin/bash
+# Script para la clonacion de particiones remotas.
+# (puede usarse como base para el programa de restauración de imágenes usado por OpenGnSys Admin).
+# Versión: 0.9.1, 2009/03/17, - Antonio J. Doblas Viso. Universidad de Malaga.
+# Versión: 0.9.2, 2010/07/27, - Antonio J. Doblas Viso. Universidad de Malaga.
+# Version: 0.1.0  2011/01/26, - Antonio J. Doblas Viso. Universidad de Malaga.
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+#if [ $# -ne 5 ]; then
+ #   ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG tamaño"
+#    exit $?
+#fi
+
+
+#/**  @function cloneremoteFromMaster: @brief Restaura una particion o imagen sobre las particiones de equipos cliente remotos
+#@param  $1 str_origen admite dirección IP del equipo Master.
+#@param $2 str_origen  admite int_disk    str_REPO|str_CACHE
+#@param $3 str_origen  admite int partorigen   stre_imagen 
+#@param $4 str_sesion multicast
+#@param $5 int_disco_destino
+#@param $6 init_particion_destino
+#@param ejemplo: cloneRemoteFromMaster 172.17.36.11 1 1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop
+#@param ejemplo: cloneRemoteFromMaster 172.17.36.11 REPO /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
+#@param ejemplo: cloneRemoteFromMaster 172.17.36.11 CACHE /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
+#@return la propia de la herramienta de clonacion partimage o ntfsclone 
+#
+
+
+
+FOUNDSOURCE=false
+HOSTIP=`ogGetIpAddress`
+
+SESSIONMCASTSERVER=$4
+SESSIONMCASTCLIENT=`echo $4 | awk -F: '{print $1}'`
+DISKTARGET=$5
+PARTTARGET=$6
+TOOLCLONE=$7
+COMPRESOR=$8
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+if [ $# -lt 1 ]; then
+	echo "cloneRemoteFromMaster ipmaster disk init [MULTICAST|UNICAST] session disk part tool comp"
+	exit 1
+fi
+
+if [  $# -lt 6  ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ipMaster SOURCE_disco SOURCE_particion [MULTICAT|UNICAST] SESSION TARGER_disck TARGET_partition" 
+    exit $?
+fi
+
+#Chequeamos variables-constantes
+
+# check HOSTIP
+if [ -z "$HOSTIP" ] 
+then
+	source /tmp/net-eth0.conf 
+	HOSTIP=`ogGetIpAddress`
+fi
+MODEMASTER=false
+
+
+#Chequeamos parametros.
+
+# is $1 a valid IP
+MASTERIP=$1
+
+# contendor origen (disco particion o file)
+
+PROTOCOL=$4
+# Controlamos si multicast o unicast.
+case $PROTOCOL in 
+ 	MULTICAST|multicast)
+		SESSIONMCASTSERVER=$5
+		SESSIONMCASTCLIENT=`echo $5 | awk -F: '{print $1}'`
+	;;
+	UNICAST|unicast) 
+		SESSIONUCASTSERVER=$5
+    	SESSIONUCASTCLIENT=`echo $5 | awk -F: '{print $1}'`:$MASTERIP
+	;;
+esac
+
+
+# contenedor destino (disco particion)
+DISKTARGET=$6
+PARTTARGET=$7
+
+#herramienta de compresión.
+TOOLCLONE=$8
+COMPRESOR=$9
+
+
+###IMG=$(ogGetPath $2 $3.img)
+###echo $IMG
+
+# Check command in Master (sendFile or sendPartition)
+
+case $MASTERIP in
+	$HOSTIP)
+		ogGetPath $2 $3.img
+		RC=`echo $?`
+		echo "$RC comenzando control del valor del origen $2 $3"
+		if [ $RC == "0" ] 
+		then
+			echo "mode senfile"
+			IMG=$(ogGetPath $2 $3.img)
+			MODEMASTER=SENDFILE
+		else
+			if [ $(ogDiskToDev $2 $3) ]
+			then
+				echo "mode sendpartitons"
+				DISKSOURCE=$2
+				PARTSOURCE=$3
+				MODEMASTER=SENDPARTITION
+			fi
+		fi
+
+		echo "modo "  $MODEMASTER
+
+		if [ "$MODEMASTER" == "false" ] 
+		then 
+			echo "cloneRemote: origen no encontrado"
+			exit 1
+		else
+			echo "cloneRemote: sistema preparando para un $MODEMASTER"
+		fi
+
+		case "$MODEMASTER" in
+			SENDPARTITION)
+				echo "[5]: cloneRemoteFromMaster: sistema preparando como MASTER modo $MODEMASTER"
+				echo "[10]: Desmontando DISK:$DISKSOURCE PARTITION:$PARTSOURCE"
+				ogUnmount $2 $3 || exit
+				#Obtener tamaño de la partición.
+				SIZE=$(ogGetPartitionSize $2 $3)  
+				# Reducir el sistema de archvios.
+				echo "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE"
+				ogReduceFs $2 $3 || exit 1
+
+				#echo "salida de ogReduceFS" $?
+				#if [ $? == 1 ]
+				#then
+				#	echo "no se ha podido reducir FS"
+#				exit 1
+#
+				REDSIZE=$(ogGetFsSize $2 $3) 	
+				echo "[20]: Reducido el  sistema de archivos a $REDSIZE  $DISKSOURCE $PARTSOURCE"
+				if [ $REDSIZE -lt $SIZE ]; then
+    					echo "[24] Redimensionar partición a $REDSIZE KB."
+    					ogSetPartitionSize $2 $3 $REDSIZE
+				fi
+				echo "[25] ofreciendo informacion a los clientes-slaves"
+				faucet 4000 --out echo "$TOOLCLONE $COMPRESOR $REDSIZE" &
+				
+				echo "[30] Enviando $PROTOCOL "
+				case $PROTOCOL in
+					MULTICAST|multicast)
+						echo ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR 
+ 						ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR 
+ 					;;
+ 					UNICAST|unicast)
+ 						sleep 60
+ 						echo "ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
+ 						ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR 
+ 					;;
+ 				esac	
+ 				
+ 				if [ $REDSIZE -lt $SIZE ]; then
+   					echo "[85] Redimensionar partición a $SIZE KB."
+   		 			ogSetPartitionSize $2 $3 $SIZE
+   		 			echo "[90] Extender sistema de archivos."
+   		 			ogExtendFs $2 $3
+				fi
+				pkill faucet
+			;;
+			SENDFILE)
+				echo "[5]: cloneRemoteFromMaster: sistema preparando como MASTER modo $MODEMASTER"
+				echo "[10]: Preparando Imagen: $IMG"
+				TOOLCLONE=$(ogGetImageProgram $2 $3)
+				COMPRESOR=$(ogGetImageCompressor $2 $3)
+				REDSIZE=$(ogGetImageSize $2 $3)
+				echo "[25] ofreciendo informacion a los clientes-slaves: $TOOLCLONE $COMPRESOR $REDSIZE"
+				faucet 4000 --out echo "$TOOLCLONE $COMPRESOR $REDSIZE" &
+				
+				echo "[30] Enviando $PROTOCOL:"
+				echo "ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
+				ogMcastSendFile  $2 $3.img $SESSIONMCASTSERVER
+				
+				pkill faucet	
+		;;
+		esac
+		pkill faucet
+	;;
+	*)
+		echo "[5]: cloneRemoteFromMaster: sistema preparando como CLIENTE modo $MODEMASTER"
+		ogUnmount $DISKTARGET $PARTTARGET
+		echo "[24] Cliente intentando conectar con el master $MASTERIP"
+		echo -n "[25] Buscando informacion extra sobre la clonacion: "
+		# While para esperar al servidor
+		while [ -z "$INFOEXTRA" ]
+		do
+			INFOEXTRA=`hose $MASTERIP 4000 --in cat 2>/dev/null`
+			sleep 10
+			echo -n "."
+		done		
+		TOOLCLONE=$(echo $INFOEXTRA | awk '{print $1}')
+		COMPRESOR=$(echo $INFOEXTRA | awk '{print $2}')
+		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $3}')
+		echo -n "[25] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE "
+		# comprobamos que el tamaño de a imagen es menor que la del cliente.
+		SIZEPARTTARGET=$(ogGetPartitionSize $DISKTARGET $PARTTARGET)
+		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
+ 		then	
+			echo "[30] Iniciando Cliente $PROTOCOL "
+				case $PROTOCOL in
+					MULTICAST|multicast)
+						echo ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR 
+						ogMcastReceiverPartition "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR" 
+		 					;;
+ 					UNICAST|unicast)
+ 						echo ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR
+ 						ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR 
+ 					;;
+ 				esac
+			
+			
+			echo "[90] Extender sistema de archivos"
+			ogExtendFs $DISKTARGET $PARTTARGET
+			# Cambiar nombre en sistemas Windows.
+			if [ "$(ogGetOsType $DISKTARGET $PARTTARGET)" = "Windows" ]; then
+    				HOST=$(ogGetHostname)
+    				HOST=${HOST:-"UNKNOWN"}
+    				echo "[90] Cambiar nombre Windows a \"$HOST\"."
+    				ogSetWindowsName $DISKTARGET $PARTTARGET "$HOST"
+			fi		
+		else
+			echo -n "[25] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE "
+			echo -n "[26] ERROR tamanio particion= $SIZEPARTTARGET  tamanio de la imagen= $SIZEIMAGE"
+			exit 1
+		fi
+	;;
+esac
+TIME=$[SECONDS-TIME1]
+echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+
+

@@ -3,7 +3,7 @@ Instalación de OpenGnSys Server v 0.9
 
 Notas iniciales
 
-Se presupone que el servidor de OpenGnSys va a ser instalado en un sistema operativo Ubuntu 9.04 Server de 32 bits.
+Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Linux a partir de la versión 9.04.
 
 La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede descargarse directamente de la dirección: http://www.opengnsys.es/browser/trunk/installer/opengnsys_installer.sh?format=txt
 
@@ -25,14 +25,13 @@ Se realizan los siguientes procesos:
     * Crear la estructura básica de directorios de OpenGnSys.
     * Descargar el repositorio de código en un directorio temporal (/tmp/opengnsys_installer). Nota: en versiones futuras este proceso no será necesario.
     * Compilar e instalar los servicios de OpenGnSys.
-    * Configuración básica de los serviciios de red DHCP, PXE y NFS a partir de los parámetros de conexión.
+    * Configuración básica de los serviciios de red DHCP, PXE y NFS/Samba a partir de las plantillas de configuración
     * Copiar ficheros complementarios de gestión del servidor.
     * Crear la base de datos y configurar el servidor web de OpenGnSys Web Admin Console.
-    * Copiar los ficheros de las páginas web de Web Console.
+    * Copiar los ficheros de las páginas de Web Admin Console.
     * Copiar la estructura de directorios de OpenGnSys Client.
-    * Descargar y generar la imagen inicial Initrd y el Kernel de OpenGnSys Client (llamada al script initrd-generator).
-    * Descargar los paquetes Udeb de herramientas complementarias para OpenGnSys Client (llamada al script upgrade-clients-udeb.sh).
-    * Configuración básica de los serviciios de OpenGNsys a partir de los parámetros de red.
+    * Descargar la imagen inicial de OpenGnSys Client.
+    * Configuración básica de los serviciios de OpenGnSys a partir de los parámetros de red.
 
 Una vez finalizada la ejecución del instalador, puede empezarse a trabajar con el sistema:
     * Configurar DHCP.

@@ -1,0 +1,51 @@
+#!/bin/bash
+PARM=`cat`
+
+#TODO:  ticket 379
+#buscar parametro de identificador de operacion.
+#usar parametro de identificacion para anexarlo al nombre de log
+#Comprobar si la variable está seteas.
+#Si no lo está setearla.
+#Si esta seteada (en progreso) salir.
+
+
+
+BASEDIR=/opt/opengnsys
+REPONAME=ogAdmRepo
+REPOLOG=$BASEDIR/log/$REPONAME.log
+MCASTLOGBASE=$BASEDIR/log/mcastlog
+MCASTLOG=$MCASTLOGBASE/ogAdmRepoMcast.`date +%Y%m%d-%H%M%S`
+
+mkdir -p $MCASTLOGBASE
+
+PARM1=$(echo $PARM | cut -f1 -d" ")
+PARM2=$(echo $PARM | cut -f2 -d" ")
+PARM3=$(echo $PARM | cut -f3 -d" ")
+PARM4=$(echo $PARM | cut -f4 -d" ")
+
+
+case $PARM1 in
+	START_MULTICAST)
+		#1 START_MULTICAST
+		#2 fichero a enviar
+		#3 opciones de multicast
+		FILE=/opt/opengnsys/images$PARM2
+		MCASTOPT=$PARM3
+		echo `date +%Y%m%d-%H%M%S` "/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT" >> $REPOLOG
+		/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT &>> $MCASTLOG
+		case $? in
+			1)
+			echo `date +%Y%m%d-%H%M%S` Parametros insuficientes >> $REPOLOG
+			;;
+			2)
+			echo `date +%Y%m%d-%H%M%S` Fichero no accesible >> $REPOLOG
+			;;
+			3)
+			echo `date +%Y%m%d-%H%M%S` sesion multicast no valida >> $REPOLOG
+			;;
+		esac
+	;;
+	default)
+	    echo "Solicitud con parametros: -  $PARM  - no realizada: No registrada o con errores" >> $REPOLOG
+	;;
+esac

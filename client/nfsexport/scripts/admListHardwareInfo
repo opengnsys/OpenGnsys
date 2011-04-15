@@ -1,6 +1,0 @@
-#!/bin/bash
-RETORNO=$(listHardwareInfo $* 2>/dev/null) || exit $?
-# Fichero tempotal de salida para intercambio de datos con el servicio
-OTPUTFILE="/tmp/retorno"
-echo $RETORNO>$OTPUTFILE || exit $?
-exit 0

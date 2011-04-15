@@ -7,11 +7,17 @@
 
 
 
-####  AVISO: Editar configuración de acceso por defecto
+####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
 OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
 OPENGNSYS_DB_USER="usuog"		# Usuario de acceso
 OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario
+
+####  AVISO: NO EDITAR. 
+#### configuración de acceso smb para clientes OG.
+OPENGNSYS_CLIENT_USER="opengnsys"		# Nombre del usuario
+OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario opengnsys
+
 
 
 # Sólo ejecutable por usuario root
@@ -21,13 +27,24 @@ then
         exit 1
 fi
 
+# Detectar sistema operativo del servidor (debe soportar LSB).
+OSDISTRIB=$(lsb_release -is 2>/dev/null)
+# Array con las dependencias que deben estar instaladas, según de la distribución detectada.
+case "$OSDISTRIB" in
+	Ubuntu) DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+		;;
+	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
+		exit 1 ;;
+esac
+
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
+OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://www.opengnsys.es/svn/trunk
+    SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 fi
 
 WORKDIR=/tmp/opengnsys_installer
@@ -35,9 +52,6 @@ mkdir -p $WORKDIR
 
 INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_installation.log
-
-# Array con las dependencias
-DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server udpcast bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent )
 
 # Base de datos
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
@@ -48,13 +62,13 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 #####################################################################
 function getDateTime()
 {
-        echo `date +%Y%m%d-%H%M%S`
+        date "+%Y%m%d-%H%M%S"
 }
 
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-        echo $1
+        echo "$1"
         FECHAHORA=`getDateTime`
         echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
 }
@@ -162,10 +176,10 @@ function checkDependencies()
 function installDependencies()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "installDependencies(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
-	echoAndLog "installDependencies(): installing uncompleted dependencies"
+	echoAndLog "${FUNCNAME}(): installing uncompleted dependencies"
 
 	# copia local del array del parametro 1
 	local deps
@@ -178,22 +192,22 @@ function installDependencies()
 	done
 
 	if [ -z "${string_deps}" ]; then
-		errorAndLog "installDependencies(): array of dependeces is empty"
+		errorAndLog "${FUNCNAME}(): array of dependeces is empty"
 		exit 1
 	fi
 
 	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 	export DEBIAN_FRONTEND=noninteractive
 
-	echoAndLog "installDependencies(): now ${string_deps} will be installed"
+	echoAndLog "${FUNCNAME}(): now ${string_deps} will be installed"
 	apt-get -y install --force-yes ${string_deps}
 	if [ $? -ne 0 ]; then
-		errorAndLog "installDependencies(): error installing dependencies"
+		errorAndLog "${FUNCNAME}(): error installing dependencies"
 		return 1
 	fi
 
 	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND
-	echoAndLog "installDependencies(): dependencies installed"
+	echoAndLog "${FUNCNAME}(): dependencies installed"
 }
 
 # Hace un backup del fichero pasado por parámetro
@@ -234,23 +248,24 @@ function backupFile()
 function mysqlSetRootPassword()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "mysqlSetRootPassword(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_mysql=$1
-	echoAndLog "mysqlSetRootPassword(): setting root password in MySQL server"
-	/usr/bin/mysqladmin -u root password ${root_mysql}
+	local root_mysql="$1"
+	echoAndLog "${FUNCNAME}(): setting root password in MySQL server"
+	mysqladmin -u root password "$root_mysql"
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlSetRootPassword(): error while setting root password in MySQL server"
+		errorAndLog "${FUNCNAME}(): error while setting root password in MySQL server"
 		return 1
 	fi
-	echoAndLog "mysqlSetRootPassword(): root password saved!"
+	echoAndLog "${FUNCNAME}(): root password saved!"
 	return 0
 }
 
 # Si el servicio mysql esta ya instalado cambia la variable de la clave del root por la ya existente
-function mysqlGetRootPassword(){
+function mysqlGetRootPassword()
+{
 	local pass_mysql
 	local pass_mysql2
         # Comprobar si MySQL está instalado con la clave de root por defecto.
@@ -258,19 +273,18 @@ function mysqlGetRootPassword(){
 		echoAndLog "${FUNCNAME}(): Using default mysql root password."
         else
 	        stty -echo
-	        echo "Existe un servicio mysql ya instalado"
-	        read -p  "Insertar clave de root de Mysql: " pass_mysql
+	        echo "There is a MySQL service already installed."
+	        read -p "Enter MySQL root password: " pass_mysql
 	        echo ""
-	        read -p "Confirmar clave:" pass_mysql2
+	        read -p "Confrim password:" pass_mysql2
 	        echo ""
 	        stty echo
 	        if [ "$pass_mysql" == "$pass_mysql2" ] ;then
-		        MYSQL_ROOT_PASSWORD=$pass_mysql
-		        echo "La clave es: ${MYSQL_ROOT_PASSWORD}"
+		        MYSQL_ROOT_PASSWORD="$pass_mysql"
 		        return 0
 	        else
-	        	echo "Las claves no coinciden no se configura la clave del servidor de base de datos."
-	        	echo "las operaciones con la base de datos daran error"
+			echo "The keys don't match. Do not configure the server's key,"
+	        	echo "transactions in the database will give error."
 	        	return 1
 	        fi
 	fi
@@ -280,18 +294,18 @@ function mysqlGetRootPassword(){
 function mysqlTestConnection()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "mysqlTestConnection(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
-	echoAndLog "mysqlTestConnection(): checking connection to mysql..."
+	echoAndLog "${FUNCNAME}(): checking connection to mysql..."
 	echo "" | mysql -uroot -p"${root_password}"
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlTestConnection(): connection to mysql failed, check root password and if daemon is running!"
+		errorAndLog "${FUNCNAME}(): connection to mysql failed, check root password and if daemon is running!"
 		return 1
 	else
-		echoAndLog "mysqlTestConnection(): connection success"
+		echoAndLog "${FUNCNAME}(): connection success"
 		return 0
 	fi
 }
@@ -300,19 +314,19 @@ function mysqlTestConnection()
 function mysqlDbExists()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlDbExists(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local database=$2
-	echoAndLog "mysqlDbExists(): checking if $database exists..."
+	echoAndLog "${FUNCNAME}(): checking if $database exists..."
 	echo "show databases" | mysql -uroot -p"${root_password}" | grep "^${database}$"
 	if [ $? -ne 0 ]; then
-		echoAndLog "mysqlDbExists():database $database doesn't exists"
+		echoAndLog "${FUNCNAME}():database $database doesn't exists"
 		return 1
 	else
-		echoAndLog "mysqlDbExists():database $database exists"
+		echoAndLog "${FUNCNAME}():database $database exists"
 		return 0
 	fi
 }
@@ -320,24 +334,24 @@ function mysqlDbExists()
 function mysqlCheckDbIsEmpty()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlCheckDbIsEmpty(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local database=$2
-	echoAndLog "mysqlCheckDbIsEmpty(): checking if $database is empty..."
+	echoAndLog "${FUNCNAME}(): checking if $database is empty..."
 	num_tablas=`echo "show tables" | mysql -uroot -p"${root_password}" "${database}" | wc -l`
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlCheckDbIsEmpty(): error executing query, check database and root password"
+		errorAndLog "${FUNCNAME}(): error executing query, check database and root password"
 		exit 1
 	fi
 
 	if [ $num_tablas -eq 0 ]; then
-		echoAndLog "mysqlCheckDbIsEmpty():database $database is empty"
+		echoAndLog "${FUNCNAME}():database $database is empty"
 		return 0
 	else
-		echoAndLog "mysqlCheckDbIsEmpty():database $database has tables"
+		echoAndLog "${FUNCNAME}():database $database has tables"
 		return 1
 	fi
 
@@ -402,20 +416,20 @@ function mysqlCreateDb()
 function mysqlCheckUserExists()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlCheckUserExists(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local userdb=$2
 
-	echoAndLog "mysqlCheckUserExists(): checking if $userdb exists..."
+	echoAndLog "${FUNCNAME}(): checking if $userdb exists..."
 	echo "select user from user where user='${userdb}'\\G" |mysql -uroot -p"${root_password}" mysql | grep user
 	if [ $? -ne 0 ]; then
-		echoAndLog "mysqlCheckUserExists(): user doesn't exists"
+		echoAndLog "${FUNCNAME}(): user doesn't exists"
 		return 1
 	else
-		echoAndLog "mysqlCheckUserExists(): user already exists"
+		echoAndLog "${FUNCNAME}(): user already exists"
 		return 0
 	fi
 
@@ -425,7 +439,7 @@ function mysqlCheckUserExists()
 function mysqlCreateAdminUserToDb()
 {
 	if [ $# -ne 4 ]; then
-		errorAndLog "mysqlCreateAdminUserToDb(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
@@ -434,7 +448,7 @@ function mysqlCreateAdminUserToDb()
 	local userdb=$3
 	local passdb=$4
 
-	echoAndLog "mysqlCreateAdminUserToDb(): creating admin user ${userdb} to database ${database}"
+	echoAndLog "${FUNCNAME}(): creating admin user ${userdb} to database ${database}"
 
 	cat > $WORKDIR/create_${database}.sql <<EOF
 GRANT USAGE ON *.* TO '${userdb}'@'localhost' IDENTIFIED BY '${passdb}' ;
@@ -443,11 +457,11 @@ FLUSH PRIVILEGES ;
 EOF
 	mysql -u root --password=${root_password} < $WORKDIR/create_${database}.sql
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlCreateAdminUserToDb(): error while creating user in mysql"
+		errorAndLog "${FUNCNAME}(): error while creating user in mysql"
 		rm -f $WORKDIR/create_${database}.sql
 		return 1
 	else
-		echoAndLog "mysqlCreateAdminUserToDb(): user created ok"
+		echoAndLog "${FUNCNAME}(): user created ok"
 		rm -f $WORKDIR/create_${database}.sql
 		return 0
 	fi
@@ -483,6 +497,14 @@ function svnExportCode()
 ###  Detectar red
 ############################################################
 
+# Comprobar si existe conexión.
+function checkNetworkConnection()
+{
+	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
+	wget --spider -q $OPENGNSYS_SERVER
+}
+
+# Obtener los parámetros de red de la interfaz por defecto.
 function getNetworkSettings()
 {
 	# Variables globales definidas:
@@ -527,8 +549,9 @@ function getNetworkSettings()
 ### Esqueleto para el Servicio pxe y contenedor tftpboot ###
 ############################################################
 
-function tftpConfigure() {
-        echo "Configurando el servicio tftp"
+function tftpConfigure()
+{
+        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         basetftp=/var/lib/tftpboot
 
         # reiniciamos demonio internet ????? porque ????
@@ -540,11 +563,16 @@ function tftpConfigure() {
         # prepamos el directorio de la configuracion de pxe
         mkdir -p ${basetftp}/pxelinux.cfg
         cat > ${basetftp}/pxelinux.cfg/default <<EOF
-DEFAULT pxe
-
-LABEL pxe
-KERNEL linux
-APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on
+DEFAULT syslinux/vesamenu.c32 
+MENU TITLE Aplicacion GNSYS 
+ 
+LABEL 1 
+MENU LABEL 1 
+KERNEL syslinux/chain.c32 
+APPEND hd0 
+ 
+PROMPT 0 
+TIMEOUT 10 
 EOF
         # comprobamos el servicio tftp
         sleep 1
@@ -553,12 +581,14 @@ EOF
         chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP ${basetftp}
 }
 
-function testPxe () {
+function testPxe ()
+{
+        echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
         cd /tmp
-        echo "comprobando servicio pxe ..... Espere"
-        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echo "servidor tftp OK" || echo "servidor tftp KO"
+        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
         cd /
 }
+
 
 ########################################################################
 ## Configuracion servicio NFS
@@ -586,6 +616,12 @@ function nfsConfigure()
 	nfsAddExport /opt/opengnsys/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while adding logging client config"
+		return 1
+	fi
+
+	nfsAddExport /var/lib/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the pxe ogclient"
 		return 1
 	fi
 
@@ -655,6 +691,37 @@ function nfsAddExport()
 	return 0
 }
 
+
+########################################################################
+## Configuracion servicio Samba
+########################################################################
+function smbConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Configuring Samba service."
+
+	backupFile /etc/samba/smb.conf
+	
+	# Copiar plantailla de recursos para OpenGnSys
+        sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/samba/smb-og.conf
+	# Configurar y recargar Samba"
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
+	/etc/init.d/smbd restart
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configure Samba"
+		return 1
+	fi
+	# Crear usuario de acceso a los recursos y establecer permisos.
+	useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
+	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+
+	echoAndLog "${FUNCNAME}(): Added Samba configuration."
+	return 0
+}
+
+
 ########################################################################
 ## Configuracion servicio DHCP
 ########################################################################
@@ -671,7 +738,7 @@ function dhcpConfigure()
 	    -e "s/NETBROAD/$NETBROAD/g" \
 	    -e "s/ROUTERIP/$ROUTERIP/g" \
 	    -e "s/DNSIP/$DNSIP/g" \
-	    $WORKDIR/opengnsys/server/DHCP/dhcpd.conf > /etc/dhcp3/dhcpd.conf
+	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd.conf
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
 		return 1
@@ -697,6 +764,8 @@ function installWebFiles()
 		exit 1
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	# Descomprimir XAJAX.
+	unzip $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
@@ -747,6 +816,7 @@ EOF
 		return 0
 	fi
 }
+
 
 # Crear documentación Doxygen para la consola web.
 function makeDoxygenFiles()
@@ -799,7 +869,8 @@ function openGnsysInstallCreateDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function openGnsysCopyServerFiles () {
+function openGnsysCopyServerFiles ()
+{
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
@@ -807,25 +878,15 @@ function openGnsysCopyServerFiles () {
 
 	local path_opengnsys_base=$1
 
-	local SOURCES=( client/boot/initrd-generator \
-                        client/boot/upgrade-clients-udeb.sh \
-                        client/boot/udeblist.conf  \
-                        client/boot/udeblist-jaunty.conf  \
-                        client/boot/udeblist-karmic.conf \
-                        client/boot/udeblist-lucid.conf \
-                        client/boot/udeblist-maverick.conf \
-                        server/PXE/pxelinux.cfg \
+	# No se copian los ficheros del cliente antiguo:
+	# - client/boot/initrd-generator ==> /opt/opengnsys/bin
+        # - client/boot/upgrade-clients-udeb.sh ==> /opt/opengnsys/bin
+        # - client/boot/udeblist*.conf ==> /opt/opengnsys/etc
+	local SOURCES=( server/tftpboot/pxelinux.cfg \
                         server/bin \
                         repoman/bin \
                         doc )
-	local TARGETS=( bin/initrd-generator \
-                        bin/upgrade-clients-udeb.sh \
-                        etc/udeblist.conf \
-                        etc/udeblist-jaunty.conf  \
-                        etc/udeblist-karmic.conf \
-                        etc/udeblist-lucid.conf \
-                        etc/udeblist-maverick.conf \
-                        tftpboot/pxelinux.cfg \
+	local TARGETS=( tftpboot/pxelinux.cfg \
                         bin \
                         bin \
                         doc )
@@ -892,7 +953,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Client
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient ../../../../client/nfsexport/bin
+	make && mv ogAdmClient ../../../../client/shared/bin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Client"
 		hayErrores=1
@@ -907,7 +968,7 @@ function servicesCompilation ()
 ####################################################################
 
 # Copiar carpeta de Interface
-function InterfaceAdm ()
+function copyInterfaceAdm ()
 {
 	local hayErrores=0
 	
@@ -918,6 +979,8 @@ function InterfaceAdm ()
 		echoAndLog "${FUNCNAME}(): error while copying Administration Interface Folder"
 		hayErrores=1
 	fi
+	chown $OPENGNSYS_CLIENT_USER:$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
+	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 
 	return $hayErrores
 }
@@ -926,25 +989,46 @@ function InterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysClientCreate()
+function openGnsysCopyClientFiles()
 {
-	local OSDISTRIB OSCODENAME
-
 	local hayErrores=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-        cp -ar $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
-        find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while copying client estructure"
+		hayErrores=1
+	fi
+	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
-        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-        cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
+	cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		hayErrores=1
 	fi
+	
+	if [ $hayErrores -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): client copy files success."
+	else
+		errorAndLog "${FUNCNAME}(): client copy files with errors"
+	fi
+
+	return $hayErrores
+}
+
+
+
+
+# Crear antiguo cliente initrd para OpenGnSys 0.10
+function openGnsysOldClientCreate()
+{
+	local OSCODENAME
+
+	local hayErrores=0
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISTRIB=$(lsb_release -is 2>/dev/null)
 	OSCODENAME=$(lsb_release -cs 2>/dev/null)
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
@@ -975,12 +1059,39 @@ function openGnsysClientCreate()
 	fi
 
 	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): Client generation success."
+		echoAndLog "${FUNCNAME}(): Old client generation success."
 	else
-		errorAndLog "${FUNCNAME}(): Client generation with errors"
+		errorAndLog "${FUNCNAME}(): Old client generation with errors"
 	fi
 
 	return $hayErrores
+}
+
+
+# Crear nuevo cliente OpenGnSys 1.0
+function openGnsysClientCreate()
+{
+	local DOWNLOADURL=http://www.opengnsys.es/downloads
+	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
+	local TMPFILE=/tmp/$FILENAME
+
+	echoAndLog "${FUNCNAME}(): Loading Client"
+	# Descargar y descomprimir cliente ogclient
+	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
+	if [ ! -s $TMPFILE ]; then
+		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
+		return 1
+	fi
+	echoAndLog "${FUNCNAME}(): Extranting Client files"
+	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
+	rm -f $TMPFILE
+	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
+	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
+	# Establecer los permisos.
+	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
+	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
+	echoAndLog "${FUNCNAME}(): Client generation success"
 }
 
 
@@ -990,9 +1101,11 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux /opt/opengnsys/sbin/
 	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
 	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
@@ -1014,16 +1127,17 @@ function openGnsysConfigure()
 #######  Función de resumen informativo de la instalación
 #####################################################################
 
-function installationSummary(){
+function installationSummary()
+{
 	echo
 	echoAndLog "OpenGnSys Installation Summary"
 	echo       "=============================="
 	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "TFTP configuracion directory:     /var/lib/tftpboot"
-	echoAndLog "DHCP configuracion file:          /etc/dhcp3/dhcpd.conf"
-	echoAndLog "NFS configuracion file:           /etc/exports"
+	echoAndLog "DHCP configuration file:          /etc/dhcp3/dhcpd.conf"
+	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
+	echoAndLog "Samba configuration directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
@@ -1048,15 +1162,23 @@ echo
 echoAndLog "OpenGnSys installation begins at $(date)"
 pushd $WORKDIR
 
-# Detener servicios de OpenGnSys, si están activos previamente.
-[ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
-
-# Detectar parámetros de red por defecto
+# Comprobar si hay conexión y detectar parámetros de red por defecto.
+checkNetworkConnection
+if [ $? -ne 0 ]; then
+	errorAndLog "Error connecting to server. Causes:"
+	errorAndLog " - Network is unreachable, review devices parameters."
+	errorAndLog " - You are inside a private network, configure the proxy service."
+	errorAndLog " - Server is temporally down, try agian later."
+	exit 1
+fi
 getNetworkSettings
 if [ $? -ne 0 ]; then
 	errorAndLog "Error reading default network settings."
 	exit 1
 fi
+
+# Detener servicios de OpenGnSys, si están activos previamente.
+[ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
 # Actualizar repositorios
 apt-get update
@@ -1098,9 +1220,9 @@ if [ $? -ne 0 ]; then
 fi
 
 # Copiar carpeta Interface entre administración y motor de clonación.
-InterfaceAdm
+copyInterfaceAdm
 if [ $? -ne 0 ]; then
-	errorAndLog "Error while copying Interface Administration"
+	errorAndLog "Error while copying Administration Interface"
 	exit 1
 fi
 
@@ -1108,9 +1230,17 @@ fi
 tftpConfigure
 
 # Configuración NFS
-nfsConfigure
+#### (descomentar las siguientes líneas para exportar servicios por NFS)
+#nfsConfigure
+#if [ $? -ne 0 ]; then
+#	errorAndLog "Error while configuring nfs server!"
+#	exit 1
+#fi
+
+# Configuración Samba
+smbConfigure
 if [ $? -ne 0 ]; then
-	errorAndLog "Error while configuring nfs server!"
+	errorAndLog "Error while configuring Samba server!"
 	exit 1
 fi
 
@@ -1177,10 +1307,10 @@ else
 	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
 	INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
 	REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-	OPENGNSYS_DB_UPDADE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
- 	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE ]; then
+	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+ 	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
- 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDADE_FILE
+ 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
  	else
  		echoAndLog "Database unchanged."
  	fi
@@ -1200,10 +1330,24 @@ fi
 
 popd
 
-# Creando la estructura del cliente
+
+# Crear la estructura de los accesos al servidor desde el cliente (shared)
+openGnsysCopyClientFiles
+if [ $? -ne 0 ]; then
+	errorAndLog "Error creating client structure"
+fi
+
+# Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
+#### (descomentar las siguientes líneas para generar cliente initrd)
+#openGnsysOldClientCreate
+#if [ $? -ne 0 ]; then
+#	errorAndLog "Warning: cannot create old initrd client"
+#fi
+
+# Crear la estructura del cliente de OpenGnSys 1.0
 openGnsysClientCreate
 if [ $? -ne 0 ]; then
-	errorAndLog "Error creating clients"
+	errorAndLog "Error creating client"
 	exit 1
 fi
 

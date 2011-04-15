@@ -3,6 +3,7 @@
 #Version 0.3   Ejecución desde cron cada minuto, 
 ##  echo "* * * * *   root   /opt/opengnsys/bin/torrent-creator" > /etc/cron.d/torrentcreator
 
+## ver moficifcacione en linea 41 - 46
 
 # Comprobar si el proceso ya está en ejecución.
 PROG=$(basename $0)
@@ -26,20 +27,27 @@ pushd $OGIMG >/dev/null
 trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
 for IMG in *.{img,pgz}; do
 	# Saltar al siguiente si la imagen está bloqueada o si no existe el fichero.
-	if [ -f "$IMG.lock" -o ! -f "$IMG" ]; then
+	LOCKFILE="$IMG.lock"
+	if [ -f "$LOCKFILE" -o ! -f "$IMG" ]; then
 		continue
 	fi
 	# Comprobar si ya existe el fichero Torrent para esa imagen.
 	TORRENT="$IMG.torrent"
-	if [ -f "$TORRENT"  ]; then
+	SUMFILE="$IMG.sum"
+	if [ -f "$TORRENT" ]; then
 		FILESIZE="$(ls -l $IMG | awk '{print $5}')"
 		read -e TORRFILE TORRSIZE <<<"$(ctorrent -x $TORRENT | awk '$1~/<1>/ {print $2,$3}')"
 		[ "$(basename $IMG)" = "$TORRFILE" -a "[$FILESIZE]" = "$TORRSIZE" ] && continue
 	fi
-	# Crear fichero Torrent.
+	# Bloquear imagen, crear ficheros Torrent y Checksum y desbloquear imagen.
 	echo "`date` : Inicio creación de fichero $TORRENT" >> $LOGFILE
-	rm -f "$TORRENT"
-	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT"
+	touch "$LOCKFILE"
+	trap "rm -f $LOCKFILE" 1 2 3 6 9
+	rm -f "$TORRENT" "$SUMFILE"
+	DATASUM=`md5sum "$IMG" | cut -f1 -d" "` 
+	echo $DATASUM > "$SUMFILE"
+	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATASUM
+	rm -f "$LOCKFILE"
 	if [ -f "$TORRENT"  ]; then
 		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE
 	else

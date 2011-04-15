@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# Scirpt para la actualizacion de datos en la cache.
+# Versión: 0.9.1, 2008/03/17, - integracion eac
+# Versión: 0.9.2, 2010/07/27, -  integracion opengnsys
+
+
+
+#1 REPO
+#2 nombre del fichero con su extension, tipo /imagen1.img  o /ubuntu.iso
+#3 Protocolo TORRENT | MULTICAST    | UNICAST
+#4 opciones protocolo   
+#5 opciones de update cache
+
+
+PROG="$(basename $0)"
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
+    exit $?
+fi
+
+REPOSITORIO=$1
+PROTOCOLO=$3
+OPTPROTOCOLO=$4
+REPOIP=$(ogGetRepoIp)
+echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
+# Si el repositorio local CACHE no existe salimos.
+if ! $(ogFindCache >/dev/null); then
+        ogRaiseError $OG_ERR_NOTFOUND "CACHE"
+        exit $?
+fi
+
+#Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-
+#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
+ogUpdateCacheIsNecesary $1 $2 || exit 0
+
+CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
+FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
+
+if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
+then
+	echo "el tamanio del fichero $2 = $FILESIZE es mayor que el espacio dispinible en la cache = $CACHESIZEFREE"
+	exit 1
+fi
+
+ogUpdateCacheIsNecesary $1 $2 || exit 0
+
+ogMountCache
+
+## Si no existe, crear subdirectorio para el fichero en la cache.
+IMGDIR=$(ogGetParentPath "$1" "/$2")
+if [ $? != 0 ]; then
+    echo "[5] Crear subdirectorio del fichero  \"$2 $(dirname "$2")."
+   ogMakeDir "CACHE" $(dirname "/$2")
+   IMGDIR=$(ogGetParentPath "$1" "/$2") || exit $?
+fi
+
+
+
+
+case "$PROTOCOLO" in
+	torrent | TORRENT )
+		echo "ogCopyFile $1 $2.torrent absolute $OGCAC$OGIMG"
+		ogCopyFile $1 $2.torrent $OGCAC$OGIMG
+		#TODO: comprobar que el tracker definido en el fichero es correcto.
+    	#TODO comprobar que el fichero torrent está en cache
+		echo "ogTorrentStart CACHE $2.torrent $4"
+		ogTorrentStart CACHE $2.torrent $4
+	;;
+	multicast | MULTICAST )
+		echo "determinando puerto principal y auxiliar."
+		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
+		let PORTAUX=$PORT+1
+        #TODO: ticket 379
+		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
+		sleep $NUMBER
+		#FIN TODO
+		echo "comprobando puerto $PORTAUX en $REPOIP (sesion multicast en puerto $PORT) "
+		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
+		then 
+	   		ogMcastReceiverFile $PORT CACHE $2
+		else
+		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
+	   		echo "solicita la apertura:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
+	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
+	   		sleep 10
+	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
+	   		then 
+	   			ogMcastReceiverFile $PORT CACHE $2	   
+			else
+			    echo "la peticion ha fallado: hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+	   		    exit 1
+	   		fi
+		fi	
+	;;
+	unicast | UNICAST )
+		echo "unicast"
+	;;
+esac
+
+if ogUpdateCacheIsNecesary $1 $2 
+then
+	echo "algo ha fallado"
+	exit 1
+else
+	echo "updateCache ok"
+	exit 0
+fi
+
+
+
+#

@@ -75,14 +75,13 @@ while [ $# -gt 0 ]; do
     fi
     # Leer formato de cada parámetro - Tipo:Tamaño
     TYPE="${1%%:*}"
-    [ "$TYPE" != "CACHE" ] || ogRaiseError $OG_ERR_FORMAT "$TYPE" || return $?
     SIZE="${1#*:}"
-    # Convertir en sectores de 512 B.
-    SIZE=$(echo $SIZE|awk '{print $0*2}')      # (solución error de sintaxis)
-    [ $SIZE -ne 0 ] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
-    # Obtener identificador de tipo de partición.
+    # Obtener identificador de tipo de partición válido.
     ID=$(ogFsToId "$TYPE")
-    [ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+    [ "$TYPE" != "CACHE" -a -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+    # Comprobar tamaño numérico y convertir en sectores de 512 B.
+    [[ "$SIZE" == *([0-9]) ]] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
+    SIZE=$[SIZE*2]
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
         [ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
@@ -124,7 +123,7 @@ ogUnmountAll $ND 2>/dev/null
 # Si la tabla de particiones no es valida, volver a generarla.
 [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
-sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe
+sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe $DISK
 rm -f $tmpsfdisk
 [ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
 }
@@ -609,9 +608,10 @@ partprobe 2>/dev/null
 
 function ogUpdatePartitionTable ()
 {
-echo "Forzando al kernel la lectura de la tabla de particiones"
-list=`partprobe -s | cut -f1 -d: ` 2>/dev/null
-echo $list > /tmp/disk
+for i in `ogDiskToDev`
+do 
+	partprobe $i
+done
 }
 
 
@@ -727,7 +727,7 @@ PART=`ogDiskToDev $1 $2` || return $?
 
 # Elección del tipo de partición.
 ID=$(ogFsToId "$3")
-[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
+[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$3" || return $?
 
 echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 }

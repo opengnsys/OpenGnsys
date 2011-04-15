@@ -130,6 +130,31 @@ function consola_remota(ambito){
 	Ambito=ambito;
 	consola_eco(1);
 }
+
+//________________________________________________________________________________________________________
+//	
+//	Abre una ventana independiente, para ver el log del ordenador cliente
+//________________________________________________________________________________________________________
+
+
+function ver_log(ambito){
+	var nombre_ordenador=currentNodo.toma_infonodo();
+	var whref="../principal/verlog.php?nombreordenador="+nombre_ordenador;
+	window.open(whref,"","width=400,height=100,scrollbars=YES,resizable=YES")
+}
+
+//________________________________________________________________________________________________________
+//	
+//	Abre una ventana independiente, para ver el log del ordenador cliente
+//________________________________________________________________________________________________________
+
+
+function ver_log_seguimiento(ambito){
+	var nombre_ordenador=currentNodo.toma_infonodo();
+	var whref="../principal/verlogseguimiento.php?nombreordenador="+nombre_ordenador;
+	window.open(whref,"","width=400,height=100,scrollbars=YES,resizable=YES")
+}
+
 //________________________________________________________________________________________________________
 //	
 //	Abre una ventana para  mostrar el eco de una consola
@@ -334,4 +359,26 @@ function incorporarordenador(){
 	window.open(whref,"frame_contenidos")
 }
 
+function ver_boot(){
+	reset_contextual(-1,-1) // Oculta menu contextual
+	var idambito=currentNodo.toma_identificador();
+	var litambito=currentNodo.toma_sufijo();
+	var nombreambito=currentNodo.toma_infonodo();
+	//alert(idambito);
+	//alert('nombreambito' + nombreambito);
+	//alert('litambito' + litambito);
+	var whref="boot.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito
+	 window.open(whref,"frame_contenidos")
+}
+function ver_ubicarordenadores(){
+	reset_contextual(-1,-1) // Oculta menu contextual
+	var idambito=currentNodo.toma_identificador();
+	var litambito=currentNodo.toma_sufijo();
+	var nombreambito=currentNodo.toma_infonodo();
+	//alert(idambito);
+	//alert('nombreambito' + nombreambito);
+	//alert('litambito' + litambito);
+	var whref="ubicarordenadores.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito
+	 window.open(whref,"frame_contenidos")
+}
 	

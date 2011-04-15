@@ -95,10 +95,8 @@ return $CODE
 function ogGetCaller () {
 
 # Obtener el nombre del programa o del script que ha llamado al proceso actual.
-basename $(ps | grep $PPID | \
-                awk -v P=$PPID '{if ($1==P) {
-                                   if ($5~/bash/ && $6!="") print $6
-                                   else print $5; } }')
+basename $(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
+                                else print $13;}')
 }
 
 
@@ -158,3 +156,34 @@ while [ $# -gt 0 ]; do
     shift
 done
 }
+
+ogCheckProgram ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME \"str_program1 program2 programN\" " \
+		   "$FUNCNAME \"partimage partclone mbuffer\" "
+    return
+fi
+
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+local PERROR PLOG
+PERROR=0
+PLOG=" "
+for i in `echo $1`
+do
+  if [ ! `which $i` ] 
+     then
+     	PERROR=1
+     	PLOG="$PLOG $i" 
+     fi
+done
+if [ "$PERROR" == "1" ] 
+then
+	ogRaiseError $OG_ERR_NOTEXEC "$PLOG" || return $?
+else    	
+	return 0
+fi
+} 
