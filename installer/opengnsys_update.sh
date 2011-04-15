@@ -36,7 +36,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL="/http://$OPENGNSYS_SERVER/svn/trunk/"
+    SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
     DEPS="$DEPS subversion"
 fi
 
