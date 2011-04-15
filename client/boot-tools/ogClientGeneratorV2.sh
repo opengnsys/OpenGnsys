@@ -39,7 +39,6 @@ source $PROGRAMDIR/ogInstaller.lib
 
 echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
 
-echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
 ##########################################################################
 ## FASE 1 -  Instalación de software adicional.
 ##TO DO Integrar en el instaldor. Actualizar repositorios
@@ -60,10 +59,6 @@ fi
 ############################################## FIN FASE 1
 
 
-
-
-
-echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
 
 ############## FASE 2   - Asignación de variables
 #obtenemos las variables necesarias.

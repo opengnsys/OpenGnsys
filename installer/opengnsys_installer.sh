@@ -44,7 +44,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://$OPENGNSYS_SERVER/svn/branches/version1.0
+    SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 fi
 
 WORKDIR=/tmp/opengnsys_installer
@@ -62,13 +62,13 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 #####################################################################
 function getDateTime()
 {
-        echo `date +%Y%m%d-%H%M%S`
+        date "+%Y%m%d-%H%M%S"
 }
 
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-        echo $1
+        echo "$1"
         FECHAHORA=`getDateTime`
         echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
 }
@@ -252,9 +252,9 @@ function mysqlSetRootPassword()
 		exit 1
 	fi
 
-	local root_mysql=$1
+	local root_mysql="$1"
 	echoAndLog "${FUNCNAME}(): setting root password in MySQL server"
-	/usr/bin/mysqladmin -u root password ${root_mysql}
+	mysqladmin -u root password "$root_mysql"
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting root password in MySQL server"
 		return 1
@@ -264,7 +264,8 @@ function mysqlSetRootPassword()
 }
 
 # Si el servicio mysql esta ya instalado cambia la variable de la clave del root por la ya existente
-function mysqlGetRootPassword(){
+function mysqlGetRootPassword()
+{
 	local pass_mysql
 	local pass_mysql2
         # Comprobar si MySQL está instalado con la clave de root por defecto.
@@ -272,19 +273,18 @@ function mysqlGetRootPassword(){
 		echoAndLog "${FUNCNAME}(): Using default mysql root password."
         else
 	        stty -echo
-	        echo "Existe un servicio mysql ya instalado"
-	        read -p  "Insertar clave de root de Mysql: " pass_mysql
+	        echo "There is a MySQL service already installed."
+	        read -p "Enter MySQL root password: " pass_mysql
 	        echo ""
-	        read -p "Confirmar clave:" pass_mysql2
+	        read -p "Confrim password:" pass_mysql2
 	        echo ""
 	        stty echo
 	        if [ "$pass_mysql" == "$pass_mysql2" ] ;then
-		        MYSQL_ROOT_PASSWORD=$pass_mysql
-		        echo "La clave es: ${MYSQL_ROOT_PASSWORD}"
+		        MYSQL_ROOT_PASSWORD="$pass_mysql"
 		        return 0
 	        else
-	        	echo "Las claves no coinciden no se configura la clave del servidor de base de datos."
-	        	echo "las operaciones con la base de datos daran error"
+			echo "The keys don't match. Do not configure the server's key,"
+	        	echo "transactions in the database will give error."
 	        	return 1
 	        fi
 	fi
@@ -294,18 +294,18 @@ function mysqlGetRootPassword(){
 function mysqlTestConnection()
 {
 	if [ $# -ne 1 ]; then
-		errorAndLog "mysqlTestConnection(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
-	echoAndLog "mysqlTestConnection(): checking connection to mysql..."
+	echoAndLog "${FUNCNAME}(): checking connection to mysql..."
 	echo "" | mysql -uroot -p"${root_password}"
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlTestConnection(): connection to mysql failed, check root password and if daemon is running!"
+		errorAndLog "${FUNCNAME}(): connection to mysql failed, check root password and if daemon is running!"
 		return 1
 	else
-		echoAndLog "mysqlTestConnection(): connection success"
+		echoAndLog "${FUNCNAME}(): connection success"
 		return 0
 	fi
 }
@@ -314,19 +314,19 @@ function mysqlTestConnection()
 function mysqlDbExists()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlDbExists(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local database=$2
-	echoAndLog "mysqlDbExists(): checking if $database exists..."
+	echoAndLog "${FUNCNAME}(): checking if $database exists..."
 	echo "show databases" | mysql -uroot -p"${root_password}" | grep "^${database}$"
 	if [ $? -ne 0 ]; then
-		echoAndLog "mysqlDbExists():database $database doesn't exists"
+		echoAndLog "${FUNCNAME}():database $database doesn't exists"
 		return 1
 	else
-		echoAndLog "mysqlDbExists():database $database exists"
+		echoAndLog "${FUNCNAME}():database $database exists"
 		return 0
 	fi
 }
@@ -334,24 +334,24 @@ function mysqlDbExists()
 function mysqlCheckDbIsEmpty()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlCheckDbIsEmpty(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local database=$2
-	echoAndLog "mysqlCheckDbIsEmpty(): checking if $database is empty..."
+	echoAndLog "${FUNCNAME}(): checking if $database is empty..."
 	num_tablas=`echo "show tables" | mysql -uroot -p"${root_password}" "${database}" | wc -l`
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlCheckDbIsEmpty(): error executing query, check database and root password"
+		errorAndLog "${FUNCNAME}(): error executing query, check database and root password"
 		exit 1
 	fi
 
 	if [ $num_tablas -eq 0 ]; then
-		echoAndLog "mysqlCheckDbIsEmpty():database $database is empty"
+		echoAndLog "${FUNCNAME}():database $database is empty"
 		return 0
 	else
-		echoAndLog "mysqlCheckDbIsEmpty():database $database has tables"
+		echoAndLog "${FUNCNAME}():database $database has tables"
 		return 1
 	fi
 
@@ -416,20 +416,20 @@ function mysqlCreateDb()
 function mysqlCheckUserExists()
 {
 	if [ $# -ne 2 ]; then
-		errorAndLog "mysqlCheckUserExists(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
 	local root_password="${1}"
 	local userdb=$2
 
-	echoAndLog "mysqlCheckUserExists(): checking if $userdb exists..."
+	echoAndLog "${FUNCNAME}(): checking if $userdb exists..."
 	echo "select user from user where user='${userdb}'\\G" |mysql -uroot -p"${root_password}" mysql | grep user
 	if [ $? -ne 0 ]; then
-		echoAndLog "mysqlCheckUserExists(): user doesn't exists"
+		echoAndLog "${FUNCNAME}(): user doesn't exists"
 		return 1
 	else
-		echoAndLog "mysqlCheckUserExists(): user already exists"
+		echoAndLog "${FUNCNAME}(): user already exists"
 		return 0
 	fi
 
@@ -439,7 +439,7 @@ function mysqlCheckUserExists()
 function mysqlCreateAdminUserToDb()
 {
 	if [ $# -ne 4 ]; then
-		errorAndLog "mysqlCreateAdminUserToDb(): invalid number of parameters"
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
@@ -448,7 +448,7 @@ function mysqlCreateAdminUserToDb()
 	local userdb=$3
 	local passdb=$4
 
-	echoAndLog "mysqlCreateAdminUserToDb(): creating admin user ${userdb} to database ${database}"
+	echoAndLog "${FUNCNAME}(): creating admin user ${userdb} to database ${database}"
 
 	cat > $WORKDIR/create_${database}.sql <<EOF
 GRANT USAGE ON *.* TO '${userdb}'@'localhost' IDENTIFIED BY '${passdb}' ;
@@ -457,11 +457,11 @@ FLUSH PRIVILEGES ;
 EOF
 	mysql -u root --password=${root_password} < $WORKDIR/create_${database}.sql
 	if [ $? -ne 0 ]; then
-		errorAndLog "mysqlCreateAdminUserToDb(): error while creating user in mysql"
+		errorAndLog "${FUNCNAME}(): error while creating user in mysql"
 		rm -f $WORKDIR/create_${database}.sql
 		return 1
 	else
-		echoAndLog "mysqlCreateAdminUserToDb(): user created ok"
+		echoAndLog "${FUNCNAME}(): user created ok"
 		rm -f $WORKDIR/create_${database}.sql
 		return 0
 	fi
@@ -549,8 +549,9 @@ function getNetworkSettings()
 ### Esqueleto para el Servicio pxe y contenedor tftpboot ###
 ############################################################
 
-function tftpConfigure() {
-        echo "Configurando el servicio tftp"
+function tftpConfigure()
+{
+        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         basetftp=/var/lib/tftpboot
 
         # reiniciamos demonio internet ????? porque ????
@@ -580,10 +581,11 @@ EOF
         chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP ${basetftp}
 }
 
-function testPxe () {
+function testPxe ()
+{
+        echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
         cd /tmp
-        echo "comprobando servicio pxe ..... Espere"
-        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echo "servidor tftp OK" || echo "servidor tftp KO"
+        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
         cd /
 }
 
@@ -695,7 +697,7 @@ function nfsAddExport()
 ########################################################################
 function smbConfigure()
 {
-	echoAndLog "${FUNCNAME}(): Configure Samba server."
+	echoAndLog "${FUNCNAME}(): Configuring Samba service."
 
 	backupFile /etc/samba/smb.conf
 	
@@ -867,7 +869,8 @@ function openGnsysInstallCreateDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function openGnsysCopyServerFiles () {
+function openGnsysCopyServerFiles ()
+{
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
@@ -878,11 +881,7 @@ function openGnsysCopyServerFiles () {
 	# No se copian los ficheros del cliente antiguo:
 	# - client/boot/initrd-generator ==> /opt/opengnsys/bin
         # - client/boot/upgrade-clients-udeb.sh ==> /opt/opengnsys/bin
-        # - client/boot/udeblist.conf ==> /opt/opengnsys/etc
-        # - client/boot/udeblist-jaunty.conf ==> /opt/opengnsys/etc
-        # - client/boot/udeblist-karmic.conf ==> /opt/opengnsys/etc
-        # - client/boot/udeblist-lucid.conf ==> /opt/opengnsys/etc
-        # - client/boot/udeblist-maverick.conf ==> /opt/opengnsys/etc
+        # - client/boot/udeblist*.conf ==> /opt/opengnsys/etc
 	local SOURCES=( server/tftpboot/pxelinux.cfg \
                         server/bin \
                         repoman/bin \
@@ -1087,8 +1086,8 @@ function openGnsysClientCreate()
 	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
 	rm -f $TMPFILE
 	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
-	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
-	ln $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
+	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
@@ -1163,9 +1162,6 @@ echo
 echoAndLog "OpenGnSys installation begins at $(date)"
 pushd $WORKDIR
 
-# Detener servicios de OpenGnSys, si están activos previamente.
-[ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
-
 # Comprobar si hay conexión y detectar parámetros de red por defecto.
 checkNetworkConnection
 if [ $? -ne 0 ]; then
@@ -1180,6 +1176,9 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error reading default network settings."
 	exit 1
 fi
+
+# Detener servicios de OpenGnSys, si están activos previamente.
+[ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
 # Actualizar repositorios
 apt-get update

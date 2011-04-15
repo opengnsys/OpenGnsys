@@ -19,6 +19,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #354	Bloqueos mejoras: funciones repetidas (no se resolverá)
 #355	Error al cambiar partición de NTFS a EXT[234]
 #358	ogCreateCache e initCache: No comprueba si se está usando la cuarta partición (no se resolverá)
+#369	Reducir posibles errores en transferencia multicast
 
 Tickets resueltos en módulo OpenGnSys Client:
 #93	Gestionar una estructura de directorios Linux debootstrap para enlazarlo al Initrd
@@ -36,6 +37,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #334	OgClient en modo admin: problemas al escribir en el repo
 #336	Regenerar el cliente ogclient-1.0-lucid-32bit.tar.gz
 #360	Importar herramientas de generación del cliente desde la rama ogClient (mejora)
+#368	Generar nuevo cliente como boot-tools
 
 Tickets resueltos en módulo OpenGnSys Server:
 #350	ogAdmAgent no se inicia
@@ -74,6 +76,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #365	Comprobar conectividad http y svn en el instalador
 
 Tickets genéricos resueltos:
+#362	Convertir versión 1.0 en rama principal de desarrollo
 
 
 Lista de cambios incluidos en OpenGnSys 0.10
