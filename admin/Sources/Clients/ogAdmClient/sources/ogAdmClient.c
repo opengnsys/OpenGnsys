@@ -1132,7 +1132,7 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 
 	nfn=copiaParametro("nfn",ptrTrama);
 	ids=copiaParametro("ids",ptrTrama);
-
+	muestraMensaje(7,NULL);
 	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(2,NULL);
 		sprintf(interface,"%s/%s",pathinterface,nfn);
@@ -1197,7 +1197,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 	muestraMensaje(3,NULL);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
-	sprintf(parametros,"%s %s %s %s %s",nfn,dsk,par,nci,ipr);
+	sprintf(parametros,"%s %s %s %s %s %s",nfn,dsk,par,nci,ipr,ptc);
 	herror=interfaceAdmin(interface,parametros,NULL);
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
