@@ -1,6 +1,26 @@
 #!/bin/bash
-# createImage - Scirpt de ejemplo para crear una imagen de un sistema de archivos.
-# (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+
+#/**
+#         createImage
+#@brief   Scirpt de ejemplo para crear una imagen de un sistema de archivos.
+#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#@param 1 disco 
+#@param 2 particion 
+#@param 3 REPO|CACHE
+#@param 4 imagen
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_NOTCACHE   #si cache no existe.
+#@exception OG_ERR_REDUCEFS     #error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS     #errror al expandir el sistema de archivos.
+#@note   
+#@todo: 
+#@version 1.0 - control de errores para el ogAdmServer
+#@author  
+#@date    
+#*/ ##
+
+
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -17,7 +37,7 @@ IMGEXT="img"
 # Si el repositorio es CACHE comprobamos que exista
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
     if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTFOUND "CACHE"
+        ogRaiseError $OG_ERR_NOTCACHE "$MSG_ERR_NOTCACHE"
         exit $?
     fi
 fi
@@ -47,7 +67,7 @@ ogUnmount $1 $2
 ogCheckFs $1 $2
 
 echo "[30]: Reducir sistema de archivos."
-ogReduceFs $1 $2 || exit 1
+ogReduceFs $1 $2 || $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; exit $?)
 
 # Crear la imagen.
 echo "[40] Crear imagen."
@@ -55,7 +75,8 @@ ogCreateImage $1 "$2" $3 $4 "$IMGPROG" "$IMGCOMP" || exit $?
 #ogCreateImage $1 "$2" $3 $4 || exit $?
 
 echo "[90] Extender sistema de archivos."
-ogExtendFs $1 $2
+ogExtendFs $1 $2 || $(ogRaiseError $OG_ERR_EXTENDFS "$1 $2"; exit $?)
+
 
 TIME=$[SECONDS-TIME1]
 echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
