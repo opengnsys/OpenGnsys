@@ -77,4 +77,27 @@ export OG_ERR_LOCKED=4		# Partición o fichero bloqueado.
 export OG_ERR_IMAGE=5		# Error al crear o restaurar una imagen.
 export OG_ERR_NOTOS=6		# Sin sistema operativo.
 export OG_ERR_NOTEXEC=7		# Programa o función no ejecutable.
+#codigo 8-13 reservados por ogAdmClient.h
+export OG_ERR_NOTWRITE=14	# No hay acceso de escritura
+export OG_ERR_NOTCACHE=15	# No hay particion cache en cliente
+export OG_ERR_CACHESIZE=16	# No hay espacio en la cache para almacenar fichero-imagen
+export OG_ERR_REDUCEFS=17	# Error al reducir sistema archivos
+export OG_ERR_EXTENDFS=18	# Error al expandir el sistema de archivos
+
+export OG_ERR_IMGSIZEPARTITION=30   #Error al restaurar: Particion mas pequeña que la imagen. 
+
+export OG_ERR_UCASTSYNTAXT=50  # Error en la generación de sintaxis de transferenica unicast
+export OG_ERR_UCASTSENDPARTITION=51  # Error en envio UNICAST de una particion
+export OG_ERR_UCASTSENDFILE=52  # Error en envio UNICAST de un fichero
+export OG_ERR_UCASTRECEIVERPARTITION=53  #Error en la recepcion UNICAST de una particion
+export OG_ERR_UCASTRECEIVERFILE=54  #Error en la recepcion UNICAST de un fichero
+export OG_ERR_MCASTSYNTAXT=55 # Error en la generacion de sintaxis de transferenica Multicast.
+export OG_ERR_MCASTSENDFILE=56  # Error en envio MULTICAST de un fichero
+export OG_ERR_MCASTRECEIVERFILE=57  #Error en la recepcion MULTICAST de un fichero
+export OG_ERR_MCASTSENDPARTITION=58  # Error en envio MULTICAST de una particion
+export OG_ERR_MCASTRECEIVERPARTITION=59  # Error en la recepcion MULTICAST de una particion
+export OG_ERR_PROTOCOLJOINMASTER=60 # Error en la conexion de una sesion UNICAST|MULTICAST con el MASTER
+
+
+
 
