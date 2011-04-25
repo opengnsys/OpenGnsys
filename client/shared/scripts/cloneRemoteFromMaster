@@ -103,6 +103,7 @@ case $MASTERIP in
 		fi 
 		echo $MODEMASTER
 		# Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}
+					
 		case "$MODEMASTER" in
 			SENDPARTITION)
 				echo "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves"
@@ -152,12 +153,22 @@ case $MASTERIP in
 				REDSIZE=$(ogGetImageSize $2 $3)
 				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
 				faucet 4000 --out echo "READY $TOOLCLONE $COMPRESOR $REDSIZE" &
-				echo "[29] ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
-				ogMcastSendFile  $2 $3.img $SESSIONMCASTSERVER	|| RETVAL=$?			
+				case $PROTOCOL in
+					MULTICAST|multicast)
+						echo "[29] ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
+						ogMcastSendFile  $2 $3.img $SESSIONMCASTSERVER	|| RETVAL=$?
+						;;
+ 					UNICAST|unicast)
+ 						sleep 60
+ 						echo "[29] ogUcastSendFile $2 $3.img $SESSIONUCASTSERVER"
+ 						ogUcastSendFile $2 $3.img $SESSIONUCASTSERVER || RETVAL=$?
+ 					;;
+ 				esac							
 				pkill faucet	
 			;;
 		esac
-		exit $RETVAL
+		#exit $RETVAL
+        exit 0
 		# FIN Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}
 	;;
 	*)

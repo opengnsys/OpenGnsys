@@ -8,6 +8,9 @@
 #@warning License: GNU GPLv3+
 #*/
 
+
+##################### FUNCIONES UNICAST ################
+
 #/**
 #         ogUcastSyntax
 #@brief   Función para generar la instrucción de transferencia de datos unicast
@@ -27,7 +30,7 @@
 #*/ ##
       
 
-##################### FUNCIONES UNICAST ################
+
 
 function ogUcastSyntax ()
 {
@@ -123,10 +126,10 @@ SENDPARTITION)
 		echo "$SYNTAXCLIENT | $COMPRESSOR | $TOOLS "
 	;;
 	SENDFILE)
-		echo "$SYNTAXSERVER --file $3"
+		echo "$SYNTAXSERVER -i $3"
     ;;
     RECEIVERFILE)
-		echo "$SYNTAXCLIENT --file $3"
+		echo "$SYNTAXCLIENT -i $3"
     ;;
    *)
    ;;
@@ -233,6 +236,86 @@ else
 	echo $COMMAND
 	eval $COMMAND || ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " "; return $?
 fi
+}
+
+
+
+#/**
+#         ogUcastSendFile [ str_repo | int_ndisk int_npart ] /Relative_path_file  sessionMulticast
+#@brief   Envía un fichero por unicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param (2 parámetros)  $1 path_aboluto_fichero  $2 sesionMcast
+#@param (3 parámetros)  $1 Contenedor REPO|CACHE $2 path_absoluto_fichero $3 sesionMulticast
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero $4 sesionMulticast
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_NOTFOUND
+#@exception OG_ERR_UCASTSENDFILE
+#@note    Requisitos: 
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+# 
+
+function ogUcastSendFile ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
+
+
+#ARGS usado para controlar ubicación de la sesion multicast
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] /Relative_path_file sesionMcast(puerto:ip:ip:ip)" \
+           "$FUNCNAME  1 1 /aula1/winxp.img 8000:172.17.36.11:172.17.36.12" \
+           "$FUNCNAME  REPO /aula1/ubuntu.iso sesionUcast" \
+           "$FUNCNAME  CACHE /aula1/winxp.img sesionUcast" \
+           "$FUNCNAME  /opt/opengnsys/images/aula1/hd500.vmx sesionUcast"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.               */ (Comentrio Doxygen)
+        SOURCE=$(ogGetPath "$1")
+        ARG=2
+        DEVICE="$1"
+		;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        ARG=4
+        DEVICE="$1 $2 $3"
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        ARG=3
+        DEVICE="$1 $2 "
+        ;;
+esac
+
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Comprobar fichero origen
+ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
+
+
+
+SESSION=${!ARG}
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogUcastSyntax "SENDFILE" "$SESSION" "$SOURCE"`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTSENDFILE " "; return $?
+fi
+
 }
 
 

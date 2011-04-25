@@ -91,7 +91,7 @@ where repositorios.idrepositorio=(select idrepositorio from ordenadores where or
 		if($cantRegistros>0){
 			$rs->Primero(); 
 			while (!$rs->EOF){
-				$SelectHtml.='<OPTION value=" CACHE /'.$rs->campos["nombreca"].'"';				
+				$SelectHtml.='<OPTION value=" REPO /'.$rs->campos["nombreca"].'"';				
 				$SelectHtml.='>';
 				$SelectHtml.='IMG-REPO: ' . $rs->campos["nombreca"].'</OPTION>';
 				$rs->Siguiente();
