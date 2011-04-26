@@ -431,7 +431,7 @@ CERROR="8x8/128"
 which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' " 
 
 # Generamos la instrucción base de multicast -Envio,Recepcion-
-SYNTAXSERVER="udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
+SYNTAXSERVER="udp-sender $MBUFFER --nokbd --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
 SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
 
 
