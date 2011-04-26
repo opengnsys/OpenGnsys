@@ -711,11 +711,8 @@ function smbConfigure()
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
 	fi
-	# Crear usuario de acceso a los recursos y establecer permisos.
-	useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
+	# Crear usuario de acceso a los recursos.
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
-	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
 
 	echoAndLog "${FUNCNAME}(): Added Samba configuration."
 	return 0
@@ -835,17 +832,17 @@ function makeDoxygenFiles()
 
 
 # Crea la estructura base de la instalación de opengnsys
-function openGnsysInstallCreateDirs()
+function createDirs()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local path_opengnsys_base=$1
+	local path_opengnsys_base="$1"
 
+	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in $path_opengnsys_base"
-
 	mkdir -p $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/bin
 	mkdir -p $path_opengnsys_base/client
@@ -853,14 +850,35 @@ function openGnsysInstallCreateDirs()
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
 	mkdir -p $path_opengnsys_base/log/clients
+	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
 	ln -fs /var/lib/tftpboot $path_opengnsys_base
-	ln -fs $path_opengnsys_base/log /var/log/opengnsys
-
+	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
+		return 1
+	fi
+
+	# Crear usuario ficticio.
+	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then 
+		echoAndLog "${FUNCNAME}(): OpenGnSys user is already created"
+	else
+		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
+		useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
+			return 1
+		fi
+	fi
+
+	# Establecer los permisos básicos.
+	echoAndLog "${FUNCNAME}(): setting directory permissions"
+	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
 	fi
 
@@ -1195,7 +1213,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Arbol de directorios de OpenGnSys.
-openGnsysInstallCreateDirs ${INSTALL_TARGET}
+createDirs ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while creating directory paths!"
 	exit 1

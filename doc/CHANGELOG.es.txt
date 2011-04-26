@@ -11,7 +11,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #286	Parámetro debug para el engine
 #291	Creación de imagenes desde el modo user
 #298	Tratamientos de bloqueos de imágenes para solucionar problemas de concurrencia (mejora)
-#305	Integración engine version 1.0
+#305	Integración engine versión 1.0
 #309	Integración create/restoreImage Trunk y Testing: extensión .img
 #337	Scripts cliente: reboot|poweroff sleep antes de llamar a Busybox (no se resolverá)
 #342	ogGetImageInfo() Partclone size MB GB
@@ -29,7 +29,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #189	Añadir las variables de entorno y Engine en las consolas tty2-tty7 y remotas
 #243	Browser incluye terminal con letra monospace y barra de estado en UTF-8 (mejora)
 #288	Integración modulo netboot
-#294	Integración activacion wol del cliente
+#294	Integración activación Wake On LAN del cliente
 #303	Integración proceso arranque cliente versión 1.0
 #304 	Integración interface adm versión 1.0
 #314 	SMB punto acceso 2nd FileSystem del cliente [tftpboot] [ogboot]
@@ -45,6 +45,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #188	Al restaurar por torrent el BitFile no se crea siempre
 #300	Integración binarios del repo
+#384	Se ha portado una versión antigua del script sendFileMcast
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #126	Integración de consola Web con bittorent (mejora)
@@ -54,11 +55,13 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #258	Error al eliminar un perfil de software
 #266	Información unidades en tamaño de la caché
 #268	Erratas en texto de formularios
-#301	Integración modulos web versión 1.0
-#302	Integración base de datos version 1.0
-#306	Asistente Clonacion Particiones Remotas no genera código
+#301	Integración módulos web versión 1.0
+#302	Integración base de datos versión 1.0
+#306	Asistente Clonación Particiones Remotas no genera código
 #307	Asistente Deploy de Imagenes no muestra nombres de imágenes
+#308	Asistente Deploy de Imagenes - multicast: no lanza el repo
 #310	Instalar: no genera las propiedades del repositorio por defecto en la consola (duplicado de #248)
+#315	OpenGnSys distribuido: CloneRemoteFromPartition en Unicast
 #338	Validación de formularios de la consola web
 #339	Añadir opción de apagado en cliente sin menú asociado (mejora)
 #349	Botón de confirmación en gestor de arranque
@@ -68,12 +71,13 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #299	Instalador para la versión 1.0
-#312	instalador: torrent-tracker no se se instala
+#312	Instalador: torrent-tracker no se se instala
 #313	Instalador: no genera la estrucutra para el cliente
 #316	Error en opengnsys_update.sh al copiar archivos de servicios
 #335	Error en opengnsys_update.sh al descomprimir cliente
 #361	Actualizador debe aplicar cambios en la estructura de base de datos
 #365	Comprobar conectividad http y svn en el instalador
+#366	Fichero interfaceAdm/CambiarAcceso no se instala con los correspondientes permisos para el grupo
 
 Tickets genéricos resueltos:
 #362	Convertir versión 1.0 en rama principal de desarrollo
@@ -91,7 +95,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #276	Error de CRC al restaurar imágenes con Partclone
 #292	Error de CRC al restaurar o crear imagen (duplicado de #276)
 #290	ogReduceFs en Ext[234]
-#293	createImageTesting incluye el redimensionado de la particion origen pero luego no la expande
+#293	createImageTesting incluye el redimensionado de la partición origen pero luego no la expande
 #297	Error al detectar tipo de partición Linux marcada como activa
 
 Tickets resueltos en módulo OpenGnSys Client:
@@ -118,7 +122,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #254	Consola Web: particionar y formatear
 #259	Consola Web: información de un repositorio
 #282 	Gestión web de log
-#283	Gestor de activacion/desactivacion modulos web
+#283	Gestor de activación/desactivación módulos web
 #284 	Modulo web: propiedades aula/equipos combo box para elementos netboot
 #285	Modulo web: propiedades aula/equipos combo box para elementos netboot
 
@@ -136,7 +140,7 @@ Lista de cambios incluidos en OpenGnSys 0.9.2
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #159	No reconoce Ubuntu 10.04
-#165	funcion torrent no migrada correctamente desde el branch
+#165	Función torrent no migrada correctamente desde el branch
 #166	Errores Particionando y Formateando
 #172	Protocol.lib Error control nº parámetros sesión multicast de cliente
 #178	Adaptar funciones de generación y restauración de imágenes monolíticas
@@ -208,9 +212,9 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #17	Arrancar Windows Vista
 #38	Documentar codigo shell scripts linux con doxygen
 #50 	Ayuda en las funciones
-#52 	funcion generacion documentacion doxygen para bash
+#52 	Función generación documentación Doxygen para BASH
 #58 	Utilizar formato de ayuda y función ogHelp
-#61 	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de particion en cuestión
+#61 	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de partición en cuestión
 #71 	ogListPartitions falla con partición extendida
 #73 	Mensajes de error en particiones vacías
 #75 	Arrancar sistemas Linux en partición distinta a la original 
@@ -222,8 +226,8 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #101	trunk Disk.lib error linea 445
 #109	ogSetPartitionId no modifica bien el identificador de la partición
 #110	ogCreatePartitions no llama a ogTypeToId
-#111	ogFormatFS no reconoce el tipo de partiticion CACHE
-#121    ogCreatePartitions revision 813
+#111	ogFormatFS no reconoce el tipo de partitición CACHE
+#121    ogCreatePartitions revisión 813
 
 Tickets resueltos en módulo OpenGnSys Client:
 #11 	Páginas de inicio estilo rembo
@@ -232,7 +236,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #41 	Usar kernel 2.6.30 o superior en los clientes (mejora)
 #55  	Incluir tune2fs y resize2fs en cliente Initrd
 #56 	Montar particiones ReiserFS en cliente Initrd
-#59 	añadir mkfs para los sitemas ext al cliente initrd
+#59 	Añadir mkfs para los sitemas Ext al cliente initrd
 #60 	default de preinit no inicia el sistema
 #67 	Cliente QT no importa NFS
 #68 	Cliente no encuentra el subdirectorio de logs
@@ -240,13 +244,13 @@ Tickets resueltos en módulo OpenGnSys Client:
 #84 oginit considera siempre al servidor dhcp como si fuese el servidor opengnsys
 #105    El browser del cliente no detecta algunos ratones
 #106    Añadir al busybox del initrd soporte de configuración de red (no se resolverá)
-#118    Funcion ogGetIpAddress no obtiene la ip adecuadamente
+#118    Función ogGetIpAddress no obtiene la ip adecuadamente
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #10 	Consola no detecta bien el inventario de hardware
 #19	Integrar las bases de datos (tarea)
 #20	Creación de scripts de instalación (no se ressolverá)
-#25 	Interfaz web: Problemas con la creacion de entidades
+#25 	Interfaz web: Problemas con la creación de entidades
 #34 	Unificar codificación de caracteres en interfaz web
 #42 	Error en menú opciones ordenador (tarea)
 #54 	Gestión de usuarios
@@ -277,7 +281,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #95     Petición de clave rootMySQL en reintento de instalación tar.gz
 #102	Fallo en el instalador
 #103	ogAdmClient.cfg no compatible con el instalacion (lineas en blanco al final)
-#104	el instalador no configura bien el dhcp, nfs-export
+#104	El instalador no configura bien el dhcp, nfs-export
 #107    Actualizador da error si no se ha eliminado el directorio de /tmp
 #123    Creación de usuarios por defecto en el instalador
 

@@ -357,8 +357,8 @@ function makeDoxygenFiles()
 # Crea la estructura base de la instalación de opengnsys
 function createDirs()
 {
+	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
-
 	mkdir -p ${INSTALL_TARGET}
 	mkdir -p ${INSTALL_TARGET}/bin
 	mkdir -p ${INSTALL_TARGET}/client
@@ -366,14 +366,35 @@ function createDirs()
 	mkdir -p ${INSTALL_TARGET}/etc
 	mkdir -p ${INSTALL_TARGET}/lib
 	mkdir -p ${INSTALL_TARGET}/log/clients
+	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	mkdir -p ${INSTALL_TARGET}/sbin
 	mkdir -p ${INSTALL_TARGET}/www
 	mkdir -p ${INSTALL_TARGET}/images
 	ln -fs /var/lib/tftpboot ${INSTALL_TARGET}
-	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
-
+	mkdir -p ${INSTALL_TARGET}/tftpboot/pxelinux.cfg
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
+		return 1
+	fi
+
+	# Crear usuario ficticio.
+	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then
+		echoAndLog "${FUNCNAME}(): OpenGnSys user is already created"
+	else
+		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
+		useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
+			return 1
+		fi
+	fi
+
+	# Establecer los permisos básicos.
+	echoAndLog "${FUNCNAME}(): setting directory permissions"
+	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
 	fi
 
