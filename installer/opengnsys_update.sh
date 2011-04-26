@@ -378,11 +378,11 @@ function createDirs()
 	fi
 
 	# Crear usuario ficticio.
-	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then
-		echoAndLog "${FUNCNAME}(): OpenGnSys user is already created"
+	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
+		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\"is already created"
 	else
 		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
-		useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
+		useradd $OPENGNSYS_CLIENTUSER 2>/dev/null
 		if [ $? -ne 0 ]; then
 			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
 			return 1
@@ -391,8 +391,8 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
-	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1

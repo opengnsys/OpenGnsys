@@ -711,7 +711,7 @@ function smbConfigure()
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
 	fi
-	# Crear usuario de acceso a los recursos.
+	# Crear clave para usuario de acceso a los recursos.
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
 
 	echoAndLog "${FUNCNAME}(): Added Samba configuration."
@@ -863,7 +863,7 @@ function createDirs()
 
 	# Crear usuario ficticio.
 	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then 
-		echoAndLog "${FUNCNAME}(): OpenGnSys user is already created"
+		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENT_USER\" is already created"
 	else
 		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
 		useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
