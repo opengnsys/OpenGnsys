@@ -1151,7 +1151,7 @@ function installationSummary()
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
 	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
-	perl -pi -e "s/($| r[0-9])*/ $REVISION/" $VERSIONFILE
+	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
 	# Mostrar información.
 	echo

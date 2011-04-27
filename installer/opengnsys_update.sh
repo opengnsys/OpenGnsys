@@ -36,9 +36,9 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
     DEPS="$DEPS subversion"
 fi
+SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -379,7 +379,7 @@ function createDirs()
 
 	# Crear usuario ficticio.
 	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
-		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\"is already created"
+		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\" is already created"
 	else
 		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
 		useradd $OPENGNSYS_CLIENTUSER 2>/dev/null
