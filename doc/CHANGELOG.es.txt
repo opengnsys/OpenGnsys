@@ -23,6 +23,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 
 Tickets resueltos en módulo OpenGnSys Client:
 #93	Gestionar una estructura de directorios Linux debootstrap para enlazarlo al Initrd
+#115	ogAdmClient no lee correctamente el fichero de configuración
 #131	Generar paquetes deb para el cliente (no se resolverá)
 #162	Optimizar el uso del fichero-disco con particiones para su uso en entorno virtualizado (mejora)
 #163	Incluir en el cliente la clave autorizada rsa ssh del servidor

@@ -538,6 +538,28 @@ function updateClient()
 	echoAndLog "${FUNCNAME}(): Client update successfully"
 }
 
+# Resumen de actualización.
+function updateSummary()
+{
+	# Actualizar fichero de versión y revisión.
+	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print " r"$2}')
+
+	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
+	if grep -q " r[0-9]*$" $VERSIONFILE 2>/dev/null; then
+		echo " $REVISION" >>$VERSIONFILE
+	else
+		perl -pi -e "s/ r[0-9]*/$REVISION/" $VERSIONFILE
+	fi
+
+	echo
+	echoAndLog "OpenGnSys Update Summary"
+        echo       "========================"
+        echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echo
+}
+
+
 
 #####################################################################
 ####### Proceso de actualización de OpenGnSys
@@ -636,6 +658,9 @@ updateServicesStart
 if [ -f /tmp/dstate ]; then
 	rm -f /tmp/dstate
 fi
+
+# Mostrar resumen de actualización.
+updateSummary
 
 #rm -rf $WORKDIR
 echoAndLog "OpenGnSys update finished at $(date)"

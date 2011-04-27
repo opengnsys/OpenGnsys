@@ -44,8 +44,8 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 fi
+SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -1147,10 +1147,18 @@ function openGnsysConfigure()
 
 function installationSummary()
 {
+	# Crear fichero de versión y revisión, si no existe.
+	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
+	if ! grep -q "r[0-9]*$" $VERSIONFILE 2>/dev/null; then
+		LANG=C svn info $SVN_URL|awk '/Revision:/ {print " r"$2}' >>$VERSIONFILE
+	fi
+
+	# Mostrar información.
 	echo
 	echoAndLog "OpenGnSys Installation Summary"
 	echo       "=============================="
-	echoAndLog "Project version:                  $(cat $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)"
+	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration file:          /etc/dhcp3/dhcpd.conf"
