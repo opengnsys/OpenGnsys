@@ -1149,10 +1149,9 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
-	if ! grep -q "r[0-9]*$" $VERSIONFILE 2>/dev/null; then
-		LANG=C svn info $SVN_URL|awk '/Revision:/ {print " r"$2}' >>$VERSIONFILE
-	fi
+	perl -pi -e "s/($| r[0-9])*/ $REVISION/" $VERSIONFILE
 
 	# Mostrar información.
 	echo
