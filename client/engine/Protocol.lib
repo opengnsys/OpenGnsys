@@ -2,15 +2,18 @@
 #/**
 #@file    Protocol.lib
 #@brief   Librería o clase Protocol
-#@class   FileTransfer
+#@class   Protocol
 #@brief   Funciones para transmisión de datos
-#@version 0.91
+#@version 1.0
 #@warning License: GNU GPLv3+
 #*/
 
+
+##################### FUNCIONES UNICAST ################
+
 #/**
 #         ogUcastSyntax
-#@brief   Función para generar la instrucción de ejucucion la transferencia de datos unicast
+#@brief   Función para generar la instrucción de transferencia de datos unicast
 #@param 1 Tipo de operación [ SENDPARTITION RECEIVERPARTITION SENDFILE RECEIVERFILE ] 
 #@param 2 Sesion Unicast 
 #@param 3 Dispositivo (opción PARTITION) o fichero(opción FILE) que será enviado.
@@ -18,16 +21,16 @@
 #@param 5 Tools de compresion (opcion PARTITION) 
 #@return  instrucción para ser ejecutada.
 #@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_UCASTSYNTAXT     formato de la sesion unicast incorrecta.
 #@note    Requisitos: mbuffer
-#@todo    
+#@todo: controlar que mbuffer esta disponible para los clientes.
 #@version 1.0 - 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2011/03/09
 #*/ ##
-#/**
-#         
+      
 
-##################### FUNCIONES UNICAST ################
+
 
 function ogUcastSyntax ()
 {
@@ -50,7 +53,7 @@ if [ "$*" == "help" -o "$2" == "help" ]; then
 fi
 PERROR=0
 
-#TODO: controlar que mbuffer esta disponible para los clientes.
+
 
 
 # Error si no se reciben $PARM parámetros.
@@ -99,14 +102,13 @@ DEVICE=$3
 if [ "$PARM" == "5" ]
 then
 	# 4 param check 
-	ogCheckStringInGroup "$4" "partclone partimage ntfsclone" || ogRaiseError $OG_ERR_NOTFOUND " herramienta $4 no soportada" || PERROR=10 #return $?
+	ogCheckStringInGroup "$4" "partclone PARTCLONE partimage PARTIMAGE ntfsclone NTFSCLONE" || ogRaiseError $OG_ERR_NOTFOUND " herramienta $4 no soportada" || PERROR=10 #return $?
 	TOOL=$4
-	ogCheckStringInGroup "$5" "lzop gzip 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
+	ogCheckStringInGroup "$5" "lzop gzip LZOP GZIP 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
 	LEVEL=$5
 fi
 
-
-[ "$PERROR" -gt "0" ] && return 1
+[ "$PERROR" == "0" ] || ogRaiseError $OG_ERR_UCASTSYNTAXT " $PERROR" || return $?
 
 # Generamos la instrucción base de unicast -Envio,Recepcion-
 SYNTAXSERVER="mbuffer $ADDRESS"
@@ -124,10 +126,10 @@ SENDPARTITION)
 		echo "$SYNTAXCLIENT | $COMPRESSOR | $TOOLS "
 	;;
 	SENDFILE)
-		echo "$SYNTAXSERVER --file $3"
+		echo "$SYNTAXSERVER -i $3"
     ;;
     RECEIVERFILE)
-		echo "$SYNTAXCLIENT --file $3"
+		echo "$SYNTAXCLIENT -i $3"
     ;;
    *)
    ;;
@@ -138,23 +140,26 @@ esac
 #/**
 #         ogUcastSendPartition
 #@brief   Función para enviar el contenido de una partición a multiples particiones remotas usando UNICAST.
-#@param
-#@param
-#@param
+#@param 1  disk
+#@param 2  partition
+#@param 3  sesionUcast
+#@param 4  tool image
+#@param 5  tool compresor
 #@return
-#@exception
+#@exception $OG_ERR_FORMAT
+#@exception $OG_ERR_UCASTSENDPARTITION
 #@note
-#@todo: ogIsLocked siempre devuelve 1. crear ticket
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
+#@todo: ogIsLocked siempre devuelve 1
+#@version 1.0 - 
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2011/03/09
 #*/ ##
 
-ogUcastSendPartition ()
+function ogUcastSendPartition ()
 {
 
 # Variables locales
-local PART   COMMAND
+local PART   COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -173,28 +178,37 @@ ogUnmount $1 $2
 
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogUcastSyntax SENDPARTITION "$3" $PART $4 $5`
-echo $COMMAND
-eval $COMMAND
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTSENDPARTITION " "; return $?
+fi
+
 }
 
 #/**
 #         ogUcastReceiverPartition
 #@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por UNICAST.
-#@param
-#@param
-#@param
+#@param 1   disk
+#@param 2   partition 
+#@param 3   session unicast
 #@return
-#@exception
+#@exception OG_ERR_FORMAT
+#@exception OG_ERR_UCASTRECEIVERPARTITION
 #@note
 #@todo:
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
+#@version 1.0 - Integración para OpenGNSys.
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2011/03/09
 #*/ ##
-ogUcastReceiverPartition ()
+function ogUcastReceiverPartition ()
 {
 # Variables locales
-local PART   COMMAND
+local PART   COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -210,13 +224,99 @@ PART=$(ogDiskToDev "$1" "$2") || return $?
 #ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
 ogUnmount $1 $2
 
+
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogUcastSyntax RECEIVERPARTITION "$3" $PART $4 $5`
-echo $COMMAND
-eval $COMMAND
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " "; return $?
+fi
 }
 
 
+
+#/**
+#         ogUcastSendFile [ str_repo | int_ndisk int_npart ] /Relative_path_file  sessionMulticast
+#@brief   Envía un fichero por unicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param (2 parámetros)  $1 path_aboluto_fichero  $2 sesionMcast
+#@param (3 parámetros)  $1 Contenedor REPO|CACHE $2 path_absoluto_fichero $3 sesionMulticast
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero $4 sesionMulticast
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_NOTFOUND
+#@exception OG_ERR_UCASTSENDFILE
+#@note    Requisitos: 
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+# 
+
+function ogUcastSendFile ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
+
+
+#ARGS usado para controlar ubicación de la sesion multicast
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] /Relative_path_file sesionMcast(puerto:ip:ip:ip)" \
+           "$FUNCNAME  1 1 /aula1/winxp.img 8000:172.17.36.11:172.17.36.12" \
+           "$FUNCNAME  REPO /aula1/ubuntu.iso sesionUcast" \
+           "$FUNCNAME  CACHE /aula1/winxp.img sesionUcast" \
+           "$FUNCNAME  /opt/opengnsys/images/aula1/hd500.vmx sesionUcast"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.               */ (Comentrio Doxygen)
+        SOURCE=$(ogGetPath "$1")
+        ARG=2
+        DEVICE="$1"
+		;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        ARG=4
+        DEVICE="$1 $2 $3"
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        ARG=3
+        DEVICE="$1 $2 "
+        ;;
+esac
+
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Comprobar fichero origen
+ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
+
+
+
+SESSION=${!ARG}
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogUcastSyntax "SENDFILE" "$SESSION" "$SOURCE"`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTSENDFILE " "; return $?
+fi
+
+}
 
 
 
@@ -230,13 +330,14 @@ eval $COMMAND
 #@param 5 Tools de compresion (opcion PARTITION) 
 #@return  instrucción para ser ejecutada.
 #@exception OG_ERR_FORMAT     formato incorrecto.
-#@note    Requisitos: upd-cast 2009
+#@exception OG_ERR_NOTEXEC
+#@exception OG_ERR_MCASTSYNTAXT
+#@note    Requisitos: upd-cast 2009 o superior
 #@todo    localvar  check versionudp
-#@version 0.91 - Definición de FileTransfer
+#@version 1.0 - 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
 #*/ ##
-#/**
 #         
 
 
@@ -263,7 +364,7 @@ PERROR=0
 
 #si no tenemos updcast o su version superior 2009 udpcast error.
 ISUDPCAST=$(udp-receiver --help 2>&1)
-echo $ISUDPCAST | grep start-timeout > /dev/null || ogRaiseError $OG_ERR_FORMAT "upd-cast no existe o version antigua -requerida 2009-"|| return $?
+echo $ISUDPCAST | grep start-timeout > /dev/null || ogRaiseError $OG_ERR_NOTEXEC "upd-cast no existe o version antigua -requerida 2009-"|| return $?
 
 
 # Error si no se reciben $PARM parámetros.
@@ -311,14 +412,17 @@ DEVICE=$3
 if [ "$PARM" == "5" ]
 then
 	# 4 param check 
-	ogCheckStringInGroup "$4" "partclone partimage ntfsclone" || ogRaiseError $OG_ERR_NOTFOUND " herramienta $4 no soportada" || PERROR=10 #return $?
+	ogCheckStringInGroup "$4" "partclone PARTCLONE partimage PARTIMAGE ntfsclone NTFSCLONE" || ogRaiseError $OG_ERR_NOTFOUND " herramienta $4 no soportada" || PERROR=10 #return $?
 	TOOL=$4
-	ogCheckStringInGroup "$5" "lzop gzip 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
+	ogCheckStringInGroup "$5" "lzop LZOP gzip GZIP 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
 	LEVEL=$5
 fi
 
 
-[ "$PERROR" -gt "0" ] && return 1
+if [ "$PERROR" != "0" ]; then
+	ogRaiseError $OG_ERR_MCASTSYNTAXT " $PERROR"; return $?
+fi
+
 
 # Valores estandar no configurables.
 CERROR="8x8/128"
@@ -327,7 +431,7 @@ CERROR="8x8/128"
 which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' " 
 
 # Generamos la instrucción base de multicast -Envio,Recepcion-
-SYNTAXSERVER="udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME "
+SYNTAXSERVER="udp-sender $MBUFFER --nokbd --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
 SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
 
 
@@ -362,20 +466,23 @@ esac
 #@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero $4 sesionMulticast
 #@return  
 #@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_NOTFOUND
+#@exception OG_ERR_MCASTSENDFILE
 #@note    Requisitos: 
-#@version 0.91 - Definición de Protocol.lib
+#@version 1.0 - Definición de Protocol.lib
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
 #*/ ##
-#/**
 # 
 
 function ogMcastSendFile ()
 {
 # Variables locales.
-local ARGS SOURCE TARGET COMMAND DEVICE
-#ARGS usado para controlar ubicación de la sesion multicast
+local ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
 
+#LOGFILE="/tmp/mcast.log"
+
+#ARGS usado para controlar ubicación de la sesion multicast
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] /Relative_path_file sesionMcast" \
@@ -412,11 +519,26 @@ esac
 # Comprobar fichero origen
 ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
 
+# eliminamos ficheros antiguos de log
+#rm $LOGFILE
+
 SESSION=${!ARG}
-# llamando a la funcion con param1 session $SESSION y param2 $SOURCE
+
+
+
+#generamos la instrucción a ejecutar.  
 COMMAND=`ogMcastSyntax "SENDFILE" "$SESSION" "$SOURCE"`
-echo $COMMAND
-eval $COMMAND
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDFILE " "; return $?
+	#[ -s "$LOGFILE" ] || return 21
+fi
+
 }
 
 
@@ -429,15 +551,15 @@ eval $COMMAND
 #@param (4 parámetros)  $1 sesionMcastCLIENT $2 disk $3 particion $4 path_absoluto_fichero_destino
 #@return  
 #@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_MCASTRECEIVERFILE
 #@note    Requisitos: 
-#@version 0.91 - Definición de Protocol.lib
+#@version 1.0 - Definición de Protocol.lib
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
 #*/ ##
-#/**
 # 
 
-ogMcastReceiverFile ()
+function ogMcastReceiverFile ()
 {
 
 # Variables locales.
@@ -477,30 +599,41 @@ TARGETFILE=`basename ${!ARG}`
 
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogMcastSyntax RECEIVERFILE "$1" $TARGETDIR/$TARGETFILE `
-echo $COMMAND
-eval $COMMAND
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTRECEIVERFILE " "; return $?
+	#[ -s "$LOGFILE" ] || return 21
+fi
 }
 
 #/**
 #         ogMcastSendPartition
 #@brief   Función para enviar el contenido de una partición a multiples particiones remotas.
-#@param
-#@param
-#@param
+#@param 1   disk
+#@param 2  partition
+#@param 3  session multicast
+#@param 4  tool clone
+#@param 5  tool compressor
 #@return
-#@exception
+#@exception OG_ERR_FORMAT
+#@exception OG_ERR_MCASTSENDPARTITION
 #@note
 #@todo: ogIsLocked siempre devuelve 1. crear ticket
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
 #*/ ##
 
-ogMcastSendPartition ()
+function ogMcastSendPartition ()
 {
 
 # Variables locales
-local PART   COMMAND
+local PART   COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -516,31 +649,41 @@ PART=$(ogDiskToDev "$1" "$2") || return $?
 #ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
 ogUnmount $1 $2
 
-
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogMcastSyntax SENDPARTITION "$3" $PART $4 $5`
-echo $COMMAND
-eval $COMMAND
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDPARTITION " "; return $?
+fi
+
+
 }
 
 #/**
 #         ogMcastReceiverPartition
 #@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por multicast.
-#@param
-#@param
-#@param
+#@param 1   disk
+#@param 2  partition
+#@param 3  session multicast
+#@param 4  tool clone
+#@param 5  tool compressor
 #@return
-#@exception
+#@exception $OG_ERR_FORMAT
 #@note
 #@todo:
-#@version 0.1 - Integración para OpenGNSys.
-#@author
-#@date
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
 #*/ ##
-ogMcastReceiverPartition ()
+function ogMcastReceiverPartition ()
 {
 # Variables locales
-local PART   COMMAND
+local PART   COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -558,8 +701,16 @@ ogUnmount $1 $2
 
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogMcastSyntax RECEIVERPARTITION "$3" $PART $4 $5`
-echo $COMMAND
-eval $COMMAND
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDPARTITION " "; return $?
+fi
+
 }
 
 
@@ -598,7 +749,7 @@ eval $COMMAND
 #mode=leecher  -> NO seedear mientras descarga
 #time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
 
-ogTorrentStart ()
+function ogTorrentStart ()
 {
 
 # Variables locales.
@@ -737,7 +888,7 @@ cd /tmp
 #@date
 #*/ ##
 
-ogCreateTorrent ()
+function ogCreateTorrent ()
 {
 # Variables locales.
 local ARGS ARG SOURCE EXT IPTORRENT

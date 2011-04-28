@@ -36,9 +36,9 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
     USESVN=0
 else
     USESVN=1
-    SVN_URL=http://$OPENGNSYS_SERVER/svn/branches/version1.0
     DEPS="$DEPS subversion"
 fi
+SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -357,8 +357,8 @@ function makeDoxygenFiles()
 # Crea la estructura base de la instalación de opengnsys
 function createDirs()
 {
+	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
-
 	mkdir -p ${INSTALL_TARGET}
 	mkdir -p ${INSTALL_TARGET}/bin
 	mkdir -p ${INSTALL_TARGET}/client
@@ -366,14 +366,35 @@ function createDirs()
 	mkdir -p ${INSTALL_TARGET}/etc
 	mkdir -p ${INSTALL_TARGET}/lib
 	mkdir -p ${INSTALL_TARGET}/log/clients
+	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	mkdir -p ${INSTALL_TARGET}/sbin
 	mkdir -p ${INSTALL_TARGET}/www
 	mkdir -p ${INSTALL_TARGET}/images
 	ln -fs /var/lib/tftpboot ${INSTALL_TARGET}
-	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
-
+	mkdir -p ${INSTALL_TARGET}/tftpboot/pxelinux.cfg
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
+		return 1
+	fi
+
+	# Crear usuario ficticio.
+	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
+		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\" is already created"
+	else
+		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
+		useradd $OPENGNSYS_CLIENTUSER 2>/dev/null
+		if [ $? -ne 0 ]; then
+			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
+			return 1
+		fi
+	fi
+
+	# Establecer los permisos básicos.
+	echoAndLog "${FUNCNAME}(): setting directory permissions"
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
 	fi
 
@@ -517,6 +538,24 @@ function updateClient()
 	echoAndLog "${FUNCNAME}(): Client update successfully"
 }
 
+# Resumen de actualización.
+function updateSummary()
+{
+	# Actualizar fichero de versión y revisión.
+	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
+
+	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
+	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+
+	echo
+	echoAndLog "OpenGnSys Update Summary"
+        echo       "========================"
+        echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echo
+}
+
+
 
 #####################################################################
 ####### Proceso de actualización de OpenGnSys
@@ -615,6 +654,9 @@ updateServicesStart
 if [ -f /tmp/dstate ]; then
 	rm -f /tmp/dstate
 fi
+
+# Mostrar resumen de actualización.
+updateSummary
 
 #rm -rf $WORKDIR
 echoAndLog "OpenGnSys update finished at $(date)"

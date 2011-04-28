@@ -15,6 +15,10 @@ if ! touch $OGLOGFILE 2>/dev/null; then
 fi
 LOGLEVEL=5
 
+#facilitando el entorno Og desde ssh
+cp $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
+
+
 # Arranque de OpenGnSys Client.
 if [ -x "$OPENGNSYS/bin/ogAdmClient" ]; then
     echo "$MSG_LAUNCHCLIENT"
