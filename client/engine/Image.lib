@@ -457,7 +457,6 @@ touch $IMGDIR/$(basename "${!#}").lock
 #@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
 #@exception OG_ERR_LOCKED   partición bloqueada por otra operación.
 #@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
-#@exception OG_ERR_IMGSIZEPARTITION  Tamaño de la particion es menor al tamaño de la imagen.
 #@todo    Comprobar incongruencias partición-imagen, control de errores, definir parámetros, caché/repositorio, etc.
 #@version 0.1 -  Integracion para Opengnsys  - HIDRA:RestaurarImagen{EXT3, NTFS}.sh;  EAC: RestorePartitionFromImage() en Deploy.lib
 #@author Ramon Gomez, ETSII Universidad de Sevilla 
@@ -491,7 +490,7 @@ IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 IMGSIZE=$(ogGetImageSize "$1" "$2")
 PARTSIZE=$(ogGetPartitionSize $3 $4)
 if [ $IMGSIZE -gt $PARTSIZE ]; then
-    ogRaiseError $OG_ERR_IMGSIZEPARTITION "$IMGSIZE > $PARTSIZE"
+    ogRaiseError $OG_ERR_PARTITION "$IMGSIZE > $PARTSIZE"
     return $?
 fi
 
