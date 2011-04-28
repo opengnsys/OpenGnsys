@@ -2,8 +2,21 @@ Instalación de OpenGnSys Server v 0.9
 =====================================
 
 Notas iniciales
+---------------
 
 Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Linux a partir de la versión 9.04.
+
+El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el rpositorio código y el cliente preconfigurado.
+
+Requisitos mínimos de almacenamiento:
+- 350 MB en el directorio /tmp (solo durante la instalación)
+- 300 MB en el directorio /var/lib/tftpboot
+- 50 MB en el directorio de instalación /opt/opengnsys
+- Estimar la capacidad necesaria para el repositorio de imágenes en /opt/opengnsys/images
+
+
+Instalación
+-----------
 
 La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede descargarse directamente de la dirección: http://www.opengnsys.es/browser/trunk/installer/opengnsys_installer.sh?format=txt
 
