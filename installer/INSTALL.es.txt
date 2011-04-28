@@ -1,5 +1,5 @@
 Instalación y Actualización de OpenGnSys
-========================
+========================================
 
 
 Instalación inicial
@@ -13,7 +13,7 @@ O bien, descargar el instalador desde la última reversión del repositorio:
         svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh
 
 Ejecutar el instalador como root:
-        sudo ./opengnsys_installer.sh 
+        sudo bash opengnsys_installer.sh 
 
 
 Actaulización de ficheros
@@ -29,21 +29,19 @@ O bien, descargar el actualizador desde la última revisión del repositorio:
         svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_update.sh
 
 Ejecutar el programa de actualización como root:
-        sudo ./opengnsys_installer.sh 
+        sudo bash opengnsys_installer.sh 
 
 NOTA: el programa de actualización no modifica ficheros de configuración, no actualiza la bases de datos, no modifica ficheros de imágenes, ni recompila los servicios principales de OpenGnSys.
 
 
-Desinstalar OpenGNSys
+Desinstalar OpenGnSys
 ---------------------
 
-   1. Hacemos copia de datos sql de la base de datos ogBDAdmin opengnsys.
-   2. Eliminamos la base de datos ogBDAdmin
-   3. Eliminar mysql: sudo aptitude --purge remove mysql-server
-   4. Parar los servicios og: /etc/init.d/opengnsys stop 
-Desinstalando OpenGNSys
+AVISO: Para poder conservar la información, es recomendable hacer copia de seguridad del servidor antes de desinstalar.
 
-   1. Hacemos copia de datos sql de la base de datos ogBDAdmin opengnsys.
-   2. Eliminamos la base de datos ogBDAdmin
-   3. Eliminar mysql: sudo aptitude --purge remove mysql-server
-   4. Parar los servicios og: /etc/init.d/opengnsys stop 
+Ejecutar como root el programa de desinstalación, bien disponible en el fichero comprimido o bien descargado directamente del servidor:
+
+        sudo bash opengnsys_uninstall.sh 
+
+NOTA: el programa de desinstalación no elimina los ficheros de imágenes, no desinstala ningún paquete del sistema operativo incluido en el proceso de instalación y no detiene, ni desconfigura ningún otro servicio auxiliar a OpenGnSys.
+
