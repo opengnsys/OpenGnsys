@@ -44,7 +44,7 @@ for dir in $OPENGNSYS/*; do
         rm -fr "$dir"
     fi
 done
-rm -f /etc/init.d/opengnsys /etc/default/opengnsys
+rm -f /etc/init.d/opengnsys /etc/default/opengnsys /var/log/opengnsys
 # Comentar recursos de OpenGnSys en Samba.
 perl -pi -e "s/^ *include \= \/etc\/samba\/smb-og.conf/\;   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
 /etc/init.d/smbd restart
