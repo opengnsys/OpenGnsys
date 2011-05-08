@@ -172,8 +172,15 @@ case $MASTERIP in
 		# FIN Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}
 	;;
 	*)
-		echo "[1] Equipo -Client- preparando para recibir datos"
-		ogUnmount $DISKTARGET $PARTTARGET || exit $?
+		echo "[1] Equipo -Client- preparando para recibir datos $PROTOCOL"
+		# TODO: si el cliente no está en la lista de clientes UNICAST salir.
+		case $PROTOCOL in
+			UNICAST|unicast)
+ 				echo "$SESSIONUCASTSERVER" | grep $HOSTIP || exit 1			
+ 			;;
+ 		esac	
+ 		echo "[2] Desmontando particion destino"	 
+		ogUnmount $DISKTARGET $PARTTARGET 
 		echo -n "[25] Buscando informacion extra sobre la clonacion con el master $MASTERIP: "
 		sleep 10
 		TIMEWAITMASTER=120
@@ -196,7 +203,7 @@ case $MASTERIP in
 		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $4}')
 		echo -n "[25] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE "
 		# comprobamos que el tamaño de a imagen es menor que la del cliente.
-		SIZEPARTTARGET=$(ogGetPartitionSize $DISKTARGET $PARTTARGET)
+		SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
 		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
  		then	
 			echo "[30] Iniciando Cliente $PROTOCOL "
