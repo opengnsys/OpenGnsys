@@ -67,6 +67,7 @@ else
 <BODY>
 <?
 if(empty($idx) && empty($msg)) {
+	// No hay operaciones realizandose
 	echo '<BR><BR><BR><BR><BR>';
 	echo '<TABLE cellspacing=0 cellpadding=2 align=center border=0>';
 	echo '<TR><TD align=center><IMG border=0 src="../images/iconos/logoopengnsys.png"></TD></TR>';
@@ -75,6 +76,9 @@ if(empty($idx) && empty($msg)) {
 	echo '</TABLE>';
 }
 else{
+	// Se está realizando una operacion
+	echo '<h1>' . $TbMsg[23]   . ' </h1>';
+	echo '<h1>' . $TbMsg[24]   . ' </h1>';
 	echo '<BR><BR><BR>';
 	echo '<TABLE  cellspacing=0 cellpadding=2 align=center border=0>';
 	echo '<TR><TD align=center class="tdbarra">Opengnsys Browser Message</TD><TR>';
