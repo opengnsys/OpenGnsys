@@ -489,7 +489,9 @@ IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
 # Error si la imagen no cabe en la particion.
 IMGSIZE=$(ogGetImageSize "$1" "$2")
-PARTSIZE=$(ogGetPartitionSize $3 $4)
+#TODO:
+#PARTSIZE=$(ogGetPartitionSize $3 $4)
+PARTSIZE=$(parted `ogDiskToDev $3 $4` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
 if [ $IMGSIZE -gt $PARTSIZE ]; then
     ogRaiseError $OG_ERR_IMGSIZEPARTITION "$IMGSIZE > $PARTSIZE"
     return $?
@@ -678,7 +680,7 @@ then
 	then
 		TOOLS=PARTCLONE
 		FS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($8);}')
-		echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1048576 || SIZEFACTOR=1024
+		echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1000000 || SIZEFACTOR=1024
 		SIZE=$(echo $PARTCLONEINFO | awk -v FACTOR=$SIZEFACTOR '{gsub(/\: /,"\n"); printf "%d\n", $11*FACTOR;}')
 		IMGDETECT="TRUE"
 	fi
