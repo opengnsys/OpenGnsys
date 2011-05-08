@@ -375,11 +375,6 @@ function ContextualXMLGruposAulas(){
 	$layerXML.=' textoitem='.$TbMsg[6];
 	$layerXML.='></ITEM>';
 
-        $layerXML.='<ITEM';
-        $layerXML.=' subflotante="flo_netboot"';
-        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
-        $layerXML.=' textoitem="NetBoot Gestion"';
-        $layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>'; 
