@@ -30,6 +30,9 @@ $TbMsg=array();
 	$TbMsg[20]='ATENCIÓN, ha habido algún error en el proceso de Inventario Software';
 	$TbMsg[21]='El proceso de jecuación del script bash ha terminado correctamente';
 	$TbMsg[22]='ATENCIÓN, ha habido algún error en el proceso de ejecución del script bash';
+	$TbMsg[23]='ATENCIÓN';
+	$TbMsg[24]='NO UTILICE NI APAGUE ESTE ORDENADOR.';
+	
 
 
 ?>
