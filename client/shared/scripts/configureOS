@@ -1,0 +1,19 @@
+#!/bin/bash
+#1 disk
+#2 partition
+
+PARTSIZE=$(ogGetPartitionSize $1 $2)
+FSSIZE=$(ogGetFsSize $1 $2)
+if [ $FSSIZE -lt $PARTSIZE ]; then
+	echo "Extender sistema de archivos."
+	ogExtendFs $1 $2
+fi
+
+# Cambiar nombre en sistemas Windows y quitar usuario de acceso por defecto.
+if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
+    HOST=$(ogGetHostname)
+    HOST=${HOST:-"pc"}
+    echo " Cambiar nombre Windows a \"$HOST\" "
+    ogSetWindowsName $1 $2 "$HOST"
+    #ogSetWinlogonUser $1 $2 " "	# Descomentar para cambiar usuario de inicio.
+fi
