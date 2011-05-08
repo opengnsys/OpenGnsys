@@ -26,7 +26,7 @@ REPOIP=$(ogGetRepoIp)
 echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 # Si el repositorio local CACHE no existe salimos.
 if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTFOUND "CACHE"
+        ogRaiseError $OG_ERR_NOTCACHE "CACHE"
         exit $?
 fi
 
@@ -40,7 +40,8 @@ FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
 if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
 then
 	echo "el tamanio del fichero $2 = $FILESIZE es mayor que el espacio dispinible en la cache = $CACHESIZEFREE"
-	exit 1
+	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+    exit $?
 fi
 
 ogUpdateCacheIsNecesary $1 $2 || exit 0
@@ -96,6 +97,7 @@ case "$PROTOCOLO" in
 	;;
 	unicast | UNICAST )
 		echo "unicast"
+		ogCopyFile $1 $2 $OGCAC$OGIMG
 	;;
 esac
 
