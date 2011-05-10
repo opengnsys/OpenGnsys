@@ -44,6 +44,10 @@
 #@version 1.0 - control de errores para el ogAdmServer
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/04/24
+#@version 1.0 - Uso de parted para controlar tamaño particion destino. Requiere Formateo FS previo -parted usa FS para el tamanyo".
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/04/24
+
 #*/ ##
 
 
@@ -201,9 +205,14 @@ case $MASTERIP in
 		TOOLCLONE=$(echo $INFOEXTRA | awk '{print $2}')
 		COMPRESOR=$(echo $INFOEXTRA | awk '{print $3}')
 		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $4}')
-		echo -n "[25] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE "
-		# comprobamos que el tamaño de a imagen es menor que la del cliente.
+		echo -n "[26] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE "
 		SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
+		if [ -z $SIZEPARTTARGET ]; then
+			echo "[5] TODO Formateando particion destino si no es accesible por parted"	 
+			ogFormat $DISKTARGET $PARTTARGET 
+		fi 
+		echo "[29] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"	 
+		# comprobamos que el tamaño de a imagen es menor que la del cliente.
 		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
  		then	
 			echo "[30] Iniciando Cliente $PROTOCOL "
@@ -230,7 +239,7 @@ case $MASTERIP in
 			fi		
 		else
 		    # Si el tamaño de los datos recibidos es más grande que la particion destino
-			ogRaiseError $OG_ERR_IMGSIZEPARTITION "ERROR tamanio particion= $SIZEPARTTARGET  tamanio de la imagen= $SIZEIMAGE"; exit $?
+			ogRaiseError $OG_ERR_IMGSIZEPARTITION "ERROR tamanio particion= $SIZEPARTTARGET  menor que la imagen= $SIZEIMAGE"; exit $?
 		fi
 	;;
 esac
