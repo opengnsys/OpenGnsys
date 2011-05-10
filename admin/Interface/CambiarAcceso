@@ -5,12 +5,6 @@
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE
 # $1 modo  (admin, user)
 #_______________________________________________________________________________________________________________________________
-### codigos de error
-#$OG_ERR_NOTEXEC = 7      La llamada no se ha realizado desde OGclient.
-#$OG_ERR_NOTFOUND = 2       Repositorio no montado.
-#$OG_ERR_LOCKED = 	4	   Repositorio bloqueado.
-#$OG_ERR_NOTWRITE = 14    No Se ha realizado el montaje RW correctamente.
-
 
 # Error si llamada no se realliza desde OpenGnSys Client.
 PROG=$(basename $0)
@@ -52,29 +46,3 @@ case "$PROTO" in
 	nfs)	mount -t nfs $REPOIP:$OGIMG $OGIMG -o $MODE ;;
 	smb)	mount -t cifs //$REPOIP/ogimages $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=og ;;
 esac
-
-#Comprobamos que el tipo de acceso (escritura/lectura) se ha realizado correctamente.
-FILETEST="${OGIMG}/testWrite.txt"
-touch $FILETEST
-VALUE=$?
-
-case "$1" in 
-	admin)
-		if [ "$VALUE" == 0 ] 
-		then 
-			rm $FILETEST 
-		else
-			ogRaiseError $OG_ERR_NOTWRITE "sin acceso de escritura en modo admin"
-			exit $?			
-		fi
-	;;
-	user)
-		if [ "$VALUE" == 0 ] 
-		then
-			rm $FILETEST
-			ogRaiseError $OG_ERR_NOTWRITE "Warning: con acceso de escritura en modo user"
-			exit $?	
-		fi
-	;;
-esac
-
