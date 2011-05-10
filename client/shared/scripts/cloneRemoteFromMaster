@@ -210,6 +210,7 @@ case $MASTERIP in
 		if [ -z $SIZEPARTTARGET ]; then
 			echo "[5] TODO Formateando particion destino si no es accesible por parted"	 
 			ogFormat $DISKTARGET $PARTTARGET 
+			SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
 		fi 
 		echo "[29] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"	 
 		# comprobamos que el tamaño de a imagen es menor que la del cliente.
