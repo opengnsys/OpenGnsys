@@ -894,20 +894,20 @@ function openGnsysCopyServerFiles ()
 		exit 1
 	fi
 
-	local path_opengnsys_base=$1
+	local path_opengnsys_base="$1"
 
-	# No se copian los ficheros del cliente antiguo:
-	# - client/boot/initrd-generator ==> /opt/opengnsys/bin
-        # - client/boot/upgrade-clients-udeb.sh ==> /opt/opengnsys/bin
-        # - client/boot/udeblist*.conf ==> /opt/opengnsys/etc
 	local SOURCES=( server/tftpboot/pxelinux.cfg \
-                        server/bin \
-                        repoman/bin \
-                        doc )
+			server/bin \
+			repoman/bin \
+			installer/opengnsys_uninstall.sh \
+			installer/opengnsys_update.sh \
+			doc )
 	local TARGETS=( tftpboot/pxelinux.cfg \
-                        bin \
-                        bin \
-                        doc )
+			bin \
+			bin \
+			lib \
+			lib \
+			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
