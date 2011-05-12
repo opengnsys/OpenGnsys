@@ -8,18 +8,20 @@ if [ $# -lt 4 ]; then
 fi
 
 #controlar param1 REPO
-
+echo "Realizando un updateCache REPO $2.img $5 $6"
 updateCache REPO $2.img $5 $6
-RC=$?
-if [ "$RC" != "0" ]
+RETVAL=$?
+if [ "$RETVAL" != "0" ]
 then
-	echo "fin del updateCache REPO $2.img $5 $6 con error $RC"
+	echo "fin del updateCache REPO $2.img $5 $6 con error $RETVAL"
 	# RC=15 No hay cache
 	# RC=16 no hay espacio sufiente
-	exit $RC
+	exit $RETVAL
 	
 else
 	echo "iniciando un ogRestore CACHE desde deployImage"
-	ogRestoreImage CACHE $2 $3 $4 
-	ogExtendFs $3 $4
+	ogRestoreImage CACHE /$2 $3 $4 
+	RETVAL=$?
+	[ "$RETVAL" == "0" ] && configureOs $2 $4
+	exit $RETVAL 
 fi

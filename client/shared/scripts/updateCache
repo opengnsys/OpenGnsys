@@ -14,7 +14,7 @@
 
 
 PROG="$(basename $0)"
-if [ $# -lt 4 ]; then
+if [ $# -lt 3 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
     exit $?
 fi
