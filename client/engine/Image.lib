@@ -453,11 +453,12 @@ touch $IMGDIR/$(basename "${!#}").lock
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  (por determinar)
-#@exception OG_ERR_FORMAT   formato incorrecto.
-#@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
-#@exception OG_ERR_LOCKED   partición bloqueada por otra operación.
-#@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
-#@exception OG_ERR_IMGSIZEPARTITION  Tamaño de la particion es menor al tamaño de la imagen.
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception OG_ERR_PARTITION 3	# Error en partición de disco.
+#@exception OG_ERR_LOCKED    4 partición bloqueada por otra operación.
+#@exception OG_ERR_IMAGE    5 error al restaurar la imagen del sistema.
+#@exception OG_ERR_IMGSIZEPARTITION  30 Tamaño de la particion es menor al tamaño de la imagen.
 #@todo    Comprobar incongruencias partición-imagen, control de errores, definir parámetros, caché/repositorio, etc.
 #@version 0.1 -  Integracion para Opengnsys  - HIDRA:RestaurarImagen{EXT3, NTFS}.sh;  EAC: RestorePartitionFromImage() en Deploy.lib
 #@author Ramon Gomez, ETSII Universidad de Sevilla 
@@ -467,6 +468,12 @@ touch $IMGDIR/$(basename "${!#}").lock
 #@version 0.9 - Primera version muy en pruebas para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/10
+#@version 1.0 - generacion sintaxis de restauracion
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2011/02/01
+#@version 1.0.1 - Control errores, tamaño particion, fichero-imagen
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2011/05/11
 #*/ ##
 function ogRestoreImage ()
 {
@@ -480,23 +487,26 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 4 parámetros.
-[ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# -lt 4 ] && return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 # Procesar parámetros.
-PART="$(ogDiskToDev "$3" "$4")" || return $?
+PART="$(ogDiskToDev $3 $4)" || return $(ogRaiseError $OG_ERR_NOTFOUND " $3 $4"; echo $?)
 #IMGTYPE=$(ogGetImageType "$1" "$2")
 IMGTYPE=img
-IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
-[ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
+IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE") 
+[ -r "$IMGFILE" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $3 $4"; echo $?)
+# comprobamos consistencia de la imagen
+ogGetImageInfo $IMGFILE >/dev/null  || return $(ogRaiseError $OG_ERR_IMAGE " $1 $2"; echo $?)
+
 # Error si la imagen no cabe en la particion.
-IMGSIZE=$(ogGetImageSize "$1" "$2")
+IMGSIZE=$(ogGetImageSize "$1" "$2") || return $(ogRaiseError $OG_ERR_IMAGE " $1 $2"; echo $?)
 #TODO:
-#PARTSIZE=$(ogGetPartitionSize $3 $4)
+#Si la particion no esta formateado o tiene problemas formateamos
+ogMount $3 $4 || ogFormat $3 $4
 PARTSIZE=$(parted `ogDiskToDev $3 $4` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
 if [ $IMGSIZE -gt $PARTSIZE ]; then
-    ogRaiseError $OG_ERR_IMGSIZEPARTITION "$IMGSIZE > $PARTSIZE"
+    ogRaiseError $OG_ERR_IMGSIZEPARTITION "  $PARTSIZE < $IMGSIZE"
     return $?
 fi
-
 # Comprobar el bloqueo de la imagen y de la partición.
 if ogIsImageLocked "$IMGFILE"; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $1, $2.$IMGTYPE"
@@ -507,8 +517,8 @@ if ogIsLocked $3 $4; then
     return $?
 fi
 # Desmontar y bloquear partición.
-ogUnmount $3 $4 2>/dev/null || return $?
-ogLock $3 $4 || return $?
+ogUnmount $3 $4 2>/dev/null || return $(ogRaiseError $OG_ERR_PARTITION " $3 $4"; echo $?)
+ogLock $3 $4 || return $(ogRaiseError $OG_ERR_PARTITION " $3 $4"; echo $?)
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
 # Restaurar según el tipo de imagen.
@@ -754,8 +764,8 @@ local IMGFILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME testing path_dir str_image int_ndisk int_npart" \
-           "$FUNCNAME 1 1 REPO /aula1/winxp  ==>  5642158"
+    ogHelp "$FUNCNAME" "$FUNCNAME REPO|CACHE /str_image" \
+           "$FUNCNAME REPO /aula1/winxp  ==>  5642158"
     return
 fi
 # Error si no se reciben menos de 2 parámetros.
