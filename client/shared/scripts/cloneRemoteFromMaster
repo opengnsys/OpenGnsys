@@ -47,6 +47,9 @@
 #@version 1.0 - Uso de parted para controlar tamaño particion destino. Requiere Formateo FS previo -parted usa FS para el tamanyo".
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/04/24
+#@version 1.0.1 - Se elimina la operación de reducir la particion.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/05/16
 
 #*/ ##
 
@@ -137,10 +140,10 @@ case $MASTERIP in
 				ogReduceFs $2 $3 || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al reducir el FS $2 $3  l129"; echo $?)
 				REDSIZE=$(ogGetFsSize $2 $3) || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar el nuevo FS $2 $3  l130"; echo $?)	
 				echo "[20]: Reducido el  sistema de archivos a $REDSIZE  $DISKSOURCE $PARTSOURCE"
-				if [ $REDSIZE -lt $SIZE ]; then
-    					echo "[24] Redimensionar partición a $REDSIZE KB."
-    					ogSetPartitionSize $2 $3 $REDSIZE
-				fi
+				#if [ $REDSIZE -lt $SIZE ]; then
+    			#		echo "[24] Redimensionar partición a $REDSIZE KB."
+    			#		ogSetPartitionSize $2 $3 $REDSIZE
+				#fi
 				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
 				pkill faucet
 				if ps aux | grep -v grep | grep "faucet 4000" 
@@ -161,12 +164,12 @@ case $MASTERIP in
  					;;
  				esac	
  				
- 				if [ $REDSIZE -lt $SIZE ]; then
-   					echo "[85] Redimensionar partición a $SIZE KB."
-   		 			ogSetPartitionSize $2 $3 $SIZE
+ 				#if [ $REDSIZE -lt $SIZE ]; then
+   				#	echo "[85] Redimensionar partición a $SIZE KB."
+   		 		#	ogSetPartitionSize $2 $3 $SIZE
    		 			echo "[90] Extender sistema de archivos."
    		 			ogExtendFs $2 $3
-				fi
+				#fi
 				pkill faucet
 				if [ $RETVAL == 0 ]
 				then 
@@ -180,8 +183,8 @@ case $MASTERIP in
 				echo "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves"
 				echo "[10]: Preparando Imagen: $IMG"
 				TOOLCLONE=$(ogGetImageProgram $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "TOOLCLONE no detectado l174"; echo $?)
-				COMPRESOR=$(ogGetImageCompressor $2 $3) exit $(ogRaiseError $OG_ERR_LOCKED "COMPRESOR NO DETECTADO l175"; echo $?)
-				REDSIZE=$(ogGetImageSize $2 $3) exit $(ogRaiseError $OG_ERR_LOCKED "REDSIZE NO DETECTADO l176"; echo $?)
+				COMPRESOR=$(ogGetImageCompressor $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "COMPRESOR NO DETECTADO l175"; echo $?)
+				REDSIZE=$(ogGetImageSize $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "REDSIZE NO DETECTADO l176"; echo $?)
 				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
 				if ps aux | grep -v grep | grep "faucet 4000" 
 				then
@@ -261,7 +264,7 @@ case $MASTERIP in
  					;;
  				esac						
 			echo "[90] llamando a configureOS $DISKTARGET $PARTTARGET"
-			configureOS $DISKTARGET $PARTTARGET			
+			configureOs $DISKTARGET $PARTTARGET			
 		else
 		    # Si el tamaño de los datos recibidos es más grande que la particion destino
 			ogRaiseError $OG_ERR_IMGSIZEPARTITION "ERROR tamanio particion= $SIZEPARTTARGET  menor que la imagen= $SIZEIMAGE"; exit $?
