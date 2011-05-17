@@ -9,6 +9,9 @@
 #@version 1.0 - adaptación a OpenGnSys 1.0
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2011/03/02
+#@version 1.0.1 - control de auto actualización del script
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2011/05/17
 #*/
 
 
@@ -30,6 +33,7 @@ fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
+PROGRAMNAME=$(basename "$0")
 DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
@@ -51,6 +55,31 @@ LOG_FILE=/tmp/opengnsys_update.log
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
+
+# Comprobar auto-actualización.
+function checkAutoUpdate()
+{
+	local update=0
+
+	# Actaulizar el script si ha cambiado o no existe el original.
+	if [ $USESVN -eq 1 ]; then
+		svn export $SVN_URL/$PROGRAMNAME
+		if ! diff --brief $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+			mv $PROGRAMNAME $INSTALL_TARGET/lib
+			update=1
+		else
+			rm -f $PROGRAMNAME
+		fi
+	else
+		if ! diff --brief $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+			cp -a $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib
+			update=1
+		fi
+	fi
+
+	return $update
+}
+
 
 function getDateTime()
 {
@@ -167,7 +196,7 @@ function importSqlFile()
 #####################################################################
 
 # Instalar las deependencias necesarias para el actualizador.
-function installDependencies ()
+function installDependencies()
 {
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
@@ -255,7 +284,8 @@ function getNetworkSettings()
 
 # Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
 
-function updateServicesStart(){
+function updateServicesStart()
+{
 	echoAndLog "${FUNCNAME}(): Updating /etc/init.d/opengnsys ..."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	if [ $? != 0 ]; then
@@ -316,7 +346,7 @@ function updateWebFiles()
 }
 
 # Copiar carpeta de Interface 
-function updateInterfaceAdm () 
+function updateInterfaceAdm()
 { 
 	local hayErrores=0 
          
@@ -403,7 +433,7 @@ function createDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function updateServerFiles ()
+function updateServerFiles()
 {
 	# No copiar ficheros del antiguo cliente Initrd
 	local SOURCES=( repoman/bin \
@@ -437,10 +467,7 @@ function updateServerFiles ()
 ####################################################################
 
 # Recompilar y actualiza los serivicios y clientes.
-function compileServices ()
-{
-# Compilar los servicios de OpenGNsys
-function compileServices ()
+function compileServices()
 {
 	local hayErrores=0
 
@@ -600,6 +627,16 @@ function updateSummary()
 echoAndLog "OpenGnSys update begins at $(date)"
 
 pushd $WORKDIR
+
+# Comprobar auto-actualización del programa.
+if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
+	checkAutoUpdate
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): OpenGnSys updater has been overwritten."
+		echoAndLog "${FUNCNAME}(): Please, re-execute this script."
+		exit
+	fi
+fi
 
 # Instalar dependencias.
 installDependencies $DEPS
