@@ -403,14 +403,16 @@ function createDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function updateServerFiles () {
-
+function updateServerFiles ()
+{
 	# No copiar ficheros del antiguo cliente Initrd
 	local SOURCES=( repoman/bin \
 			server/bin \
+			installer/opengnsys_uninstall.sh \
                         doc )
 	local TARGETS=( bin \
                         bin \
+                        lib \
                         doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
@@ -434,11 +436,44 @@ function updateServerFiles () {
 ### Funciones de compilación de código fuente de servicios
 ####################################################################
 
-# Recompilar y actualiza el binario del clinete
-function recompileClient ()
+# Recompilar y actualiza los serivicios y clientes.
+function compileServices ()
 {
+# Compilar los servicios de OpenGNsys
+function compileServices ()
+{
+	local hayErrores=0
+
+	# Compilar OpenGnSys Server
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Admin Server"
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
+	make && mv ogAdmServer $INSTALL_TARGET/sbin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
+		hayErrores=1
+	fi
+	popd
+	# Compilar OpenGnSys Repository Manager
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Repository Manager"
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
+	make && mv ogAdmRepo $INSTALL_TARGET/sbin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
+		hayErrores=1
+	fi
+	popd
+	# Compilar OpenGnSys Agent
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Agent"
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
+	make && mv ogAdmAgent $INSTALL_TARGET/sbin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
+		hayErrores=1
+	fi
+	popd
+
 	# Compilar OpenGnSys Client
-	echoAndLog "${FUNCNAME}(): recompiling OpenGnSys Client"
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
 	make && mv ogAdmClient $INSTALL_TARGET/client/bin
 	if [ $? -ne 0 ]; then
@@ -564,14 +599,14 @@ function updateSummary()
 
 echoAndLog "OpenGnSys update begins at $(date)"
 
-# Instalar dependencia.
+pushd $WORKDIR
+
+# Instalar dependencias.
 installDependencies $DEPS
 if [ $? -ne 0 ]; then
 	errorAndLog "Error: you may install all needed dependencies."
 	exit 1
 fi
-
-pushd $WORKDIR
 
 # Comprobar si hay conexión y detectar parámetros de red por defecto.
 checkNetworkConnection
@@ -637,10 +672,10 @@ fi
 # Generar páginas Doxygen para instalar en el web
 makeDoxygenFiles
 
-# Creando la estructura del cliente
-recompileClient
-# NO se actualiza el antiguo cliente Initrd
-#updateOldClient
+# Recompilar y actualizar los servicios del sistema
+compileServices
+
+# Actaulizar ficheros auxiliares del cliente
 updateClient
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"
