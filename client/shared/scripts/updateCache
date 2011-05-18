@@ -32,7 +32,11 @@ fi
 
 #Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-
 #TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
-ogUpdateCacheIsNecesary $1 $2 || exit 0
+ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+[ "$RETVAL" == "1" ] && exit 0
+[ "$RETVAL" -gt  "1" ] && exit 1
+
 
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
@@ -44,7 +48,10 @@ then
     exit $?
 fi
 
-ogUpdateCacheIsNecesary $1 $2 || exit 0
+ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+[ "$RETVAL" == "1" ] && exit 0
+[ "$RETVAL" -gt  "1" ] && exit 1
 
 ogMountCache
 
@@ -101,15 +108,9 @@ case "$PROTOCOLO" in
 	;;
 esac
 
-if ogUpdateCacheIsNecesary $1 $2 
-then
-	echo "algo ha fallado"
-	exit 1
-else
-	echo "updateCache ok"
-	exit 0
-fi
 
-
-
-#
+ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+[ "$RETVAL" == "0" ] && exit 1
+[ "$RETVAL" == "1" ] && exit 0
+[ "$RETVAL" -gt  "1" ] && exit 1
