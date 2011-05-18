@@ -63,7 +63,7 @@ function checkAutoUpdate()
 
 	# Actaulizar el script si ha cambiado o no existe el original.
 	if [ $USESVN -eq 1 ]; then
-		svn export $SVN_URL/$PROGRAMNAME
+		svn export $SVN_URL/installer/$PROGRAMNAME
 		if ! diff --brief $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			mv $PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
