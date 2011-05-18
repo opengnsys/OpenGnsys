@@ -1,0 +1,203 @@
+#!/bin/bash
+#/**
+#@file    Registry.lib
+#@brief   Librería o clase Registry
+#@class   Boot
+#@brief   Funciones para gestión del registro de Windows.
+#@version 1.0.1
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogAddRegistryKey path_mountpoint str_hive str_keyname
+#@brief   Añade una nueva clave al registro de Windows.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogAddRegistryValue ()
+{
+}
+
+#/**
+#         ogAddRegistryValue path_mountpoint str_hive str_valuename str_valuedata
+#@brief   Añade un nuevo valor (dupla nombre/valor) al registro de Windows.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogAddRegistryValue ()
+{
+}
+
+
+#/**
+#         ogGetRegistryPath path_mountpoint str_hive
+#@brief   Función básica que devuelve el camino del fichero con una sección del registro.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@return  str_path - camino del fichero de registro
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning El sistema de archivos de Windows debe estar montada previamente.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogGetRegistryPath ()
+{
+# Variables locales.
+local FILE FILENT FILEXP
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro en NT/2000 o XP/Vista/7.
+FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
+[ -f $FILENT ] && FILE="$FILENT"
+FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
+[ -f $FLEHXP ] && FILE="$FILEXP"
+[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
+
+echo "$FILE"
+}
+
+
+#/**
+#         ogGetRegistryValue path_mountpoint str_hive str_valuename
+#@brief   Devuelve el dato de un valor del registro de Windows.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_valuename    nombre del valor
+#@return  str_valuedata - datos del valor.
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw, awk
+#@warning La partición de Windows debe estar montada previamente.
+#@version 0.9 - Adaptación para OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-11
+#*/ ##
+function ogGetRegistryValue ()
+{
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetRegistryPath "$1" "$2") || return $?
+
+# Devolver el dato del valor de registro.
+# /* (comentario Doxygen)
+chntpw $FILE << FIN 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+cd ${3%\\*}
+cat ${3##*\\}
+q
+FIN
+# (comentario Doxygen) */
+}
+
+
+#/**
+#         ogListRegistryKey path_mountpoint str_hive str_key
+#@brief   Lista los nombres de claves de una determinada clave del registro de Windows.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_key          clave de registro
+#@return  str_subkey ... - lista de subclaves
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw, awk
+#@warning La partición de Windows debe estar montada previamente.
+#@version 0.9 - Adaptación para OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-23
+#@version 1.0.1 - Renombrada de ogListRegistryKeys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogListRegistryKey ()
+{
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetRegistryPath "$1" "$2") || return $?
+
+# Devolver la lista de claves de registro.
+chntpw $FILE << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
+ls $3
+q
+FIN
+}
+
+
+#/**
+#         ogSetRegistryValue path_mountpoint str_hive str_valuename str_valuedata
+#@brief   Establece el dato asociado a un valor del registro de Windows.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         tipo de registro
+#@param   str_valuename    nombre del valor de registro
+#@param   str_valuedata    dato del valor de registro
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw, awk
+#@warning La partición de Windows debe estar montada previamente.
+#@version 0.9 - Adaptación para OpenGNSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-24
+#*/ ##
+function ogSetRegistryValue ()
+{
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename str_data"
+    return
+fi
+# Error si no se reciben 4 parámetros.
+[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetRegistryPath "$1" "$2") || return $?
+
+# Cambiar el dato del valor de registro.
+chntpw $FILE << FIN &>/dev/null
+ed $3
+$4
+q
+y
+FIN
+}
+
