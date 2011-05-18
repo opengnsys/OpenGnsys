@@ -22,6 +22,6 @@ else
 	echo "iniciando un ogRestore CACHE desde deployImage"
 	ogRestoreImage CACHE /$2 $3 $4 
 	RETVAL=$?
-	[ "$RETVAL" == "0" ] && configureOs $2 $4
+	[ "$RETVAL" == "0" ] && configureOs $3 $4
 	exit $RETVAL 
 fi
