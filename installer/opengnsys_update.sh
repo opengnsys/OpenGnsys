@@ -632,8 +632,8 @@ pushd $WORKDIR
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
 	checkAutoUpdate
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): OpenGnSys updater has been overwritten."
-		echoAndLog "${FUNCNAME}(): Please, re-execute this script."
+		echoAndLog "OpenGnSys updater has been overwritten."
+		echoAndLog "Please, re-execute this script."
 		exit
 	fi
 fi
