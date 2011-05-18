@@ -367,10 +367,13 @@ mount | awk -v P=$PART '{if ($1==P) {print $3}}'
 #@brief   Comprueba si un sistema de archivos está formateado.
 #@param   int_ndisk      nº de orden del disco o volumen.
 #@param   int_npartition nº de orden del sistema de archivos.
-#@return  int_code       Código de salida
+#@return  Código de salida: 0 - formateado, 1 - sin formato o error.
 #@version 0.91 - Adaptación inicial para comprobar que existe caché.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-03-18
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
 #*/ ##
 function ogIsFormated ()
 {
@@ -381,10 +384,10 @@ if [ "$*" == "help" ]; then
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Falso, en caso de error.
+[ $# == 2 ] || return 1
 
-DISK=$(ogDiskToDev "$1")
+DISK=$(ogDiskToDev "$1") || return 1
 test -n "$(parted -sm $DISK print 2>/dev/null | \
                       awk -F: -v fs=$2 '{if ($1==fs) print $5}')"
 }
@@ -395,10 +398,13 @@ test -n "$(parted -sm $DISK print 2>/dev/null | \
 #@brief   Comprueba si un sistema de archivos está montado.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@return  Código de salida: 0 - sin montar, 1 - montado.
+#@return  Código de salida: 0 - montado, 1 - sin montar o error.
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
 #*/ ##
 function ogIsMounted ()
 {
@@ -408,8 +414,8 @@ if [ "$*" == "help" ]; then
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Falso, en caso de error.
+[ $# == 2 ] || return 1
 
 test -n "$(ogGetMountPoint $1 $2)"
 }
@@ -420,11 +426,14 @@ test -n "$(ogGetMountPoint $1 $2)"
 #@brief   Comprueba si una partición está bloqueada por una operación de uso exclusivo.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@return  Código de salida: 0 - sin bloquear, 1 - bloqueada.
+#@return  Código de salida: 0 - bloqueado, 1 - sin bloquear o error.
 #@note    El fichero de bloqueo se localiza en \c /var/lock/part, siendo \c part el dispositivo de la partición, sustituyendo el carácter "/" por "-".
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-03
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
 #*/ ##
 function ogIsLocked ()
 {
@@ -437,11 +446,11 @@ if [ "$*" == "help" ]; then
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Falso, en caso de error.
+[ $# == 2 ] || return 1
 
 # Obtener partición.
-PART="$(ogDiskToDev $1 $2)" || return $?
+PART="$(ogDiskToDev $1 $2)" || return 1
 
 # Comprobar existencia del fichero de bloqueo.
 LOCKFILE="/var/lock/lock${PART//\//-}"

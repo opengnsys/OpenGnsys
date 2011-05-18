@@ -259,11 +259,14 @@ ogGetPath $PARENT
 #         ogIsNewerFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
 #@brief   Metafunción que indica se un fichero es más nuevo que otro.
 #@see     ogGetPath
-#@return  int_code      Código de salida
+#@return  Código de salida: 0 - nuevo, 1 - antiguo o error
 #@warning Deben existir tanto el fichero origen como el destino.
 #@version 0.9.2 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-07-24
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
 #*/ ##
 function ogIsNewerFile ()
 {
@@ -289,9 +292,9 @@ case "$1" in
         shift 2 ;;
 esac
 # Comprobar que existen los ficheros origen y destino.
-[ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+[ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return 1
 TARGET=$(ogGetPath "$@")
-[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
+[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return 1
 # Devolver si el primer fichero se ha modificado después que el segundo.
 test "$SOURCE" -nt "$TARGET"
 }

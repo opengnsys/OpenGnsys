@@ -387,12 +387,15 @@ dd if="$DISK" of="$IMGFILE" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IM
 #@brief   Comprueba si una imagen está bloqueada para uso exclusivo.
 #@param   str_repo     repositorio de imágenes (opcional)
 #@param   path_image   camino de la imagen (sin extensión)
-#@return  Código de salida: 0 - sin bloquear, 1 - bloqueada.
+#@return  Código de salida: 0 - bloqueado, 1 - sin bloquear o error.
 #@note    repo = { REPO, CACHE }
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@version 1.0 - Adaptación a OpenGnSys 1.0
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011/03/10
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
 #*/ ##
 function ogIsImageLocked ()
 {
@@ -404,7 +407,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
-[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# -lt 1 -o $# -gt 2 ] && return 1
 
 # Comprobar si existe el fichero de bloqueo.
 test -n "$(ogGetPath $@.lock)"
