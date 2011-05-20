@@ -16,7 +16,23 @@ Activar el grldr del grub4dos
     cp /opt/opengnsys/www/principal/boot.php /opt/opengnsys/www/principal/boot.pxelinux.php
 	cp /opt/opengnsys/www/principal/boot.grub4dos.php /opt/opengnsys/www/principal/boot.php
     
-
+4) 
+En la funcion ogBoot, de la libreria Boot.lib descomentar los comentarios del if de las líneas 71 a 85, para que quede 
+        #FIXME: activar seguimiento inicio sesion XP con grub4dos
+		if `ogGetOsVersion 1 1 | grep "XP" > /dev/null`
+        then 
+        	dd if=/dev/zero of=${MNTDIR}/ogboot.me  bs=1024 count=3
+        	dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot  bs=1024 count=3
+        	dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot  bs=1024 count=3         
+        	ogLoadHiveWindows $1 $2
+			ogHiveNTRunMachine "cmd /c del c:\ogboot.* "  ogcleanboot
+			ogUpdateHiveWindows
+			reboot
+        else        
+        	cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
+        	##kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
+        	kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
+		fi
 
 
  
