@@ -241,76 +241,83 @@ ifconfig lo 127.0.0.1
 ogconfigure_networking()
 {
 IP=$IPOPTS
-# http://paste.ubuntu.com/427631/  Paste from yofel at Tue, 4 May 2010 13:49:56 +0000
-        if [ -n "${BOOTIF}" ]; then
-                # pxelinux sets BOOTIF to a value based on the mac address of the
-                # network card used to PXE boot, so use this value for DEVICE rather
-                # than a hard-coded device name from initramfs.conf. this facilitates
-                # network booting when machines may have multiple network cards.
-                # pxelinux sets BOOTIF to 01-$mac_address
 
-                # strip off the leading "01-", which isn't part of the mac
-                # address
-                temp_mac=${BOOTIF#*-}
-
-                # convert to typical mac address format by replacing "-" with ":"
-                bootif_mac=""
-                IFS='-'
-                for x in $temp_mac ; do
-                        if [ -z "$bootif_mac" ]; then
-                                bootif_mac="$x"
-                        else
-                                bootif_mac="$x:$bootif_mac"
-                        fi
-                done
-                unset IFS
-
-                # look for devices with matching mac address, and set DEVICE to
-                # appropriate value if match is found.
-                for device in /sys/class/net/* ; do
-                        if [ -f "$device/address" ]; then
-                                current_mac=$(cat "$device/address")
-                                if [ "$bootif_mac" = "$current_mac" ]; then
-                                        DEVICE=${device##*/}
-                                        break
-                                fi
-                        fi
-                done
+#Buscando interfaz a configurar DEVICE
+#BOOTIF lo exporte el pxelinux.0. con valor tipo 01-$mac_address
+if [ -n "${BOOTIF}" ] 
+then
+	temp_mac=${BOOTIF#*-}
+	# convert to typical mac address format by replacing "-" with ":"
+	bootif_mac=""
+	IFS='-'
+	for x in $temp_mac ; do
+		if [ -z "$bootif_mac" ]; then
+        bootif_mac="$x"
+        else
+        	bootif_mac="$x:$bootif_mac"
         fi
-
-        # networking already configured thus bail out
-        [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
-
-        # support ip options see linux sources
-        # Documentation/filesystems/nfsroot.txt
-        # Documentation/frv/booting.txt
-
-        for ROUNDTTT in 2 3 4 6 9 16 25 36 64 100; do
-
-                # The NIC is to be configured if this file does not exist.
-                # Ip-Config tries to create this file and when it succeds
-                # creating the file, ipconfig is not run again.
-                if [ -e /tmp/net-"${DEVICE}".conf ]; then
-                        break;
-                fi
-
-            case ${IP} in
-		    none|off)
+	done
+	unset IFS
+	# look for devices with matching mac address, and set DEVICE to
+	# appropriate value if match is found.
+	for device in /sys/class/net/* ; do
+		if [ -f "$device/address" ]; then
+			current_mac=$(cat "$device/address")
+			if [ "$bootif_mac" = "$current_mac" ]; then
+				DEVICE=${device##*/}
+				break
+			fi
+		fi
+	done
+else
+	# Si no bootif, intentamos buscar que interfaz se ha iniciado.
+	IP=$ip
+	#TODO Detectar que interfaz se ha iniciado
+	case ${IP} in
+		none|off)
+           # Do nothing
+        ;;
+        ""|on|any)
+          # Bring up device
+          DEVICE=eth0
+        ;;
+        dhcp|bootp|rarp|both)
+          DEVICE=eth0
+        ;;
+        *)
+          DEVICE=`echo $IP | cut -f6 -d:`
+        ;;
+	esac
+fi
+# FIN de Busqueda de la interfaz  $DEVICE
+# networking already configured thus bail out
+[ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
+# support ip options see linux sources
+# Documentation/filesystems/nfsroot.txt
+# Documentation/frv/booting.txt
+for ROUNDTTT in 2 3 4 6 9 16 25 36 64 100; do
+	# The NIC is to be configured if this file does not exist.
+	# Ip-Config tries to create this file and when it succeds
+	# creating the file, ipconfig is not run again.
+	if [ -e /tmp/net-"${DEVICE}".conf ]; then
+		break;
+	fi
+	case ${IP} in
+		none|off)
 			# Do nothing
-			;;
-		    ""|on|any)
+		;;
+		""|on|any)
 			# Bring up device
 			echo "Setting $DEVICE with kernel params $IP: ipconfig -t ${ROUNDTTT} ${DEVICE} "
 			ipconfig -t ${ROUNDTTT} ${DEVICE}
-			;;
-		    dhcp|bootp|rarp|both)
+		;;
+		dhcp|bootp|rarp|both)
 			echo "Setting $DEVICE with (dhcp) kernel params $IP: ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE} "
 			ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE}
-			;;
-		    *)
+		;;
+		*)
 			echo "Setting $DEVICE with kernel params $IP: ipconfig -t ${ROUNDTTT} -d $IP  "
 			ipconfig -t ${ROUNDTTT} -d $IP
-
 			# grab device entry from ip option
 			NEW_DEVICE=${IP#*:*:*:*:*:*}
 			if [ "${NEW_DEVICE}" != "${IP}" ]; then
@@ -322,18 +329,18 @@ IP=$IPOPTS
 			if [ -n "${NEW_DEVICE}" ]; then
 				DEVICE="${NEW_DEVICE}"
 			fi
-			;;
-               esac
-        done
+		;;
+	esac
+done
 
-        # source ipconfig output
-        if [ -n "${DEVICE}" ]; then
-                # source specific bootdevice
-                . /tmp/net-${DEVICE}.conf
-        else
-                # source any interface as not exaclty specified
-                . /tmp/net-*.conf
-        fi
+# source ipconfig output
+if [ -n "${DEVICE}" ]; then
+	# source specific bootdevice
+    . /tmp/net-${DEVICE}.conf
+else
+    # source any interface as not exaclty specified
+    . /tmp/net-*.conf
+fi
 }
 
    #####################################################################
