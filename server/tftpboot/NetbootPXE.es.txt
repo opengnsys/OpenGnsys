@@ -1,0 +1,22 @@
+
+
+OpenGnsys usa como gestor pxe, el binario pxelinux.0
+
+
+También ofrece la posibilidad de usar el bianrio grldr que se está evaluando para solucionar algunas incidencias.
+
+
+
+Activar el grldr del grub4dos
+1) modificar el dhcp, donde aparezca filename "pxelinux.0" por "grldr"
+     filename "grldr";
+2) Reiniciamos el servicio dhcp    
+     /etc/init.d/dhcpd restart
+3) Renombrar cambiar el gestor de arranque de la web, para que use grldr.
+    cp /opt/opengnsys/www/principal/boot.php /opt/opengnsys/www/principal/boot.pxelinux.php
+	cp /opt/opengnsys/www/principal/boot.grub4dos.php /opt/opengnsys/www/principal/boot.php
+    
+
+
+
+ 

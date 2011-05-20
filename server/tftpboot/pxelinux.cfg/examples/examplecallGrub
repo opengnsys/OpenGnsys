@@ -1,0 +1,29 @@
+DEFAULT IfNOTcacheGOnet
+#DEFAULT pxe-2.6.32-21-generic-pae
+
+#ejemplos para el parametro ip
+#ip=ipCLIENTE:ipROOTserver:ipROUTER:NetMASK:hostNAME:[device]
+#ip=172.17.36.2:172.17.36.11:172.17.36.254:255.255.255.0:r60
+#ip=dhcp
+
+LABEL cache
+KERNEL grub.exe
+APPEND --config-file="find --set-root /vmlinuz; kernel /vmlinuz ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on engine=testing reposerver=172.17.32.242; initrd /initrd.img"
+
+LABEL net
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; kernel (pd)/ogclient/vmlinuz-2.6.32-21-generic-pae ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on engine=testing ogrepo=172.17.32.242; initrd (pd)/ogclient/initrd.img-2.6.32-21-generic-pae"
+
+LABEL IfNOTcacheGOnet
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title cache; fallback 1; find --set-root /ogvmlinuz; kernel /ogvmlinuz ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on engine=testing ogrepo=172.17.36.11 ogprotocol=smb og2nd=sqfs; initrd /oginitrd; boot; title net; kernel (pd)/ogclient/vmlinuz-2.6.32-21-generic-pae ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on engine=testing ogrepo=172.17.36.11 ogprotocol=nfs og2nd=sqfs; initrd (pd)/ogclient/initrd.img-2.6.32-21-generic-pae; boot"
+
+
+
+LABEL pxe-2.6.32-21-generic-pae
+KERNEL ogclient/vmlinuz-2.6.32-21-generic-pae
+APPEND initrd=ogclient/initrd.img-2.6.32-21-generic-pae ip=dhcp ro boot=og vga=788 irqpoll acpi=on reposerver=172.17.32.242
+
+LABEL grub
+KERNEL grub.exe
+APPEND keeppxe
