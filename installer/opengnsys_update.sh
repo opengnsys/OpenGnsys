@@ -30,6 +30,12 @@ then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
+# Error si OpenGnSys no está instalado (no existe el directorio del proyecto)
+INSTALL_TARGET=/opt/opengnsys
+if [ ! -d $INSTALL_TARGET ]; then
+        echo "ERROR: OpenGnSys is not installed, cannot update!!"
+        exit 1
+fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
@@ -47,7 +53,6 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
 
-INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_update.log
 
 
@@ -255,28 +260,6 @@ function checkNetworkConnection()
 	wget --spider -q $OPENGNSYS_SERVER
 }
 
-# Obtener los parámetros de red de la interfaz por defecto.
-function getNetworkSettings()
-{
-        local MAINDEV
-
- 	echoAndLog "$FUNCNAME(): Detecting default network parameters."
-	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
-	if [ -z "$MAINDEV" ]; then
- 		errorAndLog "${FUNCNAME}(): Network device not detected."
-		return 1
-	fi
-
-	# Variables de ejecución de Apache
-	# - APACHE_RUN_USER
-	# - APACHE_RUN_GROUP
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
-	fi
-	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
-}
-
 
 #####################################################################
 ####### Funciones específicas de la instalación de Opengnsys
@@ -323,6 +306,20 @@ function updateClientFiles()
 
 	return $hayErrores
 }
+
+# Exportar nombre de usuario y grupo del servicio Apache.
+function getApacheUser()
+{
+	# Variables de ejecución de Apache
+	# - APACHE_RUN_USER
+	# - APACHE_RUN_GROUP
+	if [ -f /etc/apache2/envvars ]; then
+		source /etc/apache2/envvars
+	fi
+	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
+}
+
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
@@ -516,65 +513,8 @@ function compileServices()
 
 
 ####################################################################
-### Funciones instalacion cliente opengnsys
+### Funciones instalacion cliente OpenGnSys
 ####################################################################
-
-# Actualizar antiguo cliente Initrd.
-function updateOldClient()
-{
-	local OSDISTRIB OSCODENAME
-
-	local hayErrores=0
-
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-        rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
-        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-        rsync -iplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while copying engine files"
-		hayErrores=1
-	fi
-
-	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISTRIB=$(lsb_release -is) 2>/dev/null
-	OSCODENAME=$(lsb_release -cs) 2>/dev/null
-	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
-		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	else
-		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading default udeb files."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	fi
-
-	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): Client generation success."
-	else
-		errorAndLog "${FUNCNAME}(): Client generation with errors"
-	fi
-
-	return $hayErrores
-}
 
 # Actualizar nuevo cliente para OpenGnSys 1.0
 function updateClient()
@@ -656,11 +596,6 @@ if [ $? -ne 0 ]; then
 	errorAndLog " - Server is temporally down, try agian later."
 	exit 1
 fi
-getNetworkSettings
-if [ $? -ne 0 ]; then
-	errorAndLog "Error reading default network settings."
-	exit 1
-fi
 
 # Arbol de directorios de OpenGnSys.
 createDirs ${INSTALL_TARGET}
@@ -703,6 +638,7 @@ updateClientFiles
 updateInterfaceAdm
 
 # Actualizar páqinas web
+getApacheUser
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Web Admin files"
