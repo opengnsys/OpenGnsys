@@ -436,14 +436,16 @@ function createDirs()
 function updateServerFiles()
 {
 	# No copiar ficheros del antiguo cliente Initrd
-	local SOURCES=( repoman/bin \
+	local SOURCES=(	repoman/bin \
 			server/bin \
+			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
-                        doc )
-	local TARGETS=( bin \
-                        bin \
-                        lib \
-                        doc )
+			doc )
+	local TARGETS=(	bin \
+			bin \
+			tftpboot \
+			lib \
+			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
