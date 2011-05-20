@@ -16,7 +16,7 @@
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-18
 #*/ ##
-function ogAddRegistryValue ()
+function ogAddRegistryKey ()
 {
 }
 
@@ -33,7 +33,53 @@ function ogAddRegistryValue ()
 
 
 #/**
-#         ogGetRegistryPath path_mountpoint str_hive
+#         ogChangeRegistryKey path_mountpoint str_hive str_keyname
+#@brief   Modifica el nombre de una clave al registro de Windows.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogChangeRegistryKey ()
+{
+}
+
+#/**
+#         ogChangeRegistryValue path_mountpoint str_hive str_valuename str_valuedata
+#@brief   Modifica el nombre de un valor (dupla nombre/valor) al registro de Windows.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogChangeRegistryValue ()
+{
+}
+
+
+#/**
+#         ogDeleteRegistryKey path_mountpoint str_hive str_keyname
+#@brief   Elimina una clave del registro de Windows con todo su contenido.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-20
+#*/ ##
+function ogDeleteRegistryKey ()
+{
+}
+
+#/**
+#         ogDeleteRegistryValue path_mountpoint str_hive str_valuename str_valuedata
+#@brief   Elimina un valor del registro de Windows.
+#@version 1.0.1 - Nueva función
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-20
+#*/ ##
+function ogDeleteRegistryValue ()
+{
+}
+
+
+#/**
+#         ogGetHivePath path_mountpoint str_hive
 #@brief   Función básica que devuelve el camino del fichero con una sección del registro.
 #@param   path_mountpoint  directorio donde está montado el sistema Windows
 #@param   str_hive         sección del registro
@@ -46,7 +92,7 @@ function ogAddRegistryValue ()
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-18
 #*/ ##
-function ogGetRegistryPath ()
+function ogGetHivePath ()
 {
 # Variables locales.
 local FILE FILENT FILEXP
@@ -101,7 +147,7 @@ fi
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Camino del fichero de registro.
-FILE=$(ogGetRegistryPath "$1" "$2") || return $?
+FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
@@ -148,7 +194,7 @@ fi
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Camino del fichero de registro.
-FILE=$(ogGetRegistryPath "$1" "$2") || return $?
+FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver la lista de claves de registro.
 chntpw $FILE << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
@@ -190,7 +236,7 @@ fi
 [ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Camino del fichero de registro.
-FILE=$(ogGetRegistryPath "$1" "$2") || return $?
+FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Cambiar el dato del valor de registro.
 chntpw $FILE << FIN &>/dev/null

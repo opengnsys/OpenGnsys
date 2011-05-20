@@ -291,3 +291,235 @@ ms-sys -z -f $PART
 ms-sys -m -f $PART
 }
 
+
+#/**
+#         ogFixBootSector int_ndisk int_parition
+#@brief   Corrige el boot sector de una particion activa para MS windows/dos -fat-ntfs
+#@param   int_ndisk      nº de orden del disco
+#@param   int_partition     nº de particion
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+function ogFixBootSector ()
+{
+# Variables locales.
+local PART DISK FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+#TODO, solo si la particion existe
+#TODO, solo si es ntfs o fat
+PARTYPE=$(ogGetPartitionId $1 $2) 
+case $PARTYPE in
+	1|4|6|7|b|c|e|f)
+	;;
+	*)
+	return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+	;;
+esac
+
+ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+
+#Preparando instruccion	
+let DISK=$1-1	
+PART=$2
+FILE=/tmp/temporal
+cat > $FILE <<EOF
+disk=$DISK
+main_part=$PART
+fix_first_sector=yes
+EOF
+
+spartlnx.run -cui -nm -a -f $FILE
+
+}
+
+
+
+#/**
+#         ogWindowsBootParameters int_ndisk int_parition
+#@brief   Configura el gestor de arranque de windows 7 / vista
+#@param   int_ndisk      nº de orden del disco
+#@param   int_partition     nº de particion
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+
+function ogWindowsBootParameters ()
+{
+# Variables locales.
+local PART DISK FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+
+VERSION=$(ogGetOsVersion $1 $2)
+
+if echo $VERSION | grep "Windows 7"
+then
+	WINVER="Windows 7"
+elif echo $VERSION | grep "Windows Seven"
+then 
+	WINVER="Windows Vista"
+else
+	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+fi
+
+ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+#Preparando instruccion	
+let DISK=$1-1
+PART=$2	
+FILE=/tmp/temporal
+
+#Preparando instruccion	Windows Resume Application
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Windows Resume Application
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	tipo windows
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=$WINVER
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	Ramdisk Options
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Ramdisk Options
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	Windows Boot Manager
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Windows Boot Manager
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	Herramienta de diagnóstico de memoria de Windows
+#cat > $FILE <<EOF
+#boot_disk=$DISK
+#boot_main_part=$PART
+#disk=$DISK
+#main_part=$PART
+#boot_entry=Herramienta de diagnóstico de memoria de Windows
+#EOF
+#spartlnx.run -cui -nm -w -f $FILE
+
+}
+	
+
+#         ogWinRegistrePartition int_ndisk int_partiton str_volume int_disk int_partition
+#@brief   Registra una partición en windows con un determinado volumen.
+#@param   int_ndisk      nº de orden del disco a registrar
+#@param   int_partition     nº de particion a registrar
+#@param   str_volumen      volumen a resgistar
+#@param   int_ndisk_windows      nº de orden del disco donde esta windows
+#@param   int_partition_windows     nº de particion donde esta windows
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+
+function ogWinRegistrePartition ()
+{	
+# Variables locales.
+local PART DISK FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk_TO_registre int_partition_TO_registre str_NewVolume int_disk int_parition " \
+           "$FUNCNAME 1 1 c: 1 1"
+    return
+fi
+
+# Error si no se reciben 5 parámetros.
+[ $# == 5 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+REGISTREDDISK=$1
+REGISTREDPART=$2
+REGISTREDVOL=$(echo $3 | cut -c1 | tr '[:lower:]' '[:upper:]')
+DISK=$4
+PART=$5
+FILE=/tmp/temporal
+
+ogDiskToDev $REGISTREDDISK $REGISTREDPART || return $(ogRaiseError $OG_ERR_PARTITION "particion a registrar "; echo $?)
+ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows"; echo $?)
+
+ogGetOsType $DISK $PART | grep "Windows" || return $(ogRaiseError $OG_ERR_NOTOS "no es windows"; echo $?)
+
+VERSION=$(ogGetOsVersion $DISK $PART)
+
+#Systemroot
+
+if ogGetPath $DISK $PART WINDOWS
+then
+	SYSTEMROOT="Windows"
+elif ogGetPath $DISK $PART WINNT
+then 
+	SYSTEMROOT="winnt"
+else
+	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+fi
+
+ogUnmount $DISK $PART
+let DISK=$DISK-1
+let REGISTREDDISK=$REGISTREDDISK-1
+#Preparando instruccion	Windows Boot Manager
+cat > $FILE <<EOF
+windows_disk=$DISK
+windows_main_part=$PART
+windows_dir=$SYSTEMROOT
+disk=$REGISTREDDISK
+main_part=$REGISTREDPART
+;ext_part
+part_letter=$REGISTREDVOL
+EOF
+spartlnx.run -cui -nm -u -f $FILE
+}
