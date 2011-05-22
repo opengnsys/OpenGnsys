@@ -7,7 +7,7 @@ title firsboot
 find --set-root --ignore-floppies --ignore-cd /ogboot.me
 cmp /ogboot.me /ogboot.firstboot || ls FALLBACK
 write /ogboot.firstboot iniciado
-chainloader /ntldr
+chainloader +1
 savedefault fallback
 boot
 
@@ -15,7 +15,7 @@ title secondboot
 find --set-root --ignore-floppies --ignore-cd /ogboot.me
 cmp /ogboot.me /ogboot.secondboot || ls FALLBACK
 write /ogboot.secondboot iniciado
-chainloader /ntldr
+chainloader +1
 savedefault fallback
 boot
 

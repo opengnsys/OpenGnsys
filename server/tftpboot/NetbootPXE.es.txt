@@ -19,7 +19,7 @@ Activar el grldr del grub4dos
 4) 
 En la funcion ogBoot, de la libreria Boot.lib descomentar los comentarios del if de las líneas 71 a 85, para que quede 
         #FIXME: activar seguimiento inicio sesion XP con grub4dos
-		if `ogGetOsVersion 1 1 | grep "XP" > /dev/null`
+		if `ogGetOsVersion $1 $2 | grep "XP" > /dev/null`
         then 
         	dd if=/dev/zero of=${MNTDIR}/ogboot.me  bs=1024 count=3
         	dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot  bs=1024 count=3

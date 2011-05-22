@@ -69,7 +69,7 @@ case "$TYPE" in
         # Activar la partición y copiar Grub4DOS.
         ogSetPartitionActive $1 $2
         #FIXME: activar seguimiento inicio sesion XP con grub4dos
-		#if `ogGetOsVersion 1 1 | grep "XP" > /dev/null`
+		#if `ogGetOsVersion $1 $2 | grep "XP" > /dev/null`
         #then 
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.me  bs=1024 count=3
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot  bs=1024 count=3
@@ -506,15 +506,18 @@ spartlnx.run -cui -nm -a -f $FILE
 
 #/**
 #         ogWindowsBootParameters int_ndisk int_parition
-#@brief   Configura el gestor de arranque de windows 7 / vista
+#@brief   Configura el gestor de arranque de windows 7 / vista / XP / 2000
 #@param   int_ndisk      nº de orden del disco
 #@param   int_partition     nº de particion
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación a OpenGNSys.
+#@version 0.9 - Integración desde EAC para OpenGNSys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009-09-24
+#@version 1.0.1 - Adapatacion para OpenGnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2011-05-20
 #*/ ##
 
 
@@ -522,6 +525,10 @@ function ogWindowsBootParameters ()
 {
 # Variables locales.
 local PART DISK FILE
+#Preparando variables adaptadas a sintaxis windows.
+let DISK=$1-1
+PART=$2	
+FILE=/tmp/temporal
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -537,21 +544,24 @@ ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 
 VERSION=$(ogGetOsVersion $1 $2)
 
-if echo $VERSION | grep "Windows 7"
+if echo "$VERSION" | grep "Windows 7"
 then
 	WINVER="Windows 7"
-elif echo $VERSION | grep "Windows Seven"
+elif echo "$VERSION" | grep "Windows Seven"
 then 
 	WINVER="Windows Vista"
+elif echo "$VERSION" | grep "XP"
+then
+	MOUNT=$(ogMount $1 $2)
+	[ -f ${MOUNT}/boot.ini ] || return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+	cat ${MOUNT}/boot.ini | sed s/partition\([0-9]\)/partition\($PART\)/g | sed s/rdisk\([0-9]\)/rdisk\($DISK\)/g > ${MOUNT}/tmp.boot.ini; mv ${MOUNT}/tmp.boot.ini ${MOUNT}/boot.ini
+	return 0
 else
 	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
 fi
 
 ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
-#Preparando instruccion	
-let DISK=$1-1
-PART=$2	
-FILE=/tmp/temporal
+
 
 #Preparando instruccion	Windows Resume Application
 cat > $FILE <<EOF
@@ -606,7 +616,7 @@ spartlnx.run -cui -nm -w -f $FILE
 }
 	
 
-#         ogWinRegistrePartition int_ndisk int_partiton str_volume int_disk int_partition
+#         ogWindowsRegisterPartition int_ndisk int_partiton str_volume int_disk int_partition
 #@brief   Registra una partición en windows con un determinado volumen.
 #@param   int_ndisk      nº de orden del disco a registrar
 #@param   int_partition     nº de particion a registrar
@@ -622,7 +632,7 @@ spartlnx.run -cui -nm -w -f $FILE
 #*/ ##
 
 
-function ogWinRegistrePartition ()
+function ogWindowsRegisterPartition ()
 {	
 # Variables locales.
 local PART DISK FILE
