@@ -32,9 +32,20 @@ switch (form.idmetodo.value)
 	case "TORRENT":
 		protocol=" TORRENT " +  form.modp2p.value + ":" + form.timep2p.value;
 		break;
+	case "UNICAST":
+		protocol=" UNICAST";
+		break;
 }
 //form.codigo.value="deployImage REPO /";
-form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+if (form.modo[0].checked) 
+{
+	form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+}
+else
+{
+	form.codigo.value="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
+}
+
 }
 
 function codeParticionado(form){

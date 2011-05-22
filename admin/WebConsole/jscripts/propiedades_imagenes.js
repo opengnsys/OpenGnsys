@@ -74,23 +74,23 @@ function confirmar(op){
 //	Comprobar_datos 
 //________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.nombreca.value=="") {
-		alert(TbMsg[3]);
-		document.fdatos.nombreca.focus();
-		return(false);
+	function validate (field, validator, msgi) {
+		if (!validator (field.value)) {
+			alert(TbMsg[msgi]);
+			validation_highlight (field);
+			return false;
+		}
+		return true;
 	}
-	if (document.fdatos.descripcion.value=="") {
-		alert(TbMsg[0]);
-		document.fdatos.descripcion.focus();
-		return(false);
-	}	
-	/*
-	var  p=document.fdatos.idperfilsoft.selectedIndex
-	 if (p==0){  
-         alert(TbMsg[1])
-         document.forms.fdatos.idperfilsoft.focus()
-         return(false)
-	}
-	*/
+
+	
+	var form = document.fdatos;
+	return 	validate (form.nombreca, validate_nameimagefile, 3) &&
+			validate (form.nombreca, validate_notnull, 3) &&
+			validate (form.descripcion, validate_notnull, 0) &&			
+			validate (form.numpar, validate_notnull, 4) &&
+			validate (form.codpar, validate_notnull, 5) &&
+			validate (form.idrepositorio, validate_notnull, 6);
+
 	return(true);
 }
