@@ -29,9 +29,11 @@ fi
 
 DISK=$1; PART=$2; 
 
-ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows no detectada"; echo $?)
-ogGetOsType $DISK $PART | grep "Windows" || return $(ogRaiseError $OG_ERR_NOTOS "no es windows"; echo $?)
-VERSION=$(ogGetOsVersion $DISK $PART)
+#Comprobaciones redundantes: borrar"
+#ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows no detectada"; echo $?)
+#ogGetOsType $DISK $PART | grep "Windows" || return $(ogRaiseError $OG_ERR_NOTOS "no es windows"; echo $?)
+#VERSION=$(ogGetOsVersion $DISK $PART)
+#Fin Comprobaciones redundantes: borrar"
 
 if ogGetPath $DISK $PART WINDOWS
 then
@@ -43,32 +45,56 @@ else
 	return $(ogRaiseError $OG_ERR_NOTOS "version windows no detectada"; echo $?)
 fi
 
-hiveSAM=$(ogGetPath 1 1 /${SYSTEMROOT}/system32/config/SAM) && export hiveSAM || return $(ogRaiseError $OG_ERR_NOTOS " hive SAM  no detectada"; echo $?)
-hiveSYSTEM=$(ogGetPath 1 1 /${SYSTEMROOT}/system32/config/system) && export hiveSYSTEM || return $(ogRaiseError $OG_ERR_NOTOS "hive SYSTEM  no detectada"; echo $?)
-hiveSOFTWARE=$(ogGetPath 1 1 /${SYSTEMROOT}/system32/config/software) && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
+hiveSAM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/SAM) && export hiveSAM || return $(ogRaiseError $OG_ERR_NOTOS " hive SAM  no detectada"; echo $?)
+hiveSYSTEM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/system) && export hiveSYSTEM || return $(ogRaiseError $OG_ERR_NOTOS "hive SYSTEM  no detectada"; echo $?)
+hiveSOFTWARE=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/software) && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
 export TEMPhive=/tmp/tmpregistry
 
-export particion=`ogMount $1 $2`
-mkfifo pipe 2>/dev/null
-declare -i count
-declare -A HivePathUser
-count=3
+## borrar elementos de la primera integracion
+#export particion=`ogMount $DISK $PART`
+#mkfifo pipe 2>/dev/null
+#declare -i count
+#declare -A HivePathUser
+#count=3
+# fin borrar elementos de la primera integracion
+
+declare -i COUNT
+COUNT=3
+BASEHOMEDIR=$(ogGetPath 1 1 /"Documents and Settings")
+TMPUSERFILE="/tmp/WuserRegAndDAT.tmp"
+find "$BASEHOMEDIR/" -type f -name NTUSER.DAT > $TMPUSERFILE  
 LISTUSERS=$(drbl-chntpw -l $hiveSAM | grep RID | awk -F"<" '{print $2}' | awk -F">" '{print $1}')
+#echo "$BASEHOMEDIR" $LISTUSERS
 for user in $LISTUSERS
 do	
-		if find ${particion}/ -type f -name NTUSER.DAT > pipe| cat pipe | grep $user > /tmp/path.txt.$count
-		then 
-		echo pefil de $user encontrado, para utilizar este usuario con funciones utilizar id_hive= $count o \$usuario
-		read camino < /tmp/path.txt.$count
-		echo $camino | sed -e 's/ /\\ /g' > /tmp/path.txt.$count
-		camino2=$(echo $camino | sed -e 's/ /\\ /g')
-		echo $camino2 | sed -e 's/\\/\\\\/g' > /tmp/path.txt.$count
-		export `echo $user=hiveUSER$count`
-		export `echo hiveUSER$count`="$camino2"
-		count=${count}+1
+	# borrar elementos de la primera integracion.
+		#if find ${particion}/ -type f -name NTUSER.DAT > pipe| cat pipe | grep $user > /tmp/path.txt.$count
+		#then 
+		#echo pefil de $user encontrado, para utilizar este usuario con funciones utilizar id_hive= $count o \$usuario
+		#read camino < /tmp/path.txt.$count
+		#echo $camino | sed -e 's/ /\\ /g' > /tmp/path.txt.$count
+		#camino2=$(echo $camino | sed -e 's/ /\\ /g')
+		#echo $camino2 | sed -e 's/\\/\\\\/g' > /tmp/path.txt.$count
+		#export `echo $user=hiveUSER$count`
+		#export `echo hiveUSER$count`="$camino2"
+		#count=${count}+1
+		#fiecho $user
+    # Fin borrar elementos de la primera integracion.
+        
+        # Comprobamos que el usuario registrado tiene .DAT
+		if HOMEDIR=$(cat $TMPUSERFILE | grep -w $user)  
+		then
+			#echo "$user exportamos los usuarios de windows como variables, y como valor hiveUSERX; donde la X es 3 4 5 6 ... X"
+			export `echo $user=hiveUSER$COUNT` 
+			#echo "$user exportamos la variable hiveUSERX con el valor del home de la variable-usuario_windows"
+			##export `echo hiveUSER$COUNT`="$(echo $HOMEDIR | sed -e 's/ /\\ /'g | sed -e 's/\\/\\\\/g')"
+			export `echo hiveUSER$COUNT`="$(echo $HOMEDIR)"
+			#echo " estas variables \$USUARIO -> Identificador del HIVE ; \${!USUARIO} -> path del HIVE "
+			COUNT=${COUNT}+1
 		fi
+		
 done
-count=0    
+COUNT=0
 }
 
 
@@ -98,16 +124,11 @@ if [ "$*" == "help" ]; then
     return
 fi	
 
-echo drbl-chntpw -f $TEMPhive $hiveSAM $hiveSYSTEM $hiveSOFTWARE $hiveUSER3 $hiveUSER4 $hiveUSER5 $hiveUSER6 $hiveUSER7 $hiveUSER8 $hiveUSER9> /tmp/run.sh
-cat /tmp/run.sh
-sh /tmp/run.sh
-rm -fr $TEMPhive
-rm /tmp/run.sh
+echo drbl-chntpw -f $TEMPhive $hiveSAM $hiveSYSTEM $hiveSOFTWARE \"${hiveUSER3}\" \"${hiveUSER4}\" \"${hiveUSER5}\" \"${hiveUSER6}\" \"${hiveUSER7}\" \"${hiveUSER8}\" \"${hiveUSER9}\" > /tmp/run.sh
+cat /tmp/run.sh; sh /tmp/run.sh; rm -fr $TEMPhive; rm /tmp/run.sh
 
-unset hiveSAM
-unset hiveSYSTEM
-unset hiveSOFTWARE
-unset TEMPhive
+unset hiveSAM hiveSYSTEM hiveSOFTWARE TEMPhive hiveUSER3 hiveUSER4 hiveUSER5 hiveUSER6 hiveUSER7 hiveUSER8 hiveUSER9
+ 
 
 }
 
@@ -156,9 +177,19 @@ if [ "$*" == "help" ]; then
     return
 fi		
 
-drbl-chntpw -l $hiveSAM | grep RID | grep -w $1 || return 22
+# TODO: error si no se ha llamado previamente a ogLoadHiveWindows
+[ -n $hiveSAM ] || return $(ogRaiseError $OG_ERR_FORMAT "se debe utilizar primero la utilidad ogLoadHiveWindows"; echo $?)
+
+# TODO: error si el usuario no tiene cuenta en windows.
+drbl-chntpw -l $hiveSAM | grep RID | grep -w $1 || return $(ogRaiseError $OG_ERR_FORMAT "el usuario $1 no tiene cuenta en este windows: Compruebe mayusculas o minusculas"; echo $?)
+
+# TODO: error si no el usario no no tiene HIVE asociado.
+[ -n "${!1}" ] || return $(ogRaiseError $OG_ERR_FORMAT "el usuario no tiene hive creado"; echo $?)
+
 
 HIVEID=$(echo ${!1} | tr -d "hiveUSER")
+
+
 #echo "IMPORTANTE:  la variable HiveUser3=/mnt/windows/Document/\ and/\ Seeting\alumnmos\NTUSER.dat"
 echo $HIVEID
 #cp /var/EAC/admin/utilswin/Fondo.BMP ${particion}/WINDOWS/
@@ -486,5 +517,59 @@ ed BootExecute
 $valor
 --n
 EOF
+}
+
+
+function ogSchrootLinux () {
+
+# Variables locales.
+local PART DISK DIRCONF SCHROOTDEVICE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition" \
+           "$FUNCNAME 1 1 "
+    return
+fi	
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+DISK=$1; PART=$2; DIRCONF="/etc/schroot"
+
+
+VERSION=$(ogGetOsVersion $DISK $PART) 
+echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+
+ogUnmount $DISK $PART) || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+
+SCHROOTDEVICE=$(ogDiskToDev $DISK $PART)
+
+
+rm ${DIRCONF}/mount-defaults
+rm ${DIRCONF}/schroot.conf
+
+cat >> ${DIRCONF}/mount-defaults << EOF
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+proc            /proc           proc    defaults        0       0
+/dev            /dev            none    rw,bind         0       0
+/dev/pts        /dev/pts        none    rw,bind         0       0
+/dev/shm        /dev/shm        none    rw,bind         0       0
+EOF
+
+
+cat >> ${DIRCONF}/schroot.conf << EOF
+[linux]
+description=$VERSION
+type=block-device
+device=$SCHROOTDEVICE
+EOF
+
+
+
+
+schroot -c linux
+
+schroot -end-sessiona --all-sessions
 }
 
