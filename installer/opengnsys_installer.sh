@@ -728,7 +728,7 @@ function dhcpConfigure()
 	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
 
 	local DHCPSERVER=/etc/init.d/isc-dhcp-server
-	local DHCPCONFIG=/etc/dhcp/dhcpd.conf
+	DHCPCONFIG=/etc/dhcp/dhcpd.conf
 	if [ ! -x $DHCPSERVER ]; then
 		DHCPSERVER=/etc/init.d/dhcp3-server
 		DHCPCONFIG=/etc/dhcp3/dhcpd.conf
@@ -1166,7 +1166,7 @@ function installationSummary()
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "DHCP configuration file:          /etc/dhcp3/dhcpd.conf"
+	echoAndLog "DHCP configuration file:          $DHCPCONFIG"
 	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
 	echoAndLog "Samba configuration directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"

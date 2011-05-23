@@ -531,14 +531,14 @@ function getNetworkSettings()
 	local dev=""
 
         echoAndLog "${FUNCNAME}(): Detecting network parameters."
-	DEVICE=$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')
+	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}') )
 	if [ -z "$DEVICE" ]; then
 		errorAndLog "${FUNCNAME}(): Network devices not detected."
 		exit 1
 	fi
 	for dev in ${DEVICE[*]}; do
 		SERVERIP[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
-		if [ -n "${SERVERIP[i]}"; then
+		if [ -n "${SERVERIP[i]}" ]; then
 			NETMASK[i]=$(LANG=C ifconfig $dev | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
 			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
 			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
@@ -642,33 +642,39 @@ function smbConfigure()
 
 function dhcpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
+	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
 
 	local errcode=0
 	local i=0
 	local dev=""
 
-	backupFile /etc/dhcp3/dhcpd.conf
+	local DHCPSERVER=/etc/init.d/isc-dhcp-server
+	DHCPCFGDIR=/etc/dhcp
+	if [ ! -x $DHCPSERVER ]; then
+		DHCPSERVER=/etc/init.d/dhcp3-server
+		DHCPCFGDIR=/etc/dhcp3
+	fi
+	backupFile $DHCPCFGDIR/dhcpd.conf
 	for dev in ${DEVICE[*]}; do
-		if [ -n "${SERVERIP[i]}"; then
-			backupFile /etc/dhcp3/dhcpd-$dev.conf
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/NETIP/${NETIP[i]}/g" \
-			    -e "s/NETMASK/${NETMASK[i]}/g" \
-			    -e "s/NETBROAD/${NETBROAD[i]}/g" \
-			    -e "s/ROUTERIP/${ROUTERIP[i]}/g" \
+		if [ -n "${SERVERIP[$i]}" ]; then
+			backupFile $DHCPCFGDIR/dhcpd-$dev.conf
+			sed -e "s/SERVERIP/${SERVERIP[$i]}/g" \
+			    -e "s/NETIP/${NETIP[$i]}/g" \
+			    -e "s/NETMASK/${NETMASK[$i]}/g" \
+			    -e "s/NETBROAD/${NETBROAD[$i]}/g" \
+			    -e "s/ROUTERIP/${ROUTERIP[$i]}/g" \
 			    -e "s/DNSIP/$DNSIP/g" \
-			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd-$dev.conf || errcode=1
+			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCFGDIR/dhcpd-$dev.conf || errcode=1
 		fi
 		let i++
 	done
 	if [ $errcode -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
+		errorAndLog "${FUNCNAME}(): error while configuring DHCP server"
 		return 1
 	fi
-	ln -f /etc/dhcp3/dhcpd.conf dhcpd-$DEFAULTDEV.conf
-	/etc/init.d/dhcp3-server restart
-        echoAndLog "${FUNCNAME}(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
+	ln -f $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
+	$DHCPSERVER restart
+	echoAndLog "${FUNCNAME}(): Sample DHCP configured in \"$DHCPCFGDIR\"."
 	return 0
 }
 
@@ -870,7 +876,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Server
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
-	make && make install
+	make && mv ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
 		hayErrores=1
@@ -879,7 +885,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Repository Manager
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && make install
+	make && mv ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
 		hayErrores=1
@@ -888,7 +894,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Agent
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && make install
+	make && mv ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
 		hayErrores=1
@@ -1056,7 +1062,7 @@ function openGnsysConfigure()
 
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config files."
 	for dev in ${DEVICE[*]}; do
-		if [ -n "${SERVERIP[i]}"; then
+		if [ -n "${SERVERIP[i]}" ]; then
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
@@ -1082,11 +1088,11 @@ function openGnsysConfigure()
 		fi
 		let i++
 	done
-	ln -f $INSTALL_TARGET/etc/ogAdmServer.cfg ogAdmServer-$DEFAULTDEV.cfg
-	ln -f $INSTALL_TARGET/etc/ogAdmRepo.cfg ogAdmRepo-$DEFAULTDEV.cfg
-	ln -f $INSTALL_TARGET/etc/ogAdmAgent.cfg ogAdmAgent-$DEFAULTDEV.cfg
-	ln -f $INSTALL_TARGET/client/etc/ogAdmClient.cfg ogAdmClient-$DEFAULTDEV.cfg
-	ln -f $INSTALL_TARGET/www/controlacceso.php controlacceso-$DEFAULTDEV.php
+	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
+	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
+	ln -f $INSTALL_TARGET/cleint/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 	chown root:root $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
@@ -1115,7 +1121,7 @@ function installationSummary()
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "DHCP configuration file:          /etc/dhcp3/dhcpd.conf"
+	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
 	echoAndLog "Samba configuration directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
