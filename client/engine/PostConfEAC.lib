@@ -541,7 +541,7 @@ DISK=$1; PART=$2; DIRCONF="/etc/schroot"
 VERSION=$(ogGetOsVersion $DISK $PART) 
 echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
-ogUnmount $DISK $PART) || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+ogUnmount $DISK $PART || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
 SCHROOTDEVICE=$(ogDiskToDev $DISK $PART)
 
