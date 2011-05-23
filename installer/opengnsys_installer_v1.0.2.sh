@@ -1081,7 +1081,7 @@ function openGnsysConfigure()
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
 			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
-				$INSTALL_TARGET/www/controlacceso.php $INSTALL_TARGET/www/controlacceso-$dev.php
+				$INSTALL_TARGET/www/controlacceso.php > $INSTALL_TARGET/www/controlacceso-$dev.php
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
@@ -1091,7 +1091,7 @@ function openGnsysConfigure()
 	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
-	ln -f $INSTALL_TARGET/cleint/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	ln -f $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 	chown root:root $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
