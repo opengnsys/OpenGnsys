@@ -583,15 +583,15 @@ boot_entry=$WINVER
 EOF
 spartlnx.run -cui -nm -w -f $FILE
 
-#Preparando instruccion	Ramdisk Options
-cat > $FILE <<EOF
-boot_disk=$DISK
-boot_main_part=$PART
-disk=$DISK
-main_part=$PART
-boot_entry=Ramdisk Options
-EOF
-spartlnx.run -cui -nm -w -f $FILE
+##Preparando instruccion	Ramdisk Options
+#cat > $FILE <<EOF
+#boot_disk=$DISK
+#boot_main_part=$PART
+#disk=$DISK
+#main_part=$PART
+#boot_entry=Ramdisk Options
+#EOF
+#spartlnx.run -cui -nm -w -f $FILE
 
 #Preparando instruccion	Windows Boot Manager
 cat > $FILE <<EOF
