@@ -725,10 +725,10 @@ function smbConfigure()
 
 function dhcpConfigure()
 {
-	echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
+	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
 
 	local DHCPSERVER=/etc/init.d/isc-dhcp-server
-	local DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+	local DHCPCONFIG=/etc/dhcp/dhcpd.conf
 	if [ ! -x $DHCPSERVER ]; then
 		DHCPSERVER=/etc/init.d/dhcp3-server
 		DHCPCONFIG=/etc/dhcp3/dhcpd.conf
