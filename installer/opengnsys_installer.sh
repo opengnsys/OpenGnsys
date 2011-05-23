@@ -725,24 +725,30 @@ function smbConfigure()
 
 function dhcpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
+	echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
 
-	backupFile /etc/dhcp3/dhcpd.conf
+	local DHCPSERVER=/etc/init.d/isc-dhcp-server
+	local DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+	if [ ! -x $DHCPSERVER ]; then
+		DHCPSERVER=/etc/init.d/dhcp3-server
+		DHCPCONFIG=/etc/dhcp3/dhcpd.conf
+	fi
+	backupFile $DHCPCONFIG
 
-        sed -e "s/SERVERIP/$SERVERIP/g" \
+	sed -e "s/SERVERIP/$SERVERIP/g" \
 	    -e "s/NETIP/$NETIP/g" \
 	    -e "s/NETMASK/$NETMASK/g" \
 	    -e "s/NETBROAD/$NETBROAD/g" \
 	    -e "s/ROUTERIP/$ROUTERIP/g" \
 	    -e "s/DNSIP/$DNSIP/g" \
-	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd.conf
+	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCONFIG
 	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
+		errorAndLog "${FUNCNAME}(): error while configuring DHCP server"
 		return 1
 	fi
 
-	/etc/init.d/dhcp3-server restart
-        echoAndLog "${FUNCNAME}(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
+	$DHCPSERVER restart
+        echoAndLog "${FUNCNAME}(): Sample DHCP configured in file \"$DHCPCONFIG\"."
 	return 0
 }
 
