@@ -453,7 +453,11 @@ function updateServerFiles()
 	pushd $WORKDIR/opengnsys >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
-		rsync --exclude .svn -irplt "${SOURCES[$i]}" $(dirname "${INSTALL_TARGET}/${TARGETS[$i]}")
+		if [ -d "$INSTALL_TARGET/${TARGETS[$i]}" ]; then
+			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname "$INSTALL_TARGET/${TARGETS[i]}")
+		else
+			rsync --exclude .svn -irplt "${SOURCES[i]}" "$INSTALL_TARGET/${TARGETS[i]}"
+		fi
 	done
 	popd >/dev/null
 	echoAndLog "${FUNCNAME}(): updating cron files"
