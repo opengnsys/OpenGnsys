@@ -507,38 +507,29 @@ function checkNetworkConnection()
 # Obtener los parámetros de red de la interfaz por defecto.
 function getNetworkSettings()
 {
-	# Arrays globales definidas:
-	# - DEVICE:     nombres de dispositivos de red activos.
-	# - DEFAULTDEV: dispositivo de red por defecto.
-	# - SERVERIP:   IP local del servidor.
-	# - NETIP:      IP de la red.
-	# - NETMASK:    máscara de red.
-	# - NETBROAD:   IP de difusión de la red.
-	# - ROUTERIP:   IP del router.
-	# - DNSIP:      IP del servidor DNS.
+	# Variables globales definidas:
+	# - SERVERIP: IP local del servidor.
+	# - NETIP:    IP de la red.
+	# - NETMASK:  máscara de red.
+	# - NETBROAD: IP de difusión de la red.
+	# - ROUTERIP: IP del router.
+	# - DNSIP:    IP del servidor DNS.
 
-	local i=0
-	local dev=""
+	local MAINDEV
 
-        echoAndLog "${FUNCNAME}(): Detecting network parameters."
-	DEVICE=$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')
-	if [ -z "$DEVICE" ]; then
-		errorAndLog "${FUNCNAME}(): Network devices not detected."
+        echoAndLog "${FUNCNAME}(): Detecting default network parameters."
+	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
+	if [ -z "$MAINDEV" ]; then
+		errorAndLog "${FUNCNAME}(): Network device not detected."
 		exit 1
 	fi
-	for dev in ${DEVICE[*]}; do
-		SERVERIP[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
-		if [ -n "${SERVERIP[i]}"; then
-			NETMASK[i]=$(LANG=C ifconfig $dev | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
-			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
-			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
-			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
-			let i++
-		fi
-	done
+	SERVERIP=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+	NETMASK=$(LANG=C ifconfig $MAINDEV | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
+	NETBROAD=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {print ($6)}')
+	NETIP=$(netstat -nr | grep $MAINDEV | awk '$1!~/0\.0\.0\.0/ {if (n=="") n=$1} END {print n}')
+	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
-	if [ -z "${NETIP}[*]" -o -z "${NETMASK[*]}" ]; then
+	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
 		errorAndLog "${FUNCNAME}(): Network not detected."
 		exit 1
 	fi
@@ -600,6 +591,108 @@ function testPxe ()
 
 
 ########################################################################
+## Configuracion servicio NFS
+########################################################################
+
+# ADVERTENCIA: usa variables globales NETIP y NETMASK!
+function nfsConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Config nfs server."
+
+	backupFile /etc/exports
+
+	nfsAddExport /opt/opengnsys/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding nfs client config"
+		return 1
+	fi
+
+	nfsAddExport /opt/opengnsys/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding nfs images config"
+		return 1
+	fi
+
+	nfsAddExport /opt/opengnsys/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding logging client config"
+		return 1
+	fi
+
+	nfsAddExport /var/lib/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the pxe ogclient"
+		return 1
+	fi
+
+	/etc/init.d/nfs-kernel-server restart
+
+	exportfs -va
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configure exports"
+		return 1
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
+	return 0
+}
+
+
+# ejemplos:
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
+#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
+function nfsAddExport()
+{
+	if [ $# -lt 2 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	if [ ! -f /etc/exports ]; then
+		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
+		return 1
+	fi
+
+	local export="${1}"
+	local contador=0
+	local cadenaexport
+
+	grep "^${export}" /etc/exports > /dev/null
+	if [ $? -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
+		return 0
+	fi
+
+	cadenaexport="${export}"
+	for parametro in $*
+	do
+		if [ $contador -gt 0 ]
+		then
+			host=`echo $parametro | awk -F: '{print $1}'`
+			options=`echo $parametro | awk -F: '{print $2}'`
+			if [ "${host}" == "" ]; then
+				errorAndLog "${FUNCNAME}(): host can't be empty"
+				return 1
+			fi
+			cadenaexport="${cadenaexport}\t${host}"
+
+			if [ "${options}" != "" ]; then
+				cadenaexport="${cadenaexport}(${options})"
+			fi
+		fi
+		let contador=contador+1
+	done
+
+	echo -en "$cadenaexport\n" >> /etc/exports
+
+	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
+
+	return 0
+}
+
+
+########################################################################
 ## Configuracion servicio Samba
 ########################################################################
 function smbConfigure()
@@ -634,27 +727,20 @@ function dhcpConfigure()
 {
         echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
 
-	local i=0
-	local dev=""
+	backupFile /etc/dhcp3/dhcpd.conf
 
-	[ -h /etc/dhcp3/dhcpd.conf ] || backupFile /etc/dhcp3/dhcpd.conf
-	for dev in ${DEVICE[*]}; do
-		if [ -n "${SERVERIP[i]}"; then
-			backupFile /etc/dhcp3/dhcpd-$dev.conf
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/NETIP/${NETIP[i]}/g" \
-			    -e "s/NETMASK/${NETMASK[i]}/g" \
-			    -e "s/NETBROAD/${NETBROAD[i]}/g" \
-			    -e "s/ROUTERIP/${ROUTERIP[i]}/g" \
-			    -e "s/DNSIP/$DNSIP/g" \
-			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd-$dev.conf
-		fi
-	done
+        sed -e "s/SERVERIP/$SERVERIP/g" \
+	    -e "s/NETIP/$NETIP/g" \
+	    -e "s/NETMASK/$NETMASK/g" \
+	    -e "s/NETBROAD/$NETBROAD/g" \
+	    -e "s/ROUTERIP/$ROUTERIP/g" \
+	    -e "s/DNSIP/$DNSIP/g" \
+	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd.conf
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
 		return 1
 	fi
-	ln -fs /etc/dhcp3/dhcpd.conf dhcpd-$DEFAULTDEV.conf
+
 	/etc/init.d/dhcp3-server restart
         echoAndLog "${FUNCNAME}(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
 	return 0
