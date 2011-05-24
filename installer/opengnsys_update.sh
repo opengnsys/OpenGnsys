@@ -441,7 +441,7 @@ function updateServerFiles()
 	local TARGETS=(	bin \
 			bin \
 			tftpboot \
-			lib \
+			lib/opengnsys_uninstall.sh \
 			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
@@ -454,9 +454,9 @@ function updateServerFiles()
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
-			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname "$INSTALL_TARGET/${TARGETS[i]}")
+			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
 		else
-			rsync --exclude .svn -irplt "${SOURCES[i]}" "$INSTALL_TARGET/${TARGETS[i]}"
+			rsync --exclude .svn -irplt "${SOURCES[i]}" $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}")
 		fi
 	done
 	popd >/dev/null
