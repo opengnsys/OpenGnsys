@@ -19,3 +19,6 @@ UPDATE `ogAdmBD`.`asistentes` SET `idcomando` = '8' ;
 
 
 UPDATE `ogAdmBD`.`itemboot` SET `append` = 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true' WHERE `itemboot`.`label` = 'ogClientAdmin';
+
+UPDATE `ogAdmBD`.`parametros` SET `tipopa` =  '4', `visual` = '1' WHERE `parametros`.`idparametro` = 30;
+

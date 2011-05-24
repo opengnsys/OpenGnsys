@@ -235,7 +235,7 @@ function svnExportCode()
 		exit 1
 	fi
 
-	local url=$1
+	local url="$1"
 
 	echoAndLog "${FUNCNAME}(): downloading subversion code..."
 
@@ -345,15 +345,15 @@ function updateWebFiles()
 # Copiar carpeta de Interface 
 function updateInterfaceAdm()
 { 
-	local hayErrores=0 
+	local errcode=0 
          
 	# Crear carpeta y copiar Interface 
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder" 
 	mv $INSTALL_TARGET/client/interfaceAdm $INSTALL_TARGET/client/Interface
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client
-	ERRCODE=$?
+	errcoce=$?
 	mv $INSTALL_TARGET/client/Interface $INSTALL_TARGET/client/interfaceAdm
-	if [ $? -ne 0 ]; then 
+	if [ $errcode -ne 0 ]; then 
 		echoAndLog "${FUNCNAME}(): error while updating admin interface" 
 		exit 1
 	fi 
@@ -453,7 +453,7 @@ function updateServerFiles()
 	pushd $WORKDIR/opengnsys >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
-		if [ -d "$INSTALL_TARGET/${TARGETS[$i]}" ]; then
+		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
 			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname "$INSTALL_TARGET/${TARGETS[i]}")
 		else
 			rsync --exclude .svn -irplt "${SOURCES[i]}" "$INSTALL_TARGET/${TARGETS[i]}"
@@ -574,6 +574,16 @@ echoAndLog "OpenGnSys update begins at $(date)"
 
 pushd $WORKDIR
 
+# Comprobar si hay conexión y detectar parámetros de red por defecto.
+checkNetworkConnection
+if [ $? -ne 0 ]; then
+	errorAndLog "Error connecting to server. Causes:"
+	errorAndLog " - Network is unreachable, review devices parameters."
+	errorAndLog " - You are inside a private network, configure the proxy service."
+	errorAndLog " - Server is temporally down, try agian later."
+	exit 1
+fi
+
 # Comprobar auto-actualización del programa.
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
 	checkAutoUpdate
@@ -588,16 +598,6 @@ fi
 installDependencies $DEPS
 if [ $? -ne 0 ]; then
 	errorAndLog "Error: you may install all needed dependencies."
-	exit 1
-fi
-
-# Comprobar si hay conexión y detectar parámetros de red por defecto.
-checkNetworkConnection
-if [ $? -ne 0 ]; then
-	errorAndLog "Error connecting to server. Causes:"
-	errorAndLog " - Network is unreachable, review devices parameters."
-	errorAndLog " - You are inside a private network, configure the proxy service."
-	errorAndLog " - Server is temporally down, try agian later."
 	exit 1
 fi
 
