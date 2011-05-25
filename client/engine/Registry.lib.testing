@@ -14,10 +14,30 @@
 #@brief   Añade una nueva clave al registro de Windows.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-18
+#@date    2011-05-25
 #*/ ##
 function ogAddRegistryKey ()
 {
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetHivePath "$1" "$2") || return $?
+
+# Añadir nueva clave.
+chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+nk $3
+q
+y
+EOT
 }
 
 #/**
@@ -33,37 +53,34 @@ function ogAddRegistryValue ()
 
 
 #/**
-#         ogChangeRegistryKey path_mountpoint str_hive str_keyname
-#@brief   Modifica el nombre de una clave al registro de Windows.
-#@version 1.0.1 - Nueva función
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-18
-#*/ ##
-function ogChangeRegistryKey ()
-{
-}
-
-#/**
-#         ogChangeRegistryValue path_mountpoint str_hive str_valuename str_valuedata
-#@brief   Modifica el nombre de un valor (dupla nombre/valor) al registro de Windows.
-#@version 1.0.1 - Nueva función
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-18
-#*/ ##
-function ogChangeRegistryValue ()
-{
-}
-
-
-#/**
 #         ogDeleteRegistryKey path_mountpoint str_hive str_keyname
 #@brief   Elimina una clave del registro de Windows con todo su contenido.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-20
+#@date    2011-05-25
 #*/ ##
 function ogDeleteRegistryKey ()
 {
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetHivePath "$1" "$2") || return $?
+
+# Añadir nueva clave.
+chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+dk $3
+q
+y
+EOT
 }
 
 #/**
@@ -71,10 +88,33 @@ function ogDeleteRegistryKey ()
 #@brief   Elimina un valor del registro de Windows.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-20
+#@date    2011-05-25
 #*/ ##
 function ogDeleteRegistryValue ()
 {
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetHivePath "$1" "$2") || return $?
+
+# Devolver el dato del valor de registro.
+# /* (comentario Doxygen)
+chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+cd ${3%\\*}
+dv ${3##*\\}
+q
+y
+EOT
+# (comentario Doxygen) */
 }
 
 
@@ -151,11 +191,11 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
-chntpw $FILE << FIN 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
 cd ${3%\\*}
 cat ${3##*\\}
 q
-FIN
+EOT
 # (comentario Doxygen) */
 }
 
@@ -197,7 +237,7 @@ fi
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver la lista de claves de registro.
-chntpw $FILE << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
+chntpw "$FILE" << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
 ls $3
 q
 FIN
@@ -239,7 +279,7 @@ fi
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Cambiar el dato del valor de registro.
-chntpw $FILE << FIN &>/dev/null
+chntpw "$FILE" << FIN &>/dev/null
 ed $3
 $4
 q
