@@ -41,14 +41,44 @@ EOT
 }
 
 #/**
-#         ogAddRegistryValue path_mountpoint str_hive str_valuename str_valuedata
-#@brief   Añade un nuevo valor (dupla nombre/valor) al registro de Windows.
+#         ogAddRegistryValue path_mountpoint str_hive str_valuename [str_valuetype]
+#@brief   Añade un nuevo valor al registro de Windows, indicando su tipo de datos.
+#@note    valuetype = { STRING, BINARY, DWORD }
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-18
+#@date    2011-05-25
 #*/ ##
 function ogAddRegistryValue ()
 {
+# Variables locales.
+local FILE TYPE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename [str_valuetype]"
+    return
+fi
+# Error si no se reciben 3 o 4 parámetros.
+[ $# == 3 -o $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Camino del fichero de registro.
+FILE=$(ogGetHivePath "$1" "$2") || return $?
+case "$4" in
+    string|STRING|"")  TYPE=1 ;;
+    binary|BINARY)     TYPE=3 ;;
+    dword|DWORD)       TYPE=4 ;;
+    *)                 ogRaiseError $OG_ERR_OUTOFLIMIT "$4"
+                       exit $? ;;
+esac
+
+# Devolver el dato del valor de registro.
+# /* (comentario Doxygen)
+chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+cd ${3%\\*}
+nv $TYPE ${3##*\\}
+q
+y
+EOT
+# (comentario Doxygen) */
 }
 
 
@@ -237,10 +267,10 @@ fi
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver la lista de claves de registro.
-chntpw "$FILE" << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
+chntpw "$FILE" << EOT 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
 ls $3
 q
-FIN
+EOT
 }
 
 
@@ -279,11 +309,11 @@ fi
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Cambiar el dato del valor de registro.
-chntpw "$FILE" << FIN &>/dev/null
+chntpw "$FILE" << EOT &>/dev/null
 ed $3
 $4
 q
 y
-FIN
+EOT
 }
 
