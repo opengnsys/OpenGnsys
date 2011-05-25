@@ -297,8 +297,7 @@ if [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ]; then
 	echo "variable DEVICE con valor $DEVICE  y fichero /tmp/net-$DEVICE encontrados"
 	return 0
 else
-	echo "variable DEVICE con valor $DEVICE no encontrada y fichero /tmp/net-$DEVICE encontrados , llamamos de nuevo a ogconfigure_networking"
-	ogconfigure_networking
+	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /tmp/net-$DEVICE"
 fi
 
 # support ip options see linux sources
@@ -346,8 +345,8 @@ done
 if [ -n "${DEVICE}" ]; then	
     . /tmp/net-${DEVICE}.conf
     DEVICECFG="/tmp/net-${DEVICE}"
-	export DEVICECFG
-	export DEVICE
+	export $DEVICECFG
+	export $DEVICE
 	echo "exportando variable DEVICE con valor = $DEVICE y el DEVICECFG con valor $DEVICECFG"    
 else
     # source any interface as not exaclty specified
