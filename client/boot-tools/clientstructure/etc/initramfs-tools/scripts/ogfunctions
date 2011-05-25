@@ -345,7 +345,7 @@ done
 # source ipconfig output
 if [ -n "${DEVICE}" ]; then	
     . /tmp/net-${DEVICE}.conf
-    DEVICECFG="/tmp/net-${DEVICE}
+    DEVICECFG="/tmp/net-${DEVICE}"
 	export DEVICECFG
 	export DEVICE
 	echo "exportando variable DEVICE con valor = $DEVICE y el DEVICECFG con valor $DEVICECFG"    
