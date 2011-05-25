@@ -266,45 +266,36 @@ function checkNetworkConnection()
 #####################################################################
 
 # Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
-
 function updateServicesStart()
 {
-	echoAndLog "${FUNCNAME}(): Updating /etc/init.d/opengnsys ..."
+	echoAndLog "${FUNCNAME}(): Updating OpenGnSys init file ..."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	if [ $? != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
 		exit 1
 	fi
-	echoAndLog "${FUNCNAME}(): /etc/init.d/opengnsys updated successfully."
+	echoAndLog "${FUNCNAME}(): init file updated successfully."
 }
 
 # Actualizar cliente OpenGnSys
 function updateClientFiles()
 {
-	local hayErrores=0
-
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
-		hayErrores=1
+		exit 1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
-		hayErrores=1
+		exit 1
 	fi
 	
-	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): client  files update success."
-	else
-		errorAndLog "${FUNCNAME}(): client files update with errors"
-	fi
-
-	return $hayErrores
+	echoAndLog "${FUNCNAME}(): client files update success."
 }
 
 # Exportar nombre de usuario y grupo del servicio Apache.
@@ -339,7 +330,6 @@ function updateWebFiles()
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
-	
 }
 
 # Copiar carpeta de Interface 

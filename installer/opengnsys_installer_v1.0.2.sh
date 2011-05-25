@@ -941,31 +941,31 @@ function copyInterfaceAdm ()
 
 function openGnsysCopyClientFiles()
 {
-	local hayErrores=0
+	local errstatus=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
 	cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
-		hayErrores=1
+		errstatus=1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-	cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	cp -ar $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
-		hayErrores=1
+		errstatus=1
 	fi
 	
-	if [ $hayErrores -eq 0 ]; then
+	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
 		errorAndLog "${FUNCNAME}(): client copy files with errors"
 	fi
 
-	return $hayErrores
+	return $errstatus
 }
 
 

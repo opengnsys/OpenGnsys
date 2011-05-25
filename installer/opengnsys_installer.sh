@@ -1027,7 +1027,7 @@ function openGnsysCopyClientFiles()
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-	cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	cp -ar $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		hayErrores=1
