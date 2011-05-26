@@ -12,6 +12,15 @@
 #/**
 #         ogAddRegistryKey path_mountpoint str_hive str_keyname
 #@brief   Añade una nueva clave al registro de Windows.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_keyname      nombre de la clave
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw
+#@warning El sistema de archivos de Windows debe estar montada previamente.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-25
@@ -23,17 +32,17 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey'"
     return
 fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Añadir nueva clave.
-chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2>/dev/null
 cd ${3%\\*}
 nk ${3##*\\}
 q
@@ -44,7 +53,17 @@ EOT
 #/**
 #         ogAddRegistryValue path_mountpoint str_hive str_valuename [str_valuetype]
 #@brief   Añade un nuevo valor al registro de Windows, indicando su tipo de datos.
-#@note    valuetype = { STRING, BINARY, DWORD }
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_valuename    nombre del valor
+#@param   str_valuetype    tipo de datos del valor (opcional)
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
+#@note    hive = { default, sam, security, software, system, components }
+#@note    valuetype = { string, binary, dword }, por defecto: string
+#@warning Requisitos: chntpw
+#@warning El sistema de archivos de Windows debe estar montada previamente.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-25
@@ -56,7 +75,9 @@ local FILE TYPE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename [str_valuetype]"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename [str_valuetype]" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1'" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1' DWORD" 
     return
 fi
 # Error si no se reciben 3 o 4 parámetros.
@@ -73,7 +94,7 @@ esac
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
-chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2>/dev/null
 cd ${3%\\*}
 nv $TYPE ${3##*\\}
 q
@@ -86,6 +107,16 @@ EOT
 #/**
 #         ogDeleteRegistryKey path_mountpoint str_hive str_keyname
 #@brief   Elimina una clave del registro de Windows con todo su contenido.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_keyname      nombre de la clave
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw
+#@warning El sistema de archivos de Windows debe estar montada previamente.
+#@warning La clave debe estar vacía para poder ser borrada.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-25
@@ -97,17 +128,17 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey'"
     return
 fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Añadir nueva clave.
-chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2>/dev/null
 cd ${3%\\*}
 dk ${3##*\\}
 q
@@ -116,8 +147,17 @@ EOT
 }
 
 #/**
-#         ogDeleteRegistryValue path_mountpoint str_hive str_valuename str_valuedata
+#         ogDeleteRegistryValue path_mountpoint str_hive str_valuename
 #@brief   Elimina un valor del registro de Windows.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_valuename    nombre del valor
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw
+#@warning El sistema de archivos de Windows debe estar montada previamente.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-25
@@ -129,18 +169,18 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1'"
     return
 fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
-chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2>/dev/null
 cd ${3%\\*}
 dv ${3##*\\}
 q
@@ -157,7 +197,7 @@ EOT
 #@param   str_hive         sección del registro
 #@return  str_path - camino del fichero de registro
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
 #@note    hive = { default, sam, security, software, system, components }
 #@warning El sistema de archivos de Windows debe estar montada previamente.
 #@version 1.0.1 - Nueva función
@@ -172,6 +212,7 @@ local FILE FILENT FILEXP
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive"
+           "$FUNCNAME /mnt/sda1 SOFTWARE"
     return
 fi
 # Error si no se reciben 2 parámetros.
@@ -196,11 +237,10 @@ echo "$FILE"
 #@param   str_valuename    nombre del valor
 #@return  str_valuedata - datos del valor.
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
 #@note    hive = { default, sam, security, software, system, components }
 #@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
+#@warning El sistema de archivos de Windows debe estar montado previamente.
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
@@ -212,12 +252,12 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1'  ==>  1"
     return
 fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
@@ -240,11 +280,10 @@ EOT
 #@param   str_key          clave de registro
 #@return  str_subkey ... - lista de subclaves
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
 #@note    hive = { default, sam, security, software, system, components }
 #@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
+#@warning El sistema de archivos de Windows debe estar montado previamente.
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
@@ -256,7 +295,8 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\Windows\CurrentVersion'"
     return
 fi
 # Error si no se reciben 3 parámetros.
@@ -276,6 +316,15 @@ EOT
 #/**
 #         ogListRegistryValues path_mountpoint str_hive str_key
 #@brief   Lista los nombres de valores de una determinada clave del registro de Windows.
+#@param   path_mountpoint  directorio donde está montado el sistema Windows
+#@param   str_hive         sección del registro
+#@param   str_key          clave de registro
+#@return  str_value ... - lista de valores
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
+#@note    hive = { default, sam, security, software, system, components }
+#@warning Requisitos: chntpw, awk
+#@warning El sistema de archivos de Windows debe estar montado previamente.
 #@version 1.0.1 - Nueva función.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-26
@@ -287,12 +336,12 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\Windows\CurrentVersion'"
     return
 fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
@@ -308,16 +357,15 @@ EOT
 #         ogSetRegistryValue path_mountpoint str_hive str_valuename str_valuedata
 #@brief   Establece el dato asociado a un valor del registro de Windows.
 #@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_hive         tipo de registro
+#@param   str_hive         sección del registro
 #@param   str_valuename    nombre del valor de registro
 #@param   str_valuedata    dato del valor de registro
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
 #@note    hive = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
+#@warning Requisitos: chntpw
+#@warning El sistema de archivos de Windows debe estar montado previamente.
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-24
@@ -330,11 +378,11 @@ local FILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename str_data"
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1' 1"
     return
 fi
 # Error si no se reciben 4 parámetros.
 [ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
