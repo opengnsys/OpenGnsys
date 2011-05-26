@@ -34,7 +34,8 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Añadir nueva clave.
 chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
-nk $3
+cd ${3%\\*}
+nk ${3##*\\}
 q
 y
 EOT
@@ -107,7 +108,8 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Añadir nueva clave.
 chntpw "$FILE" << EOT 2>/dev/null | awk '/> Value/ {getline;print $0;}'
-dk $3
+cd ${3%\\*}
+dk ${3##*\\}
 q
 y
 EOT
@@ -231,8 +233,8 @@ EOT
 
 
 #/**
-#         ogListRegistryKey path_mountpoint str_hive str_key
-#@brief   Lista los nombres de claves de una determinada clave del registro de Windows.
+#         ogListRegistryKeys path_mountpoint str_hive str_key
+#@brief   Lista los nombres de subclaves de una determinada clave del registro de Windows.
 #@param   path_mountpoint  directorio donde está montado el sistema Windows
 #@param   str_hive         sección del registro
 #@param   str_key          clave de registro
@@ -246,11 +248,8 @@ EOT
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
-#@version 1.0.1 - Renombrada de ogListRegistryKeys
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-18
 #*/ ##
-function ogListRegistryKey ()
+function ogListRegistryKeys ()
 {
 # Variables locales.
 local FILE
@@ -268,6 +267,37 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver la lista de claves de registro.
 chntpw "$FILE" << EOT 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
+ls $3
+q
+EOT
+}
+
+
+#/**
+#         ogListRegistryValues path_mountpoint str_hive str_key
+#@brief   Lista los nombres de valores de una determinada clave del registro de Windows.
+#@version 1.0.1 - Nueva función.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-26
+#*/ ##
+function ogListRegistryValues ()
+{
+# Variables locales.
+local FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_key"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Camino del fichero de registro.
+FILE=$(ogGetHivePath "$1" "$2") || return $?
+
+# Devolver la lista de claves de registro.
+chntpw "$FILE" << EOT 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/REG_/ {print $4}'
 ls $3
 q
 EOT
