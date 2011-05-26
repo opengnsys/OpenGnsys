@@ -346,7 +346,7 @@ fi
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver la lista de claves de registro.
-chntpw "$FILE" << EOT 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/REG_/ {print $4}'
+chntpw "$FILE" << EOT 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/REG_/ {print $2}'
 ls $3
 q
 EOT

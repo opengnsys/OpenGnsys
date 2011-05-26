@@ -364,8 +364,8 @@ function makeDoxygenFiles()
 		return 1
 	fi
 	rm -fr "$INSTALL_TARGET/www/api"
- 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
-    rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
+	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
+	rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
