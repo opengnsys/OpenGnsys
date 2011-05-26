@@ -1,0 +1,30 @@
+#ª/bin/bash
+
+source /tmp/net-eth0.conf
+FILEINFOHTML=/opt/opengnsys/log/`ogGetIpAddress`.info.html
+
+SPEED=$(ethtool $DEVICE | grep Speed | awk -F": " '{print $2}')
+DUPLEX=$(ethtool $DEVICE | grep Duplex | awk -F": " '{print $2}')
+
+#
+#  echo '';
+#
+
+cat > $FILEINFOHTML << EOF
+<div align="center" style="font-family: Arial, Helvetica, sans-serif;">'
+<p style="color:#999999; font-size: 16px; margin: 2em;">
+
+<table border=1> 
+<tr> 
+<TD rowspan=2><P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png"><P> </td>
+<td> Hostname: </td> <td> IP </td> <td> MAC </td> <td> Speed </td> <td> duplex </td> </tr>
+<tr>  <td> $HOSTNAME </td> <td> $(ogGetIpAddress) </td> <td> $(ogGetMacAddress)  </td> <td> $SPEED </td> <td>  $DUPLEX </td> </tr>
+</table>
+
+
+</p>
+<p style="font-size: 14px; margin: 2em;">
+</p>
+</div>
+
+EOF
