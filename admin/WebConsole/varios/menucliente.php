@@ -84,8 +84,9 @@ else{
 	}
 	else{
 		echo'<BODY  bgcolor=white background="../images/iconos/fondo800x600.png">';
-		echo '<P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png"><P>';
+		#echo '<P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png"><P>';
 	}
+		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
 		echo $codeHtml;
 	?>
 	</BODY>
