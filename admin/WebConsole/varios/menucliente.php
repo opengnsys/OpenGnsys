@@ -25,7 +25,7 @@ if (isset($_GET["tip"]))	$tip=$_GET["tip"];
 
 $iph=tomaIP();
 if(empty($iph))
-	die("***ATENCION.- Usted no esta accediendo desde un ordenador permitido: Dirección IP=".$iph); 
+	die($TbMsg[0].": ".$TbMsg[1]."=".$iph); 
 
 $UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
 $UrlPagina=dirname($UrlPagina);
@@ -62,11 +62,9 @@ if(!empty($rsmenu)){
 }
 else{
 	$codeHtml='<div align="center" style="font-family: Arial, Helvetica, sans-serif;">';
-	$codeHtml.='<p style="color:#999999; font-size: 16px; margin: 2em;">';
-	$codeHtml.='  NO SE HA DETECTADO NING&Uacute;N MEN&Uacute; PARA ESTE CLIENTE';
-	$codeHtml.='</p>';
+	$codeHtml.='<p style="color:#999999; font-size: 16px; margin: 2em;">'.$TbMsg[2].'</p>';
 	$codeHtml.='<p style="font-size: 14px; margin: 2em;">';
-	$codeHtml.='  <a href="command:poweroff">Apagar el equipo</a>';
+	$codeHtml.='  <a href="command:poweroff">'.$TbMsg[3].'</a>';
 	$codeHtml.='</p>';
 	$codeHtml.='</div>';
 }
