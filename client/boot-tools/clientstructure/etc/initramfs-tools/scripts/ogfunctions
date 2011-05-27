@@ -98,6 +98,12 @@ ogPostConfigureFS()
 	echo "link-local 169.254.0.0" >> /etc/networks
 	echo "localnet $NETIP" >> /etc/networks
 	#route
+
+	#enlace si iniciamos desde cdrom
+    # el cdrom lo monta en /opt/og2fs/tftpboot
+    # y el sistema root sqfs en /opt/og2fs/2ndfs
+	[ "$ogprotocol" == "cdrom" ] &&  ln -s /opt/og2fs/2ndfs/opt/opengnsys/* /opt/opengnsys/
+
 }
 
 
