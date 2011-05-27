@@ -385,6 +385,106 @@ rm /tmp/id_dsa.pub
 }
 
 
+
+function ogCrearISO {
+apt-get install syslinux genisoimage
+#apt-get install gpxe
+mkdir -p /tmp/iso/isolinux
+#cd tmp/iso/
+cp -prv /usr/lib/syslinux/* /tmp/iso/isolinux/
+cp -prv /usr/share/gpxe/* /tmp/iso/isolinux/
+mkdir -p /tmp/iso/ogclient
+#el ogclienteToISO  debe tener una copia del ogvmlinuz como linuxISO
+cp -prv /var/lib/tftpboot/ogclientToIso/* /tmp/iso/ogclient
+
+
+cat << FIN > /tmp/iso/isolinux/isolinux.cfg
+DEFAULT menu.c32
+PROMPT 0
+ALLOWOPTIONS 1
+
+MENU TITLE FuTuR3 Live Collection
+
+LABEL gpxe
+MENU LABEL gpxe
+KERNEL /clonezilla/live/vmlinuz1
+APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
+
+
+#default 0
+#prompt 1
+#timeout 100
+
+#display mensaje.txt
+
+ 
+
+
+LABEL 0
+MENU LABEL ogClient vga irqpool acpi ogdebug ip:none
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=true ip=none
+
+LABEL 1
+MENU LABEL ogClient irqpoll acpi ip:none
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro  irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=false ip=none
+
+LABEL 2
+MENU LABEL ogClient acpi debug ip=dhcp
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro acpi=on boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=true ip=dhcp
+
+LABEL 3
+MENU LABEL ogClient ip=dhcp
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro acpi=off boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=false ip=dhcp
+
+
+#LABEL ogclient
+#KERNEL /ogclient/linuxISO
+#APPEND initrd=/ogclient/initrdISO.img
+
+#KERNEL linuxISO
+#APPEND initrd=initrdISO.img
+
+LABEL 4
+MENU LABEL local
+localboot 0x80
+append -
+
+
+label 5
+MENU LABEL Network boot via gPXE lkrn
+KERNEL gpxe.lkrn
+
+label 5
+MENU LABEL Network boot via gPXE usb
+KERNEL gpxe.usb
+
+label 5
+MENU LABEL Network boot via gPXE  pxe
+KERNEL gpxe.pxe
+
+label 5
+MENU LABEL Network boot via gPXE  iso
+KERNEL gpxe.iso
+FIN
+#### /tmp/iso# 
+mkisofs -V ogClient -o ogClient.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table tmp/iso
+
+}
+
+function ogprobarISO {
+#/tmp/iso
+qemu -m 256 -boot d -cdrom ogClient.iso 
+}
+
+
+
+
+
+
 ogClientConfpxe()
 {
 ################## DEJAMOS FICHERO DE EJEMPLOS PARA:
