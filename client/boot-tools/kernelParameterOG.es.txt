@@ -28,7 +28,10 @@ ip=
  og2nd=sqfs|img 
  
  #protocolo de acceso al og2nd.
- ogprotocol=smb|nfs
+ ogprotocol=smb|nfs|local
+ #local para cdrom, usb a partir de la iso.  labelparticionusbUNETBOOTIN=ogClient
+ #loacl tambien para fichero.sqfs en cache.
+ 
  
  # modo de funcionalidad del browser con shell root activa.
  ogactiveadmin=true|false

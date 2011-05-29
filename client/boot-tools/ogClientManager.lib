@@ -388,6 +388,7 @@ rm /tmp/id_dsa.pub
 
 function ogCrearISO {
 apt-get install syslinux genisoimage
+#TODO: deb http://free.nchc.org.tw/drbl-core drbl stable
 #apt-get install gpxe
 mkdir -p /tmp/iso/isolinux
 #cd tmp/iso/
@@ -403,7 +404,7 @@ DEFAULT menu.c32
 PROMPT 0
 ALLOWOPTIONS 1
 
-MENU TITLE FuTuR3 Live Collection
+MENU TITLE  OpenGnsys 1.0.1 v00
 
 LABEL gpxe
 MENU LABEL gpxe
@@ -423,22 +424,22 @@ APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 i
 LABEL 0
 MENU LABEL ogClient vga irqpool acpi ogdebug ip:none
 KERNEL /ogclient/linuxISO
-APPEND initrd=/ogclient/oginitrd.img ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=true ip=none
+APPEND initrd=/ogclient/oginitrd.img ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=none
 
 LABEL 1
 MENU LABEL ogClient irqpoll acpi ip:none
 KERNEL /ogclient/linuxISO
-APPEND initrd=/ogclient/oginitrd.img ro  irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=false ip=none
+APPEND initrd=/ogclient/oginitrd.img ro  irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=none
 
 LABEL 2
 MENU LABEL ogClient acpi debug ip=dhcp
 KERNEL /ogclient/linuxISO
-APPEND initrd=/ogclient/oginitrd.img ro acpi=on boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=true ip=dhcp
+APPEND initrd=/ogclient/oginitrd.img ro acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=dhcp
 
 LABEL 3
 MENU LABEL ogClient ip=dhcp
 KERNEL /ogclient/linuxISO
-APPEND initrd=/ogclient/oginitrd.img ro acpi=off boot=oginit  og2nd=sqfs ogprotocol=cdrom ogactiveadmin=true ogdebug=false ip=dhcp
+APPEND initrd=/ogclient/oginitrd.img ro acpi=off boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=dhcp
 
 
 #LABEL ogclient
@@ -473,12 +474,22 @@ FIN
 #### /tmp/iso# 
 mkisofs -V ogClient -o ogClient.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table tmp/iso
 
+### vi /etc/grub.d/40_custom 
+##
+#menuentry "og cache " {
+#set root=(hd0,4)
+#linux /ogvmlinuz ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=none
+#initrd /oginitrd.img
+#}
+
+
 }
 
 function ogprobarISO {
 #/tmp/iso
 qemu -m 256 -boot d -cdrom ogClient.iso 
 }
+
 
 
 

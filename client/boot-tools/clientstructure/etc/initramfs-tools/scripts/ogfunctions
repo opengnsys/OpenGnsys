@@ -99,10 +99,12 @@ ogPostConfigureFS()
 	echo "localnet $NETIP" >> /etc/networks
 	#route
 
-	#enlace si iniciamos desde cdrom
-    # el cdrom lo monta en /opt/og2fs/tftpboot
-    # y el sistema root sqfs en /opt/og2fs/2ndfs
-	[ "$ogprotocol" == "cdrom" ] &&  ln -s /opt/og2fs/2ndfs/opt/opengnsys/* /opt/opengnsys/
+	#enlace si iniciamos desde ogprotocolo=local { cdrom, usb, cache } .
+    # monta el raiz del dispositivo local en /opt/og2fs/tftpboot  - acceso al fichero .sqfs
+    # y monta el sistema root sqfs en /opt/og2fs/2ndfs
+	[ "$LOCALMEDIA" == "CACHE" ] && ln -s /opt/og2fs/tftpboot /opt/opengnsys/cache
+	[ "$ogprotocol" == "local" ] &&  ln -s /opt/og2fs/2ndfs/opt/opengnsys/* /opt/opengnsys/
+
 
 }
 
@@ -149,10 +151,15 @@ else
 fi
 
 case "$ogprotocol" in
-	cdrom)
-		echo  "Montar imagen de CD-ROM"
-		blkid /dev/s*
-		mount -t iso9660 LABEL=ogClient $LOCALROOTBOOT
+	local)
+		echo  "Montar imagen del sistema root desde dispositivo local"
+		for i in $(blkid /dev/s* | grep ogClient | awk -F: '{print $2}' | tr -d \"); do export $i; done
+		mount -t $TYPE LABEL=$LABEL $LOCALROOTBOOT
+		if [ $? != 0 ]
+		then
+			mount -t reiserfs LABEL=CACHE $LOCALROOTBOOT
+			export LOCALMEDIA=CACHE
+		fi
 		;;    
 	httfs)
 		echo "protocolo httfs aun no soportado"
