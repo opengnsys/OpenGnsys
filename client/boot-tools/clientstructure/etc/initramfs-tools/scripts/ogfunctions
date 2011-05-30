@@ -260,10 +260,10 @@ ifconfig lo 127.0.0.1
 
 ogconfigure_networking()
 {
-echo "ogconfigure_networking: Buscando interfaz a configurar DEVICE"
+#echo "ogconfigure_networking: Buscando interfaz a configurar DEVICE"
 if [ -n "${BOOTIF}" ] 
 then
-	echo " variable BOOTIF exportada con pxelinux.0 con valor $BOOTIF"
+	#echo " variable BOOTIF exportada con pxelinux.0 con valor $BOOTIF"
 	IP=$IPOPTS
 	temp_mac=${BOOTIF#*-}
 	# convert to typical mac address format by replacing "-" with ":"
@@ -289,7 +289,7 @@ then
 		fi
 	done
 else
-	echo "variable BOOTIF no exportada, intentamos detectar que interfaz se ha iniciado"
+	#echo "variable BOOTIF no exportada, intentamos detectar que interfaz se ha iniciado"
 	IP=$ip
 	#TODO Detectar que interfaz se ha iniciado
 	case ${IP} in
@@ -313,11 +313,23 @@ if [ -z "${DEVICE}" ]; then
 	ogconfigure_networking
 fi
 
-if [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ]; then 
-	echo "variable DEVICE con valor $DEVICE  y fichero /tmp/net-$DEVICE encontrados"
-	return 0
-else
-	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /tmp/net-$DEVICE"
+[ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
+#if [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ]; then 
+#	echo "variable DEVICE con valor $DEVICE  y fichero /tmp/net-$DEVICE encontrados"
+#	return 0
+#else
+#	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /tmp/net-$DEVICE"
+#fi
+
+# Activamos la interfaz antes de configurar.
+ip address flush $DEVICE
+ip link set dev $DEVICE up
+# Si no se detecta señal portadora volver a configurar.
+sleep 1
+CARRIER=$(cat /sys/class/net/${DEVICE}/carrier)
+if [ "$CARRIER" != "1" ]
+then
+	ogconfigure_networking
 fi
 
 # support ip options see linux sources
