@@ -255,7 +255,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 		echo '</TD></TR>';
 		//Muestra particiones y configuración
 
-		echo pintaParticiones($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc);
+		echo pintaParticiones($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc,$ambito,$idambito);
 		$rs->Siguiente();
 	}
 	echo "</TABLE>";

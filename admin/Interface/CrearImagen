@@ -9,6 +9,27 @@
 # $4 Dirección del repositorio (REPO, por defecto)
 #___________________________________________________
 
+
+#$OG_ERR_NOTEXEC    Si no es llamada por OG client
+#$OG_ERR_LOCKED=4    Si la particion está bloqueada.
+
+
+#Codigos de error del scripts createImage
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
+#@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
+#@exception OG_ERR_NOTWRITE   # 14 error de escritura
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
+#@exception OG_ERR_REDUCEFS   # 17 error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS   # 18 Errror al expandir el sistema de archivos.
+
+
+#Códigos de error de la funcion ogCreateImage
+
+
+
+
 # Registro de ejecución
 echo $* >> $OGLOGFILE
 
@@ -21,20 +42,46 @@ if [ "$CALLER" != "ogAdmClient" ]; then
 	exit $?
 fi
 
+# Si el origen(pariticion) esta bloqueada salir.
+
+#if ogIsLocked $1 $2; then
+#	ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $1 $2"
+#	exit $?
+#fi
+
+
 # Valor por defecto para el repositorio.
 REPO=${4:-"REPO"}
 [ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+[ "$REPO" == "CACHE" ] && REPO="CACHE"
 
-# Si cleinte no está en modo "admin"; activar repositorio para escritura,
-#    crear imagen y activar para lectura.
-[ "$boot" != "admin" ] && CambiarAcceso admin
+# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
+if [ "$REPO" == "REPO" -a "$boot" != "admin"  ] 
+then 
+	CambiarAcceso admin &>> $OGLOGFILE
+	RETVAL=$?
+	[ $RETVAL -gt 0 ] && exit $RETVAL 	
+fi
+
+
+
 if [ -f createImage$ogengine ]; then
-	createImage$ogengine "$1" "$2" "$REPO" "$3" &>> $OGLOGFILE
+	createImage$ogengine "$1" "$2" "$REPO" /"$3" &>> $OGLOGFILE
 else
-	createImage "$1" "$2" "$REPO" "$3" &>> $OGLOGFILE
+	createImage "$1" "$2" "$REPO" /"$3" &>> $OGLOGFILE
 fi
 RETVAL=$?
-[ "$boot" != "admin" ] && CambiarAcceso user
+
+[ "$REPO" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
+
+if [ $RETVAL == 0 ]
+then
+	rm $OGLOGFILE
+	touch $OGLOGFILE
+else
+	echo $RETVAL &>> $OGLOGFILE
+fi
+
 exit $RETVAL
 

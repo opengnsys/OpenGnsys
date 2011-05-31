@@ -61,7 +61,7 @@ if (!$resul){
 				<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TD>
 				<TH align=center>&nbsp;<? echo $TbMsg[11] ?>&nbsp;</TD>
 			</TR>
-				<?
+				<?					
 					echo tablaConfiguraciones($cmd,$idambito,$idrepositorio);
 				?>
 		</TABLE>
@@ -110,12 +110,39 @@ function tomaPropiedades($cmd,$ido){
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_imagenes($cmd,$idperfilsoft,$particion)
+function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$particion,$masterip)
 {
 	$SelectHtml="";
-	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.idperfilsoft FROM  imagenes"; 
-//				WHERE imagenes.idperfilsoft=".$idperfilsoft;
-	//	echo $cmd->texto;
+	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.idperfilsoft, repositorios.nombrerepositorio
+				FROM  imagenes INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
+				WHERE imagenes.idrepositorio=".$idrepositorio ." OR repositorios.ip='" .$masterip ."'";
+	//echo $cmd->texto;
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$particion.'" style="WIDTH: 300">';
+	$SelectHtml.= '    <OPTION value="0"></OPTION>';
+	if ($rs->Abrir()){
+		$rs->Primero(); 
+		while (!$rs->EOF){
+			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["nombreca"].'"';
+			if($idperfilsoft==$rs->campos["idperfilsoft"]) $SelectHtml.=" selected ";
+			$SelectHtml.='>';
+			$SelectHtml.= $rs->campos["descripcion"]. ' -- '. $rs->campos['nombrerepositorio']  . '</OPTION>';
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	}
+	$SelectHtml.= '</SELECT>';
+	return($SelectHtml);
+}
+
+function HTMLSELECT_imagenesORIGINAL($cmd,$idrepositorio,$idperfilsoft,$particion,$masterip)
+{
+	$SelectHtml="";
+	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.idperfilsoft 
+				FROM  imagenes INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
+				WHERE imagenes.idrepositorio=".$idrepositorio ." OR repositorios.ip='" .$masterip ."'";
+	//echo $cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$particion.'" style="WIDTH: 300">';
@@ -134,14 +161,15 @@ function HTMLSELECT_imagenes($cmd,$idperfilsoft,$particion)
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
+
+
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los repositorios
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion){
+function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion,$masterip){
 	$SelectHtml="";
 	$rs=new Recordset; 
-	
-	$cmd->texto="SELECT nombrerepositorio,ip FROM  repositorios";
+	$cmd->texto='SELECT nombrerepositorio,ip FROM  repositorios where idrepositorio="'.$idrepositorio .'" or ip="'.$masterip.'"';
 	$rs->Comando=&$cmd; 
 
 	if (!$rs->Abrir()) return($SelectHtml); // Error al abrir recordset
@@ -152,8 +180,8 @@ function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion){
 		if($rs->campos["idrepositorio"]==$idrepositorio) $SelectHtml.=" selected ";
 		$SelectHtml.='>';
 		$SelectHtml.= $rs->campos["nombrerepositorio"];
-		$SelectHtml.='</OPTION>';
-		$rs->Siguiente();
+		$SelectHtml.='</OPTION>';				 
+		$rs->Siguiente();		
 	}
 	$SelectHtml.= '</SELECT>';
 	$rs->Cerrar();
@@ -168,7 +196,7 @@ function tablaConfiguraciones($cmd,$idordenador,$idrepositorio)
 	global $TbMsg;
 	$tablaHtml="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT ordenadores_particiones.numpar,ordenadores_particiones.codpar,ordenadores_particiones.tamano,
+	$cmd->texto="SELECT ordenadores.ip AS masterip,ordenadores_particiones.numpar,ordenadores_particiones.codpar,ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso,nombresos.nombreso,tipospar.tipopar,tipospar.clonable,
 				imagenes.nombreca,imagenes.descripcion as imagen,perfilessoft.idperfilsoft,
 				perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
@@ -199,8 +227,8 @@ function tablaConfiguraciones($cmd,$idordenador,$idrepositorio)
 				$tablaHtml.='<TD align=center>&nbsp;'.'<span style="FONT-SIZE:10px;	COLOR: red;" >'.$TbMsg[12].'</span></TD>'.chr(13);
 			else
 				$tablaHtml.='<TD>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='<TD>'.HTMLSELECT_imagenes($cmd,$rs->campos["idperfilsoft"],$rs->campos["numpar"]).'</TD>';
-			$tablaHtml.='<TD>'.HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$rs->campos["numpar"]).'</TD>';
+			$tablaHtml.='<TD>'.HTMLSELECT_imagenes($cmd,$idrepositorio,$rs->campos["idperfilsoft"],$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
+			$tablaHtml.='<TD>'.HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
 			$tablaHtml.='<TD>&nbsp;</TD>';
 		}
 		$tablaHtml.='</TR>'.chr(13);	
