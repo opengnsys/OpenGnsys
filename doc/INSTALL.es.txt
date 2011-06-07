@@ -1,4 +1,4 @@
-Instalación de OpenGnSys Server v 0.9
+Instalación de OpenGnSys Server v 1.0
 =====================================
 
 Notas iniciales
@@ -18,15 +18,15 @@ Requisitos mínimos de almacenamiento:
 Instalación
 -----------
 
-La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede descargarse directamente de la dirección: http://www.opengnsys.es/browser/trunk/installer/opengnsys_installer.sh?format=txt
+La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede descargarse directamente de la dirección: http://www.opengnsys.es/browser/tags/opengnsys-1.0/installer/opengnsys_installer.sh?format=txt
 
 Ejemplos de descarga con varias herramientas:
 
     * Descargar con wget.
-	wget http://www.opengnsys.es/browser/trunk/installer/opengnsys_installer.sh?format=txt -O opengnsys_installer.sh
+	wget http://www.opengnsys.es/browser/tags/opengnsys-1.0/installer/opengnsys_installer.sh?format=txt -O opengnsys_installer.sh
 
     * Descargar con curl.
-	curl http://www.opengnsys.es/browser/trunk/installer/opengnsys_installer.sh?format=txt > opengnsys_installer.sh
+	curl http://www.opengnsys.es/browser/tags/opengnsys-1.0/installer/opengnsys_installer.sh?format=txt > opengnsys_installer.sh
 
 El script debe ser ejecutado como usuario root:
 	sudo bash opengnsys_installer.sh

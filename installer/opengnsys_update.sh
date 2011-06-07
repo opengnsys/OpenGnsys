@@ -38,7 +38,7 @@ else
     USESVN=1
     DEPS="$DEPS subversion"
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
+SVN_URL="http://$OPENGNSYS_SERVER/svn/tags/opengnsys-1.0/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
