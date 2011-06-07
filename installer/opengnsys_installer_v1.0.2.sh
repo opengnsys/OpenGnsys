@@ -27,16 +27,6 @@ then
         exit 1
 fi
 
-# Detectar sistema operativo del servidor (debe soportar LSB).
-OSDISTRIB=$(lsb_release -is 2>/dev/null)
-# Array con las dependencias que deben estar instaladas, según de la distribución detectada.
-case "$OSDISTRIB" in
-	Ubuntu) DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
-		;;
-	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
-		exit 1 ;;
-esac
-
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 OPENGNSYS_SERVER="www.opengnsys.es"
@@ -58,26 +48,71 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 
 
 #####################################################################
+####### Funciones de configuración
+#####################################################################
+
+# Generar variables de configuración del instalador
+# Variables globales:
+# - OSDISTRIB, OSCODENAME - datos de la distribución Linux
+# - DEPENDENCIES - array de dependencias que deben estar instaladas
+# - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
+# - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
+# - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
+function autoConfigure()
+{
+# Detectar sistema operativo del servidor (debe soportar LSB).
+OSDISTRIB=$(lsb_release -is 2>/dev/null)
+OSCODENAME=$(lsb_release -cs 2>/dev/null)
+
+# Configuración según la distribución de Linux.
+case "$OSDISTRIB" in
+	Ubuntu)	DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+		UPDATEPKGLIST="apt-get update"
+		INSTALLPKG="apt-get -y install --force-yes"
+		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
+		case "$OSCODENAME" in
+			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
+				DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+				;;
+			*)	DHCPINIT=/etc/init.d/dhcp3-server
+				DHCPCFGDIR=/etc/dhcp3/dhcpd.conf
+				;;
+		esac
+		;;
+	Fedora)	DEPENDENCIES=( subversion httpd php mysql-server php-mysql dhcp bittorrent tftp-server syslinux binutils gcc g++ make wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		INSTALLPKGS="yum install -y"
+		CHECKPKGS="rpm -q \$package"
+		DHCPINIT=/etc/init.d/dhcpd
+		DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+		;;
+	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
+		exit 1 ;;
+esac
+}
+
+
+#####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
+
 function getDateTime()
 {
-        date "+%Y%m%d-%H%M%S"
+	date "+%Y%m%d-%H%M%S"
 }
 
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-        echo "$1"
-        FECHAHORA=`getDateTime`
-        echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
+	echo "$1"
+	local DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
 function errorAndLog()
 {
-        echo "ERROR: $1"
-        FECHAHORA=`getDateTime`
-        echo "$FECHAHORA;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
+	echo "ERROR: $1"
+	local DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
 # comprueba si el elemento pasado en $2 esta en el array $1
@@ -123,7 +158,7 @@ function checkPackage()
 		exit 1
 	fi
 	echoAndLog "${FUNCNAME}(): checking if package $package exists"
-	dpkg -s $package &>/dev/null | grep Status | grep -qw install
+	eval $CHECKPKG
 	if [ $? -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): package $package exists"
 		return 0
@@ -199,8 +234,8 @@ function installDependencies()
 	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 	export DEBIAN_FRONTEND=noninteractive
 
-	echoAndLog "${FUNCNAME}(): now ${string_deps} will be installed"
-	apt-get -y install --force-yes ${string_deps}
+	echoAndLog "${FUNCNAME}(): now $string_deps will be installed"
+	eval $INSTALLPKG $string_deps
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error installing dependencies"
 		return 1
@@ -648,12 +683,6 @@ function dhcpConfigure()
 	local i=0
 	local dev=""
 
-	local DHCPSERVER=/etc/init.d/isc-dhcp-server
-	DHCPCFGDIR=/etc/dhcp
-	if [ ! -x $DHCPSERVER ]; then
-		DHCPSERVER=/etc/init.d/dhcp3-server
-		DHCPCFGDIR=/etc/dhcp3
-	fi
 	backupFile $DHCPCFGDIR/dhcpd.conf
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[$i]}" ]; then
@@ -673,7 +702,7 @@ function dhcpConfigure()
 		return 1
 	fi
 	ln -f $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
-	$DHCPSERVER restart
+	$DHCPINIT restart
 	echoAndLog "${FUNCNAME}(): Sample DHCP configured in \"$DHCPCFGDIR\"."
 	return 0
 }
@@ -975,12 +1004,9 @@ function openGnsysCopyClientFiles()
 # Crear antiguo cliente initrd para OpenGnSys 0.10
 function openGnsysOldClientCreate()
 {
-	local OSCODENAME
-
 	local hayErrores=0
 
 	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSCODENAME=$(lsb_release -cs 2>/dev/null)
 	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
         	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
@@ -1149,6 +1175,9 @@ echo
 echoAndLog "OpenGnSys installation begins at $(date)"
 pushd $WORKDIR
 
+# Detectar datos de auto-configuración del instalador.
+autoConfigure
+
 # Detectar parámetros de red y comprobar si hay conexión.
 getNetworkSettings
 if [ $? -ne 0 ]; then
@@ -1168,7 +1197,7 @@ fi
 [ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
 # Actualizar repositorios
-apt-get update
+eval $UPDATEPKGLIST
 
 # Instalación de dependencias (paquetes de sistema operativo).
 declare -a notinstalled
