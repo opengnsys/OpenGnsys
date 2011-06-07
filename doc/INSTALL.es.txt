@@ -1,5 +1,5 @@
-Instalación de OpenGnSys Server v 0.9
-=====================================
+Instalación de OpenGnSys Server v 1.0.1
+=======================================
 
 Notas iniciales
 ---------------

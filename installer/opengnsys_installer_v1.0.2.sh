@@ -570,15 +570,15 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
-        basetftp=/var/lib/tftpboot
+        local basetftp=/var/lib/tftpboot
 
+        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -pr /usr/lib/syslinux/ ${basetftp}/syslinux
-        cp /usr/lib/syslinux/pxelinux.0 ${basetftp}
+        cp -ar /usr/lib/syslinux/ ${basetftp}/syslinux
+        cp -a /usr/lib/syslinux/pxelinux.0 ${basetftp}
         # prepamos el directorio de la configuracion de pxe
         mkdir -p ${basetftp}/pxelinux.cfg
         cat > ${basetftp}/pxelinux.cfg/default <<EOF
@@ -788,6 +788,7 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/images
 	ln -fs /var/lib/tftpboot $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
+	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -807,8 +808,8 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
-	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
@@ -828,13 +829,13 @@ function openGnsysCopyServerFiles ()
 
 	local path_opengnsys_base="$1"
 
-	local SOURCES=( server/tftpboot/pxelinux.cfg \
+	local SOURCES=( server/tftpboot \
 			server/bin \
 			repoman/bin \
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
 			doc )
-	local TARGETS=( tftpboot/pxelinux.cfg \
+	local TARGETS=( tftpboot \
 			bin \
 			bin \
 			lib \

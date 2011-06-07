@@ -376,19 +376,12 @@ function createDirs()
 {
 	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
-	mkdir -p ${INSTALL_TARGET}
-	mkdir -p ${INSTALL_TARGET}/bin
-	mkdir -p ${INSTALL_TARGET}/client
-	mkdir -p ${INSTALL_TARGET}/doc
-	mkdir -p ${INSTALL_TARGET}/etc
-	mkdir -p ${INSTALL_TARGET}/lib
+	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
+	mkdir -p ${INSTALL_TARGET}/{client,images}
 	mkdir -p ${INSTALL_TARGET}/log/clients
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
-	mkdir -p ${INSTALL_TARGET}/sbin
-	mkdir -p ${INSTALL_TARGET}/www
-	mkdir -p ${INSTALL_TARGET}/images
 	ln -fs /var/lib/tftpboot ${INSTALL_TARGET}
-	mkdir -p ${INSTALL_TARGET}/tftpboot/pxelinux.cfg
+	mkdir -p ${INSTALL_TARGET}/tftpboot/{pxelinux.cfg,menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -408,8 +401,8 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
