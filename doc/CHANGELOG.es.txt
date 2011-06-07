@@ -2,6 +2,45 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.1
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#147	No se puede iniciar Windows 7 (se soluciona en ticket 402)
+#179	Cache.lib: funciones de arranque offline y distribuido
+#373	cloneRemoteFromMaster si no detecta master se queda en bucle
+#380	updateCache debe eliminar imagen con igual nombre pero checksum distinto (se soluciona en ticket 394)
+#389	Tamaño de particion menor que tamaño de sistema de archivos en proceso de restauración de imagenes
+#391	Script configureOs
+#392	Formatear Sistema de archivos antes de restaurar
+#396	Funciones tipo ogIs.... devuelve el codigo 1, si no es cierto y si hay errores de sintaxis
+#406	actualizar grub4dos
+#407	Integrar las funciones de acceso al registro EAC
+
+Tickets resueltos en módulo OpenGnSys Client:
+#16	Disminuir al máximo el tiempo de arranque normal de un cliente
+#65	Realizar estudio arranque clientes desde caché (tarea)
+#134	Arranque del cliente con GRUB
+#135	Arreglar el arranque de Windows en SATA-2 con GRUB
+#164	Depurar el instalador del ogclient (se soluciona en ticket 404)
+#383	Initrd de boot-tools no gestiona bien los tiempos de configuración de la interfaz de red (se soluciona en ticket 404)
+#395	ogclient PXE creado con boot-tools no reconoce NIC Atheros (se soluciona en ticket 404)
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#256	Restaurar con caché (se soluciona en ticket 357)
+#378	Asignar letrero auxiliar en el fondo del browser, indicando que no se apague el ordenador
+#387	Opción reubicador de ordenadores, no soporta nombres de grupos de ordenadores que incluye espacios
+#388	Netboot sobre grupo de aulas muestra ordenadores que no le corresponde
+#390	Formulario de creación de objeto imagen no controla el nombre canonico
+#409	updateCache integrado en asistente deployImagen
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#398	Script para crear fichero comprimido con el último código del proyecto
+#400	Copiar desinstalador y actualizador
+#408	No se actualiza correctamente el tftpboot
+#412	Permisos netboot para grub4dos
+
+
 Lista de cambios incluidos en OpenGnSys 1.0
 -------------------------------------------
 
