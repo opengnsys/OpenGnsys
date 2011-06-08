@@ -19,11 +19,15 @@ Librerías:
 
 - Boot.lib         funciones de arranque y posconfiguración de
                    sistemas operativos.
+- Cache.lib        funciones de gestión de la caché local del cliente.
 - Disk.lib         funciones de control de dispositivos de disco.
 - File.lib         funciones de manipulación de ficheros.
 - FileSystem.lib   funciones de gestión de sistemas de ficheros.
 - Image.lib        funciones de administración de imágenes de
                    sistemas operativos.
 - Inventory.lib    funciones de control de inventario e informes.
+- Net.lib          funciones básicas de control de acceso a la red.
+- Protocol.lib     funciones de implementación de protocolos de comunicación.
+- Registry.lib     funciones básicas de gestión del registro de Windows.
 - System.lib       funciones básicas del sistema.
 

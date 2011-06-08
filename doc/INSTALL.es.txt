@@ -18,7 +18,12 @@ Requisitos mínimos de almacenamiento:
 Instalación
 -----------
 
-La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede descargarse directamente de la dirección: http://www.opengnsys.es/browser/branches/version1.0/installer/opengnsys_installer.sh?format=txt
+La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: http://www.opengnsys.es/browser/branches/version1.0/installer/opengnsys_installer.sh?format=txt
+
+Ejemplos de descompresión del programa:
+
+	tar xvzf opengnsys-1.0.1.tar.gz
+	cd opengnsys/installer
 
 Ejemplos de descarga con varias herramientas:
 
@@ -52,3 +57,31 @@ Una vez finalizada la ejecución del instalador, puede empezarse a trabajar con 
     * Personalizar scripts de administración.
     * Definir menús de inicio para los clientes.
 
+
+
+Actualización
+-------------
+
+Se dispone de un script de auto-actualización del sistema, con las siguientes características:
+    * Es necesario conexión a Internet para obtener las últimas actualizaciones.
+    * No se actualizan los servicios asociados al sistema operativo.
+    * No se modifican los ficheros de configuración.
+
+
+El script debe ser ejecutado como usuario root:
+	sudo /opt/opengnsys/lib/opengnsys_update.sh
+ 
+
+
+Desinstalación
+--------------
+
+También existe un script de desinstalación de los componentes de OpenGnSys, con las siguientes características:
+    * Se iliminan los ficheros de OpenGnSys y su base de datos.
+    * No se eliminan ni paquetes del sistema operativo ni sus ficheros de configuración.
+    * No se elimina el directorio de las imágenes ni su contenido.
+
+
+El script debe ser ejecutado como usuario root:
+	sudo /opt/opengnsys/lib/opengnsys_uninstall.sh
+ 
