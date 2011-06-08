@@ -10,10 +10,11 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #179	Cache.lib: funciones de arranque offline y distribuido
 #373	cloneRemoteFromMaster si no detecta master se queda en bucle
 #380	updateCache debe eliminar imagen con igual nombre pero checksum distinto (se soluciona en ticket 394)
-#389	Tamaño de particion menor que tamaño de sistema de archivos en proceso de restauración de imagenes
+#389	Tamaño de partición menor que tamaño de sistema de archivos en proceso de restauración de imágenes
 #391	Script configureOs
 #392	Formatear Sistema de archivos antes de restaurar
-#396	Funciones tipo ogIs.... devuelve el codigo 1, si no es cierto y si hay errores de sintaxis
+#396	Funciones tipo ogIs.... devuelven codigo 1, si no es cierto y si hay errores de sintaxis
+#401	Ampliar las funciones de gestión del registro de Windows
 #406	actualizar grub4dos
 #407	Integrar las funciones de acceso al registro EAC
 

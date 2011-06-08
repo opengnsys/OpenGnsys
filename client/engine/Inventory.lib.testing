@@ -1,0 +1,290 @@
+#!/bin/bash
+#/**
+#@file    Inventory.lib
+#@brief   Librería o clase Inventory
+#@class   Inventory
+#@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
+#@version 1.0.1
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogGetArch
+#@brief   Devuelve el tipo de arquitectura del cliente.
+#@return  str_arch - Arquitectura (i386 para 32 bits, x86_64 para 64 bits).
+#@version 0.9.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-17
+#*/ 
+function ogGetArch () {
+[ -d /lib64 ] && echo x86_64 || echo i386
+}
+
+
+#/**
+#         ogGetOsVersion int_ndisk int_npartition
+#@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  OSType:OSVersion
+#@note    TipoSistema = { Linux, Windows }
+#@note    Requisitos: awk, head, chroot
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
+#@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
+#@version 0.9 - Primera versión para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-15
+#@version 1.0.1 - Nuevos sistemas de archivos y gestión del registro de Windows
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogGetOsVersion ()
+{
+# Variables locales.
+local MNTDIR TYPE DISTRIB VERSION FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+# Error si no se reciben 2 parametros.
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Montar la particion, si no lo estaba previamente.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Elección del tipo de sistema operativo.
+case "$(ogGetFsType $1 $2)" in
+    EXT[234] | REISERFS | REISER4 | JFS | XFS | BTRFS)
+        TYPE="Linux"
+        # Para Linux: leer descripción.
+        VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
+        # Si no se puede obtener, buscar en ficheros del sistema.
+        if [ -z "$VERSION" ]; then
+            FILE="$MNTDIR/etc/lsb-release"
+            [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+            for DISTRIB in redhat SuSE mandrake; do
+                FILE="$MNTDIR/etc/${DISTRIB}-release"
+                [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+            done
+            FILE="$MNTDIR/etc/arch-release"
+            [ -r $FILE ] && VERSION="Arch Linux"
+        fi
+        [ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
+        ;;
+    NTFS | FAT32)
+        TYPE="Windows"
+        # Para Windows: leer la version del registro.
+        VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+        ;;
+esac
+
+# Mostrar resultado y salir sin errores.
+[ -n "$VERSION" ] && echo "$TYPE:$VERSION"
+return 0
+}
+
+
+#/**
+#         ogGetOsType int_ndisk int_npartition
+#@brief   Devuelve el tipo del sistema operativo instalado.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  OSType
+#@note    OSType = { Linux, Windows }
+#@see     ogGetOsVersion
+#*/ ##
+function ogGetOsType ()
+{
+ogGetOsVersion "$@" | cut -sf1 -d:
+}
+
+
+#/**
+#         ogListHardwareInfo
+#@brief   Lista el inventario de hardware de la máquina cliente.
+#@return  TipoDispositivo:Modelo    (por determinar)
+#@warning Se ignoran los parámetros de entrada.
+#@note    TipoDispositivo = { ata, bio, boa, cdr, cpu, dis, fir, mem, mod, mul, net, ser, vga }
+#@note    Requisitos: lshw, awk
+#@version 0.1 - Primeras pruebas con OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-07-28
+#*/ ##
+function ogListHardwareInfo ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+
+# Recopilación de disposibivos procesando la salida de \c lshw
+ogEcho info "$MSG_HARDWAREINVENTORY}"
+lshw | awk 'BEGIN {type="mod";}
+	/product:/ {sub(/ *product: */,"");  prod=$0;}
+	/vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
+	/version:/ {sub(/ *version: */,"v.");vers=$0;}
+	/size:/    {sub(/ *size: */,"");     size=$0;}
+	/\*-/	   {if (type=="mem")
+                    print type"="size;
+                else
+                    if (type!="" && prod!="")
+                        print type"="vend,prod,size,vers;
+                type=prod=vend=vers=size="";}
+	/-core/    {type="boa";}
+	/-firmware/ {type="bio";}
+	/-cpu/     {type="cpu";}
+	/-memory/  {type="mem";}
+	/-ide/     {type="ide";}
+	/-disk/    {type="dis";}
+	/-cdrom/   {type="cdr";}
+	/-display/ {type="vga";}
+	/-network/ {type="net";}
+	/-multimedia/ {type="mul";}
+	/-usb/     {type="usb";}
+	/-firewire/ {type="fir";}
+	/-serial/  {type="bus";}
+	END 	   {if (type!="" && prod!="")
+                    print type"="vend,prod,size,vers;}
+      '
+# */ (comentario para Doxygen)
+}
+
+
+#/**
+#         ogListSoftware int_ndisk int_npartition
+#@brief   Lista el inventario de software instalado en un sistema operativo.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  programa versión ...
+#@warning Se ignoran los parámetros de entrada.
+#@note    Requisitos: ...
+#@todo    Detectar software en Linux
+#@version 0.1 - Primeras pruebas con OpenGNSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-23
+#@version 1.0.1 - Usar tipo de sistema operativo en vez de tipo de partición
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogListSoftware ()
+{
+# Variables locales.
+local MNTDIR TYPE DPKGDIR RPMDIR KEYS k PROG VERS
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME 1 1"
+    return
+fi
+# Error si no se reciben 2 parametros.
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener tipo de sistema de archivos y montarlo.
+MNTDIR=$(ogMount "$1" "$2") || return $?
+TYPE=$(ogGetOsType "$1" "$2") || return $?
+
+case "$TYPE" in
+    Linux)
+        # Procesar paquetes dpkg.
+        DPKGDIR="${MNTDIR}/var/lib/dpkg"
+        if [ -r $DPKGDIR ]; then
+        #    dpkg --admindir=$DPKGDIR -l | \
+            # Proceso de fichero en sistemas de 64 bits.
+            if [ -e $MNTDIR/lib64 ]; then
+                awk '/Package:/ {if (pack!="") print pack,vers;
+                                 sub(/-dev$/,"",$2);
+                                 pack=$2}
+                     /Version:/ {sub(/^.*:/,"",$2); sub(/-.*$/,"",$2);
+                                 vers=$2}
+                     /Status:/  {if ($2!="install") pack=vers=""}
+                     END        {if (pack!="") print pack,vers}
+                    ' $MNTDIR/var/lib/dpkg/status | sort | uniq
+            else
+                # FIXME Sólo 32 bits
+                chroot "$MNTDIR" /usr/bin/dpkg -l | \
+                    awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
+                                  sub(/-.*$/,"",$3); print $2,$3}
+                        ' | sort | uniq
+            fi
+        fi
+        # Procesar paquetes RPM.
+        RPMDIR="${MNTDIR}/var/lib/rpm"
+        if [ -r $RPMDIR ]; then
+            # Correccion inconsistencia de version de base de datos.
+            #    rm -f ${RPMDIR}/__db.*
+            #    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
+            # FIXME Sólo 32 bits
+            chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
+                   awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
+                   sort | uniq
+           	#    rm -f ${RPMDIR}/__db.*
+        fi
+        # Procesar paquetes pacman.
+        PACMANDIR="${MNTDIR}/var/lib/pacman/local"
+        if [ -r $PACMANDIR ]; then
+            # FIXME Separar nombre y versión de los paquetes
+            ls -A $PACMANDIR
+        fi
+        ;;
+    Windows)
+        # Claves de registro para programas instalados: formato "{clave}".
+        KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+        # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+        (for k in $KEYS; do
+            PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+            if [ -n "$PROG" ]; then
+                VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                echo "$PROG $VERS"
+            fi
+        done) | sort | uniq
+        ;;
+    *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
+        return $? ;;
+esac
+}
+
+#/**  @function ogInfoCache: @brief muestra la informacion de la CACHE.
+#@param  sin parametros
+#@return  texto que se almacena en $IP.-InfoCache.  punto_montaje, tama?oTotal, TamanioOcupado, TaminioLibre, imagenes dentro de la cahce
+#@warning  Salidas de errores no determinada
+#@warning   printf no soportado por busybox
+#@attention
+#@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+function ogInfoCache () {
+if ogMountCache
+then
+	info=`df -h | grep $OGCAC`
+	infoFilesystem=`echo $info | cut -f1 -d" "`
+	infoSize=`echo $info | cut -f2 -d" "`
+	infoUsed=`echo $info | cut -f3 -d" "`
+	infoAvail=`echo $info | cut -f4 -d" "`
+	infoUsedPorcet=`echo $info | cut -f5 -d" "`
+	infoMountedOn=`echo $info | cut -f2 -d" "`
+        if `ls  ${OGCAC}$OGIMG > /dev/null 2>&1`
+	then
+	       cd ${OGCAC}${OPENGNSYS}
+		#content=`find images/ -type f -printf "%h/  %f  %s \n"`   busybox no soporta printf
+		content=`find images/ -type f`
+		cd /
+		echo $info
+		echo -ne $content
+		echo " "
+		#echo "$info" > ${OGLOG}/${IP}-InfoCache
+		#echo "$content" >> {$OGLOG}/${IP}-InfoCache
+	else
+		echo $info
+		#echo "$info" > {$OGLOG}/${IP}-InfoCache
+	fi
+	ogUnmountCache
+else
+	echo " "
+	#echo " " > {$OGLOG}/${IP}-InfoCache
+
+fi
+}
