@@ -70,21 +70,38 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
+		APACHEINIT=/etc/init.d/apache2
+		APACHECFGDIR=/etc/apache2
+		APACHEUSER="www-data"
+		APACHEGROUP="www-data"
 		case "$OSCODENAME" in
 			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
-				DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+				DHCPCFGDIR=/etc/dhcp
 				;;
 			*)	DHCPINIT=/etc/init.d/dhcp3-server
-				DHCPCFGDIR=/etc/dhcp3/dhcpd.conf
+				DHCPCFGDIR=/etc/dhcp3
 				;;
 		esac
+		SAMBAINIT=/etc/init.d/smbd
+		SAMBACFGDIR=/etc/samba
+		TFTPCFGDIR=/var/lib/tftpboot
 		;;
-	Fedora)	DEPENDENCIES=( subversion httpd php mysql-server php-mysql dhcp bittorrent tftp-server syslinux binutils gcc g++ make wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
-		INSTALLPKGS="yum install -y"
-		CHECKPKGS="rpm -q \$package"
+	Fedora)	DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		UPDATEPKGLIST=""
+		INSTALLPKG="yum install -y"
+		CHECKPKG="rpm -q \$package"
+		APACHEINIT=/etc/init.d/httpd
+		APACHECFGDIR=/etc/httpd/conf.d
+		APACHEUSER="apache"
+		APACHEGROUP="apache"
 		DHCPINIT=/etc/init.d/dhcpd
-		DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+		DHCPCFGDIR=/etc/dhcp
+		SAMBAINIT=/etc/init.d/smb
+		SAMBACFGDIR=/etc/samba
+		TFTPCFGDIR=/var/lib/tftpboot
 		;;
+	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
+		exit 1 ;;
 	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
 		exit 1 ;;
 esac
