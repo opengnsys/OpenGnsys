@@ -95,54 +95,6 @@ kexec -e
 
 
 #/**
-#         ogGetRegistryValue path_mountpoint str_registrytype str_valuename
-#@brief   Devuelve el dato de un valor del registro de Windows.
-#@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_registrytype tipo de registro a leer
-#@param   str_valuename    valor de registro
-#@return  str_valuedata - valor de la clave.
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@note    registrytype = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
-#@version 0.9 - Adaptación para OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-11
-#*/ ##
-function ogGetRegistryValue ()
-{
-# Variables locales.
-local FILE FILENT FILEXP
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_registrytype str_key"
-    return
-fi
-# Error si no se reciben 3 parámetros.
-[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
-
-# Devolver el dato del valor de registro.
-# /* (comentario Doxygen)
-chntpw $FILE << FIN 2>/dev/null | awk '/> Value/ {getline;print $0;}'
-cd ${3%\\*}
-cat ${3##*\\}
-q
-FIN
-# (comentario Doxygen) */
-}
-
-
-#/**
 #         ogGetWindowsName int_ndisk int_npartition
 #@brief   Muestra el nombre del equipo en el registro de Windows.
 #@param   int_ndisk      nº de orden del disco
@@ -175,51 +127,6 @@ MNTDIR=$(ogMount $1 $2) 2>/dev/null
 
 # Obtener dato del valor de registro.
 ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName'
-}
-
-
-#/**
-#         ogListRegistryKeys path_mountpoint str_registrytype str_key
-#@brief   Lista los nombres de claves de una determinada clave del registro de Windows.
-#@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_registrytype tipo de registro a leer
-#@param   str_key          clave de registro
-#@return  str_key ... - lista de claves de registro
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@note    registrytype = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
-#@version 0.9 - Adaptación para OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-23
-#*/ ##
-function ogListRegistryKeys ()
-{
-# Variables locales.
-local FILE FILENT FILEXP
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_registrytype str_key"
-    return
-fi
-# Error si no se reciben 3 parámetros.
-[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
-
-# Devolver la lista de claves de registro.
-chntpw $FILE << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
-ls $3
-q
-FIN
 }
 
 
@@ -282,55 +189,6 @@ awk 'BEGIN {cont=-1;}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}
     ' $CONFFILE
 # */ (comentario Doxygen)
-}
-
-
-
-#/**
-#         ogSetRegistryValue path_mountpoint str_registrytype str_valuename str_valuedata
-#@brief   Establece el dato asociado a un valor del registro de Windows.
-#@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_registrytype tipo de registro
-#@param   str_valuename    nombre del valor de registro
-#@param   str_valuedata    dato del valor de registro
-#@return  (nada)
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@note    registrytype = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
-#@version 0.9 - Adaptación para OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-24
-#*/ ##
-function ogSetRegistryValue ()
-{
-# Variables locales.
-local FILE FILENT FILEXP
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_registrytype str_key"
-    return
-fi
-# Error si no se reciben 4 parámetros.
-[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
-
-# Cambiar el dato del valor de registro.
-chntpw $FILE << FIN &>/dev/null
-ed $3
-$4
-q
-y
-FIN
 }
 
 
