@@ -56,8 +56,10 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
+# - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
+# - TFTPCFGDIR - configuración de TFTP
 function autoConfigure()
 {
 # Detectar sistema operativo del servidor (debe soportar LSB).
@@ -271,25 +273,25 @@ function backupFile()
 		exit 1
 	fi
 
-	local fichero=$1
-	local fecha=`date +%Y%m%d`
+	local file="$1"
+	local dateymd=`date +%Y%m%d`
 
-	if [ ! -f $fichero ]; then
-		errorAndLog "${FUNCNAME}(): file $fichero doesn't exists"
+	if [ ! -f "$file" ]; then
+		errorAndLog "${FUNCNAME}(): file $file doesn't exists"
 		return 1
 	fi
 
-	echoAndLog "${FUNCNAME}(): realizando backup de $fichero"
+	echoAndLog "${FUNCNAME}(): making $file backup"
 
 	# realiza una copia de la última configuración como last
-	cp -p $fichero "${fichero}-LAST"
+	cp -a "$file" "${file}-LAST"
 
 	# si para el día no hay backup lo hace, sino no
-	if [ ! -f "${fichero}-${fecha}" ]; then
-		cp -p $fichero "${fichero}-${fecha}"
+	if [ ! -f "${file}-${dateymd}" ]; then
+		cp -a "$file" "${file}-${dateymd}"
 	fi
 
-	echoAndLog "${FUNCNAME}(): backup realizado"
+	echoAndLog "${FUNCNAME}(): $file backup success"
 }
 
 #####################################################################
@@ -608,11 +610,11 @@ function getNetworkSettings()
 	# Variables de ejecución de Apache
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
+	if [ -f $APACHECFGDIR/envvars ]; then
+		source $APACHECFGDIR/envvars
 	fi
-	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
+	APACHE_RUN_USER=${APACHE_RUN_USER:-"$APACHEUSER"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
 }
 
 
@@ -622,18 +624,16 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        local basetftp=/var/lib/tftpboot
-
         echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -ar /usr/lib/syslinux/ ${basetftp}/syslinux
-        cp -a /usr/lib/syslinux/pxelinux.0 ${basetftp}
+        cp -ar /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
+        cp -a /usr/lib/syslinux/pxelinux.0 $TFTPCFGDIR
         # prepamos el directorio de la configuracion de pxe
-        mkdir -p ${basetftp}/pxelinux.cfg
-        cat > ${basetftp}/pxelinux.cfg/default <<EOF
+        mkdir -p $TFTPCFGDIR/pxelinux.cfg
+        cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
 DEFAULT syslinux/vesamenu.c32 
 MENU TITLE Aplicacion GNSYS 
  
@@ -668,14 +668,14 @@ function smbConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Configuring Samba service."
 
-	backupFile /etc/samba/smb.conf
+	backupFile $SAMBACFGDIR/smb.conf
 	
 	# Copiar plantailla de recursos para OpenGnSys
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
-		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/samba/smb-og.conf
+		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
-	/etc/init.d/smbd restart
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" $SAMBACFGDIR/smb.conf
+	$SAMBAINIT restart
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
@@ -787,7 +787,7 @@ EOF
 		return 1
 	else
 		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
-		/etc/init.d/apache2 restart
+		$APACHEINIT restart
 		return 0
 	fi
 }
@@ -1016,53 +1016,7 @@ function openGnsysCopyClientFiles()
 }
 
 
-
-
-# Crear antiguo cliente initrd para OpenGnSys 0.10
-function openGnsysOldClientCreate()
-{
-	local hayErrores=0
-
-	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
-		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	else
-		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading default udeb files."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	fi
-
-	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): Old client generation success."
-	else
-		errorAndLog "${FUNCNAME}(): Old client generation with errors"
-	fi
-
-	return $hayErrores
-}
-
-
-# Crear nuevo cliente OpenGnSys 1.0
+# Crear cliente OpenGnSys 1.0
 function openGnsysClientCreate()
 {
 	local DOWNLOADURL=http://www.opengnsys.es/downloads
@@ -1154,7 +1108,7 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Last Changed Rev:/ {print "r"$4}')
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
@@ -1369,13 +1323,6 @@ openGnsysCopyClientFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
-
-# Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
-#### (descomentar las siguientes líneas para generar cliente initrd)
-#openGnsysOldClientCreate
-#if [ $? -ne 0 ]; then
-#	errorAndLog "Warning: cannot create old initrd client"
-#fi
 
 # Crear la estructura del cliente de OpenGnSys 1.0
 openGnsysClientCreate
