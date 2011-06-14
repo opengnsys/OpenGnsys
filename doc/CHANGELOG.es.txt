@@ -29,6 +29,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #256	Restaurar con caché (se soluciona en ticket 357)
+#357    Comando Restaurar admite protocolos P2P, multicast, unicast
 #378	Asignar letrero auxiliar en el fondo del browser, indicando que no se apague el ordenador
 #387	Opción reubicador de ordenadores, no soporta nombres de grupos de ordenadores que incluye espacios
 #388	Netboot sobre grupo de aulas muestra ordenadores que no le corresponde
