@@ -1093,26 +1093,27 @@ function openGnsysOldClientCreate()
 }
 
 
-# Crear nuevo cliente OpenGnSys 1.0
-function openGnsysClientCreate()
+# Crear cliente OpenGnSys 1.0.1
+function clientCreate()
 {
-	local DOWNLOADURL=http://www.opengnsys.es/downloads
-	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
+	local DOWNLOADURL="http://www.opengnsys.es/downloads"
+	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
 	local TMPFILE=/tmp/$FILENAME
+	local TMPDIR=${TMPFILE%.iso}
 
 	echoAndLog "${FUNCNAME}(): Loading Client"
-	# Descargar y descomprimir cliente ogclient
+	# Descargar, montar imagen, copiar cliente ogclient y desmontar.
 	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
 	if [ ! -s $TMPFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
-	echoAndLog "${FUNCNAME}(): Extranting Client files"
-	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
+	echoAndLog "${FUNCNAME}(): Copying Client files"
+	mount -o loop,ro $TMPFILE $TMPDIR
+	cp -vr $TMPDIR/* $INSTALL_TARGET/tftpboot
+	umount $TMPDIR
+	rmdir $TMPDIR
 	rm -f $TMPFILE
-	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
@@ -1377,7 +1378,7 @@ fi
 #fi
 
 # Crear la estructura del cliente de OpenGnSys 1.0
-openGnsysClientCreate
+clientCreate
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client"
 	exit 1
