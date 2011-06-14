@@ -12,6 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/CreaComando.php");
+include_once("../idiomas/php/".$idioma."/menucliente".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
