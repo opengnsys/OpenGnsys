@@ -14,7 +14,7 @@
 
 
 PROG="$(basename $0)"
-if [ $# -lt 4 ]; then
+if [ $# -lt 3 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
     exit $?
 fi
@@ -26,13 +26,17 @@ REPOIP=$(ogGetRepoIp)
 echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 # Si el repositorio local CACHE no existe salimos.
 if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTFOUND "CACHE"
+        ogRaiseError $OG_ERR_NOTCACHE "CACHE"
         exit $?
 fi
 
 #Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-
 #TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
-ogUpdateCacheIsNecesary $1 $2 || exit 0
+ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+[ "$RETVAL" == "1" ] && exit 0
+[ "$RETVAL" -gt  "1" ] && exit 1
+
 
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
@@ -40,10 +44,14 @@ FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
 if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
 then
 	echo "el tamanio del fichero $2 = $FILESIZE es mayor que el espacio dispinible en la cache = $CACHESIZEFREE"
-	exit 1
+	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+    exit $?
 fi
 
-ogUpdateCacheIsNecesary $1 $2 || exit 0
+ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+[ "$RETVAL" == "1" ] && exit 0
+[ "$RETVAL" -gt  "1" ] && exit 1
 
 ogMountCache
 
@@ -96,18 +104,13 @@ case "$PROTOCOLO" in
 	;;
 	unicast | UNICAST )
 		echo "unicast"
+		ogCopyFile $1 $2 $OGCAC$OGIMG
 	;;
 esac
 
-if ogUpdateCacheIsNecesary $1 $2 
-then
-	echo "algo ha fallado"
-	exit 1
-else
-	echo "updateCache ok"
-	exit 0
-fi
 
-
-
-#
+ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+[ "$RETVAL" == "0" ] && exit 1
+[ "$RETVAL" == "1" ] && exit 0
+[ "$RETVAL" -gt  "1" ] && exit 1

@@ -51,6 +51,9 @@ function validate_ipadress_notnull(value) {
 	return validate_ipadress(value) && validate_notnull(value);
 }
 
+function validate_nameimagefile(value) {
+	return validate_expr(value, "^[0-9a-zA-Z]*$");
+}
 
 
 function validation_highlight(field) {

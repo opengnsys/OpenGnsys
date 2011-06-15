@@ -332,6 +332,31 @@ sfdisk -s $DISK
 
 
 #/**
+#         ogGetDiskType path_device
+#@brief   Muestra el tipo de disco (real, RAID, meta-disco, etc.).
+#@warning Función en pruebas
+#*/ ##
+function ogGetDiskType ()
+{
+local DEV MAJOR TYPE
+
+# Obtener el driver del dispositivo de bloques.
+[ -b "$1" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+DEV=${1#/dev/}
+MAJOR=$(awk -v D="$DEV" '{if ($4==D) print $1;}' /proc/partitions)
+TYPE=$(awk -v D=$MAJOR '/Block/ {bl=1} {if ($1==D&&bl) print toupper($2)}' /proc/devices)
+# Devolver mnemónico del driver de dispositivo.
+case "$TYPE" in
+    SD)            TYPE="DISK" ;;
+    SR|IDE*)       TYPE="CDROM" ;;         # FIXME Comprobar discos IDE.
+    MD|CCISS*)     TYPE="RAID" ;;
+    DEVICE-MAPPER) TYPE="MAPPER" ;;        # FIXME Comprobar LVM y RAID.
+esac
+echo $TYPE
+}
+
+
+#/**
 #         ogGetPartitionActive int_ndisk
 #@brief   Muestra que particion de un disco esta marcada como de activa.
 #@param   int_ndisk   nº de orden del disco

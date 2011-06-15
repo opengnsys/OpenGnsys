@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#/**
+#         configureOS
+#@brief   Scirpt de ejemplo para realizar la configuracion del sistema operativo restaurado.
+#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#@param 1 disco 
+#@param 2 particion 
+#@return  
+#@TODO  comprobar que el tipo de particion corresponde con el sistema de archivos.
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@version 1.0.1 - Integracion cambio de nombre, extender fs, chequear particion activa
+#@author  
+#@date   2011-05-11
+#@version 1.0.1 - Configura el sector de la particion y el gestor de windows para iniciarse desde cualquier particion.  
+#@author Antonio J. Doblas Viso.    Universidad de Malaga.
+#@date   2011-05-20
+
+
+
+# Si el sistema de archivos no esta extendido. Realizar.
+PARTSIZE=$(ogGetPartitionSize $1 $2)
+FSSIZE=$(ogGetFsSize $1 $2)
+if [ $FSSIZE -lt $PARTSIZE ]; then
+	echo "Extender sistema de archivos."
+	ogExtendFs $1 $2
+fi
+
+#Si no existe particion activa, activar este sistema.
+FLAGACTIVE=$(ogGetPartitionActive $1)
+[ -z $FLAGACTIVE ] && ogSetPartitionActive $1 $2
+
+# Cambiar nombre en sistemas Windows y quitar usuario de acceso por defecto.
+if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
+    HOST=$(ogGetHostname)
+    HOST=${HOST:-"pc"}
+    echo " Cambiar nombre Windows a \"$HOST\" "
+    ogSetWindowsName $1 $2 "$HOST"
+    #ogSetWinlogonUser $1 $2 " "	# Descomentar para cambiar usuario de inicio.
+    # Configurar el boot sector de la particion windows.
+    ogFixBootSector  $1 $2
+    # Configura el gestor de arranque de windows xp vista seven
+    ogWindowsBootParameters $1 $2
+    # Registra en windows que la particion indicada es su nueva unidad c:\
+    ogWindowsRegisterPartition $1 $2 C $1 $2
+fi

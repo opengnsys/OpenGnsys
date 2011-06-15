@@ -551,15 +551,15 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
-        basetftp=/var/lib/tftpboot
+        local basetftp=/var/lib/tftpboot
 
+        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -pr /usr/lib/syslinux/ ${basetftp}/syslinux
-        cp /usr/lib/syslinux/pxelinux.0 ${basetftp}
+        cp -ar /usr/lib/syslinux/ ${basetftp}/syslinux
+        cp -a /usr/lib/syslinux/pxelinux.0 ${basetftp}
         # prepamos el directorio de la configuracion de pxe
         mkdir -p ${basetftp}/pxelinux.cfg
         cat > ${basetftp}/pxelinux.cfg/default <<EOF
@@ -725,24 +725,30 @@ function smbConfigure()
 
 function dhcpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Sample DHCP Configuration."
+	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
 
-	backupFile /etc/dhcp3/dhcpd.conf
+	local DHCPSERVER=/etc/init.d/isc-dhcp-server
+	DHCPCONFIG=/etc/dhcp/dhcpd.conf
+	if [ ! -x $DHCPSERVER ]; then
+		DHCPSERVER=/etc/init.d/dhcp3-server
+		DHCPCONFIG=/etc/dhcp3/dhcpd.conf
+	fi
+	backupFile $DHCPCONFIG
 
-        sed -e "s/SERVERIP/$SERVERIP/g" \
+	sed -e "s/SERVERIP/$SERVERIP/g" \
 	    -e "s/NETIP/$NETIP/g" \
 	    -e "s/NETMASK/$NETMASK/g" \
 	    -e "s/NETBROAD/$NETBROAD/g" \
 	    -e "s/ROUTERIP/$ROUTERIP/g" \
 	    -e "s/DNSIP/$DNSIP/g" \
-	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > /etc/dhcp3/dhcpd.conf
+	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCONFIG
 	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configuring dhcp server"
+		errorAndLog "${FUNCNAME}(): error while configuring DHCP server"
 		return 1
 	fi
 
-	/etc/init.d/dhcp3-server restart
-        echoAndLog "${FUNCNAME}(): Sample DHCP Configured in file \"/etc/dhcp3/dhcpd.conf\"."
+	$DHCPSERVER restart
+        echoAndLog "${FUNCNAME}(): Sample DHCP configured in file \"$DHCPCONFIG\"."
 	return 0
 }
 
@@ -856,6 +862,7 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/images
 	ln -fs /var/lib/tftpboot $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
+	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -875,8 +882,8 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
-	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg}
+	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
@@ -894,20 +901,20 @@ function openGnsysCopyServerFiles ()
 		exit 1
 	fi
 
-	local path_opengnsys_base=$1
+	local path_opengnsys_base="$1"
 
-	# No se copian los ficheros del cliente antiguo:
-	# - client/boot/initrd-generator ==> /opt/opengnsys/bin
-        # - client/boot/upgrade-clients-udeb.sh ==> /opt/opengnsys/bin
-        # - client/boot/udeblist*.conf ==> /opt/opengnsys/etc
-	local SOURCES=( server/tftpboot/pxelinux.cfg \
-                        server/bin \
-                        repoman/bin \
-                        doc )
-	local TARGETS=( tftpboot/pxelinux.cfg \
-                        bin \
-                        bin \
-                        doc )
+	local SOURCES=( server/tftpboot \
+			server/bin \
+			repoman/bin \
+			installer/opengnsys_uninstall.sh \
+			installer/opengnsys_update.sh \
+			doc )
+	local TARGETS=( tftpboot \
+			bin \
+			bin \
+			lib \
+			lib \
+			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
@@ -1086,26 +1093,27 @@ function openGnsysOldClientCreate()
 }
 
 
-# Crear nuevo cliente OpenGnSys 1.0
-function openGnsysClientCreate()
+# Crear cliente OpenGnSys 1.0.1
+function clientCreate()
 {
-	local DOWNLOADURL=http://www.opengnsys.es/downloads
-	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
-	local TMPFILE=/tmp/$FILENAME
+	local DOWNLOADURL="http://www.opengnsys.es/downloads"
+	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
+	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
+	local TMPDIR=/tmp/${FILENAME%.iso}
 
 	echoAndLog "${FUNCNAME}(): Loading Client"
-	# Descargar y descomprimir cliente ogclient
-	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
-	if [ ! -s $TMPFILE ]; then
+	# Descargar, montar imagen, copiar cliente ogclient y desmontar.
+	wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
-	echoAndLog "${FUNCNAME}(): Extranting Client files"
-	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
-	rm -f $TMPFILE
-	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img 
+	echoAndLog "${FUNCNAME}(): Copying Client files"
+	mount -o loop,ro $TARGETFILE $TMPDIR
+	cp -vr $TMPDIR/* $INSTALL_TARGET/tftpboot
+	umount $TMPDIR
+	rmdir $TMPDIR
+
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
@@ -1149,7 +1157,7 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
@@ -1160,7 +1168,7 @@ function installationSummary()
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "DHCP configuration file:          /etc/dhcp3/dhcpd.conf"
+	echoAndLog "DHCP configuration file:          $DHCPCONFIG"
 	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
 	echoAndLog "Samba configuration directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
@@ -1370,7 +1378,7 @@ fi
 #fi
 
 # Crear la estructura del cliente de OpenGnSys 1.0
-openGnsysClientCreate
+clientCreate
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client"
 	exit 1

@@ -1,0 +1,575 @@
+#!/bin/bash
+
+#         ogLoadHiveWindows int_ndisk int_partiton 
+#@brief   Localiza los hive del registro de windows (de sistema y usuarios)
+#@param   int_ndisk      nº de orden del disco 
+#@param   int_partition     nº de particion 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+
+function ogLoadHiveWindows () {
+# Variables locales.
+local PART DISK 
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition" \
+           "$FUNCNAME 1 1 "
+    return
+fi	
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+DISK=$1; PART=$2; 
+
+#Comprobaciones redundantes: borrar"
+#ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows no detectada"; echo $?)
+#ogGetOsType $DISK $PART | grep "Windows" || return $(ogRaiseError $OG_ERR_NOTOS "no es windows"; echo $?)
+#VERSION=$(ogGetOsVersion $DISK $PART)
+#Fin Comprobaciones redundantes: borrar"
+
+if ogGetPath $DISK $PART WINDOWS
+then
+	SYSTEMROOT="Windows"
+elif ogGetPath $DISK $PART WINNT
+then 
+	SYSTEMROOT="winnt"
+else
+	return $(ogRaiseError $OG_ERR_NOTOS "version windows no detectada"; echo $?)
+fi
+
+hiveSAM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/SAM) && export hiveSAM || return $(ogRaiseError $OG_ERR_NOTOS " hive SAM  no detectada"; echo $?)
+hiveSYSTEM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/system) && export hiveSYSTEM || return $(ogRaiseError $OG_ERR_NOTOS "hive SYSTEM  no detectada"; echo $?)
+hiveSOFTWARE=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/software) && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
+export TEMPhive=/tmp/tmpregistry
+
+## borrar elementos de la primera integracion
+#export particion=`ogMount $DISK $PART`
+#mkfifo pipe 2>/dev/null
+#declare -i count
+#declare -A HivePathUser
+#count=3
+# fin borrar elementos de la primera integracion
+
+declare -i COUNT
+COUNT=3
+BASEHOMEDIR=$(ogGetPath 1 1 /"Documents and Settings")
+TMPUSERFILE="/tmp/WuserRegAndDAT.tmp"
+find "$BASEHOMEDIR/" -type f -name NTUSER.DAT > $TMPUSERFILE  
+LISTUSERS=$(drbl-chntpw -l $hiveSAM | grep RID | awk -F"<" '{print $2}' | awk -F">" '{print $1}')
+#echo "$BASEHOMEDIR" $LISTUSERS
+for user in $LISTUSERS
+do	
+	# borrar elementos de la primera integracion.
+		#if find ${particion}/ -type f -name NTUSER.DAT > pipe| cat pipe | grep $user > /tmp/path.txt.$count
+		#then 
+		#echo pefil de $user encontrado, para utilizar este usuario con funciones utilizar id_hive= $count o \$usuario
+		#read camino < /tmp/path.txt.$count
+		#echo $camino | sed -e 's/ /\\ /g' > /tmp/path.txt.$count
+		#camino2=$(echo $camino | sed -e 's/ /\\ /g')
+		#echo $camino2 | sed -e 's/\\/\\\\/g' > /tmp/path.txt.$count
+		#export `echo $user=hiveUSER$count`
+		#export `echo hiveUSER$count`="$camino2"
+		#count=${count}+1
+		#fiecho $user
+    # Fin borrar elementos de la primera integracion.
+        
+        # Comprobamos que el usuario registrado tiene .DAT
+		if HOMEDIR=$(cat $TMPUSERFILE | grep -w $user)  
+		then
+			#echo "$user exportamos los usuarios de windows como variables, y como valor hiveUSERX; donde la X es 3 4 5 6 ... X"
+			export `echo $user=hiveUSER$COUNT` 
+			#echo "$user exportamos la variable hiveUSERX con el valor del home de la variable-usuario_windows"
+			##export `echo hiveUSER$COUNT`="$(echo $HOMEDIR | sed -e 's/ /\\ /'g | sed -e 's/\\/\\\\/g')"
+			export `echo hiveUSER$COUNT`="$(echo $HOMEDIR)"
+			#echo " estas variables \$USUARIO -> Identificador del HIVE ; \${!USUARIO} -> path del HIVE "
+			COUNT=${COUNT}+1
+		fi
+		
+done
+COUNT=0
+}
+
+
+#         ogUpdateHiveWindows  
+#@brief   Actualiza los hive de windows.
+#@param   int_ndisk       
+#@param   int_partition     
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+
+function ogUpdateHiveWindows (){
+# Variables locales.
+local PART DISK FILE
+
+#TODO detectar llamada a ogLoadHiveWindows
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME " \
+           "$FUNCNAME  "
+    return
+fi	
+
+echo drbl-chntpw -f $TEMPhive $hiveSAM $hiveSYSTEM $hiveSOFTWARE \"${hiveUSER3}\" \"${hiveUSER4}\" \"${hiveUSER5}\" \"${hiveUSER6}\" \"${hiveUSER7}\" \"${hiveUSER8}\" \"${hiveUSER9}\" > /tmp/run.sh
+cat /tmp/run.sh; sh /tmp/run.sh; rm -fr $TEMPhive; rm /tmp/run.sh
+
+unset hiveSAM hiveSYSTEM hiveSOFTWARE TEMPhive hiveUSER3 hiveUSER4 hiveUSER5 hiveUSER6 hiveUSER7 hiveUSER8 hiveUSER9
+ 
+
+}
+
+
+
+function ogHiveNTRunMachine () {
+#echo sintaxis:  PathScripts idScripts
+#echo ejemplo:   c:\\\\WINDOSWS\\\\crearusuarios.bat  scripts1
+#echo IMPORTANTE: el path debe llevar dos barras \\, pero como se deben 'escapar' debes poner cuatro \\\\
+#echo "identifica 0=$hiveSAM 1=$hiveSystem 2=$hiveSoftware 3=$HiveUser3"
+
+local PART DISK FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME PathScripts|command keyName " \
+           "$FUNCNAME c:\\\\Windows\\\\crearusuarios.cmd scripts_crearUsuarios "\
+           "$FUNCNAME "cmd /c del c:\ogboot.*" ogcleanboot "\
+           "$FUNCNAME Requiere la previa ejecución de ogLoadHive int_disk int_part"\
+           "$FUNCNAME Despues requiere el ogUpdateHive"
+    return
+fi	
+	
+
+# Error si no se reciben al menos 1 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)	
+
+
+cat >> $TEMPhive << EOF
+h 2
+cd \Microsoft\Windows\CurrentVersion\Run
+nv 1 $2
+ed $2
+$1
+EOF
+#ogGetRegistryValue /mnt/sda1 software '\Microsoft\Windows\CurrentVersion\Run\og3'
+}
+
+function ogNTPolUserOn () {
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME id_hive_user " \
+           "$FUNCNAME NombreUsuario"\
+           "$FUNCNAME "
+    return
+fi		
+
+# TODO: error si no se ha llamado previamente a ogLoadHiveWindows
+[ -n $hiveSAM ] || return $(ogRaiseError $OG_ERR_FORMAT "se debe utilizar primero la utilidad ogLoadHiveWindows"; echo $?)
+
+# TODO: error si el usuario no tiene cuenta en windows.
+drbl-chntpw -l $hiveSAM | grep RID | grep -w $1 || return $(ogRaiseError $OG_ERR_FORMAT "el usuario $1 no tiene cuenta en este windows: Compruebe mayusculas o minusculas"; echo $?)
+
+# TODO: error si no el usario no no tiene HIVE asociado.
+[ -n "${!1}" ] || return $(ogRaiseError $OG_ERR_FORMAT "el usuario no tiene hive creado"; echo $?)
+
+
+HIVEID=$(echo ${!1} | tr -d "hiveUSER")
+
+
+#echo "IMPORTANTE:  la variable HiveUser3=/mnt/windows/Document/\ and/\ Seeting\alumnmos\NTUSER.dat"
+echo $HIVEID
+#cp /var/EAC/admin/utilswin/Fondo.BMP ${particion}/WINDOWS/
+
+cat >> $TEMPhive << EOF
+h $HIVEID
+cd \Control Panel\Desktop
+ed Wallpaper
+C:\\WINDOWS\\fondo.bmp
+
+cd \Software\Microsoft\Windows\CurrentVersion\Policies
+nk Explorer
+cd Explorer
+
+nv 4 NoDesktop
+ed NoDesktop
+1
+
+nv 4 NoSimpleStartMenu
+ed NoSimpleStartMenu
+1
+nv 4 NoWindowsUpdate
+ed NoWindowsUpdate
+1
+
+nv 4 NoSMConfigurePrograms
+ed NoSMConfigurePrograms
+1
+
+nv 4 NoChangeStartMenu
+ed NoChangeStartMenu
+1
+
+nv 4 Intellimenus
+ed Intellimenus
+1
+
+nv 4 NoRun
+ed NoRun
+1
+
+nv 4 NoRecentDocsHistory
+ed NoRecentDocsHistory
+1
+EOF
+}
+
+
+
+
+
+##########################################################
+##########################################################
+#####librerias de PostConfiguracion v0.1para Advanced Deploy enViorenment###########
+# Liberado bajo licencia GPL <http://www.gnu.org/licenses/gpl.html>################
+############# 2008 Antonio Jes�s Doblas Viso  adv@uma.es ##########################
+########### Universidad de Malaga (Spain)############################
+##########################################################
+
+
+
+
+
+function NTChangeName () {
+if [ $# = 0 ]
+then
+echo sintaxis: NTChangeNAME str_$var
+echo ejemplos: NTCHangeName adi${IPcuatro}-xp
+fi
+cat >> $temporal << EOF
+h 1 
+ed ControlSet001\Control\ComputerName\ComputerName\ComputerName
+$1
+ed ControlSet001\Services\Tcpip\Parameters\Hostname
+$1
+ed ControlSet001\Services\Tcpip\Parameters\NV Hostname
+$1
+h 2
+cd \Microsoft\Windows NT\CurrentVersion\Winlogon
+ed DefaultDomainName
+$1
+EOF
+}
+
+
+
+function NTSetGroupName () {
+if [ $# = 0 ]
+then
+echo sintaxis: NTSetGroupName str_$var
+echo ejemplos: NTSetGroupName adi
+fi
+cat >> $temporal << EOF
+h 2
+ed \Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName
+$1
+EOF
+}
+
+
+function NTSetOwner (){
+if [ $# = 0 ]
+then
+echo sintaxis: NtSetOwner str_propietario str_organizacion
+echo ejemplos: NTSetOwner eu\ politecnica universidad\ de\ malaga
+fi
+cat >> $temporal << EOF
+h 2
+ed \Microsoft\Windows NT\CurrentVersion\RegisteredOwner
+$1
+ed \Microsoft\Windows NT\CurrentVersion\RegisteredOrganization
+$2
+EOF
+}
+
+
+function NTAutoLogon (){
+if [ $# = 0 ]
+then
+echo sintaxis: Int_Activar Int_nves str_usuario str_passwd str_equipo 
+echo ejemplos: 1 2 administrador 3451 $equipo
+echo IMPORTANTE: cuando AutoLogonCount llegue a 0, activa el AutoAdminLogon a 0. Pero no borra los valores de DefaultPassword
+return 2
+fi
+echo la pass es $4
+export temporal=/tmp/tmpregistry
+cat >> $temporal << EOF
+hive 2
+cd \Microsoft\Windows NT\CurrentVersion\Winlogon
+nv 1 AutoAdminLogon
+ed AutoAdminLogon
+$1
+nv 1 AutoLogonCount
+ed AutoLogonCount
+$2
+nv 1 DefaultUserName
+ed DefaultUserName
+$3
+nv 1 DefaultDomainName
+ed DefaultDomainName
+$5
+EOF
+if [ "$4" == none ]
+then
+echo "debe aparecer done" $4
+cat >> $temporal << EOF
+dv DefaultPassword
+
+
+EOF
+else
+cat >> $temporal << EOF
+nv 1 DefaultPassword
+ed DefaultPassword
+$4
+EOF
+fi
+}
+
+function NTStatusRatonTeclado (){
+if [ $# = 0 ]
+then
+echo sintaxis: Int-StatusRaton Int-StatusTeclado 
+echo ejemplos:  int=1 activo   int=4 desactivado
+return 2
+fi
+cat >> $temporal << EOF
+hive 1
+cd \ControlSet001\Services\Mouclass
+ed Start
+$1
+cd \ControlSet001\Services\Kbdclass
+ed Start
+$2
+EOF
+}
+
+function NTRunOnceMachine () {
+if [ $# = 0 ]
+then
+echo sintaxis:  PathScripts idScripts
+echo "ejemplo:   c:\\\\WINDOSWS\\\\crearusuarios.bat  scripts1"
+echo "IMPORTANTE: el path debe llevar dos barras \\, pero como se deben 'escapar' debes poner cuatro \\\\"
+return 2
+fi
+export temporal=/tmp/tmpregistry
+cat >> $temporal << EOF
+h 2
+cd \Microsoft\Windows\CurrentVersion\RunOnce
+nv 1 $2
+ed $2
+$1
+EOF
+}
+
+function NTRunMachine () {
+if [ $# = 0 ]
+then
+echo sintaxis:  PathScripts idScripts
+echo ejemplo:   c:\\\\WINDOSWS\\\\crearusuarios.bat  scripts1
+echo IMPORTANTE: el path debe llevar dos barras \\, pero como se deben 'escapar' debes poner cuatro \\\\
+return 2
+fi
+export temporal=/tmp/tmpregistry
+cat >> $temporal << EOF
+h 2
+cd \Microsoft\Windows\CurrentVersion\Run
+nv 1 $2
+ed $2
+$1
+EOF
+}
+
+function NTRunUser () {
+if [ $# = 0 ]
+then
+echo sintaxis:  str_PathWINScripts str_idScripts Int_hive||\$usuario
+echo ejemplo:   c:\\\\WINDOSWS\\\\crearusuarios.bat  scripts1 3
+echo IMPORTANTE: el pathWIN debe llevar dos barras \\, pero como se deben 'escapar' debes poner cuatro \\\\
+echo IMPORTANTE: el pathLinux si lleva espacios debe escaparse con una barra \\
+echo IMPORTANTE Int_hive: 3 para el primer usuario, 4 para el segundo usuario
+echo requiere export un HiveUser3=/mnt/windows/Document\ and\ Seeting\alumnmos\NTUSER.dat
+return 2
+fi
+cat >> $temporal << EOF
+h $3
+cd \Software\Microsoft\Windows\CurrentVersion\Run
+nv 1 $2
+ed $2
+$1
+EOF
+}
+
+
+
+function NTPolUserOn () {
+if [ $# = 0 ]
+then
+Msg "requiere LoadRegistryUser str_user1 str_user2..." orange
+echo "sintaxis:  Int_hive"
+echo "ejemplo: NTPolUserOn 3"
+echo "IMPORTANTE:  la variable HiveUser3=/mnt/windows/Document/\ and/\ Seeting\alumnmos\NTUSER.dat"
+return 2
+fi
+cp /var/EAC/admin/utilswin/Fondo.BMP ${particion}/WINDOWS/
+cat >> $temporal << EOF
+h $1
+cd \Control Panel\Desktop
+ed Wallpaper
+C:\\WINDOWS\\fondo.bmp
+
+cd \Software\Microsoft\Windows\CurrentVersion\Policies
+nk Explorer
+cd Explorer
+
+nv 4 NoDesktop
+ed NoDesktop
+1
+
+nv 4 NoSimpleStartMenu
+ed NoSimpleStartMenu
+1
+nv 4 NoWindowsUpdate
+ed NoWindowsUpdate
+1
+
+nv 4 NoSMConfigurePrograms
+ed NoSMConfigurePrograms
+1
+
+nv 4 NoChangeStartMenu
+ed NoChangeStartMenu
+1
+
+nv 4 Intellimenus
+ed Intellimenus
+1
+
+nv 4 NoRun
+ed NoRun
+1
+
+nv 4 NoRecentDocsHistory
+ed NoRecentDocsHistory
+1
+EOF
+}
+
+function NTPolUserOFF () {
+if [ $# = 0 ]
+then
+Msg "requiere LoadRegistryUser str_user1 str_user2..." orange
+echo "sintaxis:  Int_hive"
+echo "ejemplo: NTPolUserOFF 3"
+echo "IMPORTANTE:  la variable HiveUser3=/mnt/windows/Document/\ and/\ Seeting\alumnmos\NTUSER.dat"
+return 2
+fi
+cat >> $temporal << EOF
+h $1
+cd \Control Panel\Desktop
+ed Wallpaper
+C:\\WINDOWS\\web\\wallpaper\\Felicidad.bmp
+
+cd \Software\Microsoft\Windows\CurrentVersion\
+rdel Policies
+nk Policies
+1
+EOF
+}
+
+
+function NTStatusBootChk () {
+if [ $# = 0 ]
+then
+echo sintaxis: Int-Status
+echo ejemplos:  int=0 desactivado int=1 activado
+return 2
+fi
+[ $1 = 0 ] && valor="none"
+[ $1 = 1 ] && valor="autocheck autochk *"
+cat >> $temporal << EOF
+hive 1
+cd \ControlSet001\Control\Session Manager
+ed BootExecute
+$valor
+--n
+EOF
+}
+
+
+function ogSchrootLinux () {
+
+# Variables locales.
+local PART DISK DIRCONF SCHROOTDEVICE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition" \
+           "$FUNCNAME 1 1 "
+    return
+fi	
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+DISK=$1; PART=$2; DIRCONF="/etc/schroot"
+
+
+VERSION=$(ogGetOsVersion $DISK $PART) 
+echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+
+ogUnmount $DISK $PART || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+
+SCHROOTDEVICE=$(ogDiskToDev $DISK $PART)
+
+
+rm ${DIRCONF}/mount-defaults
+rm ${DIRCONF}/schroot.conf
+
+cat >> ${DIRCONF}/mount-defaults << EOF
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+proc            /proc           proc    defaults        0       0
+/dev            /dev            none    rw,bind         0       0
+/dev/pts        /dev/pts        none    rw,bind         0       0
+/dev/shm        /dev/shm        none    rw,bind         0       0
+EOF
+
+
+cat >> ${DIRCONF}/schroot.conf << EOF
+[linux]
+description=$VERSION
+type=block-device
+device=$SCHROOTDEVICE
+EOF
+
+
+
+
+schroot -c linux
+
+schroot -end-sessiona --all-sessions
+}
+

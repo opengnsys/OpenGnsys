@@ -9,6 +9,9 @@
 #@version 1.0 - adaptación a OpenGnSys 1.0
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2011/03/02
+#@version 1.0.1 - control de auto actualización del script
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2011/05/17
 #*/
 
 
@@ -27,9 +30,16 @@ then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
+# Error si OpenGnSys no está instalado (no existe el directorio del proyecto)
+INSTALL_TARGET=/opt/opengnsys
+if [ ! -d $INSTALL_TARGET ]; then
+        echo "ERROR: OpenGnSys is not installed, cannot update!!"
+        exit 1
+fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
+PROGRAMNAME=$(basename "$0")
 DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
@@ -43,7 +53,6 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
 
-INSTALL_TARGET=/opt/opengnsys
 LOG_FILE=/tmp/opengnsys_update.log
 
 
@@ -51,6 +60,31 @@ LOG_FILE=/tmp/opengnsys_update.log
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
+
+# Comprobar auto-actualización.
+function checkAutoUpdate()
+{
+	local update=0
+
+	# Actaulizar el script si ha cambiado o no existe el original.
+	if [ $USESVN -eq 1 ]; then
+		svn export $SVN_URL/installer/$PROGRAMNAME
+		if ! diff --brief $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+			mv $PROGRAMNAME $INSTALL_TARGET/lib
+			update=1
+		else
+			rm -f $PROGRAMNAME
+		fi
+	else
+		if ! diff --brief $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+			cp -a $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib
+			update=1
+		fi
+	fi
+
+	return $update
+}
+
 
 function getDateTime()
 {
@@ -167,7 +201,7 @@ function importSqlFile()
 #####################################################################
 
 # Instalar las deependencias necesarias para el actualizador.
-function installDependencies ()
+function installDependencies()
 {
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
@@ -201,7 +235,7 @@ function svnExportCode()
 		exit 1
 	fi
 
-	local url=$1
+	local url="$1"
 
 	echoAndLog "${FUNCNAME}(): downloading subversion code..."
 
@@ -226,18 +260,47 @@ function checkNetworkConnection()
 	wget --spider -q $OPENGNSYS_SERVER
 }
 
-# Obtener los parámetros de red de la interfaz por defecto.
-function getNetworkSettings()
+
+#####################################################################
+####### Funciones específicas de la instalación de Opengnsys
+#####################################################################
+
+# Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
+function updateServicesStart()
 {
-        local MAINDEV
-
- 	echoAndLog "$FUNCNAME(): Detecting default network parameters."
-	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
-	if [ -z "$MAINDEV" ]; then
- 		errorAndLog "${FUNCNAME}(): Network device not detected."
-		return 1
+	echoAndLog "${FUNCNAME}(): Updating OpenGnSys init file ..."
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+	if [ $? != 0 ]; then
+		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
+		exit 1
 	fi
+	echoAndLog "${FUNCNAME}(): init file updated successfully."
+}
 
+# Actualizar cliente OpenGnSys
+function updateClientFiles()
+{
+	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while updating client structure"
+		exit 1
+	fi
+	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
+	
+	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while updating engine files"
+		exit 1
+	fi
+	
+	echoAndLog "${FUNCNAME}(): client files update success."
+}
+
+# Exportar nombre de usuario y grupo del servicio Apache.
+function getApacheUser()
+{
 	# Variables de ejecución de Apache
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
@@ -248,51 +311,6 @@ function getNetworkSettings()
 	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
 }
 
-
-#####################################################################
-####### Funciones específicas de la instalación de Opengnsys
-#####################################################################
-
-# Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
-
-function updateServicesStart(){
-	echoAndLog "${FUNCNAME}(): Updating /etc/init.d/opengnsys ..."
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
-	if [ $? != 0 ]; then
-		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
-		exit 1
-	fi
-	echoAndLog "${FUNCNAME}(): /etc/init.d/opengnsys updated successfully."
-}
-
-# Actualizar cliente OpenGnSys
-function updateClientFiles()
-{
-	local hayErrores=0
-
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while updating client structure"
-		hayErrores=1
-	fi
-	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while updating engine files"
-		hayErrores=1
-	fi
-	
-	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): client  files update success."
-	else
-		errorAndLog "${FUNCNAME}(): client files update with errors"
-	fi
-
-	return $hayErrores
-}
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
@@ -312,21 +330,20 @@ function updateWebFiles()
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
-	
 }
 
 # Copiar carpeta de Interface 
-function updateInterfaceAdm () 
+function updateInterfaceAdm()
 { 
-	local hayErrores=0 
+	local errcode=0 
          
 	# Crear carpeta y copiar Interface 
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder" 
 	mv $INSTALL_TARGET/client/interfaceAdm $INSTALL_TARGET/client/Interface
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client
-	ERRCODE=$?
+	errcoce=$?
 	mv $INSTALL_TARGET/client/Interface $INSTALL_TARGET/client/interfaceAdm
-	if [ $? -ne 0 ]; then 
+	if [ $errcode -ne 0 ]; then 
 		echoAndLog "${FUNCNAME}(): error while updating admin interface" 
 		exit 1
 	fi 
@@ -347,8 +364,8 @@ function makeDoxygenFiles()
 		return 1
 	fi
 	rm -fr "$INSTALL_TARGET/www/api"
- 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
-    rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
+	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
+	rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
@@ -359,19 +376,12 @@ function createDirs()
 {
 	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
-	mkdir -p ${INSTALL_TARGET}
-	mkdir -p ${INSTALL_TARGET}/bin
-	mkdir -p ${INSTALL_TARGET}/client
-	mkdir -p ${INSTALL_TARGET}/doc
-	mkdir -p ${INSTALL_TARGET}/etc
-	mkdir -p ${INSTALL_TARGET}/lib
+	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
+	mkdir -p ${INSTALL_TARGET}/{client,images}
 	mkdir -p ${INSTALL_TARGET}/log/clients
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
-	mkdir -p ${INSTALL_TARGET}/sbin
-	mkdir -p ${INSTALL_TARGET}/www
-	mkdir -p ${INSTALL_TARGET}/images
 	ln -fs /var/lib/tftpboot ${INSTALL_TARGET}
-	mkdir -p ${INSTALL_TARGET}/tftpboot/pxelinux.cfg
+	mkdir -p ${INSTALL_TARGET}/tftpboot/{pxelinux.cfg,menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -391,8 +401,8 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg}
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
@@ -403,15 +413,19 @@ function createDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function updateServerFiles () {
-
+function updateServerFiles()
+{
 	# No copiar ficheros del antiguo cliente Initrd
-	local SOURCES=( repoman/bin \
+	local SOURCES=(	repoman/bin \
 			server/bin \
-                        doc )
-	local TARGETS=( bin \
-                        bin \
-                        doc )
+			server/tftpboot \
+			installer/opengnsys_uninstall.sh \
+			doc )
+	local TARGETS=(	bin \
+			bin \
+			tftpboot \
+			lib/opengnsys_uninstall.sh \
+			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
 		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
@@ -422,7 +436,11 @@ function updateServerFiles () {
 	pushd $WORKDIR/opengnsys >/dev/null
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
-		rsync --exclude .svn -irplt "${SOURCES[$i]}" $(dirname "${INSTALL_TARGET}/${TARGETS[$i]}")
+		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
+			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
+		else
+			rsync --exclude .svn -irplt "${SOURCES[i]}" $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}")
+		fi
 	done
 	popd >/dev/null
 	echoAndLog "${FUNCNAME}(): updating cron files"
@@ -434,11 +452,41 @@ function updateServerFiles () {
 ### Funciones de compilación de código fuente de servicios
 ####################################################################
 
-# Recompilar y actualiza el binario del clinete
-function recompileClient ()
+# Recompilar y actualiza los serivicios y clientes.
+function compileServices()
 {
+	local hayErrores=0
+
+	# Compilar OpenGnSys Server
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Admin Server"
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
+	make && mv ogAdmServer $INSTALL_TARGET/sbin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
+		hayErrores=1
+	fi
+	popd
+	# Compilar OpenGnSys Repository Manager
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Repository Manager"
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
+	make && mv ogAdmRepo $INSTALL_TARGET/sbin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
+		hayErrores=1
+	fi
+	popd
+	# Compilar OpenGnSys Agent
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Agent"
+	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
+	make && mv ogAdmAgent $INSTALL_TARGET/sbin
+	if [ $? -ne 0 ]; then
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
+		hayErrores=1
+	fi
+	popd
+
 	# Compilar OpenGnSys Client
-	echoAndLog "${FUNCNAME}(): recompiling OpenGnSys Client"
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
 	make && mv ogAdmClient $INSTALL_TARGET/client/bin
 	if [ $? -ne 0 ]; then
@@ -452,86 +500,40 @@ function recompileClient ()
 
 
 ####################################################################
-### Funciones instalacion cliente opengnsys
+### Funciones instalacion cliente OpenGnSys
 ####################################################################
-
-# Actualizar antiguo cliente Initrd.
-function updateOldClient()
-{
-	local OSDISTRIB OSCODENAME
-
-	local hayErrores=0
-
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-        rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/nfsexport/* $INSTALL_TARGET/client
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
-        mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-        rsync -iplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while copying engine files"
-		hayErrores=1
-	fi
-
-	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSDISTRIB=$(lsb_release -is) 2>/dev/null
-	OSCODENAME=$(lsb_release -cs) 2>/dev/null
-	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
-		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	else
-		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading default udeb files."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	fi
-
-	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): Client generation success."
-	else
-		errorAndLog "${FUNCNAME}(): Client generation with errors"
-	fi
-
-	return $hayErrores
-}
 
 # Actualizar nuevo cliente para OpenGnSys 1.0
 function updateClient()
 {
 	local DOWNLOADURL=http://www.opengnsys.es/downloads
 	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
-	local TMPFILE=/tmp/$FILENAME
+	local SOURCEFILE=$DOWNLOADURL/$FILENAME
+	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
+	local SOURCELENGTH
+	local TARGETLENGTH
+	local TMPDIR=/tmp/${FILENAME%.iso}
 
-	echoAndLog "${FUNCNAME}(): Loading Client"
-	# Descargar y descomprimir cliente ogclient
-	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
-	if [ ! -s $TMPFILE ]; then
-		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
-		return 1
+	# Comprobar si debe actualizarse el cliente.
+	SOURCELENGTH=$(wget --spider $SOURCEFILE | LANG=C awk '/Length:/ {print $2}')
+	TARGETLENGTH=$(ls -l $TARGETFILE | awk '{print $5}' 2>/dev/null)
+	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
+		echoAndLog "${FUNCNAME}(): Loading Client"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		if [ ! -s $TARGETFILE ]; then
+			errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
+			return 1
+		fi
+	else
+		echoAndLog "${FUNCNAME}(): Client is already loaded"
 	fi
-	echoAndLog "${FUNCNAME}(): Extracting Client files"
-	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
-	rm -f $TMPFILE
-	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
+	echoAndLog "${FUNCNAME}(): Updatting ogclient files"
+	mount -o loop,ro $TARGETFILE $TMPDIR
+	rsync -irplt $TMPDIR/* $INSTALL_TARGET/tftpboot
+	umount $TMPDIR
+	rmdir $TMPDIR
+
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
@@ -564,13 +566,6 @@ function updateSummary()
 
 echoAndLog "OpenGnSys update begins at $(date)"
 
-# Instalar dependencia.
-installDependencies $DEPS
-if [ $? -ne 0 ]; then
-	errorAndLog "Error: you may install all needed dependencies."
-	exit 1
-fi
-
 pushd $WORKDIR
 
 # Comprobar si hay conexión y detectar parámetros de red por defecto.
@@ -582,9 +577,21 @@ if [ $? -ne 0 ]; then
 	errorAndLog " - Server is temporally down, try agian later."
 	exit 1
 fi
-getNetworkSettings
+
+# Comprobar auto-actualización del programa.
+if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
+	checkAutoUpdate
+	if [ $? -ne 0 ]; then
+		echoAndLog "OpenGnSys updater has been overwritten."
+		echoAndLog "Please, re-execute this script."
+		exit
+	fi
+fi
+
+# Instalar dependencias.
+installDependencies $DEPS
 if [ $? -ne 0 ]; then
-	errorAndLog "Error reading default network settings."
+	errorAndLog "Error: you may install all needed dependencies."
 	exit 1
 fi
 
@@ -629,6 +636,7 @@ updateClientFiles
 updateInterfaceAdm
 
 # Actualizar páqinas web
+getApacheUser
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Web Admin files"
@@ -637,10 +645,10 @@ fi
 # Generar páginas Doxygen para instalar en el web
 makeDoxygenFiles
 
-# Creando la estructura del cliente
-recompileClient
-# NO se actualiza el antiguo cliente Initrd
-#updateOldClient
+# Recompilar y actualizar los servicios del sistema
+compileServices
+
+# Actaulizar ficheros auxiliares del cliente
 updateClient
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"

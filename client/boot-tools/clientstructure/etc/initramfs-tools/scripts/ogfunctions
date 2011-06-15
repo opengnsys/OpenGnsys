@@ -20,25 +20,31 @@ return 0
 
 ogExportVarEnvironment ()
 {
-	#puntos de accesos al servidor ogprotocol=nfs
-	export NFSROOTBOOT="/var/lib/tftpboot"
-	export NFSCLIENTDIR="/opt/opengnsys/client"
-	export NFSLOGDIR="/opt/opengnsys/log/clients"
-	export NFSIMGDIR="/opt/opengnsys/images"
-	#puntos de accesos al servidor ogprotocol=smb
-	export SMBROOTBOOT="tftpboot"
-	export SMBCLIENTDIR="ogclient"
-	export SMBLOGDIR="oglog"
-	export SMBIMGDIR="ogimages"
+	export CFGINITRD="/tmp/initrd.cfg"
+	echo "puntos de accesos al servidor ogprotocol=nfs" >> $CFGINITRD
+	export NFSROOTBOOT="/var/lib/tftpboot" && echo "NFSROOTBOOT=$NFSROOTBOOT" >> $CFGINITRD	
+	export NFSCLIENTDIR="/opt/opengnsys/client" && echo "NFSCLIENDIR=$NFSCLIENTDIR" >> $CFGINITRD	
+	export NFSLOGDIR="/opt/opengnsys/log/clients" && echo "NFSLOGDIR=$NFSLOGDIR" >> $CFGINITRD	
+	export NFSIMGDIR="/opt/opengnsys/images" && echo "NFSIMGDIR=$NFSIMGDIR" >> $CFGINITRD	
+	echo "puntos de accesos al servidor ogprotocol=smb" >> $CFGINITRD
+	export SMBROOTBOOT="tftpboot"  && echo "SMBROOTBOOT=$SMBROOTBOOT" >> $CFGINITRD	
+	export SMBCLIENTDIR="ogclient" && echo "SMBCLIENTDIR=$SMBCLIENTDIR" >> $CFGINITRD
+	export SMBLOGDIR="oglog" && echo "SMBLOGDIR=$SMBLOGDIR" >> $CFGINITRD
+	export SMBIMGDIR="ogimages" && echo "SMBIMGDIR=$SMBIMGDIR" >> $CFGINITRD
 
-	#puntos de montaje local ram o cache
-	export LOCALCLIENTDIR="/opt/opengnsys"
-	export LOCALLOGDIR="/opt/opengnsys/log"
-	export LOCALIMGDIR="/opt/opengnsys/images"
-	export LOCALROOTBOOT="/opt/og2fs/tftpboot"		#punto de montaje del contendor tftpboot
-	export LOCALROOTIMG="/opt/og2fs/2ndfs"			#punto de montaje donde se accede al 2nd FS mediante loop
-	export LOCALROOTRAM="/opt/og2fs/1stfs"			#punto de montaje para unionfs
-	export LOCALROOTUNION="/opt/og2fs/unionfs"		#punto de union entreo LOCALROOTIMG y LOCALROOTRAM
+	echo "puntos de montaje local para los contenedores" >> $CFGINITRD
+	export LOCALROOTBOOT="/opt/og2fs/tftpboot"	&& echo "LOCALROOTBOOT=$LOCALROOTBOOT" >> $CFGINITRD
+	export LOCALCLIENTDIR="/opt/opengnsys" && echo "LOCALCLIENTDIR=$LOCALCLIENTDIR" >> $CFGINITRD		
+	export LOCALLOGDIR="/opt/opengnsys/log" && echo "LOCALLOGDIR=$LOCALLOGDIR" >> $CFGINITRD
+	export LOCALIMGDIR="/opt/opengnsys/images" && echo "LOCALIMGDIR=$LOCALIMGDIR" >> $CFGINITRD
+	
+	echo "puntos de montajes para realizar la integración unionfs entre el initrd y el sistema root" >> $CFGINITRD
+	#punto de montaje donde se accede al 2nd FS mediante loop
+	export LOCALROOTIMG="/opt/og2fs/2ndfs"	&& echo "LOCALROOTIMG=$LOCALROOTIMG" >> $CFGINITRD		
+	#punto de montaje para unionfs 
+	export LOCALROOTRAM="/opt/og2fs/1stfs" && echo "LOCALROOTRAM=$LOCALROOTRAM" >> $CFGINITRD				
+	#punto de union entreo LOCALROOTIMG y LOCALROOTRAM
+	export LOCALROOTUNION="/opt/og2fs/unionfs" && echo "LOCALROOTUNION=$LOCALROOTUNION" >> $CFGINITRD			
 	##INFORMACION DE OTRAS VARIABLES OBTENDIAS EN OTRAS FUNCIONES.
 	#ogGetROOTSERVER()  ip del servidor pxe, valor obtenido automaticamente desde dhcpd.
 	#IPV4DDR
@@ -92,6 +98,14 @@ ogPostConfigureFS()
 	echo "link-local 169.254.0.0" >> /etc/networks
 	echo "localnet $NETIP" >> /etc/networks
 	#route
+
+	#enlace si iniciamos desde ogprotocolo=local { cdrom, usb, cache } .
+    # monta el raiz del dispositivo local en /opt/og2fs/tftpboot  - acceso al fichero .sqfs
+    # y monta el sistema root sqfs en /opt/og2fs/2ndfs
+	[ "$LOCALMEDIA" == "CACHE" ] && ln -s /opt/og2fs/tftpboot /opt/opengnsys/cache
+	[ "$ogprotocol" == "local" ] &&  ln -s /opt/og2fs/2ndfs/opt/opengnsys/* /opt/opengnsys/
+
+
 }
 
 
@@ -120,6 +134,7 @@ ogGetROOTSERVER ()
 		fi
 	fi
 	export ROOTSERVER
+	echo "ROOTSERVER=$ROOTSERVER" >> $CFGINITRD
 return 0
 }	
 
@@ -136,10 +151,15 @@ else
 fi
 
 case "$ogprotocol" in
-	cdrom)
-		echo  "Montar imagen de CD-ROM"
-		blkid /dev/s*
-		mount -t iso9660 LABEL=ogClient $LOCALROOTBOOT
+	local)
+		echo  "Montar imagen del sistema root desde dispositivo local"
+		for i in $(blkid /dev/s* | grep ogClient | awk -F: '{print $2}' | tr -d \"); do export $i; done
+		mount -t $TYPE LABEL=$LABEL $LOCALROOTBOOT
+		if [ $? != 0 ]
+		then
+			mount -t reiserfs LABEL=CACHE $LOCALROOTBOOT
+			export LOCALMEDIA=CACHE
+		fi
 		;;    
 	httfs)
 		echo "protocolo httfs aun no soportado"
@@ -240,77 +260,104 @@ ifconfig lo 127.0.0.1
 
 ogconfigure_networking()
 {
-IP=$IPOPTS
-# http://paste.ubuntu.com/427631/  Paste from yofel at Tue, 4 May 2010 13:49:56 +0000
-        if [ -n "${BOOTIF}" ]; then
-                # pxelinux sets BOOTIF to a value based on the mac address of the
-                # network card used to PXE boot, so use this value for DEVICE rather
-                # than a hard-coded device name from initramfs.conf. this facilitates
-                # network booting when machines may have multiple network cards.
-                # pxelinux sets BOOTIF to 01-$mac_address
-
-                # strip off the leading "01-", which isn't part of the mac
-                # address
-                temp_mac=${BOOTIF#*-}
-
-                # convert to typical mac address format by replacing "-" with ":"
-                bootif_mac=""
-                IFS='-'
-                for x in $temp_mac ; do
-                        if [ -z "$bootif_mac" ]; then
-                                bootif_mac="$x"
-                        else
-                                bootif_mac="$x:$bootif_mac"
-                        fi
-                done
-                unset IFS
-
-                # look for devices with matching mac address, and set DEVICE to
-                # appropriate value if match is found.
-                for device in /sys/class/net/* ; do
-                        if [ -f "$device/address" ]; then
-                                current_mac=$(cat "$device/address")
-                                if [ "$bootif_mac" = "$current_mac" ]; then
-                                        DEVICE=${device##*/}
-                                        break
-                                fi
-                        fi
-                done
+#echo "ogconfigure_networking: Buscando interfaz a configurar DEVICE"
+if [ -n "${BOOTIF}" ] 
+then
+	#echo " variable BOOTIF exportada con pxelinux.0 con valor $BOOTIF"
+	IP=$IPOPTS
+	temp_mac=${BOOTIF#*-}
+	# convert to typical mac address format by replacing "-" with ":"
+	bootif_mac=""
+	IFS='-'
+	for x in $temp_mac ; do
+		if [ -z "$bootif_mac" ]; then
+        bootif_mac="$x"
+        else
+        	bootif_mac="$x:$bootif_mac"
         fi
+	done
+	unset IFS
+	# look for devices with matching mac address, and set DEVICE to
+	# appropriate value if match is found.
+	for device in /sys/class/net/* ; do
+		if [ -f "$device/address" ]; then
+			current_mac=$(cat "$device/address")
+			if [ "$bootif_mac" = "$current_mac" ]; then
+				DEVICE=${device##*/}
+				break
+			fi
+		fi
+	done
+else
+	#echo "variable BOOTIF no exportada, intentamos detectar que interfaz se ha iniciado"
+	IP=$ip
+	#TODO Detectar que interfaz se ha iniciado
+	case ${IP} in
+		none|off)
+           return 0
+        ;;
+        ""|on|any)
+          # Bring up device
+          DEVICE=eth0
+        ;;
+        dhcp|bootp|rarp|both)
+          DEVICE=eth0
+        ;;
+        *)
+          DEVICE=`echo $IP | cut -f6 -d:`
+        ;;
+	esac
+fi
+if [ -z "${DEVICE}" ]; then
+	echo "variable DEVICE con valor $DEVICE no encontrada, llamamos de nuevo a ogconfigure_networking"
+	ogconfigure_networking
+fi
 
-        # networking already configured thus bail out
-        [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
+[ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
+#if [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ]; then 
+#	echo "variable DEVICE con valor $DEVICE  y fichero /tmp/net-$DEVICE encontrados"
+#	return 0
+#else
+#	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /tmp/net-$DEVICE"
+#fi
 
-        # support ip options see linux sources
-        # Documentation/filesystems/nfsroot.txt
-        # Documentation/frv/booting.txt
+# Activamos la interfaz antes de configurar.
+ip address flush $DEVICE
+ip link set dev $DEVICE up
+# Si no se detecta señal portadora volver a configurar.
+sleep 1
+CARRIER=$(cat /sys/class/net/${DEVICE}/carrier)
+if [ "$CARRIER" != "1" ]
+then
+	ogconfigure_networking
+fi
 
-        for ROUNDTTT in 2 3 4 6 9 16 25 36 64 100; do
-
-                # The NIC is to be configured if this file does not exist.
-                # Ip-Config tries to create this file and when it succeds
-                # creating the file, ipconfig is not run again.
-                if [ -e /tmp/net-"${DEVICE}".conf ]; then
-                        break;
-                fi
-
-            case ${IP} in
-		    none|off)
-			# Do nothing
-			;;
-		    ""|on|any)
+# support ip options see linux sources
+# Documentation/filesystems/nfsroot.txt
+# Documentation/frv/booting.txt
+for ROUNDTTT in 2 3 4 6 9 16 25 36 64 100; do
+	# The NIC is to be configured if this file does not exist.
+	# Ip-Config tries to create this file and when it succeds
+	# creating the file, ipconfig is not run again.
+	if [ -e /tmp/net-"${DEVICE}".conf ]; then
+		break;
+	fi
+	case ${IP} in
+		none|off)
+			return 0
+		;;
+		""|on|any)
 			# Bring up device
-			echo "Setting $DEVICE with kernel params $IP: ipconfig -t ${ROUNDTTT} ${DEVICE} "
+			echo "Setting $DEVICE  with option:on|any and Variable IP= $IP: ipconfig -t ${ROUNDTTT} ${DEVICE} "
 			ipconfig -t ${ROUNDTTT} ${DEVICE}
-			;;
-		    dhcp|bootp|rarp|both)
-			echo "Setting $DEVICE with (dhcp) kernel params $IP: ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE} "
+		;;
+		dhcp|bootp|rarp|both)
+			echo "Setting $DEVICE with option:dhcp|bootp|rarp|both and Variable IP=  $IP: ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE} "
 			ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE}
-			;;
-		    *)
-			echo "Setting $DEVICE with kernel params $IP: ipconfig -t ${ROUNDTTT} -d $IP  "
+		;;
+		*)
+			echo "Setting $DEVICE with option *  and Variable IP= $IP: ipconfig -t ${ROUNDTTT} -d $IP  "
 			ipconfig -t ${ROUNDTTT} -d $IP
-
 			# grab device entry from ip option
 			NEW_DEVICE=${IP#*:*:*:*:*:*}
 			if [ "${NEW_DEVICE}" != "${IP}" ]; then
@@ -322,18 +369,23 @@ IP=$IPOPTS
 			if [ -n "${NEW_DEVICE}" ]; then
 				DEVICE="${NEW_DEVICE}"
 			fi
-			;;
-               esac
-        done
+		;;
+	esac
+done
 
-        # source ipconfig output
-        if [ -n "${DEVICE}" ]; then
-                # source specific bootdevice
-                . /tmp/net-${DEVICE}.conf
-        else
-                # source any interface as not exaclty specified
-                . /tmp/net-*.conf
-        fi
+# source ipconfig output
+if [ -n "${DEVICE}" ]; then	
+    . /tmp/net-${DEVICE}.conf
+    DEVICECFG="/tmp/net-${DEVICE}"
+	export DEVICECFG
+	export DEVICE
+	echo "DEVICE=$DEVICE" >> $CFGINITRD
+	echo "DEVICECFG=$DEVICECFG" >> $CFGINITRD
+	echo "exportando variable DEVICE con valor = $DEVICE y el DEVICECFG con valor $DEVICECFG"    
+else
+    # source any interface as not exaclty specified
+    . /tmp/net-*.conf
+fi
 }
 
    #####################################################################

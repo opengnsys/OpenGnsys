@@ -7,4 +7,15 @@ echo -e >>  $OGLOGFILE
 echo -e >>  $OGLOGFILE
 echo "Salida: *****************************" >>  $OGLOGFILE
 chmod +x $1
-$1 &>> $OGLOGFILE || exit $?
+$1 &>> $OGLOGFILE
+RETVAL=$?
+echo $RETVAL &>> $OGLOGFILE
+
+if [ $RETVAL == 0 ]
+then
+	rm $OGLOGFILE
+	touch $OGLOGFILE
+else
+	echo $RETVAL &>> $OGLOGFILE
+fi
+exit $RETVAL

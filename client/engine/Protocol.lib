@@ -853,7 +853,7 @@ then
 	case "$MODE" in
         peer|PEER)
         	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
-            ctorrent -f -X "sleep 15; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf >> $OGLOGFILE
+            ctorrent -f -X "sleep 15; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf 
         ;;
         leecher|LEECHER)
            	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
@@ -969,64 +969,66 @@ if [ "$*" == "help" ]; then
     return
 fi
 
+#TODO:  return 0->true, 1->false; si error, aunque sintaxis devuelve > 1
+
 # Error si no se reciben los argumentos ARG necesarios segÃºn la opcion.
-[ $# == "2" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
+#[ $# == "2" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
+#ogCheckStringInGroup "$1" "REPO repo" || ogRaiseError $OG_ERR_FORMAT "El contendor $1 no es valido, solo se admite REPO" || return $?
+
+[ $# == "2" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
 
-ogCheckStringInGroup "$1" "REPO repo" || ogRaiseError $OG_ERR_FORMAT "El contendor $1 no es valido, solo se admite REPO" || return $?
+FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
-FILESOURCE=`ogGetPath $1 $2`
+#echo "paso 1. si no existe la imagen, confirmamos que es necesaria la actualizacion de la cache."
 FILETARGET=`ogGetPath CACHE $2`
-
-echo "paso 1. si no existe la imagen, confirmamos que es necesaria la actualizacion de la cache."
 if [ -z $FILETARGET ]
 then
 	# borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
 	ogDeleteFile CACHE /$2.torrent.bf &> /dev/null
 	ogDeleteFile CACHE /$2.sum &> /dev/null
-	echo "Salida con valor 0, paso 1, la cache no contiene esa imagen "
+	echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
 	return 0 
 fi
-echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
+
+#echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
 if ogGetPath $FILETARGET.torrent.bf  > /dev/null
 then
-    echo "Salida con valor 0, paso 2 la imagen esta en un estado de descarga torrent interrumpido."
     #TODO: comprobar los md5 para asegurarnos que la imagen es la misma.
+    echo "TRUE=0, es necesario actualizar. Paso 2, la imagen esta en un estado de descarga torrent interrumpido"
     return 0
 fi
 
+
 ## En este punto la imagen en el repo y en la cache se llaman igual, 
-echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
+#echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
 if [ -f $FILESOURCE.sum ]
 then
-	echo "leyendo el sum del fichero sum del repo"
+	#	echo "leyendo el sum del fichero sum del repo"
 	MD5SOURCE=$(cat $FILESOURCE.sum)
-#elif [ -f $FILETARGET.torrent ]
-#then
-#	echo "leyendo el sum del fichero torrent de la cache"
-#	MD5SOURCE=$(ctorrent -x $FILETARGET.torrent | grep Comment | awk -F": " '{print $2}')
 else
-	echo "calculando el sun del repo"
+	#	echo "calculando el sun del repo"
 	MD5SOURCE=$(md5sum $FILESOURCE | cut -f1 -d" ") 
 fi
 if [ -f $FILETARGET.sum ]
 then
-	echo "leyendo el sum de la cache"
+	#echo "leyendo el sum de la cache"
 	MD5TARGET=$(cat $FILETARGET.sum)
 else
-	echo "calculando el sum de la cache"
+	#echo "calculando el sum de la cache"
 	md5sum $FILETARGET | cut -f1 -d" " > $FILETARGET.sum
 	MD5TARGET=$(cat $FILETARGET.sum)	
 fi
 
-echo "Paso 5. comparamos los md5"
+#echo "Paso 5. comparamos los md5"
 #TODO: que hacer cuando los md5 son distintos. Por defecto borrar.
 if [ "$MD5SOURCE" == "$MD5TARGET" ]
 then
-	echo "paso5.A la imagen esta en cache"
+	echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
 	return 1
 else
-    echo "paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
+    echo "TRUE=0, Si es necesario actualizar. paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
 	rm $FILETARGET
 	return 0
 fi

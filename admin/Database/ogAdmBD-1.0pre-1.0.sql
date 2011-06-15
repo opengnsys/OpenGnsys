@@ -1,11 +1,8 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
--- Base de datos: `ogBDAdmin`
+-- Base de datos: `ogAdmBD`
 --
-
-
-
 
 
 ALTER TABLE `aulas` CHANGE `modp2p` `modp2p` ENUM( 'seeder', 'peer', 'leecher' ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'peer';

@@ -68,9 +68,21 @@ case "$TYPE" in
         [ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
         # Activar la partición y copiar Grub4DOS.
         ogSetPartitionActive $1 $2
-        cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
-        #kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
-        kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
+        #FIXME: activar seguimiento inicio sesion XP con grub4dos
+		#if `ogGetOsVersion $1 $2 | grep "XP" > /dev/null`
+        #then 
+        #	dd if=/dev/zero of=${MNTDIR}/ogboot.me  bs=1024 count=3
+        #	dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot  bs=1024 count=3
+        #	dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot  bs=1024 count=3         
+        #	ogLoadHiveWindows $1 $2
+		#	ogHiveNTRunMachine "cmd /c del c:\ogboot.* "  ogcleanboot
+		#	ogUpdateHiveWindows
+		#	reboot
+        #else        
+        	cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
+        	##kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
+        	kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
+		#fi
         ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
         return $?
@@ -79,54 +91,6 @@ esac
 
 # Arrancar.
 kexec -e
-}
-
-
-#/**
-#         ogGetRegistryValue path_mountpoint str_registrytype str_valuename
-#@brief   Devuelve el dato de un valor del registro de Windows.
-#@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_registrytype tipo de registro a leer
-#@param   str_valuename    valor de registro
-#@return  str_valuedata - valor de la clave.
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@note    registrytype = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
-#@version 0.9 - Adaptación para OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-11
-#*/ ##
-function ogGetRegistryValue ()
-{
-# Variables locales.
-local FILE FILENT FILEXP
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_registrytype str_key"
-    return
-fi
-# Error si no se reciben 3 parámetros.
-[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
-
-# Devolver el dato del valor de registro.
-# /* (comentario Doxygen)
-chntpw $FILE << FIN 2>/dev/null | awk '/> Value/ {getline;print $0;}'
-cd ${3%\\*}
-cat ${3##*\\}
-q
-FIN
-# (comentario Doxygen) */
 }
 
 
@@ -163,51 +127,6 @@ MNTDIR=$(ogMount $1 $2) 2>/dev/null
 
 # Obtener dato del valor de registro.
 ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName'
-}
-
-
-#/**
-#         ogListRegistryKeys path_mountpoint str_registrytype str_key
-#@brief   Lista los nombres de claves de una determinada clave del registro de Windows.
-#@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_registrytype tipo de registro a leer
-#@param   str_key          clave de registro
-#@return  str_key ... - lista de claves de registro
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@note    registrytype = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
-#@version 0.9 - Adaptación para OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-23
-#*/ ##
-function ogListRegistryKeys ()
-{
-# Variables locales.
-local FILE FILENT FILEXP
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_registrytype str_key"
-    return
-fi
-# Error si no se reciben 3 parámetros.
-[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
-
-# Devolver la lista de claves de registro.
-chntpw $FILE << FIN 2>/dev/null | awk 'BEGIN {FS="[<>]"} $1~/^  $/ {print $2}'
-ls $3
-q
-FIN
 }
 
 
@@ -270,55 +189,6 @@ awk 'BEGIN {cont=-1;}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}
     ' $CONFFILE
 # */ (comentario Doxygen)
-}
-
-
-
-#/**
-#         ogSetRegistryValue path_mountpoint str_registrytype str_valuename str_valuedata
-#@brief   Establece el dato asociado a un valor del registro de Windows.
-#@param   path_mountpoint  directorio donde está montado el sistema Windows
-#@param   str_registrytype tipo de registro
-#@param   str_valuename    nombre del valor de registro
-#@param   str_valuedata    dato del valor de registro
-#@return  (nada)
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositivo.
-#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@note    registrytype = { default, sam, security, software, system, components }
-#@warning Requisitos: chntpw, awk
-#@warning La partición de Windows debe estar montada previamente.
-#@version 0.9 - Adaptación para OpenGNSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-24
-#*/ ##
-function ogSetRegistryValue ()
-{
-# Variables locales.
-local FILE FILENT FILEXP
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_registrytype str_key"
-    return
-fi
-# Error si no se reciben 4 parámetros.
-[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
-
-# Cambiar el dato del valor de registro.
-chntpw $FILE << FIN &>/dev/null
-ed $3
-$4
-q
-y
-FIN
 }
 
 
@@ -403,7 +273,7 @@ ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows NT\CurrentVersion\Winlog
 
 
 #/**
-#         ogNewMbrXP int_ndisk
+#         ogBootMbrXP int_ndisk
 #@brief   Genera un nuevo Master Boot Record en el disco duro indicado, compatible con los SO tipo Windows
 #@param   int_ndisk      nº de orden del disco
 #@return  salida del programa my-sys
@@ -414,7 +284,7 @@ ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows NT\CurrentVersion\Winlog
 #@date    2009-09-24
 #*/ ##
 
-function ogNewMbrXP ()
+function ogBootMbrXP ()
 {
 # Variables locales.
 local PART
@@ -433,3 +303,279 @@ ms-sys -z -f $PART
 ms-sys -m -f $PART
 }
 
+
+#/**
+#         ogBootMbrGeneric int_ndisk
+#@brief   Genera un nuevo Codigo de arranque en el MBR del disco indicado, compatible con los SO tipo Windows, Linux.
+#@param   int_ndisk      nº de orden del disco
+#@return  salida del programa my-sys
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+function ogBootMbrGeneric ()
+{
+# Variables locales.
+local PART
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk " \
+           "$FUNCNAME 1 "
+    return
+fi
+# Error si no se reciben 1 parámetros.
+[ $# == 1 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?) 
+
+PART="$(ogDiskToDev $1)" || return $(ogRaiseError $OG_ERR_NOTFOUND; echo $?)
+ms-sys -z -f $PART
+ms-sys -s -f $PART
+}
+
+
+
+
+#/**
+#         ogFixBootSector int_ndisk int_parition
+#@brief   Corrige el boot sector de una particion activa para MS windows/dos -fat-ntfs
+#@param   int_ndisk      nº de orden del disco
+#@param   int_partition     nº de particion
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+function ogFixBootSector ()
+{
+# Variables locales.
+local PART DISK FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+#TODO, solo si la particion existe
+#TODO, solo si es ntfs o fat
+PARTYPE=$(ogGetPartitionId $1 $2) 
+case $PARTYPE in
+	1|4|6|7|b|c|e|f)
+	;;
+	*)
+	return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+	;;
+esac
+
+ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+
+#Preparando instruccion	
+let DISK=$1-1	
+PART=$2
+FILE=/tmp/temporal
+cat > $FILE <<EOF
+disk=$DISK
+main_part=$PART
+fix_first_sector=yes
+EOF
+
+spartlnx.run -cui -nm -a -f $FILE
+
+}
+
+
+
+#/**
+#         ogWindowsBootParameters int_ndisk int_parition
+#@brief   Configura el gestor de arranque de windows 7 / vista / XP / 2000
+#@param   int_ndisk      nº de orden del disco
+#@param   int_partition     nº de particion
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Integración desde EAC para OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#@version 1.0.1 - Adapatacion para OpenGnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2011-05-20
+#*/ ##
+
+
+function ogWindowsBootParameters ()
+{
+# Variables locales.
+local PART DISK FILE
+#Preparando variables adaptadas a sintaxis windows.
+let DISK=$1-1
+PART=$2	
+FILE=/tmp/temporal
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+
+VERSION=$(ogGetOsVersion $1 $2)
+
+if echo "$VERSION" | grep "Windows 7"
+then
+	WINVER="Windows 7"
+elif echo "$VERSION" | grep "Windows Seven"
+then 
+	WINVER="Windows Vista"
+elif echo "$VERSION" | grep "XP"
+then
+	MOUNT=$(ogMount $1 $2)
+	[ -f ${MOUNT}/boot.ini ] || return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+	cat ${MOUNT}/boot.ini | sed s/partition\([0-9]\)/partition\($PART\)/g | sed s/rdisk\([0-9]\)/rdisk\($DISK\)/g > ${MOUNT}/tmp.boot.ini; mv ${MOUNT}/tmp.boot.ini ${MOUNT}/boot.ini
+	return 0
+else
+	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+fi
+
+ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
+
+
+#Preparando instruccion	Windows Resume Application
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Windows Resume Application
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	tipo windows
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=$WINVER
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+##Preparando instruccion	Ramdisk Options
+#cat > $FILE <<EOF
+#boot_disk=$DISK
+#boot_main_part=$PART
+#disk=$DISK
+#main_part=$PART
+#boot_entry=Ramdisk Options
+#EOF
+#spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	Windows Boot Manager
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Windows Boot Manager
+EOF
+spartlnx.run -cui -nm -w -f $FILE
+
+#Preparando instruccion	Herramienta de diagnóstico de memoria de Windows
+#cat > $FILE <<EOF
+#boot_disk=$DISK
+#boot_main_part=$PART
+#disk=$DISK
+#main_part=$PART
+#boot_entry=Herramienta de diagnóstico de memoria de Windows
+#EOF
+#spartlnx.run -cui -nm -w -f $FILE
+
+}
+	
+
+#         ogWindowsRegisterPartition int_ndisk int_partiton str_volume int_disk int_partition
+#@brief   Registra una partición en windows con un determinado volumen.
+#@param   int_ndisk      nº de orden del disco a registrar
+#@param   int_partition     nº de particion a registrar
+#@param   str_volumen      volumen a resgistar
+#@param   int_ndisk_windows      nº de orden del disco donde esta windows
+#@param   int_partition_windows     nº de particion donde esta windows
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 0.9 - Adaptación a OpenGNSys.
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2009-09-24
+#*/ ##
+
+
+function ogWindowsRegisterPartition ()
+{	
+# Variables locales.
+local PART DISK FILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk_TO_registre int_partition_TO_registre str_NewVolume int_disk int_parition " \
+           "$FUNCNAME 1 1 c: 1 1"
+    return
+fi
+
+# Error si no se reciben 5 parámetros.
+[ $# == 5 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+REGISTREDDISK=$1
+REGISTREDPART=$2
+REGISTREDVOL=$(echo $3 | cut -c1 | tr '[:lower:]' '[:upper:]')
+DISK=$4
+PART=$5
+FILE=/tmp/temporal
+
+ogDiskToDev $REGISTREDDISK $REGISTREDPART || return $(ogRaiseError $OG_ERR_PARTITION "particion a registrar "; echo $?)
+ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows"; echo $?)
+
+ogGetOsType $DISK $PART | grep "Windows" || return $(ogRaiseError $OG_ERR_NOTOS "no es windows"; echo $?)
+
+VERSION=$(ogGetOsVersion $DISK $PART)
+
+#Systemroot
+
+if ogGetPath $DISK $PART WINDOWS
+then
+	SYSTEMROOT="Windows"
+elif ogGetPath $DISK $PART WINNT
+then 
+	SYSTEMROOT="winnt"
+else
+	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+fi
+
+ogUnmount $DISK $PART
+let DISK=$DISK-1
+let REGISTREDDISK=$REGISTREDDISK-1
+#Preparando instruccion	Windows Boot Manager
+cat > $FILE <<EOF
+windows_disk=$DISK
+windows_main_part=$PART
+windows_dir=$SYSTEMROOT
+disk=$REGISTREDDISK
+main_part=$REGISTREDPART
+;ext_part
+part_letter=$REGISTREDVOL
+EOF
+spartlnx.run -cui -nm -u -f $FILE
+}

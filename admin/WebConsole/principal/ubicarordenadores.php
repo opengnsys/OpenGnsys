@@ -191,10 +191,10 @@ while (!$rsmenu->EOF)
 	echo "<td> ";
 	echo $rsmenu->campos['nombregrupoordenador'];
 	echo " <br>";
-    echo "<input type='button' onClick='move(this.form.L" . $rsmenu->campos['nombregrupoordenador'] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
- 	echo "<input type='button' onClick='move(this.form.Lpxe,this.form.L" . $rsmenu->campos['nombregrupoordenador'] .")' value='IN' style='height: 25px; width: 35px' >";
+    echo "<input type='button' onClick='move(this.form.L" . $rsmenu->campos['idgrupo'] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
+ 	echo "<input type='button' onClick='move(this.form.Lpxe,this.form.L" . $rsmenu->campos['idgrupo'] .")' value='IN' style='height: 25px; width: 35px' >";
  	echo " <br>";
-	echo "<select multiple size='30' name='L" . $rsmenu->campos['nombregrupoordenador'] . "' style='width:100'>";
+	echo "<select multiple size='30' name='L" . $rsmenu->campos['idgrupo'] . "' style='width:100'>";
     $listadogrupo="";
 	#$listadogrupo=listaequipos($cmd,$rsmenu->campos['idgrupo'],$seleccion);
 	$listadogrupo=ListaEquiposGrupo($cmd,$rsmenu->campos['idaula'],$rsmenu->campos['idgrupo']);

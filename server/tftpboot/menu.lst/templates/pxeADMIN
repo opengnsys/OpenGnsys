@@ -1,0 +1,38 @@
+default saved
+timeout 1
+hiddenmenu
+fallback 1 2 3
+
+title firsboot
+find --set-root --ignore-floppies --ignore-cd /ogboot.me
+cmp /ogboot.me /ogboot.firstboot || ls FALLBACK
+write /ogboot.firstboot iniciado
+chainloader +1
+savedefault fallback
+boot
+
+title secondboot
+find --set-root --ignore-floppies --ignore-cd /ogboot.me
+cmp /ogboot.me /ogboot.secondboot || ls FALLBACK
+write /ogboot.secondboot iniciado
+chainloader +1
+savedefault fallback
+boot
+
+title OpenGnsys-CACHE
+find --set-root --ignore-floppies --ignore-cd /boot/ogvmlinuz
+kernel /boot/ogvmlinuz ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true INFOHOST
+initrd /boot/oginitrd.img
+savedefault fallback
+boot
+
+title OpenGnsys-NET
+keeppxe
+kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true INFOHOST 
+initrd (pd)/ogclient/oginitrd.img
+boot
+
+
+
+
+

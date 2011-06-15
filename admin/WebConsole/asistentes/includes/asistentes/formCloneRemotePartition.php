@@ -30,7 +30,7 @@
 		Elige herramienta de clonacion:
 		<select name="tool" id="tool" style="WIDTH:220";">
 			<option value="partclone"> partclone </option>
-			<option value="partimage"> partimage </option>
+		<!--	<option value="partimage"> partimage </option> -->
 		</select>
 		<br />
 		Elige compresor para la herramienta de clonacion:

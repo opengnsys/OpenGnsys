@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#_______________________________________________________________________________________________________________________________
+#______________________________________
 #
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE
 # $1 modo  (admin, user)
-#_______________________________________________________________________________________________________________________________
+#______________________________________
 
 # Error si llamada no se realliza desde OpenGnSys Client.
 PROG=$(basename $0)
@@ -14,7 +14,7 @@ if [ "$CALLER" != "CrearImagen" -a "$CALLER" != "ConsolaRemota" ]; then
     exit $?
 fi
 
-# Salir si el repositorio est· bloquedo (tiene ficheros abiertos).
+# Salir si el repositorio est√° bloquedo (tiene ficheros abiertos).
 REPOIP=$(ogGetRepoIp)
 if [ -z "$REPOIP" ]; then
 	ogRaiseError $OG_ERR_NOTFOUND "repo no montado"

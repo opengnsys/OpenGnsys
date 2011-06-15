@@ -67,14 +67,14 @@ $rs->Primero();
 	$router=$rs->campos["router"];
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
-	$infohost=" IP=" 
+	$infohost="ip=" 
 			. $ip . ":"
 			. $repo .":" 
 			. $router . ":" 
 			. $netmask .":" 
 			. $hostname .":" 
-			. $netiface . ":none repo="
-			. $repo; 
+			. $netiface . ":none";  # repo="
+			#. $repo; 
 $rs->Cerrar();
 
 ###################obtenemos las variables de red del aula.
@@ -84,89 +84,12 @@ $rs->Cerrar();
 	$macfile="01-" . str_replace(":","-",strtoupper($mac));	
 	$nombre_archivo="/var/lib/tftpboot/menu.lst/" . $macfile;
 
+#controlar optboot
 
-########## Escribimos el fichero mac
-if (!$gestion=fopen($nombre_archivo, 'w+')) 
-{
-	echo "No se puede abrir el archivo ($nombre_archivo)";
-	return;
-}	
-# cuales son los parametros del menu
-fwrite($gestion, "color white/blue black/light-gray \n");
-
-
-$cmd->texto="SELECT itemboot.label, itemboot.kernel, 
-			itemboot.append, menuboot.timeout, menuboot.prompt,
-			 menuboot.description, menuboot_itemboot.default 
-			From itemboot,menuboot_itemboot,menuboot 
-			WHERE menuboot_itemboot.labelmenu=menuboot.label 
-			AND menuboot_itemboot.labelitem=itemboot.label 
-			AND menuboot.label='" . $optboot   . "'";
- 
-$rs->Comando=&$cmd; 
-if (!$rs->Abrir()) echo "error";
-$rs->Primero(); 
-while (!$rs->EOF)
-{ 
-		fwrite($gestion, " \n");     
-		fwrite($gestion, "LABEL " .  $rs->campos['label'] . " \n");
-		fwrite($gestion, "MENU LABEL " . $rs->campos['label'] . " \n");
-		#if ( $rs->campos["default"] == true)
-		#{
-		#	fwrite($gestion, "MENU DEFAULT \n");
-		#}
-		
-		
-		# set netmask cird para ogclient
-		$isogclient=substr_count($rs->campos["label"] , "og");
-		if ($isogclient > 0)
-		{
-			$netmask=$netmask;
-			$kernel=$rs->campos["kernel"];
-			$append=$rs->campos["append"];
-			fwrite($gestion,"keeppxe \n");
-			fwrite($gestion, $rs->campos["kernel"] . " " .  $infohost . " \n");
-			fwrite($gestion, $rs->campos["append"] . " \n"); 
-			fwrite($gestion,"savedefault \n");
-			fwrite($gestion,"boot \n");
-					
-          #  fwrite($gestion,"APPEND keeppxe --config-file='pxe detect; default 0; timeout 0; hiddenmenu; title cache; fallback 1; find --set-root /boot/ogvmlinuz; kernel /boot/ogvmlinuz ro boot=oginit vga=788 irqpoll acpi=on " . $infohost . " ogprotocol=smb og2nd=sqfs ; initrd /boot/oginitrd.img; boot; title net; kernel (pd)/ogclient/vmlinuz ro boot=oginit vga=788 irqpoll acpi=on " . $infohost . " ogprotocol=smb og2nd=sqfs; initrd (pd)/ogclient/oginitrd.img; boot' \n");
-		#	keeppxe
-		#	kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true  IP=172.17.9.204:172.17.9.249:172.17.9.254:255.255.255.0:cte204:eth0:none repo=172.17.9.249
-		#	initrd (pd)/ogclient/oginitrd.img
-		#	savedault
-		#	boot
-			
-			
-		}	
-		else
-		{
-			$netmask=netmask2cidr($netmask);
-			fwrite($gestion, $rs->campos["kernel"] . $return );
-			fwrite($gestion, $rs->campos["append"] . " \n"); 
-			
-		}
-
-		
-
-	
-
-	#	$prompt=$rs->campos["prompt"];
-	#	$timeout=$rs->campos["timeout"];
-
-		$rs->Siguiente();
-}
-$rs->Cerrar();
-
-			
-
-	fwrite($gestion, " \n");  
-	fwrite($gestion, "PROMPT " . $prompt ." \n");
-	fwrite($gestion, "TIMEOUT " . $timeout . " \n");
-	fwrite($gestion, " \n");  
-	fclose($gestion); 
-	exec("chown www-data:www-data /var/lib/tftpboot/pxelinux.cfg/". $macfile);
-	exec("chmod 777 /var/lib/tftpboot/pxelinux.cfg/". $macfile);
+	#exec("cp /var/lib/tftpboot/menu.lst/templates/". $optboot . " /var/lib/tftpboot/menu.lst/". $macfile);
+	exec("sed s/INFOHOST/".$infohost."/g /var/lib/tftpboot/menu.lst/templates/" . $optboot . " > /var/lib/tftpboot/menu.lst/" . $macfile);
+	exec("chown www-data:www-data /var/lib/tftpboot/menu.lst/". $macfile);
+	exec("chmod 777 /var/lib/tftpboot/menu.lst/". $macfile);
 	
 
 

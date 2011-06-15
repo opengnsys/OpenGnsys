@@ -165,11 +165,26 @@ $cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaul
 
 
 
-function htmlOPTION_images($cmd)
+function htmlOPTION_images($cmd,$ambito,$idambito)
 {
+if ($ambito == 4)
+{
+$subconsultarepo='SELECT DISTINCT idrepositorio from ordenadores where idaula=' . $idambito ;
+}
+if ($ambito == 8) 
+{
+$subconsultarepo='SELECT DISTINCT idrepositorio FROM  ordenadores where grupoid=' . $idambito ;
+}
+if ($ambito == 16)
+{
+$subconsultarepo='SELECT idrepositorio FROM  ordenadores where idordenador=' . $idambito ;
+}	
+	
+	
 	$SelectHtml="";
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
-				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio"; 
+				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio AND repositorios.idrepositorio=(" . $subconsultarepo . ")"; 
+	
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	
@@ -182,6 +197,11 @@ function htmlOPTION_images($cmd)
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();
+	}
+	else
+	{
+		$SelectHtml.='<option value=""> ERROR: Ambito con multiples Repositorios --</option>';
+	
 	}
 	return($SelectHtml);	
 }

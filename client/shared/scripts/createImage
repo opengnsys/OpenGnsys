@@ -1,6 +1,39 @@
 #!/bin/bash
-# createImage - Scirpt de ejemplo para crear una imagen de un sistema de archivos.
-# (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+
+#/**
+#         createImage
+#@brief   Scirpt de ejemplo para crear una imagen de un sistema de archivos.
+#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#@param 1 disco 
+#@param 2 particion 
+#@param 3 REPO|CACHE
+#@param 4 imagen
+#@return  
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
+#@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
+#@exception OG_ERR_NOTWRITE   # 14 error de escritura
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
+#@exception OG_ERR_REDUCEFS   # 17 error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS   # 18 Errror al expandir el sistema de archivos.
+#@note   
+#@todo: que hacer, si el tamaño de la cache es sufciente, pero no tiene espacio libre
+#@todo: que hacer, si hay una imagen con igual nombre en la cache
+#@version 1.0 - control de errores para el ogAdmServer
+#@author  
+#@date   2011-04-10
+#@version 1.0.1 - Fin de control de errores para el ogAdmServer
+#@author  
+#@date   2011-05-10
+ 
+#*/ ##
+
+# Test 1.  crear una imagen en un REPO sin espacio libre. 
+# test 2.  crear una imagen en un REPO en modo solo lectura.
+# test 3.  intentar crear una imagen en la cache de un equipo que no la disponga.
+# test 4.  crear una imagen en la Cache sin espacio sufiente. 
+# test 5.  intentar crear una imagen, en la que no se puede reducir el FS.
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -16,20 +49,22 @@ IMGEXT="img"
 
 # Si el repositorio es CACHE comprobamos que exista
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
-    if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTFOUND "CACHE"
-        exit $?
-    fi
+    ! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
 fi
 
 # Obtener información de los parámetros de entrada.
-PART=$(ogDiskToDev "$1" "$2") || exit $?
+PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || exit $(ogRaiseError $OG_ERR_PARTITION "$1 $2"; echo $?)
+
+#Comprobamos acceso de escritura.
+DIRTEMP=$(date +%Y%m%d-%H%M%S)
+ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3"; echo $?) && ogDeleteTree $3 /$4$DIRTEMP 
+
 IMGDIR=$(ogGetParentPath "$3" "/$4")
 # Si no existe, crear subdirectorio de la imagen.
 if [ $? != 0 ]; then
     echo "[5] Crear subdirectorio de la imagen \"$3 $(dirname "$4")."
-    ogMakeDir "$3" $(dirname "/$4")
-    IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $?
+    ogMakeDir "$3" $(dirname "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
+    IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
 fi
 IMGFILE=$IMGDIR/$(basename "/$4").$IMGEXT
 # Renombrar el fichero de imagen si ya existe.
@@ -38,24 +73,47 @@ if [ -f "$IMGFILE" ]; then
     mv "$IMGFILE" "$IMGFILE.ant"
     mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
 fi
+
+#Comprobar espacio que requerira la imagen para ser almacenada
+if ogMount $1 $2 &>/dev/null
+then
+	SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
+	#Aplicar factor de compresion
+	FACTORGZIP=55/100
+	FACTORLZOP=65/100
+	let SIZEREQUIRED=$SIZEDATA*$FACTORLZOP
+	#Comprobar espacio libre en el contenedor.
+	[ "$3" == "CACHE" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
+	[ "$3" == "REPO" ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $3}')
+else
+ 	ogRaiseError $OG_ERR_PARTITION "$1 $2"
+    exit $?
+fi	
+
 # Mostrar información.
 echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
+echo "[16] $PROG: TamañoRequerido=$SIZEREQUIRED EspacioDisponible=$SIZEFREE"
+
+[ "$SIZEREQUIRED" -gt "$SIZEFREE" ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
+
+
+# TODO: que hacer si la cache no tiene espacio libre.
 
 # Comprobar consistencia del sistema de archivos.
 echo "[20] Comprobar sistema de archivos."
 ogUnmount $1 $2
-ogCheckFs $1 $2
+ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
 
 echo "[30]: Reducir sistema de archivos."
-ogReduceFs $1 $2 || exit 1
+ogReduceFs $1 $2 || exit $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; echo $?)
 
 # Crear la imagen.
-echo "[40] Crear imagen."
-ogCreateImage $1 "$2" $3 $4 "$IMGPROG" "$IMGCOMP" || exit $?
-#ogCreateImage $1 "$2" $3 $4 || exit $?
+echo "[40] Crear imagen con: ogCreateImage $1 $2 $3 $4 $IMGPROG $IMGCOMP"
+ogCreateImage $1 "$2" $3 $4 "$IMGPROG" "$IMGCOMP" || exit $(ogRaiseError $OG_ERR_IMAGE "ogCreteImage"; echo $?)
 
 echo "[90] Extender sistema de archivos."
-ogExtendFs $1 $2
+ogExtendFs $1 $2 || exit $(ogRaiseError $OG_ERR_EXTENDFS "$1 $2"; echo $?)
+
 
 TIME=$[SECONDS-TIME1]
 echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"

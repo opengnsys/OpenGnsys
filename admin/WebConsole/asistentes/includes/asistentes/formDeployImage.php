@@ -1,22 +1,24 @@
 
-
+ Elige si solo quieres almacenar la imagen en la Cache - UpdateCache  <br>
+		<input type="radio" name="modo" value="deployImage" checked > deployImage (update+restore) <br>
+		<input type="radio" name="modo" value="updateCache" > updateCache (solo descarga) <br> 
+	
 <tr> <td> opciones basicas </td> <td> opciones multicast </td> <td> opciones torrent </td> <td> opciones unicast </td></tr>
 
 <tr>  
 	<td class="op_basic">
+	   
 	    Elige la particion del disco donde se restaurar la imagen:
 		<select name="idparticion" id="idparticion" style="WIDTH:220">
 				<option value="1"> 1 </option>
 				<option value="2"> 2 </option>
 				<option value="3"> 3 </option>
 		</select>
-	
-	<!--DIV donde se mostrara la respuesta AJAX sobre las particiones clonables del equipo-->
-		<div id="divListado"></div>
+		<br />
 	    Elige la imagen a distribuir:	
 		<select name="idimagen" id="idimagen" style="WIDTH:220">
 				<option value="">--Selecciona imagen --</option>
-				<?php echo ''. htmlOPTION_images($cmd) .'';   ?>
+				<?php echo ''. htmlOPTION_images($cmd,$ambito,$idambito) .'';   ?>
 		</select>		
 		<br />		
 	
@@ -26,6 +28,7 @@
 		<!--	<option value="UNICAST"> UNICAST </option> -->
 			<option value="TORRENT"> TORRENT </option>
 			<option value="MULTICAST"> MULTICAST </option>
+			<option value="UNICAST"> UNICAST </option>
 		</select>
 		<br />
 	</td>

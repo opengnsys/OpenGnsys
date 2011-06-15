@@ -57,7 +57,9 @@ else
 {
 	$cmd->CreaParametro("@grupo",$grupo,0);
 	$cmd->CreaParametro("@hostname",$hostname,0);
-	$cmd->texto="update ordenadores set grupoid=(Select idgrupo from gruposordenadores where nombregrupoordenador=@grupo) where nombreordenador=@hostname";
+	#$cmd->texto="update ordenadores set grupoid=(Select idgrupo from gruposordenadores where nombregrupoordenador=@grupo) where nombreordenador=@hostname";
+	$cmd->texto="update ordenadores set grupoid=@grupo where nombreordenador=@hostname";
+	
 }
 $cmd->Ejecutar();
 #Update ordenadores Set grupoid=(Select idgrupo From gruposordenadores Where nombregrupoordenador="subgrupo1") where nombreordenador="prueba1"

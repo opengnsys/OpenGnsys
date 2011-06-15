@@ -1,0 +1,61 @@
+DEFAULT syslinux/vesamenu.c32 
+PROMPT 0
+ 
+MENU TITLE Aplicacion OpenGnsys 
+MENU BACKGROUND opengnsys.png
+
+       
+
+
+LABEL title Boot MBR of First Hard Disk
+MENU LABEL title Boot MBR of First Hard Disk
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title  MBR; chainloader (hd0)+1; rootnoverify (hd0); boot;" 
+
+
+title Boot Partition Boot Sector - First Hard Disk, First Partition
+LABEL title Boot Partition Boot Sector - First Hard Disk, First Partition
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title  PBS11; root (hd0,0); chainloader (hd0,0)+1; boot;"
+
+title Boot Partition Boot Sector - First Hard Disk, Second Partition
+LABEL title Boot Partition Boot Sector - First Hard Disk, Second Partition
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title  PBS11; root (hd0,1); chainloader (hd0,1)+1; boot;"
+
+
+LABEL WindowsXP
+MENU LABEL WindowsXP
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title windowsXP; fallback 1; find --set-root --ignore-floppies /ntldr; chainloader /ntldr; boot; title net; kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false  IP=172.17.9.204:172.17.9.249:172.17.9.254:255.255.255.0:cte204:eth0:none repo=172.17.9.249; initrd (pd)/ogclient/oginitrd.img; boot"
+
+LABEL ogClientUser 
+MENU LABEL ogClientUser 
+KERNEL ogclient/ogvmlinuz 
+APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true  IP=172.17.9.204:172.17.9.249:172.17.9.254:255.255.255.0:cte204:eth0:none repo=172.17.9.249 
+
+
+
+
+LABEL DetectaWindowsXP
+MENU LABEL detectaWindowsXP
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title windowsXP; fallback 1; find --set-root --ignore-floppies /ogboot.me; chainloader /ntldr; boot; title net; kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true  IP=172.17.9.204:172.17.9.249:172.17.9.254:255.255.255.0:cte204:eth0:none repo=172.17.9.249; initrd (pd)/ogclient/oginitrd.img; boot"
+
+
+LABEL DetectaWindowsXP2
+MENU LABEL detectaWindowsXP2
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default saved; timeout 10; fallback 1 2;  title firsboot; find --set-root --ignore-floppies /ogboot.me; cmp /ogboot.me /ogfirstboot.me || ls FALLBACK; write /ogfirstboot.me iniciado ; chainloader /ntldr; savedefault fallback; boot; title secondboot; find --set-root --ignore-floppies /ogboot.me; cmp /ogboot.me /ogsecondboot.me || ls FALLBACK; write /ogsecondboot.me iniciado ; chainloader /ntldr; savedefault fallback; boot;  title OpenGnsys-NET; kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true  IP=172.17.9.204:172.17.9.249:172.17.9.254:255.255.255.0:cte204:eth0:none repo=172.17.9.249; initrd (pd)/ogclient/oginitrd.img; savedault; boot"
+
+
+
+LABEL IfNOTcacheGOnet
+MENU LABEL IfNOTcacheGOnet
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect; default 0; timeout 0; hiddenmenu; title cache; fallback 1; find --set-root /ogvmlinuz; kernel /ogvmlinuz ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on engine=testing ogrepo=172.17.36.11 ogprotocol=smb og2nd=sqfs; initrd /oginitrd; boot; title net; kernel (pd)/ogclient/vmlinuz-2.6.32-21-generic-pae ip=dhcp ro boot=oginit vga=788 irqpoll acpi=on engine=testing ogrepo=172.17.36.11 ogprotocol=nfs og2nd=sqfs; initrd (pd)/ogclient/initrd.img-2.6.32-21-generic-pae; boot"
+
+LABEL grub command line
+MENU LABEL command line
+KERNEL grub.exe
+APPEND keeppxe --config-file="pxe detect;"

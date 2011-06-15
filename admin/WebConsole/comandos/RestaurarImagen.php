@@ -147,7 +147,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 //	Devuelve:
 //		El código html de la tabla
 //________________________________________________________________________________________________________
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
+function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
 {
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
@@ -188,12 +188,13 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					//echo'<TD align=rigth>&nbsp;'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
 									
-					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true).'</TD>';
-					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false).'</TD>';
+					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
+					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
 						//Clonación
-					$metodos="1=UNICAST".chr(13);
-					$metodos.="2=MULTICAST".chr(13);
-					$metodos.="3=TORRENT";
+					
+					$metodos="UNICAST=UNICAST".chr(13);
+					$metodos.=mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST".chr(13);
+					$metodos.="TORRENT peer:60=TORRENT";
 					
 					$TBmetodos["UNICAST"]=1;
 					$TBmetodos["MULTICAST"]=2;
@@ -210,7 +211,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw)
+function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
 	$SelectHtml="";
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
@@ -220,7 +221,19 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw)
 	else
 		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;		
 		
-	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0"; // La imagene debe existir y estar creada	
+	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y estar creada	
+    
+	$idordenador1 = explode(",",$idordenadores);
+	$idordenador=$idordenador1[0];
+	if ($ambito == 16)
+		$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .") OR repositorios.ip=(select ip from ordenadores where ordenadores.idordenador=". $idordenador .")";
+    else 
+    	$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .")";
+    
+
+
+	//echo $cmd->texto;
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if($sw) $des=1; else $des=0;
@@ -266,4 +279,66 @@ function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion){
 	$rs->Cerrar();
 	return($SelectHtml);
 }
+
+
+function mcast_syntax($cmd,$ambito,$idambito)
+{
+//if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
+if ($ambito == 4) 
+{
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas where aulas.idaula=' . $idambito ;
+}
+
+if ($ambito == 8) 
+{
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
+}
+
+if ($ambito == 16)
+{
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
+}
+
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+if ($rs->Abrir()){
+		$rs->Primero(); 
+       	$mcastsyntax.='MULTICAST ' . $rs->campos["pormul"] . ':';
+        		
+		$rs->Siguiente();
+		switch ($rs->campos["modomul"]) 
+		{
+			case 1:
+			    $mcastsyntax.="half-duplex:";
+				break;
+			default:
+			    $mcastsyntax.="full-duplex:";
+				break;
+		} 			
+		$rs->Siguiente();
+		$mcastsyntax.=$rs->campos["ipmul"] . ':';
+		
+		$rs->Siguiente();
+		$mcastsyntax.=$rs->campos["velmul"] .'M:';
+		
+	$rs->Cerrar();
+	}
+	     	$mcastsyntax.="50:";
+			$mcastsyntax.="60";
+	return($mcastsyntax);	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ?>
