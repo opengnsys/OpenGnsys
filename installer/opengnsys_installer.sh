@@ -27,16 +27,6 @@ then
         exit 1
 fi
 
-# Detectar sistema operativo del servidor (debe soportar LSB).
-OSDISTRIB=$(lsb_release -is 2>/dev/null)
-# Array con las dependencias que deben estar instaladas, según de la distribución detectada.
-case "$OSDISTRIB" in
-	Ubuntu) DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql nfs-kernel-server dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
-		;;
-	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
-		exit 1 ;;
-esac
-
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 OPENGNSYS_SERVER="www.opengnsys.es"
@@ -58,26 +48,90 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 
 
 #####################################################################
+####### Funciones de configuración
+#####################################################################
+
+# Generar variables de configuración del instalador
+# Variables globales:
+# - OSDISTRIB, OSCODENAME - datos de la distribución Linux
+# - DEPENDENCIES - array de dependencias que deben estar instaladas
+# - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
+# - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
+# - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
+# - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
+# - TFTPCFGDIR - configuración de TFTP
+function autoConfigure()
+{
+# Detectar sistema operativo del servidor (debe soportar LSB).
+OSDISTRIB=$(lsb_release -is 2>/dev/null)
+OSCODENAME=$(lsb_release -cs 2>/dev/null)
+
+# Configuración según la distribución de Linux.
+case "$OSDISTRIB" in
+	Ubuntu)	DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+		UPDATEPKGLIST="apt-get update"
+		INSTALLPKG="apt-get -y install --force-yes"
+		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
+		APACHEINIT=/etc/init.d/apache2
+		APACHECFGDIR=/etc/apache2
+		APACHEUSER="www-data"
+		APACHEGROUP="www-data"
+		case "$OSCODENAME" in
+			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
+				DHCPCFGDIR=/etc/dhcp
+				;;
+			*)	DHCPINIT=/etc/init.d/dhcp3-server
+				DHCPCFGDIR=/etc/dhcp3
+				;;
+		esac
+		SAMBAINIT=/etc/init.d/smbd
+		SAMBACFGDIR=/etc/samba
+		TFTPCFGDIR=/var/lib/tftpboot
+		;;
+	Fedora)	DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		UPDATEPKGLIST=""
+		INSTALLPKG="yum install -y"
+		CHECKPKG="rpm -q \$package"
+		APACHEINIT=/etc/init.d/httpd
+		APACHECFGDIR=/etc/httpd/conf.d
+		APACHEUSER="apache"
+		APACHEGROUP="apache"
+		DHCPINIT=/etc/init.d/dhcpd
+		DHCPCFGDIR=/etc/dhcp
+		SAMBAINIT=/etc/init.d/smb
+		SAMBACFGDIR=/etc/samba
+		TFTPCFGDIR=/var/lib/tftpboot
+		;;
+	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
+		exit 1 ;;
+	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
+		exit 1 ;;
+esac
+}
+
+
+#####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
+
 function getDateTime()
 {
-        date "+%Y%m%d-%H%M%S"
+	date "+%Y%m%d-%H%M%S"
 }
 
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-        echo "$1"
-        FECHAHORA=`getDateTime`
-        echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
+	echo "$1"
+	local DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
 function errorAndLog()
 {
-        echo "ERROR: $1"
-        FECHAHORA=`getDateTime`
-        echo "$FECHAHORA;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
+	echo "ERROR: $1"
+	local DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
 # comprueba si el elemento pasado en $2 esta en el array $1
@@ -123,7 +177,7 @@ function checkPackage()
 		exit 1
 	fi
 	echoAndLog "${FUNCNAME}(): checking if package $package exists"
-	dpkg -s $package &>/dev/null | grep Status | grep -qw install
+	eval $CHECKPKG
 	if [ $? -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): package $package exists"
 		return 0
@@ -199,8 +253,8 @@ function installDependencies()
 	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 	export DEBIAN_FRONTEND=noninteractive
 
-	echoAndLog "${FUNCNAME}(): now ${string_deps} will be installed"
-	apt-get -y install --force-yes ${string_deps}
+	echoAndLog "${FUNCNAME}(): now $string_deps will be installed"
+	eval $INSTALLPKG $string_deps
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error installing dependencies"
 		return 1
@@ -219,25 +273,25 @@ function backupFile()
 		exit 1
 	fi
 
-	local fichero=$1
-	local fecha=`date +%Y%m%d`
+	local file="$1"
+	local dateymd=`date +%Y%m%d`
 
-	if [ ! -f $fichero ]; then
-		errorAndLog "${FUNCNAME}(): file $fichero doesn't exists"
+	if [ ! -f "$file" ]; then
+		errorAndLog "${FUNCNAME}(): file $file doesn't exists"
 		return 1
 	fi
 
-	echoAndLog "${FUNCNAME}(): realizando backup de $fichero"
+	echoAndLog "${FUNCNAME}(): making $file backup"
 
 	# realiza una copia de la última configuración como last
-	cp -p $fichero "${fichero}-LAST"
+	cp -a "$file" "${file}-LAST"
 
 	# si para el día no hay backup lo hace, sino no
-	if [ ! -f "${fichero}-${fecha}" ]; then
-		cp -p $fichero "${fichero}-${fecha}"
+	if [ ! -f "${file}-${dateymd}" ]; then
+		cp -a "$file" "${file}-${dateymd}"
 	fi
 
-	echoAndLog "${FUNCNAME}(): backup realizado"
+	echoAndLog "${FUNCNAME}(): $file backup success"
 }
 
 #####################################################################
@@ -369,6 +423,8 @@ function mysqlImportSqlFileToDb()
 	local database="$2"
 	local sqlfile="$3"
 	local tmpfile=$(mktemp)
+	local i=0
+	local dev=""
 	local status
 
 	if [ ! -f $sqlfile ]; then
@@ -376,10 +432,17 @@ function mysqlImportSqlFileToDb()
 		return 1
 	fi
 
-	echoAndLog "${FUNCNAME}(): importing sql file to ${database}..."
+	echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
 	chmod 600 $tmpfile
-	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-	    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
+	for dev in ${DEVICE[*]}; do
+		if [ "${SERVERIP[i]} == $DEFAULTDEV" ]; then
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
+			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+				$sqlfile > $tmpfile
+		fi
+		let i++
+	done
 	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $tmpfile
 	status=$?
 	rm -f $tmpfile
@@ -507,29 +570,39 @@ function checkNetworkConnection()
 # Obtener los parámetros de red de la interfaz por defecto.
 function getNetworkSettings()
 {
-	# Variables globales definidas:
-	# - SERVERIP: IP local del servidor.
-	# - NETIP:    IP de la red.
-	# - NETMASK:  máscara de red.
-	# - NETBROAD: IP de difusión de la red.
-	# - ROUTERIP: IP del router.
-	# - DNSIP:    IP del servidor DNS.
+	# Arrays globales definidas:
+	# - DEVICE:     nombres de dispositivos de red activos.
+	# - SERVERIP:   IPs locales del servidor.
+	# - NETIP:      IPs de redes.
+	# - NETMASK:    máscaras de red.
+	# - NETBROAD:   IPs de difusión de redes.
+	# - ROUTERIP:   IPs de routers.
+	# Otras variables globales:
+	# - DEFAULTDEV: dispositivo de red por defecto.
+	# - DNSIP:      IP del servidor DNS principal.
 
-	local MAINDEV
+	local i=0
+	local dev=""
 
-        echoAndLog "${FUNCNAME}(): Detecting default network parameters."
-	MAINDEV=$(ip -o link show up | awk '!/loopback/ {d=d$2} END {sub(/:.*/,"",d); print d}')
-	if [ -z "$MAINDEV" ]; then
-		errorAndLog "${FUNCNAME}(): Network device not detected."
+        echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}') )
+	if [ -z "$DEVICE" ]; then
+		errorAndLog "${FUNCNAME}(): Network devices not detected."
 		exit 1
 	fi
-	SERVERIP=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
-	NETMASK=$(LANG=C ifconfig $MAINDEV | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
-	NETBROAD=$(ip -o addr show dev $MAINDEV | awk '$3~/inet$/ {print ($6)}')
-	NETIP=$(netstat -nr | grep $MAINDEV | awk '$1!~/0\.0\.0\.0/ {if (n=="") n=$1} END {print n}')
-	ROUTERIP=$(netstat -nr | awk '$1~/0\.0\.0\.0/ {print $2}')
+	for dev in ${DEVICE[*]}; do
+		SERVERIP[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+		if [ -n "${SERVERIP[i]}" ]; then
+			NETMASK[i]=$(LANG=C ifconfig $dev | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
+			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
+			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
+			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
+			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
+			let i++
+		fi
+	done
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
-	if [ -z "$NETIP" -o -z "$NETMASK" ]; then
+	if [ -z "${NETIP}[*]" -o -z "${NETMASK[*]}" ]; then
 		errorAndLog "${FUNCNAME}(): Network not detected."
 		exit 1
 	fi
@@ -537,11 +610,11 @@ function getNetworkSettings()
 	# Variables de ejecución de Apache
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
+	if [ -f $APACHECFGDIR/envvars ]; then
+		source $APACHECFGDIR/envvars
 	fi
-	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
+	APACHE_RUN_USER=${APACHE_RUN_USER:-"$APACHEUSER"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
 }
 
 
@@ -551,18 +624,16 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        local basetftp=/var/lib/tftpboot
-
         echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -ar /usr/lib/syslinux/ ${basetftp}/syslinux
-        cp -a /usr/lib/syslinux/pxelinux.0 ${basetftp}
+        cp -ar /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
+        cp -a /usr/lib/syslinux/pxelinux.0 $TFTPCFGDIR
         # prepamos el directorio de la configuracion de pxe
-        mkdir -p ${basetftp}/pxelinux.cfg
-        cat > ${basetftp}/pxelinux.cfg/default <<EOF
+        mkdir -p $TFTPCFGDIR/pxelinux.cfg
+        cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
 DEFAULT syslinux/vesamenu.c32 
 MENU TITLE Aplicacion GNSYS 
  
@@ -591,122 +662,20 @@ function testPxe ()
 
 
 ########################################################################
-## Configuracion servicio NFS
-########################################################################
-
-# ADVERTENCIA: usa variables globales NETIP y NETMASK!
-function nfsConfigure()
-{
-	echoAndLog "${FUNCNAME}(): Config nfs server."
-
-	backupFile /etc/exports
-
-	nfsAddExport /opt/opengnsys/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding nfs client config"
-		return 1
-	fi
-
-	nfsAddExport /opt/opengnsys/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding nfs images config"
-		return 1
-	fi
-
-	nfsAddExport /opt/opengnsys/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding logging client config"
-		return 1
-	fi
-
-	nfsAddExport /var/lib/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the pxe ogclient"
-		return 1
-	fi
-
-	/etc/init.d/nfs-kernel-server restart
-
-	exportfs -va
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configure exports"
-		return 1
-	fi
-
-	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
-	return 0
-}
-
-
-# ejemplos:
-#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
-#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
-#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
-function nfsAddExport()
-{
-	if [ $# -lt 2 ]; then
-		errorAndLog "${FUNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
-
-	if [ ! -f /etc/exports ]; then
-		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
-		return 1
-	fi
-
-	local export="${1}"
-	local contador=0
-	local cadenaexport
-
-	grep "^${export}" /etc/exports > /dev/null
-	if [ $? -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
-		return 0
-	fi
-
-	cadenaexport="${export}"
-	for parametro in $*
-	do
-		if [ $contador -gt 0 ]
-		then
-			host=`echo $parametro | awk -F: '{print $1}'`
-			options=`echo $parametro | awk -F: '{print $2}'`
-			if [ "${host}" == "" ]; then
-				errorAndLog "${FUNCNAME}(): host can't be empty"
-				return 1
-			fi
-			cadenaexport="${cadenaexport}\t${host}"
-
-			if [ "${options}" != "" ]; then
-				cadenaexport="${cadenaexport}(${options})"
-			fi
-		fi
-		let contador=contador+1
-	done
-
-	echo -en "$cadenaexport\n" >> /etc/exports
-
-	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
-
-	return 0
-}
-
-
-########################################################################
 ## Configuracion servicio Samba
 ########################################################################
 function smbConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Configuring Samba service."
 
-	backupFile /etc/samba/smb.conf
+	backupFile $SAMBACFGDIR/smb.conf
 	
 	# Copiar plantailla de recursos para OpenGnSys
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
-		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/samba/smb-og.conf
+		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
-	/etc/init.d/smbd restart
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" $SAMBACFGDIR/smb.conf
+	$SAMBAINIT restart
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
@@ -727,28 +696,31 @@ function dhcpConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
 
-	local DHCPSERVER=/etc/init.d/isc-dhcp-server
-	DHCPCONFIG=/etc/dhcp/dhcpd.conf
-	if [ ! -x $DHCPSERVER ]; then
-		DHCPSERVER=/etc/init.d/dhcp3-server
-		DHCPCONFIG=/etc/dhcp3/dhcpd.conf
-	fi
-	backupFile $DHCPCONFIG
+	local errcode=0
+	local i=0
+	local dev=""
 
-	sed -e "s/SERVERIP/$SERVERIP/g" \
-	    -e "s/NETIP/$NETIP/g" \
-	    -e "s/NETMASK/$NETMASK/g" \
-	    -e "s/NETBROAD/$NETBROAD/g" \
-	    -e "s/ROUTERIP/$ROUTERIP/g" \
-	    -e "s/DNSIP/$DNSIP/g" \
-	    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCONFIG
-	if [ $? -ne 0 ]; then
+	backupFile $DHCPCFGDIR/dhcpd.conf
+	for dev in ${DEVICE[*]}; do
+		if [ -n "${SERVERIP[$i]}" ]; then
+			backupFile $DHCPCFGDIR/dhcpd-$dev.conf
+			sed -e "s/SERVERIP/${SERVERIP[$i]}/g" \
+			    -e "s/NETIP/${NETIP[$i]}/g" \
+			    -e "s/NETMASK/${NETMASK[$i]}/g" \
+			    -e "s/NETBROAD/${NETBROAD[$i]}/g" \
+			    -e "s/ROUTERIP/${ROUTERIP[$i]}/g" \
+			    -e "s/DNSIP/$DNSIP/g" \
+			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCFGDIR/dhcpd-$dev.conf || errcode=1
+		fi
+		let i++
+	done
+	if [ $errcode -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configuring DHCP server"
 		return 1
 	fi
-
-	$DHCPSERVER restart
-        echoAndLog "${FUNCNAME}(): Sample DHCP configured in file \"$DHCPCONFIG\"."
+	ln -f $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
+	$DHCPINIT restart
+	echoAndLog "${FUNCNAME}(): Sample DHCP configured in \"$DHCPCFGDIR\"."
 	return 0
 }
 
@@ -815,7 +787,7 @@ EOF
 		return 1
 	else
 		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
-		/etc/init.d/apache2 restart
+		$APACHEINIT restart
 		return 0
 	fi
 }
@@ -951,7 +923,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Server
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
-	make && make install
+	make && mv ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
 		hayErrores=1
@@ -960,7 +932,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Repository Manager
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && make install
+	make && mv ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
 		hayErrores=1
@@ -969,7 +941,7 @@ function servicesCompilation ()
 	# Compilar OpenGnSys Agent
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && make install
+	make && mv ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
 		hayErrores=1
@@ -1016,13 +988,13 @@ function copyInterfaceAdm ()
 
 function openGnsysCopyClientFiles()
 {
-	local hayErrores=0
+	local errstatus=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
 	cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
-		hayErrores=1
+		errstatus=1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
@@ -1031,76 +1003,27 @@ function openGnsysCopyClientFiles()
 	cp -ar $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
-		hayErrores=1
+		errstatus=1
 	fi
 	
-	if [ $hayErrores -eq 0 ]; then
+	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
 		errorAndLog "${FUNCNAME}(): client copy files with errors"
 	fi
 
-	return $hayErrores
+	return $errstatus
 }
 
 
-
-
-# Crear antiguo cliente initrd para OpenGnSys 0.10
-function openGnsysOldClientCreate()
-{
-	local OSCODENAME
-
-	local hayErrores=0
-
-	# Cargar Kernel, Initrd y paquetes udeb para la distribución del servidor (o por defecto).
-	OSCODENAME=$(lsb_release -cs 2>/dev/null)
-	if [ "$OSDISTRIB" = "Ubuntu" -a -n "$OSCODENAME" ]; then
-		echoAndLog "${FUNCNAME}(): Loading Kernel and Initrd files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot -v $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading udeb files for $OSDISTRIB $OSCODENAME."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh $OSCODENAME 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	else
-		echoAndLog "${FUNCNAME}(): Loading default Kernel and Initrd files."
-        	$INSTALL_TARGET/bin/initrd-generator -t $INSTALL_TARGET/tftpboot 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while generating initrd OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-		echoAndLog "${FUNCNAME}(): Loading default udeb files."
-        	$INSTALL_TARGET/bin/upgrade-clients-udeb.sh 2>&1 | tee -a $LOG_FILE
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error while upgrading udeb files OpenGnSys Admin Client"
-			hayErrores=1
-		fi
-	fi
-
-	if [ $hayErrores -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): Old client generation success."
-	else
-		errorAndLog "${FUNCNAME}(): Old client generation with errors"
-	fi
-
-	return $hayErrores
-}
-
-
-# Crear cliente OpenGnSys 1.0.1
+# Crear cliente OpenGnSys 1.0.2
 function clientCreate()
 {
 	local DOWNLOADURL="http://www.opengnsys.es/downloads"
 	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
-
+ 
 	echoAndLog "${FUNCNAME}(): Loading Client"
 	# Descargar, montar imagen, copiar cliente ogclient y desmontar.
 	wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
@@ -1109,6 +1032,7 @@ function clientCreate()
 		return 1
 	fi
 	echoAndLog "${FUNCNAME}(): Copying Client files"
+	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
 	cp -vr $TMPDIR/* $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
@@ -1124,6 +1048,9 @@ function clientCreate()
 # Configuración básica de servicios de OpenGnSys
 function openGnsysConfigure()
 {
+	local i=0
+	local dev=""
+
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
@@ -1132,18 +1059,44 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
-	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config file in \"$INSTALL_TARGET/etc\"."
-	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmServer.cfg
-	perl -pi -e "s/SERVERIP/$SERVERIP/g" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g" $INSTALL_TARGET/etc/ogAdmAgent.cfg
-	chown root:root $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
-	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer.cfg,ogAdmAgent.cfg}
-	echoAndLog "${FUNCNAME}(): Creating Web Console config file"
-	OPENGNSYS_CONSOLEURL="http://$SERVERIP/opengnsys"
-	perl -pi -e "s/SERVERIP/$SERVERIP/g; s/DBUSER/$OPENGNSYS_DB_USER/g; s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g; s/DATABASE/$OPENGNSYS_DATABASE/g; s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $INSTALL_TARGET/www/controlacceso.php
-	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso.php
-	chmod 600 $INSTALL_TARGET/www/controlacceso.php
-	sed -e "s/SERVERIP/$SERVERIP/g" -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+
+	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config files."
+	for dev in ${DEVICE[*]}; do
+		if [ -n "${SERVERIP[i]}" ]; then
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
+			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
+				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo/ogAdmRepo.cfg > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
+			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
+				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent/ogAdmAgent.cfg > $INSTALL_TARGET/etc/ogAdmAgent-$dev.cfg
+			OPENGNSYS_CONSOLEURL="http://${SERVERIP[i]}/opengnsys"
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
+			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
+			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
+				$INSTALL_TARGET/www/controlacceso.php > $INSTALL_TARGET/www/controlacceso-$dev.php
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
+				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
+		fi
+		let i++
+	done
+	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
+	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
+	ln -f $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
+	chown root:root $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
+	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
+	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
+	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	/etc/init.d/opengnsys start
 }
@@ -1168,7 +1121,7 @@ function installationSummary()
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
-	echoAndLog "DHCP configuration file:          $DHCPCONFIG"
+	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
 	echoAndLog "Samba configuration directory:    /etc/samba"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
@@ -1195,7 +1148,15 @@ echo
 echoAndLog "OpenGnSys installation begins at $(date)"
 pushd $WORKDIR
 
-# Comprobar si hay conexión y detectar parámetros de red por defecto.
+# Detectar datos de auto-configuración del instalador.
+autoConfigure
+
+# Detectar parámetros de red y comprobar si hay conexión.
+getNetworkSettings
+if [ $? -ne 0 ]; then
+	errorAndLog "Error reading default network settings."
+	exit 1
+fi
 checkNetworkConnection
 if [ $? -ne 0 ]; then
 	errorAndLog "Error connecting to server. Causes:"
@@ -1204,17 +1165,12 @@ if [ $? -ne 0 ]; then
 	errorAndLog " - Server is temporally down, try agian later."
 	exit 1
 fi
-getNetworkSettings
-if [ $? -ne 0 ]; then
-	errorAndLog "Error reading default network settings."
-	exit 1
-fi
 
 # Detener servicios de OpenGnSys, si están activos previamente.
 [ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
 # Actualizar repositorios
-apt-get update
+eval $UPDATEPKGLIST
 
 # Instalación de dependencias (paquetes de sistema operativo).
 declare -a notinstalled
@@ -1261,14 +1217,6 @@ fi
 
 # Configurando tftp
 tftpConfigure
-
-# Configuración NFS
-#### (descomentar las siguientes líneas para exportar servicios por NFS)
-#nfsConfigure
-#if [ $? -ne 0 ]; then
-#	errorAndLog "Error while configuring nfs server!"
-#	exit 1
-#fi
 
 # Configuración Samba
 smbConfigure
@@ -1370,14 +1318,7 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
 
-# Crear la estructura del antiguo cliente initrd de OpenGnSys 0.10
-#### (descomentar las siguientes líneas para generar cliente initrd)
-#openGnsysOldClientCreate
-#if [ $? -ne 0 ]; then
-#	errorAndLog "Warning: cannot create old initrd client"
-#fi
-
-# Crear la estructura del cliente de OpenGnSys 1.0
+# Crear la estructura del cliente de OpenGnSys
 clientCreate
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client"

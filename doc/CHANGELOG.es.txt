@@ -2,6 +2,10 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.2
+---------------------------------------------
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.1
 ---------------------------------------------
 
@@ -45,6 +49,9 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #400	Copiar desinstalador y actualizador
 #408	No se actualiza correctamente el tftpboot
 #412	Permisos Netboot para Grub4Dos
+ 
+Tickets genéricos resueltos:
+#413	Integración de OpenGnSys 1.0.1 en rama principal
 
 
 Lista de cambios incluidos en OpenGnSys 1.0
