@@ -1109,6 +1109,7 @@ function clientCreate()
 		return 1
 	fi
 	echoAndLog "${FUNCNAME}(): Copying Client files"
+	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
 	cp -vr $TMPDIR/* $INSTALL_TARGET/tftpboot
 	umount $TMPDIR

@@ -506,8 +506,8 @@ function compileServices()
 # Actualizar nuevo cliente para OpenGnSys 1.0
 function updateClient()
 {
-	local DOWNLOADURL=http://www.opengnsys.es/downloads
-	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
+	local DOWNLOADURL="http://www.opengnsys.es/downloads"
+	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
@@ -515,8 +515,8 @@ function updateClient()
 	local TMPDIR=/tmp/${FILENAME%.iso}
 
 	# Comprobar si debe actualizarse el cliente.
-	SOURCELENGTH=$(wget --spider $SOURCEFILE | LANG=C awk '/Length:/ {print $2}')
-	TARGETLENGTH=$(ls -l $TARGETFILE | awk '{print $5}' 2>/dev/null)
+	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
+	TARGETLENGTH=$(ls -l $TARGETFILE 2>/dev/null | awk '{print $5}')
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Client"
 		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
@@ -528,7 +528,8 @@ function updateClient()
 		echoAndLog "${FUNCNAME}(): Client is already loaded"
 	fi
 	# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
-	echoAndLog "${FUNCNAME}(): Updatting ogclient files"
+	echoAndLog "${FUNCNAME}(): Updating ogclient files"
+	mkdir $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
 	rsync -irplt $TMPDIR/* $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
