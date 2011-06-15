@@ -261,7 +261,7 @@ ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows NT\CurrentVersion\Winlog
 
 
 #/**
-#         ogNewMbrXP int_ndisk
+#         ogBootMbrXP int_ndisk
 #@brief   Genera un nuevo Master Boot Record en el disco duro indicado, compatible con los SO tipo Windows
 #@param   int_ndisk      nº de orden del disco
 #@return  salida del programa my-sys
@@ -272,7 +272,7 @@ ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows NT\CurrentVersion\Winlog
 #@date    2009-09-24
 #*/ ##
 
-function ogNewMbrXP ()
+function ogBootMbrXP ()
 {
 # Variables locales.
 local PART
@@ -290,6 +290,38 @@ PART="$(ogDiskToDev $1)" || return $?
 ms-sys -z -f $PART
 ms-sys -m -f $PART
 }
+
+
+#/** 
+#         ogBootMbrGeneric int_ndisk 
+#@brief   Genera un nuevo Codigo de arranque en el MBR del disco indicado, compatible con los SO tipo Windows, Linux. 
+#@param   int_ndisk      nº de orden del disco 
+#@return  salida del programa my-sys 
+#@exception OG_ERR_FORMAT    Formato incorrecto. 
+#@exception OG_ERR_NOTFOUND Tipo de partición desconocido o no se puede montar. 
+#@version 0.9 - Adaptación a OpenGNSys. 
+#@author  Antonio J. Doblas Viso. Universidad de Málaga 
+#@date    2009-09-24 
+#*/ ## 
+ 
+function ogBootMbrGeneric () 
+{ 
+# Variables locales. 
+local PART 
+ 
+# Si se solicita, mostrar ayuda. 
+if [ "$*" == "help" ]; then 
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk " \ 
+           "$FUNCNAME 1 " 
+    return 
+fi 
+# Error si no se reciben 1 parámetros. 
+[ $# == 1 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)  
+ 
+PART="$(ogDiskToDev $1)" || return $(ogRaiseError $OG_ERR_NOTFOUND; echo $?) 
+ms-sys -z -f $PART 
+ms-sys -s -f $PART 
+} 
 
 
 #/**
@@ -346,7 +378,6 @@ EOF
 spartlnx.run -cui -nm -a -f $FILE
 
 }
-
 
 
 #/**
@@ -451,7 +482,7 @@ spartlnx.run -cui -nm -w -f $FILE
 }
 	
 
-#         ogWinRegistrePartition int_ndisk int_partiton str_volume int_disk int_partition
+#         ogWindowsRegisterPartition int_ndisk int_partiton str_volume int_disk int_partition
 #@brief   Registra una partición en windows con un determinado volumen.
 #@param   int_ndisk      nº de orden del disco a registrar
 #@param   int_partition     nº de particion a registrar
@@ -467,7 +498,7 @@ spartlnx.run -cui -nm -w -f $FILE
 #*/ ##
 
 
-function ogWinRegistrePartition ()
+function ogWindowsRegisterPartition ()
 {	
 # Variables locales.
 local PART DISK FILE

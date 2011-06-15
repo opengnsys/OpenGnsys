@@ -508,21 +508,32 @@ function updateClient()
 {
 	local DOWNLOADURL=http://www.opengnsys.es/downloads
 	local FILENAME=ogclient-1.0.1-lucid-32bit.tar.gz
-	local TMPFILE=/tmp/$FILENAME
+	local SOURCEFILE=$DOWNLOADURL/$FILENAME
+	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
+	local SOURCELENGTH
+	local TARGETLENGTH
+	local TMPDIR=/tmp/${FILENAME%.iso}
 
-	echoAndLog "${FUNCNAME}(): Loading Client"
-	# Descargar y descomprimir cliente ogclient
-	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
-	if [ ! -s $TMPFILE ]; then
-		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
-		return 1
+	# Comprobar si debe actualizarse el cliente.
+	SOURCELENGTH=$(wget --spider $SOURCEFILE | LANG=C awk '/Length:/ {print $2}')
+	TARGETLENGTH=$(ls -l $TARGETFILE | awk '{print $5}' 2>/dev/null)
+	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
+		echoAndLog "${FUNCNAME}(): Loading Client"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		if [ ! -s $TARGETFILE ]; then
+			errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
+			return 1
+		fi
+	else
+		echoAndLog "${FUNCNAME}(): Client is already loaded"
 	fi
-	echoAndLog "${FUNCNAME}(): Extracting Client files"
-	tar xzvf $TMPFILE -C $INSTALL_TARGET/tftpboot
-	rm -f $TMPFILE
-	# Usar la versión más reciente del Kernel y del Initrd para el cliente.
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/vmlinuz-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
-	ln -f $(ls $INSTALL_TARGET/tftpboot/ogclient/initrd.img-*|tail -1) $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
+	echoAndLog "${FUNCNAME}(): Updatting ogclient files"
+	mount -o loop,ro $TARGETFILE $TMPDIR
+	rsync -irplt $TMPDIR/* $INSTALL_TARGET/tftpboot
+	umount $TMPDIR
+	rmdir $TMPDIR
+
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient

@@ -1021,22 +1021,21 @@ function clientCreate()
 {
 	local DOWNLOADURL="http://www.opengnsys.es/downloads"
 	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
-	local TMPFILE=/tmp/$FILENAME
-	local TMPDIR=${TMPFILE%.iso}
+	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
+	local TMPDIR=/tmp/${FILENAME%.iso}
  
 	echoAndLog "${FUNCNAME}(): Loading Client"
 	# Descargar, montar imagen, copiar cliente ogclient y desmontar.
-	wget $DOWNLOADURL/$FILENAME -O $TMPFILE
-	if [ ! -s $TMPFILE ]; then
+	wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
 	echoAndLog "${FUNCNAME}(): Copying Client files"
-	mount -o loop,ro $TMPFILE $TMPDIR
+	mount -o loop,ro $TARGETFILE $TMPDIR
 	cp -vr $TMPDIR/* $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
-	rm -f $TMPFILE
 
 	# Establecer los permisos.
 	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
@@ -1110,7 +1109,7 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Last Changed Rev:/ {print "r"$4}')
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
