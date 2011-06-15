@@ -529,7 +529,7 @@ function updateClient()
 	fi
 	# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
 	echoAndLog "${FUNCNAME}(): Updating ogclient files"
-	mkdir $TMPDIR
+	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
 	rsync -irplt $TMPDIR/* $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
