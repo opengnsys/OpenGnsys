@@ -577,8 +577,6 @@ EOF
         # comprobamos el servicio tftp
         sleep 1
         testPxe
-        ## damos perfimos de lectura a usuario web.
-        chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP ${basetftp}
 }
 
 function testPxe ()
@@ -882,8 +880,8 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
-	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chmod -R 775 $path_opengnsys_base/{log/clients,images,tftpboot}
+	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
@@ -940,10 +938,10 @@ function openGnsysCopyServerFiles ()
 }
 
 ####################################################################
-### Funciones de compilación de códifo fuente de servicios
+### Funciones de compilación de código fuente de servicios
 ####################################################################
 
-# Compilar los servicios de OpenGNsys
+# Compilar los servicios de OpenGnSys
 function servicesCompilation ()
 {
 	local hayErrores=0
@@ -1111,13 +1109,15 @@ function clientCreate()
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
-	cp -vr $TMPDIR/* $INSTALL_TARGET/tftpboot
+	cp -vr $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
 
 	# Establecer los permisos.
-	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
+	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \
+	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
 

@@ -18,7 +18,8 @@ LOGLEVEL=5
 
 #facilitando el entorno Og desde ssh
 cp $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
-
+# Crear menú por defecto para el cliente
+generateMenuDefault
 
 # Arranque de OpenGnSys Client.
 if [ -x "$OPENGNSYS/bin/ogAdmClient" ]; then

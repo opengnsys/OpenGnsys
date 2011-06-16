@@ -88,22 +88,22 @@ function checkAutoUpdate()
 
 function getDateTime()
 {
-        date "+%Y%m%d-%H%M%S"
+	date "+%Y%m%d-%H%M%S"
 }
 
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-        echo $1
-        FECHAHORA=`getDateTime`
-        echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
+	echo $1
+	DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
 function errorAndLog()
 {
-        echo "ERROR: $1"
-        FECHAHORA=`getDateTime`
-        echo "$FECHAHORA;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
+	echo "ERROR: $1"
+	DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
 
@@ -531,13 +531,15 @@ function updateClient()
 	echoAndLog "${FUNCNAME}(): Updating ogclient files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
-	rsync -irplt $TMPDIR/* $INSTALL_TARGET/tftpboot
+	rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
 
 	# Establecer los permisos.
-	chmod -R 755 $INSTALL_TARGET/tftpboot/ogclient
+	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \
+	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 	echoAndLog "${FUNCNAME}(): Client update successfully"
 }
 
