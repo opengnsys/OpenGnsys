@@ -6,8 +6,6 @@
 #@warning License: GNU GPLv3+
 
 
-
-
 ogExportKernelParameters ()
 {
 	GLOBAL="cat /proc/cmdline"
@@ -20,55 +18,89 @@ return 0
 
 ogExportVarEnvironment ()
 {
-	export CFGINITRD="/tmp/initrd.cfg"
-	echo "puntos de accesos al servidor ogprotocol=nfs" >> $CFGINITRD
-	export NFSROOTBOOT="/var/lib/tftpboot" && echo "NFSROOTBOOT=$NFSROOTBOOT" >> $CFGINITRD	
-	export NFSCLIENTDIR="/opt/opengnsys/client" && echo "NFSCLIENDIR=$NFSCLIENTDIR" >> $CFGINITRD	
-	export NFSLOGDIR="/opt/opengnsys/log/clients" && echo "NFSLOGDIR=$NFSLOGDIR" >> $CFGINITRD	
-	export NFSIMGDIR="/opt/opengnsys/images" && echo "NFSIMGDIR=$NFSIMGDIR" >> $CFGINITRD	
-	echo "puntos de accesos al servidor ogprotocol=smb" >> $CFGINITRD
-	export SMBROOTBOOT="tftpboot"  && echo "SMBROOTBOOT=$SMBROOTBOOT" >> $CFGINITRD	
-	export SMBCLIENTDIR="ogclient" && echo "SMBCLIENTDIR=$SMBCLIENTDIR" >> $CFGINITRD
-	export SMBLOGDIR="oglog" && echo "SMBLOGDIR=$SMBLOGDIR" >> $CFGINITRD
-	export SMBIMGDIR="ogimages" && echo "SMBIMGDIR=$SMBIMGDIR" >> $CFGINITRD
-
-	echo "puntos de montaje local para los contenedores" >> $CFGINITRD
-	export LOCALROOTBOOT="/opt/og2fs/tftpboot"	&& echo "LOCALROOTBOOT=$LOCALROOTBOOT" >> $CFGINITRD
-	export LOCALCLIENTDIR="/opt/opengnsys" && echo "LOCALCLIENTDIR=$LOCALCLIENTDIR" >> $CFGINITRD		
-	export LOCALLOGDIR="/opt/opengnsys/log" && echo "LOCALLOGDIR=$LOCALLOGDIR" >> $CFGINITRD
-	export LOCALIMGDIR="/opt/opengnsys/images" && echo "LOCALIMGDIR=$LOCALIMGDIR" >> $CFGINITRD
-	
-	echo "puntos de montajes para realizar la integración unionfs entre el initrd y el sistema root" >> $CFGINITRD
-	#punto de montaje donde se accede al 2nd FS mediante loop
-	export LOCALROOTIMG="/opt/og2fs/2ndfs"	&& echo "LOCALROOTIMG=$LOCALROOTIMG" >> $CFGINITRD		
+	export CFGINITRD="/tmp/initrd.cfg"	
+	OGPROTOCOL="${ogprotocol:-smb}"
+	case "$OGPROTOCOL" in
+		nfs|NFS)			
+				#export NFSROOTBOOT="/var/lib/tftpboot" 	
+			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
+				#export NFSCLIENTDIR="/opt/opengnsys/client" 	
+			export SRCOGSHARE="/opt/opengnsys/client" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+				#export NFSLOGDIR="/opt/opengnsys/log/clients" 
+			export SRCOGLOG="/opt/opengnsys/log/clients" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
+				#export NFSIMGDIR="/opt/opengnsys/images" 
+			export SRCOGIMAGES="/opt/opengnsys/images" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
+		;;
+		smb|SMB|cifs|CIFS|samba|SAMBA)
+			export OPTIONS=" -o user=opengnsys,pass=og"
+				#export SMBROOTBOOT="tftpboot"  && echo "SMBROOTBOOT=$SMBROOTBOOT" >> $CFGINITRD	
+			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
+				#export SMBCLIENTDIR="ogclient" && echo "SMBCLIENTDIR=$SMBCLIENTDIR" >> $CFGINITRD
+			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+				#export SMBLOGDIR="oglog" && echo "SMBLOGDIR=$SMBLOGDIR" >> $CFGINITRD
+			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
+				#export SMBIMGDIR="ogimages" && echo "SMBIMGDIR=$SMBIMGDIR" >> $CFGINITRD
+			export SRCOGIMAGES="ogimages" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
+		;;
+		local|LOCAL)
+			export SRCOGLIVE="local"
+		;;
+	esac
+	#punto de acceso al boot-tools live
+		#export LOCALROOTBOOT="/opt/og2fs/tftpboot"	&& echo "LOCALROOTBOOT=$LOCALROOTBOOT" >> $CFGINITRD
+	export DSTOGLIVE="/opt/oglive/tftpboot"
 	#punto de montaje para unionfs 
-	export LOCALROOTRAM="/opt/og2fs/1stfs" && echo "LOCALROOTRAM=$LOCALROOTRAM" >> $CFGINITRD				
-	#punto de union entreo LOCALROOTIMG y LOCALROOTRAM
-	export LOCALROOTUNION="/opt/og2fs/unionfs" && echo "LOCALROOTUNION=$LOCALROOTUNION" >> $CFGINITRD			
-	##INFORMACION DE OTRAS VARIABLES OBTENDIAS EN OTRAS FUNCIONES.
-	#ogGetROOTSERVER()  ip del servidor pxe, valor obtenido automaticamente desde dhcpd.
-	#IPV4DDR
-	#IPV4BROADCAST
-	#IPV4NETMASK
-	#IPV4GATEWAY
-	#DNS0 	DNS1
-	#HOSTNAME
-	#ROOTSERVER  #ip del servidor pxe que ha servido el kernel
-	#REPOSERVER=ogrepo  -> ogConectROOTSERVER() ip del servidor de images para separar serviicios.
+		#export LOCALROOTRAM="/opt/og2fs/1stfs" && echo "LOCALROOTRAM=$LOCALROOTRAM" >> $CFGINITRD				
+	export OGLIVERAMFS="/opt/oglive/ramfs" && echo "OGLIVERAMFS=$OGLIVERAMFS" >> $CFGINITRD
+	#punto de montaje donde se accede al 2nd FS mediante loop
+		#export LOCALROOTIMG="/opt/og2fs/2ndfs"	&& echo "LOCALROOTIMG=$LOCALROOTIMG" >> $CFGINITRD		
+	export OGLIVEROOTFS="/opt/oglive/rootfs" && echo "OGLIVEROOTFS=$OGLIVEROOTFS" >> $CFGINITRD
+	#punto de union entre LOCALROOTIMG y LOCALROOTRAM
+		#export LOCALROOTUNION="/opt/og2fs/unionfs" && echo "LOCALROOTUNION=$LOCALROOTUNION" >> $CFGINITRD			
+	export OGLIVEUNIONFS="/opt/oglive/unionfs" && echo "OGLIVEUNIONFS=$OGLIVEUNIONFS" >> $CFGINITRD
+	#etiquta para los dispositivos offline
+	export OGLIVELABEL="ogClient"
+	
+	#echo "puntos de montajes para los demas accesos"
+	#echo "acceso al client, engine, scritps, interfaz"
+		#export LOCALCLIENTDIR="/opt/opengnsys" && echo "LOCALCLIENTDIR=$LOCALCLIENTDIR" >> $CFGINITRD		
+	export DSTOGSHARE="/opt/opengnsys" && echo "DSTOGSHARE=$DSTOGSHARE" >> $CFGINITRD		
+		#export LOCALLOGDIR="/opt/opengnsys/log" && echo "LOCALLOGDIR=$LOCALLOGDIR" >> $CFGINITRD
+	export DSTOGLOG="/opt/opengnsys/log" && echo "DSTOGLOG=$DSTOGLOG" >> $CFGINITRD
+		#export LOCALIMGDIR="/opt/opengnsys/images" && echo "LOCALIMGDIR=$LOCALIMGDIR" >> $CFGINITRD
+	export DSTOGIMAGES="/opt/opengnsys/images" && echo "DSTOGIMAGES=$DSTOGIMAGES" >> $CFGINITRD
+		
+	##INFORMACION DE OTRAS VARIABLES OBTENDIAS EN OTRAS FUNCIONES ogConfigureNetwork.
+		#DEVICE
+		#IPV4DDR
+		#IPV4BROADCAST
+		#IPV4NETMASK
+		#IPV4GATEWAY
+		#HOSTNAME
+    #INFORMACION de otras variasbles obteneidas desde ogGetROOTSERVER
+		#ROOTSERVER  si ip=dhcp -> ROOTSERVER=NEXT-SERVER; si ip=host:rootserver:gw:mask:hostname:interfaz -> ROOTSERVER=rootserver
+		#BOOTIF -> si el gestor remoto es pxelinux.0 y se añade una linea más tipo "IPAPPEND 2" esta variable tendrá la mac de la interfaz.
+		#$OGSERVERLIVE
+		#$OGSERVERSHARE
+		#$OGSERVERLOG
+		#$OGSERVERIMAGES
 	return 0
 }
 
 ogConfigureRamfs ()
 {
-	mkdir -p $LOCALROOTBOOT
-	mkdir -p $LOCALROOTIMG
-	mkdir -p $LOCALROOTRAM   			 
-	mkdir -p $LOCALROOTUNION 
+		#mkdir -p $LOCALROOTBOOT
+	mkdir -p $DSTOGLIVE	
+		#mkdir -p $LOCALROOTRAM 	
+	mkdir -p $OGLIVERAMFS	
+		#mkdir -p $LOCALROOTIMG
+	mkdir -p $OGLIVEROOTFS	  			 
+		#mkdir -p $LOCALROOTUNION
+	mkdir -p $OGLIVEUNIONFS 
 }
 
 ogLoadNetModule ()
 {
-	#cargando netmodule
 	if [ -n "$ognetmodule" ]
 	then
    		echo "Cargando modulo de red $netmodule"
@@ -90,6 +122,10 @@ ogPostConfigureFS()
 	echo "order hosts,bind" > /etc/host.conf
 	echo "multi on" >> /etc/host.conf
 	
+	#configuramos el dns
+	echo "nameserver $ogdns" > /etc/resolv.conf 
+	
+	
 	# configuramos el /etc/networks
 	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
 	NETIP=$(route -n | grep eth0 | awk -F" " '{print $1}') && NETIP=$(echo $NETIP | cut -f1 -d" ")
@@ -99,18 +135,27 @@ ogPostConfigureFS()
 	echo "localnet $NETIP" >> /etc/networks
 	#route
 
+	echo "ogLive1.0.2" > /etc/debian_chroot
+
 	#enlace si iniciamos desde ogprotocolo=local { cdrom, usb, cache } .
     # monta el raiz del dispositivo local en /opt/og2fs/tftpboot  - acceso al fichero .sqfs
     # y monta el sistema root sqfs en /opt/og2fs/2ndfs
-	[ "$LOCALMEDIA" == "CACHE" ] && ln -s /opt/og2fs/tftpboot /opt/opengnsys/cache
-	[ "$ogprotocol" == "local" ] &&  ln -s /opt/og2fs/2ndfs/opt/opengnsys/* /opt/opengnsys/
+		#[ "$LOCALMEDIA" == "CACHE" ] && ln -s /opt/oglive/tftpboot /opt/opengnsys/cache
+		#[ "$ogprotocol" == "local" ] &&  ln -s /opt/oglive/2ndfs/opt/opengnsys/* /opt/opengnsys/
+	[ "$LOCALMEDIA" == "CACHE" ] && ln -s $DSTOGLIVE /opt/opengnsys/cache
+	[ "$ogprotocol" == "local" ] &&  ln -s ${OGLIVEROOTFS}/opt/opengnsys/* /opt/opengnsys/
 
 
 }
 
 
 
-
+#Requiere ogConfigureNetworking.
+#Exporta ROOTSERVER
+# si la red ha sido configurada con dhcp el valor de ROOTSERVER será el valor de next-server del dhcp
+# si la red ha sido configurada con el parametro de kernel ip, será el segundo valor.
+   ## ip=iphost:ipnext-server:ipgateway:netmask:hostname:iface:none
+   ## ip=172.17.36.21:62.36.225.150:172.17.36.254:255.255.255.0:prueba1:eth0:none
 ogGetROOTSERVER ()
 {
 	# get nfs root from dhcp
@@ -135,72 +180,81 @@ ogGetROOTSERVER ()
 	fi
 	export ROOTSERVER
 	echo "ROOTSERVER=$ROOTSERVER" >> $CFGINITRD
-return 0
-}	
-
-ogConectROOTSERVER ()
-{
-local OPTIONS
-#params a detectar
-if [ $ogrepo ]
-then
-	# Validar si la ip es correcta
-	ROOTREPO=$ogrepo
-else
-	ROOTREPO=$ROOTSERVER
-fi
-
-case "$ogprotocol" in
-	local)
-		echo  "Montar imagen del sistema root desde dispositivo local"
-		for i in $(blkid /dev/s* | grep ogClient | awk -F: '{print $2}' | tr -d \"); do export $i; done
-		mount -t $TYPE LABEL=$LABEL $LOCALROOTBOOT
-		if [ $? != 0 ]
-		then
-			mount -t reiserfs LABEL=CACHE $LOCALROOTBOOT
-			export LOCALMEDIA=CACHE
-		fi
-		;;    
-	httfs)
-		echo "protocolo httfs aun no soportado"
-		;;
-	sshfs)
-		echo "protocolo sshfs aun no soportado"
-		;;
-	smb)    
-		echo "Preparando conexión con el Repositorio $ROOTSERVER por $ogprotocol"
-		OPTIONS=" -o user=opengnsys,pass=og"
-		mount.cifs //${ROOTSERVER}/${SMBCLIENTDIR} $LOCALCLIENTDIR $OPTIONS 
-		mount.cifs //${ROOTSERVER}/${SMBLOGDIR} $LOCALLOGDIR $OPTIONS 
-		mount.cifs //${ROOTSERVER}/${SMBROOTBOOT} $LOCALROOTBOOT $OPTIONS 
-		mount.cifs //${ROOTREPO}/${SMBIMGDIR} $LOCALIMGDIR ${OPTIONS},ro 
-		;;
-	nfs)
-		echo "Preparando conexión con el Repositorio $ROOTSERVER por $ogprotocol"
-		nfsmount -o nolock,ro $ROOTSERVER:$NFSCLIENTDIR $LOCALCLIENTDIR
-		nfsmount -o nolock $ROOTSERVER:$NFSLOGDIR $LOCALLOGDIR
-		nfsmount -o nolock $ROOTSERVER:$NFSROOTBOOT $LOCALROOTBOOT
-		nfsmount -o nolock,ro $ROOTREPO:$NFSIMGDIR $LOCALIMGDIR
-		;;
-esac
+	
+	#si oglive no oglive=R
+	export OGSERVERIMAGES="${ogrepo:-$ROOTSERVER}"
+	export OGSERVERSHARE="${ogshare:-$ROOTSERVER}"
+	export OGSERVERLOG="${oglog:-$ROOTSERVER}"
+	export OGSERVERLIVE="${oglive:-$OGSERVERIMAGES}"
+	
+	return 0
 }
 
-ogMerge2ndFile()
+#ogConnect
+# parm 1    ip servidor  TODO:dns
+# parm 2    protocolo
+# parm 3    punto de acceso remoto
+# parm 4    punto de montaje local
+# parm 5    acceso de lectura tipo ",ro"
+ogConnect ()
 {
-if [ -f $LOCALROOTBOOT/ogclient/ogclient.sqfs ]
+	SERVER=$1
+	PROTOCOL=$2
+	SRC=$3
+	DST=$4
+	READONLY=$5
+	
+	case "$PROTOCOL" in
+		nfs)
+			nfsmount -o nolock${READONLY} ${SERVER}:${SRC} ${DST} 
+		;;
+		smb)
+			mount.cifs //${SERVER}/${SRC} ${DST} ${OPTIONS}${READONLY}		
+		;;
+	esac
+}
+	
+ogConnectOgLive ()
+{
+# Si ogprotocol=local, la funcion ogExportVar => SRCOGLIVE=local
+	if [ "$SRCOGLIVE" == "local" ]
+	then		
+		echo  "Montar imagen del sistema root desde dispositivo local"
+		for i in $(blkid /dev/s* | grep $OGLIVELABEL  | awk -F: '{print $2}' | tr -d \"); do export $i; done
+		mount -t $TYPE LABEL=$LABEL $DSTOGLIVE  
+		if [ $? != 0 ]
+		then
+			mount -t reiserfs LABEL=CACHE $DSTOGLIVE
+			export LOCALMEDIA=CACHE
+		fi
+	else
+# Si ogprotocol es remoto.    TODO en smb rw y en nfs ro??
+	ogConnect $OGSERVERLIVE $OGPROTOCOL $SRCOGLIVE $DSTOGLIVE 		
+	fi		
+# Si el montaje ha sido correcto, tanto en local como en remoto. Procedemos con la union
+	ogMergeLive
+}
+
+
+
+ogMergeLive()
+{
+#Si existe en el punto de acceso del del oglive el fichero ogclient.sqfs	
+if [ -f $DSTOGLIVE/ogclient/ogclient.sqfs ]
 then	
 	cat /proc/mounts > /tmp/mtab.preunion
 	if [ "$og2nd" == "img" ]
 	then
-		#para acceder al img
-		losetup /dev/loop0 $LOCALROOTBOOT/ogclient/ogclient.img -o 32256
-		mount /dev/loop0 $LOCALROOTIMG
+		#Montamos el ROOTFS tipo  img, para desarrolladores
+		losetup /dev/loop0 $DSTOGLIVE/ogclient/ogclient.img -o 32256
+		mount /dev/loop0 $OGLIVEROOTFS
 	else
-		## para acceder al squashfs
-		mount $LOCALROOTBOOT/ogclient/ogclient.sqfs $LOCALROOTIMG -t squashfs -o loop
+		## Montamos el ROOTFS tipo squashfs
+		mount $DSTOGLIVE/ogclient/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
 	fi
+# Realizamos la union entre el ogliveram(initrd) y el ogliverootfs(ogclient.sqfs)	
 	for i in etc var lib bin sbin usr root boot; do
-		unionmount $i
+		ogUnionLiveDir $i
 	done
 	cat /tmp/mtab.preunion > /etc/mtab
 else
@@ -210,57 +264,40 @@ fi
 }
 
 
-unionmount()
+
+
+#ogUnionLiveDir 
+#par 1 el directorio a unir.
+# para el parmetro 1 (directorio), 
+ogUnionLiveDir()
 {
-	tmpdir=/$1		#dir
+	TMPDIR=/$1		#dir
 	FUSE_OPT="-o default_permissions -o allow_other -o use_ino -o nonempty -o suid"
 	UNION_OPT="-o cow -o noinitgroups"
 	UBIN="unionfs-fuse"
-					#UPATH="/unionfs"
-					#LOCALROOTIMG="/opt/og2fs/2ndfs"	
-					#LOCALROOTRAM="/opt/og2fs/1stfs"		#/unionfs/host	#punto de montaje para unionfs
-					#LOCALROOTUNION=/opt/og2fs/unionfs/"	#/unionfs/union	#punto de union entreo LOCALROOTIMG y LOCALROOTRAM
-					#mkdir -p $LOCALROOTRAM   			 #/unionfs/host
-					#mkdir -p $LOCALROOTUNION 			  #/unionfs/union
-	mkdir -p $LOCALROOTRAM$tmpdir
-	#mount --bind /$tmpdir $LOCALROOTRAM$tmpdir
-	U1STDIR="${LOCALROOTRAM}${tmpdir}=RW"
-	U2NDDIR="${LOCALROOTIMG}${tmpdir}=RO"
-	UNIONDIR=$LOCALROOTUNION$tmpdir
+
+	mkdir -p $OGLIVERAMFS$TMPDIR
+	U1STDIR="${OGLIVERAMFS}${TMPDIR}=RW"
+	U2NDDIR="${OGLIVEROOTFS}${TMPDIR}=RO"
+	UNIONDIR=${OGLIVEUNIONFS}${TMPDIR}
 	mkdir -p $UNIONDIR
 	$UBIN $FUSE_OPT $UNION_OPT ${U1STDIR}:${U2NDDIR} $UNIONDIR
-	mount --bind  $UNIONDIR $tmpdir
+	mount --bind  $UNIONDIR $TMPDIR
 }
 
 
-unionmountOLD()
-{
-	FUSE_OPT="-o default_permissions -o allow_other -o use_ino -o nonempty -o suid"
-	UNION_OPT="-o cow -o noinitgroups"
-	UPATH="/unionfs"
-	UBIN="unionfs-fuse"
-	mkdir -p /unionfs/host
-	mkdir -p /unionfs/union
-	dir=$1
-	mkdir -p /unionfs/host/$dir
-	#mount --bind /$dir /unionfs/host/$dir
-	mkdir -p /unionfs/union/$dir
-	host="/unionfs/host/${dir}=RW"
-	common="/opt/og2fs/${dir}=RO"
-	$UBIN $FUSE_OPT $UNION_OPT ${host}:${common} /unionfs/union/$dir
-	mount --bind  /unionfs/union/$dir /$dir
-}
 
-ogconfigure_lo()
+
+ogConfigureLoopback()
 {
 # for the portmapper we need localhost
 ifconfig lo 127.0.0.1
 #/etc/init.d/portmap start
 }
 
-ogconfigure_networking()
+ogConfigureNetworking()
 {
-#echo "ogconfigure_networking: Buscando interfaz a configurar DEVICE"
+#echo "ogConfigureNetworking: Buscando interfaz a configurar DEVICE"
 if [ -n "${BOOTIF}" ] 
 then
 	#echo " variable BOOTIF exportada con pxelinux.0 con valor $BOOTIF"
@@ -310,7 +347,7 @@ else
 fi
 if [ -z "${DEVICE}" ]; then
 	echo "variable DEVICE con valor $DEVICE no encontrada, llamamos de nuevo a ogconfigure_networking"
-	ogconfigure_networking
+	ogConfigureNetworking
 fi
 
 [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
@@ -329,7 +366,7 @@ sleep 1
 CARRIER=$(cat /sys/class/net/${DEVICE}/carrier)
 if [ "$CARRIER" != "1" ]
 then
-	ogconfigure_networking
+	ogConfigureNetworking
 fi
 
 # support ip options see linux sources
@@ -376,7 +413,7 @@ done
 # source ipconfig output
 if [ -n "${DEVICE}" ]; then	
     . /tmp/net-${DEVICE}.conf
-    DEVICECFG="/tmp/net-${DEVICE}"
+    DEVICECFG="/tmp/net-${DEVICE}.conf"
 	export DEVICECFG
 	export DEVICE
 	echo "DEVICE=$DEVICE" >> $CFGINITRD
@@ -476,4 +513,119 @@ ogYesNo()
     [[ "$ans" = "y" || "$ans" == "yes" ]]
 }
      
+     
+### # borrar     
+     
+ogConectROOTSERVER ()
+{
+local OPTIONS
+#params a detectar
+if [ $ogrepo ]
+then
+	# Validar si la ip es correcta
+	ROOTREPO=$ogrepo
+else
+	ROOTREPO=$ROOTSERVER
+fi
 
+case "$ogprotocol" in
+	local)
+		echo  "Montar imagen del sistema root desde dispositivo local"
+		for i in $(blkid /dev/s* | grep ogClient | awk -F: '{print $2}' | tr -d \"); do export $i; done
+		mount -t $TYPE LABEL=$LABEL $LOCALROOTBOOT
+		if [ $? != 0 ]
+		then
+			mount -t reiserfs LABEL=CACHE $LOCALROOTBOOT
+			export LOCALMEDIA=CACHE
+		fi
+		;;    
+	httfs)
+		echo "protocolo httfs aun no soportado"
+		;;
+	sshfs)
+		echo "protocolo sshfs aun no soportado"
+		;;
+	smb)    
+		echo "Preparando conexión con el Repositorio $ROOTSERVER por $ogprotocol"
+		OPTIONS=" -o user=opengnsys,pass=og"
+		mount.cifs //${ROOTSERVER}/${SMBROOTBOOT} $LOCALROOTBOOT $OPTIONS 		
+		mount.cifs //${ROOTSERVER}/${SMBCLIENTDIR} $LOCALCLIENTDIR $OPTIONS		 
+		mount.cifs //${ROOTSERVER}/${SMBLOGDIR} $LOCALLOGDIR $OPTIONS 
+		
+		mount.cifs //${ROOTREPO}/${SMBIMGDIR} $LOCALIMGDIR ${OPTIONS},ro 
+		;;
+	nfs)
+		echo "Preparando conexión con el Repositorio $ROOTSERVER por $ogprotocol"
+		nfsmount -o nolock $ROOTSERVER:$NFSROOTBOOT $LOCALROOTBOOT		
+		nfsmount -o nolock,ro $ROOTSERVER:$NFSCLIENTDIR $LOCALCLIENTDIR		
+		nfsmount -o nolock $ROOTSERVER:$NFSLOGDIR $LOCALLOGDIR
+		
+		nfsmount -o nolock,ro $ROOTREPO:$NFSIMGDIR $LOCALIMGDIR
+		;;
+esac
+}
+
+        ogMerge2ndFile()
+{
+if [ -f $LOCALROOTBOOT/ogclient/ogclient.sqfs ]
+then	
+	cat /proc/mounts > /tmp/mtab.preunion
+	if [ "$og2nd" == "img" ]
+	then
+		#para acceder al img
+		losetup /dev/loop0 $LOCALROOTBOOT/ogclient/ogclient.img -o 32256
+		mount /dev/loop0 $LOCALROOTIMG
+	else
+		## para acceder al squashfs
+		mount $LOCALROOTBOOT/ogclient/ogclient.sqfs $LOCALROOTIMG -t squashfs -o loop
+	fi
+	for i in etc var lib bin sbin usr root boot; do
+		unionmount $i
+	done
+	cat /tmp/mtab.preunion > /etc/mtab
+else
+	echo "Fichero imagen del cliente no encontrado"
+	return 1
+fi
+}
+
+unionmount()
+{
+	tmpdir=/$1		#dir
+	FUSE_OPT="-o default_permissions -o allow_other -o use_ino -o nonempty -o suid"
+	UNION_OPT="-o cow -o noinitgroups"
+	UBIN="unionfs-fuse"
+					#UPATH="/unionfs"
+					#LOCALROOTIMG="/opt/og2fs/2ndfs"	
+					#LOCALROOTRAM="/opt/og2fs/1stfs"		#/unionfs/host	#punto de montaje para unionfs
+					#LOCALROOTUNION=/opt/og2fs/unionfs/"	#/unionfs/union	#punto de union entreo LOCALROOTIMG y LOCALROOTRAM
+					#mkdir -p $LOCALROOTRAM   			 #/unionfs/host
+					#mkdir -p $LOCALROOTUNION 			  #/unionfs/union
+	mkdir -p $LOCALROOTRAM$tmpdir
+	#mount --bind /$tmpdir $LOCALROOTRAM$tmpdir
+	U1STDIR="${LOCALROOTRAM}${tmpdir}=RW"
+	U2NDDIR="${LOCALROOTIMG}${tmpdir}=RO"
+	UNIONDIR=$LOCALROOTUNION$tmpdir
+	mkdir -p $UNIONDIR
+	$UBIN $FUSE_OPT $UNION_OPT ${U1STDIR}:${U2NDDIR} $UNIONDIR
+	mount --bind  $UNIONDIR $tmpdir
+}
+
+
+unionmountOLD()
+{
+	FUSE_OPT="-o default_permissions -o allow_other -o use_ino -o nonempty -o suid"
+	UNION_OPT="-o cow -o noinitgroups"
+	UPATH="/unionfs"
+	UBIN="unionfs-fuse"
+	mkdir -p /unionfs/host
+	mkdir -p /unionfs/union
+	dir=$1
+	mkdir -p /unionfs/host/$dir
+	#mount --bind /$dir /unionfs/host/$dir
+	mkdir -p /unionfs/union/$dir
+	host="/unionfs/host/${dir}=RW"
+	common="/opt/og2fs/${dir}=RO"
+	$UBIN $FUSE_OPT $UNION_OPT ${host}:${common} /unionfs/union/$dir
+	mount --bind  /unionfs/union/$dir /$dir
+}

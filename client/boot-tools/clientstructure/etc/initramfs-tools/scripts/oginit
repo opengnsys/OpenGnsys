@@ -21,7 +21,9 @@
 #@version 0.8.1 - UnionFS + squasfs
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2010/06/29
-
+#@version 1.0. - Adaptacion variables. Corrección enlace red
+#@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
+#@date    2011/06/16
 #*/
 
 
@@ -45,8 +47,6 @@ mountroot ()
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before get OG variables: y/N "
     [ $? == 0 ] && sh || echo " "
-
-
 	set -a
 	log_success_msg "Checking kernel parameters"
 	ogExportKernelParameters 
@@ -67,29 +67,48 @@ mountroot ()
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before configure networking: y/N "
     [ $? == 0 ] && sh || echo " "
-	ogconfigure_networking
+	ogConfigureNetworking
 	log_success_msg "config networking"
-	ogconfigure_lo
+	ogConfigureLoopback
 	log_success_msg "config loopback"
 
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before detect rootserver: y/N "
     [ $? == 0 ] && sh || echo " "
-	ogGetROOTSERVER && log_success_msg "Get Info from pxe server" 
+	ogGetROOTSERVER && log_success_msg "Get Info from pxe server and ckeck distribuited OG services " 
 
-	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before conect with og Services : y/N "
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect and merging the rootfs -ogLive- : y/N "
     [ $? == 0 ] && sh || echo " "
-	ogConectROOTSERVER && log_success_msg "Conecting with og services" || sh
-	# ogConectROOTMEDIA
+	ogConnectOgLive && log_success_msg "Merge the initrd with the remote rootfs -ogLive-" || sh
+    # si es necesario realiza ogConnect $OGSERVERLIVE $OGPROTOCOL $SRCOGLIVE $DSTOGLIVE 
 
-	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before merge the Second File System with initrd (First File System) : y/N "
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir SHARE -engine,scripts,interface, -share- : y/N "
     [ $? == 0 ] && sh || echo " "
-	ogMerge2ndFile && log_success_msg "Merge onto Second File System"
+	ogConnect $OGSERVERSHARE $OGPROTOCOL $SRCOGSHARE $DSTOGSHARE 
+	
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir LOG STORAGE : y/N "
+    [ $? == 0 ] && sh || echo " "
+	ogConnect $OGSERVERLOG $OGPROTOCOL $SRCOGLOG $DSTOGLOG
+	
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with REPOSITORY STORAGE : y/N "
+    [ $? == 0 ] && sh || echo " "
+	ogConnect $OGSERVERIMAGES $OGPROTOCOL $SRCOGIMAGES $DSTOGIMAGES
+	 
+   
+
+	#[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before conect with og Services : y/N "
+    #[ $? == 0 ] && sh || echo " "
+	#ogConectROOTSERVER && log_success_msg "Conecting with og services" || sh
+    
+
+	#[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before merge the Second File System with initrd (First File System) : y/N "
+    #[ $? == 0 ] && sh || echo " "
+	#ogMerge2ndFile && log_success_msg "Merge onto Second File System"
 
 
-	#[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/og-bottom"
-	#run_scripts /scripts/og-bottom
-	#[ "$quiet" != "y" ] && log_end_msg
+	####[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/og-bottom"
+	####run_scripts /scripts/og-bottom
+	####[ "$quiet" != "y" ] && log_end_msg
 
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before doing the postconfiguration: y/N "

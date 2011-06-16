@@ -1,4 +1,10 @@
 #!/bin/bash
+
+### NOTA este archivo se sobreescribe al conectarse con el ogSHARE
+
+
+
+
 #/**
 #@file    loadenviron.sh
 #@brief   Script de carga de la API de funciones de OpenGNSys.
