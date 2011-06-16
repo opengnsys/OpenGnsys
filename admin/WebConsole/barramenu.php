@@ -99,7 +99,7 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 									window.top.location.href="acceso.php";
 									break;
 							case 22: 		
-									opadre.frames["frame_contenidos"].document.location.href=href4
+									opadre.frames["frame_contenidos"].document.location.href=href5
 									break;
 						}
 				}
