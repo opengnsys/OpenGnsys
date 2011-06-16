@@ -536,8 +536,8 @@ function updateClient()
 	rmdir $TMPDIR
 
 	# Establecer los permisos.
-	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \
-	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \
+	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
+	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 	echoAndLog "${FUNCNAME}(): Client update successfully"
