@@ -12,7 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/CreaComando.php");
-include_once("../idiomas/php/".$idioma."/menucliente".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/menucliente_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -70,26 +70,26 @@ else{
 	$codeHtml.='</div>';
 }
 ?>
-	<HTML>
-	<HEAD>
+	<html>
+	<head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	</HEAD>
+	</head>
 	<?
 
 	if(!empty($rsmenu->campos["idurlimg"])){ // Imagen de fondo
 		$urlimg=TomaDato($cmd,0,'iconos',$rsmenu->campos["idurlimg"],'idicono','urlicono');
 		$urlimgfondo="../images/iconos/".$urlimg;
-		echo '<BODY  bgcolor=white background="'.$urlimgfondo.'">';
+		echo '<body bgcolor="white" background="'.$urlimgfondo.'">';
 	}
 	else{
-		echo'<BODY  bgcolor=white background="../images/iconos/fondo800x600.png">';
-		#echo '<P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png"><P>';
+		echo'<body bgcolor="white" background="../images/iconos/fondo800x600.png">';
+		echo '<p align="left"><img border=0 src="../images/iconos/logoopengnsys.png"><p>';
 	}
 		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
 		echo $codeHtml;
 	?>
-	</BODY>
-	</HTML>
+	</body>
+	</html>
 <?
 //___________________________________________________________________________________________________
 //
