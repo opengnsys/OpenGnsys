@@ -83,7 +83,7 @@ else{
 	}
 	else{
 		echo'<body bgcolor="white" background="../images/iconos/fondo800x600.png">';
-		echo '<p align="left"><img border=0 src="../images/iconos/logoopengnsys.png"><p>';
+		//echo '<p align="left"><img border=0 src="../images/iconos/logoopengnsys.png"><p>';
 	}
 		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
 		echo $codeHtml;
