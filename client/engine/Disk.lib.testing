@@ -4,7 +4,7 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 1.0.1
+#@version 1.0.2
 #@warning License: GNU GPLv3+
 #*/
 
@@ -250,6 +250,37 @@ esac
 
 
 #/**
+#         ogGenerateDiskInfo
+#@brief   Crea fichero de información de configuración de disco.
+#*/ ##
+function ogGenerateDiskInfoa ()
+{
+# Variables locales
+local DEVS d i=1
+# Fichero de configuración de discos.
+DISKSCONF=/etc/disks.conf
+
+# Detectar metadispositivos.
+vgs -a --noheadings 2>/dev/null            # TODO dmraid, losetup
+# Crear copia del fichero de particiones.
+cp /proc/particions /tmp/particions
+# Ficheros de dispositivos de disco.
+DEVS=$(awk '$4!~/^(name|)$/ {if ($2%16==0) print "/dev/"$4}' /proc/particions)
+# Generar fichero de configuración
+rm -f $DISKSCONF
+for d in $DEVS; do
+    case "$(ogGetDiskType $d)" in
+        DISK|RAID)
+            echo "$i $d" >>$DISKSCONF
+            let i++
+            ;;
+        *)  ;;
+    esac
+done
+}
+
+
+#/**
 #         ogGetDiskSize int_ndisk
 #@brief   Muestra el tamaño en KB de un disco.
 #@param   int_ndisk   nº de orden del disco
@@ -407,7 +438,7 @@ PART=$(ogDiskToDev "$1" "$2") || return $?
 case "$(ogGetPartitionId $1 $2)" in
     5|f)  # Procesar detección de tamaño de partición Extendida.
           sfdisk -l $DISK 2>/dev/null | \
-                    awk -v p=$PART '{if ($1==p) {sub (/\*/,""); print $5} }'
+                    awk -v p=$PART '{if ($1==p) {sub (/[^0-9]+/,"",$5); print $5} }'
           ;;
     *)    sfdisk -s $PART
           ;;
