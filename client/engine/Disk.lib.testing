@@ -23,7 +23,7 @@
 #@attention No puede definirse partición de cache y no se modifica si existe.
 #@note    Requisitos: sfdisk, parted, partprobe, awk
 #@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/09
 #@version 0.9.1 - Corrección del redondeo del tamaño del disco.
@@ -141,7 +141,7 @@ rm -f $tmpsfdisk
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: DiskEAC() en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
+#@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009/07/20
 #*/ ##
@@ -184,13 +184,16 @@ return $OG_ERR_NOTFOUND
 #@exception OG_ERR_NOTFOUND Dispositivo no detectado.
 #@note    Requisitos: awk, lvm
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: Disk() en ATA.lib;  HIDRA: DetectarDiscos.sh
-#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@author  Ramon Gomez, ETSII Universidad de Sevilla 
 #@Date    2008/06/19
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
+#@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-07-20
+#@version 1.0.2 - Usar fichero de configuración de discos
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2011-06-17
 #*/ ##
 function ogDiskToDev ()
 {
@@ -206,10 +209,12 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Listar dispositivo para los discos duros (tipos: 3=hd, 8=sd).
-ALLDISKS=$(awk '($1==3 || $1==8) && $4!~/[0-9]/ {printf "/dev/%s ",$4}' /proc/partitions)
-VOLGROUPS=$(vgs -a --noheadings 2>/dev/null | awk '{printf "/dev/%s ",$1}')
-ALLDISKS="$ALLDISKS $VOLGROUPS"
+# Si cambia, generar info. de configuración de discos.
+if [ -z "$DISKSCONF" ] || ! diff -q <(cat /proc/partitions) /tmp/partitions 2>/dev/null; then
+    ogGenerateDiskInfo
+fi
+# Obtener lista de discos del fichero de configuración.
+ALLDISKS=$(cut -f2 -d" " $DISKSCONF)
 
 # Mostrar salidas segun el número de parametros.
 case $# in
@@ -252,8 +257,13 @@ esac
 #/**
 #         ogGenerateDiskInfo
 #@brief   Crea fichero de información de configuración de disco.
+#@note    Fichero de configuración: /etc/disks.conf
+#@note    Requisitos: awk, lvm
+#@version 10.2 - Nueva función para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2011/06/17
 #*/ ##
-function ogGenerateDiskInfoa ()
+function ogGenerateDiskInfo ()
 {
 # Variables locales
 local DEVS d i=1
@@ -263,9 +273,9 @@ DISKSCONF=/etc/disks.conf
 # Detectar metadispositivos.
 vgs -a --noheadings 2>/dev/null            # TODO dmraid, losetup
 # Crear copia del fichero de particiones.
-cp /proc/particions /tmp/particions
+cp /proc/partitions /tmp/partitions
 # Ficheros de dispositivos de disco.
-DEVS=$(awk '$4!~/^(name|)$/ {if ($2%16==0) print "/dev/"$4}' /proc/particions)
+DEVS=$(awk '$4!~/^(name|)$/ {if ($2%16==0) print "/dev/"$4}' /proc/partitions)
 # Generar fichero de configuración
 rm -f $DISKSCONF
 for d in $DEVS; do
@@ -345,7 +355,7 @@ echo $TYPE
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    Requisitos: parted
 #@todo    Queda definir formato para atributos (arranque, oculta, ...).
-#@version 0.9 - Primera version compatible con OpenGNSys.
+#@version 0.9 - Primera version compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/17
 #*/ ##
@@ -377,7 +387,7 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    Requisitos: sfdisk
-#@version 0.9 - Primera versión compatible con OpenGNSys.
+#@version 0.9 - Primera versión compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    25/03/2009
 #*/ ##
@@ -414,7 +424,7 @@ echo $(sfdisk --id $DISK $2 2>/dev/null)
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: SizePartition () en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
+#@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
@@ -560,7 +570,7 @@ echo $TYPE
 #@note    Requisitos: \c parted \c awk
 #@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
 #@attention Las tuplas de valores están separadas por espacios.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
@@ -638,7 +648,7 @@ echo $PARTS | cut -sf5- -d" "
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: SetPartitionActive() en ATA.lib
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version compatible con OpenGNSys.
+#@version 0.9 - Primera version compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/17
 #*/ ##
@@ -674,7 +684,7 @@ parted -s $DISK set $2 boot on 2>/dev/null
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: sfdisk, awk
 #@todo    Compruebar que el tamaño sea numérico positivo y evitar que pueda solaparse con la siguiente partición.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
