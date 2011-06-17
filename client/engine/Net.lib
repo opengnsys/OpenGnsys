@@ -4,7 +4,7 @@
 #@brief    Librería o clase Net
 #@class    Net
 #@brief    Funciones básicas de red.
-#@version  0.10
+#@version  1.0.2
 #@warning  License: GNU GPLv3+
 #*/
 
@@ -37,7 +37,7 @@ echo $HOST
 #/**
 #         ogGetNetInterface
 #@brief   Muestra la interfaz de red del sistema
-#@return  str_interfaz - interfaz de red
+#@return  str_interface - interfaz de red
 #@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
 #@note    Usa las variables utilizadas por el initrd "/etc/net-ethX.conf
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
@@ -45,11 +45,8 @@ echo $HOST
 #*/ ##
 function ogGetNetInterface ()
 {
-	 echo $DEVICE
-
+echo $DEVICE
 }
-
-
 
 
 #/**
@@ -63,19 +60,25 @@ function ogGetNetInterface ()
 #@note    Usa las variables utilizadas por el initrd "/etc/net-ethX.conf
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011-02-24
+#@version 1.0.2 - Soporte para varias tarjetas de red
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-06-17
 #*/ ##
 function ogGetIpAddress ()
 {
 local IP
-if [ -n $IPV4ADDR ]
-then
-	 echo $IPV4ADDR
+if [ -n $IPV4ADDR ]; then
+     IP=$IPV4ADDR
 else
-	# Obtener direcciones IP.        /* (comentario para Doxygen)
-	IP=$(ip address show | awk '$2!~/lo/ { readline; if ($1~/inet$/) {sub (/\/.*/, ""); printf ("%s ", $2)}}')
-	# Mostrar sólo la primera.       (comentario para Doxygen) */
-	echo ${IP%% *}
+    # Obtener direcciones IP.
+    if [ -n "$DEVICE" ]; then
+        IP=$(ip -o address show up dev "$DEVICE" 2>/dev/null | awk '{if ($3~/inet$/) {printf ("%s ", $4)}}')
+    else
+        IP=$(ip -o address show up | awk '$2!~/lo/ {if ($3~/inet$/) {printf ("%s ", $4)}}')
+    fi
 fi
+# Mostrar solo la primera.
+echo ${IP%%/*}       # (comentario para Doxygen) */
 }
 
 
@@ -86,12 +89,19 @@ fi
 #@version 0.10 - Integración en OpenGnSys 0.10
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-02-11
+#@version 1.0.2 - Soporte para varias tarjetas de red
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-06-17
 #*/ ##
 function ogGetMacAddress ()
 {
 local MAC
 # Obtener direcciones Ethernet.
-MAC=$(ip address show | awk '$2!~/lo/ {readline; if ($1~/ether/) printf ("%s ", toupper($2));}')
+if [ -n "$DEVICE" ]; then
+    MAC=$(ip -o address show up dev "$DEVICE" 2>/dev/null | awk '{sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
+else
+    MAC=$(ip -o address show up | awk '$2!~/lo/ {sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
+fi
 # Mostrar sólo la primera.
 echo ${MAC%% *}
 }
