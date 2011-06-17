@@ -458,7 +458,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 case "$(ogGetPartitionId $1 $2)" in
     5|f)  # Procesar detección de tamaño de partición Extendida.
           sfdisk -l $DISK 2>/dev/null | \
-                    awk -v p=$PART '{if ($1==p) {sub (/\*/,""); print $5} }'
+                    awk -v p=$PART '{if ($1==p) {sub (/[^0-9]+/,"",$5); print $5} }'
           ;;
     *)    sfdisk -s $PART
           ;;
