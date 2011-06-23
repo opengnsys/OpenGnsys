@@ -4,7 +4,7 @@
 # Lanzar servicios complementarios del cliente.
 echo -ne "og\nog\n" | passwd root
 #Compatibilidad ssh con el boot-tools 1.0.2
-/etc/init.d/ssh restart || /usr/sbin/sshd
+/usr/sbin/sshd
 #setterm -blank 0 -powersave off -powerdown 0 < /dev/console > /dev/console 2>&1
 ethtool -s $DEVICE wol g 2>/dev/null
 
