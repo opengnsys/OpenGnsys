@@ -5,6 +5,8 @@ export SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 export SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 export SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 
+export SVNOG2=/tmp/opengnsys_installer/opengnsys2
+
 export OGCLIENTBASEDIR=/var/lib/tftpboot/ogclient/
 export OGCLIENTFILE=${OGCLIENTBASEDIR}ogclient.img
 export OGCLIENTMOUNT=${OGCLIENTBASEDIR}ogclientmount
@@ -185,7 +187,8 @@ fi
 ########### parametro:    "host"
 function ogClient2ndSVN()
 {
-ogClientOsInfo $1
+ogClientOsInfo host
+#ogClientOsInfo $1
 #1 la salida de ogClientOsInfo
 local LERROR
 LERROR=TRUE
@@ -263,6 +266,13 @@ then
 	return 1
 fi
 
+#Compatiblidad con og2
+cp -prv ${SVNOG2}/engine/2.0 en /opt/opengnsys/lib/engine/2.0
+cp -prv ${SVNOG2}/ogr/ogr /opt/opengnsys/bin/
+cp -prv ${SVNOG2}/ogr/libogr.py /opt/opengnsys/bin/
+cp -prv ${SVNOG2}/job_executer /opt/opengnsys/bin/
+
+
 cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 if [ $? -ne 0 ]
 then 
@@ -276,6 +286,8 @@ else
 	echoAndLog "$FUNCNAME: Finalizado: OK  "
 	return 0
 fi
+
+
 }
 
 
