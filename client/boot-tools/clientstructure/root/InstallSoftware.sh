@@ -24,7 +24,7 @@ apt-get -y --force-yes install netpipes nfs-common sshfs smbfs smbclient davfs2 
 
 apt-get clean
 # software services
-apt-get -y --force-yes install openssh-server bittornado trickle iptraf screen schroot grub
+apt-get -y --force-yes install openssh-server bittornado trickle iptraf screen schroot grub lighttpd 
 
 # software disk and filesystem
 apt-get -y --force-yes install drbl-ntfsprogs ntfsprogs parted ntfs-3g dosfstools
@@ -35,13 +35,22 @@ apt-get -y --force-yes install btrfs-tools hfsplus hfsprogs hfsutils nilfs-tools
 apt-get -y --force-yes install drbl-partimage fsarchiver pv kexec-tools
 apt-get -y --force-yes install mbuffer
 
+#monitor
+apt-get install bwbar bmon bwm iftop ifstat ibmonitor ifstatus dstat udisk hdparm sdparm blktool testdisk ssmping mii-diag 
 
-apt-get clean
 ## software postconf
 apt-get -y --force-yes install drbl-chntpw chntpw ethtool lshw gawk
 
 # software compressor
 apt-get -y --force-yes install lzma zip unzip gzip lzop drbl-lzop pigz pbzip2 lbzip2 rzip p7zip-full unzip
+
+#plymouth
+apt-get install plymouth plymouth-theme-script
+
+#compatibilidad og2
+apt-get install python-openssl python
+
+
 
 apt-get -y --force-yes remove busybox
 apt-get -y --force-yes install busybox-static  bash-static 
