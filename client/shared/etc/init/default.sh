@@ -21,6 +21,10 @@ cp $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
 # Crear menú por defecto para el cliente
 generateMenuDefault
 
+#Matando plymount para inicir browser o shell
+pkill -9 plymouthd
+
+
 # Arranque de OpenGnSys Client.
 if [ -x "$OPENGNSYS/bin/ogAdmClient" ]; then
     echo "$MSG_LAUNCHCLIENT"
