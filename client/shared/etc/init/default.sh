@@ -1,6 +1,25 @@
 #!/bin/bash
 
 # TODO Separar esta sección en otro script
+
+#httd-log-status
+cp /opt/opengnsys/http/10-cgi.conf /etc/lighttpd/conf-enabled/
+/etc/init.d/lighttpd start
+chmod  755 /opt
+cp /opt/opengnsys/http/* /usr/lib/cgi-bin
+#TODO: 
+dstat -dn 10 > /tmp/bandwidth &
+export OGLOGTRACK=/tmp/track.log
+export OGLOGSTANDAR=/tmp/standar.log
+touch  $OGLOGTRACK
+touch  $OGLOGSTANDAR
+touch  ${OGLOGTRACK}.tmp
+chmod 777 $OGLOGTRACK
+chmod 777 $OGLOGSTANDAR
+chmod 777 ${OGLOGTRACK}.tmp
+echo "preparado" >> $OGLOGSTANDAR
+# http-log-status
+
 # Lanzar servicios complementarios del cliente.
 echo -ne "og\nog\n" | passwd root
 #Compatibilidad ssh con el boot-tools 1.0.2
