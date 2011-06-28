@@ -5,6 +5,9 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 Lista de cambios incluidos en OpenGnSys 1.0.2
 ---------------------------------------------
 
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#370	ogGetMacAddress en host multiples interfaces siempre usa datos eth0 aunque no esté activa
+
 
 Lista de cambios incluidos en OpenGnSys 1.0.1
 ---------------------------------------------
@@ -30,6 +33,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #164	Depurar el instalador del ogclient (duplicado de #404)
 #383	Initrd de boot-tools no gestiona bien los tiempos de configuración de la interfaz de red (duplicado de #404)
 #395	ogclient PXE creado con boot-tools no reconoce NIC Atheros (duplicado de #404)
+#418	Servicio ssh no se activa
 
 Tickets resueltos en módulo OpenGnSys Server:
 #357	Comando web restaurar imagen: intentar activar multicast y torrent
@@ -42,6 +46,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #388	Netboot sobre grupo de aulas muestra ordenadores que no le corresponde
 #390	Formulario de creación de objeto imagen no controla el nombre canonico
 #409	Script updateCache integrado en asistente deployImagen
+#417	Corregir nombres de ficheros de idiomas para catalán
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #398	Script para crear fichero comprimido con el último código del proyecto
@@ -49,7 +54,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #400	Copiar desinstalador y actualizador
 #408	No se actualiza correctamente el tftpboot
 #412	Permisos Netboot para Grub4Dos
- 
+
 Tickets genéricos resueltos:
 #413	Integración de OpenGnSys 1.0.1 en rama principal
 
