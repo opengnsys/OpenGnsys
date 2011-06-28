@@ -25,17 +25,24 @@
 #@exception OG_ERR_IMGSIZEPARTITION  30 Tamaño de la particion es menor al tamaño de la imagen.
 #@todo: el scripts restoreImage limitarlo a origen:fichero destino:particion
 #@version 1.0.1 - Separación en protocolos de transferencia y postconfiguracion
-#@author  
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date   2011-05-11
-#
+#@version 1.0.1 - Separación de los ficheros-log para ser gestionado por el httpd-log
+#@author Antonio J. Doblas Viso. Universidad de Málaga  
+#@date   2011-05-11
 
+
+echo " " > $OGLOGSTANDAR
+echo " " > $OGLOGTRACK
 
 # Registro de ejecución
-echo $* >> $OGLOGFILE
+echo $* >> $OGLOGSTANDAR
+echo "$*" &>> $OGLOGSTANDAR | $(tail -n 1 $OGLOGSTANDAR >> $OGLOGFILE)
+
 
 # Si el origen(pariticion) esta bloqueada salir.
 
-echo "TODO comprobando si esta bloqueado el $1 $2" &>> $OGLOGFILE
+echo "TODO comprobando si esta bloqueado el $1 $2" &>> $OGLOGSTANDAR
 #if ogIsLocked $1 $2; then
 #	ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $1 $2"
 #	exit $?
@@ -50,8 +57,8 @@ REPO=${4:-"REPO"}
 
 if [ "$REPO" == "CACHE" ] 
 then
-	echo "Iniciando un ogRestoreImage CACHE /$3 $1 $2" &>> $OGLOGFILE
-	ogRestoreImage CACHE /"$3" "$1" "$2" &>> $OGLOGFILE
+	echo "[1] Iniciando un ogRestoreImage CACHE /$3 $1 $2" &>> $OGLOGSTANDAR
+	ogRestoreImage CACHE /"$3" "$1" "$2" &>> $OGLOGTRACK
 	RETVAL=$?
 fi	
 
@@ -59,23 +66,25 @@ fi
 
 if [ "$REPO" == "REPO" ]
 then
-	echo "updateCache REPO /$3.img $5 $6"	 &>> $OGLOGFILE 
-	updateCache REPO /$3.img $5 $6	 &>> $OGLOGFILE	
+	echo "[1] updateCache REPO /$3.img $5 $6"	 &>> $OGLOGSTANDAR 
+	updateCache REPO /$3.img $5 $6	 &>> $OGLOGTRACK	
 	RETVAL=$?
 	case $RETVAL in
 		0) 
-		echo "updateCache (correcto); re realiza ogRestoreImage REPO /$3 $1 $2 UNICAST" &>> $OGLOGFILE
-		ogRestoreImage CACHE /"$3" "$1" "$2" &>> $OGLOGFILE
+		 echo "[50] updateCache (correcto)" &>> $OGLOGSTANDAR
+		 echo "[55] Restaurando la imagen desde la cache con comando: ogRestoreImage CACHE /$3 $1 $2 UNICAST" &>> $OGLOGSTANDAR
+		 ogRestoreImage CACHE /"$3" "$1" "$2" &> $OGLOGTRACK
 		RETVAL=$? 
 		;;
 		15)
-		echo "updateCache(no hay CACHE); se realiza ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGFILE 
-		ogRestoreImage REPO /"$3" "$1" "$2" &>> $OGLOGFILE
+		echo "[50] updateCache(no hay CACHE); se realiza ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGSTANDAR
+		echo "[55] Se restaura la imagen directamente desde el REPO: ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGSTANDAR
+		ogRestoreImage REPO /"$3" "$1" "$2" &>> $OGLOGTRACK
 		RETVAL=$? 		
 		;;
 		16)
-		echo "updateCache(no hay espacio sufiente en la CACHE), Se realiza ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGFILE
-		ogRestoreImage REPO /"$3" "$1" "$2" &>> $OGLOGFILE
+		echo "[50] updateCache(no hay espacio sufiente en la CACHE), Se realiza ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGSTANDAR
+		ogRestoreImage REPO /"$3" "$1" "$2" &>> $OGLOGTRACK
 		RETVAL=$? 
 		;;
 	esac		
@@ -83,14 +92,14 @@ fi
 
 if [ $RETVAL == 0 ]
 then
-	echo "Iniciando la Configuracion del Sistema Restaurado" &>> $OGLOGFILE
-	configureOs $1 $2
+	echo "[90] Iniciando la Configuracion del Sistema Restaurado" &>> $OGLOGSTANDAR
+	configureOs $1 $2 &>> $OGLOGTRACK
 fi
-if [ $RETVAL == 0 ]
-then
-	rm $OGLOGFILE
-	touch $OGLOGFILE
-else
-	echo $RETVAL &>> $OGLOGFILE
-fi
+#if [ $RETVAL == 0 ]
+#then
+#	rm $OGLOGFILE
+#	touch $OGLOGFILE
+#else
+#	echo $RETVAL &>> $OGLOGFILE
+#fi
 exit $RETVAL
