@@ -1,8 +1,8 @@
 !#/bin/bash
 #TODO Comprobar si esta los source.
 
-svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
-svn checkout http://www.opengnsys.es/svn/branches/version2/  /tmp/opengnsys_installer/opengnsys2
+#svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
+#svn checkout http://www.opengnsys.es/svn/branches/version2/  /tmp/opengnsys_installer/opengnsys2
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 	
@@ -11,7 +11,7 @@ SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 SVNOG2=/tmp/opengnsys_installer/opengnsys2
  
-OGCLIENTMOUNT=""
+OGCLIENTMOUNT="/"
 
 #ogClientOsInfo host
 #ogClientOsInfo $1
@@ -99,6 +99,11 @@ then
 	echo "$FUNCNAME(): Copying Browser : ERROR"
 	exit 1
 fi
+
+#plymoutyh
+update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/opengnsys/opengnsys.plymouth 100
+update-alternatives --set default.plymouth /lib/plymouth/themes/opengnsys/opengnsys.plymouth 
+
 
 #Compatiblidad con og2
 cp -prv ${SVNOG2}/engine/2.0 en $OGCLIENTMOUNT/opt/opengnsys/lib/engine/2.0
