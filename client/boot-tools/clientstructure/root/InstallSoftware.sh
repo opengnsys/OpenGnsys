@@ -36,7 +36,7 @@ apt-get -y --force-yes install drbl-partimage fsarchiver pv kexec-tools
 apt-get -y --force-yes install mbuffer
 
 #monitor
-apt-get install bwbar bmon bwm iftop ifstat ibmonitor ifstatus dstat udisk hdparm sdparm blktool testdisk ssmping mii-diag 
+apt-get install bwbar bmon iftop ifstat  dstat  hdparm sdparm blktool testdisk ssmping mii-diag
 
 ## software postconf
 apt-get -y --force-yes install drbl-chntpw chntpw ethtool lshw gawk subversion
