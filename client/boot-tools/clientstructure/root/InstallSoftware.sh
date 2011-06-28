@@ -39,7 +39,7 @@ apt-get -y --force-yes install mbuffer
 apt-get install bwbar bmon bwm iftop ifstat ibmonitor ifstatus dstat udisk hdparm sdparm blktool testdisk ssmping mii-diag 
 
 ## software postconf
-apt-get -y --force-yes install drbl-chntpw chntpw ethtool lshw gawk
+apt-get -y --force-yes install drbl-chntpw chntpw ethtool lshw gawk subversion
 
 # software compressor
 apt-get -y --force-yes install lzma zip unzip gzip lzop drbl-lzop pigz pbzip2 lbzip2 rzip p7zip-full unzip
