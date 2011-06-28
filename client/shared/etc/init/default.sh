@@ -3,10 +3,10 @@
 # TODO Separar esta sección en otro script
 
 #httd-log-status
-cp /opt/opengnsys/http/10-cgi.conf /etc/lighttpd/conf-enabled/
+cp /opt/opengnsys/lib/httpd/10-cgi.conf /etc/lighttpd/conf-enabled/
 /etc/init.d/lighttpd start
 chmod  755 /opt
-cp /opt/opengnsys/http/* /usr/lib/cgi-bin
+cp /opt/opengnsys/lib/httpd/* /usr/lib/cgi-bin
 #TODO: 
 dstat -dn 10 > /tmp/bandwidth &
 export OGLOGTRACK=/tmp/track.log
