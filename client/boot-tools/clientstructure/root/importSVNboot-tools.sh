@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 #TODO Comprobar si esta los source.
 
 #svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
@@ -11,7 +11,7 @@ SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 SVNOG2=/tmp/opengnsys_installer/opengnsys2
  
-OGCLIENTMOUNT="/"
+OGCLIENTMOUNT=""
 
 #ogClientOsInfo host
 #ogClientOsInfo $1
@@ -50,7 +50,7 @@ fi
 chmod 775 ${SVNCLIENTDIR}/clientstructure/root/*
 
 # los copiamos
-cp -prv ${SVNCLIENTDIR}/clientstructure/* $OGCLIENTMOUNT
+cp -prv ${SVNCLIENTDIR}/clientstructure/* /
 mkdir -p ${OGCLIENTMOUNT}/opt/opengnsys/
 cp -prv ${SVNCLIENTSTRUCTURE}/* ${OGCLIENTMOUNT}/opt/opengnsys/
 cp -prv ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
@@ -106,12 +106,13 @@ update-alternatives --set default.plymouth /lib/plymouth/themes/opengnsys/opengn
 
 
 #Compatiblidad con og2
-cp -prv ${SVNOG2}/engine/2.0 en $OGCLIENTMOUNT/opt/opengnsys/lib/engine/2.0
+echo "mkdir -p /opt/opengnsys/lib/engine/2.0/"
+mkdir -p /opt/opengnsys/lib/engine/2.0/
+echo "cp -prv ${SVNOG2}/engine/2.0 $OGCLIENTMOUNT/opt/opengnsys/lib/engine/2.0" 
+cp -prv ${SVNOG2}/engine/2.0/ $OGCLIENTMOUNT/opt/opengnsys/lib/engine/
 cp -prv ${SVNOG2}/ogr/ogr $OGCLIENTMOUNT/opt/opengnsys/bin/
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/opt/opengnsys/bin/
 cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
-
-
+cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.7/
 
 cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
