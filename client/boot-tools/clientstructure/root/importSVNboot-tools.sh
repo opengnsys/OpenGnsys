@@ -10,7 +10,7 @@ SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 SVNOG2=/tmp/opengnsys_installer/opengnsys2
-
+ 
 OGCLIENTMOUNT=""
 
 #ogClientOsInfo host
