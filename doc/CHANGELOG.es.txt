@@ -26,6 +26,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #164	Depurar el instalador del ogclient (duplicado de #404)
 #383	Initrd de boot-tools no gestiona bien los tiempos de configuración de la interfaz de red (duplicado de #404)
 #395	ogclient PXE creado con boot-tools no reconoce NIC Atheros (duplicado de #404)
+#418	Servicio ssh no se activa
 
 Tickets resueltos en módulo OpenGnSys Server:
 #357	Comando web restaurar imagen: intentar activar multicast y torrent
@@ -38,6 +39,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #388	Netboot sobre grupo de aulas muestra ordenadores que no le corresponde
 #390	Formulario de creación de objeto imagen no controla el nombre canonico
 #409	Script updateCache integrado en asistente deployImagen
+#417	Corregir nombres de ficheros de idiomas para catalán
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #398	Script para crear fichero comprimido con el último código del proyecto
