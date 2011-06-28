@@ -35,7 +35,7 @@ sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/clientstructure/etc/apt/sour
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Parsing apt.sources : ERROR"
-	return 1
+	exit 1
 fi
 
 #parseamos el script de generación del initrd.
@@ -43,7 +43,7 @@ sed -e "s/OSRELEASE/$OSRELEASE/g" ${SVNCLIENTDIR}/clientstructure/root/GenerateI
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Parsing GenerateInitrd.sh : ERROR"
-	return 1
+	exit 1
 fi
 
 #damos permiso al directorio de scripts 
@@ -57,8 +57,8 @@ cp -prv ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
 
 if [ $? -ne 0 ]
 then 
-	errorAndLog "$FUNCNAME(): Copying client data : ERROR"
-	return 1
+	echo "$FUNCNAME(): Copying client data : ERROR"
+	exit 1
 fi
 
 # copiamos algunas cosas del nfsexport
@@ -81,23 +81,23 @@ cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3
 
 if [ $? -ne 0 ]
 then 
-	errorAndLog "$FUNCNAME(): Linking Browser fonts : ERROR"
-	return 1
+	echo "$FUNCNAME(): Linking Browser fonts : ERROR"
+	exit 1
 fi
 
 # B ########################################################
 cp -pr ${SVNCLIENTSTRUCTURE}/lib/pci.ids $OGCLIENTMOUNT/etc
 if [ $? -ne 0 ]
 then 
-	errorAndLog "$FUNCNAME(): Copying pci.ids : ERROR"
-	return 1
+	echo "$FUNCNAME(): Copying pci.ids : ERROR"
+	exit 1
 fi
 
 cp ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
 if [ $? -ne 0 ]
 then 
-	errorAndLog "$FUNCNAME(): Copying Browser : ERROR"
-	return 1
+	echo "$FUNCNAME(): Copying Browser : ERROR"
+	exit 1
 fi
 
 #Compatiblidad con og2
@@ -113,11 +113,11 @@ cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
 if [ $? -ne 0 ]
 then 
-	errorAndLog "$FUNCNAME(): Copying ogAdmClient : ERROR"
-	return 1
+	echo "$FUNCNAME(): Copying ogAdmClient : ERROR"
+	exit 1
 else
-	echoAndLog "$FUNCNAME: Finalizado: OK  "
-	return 0
+	echo "$FUNCNAME: Finalizado: OK  "
+	exit 0
 fi
 
 
