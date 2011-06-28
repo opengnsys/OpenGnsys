@@ -1,0 +1,11 @@
+TEXTAREA {
+background-color: navy;
+border: black 2px solid;
+color: white;
+font-family: arial, verdana, ms sans serif;
+font-size: 8pt;
+font-weight: normal
+} 
+
+ example1 {color:white; background-color:navy;
+                     font-weight:bold; text-align:center;}
