@@ -507,7 +507,7 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://www.opengnsys.es/downloads"
-	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
+	local FILENAME=ogclient-1.0.2-natty-32bit-beta01-rev2111.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
