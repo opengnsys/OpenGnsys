@@ -65,15 +65,25 @@ $rs->Primero();
 	$router=$rs->campos["router"];
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
-	$infohost=" ip=" 
-			. $ip . ":"
-			. $repo .":" 
-			. $router . ":" 
-			. $netmask .":" 
-			. $hostname .":" 
-			. $netiface . ":none ogrepo="
-			. $repo; 
 $rs->Cerrar();
+
+$cmd->texto="SELECT ipserveradm from entornos";
+$rs=new Recordset;
+$rs->Comando=&$cmd;
+if (!$rs->Abrir()) echo "error";
+
+$rs->Primero();
+        $server=$rs->campos["ipserveradm"];
+$rs->Cerrar();
+
+$infohost=" ip="
+. $ip . ":"
+. $server .":"
+. $router . ":"
+. $netmask .":"
+. $hostname .":"
+. $netiface . ":none ogrepo="
+. $repo;
 
 ###################obtenemos las variables de red del aula.
 
