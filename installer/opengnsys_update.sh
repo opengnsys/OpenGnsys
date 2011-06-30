@@ -517,6 +517,7 @@ function updateClient()
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE | awk '/Length:/ {print $2}')
 	TARGETLENGTH=$(ls -l $TARGETFILE 2>/dev/null | awk '{print $5}')
+	[-z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Client"
 		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
