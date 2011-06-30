@@ -79,6 +79,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - COMMONDEPS, SERVERDEPS, REPODEPS - arrays de dependencias de paquetes
 # - UPDATEPKGLIST, INSTALLPKG, CHECKPKG - comandos para gestión de paquetes
+# - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - configuración de Apache
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
 # - TFTPCFGDIR, SYSLINUXDIR - configuración de TFTP/Syslinux
@@ -96,6 +97,10 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
+		APACHEINIT=/etc/init.d/apache2
+		APACHECFGDIR=/etc/apache2
+		APACHEUSER="www-data"
+		APACHEGROUP="www-data"
 		case "$OSCODENAME" in
 			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
 				DHCPCFGDIR=/etc/dhcp
@@ -115,6 +120,10 @@ case "$OSDISTRIB" in
 		REPODEPS=( samba bittorrent python-tornado ctorrent )		# TODO comprobar paquetes
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q \$package"
+		APACHEINIT=/etc/init.d/httpd
+		APACHECFGDIR=/etc/httpd
+		APACHEUSER="apache"
+		APACHEGROUP="apache"
 		DHCPINIT=/etc/init.d/dhcp
 		DHCPCFGDIR=/etc/dhcp
 		MYSQLINIT=/etc/init.d/mysqld
@@ -229,7 +238,7 @@ function checkDependencies()
 	do
 		checkPackage ${deps[$i]}
 		if [ $? -ne 0 ]; then
-			local_notinstalled[$uncompletedeps]=$package
+			local_notinstalled[$uncompletedeps]=${deps[$i]}
 			let uncompletedeps=uncompletedeps+1
 		fi
 	done
@@ -616,7 +625,11 @@ function svnExportCode()
 function checkNetworkConnection()
 {
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
-	wget --spider -q $OPENGNSYS_SERVER
+	if which wget &>/dev/null; then
+		wget --spider -q $OPENGNSYS_SERVER
+	elif which curl &>/dev/null; then
+		curl -s $OPENGNSYS_SERVER >/dev/null
+	fi
 }
 
 # Obtener los parámetros de red de la interfaz por defecto.
@@ -662,11 +675,11 @@ function getNetworkSettings()
 	# Variables de ejecución de Apache
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
+	if [ -f $APACHECFGDIR/envvars ]; then
+		source $APACHECFGDIR/envvars
 	fi
-	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
+	APACHE_RUN_USER=${APACHE_RUN_USER:-$APACHEUSER}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-$APACHEGROUP}
 }
 
 
@@ -790,7 +803,7 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Descomprimir XAJAX.
-	unzip $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	unzip -q -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
@@ -837,7 +850,7 @@ EOF
 		return 1
 	else
 		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
-		/etc/init.d/apache2 restart
+		$APACHEINIT restart
 		return 0
 	fi
 }
@@ -1226,7 +1239,7 @@ fi
 eval $UPDATEPKGLIST
 
 # Instalación de dependencias (paquetes de sistema operativo).
-MYSQLINSTALLED=$(checkPackage "mysql-server")
+checkPackage "mysql-server"; MYSQLINSTALLED=$?
 checkAndInstall
 if [ $? -ne 0 ]; then
 	echoAndLog "Error while installing some dependeces, please verify your server installation before continue"
@@ -1351,10 +1364,10 @@ installWebFiles
 # Generar páqinas web de documentación de la API
 makeDoxygenFiles
 
-# creando configuracion de apache2
-openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
+# Creando configuración de Apache
+openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET $APACHECFGDIR
 if [ $? -ne 0 ]; then
-	errorAndLog "Error configuring Apache for OpenGnSYS Admin"
+	errorAndLog "Error configuring Apache for OpenGnSys Admin"
 	exit 1
 fi
 
