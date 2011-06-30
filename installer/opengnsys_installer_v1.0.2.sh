@@ -104,18 +104,20 @@ case "$OSDISTRIB" in
 				DHCPCFGDIR=/etc/dhcp3
 				;;
 		esac
+		MYSQLINIT=/etc/init.d/mysql
 		SAMBAINIT=/etc/init.d/smbd
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/lib/syslinux
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora)	COMMONDEPS=( subversion binutils gcc gcc-c++ glibc-devel.i686 glibc-static.i686 libstdc++-static.i686 make wget )		# TODO comprobar paquetes
-		SERVERDEPS=( httpd php mysql-server php-mysql dhcp tftp-server tftp syslinux doxygen graphviz unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		SERVERDEPS=( httpd php mysql-server mysql-devel php-mysql dhcp tftp-server tftp syslinux doxygen graphviz unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		REPODEPS=( samba bittorrent python-tornado ctorrent )		# TODO comprobar paquetes
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q \$package"
-		DHCPINIT=/etc/init.d/dhcpd
+		DHCPINIT=/etc/init.d/dhcp
 		DHCPCFGDIR=/etc/dhcp
+		MYSQLINIT=/etc/init.d/mysqld
 		SAMBAINIT=/etc/init.d/smb
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/share/syslinux
@@ -188,7 +190,7 @@ function isInArray()
 
 function checkPackage()
 {
-	package=$1
+	local package="$1"
 	if [ -z $package ]; then
 		errorAndLog "${FUNCNAME}(): parameter required"
 		exit 1
@@ -357,6 +359,7 @@ function mysqlSetRootPassword()
 
 	local root_mysql="$1"
 	echoAndLog "${FUNCNAME}(): setting root password in MySQL server"
+	$MYSQLINIT restart
 	mysqladmin -u root password "$root_mysql"
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting root password in MySQL server"
@@ -913,7 +916,7 @@ function createDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function openGnsysCopyServerFiles ()
+function copyServerFiles ()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -1033,7 +1036,7 @@ function copyInterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysCopyClientFiles()
+function copyClientFiles()
 {
 	local errstatus=0
 
@@ -1223,6 +1226,7 @@ fi
 eval $UPDATEPKGLIST
 
 # Instalación de dependencias (paquetes de sistema operativo).
+MYSQLINSTALLED=$(checkPackage "mysql-server")
 checkAndInstall
 if [ $? -ne 0 ]; then
 	echoAndLog "Error while installing some dependeces, please verify your server installation before continue"
@@ -1279,15 +1283,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # Copiar ficheros de servicios OpenGnSys Server.
-openGnsysCopyServerFiles ${INSTALL_TARGET}
+copyServerFiles ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
 fi
 
 # Instalar Base de datos de OpenGnSys Admin.
-isInArray notinstalled "mysql-server"
-if [ $? -eq 0 ]; then
+if [ $MYSQLINSTALLED -eq 0 ]; then
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 else
 	mysqlGetRootPassword
@@ -1359,7 +1362,7 @@ popd
 
 
 # Crear la estructura de los accesos al servidor desde el cliente (shared)
-openGnsysCopyClientFiles
+copyClientFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
