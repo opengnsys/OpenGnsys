@@ -13,7 +13,7 @@ CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
 LBIT=$(shell getconf LONG_BIT)
-ifeq ($(LBIT, 64)
+ifeq ($(LBIT), 64)
     LDFLAGS := -L/usr/lib64 -L/usr/lib64/mysql -lpthread -lmysqlclient
 else
     LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient

@@ -78,7 +78,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # Variables globales:
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - COMMONDEPS, SERVERDEPS, REPODEPS - arrays de dependencias de paquetes
-# - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
+# - UPDATEPKGLIST, INSTALLPKG, CHECKPKG - comandos para gestión de paquetes
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
 function autoConfigure()
@@ -104,11 +104,11 @@ case "$OSDISTRIB" in
 				;;
 		esac
 		;;
-	Fedora)	COMMONDEPS=( subversion binutils gcc gcc-c++ make wget )		# TODO comprobar paquetes
+	Fedora)	COMMONDEPS=( subversion binutils gcc gcc-c++ glibc-devel.i686 glibc-static.i686 libstdc++-static.i686 make wget )		# TODO comprobar paquetes
 		SERVERDEPS=( httpd php mysql-server php-mysql dhcp tftp-server syslinux binutils gcc gcc-c++ make wget doxygen graphviz unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		REPODEPS=( samba bittorrent python-tornado ctorrent )		# TODO comprobar paquetes
-		INSTALLPKGS="yum install -y"
-		CHECKPKGS="rpm -q \$package"
+		INSTALLPKG="yum install -y"
+		CHECKPKG="rpm -q \$package"
 		DHCPINIT=/etc/init.d/dhcpd
 		DHCPCFGDIR=/etc/dhcp/dhcpd.conf
 		;;
