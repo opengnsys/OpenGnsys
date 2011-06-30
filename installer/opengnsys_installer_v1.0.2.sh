@@ -98,10 +98,10 @@ case "$OSDISTRIB" in
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
 		case "$OSCODENAME" in
 			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
-				DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+				DHCPCFGDIR=/etc/dhcp
 				;;
 			*)	DHCPINIT=/etc/init.d/dhcp3-server
-				DHCPCFGDIR=/etc/dhcp3/dhcpd.conf
+				DHCPCFGDIR=/etc/dhcp3
 				;;
 		esac
 		SAMBAINIT=/etc/init.d/smbd
@@ -110,12 +110,12 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora)	COMMONDEPS=( subversion binutils gcc gcc-c++ glibc-devel.i686 glibc-static.i686 libstdc++-static.i686 make wget )		# TODO comprobar paquetes
-		SERVERDEPS=( httpd php mysql-server php-mysql dhcp tftp-server syslinux binutils gcc gcc-c++ make wget doxygen graphviz unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		SERVERDEPS=( httpd php mysql-server php-mysql dhcp tftp-server tftp syslinux doxygen graphviz unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		REPODEPS=( samba bittorrent python-tornado ctorrent )		# TODO comprobar paquetes
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q \$package"
 		DHCPINIT=/etc/init.d/dhcpd
-		DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+		DHCPCFGDIR=/etc/dhcp
 		SAMBAINIT=/etc/init.d/smb
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/share/syslinux
