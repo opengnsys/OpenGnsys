@@ -81,6 +81,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - UPDATEPKGLIST, INSTALLPKG, CHECKPKG - comandos para gestión de paquetes
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
+# - TFTPCFGDIR, SYSLINUXDIR - configuración de TFTP/Syslinux
 function autoConfigure()
 {
 # Detectar sistema operativo del servidor (debe soportar LSB).
@@ -103,6 +104,10 @@ case "$OSDISTRIB" in
 				DHCPCFGDIR=/etc/dhcp3/dhcpd.conf
 				;;
 		esac
+		SAMBAINIT=/etc/init.d/smbd
+		SAMBACFGDIR=/etc/samba
+		SYSLINUXDIR=/usr/lib/syslinux
+		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora)	COMMONDEPS=( subversion binutils gcc gcc-c++ glibc-devel.i686 glibc-static.i686 libstdc++-static.i686 make wget )		# TODO comprobar paquetes
 		SERVERDEPS=( httpd php mysql-server php-mysql dhcp tftp-server syslinux binutils gcc gcc-c++ make wget doxygen graphviz unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
@@ -111,6 +116,10 @@ case "$OSDISTRIB" in
 		CHECKPKG="rpm -q \$package"
 		DHCPINIT=/etc/init.d/dhcpd
 		DHCPCFGDIR=/etc/dhcp/dhcpd.conf
+		SAMBAINIT=/etc/init.d/smb
+		SAMBACFGDIR=/etc/samba
+		SYSLINUXDIR=/usr/share/syslinux
+		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
 		exit 1 ;;
@@ -664,18 +673,16 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        local basetftp=/var/lib/tftpboot
-
         echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -ar /usr/lib/syslinux/ ${basetftp}/syslinux
-        cp -a /usr/lib/syslinux/pxelinux.0 ${basetftp}
+        cp -ar $SYSLINUXDIR $TFTPCFGDIR/syslinux
+        cp -a $SYSLINUXDIR/pxelinux.0 $TFTPCFGDIR
         # prepamos el directorio de la configuracion de pxe
-        mkdir -p ${basetftp}/pxelinux.cfg
-        cat > ${basetftp}/pxelinux.cfg/default <<EOF
+        mkdir -p $TFTPCFGDIR/pxelinux.cfg
+        cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
 DEFAULT syslinux/vesamenu.c32 
 MENU TITLE Aplicacion GNSYS 
  
@@ -690,8 +697,6 @@ EOF
         # comprobamos el servicio tftp
         sleep 1
         testPxe
-        ## damos perfimos de lectura a usuario web.
-        chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP ${basetftp}
 }
 
 function testPxe ()
@@ -710,14 +715,14 @@ function smbConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Configuring Samba service."
 
-	backupFile /etc/samba/smb.conf
+	backupFile $SAMBACFGDIR/smb.conf
 	
 	# Copiar plantailla de recursos para OpenGnSys
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
-		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > /etc/samba/smb-og.conf
+		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
-	/etc/init.d/smbd restart
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" $SAMBACFGDIR/smb.conf
+	$SAMBAINIT restart
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
