@@ -12,7 +12,12 @@ CFLAGS := -O0 -g -Wall -I../includes	# Depuracion
 CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
-LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
+LBIT=$(shell getconf LONG_BIT)
+ifeq ($(LBIT, 64)
+    LDFLAGS := -L/usr/lib64 -L/usr/lib64/mysql -lpthread -lmysqlclient
+else
+    LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
+endif
 
 # Ficheros objetos
 OBJS := ../includes/Database.o sources/ogAdmBoot.o 
