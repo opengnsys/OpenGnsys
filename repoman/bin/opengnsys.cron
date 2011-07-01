@@ -1,0 +1,15 @@
+# Comprobamos si los servicios de opengnsys están levantado y si no es así los iniciamos.
+# Variables.
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+LOGDIR="$OPENGNSYS/log"
+
+
+if ! $(pgrep ogAdmServer >> /dev/null); then
+	date +"%d/%m/%Y %T ERROR: El servicio ogAdmServer  estaba caido, se reinicia" >> $LOGDIR/ogAdmServer.log
+	/etc/init.d/opengnsys restart
+fi
+if ! $(pgrep ogAdmRepo >> /dev/null); then
+	date +"%d/%m/%Y %T ERROR: El servicio opAdmRepo  estaba caido, se reinicia" >> $LOGDIR/ogAdmRepo.log
+	/etc/init.d/opengnsys restart
+fi
+
