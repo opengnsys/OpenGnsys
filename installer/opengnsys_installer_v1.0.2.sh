@@ -15,7 +15,7 @@ OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario
 
 ####  AVISO: NO EDITAR. 
 #### configuración de acceso smb para clientes OG.
-OPENGNSYS_CLIENT_USER="opengnsys"		# Nombre del usuario
+OPENGNSYS_CLIENT_USER="opengnsys"	# Nombre del usuario
 OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario opengnsys
 
 
@@ -79,8 +79,11 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - COMMONDEPS, SERVERDEPS, REPODEPS - arrays de dependencias de paquetes
 # - UPDATEPKGLIST, INSTALLPKG, CHECKPKG - comandos para gestión de paquetes
+# - OGACTIVATE, OGINIT - activación e inicio de servicios de OpenGnSys
 # - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - configuración de Apache
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
+# - INETDINIT - arranque de Inetd
+# - MYSQLINIT - arranque de MySQL
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
 # - TFTPCFGDIR, SYSLINUXDIR - configuración de TFTP/Syslinux
 function autoConfigure()
@@ -97,6 +100,8 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
+		OGACTIVATE="update-rc.d opengnsys defaults"
+		OGINIT=/etc/init.d/opengnsys
 		APACHEINIT=/etc/init.d/apache2
 		APACHECFGDIR=/etc/apache2
 		APACHEUSER="www-data"
@@ -109,6 +114,7 @@ case "$OSDISTRIB" in
 				DHCPCFGDIR=/etc/dhcp3
 				;;
 		esac
+		INETDINIT=/etc/init.d/openbsd-inetd
 		MYSQLINIT=/etc/init.d/mysql
 		SAMBAINIT=/etc/init.d/smbd
 		SAMBACFGDIR=/etc/samba
@@ -120,14 +126,17 @@ case "$OSDISTRIB" in
 		REPODEPS=( samba bittorrent python-tornado ctorrent )		# TODO comprobar paquetes
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q \$package"
-		APACHEINIT=/etc/init.d/httpd
-		APACHECFGDIR=/etc/httpd
+		OGACTIVATE="chkconfig opengnsys on"
+		OGINIT="service opengnsys"
+		APACHEINIT="service httpd"
+		APACHECFGDIR=/etc/httpd/conf.d
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
-		DHCPINIT=/etc/init.d/dhcp
+		DHCPINIT="service dhcpd"
 		DHCPCFGDIR=/etc/dhcp
-		MYSQLINIT=/etc/init.d/mysqld
-		SAMBAINIT=/etc/init.d/smb
+		INETDINIT="service xinetd"
+		MYSQLINIT="service mysqld"
+		SAMBAINIT="service smb"
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/share/syslinux
 		TFTPCFGDIR=/var/lib/tftpboot
@@ -691,7 +700,7 @@ function tftpConfigure()
 {
         echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
-        /etc/init.d/openbsd-inetd start
+        $INETDINIT restart
 
         # preparacion contenedor tftpboot
         cp -ar $SYSLINUXDIR $TFTPCFGDIR/syslinux
@@ -1120,7 +1129,7 @@ function openGnsysConfigure()
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux /opt/opengnsys/sbin/
-	update-rc.d opengnsys defaults
+	eval $OGACTIVATE
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
@@ -1163,7 +1172,7 @@ function openGnsysConfigure()
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
-	/etc/init.d/opengnsys start
+	$OGINIT start
 }
 
 
@@ -1303,7 +1312,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Instalar Base de datos de OpenGnSys Admin.
-if [ $MYSQLINSTALLED -eq 0 ]; then
+if [ $MYSQLINSTALLED -ne 0 ]; then
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 else
 	mysqlGetRootPassword
