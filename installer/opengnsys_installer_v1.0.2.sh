@@ -743,7 +743,7 @@ function smbConfigure()
 	backupFile $SAMBACFGDIR/smb.conf
 	
 	# Copiar plantailla de recursos para OpenGnSys
-        sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
 	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" $SAMBACFGDIR/smb.conf
@@ -1133,6 +1133,10 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
+
+	echoAndLog "${FUNCNAME}(): Creating logrotate configuration file."
+	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsys
 
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config files."
 	for dev in ${DEVICE[*]}; do

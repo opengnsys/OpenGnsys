@@ -7,17 +7,17 @@
 
 copytruncate
 compress
-/opt/opengnsys/log/clients/*.log {
+OPENGNSYSDIR/log/clients/*.log {
      rotate 5
      size 100k
 }
 
-/opt/opengnsys/log/mcastlog/ogAdmRepoMcast.* { 
+OPENGNSYSDIR/log/mcastlog/ogAdmRepoMcast.* { 
      rotate 2
      weekly
 }
 
-/opt/opengnsys/log/bttrack.log  /opt/opengnsys/log/ogAdmRepo.log /opt/opengnsys/log/ogAdmServer.log {
+OPENGNSYSDIR/log/bttrack.log OPENGNSYSDIR/log/ogAdmRepo.log OPENGNSYSDIR/log/ogAdmServer.log {
      rotate 4
      weekly
 }

@@ -1060,6 +1060,10 @@ function openGnsysConfigure()
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 
+	echoAndLog "${FUNCNAME}(): Creating logrotate configuration file."
+	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsys
+
 	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config files."
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[i]}" ]; then
