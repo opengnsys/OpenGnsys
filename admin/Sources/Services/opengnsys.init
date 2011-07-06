@@ -78,28 +78,35 @@ config() {
     OSDISTRIB=$(lsb_release -is 2>/dev/null)
     case "$OSDISTRIB" in
         Ubuntu)
-            DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
-            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --name"
-            DAEMONOPTS="--"
-            INITFUNCTIONS=
+            INITFUNCTIONS=/lib/lsb/init-functions
+            DAEMONSTART="start-daemon"
+            DAEMONSTOP="killproc"
+            ACTIONMSG="log_daemon_msg"
+            SUCCESSMSG="log_end_msg 0"
+            FAILMSG="log_end_msg 1"
             ;;
         Fedora)
+            INITFUNCTIONS=/etc/init.d/functions
             DAEMONSTART="daemon"
             DAEMONSTOP="killproc"
-            DAEMONOPTS=""
-            INITFUNCTIONS=/etc/init.d/functions
+            ACTIONMSG="echo -n"
+            SUCCESSMSG="success; echo"
+            FAILMSG="failure; echo"
             ;;
         *)  echo "Distribución Linux desconcocida"
             exit ;;
     esac
+    if [ -x $INITFUNCTIONS ]; then
+        source $INITFUNCTIONS
+    fi
 }
 
 arranca_demonios() {
   if [ $RUN_OGADMSERVER = "yes" ]
   then
-     echo -n "Iniciando demonio: $SERVERNAME"
-     $DAEMONSTART $SERVERDAEMON $DAEMONOPTS $SERVERDAEMON_OPTIONS
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $SERVERNAME"
+     $DAEMONSTART $SERVERDAEMON $SERVERDAEMON_OPTIONS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
   if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]
   then
@@ -107,32 +114,32 @@ arranca_demonios() {
   fi
   if [ $RUN_OGADMREPO = "yes" ]
   then
-     echo -n "Iniciando demonio: $REPONAME"
-     $DAEMONSTART $REPODAEMON $DAEMONOPTS $REPODAEMON_OPTIONS
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $REPONAME"
+     $DAEMONSTART $REPODAEMON $REPODAEMON_OPTIONS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      ############ ADV  	 
-     echo -n "Iniciando demonio: $REPOAUXNAME"
-     faucet $REPOAUXPORT --daemon --in bash -c  "$REPOAUXDAEMON"
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
+     faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      ############ ADV
   fi
   if [ $RUN_OGADMAGENT = "yes" ]
   then
-     echo -n "Iniciando demonio: $AGENTNAME"
-     $DAEMONSTART $AGENTDAEMON $DAEMONOPTS $AGENTDAEMON_OPTIONS
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $AGENTNAME"
+     $DAEMONSTART $AGENTDAEMON $AGENTDAEMON_OPTIONS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi    
   if [ $RUN_BTTRACKER = "yes" ]
   then
-     echo -n "Iniciando demonio: $BTTRACK"
+     $ACTIONMSG "Iniciando demonio: $BTTRACK"
      start-stop-daemon --make-pidfile --pidfile $BTTRACKPID --start --quiet --background --exec $BTTRACK -- $BTTRACK_OPTIONS
-     echo "."
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
   if [ $RUN_BTSEEDER = "yes" ]
   then
-     echo -n "Iniciando demonio: $BTSEEDER"
+     $ACTIONMSG "Iniciando demonio: $BTSEEDER"
      start-stop-daemon --make-pidfile --pidfile $BTSEEDERPID --start --quiet  --background --exec $BTSEEDER -- $BTTORRENTSDIR
-     echo "."
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
 
 }
@@ -140,32 +147,32 @@ arranca_demonios() {
 para_demonios() {
   if [ -e $BTSEEDERPID ]
   then
-    echo -n "Parando demonio: $BTSEEDER"
+    $ACTIONMSG "Parando demonio: $BTSEEDER"
     start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $BTSEEDERPID
-    echo "."
-    rm $BTSEEDERPID > /dev/null
+    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+    rm -f $BTSEEDERPID
   fi
   if [ -e $BTTRACKPID ]
   then
-    echo -n "Parando demonio: $BTTRACK"
+    $ACTIONMSG "Parando demonio: $BTTRACK"
     start-stop-daemon --stop --quiet --oknodo --pidfile $BTTRACKPID
-    echo "."
-    rm $BTTRACKPID > /dev/null
+    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+    rm -f $BTTRACKPID
   fi 
-  echo -n "Parando demonio: $AGENTNAME"
+  $ACTIONMSG "Parando demonio: $AGENTNAME"
   $DAEMONSTOP $AGENTDAEMON
-  echo "." 
-  echo -n "Parando demonio: $REPONAME"
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  $ACTIONMSG "Parando demonio: $REPONAME"
   $DAEMONSTOP $REPODAEMON
-  echo "."
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   ############# ADV
-  echo -n "Parando demonio: $REPOAUXNAME"
+  $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
-  echo "."
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   ############ ADV  
-  echo -n "Parando demonio: $SERVERNAME"
+  $ACTIONMSG "Parando demonio: $SERVERNAME"
   $DAEMONSTOP $SERVERDAEMON
-  echo "."
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
 }
 
 config
