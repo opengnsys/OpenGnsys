@@ -100,9 +100,6 @@ then
 	exit 1
 fi
 
-#plymoutyh
-update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/opengnsys/opengnsys.plymouth 100
-update-alternatives --set default.plymouth /lib/plymouth/themes/opengnsys/opengnsys.plymouth 
 
 
 #Compatiblidad con og2

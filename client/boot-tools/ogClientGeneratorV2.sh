@@ -93,7 +93,10 @@ cat /etc/schroot/schroot.conf | grep ogclient || ogClientSchrootConf
 
 
 ############### FASE 5: Configuración del Segundo Sistema de archivos (img) con la estructura especial de OpenGnsys
-ogClient2ndSVN $TYPECLIENT || exit
+#ogClient2ndSVN $TYPECLIENT || exit
+cp ${SVNCLIENTDIR}/clientstructure/root/* /tmp/
+chmod 777 /tmp/*.sh
+schroot -p -c IMGogclient -- /tmp/importSVNboot-tools.sh 
 
 
 

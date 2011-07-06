@@ -91,6 +91,7 @@ then
 	errorAndLog "$FUNCNAME(): Creando directorio $OGCLIENTMOUNT : ERROR" 
 	return 1
 fi 
+chown -R root:opengnsys $OGCLIENTBASEDIR
 echo "$FUNCNAME(): Creando el disco virtual que almacenará el FS del cliente $OGCLIENTSIZEMB MB de datos físicos" 
 dd if=/dev/zero of=$OGCLIENTFILE bs=1048576 count=$OGCLIENTSIZEMB
 #qemu-img create $OGCLIENTFILE 3G	
@@ -300,21 +301,21 @@ cat << EOF > /etc/schroot/schroot.conf
 type=loopback
 file=/var/lib/tftpboot/ogclient/ogclient.img
 description=ogclient ubuntu luc IMGi
-priority=1
+#priority=1
 users=root
 groups=root
 root-groups=root
 mount-options=-o offset=32256
 root-users=root
-[DIRogclient]
-type=directory
-directory=/var/lib/tftpboot/ogclient/ogclientmount
-description=ogclient ubuntu lucid DIR
-priority=2
-users=root
-groups=root
-root-groups=root
-root-users=root
+#[DIRogclient]
+#type=directory
+#directory=/var/lib/tftpboot/ogclient/ogclientmount
+#description=ogclient ubuntu lucid DIR
+#priority=2
+#users=root
+#groups=root
+#root-groups=root
+#root-users=root
 EOF
 cp /etc/schroot/mount-defaults /etc/schroot/mount-defaults.`getDateTime`
 cat << EOF > /etc/schroot/mount-defaults
@@ -350,6 +351,8 @@ cp /tmp/*-${OSRELEASE} $OGCLIENTBASEDIR
 cp /tmp/initrd.img-${OSRELEASE} ${OGCLIENTBASEDIR}/oginitrd.img
 cp /tmp/vmlinuz-${OSRELEASE} ${OGCLIENTBASEDIR}/ogvmlinuz
 cd -
+chmod -R 755 $OGCLIENTBASEDIR
+
 }
 
 
