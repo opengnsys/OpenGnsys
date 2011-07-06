@@ -14,7 +14,10 @@ Activar el grldr del grub4dos
      /etc/init.d/dhcpd restart
 3) Renombrar cambiar el gestor de arranque de la web, para que use grldr.
     cp /opt/opengnsys/www/principal/boot.php /opt/opengnsys/www/principal/boot.pxelinux.php
-	cp /opt/opengnsys/www/principal/boot.grub4dos.php /opt/opengnsys/www/principal/boot.php
+    cp /opt/opengnsys/www/principal/boot.grub4dos.php /opt/opengnsys/www/principal/boot.php
+
+    cp /opt/opengnsys/www/gestores/gestor_pxe.php /opt/opengnsys/www/gestores/gestor_pxe.pxelinux.php
+    cp /opt/opengnsys/www/gestores/gestor_pxe_grub4dos.php /opt/opengnsys/www/gestores/gestor_pxe.php
     
 4) 
 En la funcion ogBoot, de la libreria Boot.lib descomentar los comentarios del if de las líneas 71 a 85, para que quede 
