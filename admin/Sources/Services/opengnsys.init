@@ -1,13 +1,5 @@
 #! /bin/sh
 
-##########1.0######################################################################################################
-####### Script de arranque de los servicios de OpenGnSys: Servidor ogAdmServer, Servidor de repositorio ogAdmRepo,
-####### Tracker Bittorrent y seeder de imagenes por Bittorrent
-####### autor: jcxifre <jcxifre@unizar.es>
-####### basado en http://www.epilogue.org/~xef4/start-stop-example
-##################################################################################################################
-
-
 ### BEGIN INIT INFO
 # Provides:          opengnsys
 # Required-Start:
@@ -81,11 +73,32 @@ then
         . /etc/default/opengnsys
 fi
 
+# Configuración de arranque según la distribución Linux usada.
+config() {
+    OSDISTRIB=$(lsb_release -is 2>/dev/null)
+    case "$OSDISTRIB" in
+        Ubuntu)
+            DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
+            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --name"
+            DAEMONOPTS="--"
+            INITFUNCTIONS=
+            ;;
+        Fedora)
+            DAEMONSTART="daemon"
+            DAEMONSTOP="killproc"
+            DAEMONOPTS=""
+            INITFUNCTIONS=/etc/init.d/functions
+            ;;
+        *)  echo "Distribución Linux desconcocida"
+            exit ;;
+    esac
+}
+
 arranca_demonios() {
   if [ $RUN_OGADMSERVER = "yes" ]
   then
-     echo -n "Iniciando demonio: "$SERVERNAME
-     start-stop-daemon --start --quiet --background --exec $SERVERDAEMON -- $SERVERDAEMON_OPTIONS
+     echo -n "Iniciando demonio: $SERVERNAME"
+     $DAEMONSTART $SERVERDAEMON $DAEMONOPTS $SERVERDAEMON_OPTIONS
      echo "."
   fi
   if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]
@@ -94,30 +107,30 @@ arranca_demonios() {
   fi
   if [ $RUN_OGADMREPO = "yes" ]
   then
-     echo -n "Iniciando demonio: "$REPONAME
-     start-stop-daemon --start --quiet  --background --exec $REPODAEMON -- $REPODAEMON_OPTIONS
+     echo -n "Iniciando demonio: $REPONAME"
+     $DAEMONSTART $REPODAEMON $DAEMONOPTS $REPODAEMON_OPTIONS
      echo "."
      ############ ADV  	 
-  	 echo -n "Iniciando demonio:  "$REPOAUXNAME
-  	 faucet $REPOAUXPORT --daemon --in bash -c  "$REPOAUXDAEMON"
+     echo -n "Iniciando demonio: $REPOAUXNAME"
+     faucet $REPOAUXPORT --daemon --in bash -c  "$REPOAUXDAEMON"
      echo "."
-	 ############ ADV
+     ############ ADV
   fi
   if [ $RUN_OGADMAGENT = "yes" ]
   then
-     echo -n "Iniciando demonio: "$AGENTNAME $AGENTDAEMON
-     start-stop-daemon --start --quiet --background --exec $AGENTDAEMON -- $AGENTDAEMON_OPTIONS
+     echo -n "Iniciando demonio: $AGENTNAME"
+     $DAEMONSTART $AGENTDAEMON $DAEMONOPTS $AGENTDAEMON_OPTIONS
      echo "."
   fi    
   if [ $RUN_BTTRACKER = "yes" ]
   then
-     echo -n "Iniciando demonio: "$BTTRACK
+     echo -n "Iniciando demonio: $BTTRACK"
      start-stop-daemon --make-pidfile --pidfile $BTTRACKPID --start --quiet --background --exec $BTTRACK -- $BTTRACK_OPTIONS
      echo "."
   fi
   if [ $RUN_BTSEEDER = "yes" ]
   then
-     echo -n "Iniciando demonio: "$BTSEEDER
+     echo -n "Iniciando demonio: $BTSEEDER"
      start-stop-daemon --make-pidfile --pidfile $BTSEEDERPID --start --quiet  --background --exec $BTSEEDER -- $BTTORRENTSDIR
      echo "."
   fi
@@ -127,32 +140,35 @@ arranca_demonios() {
 para_demonios() {
   if [ -e $BTSEEDERPID ]
   then
-    echo -n "Parando demonio: "$BTSEEDER
+    echo -n "Parando demonio: $BTSEEDER"
     start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $BTSEEDERPID
-	echo "."
+    echo "."
     rm $BTSEEDERPID > /dev/null
   fi
   if [ -e $BTTRACKPID ]
   then
-    echo -n "Parando demonio: "$BTTRACK
+    echo -n "Parando demonio: $BTTRACK"
     start-stop-daemon --stop --quiet --oknodo --pidfile $BTTRACKPID
-	echo "."
+    echo "."
     rm $BTTRACKPID > /dev/null
   fi 
-  echo -n "Parando demonio: "$AGENTNAME
-  start-stop-daemon --stop --quiet --oknodo --name $AGENTNAME
+  echo -n "Parando demonio: $AGENTNAME"
+  $DAEMONSTOP $AGENTDAEMON
   echo "." 
-  echo -n "Parando demonio: "$REPONAME
-  start-stop-daemon --stop --quiet --oknodo --name $REPONAME
+  echo -n "Parando demonio: $REPONAME"
+  $DAEMONSTOP $REPODAEMON
   echo "."
   ############# ADV
-  echo -n "Parando demonio: "$REPOAUXNAME
+  echo -n "Parando demonio: $REPOAUXNAME"
   pkill faucet
+  echo "."
   ############ ADV  
-  echo -n "Parando demonio: "$SERVERNAME
-  start-stop-daemon --stop --quiet --oknodo --name $SERVERNAME
+  echo -n "Parando demonio: $SERVERNAME"
+  $DAEMONSTOP $SERVERDAEMON
   echo "."
 }
+
+config
 
 case "$1" in
   start)
