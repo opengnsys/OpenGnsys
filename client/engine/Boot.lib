@@ -68,8 +68,8 @@ case "$TYPE" in
         [ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
         # Activar la partición y copiar Grub4DOS.
         ogSetPartitionActive $1 $2
-        #FIXME: activar seguimiento inicio sesion XP con grub4dos
-		#if `ogGetOsVersion $1 $2 | grep "XP" > /dev/null`
+        #FIXME: activar seguimiento inicio sesion Windows con grub4dos
+		#if `ogGetOsVersion $1 $2 | grep "Windows" > /dev/null`
         #then 
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.me  bs=1024 count=3
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot  bs=1024 count=3
