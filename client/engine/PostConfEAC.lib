@@ -573,16 +573,20 @@ schroot -c linux
 schroot -end-sessiona --all-sessions
 }
 
+####################################################################################
+################### Funciones para postconfiguracion windows #######################
+############# 2011 Jonathan Alonso Martinez  jonathan.alonso@uab.cat ###############
+#################### Universidad Autonoma de Barcelona (Spain)######################
+####################################################################################
 
 #         ogAddCmd path_mountpoint str_filename str_commands
 #@brief   Crea y añade comandos a un archivo para que se pueda ejecutar posteriormente
-#@param   path_mountpoint      directorio donde está montado el sistema Windows
-#@param   str_filename         nombre del fichero cmd (siempre se guardara en windows\system32\para que sea visible por el sistema
-#@param   str_commands         comando o comandos que se añadiran al fichero
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename     	nombre del fichero cmd (siempre se guardara en windows\system32\para que sea visible por el sistema
+#@param   str_commands     	comando o comandos que se añadiran al fichero
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_PARTITION Tipo de partición
-desconocido o no se puede montar.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@version 1.0.2 - Nueva función
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2011-06-29
@@ -595,24 +599,22 @@ if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_commands" \
            "$FUNCNAME /mnt/sda1 filename.cmd" 
     return
-fi    
+fi	
 
-# Error si no se reciben minimo 3 parámetros.
+# Error si no se reciben 3 parámetros.
 [ $# == 3 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
-                
-#cat >> /root/$3 << EOF
+
 cat >> $1/Windows/System32/$2 << EOF
 $3\r\n
 EOF
 }
 
-
-#         ogDomainScript str_domain str_user str_password
+#         ogDomainScript path_mountpoint str_domain str_user str_password
 #@brief   Crea un script .vbs para que se puede ejecutar al inicio para unir al dominio una maquina windows
-#@param   path_mountpoint      directorio donde está montado el sistema Windows
-#@param   str_domain          Dominio donde se quiere conectar
-#@param   str_user             Usuario con privilegios para unir al dominio 
-#@param   str_password         Password del usuario con privilegios 
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_domain      	Dominio donde se quiere conectar
+#@param   str_user     		Usuario con privilegios para unir al dominio 
+#@param   str_password     	Password del usuario con privilegios 
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@version 1.0.2 - Nueva función
@@ -627,12 +629,11 @@ if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_domain str_user str_password" \
            "$FUNCNAME /mnt/sda1 dominio usuario password_usuario"
     return
-fi    
+fi	
 
 # Error si no se reciben 4 parámetros.
 [ $# == 4 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 
-#cat > /root/joindomain.vbs << EOF
 cat > $1/Windows/System32/joindomain.vbs << EOF
 Const JOIN_DOMAIN = 1\r\n
 Const ACCT_CREATE = 2\r\n
@@ -652,21 +653,20 @@ Set objNetwork = CreateObject("WScript.Network")\r\n
 strComputer = objNetwork.ComputerName\r\n
 \r\n
 Set objComputer = GetObject("winmgmts:{impersonationLevel=Impersonate}!\\" & _ \r\n
-                  strComputer & "\root\cimv2:Win32_ComputerSystem.Name='" & _\r\n
-                  strComputer & "'")\r\n
+					strComputer & "\root\cimv2:Win32_ComputerSystem.Name='" & _\r\n
+						strComputer & "'")\r\n
 \r\n
 ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, _\r\n
-              strPassword, strDomain & "\" & strUser, NULL, _\r\n
-              JOIN_DOMAIN + ACCT_CREATE)\r\n
+					strPassword, strDomain & "\" & strUser, NULL, _\r\n
+						JOIN_DOMAIN + ACCT_CREATE)\r\n
 EOF
 }
-
 
 #/**
 #         ogInstallMiniSetup path_mountpoint str_filename
 #@brief   Establece el dato asociado a un valor del registro de Windows.
-#@param   path_mountpoint      directorio donde está montado el sistema Windows
-#@param   str_filename        nombre del archivo .cmd a ejecutar en el arranque (estara en system32 y sera visible por el sistema)
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename    	nombre del archivo .cmd a ejecutar en el arranque (estara en system32 y sera visible por el sistema)
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@version 1.0.2 - Nueva función
@@ -680,20 +680,20 @@ if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename" \
            "$FUNCNAME /mnt/sda1 prueba.cmd"
     return
-fi    
+fi	
 
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 
-#Añadimos una linea al archivo cmd para que una vez acabe la postconfiguracion resetee el mini setup, sino lo haria en cada arranque
+#Añadimos una linea al archivo cmd para que una vez acabe la postconfiguracion resetee
+#el mini setup, sino lo haria en cada arranque
 cat >> $1/Windows/System32/$2 << EOF
 REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f\r\n
 REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f\r\n
 EOF
- 
+
 #Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
 ogSetRegistryValue "$1" SYSTEM "\Setup\SystemSetupInProgress" 1
 ogSetRegistryValue "$1" SYSTEM "\Setup\SetupType" 4
 ogSetRegistryValue "$1" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
 }
-
