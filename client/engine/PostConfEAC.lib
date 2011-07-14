@@ -579,8 +579,45 @@ schroot -end-sessiona --all-sessions
 #################### Universidad Autonoma de Barcelona (Spain)######################
 ####################################################################################
 
+#/**
+#         ogInstallMiniSetup path_mountpoint str_filename
+#@brief   Crea unas claves del registro y el archivo cmd que se ejecutara en el primer arranque estando la maquina en un estado bloqueado
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename    	nombre del archivo .cmd a ejecutar en el arranque (estara en system32 y sera visible por el sistema)
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 1.0.2 - Nueva función
+#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
+#@date    2011-06-29
+#*/ ##
+function ogInstallMiniSetup () {
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename" \
+           "$FUNCNAME /mnt/sda1 filename.cmd"
+    return
+fi	
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+# Creamos el archivo cmd y creamos un par de comandos para que una vez acabe la 
+# postconfiguracion resetee el mini setup, sino lo haria en cada arranque.
+cat > $1/Windows/System32/$2 << EOF
+REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f
+REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f
+EOF
+
+#Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
+ogSetRegistryValue "$1" SYSTEM "\Setup\SystemSetupInProgress" 1
+ogSetRegistryValue "$1" SYSTEM "\Setup\SetupType" 4
+ogSetRegistryValue "$1" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
+}
+
+
 #         ogAddCmd path_mountpoint str_filename str_commands
-#@brief   Crea y añade comandos a un archivo para que se pueda ejecutar posteriormente
+#@brief   Añade comandos al cmd creado por ogInstalMiniSetup
 #@param   path_mountpoint  	directorio donde está montado el sistema Windows
 #@param   str_filename     	nombre del fichero cmd (siempre se guardara en windows\system32\para que sea visible por el sistema
 #@param   str_commands     	comando o comandos que se añadiran al fichero
@@ -597,7 +634,7 @@ function ogAddCmd() {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_commands" \
-           "$FUNCNAME /mnt/sda1 filename.cmd" 
+           "$FUNCNAME /mnt/sda1 filename.cmd command" 
     return
 fi	
 
@@ -605,13 +642,14 @@ fi
 [ $# == 3 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 
 cat >> $1/Windows/System32/$2 << EOF
-$3\r\n
+$3
 EOF
 }
 
 #         ogDomainScript path_mountpoint str_domain str_user str_password
-#@brief   Crea un script .vbs para que se puede ejecutar al inicio para unir al dominio una maquina windows
+#@brief   Crea un script .vbs para unir al dominio una maquina windows y el comando adequado en el archivo cmd creado por ogInstallMiniSetup
 #@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename     	nombre del fichero cmd donde deberemos introducir el comando de ejecutar el script vbs
 #@param   str_domain      	Dominio donde se quiere conectar
 #@param   str_user     		Usuario con privilegios para unir al dominio 
 #@param   str_password     	Password del usuario con privilegios 
@@ -626,74 +664,42 @@ function ogDomainScript() {
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_domain str_user str_password" \
-           "$FUNCNAME /mnt/sda1 dominio usuario password_usuario"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_domain str_user str_password" \
+           "$FUNCNAME /mnt/sda1 filename.cmd domain user password_user"
     return
 fi	
 
 # Error si no se reciben 4 parámetros.
-[ $# == 4 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+[ $# == 5 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 
+# Añadimos en el cmd que se ejecutara al arranque, el comando de ejecutar el script que añade al dominio.
+ogAddCmd $1 "$2" "CSCRIPT joindomain.vbs"
+# Eliminamos el script porque tiene el usuario de administrador de dominio en claro
+ogAddCmd $1 "$2" "del /Q C:\Windows\System32\joindomain.vbs"
+
+# Creamos el archivo joindomain.vbs que nos introduce la maquina en el dominio
 cat > $1/Windows/System32/joindomain.vbs << EOF
-Const JOIN_DOMAIN = 1\r\n
-Const ACCT_CREATE = 2\r\n
-Const ACCT_DELETE = 4\r\n
-Const WIN9X_UPGRADE = 16\r\n
-Const DOMAIN_JOIN_IF_JOINED = 32\r\n
-Const JOIN_UNSECURE = 64\r\n
-Const MACHINE_PASSWORD_PASSED = 128\r\n
-Const DEFERRED_SPN_SET = 256\r\n
-Const INSTALL_INVOCATION = 262144\r\n
-\r\n
-strDomain = "$2"\r\n
-strUser = "$3"\r\n
-strPassword = "$4"\r\n
-\r\n
-Set objNetwork = CreateObject("WScript.Network")\r\n
-strComputer = objNetwork.ComputerName\r\n
-\r\n
-Set objComputer = GetObject("winmgmts:{impersonationLevel=Impersonate}!\\" & _ \r\n
-					strComputer & "\root\cimv2:Win32_ComputerSystem.Name='" & _\r\n
-						strComputer & "'")\r\n
-\r\n
-ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, _\r\n
-					strPassword, strDomain & "\" & strUser, NULL, _\r\n
-						JOIN_DOMAIN + ACCT_CREATE)\r\n
+Const JOIN_DOMAIN = 1
+Const ACCT_CREATE = 2
+Const ACCT_DELETE = 4
+Const WIN9X_UPGRADE = 16
+Const DOMAIN_JOIN_IF_JOINED = 32
+Const JOIN_UNSECURE = 64
+Const MACHINE_PASSWORD_PASSED = 128
+Const DEFERRED_SPN_SET = 256
+Const INSTALL_INVOCATION = 262144
+
+strDomain = "$3"
+strUser = "$4"
+strPassword = "$5"
+
+Set objNetwork = CreateObject("WScript.Network")
+strComputer = objNetwork.ComputerName
+
+Set objComputer = GetObject("winmgmts:{impersonationLevel=Impersonate}!\\\" & _
+    strComputer & "\root\cimv2:Win32_ComputerSystem.Name='" & strComputer & "'")
+
+ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, strPassword, _
+    strDomain & "\" & strUser, NULL, JOIN_DOMAIN + ACCT_CREATE)
 EOF
-}
-
-#/**
-#         ogInstallMiniSetup path_mountpoint str_filename
-#@brief   Establece el dato asociado a un valor del registro de Windows.
-#@param   path_mountpoint  	directorio donde está montado el sistema Windows
-#@param   str_filename    	nombre del archivo .cmd a ejecutar en el arranque (estara en system32 y sera visible por el sistema)
-#@return  (nada)
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@version 1.0.2 - Nueva función
-#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
-#@date    2011-06-29
-#*/ ##
-function ogInstallMiniSetup () {
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename" \
-           "$FUNCNAME /mnt/sda1 prueba.cmd"
-    return
-fi	
-
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
-
-#Añadimos una linea al archivo cmd para que una vez acabe la postconfiguracion resetee
-#el mini setup, sino lo haria en cada arranque
-cat >> $1/Windows/System32/$2 << EOF
-REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f\r\n
-REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f\r\n
-EOF
-
-#Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
-ogSetRegistryValue "$1" SYSTEM "\Setup\SystemSetupInProgress" 1
-ogSetRegistryValue "$1" SYSTEM "\Setup\SetupType" 4
-ogSetRegistryValue "$1" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
 }
