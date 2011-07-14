@@ -9,6 +9,7 @@
 #*/
 
 OGIMG=${OGIMG:-/opt/opengnsys/images}
+ROOTREPO=${ROOTREPO:-"$ROOTSERVER"}
 
 # TODO Revisar proceso de arranque para no montar 2 veces el repositorio.
 if [ $ogactiveadmin == "true" ]; then 
@@ -18,8 +19,8 @@ if [ $ogactiveadmin == "true" ]; then
 	protocol=${potocol:-"smb"}
 	printf "$MSG_MOUNTREPO\n" "$protocol" "$boot"
 	case "$protocol" in
-		nfs)	mount.nfs ${ROOTSERVER}:$OGIMG $OGIMG -o rw,nolock ;;
-		smb)	mount.cifs //${ROOTSERVER}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=og ;;
+		nfs)	mount.nfs ${ROOTREPO}:$OGIMG $OGIMG -o rw,nolock ;;
+		smb)	mount.cifs //${ROOTREPO}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=og ;;
 	esac
 fi
 
