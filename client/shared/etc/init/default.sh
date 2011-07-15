@@ -3,6 +3,7 @@
 # TODO Separar esta sección en otro script
 
 #httd-log-status
+cp /opt/opengnsys/lib/httpd/lighttpd.conf /etc/lighttpd/
 cp /opt/opengnsys/lib/httpd/10-cgi.conf /etc/lighttpd/conf-enabled/
 /etc/init.d/lighttpd start
 chmod  755 /opt
