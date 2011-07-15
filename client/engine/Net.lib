@@ -146,7 +146,7 @@ fi
 function ogGetServerIp ()
 {
 # Obtener direcciones IP.
-if [ -n "$PENGNSYS" ]; then
+if [ -n "$OPENGNSYS" ]; then
     case "$ogprotocol" in
         nfs)  mount | grep " on $OPENGNSYS " | cut -f1 -d: ;;
         smb)  mount | grep " on $OPENGNSYS " | cut -f3 -d/ ;;
