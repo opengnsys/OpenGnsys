@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 ### BEGIN INIT INFO
 # Provides:          opengnsys
@@ -79,7 +79,7 @@ config() {
     case "$OSDISTRIB" in
         Ubuntu)
             INITFUNCTIONS=/lib/lsb/init-functions
-            DAEMONSTART="start-daemon"
+            DAEMONSTART="start_daemon"
             DAEMONSTOP="killproc"
             ACTIONMSG="log_daemon_msg"
             SUCCESSMSG="log_end_msg 0"
@@ -96,7 +96,7 @@ config() {
         *)  echo "Distribución Linux desconcocida"
             exit ;;
     esac
-    if [ -x $INITFUNCTIONS ]; then
+    if [ -r $INITFUNCTIONS ]; then
         source $INITFUNCTIONS
     fi
 }
