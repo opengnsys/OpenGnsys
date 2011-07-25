@@ -7,16 +7,13 @@
 
 
 
-####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
+####  AVISO: Editar configuración de acceso por defecto.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
 OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
-OPENGNSYS_DB_USER="usuog"		# Usuario de acceso
-OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario
-
-####  AVISO: NO EDITAR. 
-#### configuración de acceso smb para clientes OG.
-OPENGNSYS_CLIENT_USER="opengnsys"	# Nombre del usuario
-OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario opengnsys
+OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
+OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario de la base de datos
+OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario de acceso desde el cliente
+OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario del cliente
 
 
 # Mostrar ayuda.
@@ -736,13 +733,18 @@ function testPxe ()
 ########################################################################
 ## Configuracion servicio Samba
 ########################################################################
+
+# Configuración de servidor y cliente Samba.
+# Variables globales:
+# - SAMBAUSER, SAMBAPASS: usuario y clave de acceso a los servicios Samba
 function smbConfigure()
 {
-	echoAndLog "${FUNCNAME}(): Configuring Samba service."
-
-	backupFile $SAMBACFGDIR/smb.conf
+	local CLIENTINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	local CLIENTDIR=$WORKDIR/ogclient
 	
 	# Copiar plantailla de recursos para OpenGnSys
+	echoAndLog "${FUNCNAME}(): Configuring Samba service."
+	backupFile $SAMBACFGDIR/smb.conf
 	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
@@ -753,7 +755,25 @@ function smbConfigure()
 		return 1
 	fi
 	# Crear clave para usuario de acceso a los recursos.
-	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | smbpasswd -a -s $OPENGNSYS_CLIENT_USER
+	if [ -r $CLIENTINITRD ]; then
+		SAMBAUSER="$OPENGNSYS_CLIENT_USER"
+		SAMBAPASS="$OPENGNSYS_CLIENT_PASSWD"
+	else
+		SAMBAUSER="opengnsys"		# Usuario por defecto.
+		SAMBAPASS="og"			# Clave por defecto.
+	fi
+	echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | smbpasswd -a -s $SAMBAUSER
+
+	# Editar la parte de acceso del cliente:
+	#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
+	echoAndLog "${FUNCNAME}(): Configuring Samba client access."
+	mkdir -p $CLIENTDIR
+	pushd $CLIENTDIR 2>/dev/null
+	gzip -dc $CLIENTINITRD | cpio -im
+	sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
+	find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
+	popd 2>/dev/null
+	rm -fr $CLIENTDIR
 
 	echoAndLog "${FUNCNAME}(): Added Samba configuration."
 	return 0
@@ -1106,6 +1126,10 @@ function clientCreate()
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
+	if [ $? != 0 ]; then
+		errorAndLog "${FUNCNAME}(): Unable to mount OpenGnSys Client image"
+		return 1
+	fi
 	cp -vr $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
@@ -1203,8 +1227,9 @@ function installationSummary()
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
 	echoAndLog "Samba configuration directory:    /etc/samba"
+	echoAndLog "Samba client username:            $SAMBAUSER"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
-	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
+	echoAndLog "Web Console admin username:       $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
 	echo
 	echoAndLog "Post-Installation Instructions:"
@@ -1293,13 +1318,6 @@ fi
 
 # Configurando tftp
 tftpConfigure
-
-# Configuración Samba
-smbConfigure
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while configuring Samba server!"
-	exit 1
-fi
 
 # Configuración ejemplo DHCP
 dhcpConfigure
@@ -1397,6 +1415,12 @@ fi
 clientCreate
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client"
+	exit 1
+fi
+# Configuración Samba
+smbConfigure
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while configuring Samba server!"
 	exit 1
 fi
 
