@@ -758,22 +758,25 @@ function smbConfigure()
 	if [ -r $CLIENTINITRD ]; then
 		SAMBAUSER="$OPENGNSYS_CLIENT_USER"
 		SAMBAPASS="$OPENGNSYS_CLIENT_PASSWD"
+		# Editar la parte de acceso del cliente:
+		#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
+		echoAndLog "${FUNCNAME}(): Configuring Samba client access."
+		mkdir -p $CLIENTDIR
+		pushd $CLIENTDIR 2>/dev/null
+		gzip -dc $CLIENTINITRD | cpio -im
+		if [ -f scripts/ogfunctions ]; then
+			sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
+			find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
+		else
+			errorAndLog "${FUNCNAME}(): Warning: unable to change Samba client password"
+		fi
+		popd 2>/dev/null
+		rm -fr $CLIENTDIR
 	else
 		SAMBAUSER="opengnsys"		# Usuario por defecto.
 		SAMBAPASS="og"			# Clave por defecto.
 	fi
 	echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | smbpasswd -a -s $SAMBAUSER
-
-	# Editar la parte de acceso del cliente:
-	#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
-	echoAndLog "${FUNCNAME}(): Configuring Samba client access."
-	mkdir -p $CLIENTDIR
-	pushd $CLIENTDIR 2>/dev/null
-	gzip -dc $CLIENTINITRD | cpio -im
-	sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
-	find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
-	popd 2>/dev/null
-	rm -fr $CLIENTDIR
 
 	echoAndLog "${FUNCNAME}(): Added Samba configuration."
 	return 0
