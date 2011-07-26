@@ -79,8 +79,9 @@ config() {
     case "$OSDISTRIB" in
         Ubuntu)
             INITFUNCTIONS=/lib/lsb/init-functions
-            DAEMONSTART="start_daemon"
-            DAEMONSTOP="killproc"
+            DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
+            EXTRAOPTS="--"
+            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --name"
             ACTIONMSG="log_daemon_msg"
             SUCCESSMSG="log_end_msg 0"
             FAILMSG="log_end_msg 1"
@@ -88,6 +89,7 @@ config() {
         Fedora)
             INITFUNCTIONS=/etc/init.d/functions
             DAEMONSTART="daemon"
+            EXTRAOPTS=""
             DAEMONSTOP="killproc"
             ACTIONMSG="echo -n"
             SUCCESSMSG="success; echo"
@@ -105,7 +107,7 @@ arranca_demonios() {
   if [ $RUN_OGADMSERVER = "yes" ]
   then
      $ACTIONMSG "Iniciando demonio: $SERVERNAME"
-     $DAEMONSTART $SERVERDAEMON $SERVERDAEMON_OPTIONS
+     $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
   if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]
@@ -115,7 +117,7 @@ arranca_demonios() {
   if [ $RUN_OGADMREPO = "yes" ]
   then
      $ACTIONMSG "Iniciando demonio: $REPONAME"
-     $DAEMONSTART $REPODAEMON $REPODAEMON_OPTIONS
+     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      ############ ADV  	 
      $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
@@ -126,7 +128,7 @@ arranca_demonios() {
   if [ $RUN_OGADMAGENT = "yes" ]
   then
      $ACTIONMSG "Iniciando demonio: $AGENTNAME"
-     $DAEMONSTART $AGENTDAEMON $AGENTDAEMON_OPTIONS
+     $DAEMONSTART $AGENTDAEMON $EXTRAOPTS $AGENTDAEMON_OPTIONS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi    
   if [ $RUN_BTTRACKER = "yes" ]
