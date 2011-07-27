@@ -41,8 +41,6 @@ if [ -n "$LOGLEVEL" ]; then
 else
     echo "$*"
 fi
-echo "OpenGnSys $LOGLEVEL $DATETIME $*" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE
-
 }
 
 
