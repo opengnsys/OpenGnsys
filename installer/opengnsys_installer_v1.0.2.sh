@@ -794,16 +794,19 @@ function dhcpConfigure()
 	local errcode=0
 	local i=0
 	local dev=""
+	local ROUTER=""
 
 	backupFile $DHCPCFGDIR/dhcpd.conf
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[$i]}" ]; then
 			backupFile $DHCPCFGDIR/dhcpd-$dev.conf
+			ROUTER="${ROUTERIP[$i]}"
+			ROUTER=${ROUTER:-${SERVERIP[$i]}}
 			sed -e "s/SERVERIP/${SERVERIP[$i]}/g" \
 			    -e "s/NETIP/${NETIP[$i]}/g" \
 			    -e "s/NETMASK/${NETMASK[$i]}/g" \
 			    -e "s/NETBROAD/${NETBROAD[$i]}/g" \
-			    -e "s/ROUTERIP/${ROUTERIP[$i]}/g" \
+			    -e "s/ROUTERIP/$ROUTER/g" \
 			    -e "s/DNSIP/$DNSIP/g" \
 			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCFGDIR/dhcpd-$dev.conf || errcode=1
 		fi
@@ -813,7 +816,7 @@ function dhcpConfigure()
 		errorAndLog "${FUNCNAME}(): error while configuring DHCP server"
 		return 1
 	fi
-	ln -f $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
+	ln -fs $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
 	$DHCPINIT restart
 	echoAndLog "${FUNCNAME}(): Sample DHCP configured in \"$DHCPCFGDIR\"."
 	return 0
@@ -1193,11 +1196,11 @@ function openGnsysConfigure()
 		fi
 		let i++
 	done
-	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
-	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
-	ln -f $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
+	ln -fs $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
+	ln -fs $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	ln -fs $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
+	ln -fs $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	ln -fs $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 	chown root:root $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
