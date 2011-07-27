@@ -64,13 +64,12 @@ BTTRACKPID="/var/run/bttrack.pid"
 BTSEEDERPID="/var/run/btseeder.pid"
 
 
-set -e
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/usr/bin"
 
 # Read config file if it is present.
 if [ -r /etc/default/opengnsys ]
 then
-        . /etc/default/opengnsys
+    source /etc/default/opengnsys
 fi
 
 # Configuración de arranque según la distribución Linux usada.
@@ -170,7 +169,7 @@ para_demonios() {
   ############# ADV
   $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
-  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  [ $? -le 1 ] && $SUCCESSMSG || $FAILMSG
   ############ ADV  
   $ACTIONMSG "Parando demonio: $SERVERNAME"
   $DAEMONSTOP $SERVERDAEMON
