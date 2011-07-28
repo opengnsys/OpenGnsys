@@ -12,8 +12,8 @@ MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
 OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
 OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
 OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario de la base de datos
-OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario de acceso desde el cliente
 OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario del cliente
+
 
 
 # Mostrar ayuda.
@@ -65,6 +65,9 @@ LOG_FILE=/tmp/opengnsys_installation.log
 
 # Base de datos
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
+
+# Usuario de acceso desde el cliente
+OPENGNSYS_CLIENT_USER="opengnsys"
 
 
 #####################################################################
