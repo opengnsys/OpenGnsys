@@ -513,6 +513,8 @@ function updateClient()
 	local SOURCELENGTH
 	local TARGETLENGTH
 	local TMPDIR=/tmp/${FILENAME%.iso}
+	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	local SAMBAPASS
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE | awk '/Length:/ {print $2}')
@@ -525,23 +527,35 @@ function updateClient()
 			errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 			return 1
 		fi
+		# Obtener la clave actual de acceso a Samba para restaurarla.
+		if [ -f $OGINITRD ]; then
+			SAMBAPASS=$(gzip -dc $OGINITRD | \
+				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+i				    grep "^[         ]*OPTIONS=" | \
+				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+		fi
+		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
+		echoAndLog "${FUNCNAME}(): Updatting ogclient files"
+		mkdir -p $TMPDIR
+		mount -o loop,ro $TARGETFILE $TMPDIR
+		rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
+		umount $TMPDIR
+		rmdir $TMPDIR
+		# Recuperar la clave de acceso a Samba.
+		if [ -n "$SAMBAPASS" ]; then
+			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
+					$INSTALL_TARGET/bin/setsmbpass
+		fi
+		# Establecer los permisos.
+		find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
+		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
+		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
+		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
-		echoAndLog "${FUNCNAME}(): Client is already loaded"
+		echoAndLog "${FUNCNAME}(): Client is already updated"
 	fi
-	# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
-	echoAndLog "${FUNCNAME}(): Updatting ogclient files"
-	mkdir -p $TMPDIR
-	mount -o loop,ro $TARGETFILE $TMPDIR
-	rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
-	umount $TMPDIR
-	rmdir $TMPDIR
-
-	# Establecer los permisos.
-	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
-	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
-	echoAndLog "${FUNCNAME}(): Client update successfully"
 }
 
 # Resumen de actualización.

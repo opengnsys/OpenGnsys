@@ -27,12 +27,14 @@ fi
 
 # Crear clave para usuario de acceso a los recursos.
 if [ -r $CLIENTINITRD ]; then
-	stty -echo
+	stty -echo 2>/dev/null
 	echo -n "Clave del usuario Samba: "
 	read SAMBAPASS
+	echo
 	echo -n "Confirmar clave: "
 	read SAMBAPASS2
-	stty echo
+	echo
+	stty echo 2>/dev/null
 	if [ "$SAMBAPASS" != "$SAMBAPASS2" ]; then
 		echo "$PROG: Error: las claves no coinciden" >&2
 		exit 2
