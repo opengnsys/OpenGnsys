@@ -517,7 +517,7 @@ function updateClient()
 	local SAMBAPASS
 
 	# Comprobar si debe actualizarse el cliente.
-	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE | awk '/Length:/ {print $2}')
+	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
 	TARGETLENGTH=$(ls -l $TARGETFILE 2>/dev/null | awk '{print $5}')
 	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
@@ -531,7 +531,7 @@ function updateClient()
 		if [ -f $OGINITRD ]; then
 			SAMBAPASS=$(gzip -dc $OGINITRD | \
 				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
-i				    grep "^[         ]*OPTIONS=" | \
+				    grep "^[ 	]*OPTIONS=" | \
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 		fi
 		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
