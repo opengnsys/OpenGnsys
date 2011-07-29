@@ -22,7 +22,10 @@ echo "preparado" >> $OGLOGSTANDAR
 # http-log-status
 
 # Lanzar servicios complementarios del cliente.
-echo -ne "og\nog\n" | passwd root
+PASS=$(grep "^[ 	]*OPTIONS=" /scripts/ogfunctions 2>&1 | \
+	sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+PASS=${PASS:-"og"}
+echo -ne "$PASS\n$PASS\n" | passwd root 2>/dev/null
 #Compatibilidad ssh con el boot-tools 1.0.2
 /usr/sbin/sshd
 #setterm -blank 0 -powersave off -powerdown 0 < /dev/console > /dev/console 2>&1
