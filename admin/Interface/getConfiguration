@@ -8,6 +8,7 @@
 
 cfg=$(listPrimaryPartitions 1)
 particiones=$(echo $cfg | awk '{n=split($0,sep," ");print n}')
+#cfg="0::::$(ogGetDiskSize 1)"	  # Incluir información de disco (partición 0)
 cfg=""
 for ((par=1;par<=$particiones;par++)); 
 	do

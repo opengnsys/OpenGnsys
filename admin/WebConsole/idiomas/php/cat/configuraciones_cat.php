@@ -45,4 +45,5 @@ $TbMsg[31]='Nombre del S.O.';
 $TbMsg[32]='Tamaño de partición';
 $TbMsg[33]='Nombre de la Imagen ';
 $TbMsg[34]='Perfil software';
+$TbMsg[35]='Disco';
 ?>
