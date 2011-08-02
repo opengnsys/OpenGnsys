@@ -14,9 +14,9 @@ uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i38
 export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 
 
-
 dpkg-divert --local --rename --add /sbin/initctl 
 ln -s /bin/true /sbin/initctl
+
 
 apt-get clean
 apt-get -y update

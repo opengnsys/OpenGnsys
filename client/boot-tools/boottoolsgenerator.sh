@@ -33,28 +33,15 @@ echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
 
 ##########################################################################
 ## FASE 1 -  Instalación de software adicional.
-DEPENDENCIES=( debootstrap subversion schroot squashfs-tools)
+cat /etc/apt/sources.list | grep "http://free.nchc.org.tw/drbl-core" || echo "deb http://free.nchc.org.tw/drbl-core drbl stable " >> /etc/apt/sources.list
 apt-get update
-# InstalaciÃ³n de dependencias (paquetes de sistema operativo).
-declare -a notinstalled
-checkDependencies DEPENDENCIES notinstalled
-if [ $? -ne 0 ]; then
-	installDependencies notinstalled
-	if [ $? -ne 0 ]; then
-		echoAndLog "Error while installing some dependeces, please verify your server installation before continue"
-		exit 1
-	fi
-fi
-########### FIN FASE 1
+apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage apt-get install gpxe
 
 ##### FASE 2   - Asignación de variables
-#obtenemos las variables necesarias.
-btogGetVar
-#obtenemos la información del host.
-btogGetOsInfo
-##### FIN fase 2
+#obtenemos las variables necesarias y la información del host.
+btogGetVar && btogGetOsInfo
 
-############# FASE 3: Creación del Sistema Root (Segundo Sistema archivos (img))
+############# FASE 3: Creación del Sistema raiz RootFS (Segundo Sistema archivos (img))
 ##3.1 creación y formateo del disco virtual. generamos el dispositivo loop.
 file $BTROOTFSIMG | grep "partition 1: ID=0x83"
 if [ $? == 1 ]
@@ -70,26 +57,17 @@ else
 	btogSetFsBase || exit 3
 fi
 
-
-############### FASE 4: Configuración el acceso al Segundo Sistema de archivos (img), para schroot
+# FASE 4: Configuración el acceso al Segundo Sistema de archivos (img), para schroot
 cat /etc/schroot/schroot.conf | grep $BTROOTFSIMG || btogSetFsAccess
 
-
-
-
-############### FASE 5: Configuración del Segundo Sistema de archivos (img) con la estructura especial de OpenGnsys
-cp ${BTSVNBOOTTOOLS}/includes/root/* /tmp/
+# FASE 5: Incorporando con ficheros OG el sistema raiz rootfs 
+cp -prv ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp/
 chmod 777 /tmp/*.sh
-schroot -p -c IMGogclient -- /tmp/importSVNboot-tools.sh 
+schroot -p -c IMGogclient -- /tmp/boottoolsFsOpengnsys.sh 
 
-
-
-
-
-
-############# FASE6: Ejecutamos los scripts de personalización del 2º sistema de archivos (img) desde la jaula schroot
-### 6.1 instalacion de software con apt-get
-schroot -p -c IMGogclient -- /root/InstallSoftware.sh 
+# FASE6: Instalacion de software
+# 6.1 instalacion de software con apt-get
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareInstall.sh 
 echo "saltando" 
  if [ $? -ne 0 ]; then
 	errorAndLog "Instalando sofware adicional OG : ERROR"
@@ -97,60 +75,33 @@ echo "saltando"
 else
 	echoAndLog "Instalando sofware adicional OG: OK"
 fi
-#### 6.2 compilación de software.
+# 6.2 compilación de software.
 cd /
-schroot -p -c IMGogclient -- /root/CompileSoftware.sh
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
 cd -
 
-### 6.3 configuracion hostname passroot securety
-cd /
-schroot -c IMGogclient -- /root/ConfFS.sh
-cd -
-#schroot -c IMGogclient -- echo -ne "og1\nog1\n" | passwd root
-# schroot -c IMGogclient -- passwd root | echo "root"
-
-
-### 6.4 incorporamos la clave publica del servidor
+#Fase 7. Personalizando
+### 7.1 incorporamos la clave publica del servidor
 cd /
 ssh-keygen -q -f /root/.ssh/id_rsa -N ""
 cp /root/.ssh/id_rsa.pub /tmp
-schroot -p -c IMGogclient -- /root/importSshKeys.sh
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSshServer.sh
 cd -
-############ y la del propio cliente.
-schroot -c IMGogclient -- /root/generateSshKeysClient.sh
+### 7.2 y la del propio cliente.
+schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsSshClient.sh
 
-## configuramos los locales.
-schroot -c IMGogclient -- /root/ReconfigureLocales.sh
+## 7.3 configuramos los locales.
+schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsFsLocales.sh
 
 exit 99
-################## FIN fase 6.   Fin de comfiguración del segundo sistema de archivos (img)
 
-
-
-
-
-
-
-
-
-
-
-
-################## FASE 7.  Generamos el 1er sistema de archivos. INITRD
+#Fase 7. Generando la ISO.
+#7.1 el initrd
 btogFsInitrd
-
-
-################## FASE 8. convertimos el 2ºFS(img) en 2ºFS(sqfs)
-# generamos el 2sistema de archivos en squashfs
-ogClient2ndSqfs
-################## FIN FASE 8. convertimos el 2ºFS(img) en 2ºFS(sqfs)
-
-
-##################### FASE 9. algunos detallas del pxe
-#dejamos ficheros de ejemplo para el pxe y el nfs
-#ogClientConfpxe
-##################### FIN FASE 9. algunos detallas del pxe
-
+#7.2 Convertivos el sistema raiz img en formato sqfs
+btogFsSqfs
+#7.3 Generamos la iso
+btogIsoGenerator
 
 # Mostrar sumario de la instalaciÃ³n e instrucciones de post-instalaciÃ³n.
 installationSummary

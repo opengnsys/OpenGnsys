@@ -45,7 +45,7 @@ fi
 #fi
 
 #damos permiso al directorio de scripts 
-chmod 775 ${SVNCLIENTDIR}/clientstructure/root/*
+chmod -R 775 ${SVNCLIENTDIR}/includes/usr/bin/*
 
 # los copiamos
 cp -prv ${SVNCLIENTDIR}/includes/* /

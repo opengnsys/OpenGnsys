@@ -9,11 +9,9 @@
 #*/
 
 
-
-
 # btGetVariables: define las constantes a utilizar
 # Autor: Antonio J. Doblas Viso. Universidad de Málaga.
-btogGetVar()
+function btogGetVar()
 {
 export BTSVNBOOTTOOLS=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 export BTSVNSHARE=/tmp/opengnsys_installer/opengnsys/client/shared
@@ -75,7 +73,7 @@ function btogGetOsInfo ()
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
 # error code return 2
-btogSetFsVirtual ()
+function btogSetFsVirtual ()
 {
 
 local RERROR  DISKLOOP PARTLOOP #return code error
@@ -157,7 +155,7 @@ fi
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
 # error code return 3
-btogSetFsBase ()
+function btogSetFsBase ()
 {
 
 # Dependencias
@@ -197,7 +195,7 @@ fi
 #@version 1.0 - Compatibilidad OpengGnsys X.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
-btogSetFsAccess()
+function btogSetFsAccess()
 {
 echoAndLog "$FUNCNAME: Iniciando la configuración del schroot "
 cp /etc/schroot/schroot.conf /etc/schroot/schroot.conf.`getDateTime`
@@ -243,45 +241,46 @@ return 0
 #@version 1.0 - Compatibilidad OpengGnsys X.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
-btogFsInitrd ()
+function btogFsInitrd ()
 {
 #DEPENDENCIAS
-ogClientVar	
-ogClientOsInfo
-# $1
+[ -z "$BTROOTFSIMG" ] && btogGetVar
+[ -z "$OSCODENAME" ] && btogGetOsInfo
+
+
 #TODO generara md5 del kernel y del initrd.
 
 cd /
-schroot -c IMGogclient -- /root/GenerateInitrd.generic.sh
-echo "cp /tmp/*-${OSRELEASE} $OGCLIENTBASEDIR"
-cp /tmp/*-${OSRELEASE} $OGCLIENTBASEDIR
-cp /tmp/initrd.img-${OSRELEASE} ${OGCLIENTBASEDIR}/oginitrd.img
-cp /tmp/vmlinuz-${OSRELEASE} ${OGCLIENTBASEDIR}/ogvmlinuz
+schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsInitrdGenerate.sh
+echo "cp /tmp/*-${OSRELEASE} ${BTTARGETDIR}"
+cp /tmp/*-${OSRELEASE} ${BTTARGETDIR}
+cp /tmp/initrd.img-${OSRELEASE} ${BTTARGETDIR}/oginitrd.img
+cp /tmp/vmlinuz-${OSRELEASE} ${BTTARGETDIR}/ogvmlinuz
 cd -
 chmod -R 755 $OGCLIENTBASEDIR
 }
 
-#btogFsToSqfs   convierte el sistema root en sqfs
+#btogFsSqfs   convierte el sistema root en sqfs
 #@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2010/05/24
 #@version 1.0 - Compatibilidad OpengGnsys X.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
-btogFsSqfs ()
+function btogFsSqfs ()
 {
 #Dependencias.
 ogClientVar	
 
 echoAndLog "$FUNCNAME: Iniciando la creación del sistema de archivos en sqfs "
 # si ya existe un sqfs lo renombramos
-[ -f $OGCLIENTBASEDIR/ogclient.sqfs ] && mv $OGCLIENTBASEDIR/ogclient.sqfs $OGCLIENTBASEDIR/ogclient.sqfs.`date +%Y%m%d-%H%M%S`
-mount | grep $OGCLIENTMOUNT || mount $OGCLIENTFILE $OGCLIENTMOUNT -o loop,offset=32256
+[ -f $BTTARGETDIR/ogclient.sqfs ] && mv $BTTARGETDIR/ogclient.sqfs $BTTARGETDIR/ogclient.sqfs.`date +%Y%m%d-%H%M%S`
+mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
 
-mksquashfs $OGCLIENTMOUNT $OGCLIENTBASEDIR/ogclient.sqfs
-chmod 744 $OGCLIENTBASEDIR/ogclient.sqfs
+mksquashfs $BTROOTFSMNT $BTTARGETDIR/ogclient.sqfs
+chmod 744 $BTTARGETDIR/ogclient.sqfs
 
-mount | grep $OGCLIENTMOUNT && umount $OGCLIENTMOUNT
+mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
 }
 
 
@@ -296,9 +295,6 @@ mount | grep $OGCLIENTMOUNT && umount $OGCLIENTMOUNT
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
 function btogIsoGenerator {
-apt-get install syslinux genisoimage
-#TODO: deb http://free.nchc.org.tw/drbl-core drbl stable
-#apt-get install gpxe
 mkdir -p /tmp/iso/isolinux
 #cd tmp/iso/
 cp -prv /usr/lib/syslinux/* /tmp/iso/isolinux/
@@ -320,16 +316,6 @@ MENU LABEL gpxe
 KERNEL /clonezilla/live/vmlinuz1
 APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
 
-
-#default 0
-#prompt 1
-#timeout 100
-
-#display mensaje.txt
-
- 
-
-
 LABEL 0
 MENU LABEL ogClient vga irqpool acpi ogdebug ip:none
 KERNEL /ogclient/linuxISO
@@ -350,33 +336,24 @@ MENU LABEL ogClient ip=dhcp
 KERNEL /ogclient/linuxISO
 APPEND initrd=/ogclient/oginitrd.img ro acpi=off boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=dhcp
 
-
-#LABEL ogclient
-#KERNEL /ogclient/linuxISO
-#APPEND initrd=/ogclient/initrdISO.img
-
-#KERNEL linuxISO
-#APPEND initrd=initrdISO.img
-
 LABEL 4
 MENU LABEL local
 localboot 0x80
 append -
 
-
 label 5
 MENU LABEL Network boot via gPXE lkrn
 KERNEL gpxe.lkrn
 
-label 5
+label 6
 MENU LABEL Network boot via gPXE usb
 KERNEL gpxe.usb
 
-label 5
+label 7
 MENU LABEL Network boot via gPXE  pxe
 KERNEL gpxe.pxe
 
-label 5
+label 8
 MENU LABEL Network boot via gPXE  iso
 KERNEL gpxe.iso
 FIN
@@ -390,7 +367,6 @@ mkisofs -V ogClient -o ogClient.iso -b isolinux/isolinux.bin -c isolinux/boot.ca
 #linux /ogvmlinuz ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=none
 #initrd /oginitrd.img
 #}
-
 
 }
 
