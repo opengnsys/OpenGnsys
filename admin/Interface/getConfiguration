@@ -6,41 +6,38 @@
 # par=Número de particion\tcod=Código de partición\tsfi=Sistema de ficheros\tsoi=Sistema instalado\ttam=Tamaño de la partición\n
 #_______________________________________________________________________________________________________________________________
 
+#particiones=$(listPartitions 1 | wc -w)  # Incluir todas las particiones
+#cfg="0::::$(ogGetDiskSize 1);"           # e información de disco (partición 0)
 cfg=$(listPrimaryPartitions 1)
 particiones=$(echo $cfg | awk '{n=split($0,sep," ");print n}')
-#cfg="0::::$(ogGetDiskSize 1)"	  # Incluir información de disco (partición 0)
 cfg=""
+
 for ((par=1;par<=$particiones;par++)); 
-	do
-		# Tipo de partición o sistema de fichero
-		fsi=$(getFsType 1 $par 2>/dev/null)
-		fsi=${fsi:-"EMPTY"}
-		# Tamaño de la particón
-		tam=$(ogGetPartitionSize 1 $par 2>/dev/null)
-		tam=${tam:-"0"}
-		# Código de la partición
-		cod=$(ogFsToId $fsi)
+do
+	# Tipo de partición o sistema de fichero
+	fsi=$(getFsType 1 $par 2>/dev/null)
+	fsi=${fsi:-"EMPTY"}
+	# Código de la partición
+	cod=$(ogFsToId $fsi)
+	# Tamaño de la particón
+	tam=$(ogGetPartitionSize 1 $par 2>/dev/null)
+	tam=${tam:-"0"}
+	# Sistema de fichero instalado 
+	if [ $cod == 82 ]; then
+		soi=" "
+	else
+		soi=$(getOsVersion 1 $par 2>/dev/null | cut -f2 -d:)
+   	fi	
 
-		
-		if [ $cod == 82 ]; then
-			soi=" "
-		else
-			# Sistema de fichero instalado 
-			soi=$(getOsVersion 1 $par 2>/dev/null)
-			soi=$(echo $soi | awk '{split($0,sep,":"); print sep[2]}')
-   		 fi	
-		
-		cfg=$(echo $cfg$par":"$cod":"$fsi":"$soi":"$tam";")
-
+	cfg="$cfg$par:$cod:$fsi:$soi:$tam;"
 done
 
 echo $cfg | awk '{
-							n=split($0,sep,";");
-							for(i=1;i<n;i++){
-									split(sep[i],dua,":");
-								 	printf("par=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",dua[1],dua[2],dua[3],dua[4],dua[5]);
-							}
-				 	
-							}'
+		n=split($0,sep,";");
+		for(i=1;i<n;i++){
+			split(sep[i],dua,":");
+		 	printf("par=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",dua[1],dua[2],dua[3],dua[4],dua[5]);
+			}
+		}'
 
 
