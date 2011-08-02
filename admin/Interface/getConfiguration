@@ -6,11 +6,8 @@
 # par=Número de particion\tcod=Código de partición\tsfi=Sistema de ficheros\tsoi=Sistema instalado\ttam=Tamaño de la partición\n
 #_______________________________________________________________________________________________________________________________
 
-#particiones=$(listPartitions 1 | wc -w)  # Incluir todas las particiones
-#cfg="0::::$(ogGetDiskSize 1);"           # e información de disco (partición 0)
-cfg=$(listPrimaryPartitions 1)
-particiones=$(echo $cfg | awk '{n=split($0,sep," ");print n}')
-cfg=""
+particiones=$(listPartitions 1 | wc -w)   # Incluir todas las particiones
+cfg="0::::$(ogGetDiskSize 1);"            # e información de disco (partición 0)
 
 for ((par=1;par<=$particiones;par++)); 
 do
