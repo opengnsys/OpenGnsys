@@ -165,7 +165,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
-					$disksize = tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores);
+					$disksize = tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
 				}
 				else {  // Información de partición (numpart>0)
 					echo'<TR height=16>'.chr(13);
@@ -179,7 +179,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);					
 
 					//echo'<TD align=rigth>&nbsp;'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</TD>'.chr(13);
-					echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
+					echo'<TD align=right>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
 										
 					//echo'<TD>&nbsp;'.$tbKeys[$k]["imagen"].'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
@@ -196,11 +196,11 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	// Mostrar información del disco, si se ha obtenido.
 	if (!empty ($disksize)) {
 		echo'<tr height="16">'.chr(13);
-		echo'<td align="center">'.$TbMsg[35].'</td>'.chr(13);
+		echo'<td align="center"&nbsp;>'.$TbMsg[35].'&nbsp;</td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
-		echo'<td align="center">'.$disksize.'</td>'.chr(13);
+		echo'<td align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'</tr>'.chr(13);

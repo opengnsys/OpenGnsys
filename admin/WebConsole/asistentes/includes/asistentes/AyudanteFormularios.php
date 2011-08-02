@@ -362,9 +362,13 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
+		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
+			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
+				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
+					$disksize = tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
+				}
+				else {  // Información de partición (numpart>0)
 					echo'<TR height=16>'.chr(13);
 					echo'<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
@@ -376,7 +380,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);					
 
 					//echo'<TD align=rigth>&nbsp;'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</TD>'.chr(13);
-					echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
+					echo'<TD align=right>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
 										
 					//echo'<TD>&nbsp;'.$tbKeys[$k]["imagen"].'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
@@ -388,7 +392,20 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					break;
 				}
 			}
+		}
 	}	
+	// Mostrar información del disco, si se ha obtenido.
+	if (!empty ($disksize)) {
+		echo'<tr height="16">'.chr(13);
+		echo'<td align="center"&nbsp;>'.$TbMsg[35].'&nbsp;</td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'</tr>'.chr(13);
+	}
 	echo '<TR height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
 }
 
