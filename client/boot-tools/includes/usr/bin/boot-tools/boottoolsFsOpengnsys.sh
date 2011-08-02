@@ -103,9 +103,9 @@ cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/opt/opengnsys/lib/python
 
 
 echo "mkdir -p /opt/opengnsys/lib/engine/"
-mkdir -p /opt/opengnsys/lib/engine/
-echo "cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/lib/engine/" 
-cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/lib/engine/
+mkdir -p /opt/opengnsys/engine/
+echo "cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/" 
+cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/
 
 
 cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/

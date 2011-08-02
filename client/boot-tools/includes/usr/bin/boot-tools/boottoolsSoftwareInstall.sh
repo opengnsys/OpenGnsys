@@ -35,7 +35,7 @@ apt-get clean
 apt-get -y --force-yes install openssh-server bittornado trickle iptraf screen schroot grub lighttpd 
 
 # software disk and filesystem
-apt-get -y --force-yes install drbl-ntfsprogs ntfsprogs parted ntfs-3g dosfstools
+apt-get -y --force-yes install drbl-ntfsprogs ntfsprogs parted ntfs-3g dosfstools ncdu
 apt-get -y --force-yes install dmraid dmsetup lvm2 e2fsprogs jfsutils reiserfsprogs xfsprogs unionfs-fuse mhddfs squashfs-tools
 apt-get -y --force-yes install  hfsplus hfsprogs hfsutils nilfs-tools reiser4progs ufsutils
 
