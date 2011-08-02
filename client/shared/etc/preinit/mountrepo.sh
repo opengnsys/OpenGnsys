@@ -20,7 +20,7 @@ if [ $ogactiveadmin == "true" ]; then
 	printf "$MSG_MOUNTREPO\n" "$protocol" "$boot"
 	case "$protocol" in
 		nfs)	mount.nfs ${ROOTREPO}:$OGIMG $OGIMG -o rw,nolock ;;
-		smb)	PASS=$(grep "^[         ]*OPTIONS=" /scripts/ogfunctions 2>&1 | \
+		smb)	PASS=$(grep "^[ 	]*OPTIONS=" /scripts/ogfunctions 2>&1 | \
 				sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 			PASS=${PASS:-"og"}
 			mount.cifs //${ROOTREPO}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=$PASS
