@@ -1,5 +1,22 @@
 #!/bin/bash
 
+#/**
+#         deployImage
+#@brief   Actualiza la cache del cliente con una imagen, y la restaura en la partición.
+#@param 1 
+#@param ejemplo:  
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note   
+#@todo: 
+#@version 0.9.1 - integracion EAC
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2008/03/17
+#@version 0.9.2 - integracion OpenGnsys
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/07/27
+#*/ ##
+
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then

@@ -24,6 +24,9 @@
 #@version 1.0. - Adaptacion variables. Corrección enlace red
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2011/06/16
+#@version 1.0.1 - Adaptacion inicio multiples dispositivos, usb, red, cd
+#@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
+#@date    2011/07/4
 #*/
 
 

@@ -1,17 +1,26 @@
 #!/bin/bash
 
-# Scirpt para la actualizacion de datos en la cache.
-# Versión: 0.9.1, 2008/03/17, - integracion eac
-# Versión: 0.9.2, 2010/07/27, -  integracion opengnsys
 
-
-
-#1 REPO
-#2 nombre del fichero con su extension, tipo /imagen1.img  o /ubuntu.iso
-#3 Protocolo TORRENT | MULTICAST    | UNICAST
-#4 opciones protocolo   
-#5 opciones de update cache
-
+#/**
+#         updateCache
+#@brief   Actualiza la cache del cliente con imagen o fichero iso.
+#@param 1 REPO          Origen del fichero. -accesible por nfs-samba-
+#@param 2 str_fichero.{img iso}  nombre del fichero a actualizar.
+#@param 3 str_protoco.  TORRENT | MULTICAST    | UNICAST.
+#@param 4 str_opcionesprotocolo
+#@param 4 str_opcionesupdatecache
+#@ejemplo: oneRemoteFromMaster 172.17.36.11 CACHE /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note   
+#@todo: 
+#@version 0.9.1 - integracion EAC
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2008/03/17
+#@version 0.9.2 - integracion OpenGnsys
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/07/27
+#*/ ##
 
 PROG="$(basename $0)"
 if [ $# -lt 3 ]; then

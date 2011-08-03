@@ -28,7 +28,7 @@ apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEAS
 apt-get -y --force-yes install console-data locales
 
 # sofware networking
-apt-get -y --force-yes install netpipes nfs-common sshfs smbfs smbclient davfs2 unionfs-fuse open-iscsi nmap tcpdump arping dnsutils
+apt-get -y --force-yes install netpipes nfs-common sshfs smbfs smbclient davfs2 unionfs-fuse open-iscsi nmap tcpdump arping dnsutils tftp
 
 apt-get clean
 # software services
@@ -46,7 +46,7 @@ apt-get -y --force-yes install drbl-partimage fsarchiver pv kexec-tools
 apt-get -y --force-yes install mbuffer
 
 #monitor
-apt-get install bwbar bmon iftop ifstat  dstat  hdparm sdparm blktool testdisk ssmping mii-diag
+apt-get -y --force-yes install bwbar bmon iftop ifstat  dstat  hdparm sdparm blktool testdisk ssmping mii-diag
 
 ## software postconf
 apt-get -y --force-yes install drbl-chntpw chntpw ethtool lshw gawk subversion
@@ -56,14 +56,17 @@ apt-get -y --force-yes install lzma zip unzip gzip lzop drbl-lzop pigz pbzip2 lb
 
 
 #compatibilidad og2
-apt-get install python-openssl python
+apt-get -y --force-yes install python-openssl python
 
 
 
 apt-get -y --force-yes remove busybox
 apt-get -y --force-yes install busybox-static  bash-static 
+
+
+#apt-get -y --force-yes install xorg-dev xorg lxde roxterm
+
 apt-get clean
-#apt-get -y --force-yes xorg-dev xorg lxde roxterm
 #
 ####################################################################
 ###################### Reconfigurando paquetes ######################

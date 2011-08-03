@@ -13,6 +13,7 @@
 # Autor: Antonio J. Doblas Viso. Universidad de Málaga.
 function btogGetVar()
 {
+
 export BTSVNBOOTTOOLS=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 export BTSVNSHARE=/tmp/opengnsys_installer/opengnsys/client/shared
 export BTSVNENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
@@ -23,10 +24,16 @@ export BTTARGETDIR=/var/lib/tftpboot/ogclient/
 export BTROOTFSIMG=${BTTARGETDIR}ogclient.img
 export BTROOTFSMNT=${BTTARGETDIR}ogclientmount
 # tamaño maximo limitado por schroot 2GB
-export BTVIRTUALDISKSIZE=1000
+export BTVIRTUALDISKSIZE=2000
 export BTROOTFSIMGLABEL=ogClient
 
 export LOG_FILE=/tmp/boot-tools_installation.log
+
+NAMEISOCLIENT=`cat /tmp/opengnsys_info_rootfs`
+NAMEHOSTCLIENT=`cat /tmp/opengnsys_chroot`
+
+export NAMEISOCLIENT
+export NAMEHOSTCLIENT
 }
 
 
@@ -228,6 +235,8 @@ proc            /proc           proc    defaults        0       0
 /tmp            /tmp            none    rw,bind         0       0                                                                
 EOF
 
+rm /etc/schroot/setup.d/*chrootname
+
 echoAndLog "$FUNCNAME: Finalizado: OK  "
 return 0
 }
@@ -247,17 +256,26 @@ function btogFsInitrd ()
 [ -z "$BTROOTFSIMG" ] && btogGetVar
 [ -z "$OSCODENAME" ] && btogGetOsInfo
 
-
-#TODO generara md5 del kernel y del initrd.
-
 cd /
 schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsInitrdGenerate.sh
 echo "cp /tmp/*-${OSRELEASE} ${BTTARGETDIR}"
 cp /tmp/*-${OSRELEASE} ${BTTARGETDIR}
+#Creando copias de las version oginitr y ogvmlinux previas
+TIMEMOD=`date +%Y%m%d-%H%M%S`
+[ -f $BTTARGETDIR/oginitrd.img ] && mv $BTTARGETDIR/oginitrd.img $BTTARGETDIR/oginitrd.img.$TIMEMOD;  mv $BTTARGETDIR/oginitrd.img.sum $BTTARGETDIR/oginitrd.img.sum.$TIMEMOD
+[ -f $BTTARGETDIR/ogvmlinuz ] && mv $BTTARGETDIR/ogvmlinuz $BTTARGETDIR/ogvmlinuz.$TIMEMOD; mv $BTTARGETDIR/ogvmlinuz.sum $BTTARGETDIR/ogvmlinuz.sum.$TIMEMOD
+
+#copiando
 cp /tmp/initrd.img-${OSRELEASE} ${BTTARGETDIR}/oginitrd.img
 cp /tmp/vmlinuz-${OSRELEASE} ${BTTARGETDIR}/ogvmlinuz
+#generamos md5 del kernel y del initrd.
+DATASUM=`md5sum "${BTTARGETDIR}/oginitrd.img" | cut -f1 -d" "`
+echo $DATASUM > ${BTTARGETDIR}/oginitrd.img.sum
+DATASUM=`md5sum "${BTTARGETDIR}/ogvmlinuz" | cut -f1 -d" "`
+echo $DATASUM > ${BTTARGETDIR}/ogvmlinuz.sum
+#Damos permisos
 cd -
-chmod -R 755 $OGCLIENTBASEDIR
+chmod -R 755 $BTTARGETDIR
 }
 
 #btogFsSqfs   convierte el sistema root en sqfs
@@ -270,17 +288,18 @@ chmod -R 755 $OGCLIENTBASEDIR
 function btogFsSqfs ()
 {
 #Dependencias.
-ogClientVar	
+[ -z "$BTROOTFSIMG" ] && btogGetVar
+[ -z "$OSCODENAME" ] && btogGetOsInfo
 
 echoAndLog "$FUNCNAME: Iniciando la creación del sistema de archivos en sqfs "
 # si ya existe un sqfs lo renombramos
 [ -f $BTTARGETDIR/ogclient.sqfs ] && mv $BTTARGETDIR/ogclient.sqfs $BTTARGETDIR/ogclient.sqfs.`date +%Y%m%d-%H%M%S`
 mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
-
 mksquashfs $BTROOTFSMNT $BTTARGETDIR/ogclient.sqfs
-chmod 744 $BTTARGETDIR/ogclient.sqfs
-
 mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
+chmod 744 $BTTARGETDIR/ogclient.sqfs
+DATASUM=`md5sum "${BTTARGETDIR}/ogclient.sqfs" | cut -f1 -d" "`
+echo $DATASUM > ${BTTARGETDIR}/ogclient.sqfs.sum
 }
 
 
@@ -295,21 +314,20 @@ mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
 function btogIsoGenerator {
+#Dependencias.
+#[ -z "$BTROOTFSIMG" ] && btogGetVar
+btogGetVar
+#Preparamos los gestores de arranque
 mkdir -p /tmp/iso/isolinux
-#cd tmp/iso/
 cp -prv /usr/lib/syslinux/* /tmp/iso/isolinux/
 cp -prv /usr/share/gpxe/* /tmp/iso/isolinux/
-mkdir -p /tmp/iso/ogclient
-#el ogclienteToISO  debe tener una copia del ogvmlinuz como linuxISO
-cp -prv /var/lib/tftpboot/ogclientToIso/* /tmp/iso/ogclient
-
 
 cat << FIN > /tmp/iso/isolinux/isolinux.cfg
 DEFAULT menu.c32
 PROMPT 0
 ALLOWOPTIONS 1
 
-MENU TITLE  OpenGnsys 1.0.1 v00
+MENU TITLE  OpenGnsys ${NAMEISOCLIENT}
 
 LABEL gpxe
 MENU LABEL gpxe
@@ -357,8 +375,32 @@ label 8
 MENU LABEL Network boot via gPXE  iso
 KERNEL gpxe.iso
 FIN
-#### /tmp/iso# 
-mkisofs -V ogClient -o ogClient.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table tmp/iso
+
+
+
+
+# preparamos el directorio boot-tools.
+mkdir -p /tmp/iso/ogclient
+cp ${BTTARGETDIR}/ogclient.sqfs /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogclient.sqfs.sum /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogvmlinuz /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogvmlinuz.sum /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogvmlinuz /tmp/iso/ogclient/linuxISO
+cp ${BTTARGETDIR}/ogvmlinuz.sum /tmp/iso/ogclient/linuxISO.sum
+cp ${BTTARGETDIR}/oginitrd.img /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/oginitrd.img.sum /tmp/iso/ogclient/
+#el ogclienteToISO  debe tener una copia del ogvmlinuz como linuxISO
+#cp -prv /var/lib/tftpboot/ogclientToIso/* /tmp/iso/ogclient
+
+cd /tmp
+#TIMEMOD=`date +%Y%m%d-%H%M%S`
+####Generamos la iso
+echo "mkisofs -V ogClient -o ${NAMEISOCLIENT}.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table /tmp/iso"
+mkisofs -V ogClient -o ${NAMEISOCLIENT}.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table /tmp/iso
+##Generamos el md5
+DATASUM=`md5sum ${NAMEISOCLIENT}.iso | cut -f1 -d" "`
+echo $DATASUM > ${NAMEISOCLIENT}.iso.sum
+
 
 ### vi /etc/grub.d/40_custom 
 ##

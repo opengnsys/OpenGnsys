@@ -5,6 +5,13 @@
 #svn checkout http://www.opengnsys.es/svn/branches/version2/  /tmp/opengnsys_installer/opengnsys2
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
+export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
+VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
+
+VERSIONBOOTTOOLS=ogLive
+
+NAMEISOCLIENT="/tmp/opengnsys_info_rootfs" 
+NAMEHOSTCLIENT="/tmp/opengnsys_chroot"
 	
 SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
@@ -19,14 +26,16 @@ OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
 OSRELEASE=$(uname -a | awk '{print $3}')
 uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
 OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+
 echo $OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP	
+
 
 LERROR=TRUE
 
 echo "$FUNCNAME: Iniciando la personalización con datos del SVN "
 
 # parseamos del apt.source
-sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/clientstructure/etc/apt/sources.list.ubuntu > ${SVNCLIENTDIR}/clientstructure/etc/apt/sources.list
+sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.ubuntu > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Parsing apt.sources : ERROR"
@@ -114,5 +123,9 @@ cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
 
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENT
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENT
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/debian_chroot
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/opengnsys_chroot
 
 
