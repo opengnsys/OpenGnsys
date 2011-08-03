@@ -533,7 +533,7 @@ fi
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@version 0.9
 #@author:  
-@date    2010/05/24
+#@date    2010/05/24
 #*/ ##
 ogYesNo()
 {
