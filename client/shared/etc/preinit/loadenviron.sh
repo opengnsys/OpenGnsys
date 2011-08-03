@@ -65,9 +65,9 @@ if [ -d $OPENGNSYS ]; then
     # Fichero de registros.
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
     
-    # Configuración de red.
-    export $(cat /tmp/initrd.cfg | grep DEVICECFG)
-    source $DEVICECFG
+    # Configuracion de la red (valido offline)
+    cat /tmp/initrd.cfg | grep DEVICECFG && export $(cat /tmp/initrd.cfg | grep DEVICECFG)
+    source $DEVICECFG 2>/dev/null
     
     # FIXME Pruebas para grupos de ordenadores
     #export OGGROUP=$(ogGetGroup)
