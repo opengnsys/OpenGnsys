@@ -6,25 +6,23 @@ export LANGUAGE=C
 export LC_ALL=C
 export LANG=C
 
-#dpkg-divert --local --rename --add /sbin/initctl 
-#ln -s /bin/true /sbin/initctl
 
-apt-get -y update
-# software to compile code
-apt-get -y --force-yes install build-essential libattr* attr make m4 gettext libmhash-dev gdebi-core gawk
+source /opt/opengnsys/lib/engine/bin/ToolsGNU.c &>/dev/null
+cd /tmp
 
-source /opt/opengnsys/lib/engine/bin/ToolsGNU.c
+echo  "ctorrent "
+which ctorrent || ctorrent install &>/dev/null
 
-which ctorrent || ctorrent install
+echo  "udp-sender "
+which udp-sender || udpcast install &>/dev/null
 
-which udp-sender || udpcast install
+echo  "ms-sys "
+which ms-sys || ms-sys install &>/dev/null
 
-which ms-sys || ms-sys install
+echo  "echo partclone "
+which partclone.ntfs || $(wget -O partclone_0.2.16_i386.deb http://downloads.sourceforge.net/project/partclone/stable/0.2.16/partclone_0.2.16_i386.deb?use_mirror=ovh &>/dev/null; gdebi -n partclone_0.2.16_i386.deb &>/dev/null) 
 
-which partclone.ntfs || $(wget -O partclone_0.2.16_i386.deb http://downloads.sourceforge.net/project/partclone/stable/0.2.16/partclone_0.2.16_i386.deb?use_mirror=ovh; gdebi -n partclone_0.2.16_i386.deb) 
+echo  "spartlnx"
+which spartlnx.run || $(wget http://damien.guibouret.free.fr/savepart.zip &>/dev/null; unzip -o savepart.zip -d /sbin/)
 
-
-which spartlnx.run || $(cd /tmp; wget http://damien.guibouret.free.fr/savepart.zip; unzip savepart.zip -d /sbin/)
-
-
-
+history -c

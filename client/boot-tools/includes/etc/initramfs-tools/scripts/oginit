@@ -3,30 +3,30 @@
 #@file    oginit
 #@brief   Guion modificador inicio initrd para OpenGnSys
 #@warning 
-#@version 0.1 - basado en ROOTfs
+#@version 0.1 - basado en ROOTfs - rootfs over nfs -
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009/00/00
-#@version 0.2 - basado en el instalador de ubunto
-#@author  Alejandro Castillo
-#@author  Ramón Gómez
-#@author  Irina
-#@author  Antonio Doblas
+#@version 0.2 - basado en RAMFS - instalador de ubunto -
+#@author  Alejandro Castillo, Ramón Gómez, Irina, Antonio Doblas
 #@date    2010/00/00
-#@version 0.7 - Generación limpia con mkinitrd, busybox
+#@version 0.7 - Hibrido en RAMFS + ROOTFS -mkinitrd, busybox, deboostrap-
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2010/05/24
-#@version 0.8 - Integración con FileSystem externo
+#@version 0.8 - Soporte smb, asignación ip estática
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2010/06/24
-#@version 0.8.1 - UnionFS + squasfs
+#@version 0.8.1 - Integración RAMFS+ROOTFS con UnionFS y squasfs
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2010/06/29
 #@version 1.0. - Adaptacion variables. Corrección enlace red
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2011/06/16
-#@version 1.0.1 - Adaptacion inicio multiples dispositivos, usb, red, cd
+#@version 1.0.1 - Logica para inicio multiples dispositivos, usb, red, cd
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2011/07/4
+#@version 1.0.2 - RAMFS: instalación y actualización automatica en cache
+#@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
+#@date    2011/08/4
 #*/
 
 
@@ -80,39 +80,30 @@ mountroot ()
     [ $? == 0 ] && sh || echo " "
 	ogGetROOTSERVER && log_success_msg "Get Info from pxe server and ckeck distribuited OG services " 
 
-	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect and merging the rootfs -ogLive- : y/N "
+
+	if [ "$ogdebug" == "true" -a "$ogupdateinitrd" == "true" ]; then
+		ogYesNo --timeout 5 --default no "Stop before check updating initrd: y/N "
+    	[ $? == 0 ] && sh || echo " "		
+	fi
+	[ "$ogupdateinitrd" == "true" ] && ogUpdateInitrd  
+
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect and merging the rootfs -ogLive- with $OGSERVERLIVE: y/N "
     [ $? == 0 ] && sh || echo " "
-	ogConnectOgLive && log_success_msg "Merge the initrd with the remote rootfs -ogLive-" || sh
+	ogConnectOgLive && log_success_msg "Merge the initrd with the remote rootfs -ogLive- on $OGSERVERLIVE" || sh
     # si es necesario realiza ogConnect $OGSERVERLIVE $OGPROTOCOL $SRCOGLIVE $DSTOGLIVE 
 
-	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir SHARE -engine,scripts,interface, -share- : y/N "
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir SHARE -engine,scripts,interface, -share- on $OGSERVERSHARE : y/N "
     [ $? == 0 ] && sh || echo " "
 	ogConnect $OGSERVERSHARE $OGPROTOCOL $SRCOGSHARE $DSTOGSHARE 
 	
-	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir LOG STORAGE : y/N "
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir LOG STORAGE on $OGSERVERLOG : y/N "
     [ $? == 0 ] && sh || echo " "
 	ogConnect $OGSERVERLOG $OGPROTOCOL $SRCOGLOG $DSTOGLOG
 	
-	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with REPOSITORY STORAGE : y/N "
+	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with REPOSITORY STORAGE on $OGSERVERIMAGES : y/N "
     [ $? == 0 ] && sh || echo " "
 	ogConnect $OGSERVERIMAGES $OGPROTOCOL $SRCOGIMAGES $DSTOGIMAGES
 	 
-   
-
-	#[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before conect with og Services : y/N "
-    #[ $? == 0 ] && sh || echo " "
-	#ogConectROOTSERVER && log_success_msg "Conecting with og services" || sh
-    
-
-	#[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before merge the Second File System with initrd (First File System) : y/N "
-    #[ $? == 0 ] && sh || echo " "
-	#ogMerge2ndFile && log_success_msg "Merge onto Second File System"
-
-
-	####[ "$quiet" != "y" ] && log_begin_msg "Running /scripts/og-bottom"
-	####run_scripts /scripts/og-bottom
-	####[ "$quiet" != "y" ] && log_end_msg
-
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before doing the postconfiguration: y/N "
     [ $? == 0 ] && sh || echo " "

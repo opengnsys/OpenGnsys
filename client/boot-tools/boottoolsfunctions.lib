@@ -401,6 +401,9 @@ mkisofs -V ogClient -o ${NAMEISOCLIENT}.iso -b isolinux/isolinux.bin -c isolinux
 DATASUM=`md5sum ${NAMEISOCLIENT}.iso | cut -f1 -d" "`
 echo $DATASUM > ${NAMEISOCLIENT}.iso.sum
 
+mv /tmp/${NAMEISOCLIENT}.iso /var/lib/tftpboot/ogclient/
+mv /tmp/${NAMEISOCLIENT}.iso.sum /var/lib/tftpboot/ogclient/
+
 
 ### vi /etc/grub.d/40_custom 
 ##

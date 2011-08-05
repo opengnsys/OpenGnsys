@@ -1,0 +1,8 @@
+#sw.X
+#+300M
+#install xorg-dev 
+#install xorg
+#install lxde 
+#+80M roxterm y gparted
+install roxterm
+install gparted 

@@ -1,0 +1,14 @@
+#sw.networking
+install netpipes 
+install wget 
+install tftp
+install dnsutils
+install trickle 
+install lighttpd 
+install ethtool 
+install ssmping 
+install mii-diag
+install tcpdump 
+install nmap
+install arping 
+install iptraf 

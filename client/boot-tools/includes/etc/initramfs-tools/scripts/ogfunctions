@@ -224,15 +224,70 @@ ogGetROOTSERVER ()
 	echo "ROOTSERVER=$ROOTSERVER" >> $CFGINITRD
 	
 	#si oglive no oglive=R
-	export OGSERVERIMAGES="${ogrepo:-$ROOTSERVER}"
-	export OGSERVERSHARE="${ogshare:-$ROOTSERVER}"
-	export OGSERVERLOG="${oglog:-$ROOTSERVER}"
-	export OGSERVERLIVE="${oglive:-$OGSERVERIMAGES}"
-	
+	export OGSERVERIMAGES="${ogrepo:-$ROOTSERVER}" && echo "OGSERVERIMAGES=$OGSERVERIMAGES" >> $CFGINITRD 
+	export OGSERVERSHARE="${ogshare:-$ROOTSERVER}" && echo "OGSERVERSHARE=$OGSERVERSHARE" >> $CFGINITRD
+	export OGSERVERLOG="${oglog:-$ROOTSERVER}" && echo "OGSERVERLOG=$OGSERVERLOG" >> $CFGINITRD
+	export OGSERVERLIVE="${oglive:-$OGSERVERIMAGES}" && echo "OGSERVERLIVE=$OGSERVERLIVE" >> $CFGINITRD
+		
 	return 0
 }
 
 
+
+#       ogUpdateInitrd
+#@brief   Actualiza el intird de la cache desde el servidor. Si el arranque ha disdo desde cache, compueba desde el servidor nueva version del initird.
+#@param1 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24
+#*/ ##
+
+ogUpdateInitrd ()
+{
+	cd /tmp
+	mkdir /tmp/cache
+	mount -t reiserfs LABEL=CACHE /tmp/cache || return
+	mkdir /tmp/cache/boot
+	
+	
+	# comparamos los del server
+	busybox tftp -g -r ogvmlinuz.sum $ROOTSERVER
+	busybox tftp -g -r oginitrd.img.sum $ROOTSERVER
+	SERVERVMLINUZ=`cat ogvmlinuz.sum`
+	SERVERINITRD=`cat oginitrd.img.sum`
+
+	
+	#comparamos los de la cache
+	CACHEVMLINUZ=`cat /tmp/cache/boot/ogvmlinuz.sum`
+	CACHEINITRD=`cat /tmp/cache/boot/oginitrd.img.sum`
+	
+	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
+	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
+	
+	cd /tmp/cache/boot
+	
+	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
+	then		
+		echo "ogvmlinuz updating"
+		busybox tftp -g -r ogvmlinuz $ROOTSERVER
+		busybox tftp -g -r ogvmlinuz.sum $ROOTSERVER
+		DOREBOOT=true
+	fi
+	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
+	then
+		echo "oginitrd updating"
+		busybox tftp -g -r oginitrd.img $ROOTSERVER
+		busybox tftp -g -r oginitrd.img.sum $ROOTSERVER
+		DOREBOOT=true
+	fi
+
+	cd /; umount /tmp/cache
+
+	[ "$DOREBOOT" == "true" ] && busybox reboot -f
+
+}
 
 #/**
 #       ogConnect
@@ -317,6 +372,7 @@ then
 	if [ "$og2nd" == "img" ]
 	then
 		#Montamos el ROOTFS tipo  img, para desarrolladores
+		#TODO: comprobar que se tiene acceso de escritura
 		losetup /dev/loop0 $DSTOGLIVE/ogclient/ogclient.img -o 32256
 		mount /dev/loop0 $OGLIVEROOTFS
 	else

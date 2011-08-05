@@ -10,3 +10,5 @@ apt-get -y update
 apt-get -y --force-yes install xorg-dev xorg lxde roxterm
 
 apt-get clean
+
+history -c

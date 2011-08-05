@@ -1,2 +1,5 @@
 #!/bin/bash
 
+
+
+history -c

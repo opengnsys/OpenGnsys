@@ -43,16 +43,7 @@ then
 	exit 1
 fi
 
-#parseamos el script de generación del initrd.
-#sed -e "s/OSRELEASE/$OSRELEASE/g" ${SVNCLIENTDIR}/clientstructure/root/GenerateInitrd.generic.sh > ${SVNCLIENTDIR}/clientstructure/root/GenerateInitrd.sh
-#
-#if [ $? -ne 0 ]
-#then 
-#	echo "$FUNCNAME(): Parsing GenerateInitrd.sh : ERROR"
-#	exit 1
-#else
-#	rm /root/GenerateInitrd.generic.sh
-#fi
+
 
 #damos permiso al directorio de scripts 
 chmod -R 775 ${SVNCLIENTDIR}/includes/usr/bin/*
@@ -129,4 +120,5 @@ echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENT
 echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/debian_chroot
 echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/opengnsys_chroot
 
+history -c
 

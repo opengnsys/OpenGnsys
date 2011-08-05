@@ -21,3 +21,5 @@ cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 
 ## TODO: exportamos la publica a los repos
 cp /root/.ssh/id_rsa.pub /tmp/rsa.ogclient.pub
+
+history -c

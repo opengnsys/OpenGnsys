@@ -14,3 +14,5 @@ cp /bin/busybox ./
 cd /tmp/
 mkinitramfs -o /tmp/initrd.img-$OSRELEASE -v $OSRELEASE
 cp /boot/vmlinuz-$OSRELEASE /tmp
+
+history -c

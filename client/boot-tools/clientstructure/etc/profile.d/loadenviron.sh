@@ -71,7 +71,7 @@ if [ -d $OPENGNSYS ]; then
     if [ -n "$ARCH" ]; then
  #       export PATH=$OGBIN/$ARCH:$PATH
   #      export LD_LIBRARY_PATH=$OGLIB/$ARCH:$LD_LIBRARY_PATH
- 	export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/og2fs/2ndfs/opt/drbl/sbin
+ 	export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/oglive/rootfs/opt/drbl/sbin
        	export PATH=$OGSCRIPTS:$PATH:$OGAPI:$OGBIN:$OGBIN/$ARCH
   fi
     # Fichero de registros.

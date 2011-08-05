@@ -1,0 +1,12 @@
+#sw.monitoring
+install htop
+install ncdu 
+install bwbar 
+install bmon 
+install iftop 
+install ifstat  
+install dstat  
+install hdparm 
+install sdparm 
+install blktool 
+install testdisk 

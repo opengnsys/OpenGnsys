@@ -14,7 +14,6 @@
  #mkdir -p /tmp/opengnsys_installer/opengnsys2;
  #cp -prv /home/administrador/workspace/OpenGnsys/branches/version2/* /tmp/opengnsys_installer/opengnsys2/;
  #cp -prv /home/administrador/workspace/OpenGnsys/branches/version1.0/client/ /tmp/opengnsys_installer/opengnsys/;
-
 #find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 
@@ -30,6 +29,11 @@ then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
+
+for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
+for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
+for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
+
 
 
 #funciones especificas del cliente.
@@ -74,20 +78,22 @@ schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh
 
 # FASE6: Instalacion de software
 # 6.1 instalacion de software con apt-get
+#cp  /etc/apt/sources.list /tmp
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareInstall.sh 
-echo "saltando" 
- if [ $? -ne 0 ]; then
-	errorAndLog "Instalando sofware adicional OG : ERROR"
-	exit 
-else
-	echoAndLog "Instalando sofware adicional OG: OK"
-fi
+
+
 # 6.2 compilación de software.
 cd /
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
+
 cd -
 
 #Fase 7. Personalizando
+
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsFsLocales.sh
+
+
 ### 7.1 incorporamos la clave publica del servidor
 cd /
 ssh-keygen -q -f /root/.ssh/id_rsa -N ""
@@ -99,6 +105,13 @@ schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsSshClient.sh
 
 ## 7.3 configuramos los locales.
 schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsFsLocales.sh
+
+for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
+for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
+for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
+
+
+
 
 
 #Fase 7. Generando la ISO.
@@ -116,3 +129,6 @@ btogIsoGenerator
 installationSummary
 
 echoAndLog "OpenGnSys installation finished at $(date)"
+
+
+
