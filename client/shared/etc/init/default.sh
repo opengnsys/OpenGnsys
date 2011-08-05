@@ -29,11 +29,18 @@ LOGLEVEL=5
 #Facilitando el entorno Og desde ssh
 cp $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
 
+
+
+########## PRUEBAS
 # Crear menú por defecto para el cliente
 generateMenuDefault
 
 # Matando plymount para inicir browser o shell
 pkill -9 plymouthd
+
+[ -f /opt/opengnsys/scripts/runhttplog.sh ] && /opt/opengnsys/scripts/runhttplog.sh
+
+########## FIN PRUEBAS
 
 # Arranque de OpenGnSys Client daemon (web services).
 if [ -x $OPENGNSYS/job_executer/init.d/job_executer ]; then
