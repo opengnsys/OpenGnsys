@@ -23,8 +23,8 @@
 #@version 1.0 - control de errores para el ogAdmServer
 #@author  
 #@date   2011-04-10
-#@version 1.0.1 - Fin de control de errores para el ogAdmServer
-#@author  
+#@version 1.0.1 - Control de espacio requerido
+#@author  Antonio J.Doblas Viso
 #@date   2011-05-10
  
 #*/ ##
