@@ -72,6 +72,8 @@ if [ -d $OPENGNSYS ]; then
     # FIXME Pruebas para grupos de ordenadores
     #export OGGROUP=$(ogGetGroup)
     export OGGROUP="$group"
+    
+    ROOTREPO=${ROOTREPO:-"$OGSERVERIMAGES"}
 fi
 
 # Declaración de códigos de error.
