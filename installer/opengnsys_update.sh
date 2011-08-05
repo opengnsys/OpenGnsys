@@ -507,7 +507,7 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://www.opengnsys.es/downloads"
-	local FILENAME=ogclient-1.0.2-natty-32bit-beta01-rev2111.iso
+	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2268.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
@@ -552,6 +552,10 @@ function updateClient()
 		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
 		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+		
+		cp -prv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot/
+		cp -prv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot/
+		
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
 		echoAndLog "${FUNCNAME}(): Client is already updated"
