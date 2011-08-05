@@ -83,6 +83,9 @@ $infohost=" ip="
 . $netmask .":"
 . $hostname .":"
 . $netiface . ":none ogrepo="
+. $repo . " oglive="
+. $repo . " oglog="
+. $server . " ogshare="
 . $repo;
 
 ###################obtenemos las variables de red del aula.
