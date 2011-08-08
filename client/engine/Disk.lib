@@ -467,6 +467,49 @@ esac
 
 
 #/**
+#         ogHidePartition int_ndisk int_npartition
+#@brief   Oculta un apartición visible.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  (nada)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  disco o particion no detectado (no es un
+dispositivo).
+#@exception OG_ERR_PARTITION tipo de partición no reconocido.
+#@version 1.0 - Versión en pruebas.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/01/12
+#*/ ##
+function ogHidePartition ()
+{
+# Variables locales.
+local PART TYPE NEWTYPE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+# Obtener tipo de partición.
+TYPE=$(ogGetPartitionType "$1" "$2")
+case "$TYPE" in
+    NTFS)   NEWTYPE="HNTFS"  ;;
+    FAT32)  NEWTYPE="HFAT32" ;;
+    FAT16)  NEWTYPE="HFAT16" ;;
+    FAT12)  NEWTYPE="HFAT12" ;;
+    *)      ogRaiseError $OG_ERR_PARTITION "$TYPE"
+            return $? ;;
+esac
+# Cambiar tipo de partición.
+ogSetPartitionId $1 $2 $NEWTYPE
+}
+
+
+#/**
 #         ogListPartitions int_ndisk
 #@brief   Lista las particiones definidas en un disco.
 #@param   int_ndisk  nº de orden del disco
@@ -616,6 +659,48 @@ SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Usar \c sfdisk para redefinir el tamaño.
 sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 partprobe 2>/dev/null
+}
+
+#/**
+#         ogUnhidePartition int_ndisk int_npartition
+#@brief   Hace visible una partición oculta.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  (nada)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  disco o particion no detectado (no es un
+dispositivo).
+#@exception OG_ERR_PARTITION tipo de partición no reconocido.
+#@version 1.0 - Versión en pruebas.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010/01/12
+#*/ ##
+function ogUnhidePartition ()
+{
+# Variables locales.
+local PART TYPE NEWTYPE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+# Obtener tipo de partición.
+TYPE=$(ogGetPartitionType "$1" "$2")
+case "$TYPE" in
+    HNTFS)   NEWTYPE="NTFS"  ;;
+    HFAT32)  NEWTYPE="FAT32" ;;
+    HFAT16)  NEWTYPE="FAT16" ;;
+    HFAT12)  NEWTYPE="FAT12" ;;
+    *)      ogRaiseError $OG_ERR_PARTITION "$TYPE"
+            return $? ;;
+esac
+# Cambiar tipo de partición.
+ogSetPartitionId $1 $2 $NEWTYPE
 }
 
 
