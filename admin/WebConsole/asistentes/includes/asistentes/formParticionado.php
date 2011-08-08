@@ -64,10 +64,6 @@ for ($p=1; $p<4; $p++) {
 
 </tr>
 
-</table>
-</td>
-
-</tr>
 <tr>
 <th>
 <input type="hidden" id="minsize" />
