@@ -473,8 +473,7 @@ esac
 #@param   int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    formato incorrecto.
-#@exception OG_ERR_NOTFOUND  disco o particion no detectado (no es un
-dispositivo).
+#@exception OG_ERR_NOTFOUND  disco o particion no detectado (no es un dispositivo).
 #@exception OG_ERR_PARTITION tipo de partición no reconocido.
 #@version 1.0 - Versión en pruebas.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
@@ -668,8 +667,7 @@ partprobe 2>/dev/null
 #@param   int_npartition nº de orden de la partición
 #@return  (nada)
 #@exception OG_ERR_FORMAT    formato incorrecto.
-#@exception OG_ERR_NOTFOUND  disco o particion no detectado (no es un
-dispositivo).
+#@exception OG_ERR_NOTFOUND  disco o particion no detectado (no es un dispositivo).
 #@exception OG_ERR_PARTITION tipo de partición no reconocido.
 #@version 1.0 - Versión en pruebas.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
