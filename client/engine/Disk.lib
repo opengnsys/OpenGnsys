@@ -467,6 +467,17 @@ esac
 
 
 #/**
+#         ogGetPartitionType int_ndisk int_npartition
+#@brief   Muestra el tipo de una particion determinada.
+#@note    Alias de la función ogGetFsType
+#*/ ##
+function ogGetPartitionType ()
+{
+ogGetFsType "$@"
+}
+
+
+#/**
 #         ogHidePartition int_ndisk int_npartition
 #@brief   Oculta un apartición visible.
 #@param   int_ndisk      nº de orden del disco
