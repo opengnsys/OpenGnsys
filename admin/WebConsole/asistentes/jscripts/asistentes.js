@@ -111,3 +111,68 @@ ogSetPartitionActive 1 1 \n \
 ogUpdatePartitionTable 1 \n \
 ogListPartitions 1 \n"; 
 }
+
+
+// Código de pulsación de selección de partición.
+function clickPartitionCheckbox(form, npart) {
+	var partCheck=eval("form.check"+npart);
+	var partType=eval("form.part"+npart);
+	var partSize=eval("form.size"+npart);
+	var partTypeCustom=eval("form.part"+npart+"custom");
+	var partSizeCustom=eval("form.size"+npart+"custom");
+	var freeDisk=document.getElementById("freedisk");
+	if (partCheck.checked) {
+		partType.disabled=false;
+		partSize.disabled=false;
+		if (partType.options[partType.selectedIndex].value == "CUSTOM") {
+			partTypeCustom.disabled=false;
+		}
+		//if (partType.options[partType.selectedIndex].value == "EXTENDED") {
+		//	document.getElementById("logicas").style.visibility="visible";
+		//}
+		if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
+			partSizeCustom.disabled=false;
+		} else {
+			partSizeCustom.disabled=true;
+		}
+	} else {
+		partType.disabled=true;
+		partSize.disabled=true;
+		partTypeCustom.disabled=true;
+		partSizeCustom.disabled=true;
+		//if (partType.options[partType.selectedIndex].value == "EXTENDED") {
+		//	document.getElementById("logicas").style.visibility="hidden";
+		//}
+	}
+	calculateFreeDisk(form);
+}
+
+
+// Código para calcular el espacio libre del disco.
+function calculateFreeDisk(form, npart) {
+	var freeDisk=document.getElementById("freedisk");
+	freeDisk.value=form.minsize.value;
+	for (npart=1; npart<=4; npart++) {
+		var partCheck=eval("form.check"+npart);
+		var partSize=eval("form.size"+npart);
+		var partSizeCustom=eval("form.size"+npart+"custom");
+		if (partCheck.checked) {
+			if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
+				freeDisk.value -= parseInt(partSizeCustom.value);
+			} else {
+				freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
+			}
+		}
+	}
+	if (parseInt(freeDisk.value) < 0) {
+		freeDisk.style.fontWeight = "bold";
+		freeDisk.style.fontStyle = "italic";
+	} else {
+		freeDisk.style.fontWeight = "normal";
+		freeDisk.style.fontStyle = "normal";
+	}
+	if (form.size4.value == 0) {
+		freeDisk.value += " (- cache)";		// Aviso de caché sin modificar.
+	}
+}
+
