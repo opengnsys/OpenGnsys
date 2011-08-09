@@ -48,65 +48,86 @@ else
 
 }
 
-function codeParticionado(form){
-var value1;
-var value2;
-var value3;
-var precache;
-if (form.check1.checked) {
-	if (form.part1.value == "CUSTOM" ) {value1 = form.part1custom.value}
-	else {value1 = form.part1.value};
-	if (form.size1.value == "CUSTOM")  {value1 += ":" + form.size1custom.value}
-	else {value1 += ":" + form.size1.value}; 
-}
-else
-{
-   value1 = "EMPTY:0"
-}
-if (form.check2.checked) {
-	if (form.part2.value == "CUSTOM" ) {value2 = form.part2custom.value}
-	else {value2 = form.part2.value};
-	if (form.size2.value == "CUSTOM")  {value2 += ":" + form.size2custom.value}
-	else {value2 += ":" + form.size2.value}; 
-}
-else
-{
-   value2 = "EMPTY:0"
-}
-if (form.check3.checked) {
-	if (form.part3.value == "CUSTOM" ) {value3 = form.part3custom.value}
-	else {value3 = form.part3.value};
-	if (form.size3.value == "CUSTOM")  {value3 += ":" + form.size3custom.value}
-	else {value3 += ":" + form.size3.value}; 
-}
-else
-{
-   value3 = "EMPTY:0"
-}
+function codeParticionado (form) {
+	var partCode="";
+	var logicalCode="";
+	var cacheCode;
+	var cacheSize;
+	var extended=false;
 
-if (form.size4.value == "0") {
-precache="ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1  \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
-//alert(precache);
-}
-else
-{
-	if (form.size4.value == "CUSTOM")  
-	{ 
-		cachesize = form.size4custom.value; 
+	for (var nPart=1; nPart<4; nPart++) {
+		var partCheck=eval("form.check"+nPart);
+		if (partCheck.checked) {
+			var partType=eval("form.part"+nPart);
+			if (partType.value == "CUSTOM" ) {
+				var partTypeCustom=eval("form.part"+nPart+"custom");
+				partCode += " " + partTypeCustom.value;
+				if (partTypeCustom.value == "EXTENDED") {
+					extended=true;
+				}
+			} else {
+				partCode += " " + partType.value;
+				if (partType.value == "EXTENDED") {
+					extended=true;
+				}
+			}
+			var partSize=eval("form.size"+nPart);
+			if (partSize.value == "CUSTOM" ) {
+				var partSizeCustom=eval("form.size"+nPart+"custom");
+				partCode += ":" + partSizeCustom.value;
+			} else {
+				partCode += ":" + partSize.value;
+			}
+		} else {
+			partCode += " EMPTY:0";
+		}
 	}
-	else 
-	{
-		cachesize = form.size4.value;
+	if (form.size4.value == "0") {
+		cacheCode = "ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1  \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
+	} else {
+		if (form.size4.value == "CUSTOM") { 
+			cacheSize = form.size4custom.value; 
+		} else {
+			cacheSize = form.size4.value;
+		} 
+		cacheCode = "ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
 	} 
-	precache="ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1  \n ogUpdatePartitionTable 1 \n initCache "  + cachesize + " ";
-	//alert(precache);
-}
+	if (extended) {
+		var lastLogical=5;
+		for (var nPart=9; nPart>5; nPart--) {
+			if (eval ("form.check"+nPart+".checked")) {
+				lastLogical = nPart;
+				break;
+			}
+		}
+		for (var nPart=5; nPart<=lastLogical; nPart++) {
+			var partCheck=eval("form.check"+nPart);
+			if (partCheck.checked) {
+				var partType=eval("form.part"+nPart);
+				if (partType.value == "CUSTOM" ) {
+					var partTypeCustom=eval("form.part"+nPart+"custom");
+					logicalCode += " " + partTypeCustom.value;
+				} else {
+					logicalCode += " " + partType.value;
+				}
+				var partSize=eval("form.size"+nPart);
+				if (partSize.value == "CUSTOM" ) {
+					var partSizeCustom=eval("form.size"+nPart+"custom");
+					logicalCode += ":" + partSizeCustom.value;
+				} else {
+					logicalCode += ":" + partSize.value;
+				}
+			} else {
+				logicalCode += " EMPTY:0";
+			}
+		}
+		partCode += logicalCode;
+	}
 
-
-form.codigo.value="\
-" + precache + " \n \
+	form.codigo.value="\
+" + cacheCode + " \n \
 ogListPartitions 1 \n \
-ogCreatePartitions 1 " + value1 + " " + value2 + " " + value3 + " \n \
+ogCreatePartitions 1 " + partCode " \n \
 ogSetPartitionActive 1 1 \n \
 ogUpdatePartitionTable 1 \n \
 ogListPartitions 1 \n"; 
@@ -121,15 +142,13 @@ function clickPartitionCheckbox(form, npart) {
 	var partTypeCustom=eval("form.part"+npart+"custom");
 	var partSizeCustom=eval("form.size"+npart+"custom");
 	var freeDisk=document.getElementById("freedisk");
+	var logical=document.getElementById("logicas");
 	if (partCheck.checked) {
 		partType.disabled=false;
 		partSize.disabled=false;
 		if (partType.options[partType.selectedIndex].value == "CUSTOM") {
 			partTypeCustom.disabled=false;
 		}
-		//if (partType.options[partType.selectedIndex].value == "EXTENDED") {
-		//	document.getElementById("logicas").style.visibility="visible";
-		//}
 		if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
 			partSizeCustom.disabled=false;
 		} else {
@@ -140,16 +159,16 @@ function clickPartitionCheckbox(form, npart) {
 		partSize.disabled=true;
 		partTypeCustom.disabled=true;
 		partSizeCustom.disabled=true;
-		//if (partType.options[partType.selectedIndex].value == "EXTENDED") {
-		//	document.getElementById("logicas").style.visibility="hidden";
-		//}
 	}
-	calculateFreeDisk(form);
+	if (npart <= 4) {
+		checkExtendedPartition(form);
+		calculateFreeDisk(form);
+	}
 }
 
 
 // Código para calcular el espacio libre del disco.
-function calculateFreeDisk(form, npart) {
+function calculateFreeDisk(form) {
 	var freeDisk=document.getElementById("freedisk");
 	freeDisk.value=form.minsize.value;
 	for (npart=1; npart<=4; npart++) {
@@ -173,6 +192,34 @@ function calculateFreeDisk(form, npart) {
 	}
 	if (form.size4.value == 0) {
 		freeDisk.value += " (- cache)";		// Aviso de caché sin modificar.
+	}
+}
+
+// Código para comprobar si hay partición extendida activa para mostrar las lógicas.
+function checkExtendedPartition(form) {
+	var logical=document.getElementById("logicas");
+	var visible=false;
+	for (npart=1; npart<4; npart++) {
+		var partCheck=eval("form.check"+npart);
+		var partType=eval("form.part"+npart);
+		var partTypeCustom=eval("form.part"+npart+"custom");
+		if (partCheck.checked) {
+			partType.style.fontWeight = "normal";
+			partTypeCustom.style.fontWeight = "normal";
+			if (partType.value == "EXTENDED") {
+				visible=true;
+				partType.style.fontWeight = "bold";
+			}
+			if (partType.value == "CUSTOM" && partTypeCustom.value == "EXTENDED") {
+				visible=true;
+				partTypeCustom.style.fontWeight = "bold";
+			}
+		}
+	}
+	if (visible) {
+		logical.style.visibility="visible";
+	} else {
+		logical.style.visibility="hidden";
 	}
 }
 
