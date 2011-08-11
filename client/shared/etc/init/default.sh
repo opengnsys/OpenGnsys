@@ -4,7 +4,7 @@
 
 
 # Lanzar servicios complementarios del cliente.
-PASS=$(grep "^[ 	]*OPTIONS=" /scripts/ogfunctions 2>&1 | \
+PASS=$(grep "^[ 	]*\(export \)\?OPTIONS=" /scripts/ogfunctions 2>&1 | \
 	sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 PASS=${PASS:-"og"}
 echo -ne "$PASS\n$PASS\n" | passwd root 2>/dev/null
