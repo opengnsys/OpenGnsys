@@ -127,7 +127,7 @@ function codeParticionado (form) {
 	form.codigo.value="\
 " + cacheCode + " \n \
 ogListPartitions 1 \n \
-ogCreatePartitions 1 " + partCode " \n \
+ogCreatePartitions 1 " + partCode + " \n \
 ogSetPartitionActive 1 1 \n \
 ogUpdatePartitionTable 1 \n \
 ogListPartitions 1 \n"; 
