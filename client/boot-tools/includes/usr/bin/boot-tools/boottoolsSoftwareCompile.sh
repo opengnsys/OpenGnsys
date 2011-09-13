@@ -25,4 +25,7 @@ which partclone.ntfs || $(wget -O partclone_0.2.16_i386.deb http://downloads.sou
 echo  "spartlnx"
 which spartlnx.run || $(wget http://damien.guibouret.free.fr/savepart.zip &>/dev/null; unzip -o savepart.zip -d /sbin/)
 
+echo "xvesa"
+gdebi -n /var/cache/apt/archives/xvesa.deb
+
 history -c
