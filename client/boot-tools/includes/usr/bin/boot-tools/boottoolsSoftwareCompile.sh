@@ -26,6 +26,6 @@ echo  "spartlnx"
 which spartlnx.run || $(wget http://damien.guibouret.free.fr/savepart.zip &>/dev/null; unzip -o savepart.zip -d /sbin/)
 
 echo "xvesa"
-gdebi -n /var/cache/apt/archives/xvesa.deb
+gdebi -n /var/cache/apt/archivesOG/xvesa.deb
 
 history -c
