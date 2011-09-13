@@ -507,7 +507,7 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://www.opengnsys.es/downloads"
-	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2268.iso
+	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
