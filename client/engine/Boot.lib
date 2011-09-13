@@ -69,20 +69,21 @@ case "$TYPE" in
         # Activar la partición y copiar Grub4DOS.
         ogSetPartitionActive $1 $2
         #FIXME: activar seguimiento inicio sesion Windows con grub4dos
-		#if `ogGetOsVersion $1 $2 | grep "Windows" > /dev/null`
+        #if `ogGetOsVersion $1 $2 | grep "Windows" > /dev/null`
         #then 
+        #   for i in `ls /mnt/`; do rm /mnt/$i/ogboot.* &>/dev/null; done
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.me  bs=1024 count=3
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot  bs=1024 count=3
         #	dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot  bs=1024 count=3         
         #	ogLoadHiveWindows $1 $2
-		#	ogHiveNTRunMachine "cmd /c del c:\ogboot.* "  ogcleanboot
-		#	ogUpdateHiveWindows
-		#	reboot
+        #	ogHiveNTRunMachine "cmd /c del c:\ogboot.* "  ogcleanboot
+        #	ogUpdateHiveWindows
+        #	reboot
         #else        
         	cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
         	##kexec -l $MNTDIR/grub.exe --append=--config-file="find --set-root /$LOADER; chainloader /$LOADER; tpm --init"
         	kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
-		#fi
+        #fi
         ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
         return $?
@@ -389,7 +390,10 @@ main_part=$PART
 fix_first_sector=yes
 EOF
 
-spartlnx.run -cui -nm -a -f $FILE
+spartlnx.run -cui -nm -a -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+
 
 }
 
@@ -462,7 +466,11 @@ disk=$DISK
 main_part=$PART
 boot_entry=Windows Resume Application
 EOF
-spartlnx.run -cui -nm -w -f $FILE
+spartlnx.run -cui -nm -w -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+
+ 
 
 #Preparando instruccion	tipo windows
 cat > $FILE <<EOF
@@ -472,17 +480,23 @@ disk=$DISK
 main_part=$PART
 boot_entry=$WINVER
 EOF
-spartlnx.run -cui -nm -w -f $FILE
+spartlnx.run -cui -nm -w -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+
 
 ##Preparando instruccion	Ramdisk Options
-#cat > $FILE <<EOF
-#boot_disk=$DISK
-#boot_main_part=$PART
-#disk=$DISK
-#main_part=$PART
-#boot_entry=Ramdisk Options
-#EOF
-#spartlnx.run -cui -nm -w -f $FILE
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Ramdisk Options
+EOF
+spartlnx.run -cui -nm -w -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+
 
 #Preparando instruccion	Windows Boot Manager
 cat > $FILE <<EOF
@@ -492,17 +506,22 @@ disk=$DISK
 main_part=$PART
 boot_entry=Windows Boot Manager
 EOF
-spartlnx.run -cui -nm -w -f $FILE
+spartlnx.run -cui -nm -w -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+
 
 #Preparando instruccion	Herramienta de diagnóstico de memoria de Windows
-#cat > $FILE <<EOF
-#boot_disk=$DISK
-#boot_main_part=$PART
-#disk=$DISK
-#main_part=$PART
-#boot_entry=Herramienta de diagnóstico de memoria de Windows
-#EOF
-#spartlnx.run -cui -nm -w -f $FILE
+cat > $FILE <<EOF
+boot_disk=$DISK
+boot_main_part=$PART
+disk=$DISK
+main_part=$PART
+boot_entry=Herramienta de diagnóstico de memoria de Windows
+EOF
+spartlnx.run -cui -nm -w -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 
 }
 	
@@ -577,5 +596,8 @@ main_part=$REGISTREDPART
 ;ext_part
 part_letter=$REGISTREDVOL
 EOF
-spartlnx.run -cui -nm -u -f $FILE
+spartlnx.run -cui -nm -u -f $FILE &
+sleep 5
+ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+
 }
