@@ -14,7 +14,7 @@ function ogPartcloneSyntax ()
 {
 #TODO: comprobar como unico parametro particion /dev/sda1
 #COMPAR="partclone.$FS --clone --force --source $PART"
-COMPAR="-F -c -s "
+COMPAR=" -d0 -F -c -s "
 TYPE="$(ogGetFsType `ogDevToDisk $1`)"
 case "$TYPE" in
     EXT[234])
@@ -210,7 +210,7 @@ if [ "$#" -eq 4 ]; then
 		;;
 		"partclone" | "PARTCLONE")
 		    # -C para que no compruebe tamaños
-			TOOL="| partclone.restore -o $PART"
+			TOOL="| partclone.restore -d0 -C -I -o $PART"
 		;;
 		*)
     		ogRaiseError $OG_ERR_NOTFOUND "Tools imaging no valid $TOOL" || return $?
