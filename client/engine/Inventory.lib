@@ -168,7 +168,7 @@ lshw | awk 'BEGIN {type="mod";}
 function ogListSoftware ()
 {
 # Variables locales.
-local MNTDIR TYPE DPKGDIR RPMDIR KEYS k PROG VERS
+local MNTDIR TYPE DPKGDIR RPMDIR KEYS KEYS32 k PROG VERS
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -228,11 +228,19 @@ case "$TYPE" in
     NTFS|HNTFS|FAT32|HFAT32)
         # Claves de registro para programas instalados: formato "{clave}".
         KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+        KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
         # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
         (for k in $KEYS; do
             PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
             if [ -n "$PROG" ]; then
                 VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                echo "$PROG $VERS"
+            fi
+        done
+        for k in $KEYS32; do
+            PROG=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+            if [ -n "$PROG" ]; then
+                VERS=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
                 echo "$PROG $VERS"
             fi
         done) | sort | uniq
