@@ -40,15 +40,15 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
-    EXT[234])     PROG="e2fsck"; CODES="1|2" ;;
-    REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES="1|2" ;;
+    EXT[234])     PROG="e2fsck"; CODES=(1 2) ;;
+    REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
     REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
-    JFS)          PROG="fsck.jfs"; CODES="1|2" ;;
+    JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
     XFS)          PROG="fsck.xfs" ;;
     NTFS|HNTFS)   PROG="ntfsfix" ;;
-    FAT32|HFAT32) PROG="dosfsck"; PARAMS="-a"; CODES="1" ;;
-    FAT16|HFAT16) PROG="dosfsck"; PARAMS="-a"; CODES="1" ;;
-    FAT12|HFAT12) PROG="dosfsck"; PARAMS="-a"; CODES="1" ;;
+    FAT32|HFAT32) PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    FAT16|HFAT16) PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    FAT12|HFAT12) PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
     *)            ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
                   return $? ;;
 esac
@@ -66,9 +66,12 @@ ogLock $1 $2
 eval $PROG $PARAMS $PART
 ERRCODE=$?
 case $ERRCODE in
-    0|$CODES) ;;
-    127)      ogRaiseError $OG_ERR_NOTEXEC "$PROG" ;;
-    *)        ogRaiseError $OG_ERR_PARTITION "$1 $2" ;;
+    0|${CODES[*]})
+            ERRCODE=0 ;;
+    127)    ogRaiseError $OG_ERR_NOTEXEC "$PROG"
+            ERRCODE=$OG_ERR_NOTEXEC ;;
+    *)      ogRaiseError $OG_ERR_PARTITION "$1 $2"
+            ERRCODE=$OG_ERR_PARTITION ;;
 esac
 ogUnlock $1 $2
 return $ERRCODE
@@ -134,8 +137,10 @@ eval $PROG $PARAMS $PART &>/dev/null
 ERRCODE=$?
 case $ERRCODE in
     0)    ;;
-    127)  ogRaiseError $OG_ERR_NOTEXEC "$PROG" ;;
-    *)    ogRaiseError $OG_ERR_PARTITION "$1 $2" ;;
+    127)  ogRaiseError $OG_ERR_NOTEXEC "$PROG"
+          ERRCODE=$OG_ERR_NOTEXEC ;;
+    *)    ogRaiseError $OG_ERR_PARTITION "$1 $2"
+          ERRCODE=$OG_ERR_PARTITION ;;
 esac
 ogUnlock $1 $2
 return $ERRCODE
