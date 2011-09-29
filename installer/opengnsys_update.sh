@@ -309,6 +309,7 @@ function apacheConfiguration ()
 		mv $APACHECONF/sites-available/opengnsys.conf $APACHECONF/sites-available/opengnsys
 		a2ensite default-ssl
 		a2enmod ssl
+		a2dissite opengnsys.conf
 		a2ensite opengnsys
 		/etc/init.d/apache2 restart
 	fi

@@ -38,7 +38,7 @@ if test $DROP; then
     mysql -u root -p"$MYSQLROOT" <<<"DROP USER '$DBUSER'@'localhost';" 2>/dev/null
 fi
 # Quitar configuración específica de Apache.
-a2dismod opengnsys
+a2dissite opengnsys
 rm -f /etc/apache2/{sites-available,sites-enabled}/opengnsys*
 /etc/init.d/apache2 reload
 # Eliminar ficheros.
