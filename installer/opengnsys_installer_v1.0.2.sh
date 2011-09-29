@@ -81,6 +81,7 @@ OPENGNSYS_CLIENT_USER="opengnsys"
 # - UPDATEPKGLIST, INSTALLPKG, CHECKPKG - comandos para gestión de paquetes
 # - OGACTIVATE, OGINIT - activación e inicio de servicios de OpenGnSys
 # - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - configuración de Apache
+# - ENABLEMOD, ENABLESITE - habilitar módulo Apache y sitio web
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - INETDINIT - arranque de Inetd
 # - MYSQLINIT - arranque de MySQL
@@ -106,6 +107,8 @@ case "$OSDISTRIB" in
 		APACHECFGDIR=/etc/apache2
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		ENABLEMOD="a2enmod"
+		ENABLESITE="a2ensite"
 		case "$OSCODENAME" in
 			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
 				DHCPCFGDIR=/etc/dhcp
@@ -868,8 +871,12 @@ function openGnsysInstallWebConsoleApacheConf()
 
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
+	# Activar SSL
+	$ENABLESITE default-ssl
+	$ENABLEMOD ssl
+	make-ssl-cert generate-default-snakeoil --force-overwrite
 
-	# genera configuración
+	# Generar configuración de OpenGnSys
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF
 # OpenGnSys Web Console configuration for Apache
 
@@ -881,8 +888,9 @@ Alias /opengnsys ${path_web_console}
 </Directory>
 EOF
 
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys.conf
-	ln -fs $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys
+	#ln -fs $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
+	$ENABLESITE opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1

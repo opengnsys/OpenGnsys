@@ -298,14 +298,26 @@ function updateClientFiles()
 	echoAndLog "${FUNCNAME}(): client files update success."
 }
 
-# Exportar nombre de usuario y grupo del servicio Apache.
-function getApacheUser()
+# Configurar HTTPS y exportar usuario y grupo del servicio Apache.
+function apacheConfiguration ()
 {
-	# Variables de ejecución de Apache
+	local APACHECONF=/etc/apache2
+
+	# Activar HTTPS, si es necesario.
+	if [ -e $APACHECONF/sites-available/opengnsys.conf ]; then
+		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
+		mv $APACHECONF/sites-available/opengnsys.conf $APACHECONF/sites-available/opengnsys
+		a2ensite default-ssl
+		a2enmod ssl
+		a2ensite opengnsys
+		/etc/init.d/apache2 restart
+	fi
+
+	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
+	if [ -f $APACHECONF/envvars ]; then
+		source $APACHECONF/envvars
 	fi
 	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
 	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
@@ -658,7 +670,7 @@ updateClientFiles
 updateInterfaceAdm
 
 # Actualizar páqinas web
-getApacheUser
+apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Web Admin files"

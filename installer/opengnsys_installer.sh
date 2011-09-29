@@ -57,6 +57,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
+# - ENABLEMOD, ENABLESITE - habilitar módulo Apache y sitio web
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
 # - TFTPCFGDIR - configuración de TFTP
@@ -76,6 +77,8 @@ case "$OSDISTRIB" in
 		APACHECFGDIR=/etc/apache2
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		ENABLEMOD="a2enmod"
+		ENABLESITE="a2ensite"
 		case "$OSCODENAME" in
 			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
 				DHCPCFGDIR=/etc/dhcp
@@ -765,8 +768,12 @@ function openGnsysInstallWebConsoleApacheConf()
 
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
+	# Activar HTTPS.
+	$ENABLESITE default-ssl
+	$ENABLEMOD ssl
+	make-ssl-cert generate-default-snakeoil --force-overwrite
 
-	# genera configuración
+	# Genera configuración de consola web.
 	cat > $path_opengnsys_base/etc/apache.conf <<EOF
 # OpenGnSys Web Console configuration for Apache
 
@@ -778,8 +785,8 @@ Alias /opengnsys ${path_web_console}
 </Directory>
 EOF
 
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys.conf
-	ln -fs $path_apache2_confd/sites-available/opengnsys.conf $path_apache2_confd/sites-enabled/opengnsys.conf
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys
+	$ENABLESITE opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1
