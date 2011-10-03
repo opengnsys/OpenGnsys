@@ -456,6 +456,8 @@ function updateServerFiles()
 		fi
 	done
 	popd >/dev/null
+	echoAndLog "${FUNCNAME}(): updating DHCP files"
+	perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
 	echoAndLog "${FUNCNAME}(): updating cron files"
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echoAndLog "${FUNCNAME}(): server files updated successfully."

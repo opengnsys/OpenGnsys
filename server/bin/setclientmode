@@ -11,7 +11,8 @@
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
-PXEDIR=$OPENGNSYS/tftpboot/pxelinux.cfg
+PXEDIR=$OPENGNSYS/tftpboot/menu.lst
+TEMPLATE="$PXEDIR/templates/$1"
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 
 # Control básico de errores.
@@ -24,8 +25,8 @@ if [ ! -r $SERVERCONF ]; then
 	echo "$PROG: Sin acceso a fichero de configuración"
 	exit 2
 fi
-if [ ! -e $PXEDIR/"$1" ]; then
-	echo "No existe archivo platilla: $PXEDIR/$1"
+if [ ! -e $TEMPLATE ]; then
+	echo "No existe archivo platilla: $TEMPLATE"
 	exit
 fi
 
@@ -49,18 +50,18 @@ if [ -z "$ETHERNET" ]; then
 	exit 1
 fi
 
-# Creamos los enlaces
-# PXE no permite enlaces simbolicos y las letras han de ir en minuscula
+# Copiar fichero de configuración y actualizar base de datos.
 date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\"" | tee -a $LOGFILE
 NPC=0
 for AUX in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$AUX\" en \"$2\"" | tee -a $LOGFILE
-	AUX=$(echo $AUX | awk '{print tolower($0)}')
 	AUX="01-${AUX:0:2}-${AUX:2:2}-${AUX:4:2}-${AUX:6:2}-${AUX:8:2}-${AUX:10:2}"
 	# Si existe anteriormente lo borra
 	[ -e $PXEDIR/$AUX ] && rm $PXEDIR/$AUX
-	if [ "$1" != "default" ]; then
-		ln $PXEDIR/"$1" $PXEDIR/$AUX
+	if [ "$1" != "default" ]; thenm
+		cp -a $TEMPLATE $PXEDIR/$AUX
+		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+			"UPDATE ordenadores SET arranque=\"$1\" WHERE mac=\"$ETHERNET\";"
 	fi
 	let NPC=NPC+1
 done
