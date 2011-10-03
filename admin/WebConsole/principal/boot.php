@@ -1,1 +1,1 @@
-boot_pxelinux.php
+boot_grub4dos.php
