@@ -60,6 +60,17 @@ for AUX in $ETHERNET; do
 	[ -e $PXEDIR/$AUX ] && rm $PXEDIR/$AUX
 	if [ "$1" != "default" ]; then
 		cp -a $TEMPLATE $PXEDIR/$AUX
+		DATOS=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+			"SELECT ordenadores.ip, ':', repositorios.ip, ':',
+				aulas.router, ':', aulas.netmask, ':',
+				ordenadores.netiface, ':none group=',
+				REPLACE (aulas.nombreaula, ' ', '_')
+				FROM ordenadores 
+				JOIN aulas ON ordenadores.idaula=aulas.idaula 
+				JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
+				WHERE ordenadores.mac=\"$ETHERNET\";")
+		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
+		perl -pi -e "s/INFOHOST/$DATOS/" $PXEDIR/$AUX
 		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
 			"UPDATE ordenadores SET arranque=\"$1\" WHERE mac=\"$ETHERNET\";"
 	fi
