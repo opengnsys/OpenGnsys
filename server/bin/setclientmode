@@ -58,7 +58,7 @@ for AUX in $ETHERNET; do
 	AUX="01-${AUX:0:2}-${AUX:2:2}-${AUX:4:2}-${AUX:6:2}-${AUX:8:2}-${AUX:10:2}"
 	# Si existe anteriormente lo borra
 	[ -e $PXEDIR/$AUX ] && rm $PXEDIR/$AUX
-	if [ "$1" != "default" ]; thenm
+	if [ "$1" != "default" ]; then
 		cp -a $TEMPLATE $PXEDIR/$AUX
 		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
 			"UPDATE ordenadores SET arranque=\"$1\" WHERE mac=\"$ETHERNET\";"

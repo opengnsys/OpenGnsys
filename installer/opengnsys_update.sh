@@ -457,7 +457,12 @@ function updateServerFiles()
 	done
 	popd >/dev/null
 	echoAndLog "${FUNCNAME}(): updating DHCP files"
-	perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
+	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
+		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
+		for i in isc-dhcp-server dhcpd3-server dhcpd; do
+			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
+		done
+	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
