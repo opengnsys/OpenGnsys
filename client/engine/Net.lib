@@ -10,6 +10,55 @@
 
 
 #/**
+#         ogGetGroupDir [ str_repo ]
+#@brief   Devuelve el cmaino del directorio para el grupo del cliente.
+#@param   str_repo     repositorio de imágenes (opcional)
+#@return  path_dir  -  Camino al directorio del grupo.
+#@note    repo = { REPO, CACHE }     REPO por defecto
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@version 1.0.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-10-03
+#*/ 
+function ogGetGroupDir ()
+{
+local REPO DIR GROUP
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo" \
+           "$FUNCNAME REPO  ==>  /opt/opengnsys/images/groups/Grupo1"
+    return
+fi
+# Error si se recibe más de 1 parámetro.
+case $# in
+    0)  REPO="REPO" ;;
+    1)  REPO="$1" ;;
+    *)  ogRaiseError $OG_ERR_FORMAT "$*"
+        return $? ;;
+esac
+
+GROUP="$(ogGetGroupName)"
+if [ -n "$GROUP" ]; then
+    DIR=$(ogGetPath "$REPO" "/groups/$GROUP" 2>/dev/null)
+    [ -d "$DIR" ] && echo "$DIR"
+fi
+}
+
+
+#/**
+#         ogGetGroupName
+#@brief   Devuelve el nombre del grupo al que pertenece el cliente.
+#@return  str_group - Nombre de grupo.
+#@version 1.0.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-10-03
+#*/ 
+function ogGetGroupName ()
+{
+[ -n "$group" ] && echo "$group"
+}
+
+
+#/**
 #         ogGetHostname
 #@brief   Muestra el nombre del cliente.
 #@return  str_host - nombre de máquina
@@ -30,7 +79,7 @@ HOST="$HOSTNAME"
 [ -z "$HOST" ] && HOST=$(awk 'BEGIN {RS=""; FS="="}
                               $1~/hostname/ {print $2}' /proc/cmdline)
 [ "$HOSTNAME" != "$HOST" ] && export HOSTNAME="$HOST"
-echo $HOST
+[ -n "$HOST" ] && echo $HOST
 }
 
 
@@ -45,7 +94,7 @@ echo $HOST
 #*/ ##
 function ogGetNetInterface ()
 {
-echo $DEVICE
+[ -n "$DEVICE" ] && echo $DEVICE
 }
 
 

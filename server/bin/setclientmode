@@ -70,7 +70,7 @@ for AUX in $ETHERNET; do
 				JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
 				WHERE ordenadores.mac=\"$ETHERNET\";")
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
-		perl -pi -e "s/INFOHOST/$DATOS/" $PXEDIR/$AUX
+		perl -pi -e "s/INFOHOST/$DATOS/g" $PXEDIR/$AUX
 		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
 			"UPDATE ordenadores SET arranque=\"$1\" WHERE mac=\"$ETHERNET\";"
 	fi
