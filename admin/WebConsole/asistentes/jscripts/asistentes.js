@@ -82,16 +82,21 @@ function codeParticionado (form) {
 			partCode += " EMPTY:0";
 		}
 	}
-	if (form.size4.value == "0") {
-		cacheCode = "ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1  \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
-	} else {
-		if (form.size4.value == "CUSTOM") { 
-			cacheSize = form.size4custom.value; 
+	if (form.check4.checked) {
+		if (form.size4.value == "0") {
+			cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
 		} else {
-			cacheSize = form.size4.value;
+			if (form.size4.value == "CUSTOM") { 
+				cacheSize = form.size4custom.value; 
+			} else {
+				cacheSize = form.size4.value;
+			} 
+			cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
 		} 
-		cacheCode = "ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
-	} 
+	} else {
+		cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
+		partCode += " EMPTY:0";
+	}
 	if (extended) {
 		var lastLogical=5;
 		for (var nPart=9; nPart>5; nPart--) {
