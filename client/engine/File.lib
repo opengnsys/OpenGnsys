@@ -107,7 +107,7 @@ esac
 TARGET=$(ogGetPath "$@")
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
 # Copiar fichero.
-cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
+cp -a "$SOURCE" "$TARGET"                    # (definir posible error)
 }
 
 

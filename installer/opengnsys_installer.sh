@@ -438,7 +438,7 @@ function mysqlImportSqlFileToDb()
 	echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
 	chmod 600 $tmpfile
 	for dev in ${DEVICE[*]}; do
-		if [ "${SERVERIP[i]} == $DEFAULTDEV" ]; then
+		if [ "${DEVICE[i]} == $DEFAULTDEV" ]; then
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
@@ -703,7 +703,7 @@ function dhcpConfigure()
 
 	backupFile $DHCPCFGDIR/dhcpd.conf
 	for dev in ${DEVICE[*]}; do
-		if [ -n "${SERVERIP[$i]}" ]; then
+		if [ -n "${SERVERIP[i]}" ]; then
 			backupFile $DHCPCFGDIR/dhcpd-$dev.conf
 			sed -e "s/SERVERIP/${SERVERIP[$i]}/g" \
 			    -e "s/NETIP/${NETIP[$i]}/g" \
