@@ -11,10 +11,16 @@ PARM=`cat`
 
 
 BASEDIR=/opt/opengnsys
+PATH=$PATH:$BASEDIR/bin
 REPONAME=ogAdmRepo
 REPOLOG=$BASEDIR/log/$REPONAME.log
 MCASTLOGBASE=$BASEDIR/log/mcastlog
 MCASTLOG=$MCASTLOGBASE/ogAdmRepoMcast.`date +%Y%m%d-%H%M%S`
+
+# Añade registro de incidencias.
+function echolog () {
+	date +"%Y%m%d-%H%M%S $*" >> $REPOLOG
+}
 
 mkdir -p $MCASTLOGBASE
 
@@ -24,28 +30,26 @@ PARM3=$(echo $PARM | cut -f3 -d" ")
 PARM4=$(echo $PARM | cut -f4 -d" ")
 
 
-case $PARM1 in
+case "$PARM1" in
 	START_MULTICAST)
 		#1 START_MULTICAST
 		#2 fichero a enviar
 		#3 opciones de multicast
-		FILE=/opt/opengnsys/images$PARM2
-		MCASTOPT=$PARM3
-		echo `date +%Y%m%d-%H%M%S` "/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT" >> $REPOLOG
-		/opt/opengnsys/bin/sendFileMcast $FILE $MCASTOPT &>> $MCASTLOG
+		FILE="$PARM2"
+		MCASTOPT="$PARM3"
+		echolog "Ejecutar $(which sendFileMcast) $FILE $MCASTOPT"
+		sendFileMcast $FILE $MCASTOPT &>> $MCASTLOG
 		case $? in
-			1)
-			echo `date +%Y%m%d-%H%M%S` Parametros insuficientes >> $REPOLOG
-			;;
-			2)
-			echo `date +%Y%m%d-%H%M%S` Fichero no accesible >> $REPOLOG
-			;;
-			3)
-			echo `date +%Y%m%d-%H%M%S` sesion multicast no valida >> $REPOLOG
-			;;
+			1)  echolog "Parametros insuficientes"
+			    return 1 ;;
+			2)  echolog "Fichero no accesible"
+			    return 2 ;;
+			3)  echolog "Sesion multicast no valida"
+			    return 3 ;;
 		esac
 	;;
 	default)
-	    echo "Solicitud con parametros: -  $PARM  - no realizada: No registrada o con errores" >> $REPOLOG
+	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"
 	;;
 esac
+
