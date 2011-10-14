@@ -20,10 +20,10 @@
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
 #@note    En Linux, debe arrancarse la partición del directorio \c /boot
-#@version 0.1 - Integracion para OpenGNSys. - EAC: HDboot(); BootLinuxEX() en Boot.lib  
+#@version 0.1 - Integración para OpenGnSys. - EAC: HDboot; BootLinuxEX en Boot.lib  
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008-10-27
-#@version 0.9 - Adaptacion para OpenGNSys.
+#@version 0.9 - Adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
 #*/ ##
@@ -101,7 +101,7 @@ kexec -e
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación para OpenGNSys.
+#@version 0.9 - Adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/ ##
@@ -138,7 +138,7 @@ ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerN
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@warning Función básica usada por \c ogBoot
-#@version 0.9 - Primera adaptación para OpenGNSys.
+#@version 0.9 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
 #@version 0.9.2 - Soporta partición /boot independiente.
@@ -200,7 +200,7 @@ awk 'BEGIN {cont=-1;}
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación a OpenGNSys.
+#@version 0.9 - Adaptación a OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-24
 #*/ ##
@@ -242,7 +242,7 @@ ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\NV H
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9.2 - Adaptación a OpenGNSys.
+#@version 0.9.2 - Adaptación a OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-07-20
 #*/ ##
@@ -277,7 +277,7 @@ ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows NT\CurrentVersion\Winlog
 #@return  salida del programa my-sys
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación a OpenGNSys.
+#@version 0.9 - Adaptación a OpenGnSys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009-09-24
 #*/ ##
@@ -309,7 +309,7 @@ ms-sys -m -f $PART
 #@return  salida del programa my-sys
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación a OpenGNSys.
+#@version 0.9 - Adaptación a OpenGnSys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009-09-24
 #*/ ##
@@ -344,7 +344,7 @@ ms-sys -s -f $PART
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación a OpenGNSys.
+#@version 0.9 - Adaptación a OpenGnSys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009-09-24
 #*/ ##
@@ -352,7 +352,7 @@ ms-sys -s -f $PART
 function ogFixBootSector ()
 {
 # Variables locales.
-local PART DISK FILE
+local PARTYPE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -367,7 +367,7 @@ fi
 #TODO, solo si la particion existe
 #TODO, solo si es ntfs o fat
 PARTYPE=$(ogGetPartitionId $1 $2) 
-case $PARTYPE in
+case "$PARTYPE" in
 	1|4|6|7|b|c|e|f)
 	;;
 	*)
@@ -391,7 +391,6 @@ spartlnx.run -cui -nm -a -f $FILE &
 sleep 5
 ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 
-
 }
 
 
@@ -404,7 +403,7 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Integración desde EAC para OpenGNSys.
+#@version 0.9 - Integración desde EAC para OpenGnSys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009-09-24
 #@version 1.0.1 - Adapatacion para OpenGnsys.
@@ -416,11 +415,11 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 function ogWindowsBootParameters ()
 {
 # Variables locales.
-local PART DISK FILE
+local PART DISK FILE VERSION WINVER MOUNT
 #Preparando variables adaptadas a sintaxis windows.
 let DISK=$1-1
 PART=$2	
-FILE=/tmp/temporal
+FILE=/tmp/temp$$
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -521,7 +520,7 @@ sleep 5
 ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 
 }
-	
+
 
 #         ogWindowsRegisterPartition int_ndisk int_partiton str_volume int_disk int_partition
 #@brief   Registra una partición en windows con un determinado volumen.
@@ -533,16 +532,14 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
-#@version 0.9 - Adaptación a OpenGNSys.
+#@version 0.9 - Adaptación a OpenGnSys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2009-09-24
 #*/ ##
-
-
 function ogWindowsRegisterPartition ()
-{	
+{
 # Variables locales.
-local PART DISK FILE
+local PART DISK FILE REGISTREDDISK REGISTREDPART REGISTREDVOL VERSION SYSTEMROOT
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -559,7 +556,7 @@ REGISTREDPART=$2
 REGISTREDVOL=$(echo $3 | cut -c1 | tr '[:lower:]' '[:upper:]')
 DISK=$4
 PART=$5
-FILE=/tmp/temporal
+FILE=/tmp/temp$$
 
 ogDiskToDev $REGISTREDDISK $REGISTREDPART || return $(ogRaiseError $OG_ERR_PARTITION "particion a registrar "; echo $?)
 ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows"; echo $?)
