@@ -6,7 +6,27 @@ Lista de cambios incluidos en OpenGnSys 1.0.2
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#14	Crear funciones de línea de comando que permitan la gestión de los grupos de PCs (duplicado)
 #370	ogGetMacAddress en host multiples interfaces siempre usa datos eth0 aunque no esté activa
+#393	En acceso ssh a los clientes, no reconoce funciones de valores de la interfaz de red
+#394	crearImagen y updateCache debe considerar espacio libre para almacenar la imagen
+#402	Gestor de arranque para Windows 7/Vista/XP/2000
+
+Tickets resueltos en módulo OpenGnSys Client:
+#430	RAMFS del boot-tools autogestión sobre la caché: Instalación y Actualización
+#432	Escalar servicios de almacenamiento
+#444	Sustitución definitiva de PXELinux por Grub4Dos en el arranque de clientes (heredado de #134)
+
+Tickets resueltos en módulo OpenGnSys Server:
+#425	Evitar que los registros de logs aumenten indefinidamente
+#428	Modificar la clave por defecto de acceso a Samba desde los clientes
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#296	Consola Web: particionar y formatear no va si hay partición de linux-swap (no se resolverá)
+#341	Control del tamaño de disco duro en consola web
+#423 	Netboot no configura el parámetro de IP serverADM
+#434	Soporte para particiones lógicas en el asistente de particionado
+#443	Usar HTTPS en la consola web
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.1
@@ -66,6 +86,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #64	Selección de aplicaciones de clonación
 #264	Error al crear la caché
 #286	Parámetro debug para el engine
+#287	cloneRemoteFromMaster unicast/multicast
 #291	Creación de imagenes desde el modo user
 #298	Tratamientos de bloqueos de imágenes para solucionar problemas de concurrencia (mejora)
 #305	Integración engine versión 1.0
@@ -223,13 +244,13 @@ Tickets resueltos en módulo OpenGnSys Client:
 Tickets resueltos en módulo OpenGnSys Server:
 #117	Añadir IP o MAC del cliente rechazado
 #146	Fallo echo consola
-#187	Mayor información en los logs de los servicios
+#187	Mayor información en los logs de los servicios (duplicado)
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console
 #122	Consola Web: Errores en comando "Particionar y Formatear"
 #148	La consola no permite clonar la partición de recuperación de Windows 7
 #158	controlar inconsistencias
-#160	Problemas particionando y formateando desde consola
+#160	Problemas particionando y formateando desde consola (ticket no válido)
 #175	Consola Web: No se ven los servidores OpenGnSys
 
 Tickets resueltos en módulo OpenGnSys Installer:
@@ -278,14 +299,14 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #75 	Arrancar sistemas Linux en partición distinta a la original 
 #85	ogCreateImage no crea los subdirectorios del path indicado
 #86	ogRestoreImage siempre añade a la imagen pasada como parámetro la subcadena ".img"
-#87	engine no se adapta a la sintaxis doxygen
+#87	Engine no se adapta a la sintaxis Doxygen
 #98 	ogGetParent no devuelve salida correcta para el argumento CACHE
 #99 	ogGetIpAddress obtiene la ip a partir del leases obtenido del dhcp
 #101	trunk Disk.lib error linea 445
 #109	ogSetPartitionId no modifica bien el identificador de la partición
 #110	ogCreatePartitions no llama a ogTypeToId
 #111	ogFormatFS no reconoce el tipo de partitición CACHE
-#121    ogCreatePartitions revisión 813
+#121    ogCreatePartitions revisión 813 (no se resolverá)
 
 Tickets resueltos en módulo OpenGnSys Client:
 #11 	Páginas de inicio estilo rembo
@@ -299,7 +320,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #67 	Cliente QT no importa NFS
 #68 	Cliente no encuentra el subdirectorio de logs
 #72 	Error en el browser al intentar cargar la libpng12.so.0
-#84 oginit considera siempre al servidor dhcp como si fuese el servidor opengnsys
+#84	oginit considera siempre al servidor DHCP como si fuese el servidor OpenGnSys
 #105    El browser del cliente no detecta algunos ratones
 #106    Añadir al busybox del initrd soporte de configuración de red (no se resolverá)
 #118    Función ogGetIpAddress no obtiene la ip adecuadamente
@@ -316,7 +337,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #76	Problemas al crear tareas y trabajos nuevos (tarea)
 #77 	No se pueden añadir comandos a tareas, trabajos, etc. (tarea)
 #78	No funciona la consola web (tarea)
-#80 	puerto por defecto del servidor opengnsys en el web admin
+#80 	Puerto por defecto del servidor opengnsys en el web admin
 #97	Instalador no deja bien configurado controlacceso.php
 #113    Incluir ayuda Doxygen en la consola web
 #119    Mensaje de aviso en el browser al elegir opción de menú
