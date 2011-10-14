@@ -10,9 +10,11 @@ fi
 
 echo "[0] Inicio del proceso de arranque."
 PART=$(ogDiskToDev "$1" "$2") || exit $?
-NAME=$(ogGetHostname)
+NAME="$(ogGetHostname)"
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $1 $2)
+# Borrar marcas de arrranque Windows.
+[ "$OSTYPE" == "Windows" ] && rm -f /mnt/*/ogboot.*
 
 echo "[10] Desmontar todos los sistemas de archivos."
 sync

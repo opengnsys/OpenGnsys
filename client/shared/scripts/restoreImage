@@ -76,14 +76,10 @@ ogRestoreImage "$@" || exit $?
 # Restaurar tamaño.
 echo "[80] Extender sistema de archivos."
 ogExtendFs $3 $4
-# Cambiar nombre en sistemas Windows y quitar usuario de acceso por defecto.
-if [ "$(ogGetOsType $3 $4)" = "Windows" ]; then
-    HOST=$(ogGetHostname)
-    HOST=${HOST:-"pc"}
-    echo "[90] Cambiar nombre Windows a \"$HOST\" y usuario de acceso."
-    ogSetWindowsName $3 $4 "$HOST"
-    #ogSetWinlogonUser $3 $4 " "	# Descomentar para cambiar usuario de inicio.
-fi
+# Llamar al script de post-configuración del sistema operativo.
+echo "[90] Post-configuracion de aranque del sistema."
+configureOs $3 $4
+
 TIME=$[SECONDS-TIME1]
 echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 
