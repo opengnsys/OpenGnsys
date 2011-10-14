@@ -40,7 +40,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
-    EXT[234])     PROG="e2fsck"; CODES=(1 2) ;;
+    EXT[234])     PROG="e2fsck"; PARAMS="-y"; CODES=(1 2) ;;
     REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
     REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
     JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
