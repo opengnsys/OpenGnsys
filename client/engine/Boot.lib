@@ -352,7 +352,7 @@ ms-sys -s -f $PART
 function ogFixBootSector ()
 {
 # Variables locales.
-local PARTYPE
+local PARTYPE DISK PART FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -380,7 +380,7 @@ ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 #Preparando instruccion	
 let DISK=$1-1	
 PART=$2
-FILE=/tmp/temporal
+FILE=/tmp/temp$$
 cat > $FILE <<EOF
 disk=$DISK
 main_part=$PART
@@ -390,7 +390,7 @@ EOF
 spartlnx.run -cui -nm -a -f $FILE &
 sleep 5
 ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
-
+rm -f $FILE
 }
 
 

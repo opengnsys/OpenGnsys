@@ -29,14 +29,10 @@
 #@date    2011/03/09
 #*/ ##
       
-
-
-
 function ogUcastSyntax ()
 {
 
-local PARM SESSION SESSIONPARM MODE PORTBASE PERROR
-local ADDRESS  
+local PARM SESSION SESSIONPARM MODE PORTBASE PERROR ADDRESS
 local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT
 
 # Si se solicita, mostrar ayuda.
@@ -159,7 +155,7 @@ function ogUcastSendPartition ()
 {
 
 # Variables locales
-local PART   COMMAND RETVAL
+local PART COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -175,7 +171,6 @@ PART=$(ogDiskToDev "$1" "$2") || return $?
 #ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
 ogUnmount $1 $2
 
-
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogUcastSyntax SENDPARTITION "$3" $PART $4 $5`
 RETVAL=$?
@@ -189,6 +184,7 @@ else
 fi
 
 }
+
 
 #/**
 #         ogUcastReceiverPartition
@@ -208,7 +204,7 @@ fi
 function ogUcastReceiverPartition ()
 {
 # Variables locales
-local PART   COMMAND RETVAL
+local PART COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -223,7 +219,6 @@ PART=$(ogDiskToDev "$1" "$2") || return $?
 
 #ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
 ogUnmount $1 $2
-
 
 #generamos la instrucción a ejecutar.  
 COMMAND=`ogUcastSyntax RECEIVERPARTITION "$3" $PART $4 $5`
@@ -260,7 +255,7 @@ fi
 function ogUcastSendFile ()
 {
 # Variables locales.
-local ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
+local ARG ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
 
 
 #ARGS usado para controlar ubicación de la sesion multicast
@@ -301,7 +296,6 @@ esac
 ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
 
 
-
 SESSION=${!ARG}
 
 #generamos la instrucción a ejecutar.  
@@ -339,7 +333,6 @@ fi
 #@date    2010/05/09
 #*/ ##
 #         
-
 
 function ogMcastSyntax ()
 {
@@ -478,7 +471,7 @@ esac
 function ogMcastSendFile ()
 {
 # Variables locales.
-local ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
+local ARGS ARG SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
 
 #LOGFILE="/tmp/mcast.log"
 
@@ -523,7 +516,6 @@ ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file
 #rm $LOGFILE
 
 SESSION=${!ARG}
-
 
 
 #generamos la instrucción a ejecutar.  
@@ -611,6 +603,7 @@ else
 fi
 }
 
+
 #/**
 #         ogMcastSendPartition
 #@brief   Función para enviar el contenido de una partición a multiples particiones remotas.
@@ -633,7 +626,7 @@ function ogMcastSendPartition ()
 {
 
 # Variables locales
-local PART   COMMAND RETVAL
+local PART COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -683,7 +676,7 @@ fi
 function ogMcastReceiverPartition ()
 {
 # Variables locales
-local PART   COMMAND RETVAL
+local PART COMMAND RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -926,7 +919,7 @@ esac
 
 
 # Error si no existe la imagen
-[ $SOURCE ] ||  ogRaiseError $OG_ERR_NOTFOUND || return $?
+[ $SOURCE ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
 
 [ -r $SOURCE.torrent ] && mv "$SOURCE.torrent" "$SOURCE.torrent.ant" && echo "Esperamos que se refresque el servidor" && sleep 20
 
@@ -957,7 +950,7 @@ function ogUpdateCacheIsNecesary ()
 {
 
 # Variables locales.
-local  ERROR SOURCE CACHE FILESOURCE MD5SOURCE FILETARGET  MD5TARGET
+local ERROR SOURCE CACHE FILESOURCE MD5SOURCE FILETARGET MD5TARGET
 ERROR=0
 
 # Si se solicita, mostrar ayuda.
@@ -986,8 +979,8 @@ FILETARGET=`ogGetPath CACHE $2`
 if [ -z $FILETARGET ]
 then
 	# borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
-	ogDeleteFile CACHE /$2.torrent.bf &> /dev/null
-	ogDeleteFile CACHE /$2.sum &> /dev/null
+	ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+	ogDeleteFile CACHE "/$2.sum" &> /dev/null
 	echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
 	return 0 
 fi
@@ -1029,7 +1022,7 @@ then
 	return 1
 else
     echo "TRUE=0, Si es necesario actualizar. paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
-	rm $FILETARGET
+	rm -f $FILETARGET
 	return 0
 fi
 

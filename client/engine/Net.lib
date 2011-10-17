@@ -55,7 +55,7 @@ fi
 function ogGetGroupName ()
 {
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME Grupo1"
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  Grupo1"
     return
 fi
 [ -n "$group" ] && echo "$group"
@@ -73,6 +73,10 @@ fi
 function ogGetHostname ()
 {
 local HOST
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  pc1"
+    return
+fi
 # Tomar nombre de la variable HOSTNAME
 HOST="$HOSTNAME"
 # Si no, tomar del DHCP, opción host-name       /* (comentario para Doxygen)
@@ -98,7 +102,11 @@ HOST="$HOSTNAME"
 #*/ ##
 function ogGetNetInterface ()
 {
-[ -n "$DEVICE" ] && echo $DEVICE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  eth0"
+    return
+fi
+[ -n "$DEVICE" ] && echo "$DEVICE"
 }
 
 
@@ -120,6 +128,10 @@ function ogGetNetInterface ()
 function ogGetIpAddress ()
 {
 local IP
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  192.168.0.10"
+    return
+fi
 if [ -n $IPV4ADDR ]; then
      IP=$IPV4ADDR
 else
@@ -149,6 +161,10 @@ echo ${IP%%/*}       # (comentario para Doxygen) */
 function ogGetMacAddress ()
 {
 local MAC
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  00:11:22:33:44:55"
+    return
+fi
 # Obtener direcciones Ethernet.
 if [ -n "$DEVICE" ]; then
     MAC=$(ip -o address show up dev "$DEVICE" 2>/dev/null | awk '{sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
@@ -174,6 +190,10 @@ echo ${MAC%% *}
 #*/ ##
 function ogGetRepoIp ()
 {
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  192.168.0.2"
+    return
+fi
 # Obtener direcciones IP, segun el protocolo de montaje
 if [ -n "$OGIMG" ]; then
     case "$ogprotocol" in
@@ -198,6 +218,10 @@ fi
 #*/ ##
 function ogGetServerIp ()
 {
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  192.168.0.2"
+    return
+fi
 # Obtener direcciones IP.
 if [ -n "$OPENGNSYS" ]; then
     case "$ogprotocol" in
