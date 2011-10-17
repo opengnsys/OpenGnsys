@@ -52,11 +52,13 @@ $cmd->texto="update ordenadores set arranque=@optboot where nombreordenador=@hos
 $cmd->Ejecutar();
 
 $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
-			ordenadores.netiface AS netiface, aulas.netmask AS netmask, aulas.router AS router, 
-			repositorios.ip AS iprepo FROM ordenadores 
-			join aulas on ordenadores.idaula=aulas.idaula 
-			join repositorios on ordenadores.idrepositorio=repositorios.idrepositorio 
-			where ordenadores.nombreordenador='". $hostname ."'"; 
+			ordenadores.netiface AS netiface, aulas.netmask AS netmask,
+			aulas.router AS router, repositorios.ip AS iprepo,
+			aulas.nombreaula AS grupo
+			FROM ordenadores 
+			JOIN aulas ON ordenadores.idaula=aulas.idaula 
+			JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
+			WHERE ordenadores.nombreordenador='". $hostname ."'"; 
 $rs=new Recordset; 
 $rs->Comando=&$cmd; 
 if (!$rs->Abrir()) echo "error";
@@ -67,9 +69,10 @@ $rs->Primero();
 	$router=$rs->campos["router"];
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
+	$group=cleanString($rs->campos["grupo"]);
 $rs->Cerrar();
 
-$cmd->texto="SELECT ipserveradm from entornos";
+$cmd->texto="SELECT ipserveradm FROM entornos";
 $rs=new Recordset;
 $rs->Comando=&$cmd;
 if (!$rs->Abrir()) echo "error";
@@ -78,17 +81,12 @@ $rs->Primero();
         $server=$rs->campos["ipserveradm"];
 $rs->Cerrar();
 
-$infohost="'ip="
-. $ip . ":"
-. $server .":"
-. $router . ":"
-. $netmask .":"
-. $hostname .":"
-. $netiface . ":none   ogrepo="
-. $repo . " oglive="
-. $repo . " oglog="
-. $server . " ogshare="
-. $server ."'";
+$infohost="'ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
+	  " group=$group" .
+	  " ogrepo=$repo" .
+	  " oglive=$repo" .
+	  " oglog=$server" .
+	  " ogshare=$server'";
 
 
 ###################obtenemos las variables de red del aula.
@@ -119,5 +117,12 @@ function netmask2cidr($netmask) {
            }
            return $cidr;
  }
+
+// Sustituye espacio por "_" y quita acentos y tildes.
+function cleanString ($cadena) {
+	$patron = array ('/ /','/á/','/é/','/í/','/ó/','/ú/','/ñ/','/Á/','/É/','/Í/','/Ó/','/Ú/','/Ñ/');
+	$reemplazo = array ('_','a','e','i','o','u','n','A','E','I','O','U','N');
+	return  preg_replace($patron,$reemplazo,$cadena);
+}
 
 ?>
