@@ -319,7 +319,7 @@ local DISK
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \ "$FUNCNAME 1  => 244198584"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" "$FUNCNAME 1  => 244198584"
     return
 fi
 # Error si no se recibe 1 parámetro.
@@ -469,7 +469,7 @@ esac
 #/**
 #         ogGetPartitionType int_ndisk int_npartition
 #@brief   Muestra el tipo de una particion determinada.
-#@note    Alias de la función ogGetFsType
+#@see     ogGetFsType
 #*/ ##
 function ogGetPartitionType ()
 {

@@ -27,7 +27,7 @@ function ogCalculateChecksum ()
 local FILE
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
-           "$FUNCNAME REPO ubuntu.img   ==>   ef899299caf8b517ce36f1157a93d8bf"
+           "$FUNCNAME REPO ubuntu.img  ==>  ef899299caf8b517ce36f1157a93d8bf"
     return
 fi
 
@@ -53,7 +53,7 @@ function ogCompareChecksumFiles ()
 local ARGS SOURCE TARGET
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
-           "if $FUNCNAME REPO ubuntu.img CACHE ubuntu.img; then ... fi"
+           "if $FUNCNAME REPO ubuntu.img CACHE ubuntu.img; then ...;  fi"
     return
 fi
 
@@ -89,6 +89,11 @@ function ogCopyFile ()
 {
 # Variables locales.
 local ARGS SOURCE TARGET
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_source [ str_repo | int_ndisk int_npartition ] path_target" \
+           "$FUNCNAME REPO newfile.txt 1 2 /tmp/newfile.txt"
+    return
+fi
 
 ARGS="$@"
 case "$1" in
@@ -123,6 +128,12 @@ function ogDeleteFile ()
 {
 # Variables locales.
 local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_file" \
+           "$FUNCNAME 1 2 /tmp/newfile.txt"
+    return
+fi
+
 # Comprobar que existe el fichero y borrarlo.
 FILE="$(ogGetPath "$@")"
 [ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
@@ -142,6 +153,12 @@ function ogDeleteTree ()
 {
 # Variables locales.
 local DIR
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_dir" \
+           "$FUNCNAME 1 2 /tmp/newdir"
+    return
+fi
+
 # Comprobar que existe el directorio y borrarlo con su contenido.
 DIR="$(ogGetPath "$@")"
 [ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
@@ -342,6 +359,12 @@ ogCalculateChecksum "$FILE" > "$FILE.sum"
 function ogMakeDir ()
 {
 local PARENT DIR
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_dir" \
+           "$FUNCNAME 1 2 /tmp/newdir"
+    return
+fi
+
 PARENT="$(ogGetParentPath "$@")" || return $?
 DIR="$(basename "${!#}")"
 mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
