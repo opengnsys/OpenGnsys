@@ -5,7 +5,7 @@
 #         updateCache
 #@brief   Actualiza la cache del cliente con imagen o fichero iso.
 #@param 1 REPO          Origen del fichero. -accesible por nfs-samba-
-#@param 2 str_fichero.{img iso}  nombre del fichero a actualizar.
+#@param 2 str_fichero   nombre del fichero a actualizar.
 #@param 3 str_protoco.  TORRENT | MULTICAST    | UNICAST.
 #@param 4 str_opcionesprotocolo
 #@param 4 str_opcionesupdatecache
@@ -31,9 +31,9 @@ if [ $# -lt 3 ]; then
     exit $?
 fi
 
-REPOSITORIO=$1
-PROTOCOLO=$3
-OPTPROTOCOLO=$4
+REPOSITORIO="$1"
+PROTOCOLO="$3"
+OPTPROTOCOLO="$4"
 REPOIP=$(ogGetRepoIp)
 echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 # Si el repositorio local CACHE no existe salimos.
@@ -51,7 +51,7 @@ ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
 
 
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
-FILESIZE=$(ls -sk $(ogGetPath $1 $2) | cut -f1 -d" ")
+FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
 
 if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
 then
@@ -60,32 +60,30 @@ then
     exit $?
 fi
 
-ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
 
-ogMountCache
+ogMountCache >/dev/null
 
 ## Si no existe, crear subdirectorio para el fichero en la cache.
-IMGDIR=$(ogGetParentPath "$1" "/$2")
+IMGDIR=$(ogGetParentPath CACHE "/$2")
 if [ $? != 0 ]; then
     echo "[5] Crear subdirectorio del fichero  \"$2 $(dirname "$2")."
-   ogMakeDir "CACHE" $(dirname "/$2")
-   IMGDIR=$(ogGetParentPath "$1" "/$2") || exit $?
+    ogMakeDir CACHE $(dirname "/$2")
+    IMGDIR=$(ogGetParentPath CACHE "/$2") || exit $?
 fi
-
-
 
 
 case "$PROTOCOLO" in
 	torrent | TORRENT )
-		echo "ogCopyFile $1 $2.torrent absolute $OGCAC$OGIMG"
-		ogCopyFile $1 $2.torrent $OGCAC$OGIMG
+		echo "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
+		ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
 		#TODO: comprobar que el tracker definido en el fichero es correcto.
     	#TODO comprobar que el fichero torrent está en cache
 		echo "ogTorrentStart CACHE $2.torrent $4"
-		ogTorrentStart CACHE $2.torrent $4
+		ogTorrentStart CACHE "$2.torrent" $4
 	;;
 	multicast | MULTICAST )
 		echo "determinando puerto principal y auxiliar."
@@ -98,7 +96,7 @@ case "$PROTOCOLO" in
 		echo "comprobando puerto $PORTAUX en $REPOIP (sesion multicast en puerto $PORT) "
 		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 		then 
-	   		ogMcastReceiverFile $PORT CACHE $2
+	   		ogMcastReceiverFile $PORT CACHE "$2"
 		else
 		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
 	   		echo "solicita la apertura:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
@@ -107,7 +105,7 @@ case "$PROTOCOLO" in
 	   		sleep 10
 	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 	   		then 
-	   			ogMcastReceiverFile $PORT CACHE $2	   
+	   			ogMcastReceiverFile $PORT CACHE "$2"
 			else
 			    echo "la peticion ha fallado: hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   		    exit 1
@@ -116,13 +114,14 @@ case "$PROTOCOLO" in
 	;;
 	unicast | UNICAST )
 		echo "unicast"
-		ogCopyFile $1 $2 $OGCAC$OGIMG
+		ogCopyFile $REPOSITORIO "$2" "$IMGDIR"
 	;;
 esac
 
 
-ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
+

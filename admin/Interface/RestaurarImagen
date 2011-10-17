@@ -51,7 +51,7 @@ REPO=${4:-"REPO"}
 if [ "$REPO" == "CACHE" ] 
 then
 	echo "Iniciando un ogRestoreImage CACHE /$3 $1 $2" &>> $OGLOGFILE
-	ogRestoreImage CACHE /"$3" "$1" "$2" &>> $OGLOGFILE
+	ogRestoreImage CACHE "$3" "$1" "$2" &>> $OGLOGFILE
 	RETVAL=$?
 fi	
 
@@ -59,32 +59,32 @@ fi
 
 if [ "$REPO" == "REPO" ]
 then
-	echo "updateCache REPO /$3.img $5 $6"	 &>> $OGLOGFILE 
-	updateCache REPO /$3.img $5 $6	 &>> $OGLOGFILE	
+	echo "updateCache REPO \"$3.img\" $5 $6"	&>> $OGLOGFILE 
+	updateCache REPO "$3.img" "$5" "$6"		&>> $OGLOGFILE	
 	RETVAL=$?
 	case $RETVAL in
 		0) 
 		echo "updateCache (correcto); re realiza ogRestoreImage REPO /$3 $1 $2 UNICAST" &>> $OGLOGFILE
-		ogRestoreImage CACHE /"$3" "$1" "$2" &>> $OGLOGFILE
-		RETVAL=$? 
+		ogRestoreImage CACHE "$3" "$1" "$2" &>> $OGLOGFILE
+		RETVAL=$?
 		;;
 		15)
 		echo "updateCache(no hay CACHE); se realiza ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGFILE 
-		ogRestoreImage REPO /"$3" "$1" "$2" &>> $OGLOGFILE
-		RETVAL=$? 		
+		ogRestoreImage REPO "$3" "$1" "$2" &>> $OGLOGFILE
+		RETVAL=$? 
 		;;
 		16)
 		echo "updateCache(no hay espacio sufiente en la CACHE), Se realiza ogRestoreImage REPO /$3 $1 $2 UNICAST"  &>> $OGLOGFILE
-		ogRestoreImage REPO /"$3" "$1" "$2" &>> $OGLOGFILE
+		ogRestoreImage REPO "$3" "$1" "$2" &>> $OGLOGFILE
 		RETVAL=$? 
 		;;
-	esac		
+	esac
 fi
 
 if [ $RETVAL == 0 ]
 then
 	echo "Iniciando la Configuracion del Sistema Restaurado" &>> $OGLOGFILE
-	configureOs $1 $2
+	configureOs "$1" "$2"
 fi
 if [ $RETVAL == 0 ]
 then
@@ -94,3 +94,4 @@ else
 	echo $RETVAL &>> $OGLOGFILE
 fi
 exit $RETVAL
+
