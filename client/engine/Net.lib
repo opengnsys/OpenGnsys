@@ -54,6 +54,10 @@ fi
 #*/ 
 function ogGetGroupName ()
 {
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME Grupo1"
+    return
+fi
 [ -n "$group" ] && echo "$group"
 }
 
