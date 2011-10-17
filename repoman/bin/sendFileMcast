@@ -23,18 +23,15 @@ if [ $# -ne 2 ]; then
     exit 1
 fi
 
-# Fichero de imagen (camino completo o nombre de imagen sin extensión).
+# Fichero a enviar (camino completo o relativo al directorio del repositorio).
 FICH="$1"
 if [ "${FICH:0:1}" != "/" ]; then
-    for EXT in pgz img; do
-        FICHIMG="$OGIMG/$FICH.$EXT"
-        [ -r "$FICHIMG" ] && break
-    done
+    FICHIMG="$OGIMG/$FICH"
 else
     FICHIMG="$FICH"
 fi
 if [ ! -f "$FICHIMG" ]; then
-    echo "$PROG Error: Fichero \"$FICH\" no accesible" 
+    echo "$PROG Error: Fichero \"$FICHIMG\" no accesible" 
     exit 2
 fi
 
@@ -59,8 +56,5 @@ CERROR="8x8/128"
 
 # Envío de fichero por Multicast.
 which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
-##### ADV v. 1.0 23/02/2011
-#version 0.10 # udp-sender $MBUFFER --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG"
 $OGBIN/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
 
-##### ADV v. 1.0  23/02/2011
