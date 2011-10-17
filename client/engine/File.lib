@@ -268,7 +268,7 @@ case $# in
     *)	ogRaiseError $OG_ERR_FORMAT
         return $? ;;
 esac
-ogGetPath "$PARENT"
+ogGetPath $PARENT
 }
 
 
