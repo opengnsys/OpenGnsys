@@ -28,10 +28,23 @@
 #Códigos de error de la funcion ogCreateImage
 
 
+TIME1=$SECONDS
 
+#TODO: revisar las variables.
+OGLOGSESSION="${OGLOGSESSION=:-/tmp/session.log}"
+OGLOGCOMMAND="${OGLOGCOMMAND=:-/tmp/command.log}"
+OGLOGSESSION="/tmp/session.log"
+OGLOGCOMMAND="/tmp/command.log"
+
+echo " " > $OGLOGSESSION
+echo " " > $OGLOGCOMMAND
+echo " " > ${OGLOGCOMMAND}.tmp
 
 # Registro de ejecución
 echo $* >> $OGLOGFILE
+
+echo "$*" &>> $OGLOGSESSION | $(tail -n 1 $OGLOGSESSION >> $OGLOGFILE)
+
 
 # Solo ejecutable por OpenGnSys Client.
 PATH=$PATH:$(dirname $0)
@@ -69,7 +82,7 @@ fi
 if [ -f createImage$ogengine ]; then
 	createImage$ogengine "$1" "$2" "$REPO" /"$3" &>> $OGLOGFILE
 else
-	createImage "$1" "$2" "$REPO" /"$3" &>> $OGLOGFILE
+	createImage "$1" "$2" "$REPO" /"$3" &>> $OGLOGCOMMAND
 fi
 RETVAL=$?
 

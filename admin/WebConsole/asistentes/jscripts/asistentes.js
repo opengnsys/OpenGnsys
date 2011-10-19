@@ -19,8 +19,12 @@ switch (form.idmetodo.value)
 		break;
 }
 //form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " 1 " + form.PartOrigen.value + "  " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " 1 " + form.PartOrigen.value + " " + form.tool.value + " " + form.compresor.value;
-form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
-
+command="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
+form.codigo.value="\
+echo [0] iniciando " + command + " | tee -a $OGLOGFILE $OGLOGSESSION \n \ " +
+command + " &>> $OGLOGCOMMAND "
+//cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value + " | tee -a $OGLOGCOMMAND \n";
+//form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
 }
 
 function codeDeployImage(form){
@@ -39,11 +43,19 @@ switch (form.idmetodo.value)
 //form.codigo.value="deployImage REPO /";
 if (form.modo[0].checked) 
 {
-	form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+	command="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+	form.codigo.value="\
+echo [0] iniciando " + command +" | tee -a $OGLOGSESSION \n \ " +
+command + " | tee -a $OGLOGCOMMAND";
+	//form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
 }
 else
 {
-	form.codigo.value="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
+	command="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
+	form.codigo.value="\
+echo [0] iniciando " + command +" | tee -a $OGLOGSESSION \n \ " +
+command + " | tee -a $OGLOGCOMMAND";		
+	//form.codigo.value="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
 }
 
 }
@@ -84,17 +96,35 @@ function codeParticionado (form) {
 	}
 	if (form.check4.checked) {
 		if (form.size4.value == "0") {
-			cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
+			//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
+			cacheCode="\
+			echo \"[20] detectando tamaño de la cache\" | tee -a $OGLOGSESSION \n \
+			sizecache=`ogGetPartitionSize 1 4` \n \
+			echo \"[30] borrando y actualizando tabla particiones disco 1\" | tee -a $OGLOGSESSION \n \
+			ogDeletePartitionTable 1  \n \
+			ogUpdatePartitionTable 1  | tee -a $OGLOGCOMMAND \n \
+			echo \"[50] Activando cache\" | tee -a $OGLOGSESSION \n \
+			initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
 		} else {
 			if (form.size4.value == "CUSTOM") { 
 				cacheSize = form.size4custom.value; 
 			} else {
 				cacheSize = form.size4.value;
 			} 
-			cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
+			//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
+			cacheCode="\
+			echo \"[30] borrando y actualizando tabla particiones disco 1\" | tee -a $OGLOGSESSION \n \
+			ogDeletePartitionTable 1  \n \
+			ogUpdatePartitionTable 1 \n \
+			echo \"[50] Activando cache\" | tee -a $OGLOGSESSION \n \
+			initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
 		} 
 	} else {
-		cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
+		//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
+		cacheCode="\
+		echo \"[30] borrando y actualizando tabla particiones disco 1\" | tee -a $OGLOGSESSION \n \
+		ogDeletePartitionTable 1  \n \
+		ogUpdatePartitionTable 1 \n";
 		partCode += " EMPTY:0";
 	}
 	if (extended) {
@@ -129,13 +159,29 @@ function codeParticionado (form) {
 		partCode += logicalCode;
 	}
 
-	form.codigo.value="\
+//	form.codigo.value="\
+//" + cacheCode + " \n \
+//ogListPartitions 1 \n \
+//ogCreatePartitions 1 " + partCode + " \n \
+//ogSetPartitionActive 1 1 \n \
+//ogUpdatePartitionTable 1 \n \
+//ogListPartitions 1 \n"; 
+form.codigo.value="\
+echo \"[0] iniciando particionado\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
+echo \"[10] desmontando cache y particiones del disco 1\" | tee -a $OGLOGSESSION \n \
+ogUnmountCache \n \
+ogUnmountAll 1 \n  \
 " + cacheCode + " \n \
-ogListPartitions 1 \n \
-ogCreatePartitions 1 " + partCode + " \n \
+echo \"[60] Listando tabla particiones 1\" | tee -a $OGLOGSESSION \n \
+ogListPartitions 1 | tee -a $OGLOGCOMMAND $OGLOGSESSION \n \
+echo \"[70] Creando tabla particiones " + partCode + " \" | tee -a $OGLOGSESSION \n \
+ogCreatePartitions 1 " + partCode + " | tee -a $OGLOGCOMMAND \n \
+echo \"[80] Activando primera particion del disco 1\" | tee -a $OGLOGSESSION \n \
 ogSetPartitionActive 1 1 \n \
+echo \"[100] Listando la nueva tabla particiones  1\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
 ogUpdatePartitionTable 1 \n \
-ogListPartitions 1 \n"; 
+ogListPartitions 1 | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n"; 	
+
 }
 
 

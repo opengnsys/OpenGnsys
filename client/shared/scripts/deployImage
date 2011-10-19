@@ -15,9 +15,17 @@
 #@version 0.9.2 - integracion OpenGnsys
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2010/07/27
+#@version 1.0.2 - Separacion de log
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/08/04
 #*/ ##
 
 TIME1=$SECONDS
+
+OGLOGSESSION="/tmp/session.log"
+OGLOGCOMMAND="/tmp/command.log"
+
+
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
@@ -25,20 +33,20 @@ if [ $# -lt 4 ]; then
 fi
 
 #controlar param1 REPO
-echo "Realizando un updateCache REPO $2.img $5 $6"
-updateCache REPO $2.img $5 $6
+echo "[1] Realizando un updateCache REPO $2.img $5 $6" | tee -a $OGLOGSESSION $OGLOGFILE
+updateCache REPO $2.img $5 $6 | tee -a $OGLOGCOMMAND
 RETVAL=$?
 if [ "$RETVAL" != "0" ]
 then
-	echo "fin del updateCache REPO $2.img $5 $6 con error $RETVAL"
+	echo "[49] Fin del updateCache REPO $2.img $5 $6 con error $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
 	# RC=15 No hay cache
 	# RC=16 no hay espacio sufiente
 	exit $RETVAL
 	
 else
-	echo "iniciando un ogRestore CACHE desde deployImage"
-	ogRestoreImage CACHE /$2 $3 $4 
+	echo "[50] Iniciando un ogRestore CACHE desde deployImage" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogRestoreImage CACHE /$2 $3 $4 &>> $OGLOGCOMMAND
 	RETVAL=$?
-	[ "$RETVAL" == "0" ] && configureOs $3 $4
+	[ "$RETVAL" == "0" ] && configureOs $3 $4 | tee -a $OGLOGCOMMAND
 	exit $RETVAL 
 fi
