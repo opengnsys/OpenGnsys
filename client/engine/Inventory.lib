@@ -78,7 +78,7 @@ case "$(ogGetFsType $1 $2)" in
         fi
         [ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
         ;;
-    NTFS | HTNFS | FAT32 | HFAT32)
+    NTFS | HNTFS | FAT32 | HFAT32)
         TYPE="Windows"
         # Para Windows: leer la version del registro.
         VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
