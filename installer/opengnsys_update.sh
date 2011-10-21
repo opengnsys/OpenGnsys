@@ -464,6 +464,7 @@ function updateServerFiles()
 		done
 	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
+	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }

@@ -2,14 +2,18 @@
 # Variables.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 LOGDIR="$OPENGNSYS/log"
+DEFAULTFILE=/etc/default/opengnsys
 
+# Comprobar servicios que deben estar activos.
+[ -f $DEFAULTFILE ] && source $DEFAULTFILE
 
-if ! $(pgrep ogAdmServer >> /dev/null); then
+# Si un servicio debe estar activo y no se está ejecutando, reiniciar OpenGnSys.
+if [ "$RUN_OGADMSERVER" == "yes" -a $(pgrep -c ogAdmServer) == 0 ]; then
 	date +"%d/%m/%Y %T ERROR: El servicio ogAdmServer  estaba caido, se reinicia" >> $LOGDIR/ogAdmServer.log
 	/etc/init.d/opengnsys restart
 fi
-if ! $(pgrep ogAdmRepo >> /dev/null); then
-	date +"%d/%m/%Y %T ERROR: El servicio opAdmRepo  estaba caido, se reinicia" >> $LOGDIR/ogAdmRepo.log
+if [ "$RUN_OGADMREPO" == "yes" -a $(pgrep -c ogAdmRepo) == 0 ]; then
+	date +"%d/%m/%Y %T ERROR: El servicio ogAdmRepo estaba caido, se reinicia" >> $LOGDIR/ogAdmRepo.log
 	/etc/init.d/opengnsys restart
 fi
 
