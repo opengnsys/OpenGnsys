@@ -590,21 +590,25 @@ schroot -end-sessiona --all-sessions
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2011-06-29
 #*/ ##
-function ogInstallMiniSetup () {
-
+function ogInstallMiniSetup ()
+{
+local CMDDIR CMDFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename" \
            "$FUNCNAME /mnt/sda1 filename.cmd"
     return
-fi	
-
+fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Comprobar que existe el directorio del fichero de comandos.
+CMDDIR=$(ogGetPath "$1/windows/system32")
+[ -n "$CMDDIR" ] || ogReiseError OG_NOTFOUND "$1/windows/system32" || return $?
+CMDFILE="$CMDDIR/$2"
 
 # Creamos el archivo cmd y creamos un par de comandos para que una vez acabe la 
 # postconfiguracion resetee el mini setup, sino lo haria en cada arranque.
-cat > $1/Windows/System32/$2 << EOF
+cat > "$CMDFILE" << EOF
 REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f
 REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f
 EOF
@@ -629,19 +633,22 @@ ogSetRegistryValue "$1" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
 #@date    2011-06-29
 #*/ ##
 
-function ogAddCmd() {
-
+function ogAddCmd ()
+{
+local CMDFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_commands" \
            "$FUNCNAME /mnt/sda1 filename.cmd command" 
     return
-fi	
-
+fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Comprobar que existe el fichero de comandos.
+CMDFILE=$(ogGetPath "$1/windows/system32/$2")
+[ -n "$CMDFILE" ] || ogReiseError OG_NOTFOUND "$1/windows/system32/$2" || return $?
 
-cat >> $1/Windows/System32/$2 << EOF
+cat >> "$CMDFILE" << EOF
 $3
 EOF
 }
@@ -660,17 +667,20 @@ EOF
 #@date    2011-06-29
 #*/ ##
 
-function ogDomainScript() {
-
+function ogDomainScript ()
+{
+local CMDDIR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_domain str_user str_password" \
            "$FUNCNAME /mnt/sda1 filename.cmd domain user password_user"
     return
-fi	
-
+fi
 # Error si no se reciben 4 parámetros.
 [ $# == 5 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Comprobar que existe el directorio de comandos.
+CMDDIR=$(ogGetPath "$1/windows/system32")
+[ -n "$CMDDIR" ] || ogReiseError OG_NOTFOUND "$1/windows/system32" || return $?
 
 # Añadimos en el cmd que se ejecutara al arranque, el comando de ejecutar el script que añade al dominio.
 ogAddCmd $1 "$2" "CSCRIPT joindomain.vbs"
@@ -678,7 +688,7 @@ ogAddCmd $1 "$2" "CSCRIPT joindomain.vbs"
 ogAddCmd $1 "$2" "del /Q C:\Windows\System32\joindomain.vbs"
 
 # Creamos el archivo joindomain.vbs que nos introduce la maquina en el dominio
-cat > $1/Windows/System32/joindomain.vbs << EOF
+cat > "$CMDDIR/joindomain.vbs" << EOF
 Const JOIN_DOMAIN = 1
 Const ACCT_CREATE = 2
 Const ACCT_DELETE = 4
@@ -703,3 +713,4 @@ ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, strPassword, _
     strDomain & "\" & strUser, NULL, JOIN_DOMAIN + ACCT_CREATE)
 EOF
 }
+
