@@ -603,7 +603,7 @@ fi
 [ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 # Comprobar que existe el directorio del fichero de comandos.
 CMDDIR=$(ogGetPath "$1/windows/system32")
-[ -n "$CMDDIR" ] || ogReiseError OG_NOTFOUND "$1/windows/system32" || return $?
+[ -n "$CMDDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1/windows/system32" || return $?
 CMDFILE="$CMDDIR/$2"
 
 # Creamos el archivo cmd y creamos un par de comandos para que una vez acabe la 
@@ -646,7 +646,7 @@ fi
 [ $# == 3 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 # Comprobar que existe el fichero de comandos.
 CMDFILE=$(ogGetPath "$1/windows/system32/$2")
-[ -n "$CMDFILE" ] || ogReiseError OG_NOTFOUND "$1/windows/system32/$2" || return $?
+[ -n "$CMDFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1/windows/system32/$2" || return $?
 
 cat >> "$CMDFILE" << EOF
 $3
@@ -680,7 +680,7 @@ fi
 [ $# == 5 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 # Comprobar que existe el directorio de comandos.
 CMDDIR=$(ogGetPath "$1/windows/system32")
-[ -n "$CMDDIR" ] || ogReiseError OG_NOTFOUND "$1/windows/system32" || return $?
+[ -n "$CMDDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1/windows/system32" || return $?
 
 # Añadimos en el cmd que se ejecutara al arranque, el comando de ejecutar el script que añade al dominio.
 ogAddCmd $1 "$2" "CSCRIPT joindomain.vbs"
