@@ -21,8 +21,8 @@ switch (form.idmetodo.value)
 //form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " 1 " + form.PartOrigen.value + "  " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " 1 " + form.PartOrigen.value + " " + form.tool.value + " " + form.compresor.value;
 command="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
 form.codigo.value="\
-echo [0] iniciando " + command + " | tee -a $OGLOGFILE $OGLOGSESSION \n \ " +
-command + " &>> $OGLOGCOMMAND "
+echo \"[0] iniciando " + command + " \" | tee -a $OGLOGFILE $OGLOGSESSION \n " +
+command + " | tee -a $OGLOGCOMMAND \n ";
 //cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value + " | tee -a $OGLOGCOMMAND \n";
 //form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
 }
@@ -180,6 +180,7 @@ echo \"[80] Activando primera particion del disco 1\" | tee -a $OGLOGSESSION \n 
 ogSetPartitionActive 1 1 \n \
 echo \"[100] Listando la nueva tabla particiones  1\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
 ogUpdatePartitionTable 1 \n \
+ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
 ogListPartitions 1 | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n"; 	
 
 }
