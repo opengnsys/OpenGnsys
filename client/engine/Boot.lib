@@ -595,3 +595,73 @@ sleep 5
 ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 
 }
+
+
+#         ogGrubInstallPartition int_disk  int_partition
+#@brief   Instala/actualiza el gestro grub en el "boot sector" de la partición indicada
+#@param   int_disk  	
+#@param   indt_part     
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 1.0.2 - Primeras pruebas.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2011-10-29
+#*/ ##
+
+function ogGrubInstallPartition {
+
+# Variables locales.
+local PART DISK DIRCONF SCHROOTDEVICE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition" \
+           "$FUNCNAME 1 1 "
+    return
+fi	
+
+# Error si no se reciben 2 parÃ¡metros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+DISK=$1; PART=$2; DIRCONF="/etc/schroot"
+
+
+VERSION=$(ogGetOsVersion $DISK $PART) 
+echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+
+SCHROOTLOCATION=$(ogMount $DISK $PART)
+SCHROOTDEVICE=$(ogDiskToDev $DISK $PART)
+
+rm ${DIRCONF}/schroot.conf
+
+cat >> ${DIRCONF}/schroot.conf << EOF
+[linux]
+description=$VERSION
+type=plain
+directory=$SCHROOTLOCATION
+EOF
+
+cat >> $SCHROOTLOCATION/root/installgrub.sh <<EOF
+#!/bin/bash
+grub-install --recheck --force $SCHROOTDEVICE
+update-grub2
+EOF
+
+chmod 777 $SCHROOTLOCATION/root/installgrub.sh
+
+mount --bind /dev $SCHROOTLOCATION/dev
+mount --bind /dev/pts  $SCHROOTLOCATION/dev/pts
+mount --bind /proc $SCHROOTLOCATION/proc
+mount --bind /sys  $SCHROOTLOCATION/sys
+
+
+schroot -c linux -- /root/installgrub.sh
+
+rm $SCHROOTLOCATION/root/installgrub.sh
+
+umount $SCHROOTLOCATION/dev/pts
+umount $SCHROOTLOCATION/dev
+umount $SCHROOTLOCATION/proc 
+umount $SCHROOTLOCATION/sys
+}
+

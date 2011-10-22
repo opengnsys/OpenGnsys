@@ -15,6 +15,9 @@
 #@version 1.0.1 - Configura el sector de la particion y el gestor de windows para iniciarse desde cualquier particion.  
 #@author Antonio J. Doblas Viso.    Universidad de Malaga.
 #@date   2011-05-20
+#@version 1.0.2 - Configura el sector de la particion y el gestor de linux para iniciarse desde cualquier particion.  
+#@author Antonio J. Doblas Viso.    Universidad de Malaga.
+#@date   2011-11-22
 
 
 
@@ -46,3 +49,6 @@ if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
     ogWindowsRegisterPartition $1 $2 C $1 $2
 fi
 
+if [ "$(ogGetOsType $1 $2)" = "Linux" ]; then
+	ogGrubInstallPartition $1 $2
+fi
