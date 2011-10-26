@@ -43,7 +43,7 @@ esac
 umount $OGIMG
 ogEcho info "$PROG: Montar repositorio $REPO por $PROTO en modo $1"
 MNTOPTS="$(awk -F\" '$1~/OPTIONS=$/ {print $2;}' /scripts/ogfunctions 2>/dev/null)"
-MNTOPTS=${MNTOPTS:-"-o "}
+MNTOPTS=${MNTOPTS:-"-o username=opengnsys,password=og"}
 case "$PROTO" in
 	nfs)	mount -t nfs $REPOIP:$OGIMG $OGIMG -o $MODE ;;
 	smb)	mount -t cifs //$REPOIP/ogimages $OGIMG $MNTOPTS,$MODE,serverino,acl ;;
