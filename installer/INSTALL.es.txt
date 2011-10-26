@@ -1,4 +1,4 @@
-Instalación y Actualización de OpenGnSys 1.0.1
+Instalación y Actualización de OpenGnSys 1.0.2
 ==============================================
 
 

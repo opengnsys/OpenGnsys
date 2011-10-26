@@ -4,9 +4,9 @@ OpenGnSys Client boot-tools   INSTALL.es.txt
 
 Advertencia previa:
 -----------------------------
-- No usar este instalador en un OpenGnsys en producción.
-- Se puede ejecutar este scripts desde un sistema ubuntu 10.04, 11.04
- - Mas información http://www.opengnsys.es/wiki/ClienteInitrdDSGenerarloV1.0.2
+- No usar este instalador en un sistema OpenGnNys en producción.
+- Se puede ejecutar este script desde un sistema Ubuntu 10.04, 11.04
+- Mas información http://www.opengnsys.es/wiki/ClienteInitrdDSGenerarloV1.0.2
 
 
 Requisitos iniciales

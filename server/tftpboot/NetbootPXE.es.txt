@@ -1,10 +1,11 @@
+Como cambiar el arranque en red PXELinux por Grub4DOS
+=====================================================
 
 
-OpenGnsys usa como gestor pxe, el binario pxelinux.0
+OpenGnSys 1.0.1 usa como gestor PXE el binario pxelinux.0, sin embargo, la actulización a OpenGnSys 1.0.2 sustituye automáticamente dicho gestor por Grub4Dos.
 
 
-También ofrece la posibilidad de usar el bianrio grldr que se está evaluando para solucionar algunas incidencias.
-
+Realizar los siguientes pasos para sutituir "a mano" PXELinux por Grub4Dos como gestor de arranque sin usar el proceso de actualización de OpenGnSys.
 
 
 Activar el grldr del grub4dos
