@@ -42,8 +42,10 @@ esac
 # Desmontar repositorio y volver a montarlo con el modo adecuado.
 umount $OGIMG
 ogEcho info "$PROG: Montar repositorio $REPO por $PROTO en modo $1"
+MNTOPTS="$(awk -F\" '$1~/OPTIONS=$/ {print $2;}' /scripts/ogfunctions 2>/dev/null)"
+MNTOPTS=${MNTOPTS:-"-o "}
 case "$PROTO" in
 	nfs)	mount -t nfs $REPOIP:$OGIMG $OGIMG -o $MODE ;;
-	smb)	mount -t cifs //$REPOIP/ogimages $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=og ;;
+	smb)	mount -t cifs //$REPOIP/ogimages $OGIMG $MNTOPTS,$MODE,serverino,acl ;;
 esac
 
