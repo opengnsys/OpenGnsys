@@ -79,7 +79,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 
 	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,	
 				ordenadores_particiones.numpar ,
-				ordenadores_particiones.codpar ,				
+				ordenadores_particiones.codpar ,
 				tipospar.tipopar,
 				tipospar.clonable,
 				ordenadores_particiones.tamano,
@@ -88,8 +88,8 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				nombresos.nombreso,
 				imagenes.idimagen, 
 				imagenes.descripcion as imagen,
-				imagenes.nombreca as nombreca,				
-				imagenes.idrepositorio as repositorio,				
+				imagenes.nombreca as nombreca,
+				imagenes.idrepositorio as repositorio,
 				ordenadores_particiones.idperfilsoft,
 				perfilessoft.descripcion as perfilsoft
 
@@ -181,52 +181,47 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	cargaNombresSO($cmd,$idambito,$ambito);
 	cargaTamano($cmd,$idambito,$ambito);
 	
-	$cmd->texto="SELECT 
-							count(*) as con,
-							group_concat(cast( temp2.idordenador AS char( 11 ) )  ORDER BY temp2.idordenador SEPARATOR ',' ) AS idordenadores,
-							temp2.configuraciones
-							FROM
-							(SELECT 
-								temp1.idordenador as idordenador,
-								group_concat(cast( temp1.configuracion AS char( 250) )  ORDER BY temp1.configuracion SEPARATOR '@' ) AS configuraciones
-								FROM
-								(SELECT ordenadores_particiones.idordenador,
-											ordenadores_particiones.numpar,
-											concat_WS( ';', 
-															ordenadores_particiones.numpar, ";
-															
+	$cmd->texto="SELECT count(*) as con,
+				group_concat(cast( temp2.idordenador AS char( 11 ) )  ORDER BY temp2.idordenador SEPARATOR ',' ) AS idordenadores,
+				temp2.configuraciones
+				FROM (SELECT 
+					temp1.idordenador as idordenador,
+					group_concat(cast( temp1.configuracion AS char( 250) )  ORDER BY temp1.configuracion SEPARATOR '@' ) AS configuraciones
+					FROM (SELECT ordenadores_particiones.idordenador,
+						ordenadores_particiones.numpar,
+						concat_WS( ';', 
+						ordenadores_particiones.numpar, ";
+
 	if($sws & $msk_tamano)						
 		$cmd->texto.="	ordenadores_particiones.tamano,";
-				
+
 	if($sws & $msk_sysFi)						
 		$cmd->texto.="	ordenadores_particiones.idsistemafichero, ";	
-		
+
 	if($sws & $msk_nombreSO)						
-		$cmd->texto.="	ordenadores_particiones.idnombreso, ";								
-							
+		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
+
 	if($sws & $msk_imagen)						
 		$cmd->texto.="	ordenadores_particiones.idimagen, ";	
-		
+
 	if($sws & $msk_perfil)						
-		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";																
+		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";
 			
 	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion
-											FROM ordenadores
-														INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-														LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-														INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
-														LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-														LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-														LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
-														
+						FROM ordenadores
+						INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+						LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
+						INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+						LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
+						LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
+						LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
+
 	switch($ambito){
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
+				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula WHERE aulas.idaula =".$idambito;
 		break;
 		case $AMBITO_GRUPOSORDENADORES :
-					$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-													WHERE gruposordenadores.idgrupo =".$idambito;
+					$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
 				$cmd->texto.=" WHERE ordenadores.idordenador=".$idambito;
@@ -246,19 +241,22 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$cc=0; // Contador de configuraciones
-	echo '<TABLE  id="tabla_conf" width="95%" class="tabla_listados_sin" align=center border=0 cellPadding=0 cellSpacing=1>';
+	echo '<table  id="tabla_conf" width="95%" class="tabla_listados_sin" align=center border=0 cellPadding=0 cellSpacing=1>';
 	while (!$rs->EOF){
 		$cc++;
 		//Muestra ordenadores
-		echo '<TR><TD colspan='.$colums.' style="BACKGROUND-COLOR: #FFFFFF;">';
+		echo '<tr><td colspan='.$colums.' style="background-color: #ffffff;">';
 		echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc);
-		echo '</TD></TR>';
+		echo '</td></tr>';
 		//Muestra particiones y configuración
 
 		echo pintaParticiones($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc,$ambito,$idambito);
 		$rs->Siguiente();
 	}
-	echo "</TABLE>";
+	if ($cc == 0) {
+                echo "<tr><th>Sin configuración: cliente no conectado al servidor.</th><tr>";
+        }
+	echo "</table>";
 	$rs->Cerrar();
 }
 //________________________________________________________________________________________________________
