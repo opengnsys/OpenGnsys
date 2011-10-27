@@ -94,7 +94,7 @@ config() {
             SUCCESSMSG="( success; echo )"
             FAILMSG="( failure; echo )"
             ;;
-        *)  echo "Distribución Linux desconcocida"
+        *)  echo "Distribución Linux desconcocida o no soportada."
             exit ;;
     esac
     if [ -r $INITFUNCTIONS ]; then
@@ -191,7 +191,7 @@ case "$1" in
         ;;
 
   *)
-        echo "Uso: opengnsys "$1" {start|stop|restart}"
+        echo "Uso: $0 {start|stop|restart}"
         exit 1
         ;;
 esac

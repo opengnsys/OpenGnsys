@@ -1,28 +1,27 @@
 #!/bin/bash
 
 #####################################################################
-####### Script instalador OpenGnsys
+####### Script instalador OpenGnSys
 ####### autor: Luis Guillén <lguillen@unizar.es>
 #####################################################################
 
 
 
-####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
+####  AVISO: Editar configuración de acceso por defecto.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
-OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
-OPENGNSYS_DB_USER="usuog"		# Usuario de acceso
-OPENGNSYS_DB_PASSWD="passusuog"		# Clave del usuario
+OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
+OPENGNSYS_DB_PASSWD="passusuog"		# Clave de acceso a la base de datos
+OPENGNSYS_CLIENT_PASSWD="og"		# Clave de acceso del cliente
+
 
 ####  AVISO: NO EDITAR. 
-#### configuración de acceso smb para clientes OG.
-OPENGNSYS_CLIENT_USER="opengnsys"		# Nombre del usuario
-OPENGNSYS_CLIENT_PASSWD="og"		# Clave del usuario opengnsys
+OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
+OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario del cliente para acceso remoto
 
 
 
 # Sólo ejecutable por usuario root
-if [ "$(whoami)" != 'root' ]
-then
+if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
@@ -31,9 +30,9 @@ fi
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
-    USESVN=0
+	USESVN=0
 else
-    USESVN=1
+	USESVN=1
 fi
 SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 
@@ -1039,21 +1038,24 @@ function clientCreate()
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
-	cp -vr $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
+	cp -avr $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
+	# Asignar la clave cliente para acceso a Samba.
+	echoAndLog "${FUNCNAME}(): Set client access key"
+	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | \
+			$INSTALL_TARGET/bin/setsmbpass
 
 	# Establecer los permisos.
 	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
 	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
-	
+
 	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-	cp -prv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot/
-	cp -prv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot/
-	
-	
+	cp -arv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
+	cp -arv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
 

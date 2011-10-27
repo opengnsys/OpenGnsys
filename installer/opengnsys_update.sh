@@ -25,8 +25,7 @@ OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
 
 
 # Sólo ejecutable por usuario root
-if [ "$(whoami)" != 'root' ]
-then
+if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
@@ -43,10 +42,10 @@ PROGRAMNAME=$(basename "$0")
 DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
-    USESVN=0
+	USESVN=0
 else
-    USESVN=1
-    DEPS="$DEPS subversion"
+	USESVN=1
+	DEPS="$DEPS subversion"
 fi
 SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 
@@ -95,15 +94,15 @@ function getDateTime()
 function echoAndLog()
 {
 	echo $1
-	DATETIME==`getDateTime`
-	echo "$DATETIME=;$SSH_CLIENT;$1" >> $LOG_FILE
+	DATETIME=`getDateTime`
+	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
 function errorAndLog()
 {
 	echo "ERROR: $1"
 	DATETIME=`getDateTime`
-	echo "$DATETIME=;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
+	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
 
@@ -131,11 +130,11 @@ function backupFile()
 	echoAndLog "${FUNCNAME}(): Making $fichero back-up"
 
 	# realiza una copia de la última configuración como last
-	cp -p $fichero "${fichero}-LAST"
+	cp -a $fichero "${fichero}-LAST"
 
 	# si para el día no hay backup lo hace, sino no
 	if [ ! -f "${fichero}-${fecha}" ]; then
-		cp -p $fichero "${fichero}-${fecha}"
+		cp -a $fichero "${fichero}-${fecha}"
 	fi
 }
 
@@ -151,7 +150,7 @@ function restoreFile()
 
 	echoAndLog "${FUNCNAME}(): restoring file $fichero"
 	if [ -f "${fichero}-LAST" ]; then
-		cp -p "$fichero-LAST" "$fichero"
+		cp -a "$fichero-LAST" "$fichero"
 	fi
 }
 
@@ -268,13 +267,17 @@ function checkNetworkConnection()
 # Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
 function updateServicesStart()
 {
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys init file ..."
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
-	if [ $? != 0 ]; then
-		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
-		exit 1
+	local initfile=/etc/init.d/opengnsyso
+
+	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init $initfile 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): Copying OpenGnSys init file in $initfile.new"
+		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init $initfile.new
+		if [ $? != 0 ]; then
+			errorAndLog "${FUNCNAME}(): Error copying $initfile.new"
+			exit 1
+		fi
+		echoAndLog "${FUNCNAME}(): Check the new init files."
 	fi
-	echoAndLog "${FUNCNAME}(): init file updated successfully."
 }
 
 # Actualizar cliente OpenGnSys
@@ -575,8 +578,8 @@ function updateClient()
 		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 		
 		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-		cp -prv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot/
-		cp -prv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot/
+		cp -arv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
+		cp -arv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 		
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
