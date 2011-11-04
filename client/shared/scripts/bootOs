@@ -13,8 +13,13 @@ PART=$(ogDiskToDev "$1" "$2") || exit $?
 NAME="$(ogGetHostname)"
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $1 $2)
-# Borrar marcas de arrranque Windows.
-[ "$OSTYPE" == "Windows" ] && rm -f /mnt/*/ogboot.*
+# Borrar marcas de arrranque de todos los Windows instalados en el disco.
+if [ "$OSTYPE" == "Windows" ]; then
+    for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
+        [ "$(ogGetOsType $1 $i)" == "Windows" ] && ogMount $1 $i &>/dev/null
+    done
+    rm -f /mnt/*/ogboot.*
+fi
 
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
