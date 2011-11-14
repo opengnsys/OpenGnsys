@@ -68,7 +68,7 @@ OSCODENAME=$(lsb_release -cs 2>/dev/null)
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
-	Ubuntu)	DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql dhcp3-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+	Ubuntu)	DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -78,14 +78,8 @@ case "$OSDISTRIB" in
 		APACHEGROUP="www-data"
 		ENABLEMOD="a2enmod"
 		ENABLESITE="a2ensite"
-		case "$OSCODENAME" in
-			natty)	DHCPINIT=/etc/init.d/isc-dhcp-server
-				DHCPCFGDIR=/etc/dhcp
-				;;
-			*)	DHCPINIT=/etc/init.d/dhcp3-server
-				DHCPCFGDIR=/etc/dhcp3
-				;;
-		esac
+		DHCPINIT=/etc/init.d/isc-dhcp-server
+		DHCPCFGDIR=/etc/dhcp
 		SAMBAINIT=/etc/init.d/smbd
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
@@ -108,6 +102,31 @@ case "$OSDISTRIB" in
 		exit 1 ;;
 	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
 		exit 1 ;;
+esac
+}
+
+# Cargar lista de paquetes del sistema y actualizar algunas variables de configuración
+# dependiendo de la versión instalada.
+function updatePackageList()
+{
+local DHCPVERSION
+
+# Si es necesario, actualizar la lista de paquetes disponibles.
+[ -n "$UPDATEPKGLIST" ] && eval $UPDATEPKGLIST
+
+# Configuración personallizada de algunos paquetes.
+case "$OSDISTRIB" in
+	Ubuntu) # Postconfiguación personalizada para Ubuntu.
+		# Configuración para DHCP v3.
+		DHCPVERSION=$(apt-cache show dhcp.?-server$ | \
+			      awk '/Version/ {print substr($2,1,1);}' | \
+			      sort -n | tail -1)
+		if [ $DHCPVERSION = 3 ]; then
+			DEPENDENCIES=${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server}
+			DHCPINIT=/etc/init.d/dhcp3-server
+			DHCPCFGDIR=/etc/dhcp3
+		fi
+		;;
 esac
 }
 
@@ -1190,7 +1209,7 @@ fi
 [ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
 # Actualizar repositorios
-eval $UPDATEPKGLIST
+updatePackageList
 
 # Instalación de dependencias (paquetes de sistema operativo).
 declare -a notinstalled
