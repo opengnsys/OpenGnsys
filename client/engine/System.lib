@@ -15,6 +15,7 @@
 #@param   str_loglevel nivel de registro de incidencias.
 #@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
+#@warning Si no se indica nivel de registro, solo muestra mensaje en pantalla.
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
 #@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
@@ -28,19 +29,20 @@ local LOGLEVEL LOGFILE DATETIME
 # Selección del nivel de registro (opcional).
 case "$1" in
      help)    shift ;;
-     info)    LOGLEVEL=$1; shift ;;
-     warning) LOGLEVEL=$1; shift ;;
-     error)   LOGLEVEL=$1; shift ;;
+     info)    LOGLEVEL="$1"; shift ;;
+     warning) LOGLEVEL="$1"; shift ;;
+     error)   LOGLEVEL="$1"; shift ;;
      *)       ;;
 esac
 DATETIME=$(date +"%F %T")
 
 if [ -n "$LOGLEVEL" ]; then
-    logger -s -t "OpenGnSys $LOGLEVEL" $LOGFILE "$DATETIME $*"
+    logger -s -t "OpenGnSys $LOGLEVEL" -f $LOGFILE "$DATETIME $*"
+    logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGCOMMAND "$DATETIME $*"
+    logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGSESSION "$DATETIME $*"
 else
     echo "$*"
 fi
-echo "OpenGnSys $LOGLEVEL $DATETIME $*" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE
 }
 
 
