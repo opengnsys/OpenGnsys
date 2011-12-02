@@ -51,10 +51,10 @@ case "$TYPE" in
     REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
     JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
     XFS)          PROG="fsck.xfs" ;;
-    NTFS|HNTFS)   PROG="ntfsfix" ;;
-    FAT32|HFAT32) PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
-    FAT16|HFAT16) PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
-    FAT12|HFAT12) PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    NTFS)         PROG="ntfsfix" ;;
+    FAT32)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    FAT16)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    FAT12)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
     *)            ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
                   return $? ;;
 esac
@@ -124,7 +124,7 @@ TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])   PROG="resize2fs"; PARAMS="-f" ;;
     REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
-    NTFS|HNTFS) PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
+    NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
     *)          ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                 return $? ;;
 esac
@@ -284,15 +284,18 @@ return $ERRCODE
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  Mnemonico
-#@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note 	  Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, FAT16, FAT32, NTFS, CACHE }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2008-10-27
-#@version 0.9 - Primera adaptacion para OpenGNSys.
+#@version 0.9 - Primera adaptacion para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-21
+#@version 1.0.2 - Obtención de datos reales de sistemas de ficheros.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-12-02
 #*/ ##
 function ogGetFsType ()
 {
@@ -310,38 +313,20 @@ fi
 # Detectar id. de tipo de partición y codificar al mnemonico.
 DISK=$(ogDiskToDev "$1") || return $?
 ID=$(ogGetPartitionId "$1" "$2") || return $?
+TYPE=""
 case "$ID" in
-     0) 	TYPE="EMPTY" ;;
-     1) 	TYPE="FAT12" ;;
-     5|f) 	TYPE="EXTENDED" ;;
-     [6e])	TYPE="FAT16" ;;
-     7) 	TYPE="NTFS" ;;          # Nota: también puede ser EXFAT
-     [bc])	TYPE="FAT32" ;;
-     11) 	TYPE="HFAT12" ;;
-     12) 	TYPE="COMPAQDIAG" ;;
-     1[6e])	TYPE="HFAT16" ;;
-     17)	TYPE="HNTFS" ;;
-     1[bc])	TYPE="HFAT32" ;;
-     42)	TYPE="WIN-DYNAMIC" ;;
-     82)	TYPE="LINUX-SWAP" ;;
-     83)	TYPE="$(parted -sm $DISK print 2>/dev/null | \
-                            awk -F: -v fs=$2 '{if ($1==fs) {print toupper($5)}}')"
-                # Si el tipo no es válido para partición Linux, Ext3 por defecto.
-                case "$TYPE" in
-                     EXT[234]|REISERFS|REISER4|BTRFS|JFS|XFS)
-                         ;;
-                     *)  TYPE="EXT3" ;;
-                esac
-                ;;
-     8e)	TYPE="LINUX-LVM" ;;
-     a7)	TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     af)	TYPE="HFS" ;;
-     bf)	TYPE="SOLARIS" ;;
-     ca)	TYPE="CACHE" ;;
-     fd)	TYPE="LINUX-RAID" ;;
-     *) 	TYPE="UNKNOWN" ;;
+     ca|a7)    # Detectar Caché local.
+               ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
+               ;;
+     *)        # Detectar sistema de ficheros.
+               if ogIsFormated $1 $2 2>/dev/null; then
+                   TYPE=$(parted -ms $DISK print | \
+                          awk -F: -v p=$2 '{if ($1==p) { print toupper($5); } }')
+               fi
+               ;;
 esac
-echo "$TYPE"
+
+[ -n "$TYPE" ] && echo "$TYPE"
 }
 
 
@@ -889,10 +874,8 @@ fi
 DISK="$(ogDiskToDev $1)" || return $?
 for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
     case "$(ogGetFsType $1 $PART)" in
-        CACHE|LINUX-SWAP)
-           ;;
-        *)
-           ogUnmount $1 $PART ;;
+        CACHE) ;;
+        *)     ogUnmount $1 $PART ;;
     esac
 done
 }

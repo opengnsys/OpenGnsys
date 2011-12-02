@@ -1042,7 +1042,7 @@ function openGnsysCopyClientFiles()
 # Crear cliente OpenGnSys 1.0.2
 function clientCreate()
 {
-	local DOWNLOADURL="http://www.opengnsys.es/downloads"
+	local DOWNLOADURL="$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}

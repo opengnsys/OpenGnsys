@@ -9,13 +9,12 @@
 particiones=$(listPartitions 1 | wc -w)   # Incluir todas las particiones
 cfg="0::::$(ogGetDiskSize 1);"            # e información de disco (partición 0)
 
-for ((par=1;par<=$particiones;par++)); 
-do
+for ((par=1;par<=$particiones;par++)); do
+	# Código del identificador de tipo de partición
+	cod=$(ogGetPartitionId 1 $par)
 	# Tipo de partición o sistema de fichero
 	fsi=$(getFsType 1 $par 2>/dev/null)
 	fsi=${fsi:-"EMPTY"}
-	# Código de la partición
-	cod=$(ogFsToId $fsi)
 	# Tamaño de la particón
 	tam=$(ogGetPartitionSize 1 $par 2>/dev/null)
 	tam=${tam:-"0"}
@@ -31,9 +30,10 @@ done
 
 echo $cfg | awk '{
 		n=split($0,sep,";");
-		for(i=1;i<n;i++){
-			split(sep[i],dua,":");
-		 	printf("par=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",dua[1],dua[2],dua[3],dua[4],dua[5]);
+		for (i=1; i<n; i++){
+			split (sep[i],dua,":");
+		 	printf ("par=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
+					dua[1],dua[2],dua[3],dua[4],dua[5]);
 			}
 		}'
 
