@@ -2,6 +2,13 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.3
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#92	ogGetFsType detecta identificador de partición no sistema de archivos
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.2
 ---------------------------------------------
 

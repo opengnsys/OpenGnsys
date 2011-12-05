@@ -321,7 +321,10 @@ case "$ID" in
      *)        # Detectar sistema de ficheros.
                if ogIsFormated $1 $2 2>/dev/null; then
                    TYPE=$(parted -ms $DISK print | \
-                          awk -F: -v p=$2 '{if ($1==p) { print toupper($5); } }')
+                          awk -F: -v p=$2 '{if ($1==p) {
+                                                sub (/\(.*\)/, "");
+                                                print toupper($5);
+                                           } }')
                fi
                ;;
 esac
