@@ -472,14 +472,10 @@ esac
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  Mnemonico
-#@note    Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP,
-LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS,
-HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note    Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
-#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un
-dispositivo.
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en
-ATA.lib
+#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2008-10-27
 #@version 0.9 - Primera adaptacion para OpenGnSys.
