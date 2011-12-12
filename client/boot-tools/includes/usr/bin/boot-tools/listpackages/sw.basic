@@ -3,7 +3,7 @@ install dialog
 install man-db
 install fbset
 install gdebi-core
-install busybox-static
+#install busybox-static
 install console-data
 install locales
 install lshw 
