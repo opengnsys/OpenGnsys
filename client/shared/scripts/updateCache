@@ -79,10 +79,15 @@ fi
 case "$PROTOCOLO" in
 	torrent | TORRENT )
 		echo "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
+		# tiempos 
+		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
 		ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
 		#TODO: comprobar que el tracker definido en el fichero es correcto.
     	#TODO comprobar que el fichero torrent está en cache
-		echo "ogTorrentStart CACHE $2.torrent $4"
+		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
+		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
+		echo "Esperando $P2PWAIT segundos para iniciar ogTorrentStart CACHE $2.torrent $4"
+		sleep $P2PWAIT
 		ogTorrentStart CACHE "$2.torrent" $4
 	;;
 	multicast | MULTICAST )
