@@ -76,9 +76,9 @@ fi
 
 if [ "$REPO" == "REPO" ]
 then
-	echo "[2] updateCache REPO \"$3.img\" $5 $6"	 | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "[2] updateCache REPO \"/$3.img\" $5 $6"	 | tee -a $OGLOGSESSION $OGLOGFILE
 	TIME2=$SECONDS
-	updateCache REPO "$3.img" "$5" "$6"	 &>> $OGLOGCOMMAND	
+	updateCache REPO "/$3.img" "$5" "$6"	 &>> $OGLOGCOMMAND	
 	RETVAL=$?
 	TIME2=$[SECONDS-TIME2]
 	echo "   [ ] Duracion del subproceso updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
