@@ -1088,7 +1088,7 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux /opt/opengnsys/sbin/
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin/
 	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys

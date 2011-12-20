@@ -1169,7 +1169,7 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux /opt/opengnsys/sbin/
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin/
 	eval $OGACTIVATE
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
