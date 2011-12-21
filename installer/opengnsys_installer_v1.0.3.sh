@@ -1128,7 +1128,7 @@ function copyClientFiles()
 # Crear cliente OpenGnSys 1.0
 function clientCreate()
 {
-	local DOWNLOADURL="http://www.opengnsys.es/downloads"
+	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogclient-1.0.2-natty-32bit-beta01-rev2111.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}

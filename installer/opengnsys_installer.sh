@@ -1042,7 +1042,7 @@ function openGnsysCopyClientFiles()
 # Crear cliente OpenGnSys 1.0.2
 function clientCreate()
 {
-	local DOWNLOADURL="$OPENGNSYS_SERVER/downloads"
+	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
@@ -1088,7 +1088,7 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin/
+	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin
 	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
