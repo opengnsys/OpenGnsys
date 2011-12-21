@@ -1129,7 +1129,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogclient-1.0.2-natty-32bit-beta01-rev2111.iso
+	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
 

@@ -264,22 +264,6 @@ function checkNetworkConnection()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
-function updateServicesStart()
-{
-	local initfile=/etc/init.d/opengnsyso
-
-	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init $initfile 2>/dev/null; then
-		echoAndLog "${FUNCNAME}(): Copying OpenGnSys init file in $initfile.new"
-		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init $initfile.new
-		if [ $? != 0 ]; then
-			errorAndLog "${FUNCNAME}(): Error copying $initfile.new"
-			exit 1
-		fi
-		echoAndLog "${FUNCNAME}(): Check the new init files."
-	fi
-}
-
 # Actualizar cliente OpenGnSys
 function updateClientFiles()
 {
@@ -459,12 +443,26 @@ function updateServerFiles()
 		fi
 	done
 	popd >/dev/null
-	echoAndLog "${FUNCNAME}(): updating DHCP files"
+	NEWFILES=""		# Ficheros de configuración que han cambiado de formato.
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
+		echoAndLog "${FUNCNAME}(): updating DHCP files"
 		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
 		for i in isc-dhcp-server dhcpd3-server dhcpd; do
 			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
 		done
+		NEWFILES="/etc/dhcp*/dhcpd*.conf"
+	fi
+	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating new init file"
+		backupFile /etc/init.d/opengnsys
+		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
+	fi
+	if ! grep -q "UrlMsg=.*msgbrowser.php" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating new client config file"
+		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
@@ -530,7 +528,7 @@ function compileServices()
 # Actualizar nuevo cliente para OpenGnSys 1.0
 function updateClient()
 {
-	local DOWNLOADURL="http://www.opengnsys.es/downloads"
+	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
@@ -599,8 +597,11 @@ function updateSummary()
 
 	echo
 	echoAndLog "OpenGnSys Update Summary"
-        echo       "========================"
-        echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echo       "========================"
+	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	if [ -n "$NEWFILES" ]; then
+		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
+	fi
 	echo
 }
 
@@ -701,9 +702,6 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"
 	exit 1
 fi
-
-# Actualizamos el fichero que arranca los servicios de OpenGnSys
-updateServicesStart
 
 # Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
 if [ -f /tmp/dstate ]; then
