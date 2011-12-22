@@ -18,8 +18,13 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #393	En acceso ssh a los clientes, no reconoce funciones de valores de la interfaz de red
 #394	crearImagen y updateCache debe considerar espacio libre para almacenar la imagen
 #402	Gestor de arranque para Windows 7/Vista/XP/2000
+#450	Instalar Grub en sistemas Linux restaurados
+#460	updateCache usando torrent en una operación con más de 60 clientes produce error inesperado del binario ctorrent en algunos equipos
 
 Tickets resueltos en módulo OpenGnSys Client:
+#371	ogAdmClient debería realizar proceso de actualización a la BD después de particionado, restauración (duplicado de #265)
+#421	boot-tools-httd-log (mejora)
+#422	boot-tools: Separar los log normales de los de seguimiento
 #430	RAMFS del boot-tools autogestión sobre la caché: Instalación y Actualización
 #432	Escalar servicios de almacenamiento
 #444	Sustitución definitiva de PXELinux por Grub4Dos en el arranque de clientes (heredado de #134)
@@ -36,6 +41,10 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #423 	Netboot no configura el parámetro de IP serverADM
 #434	Soporte para particiones lógicas en el asistente de particionado
 #443	Usar HTTPS en la consola web
+#458	Interfaz RestaurarImagen no pasa los parametros correctos a script updateCache
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#464	opengnsys_update de la 1.0.1 a la 1.0.2 no actualiza el ogAdmClient.cfg
 
 Tickets genéricos resueltos:
 #446	Integración de OpenGnSys 1.0.2 en rama principal
