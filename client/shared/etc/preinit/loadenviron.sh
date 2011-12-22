@@ -54,6 +54,9 @@ if [ -d $OPENGNSYS ]; then
 	export -f $i
     done
 
+	#Carga la configuracion del engine
+	[ -f ${OGETC}/engine.cfg ] && source ${OGETC}/engine.cfg
+
     # Carga de las API segun engine
     if [ -n "$ogengine" ]
     then
