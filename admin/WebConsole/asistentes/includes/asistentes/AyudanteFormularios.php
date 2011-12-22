@@ -298,17 +298,18 @@ function htmlForm_typepart($cmd,$numpar)
 
 
 
-
-
-
-
-function htmlForm_typepartnotcacheEngine10()
+function htmlForm_typepartnotcacheEngine10($npart)
 {
 $SelectHtml="";
+if ($npart == 4) {
+    $SelectHtml.='<OPTION value="CACHE"> CACHE </OPTION>';
+}
 $SelectHtml.='<OPTION value="FAT12"> FAT12 </OPTION>';
 $SelectHtml.='<OPTION value="FAT16"> FAT16 </OPTION>';
 $SelectHtml.='<OPTION value="FAT32"> FAT32 </OPTION>';
+$SelectHtml.='<OPTION value="HFAT32"> Hidden FAT32 </OPTION>';
 $SelectHtml.='<OPTION value="NTFS"> NTFS </OPTION>';
+$SelectHtml.='<OPTION value="HNTFS"> Hidden NTFS </OPTION>';
 #$SelectHtml.='<OPTION value="EXT2"> EXT2 </OPTION>';
 #$SelectHtml.='<OPTION value="EXT3"> EXT3 </OPTION>';
 $SelectHtml.='<OPTION value="EXT4"> LINUX:EXT[2:3:4] </OPTION>';
@@ -319,6 +320,9 @@ $SelectHtml.='<OPTION value="XFS"> XFS </OPTION>';
 $SelectHtml.='<OPTION value="JFS"> JFS </OPTION>';
 $SelectHtml.='<OPTION value="LINUX-RAID"> LINUX-RAID </OPTION>';
 $SelectHtml.='<OPTION value="LINUX-LVM"> LINUX-LVM </OPTION>';
+if ($npart <= 4) {
+    $SelectHtml.='<OPTION value="EXTENDED"> EXTENDED </OPTION>';
+}
 return($SelectHtml);
 }
 
@@ -362,9 +366,13 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
+		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
+			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
+				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
+					$disksize = tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
+				}
+				else {  // Información de partición (numpart>0)
 					echo'<TR height=16>'.chr(13);
 					echo'<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
@@ -376,7 +384,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);					
 
 					//echo'<TD align=rigth>&nbsp;'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</TD>'.chr(13);
-					echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
+					echo'<TD align=right>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
 										
 					//echo'<TD>&nbsp;'.$tbKeys[$k]["imagen"].'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
@@ -388,7 +396,20 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					break;
 				}
 			}
+		}
 	}	
+	// Mostrar información del disco, si se ha obtenido.
+	if (!empty ($disksize)) {
+		echo'<tr height="16">'.chr(13);
+		echo'<td align="center">&nbsp;'.$TbMsg[35].'&nbsp;</td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td name="disksize" id="disksize" align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'<td></td>'.chr(13);
+		echo'</tr>'.chr(13);
+	}
 	echo '<TR height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
 }
 

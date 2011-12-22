@@ -1,49 +1,5 @@
 
-KERNEL ogclient/ogvmlinuz
-initrd=ogclient/oginitrd.img 
-
-### PARAMETROS ESTANDAR DEl KERNEL
-## indicamos al kernel que proceso a iniciar el Opengnsys
- boot=oginit
- 
- vga=788 
-irqpoll 
-acpi=on 
- 
-ip=dhcp
-ip=
- 
-### PARAMETROS ESPECIFICOS DE OG.
- # Indicamos al cliente OG, cuando termine su proceso que incie el init (/opt/opengnsys/etc/preinit/default.sh)
- # si no se utiliza este parametro por defecto usa init.
- oginit=init|/bin/bash
+Ver información completa en:
+    http://www.opengnsys.es/wiki/InitrdClienteSecondFileSystem
 
  
- #por defecto todos los servicios OG, los considera ubicados en el next-server (parámetro indicado en el servicio dhcp)
-# en el caso de que queramos que indicar que REPO (/opt/opengnsys/images) está en otro equipo utilizar este parámetro ogrepo
- ogrepo=ip del repositorio
- 
- # fichero donde se encuentra el rootfs que usara el ogvmlinuz y el oginitrd.img
- # hay dos formatos, el img (fichero modificable desde el OG server), o el sqfs (fichero solo lectura del img) 
- og2nd=sqfs|img 
- 
- #protocolo de acceso al og2nd.
- ogprotocol=smb|nfs|local
- #local para cdrom, usb a partir de la iso.  labelparticionusbUNETBOOTIN=ogClient
- #loacl tambien para fichero.sqfs en cache.
- 
- 
- # modo de funcionalidad del browser con shell root activa.
- ogactiveadmin=true|false
- 
- #modo de depuración en el proceso de arranque del cliente.
- ogdebug=true|false
- 
-
-#modulo especial de la tarjeta de red.
-ognetmodule
-
-
-  
-
-

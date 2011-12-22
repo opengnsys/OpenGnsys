@@ -1,0 +1,13 @@
+#Format install paquete
+install dialog
+install man-db
+install fbset
+install gdebi-core
+install busybox-static
+install console-data
+install locales
+install lshw 
+install gawk 
+install subversion
+install python-openssl 
+install python 

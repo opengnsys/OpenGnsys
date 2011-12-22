@@ -573,3 +573,144 @@ schroot -c linux
 schroot -end-sessiona --all-sessions
 }
 
+####################################################################################
+################### Funciones para postconfiguracion windows #######################
+############# 2011 Jonathan Alonso Martinez  jonathan.alonso@uab.cat ###############
+#################### Universidad Autonoma de Barcelona (Spain)######################
+####################################################################################
+
+#/**
+#         ogInstallMiniSetup path_mountpoint str_filename
+#@brief   Crea unas claves del registro y el archivo cmd que se ejecutara en el primer arranque estando la maquina en un estado bloqueado
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename    	nombre del archivo .cmd a ejecutar en el arranque (estara en system32 y sera visible por el sistema)
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 1.0.2 - Nueva función
+#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
+#@date    2011-06-29
+#*/ ##
+function ogInstallMiniSetup ()
+{
+local CMDDIR CMDFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename" \
+           "$FUNCNAME /mnt/sda1 filename.cmd"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Comprobar que existe el directorio del fichero de comandos.
+CMDDIR=$(ogGetPath "$1/windows/system32")
+[ -n "$CMDDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1/windows/system32" || return $?
+CMDFILE="$CMDDIR/$2"
+
+# Creamos el archivo cmd y creamos un par de comandos para que una vez acabe la 
+# postconfiguracion resetee el mini setup, sino lo haria en cada arranque.
+cat > "$CMDFILE" << EOF
+REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f
+REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f
+EOF
+
+#Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
+ogSetRegistryValue "$1" SYSTEM "\Setup\SystemSetupInProgress" 1
+ogSetRegistryValue "$1" SYSTEM "\Setup\SetupType" 4
+ogSetRegistryValue "$1" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
+}
+
+
+#         ogAddCmd path_mountpoint str_filename str_commands
+#@brief   Añade comandos al cmd creado por ogInstalMiniSetup
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename     	nombre del fichero cmd (siempre se guardara en windows\system32\para que sea visible por el sistema
+#@param   str_commands     	comando o comandos que se añadiran al fichero
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version 1.0.2 - Nueva función
+#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
+#@date    2011-06-29
+#*/ ##
+
+function ogAddCmd ()
+{
+local CMDFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_commands" \
+           "$FUNCNAME /mnt/sda1 filename.cmd command" 
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Comprobar que existe el fichero de comandos.
+CMDFILE=$(ogGetPath "$1/windows/system32/$2")
+[ -n "$CMDFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1/windows/system32/$2" || return $?
+
+cat >> "$CMDFILE" << EOF
+$3
+EOF
+}
+
+#         ogDomainScript path_mountpoint str_domain str_user str_password
+#@brief   Crea un script .vbs para unir al dominio una maquina windows y el comando adequado en el archivo cmd creado por ogInstallMiniSetup
+#@param   path_mountpoint  	directorio donde está montado el sistema Windows
+#@param   str_filename     	nombre del fichero cmd donde deberemos introducir el comando de ejecutar el script vbs
+#@param   str_domain      	Dominio donde se quiere conectar
+#@param   str_user     		Usuario con privilegios para unir al dominio 
+#@param   str_password     	Password del usuario con privilegios 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 1.0.2 - Nueva función
+#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
+#@date    2011-06-29
+#*/ ##
+
+function ogDomainScript ()
+{
+local CMDDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_filename str_domain str_user str_password" \
+           "$FUNCNAME /mnt/sda1 filename.cmd domain user password_user"
+    return
+fi
+# Error si no se reciben 4 parámetros.
+[ $# == 5 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Comprobar que existe el directorio de comandos.
+CMDDIR=$(ogGetPath "$1/windows/system32")
+[ -n "$CMDDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1/windows/system32" || return $?
+
+# Añadimos en el cmd que se ejecutara al arranque, el comando de ejecutar el script que añade al dominio.
+ogAddCmd $1 "$2" "CSCRIPT joindomain.vbs"
+# Eliminamos el script porque tiene el usuario de administrador de dominio en claro
+ogAddCmd $1 "$2" "del /Q C:\Windows\System32\joindomain.vbs"
+
+# Creamos el archivo joindomain.vbs que nos introduce la maquina en el dominio
+cat > "$CMDDIR/joindomain.vbs" << EOF
+Const JOIN_DOMAIN = 1
+Const ACCT_CREATE = 2
+Const ACCT_DELETE = 4
+Const WIN9X_UPGRADE = 16
+Const DOMAIN_JOIN_IF_JOINED = 32
+Const JOIN_UNSECURE = 64
+Const MACHINE_PASSWORD_PASSED = 128
+Const DEFERRED_SPN_SET = 256
+Const INSTALL_INVOCATION = 262144
+
+strDomain = "$3"
+strUser = "$4"
+strPassword = "$5"
+
+Set objNetwork = CreateObject("WScript.Network")
+strComputer = objNetwork.ComputerName
+
+Set objComputer = GetObject("winmgmts:{impersonationLevel=Impersonate}!\\\" & _
+    strComputer & "\root\cimv2:Win32_ComputerSystem.Name='" & strComputer & "'")
+
+ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, strPassword, _
+    strDomain & "\" & strUser, NULL, JOIN_DOMAIN + ACCT_CREATE)
+EOF
+}
+

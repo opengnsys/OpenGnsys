@@ -1,0 +1,3 @@
+#!/bin/bash
+ogListPartitions "$@" | sed 's/\(EMPTY:0 \)*$//'
+

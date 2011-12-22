@@ -27,7 +27,7 @@ function ogCalculateChecksum ()
 local FILE
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
-           "$FUNCNAME REPO ubuntu.img   ==>   ef899299caf8b517ce36f1157a93d8bf"
+           "$FUNCNAME REPO ubuntu.img  ==>  ef899299caf8b517ce36f1157a93d8bf"
     return
 fi
 
@@ -53,7 +53,7 @@ function ogCompareChecksumFiles ()
 local ARGS SOURCE TARGET
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
-           "if $FUNCNAME REPO ubuntu.img CACHE ubuntu.img; then ... fi"
+           "if $FUNCNAME REPO ubuntu.img CACHE ubuntu.img; then ...;  fi"
     return
 fi
 
@@ -89,25 +89,30 @@ function ogCopyFile ()
 {
 # Variables locales.
 local ARGS SOURCE TARGET
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_source [ str_repo | int_ndisk int_npartition ] path_target" \
+           "$FUNCNAME REPO newfile.txt 1 2 /tmp/newfile.txt"
+    return
+fi
 
 ARGS="$@"
 case "$1" in
     /*)     # Camino completo.          */ (Comentrio Doxygen)
-        SOURCE=$(ogGetPath "$1")
+        SOURCE="$(ogGetPath "$1")"
         shift ;;
     [1-9]*) # ndisco npartición.
-        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        SOURCE="$(ogGetPath "$1" "$2" "$3")"
         shift 3 ;;
     *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
-        SOURCE=$(ogGetPath "$1" "$2")
+        SOURCE="$(ogGetPath "$1" "$2")"
         shift 2 ;;
 esac
 # Comprobar fichero origen y directorio destino.
 [ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
-TARGET=$(ogGetPath "$@")
+TARGET="$(ogGetPath "$@")"
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
 # Copiar fichero.
-cp -p "$SOURCE" "$TARGET"                    # (definir posible error)
+cp -a "$SOURCE" "$TARGET"                    # (definir posible error)
 }
 
 
@@ -123,8 +128,14 @@ function ogDeleteFile ()
 {
 # Variables locales.
 local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_file" \
+           "$FUNCNAME 1 2 /tmp/newfile.txt"
+    return
+fi
+
 # Comprobar que existe el fichero y borrarlo.
-FILE=$(ogGetPath "$@")
+FILE="$(ogGetPath "$@")"
 [ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 }
@@ -142,8 +153,14 @@ function ogDeleteTree ()
 {
 # Variables locales.
 local DIR
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_dir" \
+           "$FUNCNAME 1 2 /tmp/newdir"
+    return
+fi
+
 # Comprobar que existe el directorio y borrarlo con su contenido.
-DIR=$(ogGetPath "$@")
+DIR="$(ogGetPath "$@")"
 [ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 }
@@ -245,7 +262,7 @@ if [ "$*" == "help" ]; then
 fi
 
 case $# in
-    1)	PARENT=$(dirname "$1") ;;
+    1)	PARENT="$(dirname "$1")" ;;
     2)	PARENT="$1 $(dirname "/$2")" ;;
     3)	PARENT="$1 $2 $(dirname "/$3")" ;;
     *)	ogRaiseError $OG_ERR_FORMAT
@@ -282,13 +299,13 @@ fi
 ARGS="$@"
 case "$1" in
     /*)     # Camino completo.          */ (Comentrio Doxygen)
-        SOURCE=$(ogGetPath "$1")
+        SOURCE="$(ogGetPath "$1")"
         shift ;;
     [1-9]*) # ndisco npartición.
-        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        SOURCE="$(ogGetPath "$1" "$2" "$3")"
         shift 3 ;;
     *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
-        SOURCE=$(ogGetPath "$1" "$2")
+        SOURCE="$(ogGetPath "$1" "$2")"
         shift 2 ;;
 esac
 # Comprobar que existen los ficheros origen y destino.
@@ -312,7 +329,7 @@ test "$SOURCE" -nt "$TARGET"
 function ogMakeChecksumFile ()
 {
 # Variables locales.
-local FILE DATA
+local FILE
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
            "$FUNCNAME REPO ubuntu.img"
@@ -320,7 +337,7 @@ if [ "$*" == "help" ]; then
 fi
 
 # Comprobar que existe el fichero y guardar su checksum.
-FILE=$(ogGetPath "$@")
+FILE="$(ogGetPath "$@")"
 [ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 ogCalculateChecksum "$FILE" > "$FILE.sum"
 }
@@ -342,7 +359,13 @@ ogCalculateChecksum "$FILE" > "$FILE.sum"
 function ogMakeDir ()
 {
 local PARENT DIR
-PARENT=$(ogGetParentPath "$@") || return $?
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_dir" \
+           "$FUNCNAME 1 2 /tmp/newdir"
+    return
+fi
+
+PARENT="$(ogGetParentPath "$@")" || return $?
 DIR="$(basename "${!#}")"
 mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 }

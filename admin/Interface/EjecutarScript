@@ -1,21 +1,33 @@
 #!/bin/bash
+TIME1=$SECONDS
 
-echo -e >>  $OGLOGFILE
-echo "Contenido de la ejecucion: *****************************" >>  $OGLOGFILE
+OGLOGSESSION="${OGLOGSESSION=:-/tmp/session.log}"
+OGLOGCOMMAND="${OGLOGCOMMAND=:-/tmp/command.log}"
+
+OGLOGSESSION="/tmp/session.log"
+OGLOGCOMMAND="/tmp/command.log"
+
+echo " " > $OGLOGSESSION
+echo " " > $OGLOGCOMMAND
+echo " " > ${OGLOGCOMMAND}.tmp
+
+
+echo "START JOBS ***************************** " |  tee -a $OGLOGSESSION $OGLOGFILE
+
+echo "Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
 cat  $1 >> $OGLOGFILE
-echo -e >>  $OGLOGFILE
-echo -e >>  $OGLOGFILE
-echo "Salida: *****************************" >>  $OGLOGFILE
+
+echo "Salida de las instrucciones: *****************************" >>  $OGLOGFILE
 chmod +x $1
-$1 &>> $OGLOGFILE
+$1 &>> $OGLOGCOMMAND
 RETVAL=$?
 echo $RETVAL &>> $OGLOGFILE
-
+TIME=$[SECONDS-TIME1]
 if [ $RETVAL == 0 ]
 then
-	rm $OGLOGFILE
-	touch $OGLOGFILE
+	echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 else
-	echo $RETVAL &>> $OGLOGFILE
+	echo "ERROR no operacion no realizada" | tee -a $OGLOGSESSION $OGLOGFILE
 fi
+echo "END JOBS ***************************** " |  tee -a $OGLOGSESSION $OGLOGFILE
 exit $RETVAL

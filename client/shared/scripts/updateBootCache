@@ -1,7 +1,54 @@
 #!/bin/bash
-OGBTFTP="/opt/og2fs/tftpboot/ogclient/"
+
+#/**
+#         updateBootCache
+#@brief   acelerador arranque pxe. incorpora a la cache el initrd y el kernel.
+#@param 1 
+#@param ejemplo:  
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@note   
+#@todo: 
+#@version 1.0.1 - requiere el gestor de arranque grub2dos
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/07/27
+#*/ ##
+
+
+
+OGBTFTP="/opt/oglive/tftpboot/ogclient"
 ogMountCache || exit 1
-echo $OGCAC
+
 [ -d $OGCAC/boot ] || mkdir -p $OGCAC/boot 
-[ -f ${OGCAC}/boot/ogvmlinuz ] || cp ${OGBTFTP}ogvmlinuz ${OGCAC}/boot/ogvmlinuz
-[ -f ${OGCAC}/boot/oginitrd.img ] || cp ${OGBTFTP}oginitrd.img ${OGCAC}/boot/oginitrd.img
+	
+	# comparamos los del server
+	SERVERVMLINUZ=`cat ${OGBTFTP}/ogvmlinuz.sum`
+	SERVERINITRD=`cat  ${OGBTFTP}/oginitrd.img.sum`
+	
+	#comparamos los de la cache
+	CACHEVMLINUZ=`cat ${OGCAC}/boot/ogvmlinuz.sum`
+	CACHEINITRD=`cat  ${OGCAC}/cache/boot/oginitrd.img.sum`
+	
+	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
+	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
+	
+
+	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
+	then		
+		echo "ogvmlinuz updating"
+		cp ${OGBTFTP}ogvmlinuz ${OGCAC}/boot/ogvmlinuz
+		cp ${OGBTFTP}ogvmlinuz.sum ${OGCAC}/boot/ogvmlinuz.sum
+		DOREBOOT=true
+	fi
+	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
+	then
+		echo "oginitrd updating"
+		cp ${OGBTFTP}oginitrd.img ${OGCAC}/boot/oginitrd.img
+		cp ${OGBTFTP}oginitrd.img.sum ${OGCAC}/boot/oginitrd.img.sum
+		DOREBOOT=true
+	fi
+
+echo $DOREBOOT
+#	[ "$DOREBOOT" == "true" ] && busybox reboot -f
+
+

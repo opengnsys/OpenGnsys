@@ -7,6 +7,13 @@
 // Nombre del fichero: acceso.php
 // Descripción : Presenta la pantalla de login de la aplicación
 // ********************************************************************************************************
+
+# Cambiar a HTTPS
+if (empty ($_SERVER["HTTPS"])) {
+	header ("Location: https://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]);
+	exit (0);
+}
+
 include_once("controlacceso.php");
 include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");

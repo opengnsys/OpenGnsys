@@ -48,7 +48,7 @@ else
 <TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
 <HEAD>
 <?
-echo "<meta http-equiv='Refresh' content='2;URL=./verlogseguimiento.php?nombreordenador=". $_GET["nombreordenador"] ."&ip=".$ip ."'";
+echo "<meta http-equiv='Refresh' content='2;URL=http://".$ip."/cgi-bin/httpd-log.sh'";
 ?>
 
 

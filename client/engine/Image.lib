@@ -14,7 +14,7 @@ function ogPartcloneSyntax ()
 {
 #TODO: comprobar como unico parametro particion /dev/sda1
 #COMPAR="partclone.$FS --clone --force --source $PART"
-COMPAR="-F -c -s "
+COMPAR=" -d0 -F -c -s "
 TYPE="$(ogGetFsType `ogDevToDisk $1`)"
 case "$TYPE" in
     EXT[234])
@@ -210,7 +210,7 @@ if [ "$#" -eq 4 ]; then
 		;;
 		"partclone" | "PARTCLONE")
 		    # -C para que no compruebe tamaños
-			TOOL="| partclone.restore -o $PART"
+			TOOL="| partclone.restore -d0 -C -I -o $PART"
 		;;
 		*)
     		ogRaiseError $OG_ERR_NOTFOUND "Tools imaging no valid $TOOL" || return $?
@@ -382,6 +382,7 @@ IMGFILE="$IMGDIR/$(basename "$3").mbr"
 dd if="$DISK" of="$IMGFILE" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
 }
 
+
 #/**
 #         ogIsImageLocked [str_repo] path_image
 #@brief   Comprueba si una imagen está bloqueada para uso exclusivo.
@@ -481,7 +482,7 @@ touch $IMGDIR/$(basename "${!#}").lock
 function ogRestoreImage ()
 {
 # Variables locales
-local PART PARTSIZE IMGFILE IMGTYPE IMGSIZE FSTYPE
+local PART PARTSIZE IMGFILE IMGTYPE IMGSIZE FSTYPE PROGRAM ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -662,7 +663,8 @@ rm -f $(ogGetPath $@.lock)
 #@date    2010/02/08
 #*/ ##
 
-function ogGetImageInfo () {
+function ogGetImageInfo ()
+{
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME  filename " \

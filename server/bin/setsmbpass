@@ -1,0 +1,59 @@
+#!/bin/bash
+# setsmbpass: cambia la contraseña del usuario del cliente para acceder a los
+#	servicios Samba.
+# Nota: se modifica el Initrd del cliente y se cambia la clave en el servidor.
+# Nota: no se modifica el usuario de acceso (usuario "opengnsys").
+# Uso:	setsmbpass
+# Autor: Ramon Gomez - Univ. Sevilla, julio 2011
+
+
+# Variables.
+PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SAMBAUSER="opengnsys"				# Usuario por defecto.
+CLIENTINITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
+TMPDIR=/tmp/ogclient$$
+
+# Control básico de errores.
+if [ $# != 0 ]; then
+	echo "$PROG: Error de ejecución" >&2
+	echo "Formato: $PROG"
+	exit 1
+fi
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Error: solo ejecutable por root" >&2
+	exit 1
+fi
+
+# Crear clave para usuario de acceso a los recursos.
+if [ -r $CLIENTINITRD ]; then
+	stty -echo 2>/dev/null
+	echo -n "Clave del usuario Samba: "
+	read SAMBAPASS
+	echo
+	echo -n "Confirmar clave: "
+	read SAMBAPASS2
+	echo
+	stty echo 2>/dev/null
+	if [ "$SAMBAPASS" != "$SAMBAPASS2" ]; then
+		echo "$PROG: Error: las claves no coinciden" >&2
+		exit 2
+	fi
+	# Editar la parte de acceso del cliente:
+	#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
+	mkdir -p $TMPDIR
+	cd $TMPDIR
+	gzip -dc $CLIENTINITRD | cpio -im
+	if [ -f scripts/ogfunctions ]; then
+		sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
+		find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
+	else
+		echo "$PROG: Aviso: no se ha modificado la clave del cliente."
+	fi
+	rm -fr $TMPDIR
+else
+	SAMBAPASS="og"                  # Clave por defecto.
+        echo "$PROG: Aviso: no se ha modificado la clave del cliente."
+fi
+echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | smbpasswd -a -s $SAMBAUSER
+

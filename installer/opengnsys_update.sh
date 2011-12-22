@@ -25,8 +25,7 @@ OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
 
 
 # Sólo ejecutable por usuario root
-if [ "$(whoami)" != 'root' ]
-then
+if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
@@ -43,12 +42,12 @@ PROGRAMNAME=$(basename "$0")
 DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
-    USESVN=0
+	USESVN=0
 else
-    USESVN=1
-    DEPS="$DEPS subversion"
+	USESVN=1
+	DEPS="$DEPS subversion"
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
+SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -131,11 +130,11 @@ function backupFile()
 	echoAndLog "${FUNCNAME}(): Making $fichero back-up"
 
 	# realiza una copia de la última configuración como last
-	cp -p $fichero "${fichero}-LAST"
+	cp -a $fichero "${fichero}-LAST"
 
 	# si para el día no hay backup lo hace, sino no
 	if [ ! -f "${fichero}-${fecha}" ]; then
-		cp -p $fichero "${fichero}-${fecha}"
+		cp -a $fichero "${fichero}-${fecha}"
 	fi
 }
 
@@ -151,7 +150,7 @@ function restoreFile()
 
 	echoAndLog "${FUNCNAME}(): restoring file $fichero"
 	if [ -f "${fichero}-LAST" ]; then
-		cp -p "$fichero-LAST" "$fichero"
+		cp -a "$fichero-LAST" "$fichero"
 	fi
 }
 
@@ -265,18 +264,6 @@ function checkNetworkConnection()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Copiar ficheros de arranque de los servicios del sistema de OpenGnSys
-function updateServicesStart()
-{
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys init file ..."
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
-	if [ $? != 0 ]; then
-		errorAndLog "${FUNCNAME}(): Error updating /etc/init.d/opengnsys"
-		exit 1
-	fi
-	echoAndLog "${FUNCNAME}(): init file updated successfully."
-}
-
 # Actualizar cliente OpenGnSys
 function updateClientFiles()
 {
@@ -289,7 +276,7 @@ function updateClientFiles()
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
@@ -298,14 +285,27 @@ function updateClientFiles()
 	echoAndLog "${FUNCNAME}(): client files update success."
 }
 
-# Exportar nombre de usuario y grupo del servicio Apache.
-function getApacheUser()
+# Configurar HTTPS y exportar usuario y grupo del servicio Apache.
+function apacheConfiguration ()
 {
-	# Variables de ejecución de Apache
+	local APACHECONF=/etc/apache2
+
+	# Activar HTTPS, si es necesario.
+	if [ -e $APACHECONF/sites-available/opengnsys.conf ]; then
+		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
+		mv $APACHECONF/sites-available/opengnsys.conf $APACHECONF/sites-available/opengnsys
+		a2ensite default-ssl
+		a2enmod ssl
+		a2dissite opengnsys.conf
+		a2ensite opengnsys
+		/etc/init.d/apache2 restart
+	fi
+
+	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f /etc/apache2/envvars ]; then
-		source /etc/apache2/envvars
+	if [ -f $APACHECONF/envvars ]; then
+		source $APACHECONF/envvars
 	fi
 	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
 	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
@@ -443,7 +443,29 @@ function updateServerFiles()
 		fi
 	done
 	popd >/dev/null
+	NEWFILES=""		# Ficheros de configuración que han cambiado de formato.
+	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
+		echoAndLog "${FUNCNAME}(): updating DHCP files"
+		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
+		for i in isc-dhcp-server dhcpd3-server dhcpd; do
+			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
+		done
+		NEWFILES="/etc/dhcp*/dhcpd*.conf"
+	fi
+	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating new init file"
+		backupFile /etc/init.d/opengnsys
+		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
+	fi
+	if grep -q "UrlMsg=.*msgbrowser.php" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating new client config file"
+		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
+	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
+	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
@@ -506,17 +528,20 @@ function compileServices()
 # Actualizar nuevo cliente para OpenGnSys 1.0
 function updateClient()
 {
-	local DOWNLOADURL="http://www.opengnsys.es/downloads"
-	local FILENAME=ogclient-1.0.2-natty-32bit-beta00-rev2046.iso
+	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
+	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
 	local TARGETLENGTH
 	local TMPDIR=/tmp/${FILENAME%.iso}
+	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	local SAMBAPASS
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
 	TARGETLENGTH=$(ls -l $TARGETFILE 2>/dev/null | awk '{print $5}')
+	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
 		echoAndLog "${FUNCNAME}(): Loading Client"
 		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
@@ -524,23 +549,40 @@ function updateClient()
 			errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 			return 1
 		fi
+		# Obtener la clave actual de acceso a Samba para restaurarla.
+		if [ -f $OGINITRD ]; then
+			SAMBAPASS=$(gzip -dc $OGINITRD | \
+				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+				    grep "^[ 	]*OPTIONS=" | \
+				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+		fi
+		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
+		echoAndLog "${FUNCNAME}(): Updatting ogclient files"
+		mkdir -p $TMPDIR
+		mount -o loop,ro $TARGETFILE $TMPDIR
+		rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
+		umount $TMPDIR
+		rmdir $TMPDIR
+		# Recuperar la clave de acceso a Samba.
+		if [ -n "$SAMBAPASS" ]; then
+			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
+					$INSTALL_TARGET/bin/setsmbpass
+		fi
+		# Establecer los permisos.
+		find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
+		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
+		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
+		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+		
+		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
+		cp -arv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
+		cp -arv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+		
+		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
-		echoAndLog "${FUNCNAME}(): Client is already loaded"
+		echoAndLog "${FUNCNAME}(): Client is already updated"
 	fi
-	# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
-	echoAndLog "${FUNCNAME}(): Updating ogclient files"
-	mkdir -p $TMPDIR
-	mount -o loop,ro $TARGETFILE $TMPDIR
-	rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
-	umount $TMPDIR
-	rmdir $TMPDIR
-
-	# Establecer los permisos.
-	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
-	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
-	echoAndLog "${FUNCNAME}(): Client update successfully"
 }
 
 # Resumen de actualización.
@@ -555,8 +597,11 @@ function updateSummary()
 
 	echo
 	echoAndLog "OpenGnSys Update Summary"
-        echo       "========================"
-        echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echo       "========================"
+	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	if [ -n "$NEWFILES" ]; then
+		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
+	fi
 	echo
 }
 
@@ -639,7 +684,7 @@ updateClientFiles
 updateInterfaceAdm
 
 # Actualizar páqinas web
-getApacheUser
+apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Web Admin files"
@@ -657,9 +702,6 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating clients"
 	exit 1
 fi
-
-# Actualizamos el fichero que arranca los servicios de OpenGnSys
-updateServicesStart
 
 # Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
 if [ -f /tmp/dstate ]; then

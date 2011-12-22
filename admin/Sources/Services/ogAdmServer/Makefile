@@ -8,11 +8,16 @@ INSTALL_DIR := /opt/opengnsys
 
 # Opciones de compilacion
 #CFLAGS := -O0 -g -Wall -I../../Includes	# Depuracion
-CFLAGS := -O3 -Wall -I../../Includes		# Optimizacion
+CFLAGS := -O3 -Wall -I../../Includes		# Depuracion
 CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
-LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
+LBIT := $(shell getconf LONG_BIT)
+ifeq ($(LBIT), 64)
+    LDFLAGS := -L/usr/lib64 -L/usr/lib64/mysql -lpthread -lmysqlclient
+else
+    LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
+endif
 
 # Ficheros objetos
 OBJS := ../../Includes/Database.o sources/ogAdmServer.o 

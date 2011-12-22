@@ -1,0 +1,4 @@
+#sw.other
+install screen 
+install schroot 
+install grub 

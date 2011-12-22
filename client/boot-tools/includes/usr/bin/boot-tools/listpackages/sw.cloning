@@ -1,0 +1,16 @@
+#sw.cloning
+install drbl-partimage 
+install fsarchiver 
+install pv 
+install kexec-tools 
+install mbuffer
+install parted 
+install drbl-chntpw 
+install chntpw 
+install clonezilla
+install registry-tools
+install reglookup
+install libparse-win32registry-perl
+install grokevt
+install libhivex0
+install libhivex-bin
