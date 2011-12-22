@@ -458,7 +458,7 @@ function updateServerFiles()
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
 	fi
-	if ! grep -q "UrlMsg=.*msgbrowser.php" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
+	if grep -q "UrlMsg=.*msgbrowser.php" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new client config file"
 		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
