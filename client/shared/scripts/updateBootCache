@@ -36,19 +36,25 @@ ogMountCache || exit 1
 	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
 	then		
 		echo "ogvmlinuz updating"
-		cp ${OGBTFTP}ogvmlinuz ${OGCAC}/boot/ogvmlinuz
-		cp ${OGBTFTP}ogvmlinuz.sum ${OGCAC}/boot/ogvmlinuz.sum
+		cp ${OGBTFTP}/ogvmlinuz ${OGCAC}/boot/ogvmlinuz
+		cp ${OGBTFTP}/ogvmlinuz.sum ${OGCAC}/boot/ogvmlinuz.sum
 		DOREBOOT=true
 	fi
 	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
 	then
 		echo "oginitrd updating"
-		cp ${OGBTFTP}oginitrd.img ${OGCAC}/boot/oginitrd.img
-		cp ${OGBTFTP}oginitrd.img.sum ${OGCAC}/boot/oginitrd.img.sum
+		cp ${OGBTFTP}/oginitrd.img ${OGCAC}/boot/oginitrd.img
+		cp ${OGBTFTP}/oginitrd.img.sum ${OGCAC}/boot/oginitrd.img.sum
 		DOREBOOT=true
 	fi
 
 echo $DOREBOOT
 #	[ "$DOREBOOT" == "true" ] && busybox reboot -f
+
+#TODO: Comprobar si es necesario
+#cp -prv cp ${OGBTFTP}/ ${OGCAC}/boot/
+
+#TODO
+#/opt/opengnsys/lib/grub4dos/bootlace.com /dev/sda
 
 
