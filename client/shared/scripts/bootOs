@@ -28,7 +28,8 @@ for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
 done
 case "$OSTYPE" in
     Windows)
-        echo "[30] Activar particion de Windows $PART."
+        echo "[30] Mostrar y activar particion de Windows $PART."
+        [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
         ogSetPartitionActive $1 $2
         echo "[50] Asignar nombre Windows \"$NAME\" y usuario por defecto."
         ogSetWindowsName $1 $2 "$NAME"
