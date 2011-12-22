@@ -75,6 +75,7 @@ if [ $? != 0 ]; then
     IMGDIR=$(ogGetParentPath CACHE "/$2") || exit $?
 fi
 
+TIME1=$SECONDS
 
 case "$PROTOCOLO" in
 	torrent | TORRENT )
@@ -123,8 +124,15 @@ case "$PROTOCOLO" in
 	;;
 esac
 
+TIME1=$[SECONDS-TIME1]
+echo "tiempo de updateCache (descarga) $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
+echo "iniciando el calculo del crc de la imagen descargada"
+TIME2=$SECONDS
 ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
+TIME2=$[SECONDS-TIME2]
+echo "tiempo de calculo crc $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
 [ "$RETVAL" == "1" ] && exit 0
