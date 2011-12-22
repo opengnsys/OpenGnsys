@@ -23,7 +23,8 @@ if [ -d $OPENGNSYS ]; then
     export OGCAC=$OPENGNSYS/cache
     export OGLOG=$OPENGNSYS/log
 
-    export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/og2fs/2ndfs/opt/drbl/sbin
+    export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin:/opt/oglive/rootfs/opt/drbl/sbin
+ 
     export PATH=$OGSCRIPTS:$PATH:$OGAPI:$OGBIN
    
     # Exportar parámetros del kernel.
@@ -64,9 +65,15 @@ if [ -d $OPENGNSYS ]; then
     # Fichero de registros.
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
     
+    # Configuracion de la red (valido offline)
+    cat /tmp/initrd.cfg | grep DEVICECFG && export $(cat /tmp/initrd.cfg | grep DEVICECFG)
+    source $DEVICECFG 2>/dev/null
+    
     # FIXME Pruebas para grupos de ordenadores
     #export OGGROUP=$(ogGetGroup)
     export OGGROUP="$group"
+    
+    ROOTREPO=${ROOTREPO:-"$OGSERVERIMAGES"}
 fi
 
 # Declaración de códigos de error.

@@ -191,7 +191,7 @@ include_once("../includes/opcionesbotonesop.php");
 //
 // Frame con la información de la configuración
 echo '<DIV align=center>';
-echo '<IFRAME scrolling=yes height=150 width=90%
+echo '<IFRAME scrolling=yes height=170 width=90%
 		 src="../principal/configuraciones.php?swp=1&idambito='.$idordenador.'&ambito='.$AMBITO_ORDENADORES.'"></IFRAME>';
 echo '</DIV>';
 //________________________________________________________________________________________________________

@@ -23,10 +23,12 @@
 #@version 1.0 - control de errores para el ogAdmServer
 #@author  
 #@date   2011-04-10
-#@version 1.0.1 - Fin de control de errores para el ogAdmServer
-#@author  
+#@version 1.0.1 - Control de espacio requerido
+#@author  Antonio J.Doblas Viso
 #@date   2011-05-10
- 
+ #@version 1.0.2 - Separacion de log
+#@author  Antonio J.Doblas Viso
+#@date   2011-08-4
 #*/ ##
 
 # Test 1.  crear una imagen en un REPO sin espacio libre. 
@@ -36,6 +38,12 @@
 # test 5.  intentar crear una imagen, en la que no se puede reducir el FS.
 
 TIME1=$SECONDS
+OGLOGSESSION="/tmp/session.log"
+OGLOGCOMMAND="/tmp/command.log"
+
+
+
+
 PROG="$(basename $0)"
 if [ $# -ne 4 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen"
@@ -47,29 +55,38 @@ IMGPROG="partclone"
 IMGCOMP="lzop"
 IMGEXT="img"
 
+echo "[1] Iniciando $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
 # Si el repositorio es CACHE comprobamos que exista
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
     ! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
 fi
 
+echo " " > $OGLOGCOMMAND
+
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || exit $(ogRaiseError $OG_ERR_PARTITION "$1 $2"; echo $?)
+
+echo " " > $OGLOGCOMMAND
 
 #Comprobamos acceso de escritura.
 DIRTEMP=$(date +%Y%m%d-%H%M%S)
 ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3"; echo $?) && ogDeleteTree $3 /$4$DIRTEMP 
 
+echo " " > $OGLOGCOMMAND
+
 IMGDIR=$(ogGetParentPath "$3" "/$4")
 # Si no existe, crear subdirectorio de la imagen.
 if [ $? != 0 ]; then
-    echo "[5] Crear subdirectorio de la imagen \"$3 $(dirname "$4")."
+    echo "[5] Crear subdirectorio de la imagen \"$3 $(dirname "$4")." | tee -a $OGLOGSESSION $OGLOGFILE
     ogMakeDir "$3" $(dirname "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
     IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
 fi
 IMGFILE=$IMGDIR/$(basename "/$4").$IMGEXT
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
-    echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"."
+    echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
     mv "$IMGFILE" "$IMGFILE.ant"
     mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
 fi
@@ -90,9 +107,11 @@ else
     exit $?
 fi	
 
+echo " " > $OGLOGCOMMAND
+
 # Mostrar información.
-echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE"
-echo "[16] $PROG: TamañoRequerido=$SIZEREQUIRED EspacioDisponible=$SIZEFREE"
+echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[16] $PROG: TamañoRequerido=$SIZEREQUIRED EspacioDisponible=$SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
 
 [ "$SIZEREQUIRED" -gt "$SIZEFREE" ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
 
@@ -100,21 +119,25 @@ echo "[16] $PROG: TamañoRequerido=$SIZEREQUIRED EspacioDisponible=$SIZEFREE"
 # TODO: que hacer si la cache no tiene espacio libre.
 
 # Comprobar consistencia del sistema de archivos.
-echo "[20] Comprobar sistema de archivos."
+echo "[20] Comprobar sistema de archivos." | tee -a $OGLOGSESSION $OGLOGFILE
 ogUnmount $1 $2
 ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
 
-echo "[30]: Reducir sistema de archivos."
+echo " " > $OGLOGCOMMAND
+
+echo "[30]: Reducir sistema de archivos."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogReduceFs $1 $2 || exit $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; echo $?)
 
+echo " " > $OGLOGCOMMAND
+
 # Crear la imagen.
-echo "[40] Crear imagen con: ogCreateImage $1 $2 $3 $4 $IMGPROG $IMGCOMP"
+echo "[40] Crear imagen con: ogCreateImage $1 $2 $3 $4 $IMGPROG $IMGCOMP" | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateImage $1 "$2" $3 $4 "$IMGPROG" "$IMGCOMP" || exit $(ogRaiseError $OG_ERR_IMAGE "ogCreteImage"; echo $?)
 
-echo "[90] Extender sistema de archivos."
+echo "[90] Extender sistema de archivos." | tee -a $OGLOGSESSION $OGLOGFILE
 ogExtendFs $1 $2 || exit $(ogRaiseError $OG_ERR_EXTENDFS "$1 $2"; echo $?)
 
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 

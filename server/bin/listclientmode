@@ -32,30 +32,21 @@ IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
 
 if [ -n "$IDAULA" ]; then
 	# Aula encontrada
-	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT mac FROM ordenadores WHERE idaula='$IDAULA';")
+	PCNAME=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+        	"SELECT nombreordenador FROM ordenadores WHERE idaula='$IDAULA';")
 else
 	# Buscar ordenador
-	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT mac FROM ordenadores WHERE nombreordenador='$1';")
+	PCNAME=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+        	"SELECT nombreordenador FROM ordenadores WHERE nombreordenador='$1';")
 fi
-if [ -z "$ETHERNET" ]; then
-	echo "$PROG: No existe ningun aula o equipo con el nombre \"$1\""
+if [ -z "$PCNAME" ]; then
+	echo "$PROG: No existe ningún aula o equipo con el nombre \"$1\""
 	exit 1
 fi
 
-for ETH in $ETHERNET; do
-	AUX=$(echo $ETH | awk '{print tolower($0)}')
-	AUX="01-${AUX:0:2}-${AUX:2:2}-${AUX:4:2}-${AUX:6:2}-${AUX:8:2}-${AUX:10:2}"
-	PCNAME=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT nombreordenador FROM ordenadores WHERE mac='$ETH';")
-	if [ -f $PXEDIR/$AUX ]; then
-		INODE=$(ls -i $PXEDIR/$AUX | cut -f1 -d" ")
-		TMPL=$(ls -i $PXEDIR | grep $INODE | grep -v "01-" | cut -f2 -d" ")
-		[ -z "$TMPL" ] && TMPL="default"
-	else
-		TMPL="default"
-	fi
-	echo "Equipo $PCNAME ($ETH) asociado a plantilla \"$TMPL\""
+for PC in $PCNAME; do
+	PXE=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+        	"SELECT arranque FROM ordenadores WHERE nombreordenador='$PC';")
+	echo "Equipo $PC asociado a arranque tipo \"$PXE\""
 done
 

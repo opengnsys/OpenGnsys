@@ -59,7 +59,18 @@ $xajax->printJavascript('../xajax/');
 </head>
 
 
-<body>
+<body onload="
+	var disks=document.getElementsByName('disksize');
+	var min=null;
+	for (var i=0; i<disks.length; i++) {
+		var val=parseInt(disks[i].textContent);
+		if (min==null || val<min) {
+			min=val;
+		}
+	}
+	document.getElementById('minsize').value=min;
+	document.getElementById('freedisk').value=min;
+">
 <?
 switch($ambito){
 		case $AMBITO_CENTROS :
@@ -111,10 +122,10 @@ switch($ambito){
 ?>
 			
 			<tr> 
-				<th colspan="5"><INPUT TYPE="button" NAME="GenerarInstruccion" Value="Generar InstruccionOG" onClick="codeParticionado(this.form)"> 	</th>
-				<td><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
+				<th><input type="button" name="GenerarInstruccion" Value="<?php echo $TbMsg[41];?>" onclick="codeParticionado(this.form)" /> </th>
+				<td colspan="2"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
-						</table>	
+		</table>	
 	</form>	
 
 <?

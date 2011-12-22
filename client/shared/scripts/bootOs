@@ -10,9 +10,16 @@ fi
 
 echo "[0] Inicio del proceso de arranque."
 PART=$(ogDiskToDev "$1" "$2") || exit $?
-NAME=$(ogGetHostname)
+NAME="$(ogGetHostname)"
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $1 $2)
+# Borrar marcas de arrranque de todos los Windows instalados en el disco.
+if [ "$OSTYPE" == "Windows" ]; then
+    for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
+        [ "$(ogGetOsType $1 $i)" == "Windows" ] && ogMount $1 $i &>/dev/null
+    done
+    rm -f /mnt/*/ogboot.*
+fi
 
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
@@ -21,7 +28,8 @@ for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
 done
 case "$OSTYPE" in
     Windows)
-        echo "[30] Activar particion de Windows $PART."
+        echo "[30] Mostrar y activar particion de Windows $PART."
+        [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
         ogSetPartitionActive $1 $2
         echo "[50] Asignar nombre Windows \"$NAME\" y usuario por defecto."
         ogSetWindowsName $1 $2 "$NAME"

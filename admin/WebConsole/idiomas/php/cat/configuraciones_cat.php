@@ -45,4 +45,16 @@ $TbMsg[31]='Nombre del S.O.';
 $TbMsg[32]='Tamaño de partición';
 $TbMsg[33]='Nombre de la Imagen ';
 $TbMsg[34]='Perfil software';
+$TbMsg[35]='Disco';
+$TbMsg[36]='Particiones Primarias';
+$TbMsg[37]='Particiones L&oacute;gicas';
+$TbMsg[38]='Menor espacio libre (KB)';
+$TbMsg[39]='Personalizar';
+$TbMsg[40]='Sin modificar tama&ntilde;o';
+$TbMsg[41]='Generar Instrucci&oacute;n OG';
+
+$TbMsg[42]='Variable';
+$TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
+
 ?>
+

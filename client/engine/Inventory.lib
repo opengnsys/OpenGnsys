@@ -17,8 +17,14 @@
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-07-17
 #*/ 
-function ogGetArch () {
-[ -d /lib64 ] && echo x86_64 || echo i386
+function ogGetArch ()
+{
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  x86_64"
+    return
+fi
+
+[ -d /lib64 ] && echo "x86_64" || echo "i386"
 }
 
 
@@ -41,10 +47,10 @@ function ogGetOsVersion ()
 {
 # Variables locales.
 local MNTDIR TYPE DISTRIB VERSION FILE
-
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 2  =>  Linux:Ubuntu 11.04 64 bits"
     return
 fi
 # Error si no se reciben 2 parametros.
@@ -72,7 +78,7 @@ case "$(ogGetFsType $1 $2)" in
         fi
         [ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
         ;;
-    NTFS | HTNFS | FAT32 | HFAT32)
+    NTFS | HNTFS | FAT32 | HFAT32)
         TYPE="Windows"
         # Para Windows: leer la version del registro.
         VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
@@ -96,6 +102,12 @@ return 0
 #*/ ##
 function ogGetOsType ()
 {
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 2  =>  Linux"
+    return
+fi
 ogGetOsVersion "$@" | cut -sf1 -d:
 }
 
@@ -168,7 +180,7 @@ lshw | awk 'BEGIN {type="mod";}
 function ogListSoftware ()
 {
 # Variables locales.
-local MNTDIR TYPE DPKGDIR RPMDIR KEYS k PROG VERS
+local MNTDIR TYPE DPKGDIR RPMDIR PACMANDIR KEYS KEYS32 k PROG VERS
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -228,11 +240,19 @@ case "$TYPE" in
     NTFS|HNTFS|FAT32|HFAT32)
         # Claves de registro para programas instalados: formato "{clave}".
         KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+        KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
         # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
         (for k in $KEYS; do
             PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
             if [ -n "$PROG" ]; then
                 VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                echo "$PROG $VERS"
+            fi
+        done
+        for k in $KEYS32; do
+            PROG=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+            if [ -n "$PROG" ]; then
+                VERS=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
                 echo "$PROG $VERS"
             fi
         done) | sort | uniq
@@ -250,7 +270,9 @@ esac
 #@attention
 #@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
 #*/
-function ogInfoCache () {
+function ogInfoCache ()
+{
+local info infoFilesystem infoSize infoUsed infoUsedPorcet infoMountedOn content
 if ogMountCache
 then
 	info=`df -h | grep $OGCAC`
@@ -282,3 +304,4 @@ else
 
 fi
 }
+

@@ -29,20 +29,32 @@ $TbMsg[17]="Perfil Hardware";
 $TbMsg[18]="DESAGRUPAR SEGÚN VALORES DISTINTOS DE:";
 $TbMsg[19]="Datos a suministrar";
 
-$TbMsg[20]='Partición';
-$TbMsg[21]='S.O. Instalado';
-$TbMsg[22]='Tamaño';
-$TbMsg[23]='Datos de configuración';
-$TbMsg[24]='Tipo';
-$TbMsg[25]='Imagen';
-$TbMsg[26]='Perfil Software';
-$TbMsg[27]='S.F.';
-$TbMsg[28]='Ninguno';
-$TbMsg[29]='Desconocido';
+$TbMsg[20]='Partition';
+$TbMsg[21]='Installed OS';
+$TbMsg[22]='Size (KB)';
+$TbMsg[23]='Configuration Data';
+$TbMsg[24]='Type';
+$TbMsg[25]='Image';
+$TbMsg[26]='Software Profile';
+$TbMsg[27]='Filesys';
+$TbMsg[28]='None';
+$TbMsg[29]='Unknown';
 
-$TbMsg[30]='Sistema de Ficheros';
-$TbMsg[31]='Nombre del S.O.';
-$TbMsg[32]='Tamaño de partición';
-$TbMsg[33]='Nombre de la Imagen ';
-$TbMsg[34]='Perfil software';
+$TbMsg[30]='Filesystem';
+$TbMsg[31]='OS name';
+$TbMsg[32]='Partition Size';
+$TbMsg[33]='Image Name';
+$TbMsg[34]='Software Profile';
+$TbMsg[35]='Disk';
+$TbMsg[36]='Primary Partitions';
+$TbMsg[37]='Logical Partitions';
+$TbMsg[38]='Menor espacio libre (KB)';
+$TbMsg[39]='Customize';
+$TbMsg[40]='Sin modificar tama&ntilde;o';
+$TbMsg[41]='Generate Instruction';
+
+$TbMsg[42]='Variable';
+$TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
+
 ?>
+

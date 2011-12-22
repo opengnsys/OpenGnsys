@@ -834,8 +834,13 @@ function ContextualXMLOrdenadores(){
 	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
 	$layerXML.=' textoitem="Log"';
 	$layerXML.='></ITEM>';
-
-
+ 
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_log_seguimiento('.$AMBITO_ORDENADORES.')"';
+	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
+	$layerXML.=' textoitem="Log_seguimiento"';
+	$layerXML.='></ITEM>';
+	
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="mover_ordenador()"';
 	$layerXML.=' imgitem="../images/iconos/mover.gif"';

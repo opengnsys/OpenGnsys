@@ -79,7 +79,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 
 	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,	
 				ordenadores_particiones.numpar ,
-				ordenadores_particiones.codpar ,				
+				ordenadores_particiones.codpar ,
 				tipospar.tipopar,
 				tipospar.clonable,
 				ordenadores_particiones.tamano,
@@ -88,8 +88,8 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				nombresos.nombreso,
 				imagenes.idimagen, 
 				imagenes.descripcion as imagen,
-				imagenes.nombreca as nombreca,				
-				imagenes.idrepositorio as repositorio,				
+				imagenes.nombreca as nombreca,
+				imagenes.idrepositorio as repositorio,
 				ordenadores_particiones.idperfilsoft,
 				perfilessoft.descripcion as perfilsoft
 
@@ -181,62 +181,57 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	cargaNombresSO($cmd,$idambito,$ambito);
 	cargaTamano($cmd,$idambito,$ambito);
 	
-	$cmd->texto="SELECT 
-							count(*) as con,
-							group_concat(cast( temp2.idordenador AS char( 11 ) )  ORDER BY temp2.idordenador SEPARATOR ',' ) AS idordenadores,
-							temp2.configuraciones
-							FROM
-							(SELECT 
-								temp1.idordenador as idordenador,
-								group_concat(cast( temp1.configuracion AS char( 250) )  ORDER BY temp1.configuracion SEPARATOR '@' ) AS configuraciones
-								FROM
-								(SELECT ordenadores_particiones.idordenador,
-											ordenadores_particiones.numpar,
-											concat_WS( ';', 
-															ordenadores_particiones.numpar, ";
-															
-	if($sws & $msk_tamano)						
+	$cmd->texto="SELECT	COUNT(*) AS con,
+				GROUP_CONCAT(CAST( temp2.idordenador AS CHAR(11) )  ORDER BY temp2.idordenador SEPARATOR ',' ) AS idordenadores,
+				temp2.configuraciones
+				FROM (SELECT 
+					temp1.idordenador AS idordenador,
+					GROUP_CONCAT(CAST( temp1.configuracion AS CHAR(250) )  ORDER BY temp1.configuracion SEPARATOR '@' ) AS configuraciones
+					FROM (SELECT ordenadores_particiones.idordenador,
+						ordenadores_particiones.numpar,
+						concat_WS( ';', 
+						ordenadores_particiones.numpar, ";
+
+	if($sws & $msk_tamano)
 		$cmd->texto.="	ordenadores_particiones.tamano,";
-				
-	if($sws & $msk_sysFi)						
+
+	if($sws & $msk_sysFi)
 		$cmd->texto.="	ordenadores_particiones.idsistemafichero, ";	
-		
-	if($sws & $msk_nombreSO)						
-		$cmd->texto.="	ordenadores_particiones.idnombreso, ";								
-							
-	if($sws & $msk_imagen)						
+
+	if($sws & $msk_nombreSO)
+		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
+
+	if($sws & $msk_imagen)
 		$cmd->texto.="	ordenadores_particiones.idimagen, ";	
-		
-	if($sws & $msk_perfil)						
-		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";																
+
+	if($sws & $msk_perfil)
+		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";
 			
-	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion
-											FROM ordenadores
-														INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-														LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-														INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
-														LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-														LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-														LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
-														
+	$cmd->texto.="		ordenadores_particiones.codpar) AS configuracion
+						FROM ordenadores
+						INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+						LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
+						INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+						LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
+						LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
+						LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
+
 	switch($ambito){
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
-		break;
+			$cmd->texto.="	INNER JOIN aulas ON aulas.idaula = ordenadores.idaula WHERE aulas.idaula =".$idambito;
+			break;
 		case $AMBITO_GRUPOSORDENADORES :
-					$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-													WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-				$cmd->texto.=" WHERE ordenadores.idordenador=".$idambito;
+			$cmd->texto.="	WHERE ordenadores.idordenador=".$idambito;
 			break;
-	}															
-	if($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
+	}					
+	if ($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 ";
 	
-	$cmd->texto.=" ORDER BY ordenadores_particiones.idordenador,ordenadores_particiones.numpar) as temp1
-					GROUP BY temp1.idordenador) as temp2
+	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numpar) AS temp1
+					GROUP BY temp1.idordenador) AS temp2
 					GROUP BY temp2.configuraciones
 					ORDER BY con desc,idordenadores";
 								
@@ -246,19 +241,22 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$cc=0; // Contador de configuraciones
-	echo '<TABLE  id="tabla_conf" width="95%" class="tabla_listados_sin" align=center border=0 cellPadding=0 cellSpacing=1>';
+	echo '<table  id="tabla_conf" width="95%" class="tabla_listados_sin" align=center border=0 cellPadding=0 cellSpacing=1>';
 	while (!$rs->EOF){
 		$cc++;
 		//Muestra ordenadores
-		echo '<TR><TD colspan='.$colums.' style="BACKGROUND-COLOR: #FFFFFF;">';
+		echo '<tr><td colspan='.$colums.' style="background-color: #ffffff;">';
 		echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc);
-		echo '</TD></TR>';
+		echo '</td></tr>';
 		//Muestra particiones y configuración
 
 		echo pintaParticiones($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc,$ambito,$idambito);
 		$rs->Siguiente();
 	}
-	echo "</TABLE>";
+	if ($cc == 0) {
+                echo '<tr><th>'.$TbMsg[43].'</th><tr>';  // Cliente sin configuración.
+        }
+	echo "</table>";
 	$rs->Cerrar();
 }
 //________________________________________________________________________________________________________
@@ -275,25 +273,24 @@ function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 	$tablaHtml.="";
 	$contor=0;
 	$maxcontor=10; // Número máximo de prodenadores por fila
-	$cmd->texto=" SELECT idordenador,nombreordenador,ip FROM ordenadores WHERE  idordenador in (".$idordenadores." ) ORDER BY nombreordenador";
+	$cmd->texto=" SELECT idordenador,nombreordenador,ip FROM ordenadores WHERE idordenador IN (".$idordenadores.") ORDER BY nombreordenador";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(""); // Error al abrir recordset
-	$tablaHtml.='<TABLE align=left border="0" id="tbOrd_'.$cc.'" value="'.$idordenadores.'"><TR>';
+	$tablaHtml.='<table align="left" border="0" id="tbOrd_'.$cc.'" value="'.$idordenadores.'"><tr>';
 	while (!$rs->EOF){
 		$contor++;
-		$tablaHtml.= '<TD align=center  style="BACKGROUND-COLOR: #FFFFFF;">
-									<IMG src="../images/iconos/ordenador.gif" >
-									<br><span style="FONT-SIZE:9px;	COLOR: #4f4f4f;" >'.$rs->campos["nombreordenador"].'</span>
-								</TD>';
+		$tablaHtml.= '<td align="center" style="BACKGROUND-COLOR: #FFFFFF;">
+				<img src="../images/iconos/ordenador.gif" >
+				<br><span style="FONT-SIZE:9px;	COLOR: #4f4f4f;" >'.$rs->campos["nombreordenador"].'</span></td>';
 		if($contor>$maxcontor){
 			$contor=0;
-			$tablaHtml.='</TR><TR>';
+			$tablaHtml.='</tr><tr>';
 		}
 		$rs->Siguiente();
 	}
-	$tablaHtml.='</TR>';
-	$tablaHtml.= '</TABLE>';
+	$tablaHtml.='</tr>';
+	$tablaHtml.= '</table>';
 	return($tablaHtml);
 }
 /*________________________________________________________________________________________________________
@@ -308,28 +305,30 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
 	
-	$cmd->texto="SELECT count(*) as con,ordenadores_particiones.idsistemafichero,ordenadores_particiones.numpar,
-											sistemasficheros.descripcion as sistemafichero,
-											group_concat(cast(ordenadores_particiones.idordenador AS char( 11) ) 
-											 ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
-							FROM	ordenadores
-							INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-							INNER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
+	$cmd->texto="SELECT	COUNT(*) AS con,
+				ordenadores_particiones.idsistemafichero,
+				ordenadores_particiones.numpar,
+				sistemasficheros.descripcion AS sistemafichero,
+				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) ) 
+					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
+			   FROM ordenadores
+			   JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+			   JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
 
 	switch($ambito){
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
-				break;
+			$cmd->texto.="	JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
 		case $AMBITO_GRUPOSORDENADORES :
-				$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-												WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-				$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-		$cmd->texto.=" GROUP BY ordenadores_particiones.numpar,ordenadores_particiones.idsistemafichero";
+		$cmd->texto.="		GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idsistemafichero";
 	//echo "carga sistemas de ficheros:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -354,17 +353,21 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 ________________________________________________________________________________________________________*/
 function tomaSistemasFicheros($numpar,$ordenadores,$sw=false)
 {
-	global $tbSysFi; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbSysFi;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conSysFi; // Contador de elementos anteriores
 
-	for($k=0;$k<$conSysFi;$k++){
-		$pos = strpos($tbSysFi[$k]["ordenadores"], $ordenadores);
-		if ($pos !== false) { // Cadena encontrada
-			if($tbSysFi[$k]["numpar"]==$numpar){
-				if($sw) // Retonar identificador
-					return($tbSysFi[$k]["idsistemafichero"]);
-				else
-					return($tbSysFi[$k]["sistemafichero"]);
+	for ($k=0; $k<$conSysFi; $k++){
+		if ($tbSysFi[$k]["numpar"] == $numpar){
+			//$pos = strpos($tbSysFi[$k]["ordenadores"], $ordenadores);
+			//if ($pos !== false) { // Cadena encontrada
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbSysFi[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				if ($sw) {	// Retonar identificador
+					return ($tbSysFi[$k]["idsistemafichero"]);
+				} else {
+					return ($tbSysFi[$k]["sistemafichero"]);
+				}
 			}
 		}
 	}
@@ -375,33 +378,36 @@ function tomaSistemasFicheros($numpar,$ordenadores,$sw=false)
 ________________________________________________________________________________________________________*/
 function cargaPerfiles($cmd,$idambito,$ambito)
 {
-	global $tbPerfil; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbPerfil;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conPerfil; // Contador de elementos anteriores
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
 	
-	$cmd->texto="SELECT count(*) as con,ordenadores_particiones.idperfilsoft,ordenadores_particiones.numpar,perfilessoft.descripcion as perfilsoft,
-											group_concat(cast(ordenadores_particiones.idordenador AS char( 11) ) 
-											 ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
-							FROM	ordenadores
-							INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-							INNER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft";
+	$cmd->texto="SELECT count(*) AS con,
+			    ordenadores_particiones.idperfilsoft,
+			    ordenadores_particiones.numpar,
+			    perfilessoft.descripcion AS perfilsoft,
+			    GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) ) 
+				ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
+		       FROM ordenadores
+		       JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+		       JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft";
 
-	switch($ambito){
+	switch ($ambito) {
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
-				break;
+			$cmd->texto.="	JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
 		case $AMBITO_GRUPOSORDENADORES :
-				$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-												WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-				$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-		$cmd->texto.=" GROUP BY ordenadores_particiones.numpar,ordenadores_particiones.idperfilsoft";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idperfilsoft";
 	//echo "carga perfiles:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -425,14 +431,19 @@ function cargaPerfiles($cmd,$idambito,$ambito)
 ________________________________________________________________________________________________________*/
 function tomaPerfiles($numpar,$ordenadores)
 {
-	global $tbPerfil; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbPerfil;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conPerfil; // Contador de elementos anteriores
 
-	for($k=0;$k<$conPerfil;$k++){
-		$pos = strpos($tbPerfil[$k]["ordenadores"], $ordenadores);
-		if ($pos !== false) { // Cadena encontrada
-			if($tbPerfil[$k]["numpar"]==$numpar)
-				return($tbPerfil[$k]["perfilsoft"]);
+	for ($k=0; $k<$conPerfil; $k++){
+		//$pos = strpos($tbPerfil[$k]["ordenadores"], $ordenadores);
+		//if ($pos !== false) { // Cadena encontrada
+			//if($tbPerfil[$k]["numpar"]==$numpar)
+		if ($tbPerfil[$k]["numpar"] == $numpar) {
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbPerfil[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				return ($tbPerfil[$k]["perfilsoft"]);
+			}
 		}
 	}
 }
@@ -442,33 +453,36 @@ function tomaPerfiles($numpar,$ordenadores)
 ________________________________________________________________________________________________________*/
 function cargaImagenes($cmd,$idambito,$ambito)
 {
-	global $tbImg; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbImg;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conImg; // Contador de elementos anteriores
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
 	
-	$cmd->texto="SELECT count(*) as con,ordenadores_particiones.idimagen,ordenadores_particiones.numpar,imagenes.descripcion as imagen,
-											group_concat(cast(ordenadores_particiones.idordenador AS char( 11) ) 
-											 ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
-							FROM	ordenadores
-							INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-							INNER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen";
+	$cmd->texto="SELECT	count(*) as con,
+				ordenadores_particiones.idimagen,
+				ordenadores_particiones.numpar,
+				imagenes.descripcion as imagen,
+				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
+					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
+			   FROM ordenadores
+			   JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+			   JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen";
 
 	switch($ambito){
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
-				break;
+			$cmd->texto.="	JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
 		case $AMBITO_GRUPOSORDENADORES :
-				$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-												WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-				$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-		$cmd->texto.=" GROUP BY ordenadores_particiones.numpar,ordenadores_particiones.idimagen";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idimagen";
 	//echo "carga imagenes:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -492,14 +506,19 @@ function cargaImagenes($cmd,$idambito,$ambito)
 ________________________________________________________________________________________________________*/
 function tomaImagenes($numpar,$ordenadores)
 {
-	global $tbImg; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbImg;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conImg; // Contador de elementos anteriores
 
-	for($k=0;$k<$conImg;$k++){
-		$pos = strpos($tbImg[$k]["ordenadores"], $ordenadores);
-		if ($pos !== false) { // Cadena encontrada
-			if($tbImg[$k]["numpar"]==$numpar)
-				return($tbImg[$k]["imagen"]);
+	for ($k=0; $k<$conImg; $k++) {
+		//$pos = strpos($tbImg[$k]["ordenadores"], $ordenadores);
+		//if ($pos !== false) { // Cadena encontrada
+			//if($tbImg[$k]["numpar"]==$numpar){
+		if ($tbImg[$k]["numpar"] == $numpar) {
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbImg[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				return ($tbImg[$k]["imagen"]);
+			}
 		}
 	}
 }
@@ -509,33 +528,35 @@ function tomaImagenes($numpar,$ordenadores)
 ________________________________________________________________________________________________________*/
 function cargaNombresSO($cmd,$idambito,$ambito)
 {
-	global $tbSO; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbSO;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conSO; // Contador de elementos anteriores
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
 	
-	$cmd->texto="SELECT count(*) as con,ordenadores_particiones.idnombreso,ordenadores_particiones.numpar,nombresos.nombreso,
-											group_concat(cast(ordenadores_particiones.idordenador AS char( 11) ) 
-											 ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
-							FROM	ordenadores
-							INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-							INNER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso";
+	$cmd->texto="SELECT	COUNT(*) AS con,
+				ordenadores_particiones.idnombreso,
+				ordenadores_particiones.numpar,nombresos.nombreso,
+				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
+					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
+			   FROM ordenadores
+			   JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+			   JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso";
 
 	switch($ambito){
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
-				break;
+			$cmd->texto.="	JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
 		case $AMBITO_GRUPOSORDENADORES :
-				$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-												WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-				$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-		$cmd->texto.=" GROUP BY ordenadores_particiones.numpar,ordenadores_particiones.idnombreso";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idnombreso";
 	//echo "carga nombresos:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -559,14 +580,18 @@ function cargaNombresSO($cmd,$idambito,$ambito)
 ________________________________________________________________________________________________________*/
 function tomaNombresSO($numpar,$ordenadores)
 {
-	global $tbSO; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbSO;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conSO; // Contador de elementos anteriores
 
-	for($k=0;$k<$conSO;$k++){
-		$pos = strpos($tbSO[$k]["ordenadores"], $ordenadores);
-		if ($pos !== false) { // Cadena encontrada
-			if($tbSO[$k]["numpar"]==$numpar)
-				return($tbSO[$k]["nombreso"]);
+	for($k=0; $k<$conSO; $k++) {
+		if ($tbSO[$k]["numpar"]==$numpar) {
+			//$pos = strpos($tbSO[$k]["ordenadores"], $ordenadores);
+			//if ($pos !== false) { // Cadena encontrada
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbSO[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				return ($tbSO[$k]["nombreso"]);
+			}
 		}
 	}
 }
@@ -576,32 +601,34 @@ function tomaNombresSO($numpar,$ordenadores)
 ________________________________________________________________________________________________________*/
 function cargaTamano($cmd,$idambito,$ambito)
 {
-	global $tbTam; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbTam;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conTam; // Contador de elementos anteriores
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
 	
-	$cmd->texto="SELECT count(*) as con,ordenadores_particiones.tamano,ordenadores_particiones.numpar,
-											group_concat(cast(ordenadores_particiones.idordenador AS char( 11) ) 
-											 ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
-							FROM	ordenadores
-							INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador";
+	$cmd->texto="SELECT	COUNT(*) AS con,
+			   	ordenadores_particiones.tamano,
+				ordenadores_particiones.numpar,
+				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
+					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
+			   FROM ordenadores
+			   JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador";
 
 	switch($ambito){
 		case $AMBITO_AULAS :
-				$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-												WHERE aulas.idaula =".$idambito;
-				break;
+			$cmd->texto.="	JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
 		case $AMBITO_GRUPOSORDENADORES :
-				$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-												WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-				$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-		$cmd->texto.=" GROUP BY ordenadores_particiones.numpar,ordenadores_particiones.tamano";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.tamano";
 	//echo "carga tamaños:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -624,16 +651,21 @@ function cargaTamano($cmd,$idambito,$ambito)
 ________________________________________________________________________________________________________*/
 function tomaTamano($numpar,$ordenadores)
 {
-	global $tbTam; // Tabla contenedora de ordenadores incluidos en la consulta
+	global $tbTam;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conTam; // Contador de elementos anteriores
 
-	for($k=0;$k<$conTam;$k++){
-		$pos = strpos($tbTam[$k]["ordenadores"], $ordenadores);
-		if ($pos !== false) { // Cadena encontrada
-			if($tbTam[$k]["numpar"]==$numpar)
-				return($tbTam[$k]["tamano"]);
+	for ($k=0; $k<$conTam; $k++) {
+		if ($tbTam[$k]["numpar"] == $numpar) {
+//			$pos = strpos ($tbTam[$k]["ordenadores"], $ordenadores);
+//			if ($pos !== FALSE) { // Cadena encontrada
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbTam[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				return ($tbTam[$k]["tamano"]);
+			}
 		}
 	}
 }
 
 ?>
+

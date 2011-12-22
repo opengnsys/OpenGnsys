@@ -1,0 +1,10 @@
+install build-essential 
+install libattr* 
+install attr 
+install make 
+install m4 
+install gettext 
+install libmhash-dev 
+install gdebi-core 
+install gawk
+

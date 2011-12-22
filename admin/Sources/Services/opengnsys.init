@@ -1,12 +1,4 @@
-#! /bin/sh
-
-##########1.0######################################################################################################
-####### Script de arranque de los servicios de OpenGnSys: Servidor ogAdmServer, Servidor de repositorio ogAdmRepo,
-####### Tracker Bittorrent y seeder de imagenes por Bittorrent
-####### autor: jcxifre <jcxifre@unizar.es>
-####### basado en http://www.epilogue.org/~xef4/start-stop-example
-##################################################################################################################
-
+#!/bin/bash
 
 ### BEGIN INIT INFO
 # Provides:          opengnsys
@@ -72,21 +64,41 @@ BTTRACKPID="/var/run/bttrack.pid"
 BTSEEDERPID="/var/run/btseeder.pid"
 
 
-set -e
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/usr/bin"
 
 # Read config file if it is present.
 if [ -r /etc/default/opengnsys ]
 then
-        . /etc/default/opengnsys
+    source /etc/default/opengnsys
 fi
+
+# Configuración de arranque según la distribución Linux usada.
+config() {
+    OSDISTRIB=$(lsb_release -is 2>/dev/null)
+    case "$OSDISTRIB" in
+        Ubuntu)
+            INITFUNCTIONS=/lib/lsb/init-functions
+            DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
+            EXTRAOPTS="--"
+            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --exec"
+            ACTIONMSG="log_daemon_msg"
+            SUCCESSMSG="log_end_msg 0"
+            FAILMSG="log_end_msg 1"
+            ;;
+        *)  echo "Distribución Linux desconcocida o no soportada."
+            exit ;;
+    esac
+    if [ -r $INITFUNCTIONS ]; then
+        source $INITFUNCTIONS
+    fi
+}
 
 arranca_demonios() {
   if [ $RUN_OGADMSERVER = "yes" ]
   then
-     echo -n "Iniciando demonio: "$SERVERNAME
-     start-stop-daemon --start --quiet --background --exec $SERVERDAEMON -- $SERVERDAEMON_OPTIONS
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $SERVERNAME"
+     $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
   if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]
   then
@@ -94,32 +106,32 @@ arranca_demonios() {
   fi
   if [ $RUN_OGADMREPO = "yes" ]
   then
-     echo -n "Iniciando demonio: "$REPONAME
-     start-stop-daemon --start --quiet  --background --exec $REPODAEMON -- $REPODAEMON_OPTIONS
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $REPONAME"
+     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      ############ ADV  	 
-  	 echo -n "Iniciando demonio:  "$REPOAUXNAME
-  	 faucet $REPOAUXPORT --daemon --in bash -c  "$REPOAUXDAEMON"
-     echo "."
-	 ############ ADV
+     $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
+     faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+     ############ ADV
   fi
   if [ $RUN_OGADMAGENT = "yes" ]
   then
-     echo -n "Iniciando demonio: "$AGENTNAME $AGENTDAEMON
-     start-stop-daemon --start --quiet --background --exec $AGENTDAEMON -- $AGENTDAEMON_OPTIONS
-     echo "."
+     $ACTIONMSG "Iniciando demonio: $AGENTNAME"
+     $DAEMONSTART $AGENTDAEMON $EXTRAOPTS $AGENTDAEMON_OPTIONS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi    
   if [ $RUN_BTTRACKER = "yes" ]
   then
-     echo -n "Iniciando demonio: "$BTTRACK
+     $ACTIONMSG "Iniciando demonio: $BTTRACK"
      start-stop-daemon --make-pidfile --pidfile $BTTRACKPID --start --quiet --background --exec $BTTRACK -- $BTTRACK_OPTIONS
-     echo "."
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
   if [ $RUN_BTSEEDER = "yes" ]
   then
-     echo -n "Iniciando demonio: "$BTSEEDER
+     $ACTIONMSG "Iniciando demonio: $BTSEEDER"
      start-stop-daemon --make-pidfile --pidfile $BTSEEDERPID --start --quiet  --background --exec $BTSEEDER -- $BTTORRENTSDIR
-     echo "."
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
 
 }
@@ -127,32 +139,35 @@ arranca_demonios() {
 para_demonios() {
   if [ -e $BTSEEDERPID ]
   then
-    echo -n "Parando demonio: "$BTSEEDER
+    $ACTIONMSG "Parando demonio: $BTSEEDER"
     start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $BTSEEDERPID
-	echo "."
-    rm $BTSEEDERPID > /dev/null
+    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+    rm -f $BTSEEDERPID
   fi
   if [ -e $BTTRACKPID ]
   then
-    echo -n "Parando demonio: "$BTTRACK
+    $ACTIONMSG "Parando demonio: $BTTRACK"
     start-stop-daemon --stop --quiet --oknodo --pidfile $BTTRACKPID
-	echo "."
-    rm $BTTRACKPID > /dev/null
+    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+    rm -f $BTTRACKPID
   fi 
-  echo -n "Parando demonio: "$AGENTNAME
-  start-stop-daemon --stop --quiet --oknodo --name $AGENTNAME
-  echo "." 
-  echo -n "Parando demonio: "$REPONAME
-  start-stop-daemon --stop --quiet --oknodo --name $REPONAME
-  echo "."
+  $ACTIONMSG "Parando demonio: $AGENTNAME"
+  $DAEMONSTOP $AGENTDAEMON
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  $ACTIONMSG "Parando demonio: $REPONAME"
+  $DAEMONSTOP $REPODAEMON
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   ############# ADV
-  echo -n "Parando demonio: "$REPOAUXNAME
+  $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
+  [ $? -le 1 ] && $SUCCESSMSG || $FAILMSG
   ############ ADV  
-  echo -n "Parando demonio: "$SERVERNAME
-  start-stop-daemon --stop --quiet --oknodo --name $SERVERNAME
-  echo "."
+  $ACTIONMSG "Parando demonio: $SERVERNAME"
+  $DAEMONSTOP $SERVERDAEMON
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
 }
+
+config
 
 case "$1" in
   start)
@@ -167,9 +182,10 @@ case "$1" in
         ;;
 
   *)
-        echo "Uso: opengnsys "$1" {start|stop|restart}"
+        echo "Uso: $0 {start|stop|restart}"
         exit 1
         ;;
 esac
 
 exit 0
+

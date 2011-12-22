@@ -1,0 +1,9 @@
+#sw.filesystem.remote
+install nfs-common 
+install sshfs 
+install smbfs 
+install smbclient 
+install davfs2 
+install open-iscsi 
+install openssh-server 
+install bittornado 

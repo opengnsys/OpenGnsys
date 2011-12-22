@@ -1,0 +1,518 @@
+#!/bin/bash
+#/**
+#@file    boottoolsfunctions.lib
+#@brief   Librería o clase Boot-Tools
+#@class   Boot-Tools
+#@brief   Funciones para generar un sistema operativo cliente para opengnsys
+#@version 0.9
+#@warning License: GNU GPLv3+
+#*/
+
+
+# btGetVariables: define las constantes a utilizar
+# Autor: Antonio J. Doblas Viso. Universidad de Málaga.
+function btogGetVar()
+{
+
+export BTSVNBOOTTOOLS=/tmp/opengnsys_installer/opengnsys/client/boot-tools
+export BTSVNSHARE=/tmp/opengnsys_installer/opengnsys/client/shared
+export BTSVNENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
+
+export BTSVNOG2=/tmp/opengnsys_installer/opengnsys2
+
+export BTTARGETDIR=/var/lib/tftpboot/ogclient/
+export BTROOTFSIMG=${BTTARGETDIR}ogclient.img
+export BTROOTFSMNT=${BTTARGETDIR}ogclientmount
+# tamaño maximo limitado por schroot 2GB
+export BTVIRTUALDISKSIZE=2000
+export BTROOTFSIMGLABEL=ogClient
+
+export LOG_FILE=/tmp/boot-tools_installation.log
+
+NAMEISOCLIENT=`cat /tmp/opengnsys_info_rootfs`
+NAMEHOSTCLIENT=`cat /tmp/opengnsys_chroot`
+
+export NAMEISOCLIENT
+export NAMEHOSTCLIENT
+}
+
+
+# btGetOsInfo: detecta la version del host, para tenerla de referencia en el boot-tools a generar.
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+function btogGetOsInfo ()
+{
+		case $1 in
+		lenny|LENNY)
+			export OSDISTRIB=debian
+			export OSCODENAME=lenny
+			export OSRELEASE="2.6.28-11-generic"
+			export OSARCH=i386
+			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
+		;;
+		lucid|LUCID)
+			export OSDISTRIB=ubuntu
+			export OSCODENAME=lucid
+			export OSRELEASE="2.6.32-21-generic-pae"
+			export OSARCH=i386
+			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
+		;;
+		host | HOST | *)
+			export OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
+			export OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
+			export OSRELEASE=$(uname -a | awk '{print $3}')
+			uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
+			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	esac
+		echo $OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP
+}
+
+# btogSetFsVirtual: Crea y formatea el fichero - disco duro virtual
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+# error code return 2
+function btogSetFsVirtual ()
+{
+
+local RERROR  DISKLOOP PARTLOOP #return code error
+
+#Dependencias.
+[ -z "$BTROOTFSIMG" ] && btogGetVar
+
+echoAndLog "$FUNCNAME(): Creación y formateo del disco virtual $BTVIRTUALDISKSIZE MB "
+
+#Desmontamos el dispositivo virtual
+mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT 
+mount | grep $BTROOTFSMNTT && umount $BTROOTFSMNT 
+
+#echo "$FUNCNAME(): Creando el directorio donde se montará el disco virtual $BTROOTFSMNT"
+mkdir -p $BTROOTFSMNT
+
+if [ $? -ne 0 ]
+then 
+	errorAndLog "$FUNCNAME(): Creando directorio $BTROOTFSMNT : ERROR" 
+	return 1
+fi 
+
+# Permisos para el usuario opengnsys.
+chown -R root:opengnsys $BTTARGETDIR
+
+#echo "$FUNCNAME(): Creando el disco virtual con tamaño máximo de  $BTVIRTUALDISKSIZE MB" 
+dd if=/dev/zero of=$BTROOTFSIMG bs=1048576 count=$BTVIRTUALDISKSIZE
+	#qemu-img create $BTROOTFSIMG 3G	
+	#dd if=/dev/zero of=$BTROOTFSIMG bs=1k count=$OGCLIENTSIZEKB   # necesita 500MB
+
+if [ $? -ne 0 ]
+then 
+	errorAndLog "$FUNCNAME(): Creando el disco virtual con tamaño maxima $BTVIRTUALDISKSIZE MB : ERROR" 
+	return 2
+fi 
+
+# Particionamos el disco virtual con una sola particion primaria.
+DISKLOOP=$(losetup -f)
+#TODO: si no DISKLOOP error
+losetup $DISKLOOP $BTROOTFSIMG
+#echo "$FUNCNAME(): particiondo el disco virtual - $DISKLOOP - con una particion primaria"
+echo -e "n\np\n1\n\n\nt\n83\nw" | fdisk $DISKLOOP
+
+
+#echoAndLog "$FUNCNAME(): Liberamos Desmontando $DISKLOOP despues del particionado "
+losetup -d $DISKLOOP 
+if [ $? -ne 0 ]
+then 
+	errorAndLog "$FUNCNAME(): Liberando disco virtual despues del particionado: ERROR" 
+	return 2
+fi 
+
+
+PARTLOOP=$(losetup -f)
+#echo "$FUNCNAME(): Formateando la particion principal $PARTLOOP"
+losetup -o 32256 $PARTLOOP $BTROOTFSIMG && mkfs.ext3 -b 4096 -L $BTROOTFSIMGLABEL $PARTLOOP
+if [ $? -ne 0 ]
+then 
+	errorAndLog "$FUNCNAME(): Formateando la particion principal del disco virtual: ERROR" 
+	return 2
+fi
+#echoAndLog "$FUNCNAME(): Desmontando $PARTLOOP despues del formateo "
+losetup -d $PARTLOOP 
+if [ $? -ne 0 ]
+then 
+	errorAndLog "$FUNCNAME(): Liberando la particion virtual despues del formateo: ERROR" 
+	return 2
+else 
+	echoAndLog "$FUNCNAME(): $BTROOTFSIMG $BTVIRTUALDISKSIZE MB : OK"
+fi
+}
+
+
+# btogSetfsBase: Genera el sistema root base con debootstrap
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+# error code return 3
+function btogSetFsBase ()
+{
+
+# Dependencias
+[ -z "$OSCODENAME" ] && btogGetOsInfo
+
+echoAndLog "$FUNCNAME:  Iniciando la generación del sistema de archivos "
+	
+#Montamos el dispositivo virtual en su punto de montaje.
+mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
+mount | grep $BTROOTFSMNT && echoAndLog "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 OK   " || errorAndLog  "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 : FAILURE  "
+
+debootstrap --arch=$OSARCH --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
+
+
+if [ $? -ne 0 ]; then
+	errorAndLog "$FUNCNAME:  debootstrap --include=linux-image-${OSRELEASE},linux-headers-${OSRELEASE} --arch=$OSARCH --components=main,universe $OSCODENAME $BTROOTFSMNT $OSHTTP : ha fallado!"
+	mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
+	return 3
+else
+	echoAndLog "$FUNCNAME:  debootstrap --include=linux-image-${OSRELEASE},linux-headers-${OSRELEASE} --arch=$OSARCH --components=main,universe $OSCODENAME $BTROOTFSMNT $OSHTTP :  ok"
+	mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
+	return 0
+fi	
+  sleep 5
+
+##preubas  revisar OSRELEASE
+#debootstrap --include=linux-image-${OSRELEASE},linux-headers-${OSRELEASE} --arch=$OSARCH --components=main,universe ${OSCODENAME} ${OGCLIENTMOUNT} ${OSHTTP} 
+#debootstrap --include=linux-image-${OSRELEASE} --arch=i386 --variant=minbase $OSVERSION $OGCLIENTMOUNT http://es.archive.ubuntu.com/ubuntu/ 
+#debootstrap --variant=minbase --include=linux-image-${OGRELEASE} --arch=i386 $OGVERSION $OGCLIENTMOUNT http://es.archive.ubuntu.com/ubuntu/ 
+#echo debootstrap --include=linux-image-${OGRELEASE},dbus --arch=i386 --components=main,universe $OGVERSION $OGCLIENTMOUNT http://es.archive.ubuntu.com/ubuntu/ 
+}
+
+#btogSetFsAcces: habilita el acceso al sistema root del cliente con  schroot
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+function btogSetFsAccess()
+{
+echoAndLog "$FUNCNAME: Iniciando la configuración del schroot "
+cp /etc/schroot/schroot.conf /etc/schroot/schroot.conf.`getDateTime`
+cat << EOF > /etc/schroot/schroot.conf
+[IMGogclient]
+type=loopback
+file=/var/lib/tftpboot/ogclient/ogclient.img
+description=ogclient ubuntu luc IMGi
+#priority=1
+users=root
+groups=root
+root-groups=root
+mount-options=-o offset=32256
+root-users=root
+EOF
+
+cp /etc/schroot/mount-defaults /etc/schroot/mount-defaults.`getDateTime`
+cat << EOF > /etc/schroot/mount-defaults
+# mount.defaults: static file system information for chroots.
+# Note that the mount point will be prefixed by the chroot path
+# (CHROOT_PATH)
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+proc            /proc           proc    defaults        0       0
+#procbususb      /proc/bus/usb   usbfs   defaults        0       0
+#/dev            /dev            none    rw,bind         0       0
+/dev/pts        /dev/pts        none    rw,bind         0       0
+/dev/shm        /dev/shm        none    rw,bind         0       0
+#/home          /home           none    rw,bind         0       0
+/tmp            /tmp            none    rw,bind         0       0                                                                
+EOF
+
+rm /etc/schroot/setup.d/*chrootname
+
+echoAndLog "$FUNCNAME: Finalizado: OK  "
+return 0
+}
+
+
+
+#btogFsInitr  genera un initrd.
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+function btogFsInitrd ()
+{
+#DEPENDENCIAS
+[ -z "$BTROOTFSIMG" ] && btogGetVar
+[ -z "$OSCODENAME" ] && btogGetOsInfo
+
+cd /
+schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsInitrdGenerate.sh
+echo "cp /tmp/*-${OSRELEASE} ${BTTARGETDIR}"
+cp /tmp/*-${OSRELEASE} ${BTTARGETDIR}
+#Creando copias de las version oginitr y ogvmlinux previas
+TIMEMOD=`date +%Y%m%d-%H%M%S`
+[ -f $BTTARGETDIR/oginitrd.img ] && mv $BTTARGETDIR/oginitrd.img $BTTARGETDIR/oginitrd.img.$TIMEMOD;  mv $BTTARGETDIR/oginitrd.img.sum $BTTARGETDIR/oginitrd.img.sum.$TIMEMOD
+[ -f $BTTARGETDIR/ogvmlinuz ] && mv $BTTARGETDIR/ogvmlinuz $BTTARGETDIR/ogvmlinuz.$TIMEMOD; mv $BTTARGETDIR/ogvmlinuz.sum $BTTARGETDIR/ogvmlinuz.sum.$TIMEMOD
+
+#copiando
+cp /tmp/initrd.img-${OSRELEASE} ${BTTARGETDIR}/oginitrd.img
+cp /tmp/vmlinuz-${OSRELEASE} ${BTTARGETDIR}/ogvmlinuz
+#generamos md5 del kernel y del initrd.
+DATASUM=`md5sum "${BTTARGETDIR}/oginitrd.img" | cut -f1 -d" "`
+echo $DATASUM > ${BTTARGETDIR}/oginitrd.img.sum
+DATASUM=`md5sum "${BTTARGETDIR}/ogvmlinuz" | cut -f1 -d" "`
+echo $DATASUM > ${BTTARGETDIR}/ogvmlinuz.sum
+#Damos permisos
+cd -
+chmod -R 755 $BTTARGETDIR
+}
+
+#btogFsSqfs   convierte el sistema root en sqfs
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+function btogFsSqfs ()
+{
+#Dependencias.
+[ -z "$BTROOTFSIMG" ] && btogGetVar
+[ -z "$OSCODENAME" ] && btogGetOsInfo
+
+echoAndLog "$FUNCNAME: Iniciando la creación del sistema de archivos en sqfs "
+# si ya existe un sqfs lo renombramos
+[ -f $BTTARGETDIR/ogclient.sqfs ] && mv $BTTARGETDIR/ogclient.sqfs $BTTARGETDIR/ogclient.sqfs.`date +%Y%m%d-%H%M%S`
+mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
+mksquashfs $BTROOTFSMNT $BTTARGETDIR/ogclient.sqfs
+mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
+chmod 744 $BTTARGETDIR/ogclient.sqfs
+DATASUM=`md5sum "${BTTARGETDIR}/ogclient.sqfs" | cut -f1 -d" "`
+echo $DATASUM > ${BTTARGETDIR}/ogclient.sqfs.sum
+}
+
+
+
+
+
+# btogIsoGenerator genera la iso del cliente
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+function btogIsoGenerator {
+#Dependencias.
+#[ -z "$BTROOTFSIMG" ] && btogGetVar
+btogGetVar
+#Preparamos los gestores de arranque
+mkdir -p /tmp/iso/isolinux
+cp -prv /usr/lib/syslinux/* /tmp/iso/isolinux/
+cp -prv /usr/share/gpxe/* /tmp/iso/isolinux/
+
+cat << FIN > /tmp/iso/isolinux/isolinux.cfg
+DEFAULT menu.c32
+PROMPT 0
+ALLOWOPTIONS 1
+
+MENU TITLE  OpenGnsys ${NAMEISOCLIENT}
+
+LABEL gpxe
+MENU LABEL gpxe
+KERNEL /clonezilla/live/vmlinuz1
+APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
+
+LABEL 0
+MENU LABEL ogClient vga irqpool acpi ogdebug ip:none
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=none
+
+LABEL 1
+MENU LABEL ogClient irqpoll acpi ip:none
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro  irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=none
+
+LABEL 2
+MENU LABEL ogClient acpi debug ip=dhcp
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=dhcp
+
+LABEL 3
+MENU LABEL ogClient ip=dhcp
+KERNEL /ogclient/linuxISO
+APPEND initrd=/ogclient/oginitrd.img ro acpi=off boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=dhcp
+
+LABEL 4
+MENU LABEL local
+localboot 0x80
+append -
+
+label 5
+MENU LABEL Network boot via gPXE lkrn
+KERNEL gpxe.lkrn
+
+label 6
+MENU LABEL Network boot via gPXE usb
+KERNEL gpxe.usb
+
+label 7
+MENU LABEL Network boot via gPXE  pxe
+KERNEL gpxe.pxe
+
+label 8
+MENU LABEL Network boot via gPXE  iso
+KERNEL gpxe.iso
+FIN
+
+
+
+
+# preparamos el directorio boot-tools.
+mkdir -p /tmp/iso/ogclient
+cp ${BTTARGETDIR}/ogclient.sqfs /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogclient.sqfs.sum /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogvmlinuz /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogvmlinuz.sum /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/ogvmlinuz /tmp/iso/ogclient/linuxISO
+cp ${BTTARGETDIR}/ogvmlinuz.sum /tmp/iso/ogclient/linuxISO.sum
+cp ${BTTARGETDIR}/oginitrd.img /tmp/iso/ogclient/
+cp ${BTTARGETDIR}/oginitrd.img.sum /tmp/iso/ogclient/
+#el ogclienteToISO  debe tener una copia del ogvmlinuz como linuxISO
+#cp -prv /var/lib/tftpboot/ogclientToIso/* /tmp/iso/ogclient
+
+cd /tmp
+#TIMEMOD=`date +%Y%m%d-%H%M%S`
+####Generamos la iso
+echo "mkisofs -V ogClient -o ${NAMEISOCLIENT}.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table /tmp/iso"
+mkisofs -V ogClient -o ${NAMEISOCLIENT}.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -J -no-emul-boot -boot-load-size 4 -boot-info-table /tmp/iso
+##Generamos el md5
+DATASUM=`md5sum ${NAMEISOCLIENT}.iso | cut -f1 -d" "`
+echo $DATASUM > ${NAMEISOCLIENT}.iso.sum
+
+mv /tmp/${NAMEISOCLIENT}.iso /var/lib/tftpboot/ogclient/
+mv /tmp/${NAMEISOCLIENT}.iso.sum /var/lib/tftpboot/ogclient/
+
+
+### vi /etc/grub.d/40_custom 
+##
+#menuentry "og cache " {
+#set root=(hd0,4)
+#linux /ogvmlinuz ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=none
+#initrd /oginitrd.img
+#}
+
+}
+
+
+#@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0 - Compatibilidad OpengGnsys X.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/08/03
+function btogIsoTest {
+#/tmp/iso
+qemu -m 256 -boot d -cdrom ogClient.iso 
+}
+
+
+
+
+function getDateTime()
+{
+        echo `date +%Y%m%d-%H%M%S`
+}
+
+# Escribe a fichero y muestra por pantalla
+function echoAndLog()
+{
+        echo $1
+        FECHAHORA=`getDateTime`
+        echo "$FECHAHORA;$SSH_CLIENT;$1" >> $LOG_FILE
+}
+
+function errorAndLog()
+{
+        echo "ERROR: $1"
+        FECHAHORA=`getDateTime`
+        echo "$FECHAHORA;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
+}
+
+
+
+
+
+
+
+
+
+
+############### No usados en el instalador, solo en actualizaciones.
+#/**
+#         ogClientMount [str_program]
+#@brief   Acceso al 2nd FS del cliente desde el Servidor Opengnsys
+#@param 1 Opciona: scripts o programa a ejecutar para automatizaciones
+#@return  Si no hay parametros: login de acceso.
+#@return  con un parametro: La salida del programa ejecutado
+#@exception 
+#@note    
+#@todo    
+#@version 0.9 - Primera versiÃ³n para OpenGnSys
+#@author  Antonio J. Doblas Viso, Universidad de MÃ¡laga
+#@date    2010/02/15
+#*/ ##
+function ogClientMount ()
+{
+	#TODO comprobar que OGFILE y OGFILEMOUNT existe.
+	mount | grep $OGCLIENTFILE > /dev/null || mount $OGCLIENTFILE $OGCLIENTMOUNT -o loop,offset=32256
+	mount | grep $OGCLIENTMOUNT/proc > /dev/null || mount --bind /proc $OGCLIENTMOUNT/proc
+	mount | grep $OGCLIENTMOUNT/sys > /dev/null || mount --bind /sys $OGCLIENTMOUNT/sys
+	mount | grep $OGCLIENTMOUNT/tmp > /dev/null || mount --bind /tmp $OGCLIENTMOUNT/tmp
+	mount | grep $OGCLIENTMOUNT/dev > /dev/null || mount --bind /dev $OGCLIENTMOUNT/dev
+	mount | grep $OGCLIENTMOUNT/dev/pts > /dev/null || mount --bind /dev/pts $OGCLIENTMOUNT/dev/pts
+	
+	
+	[ $# = 0 ] && $(chroot $OGCLIENTMOUNT /sbin/getty 38400 `tty`)
+	[ $# = 1 ] && chroot $OGCLIENTMOUNT $1
+	
+}
+
+#/**
+#         ogClientUnmount 
+#@brief   Desmonta el 2nd FS del cliente desde el Servidor Opengnsys
+#@param   
+#@return  
+#@exception 
+#@note    
+#@todo    
+#@version 0.9 - Primera versiÃ³n para OpenGnSys
+#@author  Antonio J. Doblas Viso, Universidad de MÃ¡laga
+#@date    2010/02/15
+#*/ ##
+
+function ogClientUnmount ()
+{
+	cd /tmp
+	echo "desmontando cliente espere"
+	sleep 5
+	mount | grep $OGCLIENTMOUNT/dev > /dev/null && umount $OGCLIENTMOUNT/dev || ogClientUnmount
+	mount | grep $OGCLIENTMOUNT/dev/pts > /dev/null && umount $OGCLIENTMOUNT/dev/pts || ogClientUnmount
+	mount | grep $OGCLIENTMOUNT/proc > /dev/null && umount $OGCLIENTMOUNT/proc || ogClientUnmount
+	mount | grep $OGCLIENTMOUNT/sys > /dev/null && umount $OGCLIENTMOUNT/sys || ogClientUnmount
+	mount | grep $OGCLIENTMOUNT/tmp > /dev/null && umount $OGCLIENTMOUNT/tmp || ogClientUnmount
+	mount | grep $OGCLIENTMOUNT > /dev/null && umount $OGCLIENTMOUNT || ogClientUnmount
+	#-d -f -l
+
+}

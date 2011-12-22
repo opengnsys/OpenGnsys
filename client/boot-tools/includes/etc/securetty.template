@@ -1,0 +1,142 @@
+# /etc/securetty: list of terminals on which root is allowed to login.
+# See securetty(5) and login(1).
+console
+
+
+pts/0
+pts/1
+pts/2
+pts/3
+
+
+# Standard serial ports
+ttyS0
+ttyS1
+ttyS2
+ttyS3
+ttyS4
+ttyS5
+
+# USB dongles
+ttyUSB0
+ttyUSB1
+ttyUSB2
+
+# PowerMac
+ttyPZ0
+ttyPZ1
+ttyPZ2
+ttyPZ3
+
+# Embedded MPC platforms
+ttyPSC0
+ttyPSC1
+ttyPSC2
+ttyPSC3
+ttyPSC4
+ttyPSC5
+
+# PA-RISC mux ports
+ttyB0
+ttyB1
+
+# Standard hypervisor virtual console
+hvc0
+
+# Oldstyle Xen console
+xvc0
+
+# Standard consoles
+tty1
+tty2
+tty3
+tty4
+tty5
+tty6
+tty7
+tty8
+tty9
+tty10
+tty11
+tty12
+tty13
+tty14
+tty15
+tty16
+tty17
+tty18
+tty19
+tty20
+tty21
+tty22
+tty23
+tty24
+tty25
+tty26
+tty27
+tty28
+tty29
+tty30
+tty31
+tty32
+tty33
+tty34
+tty35
+tty36
+tty37
+tty38
+tty39
+tty40
+tty41
+tty42
+tty43
+tty44
+tty45
+tty46
+tty47
+tty48
+tty49
+tty50
+tty51
+tty52
+tty53
+tty54
+tty55
+tty56
+tty57
+tty58
+tty59
+tty60
+tty61
+tty62
+tty63
+
+# Local X displays (allows empty passwords with pam_unix's nullok_secure)
+:0
+:0.0
+:0.1
+:1
+:1.0
+:1.1
+:2
+:2.0
+:2.1
+:3
+:3.0
+:3.1
+
+# Embedded Freescale i.MX ports
+ttymxc0
+ttymxc1
+ttymxc2
+ttymxc3
+ttymxc4
+ttymxc5
+
+# Embedded Renesas SuperH ports
+ttySC0
+ttySC1
+ttySC2
+ttySC3
+ttySC4
+ttySC5
