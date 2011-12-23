@@ -38,9 +38,12 @@
 # test 5.  intentar crear una imagen, en la que no se puede reducir el FS.
 
 TIME1=$SECONDS
-OGLOGSESSION="/tmp/session.log"
-OGLOGCOMMAND="/tmp/command.log"
+#OGLOGSESSION="/tmp/session.log"
+#OGLOGCOMMAND="/tmp/command.log"
 
+
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 
 
@@ -50,10 +53,11 @@ if [ $# -ne 4 ]; then
     exit $?
 fi
 
-# Valores por defecto
-IMGPROG="partclone"
-IMGCOMP="lzop"
-IMGEXT="img"
+# Valores por defecto en etc/engine.cfg
+#IMGPROG="partclone"
+#IMGCOMP="lzop"
+#IMGEXT="img"
+#IMGREDUCE="TRUE"
 
 echo "[1] Iniciando $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
@@ -125,8 +129,13 @@ ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && ec
 
 echo " " > $OGLOGCOMMAND
 
-echo "[30]: Reducir sistema de archivos."  | tee -a $OGLOGSESSION $OGLOGFILE
-ogReduceFs $1 $2 || exit $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; echo $?)
+if [ "$IMGREDUCE" == "TRUE"   ]
+then 
+	echo "[30]: Reducir sistema de archivos."  | tee -a $OGLOGSESSION $OGLOGFILE
+	ogReduceFs $1 $2 || exit $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; echo $?)
+	TIMEAUX=$[SECONDS-TIME1]
+	echo "      tiempo de reducción del sistema de archivos: $[TIMEAUX/60]m $[TIMEAUX%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+fi
 
 echo " " > $OGLOGCOMMAND
 
