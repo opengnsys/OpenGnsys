@@ -390,21 +390,24 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 
 #/**
 #         ogGetPartitionId int_ndisk int_npartition
-#@brief   Devuelve el mnemonico con el tipo de sistema de archivos.
+#@brief   Devuelve el mnemónico con el tipo de partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  Identificador de tipo de partición.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
-#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_NOTFOUND Disco o partición no corresponde con un dispositivo.
 #@note    Requisitos: sfdisk
-#@version 0.9 - Primera versión compatible con OpenGNSys.
+#@version 0.9 - Primera versión compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    25/03/2009
+#@version 1.0.2 - Detectar partición vacía.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    23/12/2011
 #*/ ##
 function ogGetPartitionId ()
 {
 # Variables locales.
-local DISK PART
+local DISK ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -415,10 +418,10 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Detectar id. de tipo de particion y codificar al mnemonico.
+# Detectar id. de tipo de partición y codificar al mnemónico.
 DISK=$(ogDiskToDev $1) || return $?
-PART=$(ogDiskToDev $1 $2) || return $?
-echo $(sfdisk --id $DISK $2 2>/dev/null)
+ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
+echo $ID
 }
 
 
