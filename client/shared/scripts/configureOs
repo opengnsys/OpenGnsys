@@ -19,7 +19,8 @@
 #@author Antonio J. Doblas Viso.    Universidad de Malaga.
 #@date   2011-11-22
 
-
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Si el sistema de archivos no esta extendido. Realizar.
 PARTSIZE=$(ogGetPartitionSize $1 $2)
