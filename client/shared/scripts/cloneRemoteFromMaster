@@ -50,6 +50,10 @@
 #@version 1.0.1 - Se elimina la operación de reducir la particion.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/05/16
+#@version 1.0.3 - se integra con httpd-log.
+#@version 1.0.3 - Habilita el uso de la variable OGWINREDUCE=TRUE|TRUE para reducir el sistema de archivos a enviar
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/12/22
 
 #*/ ##
 
@@ -60,6 +64,8 @@
 #test 5. master sin origen particion.
 #test 6. master sin origen fichero.
 
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 
 trap "pkill faucet; exit 1" 0 1 2 3 6 9 14 15
@@ -125,26 +131,35 @@ case $MASTERIP in
 		# Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}					
 		case "$MODEMASTER" in
 			SENDPARTITION)
-				echo "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves"
+				echo "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves" | tee -a $OGLOGSESSION $OGLOGFILE
 				if ps aux | grep -v grep | grep "faucet 4000" 
 				then
 					ogRaiseError $OG_ERR_NOTFOUND "MASTER: puerto en uso: 118"; exit $?	
 				else
 					faucet 4000 --out echo "WORKING" &	
 				fi				
-				echo "[10]: Desmontando DISK:$DISKSOURCE PARTITION:$PARTSOURCE"
+				echo "[10]: Desmontando DISK:$DISKSOURCE PARTITION:$PARTSOURCE" | tee -a $OGLOGSESSION $OGLOGFILE
 				ogUnmount $2 $3 ||  exit $(ogRaiseError $OG_ERR_LOCKED "no se puede desmontar $2 $3  l124"; echo $?)
 				#Obtener tamaño de la partición.
 				SIZE=$(ogGetPartitionSize $2 $3)  || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar tamaño partcion $2 $3  l127"; echo $?)
-				echo "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE"
-				ogReduceFs $2 $3 || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al reducir el FS $2 $3  l129"; echo $?)
+				
+				if [ "$OGWINREDUCE" == "TRUE"   ]
+				then 
+						echo "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE" | tee -a $OGLOGSESSION $OGLOGFILE
+						ogReduceFs $2 $3 || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al reducir el FS $2 $3  l129"; echo $?)
+				fi
+					
 				REDSIZE=$(ogGetFsSize $2 $3) || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar el nuevo FS $2 $3  l130"; echo $?)	
-				echo "[20]: Reducido el  sistema de archivos a $REDSIZE  $DISKSOURCE $PARTSOURCE"
+				TIMEAUX=$[SECONDS-TIME1]
+				echo "[20]: Preparada para enviar el sistema de archivos: Tamaño datos: $REDSIZE  origne: $DISKSOURCE $PARTSOURCE" | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "      tiempo de reducción del sistema de archivos: $[TIMEAUX/60]m $[TIMEAUX%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+				
 				#if [ $REDSIZE -lt $SIZE ]; then
     			#		echo "[24] Redimensionar partición a $REDSIZE KB."
     			#		ogSetPartitionSize $2 $3 $REDSIZE
 				#fi
-				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
+
+				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 				pkill faucet
 				if ps aux | grep -v grep | grep "faucet 4000" 
 				then
@@ -154,12 +169,12 @@ case $MASTERIP in
 				fi
 				case $PROTOCOL in
 					MULTICAST|multicast)
-						echo "[29] ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR" 
+						echo "[29] ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR"  | tee -a $OGLOGSESSION $OGLOGFILE
  						ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR || RETVAL=$?
  					;;
  					UNICAST|unicast)
  						sleep 60
- 						echo "[29] ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
+ 						echo "[29] ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR" | tee -a $OGLOGSESSION $OGLOGFILE
  						ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR || RETVAL=$?
  					;;
  				esac	
@@ -167,7 +182,7 @@ case $MASTERIP in
  				#if [ $REDSIZE -lt $SIZE ]; then
    				#	echo "[85] Redimensionar partición a $SIZE KB."
    		 		#	ogSetPartitionSize $2 $3 $SIZE
-   		 			echo "[90] Extender sistema de archivos."
+   		 			echo "[90] Extender sistema de archivos." | tee -a $OGLOGSESSION $OGLOGFILE
    		 			ogExtendFs $2 $3
 				#fi
 				pkill faucet
@@ -214,8 +229,8 @@ case $MASTERIP in
 		esac
 		# FIN Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}
 	;;
-	*)
-		echo "[1] Equipo -Client- preparando para recibir datos $PROTOCOL"
+	*)	
+		echo "[1] Equipo -Client- preparando para recibir datos $PROTOCOL" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogDiskToDev $DISKTARGET $PARTTARGET &>/dev/null || exit $(ogRaiseError $OG_ERR_LOCKED "El cliente no tiene esas particiones $DISKTARGET $PARTTARGET l211"; echo $?) 	
 		# TODO: si el cliente no está en la lista de clientes UNICAST salir.
 		case $PROTOCOL in
@@ -223,9 +238,9 @@ case $MASTERIP in
  				echo "$SESSIONUCASTSERVER" | grep $HOSTIP || exit $(ogRaiseError $OG_ERR_PROTOCOLJOINMASTER "Este cliente no pertence a la sesion UNICAST l214"; echo $?)
 			;;
  		esac	
- 		echo "[2] Desmontando particion destino"	 
+ 		echo "[2] Desmontando particion destino" | tee -a $OGLOGSESSION $OGLOGFILE	 
 		ogUnmount $DISKTARGET $PARTTARGET || exit $(ogRaiseError $OG_ERR_LOCKED "no se puede desmontar la particion destino $2 $3  l218"; echo $?)
-		echo -n "[25] Buscando informacion extra sobre la clonacion con el master $MASTERIP: "
+		echo -n "[25] Buscando informacion extra sobre la clonacion con el master $MASTERIP: " | tee -a $OGLOGSESSION $OGLOGFILE
 		sleep 10
 		TIMEWAITMASTER=120
 		TIMEWAITING=0
@@ -234,7 +249,7 @@ case $MASTERIP in
 		do
 			INFOEXTRA=`hose $MASTERIP 4000 --in cat 2>/dev/null`
 			sleep 10; echo -n "."
-			echo comienza el timeout $TIMEWAITMASTER para abortar
+			#echo comienza el timeout $TIMEWAITMASTER para abortar
 			[ -z "$INFOEXTRA" ] && let TIMEWAITMASTER=$TIMEWAITMASTER-10
 			[ "$TIMEWAITMASTER" -gt "0" ] || exit $(ogRaiseError $OG_ERR_PROTOCOLJOINMASTER " l230 "; echo $?)
 			#Si primer parametro desde el server es READY, salimos del bucle
@@ -245,27 +260,27 @@ case $MASTERIP in
 		TOOLCLONE=$(echo $INFOEXTRA | awk '{print $2}')
 		COMPRESOR=$(echo $INFOEXTRA | awk '{print $3}')
 		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $4}')
-		echo -n "[26] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE "
+		echo "[26] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
 		ogMount $DISKTARGET $PARTTARGET || ogFormat $DISKTARGET $PARTTARGET
 		#SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
 		SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | grep Disk | awk -F" " '{print $3}' | tr -d kB);
 
-		echo "[29] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"	 
+		echo "[28] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"	 | tee -a $OGLOGSESSION $OGLOGFILE
 		# comprobamos que el tamaño de a imagen es menor que la del cliente.
 		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
- 		then	
-			echo "[30] Iniciando Cliente $PROTOCOL "
+ 		then 				
+			echo "[30] Iniciando Cliente $PROTOCOL " | tee -a $OGLOGSESSION $OGLOGFILE
 				case $PROTOCOL in
 					MULTICAST|multicast)
-						echo ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR 
+						echo "ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR" | tee -a $OGLOGSESSION $OGLOGFILE 
 						ogMcastReceiverPartition "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR"  || exit $(ogRaiseError $OG_ERR_MCASTRECEIVERPARTITION " l251 "; echo $?)
 		 			;;
  					UNICAST|unicast)
- 						echo ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR
+ 						echo "ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR" | tee -a $OGLOGSESSION $OGLOGFILE
  						ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR || exit $(ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " l230 "; echo $?)
  					;;
  				esac						
-			echo "[90] llamando a configureOS $DISKTARGET $PARTTARGET"
+			echo "[90] llamando a configureOS $DISKTARGET $PARTTARGET" | tee -a $OGLOGSESSION $OGLOGFILE
 			configureOs $DISKTARGET $PARTTARGET			
 		else
 		    # Si el tamaño de los datos recibidos es más grande que la particion destino
@@ -274,6 +289,6 @@ case $MASTERIP in
 	;;
 esac
 TIME=$[SECONDS-TIME1]
-echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 
