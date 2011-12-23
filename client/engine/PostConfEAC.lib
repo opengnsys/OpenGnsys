@@ -35,6 +35,8 @@ DISK=$1; PART=$2;
 #VERSION=$(ogGetOsVersion $DISK $PART)
 #Fin Comprobaciones redundantes: borrar"
 
+
+# primera fase, carga de los hive del sistema
 if ogGetPath $DISK $PART WINDOWS
 then
 	SYSTEMROOT="Windows"
@@ -50,37 +52,17 @@ hiveSYSTEM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/system) && exp
 hiveSOFTWARE=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/software) && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
 export TEMPhive=/tmp/tmpregistry
 
-## borrar elementos de la primera integracion
-#export particion=`ogMount $DISK $PART`
-#mkfifo pipe 2>/dev/null
-#declare -i count
-#declare -A HivePathUser
-#count=3
-# fin borrar elementos de la primera integracion
-
+# segunda fase, carga de los hive de usuarios windows.
 declare -i COUNT
 COUNT=3
-BASEHOMEDIR=$(ogGetPath 1 1 /"Documents and Settings")
+#TODO WINDOWS XP WINDOWS7
+BASEHOMEDIR=$(ogGetPath $DISK $PART /"Documents and Settings")
 TMPUSERFILE="/tmp/WuserRegAndDAT.tmp"
 find "$BASEHOMEDIR/" -type f -name NTUSER.DAT > $TMPUSERFILE  
 LISTUSERS=$(drbl-chntpw -l $hiveSAM | grep RID | awk -F"<" '{print $2}' | awk -F">" '{print $1}')
 #echo "$BASEHOMEDIR" $LISTUSERS
 for user in $LISTUSERS
-do	
-	# borrar elementos de la primera integracion.
-		#if find ${particion}/ -type f -name NTUSER.DAT > pipe| cat pipe | grep $user > /tmp/path.txt.$count
-		#then 
-		#echo pefil de $user encontrado, para utilizar este usuario con funciones utilizar id_hive= $count o \$usuario
-		#read camino < /tmp/path.txt.$count
-		#echo $camino | sed -e 's/ /\\ /g' > /tmp/path.txt.$count
-		#camino2=$(echo $camino | sed -e 's/ /\\ /g')
-		#echo $camino2 | sed -e 's/\\/\\\\/g' > /tmp/path.txt.$count
-		#export `echo $user=hiveUSER$count`
-		#export `echo hiveUSER$count`="$camino2"
-		#count=${count}+1
-		#fiecho $user
-    # Fin borrar elementos de la primera integracion.
-        
+do		        
         # Comprobamos que el usuario registrado tiene .DAT
 		if HOMEDIR=$(cat $TMPUSERFILE | grep -w $user)  
 		then
@@ -501,22 +483,68 @@ EOF
 }
 
 
-function NTStatusBootChk () {
+function ogSetWindowsChkdisk() {
 if [ $# = 0 ]
 then
-echo sintaxis: Int-Status
+echo sintaxis: true|TRUE|0 false|false|1
 echo ejemplos:  int=0 desactivado int=1 activado
 return 2
 fi
-[ $1 = 0 ] && valor="none"
-[ $1 = 1 ] && valor="autocheck autochk *"
-cat >> $temporal << EOF
+case $1 in
+	0|true|TRUE)
+		valor="autocheck autochk *";;
+	1|false|FALSE)		
+		valor="none";;
+	*)
+		return 0 ;;
+esac
+
+cat >> $TEMPhive << EOF
 hive 1
 cd \ControlSet001\Control\Session Manager
 ed BootExecute
 $valor
 --n
 EOF
+}
+
+
+
+### FASE DE PRUEBAS  NO FUNCIONA
+function NTStartRecovery () {
+if [ $# = 0 ]
+then
+	echo sintaxis: Int-Status
+	echo ejemplos:  int=0 desactivado int=1 activado
+	return 2
+fi
+
+[ $1 = 0 ] && valor="none"
+[ $1 = 1 ] && valor="00000000"
+
+
+cat >> $TEMPhive << EOF
+hive 2
+#cd \Policies\Microsoft\Windows\WinRE
+#ed DisableSetup
+cd \Policies\Microsoft\Windows
+nk WinRE 
+nv 4 DisableSetup
+ed DisableSetup
+$valor
+--n
+EOF
+
+
+#Activado
+#[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRE]
+#"DisableSetup"=-
+
+# Desactivado
+#[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WinRE]
+#"DisableSetup"=dword:00000000
+
+
 }
 
 
