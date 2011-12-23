@@ -47,6 +47,7 @@ if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
     ogWindowsBootParameters $1 $2
     # Registrar en Windows que la partición indicada es su nueva unidad C:\
     ogWindowsRegisterPartition $1 $2 C $1 $2
+    ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
 fi
 
 if [ "$(ogGetOsType $1 $2)" = "Linux" ]; then
