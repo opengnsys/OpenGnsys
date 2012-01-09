@@ -11,7 +11,9 @@
 #@param 4 str_opcionesupdatecache
 #@ejemplo: oneRemoteFromMaster 172.17.36.11 CACHE /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
 #@return  
-#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_FORMAT       formato incorrecto.
+#@exception OG_ERR_NOTCACHE     No existe cache -15-
+#@exception $OG_ERR_CACHESIZE   Tamaño de la paticion menor al archivo a descargar -16-
 #@note   
 #@todo: 
 #@version 0.9.1 - integracion EAC
@@ -31,33 +33,69 @@ if [ $# -lt 3 ]; then
     exit $?
 fi
 
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
 REPOSITORIO="$1"
 PROTOCOLO="$3"
 OPTPROTOCOLO="$4"
 REPOIP=$(ogGetRepoIp)
 echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
-# Si el repositorio local CACHE no existe salimos.
+echo "inicio"
+# Si el repositorio local CACHE no existe error 15.
 if ! $(ogFindCache >/dev/null); then
         ogRaiseError $OG_ERR_NOTCACHE "CACHE"
         exit $?
 fi
 
-#Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-
+echo "Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-"
 #TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
 
-
+CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
 
-if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
+
+echo "Comprobar que el tamaño de la cache es mayor que el fichero a descargar."
+#ERROR CACHESIZE 16
+if [ "$FILESIZE" -ge "$CACHESIZE" ]  
 then
-	echo "el tamanio del fichero $2 = $FILESIZE es mayor que el espacio dispinible en la cache = $CACHESIZEFREE"
+	echo "ERROR: El tamanio del fichero $2 = $FILESIZE es mayor que el tamanaño de la cache = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
     exit $?
+fi
+
+echo "Comprobar el espacio libre de la cache y actuar según engine.cfg"
+#ERROR CACHESIZE 16
+if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
+then
+	# echo "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"  | tee -a $OGLOGSESSION $OGLOGFILE
+	case $ACTIONCACHEFULL in 
+	NONE)
+		NEXTOPERATION=UNICAST
+	;;
+	FORMAT)
+	    echo "[51] Formatear la cache "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    ogUnmountCache
+	    ogFormatCache
+	    ogMountCache
+	    NEXTOPERATION=REPEAT
+	;;
+	DELETE)
+		echo "[51] elimar las imágenes rm -fr $OGCAC$OGIMG/* "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    rm -fr  $OGCAC$OGIMG/*
+	    NEXOPERATION=REPEAT
+	;;
+	*)
+	 	echo "ERROR: El tamanio del fichero $2 = $FILESIZE es mayor que el espacio dispinible en la cache = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+    	exit $?
+	;;
+	esac	
 fi
 
 ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
@@ -127,7 +165,7 @@ esac
 TIME1=$[SECONDS-TIME1]
 echo "tiempo de updateCache (descarga) $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
-echo "iniciando el calculo del crc de la imagen descargada"
+echo "iniciando el calculo del crc de la imagen descargada" | tee -a $OGLOGSESSION $OGLOGFILE
 TIME2=$SECONDS
 ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
 TIME2=$[SECONDS-TIME2]
