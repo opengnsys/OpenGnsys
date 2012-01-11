@@ -20,7 +20,7 @@ if [ -n "$OPENGNSYS" ]; then
     ln -fs /bin/bash /bin/sh
 
     # Crear directorio de bloqueos
-    mkdir -p /var/lock
+    mkdir -p /var/lock || mkdir -p /run/lock
 
 #    # Directorio de tipos de letras para el browser.
     QTDIR="/usr/local"
