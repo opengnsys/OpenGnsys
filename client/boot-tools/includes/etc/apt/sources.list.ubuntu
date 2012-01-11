@@ -29,8 +29,8 @@ deb-src http://es.archive.ubuntu.com/ubuntu/ OSCODENAME-updates multiverse
 ## newer versions of some applications which may provide useful features.
 ## Also, please note that software in backports WILL NOT receive any review
 ## or updates from the Ubuntu security team.
-# deb http://es.archive.ubuntu.com/ubuntu/ OSCODENAME-backports main restricted universe multiverse
-# deb-src http://es.archive.ubuntu.com/ubuntu/ OSCODENAME-backports main restricted universe multiverse
+deb http://es.archive.ubuntu.com/ubuntu/ OSCODENAME-backports main restricted universe multiverse
+deb-src http://es.archive.ubuntu.com/ubuntu/ OSCODENAME-backports main restricted universe multiverse
 
 ## Uncomment the following two lines to add software from Canonical's
 ## 'partner' repository.

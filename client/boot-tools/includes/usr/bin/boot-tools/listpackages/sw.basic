@@ -3,7 +3,8 @@ install dialog
 install man-db
 install fbset
 install gdebi-core
-#install busybox-static
+install bash-static
+#install busybox-static  #la version en oneiric no incluye el reboot y poweroff -> ver compilacion software 
 install console-data
 install locales
 install lshw 
