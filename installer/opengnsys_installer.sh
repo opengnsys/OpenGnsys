@@ -68,7 +68,8 @@ OSCODENAME=$(lsb_release -cs 2>/dev/null)
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
-	Ubuntu)	DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+	Ubuntu|Debian)	
+		DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -81,10 +82,12 @@ case "$OSDISTRIB" in
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
 		SAMBAINIT=/etc/init.d/smbd
+		[ -f $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
-	Fedora)	DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+	Fedora)
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		UPDATEPKGLIST=""
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q \$package"
@@ -143,19 +146,20 @@ function getDateTime()
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-	echo "$1"
 	local DATETIME=`getDateTime`
+	echo "$1"
 	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
+# Escribe a fichero y muestra mensaje de error
 function errorAndLog()
 {
-	echo "ERROR: $1"
 	local DATETIME=`getDateTime`
+	echo "ERROR: $1"
 	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
-# comprueba si el elemento pasado en $2 esta en el array $1
+# Comprueba si el elemento pasado en $2 está en el array $1
 function isInArray()
 {
 	if [ $# -ne 2 ]; then
@@ -163,28 +167,28 @@ function isInArray()
 		exit 1
 	fi
 
-	echoAndLog "${FUNCNAME}(): checking if $2 is in $1"
 	local deps
-	eval "deps=( \"\${$1[@]}\" )"
-	elemento=$2
-
 	local is_in_array=1
-	# copia local del array del parametro 1
-	for (( i = 0 ; i < ${#deps[@]} ; i++ ))
-	do
-		if [ "${deps[$i]}" = "${elemento}" ]; then
-			echoAndLog "isInArray(): $elemento found in array"
+	local element="$2"
+
+	echoAndLog "${FUNCNAME}(): checking if $2 is in $1"
+	eval "deps=( \"\${$1[@]}\" )"
+
+	# Copia local del array del parámetro 1.
+	for (( i = 0 ; i < ${#deps[@]} ; i++ )); do
+		if [ "${deps[$i]}" = "${element}" ]; then
+			echoAndLog "isInArray(): $element found in array"
 			is_in_array=0
 		fi
 	done
 
 	if [ $is_in_array -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): $elemento NOT found in array"
+		echoAndLog "${FUNCNAME}(): $element NOT found in array"
 	fi
 
 	return $is_in_array
-
 }
+
 
 #####################################################################
 ####### Funciones de manejo de paquetes Debian
@@ -208,7 +212,7 @@ function checkPackage()
 	fi
 }
 
-# recibe array con dependencias
+# Recibe array con dependencias
 # por referencia deja un array con las dependencias no resueltas
 # devuelve 1 si hay alguna dependencia no resuelta
 function checkDependencies()
@@ -693,7 +697,7 @@ function smbConfigure()
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" $SAMBACFGDIR/smb.conf
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= ${SAMBACFGDIR//\//\\/}\/smb-og.conf/" $SAMBACFGDIR/smb.conf
 	$SAMBAINIT restart
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
@@ -855,7 +859,8 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
-	ln -fs /var/lib/tftpboot $path_opengnsys_base
+	mkdir -p $TFTPCFGDIR
+	ln -fs $TFTPCFGDIR $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
@@ -1161,8 +1166,8 @@ function installationSummary()
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
-	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
-	echoAndLog "Samba configuration directory:    /etc/samba"
+	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"
+	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
@@ -1344,7 +1349,7 @@ makeDoxygenFiles
 # creando configuracion de apache2
 openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
 if [ $? -ne 0 ]; then
-	errorAndLog "Error configuring Apache for OpenGnSYS Admin"
+	errorAndLog "Error configuring Apache for OpenGnSys Admin"
 	exit 1
 fi
 
