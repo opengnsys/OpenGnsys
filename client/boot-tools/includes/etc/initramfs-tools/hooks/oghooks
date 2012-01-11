@@ -57,6 +57,9 @@ manual_add_modules smbfs
 manual_add_modules atl1e
 manual_add_modules squashfs
 manual_add_modules md4
+manual_add_modules des_generic
+manual_add_modules nls_utf8
+
 
 
 
