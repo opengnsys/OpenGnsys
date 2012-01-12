@@ -12,7 +12,7 @@
 
 # Si está configurado OpenGnSys ...
 if [ -n "$OPENGNSYS" ]; then
-    #echo "$MSG_POWEROFFCONF"
+    echo "${MSG_POWEROFFCONF:-.}"
 
     # Crear fichero de configuración por defecto (30 min. de espera).
     POWEROFFCONF=/etc/poweroff.conf

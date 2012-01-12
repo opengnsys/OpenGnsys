@@ -14,7 +14,7 @@
 
 # Si está configurado OpenGnSys ...
 if [ -n "$OPENGNSYS" ]; then
-    echo "$MSG_MAKELINKS"
+    echo "${MSG_MAKELINKS:-.}"
 
     # Shell BASH por defecto (para usar "runtest")
     ln -fs /bin/bash /bin/sh

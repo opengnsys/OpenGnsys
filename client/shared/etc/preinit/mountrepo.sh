@@ -13,7 +13,7 @@ ROOTREPO=${ROOTREPO:-"$ROOTSERVER"}
 
 # TODO Revisar proceso de arranque para no montar 2 veces el repositorio.
 if [ $ogactiveadmin == "true" ]; then 
-	export boot=admin
+	export boot=admin	# ATENCIÓN: siempre en modo "admin".
 	umount $OGIMG 2>/dev/null
 
 	protocol=${potocol:-"smb"}
