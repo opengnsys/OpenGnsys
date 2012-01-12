@@ -19,7 +19,7 @@ echo -ne "$PASS\n$PASS\n" | passwd root 2>/dev/null
 # Cargar el entorno OpenGnSys en conexión SSH.
 cp -a $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
 # Arrancar SSH.
-/usr/sbin/sshd
+/usr/sbin/sshd 2>/dev/null
 
 # Desactivado apagado de monitor.
 #setterm -blank 0 -powersave off -powerdown 0 < /dev/console > /dev/console 2>&1
