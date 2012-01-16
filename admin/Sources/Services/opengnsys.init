@@ -76,7 +76,7 @@ fi
 config() {
     OSDISTRIB=$(lsb_release -is 2>/dev/null)
     case "$OSDISTRIB" in
-        Ubuntu)
+        Ubuntu|Debian|LinuxMint)
             INITFUNCTIONS=/lib/lsb/init-functions
             DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
             EXTRAOPTS="--"

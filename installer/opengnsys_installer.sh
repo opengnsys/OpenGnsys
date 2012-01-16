@@ -68,7 +68,7 @@ OSCODENAME=$(lsb_release -cs 2>/dev/null)
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
-	Ubuntu|Debian)	
+	Ubuntu|Debian|LinuxMint)
 		DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
@@ -85,6 +85,7 @@ case "$OSDISTRIB" in
 		[ -f $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
+		[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp	# Debian 6
 		;;
 	Fedora)
 		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
