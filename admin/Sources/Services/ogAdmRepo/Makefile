@@ -7,17 +7,13 @@ PROYECTO := ogAdmRepo
 INSTALL_DIR := /opt/opengnsys
 
 # Opciones de compilacion
-CFLAGS := -O0 -g -Wall -I../../Includes	# Depuracion
-#CFLAGS := -O3 -Wall			# Optimizacion
+CFLAGS := $(shell mysql_config --cflags)
+CFLAGS += -O0 -g -Wall -I../../Includes	# Depuracion
+#CFLAGS += -O3 -Wall			# Optimizacion
 CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
-LBIT := $(shell getconf LONG_BIT)
-ifeq ($(LBIT), 64)
-    LDFLAGS := -L/usr/lib64 -L/usr/lib64/mysql -lpthread -lmysqlclient
-else
-    LDFLAGS := -L/usr/lib -L/usr/lib/mysql -lpthread -lmysqlclient
-endif
+LDFLAGS := -Wl,--no-as-needed $(shell mysql_config --libs) -lpthread
 
 # Ficheros objetos
 OBJS := ../../Includes/Database.o sources/ogAdmRepo.o 
