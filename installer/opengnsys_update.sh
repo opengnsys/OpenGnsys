@@ -12,6 +12,9 @@
 #@version 1.0.1 - control de auto actualización del script
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2011/05/17
+#@version 1.0.2a - obtiene valor de dirección IP por defecto
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/01/18
 #*/
 
 
@@ -257,6 +260,22 @@ function checkNetworkConnection()
 {
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
 	wget --spider -q $OPENGNSYS_SERVER
+}
+
+# Obtener los parámetros de red del servidor.
+function getNetworkSettings()
+{
+	# Variables globales definidas:
+	# - SERVERIP:   IP local de la interfaz por defecto.
+
+	local DEVICES
+	local dev
+
+	echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
+	for dev in $DEVICES; do
+		[ -z "$SERVERIP" ] && SERVERIP=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+	done
 }
 
 
@@ -529,7 +548,7 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
+	local FILENAME=ogLive-oneiric-3.0.0-14-generic-r2439.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
@@ -625,6 +644,7 @@ if [ $? -ne 0 ]; then
 	errorAndLog " - Server is temporally down, try agian later."
 	exit 1
 fi
+getNetworkSettings
 
 # Comprobar auto-actualización del programa.
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then

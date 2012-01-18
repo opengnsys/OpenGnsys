@@ -1051,7 +1051,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
+	local FILENAME=ogLive-oneiric-3.0.0-14-generic-r2439.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  

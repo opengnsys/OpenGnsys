@@ -9,6 +9,19 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #92	ogGetFsType detecta identificador de partición no sistema de archivos
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.2a (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#478	Instalador crea IP nula en servidor con varias tarjetas de red
+
+Tickets resueltos en módulo OpenGnSys Server:
+#479	Error al compilar los servicios en sistema instalado en Ubuntu 11.10
+
+Tickets genéricos resueltos:
+#480	Liberar versión de mantenimiento OpenGnSys 1.0.2a en rama principal
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.2
 ---------------------------------------------
 
