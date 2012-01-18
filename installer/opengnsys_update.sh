@@ -259,6 +259,22 @@ function checkNetworkConnection()
 	wget --spider -q $OPENGNSYS_SERVER
 }
 
+# Obtener los parámetros de red del servidor.
+function getNetworkSettings()
+{
+	# Variables globales definidas:
+	# - SERVERIP:   IP local de la interfaz por defecto.
+
+	local DEVICES
+	local dev
+
+	echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
+	for dev in $DEVICES; do
+		[ -z "$SERVERIP" ] && SERVERIP=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+	done
+}
+
 
 #####################################################################
 ####### Funciones específicas de la instalación de Opengnsys
@@ -625,6 +641,7 @@ if [ $? -ne 0 ]; then
 	errorAndLog " - Server is temporally down, try agian later."
 	exit 1
 fi
+getNetworkSettings
 
 # Comprobar auto-actualización del programa.
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
