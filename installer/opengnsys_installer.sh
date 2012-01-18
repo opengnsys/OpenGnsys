@@ -461,7 +461,7 @@ function mysqlImportSqlFileToDb()
 	echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
 	chmod 600 $tmpfile
 	for dev in ${DEVICE[*]}; do
-		if [ "${DEVICE[i]} == $DEFAULTDEV" ]; then
+		if [ "${DEVICE[i]}" == "$DEFAULTDEV" ]; then
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
@@ -641,6 +641,8 @@ function getNetworkSettings()
 	fi
 	APACHE_RUN_USER=${APACHE_RUN_USER:-"$APACHEUSER"}
 	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
+
+	echoAndLog "${FUNCNAME}(): Default network device: $DEFAULTDEV."
 }
 
 
@@ -771,7 +773,7 @@ function installWebFiles()
 }
 
 # Configuración específica de Apache.
-function openGnsysInstallWebConsoleApacheConf()
+function installWebConsoleApacheConf()
 {
 	if [ $# -ne 2 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -895,7 +897,7 @@ function createDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function openGnsysCopyServerFiles ()
+function copyServerFiles ()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -1015,12 +1017,12 @@ function copyInterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysCopyClientFiles()
+function copyClientFiles()
 {
 	local errstatus=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-	cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	cp -a $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1
@@ -1029,7 +1031,7 @@ function openGnsysCopyClientFiles()
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-	cp -ar $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
+	cp -a $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		errstatus=1
@@ -1063,7 +1065,7 @@ function clientCreate()
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
-	cp -avr $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
+	cp -av $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
 	# Asignar la clave cliente para acceso a Samba.
@@ -1078,8 +1080,8 @@ function clientCreate()
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 
 	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-	cp -arv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
-	cp -arv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+	cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
+	cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
@@ -1278,7 +1280,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Copiar ficheros de servicios OpenGnSys Server.
-openGnsysCopyServerFiles ${INSTALL_TARGET}
+copyServerFiles ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
@@ -1348,7 +1350,7 @@ installWebFiles
 makeDoxygenFiles
 
 # creando configuracion de apache2
-openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
+installWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
 if [ $? -ne 0 ]; then
 	errorAndLog "Error configuring Apache for OpenGnSys Admin"
 	exit 1
@@ -1358,7 +1360,7 @@ popd
 
 
 # Crear la estructura de los accesos al servidor desde el cliente (shared)
-openGnsysCopyClientFiles
+copyClientFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
