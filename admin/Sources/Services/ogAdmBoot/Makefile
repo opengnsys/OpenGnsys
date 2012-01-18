@@ -9,7 +9,7 @@ INSTALL_DIR := /opt/opengnsys
 # Opciones de compilacion
 CFLAGS := $(shell mysql_config --cflags)
 #CFLAGS += -O0 -g -Wall -I../../Includes	# Depuracion
-CFLAGS += -O3 -Wall			# Optimizacion
+CFLAGS += -O3 -I../../Includes		# Optimizacion
 CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
@@ -23,7 +23,7 @@ all: $(PROYECTO)
 
 $(PROYECTO): $(OBJS)
 	g++ $(LDFLAGS) $(OBJS) -o $(PROYECTO)
-#	strip $(PROYECTO)		# Optimizacion
+	strip $(PROYECTO)		# Optimizacion
 
 install: $(PROYECTO)
 	cp $(PROYECTO) $(INSTALL_DIR)/sbin
