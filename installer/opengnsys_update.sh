@@ -47,7 +47,7 @@ else
 	USESVN=1
 	DEPS="$DEPS subversion"
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
+SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -292,7 +292,7 @@ function updateClientFiles()
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
