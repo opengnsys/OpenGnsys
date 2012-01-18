@@ -12,6 +12,9 @@
 #@version 1.0.1 - control de auto actualización del script
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2011/05/17
+#@version 1.0.2a - obtiene valor de dirección IP por defecto
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/01/18
 #*/
 
 
