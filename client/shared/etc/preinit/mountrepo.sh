@@ -16,7 +16,7 @@ if [ $ogactiveadmin == "true" ]; then
 	export boot=admin	# ATENCIÓN: siempre en modo "admin".
 	umount $OGIMG 2>/dev/null
 
-	protocol=${potocol:-"smb"}
+	protocol=${ogprotocol:-"smb"}
 	printf "$MSG_MOUNTREPO\n" "$protocol" "$boot"
 	case "$ogprotocol" in
 		nfs)	mount.nfs ${ROOTREPO}:$OGIMG $OGIMG -o rw,nolock ;;
