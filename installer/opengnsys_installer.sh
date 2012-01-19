@@ -1131,7 +1131,7 @@ function openGnsysConfigure()
 			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$INSTALL_TARGET/www/controlacceso.php > $INSTALL_TARGET/www/controlacceso-$dev.php
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
+			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
 				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
