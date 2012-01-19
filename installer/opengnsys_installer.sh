@@ -657,7 +657,7 @@ function tftpConfigure()
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -ar /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
+        cp -a /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
         cp -a /usr/lib/syslinux/pxelinux.0 $TFTPCFGDIR
         # prepamos el directorio de la configuracion de pxe
         mkdir -p $TFTPCFGDIR/pxelinux.cfg
@@ -863,7 +863,7 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
 	mkdir -p $TFTPCFGDIR
-	ln -fs $TFTPCFGDIR $path_opengnsys_base
+	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
 	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
