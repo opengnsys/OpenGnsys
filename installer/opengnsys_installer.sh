@@ -1128,7 +1128,7 @@ function openGnsysConfigure()
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
+			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$INSTALL_TARGET/www/controlacceso.php > $INSTALL_TARGET/www/controlacceso-$dev.php
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
