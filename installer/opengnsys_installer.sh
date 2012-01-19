@@ -1092,6 +1092,7 @@ function openGnsysConfigure()
 {
 	local i=0
 	local dev=""
+	local CONSOLEURL
 
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
@@ -1122,7 +1123,7 @@ function openGnsysConfigure()
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent/ogAdmAgent.cfg > $INSTALL_TARGET/etc/ogAdmAgent-$dev.cfg
-			OPENGNSYS_CONSOLEURL="http://${SERVERIP[i]}/opengnsys"
+			CONSOLEURL="http://${SERVERIP[i]}/opengnsys"
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
@@ -1132,6 +1133,9 @@ function openGnsysConfigure()
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/OPENGNSYSURL/${OPENGNSYS_CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
+			if [ "$dev" == "$DEFAULTDEV" ]; then
+				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
+			fi
 		fi
 		let i++
 	done
