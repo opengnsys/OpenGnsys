@@ -104,7 +104,7 @@ local DHCPVERSION
 case "$OSDISTRIB" in
 	Ubuntu) # Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
-		DHCPVERSION=$(apt-cache show dhcp.?-server$ | \
+		DHCPVERSION=$(apt-cache --full search dhcp.?-server$ | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
 			      sort -n | tail -1)
 		if [ $DHCPVERSION = 3 ]; then
