@@ -108,7 +108,7 @@ case "$OSDISTRIB" in
 			      awk '/Version/ {print substr($2,1,1);}' | \
 			      sort -n | tail -1)
 		if [ $DHCPVERSION = 3 ]; then
-			DEPENDENCIES=${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server}
+			DEPENDENCIES=( ${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server} )
 			DHCPINIT=/etc/init.d/dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
