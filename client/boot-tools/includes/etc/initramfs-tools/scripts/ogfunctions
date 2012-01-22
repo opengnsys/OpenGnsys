@@ -108,6 +108,8 @@ ogConfigureRamfs ()
 	mkdir -p $OGLIVERAMFS	
 	mkdir -p $OGLIVEROOTFS	  			 
 	mkdir -p $OGLIVEUNIONFS 
+
+	touch /etc/fstab
 }
 
 
@@ -340,9 +342,11 @@ ogConnectOgLive ()
 	then		
 		echo  "Montar imagen del sistema root desde dispositivo local"
 		for i in $(blkid /dev/s* | grep $OGLIVELABEL  | awk -F: '{print $2}' | tr -d \"); do export $i; done
-		mount -t $TYPE LABEL=$LABEL $DSTOGLIVE  
+		# si local usb| cd con partcion es identificada como label $OGLIVELABEL		 
+		mount -t $TYPE LABEL=$OGLIVELABEL $DSTOGLIVE  
 		if [ $? != 0 ]
 		then
+			# Si local es particion CACHE es identificada como CACHE
 			mount LABEL=CACHE $DSTOGLIVE
 			export LOCALMEDIA=CACHE
 		fi
