@@ -38,11 +38,9 @@
 # test 5.  intentar crear una imagen, en la que no se puede reducir el FS.
 
 TIME1=$SECONDS
-#OGLOGSESSION="/tmp/session.log"
-#OGLOGCOMMAND="/tmp/command.log"
 
-
-#Carga del configurador del engine
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 
@@ -59,7 +57,7 @@ fi
 #IMGEXT="img"
 #IMGREDUCE="TRUE"
 
-echo "[1] Iniciando $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 
 # Si el repositorio es CACHE comprobamos que exista
@@ -83,19 +81,20 @@ echo " " > $OGLOGCOMMAND
 IMGDIR=$(ogGetParentPath "$3" "/$4")
 # Si no existe, crear subdirectorio de la imagen.
 if [ $? != 0 ]; then
-    echo "[5] Crear subdirectorio de la imagen \"$3 $(dirname "$4")." | tee -a $OGLOGSESSION $OGLOGFILE
+    echo "[5] $MSG_HELP_ogMakeDir \"$3 $(dirname "$4")." | tee -a $OGLOGSESSION $OGLOGFILE
     ogMakeDir "$3" $(dirname "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
     IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
 fi
 IMGFILE=$IMGDIR/$(basename "/$4").$IMGEXT
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
-    echo "[10] Renombrar \"$IMGFILE\" por \"$IMGFILE.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
-    mv "$IMGFILE" "$IMGFILE.ant"
+	echo "[10] $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
+	mv "$IMGFILE" "$IMGFILE.ant"
     mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
 fi
 
 #Comprobar espacio que requerira la imagen para ser almacenada
+echo " " > $OGLOGCOMMAND
 if ogMount $1 $2 &>/dev/null
 then
 	SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
@@ -110,43 +109,63 @@ else
  	ogRaiseError $OG_ERR_PARTITION "$1 $2"
     exit $?
 fi	
-
-echo " " > $OGLOGCOMMAND
-
-# Mostrar información.
-echo "[15] $PROG: Origen=$PART, Destino=$IMGFILE" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "[16] $PROG: TamañoRequerido=$SIZEREQUIRED EspacioDisponible=$SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
-
+echo "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
 [ "$SIZEREQUIRED" -gt "$SIZEFREE" ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
 
 
 # TODO: que hacer si la cache no tiene espacio libre.
 
+
 # Comprobar consistencia del sistema de archivos.
-echo "[20] Comprobar sistema de archivos." | tee -a $OGLOGSESSION $OGLOGFILE
+echo " " > $OGLOGCOMMAND
+SIZEFS=$(ogGetFsSize  $1 $2)
+echo "[20] $MSG_HELP_ogCheckFs  $PART $SIZEFS (KB) " | tee -a $OGLOGSESSION $OGLOGFILE
 ogUnmount $1 $2
 ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
 
-echo " " > $OGLOGCOMMAND
+
 
 if [ "$IMGREDUCE" == "TRUE"   ]
 then 
-	echo "[30]: Reducir sistema de archivos."  | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "[30]: $MSG_HELP_ogReduceFs  "  | tee -a $OGLOGSESSION $OGLOGFILE
 	ogReduceFs $1 $2 || exit $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; echo $?)
+	NEWSIZEFS=$(ogGetFsSize  $1 $2)
 	TIMEAUX=$[SECONDS-TIME1]
-	echo "      tiempo de reducción del sistema de archivos: $[TIMEAUX/60]m $[TIMEAUX%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "      $MSG_SCRIPTS_TIME_PARTIAL ( $NEWSIZEFS KB ) : $[TIMEAUX/60]m $[TIMEAUX%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 fi
 
-echo " " > $OGLOGCOMMAND
+
 
 # Crear la imagen.
-echo "[40] Crear imagen con: ogCreateImage $1 $2 $3 $4 $IMGPROG $IMGCOMP" | tee -a $OGLOGSESSION $OGLOGFILE
+echo " " > $OGLOGCOMMAND
+TIME2=$SECONDS
+echo "[40] $MSG_HELP_ogCreateImage : ogCreateImage $1 $2 $3 $4 $IMGPROG $IMGCOMP" | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateImage $1 "$2" $3 $4 "$IMGPROG" "$IMGCOMP" || exit $(ogRaiseError $OG_ERR_IMAGE "ogCreteImage"; echo $?)
+RESUMECREATEIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
+TIMEAUX2=$[SECONDS-TIME2]
+echo "      $RESUMECREATEIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
+
+
+#Extender sistema de archivos
+TIME3=$SECONDS
 echo "[90] Extender sistema de archivos." | tee -a $OGLOGSESSION $OGLOGFILE
 ogExtendFs $1 $2 || exit $(ogRaiseError $OG_ERR_EXTENDFS "$1 $2"; echo $?)
+SIZEFS2=$(ogGetFsSize  $1 $2)
+TIMEAUX3=$[SECONDS-TIME3]
+echo "      $MSG_HELP_ogExtendFs  $NEWSIZEFS ->  $SIZEFS = $SIZEFS2: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
+
+#TODO que hacer si error al extender sistemade archivos
+
+
+
+#resumen de la operacion
+IMGSIZE=$(ls -s `ogGetPath $3 $4.img`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $3 $4.img`)
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
+echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      FileSystem $PART with $NEWSIZEFS KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS $ogprotocol " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      Image-file $4 metada: $IMGOS " | tee -a $OGLOGSESSION $OGLOGFILE

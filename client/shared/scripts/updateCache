@@ -155,7 +155,10 @@ case "$PROTOCOLO" in
 			    echo "la peticion ha fallado: hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   		    exit 1
 	   		fi
-		fi	
+		fi
+		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
+		sleep 5
+		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
 		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete")
 	;;
 	unicast | UNICAST )
