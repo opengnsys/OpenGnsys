@@ -125,9 +125,10 @@ case "$PROTOCOLO" in
     	#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
 		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
-		echo "Esperando $P2PWAIT segundos para iniciar ogTorrentStart CACHE $2.torrent $4"
+		echo "   [ ] Esperando $P2PWAIT segundos para iniciar ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
 		sleep $P2PWAIT
 		ogTorrentStart CACHE "$2.torrent" $4
+		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND | grep -B1 "Download") 
 	;;
 	multicast | MULTICAST )
 		echo "determinando puerto principal y auxiliar."
@@ -155,6 +156,7 @@ case "$PROTOCOLO" in
 	   		    exit 1
 	   		fi
 		fi	
+		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete")
 	;;
 	unicast | UNICAST )
 		echo "unicast"
@@ -163,13 +165,13 @@ case "$PROTOCOLO" in
 esac
 
 TIME1=$[SECONDS-TIME1]
-echo "tiempo de updateCache (descarga) $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
-echo "iniciando el calculo del crc de la imagen descargada" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ] tiempo de updateCache (descarga) $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ] iniciando el calculo del crc de la imagen descargada" | tee -a $OGLOGSESSION $OGLOGFILE
 TIME2=$SECONDS
 ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
 TIME2=$[SECONDS-TIME2]
-echo "tiempo de calculo crc $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ] tiempo de calculo crc $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
