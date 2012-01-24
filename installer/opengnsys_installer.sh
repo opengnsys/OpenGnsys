@@ -122,11 +122,11 @@ local DHCPVERSION
 case "$OSDISTRIB" in
 	Ubuntu) # Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
-		DHCPVERSION=$(apt-cache show dhcp.?-server$ | \
+		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
 			      sort -n | tail -1)
 		if [ $DHCPVERSION = 3 ]; then
-			DEPENDENCIES=${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server}
+			DEPENDENCIES=( ${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server} )
 			DHCPINIT=/etc/init.d/dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
@@ -688,8 +688,108 @@ function testPxe ()
 
 
 ########################################################################
+## Configuracion servicio NFS
+########################################################################
+
+# Configurar servicio NFS.
+# ADVERTENCIA: usa variables globales NETIP y NETMASK!
+function nfsConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Config nfs server."
+	backupFile /etc/exports
+
+	nfsAddExport $INSTALL_TARGET/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding NFS client config"
+		return 1
+	fi
+
+	nfsAddExport $INSTALL_TARGET/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding NFS images config"
+		return 1
+	fi
+
+	nfsAddExport $INSTALL_TARGET/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding logging client config"
+		return 1
+	fi
+
+	nfsAddExport $INSTALL_TARGET/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the PXE ogclient"
+		return 1
+	fi
+
+	/etc/init.d/nfs-kernel-server restart
+	exportfs -va
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configure exports"
+		return 1
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
+	return 0
+}
+
+
+# Añadir entrada en fichero de configuración del servidor NFS.
+# Ejemplos:
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
+#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
+function nfsAddExport()
+{
+	if [ $# -lt 2 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+	if [ ! -f /etc/exports ]; then
+		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
+		return 1
+	fi
+
+	local export="$1"
+	local contador=0
+	local cadenaexport
+
+	grep "^$export" /etc/exports > /dev/null
+	if [ $? -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
+		return 0
+	fi
+
+	cadenaexport="${export}"
+	for parametro in $*; do
+		if [ $contador -gt 0 ]; then
+			host=`echo $parametro | awk -F: '{print $1}'`
+			options=`echo $parametro | awk -F: '{print $2}'`
+			if [ "${host}" == "" ]; then
+				errorAndLog "${FUNCNAME}(): host can't be empty"
+				return 1
+			fi
+			cadenaexport="${cadenaexport}\t${host}"
+
+			if [ "${options}" != "" ]; then
+				cadenaexport="${cadenaexport}(${options})"
+			fi
+		fi
+		let contador=contador+1
+	done
+
+	echo -en "$cadenaexport\n" >> /etc/exports
+
+	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
+	return 0
+}
+
+
+########################################################################
 ## Configuracion servicio Samba
 ########################################################################
+
+# Configurar servicios Samba.
 function smbConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Configuring Samba service."
@@ -718,6 +818,7 @@ function smbConfigure()
 ## Configuracion servicio DHCP
 ########################################################################
 
+# Configurar servicios DHCP.
 function dhcpConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
@@ -730,11 +831,11 @@ function dhcpConfigure()
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[i]}" ]; then
 			backupFile $DHCPCFGDIR/dhcpd-$dev.conf
-			sed -e "s/SERVERIP/${SERVERIP[$i]}/g" \
-			    -e "s/NETIP/${NETIP[$i]}/g" \
-			    -e "s/NETMASK/${NETMASK[$i]}/g" \
-			    -e "s/NETBROAD/${NETBROAD[$i]}/g" \
-			    -e "s/ROUTERIP/${ROUTERIP[$i]}/g" \
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/NETIP/${NETIP[i]}/g" \
+			    -e "s/NETMASK/${NETMASK[i]}/g" \
+			    -e "s/NETBROAD/${NETBROAD[i]}/g" \
+			    -e "s/ROUTERIP/${ROUTERIP[i]}/g" \
 			    -e "s/DNSIP/$DNSIP/g" \
 			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCFGDIR/dhcpd-$dev.conf || errcode=1
 		fi
@@ -759,7 +860,7 @@ function dhcpConfigure()
 function installWebFiles()
 {
 	echoAndLog "${FUNCNAME}(): Installing web files..."
-	cp -ar $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+	cp -a $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
 	if [ $? != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
@@ -1186,7 +1287,7 @@ function installationSummary()
 	echoAndLog "Log-in as Web Console admin user."
 	echoAndLog " - Review default Organization data and assign default user."
 	echoAndLog "Log-in as Web Console organization user."
-	echoAndLog " - Insert OpenGnSys data (rooms, computers, menus, etc)."
+	echoAndLog " - Insert OpenGnSys data (labs, computers, menus, etc)."
 echo
 }
 
