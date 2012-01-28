@@ -14,8 +14,10 @@ $TbMsg[5]="Nom";
 $TbMsg[6]="Direcció IP";
 $TbMsg[7]="Direcció MAC";
 $TbMsg[8]="Perfil Hardware";
-$TbMsg[9]="Servidor Dhcp";
-$TbMsg[10]="Servidor Rembo ";
+$TbMsg[9]="Autoexec";
+$TbMsg[10]="Repositori";
 $TbMsg[11]="Menu";
 $TbMsg[12]="Tamany Caché";
+$TbMsg[13]="Interfice de Xarxa";
+$TbMsg[14]="Driver de Xarxa";
 ?>
