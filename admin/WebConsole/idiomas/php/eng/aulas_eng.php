@@ -43,5 +43,9 @@
 	$TbMsg[35]='"Operators"';
 	$TbMsg[36]='"Remove operator"';
 	$TbMsg[37]='"Add a new operator"';
+	$TbMsg[39]='"Console echo"';
+	$TbMsg[40]='"Advanced NetBoot"';
+	$TbMsg[41]='"Relocate computers"';
 
 ?>
+

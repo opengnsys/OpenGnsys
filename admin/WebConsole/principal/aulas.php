@@ -478,20 +478,21 @@ function ContextualXMLAulas(){
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
 
-        $layerXML.='<ITEM';
-        $layerXML.=' subflotante="flo_netboot"';
-        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
-        $layerXML.=' textoitem="NetBoot Gestion"';
-        $layerXML.='></ITEM>';
+	$layerXML.='<ITEM';
+	// Pasar al menú la única opción del submenú "NetBoot Gestión".
+	//$layerXML.=' subflotante="flo_netboot"';
+	$layerXML.=' alpulsar="ver_boot()"';
+	$layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+	$layerXML.=' textoitem='.$TbMsg[40];
+	$layerXML.='></ITEM>';
 
 //adv compatiblidad Configurador de Startpages
-        $layerXML.='<ITEM';
-        $layerXML.=' alpulsar="ver_ubicarordenadores()"';
-        $layerXML.=' textoitem="Reubicar ordenadores"';
-        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
-        $layerXML.='></ITEM>';
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="ver_ubicarordenadores()"';
+	$layerXML.=' textoitem='.$TbMsg[41];
+	$layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+	$layerXML.='></ITEM>';
 //adv compatiblidad Configurador de Startpages
-
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_aulas()"';
@@ -936,10 +937,10 @@ function ContextualXMLComandos($litambito,$ambito){
 	global $cmd;
  	$maxlongdescri=0;
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idcomando,descripcion,pagina,gestor,funcion 
-							FROM comandos 
-							WHERE activo=1 AND aplicambito & ".$ambito.">0 
-							ORDER BY descripcion";
+	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
+			FROM comandos 
+			WHERE activo=1 AND aplicambito & ".$ambito.">0 
+			ORDER BY descripcion";
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
 		$layerXML="";
@@ -970,10 +971,10 @@ function ContextualXMLAsistentes($litambito,$ambito){
 	global $cmd;
  	$maxlongdescri=0;
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idcomando,descripcion,pagina,gestor,funcion 
-							FROM asistentes 
-							WHERE activo=1 AND aplicambito & ".$ambito.">0 
-							ORDER BY descripcion";
+	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
+			FROM asistentes 
+			WHERE activo=1 AND aplicambito & ".$ambito.">0 
+			ORDER BY descripcion";
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
 		$layerXML="";

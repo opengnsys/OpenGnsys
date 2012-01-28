@@ -32,7 +32,7 @@
 	$TbMsg[24]='Ámbit: Centres';
 	$TbMsg[25]='Ámbit: Grup d\'aules';
 	$TbMsg[26]='Ámbito: Grup d\'ordinadors';
-	$TbMsg[27]='"Incorporar ordinadores"';
+	$TbMsg[27]='"Incorporar ordinadors"';
 	$TbMsg[28]='"Procedimentss"';
 	$TbMsg[29]='"Reserves d\'aules"';
 	$TbMsg[30]='"Confirmadas"';
@@ -43,4 +43,8 @@
 	$TbMsg[35]='"Operadors"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Afegir nou Operador"';
+	$TbMsg[39]='"Eco de consola"';
+	$TbMsg[40]='"NetBoot avançat"';
+	$TbMsg[41]='"Reubicar ordinadors"';
 ?>
+
