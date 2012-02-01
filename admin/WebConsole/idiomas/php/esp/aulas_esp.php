@@ -47,6 +47,8 @@
 	$TbMsg[39]='"Eco de Consola"';
 	$TbMsg[40]='"NetBoot avanzado"';
 	$TbMsg[41]='"Reubicar ordenadores"';
+	$TbMsg[42]='Gesti&oacute;n Arranque Avanzado';
+	$TbMsg[43]='"Guardar"';
 
 ?>
 

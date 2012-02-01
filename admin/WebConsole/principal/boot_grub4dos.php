@@ -121,9 +121,9 @@ switch($litambito){
 <form name="myForm" method="post" action="../gestores/gestor_pxe_grub4dos.php?idaula=<?php echo $idambito ?>&nombreambito=<?php echo $nombreambito?>&litambito=<?php echo $litambito?>" >
 
 
-	<P align=center class=cabeceras>Gestión Arranque Avanzado<BR>
+	<P align=center class=cabeceras><?php echo $TbMsg[42]; ?><BR>
 	<SPAN align=center class=subcabeceras> <?php echo $nombreambito; ?> </SPAN>
-	<input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </P>
+	<input type="submit" value=<?php echo $TbMsg[43]; ?> name="saveButton"  onclick="allSelect()"> </P>
 	
 	
 	

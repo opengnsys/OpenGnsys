@@ -47,6 +47,8 @@
 	$TbMsg[39]='"Console echo"';
 	$TbMsg[40]='"Advanced NetBoot"';
 	$TbMsg[41]='"Relocate computers"';
+	$TbMsg[42]='Advanced Boot Management';
+	$TbMsg[43]='"Save"';
 
 ?>
 
