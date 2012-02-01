@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_aulas_eng.php 
-//	Idioma: Ing�s 
+//	Idioma: Inglés 
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
@@ -10,12 +10,12 @@ $TbMsg[1]="Insert";
 $TbMsg[2]="Modify";
 $TbMsg[3]="Remove";
 $TbMsg[4]="Labs Management";
-$TbMsg[5]="Lab Name";
-$TbMsg[6]="Ubication";
-$TbMsg[7]="Cagnon";
+$TbMsg[5]="Lab. name";
+$TbMsg[6]="Location";
+$TbMsg[7]="Projector";
 $TbMsg[8]="Blackboard";
 $TbMsg[9]="Places";
-$TbMsg[10]="Image Url";
+$TbMsg[10]="Image URL";
 $TbMsg[11]="Menu";
 $TbMsg[12]="Comments";
 $TbMsg[13]="Intervals";
@@ -24,7 +24,7 @@ $TbMsg[15]="End reserves";
 $TbMsg[16]="Repository";
 $TbMsg[17]="Hardware profile";
 $TbMsg[18]="Properties for all computers in this class";
-$TbMsg[19]="Cache Size (KB)";
+$TbMsg[19]="Cache size (KB)";
 $TbMsg[20]="Autoexec";
 $TbMsg[21]="";
 $TbMsg[22]="Multicast mode";
@@ -37,3 +37,4 @@ $TbMsg[28]="Gateway";
 $TbMsg[29]="Netmask";
 
 ?>
+

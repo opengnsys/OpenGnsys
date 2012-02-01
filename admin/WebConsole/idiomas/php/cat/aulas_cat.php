@@ -35,7 +35,7 @@
 	$TbMsg[27]='"Incorporar ordinadors"';
 	$TbMsg[28]='"Procedimentss"';
 	$TbMsg[29]='"Reserves d\'aules"';
-	$TbMsg[30]='"Confirmadas"';
+	$TbMsg[30]='"Confirmades"';
 	$TbMsg[31]='"Pendents"';
 	$TbMsg[32]='"Denegades"';
 	$TbMsg[33]='"Commutar"';
@@ -43,6 +43,7 @@
 	$TbMsg[35]='"Operadors"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Afegir nou Operador"';
+	$TbMsg[38]='"Assistents"';
 	$TbMsg[39]='"Eco de consola"';
 	$TbMsg[40]='"NetBoot avançat"';
 	$TbMsg[41]='"Reubicar ordinadors"';

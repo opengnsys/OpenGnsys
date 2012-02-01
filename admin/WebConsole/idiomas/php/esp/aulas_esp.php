@@ -43,6 +43,7 @@
 	$TbMsg[35]='"Operadores"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Añadir nuevo Operador"';
+	$TbMsg[38]='"Asistentes"';
 	$TbMsg[39]='"Eco de Consola"';
 	$TbMsg[40]='"NetBoot avanzado"';
 	$TbMsg[41]='"Reubicar ordenadores"';
