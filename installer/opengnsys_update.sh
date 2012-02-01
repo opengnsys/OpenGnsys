@@ -15,6 +15,9 @@
 #@version 1.0.2a - obtiene valor de dirección IP por defecto
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/01/18
+#@version 1.0.3 - Compatibilidad con Debian.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/02/01
 #*/
 
 
@@ -395,11 +398,18 @@ function createDirs()
 {
 	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
+	local dir
+
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
 	mkdir -p ${INSTALL_TARGET}/{client,images}
 	mkdir -p ${INSTALL_TARGET}/log/clients
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
-	ln -fs /var/lib/tftpboot ${INSTALL_TARGET}
+	# Detectar directorio de instalación de TFTP.
+	if [ ! -L ${INSTALL_TARGET}/tftpboot ]; then
+		for dir in /var/lib/tftpboot /srv/tftp; do
+			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
+		done
+	fi
 	mkdir -p ${INSTALL_TARGET}/tftpboot/{pxelinux.cfg,menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
@@ -595,8 +605,8 @@ function updateClient()
 		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 		
 		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-		cp -arv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
-		cp -arv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
+		cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 		
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
