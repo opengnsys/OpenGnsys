@@ -15,4 +15,9 @@
 	$TbMsg[7]='Reserves';
 	$TbMsg[8]='Administration';
 	$TbMsg[9]='Icons';
+	$TbMsg[10]='Exit';
+	$TbMsg[11]='Help';
+	$TbMsg[12]='Administrators';
+	$TbMsg[14]='Search';
 ?>
+
