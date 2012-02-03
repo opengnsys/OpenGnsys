@@ -28,17 +28,18 @@ if (isset($_GET["herror"])) $herror=$_GET["herror"];
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
 
 $TbErr=array();
-$TbErr[0]="SIN ERRORES";
-$TbErr[1]="ATENCIÓN: Debe acceder a la aplicación a través de la pagina inicial";
-$TbErr[2]="ATENCIÓN: La Aplicación no tiene acceso al Servidor de Bases de Datos";
-$TbErr[3]="ATENCIÓN: Existen problemas para recuperar el registro, puede que haya sido eliminado";
-$TbErr[4]="ATENCIÓN: Usted no tiene acceso a esta aplicación";
+$TbErr[0]="NO ERRORS";
+$TbErr[1]="Attention: You must access the application via the homepage";
+$TbErr[2]="Attention: The application not have access to the database server";
+$TbErr[3]="Attention: There are problems to retrieve the record, it may have been removed";
+$TbErr[4]="Attention: You do not have access to this application";
 $TbMsg=array();
-$TbMsg["ACCESS_TITLE"]="OpenGnSys: Administraci&oacute;n web de aulas";
-$TbMsg["ACCESS_OU"]="Unidad Organizativa";
-$TbMsg["ACCESS_NOUSER"]="Debe introducir un nombre de usuario";
-$TbMsg["ACCESS_NOPASS"]="Debe introducir una contraseña";
-$TbMsg["ACCESS_NOUNIT"]='ATENCIÓN: No ha introducido ninguna Unidad Organizativa.\nNO tendrá acceso al sistema a menos que sea adminstrador general de la Aplicación.\n¿Desea acceder con este perfil?';
+$TbMsg["ACCESS_TITLE"]="OpenGnSys: Labs web administration";
+$TbMsg["ACCESS_OU"]="Organitational Unit";
+$TbMsg["ACCESS_NOUSER"]="You must enter a username";
+$TbMsg["ACCESS_NOPASS"]="You must enter a password";
+$TbMsg["ACCESS_NOUNIT"]='You have not entered any Organizational Unit.\nYou will NOT have access to the system unless that you are a main administrator of the Application.\nDo you want to access with this profile?';
+
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -61,7 +62,7 @@ function comprobar_datos(){
 		return(false)
 	}
 	if (document.fdatos.pss.value==""){
-		<?php echo 'alert("'.$TbMsg["ACCESS_NOPASS"].'");' ?>
+		<?php echo 'alert("'.$TbMsg["ACCESS_NOUSER"].'");' ?>
 		document.fdatos.pss.focus()
 		return(false)
 	}
