@@ -156,28 +156,29 @@
     FONT-SIZE: 11px
 }
 
-.tabla_listados{
+.tabla_listados {
+    font-family: Arial, Helvetica, sans-serif;
 }
-
-.tabla_listados TH{
-    BACKGROUND-COLOR: #63676b;
-    COLOR: #ffffff;
-    FONT-FAMILY:  Arial, Helvetica, sans-serif;
-    FONT-SIZE: 12px;
-    FONT-WEIGHT: 500;
-	BORDER-BOTTOM:#999999 1px solid ;
+.tabla_listados caption {
+    font-size: 14px;
+    font-weight: 500;
 }
-.tabla_listados TD{
-    BACKGROUND-COLOR: #EEEECC;
-    COLOR: #003300;
-    FONT-FAMILY: Arial, Helvetica, sans-serif;
-    FONT-SIZE: 11px;
-	BORDER-BOTTOM:#999999 1px solid;
+.tabla_listados th {
+    background-color: #63676b;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    border-bottom: #999999 1px solid;
+}
+.tabla_listados td {
+    background-color: #EEEECC;
+    color: #003300;
+    font-size: 11px;
+    border-bottom: #999999 1px solid;
 }
 
 .tabla_listados_sin {
 }
-
 .tabla_listados_sin TH{
     BACKGROUND-COLOR: #63676b;
     COLOR: #ffffff;
@@ -194,7 +195,6 @@
     FONT-FAMILY: Arial, Helvetica, sans-serif;
     FONT-SIZE: 11;
 }
-
 A.tabla_listados_sin:visited{
     COLOR: #000000;
     FONT-FAMILY: sans-serif;
