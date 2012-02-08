@@ -1,4 +1,54 @@
-﻿.textos{
+﻿.acceso {
+	font: normal normal 12px sans-serif;
+}
+.acceso h1 {
+	margin-top: 90px;
+	margin-left: 250px;
+	margin-bottom: 0px;
+	padding-left: 20px;
+	width: 580px;
+	background: #bfb39b;
+	font-size: 24px;
+	color: #ddd6c6;
+}
+.acceso h2 {
+	margin-top: 0px;
+	margin-left: 250px;
+	margin-bottom: 0px;
+	padding-left: 20px;
+	width: 580px;
+	background: #bfb39b;
+	font-size: 20px;
+	color: white;
+}
+.acceso form {
+	margin-top: 0px;
+	margin-left: 250px;
+	width: 600px;
+	height: 327px;
+	background-image: url('./images/login.jpg');
+}
+.acceso fieldset {
+	padding-top: 60px;
+	margin-left: 350px;
+	border: none;
+}
+.acceso label {
+	margin-top: 20px;
+	height: 20px;
+	float: left;
+}
+.acceso input {
+	margin-top: 20px;
+	margin-right: 50px;
+	width: 100px;
+	height: 20px;
+	float: right;
+}
+.acceso button {
+	margin-left: 100px;
+}
+.textos{
 	COLOR: #A53B2D;
 	FONT-FAMILY:MS Sans Serif;
 	FONT-SIZE: 8pt;
