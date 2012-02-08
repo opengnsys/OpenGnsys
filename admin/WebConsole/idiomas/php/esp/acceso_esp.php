@@ -22,6 +22,7 @@ $TbMsg["ACCESS_USERNAME"]="Usuario";
 $TbMsg["ACCESS_PASSWORD"]="Contrase&ntilde;a";
 $TbMsg["ACCESS_ORGUNIT"]="Unidad Organizativa";
 $TbMsg["ACCESS_OK"]="OK";
+$TbMsg["ACCESS_CHOOSE"]="Elegir";
 $TbMsg["ACCESS_NOUSER"]="Debe introducir un nombre de usuario";
 $TbMsg["ACCESS_NOPASS"]="Debe introducir una contraseña";
 $TbMsg["ACCESS_NOUNIT"]='ATENCIÓN: No ha introducido ninguna Unidad Organizativa.\nNO tendrá acceso al sistema a menos que sea adminstrador general de la Aplicación.\n¿Desea acceder con este perfil?';

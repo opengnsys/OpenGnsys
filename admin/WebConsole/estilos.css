@@ -43,7 +43,18 @@
 .acceso button {
 	margin-left: 100px;
 }
-
+.pie {
+	margin: 0px auto;
+	padding: 0px 10px;
+	width: 580px;
+	font: normal normal 10px sans-serif;
+}
+.pie button {
+	font-size: 10px;
+}
+.pie span {
+	float: right;
+}
 .textos{
 	COLOR: #A53B2D;
 	FONT-FAMILY:MS Sans Serif;

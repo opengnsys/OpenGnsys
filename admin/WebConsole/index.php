@@ -33,8 +33,7 @@ $idcentro="";
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
 // Idioma.
-if (isset($_GET["idi"])) $parmidi=$_GET["idi"]; 
-if (isset($_POST["idi"])) $parmidi=$_POST["idi"]; 
+if (isset($_POST["nemonico"])) $parmidi=$_POST["nemonico"]; 
 if (!empty ($parmidi) and file_exists ("idiomas/php/$parmidi/acceso_$parmidi.php")) {
 	$idi=$parmidi;
 }
@@ -110,7 +109,21 @@ function PulsaEnter(oEvento){
     </fieldset>
 </form>
 </div>
-<?
+<div class="pie">
+<?php
+// Añadir versión y URL al proyecto.
+$versionfile="../doc/VERSION.txt";
+if (file_exists ($versionfile) {
+	echo '<span><a href="http://opengnsys.es/">';
+	include ($versionfile);
+	echo '</a></span>';
+?>
+<form action="#" name="lang" method="post">
+      <?php echo HTMLSELECT($cmd,0,'idiomas',$idi,'nemonico','descripcion',80); ?>
+      <button type="submit"><?php echo $TbMsg["ACCESS_CHOOSE"]; ?></button>
+</form>
+</div>
+<?php
 //______________________________________________________________________________
 // Posiciona cursor en campo usuario y muestra mensaje de error si lo hubiera
 echo '<script language="javascript">';
