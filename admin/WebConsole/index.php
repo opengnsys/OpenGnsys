@@ -113,10 +113,11 @@ function PulsaEnter(oEvento){
 <?php
 // Añadir versión y URL al proyecto.
 $versionfile="../doc/VERSION.txt";
-if (file_exists ($versionfile) {
+if (file_exists ($versionfile)) {
 	echo '<span><a href="http://opengnsys.es/">';
 	include ($versionfile);
 	echo '</a></span>';
+}
 ?>
 <form action="#" name="lang" method="post">
       <?php echo HTMLSELECT($cmd,0,'idiomas',$idi,'nemonico','descripcion',80); ?>
