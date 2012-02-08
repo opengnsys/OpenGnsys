@@ -25,13 +25,19 @@ include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");
 include_once("./includes/HTMLSELECT.php");
 
-// Control de errores.
+// Valores por defecto.
 $herror=0;
+$idcentro="";
+
+// Control de errores.
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
 // Idioma.
-if (isset($_GET["idi"])) $idi=$_GET["idi"]; 
-if (isset($_POST["idi"])) $idi=$_POST["idi"]; 
+if (isset($_GET["idi"])) $parmidi=$_GET["idi"]; 
+if (isset($_POST["idi"])) $parmidi=$_POST["idi"]; 
+if (!empty ($parmidi) and file_exists ("idiomas/php/$parmidi/acceso_$parmidi.php")) {
+	$idi=$parmidi;
+}
 include ("idiomas/php/$idi/acceso_$idi.php");
 
 $cmd=CreaComando($cnx); // Crea objeto comando 

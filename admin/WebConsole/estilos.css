@@ -2,9 +2,7 @@
 	font: normal normal 12px sans-serif;
 }
 .acceso h1 {
-	margin-top: 90px;
-	margin-left: 250px;
-	margin-bottom: 0px;
+	margin: 50px auto 0px auto;
 	padding-left: 20px;
 	width: 580px;
 	background: #bfb39b;
@@ -12,9 +10,7 @@
 	color: #ddd6c6;
 }
 .acceso h2 {
-	margin-top: 0px;
-	margin-left: 250px;
-	margin-bottom: 0px;
+	margin: 0px auto;
 	padding-left: 20px;
 	width: 580px;
 	background: #bfb39b;
@@ -22,8 +18,7 @@
 	color: white;
 }
 .acceso form {
-	margin-top: 0px;
-	margin-left: 250px;
+	margin: 0px auto;
 	width: 600px;
 	height: 327px;
 	background-image: url('./images/login.jpg');
@@ -48,6 +43,7 @@
 .acceso button {
 	margin-left: 100px;
 }
+
 .textos{
 	COLOR: #A53B2D;
 	FONT-FAMILY:MS Sans Serif;
