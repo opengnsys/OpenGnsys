@@ -1,24 +1,24 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: repositorios_esp.php 
+//	Fichero de idiomas php: repositorios_eng.php 
 //	Idioma: Español 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Nuevo grupo de Repositorios"';
-	$TbMsg[1]='"Añadir Repositorio "';
-	$TbMsg[2]='"Colocar Repositorio"';
-	$TbMsg[3]='"Renombrar"';
-	$TbMsg[4]='"Eliminar grupo de repositorios"';
-	$TbMsg[5]='"Información Repositorio"';
-	$TbMsg[6]='"Mover Repositorio"';
-	$TbMsg[7]='"Propiedades"';
-	$TbMsg[8]='"Eliminar Repositorio"';
-	$TbMsg[9]='"Nuevo grupo de Repositorios"';
+	$TbMsg[0]='"New Group of Repositories"';
+	$TbMsg[1]='"Add Repository "';
+	$TbMsg[2]='"Place Repository"';
+	$TbMsg[3]='"Rename"';
+	$TbMsg[4]='"Remove group of repositories"';
+	$TbMsg[5]='"Information Repository"';
+	$TbMsg[6]='"Move Repository"';
+	$TbMsg[7]='"Properties"';
+	$TbMsg[8]='"Remove Repository"';
+	$TbMsg[9]='"New Group of Repositories"';
 	$TbMsg[10]='';
 	$TbMsg[11]='';
-	$TbMsg[12]='"Repositorios"';
+	$TbMsg[12]='"Repositories"';
 	$TbMsg[13]='""';
-	$TbMsg[14]='"Repositorios"';
-	$TbMsg[15]='"Iconos"';
+	$TbMsg[14]='"Repositories"';
+	$TbMsg[15]='"icons"';
 ?>
