@@ -388,8 +388,8 @@ CREATE TABLE IF NOT EXISTS `idiomas` (
 
 INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 (1, 'Español', 'esp'),
-(2, 'Ingles', 'eng'),
-(3, 'Catalan', 'cat');
+(2, 'English', 'eng'),
+(3, 'Català', 'cat');
 
 -- --------------------------------------------------------
 
