@@ -690,11 +690,16 @@ function ContextualXMLGruposOrdenadores(){
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
 
-        $layerXML.='<ITEM';
-        $layerXML.=' subflotante="flo_netboot"';
-        $layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
-        $layerXML.=' textoitem="NetBoot Gestion"';
-        $layerXML.='></ITEM>';
+	
+	$layerXML.='<ITEM';
+	// Pasar al menú la única opción del submenú "NetBoot Gestión".
+	//$layerXML.=' subflotante="flo_netboot"';
+	$layerXML.=' alpulsar="ver_boot()"';
+	$layerXML.=' imgitem="../images/iconos/ordenadores.gif"';
+	$layerXML.=' textoitem='.$TbMsg[40];
+	$layerXML.='></ITEM>';
+	
+
         
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_aulas()"';

@@ -19,6 +19,7 @@ include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/restaurarimagen_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -195,12 +196,12 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 					$metodos="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-					$metodos.="TORRENT peer:60=TORRENT";
+					$metodos.="TORRENT peer:60=TORRENT-CACHE";
 					
 					$TBmetodos["UNICAST-DIRECT"]=1;
 					$TBmetodos["MULTICAST-DIRECT"]=2;
 					$TBmetodos["MULTICAST-CACHE"]=3;
-					$TBmetodos["TORRENT"]=4;
+					$TBmetodos["TORRENT-CACHE"]=4;
 					
 					$idxc=$_SESSION["protclonacion"];
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';

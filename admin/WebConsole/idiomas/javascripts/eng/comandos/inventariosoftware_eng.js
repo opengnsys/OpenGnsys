@@ -5,4 +5,4 @@
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";
-TbMsg[1]="You must choose at least one partition";
+TbMsg[1]="Debe elegir al menos una partición";

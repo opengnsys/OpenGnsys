@@ -1,7 +1,7 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: iniciarsesion_esp.js 
-//	Idioma: Español 
+//	Fichero de idiomas javascripts: iniciarsesion_eng.js 
+//	Idioma: Ingles 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";

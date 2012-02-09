@@ -16,6 +16,8 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../idiomas/php/".$idioma."/comandos/inventariosoftware_".$idioma.".php");
 include_once("./includes/capturaacciones.php");
+include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
