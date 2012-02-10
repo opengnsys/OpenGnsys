@@ -9,10 +9,11 @@
 $LITEJECUCION_COMANDO="Commands";
 $LITEJECUCION_PROCEDIMIENTO="Procedures";
 $LITEJECUCION_TAREA="Tasks";
-$LITEJECUCION_TRABAJO="Jobs";
+//$LITEJECUCION_TRABAJO="Jobs";
 
 $LITACCION_EXITOSA='Finished successfully'; // Literal  Finalizada con exito
 $LITACCION_FALLIDA='Finished with errors'; // Literal  Finalizada con errores
+//$LITACCION_SINRESULTADO='Without final result'
 $LITACCION_TERMINADA='Finished manualy'; //Literal   Finalizada manualmente con indicacion de exito 
 $LITACCION_ABORTADA='Canceled manualy'; // Literal  Finalizada manualmente con indicacion de errores 
 $LITACCION_SINERRORES='Active without errors'; // Literal  Activa y sin ningún error
@@ -21,6 +22,7 @@ $LITACCION_CONERRORES='Active with errors'; // Literal  Activa y con algún error
 $LITACCION_DETENIDA='Stopped'; // Literal acción momentanemente parada
 $LITACCION_INICIADA='Active'; // Literal acción activa
 $LITACCION_FINALIZADA='Finished'; // Literal acción finalizada
+$LITACCION_PROGRAMADA="Scheduled";
 
 $TbMsg=array();
 	$TbMsg[0]='Actions queue';
@@ -76,4 +78,8 @@ $TbMsg=array();
 	$TbMsg[55]='"Finish without errors"';
 	$TbMsg[56]='"Finish with errors"';
 	$TbMsg[57]='Information';
+        $TbMsg[58]='Final result:';
+        $TbMsg[59]='Scope';
+        $TbMsg[60]='All';
+        $TbMsg[61]='All';
 ?>

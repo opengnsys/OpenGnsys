@@ -9,10 +9,16 @@
 $LITEJECUCION_COMANDO="Comandos";
 $LITEJECUCION_PROCEDIMIENTO="Procedimientos";
 $LITEJECUCION_TAREA="Tareas";
+//$LITEJECUCION_TRABAJO="Trabajo";
 
 $LITACCION_EXITOSA='Finalizada correctamente'; // Literal  Finalizada con exito
 $LITACCION_FALLIDA='Finalizada con errores'; // Literal  Finalizada con errores
-$LITACCION_SINRESULTADO='Sin resultado final'; //Literal Sin resultado
+//$LITACCION_SINRESULTADO='Sin resultado final'; //Literal Sin resultado
+$LITACCION_TERMINADA='Finalizada manualmente'; //Literal   Finalizada manualmente con indicacion de exito 
+$LITACCION_ABORTADA='Cancelada manualmente'; // Literal  Finalizada manualmente con indicacion de errores 
+$LITACCION_SINERRORES='Active without errors'; // Literal  Activa y sin ningún error
+$LITACCION_CONERRORES='Active with errors'; // Literal  Activa y con algún error
+
 
 $LITACCION_DETENIDA='Parada'; // Literal acción momentanemente parada
 $LITACCION_INICIADA='Activa'; // Literal acción activa

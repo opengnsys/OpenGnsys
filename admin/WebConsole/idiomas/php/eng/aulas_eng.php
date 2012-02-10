@@ -49,6 +49,10 @@
 	$TbMsg[41]='"Relocate computers"';
 	$TbMsg[42]='Advanced Boot Management';
 	$TbMsg[43]='"Save"';
+        $TbMsg[44]='Computers locator';
+        $TbMsg[45]='Scope name';
+        $TbMsg[46]='Scope id';
+
 
 ?>
 

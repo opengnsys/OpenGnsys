@@ -146,9 +146,9 @@ switch($ambito){
 <form name="myForm" method="post" action="../gestores/gestor_ubicarordenadores.php?idaula=<?php echo $idambito ?>&nombreambito=<?php echo $nombreambito?>&litambito=<?php echo $litambito?>" >
 
 
-	<P align=center class=cabeceras>Ubicador Ordenadores<BR>
-	<SPAN align=center class=subcabeceras> <?php echo "nombre ambito:" . $nombreambito . " identificador ambito: " . $idambito . $litambito; ?> </SPAN>
-	<input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </P>
+	<P align=center class=cabeceras><?php echo $TbMsg[44]; ?> <BR>
+	<SPAN align=center class=subcabeceras> <?php echo $TbMsg[45].": " . $nombreambito ." ". $TbMsg[46]. ": " . $idambito ." " . $litambito; ?> </SPAN>
+	<input type="submit" value=<?php echo $TbMsg[43]; ?> name="saveButton"  onclick="allSelect()"> </P>
 	
 	
 	

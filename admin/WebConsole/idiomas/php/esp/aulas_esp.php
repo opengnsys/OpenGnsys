@@ -49,6 +49,9 @@
 	$TbMsg[41]='"Reubicar ordenadores"';
 	$TbMsg[42]='Gesti&oacute;n Arranque Avanzado';
 	$TbMsg[43]='"Guardar"';
+	$TbMsg[44]='Ubicador Ordenadores';
+	$TbMsg[45]='Nombre ámbito';
+	$TbMsg[46]='Identificador ámbito';
 
 ?>
 
