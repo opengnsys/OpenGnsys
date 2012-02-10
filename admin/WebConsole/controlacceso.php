@@ -13,7 +13,7 @@
  // Variables de sessión de configuración de servidor y base de datos( Modificar aquípara cambio global)  
  $cnx="localhost;DBUSER;DBPASSWORD;DATABASE;mysql"; // Cadena de conexión a la base de datos 
  $wer="OPENGNSYSURL/pagerror.php"; // Página de redireccionamiento de errores 
- $wac="OPENGNSYSURL/acceso.php"; // Página de login de la aplicación 
+ $wac="OPENGNSYSURL/"; // Página de login de la aplicación 
  $idi="esp"; // Idioma por defecto 
  //======================================================================================================== 
 ?>

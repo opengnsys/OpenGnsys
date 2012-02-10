@@ -883,7 +883,7 @@ function installWebConsoleApacheConf()
 
 	local path_opengnsys_base=$1
 	local path_apache2_confd=$2
-	local path_web_console=${path_opengnsys_base}/www
+	local CONSOLEDIR=${path_opengnsys_base}/www
 
 	if [ ! -d $path_apache2_confd ]; then
 		errorAndLog "${FUNCNAME}(): path to apache2 conf.d can not found, verify your server installation"
@@ -899,17 +899,9 @@ function installWebConsoleApacheConf()
 	$ENABLEMOD ssl
 	make-ssl-cert generate-default-snakeoil --force-overwrite
 
-	# Genera configuración de consola web.
-	cat > $path_opengnsys_base/etc/apache.conf <<EOF
-# OpenGnSys Web Console configuration for Apache
-
-Alias /opengnsys ${path_web_console}
-
-<Directory ${path_web_console}>
-	Options -Indexes FollowSymLinks
-	DirectoryIndex acceso.php
-</Directory>
-EOF
+	# Genera configuración de consola web a partir del fichero plantilla.
+	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+                $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
 
 	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys
 	$ENABLESITE opengnsys
