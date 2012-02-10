@@ -26,6 +26,7 @@ $TbMsg["ACCESS_CHOOSE"]="Choose";
 $TbMsg["ACCESS_NOUSER"]="You must enter a username";
 $TbMsg["ACCESS_NOPASS"]="You must enter a password";
 $TbMsg["ACCESS_NOUNIT"]='You have not entered any Organizational Unit.\nYou will NOT have access to the system unless that you are a main administrator of the Application.\nDo you want to access with this profile?';
+$TbMsg["ACCESS_ALLOWED"]='Allowed access. Please wait ...';
 $TbMsg["ACCESS_ERROR"]='Access error';
 $TbMsg["ACCESS_UNKNOWNERROR"]='Unknown error';
 

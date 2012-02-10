@@ -26,6 +26,7 @@ $TbMsg["ACCESS_CHOOSE"]="Elegir";
 $TbMsg["ACCESS_NOUSER"]="Debe introducir un nombre de usuario";
 $TbMsg["ACCESS_NOPASS"]="Debe introducir una contraseña";
 $TbMsg["ACCESS_NOUNIT"]='ATENCIÓN: No ha introducido ninguna Unidad Organizativa.\nNO tendrá acceso al sistema a menos que sea adminstrador general de la Aplicación.\n¿Desea acceder con este perfil?';
+$TbMsg["ACCESS_ALLOWED"]='Acceso permitido. Espere por favor ...';
 $TbMsg["ACCESS_ERROR"]='Error de acceso';
 $TbMsg["ACCESS_UNKNOWNERROR"]='Error desconocido';
 
