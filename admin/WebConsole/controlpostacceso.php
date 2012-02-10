@@ -10,6 +10,7 @@
 include_once("controlacceso.php");
 include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");
+include_once("idiomas/php/$idi/acceso_$idi.php");
 //________________________________________________________________________________________________________
  $usu=""; 
  $pss=""; 
@@ -24,7 +25,7 @@ include_once("./clases/AdoPhp.php");
 //________________________________________________________________________________________________________
  $cmd=CreaComando($cnx); // Crea objeto comando 
  if (!$cmd)
-  die("Error de acceso");
+  die($TbMsg["ACCESS_ERROR"]);
 //________________________________________________________________________________________________________
 
  $nmc=""; 
@@ -154,16 +155,18 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
  } 
  //_______________________________________________________________________________________________________ 
 ?> 
- <HTML> 
-     <TITLE> Administración web de aulas</TITLE> 
-     <HEAD> 
+<html> 
+<head> 
+     <title><?php echo $TbMsg["ACCESS_TITLE"] ?></title>
      <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-         <LINK rel="stylesheet" type="text/css" href="estilos.css"> 
-     </HEAD> 
-     <BODY> 
-         <DIV id="mensaje" style="Position:absolute;TOP:250;LEFT:330; visibility:visible"> 
-         <SPAN  align=center class=subcabeceras>Acceso permitido. Espere por favor ...</SPAN></P> 
-         <SCRIPT LANGUAGE="JAVASCRIPT"> 
+     <link rel="stylesheet" type="text/css" href="estilos.css"> 
+</head> 
+
+<body> 
+<div id="mensaje" style="position:absolute;TOP:250;LEFT:330; visibility:visible"> 
+     <span align="center" class="subcabeceras"><?php echo $TbMsg["ACCESS_ALLOWED"] ?></span>
+</div>
+     <script language="javascript"> 
              var vez=0; 
              setTimeout("acceso();",300); 
              function acceso(){ 
@@ -180,6 +183,7 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
                  vez++; 
                  setTimeout("acceso();",300); 
              } 
-     </SCRIPT> 
-  </BODY> 
- </HTML> 
+     </script> 
+</body> 
+</html> 
+
