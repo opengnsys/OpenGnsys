@@ -5,14 +5,14 @@
 //	Idioma: Español 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sin Opción";
-$TbMsg[1]="Insertar";
-$TbMsg[2]="Modificar";
-$TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestión de Variables de Entorno";
-$TbMsg[5]="IP Servidor de administración";
-$TbMsg[6]="Puerto Servidor de administración";
-$TbMsg[7]="Método de clonación preferido";
+$TbMsg[0]="No Option";
+$TbMsg[1]="Insert";
+$TbMsg[2]="Modify";
+$TbMsg[3]="Remove";
+$TbMsg[4]="Environment Variables Management";
+$TbMsg[5]="OpenGnSys Server IP address";
+$TbMsg[6]="OpenGnsys Server port";
+$TbMsg[7]="Default clonation method";
 $TbMsg[8]="";
 $TbMsg[9]="";
 $TbMsg[10]="";

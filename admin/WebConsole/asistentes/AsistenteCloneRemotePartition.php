@@ -20,6 +20,7 @@ include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../idiomas/php/".$idioma."/comandos/ejecutarscripts_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -110,3 +111,4 @@ switch($ambito){
 
 </body>
 </html>
+
