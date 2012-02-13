@@ -15,13 +15,13 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/TomaDato.php");
 include_once("../idiomas/php/".$idioma."/buscar_".$idioma.".php");
 
-session_start(); // Activa variables de sesi�
+session_start(); // Activa variables de sesión.
 
-if (isset($_POST["criterio"])) $criterio=$_POST["criterio"]; 
-if (isset($_POST["valor"])) $valor=htmlspecialchars ($_POST["valor"]); 
+if (isset($_POST["criterio"])) $criterio=htmlspecialchars($_POST["criterio"]);
+if (isset($_POST["valor"])) $valor=htmlspecialchars($_POST["valor"]); 
 if (!empty ($valor) || $criterio == "duplic") {
     $cmd=CreaComando($cadenaconexion);
-    if ($cmd){
+    if ($cmd) {
 	$rs=new Recordset; 
 	switch ($criterio) {
 		case "nombre":
@@ -114,7 +114,7 @@ if (!empty ($valor) || $criterio == "duplic") {
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<link rel="stylesheet" type="text/css" href="../estilos.css">
-	<script languaje="JAVASCRIPT">
+	<script languaje="javascript">
 //_________________________________
 function confirmar(){
 	if (comprobar_datos())
@@ -122,8 +122,8 @@ function confirmar(){
 }
 //_________________________________
 function comprobar_datos(){
-	if (document.fdatos.valor.value=="" && document.fdatos.criterio.value!="duplic"){
-		alert("Debe introducir un valor para el criterio de búsqueda")
+	if (document.fdatos.valor.value=="" && document.fdatos.criterio.value!="duplic") {
+		alert("<?php echo $TbMsg["SEARCH_NOVALUE"] ?>")
 		document.fdatos.valor.focus()
 		return(false)
 	}
@@ -182,7 +182,7 @@ if (!empty ($valor) || $criterio == "duplic") {
 <div align="center" style="margin:20;">
 	<form action="#" class="formulariodatos" name="fdatos" method="post">
 		<?php echo $TbMsg["SEARCH_CRITERIA"] ?>:
-		<select name="criterio" id="criterio">
+		<select name="criterio" id="criterio" onchange="if (document.fdatos.criterio.value=='duplic') document.fdatos.valor.disabled=true; else document.fdatos.valor.disabled=false">
 			<option value="nombre"> <?php echo $TbMsg["SEARCH_NAME"] ?> </option>
 			<option value="ip"> <?php echo $TbMsg["SEARCH_IP"] ?> </option>
 			<option value="mac"> <?php echo $TbMsg["SEARCH_MAC"] ?> </option>

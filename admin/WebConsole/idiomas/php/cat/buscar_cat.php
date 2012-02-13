@@ -14,5 +14,6 @@ $TbMsg["SEARCH_IP"]="Adreça IP";
 $TbMsg["SEARCH_MAC"]="Adreça MAC";
 $TbMsg["SEARCH_DUPLICATES"]="Duplicats";
 $TbMsg["SEARCH_NOMATCHES"]="No es troben resultats";
+$TbMsg["SEARCH_NOVALUE"]="Ha d\'introduir un valor per al criteri de cerca";
 ?>
 

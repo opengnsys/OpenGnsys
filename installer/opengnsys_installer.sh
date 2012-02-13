@@ -1477,4 +1477,5 @@ installationSummary
 
 #rm -rf $WORKDIR
 echoAndLog "OpenGnSys installation finished at $(date)"
+exit 0
 
