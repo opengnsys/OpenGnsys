@@ -38,7 +38,7 @@
 	$TbMsg[30]='"Confirmed"';
 	$TbMsg[31]='"Pending"';
 	$TbMsg[32]='"Denied"';
-	$TbMsg[33]='"Swtiching"';
+	$TbMsg[33]='"Remote console"';
 	$TbMsg[34]='"Reserve schedules"';
 	$TbMsg[35]='"Operators"';
 	$TbMsg[36]='"Remove operator"';
