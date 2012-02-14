@@ -60,7 +60,8 @@ switch($ambito){
 			$textambito=$TbMsg[4];
 			break;
 	}
-	echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
+	//echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
+	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
 				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
 	?>			
