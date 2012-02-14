@@ -34,12 +34,12 @@ foreach ($lista as $sublista) {
 	$elementos = explode("|",$sublista);
 	$hostname=$elementos[1];
 	$optboot=$elementos[0];
-	ogBootServer($cmd,$optboot,$hostname);
+	ogBootServer($cmd,$optboot,$hostname,$idioma);
 }
 echo " </body>";
 echo " </html> ";
 
-function ogBootServer($cmd,$optboot,$hostname) 
+function ogBootServer($cmd,$optboot,$hostname,$idioma) 
 {	
 global $cmd;
 global $hostname;
@@ -76,7 +76,20 @@ $rs->Primero();
         $server=$rs->campos["ipserveradm"];
 $rs->Cerrar();
 
-$infohost=" ip="
+switch ($idioma) {
+    case eng:
+        $idioma=en_GB;
+        break;
+    case esp:
+        $idioma=es_ES;
+        break;
+    case cat:
+        $idioma=es_CAT;
+        break;
+}
+
+
+$infohost="LANG=" .$idioma . " ip="
 . $ip . ":"
 . $server .":"
 . $router . ":"
