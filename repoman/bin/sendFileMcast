@@ -25,7 +25,7 @@ fi
 
 # Fichero a enviar (camino completo o relativo al directorio del repositorio).
 FICH="$1"
-if [ "${FICH:0:1}" != "/" ]; then
+if [ "${FICH:0:15}" != "$OPENGNSYS" ]; then
     FICHIMG="$OGIMG/$FICH"
 else
     FICHIMG="$FICH"
