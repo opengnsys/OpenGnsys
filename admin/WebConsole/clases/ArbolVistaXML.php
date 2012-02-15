@@ -43,7 +43,7 @@ class ArbolVistaXML{
 			$this->ancho=" width=100% ";
 		}
 		else{
-			$this->anchoM=" width=1024 ";
+			$this->anchoM=" width=100% ";
 			$this->ancho="";
 		}
 		for($i=0;$i<=5;$i++){ // Inicializar 
