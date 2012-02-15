@@ -7,6 +7,7 @@
 // Nombre del fichero: colasacciones.php
 // Descripción : 
 //		Visualiza las acciones pendientes y finalizadas con los resultados de estatus y horas de inicio y finalización
+// Cambio en la linea 73 la cantidad de días predeterminado por 180 (antes 3)
 // *************************************************************************************************************************************************
 	include_once("../includes/ctrlacc.php");
 	include_once("../clases/AdoPhp.php");
@@ -70,7 +71,7 @@
 	if (isset($_POST["sesion"])) $sesion=$_POST["sesion"]; 
 
 	if(empty($swPOST)){ // Valores por defecto 
-		$wfechainicio=mktime(0, 0, 0, date("m")  , date("d")-3, date("Y")); // Acciones desde tres días antes
+		$wfechainicio=mktime(0, 0, 0, date("m")  , date("d")-180, date("Y")); // Acciones desde tres días antes
 		$wfechafin=mktime(0, 0, 0, date("m")  , date("d")+1, date("Y"));
 		$fechainicio=date("d/m/Y",$wfechainicio);
 		$fechafin=date("d/m/Y ",$wfechafin);
