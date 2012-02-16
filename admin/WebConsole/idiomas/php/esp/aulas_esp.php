@@ -52,6 +52,9 @@
 	$TbMsg[44]='Ubicador Ordenadores';
 	$TbMsg[45]='Nombre ámbito';
 	$TbMsg[46]='Identificador ámbito';
+	$TbMsg[47]='Log historico';
+	$TbMsg[48]='Log en tiempo real';
+	
 
 ?>
 

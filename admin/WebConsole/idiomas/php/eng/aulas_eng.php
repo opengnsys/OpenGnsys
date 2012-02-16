@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: aulas_eng.php 
-//	Idioma: Inglés 
+//	Idioma: Inglï¿½s 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"New labs group"';
@@ -52,6 +52,8 @@
         $TbMsg[44]='Computers locator';
         $TbMsg[45]='Scope name';
         $TbMsg[46]='Scope id';
+    $TbMsg[47]='Log historical';
+	$TbMsg[48]='Log real time';
 
 
 ?>

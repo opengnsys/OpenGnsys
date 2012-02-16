@@ -62,7 +62,7 @@ else
 <tr>
 <?php
 	$nombreordenador=$_GET["nombreordenador"];
-	echo "<td> Log del equipo ". $nombreordenador ."  con ip " . $ip ." </td> ";
+	echo "<td> Log  host ". $nombreordenador ."  ip " . $ip ." </td> ";
 ?>
 </tr>
 </table>

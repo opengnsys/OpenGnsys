@@ -838,13 +838,13 @@ function ContextualXMLOrdenadores(){
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_log('.$AMBITO_ORDENADORES.')"';
 	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
-	$layerXML.=' textoitem="Log"';
+	$layerXML.=' textoitem='.$TbMsg[47];
 	$layerXML.='></ITEM>';
  
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="ver_log_seguimiento('.$AMBITO_ORDENADORES.')"';
 	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
-	$layerXML.=' textoitem="Log_seguimiento"';
+	$layerXML.=' textoitem='.$TbMsg[48];
 	$layerXML.='></ITEM>';
 	
 	$layerXML.='<ITEM';
