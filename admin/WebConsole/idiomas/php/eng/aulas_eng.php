@@ -52,8 +52,8 @@
         $TbMsg[44]='Computers locator';
         $TbMsg[45]='Scope name';
         $TbMsg[46]='Scope id';
-    $TbMsg[47]='Log historical';
-	$TbMsg[48]='Log real time';
+    $TbMsg[47]='"Log historical"';
+	$TbMsg[48]='"Log real time"';
 
 
 ?>
