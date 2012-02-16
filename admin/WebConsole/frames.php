@@ -22,10 +22,10 @@ include_once("./includes/constantes.php");
 	<FRAMESET cols="22%,*">
 			<? 
 			if($idtipousuario!=$SUPERADMINISTRADOR)
-				echo '<FRAME SRC="./principal/aulas.php" frameborder=0 scrolling=auto NAME="frame_arbol" >';
+				echo '<FRAME SRC="./principal/aulas.php" frameborder=1 scrolling=auto NAME="frame_arbol" >';
 			else{
 				if($idtipousuario==$SUPERADMINISTRADOR)
-					echo '<FRAME SRC="./principal/administracion.php" frameborder=0 scrolling=auto NAME="frame_arbol" >';
+					echo '<FRAME SRC="./principal/administracion.php" frameborder=1 scrolling=auto NAME="frame_arbol" >';
 			}
 			?>
 		<FRAME SRC="nada.php" frameborder=0  NAME="frame_contenidos">
