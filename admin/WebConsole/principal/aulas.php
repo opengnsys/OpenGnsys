@@ -16,6 +16,7 @@ include_once("../clases/MenuContextual.php");
 include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/aulas_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/comandos/mensajes_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
