@@ -21,6 +21,7 @@
 				<?php echo ''. htmlOPTION_images($cmd,$ambito,$idambito) .'';   ?>
 		</select>		
 		<br />		
+	    <? echo $TbMsg["WDI23"] ?>
 	
 		<br />
 		<select name="idmetodo" id="idmetodo" style="WIDTH:220";">

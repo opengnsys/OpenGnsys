@@ -21,9 +21,9 @@
 	$TbMsg["WDI11"]='Wizard Deploy Image';
 	$TbMsg["WDI12"]='Generate OG Code';
 
-        $TbMsg["WDI13"]='Elige si solo quieres almacenar la imagen en la Cache - UpdateCache  ';
+        $TbMsg["WDI13"]='Choose whether you just want to store the image on the Cache - UpdateCache';
         $TbMsg["WDI14"]='deployImage (update+restore)';
-        $TbMsg["WDI15"]='updateCache ( only download)';
+        $TbMsg["WDI15"]='updateCache (only download)';
 
         $TbMsg["WDI16"]='basic options';
         $TbMsg["WDI17"]='opciones multicast options';
