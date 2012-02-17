@@ -14,6 +14,32 @@
 	$TbMsg[6]='Environment';
 	$TbMsg[7]='Title';
 	$TbMsg[8]='Description';
-	$TbMsg[9]='Rembo-C code';
+	$TbMsg[9]='Opengnsys code';
 	$TbMsg[10]='Code file';
+
+
+	$TbMsg["WDI11"]='Wizard Deploy Image';
+	$TbMsg["WDI12"]='Generate OG Code';
+
+        $TbMsg["WDI13"]='Elige si solo quieres almacenar la imagen en la Cache - UpdateCache  ';
+        $TbMsg["WDI14"]='deployImage (update+restore)';
+        $TbMsg["WDI15"]='updateCache ( only download)';
+
+        $TbMsg["WDI16"]='basic options';
+        $TbMsg["WDI17"]='opciones multicast options';
+        $TbMsg["WDI18"]='torrent options';
+        $TbMsg["WDI19"]='unicast options';
+        $TbMsg["WDI20"]='Select the partition where the restore disk image:';
+        $TbMsg["WDI20"]='Select the disk partition where to restore the image:';
+        $TbMsg["WDI21"]='Select the image to distribute:';
+        $TbMsg["WDI22"]='--Select image --';
+        $TbMsg["WDI23"]='Select the transfer mode ';
+	$TbMsg["WDI24"]='port : ';
+	$TbMsg["WDI25"]='Mcast address : ';
+	$TbMsg["WDI26"]='mode : ';
+	$TbMsg["WDI27"]='speed : ';
+	$TbMsg["WDI28"]='Max. client number';
+	$TbMsg["WDI29"]='Max. waiting time (sec)';
+
+        $TbMsg["WDI30"]='Seed time';
 ?>

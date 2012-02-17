@@ -1,29 +1,28 @@
 
- Elige si solo quieres almacenar la imagen en la Cache - UpdateCache  <br>
-		<input type="radio" name="modo" value="deployImage" checked > deployImage (update+restore) <br>
-		<input type="radio" name="modo" value="updateCache" > updateCache (solo descarga) <br> 
+<? echo $TbMsg["WDI13"] ?> <br>
+		<input type="radio" name="modo" value="deployImage" checked ><? echo $TbMsg["WDI14"] ?> <br>
+		<input type="radio" name="modo" value="updateCache" > <? echo $TbMsg["WDI15"] ?> <br> 
 	
-<tr> <td> opciones basicas </td> <td> opciones multicast </td> <td> opciones torrent </td> <td> opciones unicast </td></tr>
+<tr> <td> <? echo $TbMsg["WDI16"] ?>  </td> <td> <? echo $TbMsg["WDI17"] ?> </td> <td>  <? echo $TbMsg["WDI18"] ?> </td> <td>  <? echo $TbMsg["WDI19"] ?> </td></tr>
 
 <tr>  
 	<td class="op_basic">
 	   
-	    Elige la particion del disco donde se restaurar la imagen:
+	    <? echo $TbMsg["WDI20"] ?> 
 		<select name="idparticion" id="idparticion" style="WIDTH:220">
 				<option value="1"> 1 </option>
 				<option value="2"> 2 </option>
 				<option value="3"> 3 </option>
 		</select>
 		<br />
-	    Elige la imagen a distribuir:	
+	    <? echo $TbMsg["WDI21"] ?>
 		<select name="idimagen" id="idimagen" style="WIDTH:220">
-				<option value="">--Selecciona imagen --</option>
+				<option value=""> <? echo $TbMsg["WDI22"] ?></option>
 				<?php echo ''. htmlOPTION_images($cmd,$ambito,$idambito) .'';   ?>
 		</select>		
 		<br />		
 	
 		<br />
-		Elige el metodo de transferencia
 		<select name="idmetodo" id="idmetodo" style="WIDTH:220";">
 		<!--	<option value="UNICAST"> UNICAST </option> -->
 			<option value="TORRENT"> TORRENT </option>
