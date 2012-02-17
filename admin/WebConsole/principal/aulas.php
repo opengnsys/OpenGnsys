@@ -940,6 +940,7 @@ function ContextualXMLOrdenadores(){
 //________________________________________________________________________________________________________
 function ContextualXMLComandos($litambito,$ambito){
 	global $cmd;
+	global $TbMsg;
  	$maxlongdescri=0;
 	$rs=new Recordset; 
 	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
@@ -951,12 +952,16 @@ function ContextualXMLComandos($litambito,$ambito){
 		$layerXML="";
 		$rs->Primero(); 
 		while (!$rs->EOF){
+			$descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];
+			if (empty ($descrip)) {
+				$descrip=$rs->campos["funcion"];
+			}
 			$layerXML.='<ITEM';
 			$layerXML.=' alpulsar="confirmarcomando('."'".$ambito."'".','.$rs->campos["idcomando"].',\''.$rs->campos["descripcion"].'\',\''.$rs->campos["pagina"]. '\',\''.$rs->campos["gestor"]. '\',\''.$rs->campos["funcion"]. '\')"';
-			$layerXML.=' textoitem="'.$rs->campos["descripcion"].'"';
+			$layerXML.=' textoitem="'.$descrip.'"';
 			$layerXML.='></ITEM>';
-			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la Descripción de mayor longitud
-				$maxlongdescri=strlen($rs->campos["descripcion"]);
+			if ($maxlongdescri < strlen($descrip)) // Toma la Descripción de mayor longitud
+				$maxlongdescri=strlen($descrip);
 			$rs->Siguiente();
 		}
 	$layerXML.='</MENUCONTEXTUAL>';
@@ -974,6 +979,7 @@ function ContextualXMLComandos($litambito,$ambito){
 //________________________________________________________________________________________________________
 function ContextualXMLAsistentes($litambito,$ambito){
 	global $cmd;
+	global $TbMsg;
  	$maxlongdescri=0;
 	$rs=new Recordset; 
 	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
@@ -985,12 +991,16 @@ function ContextualXMLAsistentes($litambito,$ambito){
 		$layerXML="";
 		$rs->Primero(); 
 		while (!$rs->EOF){
+			$descrip=$TbMsg["WIZARD_".$rs->campos["descripcion"]];
+			if (empty ($descrip)) {
+				$descrip=$rs->campos["descripcion"];
+			}
 			$layerXML.='<ITEM';
 			$layerXML.=' alpulsar="confirmarcomando('."'".$ambito."'".','.$rs->campos["idcomando"].',\''.$rs->campos["descripcion"].'\',\''.$rs->campos["pagina"]. '\',\''.$rs->campos["gestor"]. '\',\''.$rs->campos["funcion"]. '\')"';
-			$layerXML.=' textoitem="'.$rs->campos["descripcion"].'"';
+			$layerXML.=' textoitem="'.$descrip.'"';
 			$layerXML.='></ITEM>';
-			if($maxlongdescri<strlen($rs->campos["descripcion"])) // Toma la Descripción de mayor longitud
-				$maxlongdescri=strlen($rs->campos["descripcion"]);
+			if($maxlongdescri<strlen($descrip)) // Toma la Descripción de mayor longitud
+				$maxlongdescri=strlen($descrip);
 			$rs->Siguiente();
 		}
 	$layerXML.='</MENUCONTEXTUAL>';
