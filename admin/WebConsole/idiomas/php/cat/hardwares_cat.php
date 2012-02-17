@@ -5,9 +5,9 @@
 //	Idioma: Català
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Definir nou tipus hardware"';	
+	$TbMsg[0]='"Definir nou tipus de hardware"';	
 	$TbMsg[1]='"Propietats"';
-	$TbMsg[2]='"Eliminar tipus  de hardware"';
+	$TbMsg[2]='"Eliminar tipus de hardware"';
 	$TbMsg[3]='"Nou grup de components"';
 	$TbMsg[4]='"Definir nou component"';
 	$TbMsg[5]='"Col.locar component"';
@@ -24,7 +24,7 @@
 	$TbMsg[16]='"Moure perfil"';
 	$TbMsg[17]='"Eliminar perfil hardware"';
 	$TbMsg[18]='"Tipus de hardware"';
-	$TbMsg[19]='"Components hardwares"';
-	$TbMsg[20]='"Perfils hardwares"';
-
+	$TbMsg[19]='"Components hardware"';
+	$TbMsg[20]='"Perfils hardware"';
 ?>
+

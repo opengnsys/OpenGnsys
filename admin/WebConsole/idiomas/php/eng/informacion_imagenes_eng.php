@@ -14,6 +14,6 @@
 	$TbMsg[6]='Software Profile';
 	$TbMsg[7]='Computers with this image';
 	$TbMsg[8]='Partition';
-	$TbMsg[9]='Coments';
+	$TbMsg[9]='Comments';
 ?>
 

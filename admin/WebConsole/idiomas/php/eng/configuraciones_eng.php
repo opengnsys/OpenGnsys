@@ -26,7 +26,7 @@ $TbMsg[15]="IP address";
 $TbMsg[16]="MAC address";
 $TbMsg[17]="Hardware profile";
 
-$TbMsg[18]="UNGROUP BY VALUES OTHER THAN:";
+$TbMsg[18]="UNGROUP BY VALUES OF:";
 $TbMsg[19]="Data to provide";
 
 $TbMsg[20]='Partition';
@@ -51,7 +51,7 @@ $TbMsg[37]='Logical Partitions';
 $TbMsg[38]='Less free disk space (KB)';
 $TbMsg[39]='Customize';
 $TbMsg[40]='Size unchanged';
-$TbMsg[41]='Generate Instruction';
+$TbMsg[41]='Generate OG Instruction';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='No configuration: client does not connect to server.';

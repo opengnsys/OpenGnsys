@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: repositorios_eng.php 
-//	Idioma: Ingles 
+//	Idioma: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"New Group of Repositories"';
@@ -10,7 +10,7 @@
 	$TbMsg[2]='"Place Repository"';
 	$TbMsg[3]='"Rename"';
 	$TbMsg[4]='"Remove group of repositories"';
-	$TbMsg[5]='"Information Repository"';
+	$TbMsg[5]='"Repository Information"';
 	$TbMsg[6]='"Move Repository"';
 	$TbMsg[7]='"Properties"';
 	$TbMsg[8]='"Remove Repository"';
