@@ -74,7 +74,7 @@ switch($ambito){
 			$textambito=$TbMsg[4];
 			break;
 	}
-	echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
+	echo '<p align=center><span class=cabeceras>'.$TbMsg["WCRP31"].'&nbsp;</span><br>';
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
 				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
 	?>	
@@ -93,7 +93,7 @@ switch($ambito){
 		
 		
 			<tr> 
-				<th><INPUT TYPE="button" NAME="GenerarInstruccion" Value="Generar InstruccionOG" onClick="codeCloneRemotePartition(this.form)"> 	</th>
+				<th><INPUT TYPE="button" NAME="GenerarInstruccion" Value="<? echo $TbMsg["WDI12"]  ?>" onClick="codeCloneRemotePartition(this.form)"> 	</th>
 				<td colspan="5"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
 						</table>	

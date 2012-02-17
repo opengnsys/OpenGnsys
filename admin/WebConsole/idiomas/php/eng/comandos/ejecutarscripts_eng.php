@@ -42,4 +42,13 @@
 	$TbMsg["WDI29"]='Max. waiting time (sec)';
 
         $TbMsg["WDI30"]='Seed time';
+
+
+	$TbMsg["WCRP31"]='Wizard to Clone Remote Partitions';
+	$TbMsg["WCRP32"]='Select MASTER PC:';
+	$TbMsg["WCRP33"]='Select the image or partition to send from Master PC';
+        $TbMsg["WCRP34"]='Select the destine partition in the clients';
+        $TbMsg["WCRP35"]='Select the transfer mode';
+        $TbMsg["WCRP36"]='Select cloning tool';        
+        $TbMsg["WCRP37"]='Select compressor for cloning tool:';
 ?>

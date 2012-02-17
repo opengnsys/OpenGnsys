@@ -39,4 +39,14 @@
         $TbMsg["WDI29"]='Tiempo(seg) Max. Espera     : ';
 
 	$TbMsg["WDI30"]='tiempo de semilla :';
+
+        $TbMsg["WCRP31"]='Asistente Clonacion Particiones Remotas';
+        $TbMsg["WCRP32"]='Elige equipo MASTER:';
+        $TbMsg["WCRP33"]='Elige desde el Master la imagen o particion a enviar';
+        $TbMsg["WCRP34"]='Elige la identificacion de la particion destino de los clientes:';
+        $TbMsg["WCRP35"]='Elige el metodo de transferencia';
+        $TbMsg["WCRP36"]='Elige herramienta de clonacion:';
+        $TbMsg["WCRP37"]='Elige compresor para la herramienta de clonacion:';
+
+
 ?>
