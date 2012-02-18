@@ -1,7 +1,7 @@
 <?
 //________________________________________________________
 //
-//	Fichero de idiomas php: comandos/mensajes_esp.php 
+//	Fichero de idiomas php: comandos/mensajes_eng.php 
 //	Idioma: English 
 //________________________________________________________
 if (empty ($TbMsg)) $TbMsg=Array();
