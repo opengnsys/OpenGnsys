@@ -90,7 +90,7 @@ switch ($idioma) {
         $idioma=es_ES;
         break;
     case cat:
-        $idioma=es_CAT;
+        $idioma=ca_ES;
         break;
 }
 
