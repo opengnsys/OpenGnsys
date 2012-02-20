@@ -7,6 +7,33 @@ Lista de cambios incluidos en OpenGnSys 1.0.3
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #92	ogGetFsType detecta identificador de partición no sistema de archivos
+#469	Definir fichero de configuración para el motor de clonación
+#470	Implementar mejoras en script updateCache
+#471	Test de rendimiento de sistemas de archivos en contenedor de imágenes local y remoto (duplicado de #468)
+#472	Librería PostConf permite habilitar la desactivación del chkdisk tras clonación en Windows
+#481	Script sendFileMcast del repositorio sin mbuffer
+#482	Script de inicio mountrepo.sh no reconoce variable "ogprotocol"
+
+Tickets resueltos en módulo OpenGnSys Client:
+#440	Restauración con Partclone muy lenta
+#456	Seguridad: ogclient en modo usuario monta el repositorio con permisos de escritura
+#460	Cliente ogLive 11.10 (tarea)
+#466	Comando iniciar sobre sistema Linux bloqueado por Browswer
+#468	Sistema de archivos de la caché en Ext4
+
+Tickets resueltos en módulo OpenGnSys Server:
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#454	Buscador de equipos para la interfaz de administración web (mejora)
+#475	Consola web comando->restaurar habilitar restauración directa (sin cache) por Multicast y Unicast (mejora)
+#485	Cambio en la cantidad de registros a mostrar en colas de acciones
+#487	Tamaño de select dinámico en Gestión Avanzada Arranque y Reubicador de equipos
+#492	Mejoras en páginas principal de acceso (mejora)
+
+Tickets resueltos en módulo OpenGnSys Installer:
+
+Tickets genéricos resueltos:
+#499	Integración de OpenGnSys 1.0.3 en rama principal
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.2a (versión de mantenimiento)
