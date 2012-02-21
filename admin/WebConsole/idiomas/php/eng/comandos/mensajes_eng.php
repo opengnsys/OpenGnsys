@@ -15,5 +15,8 @@ $TbMsg["COMMAND_InventarioHardware"]="Hardware Inventory";
 $TbMsg["COMMAND_InventarioSoftware"]="Software Inventory";
 $TbMsg["COMMAND_Reiniciar"]="Reboot";
 $TbMsg["COMMAND_RestaurarImagen"]="Restore Image";
+$TbMsg["WIZARD_Asistente Particionado"]="Partition";
+$TbMsg["WIZARD_Asistente Clonacion Particiones Remotas"]="Clone Remote Partitions ";
+$TbMsg["WIZARD_Asistente \"Deploy\" de Imagenes"]="Deploy image";
 ?>
 
