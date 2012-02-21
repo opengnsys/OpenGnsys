@@ -5,6 +5,8 @@
 #$ambito (aula=4 y ordenadores=16)
 function htmlForm_mcast($cmd,$ambito,$idambito)
 {
+global $TbMsg;
+
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if ($ambito == 4) 
 {
@@ -25,9 +27,9 @@ $cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.mo
 	$rs->Comando=&$cmd; 
 if ($rs->Abrir()){
 		$rs->Primero(); 
-        $SelectHtml.='puerto    :<input type="text" size="3" name="mcastpuerto" value="'.$rs->campos["pormul"] . '" /> <br />';
+        $SelectHtml.= $TbMsg["WDI24"] . ':<input type="text" size="3" name="mcastpuerto" value="'.$rs->campos["pormul"] . '" /> <br />';
 		$rs->Siguiente();
-		$SelectHtml.='direccion Mcast :<input type="text" size="15"  maxlength="15" name="mcastdireccion" value="'.$rs->campos["ipmul"] . '" /> <br />';
+		$SelectHtml.= $TbMsg["WDI25"] . ':<input type="text" size="15"  maxlength="15" name="mcastdireccion" value="'.$rs->campos["ipmul"] . '" /> <br />';
 		$rs->Siguiente();
 		switch ($rs->campos["modomul"]) 
 		{
@@ -38,14 +40,14 @@ if ($rs->Abrir()){
 			    $modomulticast="full-duplex";
 				break;
 		} 
-		$SelectHtml.='modo      :<input type="text" size="8" name="mcastmodo" value="'.$modomulticast. '" /> <br />';
+		$SelectHtml.= $TbMsg["WDI26"] . ':<input type="text" size="8" name="mcastmodo" value="'.$modomulticast. '" /> <br />';
 		$rs->Siguiente();
-		$SelectHtml.='velocidad   :<input type="text" size="6" name="mcastvelocidad" value="'.$rs->campos["velmul"] . '" /> <br />';
+		$SelectHtml.= $TbMsg["WDI27"] . ':<input type="text" size="6" name="mcastvelocidad" value="'.$rs->campos["velmul"] . '" /> <br />';
 	
 	$rs->Cerrar();
 	}
-	        $SelectHtml.='nº Max. clientes      :<input type="text" size="8" name="mcastnclien" value="50" /> <br />';
-			$SelectHtml.='Tiempo(seg) Max. Espera     :<input type="text" size="8" name="mcastseg" value="60" /> <br />';
+	        $SelectHtml.= $TbMsg["WDI28"] . ':<input type="text" size="8" name="mcastnclien" value="50" /> <br />';
+			$SelectHtml.= $TbMsg["WDI29"] . ' :<input type="text" size="8" name="mcastseg" value="60" /> <br />';
 			
 	return($SelectHtml);	
 }
@@ -55,6 +57,7 @@ if ($rs->Abrir()){
 #$ambito (aula=4 y ordenadores=16)
 function htmlForm_p2p($cmd,$ambito,$idambito)
 {
+global $TbMsg;
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if ($ambito == 4) 
 {
@@ -75,9 +78,9 @@ $cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON o
 	$rs->Comando=&$cmd; 
 if ($rs->Abrir()){
 		$rs->Primero(); 
-        $SelectHtml.='modo    :<input type="text" size="10" name="modp2p" value="'.$rs->campos["modp2p"] . '" /> <br />';
+        $SelectHtml.= $TbMsg["WDI26"] . ' :<input type="text" size="10" name="modp2p" value="'.$rs->campos["modp2p"] . '" /> <br />';
 		$rs->Siguiente();
-		$SelectHtml.='tiempo de semilla :<input type="text" size="10"  maxlength="15" name="timep2p" value="'.$rs->campos["timep2p"] . '" /> <br />';
+		$SelectHtml.= $TbMsg["WDI30"] . ' :<input type="text" size="10"  maxlength="15" name="timep2p" value="'.$rs->campos["timep2p"] . '" /> <br />';
 		$rs->Siguiente();
 		$rs->Cerrar();
 	}
@@ -88,7 +91,7 @@ return($SelectHtml);
 
 function htmlForm_unicast($cmd,$ambito,$idambito)
 {
-
+global $TbMsg;
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if ($ambito == 4)
 {
@@ -116,8 +119,8 @@ $cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaul
 		}
 		$rs->Cerrar();
 	}
-		$SelectHtml.='Puerto Unicast      :<input type="text" size="8" name="ucastport" value="8000" /> <br />';
-		$SelectHtml.='Clientes Posibles   :<input type="text" size="98" name="ucastclient" value="' . $ucastclient . '" /> <br />';
+		$SelectHtml.= $TbMsg["WDI24"] . ' :<input type="text" size="8" name="ucastport" value="8000" /> <br />';
+		$SelectHtml.= $TbMsg["WDI28"] . ' :<input type="text" size="98" name="ucastclient" value="' . $ucastclient . '" /> <br />';
 		
 	return($SelectHtml);	
 }
