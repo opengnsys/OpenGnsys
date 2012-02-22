@@ -48,7 +48,7 @@ function ListarOrigenMaster($ip){
 		}
 		else
 		{			
-		$objResponse->alert("Este equipo No tiene particiones clonables.");
+		$objResponse->alert("No partion found in this host for use it to cloning other computers.");
 		}
 		$rs->Cerrar();
 	}
@@ -73,7 +73,7 @@ where repositorios.ip="' .$ip .'"';
 		}
 		else
 		{			
-		$objResponse->alert("Este equipo No tiene imagenes registradas en la cache.");
+		$objResponse->alert("No image found in CACHE in this host for use it to cloning other compuers.");
 		}
 		$rs->Cerrar();
 	}
@@ -99,7 +99,7 @@ where repositorios.idrepositorio=(select idrepositorio from ordenadores where or
 		}
 		else
 		{			
-		$objResponse->alert("Este equipo No tiene acceso a ninguna imagen del REPO asignado.");
+		$objResponse->alert("No image found in REPO from this host for use it to cloning other computers.");
 		}
 		$rs->Cerrar();
 	}
