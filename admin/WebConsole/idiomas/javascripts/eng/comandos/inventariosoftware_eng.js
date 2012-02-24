@@ -1,8 +1,8 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: iniciarsesion_esp.js 
-//	Idioma: Español 
+//	Fichero de idiomas javascripts: iniciarsesion_eng.js 
+//	Idioma: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";
-TbMsg[1]="Debe elegir al menos una partición";
+TbMsg[1]="You must choose at least one partition";
