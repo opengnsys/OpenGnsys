@@ -81,8 +81,11 @@ case "$OSDISTRIB" in
 		ENABLESITE="a2ensite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		SAMBAINIT=/etc/init.d/smbd
-		[ -f $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
+		if [ "$OSDISTRIB" == "Debian" ]; then
+			SAMBAINIT=/etc/init.d/samba
+		else
+			SAMBAINIT=/etc/init.d/smbd
+		fi
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
 		[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp	# Debian 6
@@ -120,7 +123,7 @@ local DHCPVERSION
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
-	Ubuntu) # Postconfiguación personalizada para Ubuntu.
+	Ubuntu|LinuxMint) # Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
 		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
