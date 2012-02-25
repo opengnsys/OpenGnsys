@@ -1,0 +1,100 @@
+
+OpenGnSys Server Installation v. 1.0.3
+======================================
+
+
+Notes
+-----
+
+It is assumed OpenGnSys Server will be installed in a GNU/Linux distro, Ubuntu 10.04 Server LTS or later, Linux Mint 12 or later, Debian 6 or later.
+
+
+Installation Methods
+--------------------
+
+There are three basic ways OpenGnSys installation:
+
+    Installation script. Which uses Subversion to download the application.
+    Starting from a tar.gz This application is now complete.
+    Installation step by step manual. It is obvious the installation script and install each component. 
+
+
+1. Download the Installation Script
+
+OpenGnSys installation is done by running the installation script opengnsys_installer.sh, which can be downloaded directly from http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh
+
+1.1. Download the script.  Examples with various tools:
+
+        Download with wget.
+           wget http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh
+        Download with curl.
+           curl http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh > opengnsys_installer.sh
+        Download with a web browser. Click on the link http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh and save the file as opengnsys_installer.sh 
+
+1.2. Or, installation from tar.gz.
+
+    If we do not have access to Subversion, we will have to download the package tgz from the web.  Access to http://www.opengnsys.es/browser/tags and load it on a server temporary directory.
+
+    Descompress the file:
+	tar xvzf opengnsys-version.tar.gz
+
+    Change to the installer directory:
+	cd opengnsys/installer
+
+
+2. Basic Configuration
+
+        For security reasons, it is very important modify defaults users and passwords to access to the system. For this, edit the installation file opengnsys_installer.sh and change the values of configuration variables:
+            MYSQL_ROOT_PASSWORD - MySQL root user password.
+            OPENGNSYS_DB_USER - OpenGnSys access user and OpenGnSys super-user.
+            OPENGNSYS_DB_PASSWD - User password.
+            OPENGNSYS_CLIENT_PASSWD - Password for client access to remote services. 
+
+
+3. Installation process.
+
+The installation script must be run as root:
+
+           sudo bash opengnsys_installer.sh
+
+
+4. Check the configuration files. 
+
+Init Configuration
+        /opt/opengnsys/etc/ogAdmServer.cfg - OpenGnSys Server config file
+        /opt/opengnsys/etc/ogAdmRepo.cfg - OpenGnSys Repository config file
+        /opt/opengnsys/etc/ogAdmAgent.cfg - OpenGnSys Agent config file
+        /opt/opengnsys/client/etc/ogAdmClient.cfg - OpenGnSys Client config file
+        /opt/opengnsys/www/controlacceso.php - OpenGnSys Web Admin Console config file 
+
+Configure DHCP server, insert clients data and restart the service.
+
+Access as Administrador in Web Admin Console.
+        Use the user and password set in the installer to access to database (variables OPENGNSYS_DB_USER and OPENGNSYS_DB_PASSWD).
+        Check the default organizaed configuration and default user. 
+    Access as user in Web Admin Console.
+        Use the user and password configured as administrador in the Organizational Unit.
+        Check the server IP in section "Servidores->Servidor OpenGnSys (Default)".
+        If you change the configuration, you must to restart the server: sudo /etc/init.d/opengnsys restart 
+
+
+Updating OpenGnSys
+------------------
+
+Run opengnsys_update.sh script as "root" to update all OpenGnSys components from the Subversion repository:
+
+	sudo bash /opt/opengnsys/lib/opengnsys_update.sh
+
+Follow the instructions.
+
+
+Uninstalling OpenGnSys
+----------------------
+
+Run opengnsys_uninstall.sh script as "root" to uninstall all OpenGnSys components:
+
+	sudo bash /opt/opengnsys/lib/opengnsys_uninstall.sh
+
+Follow the instructions.
+
+
