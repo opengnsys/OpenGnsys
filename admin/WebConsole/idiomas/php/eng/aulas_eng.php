@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: aulas_eng.php 
-//	Idioma: Ingl�s 
+//	Idioma: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"New labs group"';
@@ -49,12 +49,11 @@
 	$TbMsg[41]='"Relocate computers"';
 	$TbMsg[42]='Advanced Boot Management';
 	$TbMsg[43]='"Save"';
-        $TbMsg[44]='Computers locator';
-        $TbMsg[45]='Scope name';
-        $TbMsg[46]='Scope id';
-    $TbMsg[47]='"Log historical"';
-	$TbMsg[48]='"Log real time"';
-
+	$TbMsg[44]='Computers locator';
+	$TbMsg[45]='Scope name';
+	$TbMsg[46]='Scope id';
+	$TbMsg[47]='"Historical log"';
+	$TbMsg[48]='"Real time log"';
 
 ?>
 

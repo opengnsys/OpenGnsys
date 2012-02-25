@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: restaurarimagen_eng.php (Comandos)
-//	Idioma: Ing�s 
+//	Idioma: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centers';
@@ -11,12 +11,12 @@
 	$TbMsg[3]='Group of computers';
 	$TbMsg[4]='Computers';
 	$TbMsg[5]='Restore Image';
-	$TbMsg[6]='Environment';
-	$TbMsg[7]='Datos a suministrar';
+	$TbMsg[6]='Scope';
+	$TbMsg[7]='Data to provide';
 	$TbMsg[8]='Partition';
 	$TbMsg[9]='Protocol';
 	$TbMsg[10]='Restore (Same partition type)';
-	$TbMsg[11]='Restore (Others partition type)';
+	$TbMsg[11]='Restore (Other partition type)';
 	$TbMsg[12]='Unknown';
 	$TbMsg[13]='';
 	$TbMsg[14]='Scope';
@@ -27,13 +27,13 @@
 	$TbMsg[19]="Providing data";
 	// Cabeceras de tabla de configuración
 	$TbMsg[20]='Partition';
-	$TbMsg[21]='O.S. Installed';
+	$TbMsg[21]='Installed O.S.';
 	$TbMsg[22]='Size';
-	$TbMsg[23]='Datos de configuration';
+	$TbMsg[23]='Configuration data';
 	$TbMsg[24]='Type';
 	$TbMsg[25]='Image';
 	$TbMsg[26]='Software profile';
-	$TbMsg[27]='S.F.';
+	$TbMsg[27]='Filesystem';
 	$TbMsg[28]='None';
 	$TbMsg[29]='Unknown';
 	// Desagrupamiento
@@ -44,3 +44,4 @@
 	$TbMsg[34]='Software Profile';
 	
 ?>
+
