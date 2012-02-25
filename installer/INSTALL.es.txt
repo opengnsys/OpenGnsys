@@ -1,47 +1,52 @@
-Instalación y Actualización de OpenGnSys 1.0.2
+Instalación y Actualización de OpenGnSys 1.0.3
 ==============================================
 
 
 Instalación inicial
 -------------------
 
+1. Obtener el instalador.
+
 Descargar una versión completa y desccomprimir el fichero "opengnsys-version.tar.gz":
         tar xvzf opengnsys-version.tar.gz
-        cd opengnsys-version/installer
+        cd opengnsys/installer
 
 O bien, descargar el instalador desde la última reversión del repositorio:
         svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh
 
-Ejecutar el instalador como root:
+2. Configuración básica.
+
+Como medida de seguridad, debe modificarse los usuarios y claves por defecto de acceso al sistema. Para ello, editar el fichero de instalación opengnsys_installer.sh y modificar los valores de las variables de configuración:
+
+    MYSQL_ROOT_PASSWORD - clave del usuario root de MySQL.
+    OPENGNSYS_DB_USER - usuario de acceso y super-administrador de OpenGnSys.
+    OPENGNSYS_DB_PASSWD - clave del usuario.
+    OPENGNSYS_CLIENT_PASSWD - clave de acceso del cliente a servicios remotos. 
+
+3. Ejecutar el instalador como root:
         sudo bash opengnsys_installer.sh 
 
 
 Actaulización de ficheros
 -------------------------
 
-AVISO: es recomendable hacer copia de seguridad del servidor antes de actualizar.
+Ejecutar el script de actualización como usuario root:
+	sudo /opt/opengnsys/lib/opengnsys_update.sh
 
-Descargar el fichero opengnsys-version.tar.gz y descomprimirlo:
-        tar xvzf opengnsys-version.tar.gz
-        cd opengnsys-version/installer
-
-O bien, descargar el actualizador desde la última revisión del repositorio:
-        svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_update.sh
-
-Ejecutar el programa de actualización como root:
-        sudo bash opengnsys_installer.sh 
-
-NOTA: el programa de actualización no modifica ficheros de configuración, no actualiza la bases de datos, no modifica ficheros de imágenes, ni recompila los servicios principales de OpenGnSys.
+Notas importantes.
+1. Es necesario conexión a Internet para obtener las últimas actualizaciones.
+2. Si el script se actualiza a sí mismo, pedirá automáticamente que vuelva a ser ejecutado para terminar de actualizar todo el sistema.
+3. El programa de actualización no modifica ficheros de configuración, no actualiza la bases de datos y no modifica ficheros de imágenes.
 
 
 Desinstalar OpenGnSys
 ---------------------
 
-AVISO: Para poder conservar la información, es recomendable hacer copia de seguridad del servidor antes de desinstalar.
+Ejecutar el script de actualización como usuario root:
+	sudo /opt/opengnsys/lib/opengnsys_uninstall.sh
 
-Ejecutar como root el programa de desinstalación, bien disponible en el fichero comprimido o bien descargado directamente del servidor:
+Notas importantes.
+1. Para poder conservar la información, es recomendable hacer copia de seguridad del servidor antes de desinstalar.
+2. El programa de desinstalación no elimina los ficheros de imágenes, no desinstala ningún paquete del sistema operativo incluido en el proceso de instalación y no detiene, ni desconfigura ningún otro servicio auxiliar a OpenGnSys.
 
-        sudo bash opengnsys_uninstall.sh 
-
-NOTA: el programa de desinstalación no elimina los ficheros de imágenes, no desinstala ningún paquete del sistema operativo incluido en el proceso de instalación y no detiene, ni desconfigura ningún otro servicio auxiliar a OpenGnSys.
 

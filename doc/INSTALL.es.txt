@@ -1,16 +1,16 @@
-Instalación de OpenGnSys Server v 1.0.1
+Instalación de OpenGnSys Server v 1.0.3
 =======================================
 
 Notas iniciales
 ---------------
 
-Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Linux a partir de la versión 9.04.
+Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Linux a partir de la versión 9.04 (también ha sido probado en sistemas Debian 6 y Linux Mint 12).
 
 El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el rpositorio código y el cliente preconfigurado.
 
 Requisitos mínimos de almacenamiento:
 - 350 MB en el directorio /tmp (solo durante la instalación)
-- 300 MB en el directorio /var/lib/tftpboot
+- 300 MB en el directorio /var/lib/tftpboot (o /srv en sistemas Debian)
 - 50 MB en el directorio de instalación /opt/opengnsys
 - Estimar la capacidad necesaria para el repositorio de imágenes en /opt/opengnsys/images
 
@@ -22,16 +22,23 @@ La instalación de OpenGnSys se realiza ejecutando el script de instalación ope
 
 Ejemplos de descompresión del programa:
 
-	tar xvzf opengnsys-1.0.1.tar.gz
+	tar xvzf opengnsys-1.0.3.tar.gz
 	cd opengnsys/installer
 
 Ejemplos de descarga con varias herramientas:
 
     * Descargar con wget.
-	wget http://www.opengnsys.es/browser/branches/version1.0/installer/opengnsys_installer.sh?format=txt -O opengnsys_installer.sh
+	wget http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh -O opengnsys_installer.sh
 
     * Descargar con curl.
-	curl http://www.opengnsys.es/browser/branches/version1.0/installer/opengnsys_installer.sh?format=txt > opengnsys_installer.sh
+	curl http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh > opengnsys_installer.sh
+
+Como medida de seguridad, resulta muy importante modificar los usuarios y claves por defecto de acceso al sistema. Para ello, editar el fichero de instalación opengnsys_installer.sh y modificar los valores de las variables de configuración:
+
+    MYSQL_ROOT_PASSWORD - clave del usuario root de MySQL.
+    OPENGNSYS_DB_USER - usuario de acceso y super-administrador de OpenGnSys.
+    OPENGNSYS_DB_PASSWD - clave del usuario.
+    OPENGNSYS_CLIENT_PASSWD - clave de acceso del cliente a servicios remotos. 
 
 El script debe ser ejecutado como usuario root:
 	sudo bash opengnsys_installer.sh
