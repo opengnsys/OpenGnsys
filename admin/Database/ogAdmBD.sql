@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS `administradores_centros` (
   PRIMARY KEY (`idadministradorcentro`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+INSERT INTO `administradores_centros` (`idadministradorcentro`, `idusuario`, `idcentro`) VALUES
+(1, 1, 1);
+
 -- --------------------------------------------------------
 
 --
