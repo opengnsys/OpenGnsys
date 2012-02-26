@@ -126,6 +126,7 @@ echo -e "n\np\n1\n\n\nt\n83\nw" | fdisk $DISKLOOP
 
 
 #echoAndLog "$FUNCNAME(): Liberamos Desmontando $DISKLOOP despues del particionado "
+sleep 10
 losetup -d $DISKLOOP 
 if [ $? -ne 0 ]
 then 
@@ -143,6 +144,7 @@ then
 	return 2
 fi
 #echoAndLog "$FUNCNAME(): Desmontando $PARTLOOP despues del formateo "
+sleep 10
 losetup -d $PARTLOOP 
 if [ $? -ne 0 ]
 then 
@@ -174,7 +176,8 @@ echoAndLog "$FUNCNAME:  Iniciando la generación del sistema de archivos "
 mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
 mount | grep $BTROOTFSMNT && echoAndLog "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 OK   " || errorAndLog  "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 : FAILURE  "
 
-debootstrap --arch=$OSARCH --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
+debootstrap  --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
+#debootstrap --arch=$OSARCH ${OSCODENAME} ${BTROOTFSMNT} http://archive.ubuntu.com/ubuntu/
 
 
 if [ $? -ne 0 ]; then

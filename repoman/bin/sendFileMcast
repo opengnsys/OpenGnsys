@@ -25,7 +25,7 @@ fi
 
 # Fichero a enviar (camino completo o relativo al directorio del repositorio).
 FICH="$1"
-if [ "${FICH:0:1}" != "/" ]; then
+if [ "${FICH:0:15}" != "$OPENGNSYS" ]; then
     FICHIMG="$OGIMG/$FICH"
 else
     FICHIMG="$FICH"
@@ -55,6 +55,7 @@ fi
 CERROR="8x8/128"
 
 # Envío de fichero por Multicast.
-which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
+# Se desabilita el uso de mbuffer: eesta versión del upd-sender no la admite.
+#which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
 $OGBIN/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
 

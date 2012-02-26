@@ -19,6 +19,8 @@ include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________

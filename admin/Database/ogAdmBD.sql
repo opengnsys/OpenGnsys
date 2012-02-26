@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS `administradores_centros` (
   PRIMARY KEY (`idadministradorcentro`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+INSERT INTO `administradores_centros` (`idadministradorcentro`, `idusuario`, `idcentro`) VALUES
+(1, 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -388,8 +391,8 @@ CREATE TABLE IF NOT EXISTS `idiomas` (
 
 INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 (1, 'Español', 'esp'),
-(2, 'Ingles', 'eng'),
-(3, 'Catalan', 'cat');
+(2, 'English', 'eng'),
+(3, 'Català', 'cat');
 
 -- --------------------------------------------------------
 
@@ -547,7 +550,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (26, 'sft', 'Nombre del archivo de inventario software enviado por la red', '', '', '', 0, 0),
 (27, 'tpc', 'Tipo de cliente', '', '', '', 0, 0),
 (28, 'scp', 'Código script', '', '', '', 4, 1),
-(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 3, 1);
+(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1);
 
 -- --------------------------------------------------------
 

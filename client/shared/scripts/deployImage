@@ -22,8 +22,8 @@
 
 TIME1=$SECONDS
 
-OGLOGSESSION="/tmp/session.log"
-OGLOGCOMMAND="/tmp/command.log"
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 
 PROG="$(basename $0)"
@@ -33,20 +33,43 @@ if [ $# -lt 4 ]; then
 fi
 
 #controlar param1 REPO
-echo "[1] Realizando un updateCache REPO $2.img $5 $6" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[1] $MSG_SCRIPTS_TASK_START  updateCache REPO $2.img $5 $6" | tee -a $OGLOGSESSION $OGLOGFILE
 updateCache REPO $2.img $5 $6 | tee -a $OGLOGCOMMAND
 RETVAL=$?
+
+TIME2=$[SECONDS-TIME1]
+echo "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
+
 if [ "$RETVAL" != "0" ]
 then
-	echo "[49] Fin del updateCache REPO $2.img $5 $6 con error $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "[100] $MSG_SCRIPTS_TASK_ERR = $RETVAL  ; updateCache REPO $2.img $5 $6 " | tee -a $OGLOGSESSION $OGLOGFILE
 	# RC=15 No hay cache
 	# RC=16 no hay espacio sufiente
-	exit $RETVAL
-	
-else
-	echo "[50] Iniciando un ogRestore CACHE desde deployImage" | tee -a $OGLOGSESSION $OGLOGFILE
-	ogRestoreImage CACHE /$2 $3 $4 &>> $OGLOGCOMMAND
-	RETVAL=$?
-	[ "$RETVAL" == "0" ] && configureOs $3 $4 | tee -a $OGLOGCOMMAND
-	exit $RETVAL 
+	exit $RETVAL	
 fi
+
+
+
+
+TIME2=$SECONDS
+echo "[50] $MSG_SCRIPTS_TASK_START  ogRestore CACHE /$2 $3 $4" | tee -a $OGLOGSESSION $OGLOGFILE
+ogRestoreImage CACHE /$2 $3 $4 &>> $OGLOGCOMMAND
+RETVAL=$?
+if [ "$RETVAL" == "0" ] 
+then
+	RESUMERESTOREIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
+	echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+	TIME2=$[SECONDS-TIME2]
+	echo "[90] $MSG_SCRIPTS_OS_CONFIGURE " | tee -a $OGLOGSESSION $OGLOGFILE
+	configureOs $3 $4 | tee -a $OGLOGCOMMAND
+fi
+ 
+TIME=$[SECONDS-TIME1]
+echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
+
+exit $RETVAL

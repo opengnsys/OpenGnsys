@@ -1,24 +1,24 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: incorporaordenadores_esp.php (Comandos)
-//	Idioma: Español
+//	Fichero de idiomas php: consolaremota_eng.php (Comandos)
+//	Idioma: Ingles
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Apagar ordenadores';
-	$TbMsg[6]='Ámbito';	
-	$TbMsg[7]='Consola remota';
-	$TbMsg[8]='Atención para ejecutar un comando teclee su sintaxis en la caja de texto de comandos y pulse enter';
-	$TbMsg[9]='Se ha enviado una petición de consola remota a este ámbito, puede empezar a escribir comandos en la ventana para recibir el eco en la ventana de salida';
-	$TbMsg[10]='ATENCIÓN: Ha habido algún problema al enviar una petición de consola remota a este ámbito';
-	$TbMsg[11]='Código del script';
-	$TbMsg[12]='Eco remoto';
-	$TbMsg[13]='ATENCIÓN.- Ha elegido un ámbito de aplicación para la consola remota distinto al de "ordenador". <BR>Para visulizar el eco de cualquier cliente pulse sobre él con el botón secundario y elija "Eco de consola"; <BR>Se abrirá una ventana que se referescará automáticamente donde podrá hacer un seguiento del comando/script introducido';
-	$TbMsg[14]='...Espere por favor, se está enviando el código del script';
-	$TbMsg[15]='...El código del script se ha enviado, para ver la salida de cualquier ordenador elija "Eco de Consola"';
+	$TbMsg[0]='Centers';
+	$TbMsg[1]='Classrooms group';
+	$TbMsg[2]='Classrooms';
+	$TbMsg[3]='Computer group';
+	$TbMsg[4]='Computers';
+	$TbMsg[5]='Turn off computers';
+	$TbMsg[6]='Environment';	
+	$TbMsg[7]='Remote console';
+	$TbMsg[8]='WARNING: To execute a command, type the syntax in the textarea and press enter';
+	$TbMsg[9]='The remote console request is send to this environment, you can write command into textarea to receive the echo in the output window';
+	$TbMsg[10]='WARNING: There is something wrong with the remote console request to this environment';
+	$TbMsg[11]='Script code';
+	$TbMsg[12]='Remote echo ';
+	$TbMsg[13]='WARNING: You select a remote console environment  distinct of "computer". </br> To view the client echo, press over pc with right boton and select "Console echo". </br>This opens a window that automatically refreshes where you can track the command / script entered.';
+	$TbMsg[14]="...Wait, please. It's sending  the script code";
+	$TbMsg[15]='...It has sent the script code. To view the client echo, press over pc with right boton and select "Console echo".';
 ?>

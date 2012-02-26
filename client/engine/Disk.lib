@@ -288,7 +288,7 @@ case "$1" in
     HNTFS)      ID=17 ;;
     HFAT32)     ID=1b ;;
     LINUX-SWAP) ID=82 ;;
-    EXT[234]|REISERFS|REISER4|XFS|JFS)
+    LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
                 ID=83 ;;
     LINUX-LVM)  ID=8e ;;
     SOLARIS)    ID=bf ;;
@@ -471,12 +471,63 @@ esac
 
 #/**
 #         ogGetPartitionType int_ndisk int_npartition
-#@brief   Muestra el tipo de una particion determinada.
-#@see     ogGetFsType
+#@brief   Devuelve el mnemonico con el tipo de partición.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  Mnemonico
+#@note    Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 0.9 - Primera adaptacion para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-07-21
+#@version 1.0.3 - Código trasladado de antigua función ogGetFsType.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-12-01
 #*/ ##
 function ogGetPartitionType ()
 {
-ogGetFsType "$@"
+# Variables locales.
+local ID TYPE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 1  =>  NTFS"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Detectar id. de tipo de partición y codificar al mnemonico.
+ID=$(ogGetPartitionId "$1" "$2") || return $?
+case "$ID" in
+     0)         TYPE="EMPTY" ;;
+     1)         TYPE="FAT12" ;;
+     5|f)       TYPE="EXTENDED" ;;
+     6|e)       TYPE="FAT16" ;;
+     7)         TYPE="NTFS" ;;
+     b|c)       TYPE="FAT32" ;;
+     11)        TYPE="HFAT12" ;;
+     12)        TYPE="COMPAQDIAG" ;;
+     16|1e)     TYPE="HFAT16" ;;
+     17)        TYPE="HNTFS" ;;
+     1b|1c)     TYPE="HFAT32" ;;
+     42)        TYPE="WIN-DYNAMIC" ;;
+     82)        TYPE="LINUX-SWAP" ;;
+     83)        TYPE="LINUX" ;;
+     8e)        TYPE="LINUX-LVM" ;;
+     a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
+     af)        TYPE="HFS" ;;
+     bf)        TYPE="SOLARIS" ;;
+     ca)        TYPE="CACHE" ;;
+     fd)        TYPE="LINUX-RAID" ;;
+     *)         TYPE="UNKNOWN" ;;
+esac
+echo "$TYPE"
 }
 
 
@@ -554,7 +605,7 @@ fi
 DISK="$(ogDiskToDev $1)" || return $?
 NPARTS=$(ogGetPartitionsNumber $1)
 for (( PART = 1; PART <= NPARTS; PART++ )); do
-    TYPE=$(ogGetFsType $1 $PART 2>/dev/null)
+    TYPE=$(ogGetPartitionType $1 $PART 2>/dev/null)
     if [ $? -eq 0 ]; then
         SIZE=$(ogGetPartitionSize $1 $PART 2>/dev/null)
         echo -n "$TYPE:$SIZE "

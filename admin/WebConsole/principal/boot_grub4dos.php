@@ -121,9 +121,9 @@ switch($litambito){
 <form name="myForm" method="post" action="../gestores/gestor_pxe_grub4dos.php?idaula=<?php echo $idambito ?>&nombreambito=<?php echo $nombreambito?>&litambito=<?php echo $litambito?>" >
 
 
-	<P align=center class=cabeceras>Gestión Arranque Avanzado<BR>
+	<P align=center class=cabeceras><?php echo $TbMsg[42]; ?><BR>
 	<SPAN align=center class=subcabeceras> <?php echo $nombreambito; ?> </SPAN>
-	<input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </P>
+	<input type="submit" value=<?php echo $TbMsg[43]; ?> name="saveButton"  onclick="allSelect()"> </P>
 	
 	
 	
@@ -140,8 +140,8 @@ echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
 <tr>
 <td> 
  <!-- <a href="./muestramenu.php?labelmenu=pxe">  OGclient </a><br> pxe <br> -->
-OGclient <br>
-<select multiple size="30" name="Lpxe" id="Lpxe" style="width:100">
+<br>OGclient <br><br>
+<select multiple size="30" name="Lpxe" id="Lpxe">
 
 <?php
 #### listado de equipos con menu pxe
@@ -170,7 +170,7 @@ while (!$rsmenu->EOF)
     echo "<input type='button' onClick='move(this.form.L" . $rsmenu->campos['label'] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
  	echo "<input type='button' onClick='move(this.form.Lpxe,this.form.L" . $rsmenu->campos['label'] .")' value='IN' style='height: 25px; width: 35px' >";
  	echo " <br>";
-	echo "<select multiple size='30' name='L" . $rsmenu->campos['label'] . "' style='width:100'>";
+	echo "<select multiple size='30' name='L" . $rsmenu->campos['label'] . "' >";
     $listadopxe="";
 	$listadopxe=listaequipos($cmd,$rsmenu->campos['label'],$seleccion);
 	echo $listadopxe;

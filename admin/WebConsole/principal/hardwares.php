@@ -16,6 +16,7 @@ include_once("../clases/MenuContextual.php");
 include_once("../includes/constantes.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/hardwares_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/tiposhardwares_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -120,10 +121,12 @@ function CreaArbol($cmd,$idcentro){
 }
 //________________________________________________________________________________________________________
 function SubarbolXML_TiposHardwares($cmd){
-	global 	$LITAMBITO_TIPOHARDWARES;
+	global $LITAMBITO_TIPOHARDWARES;
+	global $TbMsg;
 	$cadenaXML="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idtipohardware,descripcion,urlimg FROM tipohardwares order by descripcion";
+	$cmd->texto="SELECT idtipohardware, descripcion, urlimg, nemonico
+			FROM tipohardwares ORDER BY descripcion";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
 	$rs->Primero(); 
@@ -134,7 +137,11 @@ function SubarbolXML_TiposHardwares($cmd){
 				$cadenaXML.=' imagenodo="'.$rs->campos["urlimg"].'"';
 			else
 				$cadenaXML.=' imagenodo="../images/iconos/confihard.gif"';		
-		$cadenaXML.=' infonodo="'.$rs->campos["descripcion"].'"';
+		$descrip = $TbMsg["HARDWARE_".$rs->campos["nemonico"]];
+		if (empty ($descrip)) {
+			$descrip = $rs->campos["descripcion"];
+		}
+		$cadenaXML.=' infonodo="'.$descrip.'"';
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_TIPOHARDWARES."'" .')"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_TIPOHARDWARES.'-'.$rs->campos["idtipohardware"];
 

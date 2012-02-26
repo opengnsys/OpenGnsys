@@ -1,0 +1,75 @@
+#!/bin/bash
+# setserveraddr: modifica los ficheros de configuración para asignar los valores
+#	de la interfaz de red solicitada.
+# Nota:	se enlazan los ficheros a los predefinidos detectados para la interfaz.
+# Uso:	setserveraddr iface
+# Autor: Ramon Gomez - Univ. Sevilla
+# Fecha: 2011-01-25
+
+
+# Comprobar parámetros.
+PROG="$(basename $0)"
+if [ $# -ne 1 ]; then
+	echo "$PROG: Incorrect operand. Format: $PROG device" >&2
+	exit 1
+fi
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Need to be root." >&2
+	exit 1
+fi
+
+# Detectar la interfaz de red.
+DEVICES=$(ip -o link show up|awk -F: '$2!~/lo/ {print $2}')
+FOUND=0
+for dev in $DEVICES; do
+	[ "$dev" == "$1" ] && FOUND=1;
+done
+
+if [ $FOUND == 1 ]; then
+	# Comprobar si hay que modificar la configuración de DHCP.
+	CHANGE=0
+	for f in /etc/{dhcp,dhcp3}/dhcpd.conf; do
+		file="${f/./-$1.}"
+		if [ -f $file -a ! $f -ef $file ]; then
+			ln -f $file $f
+			CHANGE=1
+		fi
+	done
+	# Si ha cambiado la configuración, reiniciar DHCP.
+	if [ $CHANGE == 1 ]; then
+		for f in /etc/init.d/{isc-dhcp-server,dhcp3-server,dhcpd}; do
+			[ -x $f ] && $f restart
+		done
+	else
+		echo "Don't change the DHCP configuration."
+	fi
+	# Comprobar si hay que modificar la configuración de OpenGnsys.
+	OPENGNSYS=/opt/opengnsys
+	CHANGE=0
+	for f in etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg www/controlacceso.php client/etc/ogAdmClient.cfg; do
+		file="$OPENGNSYS/${f/./-$1.}"
+		if [ ! -f $file ]; then
+			echo "$PROG: File $file does not exist." >&2
+			exit 2
+		fi
+		cfg=$OPENGNSYS/$f
+		if [ ! $cfg -ef $file ]; then
+			ln -f $file $cfg
+			CHANGE=1
+		fi
+	done
+	# Si ha cambiado la configuración, reiniciar OpenGnSys y actualizar la BD.
+	if [ $CHANGE == 1 ]; then
+		/etc/init.d/opengnsys restart
+		source $OPENGNSYS/etc/ogAdmServer.cfg
+		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+			 "UPDATE entornos SET ipserveradm='$ServidorAdm' WHERE identorno=1"
+		echo "Default server interface set to: $1 ($ServidorAdm)"
+	else
+		echo "Don't change the default interface: $1"
+	fi
+else
+	echo "$PROG: Network device not found. Format: $PROG device" >&2
+	exit 1
+fi
+

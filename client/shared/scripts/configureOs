@@ -18,8 +18,12 @@
 #@version 1.0.2 - Configura el sector de la particion y el gestor de linux para iniciarse desde cualquier particion.  
 #@author Antonio J. Doblas Viso.    Universidad de Malaga.
 #@date   2011-11-22
+#@version 1.0.3 - Configura el chkdisk en el arranque de windows, segun variable OGWINCHKDISK del engine.cfg.  
+#@author Antonio J. Doblas Viso.    Universidad de Malaga.
+#@date   2011-12-23
 
-
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Si el sistema de archivos no esta extendido. Realizar.
 PARTSIZE=$(ogGetPartitionSize $1 $2)
@@ -47,6 +51,7 @@ if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
     ogWindowsBootParameters $1 $2
     # Registrar en Windows que la partición indicada es su nueva unidad C:\
     ogWindowsRegisterPartition $1 $2 C $1 $2
+    ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
 fi
 
 if [ "$(ogGetOsType $1 $2)" = "Linux" ]; then

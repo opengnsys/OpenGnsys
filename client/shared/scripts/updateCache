@@ -11,7 +11,9 @@
 #@param 4 str_opcionesupdatecache
 #@ejemplo: oneRemoteFromMaster 172.17.36.11 CACHE /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
 #@return  
-#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_FORMAT       formato incorrecto.
+#@exception OG_ERR_NOTCACHE     No existe cache -15-
+#@exception $OG_ERR_CACHESIZE   Tamaño de la paticion menor al archivo a descargar -16-
 #@note   
 #@todo: 
 #@version 0.9.1 - integracion EAC
@@ -31,33 +33,69 @@ if [ $# -lt 3 ]; then
     exit $?
 fi
 
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
 REPOSITORIO="$1"
 PROTOCOLO="$3"
 OPTPROTOCOLO="$4"
 REPOIP=$(ogGetRepoIp)
 echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
-# Si el repositorio local CACHE no existe salimos.
+
+# Si el repositorio local CACHE no existe error 15.
 if ! $(ogFindCache >/dev/null); then
         ogRaiseError $OG_ERR_NOTCACHE "CACHE"
         exit $?
 fi
 
-#Comprobamos si Actualizacion - existe una imagen con igual nombre pero distinto sum-
+echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE "
 #TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
 
-
+CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
 
-if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
+
+echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE"
+#ERROR CACHESIZE 16
+if [ "$FILESIZE" -ge "$CACHESIZE" ]  
 then
-	echo "el tamanio del fichero $2 = $FILESIZE es mayor que el espacio dispinible en la cache = $CACHESIZEFREE"
+	echo "WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
     exit $?
+fi
+
+echo "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO"
+#ERROR CACHESIZE 16
+if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
+then
+	# echo "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"  | tee -a $OGLOGSESSION $OGLOGFILE
+	case $ACTIONCACHEFULL in 
+	NONE)
+		NEXTOPERATION=UNICAST
+	;;
+	FORMAT)
+	    echo "[51] $MSG_HELP_ogFormatCache "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    ogUnmountCache
+	    ogFormatCache
+	    ogMountCache
+	    NEXTOPERATION=REPEAT
+	;;
+	DELETE)
+		echo "[51] #MSG_HELP_ogDeleteTree $OGCAC$OGIMG/* "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    rm -fr  $OGCAC$OGIMG/*
+	    NEXOPERATION=REPEAT
+	;;
+	*)
+	 	echo "WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+    	exit $?
+	;;
+	esac	
 fi
 
 ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
@@ -70,11 +108,12 @@ ogMountCache >/dev/null
 ## Si no existe, crear subdirectorio para el fichero en la cache.
 IMGDIR=$(ogGetParentPath CACHE "/$2")
 if [ $? != 0 ]; then
-    echo "[5] Crear subdirectorio del fichero  \"$2 $(dirname "$2")."
+    echo "[5] $MSG_HELP_ogMakeDir  \"$2 $(dirname "$2")."
     ogMakeDir CACHE $(dirname "/$2")
     IMGDIR=$(ogGetParentPath CACHE "/$2") || exit $?
 fi
 
+TIME1=$SECONDS
 
 case "$PROTOCOLO" in
 	torrent | TORRENT )
@@ -86,25 +125,26 @@ case "$PROTOCOLO" in
     	#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
 		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
-		echo "Esperando $P2PWAIT segundos para iniciar ogTorrentStart CACHE $2.torrent $4"
+		echo "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
 		sleep $P2PWAIT
+		echo "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogTorrentStart CACHE "$2.torrent" $4
+		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND | grep -B1 "Download") 
 	;;
 	multicast | MULTICAST )
-		echo "determinando puerto principal y auxiliar."
 		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
 		let PORTAUX=$PORT+1
+		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKMCASTSESSION : $REPOIP:$PORTAUX:$PORT"
         #TODO: ticket 379
 		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
 		sleep $NUMBER
 		#FIN TODO
-		echo "comprobando puerto $PORTAUX en $REPOIP (sesion multicast en puerto $PORT) "
 		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 		then 
 	   		ogMcastReceiverFile $PORT CACHE "$2"
 		else
 		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
-	   		echo "solicita la apertura:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
+	   		echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO""
 	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
 	   		sleep 10
@@ -112,10 +152,14 @@ case "$PROTOCOLO" in
 	   		then 
 	   			ogMcastReceiverFile $PORT CACHE "$2"
 			else
-			    echo "la peticion ha fallado: hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+			    echo "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   		    exit 1
 	   		fi
-		fi	
+		fi
+		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
+		sleep 5
+		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
+		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete")
 	;;
 	unicast | UNICAST )
 		echo "unicast"
@@ -123,8 +167,15 @@ case "$PROTOCOLO" in
 	;;
 esac
 
-
+TIME1=$[SECONDS-TIME1]
+echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum " | tee -a $OGLOGSESSION $OGLOGFILE
+TIME2=$SECONDS
 ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
+TIME2=$[SECONDS-TIME2]
+echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
 [ "$RETVAL" == "1" ] && exit 0

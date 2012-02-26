@@ -2,17 +2,18 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: informacion_imagenes_eng.php 
-//	Idioma: Ingés 
+//	Idioma: InglÃ©s
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Images';
 	$TbMsg[1]='Information about images';
 	$TbMsg[2]='Image';
 	$TbMsg[3]='Images information';
-	$TbMsg[4]='S software components';
+	$TbMsg[4]='Software components';
 	$TbMsg[5]='Diferential software';
 	$TbMsg[6]='Software Profile';
 	$TbMsg[7]='Computers with this image';
 	$TbMsg[8]='Partition';
-	$TbMsg[9]='Coments';
+	$TbMsg[9]='Comments';
 ?>
+

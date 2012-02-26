@@ -68,7 +68,8 @@ OSCODENAME=$(lsb_release -cs 2>/dev/null)
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
-	Ubuntu)	DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+	Ubuntu|Debian|LinuxMint)
+		DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -80,9 +81,14 @@ case "$OSDISTRIB" in
 		ENABLESITE="a2ensite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		SAMBAINIT=/etc/init.d/smbd
+		if [ "$OSDISTRIB" == "Debian" ]; then
+			SAMBAINIT=/etc/init.d/samba
+		else
+			SAMBAINIT=/etc/init.d/smbd
+		fi
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
+		[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp	# Debian 6
 		;;
 	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
 		exit 1 ;;
@@ -102,9 +108,9 @@ local DHCPVERSION
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
-	Ubuntu) # Postconfiguación personalizada para Ubuntu.
+	Ubuntu|LinuxMint) # Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
-		DHCPVERSION=$(apt-cache --full search dhcp.?-server$ | \
+		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
 			      sort -n | tail -1)
 		if [ $DHCPVERSION = 3 ]; then
@@ -129,19 +135,20 @@ function getDateTime()
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-	echo "$1"
 	local DATETIME=`getDateTime`
+	echo "$1"
 	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
+# Escribe a fichero y muestra mensaje de error
 function errorAndLog()
 {
-	echo "ERROR: $1"
 	local DATETIME=`getDateTime`
+	echo "ERROR: $1"
 	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
-# comprueba si el elemento pasado en $2 esta en el array $1
+# Comprueba si el elemento pasado en $2 está en el array $1
 function isInArray()
 {
 	if [ $# -ne 2 ]; then
@@ -149,28 +156,28 @@ function isInArray()
 		exit 1
 	fi
 
-	echoAndLog "${FUNCNAME}(): checking if $2 is in $1"
 	local deps
-	eval "deps=( \"\${$1[@]}\" )"
-	elemento=$2
-
 	local is_in_array=1
-	# copia local del array del parametro 1
-	for (( i = 0 ; i < ${#deps[@]} ; i++ ))
-	do
-		if [ "${deps[$i]}" = "${elemento}" ]; then
-			echoAndLog "isInArray(): $elemento found in array"
+	local element="$2"
+
+	echoAndLog "${FUNCNAME}(): checking if $2 is in $1"
+	eval "deps=( \"\${$1[@]}\" )"
+
+	# Copia local del array del parámetro 1.
+	for (( i = 0 ; i < ${#deps[@]} ; i++ )); do
+		if [ "${deps[$i]}" = "${element}" ]; then
+			echoAndLog "isInArray(): $element found in array"
 			is_in_array=0
 		fi
 	done
 
 	if [ $is_in_array -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): $elemento NOT found in array"
+		echoAndLog "${FUNCNAME}(): $element NOT found in array"
 	fi
 
 	return $is_in_array
-
 }
+
 
 #####################################################################
 ####### Funciones de manejo de paquetes Debian
@@ -194,7 +201,7 @@ function checkPackage()
 	fi
 }
 
-# recibe array con dependencias
+# Recibe array con dependencias
 # por referencia deja un array con las dependencias no resueltas
 # devuelve 1 si hay alguna dependencia no resuelta
 function checkDependencies()
@@ -638,7 +645,7 @@ function tftpConfigure()
         /etc/init.d/openbsd-inetd start
 
         # preparacion contenedor tftpboot
-        cp -ar /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
+        cp -a /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
         cp -a /usr/lib/syslinux/pxelinux.0 $TFTPCFGDIR
         # prepamos el directorio de la configuracion de pxe
         mkdir -p $TFTPCFGDIR/pxelinux.cfg
@@ -669,8 +676,108 @@ function testPxe ()
 
 
 ########################################################################
+## Configuracion servicio NFS
+########################################################################
+
+# Configurar servicio NFS.
+# ADVERTENCIA: usa variables globales NETIP y NETMASK!
+function nfsConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Config nfs server."
+	backupFile /etc/exports
+
+	nfsAddExport $INSTALL_TARGET/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding NFS client config"
+		return 1
+	fi
+
+	nfsAddExport $INSTALL_TARGET/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding NFS images config"
+		return 1
+	fi
+
+	nfsAddExport $INSTALL_TARGET/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding logging client config"
+		return 1
+	fi
+
+	nfsAddExport $INSTALL_TARGET/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the PXE ogclient"
+		return 1
+	fi
+
+	/etc/init.d/nfs-kernel-server restart
+	exportfs -va
+	if [ $? -ne 0 ]; then
+		errorAndLog "${FUNCNAME}(): error while configure exports"
+		return 1
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
+	return 0
+}
+
+
+# Añadir entrada en fichero de configuración del servidor NFS.
+# Ejemplos:
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
+#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
+#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
+function nfsAddExport()
+{
+	if [ $# -lt 2 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+	if [ ! -f /etc/exports ]; then
+		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
+		return 1
+	fi
+
+	local export="$1"
+	local contador=0
+	local cadenaexport
+
+	grep "^$export" /etc/exports > /dev/null
+	if [ $? -eq 0 ]; then
+		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
+		return 0
+	fi
+
+	cadenaexport="${export}"
+	for parametro in $*; do
+		if [ $contador -gt 0 ]; then
+			host=`echo $parametro | awk -F: '{print $1}'`
+			options=`echo $parametro | awk -F: '{print $2}'`
+			if [ "${host}" == "" ]; then
+				errorAndLog "${FUNCNAME}(): host can't be empty"
+				return 1
+			fi
+			cadenaexport="${cadenaexport}\t${host}"
+
+			if [ "${options}" != "" ]; then
+				cadenaexport="${cadenaexport}(${options})"
+			fi
+		fi
+		let contador=contador+1
+	done
+
+	echo -en "$cadenaexport\n" >> /etc/exports
+
+	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
+	return 0
+}
+
+
+########################################################################
 ## Configuracion servicio Samba
 ########################################################################
+
+# Configurar servicios Samba.
 function smbConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Configuring Samba service."
@@ -681,7 +788,7 @@ function smbConfigure()
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= \/etc\/samba\/smb-og.conf/" $SAMBACFGDIR/smb.conf
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= ${SAMBACFGDIR//\//\\/}\/smb-og.conf/" $SAMBACFGDIR/smb.conf
 	$SAMBAINIT restart
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
@@ -699,6 +806,7 @@ function smbConfigure()
 ## Configuracion servicio DHCP
 ########################################################################
 
+# Configurar servicios DHCP.
 function dhcpConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Sample DHCP configuration."
@@ -711,11 +819,11 @@ function dhcpConfigure()
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[i]}" ]; then
 			backupFile $DHCPCFGDIR/dhcpd-$dev.conf
-			sed -e "s/SERVERIP/${SERVERIP[$i]}/g" \
-			    -e "s/NETIP/${NETIP[$i]}/g" \
-			    -e "s/NETMASK/${NETMASK[$i]}/g" \
-			    -e "s/NETBROAD/${NETBROAD[$i]}/g" \
-			    -e "s/ROUTERIP/${ROUTERIP[$i]}/g" \
+			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/NETIP/${NETIP[i]}/g" \
+			    -e "s/NETMASK/${NETMASK[i]}/g" \
+			    -e "s/NETBROAD/${NETBROAD[i]}/g" \
+			    -e "s/ROUTERIP/${ROUTERIP[i]}/g" \
 			    -e "s/DNSIP/$DNSIP/g" \
 			    $WORKDIR/opengnsys/server/etc/dhcpd.conf.tmpl > $DHCPCFGDIR/dhcpd-$dev.conf || errcode=1
 		fi
@@ -740,7 +848,7 @@ function dhcpConfigure()
 function installWebFiles()
 {
 	echoAndLog "${FUNCNAME}(): Installing web files..."
-	cp -ar $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+	cp -a $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
 	if [ $? != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
@@ -754,7 +862,7 @@ function installWebFiles()
 }
 
 # Configuración específica de Apache.
-function openGnsysInstallWebConsoleApacheConf()
+function installWebConsoleApacheConf()
 {
 	if [ $# -ne 2 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -763,7 +871,7 @@ function openGnsysInstallWebConsoleApacheConf()
 
 	local path_opengnsys_base=$1
 	local path_apache2_confd=$2
-	local path_web_console=${path_opengnsys_base}/www
+	local CONSOLEDIR=${path_opengnsys_base}/www
 
 	if [ ! -d $path_apache2_confd ]; then
 		errorAndLog "${FUNCNAME}(): path to apache2 conf.d can not found, verify your server installation"
@@ -779,17 +887,9 @@ function openGnsysInstallWebConsoleApacheConf()
 	$ENABLEMOD ssl
 	make-ssl-cert generate-default-snakeoil --force-overwrite
 
-	# Genera configuración de consola web.
-	cat > $path_opengnsys_base/etc/apache.conf <<EOF
-# OpenGnSys Web Console configuration for Apache
-
-Alias /opengnsys ${path_web_console}
-
-<Directory ${path_web_console}>
-	Options -Indexes FollowSymLinks
-	DirectoryIndex acceso.php
-</Directory>
-EOF
+	# Genera configuración de consola web a partir del fichero plantilla.
+	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+                $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
 
 	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys
 	$ENABLESITE opengnsys
@@ -843,7 +943,8 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
 	mkdir -p $path_opengnsys_base/images
-	ln -fs /var/lib/tftpboot $path_opengnsys_base
+	mkdir -p $TFTPCFGDIR
+	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
 	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
@@ -877,7 +978,7 @@ function createDirs()
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
-function openGnsysCopyServerFiles ()
+function copyServerFiles ()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -997,12 +1098,12 @@ function copyInterfaceAdm ()
 ### Funciones instalacion cliente opengnsys
 ####################################################################
 
-function openGnsysCopyClientFiles()
+function copyClientFiles()
 {
 	local errstatus=0
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
-	cp -ar $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	cp -a $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1
@@ -1011,7 +1112,7 @@ function openGnsysCopyClientFiles()
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-	cp -ar $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	cp -a $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		errstatus=1
@@ -1031,7 +1132,7 @@ function openGnsysCopyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-natty-2.6.38-8-generic-pae-r2303.iso
+	local FILENAME=ogLive-oneiric-3.0.0-14-generic-r2439.iso
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
@@ -1045,7 +1146,7 @@ function clientCreate()
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
-	cp -avr $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
+	cp -av $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
 	umount $TMPDIR
 	rmdir $TMPDIR
 	# Asignar la clave cliente para acceso a Samba.
@@ -1060,8 +1161,8 @@ function clientCreate()
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
 
 	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-	cp -arv $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
-	cp -arv $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+	cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
+	cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
@@ -1153,8 +1254,8 @@ function installationSummary()
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
-	echoAndLog "TFTP configuration directory:     /var/lib/tftpboot"
-	echoAndLog "Samba configuration directory:    /etc/samba"
+	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"
+	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
 	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
@@ -1166,7 +1267,7 @@ function installationSummary()
 	echoAndLog "Log-in as Web Console admin user."
 	echoAndLog " - Review default Organization data and assign default user."
 	echoAndLog "Log-in as Web Console organization user."
-	echoAndLog " - Insert OpenGnSys data (rooms, computers, menus, etc)."
+	echoAndLog " - Insert OpenGnSys data (labs, computers, menus, etc)."
 echo
 }
 
@@ -1264,7 +1365,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Copiar ficheros de servicios OpenGnSys Server.
-openGnsysCopyServerFiles ${INSTALL_TARGET}
+copyServerFiles ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
@@ -1334,9 +1435,9 @@ installWebFiles
 makeDoxygenFiles
 
 # creando configuracion de apache2
-openGnsysInstallWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
+installWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
 if [ $? -ne 0 ]; then
-	errorAndLog "Error configuring Apache for OpenGnSYS Admin"
+	errorAndLog "Error configuring Apache for OpenGnSys Admin"
 	exit 1
 fi
 
@@ -1344,7 +1445,7 @@ popd
 
 
 # Crear la estructura de los accesos al servidor desde el cliente (shared)
-openGnsysCopyClientFiles
+copyClientFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
@@ -1364,4 +1465,5 @@ installationSummary
 
 #rm -rf $WORKDIR
 echoAndLog "OpenGnSys installation finished at $(date)"
+exit 0
 

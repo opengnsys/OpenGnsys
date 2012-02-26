@@ -43,6 +43,18 @@
 	$TbMsg[35]='"Operadores"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Añadir nuevo Operador"';
+	$TbMsg[38]='"Asistentes"';
 	$TbMsg[39]='"Eco de Consola"';
+	$TbMsg[40]='"NetBoot avanzado"';
+	$TbMsg[41]='"Reubicar ordenadores"';
+	$TbMsg[42]='Gesti&oacute;n Arranque Avanzado';
+	$TbMsg[43]='"Guardar"';
+	$TbMsg[44]='Ubicador Ordenadores';
+	$TbMsg[45]='Nombre ámbito';
+	$TbMsg[46]='Identificador ámbito';
+	$TbMsg[47]='"Log historico"';
+	$TbMsg[48]='"Log en tiempo real"';
+	
 
 ?>
+

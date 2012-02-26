@@ -160,11 +160,11 @@ DEV=$(ogDiskToDev $DEV) || return $?
 
 # Formatear sistema de ficheros.
 ogUnmountCache 2>/dev/null
+           # Orden para formateo Ext4
+mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
            # Orden para formateo Reiser 3
-mkfs.reiserfs -f $DEV -l "CACHE" 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
-           # Orden para formateo XFS
-           #mkfs.xfs $DEV -L "CACHE" || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
-# Crear estructura básica
+           #mkfs.reiserfs -f $DEV -l "CACHE" 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
+# Crear estructura básica.
 MNTDIR=$(ogMountCache)
 mkdir -p $MNTDIR/$OGIMG
 }

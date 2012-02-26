@@ -1,19 +1,20 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: acciones_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: ejecutaracciones_eng.php
+//	Idioma: Ingles
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Ejecución de procedimientos';
-	$TbMsg[6]='Ámbito';
-	$TbMsg[7]='Procedimientos';
-	$TbMsg[8]='Procedimientos';
-	$TbMsg[9]='"Ejecutar procedimiento"';
-	$TbMsg[10]='"Incluir como autoexec"';
-	?>
+	$TbMsg[0]='Centers';
+	$TbMsg[1]='Group of labs';
+	$TbMsg[2]='Lab';
+	$TbMsg[3]='Group of computers';
+	$TbMsg[4]='Computers';
+	$TbMsg[5]='Implementation of procedures';
+	$TbMsg[6]='Scope';
+	$TbMsg[7]='Procedures';
+	$TbMsg[8]='Procedures';
+	$TbMsg[9]='"Execute procedures"';
+	$TbMsg[10]='"Include as autoexec"';
+?>
+

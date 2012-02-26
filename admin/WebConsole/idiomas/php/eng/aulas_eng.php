@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: aulas_eng.php 
-//	Idioma: Ingés 
+//	Idioma: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"New labs group"';
@@ -29,19 +29,31 @@
 	$TbMsg[21]='"All actions"';
 	$TbMsg[22]='Computers Status';
 	$TbMsg[23]='Lab Computer';
-	$TbMsg[24]='Environment: Centers';
-	$TbMsg[25]='Environment: Group of labs';
-	$TbMsg[26]='Environment: Group of computers';
+	$TbMsg[24]='Scope: Centers';
+	$TbMsg[25]='Scope: Group of labs';
+	$TbMsg[26]='Scope: Group of computers';
 	$TbMsg[27]='"Incorpore computers"';
 	$TbMsg[28]='"Procedures"';
 	$TbMsg[29]='"Labs Reserves"';
-	$TbMsg[30]='"Confirmeds"';
-	$TbMsg[31]='"Refuses"';
-	$TbMsg[32]='"Pendings"';
-	$TbMsg[33]='"Swtiching"';
+	$TbMsg[30]='"Confirmed"';
+	$TbMsg[31]='"Pending"';
+	$TbMsg[32]='"Denied"';
+	$TbMsg[33]='"Remote console"';
 	$TbMsg[34]='"Reserve schedules"';
 	$TbMsg[35]='"Operators"';
 	$TbMsg[36]='"Remove operator"';
 	$TbMsg[37]='"Add a new operator"';
+	$TbMsg[38]='"Wizards"';
+	$TbMsg[39]='"Console echo"';
+	$TbMsg[40]='"Advanced NetBoot"';
+	$TbMsg[41]='"Relocate computers"';
+	$TbMsg[42]='Advanced Boot Management';
+	$TbMsg[43]='"Save"';
+	$TbMsg[44]='Computers locator';
+	$TbMsg[45]='Scope name';
+	$TbMsg[46]='Scope id';
+	$TbMsg[47]='"Historical log"';
+	$TbMsg[48]='"Real time log"';
 
 ?>
+

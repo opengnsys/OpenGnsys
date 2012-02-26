@@ -8,14 +8,9 @@
 #*/
 
 
-MSG_LOADMODULES=${MSG_LOADMODULES:-"."}
-echo "$MSG_LOADMODULES"
-
-# Directorio principal de módulos del kernel.
-MODULESDIR=/lib/modules/$(uname -r)/kernel
+echo "${MSG_LOADMODULES:-.}"
 
 # Módulo del ratón.
-insmod $MODULESDIR/drivers/input/mouse/psmouse.ko 2>/dev/null
-
+modprobe psmouse 2>/dev/null
 
 

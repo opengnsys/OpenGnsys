@@ -102,7 +102,7 @@ mountroot ()
 	
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with REPOSITORY STORAGE on $OGSERVERIMAGES : y/N "
     [ $? == 0 ] && sh || echo " "
-	ogConnect $OGSERVERIMAGES $OGPROTOCOL $SRCOGIMAGES $DSTOGIMAGES
+	ogConnect $OGSERVERIMAGES $OGPROTOCOL $SRCOGIMAGES $DSTOGIMAGES ,ro
 	 
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before doing the postconfiguration: y/N "

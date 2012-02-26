@@ -1,27 +1,30 @@
 #!/bin/bash
 TIME1=$SECONDS
 
-OGLOGSESSION="${OGLOGSESSION=:-/tmp/session.log}"
-OGLOGCOMMAND="${OGLOGCOMMAND=:-/tmp/command.log}"
 
-OGLOGSESSION="/tmp/session.log"
-OGLOGCOMMAND="/tmp/command.log"
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
-echo " " > $OGLOGSESSION
-echo " " > $OGLOGCOMMAND
-echo " " > ${OGLOGCOMMAND}.tmp
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
 
-
-echo "START JOBS ***************************** " |  tee -a $OGLOGSESSION $OGLOGFILE
+# Registro de inicio de ejecución
+#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 echo "Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
 cat  $1 >> $OGLOGFILE
+
 
 echo "Salida de las instrucciones: *****************************" >>  $OGLOGFILE
 chmod +x $1
 $1 &>> $OGLOGCOMMAND
 RETVAL=$?
-echo $RETVAL &>> $OGLOGFILE
+
+
+
 TIME=$[SECONDS-TIME1]
 if [ $RETVAL == 0 ]
 then
@@ -29,5 +32,12 @@ then
 else
 	echo "ERROR no operacion no realizada" | tee -a $OGLOGSESSION $OGLOGFILE
 fi
-echo "END JOBS ***************************** " |  tee -a $OGLOGSESSION $OGLOGFILE
+
+
+# Registro de fin de ejecución
+#echo "[END Interface] Command finished with this code:  $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
+
 exit $RETVAL

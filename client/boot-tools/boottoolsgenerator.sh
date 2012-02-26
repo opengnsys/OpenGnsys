@@ -35,31 +35,28 @@ for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umo
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
 
 
-
 #funciones especificas del cliente.
 source $PROGRAMDIR/boottoolsfunctions.lib
-
 
 echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
 
 ##########################################################################
-## FASE 1 -  Instalación de software adicional.
+echo "FASE 1 -  Instalación de software adicional."
 cat /etc/apt/sources.list | grep "http://free.nchc.org.tw/drbl-core" || echo "deb http://free.nchc.org.tw/drbl-core drbl stable " >> /etc/apt/sources.list
-apt-get update
-apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage gpxe qemu
-
-##### FASE 2   - Asignación de variables
+apt-get update; apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage gpxe qemu
+####################################################################3
+echo "FASE 2   - Asignación de variables"
 #obtenemos las variables necesarias y la información del host.
 btogGetVar && btogGetOsInfo
-
-############# FASE 3: Creación del Sistema raiz RootFS (Segundo Sistema archivos (img))
-##3.1 creación y formateo del disco virtual. generamos el dispositivo loop.
+###################################################################3
+echo " FASE 3: Creación del Sistema raiz RootFS (Segundo Sistema archivos (img)) "
+echo "Fase 3.1 Generar y Formatear  el disco virtual. generamos el dispositivo loop."
 file $BTROOTFSIMG | grep "partition 1: ID=0x83"
 if [ $? == 1 ]
 then
 	btogSetFsVirtual || exit 2
 fi
-#3.2 generamos el Sistema de archivos con debootstrap 
+echo "Fase 3.2 gener sistema de archivos con debootstrap" 
 schroot -p -c IMGogclient -- touch /tmp/ogclientOK
 if [ -f /tmp/ogclientOK ] 
 then 
@@ -67,67 +64,54 @@ then
 else
 	btogSetFsBase || exit 3
 fi
-
-# FASE 4: Configuración el acceso al Segundo Sistema de archivos (img), para schroot
+###################################################################3
+echo "FASE 4: Configurar acceso schroot al Segundo Sistema de archivos (img)"
 cat /etc/schroot/schroot.conf | grep $BTROOTFSIMG || btogSetFsAccess
-
-# FASE 5: Incorporando con ficheros OG el sistema raiz rootfs 
+###########################################################################
+echo "FASE 5: Incorporando con ficheros OpenGnsys el sistema raiz rootfs "
 cp -prv ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp/
 chmod 777 /tmp/boot-tools/*.sh
 schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh 
-
-# FASE6: Instalacion de software
-# 6.1 instalacion de software con apt-get
-#cp  /etc/apt/sources.list /tmp
+############################################################################################
+echo "FASE6: Instalar software"
+echo "Fase 6.1 instalar paquetes deb con apt-get"
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareInstall.sh 
-
-
-# 6.2 compilación de software.
+echo "Fase 6.2 compilar software."
 cd /
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
-
 cd -
 
-#Fase 7. Personalizando
-
-schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsFsLocales.sh
-
-
-### 7.1 incorporamos la clave publica del servidor
+echo "Fase 7. Personalizar el sistema creado"
+echo "Fase 7.1 incorporamos la clave publica del servidor"
 cd /
 ssh-keygen -q -f /root/.ssh/id_rsa -N ""
 cp /root/.ssh/id_rsa.pub /tmp
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSshServer.sh
 cd -
-### 7.2 y la del propio cliente.
-schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsSshClient.sh
+echo "Fase 7.2. incorpoar la clave publica del propio  cliente"
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSshClient.sh
 
-## 7.3 configuramos los locales.
-schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsFsLocales.sh
+echo "Fase 7.1. configurando las locales"
+schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsFsLocales.sh
+
 
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
 
-
-
-
-
-#Fase 7. Generando la ISO.
-#7.1 el initrd
+#########################################################################
+echo "Fase 8 . Generar distribucion "
+echo "Fase 8.1 generar el initrd"
 btogFsInitrd
-
-
-#7.2 Convertivos el sistema raiz img en formato sqfs
+echo "8.2. Generar fichero sqfs a partir del fichero img"
 btogFsSqfs
-#7.3 Generamos la iso
+echo "8.3. Generar la ISO" 
 btogIsoGenerator
-
-
+######################################################################3
+########################################################################
 # Mostrar sumario de la instalaciÃ³n e instrucciones de post-instalaciÃ³n.
 installationSummary
-
 echoAndLog "OpenGnSys installation finished at $(date)"
 
 

@@ -6,6 +6,7 @@
 // Fecha Última modificación: Agosto-2010
 // Nombre del fichero: frames.php
 // Descripción :Este fichero implementa la distribución en frames de la aplicación
+// Cambio en la línea 22 22% (antes 30)
 // *******************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
@@ -17,8 +18,8 @@ include_once("./includes/constantes.php");
 <TITLE> Administración web de aulas</TITLE>
 </HEAD>
 <FRAMESET rows="25,*">
-	<FRAME SRC="barramenu.php" frameborder=0  scrolling=no  NAME="frame_menus" >
-	<FRAMESET cols="30%,*">
+	<FRAME SRC="barramenu.php" frameborder=1  scrolling=no  NAME="frame_menus" >
+	<FRAMESET cols="22%,*">
 			<? 
 			if($idtipousuario!=$SUPERADMINISTRADOR)
 				echo '<FRAME SRC="./principal/aulas.php" frameborder=1 scrolling=auto NAME="frame_arbol" >';
@@ -27,7 +28,7 @@ include_once("./includes/constantes.php");
 					echo '<FRAME SRC="./principal/administracion.php" frameborder=1 scrolling=auto NAME="frame_arbol" >';
 			}
 			?>
-		<FRAME SRC="nada.php" frameborder=1  NAME="frame_contenidos">
+		<FRAME SRC="nada.php" frameborder=0  NAME="frame_contenidos">
 		</FRAMESET>
 	</FRAMESET>	
 </FRAMESET>

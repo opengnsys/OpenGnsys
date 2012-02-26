@@ -154,26 +154,26 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!-----ADV -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center&nbsp;> Interfaz de Red: &nbsp;</TD>
+		<tr>
+			<th align=center&nbsp;>&nbsp;<?echo $TbMsg[13]?>&nbsp;</th>
 			<?
-				echo '<TD colspan=3>';
+				echo '<td colspan="3">';
 				$iface="eth0=eth0".chr(13);
 				$iface.="eth1=eth1".chr(13);
 				$iface.="eth2=eth2";
-				echo HTMLCTESELECT($iface,"netiface","estilodesple","",$netiface,100).'</TD>';
+				echo HTMLCTESELECT($iface,"netiface","estilodesple","",$netiface,100).'</td>';
 			?>
-		</TR>				
+		</tr>				
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		
-		<TR>
-			<TH align=center&nbsp;> Driver de Red: &nbsp;</TD>
+		<tr>
+			<th align="center">&nbsp;<?echo $TbMsg[14]?>&nbsp;</th>
 			<?
-				echo '<TD colspan=3>';
+				echo '<td colspan="3">';
 				$driver="generic=generic";
-				echo HTMLCTESELECT($driver,"netdriver","estilodesple","",$netdriver,100).'</TD>';
+				echo HTMLCTESELECT($driver,"netdriver","estilodesple","",$netdriver,100).'</td>';
 			?>
-		</TR>
+		</tr>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 

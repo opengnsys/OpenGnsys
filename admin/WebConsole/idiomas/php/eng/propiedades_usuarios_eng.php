@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_ordenadores_eng.php 
-//	Idioma: Ingés 
+//	Idioma: InglÃ©s
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
@@ -14,6 +14,10 @@ $TbMsg[5]="User";
 $TbMsg[6]="Password";
 $TbMsg[7]="Name";
 $TbMsg[8]="E-mail";
-$TbMsg[9]="Organizing Unit";
+$TbMsg[9]="Organitative Unit";
 $TbMsg[10]="Language ";
+$TbMsg[11]="Super-Administrator";
+$TbMsg[12]="Administrator";
+$TbMsg[13]="Operator";
 ?>
+

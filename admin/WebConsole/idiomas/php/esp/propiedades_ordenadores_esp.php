@@ -17,5 +17,7 @@ $TbMsg[8]="Perfil Hardware";
 $TbMsg[9]="Autoexec";
 $TbMsg[10]="Repositorio";
 $TbMsg[11]="Menú";
-$TbMsg[12]="Tamaño Caché (KB)";
+$TbMsg[12]="Tama&ntilde;o Caché (KB)";
+$TbMsg[13]="Interfaz de red";
+$TbMsg[14]="Driver de red";
 ?>

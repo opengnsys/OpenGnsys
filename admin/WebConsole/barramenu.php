@@ -81,6 +81,10 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 					case 13:
 							href="./principal/usuarios.php"
 							break;
+					case 14:
+						href="./principal/aulas.php"
+						href2="./varios/buscar.php"
+						break;
 				}
 				var oldOp=currentOp
 				currentOp=o;
@@ -137,6 +141,9 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 								<TD  onclick=eleccion(this,7) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/menus.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[6] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+								<td onclick="eleccion(this,14)" onmouseout="desresaltar(this)" onmouseover="resaltar(this)" align="middle">
+									&nbsp;<a href="#" style="text-decoration: none"><img border="0" src="./images/iconos/busquedas.gif">&nbsp;<span class="menupral"><?echo  $TbMsg[14] ?></span></a>&nbsp;</td>
+								<td width="4" align="middle"><img src="./images/iconos/separitem.gif"></td>
 								
 								<!--TD  onclick=eleccion(this,8) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/reservas.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[7] ?></SPAN></A>&nbsp;</TD>

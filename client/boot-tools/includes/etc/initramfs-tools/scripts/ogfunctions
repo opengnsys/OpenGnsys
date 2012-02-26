@@ -108,6 +108,8 @@ ogConfigureRamfs ()
 	mkdir -p $OGLIVERAMFS	
 	mkdir -p $OGLIVEROOTFS	  			 
 	mkdir -p $OGLIVEUNIONFS 
+
+	touch /etc/fstab
 }
 
 
@@ -248,7 +250,8 @@ ogUpdateInitrd ()
 {
 	cd /tmp
 	mkdir /tmp/cache
-	mount -t reiserfs LABEL=CACHE /tmp/cache || return
+	TYPE=$(blkid | grep CACHE | awk -F"TYPE=" '{print $2}' | tr -d \")
+	mount -t $TYPE LABEL=CACHE /tmp/cache || return
 	mkdir /tmp/cache/boot
 	
 	
@@ -314,7 +317,7 @@ ogConnect ()
 	
 	case "$PROTOCOL" in
 		nfs)
-			nfsmount -o nolock${READONLY} ${SERVER}:${SRC} ${DST} 
+			nfsmount  ${SERVER}:${SRC} ${DST} -o nolock${READONLY} 2> /dev/null || mount.nfs ${SERVER}:${SRC} ${DST} -o nolock${READONLY}
 		;;
 		smb)
 			mount.cifs //${SERVER}/${SRC} ${DST} ${OPTIONS}${READONLY}		
@@ -339,10 +342,12 @@ ogConnectOgLive ()
 	then		
 		echo  "Montar imagen del sistema root desde dispositivo local"
 		for i in $(blkid /dev/s* | grep $OGLIVELABEL  | awk -F: '{print $2}' | tr -d \"); do export $i; done
-		mount -t $TYPE LABEL=$LABEL $DSTOGLIVE  
+		# si local usb| cd con partcion es identificada como label $OGLIVELABEL		 
+		mount -t $TYPE LABEL=$OGLIVELABEL $DSTOGLIVE  
 		if [ $? != 0 ]
 		then
-			mount -t reiserfs LABEL=CACHE $DSTOGLIVE
+			# Si local es particion CACHE es identificada como CACHE
+			mount LABEL=CACHE $DSTOGLIVE
 			export LOCALMEDIA=CACHE
 		fi
 	else

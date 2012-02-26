@@ -19,6 +19,7 @@ include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/restaurarimagen_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -190,15 +191,18 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 									
 					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
 					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
-						//Clonación
+					//Clonación
 					
-					$metodos="UNICAST=UNICAST".chr(13);
-					$metodos.=mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST".chr(13);
-					$metodos.="TORRENT peer:60=TORRENT";
+					$metodos="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
+					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
+					$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
+					$metodos.="TORRENT peer:60=TORRENT-CACHE";
 					
-					$TBmetodos["UNICAST"]=1;
-					$TBmetodos["MULTICAST"]=2;
-					$TBmetodos["TORRENT"]=3;
+					$TBmetodos["UNICAST-DIRECT"]=1;
+					$TBmetodos["MULTICAST-DIRECT"]=2;
+					$TBmetodos["MULTICAST-CACHE"]=3;
+					$TBmetodos["TORRENT-CACHE"]=4;
+					
 					$idxc=$_SESSION["protclonacion"];
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 				}
@@ -303,7 +307,7 @@ $cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.mo
 	$rs->Comando=&$cmd; 
 if ($rs->Abrir()){
 		$rs->Primero(); 
-       	$mcastsyntax.='MULTICAST ' . $rs->campos["pormul"] . ':';
+       	$mcastsyntax.= $rs->campos["pormul"] . ':';
         		
 		$rs->Siguiente();
 		switch ($rs->campos["modomul"]) 

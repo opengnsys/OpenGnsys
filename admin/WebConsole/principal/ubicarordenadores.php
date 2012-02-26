@@ -146,9 +146,9 @@ switch($ambito){
 <form name="myForm" method="post" action="../gestores/gestor_ubicarordenadores.php?idaula=<?php echo $idambito ?>&nombreambito=<?php echo $nombreambito?>&litambito=<?php echo $litambito?>" >
 
 
-	<P align=center class=cabeceras>Ubicador Ordenadores<BR>
-	<SPAN align=center class=subcabeceras> <?php echo "nombre ambito:" . $nombreambito . " identificador ambito: " . $idambito . $litambito; ?> </SPAN>
-	<input type="submit" value="GUARDAR" name="saveButton"  onclick="allSelect()"> </P>
+	<P align=center class=cabeceras><?php echo $TbMsg[44]; ?> <BR>
+	<SPAN align=center class=subcabeceras> <?php echo $TbMsg[45].": " . $nombreambito ." ". $TbMsg[46]. ": " . $idambito ." " . $litambito; ?> </SPAN>
+	<input type="submit" value=<?php echo $TbMsg[43]; ?> name="saveButton"  onclick="allSelect()"> </P>
 	
 	
 	
@@ -165,7 +165,7 @@ echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
 <tr>
 <td> 
 <?php echo $nombreambito; ?> <br>
-<select multiple size="30" name="Lpxe" id="Lpxe" style="width:100">
+<select multiple size="30" name="Lpxe" id="Lpxe" >
 
 <?php
 #### listado de equipos que pertenecen al aula, pero no estan en subgrupos
@@ -194,7 +194,7 @@ while (!$rsmenu->EOF)
     echo "<input type='button' onClick='move(this.form.L" . $rsmenu->campos['idgrupo'] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
  	echo "<input type='button' onClick='move(this.form.Lpxe,this.form.L" . $rsmenu->campos['idgrupo'] .")' value='IN' style='height: 25px; width: 35px' >";
  	echo " <br>";
-	echo "<select multiple size='30' name='L" . $rsmenu->campos['idgrupo'] . "' style='width:100'>";
+	echo "<select multiple size='30' name='L" . $rsmenu->campos['idgrupo'] . "' >";
     $listadogrupo="";
 	#$listadogrupo=listaequipos($cmd,$rsmenu->campos['idgrupo'],$seleccion);
 	$listadogrupo=ListaEquiposGrupo($cmd,$rsmenu->campos['idaula'],$rsmenu->campos['idgrupo']);

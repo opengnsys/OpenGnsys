@@ -1,0 +1,45 @@
+
+Installing and updating OpenGnSys
+=================================
+
+
+
+Installing OpenGnsys
+--------------------
+
+
+For security reasons, it is very important modify defaults users and passwords to access to the system. For this, edit the installation file opengnsys_installer.sh and change the values of configuration variables:
+
+            MYSQL_ROOT_PASSWORD - MySQL root user password.
+            OPENGNSYS_DB_USER - OpenGnSys access user and OpenGnSys super-user.
+            OPENGNSYS_DB_PASSWD - User password.
+            OPENGNSYS_CLIENT_PASSWD - Password for client access to remote services. 
+
+
+Run opengnsys_installer.sh script as "root" to install all its dependencies, to  install the OpenGnSys components, and to make the initial configuration.
+
+           sudo bash opengnsys_installer.sh
+
+Follow the post-installation instructions.
+
+
+Updating OpenGnSys
+------------------
+
+Run opengnsys_update.sh script as "root" to update all OpenGnSys components from the Subversion repository:
+
+	sudo bash /opt/opengnsys/lib/opengnsys_update.sh
+
+Follow the instructions.
+
+
+Uninstalling OpenGnSys
+----------------------
+
+Run opengnsys_uninstall.sh script as "root" to uninstall all OpenGnSys components:
+
+	sudo bash /opt/opengnsys/lib/opengnsys_uninstall.sh
+
+Follow the instructions.
+
+

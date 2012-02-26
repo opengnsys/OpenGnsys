@@ -5,9 +5,9 @@
 //	Idioma: Español 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Definir nuevo tipo hardware"';	
+	$TbMsg[0]='"Definir nuevo tipo de hardware"';	
 	$TbMsg[1]='"Propiedades"';
-	$TbMsg[2]='"Eliminar tipo  de hardware"';
+	$TbMsg[2]='"Eliminar tipo de hardware"';
 	$TbMsg[3]='"Nuevo grupo de componentes"';
 	$TbMsg[4]='"Definir nuevo componente"';
 	$TbMsg[5]='"Colocar componente"';
@@ -24,7 +24,7 @@
 	$TbMsg[16]='"Mover perfil"';
 	$TbMsg[17]='"Eliminar perfil hardware"';
 	$TbMsg[18]='"Tipos de hardware"';
-	$TbMsg[19]='"Componentes hardwares"';
-	$TbMsg[20]='"Perfiles hardwares"';
-
+	$TbMsg[19]='"Componentes hardware"';
+	$TbMsg[20]='"Perfiles hardware"';
 ?>
+

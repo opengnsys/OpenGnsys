@@ -76,12 +76,13 @@ case "$(ogGetFsType $1 $2)" in
             FILE="$MNTDIR/etc/arch-release"
             [ -r $FILE ] && VERSION="Arch Linux"
         fi
-        [ -e $MNTDIR/lib64 ] && VERSION="$VERSION 64 bits"
+        [ -e $MNTDIR/lib64 ] && VERSION="$VERSION $MSG_64BIT"
         ;;
     NTFS | HNTFS | FAT32 | HFAT32)
         TYPE="Windows"
         # Para Windows: leer la version del registro.
         VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+        [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && VERSION="$VERSION $MSG_64BIT"
         ;;
 esac
 

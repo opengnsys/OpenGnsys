@@ -1,15 +1,16 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: informacion_repositorio_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: informacion_repositorio_eng.php 
+//	Idioma: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Repositorios';
-	$TbMsg[1]='Information sobre Repositorios';
-	$TbMsg[2]='Repositorio';
-	$TbMsg[3]='Información Repositorio';
-	$TbMsg[4]='Comentarios';
-	$TbMsg[5]='Imágenes alojadas';	
-	$TbMsg[6]='Ordenadores asigandos';		
+	$TbMsg[0]='Repositories';
+	$TbMsg[1]='Repositories Information';
+	$TbMsg[2]='Repository';
+	$TbMsg[3]='Repository Information';
+	$TbMsg[4]='Comments';
+	$TbMsg[5]='Hosted Images';	
+	$TbMsg[6]='Computers assigned';		
 ?>
+

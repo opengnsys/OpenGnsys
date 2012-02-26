@@ -30,28 +30,30 @@
 #@version 1.0.1 - Separación de los ficheros-log para ser gestionado por el httpd-log
 #@author Antonio J. Doblas Viso. Universidad de Málaga  
 #@date   2011-05-11
+#@version 1.0.2 - Logica basada en fichero de configuracion engine.cfg
+#@author Antonio J. Doblas Viso. Universidad de Málaga  
+#@date   2012-01-11
 
+PROTO=$5
+PROTOOPT=$6
 
 TIME1=$SECONDS
 
-OGLOGSESSION="${OGLOGSESSION=:-/tmp/session.log}"
-OGLOGCOMMAND="${OGLOGCOMMAND=:-/tmp/command.log}"
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
-OGLOGSESSION="/tmp/session.log"
-OGLOGCOMMAND="/tmp/command.log"
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
 
-echo " " > $OGLOGSESSION
-echo " " > $OGLOGCOMMAND
-echo " " > ${OGLOGCOMMAND}.tmp
-# Registro de ejecución
-echo $* >> $OGLOGSESSION
-echo "$*" &>> $OGLOGSESSION | $(tail -n 1 $OGLOGSESSION >> $OGLOGFILE)
+# Registro de inicio de ejecución
+#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 
-echo "[1] Iniciando $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Si el origen(pariticion) esta bloqueada salir.
-
 echo "TODO comprobando si esta bloqueado el $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
 #if ogIsLocked $1 $2; then
 #	ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $1 $2"
@@ -64,61 +66,132 @@ REPO=${4:-"REPO"}
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 [ "$REPO" == "CACHE" ] && REPO="CACHE"
 
+#Informacioin previa de la imagen
+IMGSIZE=$(ls -s `ogGetPath $REPO $3.img`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO $3.img`)
+
+echo "[1] IMG-FILE=$3  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
 
 if [ "$REPO" == "CACHE" ] 
 then
-	echo "[2] Iniciando un ogRestoreImage CACHE $3 $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "[2] $MSG_HELP_ogRestoreImage : ogRestoreImage CACHE $3 $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
 	ogRestoreImage CACHE "$3" "$1" "$2" &>> $OGLOGCOMMAND
 	RETVAL=$?
+	RESUMERESTOREIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
 fi	
 
 
 
 if [ "$REPO" == "REPO" ]
 then
-	echo "[2] updateCache REPO \"/$3.img\" $5 $6"	 | tee -a $OGLOGSESSION $OGLOGFILE
-	TIME2=$SECONDS
-	updateCache REPO "/$3.img" "$5" "$6"	 &>> $OGLOGCOMMAND	
-	RETVAL=$?
-	TIME2=$[SECONDS-TIME2]
-	echo "   [ ] Duracion del subproceso updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-	case $RETVAL in
-		0)
-		echo "[50] updateCache (correcto)" | tee -a $OGLOGSESSION $OGLOGFILE
-		echo "[55] Restaurando la imagen desde la cache con comando: ogRestoreImage CACHE $3 $1 $2 UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
-		TIME3=$SECONDS
+	case "$5" in
+		MULTICAST-DIRECT)
+			NEXTOPERATION=MULTICAST
+		;;
+		UNICAST-DIRECT)
+		    NEXTOPERATION=UNICAST
+		;;
+		*) 
+			echo "[2] updateCache REPO \"/$3.img\" $5 $6"	 | tee -a $OGLOGSESSION $OGLOGFILE
+			TIME2=$SECONDS
+			updateCache REPO "/$3.img" "$5" "$6"	 &>> $OGLOGCOMMAND	
+			RETVAL=$?
+			TIME2=$[SECONDS-TIME2]
+			echo "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+			case $RETVAL in
+				0)
+					echo "[50] updateCache (OK)" | tee -a $OGLOGSESSION $OGLOGFILE
+					NEXTOPERATION=CACHE
+				;;
+				15|16)
+					echo "[50] $MSG_ERR_NOTCACHE ;  $MSG_ERR_CACHESIZE " | tee -a $OGLOGSESSION $OGLOGFILE
+					echo "[50] $MSG_SCRIPTS_CHECK_ENGINE " | tee -a $OGLOGSESSION $OGLOGFILE
+					case "$RESTOREPROTOCOLNOCACHE" in
+						MULTICAST|multicast)
+							[ "$5" == "MULTICAST" ] && 	NEXTOPERATION=MULTICAST
+							[ "$5" == "TORRENT" ] && 	NEXTOPERATION=UNICAST
+							[ "$5" == "UNICAST" ] && 	NEXTOPERATION=UNICAST
+						;;
+						UNICAST|unicast)
+							NEXTOPERATION=UNICAST
+						;;
+					esac
+				;;					 		
+			esac
+		;;
+	esac	
+fi
+
+
+TIME3=$SECONDS
+
+
+case $NEXTOPERATION in
+	CACHE)		
+		echo "[55] CACHE $MSG_HELP_ogRestoreImage : ogRestoreImage CACHE $3 $1 $2 UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogRestoreImage CACHE "$3" "$1" "$2" &> $OGLOGCOMMAND	 
 		RETVAL=$? 
-		TIME3=$[SECONDS-TIME3]
-		echo "   [ ] Duracion del subproceso ogRestoreImage CACHE $[TIME3/60]m $[TIME3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-		;;
-		15)
-		echo "[50] updateCache(no hay CACHE); se realiza ogRestoreImage REPO $3 $1 $2 UNICAST"  | tee -a $OGLOGSESSION $OGLOGFILE
-		echo "[55] Se restaura la imagen directamente desde el REPO: ogRestoreImage REPO $3 $1 $2 UNICAST"  | tee -a $OGLOGSESSION $OGLOGFILE
-		TIME3=$SECONDS
+		RESUMERESTOREIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
+	;;
+	UNICAST)
+		echo "[55] $5 $MSG_HELP_ogRestoreImage : ogRestoreImage REPO $3 $1 $2 UNICAST"  | tee -a $OGLOGSESSION $OGLOGFILE
 		ogRestoreImage REPO "$3" "$1" "$2" &> $OGLOGCOMMAND		
 		RETVAL=$?
-		;;
-		16)
-		echo "[50] updateCache(no hay espacio sufiente en la CACHE), Se realiza ogRestoreImage REPO $3 $1 $2 UNICAST"  | tee -a $OGLOGSESSION $OGLOGFILE
-		TIME3=$SECONDS
-		ogRestoreImage REPO "$3" "$1" "$2" &> $OGLOGCOMMAND		
-		RETVAL=$? 
-		TIME3=$[SECONDS-TIME3]
-		echo "   [ ] Duracion del subproceso ogRestoreImage REPO $[TIME3/60]m $[TIME3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-		;;
-	esac
-fi
+		RESUMERESTOREIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
+	;;
+	MULTICAST)
+		echo "[55] $PROTO $PROTOOPT $MSG_HELP_ogRestoreImage  "  | tee -a $OGLOGSESSION $OGLOGFILE
+		OPTPROTOCOLO=$6
+		REPOIP=$(ogGetRepoIp)
+		echo "       $MSG_SCRIPTS_MULTICAST_PRECHECK_PORT " | tee -a $OGLOGSESSION
+		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
+		let PORTAUX=$PORT+1
+		#TODO: ticket 379
+		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
+		sleep $NUMBER
+		#FIN TODO
+		tools=$(ogGetImageProgram REPO $3)
+		compressor=$(ogGetImageCompressor REPO $3)
+		echo "       $MSG_SCRIPTS_MULTICAST_CHECK_PORT  $REPOIP:$PORTAUX $REPOIP:$PORT" | tee -a $OGLOGSESSION
+		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
+		then 
+			ogMcastReceiverPartition $1 $2 $PORT $tools $compressor &> $OGLOGCOMMAND	
+		else
+			# TODO ticket 379 Realizar la peticiÃ³n basada en identificador de operacion
+			echo "       $MSG_SCRIPTS_MULTICAST_REQUEST_PORT :  hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST /$3.img $OPTPROTOCOLO"  | tee -a $OGLOGSESSION $OGLOGFILE
+			hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$3.img $OPTPROTOCOLO"					
+			#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
+			sleep 20
+			if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
+			then 
+					ogMcastReceiverPartition $1 $2 $PORT $tools $compressor	  &> $OGLOGCOMMAND	
+					RETVAL=$?		
+			fi
+		fi	
+		RESUMERESTOREIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")	
+	;;
+	REPEAT)
+		$0 $*
+	;;
+esac
 
-if [ $RETVAL == 0 ]
-then
-	echo "[90] Iniciando la Configuracion del Sistema Restaurado" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+TIME3=$[SECONDS-TIME3]
+echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
+#if [ $RETVAL == 0 ]
+#then
+	echo "[90] $MSG_SCRIPTS_OS_CONFIGURE " | tee -a $OGLOGSESSION $OGLOGFILE
 	configureOs "$1" "$2"
-fi
+#fi
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
+# Registro de fin de ejecución
+#echo "[END Interface] Command finished with this code:  $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
 
 exit $RETVAL
 

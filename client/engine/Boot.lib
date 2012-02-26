@@ -88,7 +88,8 @@ case "$TYPE" in
 esac
 
 # Arrancar.
-kexec -e
+kexec -e &
+pkill browser
 }
 
 

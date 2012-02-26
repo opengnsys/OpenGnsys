@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: aules_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"Nou grup d\'aules"';
@@ -15,7 +15,7 @@
 	$TbMsg[7]='"Eliminar grup d\'aules"';
 	$TbMsg[8]='"Nou grup d\'ordinadors"';
 	$TbMsg[9]='"Afegir nou ordinador"';
-	$TbMsg[10]='"Configuració"';
+	$TbMsg[10]='"Configuraciï¿½"';
 	$TbMsg[11]='"Col.locar ordinador"';
 	$TbMsg[12]='"Ordinador Plantilla"';
 	$TbMsg[13]='"Propietats"';
@@ -29,18 +29,30 @@
 	$TbMsg[21]='"Totes"';
 	$TbMsg[22]='Estatus ordinadors';
 	$TbMsg[23]='Aula d\'ordinadors';
-	$TbMsg[24]='Ámbit: Centres';
-	$TbMsg[25]='Ámbit: Grup d\'aules';
-	$TbMsg[26]='Ámbito: Grup d\'ordinadors';
-	$TbMsg[27]='"Incorporar ordinadores"';
+	$TbMsg[24]='ï¿½mbit: Centres';
+	$TbMsg[25]='ï¿½mbit: Grup d\'aules';
+	$TbMsg[26]='ï¿½mbito: Grup d\'ordinadors';
+	$TbMsg[27]='"Incorporar ordinadors"';
 	$TbMsg[28]='"Procedimentss"';
 	$TbMsg[29]='"Reserves d\'aules"';
-	$TbMsg[30]='"Confirmadas"';
+	$TbMsg[30]='"Confirmades"';
 	$TbMsg[31]='"Pendents"';
 	$TbMsg[32]='"Denegades"';
 	$TbMsg[33]='"Commutar"';
-	$TbMsg[34]='"Programació reserves"';
+	$TbMsg[34]='"Programaciï¿½ reserves"';
 	$TbMsg[35]='"Operadors"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Afegir nou Operador"';
+	$TbMsg[38]='"Assistents"';
+	$TbMsg[39]='"Eco de consola"';
+	$TbMsg[40]='"NetBoot avanï¿½at"';
+	$TbMsg[41]='"Reubicar ordinadors"';
+	$TbMsg[42]='Gestiï¿½ Arrancada Avanï¿½at';
+	$TbMsg[43]='"Guardar"';
+	$TbMsg[44]='Ubicador Ordenadores';
+	$TbMsg[45]='Nombre Ã¡mbito';
+	$TbMsg[46]='Identificador Ã¡mbito';
+	$TbMsg[47]='"Log historico"';
+	$TbMsg[48]='"Log en tiempo real"';	
 ?>
+

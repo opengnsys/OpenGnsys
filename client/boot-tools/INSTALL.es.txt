@@ -43,5 +43,7 @@ Descripción de la estrucutra de boot-tools
 
 
 
-
-
+NOTA:
+ boottollsfuncions.lib  ->  btogSetfsBase
+ bootsoftwareinstall ->
+ packages ->sw.testing

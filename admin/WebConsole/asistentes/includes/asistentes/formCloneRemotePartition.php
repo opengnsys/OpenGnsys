@@ -3,17 +3,17 @@
 
 <tr>
 	<td class="op_basic">
-	    Elige equipo MASTER:
+	    <?echo $TbMsg["WCRP32"] ?> 
 		<select name="ipMaster" id="ipMaster" style="WIDTH:220" onChange="xajax_ListarOrigenMaster(this.value);">
-				<option value="">-- Elige equipo Master--</option>
+				<option value=""> -- <?echo $TbMsg["WCRP32"] ?> -- </option>
 				<?php echo ''.htmlOPTION_equipos($cmd,$ambito,$idambito).'';   ?>
 		</select>		
 		<br />		
 		<!--DIV donde se mostrara la respuesta AJAX sobre las particiones clonables del equipo-->
-		Elige desde el Master la imagen o particion a enviar
+		<?echo $TbMsg["WCRP33"] ?>
 		<div id="divListado"></div>
 		<br />
-		Elige la identificacion de la partición destino de los clientes:
+		<?echo $TbMsg["WCRP34"] ?> 
 		<select name="targetpart" id="targetpart" style="WIDTH:220";">
 			<option value="1 1"> 1er disco - 1ª particion </option>
 			<option value="1 2"> 1er disco - 2ª particion </option>
@@ -21,19 +21,19 @@
 			<option value="1 4"> 1er disco - 4ª particion </option>
 		</select>
 		<br />
-		Elige el metodo de transferencia
+		<?echo $TbMsg["WCRP35"] ?>
 		<select name="idmetodo" id="idmetodo" style="WIDTH:220";">
 			<option value="MULTICAST"> MULTICAST </option>
 			<option value="UNICAST"> UNICAST </option> 			
 		</select>
 		<br />
-		Elige herramienta de clonacion:
+		<?echo $TbMsg["WCRP36"] ?>
 		<select name="tool" id="tool" style="WIDTH:220";">
 			<option value="partclone"> partclone </option>
 		<!--	<option value="partimage"> partimage </option> -->
 		</select>
 		<br />
-		Elige compresor para la herramienta de clonacion:
+		<?echo $TbMsg["WCRP37"] ?>
 		<select name="compresor" id="compresor" style="WIDTH:220";">
 				<option value="lzop"> lzop </option>
 				<option value="gzip"> gzip </option>

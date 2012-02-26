@@ -5,10 +5,9 @@ set -a
 source /opt/opengnsys/etc/preinit/loadenviron.sh
 
 # Scripts de inicio.
-for f in fileslinks loadmodules mountrepo poweroff; do
+for f in fileslinks loadmodules mountrepo poweroff otherservices; do
     $OGETC/preinit/$f.sh
 done
-
 unset f
 
 if [ -f $OGETC/init/$OG_IP.sh ]; then

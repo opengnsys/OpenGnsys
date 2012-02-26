@@ -29,7 +29,8 @@
 	var  ptarea=document.fdatosejecucion.idtarea.selectedIndex
 
 	if(!sw_ejya && !sw_ejprg && !sw_mkprocedimiento && !sw_mktarea  ){
-		alert("ATENCIÓN.- Debe elegir al menos un modo de ejecución");
+		//alert("ATENCIÓN.- Debe elegir al menos un modo de ejecución");
+		alert(CTbMsg[8]);
 		return(false);
 	}
 
@@ -37,23 +38,27 @@
 	
 	if(sw_ejya){
 		if(!sw_seguimientocon && !sw_seguimientosin){
-			alert("ATENCIÓN.- Debe elegir un modo de ejecución inmediata");
+			//alert("ATENCIÓN.- Debe elegir un modo de ejecución inmediata");
+			alert(CTbMsg[9]);
 			return(false);
 		}
 	}
 	// Cuestión procedimiento -----------------------------------------------------------------------
 	if(sw_mkprocedimiento){
 		if(!sw_nuevaprocedimiento && !sw_procedimientoexistente){
-			alert("ATENCIÓN.- Debe elegir un modo de inclusión en procedimiento de este comando");
+			//alert("ATENCIÓN.- Debe elegir un modo de inclusión en procedimiento de este comando");
+			alert(CTbMsg[10]);
 			return(false);
 		}
 		if(sw_nuevaprocedimiento && descripcion_nuevaprocedimiento==""){
-			alert("ATENCIÓN.- Debe especificar el nombre del nuevo procedimiento que se creará y al que se añadirá este comando");
+			//alert("ATENCIÓN.- Debe especificar el nombre del nuevo procedimiento que se creará y al que se añadirá este comando");
+			alert(CTbMsg[11]);
 			document.fdatosejecucion.nombreprocedimiento.focus();
 			return(false);
 		}
 		if(sw_procedimientoexistente && pprocedimiento==0){
-			alert("ATENCIÓN.- Debe elegir el procedimiento al que se añadirá este comando");
+			//alert("ATENCIÓN.- Debe elegir el procedimiento al que se añadirá este comando");
+			alert(CTbMsg[12]);
 			document.fdatosejecucion.idprocedimiento.focus();
 			return(false);
 		}
@@ -62,16 +67,19 @@
 	// Cuestión tarea ------------------------------------------------------------------------------------------------------------------------------
 	if(sw_mktarea){
 		if(!sw_nuevatarea && !sw_tareaexistente){
-			alert("ATENCIÓN.- Debe elegir un modo de inclusión en tarea ejecutable, de este comando");
+			//alert("ATENCIÓN.- Debe elegir un modo de inclusión en tarea ejecutable, de este comando");
+			alert(CTbMsg[13]);
 			return(false);
 		}
 		if(sw_nuevatarea && descripcion_nuevatarea==""){
-			alert("ATENCIÓN.- Debe especificar el nombre de la nueva tarea ejecutable que se creará y a la que se añadirá este comando");
+			//alert("ATENCIÓN.- Debe especificar el nombre de la nueva tarea ejecutable que se creará y a la que se añadirá este comando");
+			alert(CTbMsg[14]);
 			document.fdatosejecucion.nombretarea.focus();
 			return(false);
 		}
 		if(sw_tareaexistente && ptarea==0){
-			alert("ATENCIÓN.- Debe elegir la tarea a la que se añadirá este comando");
+			//alert("ATENCIÓN.- Debe elegir la tarea a la que se añadirá este comando");
+			alert(CTbMsg[15]);
 			document.fdatosejecucion.idtarea.focus();
 			return(false);
 		}
