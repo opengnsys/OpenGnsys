@@ -81,14 +81,10 @@ case "$OSDISTRIB" in
 		ENABLESITE="a2ensite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		if [ "$OSDISTRIB" == "Debian" ]; then
-			SAMBAINIT=/etc/init.d/samba
-		else
-			SAMBAINIT=/etc/init.d/smbd
+		SAMBAINIT=/etc/init.d/smbd
 		fi
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
-		[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp	# Debian 6
 		;;
 	Fedora)
 		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
@@ -111,6 +107,14 @@ case "$OSDISTRIB" in
 		exit 1 ;;
 esac
 }
+
+# Modificar variables de configuración tras instalar paquetes del sistema.
+function autoConfigurePost()
+{
+[ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba        # Debian 6
+[ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp              # Debian 6
+}
+
 
 # Cargar lista de paquetes del sistema y actualizar algunas variables de configuración
 # dependiendo de la versión instalada.
@@ -1329,6 +1333,9 @@ if [ $? -ne 0 ]; then
 		exit 1
 	fi
 fi
+
+# Detectar datos de auto-configuración después de instalar paquetes.
+autoConfigurePost
 
 # Arbol de directorios de OpenGnSys.
 createDirs ${INSTALL_TARGET}
