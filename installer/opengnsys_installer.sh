@@ -81,20 +81,22 @@ case "$OSDISTRIB" in
 		ENABLESITE="a2ensite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		if [ "$OSDISTRIB" == "Debian" ]; then
-			SAMBAINIT=/etc/init.d/samba
-		else
-			SAMBAINIT=/etc/init.d/smbd
-		fi
+		SAMBAINIT=/etc/init.d/smbd
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
-		[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp	# Debian 6
 		;;
 	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
 		exit 1 ;;
 	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
 		exit 1 ;;
 esac
+}
+
+# Modificar variables de configuración tras instalar paquetes del sistema.
+function autoConfigurePost()
+{
+[ -d $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
+[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
 }
 
 # Cargar lista de paquetes del sistema y actualizar algunas variables de configuración
@@ -1280,7 +1282,7 @@ echo
 echoAndLog "OpenGnSys installation begins at $(date)"
 pushd $WORKDIR
 
-# Detectar datos de auto-configuración del instalador.
+# Detectar datos inicales de auto-configuración del instalador.
 autoConfigure
 
 # Detectar parámetros de red y comprobar si hay conexión.
@@ -1314,6 +1316,9 @@ if [ $? -ne 0 ]; then
 		exit 1
 	fi
 fi
+
+# Detectar datos de auto-configuración después de instalar paquetes.
+autoConfigurePost
 
 # Arbol de directorios de OpenGnSys.
 createDirs ${INSTALL_TARGET}
