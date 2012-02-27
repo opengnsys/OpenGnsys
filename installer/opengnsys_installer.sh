@@ -95,8 +95,8 @@ esac
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -d $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
-[ -d $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
+[ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
+[ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
 }
 
 # Cargar lista de paquetes del sistema y actualizar algunas variables de configuración
