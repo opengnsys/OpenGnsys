@@ -33,7 +33,9 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #492	Mejoras en páginas principal de acceso (mejora)
 
 Tickets resueltos en módulo OpenGnSys Installer:
-#504	instalador: error al instalar servidor DHCP en Ubuntu 10.04.4
+#504	Instalador: error al instalar servidor DHCP en Ubuntu 10.04.4
+#507	OpenGnSys Installer 1.0.3 no crea enlace /opt/opengnsys/tftpboot -> /var/lib/tftpboot en Ubuntu
+#510	Instalador: error en función autoConfigurePost
 
 Tickets genéricos resueltos:
 #498	Traducción al inglés de ficheros de documentación
