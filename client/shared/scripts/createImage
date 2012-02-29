@@ -104,7 +104,7 @@ then
 	let SIZEREQUIRED=$SIZEDATA*$FACTORLZOP
 	#Comprobar espacio libre en el contenedor.
 	[ "$3" == "CACHE" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
-	[ "$3" == "REPO" ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $3}')
+	[ "$3" == "REPO" ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
 else
  	ogRaiseError $OG_ERR_PARTITION "$1 $2"
     exit $?
