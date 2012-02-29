@@ -1,0 +1,53 @@
+
+OpenGnSys 1.0.x Filesystem Hiearchy
+===================================
+
+
+Directory Structure of OpenGnSys Client
+---------------------------------------------
+
+/opt/opengnsys
+  bin (ro) - associated tools
+  cache (rw) - mount point of the local cache filesystem
+  etc (ro) - configuration files.
+    init (ro) - init scripts.
+  images (user=ro, admin=rw) - images repository.
+  lib (ro) - tool libraries.
+    engine/bin (ro) - cloning engine libraries.
+  log (rw) - log files.
+
+
+
+Directory Structure of OpenGnSys Server:
+----------------------------------------------
+
+/opt/opengnsys
+  bin - server binaries.
+  client - exports the client's directory structure.
+  etc - configuration files.
+  lib - tool libraries.
+  log - ficheros de registro de incidencias.
+  log - log files.
+  tftpboot - remote boot files (linked to TFTP directory).
+
+
+
+Directory Structure of OpenGnSys Repository Manager
+---------------------------------------------------------
+
+/opt/opengnsys
+  bin - server binaries.
+  etc - configuration files.
+  images - filesystem images.
+  log - log files.
+
+
+
+Relationship of network file systems
+------------------------------------
+
+Server: exports /opt/opengnsys/client -> Client: imports /opt/opengnsys
+Server: exports /opt/opengnsys/log/client -> Client: imports /opt/opengnsys/log
+RepoMan: exports /opt/opengnsys/images -> Client: imports /opt/opengnsys/images
+
+
