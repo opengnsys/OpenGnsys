@@ -39,7 +39,7 @@ Estructura de directorios de OpenGnSys Server:
   etc - ficheros de configuración.
   lib - librerías de las utilidades.
   log - ficheros de registro de incidencias.
-  tftpboot - arranque remoto de clientes (enlace a /var/lib/tftpboot).
+  tftpboot - arranque remoto de clientes (enlace al directorio de TFTP).
 
 NOTA: páginas de manuales y documentación se copian a los directorios estándares del sistema operativo.
 
