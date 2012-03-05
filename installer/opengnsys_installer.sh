@@ -82,7 +82,6 @@ case "$OSDISTRIB" in
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
 		SAMBAINIT=/etc/init.d/smbd
-		fi
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
@@ -111,8 +110,8 @@ esac
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba        # Debian 6
-[ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp              # Debian 6
+[ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
+[ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
 }
 
 
@@ -1283,8 +1282,8 @@ function installationSummary()
 	echo       "==============================="
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
-	echoAndLog "Log-in as Web Console admin user."
-	echoAndLog " - Review default Organization data and assign default user."
+	echoAndLog "Optional: Log-in as Web Console admin user."
+	echoAndLog " - Review default Organization data and assign access to users."
 	echoAndLog "Log-in as Web Console organization user."
 	echoAndLog " - Insert OpenGnSys data (labs, computers, menus, etc)."
 echo
@@ -1299,7 +1298,7 @@ echo
 echoAndLog "OpenGnSys installation begins at $(date)"
 pushd $WORKDIR
 
-# Detectar datos de auto-configuración del instalador.
+# Detectar datos iniciales de auto-configuración del instalador.
 autoConfigure
 
 # Detectar parámetros de red y comprobar si hay conexión.
