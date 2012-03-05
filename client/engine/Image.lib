@@ -506,7 +506,9 @@ IMGSIZE=$(ogGetImageSize "$1" "$2") || return $(ogRaiseError $OG_ERR_IMAGE " $1 
 #TODO:
 #Si la particion no esta formateado o tiene problemas formateamos
 ogMount $3 $4 || ogFormat $3 $4
-PARTSIZE=$(parted `ogDiskToDev $3 $4` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
+#PARTSIZE=$(parted -sm $DISK unit kB print | \
+#              awk -F: -v np=$4 '{if ($1==np) {gsub(/kB/,""); print $4} } ')
+PARTSIZE=$(ogGetPartitionSize $3 $4)
 if [ $IMGSIZE -gt $PARTSIZE ]; then
     ogRaiseError $OG_ERR_IMGSIZEPARTITION "  $PARTSIZE < $IMGSIZE"
     return $?
