@@ -12,7 +12,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #471	Test de rendimiento de sistemas de archivos en contenedor de imágenes local y remoto (duplicado de #468)
 #472	Librería PostConf permite habilitar la desactivación del chkdisk tras clonación en Windows
 #481	Script sendFileMcast del repositorio sin mbuffer
-#482	Script de inicio mountrepo.sh no reconoce variable "ogprotocol"
+#511	RestoreImagen: error cuando el disco esta recien partitionado
 
 Tickets resueltos en módulo OpenGnSys Client:
 #440	Restauración con Partclone muy lenta
@@ -21,6 +21,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #466	Comando iniciar sobre sistema Linux bloqueado por Browswer
 #468	Sistema de archivos de la caché en Ext4
 #477	Mejorar la internacionalización del cliente (inglés, en especial)
+#482	Script de inicio mountrepo.sh no reconoce variable "ogprotocol"
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #376	Menú para el Browser en equipos sin menú asignados con valores por defecto (se solucionará en #411)
@@ -33,7 +34,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #492	Mejoras en páginas principal de acceso (mejora)
 
 Tickets resueltos en módulo OpenGnSys Installer:
-#504	Instalador: error al instalar servidor DHCP en Ubuntu 10.04.4
+#504	instalador: error al instalar servidor DHCP en Ubuntu 10.04.4
 #507	OpenGnSys Installer 1.0.3 no crea enlace /opt/opengnsys/tftpboot -> /var/lib/tftpboot en Ubuntu
 #510	Instalador: error en función autoConfigurePost
 
