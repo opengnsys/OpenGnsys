@@ -30,6 +30,13 @@ if [ -r $CLIENTINITRD ]; then
 	stty -echo 2>/dev/null
 	echo -n "Clave del usuario Samba: "
 	read SAMBAPASS
+	# Solo se deben aceptar números y letras para la clave de acceso.
+	if [ -n "${SAMBAPASS//[a-zA-Z0-9]/}" ]; then
+		echo
+		echo "$PROG: Error: la clave solo debe contener caracteres alfanuméricos" >&2
+		stty echo 2>/dev/null
+		exit 2
+	fi
 	echo
 	echo -n "Confirmar clave: "
 	read SAMBAPASS2
