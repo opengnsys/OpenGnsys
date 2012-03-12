@@ -8,13 +8,15 @@
 
 
 ####  AVISO: Editar configuración de acceso por defecto.
+####  WARNING: Edit default access configuration.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
 OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
 OPENGNSYS_DB_PASSWD="passusuog"		# Clave de acceso a la base de datos
 OPENGNSYS_CLIENT_PASSWD="og"		# Clave de acceso del cliente
 
 
-####  AVISO: NO EDITAR. 
+####  AVISO: NO EDITAR.
+####  WARNING: DO NOT EDIT. 
 OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
 OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario del cliente para acceso remoto
 
@@ -24,6 +26,11 @@ OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario del cliente para acceso remoto
 if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
+fi
+# Solo se deben aceptar números y letras en la clave de acceso del cliente.
+if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then
+	echo "ERROR: client password must be alphanumeric, edit installer variables."
+	exit 1
 fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
