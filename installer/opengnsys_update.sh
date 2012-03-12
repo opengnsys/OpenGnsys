@@ -15,18 +15,15 @@
 #@version 1.0.2a - obtiene valor de dirección IP por defecto
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/01/18
-#@version 1.0.3 - Compatibilidad con Debian.
+#@version 1.0.3 - Compatibilidad con Debian y auto configuración de acceso a BD.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
-#@date    2012/02/01
+#@date    2012/03/12
 #*/
 
 
-####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
-OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
-OPENGNSYS_DBUSER="usuog"		# Usuario de acceso
-OPENGNSYS_DBPASSWORD="passusuog"	# Clave del usuario
-
-####  AVISO: NO Editar variables de acceso desde el cliente
+####  AVISO: NO EDITAR variables de configuración.
+####  WARNING: DO NOT EDIT configuration variables.
+INSTALL_TARGET=/opt/opengnsys		# Directorio de instalación
 OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
 
 
@@ -36,10 +33,22 @@ if [ "$(whoami)" != 'root' ]; then
         exit 1
 fi
 # Error si OpenGnSys no está instalado (no existe el directorio del proyecto)
-INSTALL_TARGET=/opt/opengnsys
 if [ ! -d $INSTALL_TARGET ]; then
         echo "ERROR: OpenGnSys is not installed, cannot update!!"
         exit 1
+fi
+# Cargar configuración de acceso a la base de datos.
+if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
+	source $INSTALL_TARGET/etc/ogAdmServer.cfg
+elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
+	source $INSTALL_TARGET/etc/ogAdmAgent.cfg
+fi
+OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base datos
+OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
+OPENGNSYS_DBPASSWORD=${OPENGNSYS_DBPASSWORD:-"$PASSWORD"}	# Clave del usuario
+if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASSWORD" ]; then
+	echo "ERROR: set OPENGNSYS_DATABASE, OPENGNSYS_DBUSER and OPENGNSYS_DBPASSWORD"
+	echo "       variables, and run this script again."
 fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
