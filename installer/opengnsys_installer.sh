@@ -94,8 +94,10 @@ case "$OSDISTRIB" in
 		;;
 	Fedora)
 		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		EXTRADEPS=( ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm )
 		UPDATEPKGLIST=""
 		INSTALLPKG="yum install -y"
+		INSTALLEXTRA="rpm -ihv"
 		CHECKPKG="rpm -q \$package"
 		APACHEINIT=/etc/init.d/httpd
 		APACHECFGDIR=/etc/httpd/conf.d
