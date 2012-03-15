@@ -10,7 +10,7 @@
 include_once("controlacceso.php");
 include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");
-include_once("idiomas/php/$idi/acceso_$idi.php");
+#include_once("idiomas/php/$idi/acceso_$idi.php");
 //________________________________________________________________________________________________________
  $usu=""; 
  $pss=""; 
@@ -38,6 +38,8 @@ include_once("idiomas/php/$idi/acceso_$idi.php");
  }
 
  $resul=toma_datos($cmd,$idc,&$nmc,&$idi,$usu,&$tsu,$pss); 
+ // Antes la variable idioma no es la correcta
+ include_once("idiomas/php/$idi/acceso_$idi.php");
  if(!$resul) 
      Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D. 
   

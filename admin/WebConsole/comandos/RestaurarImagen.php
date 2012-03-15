@@ -117,7 +117,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				<TR>
 					<TD height=20 align="center" colspan=14>
 						<A href=#>
-						<IMG border=0 src="../images/boton_confirmar.gif" onclick="document.fdatos.submit()"></A></TD>			
+						<IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
 				</TR>
 			</TABLE>
 		</FORM>	

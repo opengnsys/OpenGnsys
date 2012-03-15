@@ -491,7 +491,11 @@ function listaAcciones($ambito,$idambito)
 					break;					
 		}	
 	}
+echo "aaui";	
 	echo $html;
+while (!$rs->EOF){
+echo $rs->campos['descripcion'].'</br>';
+};
 }
 //	_________________________________________________________________________
 
@@ -1237,4 +1241,7 @@ function ContextualXMLComun()
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
+while (!$rs->EOF){
+echo $rs['descripcion'];
+};
 ?>
