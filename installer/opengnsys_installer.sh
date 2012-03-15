@@ -65,6 +65,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
 # - ENABLEMOD, ENABLESITE - habilitar módulo Apache y sitio web
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
+# - MYSQLINIT - arranque de Samba
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
 # - TFTPCFGDIR - configuración de TFTP
 function autoConfigure()
@@ -88,12 +89,13 @@ case "$OSDISTRIB" in
 		ENABLESITE="a2ensite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
+		MYSQLINIT=/etc/init.d/mysql
 		SAMBAINIT=/etc/init.d/smbd
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
-	Fedora)
-		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+	Fedora|CentOS)
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		EXTRADEPS=( ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm )
 		UPDATEPKGLIST=""
 		INSTALLPKG="yum install -y"
@@ -105,6 +107,7 @@ case "$OSDISTRIB" in
 		APACHEGROUP="apache"
 		DHCPINIT=/etc/init.d/dhcpd
 		DHCPCFGDIR=/etc/dhcp
+		MYSQLINIT=/etc/init.d/mysqld
 		SAMBAINIT=/etc/init.d/smb
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
@@ -1404,6 +1407,7 @@ fi
 # Instalar Base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
+	$MYSQLINIT restart
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 else
 	mysqlGetRootPassword
@@ -1465,7 +1469,7 @@ installWebFiles
 makeDoxygenFiles
 
 # creando configuracion de apache2
-installWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
+installWebConsoleApacheConf $INSTALL_TARGET $APACHECFGDIR
 if [ $? -ne 0 ]; then
 	errorAndLog "Error configuring Apache for OpenGnSys Admin"
 	exit 1
