@@ -15,6 +15,7 @@ include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/SockHidra.php");
 include_once("../includes/FicherosPost.php");
 include_once("../idiomas/php/".$idioma."/iconos_".$idioma.".php");
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 // Captura de parámetros 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,12 +79,12 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 
 	$UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
 	// Se recibe fichero adjunto
-	$NombreFichero_urlicono = $HTTP_POST_FILES['urlicono']['name']; 
+	$NombreFichero_urlicono = $_FILES['urlicono']['name']; 
 	if(!empty($NombreFichero_urlicono)){
-		$NombreFicheroPost_urlicono = $HTTP_POST_FILES['urlicono']['tmp_name']; 
-		$tamano_archivo = $HTTP_POST_FILES['urlicono']['size']; 
+		$NombreFicheroPost_urlicono = $_FILES['urlicono']['tmp_name']; 
+		$tamano_archivo = $_FILES['urlicono']['size']; 
 		if($tamano_archivo>100000){
-			$msg='$TbMsg["MSG_SIZE_FILE"]';
+			$msg=$TbMsg["MSG_SIZE_FILE"];
 			IncializaCampos();
 			$opcion=$INSERTAR;
 			$accion=$SIN_ACCION;
@@ -92,7 +93,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 			if(!SalvaFichero_POST($UrlPagina,$NombreFicheroPost_urlicono,$NombreFichero_urlicono,&$UrlFichero_urlicono))
 				Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 			else{
-				$msg='$TbMsg["SUCCESS_SEND"]';
+				$msg=$TbMsg["SUCCESS_SEND"];
 				$cmd->ParamSetValor("@urlicono",basename($UrlFichero_urlicono));
 			}
 		}
@@ -113,7 +114,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 					if(!EliminaFichero($UrlPagina,$filebaja_urlicono))
 						Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 					else
-						$msg='$TbMsg["SUCCESS_UPDATE"]';
+						$msg=$TbMsg["SUCCESS_UPDATE"];
 				}
 			}
 			else{
@@ -142,7 +143,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 			if(!EliminaFichero($UrlPagina,$filebaja_urlicono))
 				Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 			else
-				$msg='$TbMsg["SUCCESS_DELETE"]';
+				$msg=$TbMsg["SUCCESS_DELETE"];
 		}
 		IncializaCampos();
 		$opcion=$INSERTAR;
@@ -177,6 +178,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <LINK rel="stylesheet" type="text/css" href="../estilos.css">
   <SCRIPT language="javascript" src="M_Iconos.js"></SCRIPT>
+<? echo '   <SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/iconos_'.$idioma.'.js"></SCRIPT>'?>
   </HEAD>
   <BODY>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -188,27 +190,30 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 	<input name="fileexist_urlicono" type="hidden" value="<? echo $urlicono?>">
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
      <DIV align=center id="Layer_Datos">
-		<P class=cabeceras><? echo $TbMsg["TITLE"] ?><BR>
-		<SPAN class="subcabeceras"><? echo $TbMsg["$mopciones[$opcion]"] ?></SPAN></P>
-		<P align="center"><SPAN class=textos><? echo $TbMsg["TABLE_TITLE"] ?></SPAN></P>
+                <P class=cabeceras><? echo $TbMsg["TITLE"] ; ?><BR>
+                <SPAN class="subcabeceras"><? echo $TbMsg["$mopciones[$opcion]"] ?></SPAN></P>
+                <P align="center"><SPAN class=textos><? echo $TbMsg["TABLE_TITLE"] ?></SPAN></P>
         <TABLE class="tabla_datos" align="center">
+
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
-			<TR>
-				<TH>&nbsp;<? echo $TbMsg["TYPE"] ?> &nbsp;</TH>
-				<?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
-					<TD><?
-							$TBtipo[1]=$TbMsg["TYPE_WEB"];
-							$TBtipo[2]=$TbMsg["TYPE_ITEMS"];
-							$TBtipo[3]=$TbMsg["TYPE_MENU"];							
-							echo $TBtipo[$idtipoicono];
-					}else{
-								$parametros='0='.chr(13);
-								$parametros.=$TbMsg["SELECT_WEB"].chr(13);
-								$parametros.=$TbMsg["SELECT_ITEMS"].chr(13);
-								$parametros.=$TbMsg["SELECT_MENU"];
-								echo '<TD>'.HTMLCTESELECT($parametros, "idtipoicono","estilodesple","",$idtipoicono,100).'</TD>';
-					}?>
-			</TR>
+
+                        <TR>
+                                <TH>&nbsp;<? echo $TbMsg["TYPE"] ?> &nbsp;</TH>
+                                <?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
+                                        <TD><?
+                                                        $TBtipo[1]=$TbMsg["TYPE_WEB"];
+                                                        $TBtipo[2]=$TbMsg["TYPE_ITEMS"];
+                                                        $TBtipo[3]=$TbMsg["TYPE_MENU"];
+                                                        echo $TBtipo[$idtipoicono];
+                                        }else{
+                                                                $parametros='0='.chr(13);
+                                                                $parametros.=$TbMsg["SELECT_WEB"].chr(13);
+                                                                $parametros.=$TbMsg["SELECT_ITEMS"].chr(13);
+                                                                $parametros.=$TbMsg["SELECT_MENU"];
+                                                                echo '<TD>'.HTMLCTESELECT($parametros, "idtipoicono","estilodesple","",$idtipoicono,100).'</TD>';
+                                        }?>
+                        </TR>
+
 
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
@@ -222,7 +227,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 		<?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
 			<TR>
-				<TH>&nbsp; <? echo $TbMsg["ICON"] ?> &nbsp;</TH>
+				<TH>&nbsp;Icono&nbsp;</TH>
 				<TD><?echo basename($urlicono)?></TD>
 			</TR>
 		<?}else{
@@ -253,20 +258,22 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
              <TR>
              <?switch($opcion){
                    case $CONSULTAR:
-						  echo '<TD><img style="cursor:hand" SRC="../images/boton_insertar_'.$idioma.'.gif" onclick="Cancelar()"></TD>';
-						  break;
-					case $ELIMINAR:
-							echo '<TD><img SRC="../images/boton_confirmar_'.$idioma.'.gif" style="cursor:hand" onclick="Confirmar()"></TD>';
-							echo '<TD><img SRC="../images/boton_cancelar_'.$idioma.'.gif" style="cursor:hand" onclick="Cancelar()"></TD>';
-							break;
+                                                  echo '<TD><img style="cursor:hand" SRC="../images/boton_insertar_'.$idioma.'.gif" onclick="Cancelar()"></TD>';
+                                                  break;
+                                        case $ELIMINAR:
+                                                        echo '<TD><img SRC="../images/boton_confirmar_'.$idioma.'.gif" style="cursor:hand" onclick="Confirmar()"></TD>';
+                                                        echo '<TD><img SRC="../images/boton_cancelar_'.$idioma.'.gif" style="cursor:hand" onclick="Cancelar()"></TD>';
+                                                        break;
                       default:
-						  echo '<TD><img style="cursor:hand" SRC="../images/boton_confirmar_'.$idioma.'.gif" onclick="Confirmar()"></TD>';
-						  echo '<TD><img style="cursor:hand" SRC="../images/boton_cancelar_'.$idioma.'.gif" onclick="Cancelar()"></TD>';
-						  break;
-				}?>
+                                                  echo '<TD><img style="cursor:hand" SRC="../images/boton_confirmar_'.$idioma.'.gif" onclick="Confirmar()"></TD>';
+                                                  echo '<TD><img style="cursor:hand" SRC="../images/boton_cancelar_'.$idioma.'.gif" onclick="Cancelar()"></TD>';
+                                                  break;
+                                }?>
            </TR>
         </TABLE>
-	</DIV>
+        </DIV>
+
+
 <?
 //________________________________________________________________________________________________________
 // Posiciona cursor en campo usuario y muestra mensaje de error si lo hubiera
