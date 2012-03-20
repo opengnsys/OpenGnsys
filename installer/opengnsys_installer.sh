@@ -66,6 +66,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
 # - APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
 # - APACHEENABLEOG, APACHESITESDIR - habilitar sitio web de OpenGnSys
+# - INETDINIT - arranque del metaservicio Inetd
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
 # - MYSQLINIT - arranque de MySQL
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
@@ -93,6 +94,7 @@ case "$OSDISTRIB" in
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
+		INETDINIT=/etc/init.d/openbsd-inetd
 		MYSQLINIT=/etc/init.d/mysql
 		SAMBAINIT=/etc/init.d/smbd
 		SAMBACFGDIR=/etc/samba
@@ -111,6 +113,7 @@ case "$OSDISTRIB" in
 		APACHEGROUP="apache"
 		DHCPINIT=/etc/init.d/dhcpd
 		DHCPCFGDIR=/etc/dhcp
+		INETDINIT=/etc/init.d/xinetd
 		MYSQLINIT=/etc/init.d/mysqld
 		SAMBAINIT=/etc/init.d/smb
 		SAMBACFGDIR=/etc/samba
@@ -676,7 +679,7 @@ function tftpConfigure()
 {
         echoAndLog "${FUNCNAME}(): Configuring TFTP service."
         # reiniciamos demonio internet ????? porque ????
-        /etc/init.d/openbsd-inetd start
+        $INETDINIT start
 
         # preparacion contenedor tftpboot
         cp -a /usr/lib/syslinux/ $TFTPCFGDIR/syslinux

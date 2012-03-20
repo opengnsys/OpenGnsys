@@ -88,14 +88,14 @@ config() {
             SUCCESSMSG="log_end_msg 0"
             FAILMSG="log_end_msg 1"
             ;;
-        Fedora)
+        CentOS|Fedora)
             INITFUNCTIONS=/etc/init.d/functions
             DAEMONSTART="daemon"
-            EXTRAOPTS=""
+            ENDOPTS="&"
             DAEMONSTOP="killproc"
             ACTIONMSG="echo -n"
-            SUCCESSMSG="( success; echo )"
-            FAILMSG="( failure; echo )"
+            SUCCESSMSG="eval ( success; echo )"
+            FAILMSG="eval ( failure; echo )"
             ;;
         *)  echo "Distribución Linux desconcocida o no soportada."
             exit ;;
@@ -127,7 +127,7 @@ arranca_demonios() {
   if [ $RUN_OGADMSERVER = "yes" ]
   then
      $ACTIONMSG "Iniciando demonio: $SERVERNAME"
-     $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS
+     $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS $ENDOPTS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
   if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]
@@ -137,7 +137,7 @@ arranca_demonios() {
   if [ $RUN_OGADMREPO = "yes" ]
   then
      $ACTIONMSG "Iniciando demonio: $REPONAME"
-     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS
+     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS $ENDOPTS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      ############ ADV  	 
      $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
@@ -148,7 +148,7 @@ arranca_demonios() {
   if [ $RUN_OGADMAGENT = "yes" ]
   then
      $ACTIONMSG "Iniciando demonio: $AGENTNAME"
-     $DAEMONSTART $AGENTDAEMON $EXTRAOPTS $AGENTDAEMON_OPTIONS
+     $DAEMONSTART $AGENTDAEMON $EXTRAOPTS $AGENTDAEMON_OPTIONS $ENDOPTS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi    
   if [ $RUN_BTTRACKER = "yes" ]

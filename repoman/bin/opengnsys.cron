@@ -8,11 +8,11 @@ DEFAULTFILE=/etc/default/opengnsys
 [ -f $DEFAULTFILE ] && source $DEFAULTFILE
 
 # Si un servicio debe estar activo y no se está ejecutando, reiniciar OpenGnSys.
-if [ "$RUN_OGADMSERVER" == "yes" -a $(pgrep -c ogAdmServer) == 0 ]; then
+if [ "$RUN_OGADMSERVER" == "yes" -a $(pgrep ogAdmServer | wc -w) == 0 ]; then
 	date +"%d/%m/%Y %T ERROR: El servicio ogAdmServer  estaba caido, se reinicia" >> $LOGDIR/ogAdmServer.log
 	/etc/init.d/opengnsys restart
 fi
-if [ "$RUN_OGADMREPO" == "yes" -a $(pgrep -c ogAdmRepo) == 0 ]; then
+if [ "$RUN_OGADMREPO" == "yes" -a $(pgrep ogAdmRepo | wc -w) == 0 ]; then
 	date +"%d/%m/%Y %T ERROR: El servicio ogAdmRepo estaba caido, se reinicia" >> $LOGDIR/ogAdmRepo.log
 	/etc/init.d/opengnsys restart
 fi
