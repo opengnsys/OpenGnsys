@@ -65,7 +65,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - EXTRADEPS, INSTALLEXTRA - paquetes extra fuera de la distribución
 # - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
 # - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
-# - APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
+# - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
 # - INETDSERV - servicio Inetd
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
@@ -97,7 +97,8 @@ case "$OSDISTRIB" in
 		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		APACHEENABLESSL="a2enmod default-ssl; a2ensite ssl"
+		APACHESSLMOD="a2enmod default-ssl"
+		APACHEENABLESSL="a2ensite ssl"
 		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
 		DHCPSERV=isc-dhcp-server
@@ -109,7 +110,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		EXTRADEPS=( ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm )
 		UPDATEPKGLIST=""
 		INSTALLPKG="yum install -y"
@@ -938,6 +939,7 @@ function installWebConsoleApacheConf()
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
 	# Activar HTTPS.
+	$APACHESSLMOD
 	$APACHEENABLESSL
 	$APACHEMAKECERT
 
