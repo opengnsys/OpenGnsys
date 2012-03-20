@@ -86,19 +86,19 @@ case "$OSDISTRIB" in
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
 		if which service &>/dev/null; then
-			STARTSERVICE="service \$service restart"
+			STARTSERVICE="eval service \$service restart"
 		else
-			STARTSERVICE="/etc/init.d/\$service restart"
+			STARTSERVICE="eval /etc/init.d/\$service restart"
 		fi
-		ENABLESERVICE="update-rc.d \$service defaults"
+		ENABLESERVICE="eval update-rc.d \$service defaults"
 		APACHESERV=apache2
 		APACHECFGDIR=/etc/apache2
 		APACHESITESDIR=sites-available
 		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		APACHESSLMOD="a2enmod default-ssl"
-		APACHEENABLESSL="a2ensite ssl"
+		APACHESSLMOD="a2enmod ssl"
+		APACHEENABLESSL="a2ensite default-ssl"
 		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
 		DHCPSERV=isc-dhcp-server
@@ -116,8 +116,8 @@ case "$OSDISTRIB" in
 		INSTALLPKG="yum install -y"
 		INSTALLEXTRA="rpm -ihv"
 		CHECKPKG="rpm -q \$package"
-		STARTSERVICE="service \$service start"
-		ENABLESERVICE="chkconfig \$service on"
+		STARTSERVICE="eval service \$service start"
+		ENABLESERVICE="eval chkconfig \$service on"
 		APACHESERV=httpd
 		APACHECFGDIR=/etc/httpd/conf.d
 		APACHEOGSITE=opengnsys.conf
