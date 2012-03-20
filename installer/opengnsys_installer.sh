@@ -131,6 +131,7 @@ function autoConfigurePost()
 {
 [ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
 [ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
+[ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
 }
 
 

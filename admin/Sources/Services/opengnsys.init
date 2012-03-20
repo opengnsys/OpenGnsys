@@ -112,6 +112,8 @@ arranca_demonios() {
      $FAILMSG
      exit $?
   fi
+  # Deshabilitar modo reforzado de SELinux.
+  [ -f /selinux/enforce ] && echo 0 > /selinux/enforce
   # Verificar permisos básicos.
   if [ "$(stat --printf="%A%G" $IMAGEDIR 2>/dev/null)" != "drwxrwxr-x$OPENGNSYSUSER" ]; then
      mkdir $IMAGEDIR 2>/dev/null
