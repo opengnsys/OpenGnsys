@@ -63,14 +63,15 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - EXTRADEPS, INSTALLEXTRA - paquetes extra fuera de la distribución
-# - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
+# - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
+# - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
 # - APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
-# - APACHEENABLEOG, APACHESITESDIR - habilitar sitio web de OpenGnSys
-# - INETDINIT - arranque del metaservicio Inetd
-# - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
-# - MYSQLINIT - arranque de MySQL
-# - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
-# - TFTPCFGDIR - configuración de TFTP
+# - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
+# - INETDSERV - servicio Inetd
+# - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
+# - MYSQLSERV - servicio MySQL
+# - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
+# - TFTPSERV, TFTPCFGDIR - servicio y configuración de TFTP
 function autoConfigure()
 {
 # Detectar sistema operativo del servidor (debe soportar LSB).
@@ -84,19 +85,26 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
-		APACHEINIT=/etc/init.d/apache2
+		if which service &>/dev/null; then
+			STARTSERVICE="service \$service restart"
+		else
+			STARTSERVICE="/etc/init.d/\$service restart"
+		fi
+		ENABLESERVICE="update-rc.d \$service defaults"
+		APACHESERV=apache2
 		APACHECFGDIR=/etc/apache2
 		APACHESITESDIR=sites-available
+		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
 		APACHEENABLESSL="a2enmod default-ssl; a2ensite ssl"
-		APACHEENABLEOG="a2ensite opengnsys"
+		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
-		DHCPINIT=/etc/init.d/isc-dhcp-server
+		DHCPSERV=isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		INETDINIT=/etc/init.d/openbsd-inetd
-		MYSQLINIT=/etc/init.d/mysql
-		SAMBAINIT=/etc/init.d/smbd
+		INETDSERV=openbsd-inetd
+		MYSQLSERV=mysql
+		SAMBASERV=smbd
 		SAMBACFGDIR=/etc/samba
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
@@ -107,16 +115,20 @@ case "$OSDISTRIB" in
 		INSTALLPKG="yum install -y"
 		INSTALLEXTRA="rpm -ihv"
 		CHECKPKG="rpm -q \$package"
-		APACHEINIT=/etc/init.d/httpd
+		STARTSERVICE="service \$service start"
+		ENABLESERVICE="chkconfig \$service on"
+		APACHESERV=httpd
 		APACHECFGDIR=/etc/httpd/conf.d
+		APACHEOGSITE=opengnsys.conf
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
-		DHCPINIT=/etc/init.d/dhcpd
+		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
-		INETDINIT=/etc/init.d/xinetd
-		MYSQLINIT=/etc/init.d/mysqld
-		SAMBAINIT=/etc/init.d/smb
+		INETDSERV=xinetd
+		MYSQLSERV=mysqld
+		SAMBASERV=smb
 		SAMBACFGDIR=/etc/samba
+		TFTPSERV=tftp
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
@@ -129,7 +141,7 @@ esac
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
+[ -e /etc/init.d/$SAMBASERV ] || SAMBASERV=samba	# Debian 6
 [ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
 [ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
 }
@@ -153,7 +165,7 @@ case "$OSDISTRIB" in
 			      sort -n | tail -1)
 		if [ $DHCPVERSION = 3 ]; then
 			DEPENDENCIES=( ${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server} )
-			DHCPINIT=/etc/init.d/dhcp3-server
+			DHCPSERV=dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
 		;;
@@ -679,8 +691,11 @@ function getNetworkSettings()
 function tftpConfigure()
 {
         echoAndLog "${FUNCNAME}(): Configuring TFTP service."
-        # reiniciamos demonio internet ????? porque ????
-        $INETDINIT start
+        # Habilitar TFTP y reiniciar Inetd.
+	service=$TFTPSERV
+	$ENABLESERVICE
+	service=$INETDSERV
+	$ENABLESERVICE; $STARTSERVICE
 
         # preparacion contenedor tftpboot
         cp -a /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
@@ -827,7 +842,8 @@ function smbConfigure()
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
 	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= ${SAMBACFGDIR//\//\\/}\/smb-og.conf/" $SAMBACFGDIR/smb.conf
-	$SAMBAINIT restart
+	service=$SAMBASERV
+	$ENABLESERVICE; $STARTSERVICE
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
@@ -872,7 +888,8 @@ function dhcpConfigure()
 		return 1
 	fi
 	ln -f $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
-	$DHCPINIT restart
+	service=$DHCPSERV
+	$ENABLESERVICE; $STARTSERVICE
 	echoAndLog "${FUNCNAME}(): Sample DHCP configured in \"$DHCPCFGDIR\"."
 	return 0
 }
@@ -928,14 +945,15 @@ function installWebConsoleApacheConf()
 	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
                 $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
 
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/opengnsys.conf
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/$APACHEOGSITE
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1
 	else
 		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
-		$APACHEINIT restart
+		service=$APACHESERV
+		$ENABLESERVICE; $STARTSERVICE
 		return 0
 	fi
 }
@@ -1216,7 +1234,6 @@ function openGnsysConfigure()
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin
-	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -1267,7 +1284,8 @@ function openGnsysConfigure()
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
-	/etc/init.d/opengnsys start
+	service="opengnsys"
+	$ENABLESERVICE; $STARTSERVICE
 }
 
 
@@ -1414,7 +1432,8 @@ fi
 # Instalar Base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
-	$MYSQLINIT restart
+	service=$MYSQLSERV
+	$ENABLESERVICE; $STARTSERVICE
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 else
 	mysqlGetRootPassword
