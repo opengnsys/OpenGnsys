@@ -62,10 +62,12 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
+# - EXTRADEPS, INSTALLEXTRA - paquetes extra fuera de la distribución
 # - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
-# - ENABLEMOD, ENABLESITE - habilitar módulo Apache y sitio web
+# - APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
+# - APACHEENABLEOG, APACHESITESDIR - habilitar sitio web de OpenGnSys
 # - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
-# - MYSQLINIT - arranque de Samba
+# - MYSQLINIT - arranque de MySQL
 # - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
 # - TFTPCFGDIR - configuración de TFTP
 function autoConfigure()
@@ -83,10 +85,12 @@ case "$OSDISTRIB" in
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
 		APACHEINIT=/etc/init.d/apache2
 		APACHECFGDIR=/etc/apache2
+		APACHESITESDIR=sites-available
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		ENABLEMOD="a2enmod"
-		ENABLESITE="a2ensite"
+		APACHEENABLESSL="a2enmod default-ssl; a2ensite ssl"
+		APACHEENABLEOG="a2ensite opengnsys"
+		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
 		DHCPINIT=/etc/init.d/isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
 		MYSQLINIT=/etc/init.d/mysql
@@ -913,16 +917,15 @@ function installWebConsoleApacheConf()
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
 	# Activar HTTPS.
-	$ENABLESITE default-ssl
-	$ENABLEMOD ssl
-	make-ssl-cert generate-default-snakeoil --force-overwrite
+	$APACHEENABLESSL
+	$APACHEMAKECERT
 
 	# Genera configuración de consola web a partir del fichero plantilla.
 	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
                 $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
 
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys
-	$ENABLESITE opengnsys
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/opengnsys.conf
+	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1
