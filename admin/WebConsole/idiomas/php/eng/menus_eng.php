@@ -15,4 +15,5 @@
 	$TbMsg[7]='"Propiedades"';
 	$TbMsg[8]='"Remove menu"';
 	$TbMsg[9]='"Menus"';
+	$TbMsg[10]='"Manage Items"';
 ?>
