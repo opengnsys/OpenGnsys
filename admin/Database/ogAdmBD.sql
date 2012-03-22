@@ -436,7 +436,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `grupoid` int(11) NOT NULL DEFAULT '0',
   `htmlmenupub` varchar(250) DEFAULT NULL,
   `htmlmenupri` varchar(250) DEFAULT NULL,
-  `resolucion` tinyint(4) DEFAULT NULL,
+  `resolucion` SMALLINT(4) DEFAULT NULL,
   PRIMARY KEY (`idmenu`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

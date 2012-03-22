@@ -50,11 +50,17 @@ $cmd->texto="update ordenadores set arranque=@optboot where nombreordenador=@hos
 $cmd->Ejecutar();
 
 $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
-			ordenadores.netiface AS netiface, aulas.netmask AS netmask, aulas.router AS router, 
-			repositorios.ip AS iprepo FROM ordenadores 
-			join aulas on ordenadores.idaula=aulas.idaula 
-			join repositorios on ordenadores.idrepositorio=repositorios.idrepositorio 
-			where ordenadores.nombreordenador='". $hostname ."'"; 
+                        ordenadores.netiface AS netiface, aulas.netmask AS netmask,
+                        aulas.router AS router, repositorios.ip AS iprepo,
+                        aulas.nombreaula AS grupo,
+                        menus.resolucion AS vga
+                        FROM ordenadores 
+                        JOIN aulas ON ordenadores.idaula=aulas.idaula 
+                        JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
+                        LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
+                        WHERE ordenadores.nombreordenador='". $hostname ."'";
+
+
 $rs=new Recordset; 
 $rs->Comando=&$cmd; 
 if (!$rs->Abrir()) echo "error";
@@ -65,6 +71,12 @@ $rs->Primero();
 	$router=$rs->campos["router"];
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
+	$group=cleanString($rs->campos["grupo"]);
+        if($rs->campos["vga"]== null)
+                $vga="788";
+        else
+                $vga=$rs->campos["vga"];
+
 $rs->Cerrar();
 
 $cmd->texto="SELECT ipserveradm from entornos";
@@ -89,30 +101,27 @@ switch ($idioma) {
 }
 
 
-$infohost="LANG=" .$idioma . " ip="
-. $ip . ":"
-. $server .":"
-. $router . ":"
-. $netmask .":"
-. $hostname .":"
-. $netiface . ":none ogrepo="
-. $repo . " oglive="
-. $repo . " oglog="
-. $server . " ogshare="
-. $repo;
+$infohost="vga=$vga ".
+          "LANG=$idioma ".
+          "ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
+          " group=$group" .
+          " ogrepo=$repo" .
+          " oglive=$repo" .
+          " oglog=$server" .
+          " ogshare=$server";
 
 ###################obtenemos las variables de red del aula.
 
 	#02.1 obtenemos nombre fichero mac
+	$pxedir="/opt/opengnsys/tftpboot/pxelinux.cfg";
 	$mac=  substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-	$macfile="01-" . str_replace(":","-",strtolower($mac));	
-	$nombre_archivo="/var/lib/tftpboot/pxelinux.cfg/" . $macfile;
+	$macfile="$pxedir/01-" . str_replace(":","-",strtolower($mac));	
 
 
 ########## Escribimos el fichero mac
-if (!$gestion=fopen($nombre_archivo, 'w+')) 
+if (!$gestion=fopen($macfile, 'w+')) 
 {
-	echo "No se puede abrir el archivo ($nombre_archivo)";
+	echo "No se puede abrir el archivo ($macfile)";
 	return;
 }	
 # cuales son los parametros del menu
@@ -154,20 +163,21 @@ while (!$rs->EOF)
 		$iseac=substr_count($rs->campos["append"] , "boot=oginit");
 		$isinitrd=substr_count($rs->campos["append"] , "initrd.gz");
 		
+		// delete vga value (included in the variable infohost)
+		// borramos valor vga (incluido en la variable infohost)
+		$append=preg_replace('/vga=.../','',$rs->campos["append"]);
 		if ($iseac > 0)
 		{
-			$append=$rs->campos["append"];
 			fwrite($gestion, $append . " " . $infohost . " \n ");
 		}
 
 		elseif ($isinitrd > 0)
 		{
-		$append=$rs->campos["append"];
 		fwrite($gestion, $append . " ogrepo=" . $repo . " \n");
 		}
 		else
 		{
-			fwrite($gestion, $rs->campos["append"] . " \n"); 
+			fwrite($gestion, $append . " \n"); 
 		}
 
 		$prompt=$rs->campos["prompt"];
@@ -184,8 +194,8 @@ $rs->Cerrar();
 	fwrite($gestion, "TIMEOUT " . $timeout . " \n");
 	fwrite($gestion, " \n");  
 	fclose($gestion); 
-	exec("chown www-data:www-data /var/lib/tftpboot/pxelinux.cfg/". $macfile);
-	exec("chmod 777 /var/lib/tftpboot/pxelinux.cfg/". $macfile);
+	exec("chown www-data:www-data $macfile");
+	exec("chmod 777 $macfile");
 	
 
 
@@ -201,5 +211,13 @@ function netmask2cidr($netmask) {
            }
            return $cidr;
  }
+
+// Sustituye espacio por "_" y quita acentos y tildes.
+function cleanString ($cadena) {
+        $patron = array ('/ /','/á/','/é/','/í/','/ó/','/ú/','/ñ/','/Á/','/É/','/Í/','/Ó/','/Ú/','/Ñ/');
+        $reemplazo = array ('_','a','e','i','o','u','n','A','E','I','O','U','N');
+        return  preg_replace($patron,$reemplazo,$cadena);
+}
+
 
 ?>

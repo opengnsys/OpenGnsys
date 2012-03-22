@@ -95,25 +95,40 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-<?
-/*
+<!--<php-->
+
 		<TR>
 			<TH  align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion){
-					$tbresolucion[1]="800x600";
-					$tbresolucion[2]="1024x768";
+					$tbresolucion[788]="800x600   16bits";
+					$tbresolucion[791]="1024x768  16bits";
+					$tbresolucion[355]="1152x864  16bits";
+					$tbresolucion[794]="1280x1024 16bits";
+					$tbresolucion[798]="1600x1200 16bits";
+                                        $tbresolucion[789]="800x600   24bits";
+                                        $tbresolucion[792]="1024x768  24bits";
+                                        $tbresolucion[795]="1280x1024 24bits";
+					$tbresolucion[799]="1600x1200 24bits";
 					echo '<TD style="width:150">'.$tbresolucion[$resolucion].'</TD>';
 				}
 				else{
-					$parametros="1=800x600".chr(13);
-					$parametros.="2=1024x768";
+					$parametros="788=800x600   16bits".chr(13);
+                                        $parametros.="791=1024x768  16bits".chr(13);
+                                        $parametros.="355=1152x864  16bits".chr(13);
+                                        $parametros.="794=1280x1024 16bits".chr(13);
+                                        $parametros.="798=1600x1200 16bits".chr(13);
+                                        $parametros.="789=800x600   24bits".chr(13);
+                                        $parametros.="792=1024x768  24bits".chr(13);
+                                        $parametros.="795=1280x1024 24bits".chr(13);
+                                        $parametros.="799=1600x1200 24bits";
+
 					echo '<TD>'.HTMLCTESELECT($parametros,"resolucion","estilodesple","",$resolucion,100).'</TD>';
 				}
 			?>
 		</TR>
-*/
-?>
+
+<!--?> -->
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TH>
