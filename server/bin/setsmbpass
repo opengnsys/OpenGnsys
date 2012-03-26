@@ -58,6 +58,7 @@ if [ -r $CLIENTINITRD ]; then
 		echo "$PROG: Aviso: no se ha modificado la clave del cliente."
 	fi
 	rm -fr $TMPDIR
+	md5sum $CLIENTINITRD | cut -f1 -d" " > $CLIENTINITRD.sum
 else
 	SAMBAPASS="og"                  # Clave por defecto.
         echo "$PROG: Aviso: no se ha modificado la clave del cliente."
