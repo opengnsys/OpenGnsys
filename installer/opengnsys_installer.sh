@@ -110,12 +110,12 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip NetPIPE debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		EXTRADEPS=( ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm )
-		UPDATEPKGLIST=""
+		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nEPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
 		INSTALLPKG="yum install -y"
 		INSTALLEXTRA="rpm -ihv"
-		CHECKPKG="rpm -q \$package"
+		CHECKPKG="rpm -q --quiet \$package"
 		STARTSERVICE="eval service \$service start"
 		ENABLESERVICE="eval chkconfig \$service on"
 		APACHESERV=httpd
@@ -169,6 +169,9 @@ case "$OSDISTRIB" in
 			DHCPSERV=dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
+		;;
+	CentOS)
+		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release )
 		;;
 esac
 }
@@ -315,7 +318,7 @@ function installDependencies()
 		exit 1
 	fi
 
-	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND
+	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND		# Debian/Ubuntu
 	export DEBIAN_FRONTEND=noninteractive
 
 	echoAndLog "${FUNCNAME}(): now $string_deps will be installed"
@@ -325,7 +328,9 @@ function installDependencies()
 		return 1
 	fi
 
-	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND
+	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND		# Debian/Ubuntu
+	test grep -q "EPEL temporal" /etc/yum.repos.d/epel.repo ] || mv -f /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo 2>/dev/null	# CentOS/RedHat EPEL
+
 	echoAndLog "${FUNCNAME}(): dependencies installed"
 }
 
