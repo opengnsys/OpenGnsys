@@ -71,7 +71,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
 # - MYSQLSERV - servicio MySQL
 # - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
-# - TFTPSERV, TFTPCFGDIR - servicio y configuración de TFTP
+# - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
 function autoConfigure()
 {
 # Detectar sistema operativo del servidor (debe soportar LSB).
@@ -107,12 +107,13 @@ case "$OSDISTRIB" in
 		MYSQLSERV=mysql
 		SAMBASERV=smbd
 		SAMBACFGDIR=/etc/samba
+		SYSLINUXDIR=/usr/lib/syslinux
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
 		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
 		EXTRADEPS=( ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm )
-		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nEPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
 		INSTALLPKG="yum install -y"
 		INSTALLEXTRA="rpm -ihv"
 		CHECKPKG="rpm -q --quiet \$package"
@@ -129,6 +130,7 @@ case "$OSDISTRIB" in
 		MYSQLSERV=mysqld
 		SAMBASERV=smb
 		SAMBACFGDIR=/etc/samba
+		SYSLINUXDIR=/usr/share/syslinux
 		TFTPSERV=tftp
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
@@ -703,12 +705,12 @@ function tftpConfigure()
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
 
-        # preparacion contenedor tftpboot
-        cp -a /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
-        cp -a /usr/lib/syslinux/pxelinux.0 $TFTPCFGDIR
-        # prepamos el directorio de la configuracion de pxe
-        mkdir -p $TFTPCFGDIR/pxelinux.cfg
-        cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
+	# preparacion contenedor tftpboot
+	cp -a $SYSLINUXDIR $TFTPCFGDIR/syslinux
+	cp -a $SYSLINUXDIR/pxelinux.0 $TFTPCFGDIR
+	# prepamos el directorio de la configuracion de pxe
+	mkdir -p $TFTPCFGDIR/pxelinux.cfg
+	cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
 DEFAULT syslinux/vesamenu.c32 
 MENU TITLE Aplicacion GNSYS 
  
@@ -720,17 +722,17 @@ APPEND hd0
 PROMPT 0 
 TIMEOUT 10 
 EOF
-        # comprobamos el servicio tftp
-        sleep 1
-        testPxe
+	# comprobamos el servicio tftp
+	sleep 1
+	testPxe
 }
 
 function testPxe ()
 {
-        echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
-        cd /tmp
-        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
-        cd /
+	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
+	pushd /tmp
+	tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	popd
 }
 
 
