@@ -62,12 +62,14 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
-# - EXTRADEPS, INSTALLEXTRA - paquetes extra fuera de la distribución
+# - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
 # - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
+# - STOPSERVICE, DISABLESERVICE - parar y deshabilitar un servicio
 # - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
 # - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
 # - INETDSERV - servicio Inetd
+# - IPTABLESSERV - servicio IPTables
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
 # - MYSQLSERV - servicio MySQL
 # - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
@@ -87,10 +89,13 @@ case "$OSDISTRIB" in
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
 		if which service &>/dev/null; then
 			STARTSERVICE="eval service \$service restart"
+			STOPSERVICE="eval service \$service stop"
 		else
 			STARTSERVICE="eval /etc/init.d/\$service restart"
+			STOPSERVICE="eval /etc/init.d/\$service stop"
 		fi
 		ENABLESERVICE="eval update-rc.d \$service defaults"
+		DISABLESERVICE="eval update-rc.d \$service disable"
 		APACHESERV=apache2
 		APACHECFGDIR=/etc/apache2
 		APACHESITESDIR=sites-available
@@ -111,14 +116,16 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp bittorrent tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz python-tornado ctorrent samba unzip debootstrap schroot squashfs-tools )		# TODO comprobar paquetes
-		EXTRADEPS=( ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm )
-		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 make wget doxygen graphviz ctorrent samba unzip debootstrap schroot squashfs-tools )
+		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
+				   'pushd /tmp; wget http://download2.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -s btlaunchmany.py /usr/bin/btlaunchmany; ln -s bttrack.py /usr/bin/bttrack; popd' )
+		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
 		INSTALLPKG="yum install -y"
-		INSTALLEXTRA="rpm -ihv"
 		CHECKPKG="rpm -q --quiet \$package"
 		STARTSERVICE="eval service \$service start"
+		STOPSERVICE="eval service \$service stop"
 		ENABLESERVICE="eval chkconfig \$service on"
+		DISABLESERVICE="eval chkconfig \$service off"
 		APACHESERV=httpd
 		APACHECFGDIR=/etc/httpd/conf.d
 		APACHEOGSITE=opengnsys.conf
@@ -161,7 +168,7 @@ local DHCPVERSION
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
-	Ubuntu|LinuxMint) # Postconfiguación personalizada para Ubuntu.
+	Ubuntu|LinuxMint)	# Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
 		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
@@ -172,7 +179,8 @@ case "$OSDISTRIB" in
 			DHCPCFGDIR=/etc/dhcp3
 		fi
 		;;
-	CentOS)
+	CentOS)	# Postconfiguación personalizada para CentOS.
+		# Incluir repositorio de paquetes EPEL.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release )
 		;;
 esac
@@ -635,6 +643,11 @@ function svnExportCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
+	echoAndLog "${FUNCNAME}(): Disabling IPTables."
+	service=$IPTABLESSERV
+	$STOPSERVICE; $DISABLESERVICE
+
+	echoAndLog "${FUNCNAME}(): Checking OpenGnSys server conectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
 	wget --spider -q $OPENGNSYS_SERVER
 }
@@ -656,7 +669,7 @@ function getNetworkSettings()
 	local i=0
 	local dev=""
 
-        echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	echoAndLog "${FUNCNAME}(): Detecting network parameters."
 	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}') )
 	if [ -z "$DEVICE" ]; then
 		errorAndLog "${FUNCNAME}(): Network devices not detected."
@@ -698,8 +711,8 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
-        # Habilitar TFTP y reiniciar Inetd.
+	echoAndLog "${FUNCNAME}(): Configuring TFTP service."
+	# Habilitar TFTP y reiniciar Inetd.
 	service=$TFTPSERV
 	$ENABLESERVICE
 	service=$INETDSERV
@@ -1378,6 +1391,12 @@ if [ $? -ne 0 ]; then
 		exit 1
 	fi
 fi
+if [ -n "$INSTALLEXTRADEPS" ]; then
+	echoAndLog "Installing extra dependencies"
+	for (( i=0; i<${#INSTALLEXTRADEPS[*]}; i++ )); do
+		eval ${INSTALLEXTRADEPS[i]}
+	done
+fi	
 
 # Detectar datos de auto-configuración después de instalar paquetes.
 autoConfigurePost
