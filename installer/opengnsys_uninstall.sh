@@ -1,23 +1,53 @@
 #!/bin/bash
-# Desinstalación de OpenGnSys.
+#/**
+#@file    opengnsys_update.sh
+#@brief   Script de desinstalación de OpenGnSys
+#@warning No se elimina el directorio de imágenes, ni se desinstalan otros programas.
+#@version 0.10 - Primera prueba de desinstalación.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2010/10/28
+#@version 1.0 - Eliminar servicios de OpenGnSys.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2011/03/02
+#@version 1.0.2 - Información de desinstalación y correcciones.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2011/12/22
+#@version 1.0.4 - Compatibilidad con otras distribuciones y auto configuración de acceso a BD
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/03/28
 
 
 ####  AVISO: Editar configuración de acceso.
-MYSQLROOT="passwordroot"      # Clave de root de MySQL
-DATABASE="ogAdmBD"            # Base de datos de administración
-OLDDATABASE="ogBDAdmin"       # Antigua base de datos
-DBUSER="usuog"                # Usuario de acceso a la base de datos
+####  WARNING: Edit access configuration
+MYSQLROOT="passwordroot"	# Clave de root de MySQL
+DATABASE="ogAdmBD"		# Base de datos de administración
+DBUSER="usuog"			# Usuario de acceso a la base de datos
 
-# Variables.
-OPENGNSYS="/opt/opengnsys"    # Directorio de OpenGnSys
-OGIMG="images"                # Directorio de imágenes del repositorio
-CLIENTUSER="opengnsys"        # Usuario de acceso del cliente
+
+####  AVISO: NO EDITAR variables de configuración.
+####  WARNING: DO NOT EDIT configuration variables.
+OPENGNSYS="/opt/opengnsys"	# Directorio de OpenGnSys
+OGIMG="images"			# Directorio de imágenes del repositorio
+CLIENTUSER="opengnsys"		# Usuario Samba
+OLDDATABASE="ogBDAdmin"		# Antigua base de datos
+
+
+# Sólo ejecutable por usuario root
+if [ "$(whoami)" != 'root' ]; then
+    echo "ERROR: this program must run under root privileges!!"
+    exit 1
+fi
+
 
 # Parar servicio.
 echo "Uninstalling OpenGnSys services."
 if [ -x /etc/init.d/opengnsys ]; then
     /etc/init.d/opengnsys stop
-    update-rc.d -f opengnsys remove
+    if test which update-rc.d 2>/dev/null; then
+        update-rc.d -f opengnsys remove
+    else
+	chkconfig --del opengnsys
+    fi
 fi
 # Eliminar bases de datos.
 echo "Erasing OpenGnSys database."
@@ -39,9 +69,11 @@ if test $DROP; then
     mysql -u root -p"$MYSQLROOT" <<<"DROP USER '$DBUSER'@'localhost';" 2>/dev/null
 fi
 # Quitar configuración específica de Apache.
-a2dissite opengnsys
-rm -f /etc/apache2/{sites-available,sites-enabled}/opengnsys*
-/etc/init.d/apache2 reload
+test which a2dissite 2>/dev/null && a2dissite opengnsys
+rm -f /etc/{apache2/{sites-available,sites-enabled},httpd/conf.d}/opengnsys*
+for serv in apache2 httpd; do
+    [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
+done
 # Eliminar ficheros.
 echo "Deleting OpenGnSys files."
 for dir in $OPENGNSYS/*; do
@@ -51,9 +83,12 @@ for dir in $OPENGNSYS/*; do
 done
 rm -f /etc/init.d/opengnsys /etc/default/opengnsys /var/log/opengnsys
 rm -f /etc/cron.d/{opengnsys,torrentcreator,torrenttracker}
-# Comentar recursos de OpenGnSys en Samba.
-perl -pi -e "s/^ *include \= \/etc\/samba\/smb-og.conf/\;   include \= \/etc\/samba\/smb-og.conf/" /etc/samba/smb.conf
-/etc/init.d/smbd restart
+# Elminar recursos de OpenGnSys en Samba.
+rm -f /etc/samba/smb-og.conf
+perl -ni -e "print unless /smb-og.conf/" /etc/samba/smb.conf
+for serv in smbd smb ; do
+    [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
+done
 # Eliminar usuario de OpenGnSys.
 smbpasswd -x $CLIENTUSER
 userdel $CLIENTUSER

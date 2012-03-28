@@ -863,7 +863,7 @@ function smbConfigure()
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
 	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/" $SAMBACFGDIR/smb.conf
-	test grep -q "smb-og" $SAMBACFGDIR/smb.conf || echo "   include \= $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
+	test grep -q "smb-og" $SAMBACFGDIR/smb.conf || echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
 	service=$SAMBASERV
 	$ENABLESERVICE; $STARTSERVICE
 	if [ $? -ne 0 ]; then
