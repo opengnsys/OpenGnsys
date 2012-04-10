@@ -1,11 +1,11 @@
-// ********************************************************************************************************
+// *******************************************************************************************************
 // Servicio: ogAdmServer
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: Marzo-2010
 // Fecha Última modificación: Marzo-2010
 // Nombre del fichero: ogAdmServer.cpp
 // Descripción :Este fichero implementa el servicio de administración general del sistema
-// ********************************************************************************************************
+// *******************************************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
 //________________________________________________________________________________________________________
@@ -130,6 +130,7 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 	char modulo[] = "gestionaTrama()";
 
 	ptrTrama=recibeTrama(socket_c);
+	
 	if (ptrTrama){
 		INTROaFINCAD(ptrTrama);
 		nfn = copiaParametro("nfn",ptrTrama); // Toma dirección/es IP
@@ -424,6 +425,113 @@ BOOLEAN hayHueco(int *idx) {
 	return (FALSE);
 }
 // ________________________________________________________________________________________________________
+// Función: InclusionClienteWin
+//
+//	Descripción:
+//		Esta función incorpora el socket de un nuevo cliente Windows o Linux a la tabla de clientes 
+//	Parámetros:
+//		- socket_c: Socket del cliente que envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN InclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama)
+ {
+	char modulo[] = "InclusionClienteWinLnx()";
+	int res,idordenador,lon;
+	char nombreordenador[LONFIL];
+		
+	res=procesoInclusionClienteWinLnx(socket_c, ptrTrama,&idordenador,nombreordenador);
+	
+	// Prepara la trama de respuesta
+
+	initParametros(ptrTrama,0);
+	ptrTrama->tipo=MSG_RESPUESTA;
+	lon = sprintf(ptrTrama->parametros, "nfn=RESPUESTA_InclusionClienteWinLnx\r");
+	lon += sprintf(ptrTrama->parametros + lon, "ido=%d\r", idordenador);
+	lon += sprintf(ptrTrama->parametros + lon, "npc=%s\r", nombreordenador);	
+	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", res);	
+	
+	if (!mandaTrama(socket_c, ptrTrama)) {
+		errorLog(modulo, 26, FALSE);
+		return (FALSE);
+	}
+	return (TRUE);	
+}
+// ________________________________________________________________________________________________________
+// Función: procesoInclusionClienteWinLnx
+//
+//	Descripción:
+//		Implementa el proceso de inclusión en el sistema del Cliente Windows o Linux
+//	Parámetros de entrada:
+//		- socket_c: Socket del cliente que envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Parámetros de salida:
+//		- ido: Identificador del ordenador
+//		- nombreordenador: Nombre del ordenador
+//	Devuelve:
+//		Código del error producido en caso de ocurrir algún error, 0 si el proceso es correcto
+// ________________________________________________________________________________________________________
+BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *idordenador,char* nombreordenador)
+ {
+	char msglog[LONSTD], sqlstr[LONSQL];
+	Database db;
+	Table tbl;
+
+	char *iph;
+	char modulo[] = "procesoInclusionClienteWinLnx()";
+	
+	// Toma parámetros
+	iph = copiaParametro("iph",ptrTrama); // Toma ip
+
+	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+		errorLog(modulo, 20, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (20);
+	}
+
+	// Recupera los datos del cliente
+	sprintf(sqlstr,
+			"SELECT idordenador,nombreordenador FROM ordenadores "
+				" WHERE ordenadores.ip = '%s'", iph);
+
+	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (21);
+	}
+
+	if (tbl.ISEOF()) { // Si no existe el cliente
+		errorLog(modulo, 22, FALSE);
+		return (22);
+	}
+
+	if (ndebug == DEBUG_ALTO) {
+		sprintf(msglog, "%s IP:%s", tbMensajes[2], iph);
+		infoDebug(msglog);
+	}
+	if (!tbl.Get("idordenador", *idordenador)) {
+		tbl.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	if (!tbl.Get("nombreordenador", nombreordenador)) {
+		tbl.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	db.Close();
+	
+	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
+		errorLog(modulo, 25, FALSE);
+		return (25);
+	}
+	return(0);
+}
+// ________________________________________________________________________________________________________
 // Función: InclusionCliente
 //
 //	Descripción:
@@ -448,7 +556,7 @@ BOOLEAN InclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 		}
 	}
 	return (TRUE);
-}
+}	
 // ________________________________________________________________________________________________________
 // Función: procesoInclusionCliente
 //
@@ -469,7 +577,7 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	char *iph, *cfg;
 	char nombreordenador[LONFIL];
 	int lon, resul, idordenador, idmenu, cache, idproautoexec, idaula, idcentro;
-	char modulo[] = "InclusionCliente()";
+	char modulo[] = "procesoInclusionCliente()";
 
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
@@ -995,7 +1103,7 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
-	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
+	sprintf(sqlstr,"SELECT idaccion,parametros,length( parametros) as lonprm"\
 			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
@@ -1007,7 +1115,7 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		db.Close();
 		return (FALSE); // No hay comandos pendientes
 	} else { // Busca entre todas las acciones de diversos ambitos
-		if (!tbl.Get("sesion", *ids)) { // Toma identificador de la acción
+		if (!tbl.Get("idaccion", *ids)) { // Toma identificador de la acción
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
 			return (FALSE);
@@ -1044,13 +1152,14 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama) {
-	char *iph, *tpc;
+	char *iph, *tpc,msglog[LONSTD];
 	int idx;
 	char modulo[] = "DisponibilidadComandos()";
 
-	iph = copiaParametro("iph",ptrTrama); // Toma ip
-	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 
+	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
+		iph = copiaParametro("iph",ptrTrama); // Toma ip
+	
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		errorLog(modulo, 47, FALSE);
 		return (FALSE);
@@ -1093,7 +1202,7 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 		return (TRUE);
 
 	sprintf(sqlstr,
-			"SELECT * FROM acciones WHERE idordenador=%s AND sesion=%s", ido,
+			"SELECT * FROM acciones WHERE idordenador=%s AND idaccion=%s", ido,
 			ids);
 	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
 		errorLog(modulo, 21, FALSE);
@@ -1113,7 +1222,7 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 	sprintf(
 			sqlstr,
 			"UPDATE acciones SET resultado='%s',estado='%d',fechahorafin='%s',descrinotificacion='%s'"\
-			" WHERE idordenador=%s AND sesion=%s",
+			" WHERE idordenador=%s AND idaccion=%s",
 			res, ACCION_FINALIZADA, fechafin, der, ido, ids);
 	if (!db.Execute(sqlstr, tbl)) { // Error al actualizar
 		db.GetErrorErrStr(msglog);
@@ -1138,7 +1247,8 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado) {
+BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
+ {
 	char *iph, *Ipes, *ptrIpes[MAXIMOS_CLIENTES];
 	int i, idx, lon;
 	char modulo[] = "enviaComando()";
@@ -2858,7 +2968,6 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 	}
 	return (TRUE); // No existen registros
 }
-
 // ********************************************************************************************************
 // PROGRAMA PRINCIPAL (SERVICIO)
 // ********************************************************************************************************
@@ -2903,6 +3012,9 @@ int main(int argc, char *argv[]) {
 
 	strcpy(tbfuncionesServer[cf].nf, "InclusionCliente");
 	tbfuncionesServer[cf++].fptr = &InclusionCliente;
+
+	strcpy(tbfuncionesServer[cf].nf, "InclusionClienteWinLnx");
+	tbfuncionesServer[cf++].fptr = &InclusionClienteWinLnx;
 
 	strcpy(tbfuncionesServer[cf].nf, "AutoexecCliente");
 	tbfuncionesServer[cf++].fptr = &AutoexecCliente;

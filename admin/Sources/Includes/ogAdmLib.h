@@ -103,9 +103,13 @@
 // ________________________________________________________________________________________________________
 typedef unsigned long DWORD;
 typedef unsigned short  WORD;
-typedef int  BOOLEAN;
-typedef char BYTE;
-typedef int  SOCKET;
+
+#ifndef  __WINDOWS__
+	typedef int  BOOLEAN;
+	typedef char BYTE;
+	typedef int  SOCKET;
+#endif
+
 typedef  void* LPVOID;
 
 #define TRUE 1
@@ -120,6 +124,7 @@ typedef  void* LPVOID;
 #define CHARNULL '\0'
 
 // ________________________________________________________________________________________________________
+//
 // Variables globales
 // ________________________________________________________________________________________________________
 char szPathFileCfg[LONSTD],szPathFileLog[LONSTD];
@@ -175,7 +180,7 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"037-Ha ocurrido algún problema en el proceso de inclusión del cliente",\
 		"038-No se ha podido establecer conexión con el Servidor de Administración",\
 		"039-Ha ocurrido algún problema al procesar la trama recibida",\
-		"040-Se han recibido parámetros conurl valores no válidos",\
+		"040-Se han recibido parámetros con valores no válidos",\
 		"041-Ha ocurrido algún problema en el proceso de inclusión del cliente",\
 		"042-Ha ocurrido algún problema al enviar una petición de comandos o tareas pendientes al Servidor de Administración",\
 		"043-Ha ocurrido algún problema al enviar una petición de comandos interactivos al Servidor de Administración",\
@@ -227,7 +232,8 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"089-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMENU",\
 		"090-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMSG",\
 		"091-Ha habido algún problema al enviar un mensaje de tipo petición al Servidor",\
-
+		"092-Error en el fichero de configuración del programa. No se ha definido el parámetro IPLOCAL",\
+		"093-No se puede caragar la libraria Windows para rabajar con sockets",\
 };
 // ________________________________________________________________________________________________________
 // Tabla de mensajes
