@@ -25,10 +25,11 @@
 #@author Ramon Gomez, ETSII Universidad de Sevilla
 #@date   2012-04-11
 
-#Carga del configurador del engine
+# Carga el configurador del engine y los parámetros de red.
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+[ -f $DEVICECFG ] && source $DEVICECFG
 
-# Si el sistema de archivos no esta extendido. Realizar.
+# Si el sistema de archivos no esta extendido, ampliarlo al tamaño de su partición.
 PARTSIZE=$(ogGetPartitionSize $1 $2)
 FSSIZE=$(ogGetFsSize $1 $2)
 if [ $FSSIZE -lt $PARTSIZE ]; then
@@ -36,7 +37,7 @@ if [ $FSSIZE -lt $PARTSIZE ]; then
 	ogExtendFs $1 $2
 fi
 
-#Si no existe particion activa, activar este sistema.
+# Si no existe partición activa, activar este sistema.
 FLAGACTIVE=$(ogGetPartitionActive $1)
 [ -z $FLAGACTIVE ] && ogSetPartitionActive $1 $2
 
