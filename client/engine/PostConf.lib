@@ -1,0 +1,82 @@
+#!/bin/bash
+#/**
+#@file    PostConf.lib
+#@brief   Librería o clase PostConf
+#@class   PostConf
+#@brief   Funciones para la postconfiguración de sistemas operativos.
+#@version 1.0.4
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogInstallLinuxClient int_ndisk int_filesys
+#@brief   Instala el cliente OpenGnSys para sistemas operativos Linux.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_filesys  nº de orden del sistema de archivos
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
+#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@exception OG_ERR_NOTOS     Sin sistema operativo.
+#@version 1.0.4 - Primera adaptación para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-04-10
+#*/
+function ogInstallLinuxClient ()
+{
+# Variables locales.
+local PART MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+PART="$(ogDiskToDev $1 $2)" || return $?
+# Comprobar si el sistema de archivos no está bloqueado.
+MNTDIR=$(ogMount $1 $2) 2>/dev/null
+[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+# Comprobar si existe el cliente y los directorios y ficheros destino.
+CLIENTFILE=$OGLIB/ogclient/ogAdmLnxClient
+[ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?
+for i in /sbin /usr/sbin /usr/local/sbin; do
+    [ -d $MNTDIR/$i ] && SBINDIR=$i
+done
+[ -n "$SBINDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 sbin" || return $?
+for i in /etc /usr/local/etc; do
+    [ -d $MNTDIR/$i ] && ETCDIR=$i
+done
+[ -n "$ETCDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 etc" || return $?
+for i in $ETCDIR/rc.local $ETCDIR/rc.d/rc.local; do
+    [ -f $i ] && RCLOCAL=$i
+done
+[ -n "$RCLOCAL" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 rc.local" || return $?
+# Realizar la instalación en modo uso exclusivo.
+ogLock $1 $2
+# Copiar cliente, generar fichero de configuración e incluir en el arranque.
+cp -a $CLIENTFILE $MNTDIR/$SBINDIR
+cat > $MNTDIR/$ETCDIR/ogAdmLnxClient.cfg << EOT
+ServidorAdm=$(ogGetServerIp)
+PUERTO=2008
+IPLOCAL=$(ogGetIpAddress)
+EOT
+cp -a $MNTDIR/$RCLOCAL /tmp/rclocal
+awk -v sbin=$SBINDIR -v etc=$ETCDIR \
+        '{ if (/^#/) { print; }
+           else {
+                if (loc==0) {
+                    printf "%s/ogAdmLnxClient -f %s/ogAdmLnxClient.cfg &\n",sbin,etc;
+                    loc=1; }
+                print; }
+        }' /tmp/rclocal > $MNTDIR/$RCLOCAL
+rm /tmp/rclocal
+ogUnlock $1 $2
+}
+
+
