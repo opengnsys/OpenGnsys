@@ -19,7 +19,6 @@
 #@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
 #@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
 #@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
-#@exception OG_ERR_NOTOS     Sin sistema operativo.
 #@version 1.0.4 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-10
@@ -79,4 +78,56 @@ rm /tmp/rclocal
 ogUnlock $1 $2
 }
 
+
+#/**
+#         ogInstallWindowsClient int_ndisk int_filesys
+#@brief   Instala el cliente OpenGnSys para sistemas operativos Windows.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_filesys  nº de orden del sistema de archivos
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
+#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@version 1.0.4 - Primera adaptación para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-04-11
+#*/
+function ogInstallWindowsClient ()
+{
+# Variables locales.
+local PART MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+PART="$(ogDiskToDev $1 $2)" || return $?
+# Comprobar si el sistema de archivos no está bloqueado.
+MNTDIR=$(ogMount $1 $2) 2>/dev/null
+[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+# Comprobar si existe el cliente y los directorios y ficheros destino.
+CLIENTFILE=$OGLIB/ogclient/ogAdmWinClient
+[ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?
+for i in winnt windows; do
+    DIR=$(ogGetPath $MNTDIR/$i)
+    [ -z "$DIR" ] && WINDIR=$DIR
+done
+[ -n "$WINDIR " ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 windows" || return $?
+# Realizar la instalación en modo uso exclusivo.
+ogLock $1 $2
+# Copiar cliente, generar fichero de configuración e incluir en el arranque.
+cp -a $CLIENTFILE "$WINDIR"
+cat > $WINDIR/ogAdmLnxClient.cfg << EOT
+ServidorAdm=$(ogGetServerIp)
+PUERTO=2008
+IPLOCAL=$(ogGetIpAddress)
+EOT
+### TODO Incluir en arranque de Windows
+ogUnlock $1 $2
+}
 
