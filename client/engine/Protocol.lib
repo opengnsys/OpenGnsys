@@ -389,7 +389,7 @@ then
 	METHOD=${SESSION[1]}
 	ogCheckIpAddress ${SESSION[2]}  || ogRaiseError $OG_ERR_FORMAT "McastSession address ${SESSION[2]}" || PERROR=5 #return $?
 	ADDRESS=${SESSION[2]}
-	ogCheckStringInReg ${SESSION[3]} "^[0-9]{1,2}\M$" || ogRaiseError $OG_ERR_FORMAT "McastSession bitrate ${SESSION[3]}" || PERROR=6 # return $?
+	ogCheckStringInReg ${SESSION[3]} "^[0-9]{1,3}\M$" || ogRaiseError $OG_ERR_FORMAT "McastSession bitrate ${SESSION[3]}" || PERROR=6 # return $?
 	BITRATE=${SESSION[3]}
 	ogCheckStringInReg ${SESSION[4]} "^[0-9]{1,10}$" || ogRaiseError $OG_ERR_FORMAT "McastSession nclients ${SESSION[4]}" || PERROR=7 # return $?
 	NCLIENTS=${SESSION[4]}
