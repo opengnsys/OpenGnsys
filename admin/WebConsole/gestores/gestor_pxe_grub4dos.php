@@ -74,7 +74,7 @@ $rs->Primero();
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
 	$group=cleanString($rs->campos["grupo"]);
-        if($rs->campos["vga"]== null)
+        if($rs->campos["vga"]== null || $rs->campos["vga"]== 0 )
                 $vga="788";
         else
                 $vga=$rs->campos["vga"];
