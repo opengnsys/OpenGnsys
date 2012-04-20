@@ -1340,6 +1340,7 @@ function installationSummary()
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
+	echoAndLog "Change IPTables and SELinux system configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Optional: Log-in as Web Console admin user."
