@@ -1,3 +1,4 @@
+#!/bin/bash
 # Comprobamos si los servicios de opengnsys están levantado y si no es así los iniciamos.
 # Variables.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
