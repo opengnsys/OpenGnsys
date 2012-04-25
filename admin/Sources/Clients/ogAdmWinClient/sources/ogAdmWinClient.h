@@ -15,22 +15,24 @@
 #include <errno.h>
 #include <time.h>
 #include <signal.h>
-
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <winreg.h>
 
+#include "registrow.h"
 #include "ogAdmLib.h"
-
+#include "servicio.h"
 // ________________________________________________________________________________________________________
 // Variables globales
 // ________________________________________________________________________________________________________
+//
 int versionWin;
 char idordenador[LONPRM];	 // Identificador del ordenador
 char nombreordenador[LONPRM]; // Nombre del ordenador
 
 char servidoradm[LONPRM]; // Dirección IP del servidor de administración
 char puerto[LONPRM]; // Puerto de comunicación
-char IPlocal[LONPRM]; // Path donde está la interface entre la administración y el módulo de clonación
+char IPlocal[LONPRM]; // Ip local por donde se van a enviar las comunicaciones
 
 
 typedef struct{  // Estructura usada para referenciar las funciones que procesan las tramas
@@ -54,3 +56,5 @@ BOOLEAN Sondeo(TRAMA *);
 
 BOOLEAN enviaMensajeServidor(SOCKET *,TRAMA *,char);
 BOOLEAN ApagarReiniciar(UINT,char *,int sw);
+
+SOCKADDR_IN *GetIPInterfaceList(SOCKET , int *);

@@ -8,6 +8,7 @@
 // ********************************************************************************************************
 #include "ogAdmWinClient.h"
 #include "ogAdmLib.c"
+#include "registrow.c"
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
 //
@@ -507,22 +508,96 @@ BOOLEAN enviaMensajeServidor(SOCKET *socket_c,TRAMA *ptrTrama,char tipo)
 	}
 	return(TRUE);
 }
+// _____________________________________________________________________________________________________________
+// Función: TomaParametrosReg
+//
+//	Descripción:
+// 		Toma los parámetros de conexión del registro
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// _____________________________________________________________________________________________________________
+BOOLEAN TomaParametrosReg()
+{
+	if(!ReadRegistryString(HIVE,BASE,"servidoradm",servidoradm,20))
+		return(FALSE);
+
+	if(!ReadRegistryString(HIVE,BASE,"puerto",puerto,20))
+		return(FALSE);
+
+	if(!ReadRegistryString(HIVE,BASE,"Iplocal",IPlocal,20))
+		return(FALSE);
+	
+	return(TRUE);
+}
+//______________________________________________________________________________________________________
+// Función: TomaIP
+//
+//	Descripción:
+// 		Recupera la ip de la máquina
+//	Parámetros:
+//		Ninguno
+// 	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN TomaIP(char* ip)
+{
+    char ac[80];
+	struct in_addr addr;
+	BOOLEAN ipv;
+
+    if (gethostname(ac, sizeof(ac)) == SOCKET_ERROR) {
+		return (FALSE);
+	}
+    struct hostent *phe = gethostbyname(ac);
+    if (phe == 0) {
+		return (FALSE);
+	}
+	ipv=FALSE;
+    for (int i = 0; phe->h_addr_list[i] != 0 && !ipv; ++i) {
+        memcpy(&addr, phe->h_addr_list[i], sizeof(struct in_addr));
+        strcpy(ip,inet_ntoa(addr));
+		if(strcmp(IPlocal,"127.0.0.1")==0)
+			ipv=FALSE;
+		else{
+			ipv=true; // IP válida distinta a loop
+			break;
+		}
+    }
+    
+    return(ipv);
+}
 // ********************************************************************************************************
 // PROGRAMA PRINCIPAL (CLIENTE)
 // ********************************************************************************************************
-int main(int argc, char* argv[])
-{
+//int main(int argc, char *argv[])
+VOID ServiceStart (DWORD dwArgc, LPTSTR *lpszArgv)
+	{
+	//___________________________________________________________
+	//
+    // Service initialization   (Report the status to the service control manager)
+	//___________________________________________________________
+	//
+    if (!ReportStatusToSCMgr(
+		SERVICE_START_PENDING, // service state
+        NO_ERROR,              // exit code
+        3000))                 // wait hint
+        return;
+	//__________________________________________
+
 	TRAMA *ptrTrama;
 	char modulo[] = "main()";
 
-	#ifdef  __WINDOWS__
-	    WSADATA     wsd;
-		if (WSAStartup(MAKEWORD(2,2),&wsd)!=0){ // Carga librería Winsock
-			errorLog(modulo, 93, FALSE);
-			exit(EXIT_FAILURE);
-		}
-	#endif
+	strcpy(szPathFileLog, "ogAdmWinClient.log"); // de configuración y de logs
 
+
+    WSADATA     wsd;
+	if (WSAStartup(MAKEWORD(2,2),&wsd)!=0){ // Carga librería Winsock
+		errorLog(modulo, 93, FALSE);
+		exit(EXIT_FAILURE);
+	}
+	
 	ptrTrama=(TRAMA *)reservaMemoria(sizeof(TRAMA));
 	if (ptrTrama == NULL) { // No hay memoria suficiente para el bufer de las tramas
 		errorLog(modulo, 3, FALSE);
@@ -531,14 +606,31 @@ int main(int argc, char* argv[])
 	/*--------------------------------------------------------------------------------------------------------
 		Validación de parámetros de ejecución y fichero de configuración 
 	 ---------------------------------------------------------------------------------------------------------*/
-	if (!validacionParametros(argc, argv,6)) // Valida parámetros de ejecución
+	if(!TomaParametrosReg()) // Toma parametros de configuracion
 		exit(EXIT_FAILURE);
 
-	if (!tomaConfiguracion(szPathFileCfg)) // Toma parametros de configuración
+	//___________________________________________________________
+	//
+    // Service initialization   (Report the status to the service control manager)
+	//___________________________________________________________
+	//
+    if (!ReportStatusToSCMgr(
+		SERVICE_START_PENDING, // service state
+        NO_ERROR,              // exit code
+        3000))                 // wait hint
+        return;
+	//__________________________________________
+	//
+	// Toma IP local
+	//___________________________________________
+	//
+	// Toma la ip también del registro
+	/*if(!TomaIP(IPlocal)){
+		errorLog(modulo,85,FALSE);
 		exit(EXIT_FAILURE);
-	
+	}
+	*/
 	versionWin=TomaVersionWindows(); // Toma versión de windows
-
 
 	/*--------------------------------------------------------------------------------------------------------
 		Carga catálogo de funciones que procesan las tramas 
@@ -573,6 +665,49 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 	infoLog(4); // Cliente iniciado
-	procesaComandos(ptrTrama); // Bucle para procesar comandos interactivos
-	return(EXIT_SUCCESS);
+
+	//__________________________________________
+	// El servicio está instalado y debe ser iniciado
+    // -- report the status to the service control manager.--
+    //
+    if (!ReportStatusToSCMgr(
+        SERVICE_RUNNING,       // service state
+        NO_ERROR,              // exit code
+        0))                    // wait hint
+        return;
+    // End of initialization
+	//__________________________________________
+	
+	//
+	// Service is now running, perform work until shutdown
+	//
+	while (ssStatus.dwCurrentState == SERVICE_RUNNING) {  // Bucle para escuchar peticiones de clientes
+		procesaComandos(ptrTrama); // Bucle para procesar comandos interactivos
+	}
+	WSACleanup();
+	// El servicio de detiene
+}
+/* _____________________________________________________________________________________________________________
+  FUNCTION: ServiceStop
+
+  PURPOSE: Stops the service
+  PARAMETERS:
+    none
+
+  RETURN VALUE:
+    none
+
+  COMMENTS:
+
+    If a ServiceStop procedure is going to
+    take longer than 3 seconds to execute,
+    it should spawn a thread to execute the
+    stop code, and return.  Otherwise, the
+    ServiceControlManager will believe that
+    the service has stopped responding.
+ _____________________________________________________________________________________________________________*/
+VOID ServiceStop()
+{
+	// Incluir aquí el código necesario antes de parar el servicio
+	ReportStatusToSCMgr(SERVICE_STOPPED, NO_ERROR, 0);
 }
