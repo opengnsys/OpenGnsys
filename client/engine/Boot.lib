@@ -66,18 +66,22 @@ case "$TYPE" in
             [ -n "$FILE" ] && LOADER="$f"
         done
         [ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
-        # Activar la partición y copiar Grub4DOS.
+        # Activar la partición.
         ogSetPartitionActive $1 $2
         #FIXME: activar seguimiento inicio sesion Windows con grub4dos
         if [ "$(ogGetOsType $1 $2)" == "Windows" ]; then 
             dd if=/dev/zero of=${MNTDIR}/ogboot.me bs=1024 count=3
             dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot bs=1024 count=3
             dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot bs=1024 count=3
+            ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\Cliente Opengnsys\Start' '2'
+            ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\Cliente Opengnsys\Start' '2'
+            ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet003\services\Cliente Opengnsys\Start' '2'
             ogLoadHiveWindows $1 $2
             ogHiveNTRunMachine "cmd /c del c:\ogboot.*" ogcleanboot
             ogUpdateHiveWindows
             reboot
-        else        
+        else
+            # Copiar Grub4Dos y preparar inicio.
             cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
             kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
         fi
