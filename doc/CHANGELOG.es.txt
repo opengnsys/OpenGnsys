@@ -2,6 +2,33 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.4
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#489	Suma de verificacion de la imagen más rápida
+
+Tickets resueltos en módulo OpenGnSys Client:
+#497	Clientes opengnsys para Windows y Linux (resuelto en #501)
+
+Tickets resueltos en módulo OpenGnSys Server:
+#514 	Controlar clave de acceso del cliente
+#517	Servicio opengnsys comprobación de permisos en sistema de archivos
+#493	Configurar el modo PXE desde el cliente
+#488	Script de comparación configuración DHCP y OpenGnSys
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#496	Ejecuición procedimientos encadendos (resuelto en #501)
+#473	La cola de acciones no muestra el protocolo usado en la restauración ni sus parámetros
+#452	Elegir resolución en los menús
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#515	Actualizador no actualiza cambios de la base de datos
+
+Tickets genéricos resueltos:
+#501	Procedimientos encadenados y clientes para Linux y Windows
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.3
 ---------------------------------------------
 
