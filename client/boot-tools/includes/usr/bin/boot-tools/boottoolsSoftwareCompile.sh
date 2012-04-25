@@ -29,11 +29,9 @@ gdebi -n /var/cache/apt/archivesOG/xvesa.deb
 echo "partclone"
 gdebi -n /var/cache/apt/archivesOG/partclone_0.2.38_i386.deb
 
-#echo "busybox"
-#gdebi -n /var/cache/apt/archivesOG/busybox_1.17.1-10ubuntu1_i386.deb
 
-echo "busybox-static"
-gdebi -n /var/cache/apt/archivesOG/busybox-static_1.17.1-10ubuntu1_i386.deb
+#echo "En ubuntu oneiric es necesario la 1.17.1 de busybox-static"
+#gdebi -n /var/cache/apt/archivesOG/busybox-static_1.17.1-10ubuntu1_i386.deb
 
 
 history -c

@@ -11,8 +11,8 @@ VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
 
 VERSIONBOOTTOOLS=ogLive
 
-NAMEISOCLIENT="/tmp/opengnsys_info_rootfs" 
-NAMEHOSTCLIENT="/tmp/opengnsys_chroot"
+NAMEISOCLIENTFILE="/tmp/opengnsys_info_rootfs" 
+NAMEHOSTCLIENTFILE="/tmp/opengnsys_chroot"
 	
 SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
@@ -115,10 +115,9 @@ cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
 
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENT
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENT
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/debian_chroot
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/opengnsys_chroot
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENTFILE
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENTFILE
+
 
 history -c
 
