@@ -51,16 +51,17 @@ $cmd->CreaParametro("@hostname",$hostname,0);
 $cmd->texto="update ordenadores set arranque=@optboot where nombreordenador=@hostname";
 $cmd->Ejecutar();
 $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
-                        ordenadores.netiface AS netiface, aulas.netmask AS netmask,
-                        aulas.router AS router, repositorios.ip AS iprepo,
-                        aulas.nombreaula AS grupo,
-                        menus.resolucion AS vga
-                        FROM ordenadores 
-                        JOIN aulas ON ordenadores.idaula=aulas.idaula 
-                        JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
-                        LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
-                        WHERE ordenadores.nombreordenador='". $hostname ."'";
-
+			ordenadores.netiface AS netiface, aulas.netmask AS netmask,
+			aulas.router AS router, repositorios.ip AS iprepo,
+			aulas.nombreaula AS grupo,
+			menus.resolucion AS vga,
+			perfileshard.winboot AS winboot
+			FROM ordenadores 
+			JOIN aulas ON ordenadores.idaula=aulas.idaula 
+			JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
+			LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
+			LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
+			WHERE ordenadores.nombreordenador='". $hostname ."'";
 
 
 $rs=new Recordset; 
@@ -74,10 +75,11 @@ $rs->Primero();
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
 	$group=cleanString($rs->campos["grupo"]);
-        if($rs->campos["vga"]== null || $rs->campos["vga"]== 0 )
-                $vga="788";
-        else
-                $vga=$rs->campos["vga"];
+	if($rs->campos["vga"]== null || $rs->campos["vga"]== 0)
+		$vga="788";
+	else
+		$vga=$rs->campos["vga"];
+	$winboot=$rs->campos["winboot"];
 
 $rs->Cerrar();
 
@@ -112,7 +114,9 @@ $infohost=" vga=$vga".
 	  " oglive=$repo" .
 	  " oglog=$server" .
 	  " ogshare=$server";
-
+if (! empty ($winboot)) {
+	  $infohost.=" winboot=$winboot";
+}
 
 ###################obtenemos las variables de red del aula.
 

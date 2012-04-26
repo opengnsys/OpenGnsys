@@ -10,17 +10,18 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 
 Tickets resueltos en módulo OpenGnSys Client:
 #497	Clientes opengnsys para Windows y Linux (resuelto en #501)
+#525	Seleccionar el tipo de arranque de sistemas Windows (reinicio o en caliente)
 
 Tickets resueltos en módulo OpenGnSys Server:
-#514 	Controlar clave de acceso del cliente
-#517	Servicio opengnsys comprobación de permisos en sistema de archivos
-#493	Configurar el modo PXE desde el cliente
 #488	Script de comparación configuración DHCP y OpenGnSys
+#493	Configurar el modo PXE desde el cliente
+#517	Servicio opengnsys comprobación de permisos en sistema de archivos
+#514 	Controlar clave de acceso del cliente
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
-#496	Ejecuición procedimientos encadendos (resuelto en #501)
-#473	La cola de acciones no muestra el protocolo usado en la restauración ni sus parámetros
 #452	Elegir resolución en los menús
+#473	La cola de acciones no muestra el protocolo usado en la restauración ni sus parámetros
+#496	Ejecuición procedimientos encadendos (resuelto en #501)
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #515	Actualizador no actualiza cambios de la base de datos

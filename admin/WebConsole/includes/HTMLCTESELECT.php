@@ -19,13 +19,14 @@
 function HTMLCTESELECT($parametros,$nombreid,$clase,$defaultlit,$valorselec,$ancho,$eventochg=""){
 	if (!empty($eventochg))	$eventochg='onchange="'.$eventochg.'(this);"';
 	$opciones=split(chr(13),$parametros);
-	$SelectHtml= '<SELECT '.$eventochg.' class= "'.$clase.'" id='.$nombreid.' name="'.$nombreid.'" style="WIDTH: '.$ancho.'">';
-	if (!empty($defaultlit)) $SelectHtml.= '<OPTION value="0">'.$defaultlit.'</OPTION>';
+	$SelectHtml= '<select '.$eventochg.' class="'.$clase.'" id='.$nombreid.' name="'.$nombreid.'" style="width: '.$ancho.'">';
+	if (!empty($defaultlit)) $SelectHtml.= '<option value="0">'.$defaultlit.'</option>';
 	for($i=0;$i<sizeof($opciones);$i++){
 		$item=split("=",$opciones[$i]);
-		$SelectHtml.= '<OPTION value="'.$item[0].'"';
+		$SelectHtml.= '<option value="'.$item[0].'"';
 		if($valorselec==$item[0]) $SelectHtml.=" selected ";
-		$SelectHtml.= '>'.$item[1].'</OPTION>';
+		$SelectHtml.= '>'.$item[1].'</option>';
 	}
+	$SelectHtml.= '</select>';
 	return($SelectHtml);
 }
