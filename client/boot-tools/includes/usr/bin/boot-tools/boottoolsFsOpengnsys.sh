@@ -6,9 +6,9 @@
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 apt-get -y --force-yes install  subversion
-export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
-VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
-
+#export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
+#VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
+VERSIONSVN=$(cat /tmp/versionsvn.txt)
 VERSIONBOOTTOOLS=ogLive
 
 NAMEISOCLIENTFILE="/tmp/opengnsys_info_rootfs" 
