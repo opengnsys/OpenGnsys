@@ -564,6 +564,7 @@ CREATE TABLE IF NOT EXISTS `perfileshard` (
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
   `idcentro` int(11) NOT NULL,
+  `winboot` enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot',
   PRIMARY KEY (`idperfilhard`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
