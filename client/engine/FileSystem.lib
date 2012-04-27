@@ -673,18 +673,18 @@ case "$(ogGetFsType $1 $2)" in
 #	    ;;
     NTFS|HNTFS)
         ogDeleteFile $1 $2 pagefile.sys
-        ogDeleteFile $1 $2 hiberfile.sys
+        ogDeleteFile $1 $2 hiberfil.sys
         ogUnmount $1 $2 2>/dev/null
         ## NTFS: Obtiene tamaño mínimo en MB.
         #SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print int($8*1.1)}')
         #ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         #ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-		SIZE=$(ogReduceFsCheck $1 $2)
-	    [ "$SIZE" == 0 ] && return 1	
+        SIZE=$(ogReduceFsCheck $1 $2)
+        [ "$SIZE" == 0 ] && return 1	
         ntfsresize -fs "${SIZE}M" $PART <<<"y"  || ogRaiseError $OG_ERR_PARTITION "error reduciendo $1,$2" || return $?
-	    ;;
+        ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
-	    return $? ;;
+        return $? ;;
 esac
 ogGetFsSize $1 $2
 }
