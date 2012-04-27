@@ -42,7 +42,7 @@ mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
 
 # Comparo los ficheros
 echo "Comparamos las configuraciones: < dhcp y > mysql"
-diff -i $TMP_DHCP $TMP_MYSQL 
+diff -bi $TMP_DHCP $TMP_MYSQL 
 [ $? == 0 ] && echo "El ficheros del servicio dhcp y la base de datos de ogAdmBD tienen la misma configuracion"
 
 rm -f $TMP_DHCP $TMP_MYSQL
