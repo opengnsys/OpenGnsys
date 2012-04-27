@@ -44,9 +44,9 @@ for IMG in *.{img,pgz}; do
 	touch "$LOCKFILE"
 	trap "rm -f $LOCKFILE" 1 2 3 6 9
 	rm -f "$TORRENT" "$SUMFILE"
-	DATASUM=`md5sum "$IMG" | cut -f1 -d" "` 
+	DATASUM=$(tail -c1M "$IMG" | md5sum -b | cut -f1 -d" ")
 	echo $DATASUM > "$SUMFILE"
-	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATASUM 2>/dev/null 
+	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATASUM 2>/dev/null
 	rm -f "$LOCKFILE"
 	if [ -f "$TORRENT"  ]; then
 		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE

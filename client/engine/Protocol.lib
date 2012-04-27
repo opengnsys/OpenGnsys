@@ -998,21 +998,12 @@ fi
 #echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
 if [ -f $FILESOURCE.sum ]
 then
-	#	echo "leyendo el sum del fichero sum del repo"
 	MD5SOURCE=$(cat $FILESOURCE.sum)
 else
-	#	echo "calculando el sun del repo"
-	MD5SOURCE=$(md5sum $FILESOURCE | cut -f1 -d" ") 
+	MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
 fi
-if [ -f $FILETARGET.sum ]
-then
-	#echo "leyendo el sum de la cache"
-	MD5TARGET=$(cat $FILETARGET.sum)
-else
-	#echo "calculando el sum de la cache"
-	md5sum $FILETARGET | cut -f1 -d" " > $FILETARGET.sum
-	MD5TARGET=$(cat $FILETARGET.sum)	
-fi
+[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+MD5TARGET=$(cat $FILETARGET.sum)
 
 #echo "Paso 5. comparamos los md5"
 #TODO: que hacer cuando los md5 son distintos. Por defecto borrar.
