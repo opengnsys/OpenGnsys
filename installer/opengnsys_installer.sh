@@ -134,6 +134,7 @@ case "$OSDISTRIB" in
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
 		INETDSERV=xinetd
+		IPTABLESSERV=iptables
 		MYSQLSERV=mysqld
 		SAMBASERV=smb
 		SAMBACFGDIR=/etc/samba
@@ -645,7 +646,9 @@ function checkNetworkConnection()
 {
 	echoAndLog "${FUNCNAME}(): Disabling IPTables."
 	service=$IPTABLESSERV
-	$STOPSERVICE; $DISABLESERVICE
+	if [ -n "$service" ]; then
+		$STOPSERVICE; $DISABLESERVICE
+	fi
 
 	echoAndLog "${FUNCNAME}(): Checking OpenGnSys server conectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
@@ -932,7 +935,7 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Descomprimir XAJAX.
-	unzip $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
