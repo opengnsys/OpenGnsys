@@ -4,7 +4,7 @@
 #@brief   Librería o clase FileSystem
 #@class   FileSystem
 #@brief   Funciones para gestión de sistemas de archivos.
-#@version 0.9
+#@version 1.0.4
 #@warning License: GNU GPLv3+
 #*/
 
@@ -183,6 +183,9 @@ esac
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-08
+#@version 1.0.4 - Solucionado error cuando no se detecta tipo de sistema de ficheros pero si se indica
+#@author  Universidad de Huelva
+#@date    2012-04-11
 #*/ ##
 function ogFormatFs ()
 {
@@ -202,7 +205,17 @@ fi
 [ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener dispositivo y tipo de sisitema de archivos.
 PART="$(ogDiskToDev $1 $2)" || return $?
-TYPE="$(ogGetFsType $1 $2)" || return $?
+TYPE="$(ogGetFsType $1 $2)"
+# Si no se detecto el tipo de sistema de ficheros
+if [ -z "$TYPE" ]; then
+    # Si no se indico ningun tipo de sistema de ficheros se retorna
+    if [ -z "$3" ]; then
+        return $?
+    else
+    # Si no se detecto, se asigna el indicado
+        TYPE="$3"
+    fi
+fi
 
 # Elegir tipo de formato segun el tipo de particion.
 case "$3" in
