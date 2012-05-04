@@ -18,6 +18,9 @@
 #@version 1.0.3 - Compatibilidad con Debian y auto configuración de acceso a BD.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/03/12
+#@version 1.0.4 - Detector de distribución y compatibilidad con CentOS.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/05/04
 #*/
 
 
@@ -54,13 +57,11 @@ fi
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
-DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
 else
 	USESVN=1
-	DEPS="$DEPS subversion"
 fi
 SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 
@@ -74,6 +75,38 @@ LOG_FILE=/tmp/opengnsys_update.log
 #####################################################################
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
+
+# Generar variables de configuración del actualizador
+# Variables globales:
+# - OSDISTRIB, OSCODENAME - datos de la distribución Linux
+# - DEPENDENCIES - array de dependencias que deben estar instaladas
+# - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
+# - APACHESERV, DHCPSERV - servicios
+function autoConfigure()
+{
+# Detectar sistema operativo del servidor (debe soportar LSB).
+OSDISTRIB=$(lsb_release -is 2>/dev/null)
+OSCODENAME=$(lsb_release -cs 2>/dev/null)
+
+# Configuración según la distribución de Linux.
+case "$OSDISTRIB" in
+        Ubuntu|Debian|LinuxMint)
+		DEPENDENCIES=
+		UPDATEPKGLIST="apt-get update"
+		INSTALLPKGS="apt-get -y install --force-yes"
+		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
+		;;
+        Fedora|CentOS)
+		DEPENDENCIES=
+		INSTALLPKGS="yum install -y"
+		CHECKPKG="rpm -q --quiet \$package"
+		;;
+	*)      ;;
+	APACHESERV="apache2 httpd"
+	DHCPSERV="isc-dhcp-server dhcpd3-server dhcpd"
+esac
+}
+
 
 # Comprobar auto-actualización.
 function checkAutoUpdate()
@@ -217,18 +250,19 @@ function importSqlFile()
 # Instalar las deependencias necesarias para el actualizador.
 function installDependencies()
 {
+	local package
+
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
 	else
 		while [ $# -gt 0 ]; do
-			dpkg -s $1 2>/dev/null | grep -q "Status: install ok"
-			if [ $? -ne 0 ]; then
-				INSTALLDEPS="$INSTALLDEPS $1"
-			fi
+			package="$1"
+			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $1"
 			shift
 		done
 		if [ -n "$INSTALLDEPS" ]; then
-			apt-get update && apt-get -y install --force-yes $INSTALLDEPS
+			$UPDATEPKGLIST
+			$INSTALLPKGS $INSTALLDEPS
 			if [ $? -ne 0 ]; then
 				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
 				return 1
@@ -329,7 +363,9 @@ function apacheConfiguration ()
 		a2enmod ssl
 		a2dissite opengnsys.conf
 		a2ensite opengnsys
-		/etc/init.d/apache2 restart
+		for i in $APACHESERV; do
+			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
+		done
 	fi
 
 	# Variables de ejecución de Apache.
@@ -485,7 +521,7 @@ function updateServerFiles()
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
 		echoAndLog "${FUNCNAME}(): updating DHCP files"
 		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
-		for i in isc-dhcp-server dhcpd3-server dhcpd; do
+		for i in DHCPSERV; do
 			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
 		done
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
@@ -503,8 +539,9 @@ function updateServerFiles()
 		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
-	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
-	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	[ ! -f /etc/cron.d/opengnsys ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
+	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
 
@@ -675,8 +712,11 @@ if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
 	fi
 fi
 
+# Detectar datos de auto-configuración del instalador.
+autoConfigure
+
 # Instalar dependencias.
-installDependencies $DEPS
+installDependencies $DEPENDENCIES
 if [ $? -ne 0 ]; then
 	errorAndLog "Error: you may install all needed dependencies."
 	exit 1
