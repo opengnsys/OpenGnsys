@@ -101,10 +101,11 @@ case "$OSDISTRIB" in
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		;;
-	*)      ;;
-	APACHESERV="apache2 httpd"
-	DHCPSERV="isc-dhcp-server dhcpd3-server dhcpd"
+	*)	# Otras distribuciones.
+		;;
 esac
+APACHESERV="apache2 httpd"
+DHCPSERV="isc-dhcp-server dhcpd3-server dhcpd"
 }
 
 
