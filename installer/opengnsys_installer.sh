@@ -340,7 +340,7 @@ function installDependencies()
 	fi
 
 	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND		# Debian/Ubuntu
-	test grep -q "EPEL temporal" /etc/yum.repos.d/epel.repo ] || mv -f /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo 2>/dev/null	# CentOS/RedHat EPEL
+	test grep -q "EPEL temporal" /etc/yum.repos.d/epel.repo 2>/dev/null ] || mv -f /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo 2>/dev/null	# CentOS/RedHat EPEL
 
 	echoAndLog "${FUNCNAME}(): dependencies installed"
 }
@@ -645,8 +645,8 @@ function svnExportCode()
 function checkNetworkConnection()
 {
 	echoAndLog "${FUNCNAME}(): Disabling IPTables."
-	service=$IPTABLESSERV
-	if [ -n "$service" ]; then
+	if [ -n "$IPTABLESSERV" ]; then
+		service=$IPTABLESSERV
 		$STOPSERVICE; $DISABLESERVICE
 	fi
 
@@ -716,8 +716,10 @@ function tftpConfigure()
 {
 	echoAndLog "${FUNCNAME}(): Configuring TFTP service."
 	# Habilitar TFTP y reiniciar Inetd.
-	service=$TFTPSERV
-	$ENABLESERVICE
+	if [ -n "$TFTPSERV" ]; then
+		service=$TFTPSERV
+		$ENABLESERVICE
+	fi
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
 
