@@ -78,15 +78,16 @@ LOG_FILE=/tmp/opengnsys_update.log
 
 # Generar variables de configuración del actualizador
 # Variables globales:
-# - OSDISTRIB, OSCODENAME - datos de la distribución Linux
+# - OSDISTRIB - distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
-# - APACHESERV, DHCPSERV - servicios
+# - APACHECFGDIR, APACHESERV, DHCPSERV - configuración y servicios
 function autoConfigure()
 {
+local i
+
 # Detectar sistema operativo del servidor (debe soportar LSB).
 OSDISTRIB=$(lsb_release -is 2>/dev/null)
-OSCODENAME=$(lsb_release -cs 2>/dev/null)
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
@@ -95,17 +96,26 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
+		APACHEUSER="www-data"
+		APACHEGROUP="www-data"
 		;;
         Fedora|CentOS)
 		DEPENDENCIES=
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
+		APACHEUSER="httpd"
+		APACHEGROUP="httpd"
 		;;
-	*)	# Otras distribuciones.
+	*)      # Otras distribuciones.
 		;;
 esac
-APACHESERV="apache2 httpd"
-DHCPSERV="isc-dhcp-server dhcpd3-server dhcpd"
+for i in apache2 httpd; do
+	[ -f /etc/$i ] && APACHECFGDIR="/etc/$i"
+	[ -f /etc/init.d/$i ] && APACHESERV="/etc/init.d/$i"
+done
+for i in dhcpd dhcpd3-server isc-dhcp-server; do
+	[ -f /etc/init.d/$i ] && DHCPSERV="/etc/init.d/$i"
+done
 }
 
 
@@ -354,29 +364,25 @@ function updateClientFiles()
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
-	local APACHECONF=/etc/apache2
-
-	# Activar HTTPS, si es necesario.
-	if [ -e $APACHECONF/sites-available/opengnsys.conf ]; then
+	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2).
+	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
-		mv $APACHECONF/sites-available/opengnsys.conf $APACHECONF/sites-available/opengnsys
+		mv $APACHECFGDIR/sites-available/opengnsys.conf $APACHECFGDIR/sites-available/opengnsys
 		a2ensite default-ssl
 		a2enmod ssl
 		a2dissite opengnsys.conf
 		a2ensite opengnsys
-		for i in $APACHESERV; do
-			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
-		done
+		$APACHESERV restart
 	fi
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f $APACHECONF/envvars ]; then
-		source $APACHECONF/envvars
+	if [ -f $APACHECFGDIR/envvars ]; then
+		source $APACHECFGDIR/envvars
 	fi
-	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
+	APACHE_RUN_USER=${APACHE_RUN_USER:-"$APACHEUSER"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"APACHEGROUP"}
 }
 
 # Copiar ficheros del OpenGnSys Web Console.
@@ -522,9 +528,7 @@ function updateServerFiles()
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
 		echoAndLog "${FUNCNAME}(): updating DHCP files"
 		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
-		for i in DHCPSERV; do
-			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
-		done
+		$DHCPSERV restart
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
 	fi
 	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
