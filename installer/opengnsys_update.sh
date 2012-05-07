@@ -103,8 +103,8 @@ case "$OSDISTRIB" in
 		DEPENDENCIES=
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
-		APACHEUSER="httpd"
-		APACHEGROUP="httpd"
+		APACHEUSER="apache"
+		APACHEGROUP="apache"
 		;;
 	*)	# Otras distribuciones.
 		;;
