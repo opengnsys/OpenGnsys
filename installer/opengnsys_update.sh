@@ -106,7 +106,7 @@ case "$OSDISTRIB" in
 		APACHEUSER="httpd"
 		APACHEGROUP="httpd"
 		;;
-	*)      # Otras distribuciones.
+	*)	# Otras distribuciones.
 		;;
 esac
 for i in apache2 httpd; do
@@ -382,7 +382,7 @@ function apacheConfiguration ()
 		source $APACHECFGDIR/envvars
 	fi
 	APACHE_RUN_USER=${APACHE_RUN_USER:-"$APACHEUSER"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"APACHEGROUP"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
 }
 
 # Copiar ficheros del OpenGnSys Web Console.
