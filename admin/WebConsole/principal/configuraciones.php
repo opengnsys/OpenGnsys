@@ -281,10 +281,10 @@ function datosOrdenadores($cmd,$idordenador)
 {
 	global $TbMsg;
 
-	$cmd->texto="SELECT nombreordenador,ip,mac,perfileshard.descripcion as perfilhard 
-							 FROM ordenadores
-							 INNER JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
-							 WHERE ordenadores.idordenador=".$idordenador;				 
+	$cmd->texto="SELECT nombreordenador, ip, mac, perfileshard.descripcion AS perfilhard 
+			 FROM ordenadores
+			 LEFT JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
+			 WHERE ordenadores.idordenador=$idordenador";				 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
