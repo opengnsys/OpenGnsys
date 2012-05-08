@@ -127,14 +127,14 @@ function checkAutoUpdate()
 	# Actaulizar el script si ha cambiado o no existe el original.
 	if [ $USESVN -eq 1 ]; then
 		svn export $SVN_URL/installer/$PROGRAMNAME
-		if ! diff --brief $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+		if ! diff -q $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			mv $PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
 		else
 			rm -f $PROGRAMNAME
 		fi
 	else
-		if ! diff --brief $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+		if ! diff -q $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			cp -a $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
 		fi
@@ -531,7 +531,7 @@ function updateServerFiles()
 		$DHCPSERV restart
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
 	fi
-	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
+	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new init file"
 		backupFile /etc/init.d/opengnsys
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
