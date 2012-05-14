@@ -605,11 +605,11 @@ function compileServices()
 ### Funciones instalacion cliente OpenGnSys
 ####################################################################
 
-# Actualizar nuevo cliente para OpenGnSys 1.0
+# Actualizar cliente OpenGnSys
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-oneiric-3.0.0-14-generic-r2439.iso
+	local FILENAME=ogLive-precise-3.2.0-23-generic-pae-r3017.iso	# 1.0.4-rc1
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
