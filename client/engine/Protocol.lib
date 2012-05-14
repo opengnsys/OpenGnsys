@@ -382,7 +382,7 @@ OIFS=$IFS; IFS=':' ; SESSION=($2); IFS=$OIFS
 
 #controlamos el PORTBASE de la sesion. Comun.-
 PORTBASE=${SESSION[0]}
-ogCheckStringInGroup ${SESSION[0]} "9000 9002 9004 9006 9008 9010" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
+ogCheckStringInGroup ${SESSION[0]} "$(seq 9000 2 9050)" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
 if [ $MODE == "server" ]
 then    
 	ogCheckStringInGroup ${SESSION[1]} "full-duplex FULL-DUPLEX half-duplex HALF-DUPLEX broadcast BROADCAST" || ogRaiseError $OG_ERR_FORMAT "McastSession method ${SESSION[1]}" || PERROR=4 #return $?

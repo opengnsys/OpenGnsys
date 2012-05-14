@@ -167,6 +167,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #256	Restaurar con caché (duplicado de #357)
+#270	Consola web: error en nombre canónico de imagen
 #357    Comando Restaurar admite protocolos P2P, multicast, unicast
 #378	Asignar letrero auxiliar en el fondo del browser, indicando que no se apague el ordenador
 #387	Opción reubicador de ordenadores, no soporta nombres de grupos de ordenadores que incluye espacios
@@ -184,6 +185,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 
 Tickets genéricos resueltos:
 #413	Integración de OpenGnSys 1.0.1 en rama principal
+#445	Limitación puertos multicast: inconsistencia consola administración y Protocol.lib
 
 
 Lista de cambios incluidos en OpenGnSys 1.0

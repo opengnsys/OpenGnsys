@@ -255,17 +255,14 @@ else
 			<TH align=center&nbsp;><?echo $TbMsg[24]?>&nbsp;</TD>
 			<?
 				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.$pormul.'</TD>';
+					echo '<td colspan="3">'.$pormul.'</td>';
 				else
-					echo '<TD colspan=3>';
-					$pormulmetodos="9000=9000".chr(13);
-					$pormulmetodos.="9002=9002".chr(13);
-					$pormulmetodos.="9004=9004".chr(13);
-					$pormulmetodos.="9006=9006".chr(13);
-					$pormulmetodos.="9010=9010".chr(13);
-					$pormulmetodos.="9012=9012".chr(13);
-					$pormulmetodos.="9014=9014";
-					echo HTMLCTESELECT($pormulmetodos,"pormul","estilodesple","",$pormul,100).'</TD>';
+					echo '<td colspan="3">';
+					for ($i=9000; $i<9050; $i+=2) {
+						$pormulmetodos.="$i=$i".chr(13);
+					}
+					$pormulmetodos.="9050=9050";
+					echo HTMLCTESELECT($pormulmetodos,"pormul","estilodesple","",$pormul,100).'</td>';
 			?>
 		</TR>				
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
