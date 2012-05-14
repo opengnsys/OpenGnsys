@@ -14,3 +14,4 @@ install libparse-win32registry-perl
 install grokevt
 install libhivex0
 install libhivex-bin
+install rsync

@@ -29,9 +29,32 @@ gdebi -n /var/cache/apt/archivesOG/xvesa.deb
 echo "partclone"
 gdebi -n /var/cache/apt/archivesOG/partclone_0.2.38_i386.deb
 
+echo "busybox-static 1.17.1 en rootfs"
+#echo "busybox-static 1.17.1 en ogLive rootfs permite reboot y poweroff
+apt-get remove -y busybox-static
+gdebi -n /var/cache/apt/archivesOG/busybox-static_1.17.1-10ubuntu1_i386.deb
+cp /bin/busybox /bin/busyboxOLD
+/bin/busyboxOLD
+echo "busybox-static 1.18.5 en initrd"
+apt-get install -y busybox-static
+cp /bin/busybox /bin/busyboxNEW
+/bin/busyboxNEW
+# en scripts reboot y poweroff hacer llamada a busyboxOLD reboot|poweroff
 
-#echo "En ubuntu oneiric es necesario la 1.17.1 de busybox-static"
-#gdebi -n /var/cache/apt/archivesOG/busybox-static_1.17.1-10ubuntu1_i386.deb
+
+
+#gpt
+apt-get install -y uuid-dev libicu-dev libpopt-dev libpopt0 ncurses-base libncurses5-dev
+wget -O download.tgz http://sourceforge.net/projects/gptfdisk/files/gptfdisk/0.8.2/gptfdisk-0.8.2.tar.gz/download
+mkdir download
+tar xzvf download.tgz -C download
+cd download/gptfdisk-0.8.2
+make
+cp sgdisk gdisk fixparts cgdisk /sbin
+cd ..
+rm -fr download*
+
+
 
 
 history -c
