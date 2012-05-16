@@ -8,16 +8,23 @@ Lista de cambios incluidos en OpenGnSys 1.0.4
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #465	httpdlog CrearImagen salida de reducir sistema archivos (no se resolverá)
 #489	Suma de verificacion de la imagen más rápida
+#521	Función ogUpdateCacheIsNecesary: usar funcion para cálculo de MD5
+#522	Script updateCache: eliminar opción del case $ACTIONCACHEFULL=NONE
 #530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
 
 Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)
 #411	Menú por defecto para los clientes con información básica del estado de red
 #415	Compatiblidad hardware (red, disco) en los clientes OpenGnSys
+#491	Log de seguimiento con información de caché local
+#494	Información de la caché en pantalla del cliente (no válido)
 #497	Clientes opengnsys para Windows y Linux (resuelto en #501)
+#520	ogLive modprobe no utiliza los modulos correspondientes
 #525	Seleccionar el tipo de arranque de sistemas Windows (reinicio o en caliente)
+#529	Cliente ogLive basado en Ubuntu 12.04
 
 Tickets resueltos en módulo OpenGnSys Server:
+#426	isAlive: control de los servicios OpenGnSys
 #448	Restauración Multicast en línea de comandos
 #488	Script de comparación configuración DHCP y OpenGnSys
 #493	Configurar el modo PXE desde el cliente
@@ -30,12 +37,15 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #490	Usuarios y Contraseñas con más de 10 caracteres
 #496	Ejecuición procedimientos encadendos (resuelto en #501)
 #500	Iniciar sesión segunda partición Linux no habilitada
+#502	Tamaño Iframe propiedades ordenadores
+#503	Asistente con seguimiento predeterminado (no válido)
 
 Tickets resueltos en módulo OpenGnSys Installer:
-#414	Instalar OpenGnSys en otras distribuciones GNU/Linux
+#414	Instalar OpenGnSys en otras distribuciones Linux
 #515	Actualizador no actualiza cambios de la base de datos
 
 Tickets genéricos resueltos:
+#445	Limitación puertos multicast: inconsistencia consola administración y Protocol.lib
 #501	Procedimientos encadenados y clientes para Linux y Windows
 #531	Integración de OpenGnSys 1.0.4 en rama principal
 
