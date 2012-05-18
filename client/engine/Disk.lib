@@ -843,6 +843,7 @@ PART=$(ogDiskToDev|cut -f$1 -d' ')$2
 echo $PART | cut -f3 -d \/
 }
 
+
 #/**  @function ogDeletePartitionTable: @brief Borra la tabla de particiones del disco.
 #@param $1 opcion A (identificador LINUX) 	str_ID_linux (/dev/sda)
 #@param $1 opcion B (Identifiador EAC)  		int_numdiskEAC(1)
@@ -854,20 +855,25 @@ echo $PART | cut -f3 -d \/
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    27/10/2008
 #*/
-function ogDeletePartitionTable () {
-if [ $# = 0 ]
-then
-	Msg "sintaxis1: ogDeletePartitionTable int_disk" red
-	Msg "sintaxis2: ogDeletePartitionTable str_/dev/sdX" red
-	return
+function ogDeletePartitionTable ()
+{
+# Variables locales.
+local DISK
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME int_disk"  \
+           "$FUNCNAME 1"
+    return
 fi
-if [ -n "${1%/dev/*}" ]
-	then
-	dev=`DiskToDev $1`
-	else
-	dev=$1
-fi
-echo -ne "o\nw" | fdisk $dev
+# Error si no se reciben 1 parámetros.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obteniendo Identificador linux de la particion.
+DISK=$(ogDiskToDev $1) || return $?
+
+# Elimando las particiones con fdisk
+echo -ne "o\nw" | fdisk $DISK
 }
 
 
@@ -920,6 +926,13 @@ echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 #@date    27/10/2008
 #*/
 function ogDeletePartitionsLabels () {
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME " \
+           "$FUNCNAME "
+    return
+fi
+
 rm /dev/disk/by-label/*    # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
 }
 

@@ -326,9 +326,10 @@ fi
 # Detectar id. de tipo de partición y codificar al mnemonico.
 DISK=$(ogDiskToDev "$1") || return $?
 ID=$(ogGetPartitionId "$1" "$2") || return $?
+[ "$ID" == "a7" ] && ID="ca"    # Traducir antiguo id. de partición de caché.
 TYPE=""
 case "$ID" in
-     ca|a7)    # Detectar Caché local.
+     ca)       # Detectar caché local.
                ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
                ;;
      *)        # Detectar sistema de ficheros.
@@ -988,37 +989,3 @@ then
 fi
 }
 
-
-
-function ogDeletePartitionsLabels ()
-{
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME " \
-           "$FUNCNAME "
-    return
-fi
-rm /dev/disk/by-label/* 2>/dev/null   # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
-}
-
-function ogDeletePartitionTable ()
-{
-
-# Variables locales.
-local DISK
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME int_disk"  \
-           "$FUNCNAME 1"
-    return
-fi
-# Error si no se reciben 1 parámetros.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Obteniendo Identificador linux de la particion.
-DISK=$(ogDiskToDev $1) || return $?
-
-# Elimando las particiones con fdisk
-echo -ne "o\nw" | fdisk $DISK
-}
