@@ -420,7 +420,12 @@ fi
 
 # Detectar id. de tipo de partición y codificar al mnemónico.
 DISK=$(ogDiskToDev $1) || return $?
-ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
+case "$(ogGetPartitionTableType $1)" in
+    GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
+            # Falta definir tipo de caché local (CA00).
+            ;;
+    MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
+esac
 echo $ID
 }
 
