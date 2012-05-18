@@ -173,7 +173,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
-
+	global $TbMsg;
 	global $msk_sysFi;
 	global $msk_nombreSO;
 	global $msk_tamano;
