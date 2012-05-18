@@ -4,7 +4,7 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 0.9
+#@version 1.0.4
 #@warning License: GNU GPLv3+
 #*/
 
@@ -470,6 +470,38 @@ esac
 
 
 #/**
+#         ogGetPartitionTableType int_ndisk
+#@brief   Devuelve el tipo de tabla de particiones del disco (GPT o MSDOS)
+#@param   int_ndisk       nº de orden del disco
+#@return  str_tabletype - Tipo de tabla de paritiones
+#@warning Salidas de errores no determinada
+#@note    tabletype: { MSDOS, GPT }
+#@note    Requisitos: parted
+#@version 1.0.4 - Primera versión para OpenGnSys
+#@author  Universidad de Huelva
+#@date    2012/03/01
+#*/
+function ogGetPartitionTableType ()
+{
+# Variables locales.
+local DISK
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Sustituye n de disco por su dispositivo.
+DISK=`ogDiskToDev $1` || return $?
+parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}'
+}
+
+
+#/**
 #         ogGetPartitionType int_ndisk int_npartition
 #@brief   Devuelve el mnemonico con el tipo de partición.
 #@param   int_ndisk      nº de orden del disco
@@ -510,6 +542,7 @@ case "$ID" in
      5|f)       TYPE="EXTENDED" ;;
      6|e)       TYPE="FAT16" ;;
      7)         TYPE="NTFS" ;;
+     700|0700)  TYPE="WINDOWS" ;;
      b|c)       TYPE="FAT32" ;;
      11)        TYPE="HFAT12" ;;
      12)        TYPE="COMPAQDIAG" ;;
@@ -517,14 +550,28 @@ case "$ID" in
      17)        TYPE="HNTFS" ;;
      1b|1c)     TYPE="HFAT32" ;;
      42)        TYPE="WIN-DYNAMIC" ;;
-     82)        TYPE="LINUX-SWAP" ;;
-     83)        TYPE="LINUX" ;;
-     8e)        TYPE="LINUX-LVM" ;;
+     82|8200)   TYPE="LINUX-SWAP" ;;
+     83|8300)   TYPE="LINUX" ;;
+     8e|8e00)   TYPE="LINUX-LVM" ;;
+     a5|a503)   TYPE="FREEBSD" ;;
+     a500)      TYPE="FREEBSD-DISK" ;;
+     a501)      TYPE="FREEBSD-BOOT" ;;
+     a502)      TYPE="FREEBSD-SWAP" ;;
+     a6)        TYPE="OPENBSD" ;;
      a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     af)        TYPE="HFS" ;;
-     bf)        TYPE="SOLARIS" ;;
-     ca)        TYPE="CACHE" ;;
-     fd)        TYPE="LINUX-RAID" ;;
+     af|af00)   TYPE="HFS" ;;
+     be|be00)   TYPE="SOLARIS-BOOT" ;;
+     bf|bf0[0145]) TYPE="SOLARIS" ;;
+     bf02)      TYPE="SOLARIS-SWAP" ;;
+     bf03)      TYPE="SOLARIS-DISK" ;;
+     ca|8301)   TYPE="CACHE" ;;
+     da)        TYPE="DATA" ;;
+     ee)        TYPE="GPT" ;;
+     ef|ef00)   TYPE="EFI" ;;
+     ef01)      TYPE="MBR" ;;
+     ef02)      TYPE="BIOS-BOOT" ;;
+     fb)        TYPE="VMFS" ;;
+     fd|fd00)   TYPE="LINUX-RAID" ;;
      *)         TYPE="UNKNOWN" ;;
 esac
 echo "$TYPE"
