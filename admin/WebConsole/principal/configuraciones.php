@@ -263,10 +263,10 @@ function datosAulas($cmd,$idaula)
 {
 	global $TbMsg;
 	
-	$cmd->texto="SELECT DISTINCT aulas.*,count(*) as numordenadores
-							 FROM aulas
-							 INNER JOIN ordenadores ON ordenadores.idaula=aulas.idaula
-							 WHERE aulas.idaula=".$idaula;							 
+	$cmd->texto="SELECT DISTINCT aulas.*, COUNT(*) AS numordenadores
+			 FROM aulas
+			 INNER JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+			 WHERE aulas.idaula=$idaula";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
@@ -329,10 +329,10 @@ function datosOrdenadores($cmd,$idordenador)
 {
 	global $TbMsg;
 
-	$cmd->texto="SELECT nombreordenador,ip,mac,perfileshard.descripcion as perfilhard 
-							 FROM ordenadores
-							 INNER JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
-							 WHERE ordenadores.idordenador=".$idordenador;				 
+	$cmd->texto="SELECT nombreordenador, ip, mac, perfileshard.descripcion AS perfilhard 
+			 FROM ordenadores
+			 LEFT JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
+			 WHERE ordenadores.idordenador=$idordenador";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
@@ -375,10 +375,10 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 {
 	global $TbMsg;
 
-	$cmd->texto="SELECT DISTINCT gruposordenadores.*,count(*) as numordenadores
-							 FROM gruposordenadores
-							 INNER JOIN ordenadores ON ordenadores.grupoid=gruposordenadores.idgrupo
-							 WHERE gruposordenadores.idgrupo=".$idgrupo;			 
+	$cmd->texto="SELECT DISTINCT gruposordenadores.*, COUNT(*) AS numordenadores
+			 FROM gruposordenadores
+			 INNER JOIN ordenadores ON ordenadores.grupoid=gruposordenadores.idgrupo
+			 WHERE gruposordenadores.idgrupo=$idgrupo";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
@@ -391,10 +391,9 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 		$rs->Cerrar();
 	}
 	//////////////////////////////////////
-	$cmd->texto="SELECT DISTINCT aulas.*
-							 FROM aulas
-							 INNER JOIN grupoordenadores ON grupoordenadores.idaula=aulas.idaula
-							 WHERE aulas.idaula=".$idaula;			 
+	$cmd->texto="SELECT DISTINCT * FROM aulas
+			 INNER JOIN grupoordenadores ON grupoordenadores.idaula=aulas.idaula
+			 WHERE aulas.idaula=.$idaula";			 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
