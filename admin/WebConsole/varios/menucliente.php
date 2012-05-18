@@ -12,6 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/CreaComando.php");
+include_once("../controlacceso.php");
 include_once("../idiomas/php/".$idioma."/menucliente_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
@@ -87,6 +88,36 @@ else{
 	}
 		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
 		echo $codeHtml;
+
+//agp
+$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";
+$gestor = fopen($nombre_archivo, 'r');
+$contenidofichero = fread($gestor, filesize($nombre_archivo));
+fclose($gestor);
+
+	$rs=new Recordset; 
+	$cmd->texto="SELECT * FROM ordenadores WHERE ip='".$iph."'";
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF){
+		$idordenador=$rs->campos["idordenador"];
+		$rs->Cerrar();}
+
+	$rs=new Recordset; 
+	$cmd->texto="SELECT * FROM ordenadores_particiones WHERE idordenador='".$idordenador."' ORDER BY numpar DESC";
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF){
+		$numeroparticion=$rs->campos["numpar"];
+		$rs->Cerrar();}
+
+	$cmd->texto="UPDATE ordenadores_particiones set cache='".$contenidofichero."' WHERE idordenador='".$idordenador."' AND numpar=4";
+	if ($numeroparticion == "4")
+	$resul=$cmd->Ejecutar();
+//agp
+
 	?>
 	</body>
 	</html>

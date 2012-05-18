@@ -55,6 +55,7 @@ $TbMsg[41]='Generar Instrucci&oacute;n OG';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
-
+$TbMsg[495]="Contenido Cache";
+$TbMsg[4951]="Cache Libre";
 ?>
 

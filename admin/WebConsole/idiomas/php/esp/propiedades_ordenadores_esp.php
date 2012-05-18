@@ -20,4 +20,5 @@ $TbMsg[11]="Menú";
 $TbMsg[12]="Tama&ntilde;o Caché (KB)";
 $TbMsg[13]="Interfaz de red";
 $TbMsg[14]="Driver de red";
+$TbMsg[495]="Contenido Cache";
 ?>

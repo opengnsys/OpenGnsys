@@ -29,6 +29,7 @@ $fk_nombreSO=0;
 $fk_tamano=0;
 $fk_imagen=0;
 $fk_perfil=0;
+$fk_cache=0;
 
 if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if (isset($_GET["ambito"])) $ambito=$_GET["ambito"]; 
@@ -42,6 +43,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 if (isset($_POST["fk_tamano"])) $fk_tamano=$_POST["fk_tamano"]; 
 if (isset($_POST["fk_imagen"])) $fk_imagen=$_POST["fk_imagen"]; 
 if (isset($_POST["fk_perfil"])) $fk_perfil=$_POST["fk_perfil"]; 
+if (isset($_POST["fk_cache"])) $fk_cache=$_POST["fk_cache"];
 
 //________________________________________________________________________________________________________
 
@@ -97,9 +99,10 @@ if (!$cmd)
 				<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">			
 				<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 				<TR>
-					<TH height=15 align="center" colspan=14><? echo $TbMsg[18]?></TH>
+					<TH height=15 align="center" colspan=17><? echo $TbMsg[18]?></TH>
 				</TR>
 				<TR>
+
 					<TD align=right><? echo $TbMsg[30]?></TD>
 					<TD align=center><INPUT type="checkbox" value="<? echo $msk_sysFi?>" name="fk_sysFi" <? if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
@@ -114,21 +117,26 @@ if (!$cmd)
 					<TD width="20" align=center>&nbsp;</TD>		
 					<TD align=right><? echo $TbMsg[34]?></TD>
 					<TD align=center><INPUT type="checkbox" value="<? echo $msk_perfil?>" name="fk_perfil" <? if($fk_perfil==$msk_perfil) echo " checked "?>></TD>
+                    <TD width="20" align=center>&nbsp;</TD>
+					<TD align=right><? echo $TbMsg[495]?></TD>
+                    <TD align=center><INPUT type="checkbox" value="<? echo $msk_cache?>" name="fk_cache" <? if($fk_cache==$msk_cache) echo " checked "?>></TD>
+
+
 				</TR>
 				<TR>
-					<TD height=2 style="BORDER-TOP:#999999 1px solid;" align="center" colspan=14>&nbsp;</TD>			
+					<TD height=2 style="BORDER-TOP:#999999 1px solid;" align="center" colspan=17>&nbsp;</TD>			
 				</TR>
 				<TR>
 					<TD height=20 align="center" colspan=14>
 						<A href=#>
-						<IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
+						<IMG border=0 src="../images/boton_confirmar.gif" onClick="document.fdatos.submit()"></A></TD>			
 				</TR>
 			</TABLE>
 		</FORM>	
 <?
 	}
-	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil;
-	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
+	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil | $fk_cache;	
+	pintaConfiguraciones($cmd,$idambito,$ambito,8,$sws,false);	
 ?>
 </BODY>
 </HTML>
@@ -148,7 +156,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;
 
-	$colums=7;
+	$colums=8;
 	echo '<tr height="16">';
 	echo '<th align="center">&nbsp;'.$TbMsg[20].'&nbsp;</th>'; // Número de partición
 	echo '<th align="center">&nbsp;'.$TbMsg[24].'&nbsp;</th>'; // Tipo de partición
@@ -157,6 +165,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	echo '<th align="center">&nbsp;'.$TbMsg[22].'&nbsp;</th>'; // Tamaño
 	echo '<th align="center">&nbsp;'.$TbMsg[25].'&nbsp;</th>'; // Imagen instalada
 	echo '<th align="center">&nbsp;'.$TbMsg[26].'&nbsp;</th>'; // Perfil software 
+	echo '<th align="center">&nbsp;'.$TbMsg[495].'&nbsp;</th>';
 	echo '</tr>';
 
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
@@ -189,6 +198,44 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					
 					//echo'<td align="center">'.$tbKeys[$k]["perfilsoft"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
+  
+					//echo'<td align="center">'.$tbKeys[$k]["perfilsoft"].'</td>'.chr(13);
+					if ($tbKeys[$k]["numpar"] == "4")
+					{
+						$rs=new Recordset; 
+						$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4";
+						$rs->Comando=&$cmd; 
+						if (!$rs->Abrir()) return(false); // Error al abrir recordset
+						$rs->Primero(); 
+						if (!$rs->EOF){
+						$campocache=$rs->campos["cache"];
+						}$rs->Cerrar();
+						echo'<td align="leght">&nbsp;';
+						$ima=split(",",$campocache);
+						$numero=1;
+						for ($x=0;$x<count($ima); $x++)
+							{
+							
+							if(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x]))
+								{
+								if(ereg(".torrent",$ima[$x]))
+									{
+								echo '&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x].'<br/>'.'<hr>';$numero++;
+									}else{
+								echo '&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x].'<br/>';
+										}
+								}else{
+							if(ereg("MB",$ima[$x]))
+								{ echo '<hr> ## '.$TbMsg[4951].' - ( '.$ima[$x].' )<br/><hr>';}else{
+								echo $numero.".-".$ima[$x].'<br/>';
+								}
+										}
+							
+							}
+						echo '&nbsp;</td>'.chr(13);
+					}else{
+						echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
+						  }
 					
 					echo'</tr>'.chr(13);
 				}
@@ -204,6 +251,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
+		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'</tr>'.chr(13);
@@ -281,10 +329,10 @@ function datosOrdenadores($cmd,$idordenador)
 {
 	global $TbMsg;
 
-	$cmd->texto="SELECT nombreordenador, ip, mac, perfileshard.descripcion AS perfilhard 
-			 FROM ordenadores
-			 LEFT JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
-			 WHERE ordenadores.idordenador=$idordenador";				 
+	$cmd->texto="SELECT nombreordenador,ip,mac,perfileshard.descripcion as perfilhard 
+							 FROM ordenadores
+							 INNER JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
+							 WHERE ordenadores.idordenador=".$idordenador;				 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
@@ -338,17 +386,33 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 		if (!$rs->EOF){
 			$nombregrupoordenador=$rs->campos["nombregrupoordenador"];
 			$ordenadores=$rs->campos["numordenadores"];
+			$idaula=$rs->campos["idaula"];
+		}
+		$rs->Cerrar();
+	}
+	//////////////////////////////////////
+	$cmd->texto="SELECT DISTINCT aulas.*
+							 FROM aulas
+							 INNER JOIN grupoordenadores ON grupoordenadores.idaula=aulas.idaula
+							 WHERE aulas.idaula=".$idaula;			 
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+	if ($rs->Abrir()){
+		$rs->Primero(); 
+		if (!$rs->EOF){
+			$urlfoto=$rs->campos["urlfoto"];
+			$nombreaula=$rs->campos["nombreaula"];
 		}
 		$rs->Cerrar();
 	}
 ?> 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[5].'</br>'.$nombreaula?>&nbsp;</TD>
 			<?
 					echo '<TD>'.$nombregrupoordenador.'</TD>
 								<TD colspan=2 valign=top align=center rowspan=2>
-									<IMG border=3 style="border-color:#63676b" src="../images/aula.jpg"><br>
+									<IMG border=3 style="border-color:#63676b" src="'.$urlfoto.'"><br>
 									<center>&nbsp;'.$TbMsg[13].':&nbsp;'. $ordenadores.'</center>
 								</TD>';
 

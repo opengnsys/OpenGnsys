@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_ordenadores_eng.php 
-//	Idioma: Ingés 
+//	Idioma: Ingï¿½s 
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
@@ -20,5 +20,5 @@ $TbMsg[11]="Menu";
 $TbMsg[12]="Cache size";
 $TbMsg[13]="Network interface";
 $TbMsg[14]="Network driver";
-
+$TbMsg[495]="Content Cache";
 ?>
