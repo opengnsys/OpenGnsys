@@ -286,9 +286,19 @@ esac
 
 #/**
 #         ogFsToId str_fstype
-#@brief   Devuelve el identificador de partición correspondiente a un tipo de sistema de archivos.
-#@param   str_fstype  mnemónico de tipo de sistema de archivos
-#@return  int_idpart  nº identificador de tipo de partición.
+#@see     ogTypeToId
+#*/ ##
+function ogFsToId ()
+{
+ogTypeToId "$@"
+}
+
+
+#/**
+#         ogTypeToId str_parttype
+#@brief   Devuelve el identificador correspondiente a un tipo de partición.
+#@param   str_parttype  mnemónico de tipo de partición. 
+#@return  int_idpart    identificador de tipo de partición.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: TypeFS () en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
@@ -296,8 +306,11 @@ esac
 #@version 0.9 - Primera version para OpenGNSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-12-14
+#@version 1.0.4 - Soportar discos GPT (sustituye a ogFsToId).
+#@author  Universidad de Huelva
+#@date    2012/03/30
 #*/ ##
-function ogFsToId ()
+function ogTypeToId ()
 {
 # Variables locales
 local ID
@@ -311,25 +324,63 @@ fi
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Asociar id. de partición para su mnemónico de sistema de archivos.
-case "$1" in
-    EMPTY)      ID=0  ;;
-    FAT12)      ID=1  ;;
-    EXTENDED)   ID=5  ;;
-    FAT16)      ID=6  ;;
-    NTFS|EXFAT) ID=7  ;;
-    FAT32)      ID=b  ;;
-    HFAT12)     ID=11 ;;
-    HFAT16)     ID=16 ;;
-    HNTFS)      ID=17 ;;
-    HFAT32)     ID=1b ;;
-    LINUX-SWAP) ID=82 ;;
-    LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
-                ID=83 ;;
-    LINUX-LVM)  ID=8e ;;
-    SOLARIS)    ID=bf ;;
-    CACHE)      ID=ca ;;
-    LINUX-RAID) ID=fd ;;
-    *)          ID="" ;;
+case "$(ogGetPartitionTableType $1)" in
+    GPT)
+        case "$1" in
+            EMPTY)      ID=0  ;;
+            WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12) 
+                        ID=0700 ;;
+            WIN-RESERVED) ID=0c01 ;;
+            LINUX-SWAP) ID=8200 ;;
+            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
+                        ID=8300 ;;
+            LINUX-LVM)  ID=8e00 ;;
+            FREEBSD-DISK) ID=a500 ;;
+            FREEBSD-BOOT) ID=a501 ;;
+            FREEBSD-SWAP) ID=a502 ;;
+            FREEBSD)    ID=a503 ;;
+            HFS|HFS+)   ID=af00 ;;
+            SOLARIS-BOOT) ID=be00 ;;
+            SOLARIS)    ID=bf00 ;;
+            SOLARIS-SWAP) ID=bf02 ;;
+            SOLARIS-DISK) ID=bf03 ;;
+            CACHE)      ID=8301 ;;
+            EFI)        ID=ef00 ;;
+            LINUX-RAID) ID=fd00 ;;
+            *)          ID="" ;;
+        esac
+        ;;
+    MSDOS)
+        case "$1" in
+            EMPTY)      ID=0  ;;
+            FAT12)      ID=1  ;;
+            EXTENDED)   ID=5  ;;
+            FAT16)      ID=6  ;;
+            WINDOWS|NTFS|EXFAT) 
+                        ID=7  ;;
+            FAT32)      ID=b  ;;
+            HFAT12)     ID=11 ;;
+            HFAT16)     ID=16 ;;
+            HNTFS)      ID=17 ;;
+            HFAT32)     ID=1b ;;
+            LINUX-SWAP) ID=82 ;;
+            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
+                        ID=83 ;;
+            LINUX-LVM)  ID=8e ;;
+            FREEBSD)    ID=a5 ;;
+            OPENBSD)    ID=a6 ;;
+            HFS|HFS+)   ID=af ;;
+            SOLARIS-BOOT) ID=be ;;
+            SOLARIS)    ID=bf ;;
+            CACHE)      ID=ca ;;
+            DATA)       ID=da ;;
+            GPT)        ID=ee ;;
+            EFI)        ID=ef ;;
+            VMFS)       ID=fb ;;
+            LINUX-RAID) ID=fd ;;
+            *)          ID="" ;;
+        esac
+        ;;
 esac
 echo $ID
 }
@@ -584,6 +635,7 @@ case "$ID" in
      7)         TYPE="NTFS" ;;
      700|0700)  TYPE="WINDOWS" ;;
      b|c)       TYPE="FAT32" ;;
+     c01|0c01)  TYPE="WIN-RESERVED" ;;
      11)        TYPE="HFAT12" ;;
      12)        TYPE="COMPAQDIAG" ;;
      16|1e)     TYPE="HFAT16" ;;
