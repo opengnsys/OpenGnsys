@@ -19,6 +19,7 @@ include_once("../includes/opciones.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
 
+$fotoordenador="";
 $grupoid=0; 
 $idaula=0; 
 $idordenador=0; 
@@ -35,7 +36,18 @@ $cache=0;
 $netiface="";
 $netdriver="";
 ### ADV
+//##agp
+if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG")
+{
+ $uploaddir ="../images/fotos/";
 
+ $uploadfile = $uploaddir.$_FILES['archivo']['name'];
+
+move_uploaded_file($_FILES['archivo']['tmp_name'], $uploadfile); 
+#copy($_FILES['archivo']['tmp_name'], $uploadfile);
+}
+//##agp
+if (isset($_POST["fotoordenador"])) $fotoordenador=$_POST["fotoordenador"];
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 if (isset($_POST["idaula"])) $idaula=$_POST["idaula"];
@@ -49,7 +61,6 @@ if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"];
 if (isset($_POST["idprocedimiento"])) $idprocedimiento=$_POST["idprocedimiento"];
 if (isset($_POST["cache"])) $cache=$_POST["cache"];
-
 if(empty($cache)) $cache=0;
 
 if (isset($_POST["netiface"])) $netiface=$_POST["netiface"];
@@ -133,7 +144,8 @@ ________________________________________________________________________________
 function Gestiona(){
 	global	$cmd;
 	global	$opcion;
-
+	$fotoordenador="../images/fotos/".$fotoordenador;
+	global $fotoordenador;
 	global $grupoid;
 	global $idordenador;
 	global $nombreordenador;
@@ -154,6 +166,7 @@ function Gestiona(){
 	global	$op_movida;
 	global	$tablanodo;
 
+	
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idaula",$idaula,1);
 	$cmd->CreaParametro("@idordenador",$idordenador,1);
@@ -167,13 +180,15 @@ function Gestiona(){
 	$cmd->CreaParametro("@cache",$cache,1);
 	$cmd->CreaParametro("@netiface",$netiface,0);
 	$cmd->CreaParametro("@netdriver",$netdriver,0);
+	$cmd->CreaParametro("@fotoordenador",$fotoordenador,0);
 	
 
 	switch($opcion){
 		case $op_alta :
+		//Insertar fotoord con Values @fotoordenador
 			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
-			idmenu,idproautoexec,idaula,grupoid,cache,netiface,netdriver) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
-			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache,@netiface,@netdriver)";
+			idmenu,idproautoexec,idaula,grupoid,cache,netiface,netdriver,fotoord) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
+			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache,@netiface,@netdriver,@fotoordenador)";
 
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
@@ -188,7 +203,7 @@ function Gestiona(){
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache,netiface=@netiface,netdriver=@netdriver 
+			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador 
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;

@@ -35,6 +35,8 @@ $TbMsg[26]="P2P mode -seeder while downloading";
 $TbMsg[27]="P2P time -seeder time(s) after download-";
 $TbMsg[28]="Gateway";
 $TbMsg[29]="Netmask";
-
+$TbMsg[509]="Computer Photo";
+$TbMsg[5091]="Insert Photo";
+$TbMsg[5092]="View Images";
 ?>
 

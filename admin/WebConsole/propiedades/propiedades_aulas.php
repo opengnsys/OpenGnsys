@@ -39,7 +39,7 @@ if  ($opcion!=$op_alta){
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 }
 else
-	$urlfoto="../images/aula.jpg";
+	$urlfoto="aula.jpg";
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -51,10 +51,15 @@ else
 	<SCRIPT language="javascript" src="../jscripts/propiedades_aulas.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_aulas_'.$idioma.'.js"></SCRIPT>'?>
+		<script language=javascript> 
+function abrir_ventana(URL){ 
+   window.open('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640') 
+} 
+</script> 
 </HEAD>
 <BODY>
 <DIV  align=center>
-<FORM  name="fdatos" action="../gestores/gestor_aulas.php" method="post"> 
+<FORM  name="fdatos" action="../gestores/gestor_aulas.php" method="post" enctype="multipart/form-data"> 
 	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
 	<INPUT type=hidden name=idaula value="<? echo $idaula?>">
 	<INPUT type=hidden name=grupoid value="<? echo $grupoid?>">
@@ -77,12 +82,12 @@ else
 				if ($opcion==$op_eliminacion){
 					echo '<TD>'. $nombreaula.'</TD>';
 					echo '<TD colspan=2 valign=top align=center rowspan=2>
-							<IMG border=3 style="border-color:#63676b" src="'.$urlfoto.'"
+							<IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"
 							<br><center>&nbsp;Computers:&nbsp;'. $ordenadores.'</center></TD>';
 			}
 			else{
 					echo '<TD><INPUT  class="formulariodatos" name=nombreaula style="width:215" type=text value="'. $nombreaula.'"></TD>';
-					echo'<TD colspan=2 valign=top align=left rowspan=2><IMG border=3 style="border-color:#63676b" src="'.$urlfoto.'"<br><center>&nbsp;Computers:&nbsp;'. $ordenadores.'</center></TD>';
+					echo'<TD colspan=2 valign=top align=left rowspan=2><IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"<br><center>&nbsp;Computers:&nbsp;'. $ordenadores.'</center>(150X110)-(jpg - gif)  ---- '.$TbMsg[5091].'</br><input name="archivo" type="file" id="archivo" size="16" /></TD>';
 			}
 			?>
 		</TR>
@@ -152,10 +157,30 @@ else
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
 			<?
 				if ($opcion==$op_eliminacion)
-					echo '<TD  colspan=3>'.$urlfoto.'</TD>';
-				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=urlfoto style="width:330" type=text value='.$urlfoto.'></TD>';
-			?>
+					echo '<TD  colspan=3>../images/fotos/'.$urlfoto.'</TD>';
+				else{								
+					?>
+					<TD colspan=3><SELECT class="formulariodatos" name="urlfoto" >
+						<?php if($urlfoto==""){
+						echo '<option value="aula.gif"></option>';}else{
+						echo '<option value="'.$urlfoto.'">'.$urlfoto.'</option>';}
+						if ($handle = opendir("../images/fotos")) {
+						while (false !== ($entry = readdir($handle))) {
+						if ($entry != "." && $entry != "..") {?>
+						
+						<option value="<? echo $entry ?>"><? echo $entry ?></option>
+						<?}
+						}
+						closedir($handle);
+						} 
+						?>
+					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><? echo $TbMsg[5092] ?></a>
+					</TD>
+
+					<?
+					}
+					?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -255,7 +280,7 @@ else
 			<TH align=center&nbsp;><?echo $TbMsg[24]?>&nbsp;</TD>
 			<?
 				if ($opcion==$op_eliminacion)
-					echo '<td colspan="3">'.$pormul.'</td>';
+					echo '<TD colspan=3>'.$pormul.'</TD>';
 				else
 					echo '<td colspan="3">';
 					for ($i=9000; $i<9050; $i+=2) {
@@ -448,7 +473,7 @@ function TomaPropiedades($cmd,$ida)
 		$idaula=$rs->campos["idaula"];
 		$nombreaula=$rs->campos["nombreaula"];
 		$urlfoto=$rs->campos["urlfoto"];
-		if ($urlfoto=="" ) $urlfoto="../images/aula.jpg";
+		if ($urlfoto=="" ) $urlfoto="aula.jpg";
 		$cagnon=$rs->campos["cagnon"];
 		$pizarra=$rs->campos["pizarra"];
 		$ubicacion=$rs->campos["ubicacion"];

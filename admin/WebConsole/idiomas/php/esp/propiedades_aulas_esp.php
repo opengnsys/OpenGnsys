@@ -35,6 +35,9 @@ $TbMsg[26]="Modo P2P -semillero durante la descarga-";
 $TbMsg[27]="Tiempo P2P -semillero despues de descarga-";
 $TbMsg[28]="Direccion gateway del aula";
 $TbMsg[29]="Mascara de red del aula";
-	
+$TbMsg[495]="Contenido Cache";
+$TbMsg[509]="Foto Ordenador";
+$TbMsg[5091]="Insertar Foto";
+$TbMsg[5092]="Ver Imagenes";	
 
 ?>

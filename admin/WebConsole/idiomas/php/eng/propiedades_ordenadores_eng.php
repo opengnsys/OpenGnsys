@@ -20,5 +20,7 @@ $TbMsg[11]="Menu";
 $TbMsg[12]="Cache size";
 $TbMsg[13]="Network interface";
 $TbMsg[14]="Network driver";
-$TbMsg[495]="Content Cache";
+$TbMsg[509]="Computer Photo";
+$TbMsg[5091]="Insert Photo";
+$TbMsg[5092]="View Images";
 ?>

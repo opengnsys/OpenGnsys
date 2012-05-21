@@ -40,3 +40,4 @@ INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('FD00',16,10), 'LINUX-RAID', 1),
 	(CONV('FFFF',16,10), 'UNKNOWN', 1);
 
+ALTER TABLE ogAdmBD.ordenadores ADD fotoord VARCHAR (250) NOT NULL;
