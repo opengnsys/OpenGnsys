@@ -130,6 +130,41 @@ rm -f $tmpsfdisk
 
 
 #/**
+#         ogDeletePartitionTable ndisk
+#@brief   Borra la tabla de particiones del disco.
+#@param   int_ndisk      nº de orden del disco
+#@return  la informacion propia del fdisk
+#@version 0.1 -  Integracion para OpenGnSys
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
+#@version 1.0.4 - Adaptado para su uso con discos GPT
+#@author  Universidad de Huelva
+#@date    2012/03/13
+#*/ ##
+function ogDeletePartitionTable ()
+{
+# Variables locales.
+local DISK
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME int_ndisk" "$FUNCNAME 1"
+    return
+fi
+# Error si no se reciben 1 parámetros.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obteniendo Identificador linux del disco.
+DISK=$(ogDiskToDev $1) || return $?
+# Crear una tabla de particiones vacía.
+case "$(ogGetPartitionTableType $1)" in
+    GPT)    sgdisk -o $DISK ;;
+    MSDOS)  echo -ne "o\nw" | fdisk $DISK ;;
+esac
+}
+
+
+#/**
 #         ogDevToDisk path_device
 #@brief   Devuelve el nº de orden de dicso (y partición) correspondiente al nombre de fichero de dispositivo.
 #@param   path_device Camino del fichero de dispositivo.
@@ -325,9 +360,9 @@ fi
 # Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Obtener el tamaño de la partición.
+# Obtener el tamaño del disco.
 DISK="$(ogDiskToDev $1)" || return $?
-sfdisk -s $DISK
+awk -v D=${DISK#/dev/} '{if ($4==D) {print $3}}' /proc/partitions
 }
 
 
@@ -893,39 +928,6 @@ fi
 #PART="$(Disk|cut -f$1 -d' ')$2"    # se comenta esta linea porque doxygen no reconoce la funcion disk y no crea los enlaces y referencias correctas.
 PART=$(ogDiskToDev|cut -f$1 -d' ')$2
 echo $PART | cut -f3 -d \/
-}
-
-
-#/**  @function ogDeletePartitionTable: @brief Borra la tabla de particiones del disco.
-#@param $1 opcion A (identificador LINUX) 	str_ID_linux (/dev/sda)
-#@param $1 opcion B (Identifiador EAC)  		int_numdiskEAC(1)
-#@return   la informacion propia del fdisk
-#@warning    no definidos
-#@attention
-#@note
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:  DeletePartitionTable () en ATA.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
-#*/
-function ogDeletePartitionTable ()
-{
-# Variables locales.
-local DISK
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME int_disk"  \
-           "$FUNCNAME 1"
-    return
-fi
-# Error si no se reciben 1 parámetros.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Obteniendo Identificador linux de la particion.
-DISK=$(ogDiskToDev $1) || return $?
-
-# Elimando las particiones con fdisk
-echo -ne "o\nw" | fdisk $DISK
 }
 
 
