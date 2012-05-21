@@ -939,7 +939,7 @@ function installWebFiles()
 	# Descomprimir XAJAX.
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 

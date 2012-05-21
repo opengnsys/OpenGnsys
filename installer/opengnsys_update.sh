@@ -402,7 +402,7 @@ function updateWebFiles()
 	fi
         restoreFile $INSTALL_TARGET/www/controlacceso.php
 	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
 
