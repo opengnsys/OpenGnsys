@@ -23,4 +23,6 @@ $TbMsg[14]="Driver de red";
 $TbMsg[509]="Foto Ordenador";
 $TbMsg[5091]="Insertar Foto";
 $TbMsg[5092]="Ver Imagenes";
+$TbMsg[495]="Contenido Cache";
+$TbMsg[4951]="Cache Libre";
 ?>
