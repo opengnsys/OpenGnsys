@@ -130,13 +130,85 @@ rm -f $tmpsfdisk
 
 
 #/**
+#         ogCreatePartitionTable int_ndisk [str_tabletype]
+#@brief   Genera una tabla de particiones en caso de que no sea valida,
+si es valida no hace nada
+#@param   int_ndisk      nº de orden del disco
+#@param   str_tabletype  tipo de tabla de particiones (opcional)
+#@return  (por determinar)
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un
+dispositivo.
+#@note    tabletype: { MSDOS, GPT }
+#@note    Requisitos: sfdisk, sgdisk
+#@version 1.0.4 - Primera versión compatible con OpenGNSys.
+#@author  Universidad de Huelva
+#@date    2012/03/06
+#*/ ##
+function ogCreatePartitionTable()
+{
+# Variables locales.
+local DISK PTTYPE CREATE CREATEPTT
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME int_ndisk [str_partype]" \
+           "$FUNCNAME 1 GPT" "$FUNCNAME 1"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+case $# in
+    1)  CREATEPTT=""
+    2)  CREATEPTT="$2"
+    *)  ogRaiseError $OG_ERR_FORMAT || return $?
+esac
+
+# Capturamos el tipo de tabla de particiones actual
+DISK=$(ogDiskToDev $1) || return $?
+PTTYPE=$(ogGetPartitionTableType $1)
+CREATEPTT=${CREATEPTT:-"$PTTYPE"}
+
+# Si la tabla actual y la que se indica son iguales, se comprueba por si hay que regenerarla.
+if [ "$CREATEPTT" == "$PTTYPE" ]; then
+    case "$PTTYPE" in
+        GPT)   [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || CREATE="GPT" ;;
+        MSDOS) [ $(parted -s $DISK print >/dev/null) ] || CREATE="MSDOS" ;;
+    esac
+else
+    CREATE="$CREATEPTT"
+fi
+# Dependiendo del valor de CREATE, creamos la tabla de particiones en cada caso.
+case "$CREATE" in
+    GPT)
+        # Si es necesario crear una tabla GPT pero la actual es MSDOS
+        if [ "$PTTYPE" == "MSDOS" ]; then
+            sgdisk -g $DISK
+        else
+            echo -e "2\nw\nY\n" | gdisk $DISK
+        fi
+        partprobe $DISK 2>/dev/null
+        ;;
+    MSDOS)
+        # Si es necesario crear una tabla MSDOS pero la actual es GPT
+        if [ "$PTTYPE" == "GPT" ]; then
+            echo -e "r\ng\nw\nY" | gdisk $DISK
+        else
+            fdisk $DISK <<< "w"
+        fi
+        partprobe $DISK 2>/dev/null
+        ;;
+esac
+}
+
+
+#/**
 #         ogDeletePartitionTable ndisk
 #@brief   Borra la tabla de particiones del disco.
 #@param   int_ndisk      nº de orden del disco
 #@return  la informacion propia del fdisk
 #@version 0.1 -  Integracion para OpenGnSys
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
+#@date    2008/10/27
 #@version 1.0.4 - Adaptado para su uso con discos GPT
 #@author  Universidad de Huelva
 #@date    2012/03/13
@@ -325,26 +397,31 @@ fi
 
 # Asociar id. de partición para su mnemónico de sistema de archivos.
 case "$(ogGetPartitionTableType $1)" in
-    GPT)
+    GPT) # Se incluyen mnemónicos compatibles con tablas MSDOS.
         case "$1" in
-            EMPTY)      ID=0  ;;
-            WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12) 
+            EMPTY)      ID=0 ;;
+            WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12|HNTFS|HFAT32|HFAT16|HFAT12)
                         ID=0700 ;;
-            WIN-RESERVED) ID=0c01 ;;
+            WIN-RESERV) ID=0c01 ;;
+            CHROMEOS-KRN) ID=7f00 ;;
+            CHROMEOS)   ID=7f01 ;;
+            CHROMEOS-RESERV) ID=7f02 ;;
             LINUX-SWAP) ID=8200 ;;
             LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
                         ID=8300 ;;
+            LINUX-RESERV) ID=8301 ;;
             LINUX-LVM)  ID=8e00 ;;
             FREEBSD-DISK) ID=a500 ;;
             FREEBSD-BOOT) ID=a501 ;;
             FREEBSD-SWAP) ID=a502 ;;
             FREEBSD)    ID=a503 ;;
             HFS|HFS+)   ID=af00 ;;
+            HFS-RAID)   ID=af01 ;;
             SOLARIS-BOOT) ID=be00 ;;
             SOLARIS)    ID=bf00 ;;
             SOLARIS-SWAP) ID=bf02 ;;
             SOLARIS-DISK) ID=bf03 ;;
-            CACHE)      ID=8301 ;;
+            CACHE)      ID=ca00;;
             EFI)        ID=ef00 ;;
             LINUX-RAID) ID=fd00 ;;
             *)          ID="" ;;
@@ -485,10 +562,10 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #@note    Requisitos: sfdisk
 #@version 0.9 - Primera versión compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    25/03/2009
+#@date    2009/03/25
 #@version 1.0.2 - Detectar partición vacía.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    23/12/2011
+#@date    2011/12/23
 #*/ ##
 function ogGetPartitionId ()
 {
@@ -508,7 +585,7 @@ fi
 DISK=$(ogDiskToDev $1) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
-            # Falta definir tipo de caché local (CA00).
+            [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=ca00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
 esac
@@ -635,15 +712,19 @@ case "$ID" in
      7)         TYPE="NTFS" ;;
      700|0700)  TYPE="WINDOWS" ;;
      b|c)       TYPE="FAT32" ;;
-     c01|0c01)  TYPE="WIN-RESERVED" ;;
+     c01|0c01)  TYPE="WIN-RESERV" ;;
      11)        TYPE="HFAT12" ;;
      12)        TYPE="COMPAQDIAG" ;;
      16|1e)     TYPE="HFAT16" ;;
      17)        TYPE="HNTFS" ;;
      1b|1c)     TYPE="HFAT32" ;;
      42)        TYPE="WIN-DYNAMIC" ;;
+     7f00)      TYPE="CHROMEOS-KRN" ;;
+     7f01)      TYPE="CHROMEOS" ;;
+     7f02)      TYPE="CHROMEOS-RESERV" ;;
      82|8200)   TYPE="LINUX-SWAP" ;;
      83|8300)   TYPE="LINUX" ;;
+     8301)      TYPE="LINUX-RESERV" ;;
      8e|8e00)   TYPE="LINUX-LVM" ;;
      a5|a503)   TYPE="FREEBSD" ;;
      a500)      TYPE="FREEBSD-DISK" ;;
@@ -652,11 +733,12 @@ case "$ID" in
      a6)        TYPE="OPENBSD" ;;
      a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
      af|af00)   TYPE="HFS" ;;
+     af01)      TYPE="HFS-RAID" ;;
      be|be00)   TYPE="SOLARIS-BOOT" ;;
      bf|bf0[0145]) TYPE="SOLARIS" ;;
      bf02)      TYPE="SOLARIS-SWAP" ;;
      bf03)      TYPE="SOLARIS-DISK" ;;
-     ca|8301)   TYPE="CACHE" ;;
+     ca|ca00)   TYPE="CACHE" ;;
      da)        TYPE="DATA" ;;
      ee)        TYPE="GPT" ;;
      ef|ef00)   TYPE="EFI" ;;
@@ -758,31 +840,37 @@ echo
 
 #/**
 #         ogListPrimaryPartitions int_ndisk
-#@brief   Metafunción que lista las particiones primarias no vacías definidas en un disco.
+#@brief   Metafunción que lista las particiones primarias no vacías de un disco.
 #@param   int_ndisk  nº de orden del disco
 #@see     ogListPartitions
 #*/ ##
 function ogListPrimaryPartitions ()
 {
 # Variables locales.
-local PARTS
+local PTTYPE PARTS
 
+PTTYPE=$(ogGetPartitionTableType $1) || return $?
 PARTS=$(ogListPartitions "$@") || return $?
-echo $PARTS | cut -sf1-4 -d" " | sed 's/\( EMPTY:0\)*$//'
+case "$PTTYPE" in
+    GPT)    echo $PARTS | sed 's/\( EMPTY:0\)*$//' ;;
+    MSDOS)  echo $PARTS | cut -sf1-4 -d" " | sed 's/\( EMPTY:0\)*$//' ;;
+esac
 }
 
 
 #/**
 #         ogListLogicalPartitions int_ndisk
-#@brief   Metafunción que lista las particiones lógicas definidas en un disco.
+#@brief   Metafunción que lista las particiones lógicas de una tabla tipo MSDOS.
 #@param   int_ndisk  nº de orden del disco
 #@see     ogListPartitions
 #*/ ##
 function ogListLogicalPartitions ()
 {
 # Variables locales.
-local PARTS
+local PTTYPE PARTS
 
+PTTYPE=$(ogGetPartitionTableType $1) || return $?
+[ "$PTTYPE" == "MSDOS" ] || ogRaiseError $OG_ERR_PARTITION "" || return $?
 PARTS=$(ogListPartitions "$@") || return $?
 echo $PARTS | cut -sf5- -d" "
 }
@@ -861,7 +949,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Redefinir el tamaño de la partición.
 sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-partprobe 2>/dev/null
+partprobe $DISK 2>/dev/null
 }
 
 #/**
