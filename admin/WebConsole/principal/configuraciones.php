@@ -296,7 +296,7 @@ function datosAulas($cmd,$idaula)
 			?>
 							<TD valign=top align=center rowspan=3>
 					<IMG border=3 style="border-color:#63676b"
-					 src="<? if ($urlfoto=="") 	echo "../images/aula.jpg"; else 	echo $urlfoto;?>">
+					src="<? echo "../images/fotos/".$urlfoto?>">
 					 <BR><center>&nbsp;<? echo $TbMsg[13].':&nbsp;'. $ordenadores?></center></TD>
 		</TR>
 		<TR>

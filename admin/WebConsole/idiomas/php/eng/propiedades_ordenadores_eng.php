@@ -23,4 +23,6 @@ $TbMsg[14]="Network driver";
 $TbMsg[509]="Computer Photo";
 $TbMsg[5091]="Insert Photo";
 $TbMsg[5092]="View Images";
+$TbMsg[495]="Content Cache";
+$TbMsg[4951]="Cache Free";
 ?>

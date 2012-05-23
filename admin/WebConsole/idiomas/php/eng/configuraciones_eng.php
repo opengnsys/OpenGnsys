@@ -57,6 +57,7 @@ $TbMsg[42]='Variable';
 $TbMsg[43]='No configuration: client does not connect to server.';
 $TbMsg[44]='Hardware equipment without profile';
 $TbMsg[45]='Add Profile to obtain data';
-
+$TbMsg[495]='Content Cache';
+$TbMsg[4951]='Cache Free';
 ?>
 
