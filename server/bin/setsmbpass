@@ -11,7 +11,8 @@
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SAMBAUSER="opengnsys"				# Usuario por defecto.
-CLIENTINITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
+TFTPDIR=$OPENGNSYS/tftpboot
+CLIENTINITRD=$TFTPDIR/ogclient/oginitrd.img
 TMPDIR=/tmp/ogclient$$
 
 # Control básico de errores.
@@ -59,6 +60,8 @@ if [ -r $CLIENTINITRD ]; then
 	fi
 	rm -fr $TMPDIR
 	md5sum $CLIENTINITRD | cut -f1 -d" " > $CLIENTINITRD.sum
+	cp -a $CLIENTINITRD $TFTPDIR
+	cp -a $CLIENTINITRD.sum $TFTPDIR
 else
 	SAMBAPASS="og"                  # Clave por defecto.
         echo "$PROG: Aviso: no se ha modificado la clave del cliente."
