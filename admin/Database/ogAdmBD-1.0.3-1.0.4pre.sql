@@ -1,11 +1,12 @@
+# Añadir resolución a menú de cliente.
 ALTER TABLE ogAdmBD.menus MODIFY resolucion smallint(4);
-
+# Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE ogAdmBD.perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
-
+# Soportar particiones GPT y añadir información de caché.
 ALTER TABLE ogAdmBD.ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
 	ADD cache varchar(500);
-
+# Nuevos tipos de particiones y particiones GPT.
 ALTER TABLE ogAdmBD.tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
@@ -45,6 +46,8 @@ INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('EF02',16,10), 'BIOS-BOOT', 0),
 	(CONV('FD00',16,10), 'LINUX-RAID', 1),
 	(CONV('FFFF',16,10), 'UNKNOWN', 1);
-
+# Añadir foto de ordenador.
 ALTER TABLE ogAdmBD.ordenadores ADD fotoord VARCHAR (250) NOT NULL;
+# Actualizar localización de foto de aula (eliminar el camino).
+UPDATE ogAdmBD.aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
 

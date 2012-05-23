@@ -51,3 +51,5 @@ INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 
 ALTER TABLE ogAdmBD.ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
+UPDATE ogAdmBD.aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
+
