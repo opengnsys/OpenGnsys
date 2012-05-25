@@ -490,6 +490,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 
 CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idordenador` int(11) NOT NULL,
+  `numdisk` tinyint(4) NOT NULL,
   `numpar` tinyint(4) NOT NULL,
   `codpar` int(8) NOT NULL,
   `tamano` int(11) NOT NULL,

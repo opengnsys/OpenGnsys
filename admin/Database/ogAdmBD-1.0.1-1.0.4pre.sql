@@ -9,6 +9,7 @@ ALTER TABLE ogAdmBD.perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL 
 
 ALTER TABLE ogAdmBD.ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
+	ADD numdisk tinyint(4) NOT NULL DEFAULT 1,
 	ADD cache varchar(500);
 
 ALTER TABLE ogAdmBD.tipospar MODIFY codpar int(8) NOT NULL;
