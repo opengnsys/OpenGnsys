@@ -329,6 +329,30 @@ if ($npart <= 4) {
 return($SelectHtml);
 }
 
+function htmlForm_typepartnotcacheGPT($npart)
+{
+$SelectHtml="";
+if ($npart == 4) {
+    $SelectHtml.='<OPTION value="CACHE"> CACHE </OPTION>';
+}
+$SelectHtml.='<OPTION value="FAT12"> FAT12 </OPTION>';
+$SelectHtml.='<OPTION value="FAT16"> FAT16 </OPTION>';
+$SelectHtml.='<OPTION value="FAT32"> FAT32 </OPTION>';
+$SelectHtml.='<OPTION value="HFAT32"> Hidden FAT32 </OPTION>';
+$SelectHtml.='<OPTION value="NTFS"> NTFS </OPTION>';
+$SelectHtml.='<OPTION value="HNTFS"> Hidden NTFS </OPTION>';
+#$SelectHtml.='<OPTION value="EXT2"> EXT2 </OPTION>';
+#$SelectHtml.='<OPTION value="EXT3"> EXT3 </OPTION>';
+$SelectHtml.='<OPTION value="EXT4"> LINUX:EXT[2:3:4] </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-SWAP"> LINUX-SWAP </OPTION>';
+$SelectHtml.='<OPTION value="REISERFS"> REISERFS </OPTION>';
+$SelectHtml.='<OPTION value="REISER4"> RESISER4 </OPTION>';
+$SelectHtml.='<OPTION value="XFS"> XFS </OPTION>';
+$SelectHtml.='<OPTION value="JFS"> JFS </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-RAID"> LINUX-RAID </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-LVM"> LINUX-LVM </OPTION>';
+return($SelectHtml);
+}
 
 function htmlForm_sizepart($cmd,$numpar)
 {
@@ -355,7 +379,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;
-	
+
 	$colums=7;
 	echo '<TR height=16>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[20].'&nbsp;</TH>';	// Número de partición

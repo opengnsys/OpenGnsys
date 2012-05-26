@@ -59,30 +59,28 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_perfil;	
 	global $msk_cache;
 				
-	$cmd->texto="SELECT 			
-				concat_WS( ';', 
-							ordenadores_particiones.numpar, ";
-							
+	$cmd->texto="SELECT CONCAT_WS( ';', ordenadores_particiones.numpar, ";
+
 	if($sws & $msk_tamano)						
 		$cmd->texto.="	ordenadores_particiones.tamano,";
-	
 
 	if($sws & $msk_sysFi)						
 		$cmd->texto.="	ordenadores_particiones.idsistemafichero, ";	
 		
 	if($sws & $msk_nombreSO)						
-		$cmd->texto.="	ordenadores_particiones.idnombreso, ";								
-							
-	if($sws & $msk_imagen)						
-		$cmd->texto.="	ordenadores_particiones.idimagen, ";	
-		
-	if($sws & $msk_perfil)						
-		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";		
-		
-	if($sws & $msk_cache)						
-		$cmd->texto.="	ordenadores_particiones.cache, ";						
+		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
 
-	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,	
+	if($sws & $msk_imagen)
+		$cmd->texto.="	ordenadores_particiones.idimagen, ";
+
+	if($sws & $msk_perfil)
+		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";
+
+	if($sws & $msk_cache)
+		$cmd->texto.="	ordenadores_particiones.cache, "; 
+
+	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,
+				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar ,
 				ordenadores_particiones.codpar ,
 				tipospar.tipopar,
@@ -107,21 +105,21 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 					LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
 					
 	switch($ambito){
-			case $AMBITO_AULAS :
-					$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-													WHERE aulas.idaula =".$idambito;
-					break;
-			case $AMBITO_GRUPOSORDENADORES :
-					$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-													WHERE gruposordenadores.idgrupo =".$idambito;
-					break;
-			case $AMBITO_ORDENADORES :
-					$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
-				break;
+		case $AMBITO_AULAS :
+			$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
+		case $AMBITO_GRUPOSORDENADORES :
+			$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
+			break;
+		case $AMBITO_ORDENADORES :
+			$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			break;
 	}		
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 ";
-					
+
 	$cmd->texto.=" GROUP by configuracion";
 	//echo "carga claves:".$cmd->texto;
 	$rs=new Recordset; 
@@ -131,23 +129,24 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	$idx=0; 
 	//echo $cmd->texto;
 	while (!$rs->EOF){
-			$tbKeys[$idx]["cfg"]=$rs->campos["configuracion"];
-			$tbKeys[$idx]["numpar"]=$rs->campos["numpar"];
-			$tbKeys[$idx]["codpar"]=$rs->campos["codpar"];			
-			$tbKeys[$idx]["tipopar"]=$rs->campos["tipopar"];
-			$tbKeys[$idx]["clonable"]=$rs->campos["clonable"];			
-			$tbKeys[$idx]["tamano"]=$rs->campos["tamano"];
-			$tbKeys[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
-			$tbKeys[$idx]["idnombreso"]=$rs->campos["idnombreso"];
-			$tbKeys[$idx]["nombreso"]=$rs->campos["nombreso"];			
-			$tbKeys[$idx]["idimagen"]=$rs->campos["idimagen"];
-			$tbKeys[$idx]["imagen"]=$rs->campos["imagen"];
-			$tbKeys[$idx]["nombreca"]=$rs->campos["nombreca"];
-			$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
-			$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
-			$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];	
-			$tbKeys[$idx]["cache"]=$rs->campos["cache"];
-			$idx++;
+		$tbKeys[$idx]["cfg"]=$rs->campos["configuracion"];
+		$tbKeys[$idx]["numdisk"]=$rs->campos["numdisk"];
+		$tbKeys[$idx]["numpar"]=$rs->campos["numpar"];
+		$tbKeys[$idx]["codpar"]=$rs->campos["codpar"];
+		$tbKeys[$idx]["tipopar"]=$rs->campos["tipopar"];
+		$tbKeys[$idx]["clonable"]=$rs->campos["clonable"];
+		$tbKeys[$idx]["tamano"]=$rs->campos["tamano"];
+		$tbKeys[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
+		$tbKeys[$idx]["idnombreso"]=$rs->campos["idnombreso"];
+		$tbKeys[$idx]["nombreso"]=$rs->campos["nombreso"];
+		$tbKeys[$idx]["idimagen"]=$rs->campos["idimagen"];
+		$tbKeys[$idx]["imagen"]=$rs->campos["imagen"];
+		$tbKeys[$idx]["nombreca"]=$rs->campos["nombreca"];
+		$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
+		$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
+		$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
+		$tbKeys[$idx]["cache"]=$rs->campos["cache"];
+		$idx++;
 		$rs->Siguiente();
 	}
 	$conKeys=$idx; // Guarda contador
@@ -180,7 +179,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	global $msk_imagen;
 	global $msk_perfil;	
 	global $msk_cache;
-		
+
 	cargaCaves($cmd,$idambito,$ambito,$sws,$swr);
 	cargaSistemasFicheros($cmd,$idambito,$ambito);
 	cargaPerfiles($cmd,$idambito,$ambito);
