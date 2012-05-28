@@ -338,7 +338,7 @@ ID=$(ogGetPartitionId "$1" "$2") || return $?
 [ "$ID" == "a7" ] && ID="ca"    # Traducir antiguo id. de partición de caché.
 TYPE=""
 case "$ID" in
-     ca|8301)  # Detectar caché local (revisar detección en tablas GPT).
+     ca|ca00)  # Detectar caché local (revisar detección en tablas GPT).
                ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
                ;;
      *)        # Detectar sistema de ficheros.
