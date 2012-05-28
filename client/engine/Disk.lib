@@ -16,8 +16,9 @@
 #@param   str_parttype   mnemónico del tipo de partición
 #@param   int_partsize   tamaño de la partición (en KB)
 #@return  (nada, por determinar)
-#@exception OG_ERR_FORMAT   formato incorrecto.
-#@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  disco o partición no detectado (no es un dispositivo).
+#@exception OG_ERR_PARTITION error en partición o en tabla de particiones.
 #@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
 #@attention Pueden definirse particiones vacías de tipo \c EMPTY
 #@attention No puede definirse partición de cache y no se modifica si existe.
@@ -29,11 +30,14 @@
 #@version 0.9.1 - Corrección del redondeo del tamaño del disco.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
+#@version 1.0.4 - Llamada a función específica para tablas GPT.
+#@author  Universidad de Huelva
+#@date    2012/03/30
 #*/ ##
 function ogCreatePartitions ()
 {
 # Variables locales.
-local ND DISK PART SECTORS CYLS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PTTYPE PART SECTORS CYLS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -46,6 +50,13 @@ fi
 # Nº total de sectores, para evitar desbordamiento (evitar redondeo).
 ND="$1"
 DISK=$(ogDiskToDev "$ND") || return $?
+PTTYPE=$(ogGetPartitionTableType $1)
+case "$PTTYPE" in
+    GPT)   ogCreateGptPartitions "$@"
+           return $? ;;
+    *)     ogRaiseError $OG_ERR_PARTITION "$PTTYPE"
+           return $? ;;
+esac
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 SECTORS=$[SECTORS/CYLS*CYLS-1]
@@ -126,6 +137,48 @@ ogUnmountAll $ND 2>/dev/null
 sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe $DISK
 rm -f $tmpsfdisk
 [ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
+}
+
+
+#/**
+#         ogCreateGptPartitions int_ndisk str_parttype:int_partsize ...
+#@brief   Define el conjunto de particiones de un disco GPT
+#@param   int_ndisk      nº de orden del disco
+#@param   str_parttype   mnemónico del tipo de partición
+#@param   int_partsize   tamaño de la partición (en KB)
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  disco o partición no detectado (no es un dispositivo).
+#@exception OG_ERR_PARTITION error en partición o en tabla de particiones.
+#@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
+#@attention Pueden definirse particiones vacías de tipo \c EMPTY
+#@attention No puede definirse partición de caché y no se modifica si existe.
+#@note    Requisitos: sfdisk, parted, partprobe, awk
+#@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
+#@version 1.0.4 - Primera versión para OpenGnSys
+#@author  Universidad de Huelva
+#@date    2012/03/30
+#*/ ##
+function ogCreateGptPartitions ()
+{
+# Variables locales.
+local ND DISK PART SECTORS CYLS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
+           "$FUNCNAME 1 NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
+    return
+fi
+# Error si no se reciben menos de 2 parámetros.
+[ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Nº total de sectores, para evitar desbordamiento (evitar redondeo).
+ND="$1"
+DISK=$(ogDiskToDev "$ND") || return $?
+
+# Se calcula el ultimo sector del disco (total de sectores usables)
+SECTORS=`ogGetLastDiskSector $1`
+
 }
 
 
@@ -520,6 +573,67 @@ echo $TYPE
 
 
 #/**
+#         ogGetLastSector int_ndisk [int_npart]
+#@brief   Devuelve el último sector usable del disco o una partición.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npart      nº de orden de la partición (opcional)
+#@return  Último sector usable.
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o partición no corresponde con un dispositivo.
+#@note    Requisitos: sfdisk, sgdisk
+#@version 1.0.4 - Primera versión compatible con OpenGnSys.
+#@author  Universidad de Huelva
+#@date    2012/06/03
+#*/ ##
+
+function ogGetLastSector ()
+{
+# Variables locales
+local DISK PART PTTYPE LASTSECTOR SECTORS CYLS
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npart]" \
+           "$FUNCNAME 1  =>  488392064" \
+           "$FUNCNAME 1 1  =>  102400062"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+case $# in 
+    1)  DISK=$(ogDiskToDev $1) || return $?
+        ;;
+    2)  DISK=$(ogDiskToDev $1) || return $?
+        PART=$(ogDiskToDev $1 $2) || return $?
+        ;;
+    *)  ogRaiseError $OG_ERR_FORMAT
+        return $? ;;
+esac
+
+# Hay que comprobar si el disco es GPT
+PTTYPE=$(ogGetPartitionTableType $1)
+case "$PTTYPE" in 
+    GPT)
+        if [ $# == 1 ]; then
+            LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
+        else
+            LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
+        fi
+        ;;
+    MSDOS)
+        if [ $# == 1 ]; then
+            SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
+            CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
+            LASTSECTOR=$[SECTORS/CYLS*CYLS-1]
+        else
+            LASTSECTOR=$(sfdisk -uS -l $DISK | \
+                         awk -v P="$PART" '{if ($1==P) {if ($2=="*") print $4; else print $3} }')
+        fi
+        ;;
+esac
+echo $LASTSECTOR
+}
+
+
+#/**
 #         ogGetPartitionActive int_ndisk
 #@brief   Muestra que particion de un disco esta marcada como de activa.
 #@param   int_ndisk   nº de orden del disco
@@ -634,6 +748,44 @@ case "$(ogGetPartitionId $1 $2)" in
     *)    sfdisk -s $PART
           ;;
 esac
+}
+
+
+#/**
+#         ogGetPartitionsNumber int_ndisk
+#@brief   Detecta el numero de particiones del disco duro indicado.
+#@param   int_ndisk      nº de orden del disco
+#@return  Devuelve el numero paritiones del disco duro indicado
+#@warning Salidas de errores no determinada
+#@attention Requisitos: parted
+#@note	  Notas sin especificar
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  DetectNumberPartition () en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    Date: 27/10/2008
+#@version 1.0 - Uso de sfdisk Primera version para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009/07/24
+#@version 1.0.4 - Uso de /proc/partitions para detectar el numero de particiones
+#@author  Universidad de Huelva
+#@date    2012/03/28
+#*/ ##
+function ogGetPartitionsNumber ()
+{
+# Variables locales.
+local DISK
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1  =>  3"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Contar el nº de veces que aparece el disco en su lista de particiones.
+DISK=$(ogDiskToDev $1) 2>/dev/null
+#sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK"
+grep -c "${DISK#/dev/}." /proc/partitions
 }
 
 
@@ -1012,35 +1164,6 @@ for i in `ogDiskToDev`
 do 
 	partprobe $i
 done
-}
-
-
-
-#/**
-#         ogGetPartitionsNumber int_ndisk
-#@brief   Detecta el numero de particiones del disco duro indicado.
-#@param   int_ndisk      nº de orden del disco
-#@return  Devuelve el numero paritiones del disco duro indicado
-#@warning Salidas de errores no determinada
-#@attention Requisitos: parted
-#@note	  Notas sin especificar
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:  DetectNumberPartition () en ATA.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    Date: 27/10/2008
-#@version 1.0 - Uso de sfdisk Primera version para OpenGnSys
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
-#*/ ##
-function ogGetPartitionsNumber ()
-{
-           #local disco totalpart
-           #disco=`ogDiskToDev $1`
-           #totalpart=`parted $disco print | egrep ^" [0123456789] " -c`
-           #echo $totalpart
-local DISK
-# Contar el nº de veces que aparece el disco en su lista de particiones.
-DISK=$(ogDiskToDev $1) 2>/dev/null
-sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK"
 }
 
 
