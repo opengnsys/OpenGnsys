@@ -60,12 +60,29 @@ command + " | tee -a $OGLOGCOMMAND";
 
 }
 
-function codeParticionado (form) {
+function codeParticionado(form){
+	var n_disk = form.n_disk.value;
+	var tipo_part_table = form.tipo_part_table.value;
+        alert("Las acciones se aplicaran al disco  "+n_disk+", tipo: "+tipo_part_table);
+	// Comprobamos si la opcion elejida es GPT o MSDOS para llamar a una funcion u otra
+	if(tipo_part_table == "GPT"){
+		codeParticionadoGPT(form);
+	}
+	else{
+		codeParticionadoMSDOS(form);
+	}
+}
+
+
+function codeParticionadoMSDOS (form) {
 	var partCode="";
 	var logicalCode="";
 	var cacheCode;
 	var cacheSize;
 	var extended=false;
+	var n_disk = form.n_disk.value;
+	var tipo_part_table = form.tipo_part_table.value;
+
 
 	for (var nPart=1; nPart<4; nPart++) {
 		var partCheck=eval("form.check"+nPart);
@@ -101,8 +118,8 @@ function codeParticionado (form) {
 			echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
 			sizecache=`ogGetPartitionSize 1 4` \n \
 			echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-			ogDeletePartitionTable 1  \n \
-			ogUpdatePartitionTable 1  | tee -a $OGLOGCOMMAND \n \
+			ogDeletePartitionTable "+n_disk+"  \n \
+			ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
 			echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
 			initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
 		} else {
@@ -114,8 +131,8 @@ function codeParticionado (form) {
 			//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
 			cacheCode="\
 			echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-			ogDeletePartitionTable 1  \n \
-			ogUpdatePartitionTable 1 \n \
+			ogDeletePartitionTable "+n_disk+"  \n \
+			ogUpdatePartitionTable "+n_disk+" \n \
 			echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
 			initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
 		} 
@@ -123,8 +140,8 @@ function codeParticionado (form) {
 		//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
 		cacheCode="\
 		echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-		ogDeletePartitionTable 1  \n \
-		ogUpdatePartitionTable 1 \n";
+		ogDeletePartitionTable "+n_disk+" \n \
+		ogUpdatePartitionTable "+n_disk+" \n";
 		partCode += " EMPTY:0";
 	}
 	if (extended) {
@@ -167,39 +184,168 @@ function codeParticionado (form) {
 //ogUpdatePartitionTable 1 \n \
 //ogListPartitions 1 \n"; 
 form.codigo.value="\
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 echo \"[0]  $MSG_HELP_ogCreatePartitions \" | tee -a $OGLOGSESSION $OGLOGFILE \n \
-echo \"[10] $MSG_HELP_ogUnmountAll 1\" | tee -a $OGLOGSESSION \n \
+echo \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\" | tee -a $OGLOGSESSION \n \
 ogUnmountCache \n \
-ogUnmountAll 1 \n  \
+ogUnmountAll "+n_disk+" \n  \
 " + cacheCode + " \n \
-echo \"[60] $MSG_HELP_ogListPartitions 1\" | tee -a $OGLOGSESSION \n \
-ogListPartitions 1 | tee -a $OGLOGCOMMAND $OGLOGSESSION \n \
+echo \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\" | tee -a $OGLOGSESSION \n \
+ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION \n \
 echo \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + " \" | tee -a $OGLOGSESSION \n \
-ogCreatePartitions 1 " + partCode + " | tee -a $OGLOGCOMMAND \n \
-echo \"[80] $MSG_HELP_ogSetPartitionActive 1 1\" | tee -a $OGLOGSESSION \n \
-ogSetPartitionActive 1 1 \n \
-echo \"[100] $MSG_HELP_ogListPartitions  1\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
-ogUpdatePartitionTable 1 \n \
+ogCreatePartitions "+n_disk+" " + partCode + " | tee -a $OGLOGCOMMAND \n \
+echo \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\" | tee -a $OGLOGSESSION \n \
+ogSetPartitionActive "+n_disk+" 1 \n \
+echo \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
+ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogListPartitions 1 | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n"; 	
+ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n"; 	
+
+}
+
+function codeParticionadoGPT (form) {
+        var partCode="";
+        var logicalCode="";
+        var cacheCode;
+        var cacheSize;
+        var extended=false;
+        var n_disk = form.n_disk.value;
+        var tipo_part_table = form.tipo_part_table.value;
+		numParts=document.getElementById("numGPTpartitions").value;
+		
+        for (var nPart=1; nPart <= numParts; nPart++) {
+                var partCheck=eval("form.checkGPT"+nPart);
+                if (partCheck.checked) {
+						// Distinguimos entre cache y el resto de particiones
+						if(nPart == 4){
+							if (form.sizeGPT4.value == "0") {
+							//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
+							cacheCode="\
+							echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
+							sizecache=`ogGetPartitionSize 1 4` \n \
+							echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+							ogDeletePartitionTable "+n_disk+"  \n \
+							ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
+							echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
+							initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
+							} else {
+									if (form.sizeGPT4.value == "CUSTOM") {
+											cacheSize = form.sizeGPT4custom.value;
+									} else {
+											cacheSize = form.sizeGPT4.value;
+									}
+									//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
+									cacheCode="\
+									echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+									ogDeletePartitionTable "+n_disk+"  \n \
+									ogUpdatePartitionTable "+n_disk+" \n \
+									echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
+									initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";
+							}
+						}
+						else{
+							var partType=eval("form.partGPT"+nPart);
+							if (partType.value == "CUSTOM" ) {
+									var partTypeCustom=eval("form.partGPT"+nPart+"custom");
+									partCode += " " + partTypeCustom.value;
+									if (partTypeCustom.value == "EXTENDED") {
+											extended=true;
+									}
+							} else {
+									partCode += " " + partType.value;
+									if (partType.value == "EXTENDED") {
+											extended=true;
+									}
+							}
+							var partSize=eval("form.sizeGPT"+nPart);
+							if (partSize.value == "CUSTOM" ) {
+									var partSizeCustom=eval("form.sizeGPT"+nPart+"custom");
+									partCode += ":" + partSizeCustom.value;
+							} else {
+									partCode += ":" + partSize.value;
+							}
+						}
+                } else {
+					if(nPart == 4){
+						//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
+						cacheCode="\
+						echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+						ogDeletePartitionTable "+n_disk+" \n \
+						ogUpdatePartitionTable "+n_disk+" \n";
+						partCode += " EMPTY:0";
+					}
+					else{
+                        partCode += " EMPTY:0";
+					}
+                }
+        }
+//      form.codigo.value="\
+//" + cacheCode + " \n \
+//ogListPartitions 1 \n \
+//ogCreatePartitions 1 " + partCode + " \n \
+//ogSetPartitionActive 1 1 \n \
+//ogUpdatePartitionTable 1 \n \
+//ogListPartitions 1 \n";
+form.codigo.value="\
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
+echo \"[0]  $MSG_HELP_ogCreatePartitions \" | tee -a $OGLOGSESSION $OGLOGFILE \n \
+echo \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\" | tee -a $OGLOGSESSION \n \
+ogUnmountCache \n \
+ogUnmountAll "+n_disk+" \n  \
+" + cacheCode + " \n \
+echo \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\" | tee -a $OGLOGSESSION \n \
+ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION \n \
+echo \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + " \" | tee -a $OGLOGSESSION \n \
+ogCreatePartitions "+n_disk+" " + partCode + " | tee -a $OGLOGCOMMAND \n \
+echo \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\" | tee -a $OGLOGSESSION \n \
+ogSetPartitionActive "+n_disk+" 1 \n \
+echo \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
+ogUpdatePartitionTable "+n_disk+" \n \
+ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
+ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n";
 
 }
 
 
+
+
+function showPartitionForm(tipo_table_part){
+	document.getElementById("form"+tipo_table_part).style.display="inline";
+	if(tipo_table_part == "MSDOS"){
+		// De los dos tipos, se oculta el otro
+		document.getElementById("formGPT").style.display="none";
+		
+	}
+	else{
+		document.getElementById("formMSDOS").style.display="none";
+	}
+}
+
+
 // Código de pulsación de selección de partición.
-function clickPartitionCheckbox(form, npart) {
-	var partCheck=eval("form.check"+npart);
-	var partType=eval("form.part"+npart);
-	var partSize=eval("form.size"+npart);
-	var partTypeCustom=eval("form.part"+npart+"custom");
-	var partSizeCustom=eval("form.size"+npart+"custom");
-	var freeDisk=document.getElementById("freedisk");
-	var logical=document.getElementById("logicas");
+function clickPartitionCheckbox(form, npart, isGPT) {
+	// Si el parametro no esta definido, se toma como false
+	isGPT = (isGPT)?isGPT:"false";
+	if(isGPT == true){
+		prefix="GPT";
+	}
+	else{
+		prefix="";
+	}
+	var partCheck=eval("form.check"+prefix+npart);
+	var partType=eval("form.part"+prefix+npart);
+	var partSize=eval("form.size"+prefix+npart);
+	var partTypeCustom=eval("form.part"+prefix+npart+"custom");
+	var partSizeCustom=eval("form.size"+prefix+npart+"custom");
+	var freeDisk=document.getElementById("freedisk"+prefix);
+	//var logical=document.getElementById("logicas"+prefix);
 	if (partCheck.checked) {
 		partType.disabled=false;
 		partSize.disabled=false;
-		if (partType.options[partType.selectedIndex].value == "CUSTOM") {
-			partTypeCustom.disabled=false;
+		if(npart != 4){
+			if (partType.options[partType.selectedIndex].value == "CUSTOM") {
+				partTypeCustom.disabled=false;
+			}
 		}
 		if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
 			partSizeCustom.disabled=false;
@@ -213,7 +359,10 @@ function clickPartitionCheckbox(form, npart) {
 		partSizeCustom.disabled=true;
 	}
 	if (npart <= 4) {
-		checkExtendedPartition(form);
+		// Si el formulario es GPT no hay extendidas
+		if(isGPT != true){
+			checkExtendedPartition(form);
+		}
 		calculateFreeDisk(form);
 	}
 }
@@ -221,6 +370,10 @@ function clickPartitionCheckbox(form, npart) {
 
 // Código para calcular el espacio libre del disco.
 function calculateFreeDisk(form) {
+	// Si esta seleccionada la opcion GPT, se llama a la funcion correspondiente
+	if(document.getElementById("tipo_part_table").value == "GPT"){
+		calculateFreeGPTDisk(form);
+	}
 	var freeDisk=document.getElementById("freedisk");
 	freeDisk.value=form.minsize.value;
 	for (npart=1; npart<=4; npart++) {
@@ -245,6 +398,108 @@ function calculateFreeDisk(form) {
 	if (form.size4.value == 0) {
 		freeDisk.value += " (- cache)";		// Aviso de caché sin modificar.
 	}
+}
+
+// Código para calcular el espacio libre del disco. en el formulario GPT
+function calculateFreeGPTDisk(form) {
+	// Si esta seleccionada la opcion MSDOS, se llama a la funcion correspondiente
+        if(document.getElementById("tipo_part_table").value == "MSDOS"){
+                calculateFreeDisk(form);
+        }
+
+	var freeDisk=document.getElementById("freediskGPT");
+        freeDisk.value=form.minsize.value;
+	// Capturamos el numero de particiones que hay hechas
+	numParts=document.getElementById("numGPTpartitions").value;
+        for (npart=1; npart<=numParts; npart++) {
+                var partCheck=eval("form.checkGPT"+npart);
+                var partSize=eval("form.sizeGPT"+npart);
+                var partSizeCustom=eval("form.sizeGPT"+npart+"custom");
+                if (partCheck.checked) {
+                        if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
+                                freeDisk.value -= parseInt(partSizeCustom.value);
+                        } else {
+                                freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
+                        }
+                }
+        }
+        if (parseInt(freeDisk.value) < 0) {
+                freeDisk.style.fontWeight = "bold";
+                freeDisk.style.fontStyle = "italic";
+        } else {
+                freeDisk.style.fontWeight = "normal";
+                freeDisk.style.fontStyle = "normal";
+        }
+        if (form.size4.value == 0) {
+                freeDisk.value += " (- cache)";         // Aviso de caché sin modificar.
+        }
+}
+
+// Agrega una nueva fila a la tabla de particiones con una nueva particion
+function addGPTPartition(){
+	var partitionTypes = "";
+	partitionTypes+='<OPTION value="FAT12"> FAT12 </OPTION>';
+	partitionTypes+='<OPTION value="FAT16"> FAT16 </OPTION>';
+	partitionTypes+='<OPTION value="FAT32"> FAT32 </OPTION>';
+	partitionTypes+='<OPTION value="HFAT32"> Hidden FAT32 </OPTION>';
+	partitionTypes+='<OPTION value="NTFS"> NTFS </OPTION>';
+	partitionTypes+='<OPTION value="HNTFS"> Hidden NTFS </OPTION>';
+	partitionTypes+='<OPTION value="EXT4"> LINUX:EXT[2:3:4] </OPTION>';
+	partitionTypes+='<OPTION value="LINUX-SWAP"> LINUX-SWAP </OPTION>';
+	partitionTypes+='<OPTION value="REISERFS"> REISERFS </OPTION>';
+	partitionTypes+='<OPTION value="REISER4"> RESISER4 </OPTION>';
+	partitionTypes+='<OPTION value="XFS"> XFS </OPTION>';
+	partitionTypes+='<OPTION value="JFS"> JFS </OPTION>';
+	partitionTypes+='<OPTION value="LINUX-RAID"> LINUX-RAID </OPTION>';
+	partitionTypes+='<OPTION value="LINUX-LVM"> LINUX-LVM </OPTION>';
+
+
+	table = document.getElementById("particionesGPT");
+	// Capturamos el numero de particiones, antes incrementamos
+	document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)+1
+	numPart=document.getElementById("numGPTpartitions").value;
+	partitionRow = table.insertRow(-1);
+	partitionRow.id = "trPartition"+numPart;
+	partitionRow.innerHTML="<td> \
+<input type='checkbox' name='checkGPT"+numPart+"' value='checkGPT"+numPart+"' onclick='clickPartitionCheckbox(this.form, "+numPart+",true);' /> Partici&oacute;n "+numPart+"</td> \
+<td>\
+<select name='partGPT"+numPart+"' id='partGPT"+numPart+"' style='width:220' disabled='true' onclick=' \
+        if (this.options[this.selectedIndex].value == \'CUSTOM\') { \
+                this.form.partGPT"+numPart+"custom.disabled=false; \
+        } else { \
+                this.form.partGPT"+numPart+"custom.disabled=true; \
+        }'><option value='CUSTOM'> Personalizar </option> \
+</select> \
+<br> \
+<select name='partGPT"+numPart+"custom' id='partGPT"+numPart+"custom' style='width:220' disabled='true' >"+partitionTypes+"</select> \
+</td> \
+<td> \
+<select name='sizeGPT"+numPart+"' id='sizeGPT"+numPart+"' style='width:220' disabled='true' onclick=' \
+        if (this.form.size"+numPart+".options[this.form.size"+numPart+".selectedIndex].value == \'CUSTOM\') { \
+                this.form.sizeGPT"+numPart+"custom.disabled=false; \
+        } else { \
+                this.form.sizeGPT"+numPart+"custom.disabled=true; \
+        } \
+' onchange='calculateFreeGPTDisk(this.form);'>0<option value='CUSTOM'> Personalizar </option> \
+</select> \
+<br /> \
+<input type='text' style='width:100' name='sizeGPT"+numPart+"custom' value='0' disabled='true' onchange='calculateFreeDisk(this.form);' /> \
+</td>"
+
+}
+
+// Agrega una nueva fila a la tabla de particiones con una nueva particion
+function deleteGPTPartition(){
+	table = document.getElementById("particionesGPT");
+        // Capturamos el numero de particiones
+	numPart=document.getElementById("numGPTpartitions").value;
+	// Si ya solo quedan 4 particiones, no se elimina
+	if(numPart > 4){
+        	partitionRow = document.getElementById("trPartition"+numPart);
+		table.deleteRow(partitionRow.rowIndex);
+	}
+	// Decrementamos el numero de particiones
+	document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)-1;
 }
 
 // Código para comprobar si hay partición extendida activa para mostrar las lógicas.
