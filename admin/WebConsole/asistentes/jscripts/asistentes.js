@@ -438,20 +438,29 @@ function calculateFreeGPTDisk(form) {
 // Agrega una nueva fila a la tabla de particiones con una nueva particion
 function addGPTPartition(){
 	var partitionTypes = "";
-	partitionTypes+='<OPTION value="FAT12"> FAT12 </OPTION>';
-	partitionTypes+='<OPTION value="FAT16"> FAT16 </OPTION>';
-	partitionTypes+='<OPTION value="FAT32"> FAT32 </OPTION>';
-	partitionTypes+='<OPTION value="HFAT32"> Hidden FAT32 </OPTION>';
-	partitionTypes+='<OPTION value="NTFS"> NTFS </OPTION>';
-	partitionTypes+='<OPTION value="HNTFS"> Hidden NTFS </OPTION>';
-	partitionTypes+='<OPTION value="EXT4"> LINUX:EXT[2:3:4] </OPTION>';
-	partitionTypes+='<OPTION value="LINUX-SWAP"> LINUX-SWAP </OPTION>';
-	partitionTypes+='<OPTION value="REISERFS"> REISERFS </OPTION>';
-	partitionTypes+='<OPTION value="REISER4"> RESISER4 </OPTION>';
-	partitionTypes+='<OPTION value="XFS"> XFS </OPTION>';
-	partitionTypes+='<OPTION value="JFS"> JFS </OPTION>';
-	partitionTypes+='<OPTION value="LINUX-RAID"> LINUX-RAID </OPTION>';
-	partitionTypes+='<OPTION value="LINUX-LVM"> LINUX-LVM </OPTION>';
+	partitionTypes+='<OPTION value="WINDOWS"> Windows </OPTION>';
+	partitionTypes+='<OPTION value="WIN-RESERV"> Windows Reserved </OPTION>';
+	partitionTypes+='<OPTION value="LINUX"> Linux </OTION>';
+	partitionTypes+='<OPTION value="LINUX-RESERV"> Linux Reserved </OPTION>';
+	partitionTypes+='<OPTION value="LINUX-SWAP"> Linux Swap </OPTION>';
+	partitionTypes+='<OPTION value="LINUX-RAID"> Linux RAID </OPTION>';
+	partitionTypes+='<OPTION value="LINUX-LVM"> Linux LVM </OPTION>';
+	partitionTypes+='<OPTION value="CHROMEOS"> ChromeOS </OTION>';
+	partitionTypes+='<OPTION value="CHROMEOS-KRN"> ChromeOS Kernel </OPTION>';
+	partitionTypes+='<OPTION value="CHROMEOS-RESERV"> ChromeOS Reserved </OPTION>';
+	partitionTypes+='<OPTION value="HFS"> MacOS HFS </OPTION>';
+	partitionTypes+='<OPTION value="HFS-RAID"> MacOS HFS RAID </OPTION>';
+	partitionTypes+='<OPTION value="FREEBSD"> FreeBSD </OPTION>';
+	partitionTypes+='<OPTION value="FREEBSD-DISK"> FreeBSD Disk </OPTION>';
+	partitionTypes+='<OPTION value="FREEBSD-BOOT"> FreeBSD Boot </OPTION>';
+	partitionTypes+='<OPTION value="FREEBSD-SWAP"> FreeBSD Swap </OPTION>';
+	partitionTypes+='<OPTION value="SOLARIS"> Solaris </OPTION>';
+	partitionTypes+='<OPTION value="SOLARIS-DISK"> Solaris Disk </OPTION>';
+	partitionTypes+='<OPTION value="SOLARIS-BOOT"> Solaris Boot </OPTION>';
+	partitionTypes+='<OPTION value="SOLARIS-SWAP"> Solaris Swap </OPTION>';
+	partitionTypes+='<OPTION value="EFI"> EFI </OPTION>';
+	partitionTypes+='<OPTION value="MBR"> MBR </OPTION>';
+	partitionTypes+='<OPTION value="BIOS-BOOT"> BIOS Boot </OPTION>';
 
 
 	table = document.getElementById("particionesGPT");
