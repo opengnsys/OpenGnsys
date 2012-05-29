@@ -734,7 +734,7 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 function ogGetPartitionId ()
 {
 # Variables locales.
-local DISK ID
+local DISK PART ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -747,6 +747,7 @@ fi
 
 # Detectar id. de tipo de partición y codificar al mnemónico.
 DISK=$(ogDiskToDev $1) || return $?
+PART=$(ogDiskToDev $1 $2) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
             [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
@@ -934,7 +935,7 @@ case "$ID" in
      A502)      TYPE="FREEBSD-SWAP" ;;
      a6)        TYPE="OPENBSD" ;;
      a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     af|Af00)   TYPE="HFS" ;;
+     af|AF00)   TYPE="HFS" ;;
      Af01)      TYPE="HFS-RAID" ;;
      be|BE00)   TYPE="SOLARIS-BOOT" ;;
      bf|BF0[0145]) TYPE="SOLARIS" ;;

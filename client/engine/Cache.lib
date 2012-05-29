@@ -152,7 +152,7 @@ fi
 # Obtener el sistema de archivos etiquetado con "CACHE".
 PART=$(realpath /dev/disk/by-label/CACHE 2>/dev/null)
 # Si no, obtener la 1ª partición marcada como de tipo caché.
-PART=${PART:-$(sfdisk -l | awk '$6~/ca|a7/ {print $1}')}
+PART=${PART:-$(sfdisk -l 2>/dev/null | awk '$6~/ca|a7/ {print $1}')}
 PART=${PART%% *}
 
 ogDevToDisk $PART 2>/dev/null
