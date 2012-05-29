@@ -545,9 +545,11 @@ char* copiaParametro(const char*nombre,TRAMA* ptrTrama)
 BOOLEAN contieneIP(char *cadenaiph,char *ipcliente)
 {
 	char *posa,*posb;
-	int lon;
+	int lon,lst;
 
 	posa=strstr(cadenaiph,ipcliente);
+	lst=strlen(cadenaiph);
+
 	if(posa==NULL) return(FALSE); // No existe la IP en la cadena
 	posb=posa; // Iguala direcciones
 	while(TRUE){
@@ -558,6 +560,9 @@ BOOLEAN contieneIP(char *cadenaiph,char *ipcliente)
 	}
 	lon=strlen(ipcliente);
 	if((posb-posa)==lon) return(TRUE); // IP encontrada
+
+	if(posb<posa+lst)
+		return(contieneIP(posb,ipcliente));
 	return(FALSE);
 }
 // ________________________________________________________________________________________________________

@@ -35,11 +35,13 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #452	Elegir resolución en los menús
 #462	Consola: eliminar grupos de ordenadores
 #473	La cola de acciones no muestra el protocolo usado en la restauración ni sus parámetros
-#490	Usuarios y Contraseñas con más de 10 caracteres
+#490	Usuarios y contraseñas con más de 10 caracteres
+#495	Contenido de la caché
 #496	Ejecuición procedimientos encadendos (resuelto en #501)
 #500	Iniciar sesión segunda partición Linux no habilitada
 #502	Tamaño Iframe propiedades ordenadores
 #503	Asistente con seguimiento predeterminado (no válido)
+#509	Incluir foto/imagen en propiedades de ordenadores y aulas
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #414	Instalar OpenGnSys en otras distribuciones Linux
