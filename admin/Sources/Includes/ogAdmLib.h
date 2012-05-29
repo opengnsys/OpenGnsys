@@ -21,7 +21,7 @@
 #define LONSUC 512	// Longitud de los mensajes de sucesos
 #define LONBLK 512	// Longitud de los paquetes de tramas leidos cada vez
 #define MAXPRM 10	// Máximo número de parámeros del fichero de configuración del servicio
-#define MAXPAR 16	// Máximo número de particiones manejadas por el sistema
+#define MAXPAR 128	// Maximo numero de particiones manejadas por el sistema, ahora con GPT es 128
 #define MAXLONURL 512 // Longitud máxima de una dirección url con parámetros
 
 #define LONHEXPRM 5 // Longitud del campo que contiene el tamaño de la cadena de parámetros
@@ -103,13 +103,9 @@
 // ________________________________________________________________________________________________________
 typedef unsigned long DWORD;
 typedef unsigned short  WORD;
-
-#ifndef  __WINDOWS__
-	typedef int  BOOLEAN;
-	typedef char BYTE;
-	typedef int  SOCKET;
-#endif
-
+typedef int  BOOLEAN;
+typedef char BYTE;
+typedef int  SOCKET;
 typedef  void* LPVOID;
 
 #define TRUE 1
@@ -124,7 +120,6 @@ typedef  void* LPVOID;
 #define CHARNULL '\0'
 
 // ________________________________________________________________________________________________________
-//
 // Variables globales
 // ________________________________________________________________________________________________________
 char szPathFileCfg[LONSTD],szPathFileLog[LONSTD];
@@ -233,7 +228,8 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"090-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMSG",\
 		"091-Ha habido algún problema al enviar un mensaje de tipo petición al Servidor",\
 		"092-Error en el fichero de configuración del programa. No se ha definido el parámetro IPLOCAL",\
-		"093-No se puede caragar la libraria Windows para rabajar con sockets",\
+		"093-No se puede caragar la libraria Windows para trabajar con sockets",\
+
 };
 // ________________________________________________________________________________________________________
 // Tabla de mensajes
