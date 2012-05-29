@@ -63,7 +63,6 @@ command + " | tee -a $OGLOGCOMMAND";
 function codeParticionado(form){
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
-        alert("Las acciones se aplicaran al disco  "+n_disk+", tipo: "+tipo_part_table);
 	// Comprobamos si la opcion elejida es GPT o MSDOS para llamar a una funcion u otra
 	if(tipo_part_table == "GPT"){
 		codeParticionadoGPT(form);

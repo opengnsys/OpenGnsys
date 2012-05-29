@@ -235,14 +235,12 @@ sgdisk $DELOPTIONS $OPTIONS $DISK && partprobe $DISK
 
 #/**
 #         ogCreatePartitionTable int_ndisk [str_tabletype]
-#@brief   Genera una tabla de particiones en caso de que no sea valida,
-si es valida no hace nada
+#@brief   Genera una tabla de particiones en caso de que no sea valida, si es valida no hace nada.
 #@param   int_ndisk      nº de orden del disco
 #@param   str_tabletype  tipo de tabla de particiones (opcional)
 #@return  (por determinar)
 #@exception OG_ERR_FORMAT   Formato incorrecto.
-#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un
-dispositivo.
+#@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    tabletype: { MSDOS, GPT }
 #@note    Requisitos: sfdisk, sgdisk
 #@version 1.0.4 - Primera versión compatible con OpenGNSys.
@@ -262,9 +260,10 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben 1 o 2 parámetros.
 case $# in
-    1)  CREATEPTT=""
-    2)  CREATEPTT="$2"
-    *)  ogRaiseError $OG_ERR_FORMAT || return $?
+    1)  CREATEPTT="" ;;
+    2)  CREATEPTT="$2" ;;
+    *)  ogRaiseError $OG_ERR_FORMAT
+        return $? ;;
 esac
 
 # Capturamos el tipo de tabla de particiones actual
@@ -506,28 +505,28 @@ case "$(ogGetPartitionTableType $1)" in
             EMPTY)      ID=0 ;;
             WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12|HNTFS|HFAT32|HFAT16|HFAT12)
                         ID=0700 ;;
-            WIN-RESERV) ID=0c01 ;;
-            CHROMEOS-KRN) ID=7f00 ;;
-            CHROMEOS)   ID=7f01 ;;
-            CHROMEOS-RESERV) ID=7f02 ;;
+            WIN-RESERV) ID=0C01 ;;
+            CHROMEOS-KRN) ID=7F00 ;;
+            CHROMEOS)   ID=7F01 ;;
+            CHROMEOS-RESERV) ID=7F02 ;;
             LINUX-SWAP) ID=8200 ;;
             LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
                         ID=8300 ;;
             LINUX-RESERV) ID=8301 ;;
-            LINUX-LVM)  ID=8e00 ;;
-            FREEBSD-DISK) ID=a500 ;;
-            FREEBSD-BOOT) ID=a501 ;;
-            FREEBSD-SWAP) ID=a502 ;;
-            FREEBSD)    ID=a503 ;;
-            HFS|HFS+)   ID=af00 ;;
-            HFS-RAID)   ID=af01 ;;
-            SOLARIS-BOOT) ID=be00 ;;
-            SOLARIS)    ID=bf00 ;;
-            SOLARIS-SWAP) ID=bf02 ;;
-            SOLARIS-DISK) ID=bf03 ;;
-            CACHE)      ID=ca00;;
-            EFI)        ID=ef00 ;;
-            LINUX-RAID) ID=fd00 ;;
+            LINUX-LVM)  ID=8E00 ;;
+            FREEBSD-DISK) ID=A500 ;;
+            FREEBSD-BOOT) ID=A501 ;;
+            FREEBSD-SWAP) ID=A502 ;;
+            FREEBSD)    ID=A503 ;;
+            HFS|HFS+)   ID=AF00 ;;
+            HFS-RAID)   ID=AF01 ;;
+            SOLARIS-BOOT) ID=BE00 ;;
+            SOLARIS)    ID=BF00 ;;
+            SOLARIS-SWAP) ID=BF02 ;;
+            SOLARIS-DISK) ID=BF03 ;;
+            CACHE)      ID=CA00;;
+            EFI)        ID=EF00 ;;
+            LINUX-RAID) ID=FD00 ;;
             *)          ID="" ;;
         esac
         ;;
@@ -750,7 +749,7 @@ fi
 DISK=$(ogDiskToDev $1) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
-            [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=ca00
+            [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
 esac
@@ -915,40 +914,40 @@ case "$ID" in
      7)         TYPE="NTFS" ;;
      700|0700)  TYPE="WINDOWS" ;;
      b|c)       TYPE="FAT32" ;;
-     c01|0c01)  TYPE="WIN-RESERV" ;;
+     C01|0C01)  TYPE="WIN-RESERV" ;;
      11)        TYPE="HFAT12" ;;
      12)        TYPE="COMPAQDIAG" ;;
      16|1e)     TYPE="HFAT16" ;;
      17)        TYPE="HNTFS" ;;
      1b|1c)     TYPE="HFAT32" ;;
      42)        TYPE="WIN-DYNAMIC" ;;
-     7f00)      TYPE="CHROMEOS-KRN" ;;
-     7f01)      TYPE="CHROMEOS" ;;
-     7f02)      TYPE="CHROMEOS-RESERV" ;;
+     7F00)      TYPE="CHROMEOS-KRN" ;;
+     7F01)      TYPE="CHROMEOS" ;;
+     7F02)      TYPE="CHROMEOS-RESERV" ;;
      82|8200)   TYPE="LINUX-SWAP" ;;
      83|8300)   TYPE="LINUX" ;;
      8301)      TYPE="LINUX-RESERV" ;;
-     8e|8e00)   TYPE="LINUX-LVM" ;;
-     a5|a503)   TYPE="FREEBSD" ;;
-     a500)      TYPE="FREEBSD-DISK" ;;
-     a501)      TYPE="FREEBSD-BOOT" ;;
-     a502)      TYPE="FREEBSD-SWAP" ;;
+     8e|8E00)   TYPE="LINUX-LVM" ;;
+     a5|A503)   TYPE="FREEBSD" ;;
+     A500)      TYPE="FREEBSD-DISK" ;;
+     A501)      TYPE="FREEBSD-BOOT" ;;
+     A502)      TYPE="FREEBSD-SWAP" ;;
      a6)        TYPE="OPENBSD" ;;
      a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     af|af00)   TYPE="HFS" ;;
-     af01)      TYPE="HFS-RAID" ;;
-     be|be00)   TYPE="SOLARIS-BOOT" ;;
-     bf|bf0[0145]) TYPE="SOLARIS" ;;
-     bf02)      TYPE="SOLARIS-SWAP" ;;
-     bf03)      TYPE="SOLARIS-DISK" ;;
-     ca|ca00)   TYPE="CACHE" ;;
+     af|Af00)   TYPE="HFS" ;;
+     Af01)      TYPE="HFS-RAID" ;;
+     be|BE00)   TYPE="SOLARIS-BOOT" ;;
+     bf|BF0[0145]) TYPE="SOLARIS" ;;
+     BF02)      TYPE="SOLARIS-SWAP" ;;
+     BF03)      TYPE="SOLARIS-DISK" ;;
+     ca|CA00)   TYPE="CACHE" ;;
      da)        TYPE="DATA" ;;
      ee)        TYPE="GPT" ;;
-     ef|ef00)   TYPE="EFI" ;;
-     ef01)      TYPE="MBR" ;;
-     ef02)      TYPE="BIOS-BOOT" ;;
+     ef|EF00)   TYPE="EFI" ;;
+     EF01)      TYPE="MBR" ;;
+     EF02)      TYPE="BIOS-BOOT" ;;
      fb)        TYPE="VMFS" ;;
-     fd|fd00)   TYPE="LINUX-RAID" ;;
+     fd|FD00)   TYPE="LINUX-RAID" ;;
      *)         TYPE="UNKNOWN" ;;
 esac
 echo "$TYPE"

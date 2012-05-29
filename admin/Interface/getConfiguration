@@ -20,7 +20,7 @@ for ((par=1;par<=$particiones;par++)); do
 	tam=${tam:-"0"}
 	# Sistema de fichero instalado 
 	case "$cod" in
-		""|82|8200|a502|bf02|ee|ef0[012])
+		""|82|8200|A502|BF02|EE|EF0[012])
 			soi=" " ;;
 		*)	soi=$(getOsVersion 1 $par 2>/dev/null | cut -f2 -d:) ;;
    	esac
