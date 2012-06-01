@@ -7,7 +7,7 @@
 #_______________________________________________________________________________________________________________________________
 
 particiones=$(ogGetPartitionsNumber 1)    # Incluir todas las particiones
-cfg="0::::$(ogGetDiskSize 1);"            # e información de disco (partición 0)
+cfg="1:0::::$(ogGetDiskSize 1);"          # e información de disco (partición 0)
 
 for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
@@ -32,7 +32,7 @@ echo $cfg | awk '{
 		n=split($0,sep,";");
 		for (i=1; i<n; i++){
 			split (sep[i],dua,":");
-		 	printf ("par=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
+		 	printf ("disk=1\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
 					dua[1],dua[2],dua[3],dua[4],dua[5]);
 			}
 		}'

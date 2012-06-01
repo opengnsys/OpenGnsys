@@ -707,22 +707,25 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c, i, dato, swu, idsoi, idsfi,k;
-	char *ptrPar[MAXPAR], *ptrCfg[5], *ptrDual[2], tbPar[LONSTD];
-	char *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
+	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
+	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
 
 	lon = sprintf(tbPar, "(");
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
 		c = splitCadena(ptrCfg, ptrPar[i], '\t');
-		par = cpt = sfi = soi = tam = NULL;
+		disk = par = cpt = sfi = soi = tam = NULL;
 		splitCadena(ptrDual, ptrCfg[0], '=');
-		par = ptrDual[1]; // Número de partición
+		disk = ptrDual[1]; // Número de disco
 
 		splitCadena(ptrDual, ptrCfg[1], '=');
+		par = ptrDual[1]; // Número de partición
+
+		splitCadena(ptrDual, ptrCfg[2], '=');
 		cpt = ptrDual[1]; // Código de partición
 
-		k=splitCadena(ptrDual, ptrCfg[2], '=');
+		k=splitCadena(ptrDual, ptrCfg[3], '=');
 		if(k==2){
 			sfi = ptrDual[1]; // Sistema de ficheros
 			/* Comprueba existencia del sistema de ficheros instalado */
@@ -731,7 +734,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		else
 			idsfi=0;
 
-		k=splitCadena(ptrDual, ptrCfg[3], '=');
+		k=splitCadena(ptrDual, ptrCfg[4], '=');
 		if(k==2){ // Sistema operativo detecdtado
 			soi = ptrDual[1]; // Nombre del S.O. instalado
 			/* Comprueba existencia del sistema operativo instalado */
@@ -740,16 +743,14 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		else
 			idsoi=0;
 
-		splitCadena(ptrDual, ptrCfg[4], '=');
+		splitCadena(ptrDual, ptrCfg[5], '=');
 		tam = ptrDual[1]; // Tamaño de la partición
 
 		lon += sprintf(tbPar + lon, "%s,", par);
 
-		sprintf(
-				sqlstr,
-				"SELECT numpar,codpar,tamano,idsistemafichero,idnombreso"
-					" FROM ordenadores_particiones WHERE idordenador=%d AND numpar=%s",
-				ido, par);
+		sprintf(sqlstr, "SELECT numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso"
+				"  FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
+				ido, disk, par);
 		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 			errorLog(modulo, 21, FALSE);
 			db.GetErrorErrStr(msglog);
@@ -757,12 +758,10 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			return (FALSE);
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
-			sprintf(
-					sqlstr,
-					"INSERT INTO ordenadores_particiones(idordenador,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
-						" VALUES(%d,%s,0x%s,%s,%d,%d,0)", ido, par, cpt, tam,
-					idsfi, idsoi);
-
+			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
+					" VALUES(%d,%s,%s,0x%s,%s,%d,%d,0)",
+					ido, disk, par, cpt, tam, idsfi, idsoi);
+			errorInfo(modulo,sqlstr);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
@@ -807,10 +806,9 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					" idnombreso=%d,"
 					" idimagen=%d,"
 					" idperfilsoft=%d"
-					" WHERE idordenador=%d AND numpar=%s"\
-, cpt, tam, idsfi,
-						idsoi, 0, 0, ido, par);
-
+					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
+					cpt, tam, idsfi, idsoi, 0, 0, ido, disk, par);
+				errorInfo(modulo,sqlstr);
 				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 					errorLog(modulo, 21, FALSE);
 					db.GetErrorErrStr(msglog);
@@ -822,10 +820,8 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	}
 	lon += sprintf(tbPar + lon, "%d)", 0);
 	// Eliminar particiones almacenadas que ya no existen
-	sprintf(
-			sqlstr,
-			"DELETE FROM ordenadores_particiones WHERE idordenador=%d AND numpar NOT IN %s",
-			ido, tbPar);
+	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar NOT IN %s",
+			ido, disk, tbPar);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
