@@ -835,8 +835,10 @@ fi
 
 # Contar el nº de veces que aparece el disco en su lista de particiones.
 DISK=$(ogDiskToDev $1) 2>/dev/null
-#sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK"
-grep -c "${DISK#/dev/}." /proc/partitions
+case "$(ogGetPartitionTableType $1)" in
+    GPT)    grep -c "${DISK#/dev/}." /proc/partitions ;;
+    MSDOS)  sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK" ;;
+esac
 }
 
 

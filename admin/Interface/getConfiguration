@@ -7,7 +7,7 @@
 #_______________________________________________________________________________________________________________________________
 
 particiones=$(ogGetPartitionsNumber 1)    # Incluir todas las particiones
-cfg="1:0::::$(ogGetDiskSize 1);"          # e información de disco (partición 0)
+cfg="0::::$(ogGetDiskSize 1);"          # e información de disco (partición 0)
 
 for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
