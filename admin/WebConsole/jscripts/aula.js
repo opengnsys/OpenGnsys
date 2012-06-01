@@ -111,13 +111,13 @@ function soIMG(so)
 	var MimgOrdenador="";
 	switch(so){
 		case 'INI':
-			MimgOrdenador="ordenador_INI.gif";  // Cliente ocupado
+			MimgOrdenador="ordenador_INI.gif";  // Iniciando cliente
 			break;
 		case 'BSY':
 			MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
 			break;
 		case 'OPG':
-			MimgOrdenador="ordenador_RMB.gif";  // Cliente Rembo
+			MimgOrdenador="ordenador_OPG.gif";  // Cliente OpenGnSys
 			break;
 		case 'WS2': 
 			MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003

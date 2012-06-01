@@ -42,6 +42,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #502	Tamaño Iframe propiedades ordenadores
 #503	Asistente con seguimiento predeterminado (no válido)
 #509	Incluir foto/imagen en propiedades de ordenadores y aulas
+#539	Leyenda en estaus de ordenadores
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #414	Instalar OpenGnSys en otras distribuciones Linux
