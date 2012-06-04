@@ -1,15 +1,25 @@
 #ª/bin/bash
 
 source /tmp/net-eth0.conf
-FILEINFOHTML=/opt/opengnsys/log/`ogGetIpAddress`.info.html
-FILEINFOCACHE=/opt/opengnsys/log/`ogGetIpAddress`.cache.txt
-ogMountCache
-CACHECONTENIDO=`ls -m /opt/opengnsys/cache/opt/opengnsys/images`
+FILEINFOHTML=$OGLOG/`ogGetIpAddress`.info.html
+FILEINFOCACHE=$OGLOG/`ogGetIpAddress`.cache.txt
+ogMountCache 2>/dev/null
+CACHECONTENIDO=`ls -m $OGCAC/$OGIMG 2>/dev/null`
 
-SPEED=$(ethtool $DEVICE | grep Speed | awk -F": " '{print $2}')
-DUPLEX=$(ethtool $DEVICE | grep Duplex | awk -F": " '{print $2}')
+SPEED=$(LANG=C ethtool $DEVICE 2>/dev/null | awk '$1~/Speed/ {print $2}')
+case "$SPEED" in
+	1000[Mm]b/s)	;;
+	100[Mm]b/s)	SPEED="<font color=\"blue\">$SPEED</font>" ;;
+	10[Mm]b/s)	SPEED="<font color=\"grey\">$SPEED</font>" ;;
+	*)		SPEED="<font color=\"red\">$SPEED</font>" ;;
+esac
+DUPLEX=$(LANG=C ethtool $DEVICE 2>/dev/null | awk '$1~/Duplex/ {print $2}')
+case "$DUPLEX" in
+	[Ff]ull)	;;
+	*)		DUPLEX="<font color=\"red\">$DUPLEX</font>"
+esac
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
-expr $CACHESIZEFREE / 1024 > /opt/opengnsys/log/`ogGetIpAddress`.cache.txt && echo '.MB,' >> /opt/opengnsys/log/`ogGetIpAddress`.cache.txt
+expr $CACHESIZEFREE / 1024 > $FILEINFOCACHE 2>/dev/null && echo '.MB,' >> $FILEINFOCACHE
 
 #
 #  echo '';
@@ -21,9 +31,9 @@ cat > $FILEINFOHTML << EOF
 
 <table border=1 width="100%">
 <tr>
-<TD rowspan=2><P align=left><IMG border=0 src="../images/iconos/logoopengnsys.png"><P> </td>
-<td> Hostname: </td> <td> IP </td> <td> MAC </td> <td> Speed </td> <td> duplex </td> </tr>
-<tr>  <td>$HOSTNAME  </td> <td> $(ogGetIpAddress) </td> <td> $(ogGetMacAddress)  </td> <td> $SPEED </td> <td>  $DUPLEX </td> </tr>
+<td rowspan="2"><p align="left"><img border="0" src="../images/iconos/logoopengnsys.png"><p> </td>
+<td> Hostname </td> <td> IP </td> <td> MAC </td> <td> Speed </td> <td> Duplex </td> </tr>
+<tr> <td>$HOSTNAME </td> <td> $(ogGetIpAddress) </td> <td> $(ogGetMacAddress) </td> <td> $SPEED </td> <td> $DUPLEX </td> </tr>
 </table>
 
 </p>
@@ -35,3 +45,4 @@ EOF
 cat >> $FILEINFOCACHE << EOF
 $CACHECONTENIDO
 EOF
+
