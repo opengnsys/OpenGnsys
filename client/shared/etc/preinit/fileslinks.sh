@@ -20,7 +20,11 @@ if [ -n "$OPENGNSYS" ]; then
     ln -fs /bin/bash /bin/sh
 
     # Crear directorio de bloqueos
-    mkdir -p /var/lock || mkdir -p /run/lock
+    mkdir -p /var/lock 2>/dev/null || mkdir -p /run/lock
+
+    # Crear ficheros temporales.
+    touch $OGLOGCOMMAND $OGLOGCOMMAND.tmp $OGLOGSESSION /tmp/menu.tmp
+    chmod 777 $OGLOGCOMMAND $OGLOGCOMMAND.tmp $OGLOGSESSION /tmp/menu.tmp
 
 #    # Directorio de tipos de letras para el browser.
     QTDIR="/usr/local"

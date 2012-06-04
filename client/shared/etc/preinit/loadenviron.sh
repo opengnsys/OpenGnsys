@@ -60,6 +60,8 @@ if [ -d $OPENGNSYS ]; then
 
     # Cargar configuración del engine.
     [ -f ${OGETC}/engine.cfg ] && source ${OGETC}/engine.cfg
+    export OGLOGCOMMAND=${OGLOGCOMMAND:-/tmp/command.log}
+    export OGLOGSESSION=${OGLOGSESSION:-/tmp/session.log}
     
     # Cargar las APIs según engine.
     if [ -n "$ogengine" ]; then
