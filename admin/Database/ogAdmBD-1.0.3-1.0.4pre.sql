@@ -6,7 +6,9 @@ ALTER TABLE ogAdmBD.perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL 
 ALTER TABLE ogAdmBD.ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
 	ADD numdisk tinyint(4) NOT NULL DEFAULT 1,
-	ADD cache varchar(500);
+	ADD cache varchar(500),
+	DROP INDEX idordenadornumpar,
+	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 # Nuevos tipos de particiones y particiones GPT.
 ALTER TABLE ogAdmBD.tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES

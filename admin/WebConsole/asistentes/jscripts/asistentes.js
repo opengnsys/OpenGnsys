@@ -501,13 +501,13 @@ function deleteGPTPartition(){
 	table = document.getElementById("particionesGPT");
         // Capturamos el numero de particiones
 	numPart=document.getElementById("numGPTpartitions").value;
-	// Si ya solo quedan 4 particiones, no se elimina
+	// Si ya solo quedan 4 particiones, no se elimina ni se decrementa el contador
 	if(numPart > 4){
         	partitionRow = document.getElementById("trPartition"+numPart);
 		table.deleteRow(partitionRow.rowIndex);
+		// Decrementamos el numero de particiones
+		document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)-1;
 	}
-	// Decrementamos el numero de particiones
-	document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)-1;
 }
 
 // Código para comprobar si hay partición extendida activa para mostrar las lógicas.
