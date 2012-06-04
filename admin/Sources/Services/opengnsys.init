@@ -7,7 +7,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      1
 # Short-Description: Servicios del sistema OpenGnSys
-# Description:       Servicios del sistema OpenGnSys:
+# Description:       Servicios del sistema OpenGnSys
 ### END INIT INFO
 
 #
@@ -81,13 +81,13 @@ config() {
             INITFUNCTIONS=/lib/lsb/init-functions
             DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
             EXTRAOPTS="--"
-            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --exec"
+            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --name"
             ACTIONMSG="log_daemon_msg"
             SUCCESSMSG="log_end_msg 0"
             FAILMSG="log_end_msg 1"
             TRACKERSTART="start-stop-daemon --make-pidfile --pidfile $BTTRACKPID --start --quiet --background --exec"
             BTTRACK_OPTIONS="$BTTRACK_OPTIONS --parse_allowed_interval 1"
-            TRACKERSTOP="start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $BTTRACKERPID"
+            TRACKERSTOP="start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $BTTRACKPID"
             SEEDERSTART="start-stop-daemon --make-pidfile --pidfile $BTSEEDERPID --start --quiet --background --exec"
             SEEDERSTOP="start-stop-daemon --stop --quiet --oknodo --pidfile $BTSEEDERPID"
             ;;
@@ -147,11 +147,9 @@ arranca_demonios() {
      $ACTIONMSG "Iniciando demonio: $REPONAME"
      $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS $ENDOPTS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-     ############ ADV  	 
      $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
      faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-     ############ ADV
   fi
   if [ $RUN_OGADMAGENT = "yes" ]; then
      $ACTIONMSG "Iniciando demonio: $AGENTNAME"
@@ -185,18 +183,16 @@ para_demonios() {
     rm -f $BTTRACKPID
   fi 
   $ACTIONMSG "Parando demonio: $AGENTNAME"
-  $DAEMONSTOP $AGENTDAEMON
+  $DAEMONSTOP $AGENTNAME
   [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   $ACTIONMSG "Parando demonio: $REPONAME"
-  $DAEMONSTOP $REPODAEMON
+  $DAEMONSTOP $REPONAME
   [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-  ############# ADV
   $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
   [ $? -le 1 ] && $SUCCESSMSG || $FAILMSG
-  ############ ADV  
   $ACTIONMSG "Parando demonio: $SERVERNAME"
-  $DAEMONSTOP $SERVERDAEMON
+  $DAEMONSTOP $SERVERNAME
   [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
 }
 
