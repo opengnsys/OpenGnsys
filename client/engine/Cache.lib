@@ -31,7 +31,7 @@
 function ogCreateCache ()
 {
 # Variables locales.
-local DISK PTTYPE PART START END ENDPREVPART SIZE MINSIZE MAXSIZE
+local DISK PART START END ENDPREVPART SIZE MINSIZE MAXSIZE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_partsize" "$FUNCNAME 10000000"
@@ -58,7 +58,7 @@ ogUnmountAll 1 2>/dev/null
 # Definir particiones y notificar al kernel.
 # En el caso de ser disco GPT, de momento se borra la particion y se vuelve a crear por
 # lo que se pierden los datos.
-case "$PTTYPE" in
+case "$(ogGetPartitionTableType $1)" in
     GPT)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
@@ -107,7 +107,7 @@ DISK=$(ogDiskToDev $NDISK)
 
 # Desmontar todos los sistemas de archivos del disco.
 ogUnmountAll $NDISK 2>/dev/null
-case "$PTTYPE" in
+case "$(ogGetPartitionTableType $1)" in
     GPT)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
