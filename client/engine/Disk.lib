@@ -294,10 +294,9 @@ case "$CREATE" in
     MSDOS)
         # Si es necesario crear una tabla MSDOS pero la actual es GPT
         if [ "$PTTYPE" == "GPT" ]; then
-            echo -e "r\ng\nw\nY" | gdisk $DISK
-        else
-            fdisk $DISK <<< "w"
+            sgdisk -Z $DISK
         fi
+        fdisk $DISK <<< "w"
         partprobe $DISK 2>/dev/null
         ;;
 esac
