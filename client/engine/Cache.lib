@@ -41,13 +41,13 @@ fi
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 FINDCACHE="1 4"                         # Partición de caché (ndisco npart).
-NDSK=${FINDCACHE#* }
-PART=${FINDCACHE% *}
+NDSK=${FINDCACHE% *}
+PART=${FINDCACHE#* }
 DISK=$(ogDiskToDev $NDSK) || return $?
 END=$(ogGetLastSector $NDSK)            # Sector final del disco.
 SIZE=$(echo $1|awk '{print $0*2}')      # En sectores de 512 B.
 START=$[END-SIZE+1]
-ENDPREVPART=$(ogGetLastSector $[PART-1])
+ENDPREVPART=$(ogGetLastSector $NDSK $[PART-1])
 # Error si tamaño no está entre límites permitidos o si se solapa con la partición anterior.
 MINSIZE=100000                          # Error de formateo si tamaño < 50 MB.
 MAXSIZE=$[END/2]                        # No permitir tamaño > mitad del disco.
