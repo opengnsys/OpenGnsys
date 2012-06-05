@@ -11,6 +11,8 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #521	Función ogUpdateCacheIsNecesary: usar funcion para cálculo de MD5
 #522	Script updateCache: eliminar opción del case $ACTIONCACHEFULL=NONE
 #530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
+#538	Función ogTypeToId: error en parámetro
+#540	Función ogCreateCache no detecta tipo de tabla de particiones
 
 Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)

@@ -86,7 +86,7 @@ while [ $# -gt 0 ]; do
     TYPE="${1%%:*}"
     SIZE="${1#*:}"
     # Obtener identificador de tipo de partición válido.
-    ID=$(ogTypeToId "$TYPE")
+    ID=$(ogTypeToId "$TYPE" MSDOS)
     [ "$TYPE" != "CACHE" -a -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
     # Comprobar tamaño numérico y convertir en sectores de 512 B.
     [[ "$SIZE" == *([0-9]) ]] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
@@ -201,7 +201,7 @@ while [ $# -gt 0 ]; do
     [ $PARTSIZE ] && DELOPTIONS="$DELOPTIONS -d$PART"
     # Creamos la particion
     # Obtener identificador de tipo de partición válido.
-    ID=$(ogTypeToId "$TYPE")
+    ID=$(ogTypeToId "$TYPE" GPT)
     [ "$TYPE" != "CACHE" -a -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$TYPE" || return $?
     # Comprobar tamaño numérico y convertir en sectores de 512 B.
     [[ "$SIZE" == *([0-9]) ]] || ogRaiseError $OG_ERR_FORMAT "$SIZE" || return $?
@@ -469,11 +469,13 @@ ogTypeToId "$@"
 
 
 #/**
-#         ogTypeToId str_parttype
+#         ogTypeToId str_parttype str_tabletype
 #@brief   Devuelve el identificador correspondiente a un tipo de partición.
 #@param   str_parttype  mnemónico de tipo de partición. 
+#@param   str_tabletype mnemónico de tipo de tabla de particiones (MSDOS por defecto).
 #@return  int_idpart    identificador de tipo de partición.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
+#@note    tabletype = { MSDOS, GPT }
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: TypeFS () en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
@@ -487,18 +489,21 @@ ogTypeToId "$@"
 function ogTypeToId ()
 {
 # Variables locales
-local ID
+local PTTYPE ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME str_fstype" "$FUNCNAME EXT3  =>  83"
+    ogHelp "$FUNCNAME" "$FUNCNAME str_parttype [str_tabletype]" \
+           "$FUNCNAME LINUX  =>  83" \
+           "$FUNCNAME LINUX MSDOS  =>  83"
     return
 fi
-# Error si no se recibe 1 parámetro.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Error si no se reciben 2 parámetro.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Asociar id. de partición para su mnemónico de sistema de archivos.
-case "$(ogGetPartitionTableType $1)" in
+# Asociar id. de partición para su mnemónico.
+PTTYPE=${2:-"MSDOS"}
+case "$PTTYPE" in
     GPT) # Se incluyen mnemónicos compatibles con tablas MSDOS.
         case "$1" in
             EMPTY)      ID=0 ;;
@@ -1118,9 +1123,53 @@ parted -s $DISK set $2 boot on 2>/dev/null
 
 
 #/**
+#         ogSetPartitionId int_ndisk int_npartition str_type
+#@brief   Cambia el identificador de la partición.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_partid     mnemónico de tipo de partición
+#@return  (nada)
+#@attention Requisitos: fdisk, sgdisk
+#@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 1.0.4 - Soporte para discos GPT.
+#@author  Universidad de Huelva
+#@date    2012/03/13
+#*/ ##
+function ogSetPartitionId() {
+# Variables locales
+local DISK PART PTTYPE ID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
+           "$FUNCNAME 1 1 NTFS"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Sustituye nº de disco por su dispositivo.
+DISK=`ogDiskToDev $1` || return $?
+PART=`ogDiskToDev $1 $2` || return $?
+
+# Elección del tipo de partición.
+PTTYPE=$(ogGetPartitionTableType $1)
+ID=$(ogTypeToId "$3" "$PTTYPE")
+[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$3,$PTTYPE" || return $?
+case "$PTTYPE" in
+    GPT)    sgdisk $DISK -t$PART:$ID 2>/dev/null ;;
+    MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK &>/dev/null ;;
+esac
+partprobe $DISK 2>/dev/null
+}
+
+
+#/**
 #         ogSetPartitionSize int_ndisk int_npartition int_size
 #@brief   Muestra el tamano en KB de una particion determinada.
-#@param  int_ndisk      nº de orden del disco
+#@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@param   int_size       tamaño de la partición (en KB)
 #@return  (nada)
@@ -1155,6 +1204,7 @@ SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 partprobe $DISK 2>/dev/null
 }
+
 
 #/**
 #         ogUnhidePartition int_ndisk int_npartition
@@ -1243,44 +1293,6 @@ fi
 #PART="$(Disk|cut -f$1 -d' ')$2"    # se comenta esta linea porque doxygen no reconoce la funcion disk y no crea los enlaces y referencias correctas.
 PART=$(ogDiskToDev|cut -f$1 -d' ')$2
 echo $PART | cut -f3 -d \/
-}
-
-
-#/**  @function ogSetPartitionId: @brief Cambia el identificador de la particion, pero no su sistema de archivos.
-#@param  $1 int_numdiskEAC
-#@param  $2 int_numpartitionEAC
-#@param  $3 str_tipoPartition admite EXT2 EXT3 NTFS FAT32 SWAP CACHE
-#@return   la propia del fdisk
-#@warning    no controla los parametros, si se introducen mal o simplemente no se introducen no muestra mensaje
-#@warning    Identifica por nombre del sistema de archivos no por número
-#@attention Requisitos:  fdisk
-#@note
-#@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
-#*/
-function ogSetPartitionId() {
-# Variables locales
-local DISK PART ID
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
-           "$FUNCNAME 1 1 NTFS"
-    return
-fi
-# Error si no se reciben 3 parámetros.
-[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Sustituye nº de disco por su dispositivo.
-DISK=`ogDiskToDev $1` || return $?
-PART=`ogDiskToDev $1 $2` || return $?
-
-# Elección del tipo de partición.
-ID=$(ogFsToId "$3")
-[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$3" || return $?
-
-echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK 1>/dev/null 2>&1
 }
 
 
