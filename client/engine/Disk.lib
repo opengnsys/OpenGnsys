@@ -678,7 +678,7 @@ case "$PTTYPE" in
             CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
             LASTSECTOR=$[SECTORS/CYLS*CYLS-1]
         else
-            LASTSECTOR=$(sfdisk -uS -l $DISK | \
+            LASTSECTOR=$(sfdisk -uS -l $DISK 2>/dev/null | \
                          awk -v P="$PART" '{if ($1==P) {if ($2=="*") print $4; else print $3} }')
         fi
         ;;
