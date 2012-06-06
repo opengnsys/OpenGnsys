@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -32,6 +32,22 @@ if(empty($iph))
 $UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
 $UrlPagina=dirname($UrlPagina);
 $UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
+//________________________________________________________________________________________________________
+//agp
+$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";
+$gestor = fopen($nombre_archivo, 'r');
+$contenidofichero = fread($gestor, filesize($nombre_archivo));
+fclose($gestor);
+if (! empty ($contenidofichero)) {
+	$cmd->texto="UPDATE ordenadores_particiones
+			SET cache='".$contenidofichero."'
+			WHERE idordenador='".$idordenador."' AND
+			      idsistemafichero=(SELECT idsistemafichero
+						FROM sistemasficheros
+						WHERE descripcion='CACHE')";
+	$resul=$cmd->Ejecutar();
+}
+//agp
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
 if(!empty($rsmenu)){
@@ -88,35 +104,6 @@ else{
 	}
 		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
 		echo $codeHtml;
-
-//agp
-$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";
-$gestor = fopen($nombre_archivo, 'r');
-$contenidofichero = fread($gestor, filesize($nombre_archivo));
-fclose($gestor);
-
-	$rs=new Recordset; 
-	$cmd->texto="SELECT * FROM ordenadores WHERE ip='".$iph."'";
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$rs->Primero(); 
-	if (!$rs->EOF){
-		$idordenador=$rs->campos["idordenador"];
-		$rs->Cerrar();}
-
-	$rs=new Recordset; 
-	$cmd->texto="SELECT * FROM ordenadores_particiones WHERE idordenador='".$idordenador."' ORDER BY numpar DESC";
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$rs->Primero(); 
-	if (!$rs->EOF){
-		$numeroparticion=$rs->campos["numpar"];
-		$rs->Cerrar();}
-
-	$cmd->texto="UPDATE ordenadores_particiones set cache='".$contenidofichero."' WHERE idordenador='".$idordenador."' AND numpar=4";
-	if ($numeroparticion == "4")
-	$resul=$cmd->Ejecutar();
-//agp
 
 	?>
 	</body>
@@ -260,3 +247,4 @@ function tomaIP(){
 	return($ipcliente);
 }
 ?>
+
