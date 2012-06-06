@@ -8,6 +8,7 @@ Lista de cambios incluidos en OpenGnSys 1.0.4
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #465	httpdlog CrearImagen salida de reducir sistema archivos (no se resolverá)
 #489	Suma de verificacion de la imagen más rápida
+#518	Se marca mal el FS al particionar, lo marca como EMPTY y luego no se pueden formatear
 #521	Función ogUpdateCacheIsNecesary: usar funcion para cálculo de MD5
 #522	Script updateCache: eliminar opción del case $ACTIONCACHEFULL=NONE
 #530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
@@ -44,6 +45,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #502	Tamaño Iframe propiedades ordenadores
 #503	Asistente con seguimiento predeterminado (no válido)
 #509	Incluir foto/imagen en propiedades de ordenadores y aulas
+#516	Restaurar desde consola: falla si esta recién particionado
 #539	Leyenda en estaus de ordenadores
 
 Tickets resueltos en módulo OpenGnSys Installer:
@@ -54,6 +56,7 @@ Tickets genéricos resueltos:
 #445	Limitación puertos multicast: inconsistencia consola administración y Protocol.lib
 #501	Procedimientos encadenados y clientes para Linux y Windows
 #508	Branch UMA: Script con TODOS los cambios de las propuestas 1.0.4 (#491, #494, #495, #502 y #503)
+@526	Particionado discos GPT
 #531	Integración de OpenGnSys 1.0.4 en rama principal
 
 
