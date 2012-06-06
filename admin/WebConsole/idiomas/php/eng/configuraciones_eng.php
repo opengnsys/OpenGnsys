@@ -61,6 +61,6 @@ $TbMsg[45]='Add Profile to obtain data';
 $TbMsg[495]='Content cache';
 $TbMsg[4951]='Cache free';
 
-$TbMsg["WARN_REBOOTAFTER"]='AVISO: It will automatically reboot after executing the operation..';
+$TbMsg["WARN_REBOOTAFTER"]='WARNING: It will automatically reboot after executing the operation..';
 ?>
 

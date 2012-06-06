@@ -52,7 +52,7 @@ $TbMsg[38]='Menor espacio libre (KB)';
 $TbMsg[39]='Personalizar';
 $TbMsg[40]='Sin modificar tama&ntilde;o';
 $TbMsg[41]='Generar Instrucci&oacute;n OG';
-$TbMsg["CONFIG_PARTTABLE"='Tabla de particiones';
+$TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
