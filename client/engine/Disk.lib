@@ -178,7 +178,7 @@ SECTORS=$(ogGetLastSector $1)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 # Si el disco es GPT empieza en el sector 2048  por defecto, pero podria cambiarse
-ALIGN=`sgdisk -D $DISK`
+ALIGN=$(sgdisk -D $DISK 2>/dev/null)
 START=$ALIGN
 PART=1
 
@@ -194,9 +194,12 @@ while [ $# -gt 0 ]; do
     TYPE="${1%%:*}"
     SIZE="${1#*:}"
     # Error si la partición es extendida (no válida en discos GPT).
-    [ "$TYPE" == "EXTENDED" ] || ogRaiseError $OG_ERR_PARTITION "EXTENDED" || return $?
+    if [ "$TYPE" == "EXTENDED" ]; then
+        ogRaiseError $OG_ERR_PARTITION "EXTENDED"
+        return $?
+    fi
     # Comprobar si existe la particion actual, capturamos su tamaño para ver si cambio o no
-    PARTSIZE=$(ogGetPartitionSize $ND $PART)
+    PARTSIZE=$(ogGetPartitionSize $ND $PART 2>/dev/null)
     # En sgdisk no se pueden redimensionar las particiones, es necesario borrarlas y volver a crealas
     [ $PARTSIZE ] && DELOPTIONS="$DELOPTIONS -d$PART"
     # Creamos la particion
@@ -228,7 +231,7 @@ ogUnmountAll $ND 2>/dev/null
 ogCreatePartitionTable $ND
 # Definir particiones y notificar al kernel.
 # Borramos primero las particiones y luego creamos las nuevas
-sgdisk $DELOPTIONS $OPTIONS $DISK && partprobe $DISK
+sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
 [ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
 }
 
