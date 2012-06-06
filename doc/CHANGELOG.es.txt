@@ -19,6 +19,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)
 #411	Menú por defecto para los clientes con información básica del estado de red
 #415	Compatiblidad hardware (red, disco) en los clientes OpenGnSys
+#419	chntpw trunca las claves de registro largas
 #491	Log de seguimiento con información de caché local
 #494	Información de la caché en pantalla del cliente (no válido)
 #497	Clientes opengnsys para Windows y Linux (resuelto en #501)
