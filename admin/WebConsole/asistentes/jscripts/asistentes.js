@@ -112,36 +112,33 @@ function codeParticionadoMSDOS (form) {
 	}
 	if (form.check4.checked) {
 		if (form.size4.value == "0") {
-			//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
 			cacheCode="\
-			echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
-			sizecache=`ogGetPartitionSize 1 4` \n \
-			echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-			ogDeletePartitionTable "+n_disk+"  \n \
-			ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
-			echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-			initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
+echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
+sizecache=`ogGetPartitionSize 1 4` \n \
+echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+ogDeletePartitionTable "+n_disk+"  \n \
+ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
+echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
+initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
 		} else {
 			if (form.size4.value == "CUSTOM") { 
 				cacheSize = form.size4custom.value; 
 			} else {
 				cacheSize = form.size4.value;
 			} 
-			//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
 			cacheCode="\
-			echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-			ogDeletePartitionTable "+n_disk+"  \n \
-			ogUpdatePartitionTable "+n_disk+" \n \
-			echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-			initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
+echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+ogDeletePartitionTable "+n_disk+"  \n \
+ogUpdatePartitionTable "+n_disk+" \n \
+echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
+initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
 		} 
 	} else {
-		//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
 		cacheCode="\
-		echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-		ogDeletePartitionTable "+n_disk+" \n \
-		ogUpdatePartitionTable "+n_disk+" \n";
-		partCode += " EMPTY:0";
+echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+ogDeletePartitionTable "+n_disk+" \n \
+ogUpdatePartitionTable "+n_disk+" \n";
+partCode += " EMPTY:0";
 	}
 	if (extended) {
 		var lastLogical=5;
@@ -175,14 +172,7 @@ function codeParticionadoMSDOS (form) {
 		partCode += logicalCode;
 	}
 
-//	form.codigo.value="\
-//" + cacheCode + " \n \
-//ogListPartitions 1 \n \
-//ogCreatePartitions 1 " + partCode + " \n \
-//ogSetPartitionActive 1 1 \n \
-//ogUpdatePartitionTable 1 \n \
-//ogListPartitions 1 \n"; 
-form.codigo.value="\
+	form.codigo.value="\
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 echo \"[0]  $MSG_HELP_ogCreatePartitions \" | tee -a $OGLOGSESSION $OGLOGFILE \n \
 echo \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\" | tee -a $OGLOGSESSION \n \
@@ -198,9 +188,10 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 echo \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n"; 	
-
+ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \
+reboot \n";
 }
+
 
 function codeParticionadoGPT (form) {
         var partCode="";
@@ -215,77 +206,59 @@ function codeParticionadoGPT (form) {
         for (var nPart=1; nPart <= numParts; nPart++) {
                 var partCheck=eval("form.checkGPT"+nPart);
                 if (partCheck.checked) {
-						// Distinguimos entre cache y el resto de particiones
-						if(nPart == 4){
-							if (form.sizeGPT4.value == "0") {
-							//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n sizecache=`ogGetPartitionSize 1 4` \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache $sizecache ";
-							cacheCode="\
-							echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
-							sizecache=`ogGetPartitionSize 1 4` \n \
-							echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-							ogDeletePartitionTable "+n_disk+"  \n \
-							ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
-							echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-							initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
-							} else {
-									if (form.sizeGPT4.value == "CUSTOM") {
-											cacheSize = form.sizeGPT4custom.value;
-									} else {
-											cacheSize = form.sizeGPT4.value;
-									}
-									//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 \n initCache " + cacheSize;
-									cacheCode="\
-									echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-									ogDeletePartitionTable "+n_disk+"  \n \
-									ogUpdatePartitionTable "+n_disk+" \n \
-									echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-									initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";
-							}
-						}
-						else{
-							var partType=eval("form.partGPT"+nPart);
-							if (partType.value == "CUSTOM" ) {
-									var partTypeCustom=eval("form.partGPT"+nPart+"custom");
-									partCode += " " + partTypeCustom.value;
-									if (partTypeCustom.value == "EXTENDED") {
-											extended=true;
-									}
-							} else {
-									partCode += " " + partType.value;
-									if (partType.value == "EXTENDED") {
-											extended=true;
-									}
-							}
-							var partSize=eval("form.sizeGPT"+nPart);
-							if (partSize.value == "CUSTOM" ) {
-									var partSizeCustom=eval("form.sizeGPT"+nPart+"custom");
-									partCode += ":" + partSizeCustom.value;
-							} else {
-									partCode += ":" + partSize.value;
-							}
-						}
+			// Distinguimos entre cache y el resto de particiones
+			if(nPart == 4) {
+				if (form.sizeGPT4.value == "0") {
+					cacheCode="\
+echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
+sizecache=`ogGetPartitionSize 1 4` \n \
+echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+ogDeletePartitionTable "+n_disk+"  \n \
+ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
+echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
+initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
+				} else {
+					if (form.sizeGPT4.value == "CUSTOM") {
+						cacheSize = form.sizeGPT4custom.value;
+					} else {
+						cacheSize = form.sizeGPT4.value;
+					}
+					cacheCode="\
+echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+ogDeletePartitionTable "+n_disk+"  \n \
+ogUpdatePartitionTable "+n_disk+" \n \
+echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
+initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";
+				}
+			} else{
+				var partType=eval("form.partGPT"+nPart);
+				if (partType.value == "CUSTOM" ) {
+					var partTypeCustom=eval("form.partGPT"+nPart+"custom");
+					partCode += " " + partTypeCustom.value;
+				} else {
+					partCode += " " + partType.value;
+				}
+				var partSize=eval("form.sizeGPT"+nPart);
+				if (partSize.value == "CUSTOM" ) {
+					var partSizeCustom=eval("form.sizeGPT"+nPart+"custom");
+					partCode += ":" + partSizeCustom.value;
+				} else {
+					partCode += ":" + partSize.value;
+				}
+			}
                 } else {
-					if(nPart == 4){
-						//cacheCode = " ogUnmountCache \n ogUnmountAll 1 \n ogDeletePartitionTable 1 \n ogUpdatePartitionTable 1 ";
-						cacheCode="\
-						echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
-						ogDeletePartitionTable "+n_disk+" \n \
-						ogUpdatePartitionTable "+n_disk+" \n";
-						partCode += " EMPTY:0";
-					}
-					else{
-                        partCode += " EMPTY:0";
-					}
+			if(nPart == 4){
+				cacheCode="\
+echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
+ogDeletePartitionTable "+n_disk+" \n \
+ogUpdatePartitionTable "+n_disk+" \n";
+partCode += " EMPTY:0";
+			} else{
+                        	partCode += " EMPTY:0";
+			}
                 }
         }
-//      form.codigo.value="\
-//" + cacheCode + " \n \
-//ogListPartitions 1 \n \
-//ogCreatePartitions 1 " + partCode + " \n \
-//ogSetPartitionActive 1 1 \n \
-//ogUpdatePartitionTable 1 \n \
-//ogListPartitions 1 \n";
-form.codigo.value="\
+	form.codigo.value="\
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 echo \"[0]  $MSG_HELP_ogCreatePartitions \" | tee -a $OGLOGSESSION $OGLOGFILE \n \
 echo \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\" | tee -a $OGLOGSESSION \n \
@@ -301,34 +274,29 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 echo \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\" | tee -a $OGLOGSESSION $OGLOGFILE \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n";
-
+ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \
+reboot \n";
 }
 
 
-
-
-function showPartitionForm(tipo_table_part){
+function showPartitionForm (tipo_table_part) {
 	document.getElementById("form"+tipo_table_part).style.display="inline";
 	if(tipo_table_part == "MSDOS"){
 		// De los dos tipos, se oculta el otro
 		document.getElementById("formGPT").style.display="none";
-		
-	}
-	else{
+	} else{
 		document.getElementById("formMSDOS").style.display="none";
 	}
 }
 
 
 // Código de pulsación de selección de partición.
-function clickPartitionCheckbox(form, npart, isGPT) {
+function clickPartitionCheckbox (form, npart, isGPT) {
 	// Si el parametro no esta definido, se toma como false
 	isGPT = (isGPT)?isGPT:"false";
 	if(isGPT == true){
 		prefix="GPT";
-	}
-	else{
+	} else {
 		prefix="";
 	}
 	var partCheck=eval("form.check"+prefix+npart);

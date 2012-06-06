@@ -5,7 +5,7 @@ ALTER TABLE ogAdmBD.perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL 
 # Soportar particiones GPT y añadir información de caché.
 ALTER TABLE ogAdmBD.ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
-	ADD numdisk tinyint(4) NOT NULL DEFAULT 1,
+	ADD numdisk tinyint(4) NOT NULL DEFAULT 1 AFTER idordenador,
 	ADD cache varchar(500),
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
