@@ -13,7 +13,7 @@ $TbMsg[4]="Ordenadores";
 
 $TbMsg[5]="Nombre";
 $TbMsg[6]="Ubicaci&oacute;n";
-$TbMsg[7]="Ca&ntilde;&oacute;n";
+$TbMsg[7]="Proyector";
 $TbMsg[8]="Pizarra";
 $TbMsg[9]="Puestos";
 $TbMsg[10]="URL Imagen";
@@ -52,12 +52,15 @@ $TbMsg[38]='Menor espacio libre (KB)';
 $TbMsg[39]='Personalizar';
 $TbMsg[40]='Sin modificar tama&ntilde;o';
 $TbMsg[41]='Generar Instrucci&oacute;n OG';
+$TbMsg["CONFIG_PARTTABLE"='Tabla de particiones';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
 $TbMsg[44]='Equipo sin Perfil de Hardware';
 $TbMsg[45]='Agregue Perfil para obtener datos';
-$TbMsg[495]='Contenido Cache';
-$TbMsg[4951]='Cache Libre';
+$TbMsg[495]='Contenido cach&eacute;';
+$TbMsg[4951]='Cach&eacute; libre';
+
+$TbMsg["WARN_REBOOTAFTER"]='AVISO: Se realizar&aacute; autom&aacute;ticamente un reinicio despu&eacute;s de ejecutar la operaci&oacute;n.';
 ?>
 

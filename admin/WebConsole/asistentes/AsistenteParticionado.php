@@ -72,8 +72,8 @@ $xajax->printJavascript('../xajax/');
 	document.getElementById('minsize').value=min;
 	document.getElementById('freedisk').value=min;
 ">
-<?
-switch($ambito){
+<?php
+	switch($ambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
 			$textambito=$TbMsg[0];
@@ -109,22 +109,20 @@ switch($ambito){
 
 	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil;
 	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
-
-	?>	
-
+?>
 
 	<form  align=center name="fdatos" > 
 
 		<table class="tabla_datos">
 		<tr>
 		<td>
-		        Aplicar acciones al disco:
+			<?php echo $TbMsg[35].":\n"; 	// Disco ?>
 		        <input type="text" name="n_disk" value="1">
 		</td>
 		</tr>
 		<tr>
 		<td>
-			Tabla de particiones:
+			<?php echo $TbMsg["CONFIG_PARTTABLE"].":\n"; ?>
 			<select name="tipo_part_table" id="tipo_part_table" onchange="showPartitionForm(this.value)">
 				<option value="MSDOS">MSDOS</option>
 				<option value="GPT">GPT</option>
@@ -147,7 +145,10 @@ switch($ambito){
 				<th><input type="button" name="GenerarInstruccion" Value="<?php echo $TbMsg[41];?>" onclick="codeParticionado(this.form)" /> </th>
 				<td colspan="2"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
-		</table>	
+			<tr>
+				<th colspan="3"><?php echo $TbMsg["WARN_REBOOTAFTER"]; ?></th>
+			</tr>
+		</table>
 	</form>	
 
 <?php

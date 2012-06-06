@@ -52,12 +52,15 @@ $TbMsg[38]='Less free disk space (KB)';
 $TbMsg[39]='Customize';
 $TbMsg[40]='Size unchanged';
 $TbMsg[41]='Generate OG Instruction';
+$TbMsg["CONFIG_PARTTABLE"='Partition table';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='No configuration: client does not connect to server.';
 $TbMsg[44]='Hardware equipment without profile';
 $TbMsg[45]='Add Profile to obtain data';
-$TbMsg[495]='Content Cache';
-$TbMsg[4951]='Cache Free';
+$TbMsg[495]='Content cache';
+$TbMsg[4951]='Cache free';
+
+$TbMsg["WARN_REBOOTAFTER"]='AVISO: It will automatically reboot after executing the operation..';
 ?>
 
