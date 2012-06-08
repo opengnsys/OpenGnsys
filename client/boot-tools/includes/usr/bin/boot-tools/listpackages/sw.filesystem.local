@@ -9,6 +9,7 @@ install dmraid
 install dmsetup 
 install lvm2 
 install e2fsprogs
+install btrfs-utils
 install jfsutils 
 install reiserfsprogs
 install xfsprogs 

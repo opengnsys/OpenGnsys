@@ -272,33 +272,23 @@ function htmlOPTION_typepartnotcache($cmd)
 function htmlForm_typepart($cmd,$numpar)
 {
 	$SelectHtml="";
-	$cmd->texto='SELECT DISTINCT tipopar FROM tipospar JOIN ordenadores_particiones ON ordenadores_particiones.codpar = tipospar.codpar WHERE numpar = ' .$numpar;
+	$cmd->texto='SELECT DISTINCT tipopar FROM tipospar
+			JOIN ordenadores_particiones ON ordenadores_particiones.codpar = tipospar.codpar
+			WHERE numpar = ' .$numpar;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			if ( $rs->campos["tipopar"] == "LINUX" )
-			{
-			$valor="EXT4";
-			$valormostrar="LINUX:EXT[2:3:4]";
-			}
-			else
-			{
 			$valor=$rs->campos["tipopar"];
-			$valormostrar=$rs->campos["tipopar"];
-			}
-			$SelectHtml.='<OPTION value="'.$valor . '" ';
-			$SelectHtml.='>';
-			$SelectHtml.= $valormostrar .'</OPTION>';
+			$SelectHtml.='<option value="'.$valor.'"> '.$valor.' </option>';
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();
 	}
 	return($SelectHtml);	
 }
-
 
 
 function htmlForm_typepartnotcacheEngine10($npart)
