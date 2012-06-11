@@ -13,6 +13,73 @@
 #*/ ##
 
 
+function ogLoadHiveWindows () {
+# Variables locales.
+local PART DISK 
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition" \
+           "$FUNCNAME 1 1 "
+    return
+fi	
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+DISK=$1; PART=$2; 
+
+#Comprobaciones redundantes: borrar"
+#ogDiskToDev $DISK $PART || return $(ogRaiseError $OG_ERR_PARTITION "particion de windows no detectada"; echo $?)
+#ogGetOsType $DISK $PART | grep "Windows" || return $(ogRaiseError $OG_ERR_NOTOS "no es windows"; echo $?)
+#VERSION=$(ogGetOsVersion $DISK $PART)
+#Fin Comprobaciones redundantes: borrar"
+
+
+# primera fase, carga de los hive del sistema
+if ogGetPath $DISK $PART WINDOWS
+then
+	SYSTEMROOT="Windows"
+elif ogGetPath $DISK $PART WINNT
+then 
+	SYSTEMROOT="winnt"
+else
+	return $(ogRaiseError $OG_ERR_NOTOS "version windows no detectada"; echo $?)
+fi
+
+hiveSAM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/SAM) && export hiveSAM || return $(ogRaiseError $OG_ERR_NOTOS " hive SAM  no detectada"; echo $?)
+hiveSYSTEM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/system) && export hiveSYSTEM || return $(ogRaiseError $OG_ERR_NOTOS "hive SYSTEM  no detectada"; echo $?)
+hiveSOFTWARE=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/software) && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
+export TEMPhive=/tmp/tmpregistry
+
+# segunda fase, carga de los hive de usuarios windows.
+declare -i COUNT
+COUNT=3
+#TODO WINDOWS XP WINDOWS7
+BASEHOMEDIR=$(ogGetPath $DISK $PART /"Documents and Settings")
+TMPUSERFILE="/tmp/WuserRegAndDAT.tmp"
+find "$BASEHOMEDIR/" -type f -name NTUSER.DAT > $TMPUSERFILE  
+LISTUSERS=$(drbl-chntpw -l $hiveSAM | grep RID | awk -F"<" '{print $2}' | awk -F">" '{print $1}')
+#echo "$BASEHOMEDIR" $LISTUSERS
+for user in $LISTUSERS
+do		        
+        # Comprobamos que el usuario registrado tiene .DAT
+		if HOMEDIR=$(cat $TMPUSERFILE | grep -w $user)  
+		then
+			#echo "$user exportamos los usuarios de windows como variables, y como valor hiveUSERX; donde la X es 3 4 5 6 ... X"
+			export `echo $user=hiveUSER$COUNT` 
+			#echo "$user exportamos la variable hiveUSERX con el valor del home de la variable-usuario_windows"
+			##export `echo hiveUSER$COUNT`="$(echo $HOMEDIR | sed -e 's/ /\\ /'g | sed -e 's/\\/\\\\/g')"
+			export `echo hiveUSER$COUNT`="$(echo $HOMEDIR)"
+			#echo " estas variables \$USUARIO -> Identificador del HIVE ; \${!USUARIO} -> path del HIVE "
+			COUNT=${COUNT}+1
+		fi
+		
+done
+COUNT=0
+}
+
+
 #         ogUpdateHiveWindows  
 #@brief   Actualiza los hive de windows.
 #@param   int_ndisk       
