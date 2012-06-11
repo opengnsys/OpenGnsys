@@ -14,3 +14,5 @@ eliminar el Proyecto OpenGnSys.
 - opengnsys_uninstall.sh     programa de desinstalación del serviidor
 - opengnsys_update.sh        programa de actualización del serviidor
 
+- install_ticket_wolunicast.sh  programa de instalación del parche para ejecutar
+                                arranque Wake-On-Lan por IP usando protocolo Unicast

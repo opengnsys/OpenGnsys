@@ -1,9 +1,8 @@
 #!/bin/bash
 
 #/**
-#         configureOS 
-#@brief   Scirpt de ejemplo para realizar la configuracion del sistema operativo restaurado.
-#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#         configureOs
+#@brief   Scirpt para realizar la configuracion del sistema operativo restaurado.
 #@param 1 disco 
 #@param 2 particion 
 #@return  

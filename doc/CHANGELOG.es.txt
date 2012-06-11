@@ -11,6 +11,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #518	Se marca mal el FS al particionar, lo marca como EMPTY y luego no se pueden formatear
 #521	Función ogUpdateCacheIsNecesary: usar funcion para cálculo de MD5
 #522	Script updateCache: eliminar opción del case $ACTIONCACHEFULL=NONE
+#527	Mejora del sistema de postconfiguracion
 #530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
 #538	Función ogTypeToId: error en parámetro
 #540	Función ogCreateCache no detecta tipo de tabla de particiones
