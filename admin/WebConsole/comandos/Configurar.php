@@ -19,8 +19,6 @@ include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
-include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
-
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -66,23 +64,12 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </HEAD>
 <BODY>
 <?
-	switch($ambito){
-			case $AMBITO_AULAS :
-				$urlimg='../images/iconos/aula.gif';
-				$textambito=$TbMsg[2];
-				break;
-			case $AMBITO_GRUPOSORDENADORES :
-				$urlimg='../images/iconos/carpeta.gif';
-				$textambito=$TbMsg[3];
-				break;
-			case $AMBITO_ORDENADORES :
-				$urlimg='../images/iconos/ordenador.gif';
-				$textambito=$TbMsg[4];
-				break;
-	}
-	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'</span><br>'; // Cabecera
-	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
-				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>'; // Subcebecera
+	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
+	//________________________________________________________________________________________________________
+	//
+		include_once("./includes/FiltradoAmbito.php");
+	//________________________________________________________________________________________________________
+				
 	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
 	if($ambito!=$AMBITO_ORDENADORES){	
 		$cadenaid="";

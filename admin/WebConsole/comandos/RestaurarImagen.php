@@ -19,7 +19,6 @@ include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/restaurarimagen_".$idioma.".php");
-include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -66,23 +65,12 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </HEAD>
 <BODY>
 <?
-	switch($ambito){
-			case $AMBITO_AULAS :
-				$urlimg='../images/iconos/aula.gif';
-				$textambito=$TbMsg[2];
-				break;
-			case $AMBITO_GRUPOSORDENADORES :
-				$urlimg='../images/iconos/carpeta.gif';
-				$textambito=$TbMsg[3];
-				break;
-			case $AMBITO_ORDENADORES :
-				$urlimg='../images/iconos/ordenador.gif';
-				$textambito=$TbMsg[4];
-				break;
-	}
-	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'</span><br>'; // Cabecera
-	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
-				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>'; // Subcebecera
+	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
+	//________________________________________________________________________________________________________
+
+		include_once("./includes/FiltradoAmbito.php");
+	//________________________________________________________________________________________________________
+				
 	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
 	if($ambito!=$AMBITO_ORDENADORES){	
 		$cadenaid="";
@@ -192,17 +180,17 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
 					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
 					//Clonación
-					
+
 					$metodos="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
 					$metodos.="TORRENT peer:60=TORRENT-CACHE";
-					
+
 					$TBmetodos["UNICAST-DIRECT"]=1;
 					$TBmetodos["MULTICAST-DIRECT"]=2;
 					$TBmetodos["MULTICAST-CACHE"]=3;
 					$TBmetodos["TORRENT-CACHE"]=4;
-					
+
 					$idxc=$_SESSION["protclonacion"];
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 				}
@@ -307,8 +295,8 @@ $cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.mo
 	$rs->Comando=&$cmd; 
 if ($rs->Abrir()){
 		$rs->Primero(); 
-       	$mcastsyntax.= $rs->campos["pormul"] . ':';
-        		
+		$mcastsyntax.= $rs->campos["pormul"] . ':';
+
 		$rs->Siguiente();
 		switch ($rs->campos["modomul"]) 
 		{

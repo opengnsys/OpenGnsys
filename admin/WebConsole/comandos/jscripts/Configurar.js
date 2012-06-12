@@ -85,7 +85,8 @@ function Confirmar(cc)
 				document.fdatosejecucion.idambito.value=idordenadores;
 			}
 		}	
-		document.fdatosejecucion.atributos.value=atributos;		
+		document.fdatosejecucion.atributos.value=atributos;	
+		filtrado();		
 		document.fdatosejecucion.submit();		
 	}
 }

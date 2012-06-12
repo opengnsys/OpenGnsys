@@ -18,6 +18,7 @@ $nombreambito="";
 $funcion="";
 $atributos="";
 $gestor="";
+$filtro="";
 
 if (isset($_POST["idcomando"])) $idcomando=$_POST["idcomando"]; 
 if (isset($_POST["descricomando"])) $descricomando=$_POST["descricomando"]; 
@@ -27,5 +28,6 @@ if (isset($_POST["nombreambito"])) $nombreambito=$_POST["nombreambito"];
 if (isset($_POST["funcion"])) $funcion=$_POST["funcion"]; 
 if (isset($_POST["atributos"])) $atributos=$_POST["atributos"]; 
 if (isset($_POST["gestor"])) $gestor=$_POST["gestor"]; 
+if (isset($_POST["filtro"])) $filtro=$_POST["filtro"]; 
 ?>
 

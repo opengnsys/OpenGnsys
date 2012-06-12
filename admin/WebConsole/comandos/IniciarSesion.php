@@ -16,8 +16,6 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../idiomas/php/".$idioma."/comandos/iniciarsesion_".$idioma.".php");
-include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
-
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -39,30 +37,11 @@ if (!$cmd)
 </HEAD>
 <BODY>
 <?
-switch($ambito){
-		case $AMBITO_CENTROS :
-			$urlimg='../images/iconos/centros.gif';
-			$textambito=$TbMsg[0];
-			break;
-		case $AMBITO_GRUPOSAULAS :
-			$urlimg='../images/iconos/carpeta.gif';
-			$textambito=$TbMsg[1];
-			break;
-		case $AMBITO_AULAS :
-			$urlimg='../images/iconos/aula.gif';
-			$textambito=$TbMsg[2];
-			break;
-		case $AMBITO_GRUPOSORDENADORES :
-			$urlimg='../images/iconos/carpeta.gif';
-			$textambito=$TbMsg[3];
-			break;
-		case $AMBITO_ORDENADORES :
-			$urlimg='../images/iconos/ordenador.gif';
-			$textambito=$TbMsg[4];
-			break;
-	}
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
-	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
+	//________________________________________________________________________________________________________
+	//
+		include_once("./includes/FiltradoAmbito.php");
+	//________________________________________________________________________________________________________
 ?>
 	<P align=center>
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>

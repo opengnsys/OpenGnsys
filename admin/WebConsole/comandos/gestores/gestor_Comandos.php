@@ -78,7 +78,12 @@ $atributos=str_replace('$',chr(9),$atributos);
 $cadenaid="";
 $cadenaip="";
 $cadenamac="";
-RecopilaIpesMacs($cmd,$ambito,$idambito);
+
+if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
+	if(substr($filtro,strlen($cadenaid)-1,1)==";") // Si el último caracter es una coma
+		$filtro=substr($filtro,0,strlen($filtro)-1); // Quita la coma
+}
+RecopilaIpesMacs($cmd,$ambito,$idambito,$filtro);
 
 /*--------------------------------------------------------------------------------------------------------------------
 	Creación de parametros para sentencias SQL
@@ -107,6 +112,9 @@ $cmd->CreaParametro("@ordtarea",0,1);
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 	$cmd->ParamSetValor("@restrambito",$idambito);
 	$idambito=0;
+}
+if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores 
+	$cmd->ParamSetValor("@restrambito",$filtro);
 }
 $resul=true;
 /*--------------------------------------------------------------------------------------------------------------------
