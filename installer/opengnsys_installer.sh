@@ -1075,10 +1075,12 @@ function copyServerFiles ()
 			repoman/bin \
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
+			install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
+			lib \
 			lib \
 			lib \
 			doc )
