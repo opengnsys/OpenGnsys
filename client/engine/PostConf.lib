@@ -39,7 +39,7 @@ fi
 # Error si no se reciben 4 parámetros.
 [ $# == 4 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 # Punto de montaje 
-MOUNTPOINT="$(ogMount "$1" "$2") || return $?
+MOUNTPOINT="$(ogMount "$1" "$2")" || return $?
 # Comprobar que existe el fichero de comandos.
 CMDFILE=$(ogGetPath "$MOUNTPOINT/windows/system32/$3")
 [ -n "$CMDFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$MOUNTPOINT/windows/system32/$3" || return $?

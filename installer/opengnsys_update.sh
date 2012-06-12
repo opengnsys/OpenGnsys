@@ -522,7 +522,7 @@ function updateServerFiles()
 		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
 			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
 		else
-			rsync --exclude .svn -irplt "${SOURCES[i]}" $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}")
+			rsync -irplt "${SOURCES[i]}" $(readlink -m "$INSTALL_TARGET/${TARGETS[i]}")
 		fi
 	done
 	popd >/dev/null
