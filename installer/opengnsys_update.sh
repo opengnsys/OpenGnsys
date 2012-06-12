@@ -506,8 +506,8 @@ function updateServerFiles()
 	local TARGETS=(	bin \
 			bin \
 			tftpboot \
-			lib \
-			lib \
+			lib/opengnsys_uninstall.sh \
+			lib/install_ticket_wolunicast.sh \
 			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
