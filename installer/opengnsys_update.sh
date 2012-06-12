@@ -501,7 +501,7 @@ function updateServerFiles()
 			server/bin \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
-			install_ticket_wolunicast.sh \
+			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
