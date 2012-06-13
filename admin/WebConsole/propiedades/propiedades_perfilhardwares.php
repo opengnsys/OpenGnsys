@@ -14,7 +14,7 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_perfilhardwares_".$idioma.".php"); 
-include_once("../idiomas/php/".$idioma."/avisos_.$idioma.".php"); 
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php"); 
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -71,7 +71,7 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg["HARD_COMMENTS"]?>&nbsp;</th>
+			<th align="center"><?php echo $TbMsg["HARD_COMMENTS"]?></th>
 			<?if ($opcion==$op_eliminacion)
 					echo '<td>'.$comentarios.'</td>';
 				else
@@ -80,7 +80,7 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center"><?php echo $TbMsg["HARD_WINBOOT"]?> <sup>(*)</sup></th>
+			<th align="center"><?php echo $TbMsg["HARD_WINBOOT"]?> <sup>*</sup></th>
 			<?php if ($opcion==$op_eliminacion)
 					echo "<td>$winboot</td>";
 				else {
@@ -92,7 +92,7 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th colspan="2" align="center"><sup>(*)</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+			<th colspan="2" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
 		</tr>
 	</table>
 </form>

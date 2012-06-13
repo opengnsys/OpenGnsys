@@ -230,7 +230,7 @@ echo $fotoordenador?>">
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th colspan="2" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+			<th colspan="3" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
 		</tr>
 
 	</TABLE>
