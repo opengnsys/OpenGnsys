@@ -14,6 +14,7 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_perfilhardwares_".$idioma.".php"); 
+include_once("../idiomas/php/".$idioma."/avisos_.$idioma.".php"); 
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -22,7 +23,7 @@ $idperfilhard=0;
 $descripcion="";
 $comentarios="";
 $grupoid=0;
-$ordenadores=0; // Número de ordenador que tienen este perfil
+$ordenadores=0;		// Número de ordenadores que tienen este perfil
 $winboot="reboot";	// Método de arranque para Windows (por defecto, reboot).
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
@@ -79,17 +80,20 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg["HARD_WINBOOT"]?>&nbsp;</th>
+			<th align="center"><?php echo $TbMsg["HARD_WINBOOT"]?> <sup>(*)</sup></th>
 			<?php if ($opcion==$op_eliminacion)
 					echo "<td>$winboot</td>";
 				else {
 					$params = "reboot=".$TbMsg["HARD_REBOOT"].chr(13);
 					$params.= "kexec=".$TbMsg["HARD_KEXEC"];
-					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",100)."<br /><em>".$TbMsg["HARD_NOTES"]."</em></td>";
+					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",100)."</td>";
 				}
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th colspan="2" align="center"><sup>(*)</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+		</tr>
 	</table>
 </form>
 </div>

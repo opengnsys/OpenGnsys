@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//__________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_perfilhardwares_esp.php 
 //	Idioma: Español 
-//________________________________________________________________________________________________________
+//__________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="Sin Opci&oacute;n";
 $TbMsg[1]="Insertar";
@@ -16,6 +16,5 @@ $TbMsg["HARD_COMPUTERS"]="Ordenadores";
 $TbMsg["HARD_WINBOOT"]="Arranque Windows";
 $TbMsg["HARD_REBOOT"]="Reinicio (reboot)";
 $TbMsg["HARD_KEXEC"]="Directo (kexec)";
-$TbMsg["HARD_NOTES"]="(ejecutar Netboot Avanzado en las aulas afectadas)";
 ?>
 

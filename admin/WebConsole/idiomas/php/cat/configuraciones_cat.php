@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//____________________________________________________
 //
-//	Fichero de idiomas php: configuraciones_esp.php 
-//	Idioma: Español 
-//________________________________________________________________________________________________________
+//	Fitxer d'idiomes php: configuraciones_cat.php 
+//      Idioma: Català
+//____________________________________________________
 $TbMsg=array();
 $TbMsg[0]='Configuraciones';
 $TbMsg[1]='Ámbito';
@@ -60,7 +60,5 @@ $TbMsg[44]='Equipo sin Perfil de Hardware';
 $TbMsg[45]='Agregue Perfil para obtener datos';
 $TbMsg[495]='Contenido Cach&eacute;';
 $TbMsg[4951]='Cach&eacute; libre';
-
-$TbMsg["WARN_REBOOTAFTER"]='AVISO: Se realizar&aacute; autom&aacute;ticamente un reinicio despu&eacute;s de ejecutar la operaci&oacute;n.';
 ?>
 

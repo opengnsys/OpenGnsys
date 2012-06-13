@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//_________________________________________________
 //
-//	Fichero de idiomas php: configuraciones_eng.php
-//	Idioma: Inglés
-//________________________________________________________________________________________________________
+//	Php language file: configuraciones_eng.php 
+//	Language: English
+//_________________________________________________
 $TbMsg=array();
 $TbMsg[0]='Configurations';
 $TbMsg[1]='Scope';
@@ -60,7 +60,5 @@ $TbMsg[44]='Hardware equipment without profile';
 $TbMsg[45]='Add Profile to obtain data';
 $TbMsg[495]='Content cache';
 $TbMsg[4951]='Cache free';
-
-$TbMsg["WARN_REBOOTAFTER"]='WARNING: It will automatically reboot after executing the operation..';
 ?>
 

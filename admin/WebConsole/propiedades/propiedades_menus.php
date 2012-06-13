@@ -1,4 +1,4 @@
-<? 
+<?php
 // ************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -16,6 +16,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_menus_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -52,7 +53,7 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
@@ -98,8 +99,8 @@ if  ($opcion!=$op_alta){
 <!--<php-->
 
 		<TR>
-			<TH  align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TH>
-			<?
+			<th align="center"><?php echo $TbMsg[17]?> <sup>*</sup></th>
+			<?php
 				if ($opcion==$op_eliminacion){
 					$tbresolucion[788]="800x600   16bits";
 					$tbresolucion[791]="1024x768  16bits";
@@ -137,7 +138,10 @@ if  ($opcion!=$op_alta){
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TD>';
 			?>
-		</TR>	
+		</TR>
+		<tr>
+			<th colspan="2" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+		</tr>
 </TABLE>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <BR>

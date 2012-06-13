@@ -79,15 +79,15 @@ function abrir_ventana(URL){
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?	$fotomenu=$fotoordenador;
+		<tr>
+			<th align="center"><?php echo $TbMsg[5]?> <sup>*</sup></th>
+			<?php	$fotomenu=$fotoordenador;
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombreordenador.'</TD>';
 				else		
 					echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
 			?>
-<td colspan="2" valign="top" align="left" rowspan="4">
+<td colspan="2" valign="top" align="left" rowspan="3">
 <img border="2" style="border-color:#63676b" src="<?php
 if ($fotoordenador=="")
 {
@@ -103,8 +103,8 @@ echo $fotoordenador?>">
 		</tr>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<th align="center"><?php echo $TbMsg[6]?> <sup>*</sup></th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
 				else
@@ -113,8 +113,8 @@ echo $fotoordenador?>">
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
+			<th align="center"><?php echo $TbMsg[7]?> <sup>*</sup></th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$mac.'</TD>';
 				else	
@@ -122,11 +122,6 @@ echo $fotoordenador?>">
 			?>
 		</TR>	
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<tr>
-			<?php
-			echo '<th colspan="2" align="center">&nbsp;'.$TbMsg["WARN_NETBOOT"].'&nbsp;</th>';
-			?>
-		</tr>
 				<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</TD>
 			<?
@@ -234,6 +229,9 @@ echo $fotoordenador?>">
 		</tr>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th colspan="2" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+		</tr>
 
 	</TABLE>
 </FORM>
