@@ -227,7 +227,7 @@ esac
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2012-04-16
 #*/ ##
-function ogInstallMiniSetup ()
+function ogInstallFirstBoot ()
 {
 local MNTDIR DIR CMDDIR CMDFILE
 # Si se solicita, mostrar ayuda.
