@@ -5,7 +5,7 @@
 //	Language: English
 //_________________________________________
 
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg["STATUS_BSY"]="Bussy";
 $TbMsg["STATUS_INI"]="Initializing";
 $TbMsg["STATUS_OFF"]="Off";

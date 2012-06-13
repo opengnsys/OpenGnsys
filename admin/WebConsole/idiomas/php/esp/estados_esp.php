@@ -5,7 +5,7 @@
 //	Idioma: Español
 //______________________________________________
 
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg["STATUS_BSY"]="Ocupado";
 $TbMsg["STATUS_INI"]="Iniciando";
 $TbMsg["STATUS_OFF"]="Apagado";
