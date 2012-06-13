@@ -282,7 +282,7 @@ function soIMG(so)
 								MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
 								break;
 				case 'OPG':
-								MimgOrdenador="ordenador_RMB.gif";  // Cliente Rembo
+								MimgOrdenador="ordenador_OPG.gif";  // Cliente Rembo
 								break;
 				case 'WS2': 
 								MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
@@ -344,7 +344,7 @@ function selector(oSLCT,op,id)
 						break;
 						
 					case 3: // Opengnsys
-						if(estado=="ordenador_RMB.gif")
+						if(estado=="ordenador_OPG.gif")
 							oCHK.checked=sw;
 						break;
 						
@@ -389,3 +389,4 @@ function filtrado()
 		document.fdatosejecucion.filtro.value="";
 }
 </SCRIPT>
+
