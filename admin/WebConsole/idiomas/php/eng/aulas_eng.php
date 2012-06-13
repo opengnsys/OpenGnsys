@@ -54,10 +54,5 @@
 	$TbMsg[46]='Scope id';
 	$TbMsg[47]='"Historical log"';
 	$TbMsg[48]='"Real time log"';
-	$TbMsg["STATUS_BSY"]="Bussy";
-	$TbMsg["STATUS_OFF"]="Off";
-	$TbMsg["STATUS_OPG"]="OpenGnSys";
-	$TbMsg["STATUS_LNX"]="GNU/Linux";
-	$TbMsg["STATUS_WXP"]="Windows";
 ?>
 

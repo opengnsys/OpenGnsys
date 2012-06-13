@@ -17,6 +17,7 @@ include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/aulas_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/estados_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/mensajes_".$idioma.".php");
 //________________________________________________________________________________________________________
 $litambito=0; 

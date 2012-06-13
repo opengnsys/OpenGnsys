@@ -1,4 +1,4 @@
-<?
+<?php
 // ******************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -11,6 +11,8 @@
 //
 // ********************************************************************************************************************
 //
+include_once("../idiomas/php/".$idioma."/estados_".$idioma.".php");
+
 $cadenaip="";
 $cid=0; // Identificadores para tablas de ordenadores
 switch($ambito)
@@ -159,28 +161,27 @@ function RecorriendoOrdenadores($cmd)
 	$htmlCode="";
 	$con=0;
 
-	$htmlCode.='<TABLE border=0 class="tabla_busquedas" align=center>';
-	$htmlCode.='<TR>';	
+	$htmlCode.='
+<TABLE border=0 class="tabla_busquedas" align=center>
+<TR>
+
+<TD align="center">'.$TbMsg["STATUS_OFF"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,1,'.$cid.')"></TD>
 		
-	$htmlCode.='<TD align="center">Apagados</TD>';
-	$htmlCode.='<TD><INPUT  type="checkbox" checked onclick="selector(this,1,'.$cid.')"></TD>';
-		
-	$htmlCode.='<TD align="center">Ocupados</TD>';		
-	$htmlCode.='<TD><INPUT   type="checkbox" checked onclick="selector(this,2,'.$cid.')"></TD>';
-		
-		
-	$htmlCode.='<TD align="center">Opengnsys</TD>';		
-	$htmlCode.='<TD><INPUT  type="checkbox" checked onclick="selector(this,3,'.$cid.')"></TD>';
-		
-	$htmlCode.='<TD align="center">Windows</TD>';		
-	$htmlCode.='<TD><INPUT  type="checkbox" checked onclick="selector(this,4,'.$cid.')"></TD>';
-				
-		
-	$htmlCode.='<TD align="center">Linux</TD>';		
-	$htmlCode.='<TD><INPUT  type="checkbox" checked onclick="selector(this,5,'.$cid.')"></TD>';
-		
-	$htmlCode.='</TR>';
-	$htmlCode.='</TABLE>';
+<TD align="center">'.$TbMsg["STATUS_BSY"].'</TD>
+<TD><INPUT   type="checkbox" checked onclick="selector(this,2,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_OPG"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,3,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_WXP"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,4,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_LNX"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,5,'.$cid.')"></TD>
+
+</TR>
+</TABLE>';
 	
 	$htmlCode.='<BR>';					
 	$htmlCode.='<TABLE id="tbo-'.$cid.'" border=0 align=center>';
