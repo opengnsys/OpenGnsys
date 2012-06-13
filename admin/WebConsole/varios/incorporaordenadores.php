@@ -12,6 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/incorporaordenadores_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -53,13 +54,14 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
 	<SPAN align=center class=subcabeceras><IMG src="../images/iconos/aula.gif">&nbsp;<?echo $TbMsg[1].":".$nombreaula ?></SPAN></P>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
+<table align="center" class="tabla_datos" border="0" cellpadding="0" cellspacing="1">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-        <tr> 
-            <th>&nbsp;<? echo $TbMsg[2]?>&nbsp;</th>
+	<tr> 
+	    <th>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</th>
 			<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
+	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th></tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-</TABLE>
+</table>
  </FORM>
 <TABLE align=center>
 	<TR>

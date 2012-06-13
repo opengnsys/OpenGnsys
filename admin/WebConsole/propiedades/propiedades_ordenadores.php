@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_ordenadores_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -86,21 +87,20 @@ function abrir_ventana(URL){
 				else		
 					echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
 			?>
-<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b"
-src="<?
+<td colspan="2" valign="top" align="left" rowspan="4">
+<img border="2" style="border-color:#63676b" src="<?php
 if ($fotoordenador=="")
 {
 $fotoordenador="../images/fotos/fotoordenador.gif";
 }else{
 $fotoordenador="../images/fotos/".$fotoordenador;
-$fotoordenador;
 }
 echo $fotoordenador?>">
-&nbsp;&nbsp;&nbsp;&nbsp;<br>(150X110)-(jpg - gif)  ---- <?echo $TbMsg[5091]?>
-<br>
+<br />(150X110)-(jpg - gif) ---- <?php echo $TbMsg[5091]?>
+<br />
 <input name="archivo" type="file" id="archivo" size="16" />
-</TD>
-		</TR>		
+</td>
+		</tr>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
@@ -122,6 +122,11 @@ echo $fotoordenador?>">
 			?>
 		</TR>	
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<?php
+			echo '<th colspan="2" align="center">&nbsp;'.$TbMsg["WARN_NETBOOT"].'&nbsp;</th>';
+			?>
+		</tr>
 				<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</TD>
 			<?

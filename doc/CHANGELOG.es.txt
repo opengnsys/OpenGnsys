@@ -20,6 +20,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)
 #411	Menú por defecto para los clientes con información básica del estado de red
 #415	Compatiblidad hardware (red, disco) en los clientes OpenGnSys
+#416	Aviso en el browser de cliente rechazado
 #419	chntpw trunca las claves de registro largas
 #491	Log de seguimiento con información de caché local
 #494	Información de la caché en pantalla del cliente (no válido)
@@ -32,6 +33,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 #426	isAlive: control de los servicios OpenGnSys
 #488	Script de comparación configuración DHCP y OpenGnSys
 #493	Configurar el modo PXE desde el cliente
+#513	Wake_on_lan por IP (opcional)
 #514 	Controlar clave de acceso del cliente
 #517	Servicio opengnsys comprobación de permisos en sistema de archivos
 
@@ -46,6 +48,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #500	Iniciar sesión segunda partición Linux no habilitada
 #502	Tamaño Iframe propiedades ordenadores
 #503	Asistente con seguimiento predeterminado (no válido)
+#505	Filtrado de ordenadores para aplicar comandos
 #509	Incluir foto/imagen en propiedades de ordenadores y aulas
 #516	Restaurar desde consola: falla si esta recién particionado
 #539	Leyenda en estaus de ordenadores
@@ -58,7 +61,7 @@ Tickets genéricos resueltos:
 #445	Limitación puertos multicast: inconsistencia consola administración y Protocol.lib
 #501	Procedimientos encadenados y clientes para Linux y Windows
 #508	Branch UMA: Script con TODOS los cambios de las propuestas 1.0.4 (#491, #494, #495, #502 y #503)
-@526	Particionado discos GPT
+#526	Particionado discos GPT
 #531	Integración de OpenGnSys 1.0.4 en rama principal
 
 
@@ -410,7 +413,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #100	oginstaller gestor torrent
-#150	Fallo de Opengnsys Intaller (si MySQL ya instalado)
+#150	Fallo de Opengnsys Intaller (duplicado de #144)
 #171	binarios y scripts para multicast
 
 Tickets genéricos resueltos:
