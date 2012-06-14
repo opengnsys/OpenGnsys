@@ -76,21 +76,21 @@ function abrir_ventana(URL){
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+		<tr>
+			<th align="center"><?php echo $TbMsg[5]?></th>
+			<?php
 				if ($opcion==$op_eliminacion){
-					echo '<TD>'. $nombreaula.'</TD>';
-					echo '<TD colspan=2 valign=top align=center rowspan=2>
-							<IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"
-							<br><center>&nbsp;Computers:&nbsp;'. $ordenadores.'</center></TD>';
+					echo '<td>'. $nombreaula.'</td>';
+					echo '<td colspan="2" valign="top" align=c"enter" rowspan="2">
+							<img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" />
+							<br />'.$TbMsg[21].': '. $ordenadores.'</td>';
 			}
 			else{
-					echo '<TD><INPUT  class="formulariodatos" name=nombreaula style="width:215" type=text value="'. $nombreaula.'"></TD>';
-					echo'<TD colspan=2 valign=top align=left rowspan=2><IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"<br><center>&nbsp;Computers:&nbsp;'. $ordenadores.'</center>(150X110)-(jpg - gif)  ---- '.$TbMsg[5091].'</br><input name="archivo" type="file" id="archivo" size="16" /></TD>';
+				echo '<td><input class="formulariodatos" name=nombreaula style="width:215" type=text value="'. $nombreaula.'" /></td>';
+				echo'<td colspan="2" valign="top" align="left" rowspan="2"><img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" /><br />'.$TbMsg[21].': '. $ordenadores.'<br />(150X110)-(jpg - gif) ---- '.$TbMsg[5091].'<br /><input name="archivo" type="file" id="archivo" size="16" /></td>';
 			}
 			?>
-		</TR>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>

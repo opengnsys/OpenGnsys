@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//_________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_ordenadores_eng.php 
-//	Idioma: Ing�s 
-//________________________________________________________________________________________________________
+//	Php language file: propiedades_ordenadores_eng.php 
+//	Language: English
+//_________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
@@ -26,3 +26,4 @@ $TbMsg[5092]="View Images";
 $TbMsg[495]="Content Cache";
 $TbMsg[4951]="Cache Free";
 ?>
+

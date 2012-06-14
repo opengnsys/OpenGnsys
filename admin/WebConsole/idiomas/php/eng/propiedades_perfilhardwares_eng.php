@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//_____________________________________________________________
 //
 //	Php language file: propiedades_perfilhardwares_eng.php 
-//	Idioma: English
-//________________________________________________________________________________________________________
+//	Language: English
+//_____________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
@@ -16,6 +16,5 @@ $TbMsg["HARD_COMPUTERS"]="Computers";
 $TbMsg["HARD_WINBOOT"]="Windows boot";
 $TbMsg["HARD_REBOOT"]="Reboot (reboot)";
 $TbMsg["HARD_KEXEC"]="Direct (kexec)";
-$TbMsg["HARD_NOTES"]="(apply changes launching Advanced Netboot on affected Labs)";
 ?>
 

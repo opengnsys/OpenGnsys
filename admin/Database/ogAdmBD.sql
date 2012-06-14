@@ -476,7 +476,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '1',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
   `netdriver` VARCHAR( 30 ) NOT NULL DEFAULT 'generic',
-	`fotoord` VARCHAR( 250 ) NOT NULL,
+  `fotoord` VARCHAR( 250 ) NOT NULL,
   PRIMARY KEY (`idordenador`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

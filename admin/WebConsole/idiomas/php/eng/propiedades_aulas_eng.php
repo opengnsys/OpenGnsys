@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_aulas_eng.php 
 //	Idioma: Inglés 
-//________________________________________________________________________________________________________
+//________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
@@ -26,7 +26,7 @@ $TbMsg[17]="Hardware profile";
 $TbMsg[18]="Properties for all computers in this class";
 $TbMsg[19]="Cache size (KB)";
 $TbMsg[20]="Autoexec";
-$TbMsg[21]="";
+$TbMsg[21]="Computers";
 $TbMsg[22]="Multicast mode";
 $TbMsg[23]="Multicast IP address";
 $TbMsg[24]="Multicast port";
