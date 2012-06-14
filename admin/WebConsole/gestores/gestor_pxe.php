@@ -187,19 +187,13 @@ while (!$rs->EOF)
 }
 $rs->Cerrar();
 
-			
 
 	fwrite($gestion, " \n");  
 	fwrite($gestion, "PROMPT " . $prompt ." \n");
 	fwrite($gestion, "TIMEOUT " . $timeout . " \n");
 	fwrite($gestion, " \n");  
 	fclose($gestion); 
-	exec("chown www-data:www-data $macfile");
 	exec("chmod 777 $macfile");
-	
-
-
-
 }
 
 function netmask2cidr($netmask) {

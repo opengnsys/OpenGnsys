@@ -128,9 +128,7 @@ $macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));
 #controlar optboot
 
 exec("sed -e 's/vga=...//g' -e 's/INFOHOST/$infohost/g' $pxedir/templates/$optboot > $macfile");
-exec("chown www-data:www-data $macfile");
 exec("chmod 777 $macfile");
-
 }
 
 
@@ -142,7 +140,7 @@ function netmask2cidr($netmask) {
                }
            }
            return $cidr;
- }
+}
 
 // Sustituye espacio por "_" y quita acentos y tildes.
 function cleanString ($cadena) {
@@ -152,3 +150,4 @@ function cleanString ($cadena) {
 }
 
 ?>
+
