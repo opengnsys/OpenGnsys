@@ -15,6 +15,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
 #538	Función ogTypeToId: error en parámetro
 #540	Función ogCreateCache no detecta tipo de tabla de particiones
+#543	Particionado -incluido initCache- sobre disco duro sin formatear no funciona
 
 Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)

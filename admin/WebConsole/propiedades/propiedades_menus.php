@@ -71,23 +71,23 @@ if  ($opcion!=$op_alta){
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<th align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300">'.$descripcion.'</TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:300" type=text value="'.$descripcion.'"></TD>';?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH  align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<th  align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD  style="width:300">'.$titulo.'</TD>';
 				else
 					echo '<TD ><INPUT  class="formulariodatos" name=titulo style="width:300" type=text value="'.$titulo.'"></TD>';?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[18]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[18]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,0,'iconos',$idurlimg,'idicono','descripcion').'&nbsp;</TD>';
@@ -99,7 +99,7 @@ if  ($opcion!=$op_alta){
 <!--<php-->
 
 		<TR>
-			<th align="center"><?php echo $TbMsg[17]?> <sup>*</sup></th>
+			<th align="center">&nbsp;<?php echo $TbMsg[17]?> <sup>*</sup>&nbsp;</th>
 			<?php
 				if ($opcion==$op_eliminacion){
 					$tbresolucion[788]="800x600   16bits";
@@ -132,15 +132,15 @@ if  ($opcion!=$op_alta){
 <!--?> -->
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<th align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD >'.$comentarios.'&nbsp</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TD>';
 			?>
 		</TR>
 		<tr>
-			<th colspan="2" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+			<th colspan="2" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
 		</tr>
 </TABLE>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

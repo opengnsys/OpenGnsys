@@ -62,7 +62,7 @@ if  ($opcion!=$op_alta){
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg["HARD_NAME"]?>&nbsp;</td>
+			<th align="center">&nbsp;<?echo $TbMsg["HARD_NAME"]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td style="width:215">'.$descripcion.'</td>';
 				else
@@ -71,8 +71,8 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center"><?php echo $TbMsg["HARD_COMMENTS"]?></th>
-			<?if ($opcion==$op_eliminacion)
+			<th align="center">&nbsp;<?php echo $TbMsg["HARD_COMMENTS"]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$comentarios.'</td>';
 				else
 					echo '<td><textarea class="formulariodatos" name="comentarios" rows="3" cols="40">'.$comentarios.'</textarea></td>';
@@ -80,19 +80,19 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center"><?php echo $TbMsg["HARD_WINBOOT"]?> <sup>*</sup></th>
-			<?php if ($opcion==$op_eliminacion)
+			<th align="center">&nbsp;<?php echo $TbMsg["HARD_WINBOOT"]?> <sup>*</sup>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
 					echo "<td>$winboot</td>";
 				else {
 					$params = "reboot=".$TbMsg["HARD_REBOOT"].chr(13);
 					$params.= "kexec=".$TbMsg["HARD_KEXEC"];
-					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",100)."</td>";
+					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",110)."</td>";
 				}
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th colspan="2" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+			<th colspan="3" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
 		</tr>
 	</table>
 </form>

@@ -78,9 +78,9 @@ function abrir_ventana(URL){
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
-			<th align="center"><?php echo $TbMsg[5]?> <sup>*</sup></th>
+			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
 			<?php	$fotomenu=$fotoordenador;
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombreordenador.'</TD>';
@@ -103,7 +103,7 @@ echo $fotoordenador?>">
 		</tr>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align="center"><?php echo $TbMsg[6]?> <sup>*</sup></th>
+			<th align="center">&nbsp;<?php echo $TbMsg[6]?> <sup>*</sup>&nbsp;</th>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
@@ -113,7 +113,7 @@ echo $fotoordenador?>">
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align="center"><?php echo $TbMsg[7]?> <sup>*</sup></th>
+			<th align="center">&nbsp;<?php echo $TbMsg[7]?> <sup>*</sup>&nbsp;</th>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$mac.'</TD>';
@@ -123,7 +123,7 @@ echo $fotoordenador?>">
 		</TR>	
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 				<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$fotoordenador.'</TD>';
@@ -157,7 +157,7 @@ echo $fotoordenador?>">
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion').'</TD>';
@@ -167,7 +167,7 @@ echo $fotoordenador?>">
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
@@ -177,7 +177,7 @@ echo $fotoordenador?>">
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion').'</TD>';
@@ -187,7 +187,7 @@ echo $fotoordenador?>">
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'procedimientos',$idprocedimiento,'idprocedimiento','descripcion').'&nbsp;</TD>';
@@ -197,7 +197,7 @@ echo $fotoordenador?>">
 		</TR>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$cache.'</TD>';
@@ -230,10 +230,10 @@ echo $fotoordenador?>">
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th colspan="4" align="center"><sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?></th>
+			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
 		</tr>
 
-	</TABLE>
+	</table>
 </FORM>
 </DIV>
 <?
