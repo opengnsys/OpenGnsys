@@ -51,6 +51,7 @@ fi
 ND="$1"
 DISK=$(ogDiskToDev "$ND") || return $?
 PTTYPE=$(ogGetPartitionTableType $1)
+PTTYPE=${PTTYPE:-"MSDOS"}               # Por defecto para discos vacíos.
 case "$PTTYPE" in
     GPT)   ogCreateGptPartitions "$@"
            return $? ;;
@@ -272,9 +273,10 @@ esac
 # Capturamos el tipo de tabla de particiones actual
 DISK=$(ogDiskToDev $1) || return $?
 PTTYPE=$(ogGetPartitionTableType $1)
+PTTYPE=${PTTYPE:-"MSDOS"}               # Por defecto para discos vacíos.
 CREATEPTT=${CREATEPTT:-"$PTTYPE"}
 
-# Si la tabla actual y la que se indica son iguales, se comprueba por si hay que regenerarla.
+# Si la tabla actual y la que se indica son iguales, se comprueba si hay que regenerarla.
 if [ "$CREATEPTT" == "$PTTYPE" ]; then
     case "$PTTYPE" in
         GPT)   [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || CREATE="GPT" ;;
@@ -667,6 +669,7 @@ esac
 
 # Hay que comprobar si el disco es GPT
 PTTYPE=$(ogGetPartitionTableType $1)
+PTTYPE=${PTTYPE:-"MSDOS"}               # Por defecto para discos vacíos.
 case "$PTTYPE" in 
     GPT)
         if [ $# == 1 ]; then
