@@ -24,7 +24,7 @@
 function ogEcho () {
 
 # Variables locales
-local LOGLEVEL LOGFILE DATETIME
+local LOGLEVEL DATETIME
 
 # Selección del nivel de registro (opcional).
 case "$1" in
@@ -37,7 +37,7 @@ esac
 DATETIME=$(date +"%F %T")
 
 if [ -n "$LOGLEVEL" ]; then
-    logger -s -t "OpenGnSys $LOGLEVEL" -f $LOGFILE "$DATETIME $*"
+    logger -s -t "OpenGnSys $LOGLEVEL" -f $OGLOGFILE "$DATETIME $*"
     logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGCOMMAND "$DATETIME $*"
     logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGSESSION "$DATETIME $*"
 else

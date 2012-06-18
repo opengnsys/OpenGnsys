@@ -270,8 +270,7 @@ ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
 #@param   str_adm_user      usuario administrador para hacer autologin y ejecutar el runonce
 #@param   str_adm_password  password del usuario administrador
 #@param   bool_autologin    si despues de la postconfiguracion queremos que la maquina haga autologin (0 o 1)
-#@param   str_auto_user     Usuario con el que queremos que haga
-autologin despues de la postconfiguracion
+#@param   str_auto_user     Usuario con el que queremos que haga autologin despues de la postconfiguracion
 #@param   str_auto_password Password del usuario que hara autologin
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
