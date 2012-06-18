@@ -185,7 +185,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 					$metodos="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-					$metodos.="TORRENT "  . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE".chr(13);
+					$metodos.="TORRENT peer:60=TORRENT-CACHE";
 
 					$TBmetodos["UNICAST-DIRECT"]=1;
 					$TBmetodos["MULTICAST-DIRECT"]=2;
@@ -279,17 +279,17 @@ function mcast_syntax($cmd,$ambito,$idambito)
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if ($ambito == 4) 
 {
-$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.puestos FROM  aulas where aulas.idaula=' . $idambito ;
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas where aulas.idaula=' . $idambito ;
 }
 
 if ($ambito == 8) 
 {
-$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.puestos FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
 }
 
 if ($ambito == 16)
 {
-$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.puestos FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
+$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
 }
 
 	$rs=new Recordset; 
@@ -314,45 +314,24 @@ if ($rs->Abrir()){
 		$rs->Siguiente();
 		$mcastsyntax.=$rs->campos["velmul"] .'M:';
 		
-        $rs->Siguiente();
-        $mcastsyntax.=$rs->campos["puestos"] .':';
-
-        rs->Cerrar();
+	$rs->Cerrar();
 	}
-    #tiempo de espera no definido en opciones
-    $mcastsyntax.="100";
+	     	$mcastsyntax.="50:";
+			$mcastsyntax.="60";
 	return($mcastsyntax);	
 }
 
 
 
-function torrent_syntax($cmd,$ambito,$idambito)
-{
-//if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if ($ambito == 4) 
-{
-	$cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas where aulas.idaula=' . $idambito ;
-}
-if ($ambito == 8) 
-{
-	$cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
-}
-if ($ambito == 16)
-{
-	$cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
-}
 
-$rs=new Recordset; 
-$rs->Comando=&$cmd; 
-if ($rs->Abrir()){
-    $rs->Primero(); 
-    $torrentsyntax=$rs->campos["modp2p"] . ':';
-    $rs->Siguiente();
-    $torrentsyntax.=$rs->campos["timep2p"];
-    $rs->Siguiente();
-    $rs->Cerrar();
-    }
-    return($torrentsyntax);   
-}
+
+
+
+
+
+
+
+
+
 
 ?>
