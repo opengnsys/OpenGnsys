@@ -846,11 +846,11 @@ then
 	case "$MODE" in
         peer|PEER)
         	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
-            ctorrent -f -X "sleep 15; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf 
+            ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf 
         ;;
         leecher|LEECHER)
-           	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
-         	ctorrent ${SOURCE} -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 -U 0
+           	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep 30; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
+         	ctorrent ${SOURCE} -X "sleep 30; kill -2 \$(pidof ctorrent)" -C 100 -U 0
         ;;
         seeder|SEEDER)
         	echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
