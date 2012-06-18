@@ -29,7 +29,7 @@
 [ -f $DEVICECFG ] && source $DEVICECFG
 
 # Si el sistema de archivos no esta extendido, ampliarlo al tamaño de su partición.
-PARTSIZE=$(ogGetPartitionSize $1 $2)
+PARTSIZE=$(ogGetPartitionSize $1 $2) || exit $?
 FSSIZE=$(ogGetFsSize $1 $2)
 if [ $FSSIZE -lt $PARTSIZE ]; then
 	echo "Extender sistema de archivos."

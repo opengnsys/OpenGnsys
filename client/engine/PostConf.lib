@@ -172,6 +172,7 @@ done
 [ -n "$RCLOCAL" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 rc.local" || return $?
 # Realizar la instalación en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 # Copiar cliente, generar fichero de configuración e incluir en el arranque.
 cp -a $CLIENTFILE $MNTDIR/$SBINDIR
 cat > $MNTDIR/$ETCDIR/ogAdmLnxClient.cfg << EOT
@@ -371,6 +372,7 @@ done
 [ -n "$WINDIR " ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 windows" || return $?
 # Realizar la instalación en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 # Copiar cliente, generar fichero de configuración e incluir en el arranque.
 cp -a $CLIENTFILE "$WINDIR"
 ogInstallMiniSetup $1 $2 ogclient.cmd

@@ -74,6 +74,7 @@ if ogIsLocked $1 $2; then
 fi
 # Comprobar en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 eval $PROG $PARAMS $PART
 ERRCODE=$?
 case $ERRCODE in
@@ -129,6 +130,7 @@ TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])   PROG="resize2fs"; PARAMS="-f" ;;
     REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
+#    BTRFS)      PROG="btrfs"; PARAMS="filesystem resize max" ;;
     NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
     *)          ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                 return $? ;;
@@ -144,6 +146,7 @@ if ogIsLocked $1 $2; then
 fi
 # Redimensionar en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 eval $PROG $PARAMS $PART &>/dev/null
 ERRCODE=$?
 case $ERRCODE in
@@ -288,6 +291,7 @@ if ogIsLocked $1 $2; then
 fi
 # Formatear en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 eval $PROG $PARAMS $PART 2>/dev/null
 ERRCODE=$?
 case $ERRCODE in
@@ -297,6 +301,54 @@ case $ERRCODE in
 esac
 ogUnlock $1 $2
 return $ERRCODE
+}
+
+
+#/**
+#         ogGetFsSize int_ndisk int_npartition [str_unit]
+#@brief Muestra el tamanio del sistema de archivos indicado, permite definir la unidad de medida, por defecto GB
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_unit       unidad (opcional, por defecto: KB)
+#@return  float_size - Tamaño del sistema de archivos
+#@note 	  str_unit = { KB, MB, GB, TB }
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o partición no corresponden con un dispositivo.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  SizeFileSystem() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 1.0.4 - Adaptación de las salidas.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-06-18
+#*/ ##
+function ogGetFsSize ()
+{
+# Variables locales.
+local MNTDIR VALUE FACTOR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_unit]" \
+           "$FUNCNAME 1 1  =>  15624188" \
+           "$FUNCNAME 1 1 KB  =>  15624188"
+    return
+fi
+# Error si no se reciben 2 o 3 parámetros.
+[ $# == 2 ] || [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+MNTDIR="$(ogMount$1 $2)" || return $?
+VALUE=
+UNIT="$3"
+UNIT=${UNIT:-"KB"}
+case "$UNIT" in
+    [kK]B)
+        FACTOR=1 ;;
+    MB) FACTOR=1024 ;;
+    GB) FACTOR=$[1024*1024] ;;
+    TB) FACTOR=$[1024*1024*1024] ;;
+    *)  ogRaiseError $OG_ERR_FORMAT "$3 != { KB, MB, GB, TB }"
+        return $? ;;
+esac
+echo "$VALUE $FACTOR" | awk '{printf "%f\n", $1/$2}'
 }
 
 
@@ -910,57 +962,6 @@ for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
 done
 }
 
-#/**  @function ogGetFsSize: @brief Muestra el tamanio del sistema de archivos indicado, permite definir la unidad de medida, por defecto GB
-#@param  $1 int_diskEAC
-#@param $2 int_PartitionEAC
-#@param $3 str_UnidadMediada		parametro opcional, admite [ kB MB GB -default GB]
-#@return  cadena con int_TotalSize:int_DataSize:int_DataFree
-#@warning  Salidas de errores no determinada
-#@warning
-#@attention
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:  SizeFileSystem() en FileSystem.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    2008-10-27
-#*/
-function ogGetFsSize () {
-if [ $# = 0 ]
-then
-	echo "sintaxis: ogGetFsSize int_disco int_partition str_SizeOutput [ kB MB GB -default GB]-]" red
-	echo "devuelve int_size : int_data : int_free" red
-return
-fi
-if [ $# -ge 2 ]
-then
-	particion=`ogMount $1 $2 ` #1>/dev/null 2>&1
-	if [ -z $3 ]
-		then
-			unit=kB  # s B kB MB GB TB %
-		else
-			unit=$3
-	fi
-	case $unit in
-		kB)
-			factor="1.024";
-		#	valor=`df | grep  $particion | awk -F" " '{size=$2*1.024; used=$3*1.024; free=$4*1.024; printf "%d:%d:%d", size,used,free}'`
-			valor=`df | grep  $particion | awk -F" " '{size=$2*1.024; used=$3*1.024; free=$4*1.024; printf "%d", size}'`
-		;;
-		MB)
-			factor="1.024/1000";
-			valor=`df | grep  $particion | awk -F" " '{size=$2*1.024/1000; used=$3*1.024/1000; free=$4*1.024/1000; printf "%d:%d:%d", size,used,free}'`
-		;;
-		GB)
-			factor="1.024/1000000";
-			valor=`df | grep $particion | awk -F" " '{size=$2*1.024/1000000; used=$3*1.024/1000000; free=$4*1.024/1000000; printf "%f:%f:%f", size,used,free}'`
-		;;
-	esac
-	#echo $valor
-	#NumberRound $valor
-	#valor=`NumberRound $valor`;
-	ogUnmount $1 $2 1>/dev/null 2>&1
-	echo $valor
-
-fi
-}
 
 function ogGetFreeSize () {
 if [ $# = 0 ]
