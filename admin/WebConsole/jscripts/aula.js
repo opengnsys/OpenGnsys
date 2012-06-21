@@ -92,7 +92,7 @@ function retornorespuestaSondeo(resul)
 		var cadena=resul.split(";"); // Trocea la cadena devuelta por el servidor de adminsitración
 		for (var i=0;i<cadena.length;i++){
 			var dual=cadena[i].split("/");
-			ip=dual[0];
+			ip=dual[0].replace(/\n*/,"");
 			so=dual[1];
 			objOrd=document.getElementById(ip);
 			if(objOrd){ // Si existe el objeto
