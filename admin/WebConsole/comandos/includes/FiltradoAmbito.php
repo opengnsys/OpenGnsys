@@ -254,7 +254,7 @@ function retornorespuestaSondeo(resul)
 		var cadena=resul.split(";"); 
 		for (var i=0;i<cadena.length;i++){
 			var dual=cadena[i].split("/");
-			ip=dual[0];
+			ip=dual[0].replace(/\n*/,"");
 			so=dual[1];
 			objOrd=document.getElementById("img-"+ip);
 			if(objOrd){ 
