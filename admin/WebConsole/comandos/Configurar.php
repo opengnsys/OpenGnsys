@@ -68,7 +68,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
-		include_once("./includes/FiltradoAmbito.php");
+	include_once("./includes/FiltradoAmbito.php");
 	//________________________________________________________________________________________________________
 				
 	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
@@ -133,6 +133,9 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	include_once("./includes/opcionesacciones.php");
 	//________________________________________________________________________________________________________
 ?>
+<SCRIPT language="javascript">
+	Sondeo();
+</SCRIPT>
 </BODY>
 </HTML>
 <?

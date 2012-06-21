@@ -41,7 +41,7 @@ if (!$cmd)
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
-		include_once("./includes/FiltradoAmbito.php");
+	include_once("./includes/FiltradoAmbito.php");
 	//________________________________________________________________________________________________________
 ?>
 	<P align=center>
@@ -66,6 +66,9 @@ if (!$cmd)
 	include_once("./includes/opcionesacciones.php");
 	//________________________________________________________________________________________________________
 ?>
+<SCRIPT language="javascript">
+	Sondeo();
+</SCRIPT>
 </BODY>
 </HTML>
 <?
