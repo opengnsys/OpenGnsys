@@ -26,7 +26,6 @@
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2012-04-16
 #*/ ##
-
 function ogAddCmd ()
 {
 local MOUNTPOINT CMDFILE
@@ -69,7 +68,6 @@ EOF
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2012-04-16
 #*/ ##
-
 function ogDomainScript ()
 {
 local CMDDIR
@@ -91,7 +89,7 @@ CMDDIR=$(ogGetPath "$MOUNTPOINT/windows/system32")
 # Añadimos en el cmd que se ejecutara al arranque, el comando de ejecutar el script que añade al dominio.
 ogAddCmd $1 $2 "$3" "CSCRIPT joindomain.vbs"
 # Eliminamos el script porque tiene el usuario de administrador de dominio en claro
-ogAddCmd $1 $2 "$3" "del /Q C:\Windows\System32\joindomain.vbs"
+ogAddCmd $1 $2 "$3" "DEL /Q C:\Windows\System32\joindomain.vbs"
 # Metemos unas claves de registro para que el dominio salga seleccionado por defecto
 ogAddCmd $1 $2 "$3" "REG ADD \"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\" /v DefaultDomainName /t REG_SZ /d \"$3\" /f"
 
@@ -136,7 +134,7 @@ EOF
 #@version 1.0.4 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-10
-#*/
+#*/ ##
 function ogInstallLinuxClient ()
 {
 # Variables locales.
@@ -195,7 +193,7 @@ ogUnlock $1 $2
 
 
 #/**
-#         ogInstallMiniSetup
+#         ogInstallMiniSetup int_ndisk int_npartition str_filename [str_admuser str_admpassword bool_autologin [str_autouser str_autopassword] ]
 #@brief   Metafunción para instalar archivo que se ejecutará en el arranque de Windows.
 #@see     ogInstallFirstBoot ogInstallRunonce
 #*/ ##
@@ -344,7 +342,7 @@ ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Wi
 #@version 1.0.4 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-11
-#*/
+#*/ ##
 function ogInstallWindowsClient ()
 {
 # Variables locales.

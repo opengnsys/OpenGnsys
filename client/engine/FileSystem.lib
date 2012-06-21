@@ -30,7 +30,7 @@
 #@version 1.0.4 - Soportar HFS/HFS+.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-05-21
-#*/
+#*/ ##
 function ogCheckFs ()
 {
 # Variables locales.
@@ -106,7 +106,7 @@ return $ERRCODE
 #@version 0.9 - Primera adaptacion para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
-#*/
+#*/ ##
 function ogExtendFs ()
 {
 # Variables locales.
@@ -164,7 +164,7 @@ return $ERRCODE
 #/**
 #         ogFormat int_ndisk int_npartition | CACHE
 #@see     ogFormatFs ogFormatCache
-#*/
+#*/ ##
 function ogFormat ()
 {
 case "$*" in
@@ -828,7 +828,7 @@ esac
 #/**
 #         ogUnlock int_ndisk int_npartition
 #@see     ogUnlockPartition
-#*/
+#*/ ##
 function ogUnlock ()
 {
 ogUnlockPartition "$@"
@@ -873,7 +873,7 @@ rm -f $LOCKFILE
 #/**
 #         ogUnmount int_ndisk int_npartition
 #@see     ogUnmountFs
-#*/
+#*/ ##
 function ogUnmount ()
 {
 ogUnmountFs "$@"
