@@ -193,10 +193,10 @@ function RecorriendoOrdenadores($cmd)
 		$ip=$rs->campos["ip"];
 		$cadenaip.=$ip.";";
 		$htmlCode.='<TABLE  cellspacing=1 cellpadding=0>';
-		$htmlCode.='	<TR><TD align="center"><img sondeo="" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.gif"></TD></TR>';
+		$htmlCode.='	<TR><TD align="center"><img sondeo="ordenador_OFF.gif" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.gif"></TD></TR>';
 		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:9px;	COLOR: #4f4f4f;">'.$nombreordenador.'</SPAN></TD></TR>';			
 		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:8px;	COLOR: #4f4f4f;">'.$ip.'</SPAN></TD></TR>';			
-		$htmlCode.='	<TR><TD align="center"><INPUT id="chk-'.$ip.'" type="checkbox" ></TD></TR>';	
+		$htmlCode.='	<TR><TD align="center"><INPUT id="chk-'.$ip.'" type="checkbox" checked></TD></TR>';	
 		$htmlCode.='</TABLE>';
 		$htmlCode.='</TD>';
 		$con++;
