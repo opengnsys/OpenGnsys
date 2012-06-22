@@ -682,8 +682,8 @@ function tomaTamano($numpar,$ordenadores)
 ________________________________________________________________________________________________________*/
 function cargaCache($cmd,$idambito,$ambito)
 {
-	global $tbTam;  // Tabla contenedora de ordenadores incluidos en la consulta
-	global $conTam; // Contador de elementos anteriores
+	global $tbCac;  // Tabla contenedora de ordenadores incluidos en la consulta
+	global $conCac; // Contador de elementos anteriores
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
@@ -710,20 +710,19 @@ function cargaCache($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.cache";
-	//echo "carga tamaños:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$idx=0; 
 	while (!$rs->EOF){
-			$tbTam[$idx]["cache"]=$rs->campos["cache"];
-			$tbTam[$idx]["numpar"]=$rs->campos["numpar"];			
-			$tbTam[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
+			$tbCac[$idx]["cache"]=$rs->campos["cache"];
+			$tbCac[$idx]["numpar"]=$rs->campos["numpar"];
+			$tbCac[$idx]["ordenadores"]=$rs->campos["ordenadores"];
 			$idx++;
 		$rs->Siguiente();
 	}
-	$conTam=$idx; // Guarda contador
+	$conCac=$idx; // Guarda contador
 	$rs->Cerrar();
 }
 /*________________________________________________________________________________________________________
@@ -732,17 +731,15 @@ function cargaCache($cmd,$idambito,$ambito)
 ________________________________________________________________________________________________________*/
 function tomaCache($numpar,$ordenadores)
 {
-	global $tbTam;  // Tabla contenedora de ordenadores incluidos en la consulta
-	global $conTam; // Contador de elementos anteriores
+	global $tbCac;  // Tabla contenedora de ordenadores incluidos en la consulta
+	global $conCac; // Contador de elementos anteriores
 
-	for ($k=0; $k<$conTam; $k++) {
-		if ($tbTam[$k]["numpar"] == $numpar) {
-//			$pos = strpos ($tbTam[$k]["ordenadores"], $ordenadores);
-//			if ($pos !== FALSE) { // Cadena encontrada
+	for ($k=0; $k<$conCac; $k++) {
+		if ($tbCac[$k]["numpar"] == $numpar) {
 			$pcs = explode (",", $ordenadores);
-			$intersec = array_intersect (explode(",", $tbTam[$k]["ordenadores"]), $pcs);
+			$intersec = array_intersect (explode(",", $tbCac[$k]["ordenadores"]), $pcs);
 			if (array_diff ($pcs, $intersec) == NULL) {
-				return ($tbTam[$k]["cache"]);
+				return ($tbCac[$k]["cache"]);
 			}
 		}
 	}
