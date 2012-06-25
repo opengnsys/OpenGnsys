@@ -63,7 +63,8 @@ case "$OSTYPE" in
     Linux)
         ## Install and Configure Grub based on OS installed and Grub 1st stage location.
         ogGrubInstallPartition $1 $2
-        ogGrubInstallMbr $1 $2  
+        # Instalar cliente para Linux. 
+        ogInstallLinuxClient $1 $2
         ;;
 esac
 

@@ -156,11 +156,11 @@ MNTDIR=$(ogMount $1 $2) 2>/dev/null
 # Comprobar si existe el cliente y los directorios y ficheros destino.
 CLIENTFILE=$OGLIB/ogclient/ogAdmLnxClient
 [ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?
-for i in /sbin /usr/sbin /usr/local/sbin; do
+for i in /usr/local/sbin /sbin /usr/sbin; do
     [ -d $MNTDIR/$i ] && SBINDIR=$i
 done
 [ -n "$SBINDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 sbin" || return $?
-for i in /etc /usr/local/etc; do
+for i in /usr/local/etc /etc; do
     [ -d $MNTDIR/$i ] && ETCDIR=$i
 done
 [ -n "$ETCDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 etc" || return $?
