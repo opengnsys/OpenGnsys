@@ -227,11 +227,12 @@ fi
 
 # Elegir tipo de formato segun el tipo de particion.
 case "$3" in
-    EXT2)      ID=83; PROG="mkfs.ext2";;
-    EXT3)      ID=83; PROG="mkfs.ext3";;
-    EXT4)      ID=83; PROG="mkfs.ext4";;
+    EXT2)      ID=83; PROG="mkfs.ext2" ;;
+    EXT3)      ID=83; PROG="mkfs.ext3" ;;
+    EXT4)      ID=83; PROG="mkfs.ext4" ;;
+    BTRFS)     ID=83; PROG="mkfs.btrfs" ;;
     REISERFS)  ID=83; PROG="mkfs.reiserfs"; PARAMS="-f" ;;
-    REISER4)   ID=83; PROG="mkfs.reiser4";;
+    REISER4)   ID=83; PROG="mkfs.reiser4" ;;
     XFS)       ID=83; PROG="mkfs.xfs"; PARAMS="-f" ;;
     JFS)       ID=83; PROG="mkfs.jfs"; PARAMS="<<<\"y\"";;
     NTFS)      ID=7;  PROG="mkntfs"; PARAMS="-f" ;;
@@ -244,16 +245,18 @@ case "$3" in
     HFAT12)    ID=11; PROG="mkdosfs"; PARAMS="-F 12" ;;
     HFS)       ID=af; PROG="mkfs.hfs" ;;
     HFS+)      ID=af; PROG="mkfs.hfsplus" ;;
+    UFS)       ID=bf; PROG="mkfs.ufs"; PARAMS="-O 2" ;;
     *)         LABEL="$3" ;;
 esac
 # Si no se indica explícitamente, detectar el tipo de sistema de archivos.
 if [ -z "$PROG" ]; then
     case "$TYPE" in
-        EXT2)         PROG="mkfs.ext2";;
-        EXT3)         PROG="mkfs.ext3";;
-        EXT4)         PROG="mkfs.ext4";;
+        EXT2)         PROG="mkfs.ext2" ;;
+        EXT3)         PROG="mkfs.ext3" ;;
+        EXT4)         PROG="mkfs.ext4" ;;
+        BTRFS)        PROG="mkfs.btrfs" ;;
         REISERFS)     PROG="mkfs.reiserfs"; PARAMS="-f" ;;
-        REISER4)      PROG="mkfs.reiser4";;
+        REISER4)      PROG="mkfs.reiser4" ;;
         XFS)          PROG="mkfs.xfs"; PARAMS="-f" ;;
         JFS)          PROG="mkfs.jfs"; PARAMS="<<<\"y\"" ;;
         LINUX-SWAP)   PROG="mkswap" ;;
@@ -263,6 +266,7 @@ if [ -z "$PROG" ]; then
         FAT12|HFAT12) PROG="mkdosfs"; PARAMS="-F 12" ;;
         HFS)          PROG="mkfs.hfs" ;;
         HFS+)         PROG="mkfs.hfsplus" ;;
+        UFS)          PROG="mkfs.ufs"; PARAMS="-O 2" ;;
         *)            ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                       return $? ;;
     esac
@@ -324,7 +328,7 @@ return $ERRCODE
 function ogGetFsSize ()
 {
 # Variables locales.
-local MNTDIR VALUE FACTOR
+local MNTDIR UNIT VALUE FACTOR SIZE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_unit]" \
@@ -334,9 +338,7 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben 2 o 3 parámetros.
 [ $# == 2 ] || [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-MNTDIR="$(ogMount$1 $2)" || return $?
-VALUE=
+# Obtener unidad y factor de medida.
 UNIT="$3"
 UNIT=${UNIT:-"KB"}
 case "$UNIT" in
@@ -348,7 +350,17 @@ case "$UNIT" in
     *)  ogRaiseError $OG_ERR_FORMAT "$3 != { KB, MB, GB, TB }"
         return $? ;;
 esac
-echo "$VALUE $FACTOR" | awk '{printf "%f\n", $1/$2}'
+
+# Obtener el tamaño del sistema de archivo (si no está formateado; tamaño = 0).
+MNTDIR="$(ogMount $1 $2 2>/dev/null)"
+if [ -n "$MNTDIR" ]; then
+    VALUE=$(df -BK "$MNTDIR" | awk '{getline; print $2}')
+    SIZE=$(echo "$VALUE $FACTOR" | awk '{printf "%f\n", $1/$2}')
+else
+    SIZE=0
+fi
+# Devolver el tamaño (quitar decimales si son 0).
+echo ${SIZE%.0*}
 }
 
 

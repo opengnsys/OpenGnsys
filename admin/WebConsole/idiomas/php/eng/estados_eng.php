@@ -6,7 +6,7 @@
 //_________________________________________
 
 if (empty ($TbMsg)) $TbMsg=array();
-$TbMsg["STATUS_BSY"]="Bussy";
+$TbMsg["STATUS_BSY"]="Busy";
 $TbMsg["STATUS_INI"]="Initializing";
 $TbMsg["STATUS_OFF"]="Off";
 $TbMsg["STATUS_OPG"]="OpenGnSys";
