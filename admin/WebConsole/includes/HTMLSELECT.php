@@ -20,6 +20,9 @@
 //		- clausulawhere: Clausula Where adicional
 // *************************************************************************************************************************************************
 function HTMLSELECT($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombreliteral,$ancho,$eventochg = "",$clase="",$clausulawhere=""){
+	$nombretabla=htmlentities($nombretabla);
+	$nombreid=htmlentities($nombreid);
+	$nombreliteral=htmlentities($nombreliteral);
 	if (!empty($eventochg))	$eventochg='onchange="'.$eventochg.'(this);"';
 	if (empty($clase))	$clase='formulariodatos';
 	$SelectHtml="";
@@ -30,7 +33,7 @@ function HTMLSELECT($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombre
 				$cmd->texto.=" AND (".$clausulawhere.")";
 	}
 	else{
-			$cmd->texto='SELECT * FROM '.$nombretabla;
+			$cmd->texto='SELECT DISTINCT '.$nombreid.', '.$nombreliteral.' FROM '.$nombretabla;
 			if(!empty($clausulawhere))
 				$cmd->texto.=" WHERE (".$clausulawhere.")";
 	}
