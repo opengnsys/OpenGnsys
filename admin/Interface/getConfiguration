@@ -11,7 +11,8 @@ cfg="0::::$(ogGetDiskSize 1);"          # e información de disco (partición 0)
 
 for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
-	cod=$(ogGetPartitionId 1 $par)
+	cod=$(ogGetPartitionId 1 $par 2>/dev/null)
+	cod=${cod:-0}
 	# Tipo de partición o sistema de fichero
 	fsi=$(getFsType 1 $par 2>/dev/null)
 	fsi=${fsi:-"EMPTY"}
