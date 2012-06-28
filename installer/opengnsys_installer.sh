@@ -1075,7 +1075,7 @@ function copyServerFiles ()
 			repoman/bin \
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
-			install_ticket_wolunicast.sh \
+			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=( tftpboot \
 			bin \
@@ -1222,13 +1222,19 @@ function clientCreate()
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
-	echoAndLog "${FUNCNAME}(): Loading Client"
-	# Descargar, montar imagen, copiar cliente ogclient y desmontar.
-	wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	# Descargar cliente, si es necesario.
+	if [ -s $PROGRAMDIR/$FILENAME ]; then
+		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
+		mv $PROGRAMDIR/$FILENAME $TARGETFILE
+	else
+		echoAndLog "${FUNCNAME}(): Loading Client"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	fi
 	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
+	# Montar imagen, copiar cliente ogclient y desmontar.
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
