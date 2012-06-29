@@ -102,7 +102,7 @@ if  ($opcion!=$op_alta){
 				if ($opcion==$op_eliminacion)
 					echo '<td>'.$tipopar.'</td>';
 				else
-					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$tipopar,'tipopar','tipopar',100,"","","clonable=1").'</td>';
+					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar',"CONCAT(tipopar,' (',HEX(codpar),')')",170,"","","clonable=1").'</td>';
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
