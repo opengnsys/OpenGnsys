@@ -410,7 +410,7 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `grupoid` int(11) DEFAULT NULL,
   `idrepositorio` int(11) NOT NULL,
   `numpar` smallint(6) NOT NULL,
-  `codpar` smallint(6) NOT NULL,
+  `codpar` int(8) NOT NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -731,7 +731,7 @@ CREATE TABLE IF NOT EXISTS `sistemasficheros` (
   `idsistemafichero` smallint(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
-  `codpar` smallint(6) NOT NULL,
+  `codpar` int(8) NOT NULL,
   PRIMARY KEY (`idsistemafichero`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

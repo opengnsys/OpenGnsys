@@ -11,6 +11,8 @@ ALTER TABLE ogAdmBD.ordenadores_particiones
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 # Nuevos tipos de particiones y particiones GPT.
 ALTER TABLE ogAdmBD.tipospar MODIFY codpar int(8) NOT NULL;
+ALTER TABLE ogAdmBD.imagenes MODIFY codpar int(8) NOT NULL;
+ALTER TABLE ogAdmBD.sistemasficheros MODIFY codpar int(8) NOT NULL;
 INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
 	(CONV('A5',16,10), 'FREEBSD', 1),

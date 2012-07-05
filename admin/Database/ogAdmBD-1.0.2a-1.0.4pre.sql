@@ -12,6 +12,8 @@ ALTER TABLE ogAdmBD.ordenadores_particiones
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 
+ALTER TABLE ogAdmBD.imagenes MODIFY codpar int(8) NOT NULL;
+ALTER TABLE ogAdmBD.sistemasficheros MODIFY codpar int(8) NOT NULL;
 ALTER TABLE ogAdmBD.tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
