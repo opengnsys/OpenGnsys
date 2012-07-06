@@ -53,6 +53,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #509	Incluir foto/imagen en propiedades de ordenadores y aulas
 #516	Restaurar desde consola: falla si esta recién particionado
 #539	Leyenda en estaus de ordenadores
+#545	Comando Restaurar de consola web: activación de unicast-cache (deploy unicast)
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #414	Instalar OpenGnSys en otras distribuciones Linux
