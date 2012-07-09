@@ -118,9 +118,7 @@ esac
 [ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
 TARGET="$(ogGetPath "$@")"
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
-# Copiar fichero.
-cp -a "$SOURCE" "$TARGET"                    # (definir posible error)
-# Para evitar problemas con las comunicaciones las copias se hacen con rsync en lugar de cp.
+# Copiar fichero (para evitar problemas de comunicaciones las copias se hacen con rsync en vez de cp).
 rsync --progress -avh "$SOURCE" "$TARGET"
 }
 
