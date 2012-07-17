@@ -156,8 +156,9 @@ ogPostConfigureFS()
 	echo "order hosts,bind" > /etc/host.conf
 	echo "multi on" >> /etc/host.conf
 	
-	#configuramos el dns
-	echo "nameserver $ogdns" > /etc/resolv.conf 
+	#configuramos el dns 
+	#echo "nameserver $ogdns" > /etc/resolv.conf 
+	echo "nameserver $ogdns" > /etc/resolvconf/resolv.conf.d/tail
 	
 	
 	# configuramos el /etc/networks
