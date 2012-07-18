@@ -29,6 +29,8 @@ Tickets resueltos en módulo OpenGnSys Client:
 #520	ogLive modprobe no utiliza los modulos correspondientes
 #525	Seleccionar el tipo de arranque de sistemas Windows (reinicio o en caliente)
 #529	Cliente ogLive basado en Ubuntu 12.04
+#546	ogLive en modo PXE durante el proceso de arranque no continuará hasta que la interfaz de red esté correctamente configurada
+#547	oglive basado en Ubuntu 12.04 no detecta ficheros de configuración de DNS
 
 Tickets resueltos en módulo OpenGnSys Server:
 #426	isAlive: control de los servicios OpenGnSys

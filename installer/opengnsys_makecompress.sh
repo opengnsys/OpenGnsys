@@ -10,7 +10,7 @@
 
 
 # Variables
-SVNURL="http://www.opengnsys.es/svn/trunk/"
+SVNURL="http://www.opengnsys.es/svn/branches/version1.0/"
 SVNREV=$(LANG=C svn info $SVNURL | awk '/Last Changed Rev:/ {print "r"$4}')
 
 # Descargar repositorio SVN
