@@ -11,7 +11,8 @@
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SAMBAUSER="opengnsys"				# Usuario por defecto.
-CLIENTINITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
+TFTPDIR=$OPENGNSYS/tftpboot
+CLIENTINITRD=$TFTPDIR/ogclient/oginitrd.img
 TMPDIR=/tmp/ogclient$$
 
 # Control básico de errores.
@@ -30,6 +31,13 @@ if [ -r $CLIENTINITRD ]; then
 	stty -echo 2>/dev/null
 	echo -n "Clave del usuario Samba: "
 	read SAMBAPASS
+	# Solo se deben aceptar números y letras para la clave de acceso.
+	if [ -n "${SAMBAPASS//[a-zA-Z0-9]/}" ]; then
+		echo
+		echo "$PROG: Error: la clave solo debe contener caracteres alfanuméricos" >&2
+		stty echo 2>/dev/null
+		exit 2
+	fi
 	echo
 	echo -n "Confirmar clave: "
 	read SAMBAPASS2
@@ -51,6 +59,9 @@ if [ -r $CLIENTINITRD ]; then
 		echo "$PROG: Aviso: no se ha modificado la clave del cliente."
 	fi
 	rm -fr $TMPDIR
+	md5sum $CLIENTINITRD | cut -f1 -d" " > $CLIENTINITRD.sum
+	cp -a $CLIENTINITRD $TFTPDIR
+	cp -a $CLIENTINITRD.sum $TFTPDIR
 else
 	SAMBAPASS="og"                  # Clave por defecto.
         echo "$PROG: Aviso: no se ha modificado la clave del cliente."

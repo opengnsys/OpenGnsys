@@ -11,8 +11,10 @@
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");
+include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_perfilhardwares_".$idioma.".php"); 
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php"); 
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -21,7 +23,8 @@ $idperfilhard=0;
 $descripcion="";
 $comentarios="";
 $grupoid=0;
-$ordenadores=0; // Número de ordenador que tienen este perfil
+$ordenadores=0;		// Número de ordenadores que tienen este perfil
+$winboot="reboot";	// Método de arranque para Windows (por defecto, reboot).
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idperfilhard"])) $idperfilhard=$_GET["idperfilhard"]; 
@@ -38,54 +41,69 @@ if  ($opcion!=$op_alta){
 }
 //________________________________________________________________________________________________________
 ?>
-<HTML>
-<TITLE>Administración web de aulas</TITLE>
-<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
-	<SCRIPT language="javascript" src="../jscripts/propiedades_perfilhardwares.js"></SCRIPT>
-	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_perfilhardwares_'.$idioma.'.js"></SCRIPT>'?>
-</HEAD>
-<BODY>
-<DIV  align=center>
-<FORM  name="fdatos" action="../gestores/gestor_perfilhardwares.php" method="post"> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=idperfilhard value=<?=$idperfilhard?>>
-	<INPUT type=hidden name=ordenadores value=<?=$ordenadores?>>
-	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
-	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
+<html>
+<title>Administración web de aulas</title>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<link rel="stylesheet" type="text/css" href="../estilos.css" />
+	<script language="javascript" src="../jscripts/propiedades_perfilhardwares.js"></script>
+	<script language="javascript" src="../jscripts/opciones.js"></script>
+	<?php echo '<script language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_perfilhardwares_'.$idioma.'.js"></script>'?>
+</head>
+<body>
+<div align="center">
+<form name="fdatos" action="../gestores/gestor_perfilhardwares.php" method="post"> 
+	<input type="hidden" name="opcion" value="<?=$opcion?>" />
+	<input type="hidden" name="idperfilhard" value="<?=$idperfilhard?>" />
+	<input type="hidden" name="ordenadores" value="<?=$ordenadores?>" />
+	<input type="hidden" name="grupoid" value="<?=$grupoid?>" />
+	<p align="center" class="cabeceras"><?echo $TbMsg["HARD_TITLE"]?><br />
+	<span align="center" class="subcabeceras"><? echo $opciones[$opcion]?></span></p>
+	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
-					echo '<TD style="width:215">'.$descripcion.'</TD>';
+		<tr>
+			<th align="center">&nbsp;<?echo $TbMsg["HARD_NAME"]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td style="width:215">'.$descripcion.'</td>';
 				else
-					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:215" type=text value="'.$descripcion.'"></TD>';?>
-			<TD align=left rowspan=2><IMG border=3 style="border-color:#63676b" src="../images/aula.jpg"><br><center>&nbsp;Ordenadores:&nbsp;<? echo $ordenadores?></center></TD>
-		</TR>
+					echo '<td><input class="formulariodatos" name="descripcion" style="width:215" type="text" value="'.$descripcion.'" /></td>'; ?>
+			<td align="left" rowspan="3"><img border="3" style="border-color:#63676b" src="../images/aula.jpg" /><br /> <?php echo $TbMsg["HARD_COMPUTERS"].": $ordenadores"?></td>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
-					echo '<TD>'.$comentarios.'</TD>';
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg["HARD_COMMENTS"]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td>'.$comentarios.'</td>';
 				else
-					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=40>'.$comentarios.'</TEXTAREA></TD>';
+					echo '<td><textarea class="formulariodatos" name="comentarios" rows="3" cols="40">'.$comentarios.'</textarea></td>';
 			?>
-		</TR>	
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-	</TABLE>
-</FORM>
-</DIV>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg["HARD_WINBOOT"]?> <sup>*</sup>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo "<td>$winboot</td>";
+				else {
+					$params = "reboot=".$TbMsg["HARD_REBOOT"].chr(13);
+					$params.= "kexec=".$TbMsg["HARD_KEXEC"];
+					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",110)."</td>";
+				}
+			?>
+		</tr>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th colspan="3" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
+		</tr>
+	</table>
+</form>
+</div>
 <?
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
-</BODY>
-</HTML>
+</body>
+</html>
 <?
 //________________________________________________________________________________________________________
 //	Recupera los datos de un perfil hardware
@@ -98,10 +116,12 @@ function TomaPropiedades($cmd,$id)
 	global $descripcion;
 	global $comentarios;
 	global $ordenadores;
+	global $winboot;
 	$rs=new Recordset; 
-	$cmd->texto="SELECT perfileshard.*, count(*) as numordenadores FROM perfileshard 
-	 						INNER JOIN ordenadores ON ordenadores.idperfilhard=perfileshard.idperfilhard
-							WHERE perfileshard.idperfilhard=".$id;
+	$cmd->texto="SELECT perfileshard.*, COUNT(*) AS numordenadores
+			FROM perfileshard 
+	 		INNER JOIN ordenadores ON ordenadores.idperfilhard=perfileshard.idperfilhard
+			WHERE perfileshard.idperfilhard=".$id;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero(); 
@@ -109,6 +129,7 @@ function TomaPropiedades($cmd,$id)
 		$descripcion=$rs->campos["descripcion"];
 		$comentarios=$rs->campos["comentarios"];
 		$ordenadores=$rs->campos["numordenadores"];
+		$winboot=$rs->campos["winboot"];
 	}
 	$rs->Cerrar();
 	return(true);

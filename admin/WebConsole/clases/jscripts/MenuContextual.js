@@ -10,7 +10,7 @@ var ctx_blanco="#ffffff";
 var ctx_negro="#000000";
 var ctx_grissombra="#808080";
 
-gmenuctx=new Array(); // Guarda el último menu flotante
+var gmenuctx=new Array(); // Guarda el último menu flotante
 var idxmnu=0 // Indice de los menus flotantes
 var currentItem=null;
 var currentPadresubmenu;
@@ -29,12 +29,12 @@ var botonraton=null;
 //____________________________________________________________________________
 function muestra_contextual(x,y,menuctx){
 	var margen=0
-	dpzx=16
-	dpzy=16
-	wtop=calculatop_ctx(y,dpzy,margen,menuctx) // Calcula posición del menu contextual
-	wleft=calculaleft_ctx(x,dpzx,margen,menuctx)
-	ftop=wtop+parseInt(document.body.scrollTop) // Tiene en cuenta el scrolling
-	fleft=wleft+parseInt(document.body.scrollLeft)
+	var dpzx=16
+	var dpzy=16
+	var wtop=calculatop_ctx(y,dpzy,margen,menuctx) // Calcula posición del menu contextual
+	var wleft=calculaleft_ctx(x,dpzx,margen,menuctx)
+	var ftop=wtop+parseInt(document.body.scrollTop) // Tiene en cuenta el scrolling
+	var fleft=wleft+parseInt(document.body.scrollLeft)
 	menuctx.style.top=ftop
 	menuctx.style.left=fleft
 	menuctx.style.visibility="visible"
@@ -51,7 +51,7 @@ function muestra_contextual(x,y,menuctx){
 //	- menuctx: El menu (objeto DIV) que se mostrará
 //____________________________________________________________________________
 function calculatop_ctx(oriy,dpzy,margen,menuctx){ // Calcula Y del menu contextual
-	largodiv=parseInt(menuctx.offsetHeight);
+	var largodiv=parseInt(menuctx.offsetHeight);
 	var wtop=oriy+dpzy+margen
 	if (wtop+largodiv>parseInt(document.body.clientHeight)){
 		var nwtop=oriy-dpzy-margen-largodiv
@@ -69,7 +69,7 @@ function calculatop_ctx(oriy,dpzy,margen,menuctx){ // Calcula Y del menu context
 //	- menuctx: El menu (objeto DIV) que se mostrará
 //____________________________________________________________________________
 function calculaleft_ctx(orix,dpzx,margen,menuctx){ // Calcula Y del menu contextual
-	anchodiv=parseInt(menuctx.offsetWidth)
+	var anchodiv=parseInt(menuctx.offsetWidth)
 	var wleft=orix+dpzx+margen
 	var maximodpl=parseInt(document.body.clientWidth)
 	if (wleft+anchodiv>maximodpl){ // Si no cabe a la derecha
@@ -210,7 +210,8 @@ function marca_desmarca(o,sw){
 		var wfondo=ctx_grissistema;
 		var wcolor=ctx_negro;
 	}
-	(MenuconImagen(contextual(o)) ? i0=2:i0=1);
+	var i0;
+	(MenuconImagen(contextual(o)) ? i0=2 : i0=1);
 	var nh=o.childNodes.length;
 	for (var i=i0;i<nh-1;i++){
 		var oTD=o.childNodes[i];
@@ -279,8 +280,8 @@ function reset_contextual(x,y){
 //	- menuctx: El submenu (objeto DIV)
 //____________________________________________________________________________
 function EnContextual(x,y,menuctx){
-	origen_x=parseInt(menuctx.offsetLeft)-parseInt(document.body.scrollLeft)
-	origen_y=parseInt(menuctx.offsetTop)-parseInt(document.body.scrollTop)
+	var origen_x=parseInt(menuctx.offsetLeft)-parseInt(document.body.scrollLeft)
+	var origen_y=parseInt(menuctx.offsetTop)-parseInt(document.body.scrollTop)
 	anchodiv=parseInt(menuctx.offsetWidth)
 	largodiv=parseInt(menuctx.offsetHeight)
 
@@ -332,14 +333,15 @@ function subcalculatop_ctx(y,menuctx){ // Calcula el posicionamiento (y) del DIV
 //	- menuctx: El submenu (objeto DIV) que se mostrará
 //____________________________________________________________________________
 function subcalculaleft_ctx(padrediv,menuctx){ // Calcula el posicionamiento (x) del DIV ( SUBmenu contextual)
-	anchopadrediv=parseInt(padrediv.offsetWidth) // Ancho del div padre
-	anchomenuctx=parseInt(menuctx.offsetWidth) // Ancho del div 
+	var anchopadrediv=parseInt(padrediv.offsetWidth) // Ancho del div padre
+	var anchomenuctx=parseInt(menuctx.offsetWidth) // Ancho del div 
+	var leftpadrediv; // Coordenada x del div padre
 	if(IE)
-		leftpadrediv=padrediv.style.pixelLeft // Coordenada x del div padre
+		leftpadrediv=padrediv.style.pixelLeft
 	else 
 		if(NS)
 			leftpadrediv=parseInt(padrediv.style.left) // Coordenada x del div padre
-	desplazamiento=leftpadrediv+anchopadrediv-4 // Desplazamiento
+	var desplazamiento=leftpadrediv+anchopadrediv-4 // Desplazamiento
 	var wleft=parseInt(desplazamiento)
 	var maximodpl=parseInt(document.body.clientWidth)+parseInt(document.body.scrollLeft)
 	if (wleft+anchomenuctx>maximodpl){

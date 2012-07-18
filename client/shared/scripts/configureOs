@@ -1,9 +1,8 @@
 #!/bin/bash
 
 #/**
-#         configureOS
-#@brief   Scirpt de ejemplo para realizar la configuracion del sistema operativo restaurado.
-#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#         configureOs
+#@brief   Scirpt para realizar la configuracion del sistema operativo restaurado.
 #@param 1 disco 
 #@param 2 particion 
 #@return  
@@ -21,39 +20,51 @@
 #@version 1.0.3 - Configura el chkdisk en el arranque de windows, segun variable OGWINCHKDISK del engine.cfg.  
 #@author Antonio J. Doblas Viso.    Universidad de Malaga.
 #@date   2011-12-23
+#@version 1.0.4 - Inyecta el cliente para gestión del sistema operativo.
+#@author Ramon Gomez, ETSII Universidad de Sevilla
+#@date   2012-04-11
 
-#Carga del configurador del engine
+# Carga el configurador del engine y los parámetros de red.
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+[ -f $DEVICECFG ] && source $DEVICECFG
 
-# Si el sistema de archivos no esta extendido. Realizar.
-PARTSIZE=$(ogGetPartitionSize $1 $2)
+# Si el sistema de archivos no esta extendido, ampliarlo al tamaño de su partición.
+PARTSIZE=$(ogGetPartitionSize $1 $2) || exit $?
 FSSIZE=$(ogGetFsSize $1 $2)
 if [ $FSSIZE -lt $PARTSIZE ]; then
 	echo "Extender sistema de archivos."
 	ogExtendFs $1 $2
 fi
 
-#Si no existe particion activa, activar este sistema.
+# Si no existe partición activa, activar este sistema.
 FLAGACTIVE=$(ogGetPartitionActive $1)
 [ -z $FLAGACTIVE ] && ogSetPartitionActive $1 $2
 
-# Cambiar nombre en sistemas Windows y quitar usuario de acceso por defecto.
-if [ "$(ogGetOsType $1 $2)" = "Windows" ]; then
-    # Cambiar nombre en sistemas Windows.
-    HOST=$(ogGetHostname)
-    HOST=${HOST:-"pc"}
-    ogSetWindowsName $1 $2 "$HOST"
-    # Descomentar la siguiente línea para cambiar usuario de inicio.
-    #ogSetWinlogonUser $1 $2 " "
-    # Configurar el boot sector de la partición Windows.
-    ogFixBootSector $1 $2
-    # Configurar el gestor de arranque de Windows XP/Vista/7.
-    ogWindowsBootParameters $1 $2
-    # Registrar en Windows que la partición indicada es su nueva unidad C:\
-    ogWindowsRegisterPartition $1 $2 C $1 $2
-    ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
-fi
+# Post-configuración personalizada para cada tipo de sistema operativo.
+OSTYPE="$(ogGetOsType $1 $2)"
+case "$OSTYPE" in 
+    Windows)
+        # Cambiar nombre en sistemas Windows.
+        HOST=$(ogGetHostname)
+        HOST=${HOST:-"pc"}
+        ogSetWindowsName $1 $2 "$HOST"
+        # Descomentar la siguiente línea para cambiar usuario de inicio.
+        #ogSetWinlogonUser $1 $2 " "
+        # Configurar el boot sector de la partición Windows.
+        ogFixBootSector $1 $2
+        # Configurar el gestor de arranque de Windows XP/Vista/7.
+        ogWindowsBootParameters $1 $2
+        # Registrar en Windows que la partición indicada es su nueva unidad C:\
+        ogWindowsRegisterPartition $1 $2 C $1 $2
+        ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
+        # Instalar cliente para Windows.
+        ogInstallWindowsClient $1 $2
+        ;;
+    Linux)
+        ## Install and Configure Grub based on OS installed and Grub 1st stage location.
+        ogGrubInstallPartition $1 $2
+        # Instalar cliente para Linux. 
+        ogInstallLinuxClient $1 $2
+        ;;
+esac
 
-if [ "$(ogGetOsType $1 $2)" = "Linux" ]; then
-	ogGrubInstallPartition $1 $2
-fi

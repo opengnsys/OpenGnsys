@@ -77,7 +77,7 @@ function Confirmar() {
 function comprobar_datos(){
 	
 	if (document.fdatos.descripcion.value==""){
-		alert("Descripcion es un dato obligatorio")
+		alert(TbMsg["DESCRIP"]);
 		document.forms.fdatos.descripcion.focus()
 		return(false)
 	}

@@ -2,11 +2,79 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.4
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#465	httpdlog CrearImagen salida de reducir sistema archivos (no se resolverá)
+#489	Suma de verificacion de la imagen más rápida
+#518	Se marca mal el FS al particionar, lo marca como EMPTY y luego no se pueden formatear
+#521	Función ogUpdateCacheIsNecesary: usar funcion para cálculo de MD5
+#522	Script updateCache: eliminar opción del case $ACTIONCACHEFULL=NONE
+#527	Mejora del sistema de postconfiguracion
+#530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
+#538	Función ogTypeToId: error en parámetro
+#540	Función ogCreateCache no detecta tipo de tabla de particiones
+#543	Particionado -incluido initCache- sobre disco duro sin formatear no funciona
+
+Tickets resueltos en módulo OpenGnSys Client:
+#116	Aviso en el browser de cliente rechazado (no se resolverá)
+#411	Menú por defecto para los clientes con información básica del estado de red
+#415	Compatiblidad hardware (red, disco) en los clientes OpenGnSys
+#416	Aviso en el browser de cliente rechazado
+#419	chntpw trunca las claves de registro largas
+#491	Log de seguimiento con información de caché local
+#494	Información de la caché en pantalla del cliente (no válido)
+#497	Clientes opengnsys para Windows y Linux (resuelto en #501)
+#520	ogLive modprobe no utiliza los modulos correspondientes
+#525	Seleccionar el tipo de arranque de sistemas Windows (reinicio o en caliente)
+#529	Cliente ogLive basado en Ubuntu 12.04
+#546	ogLive en modo PXE durante el proceso de arranque no continuará hasta que la interfaz de red esté correctamente configurada
+#547	oglive basado en Ubuntu 12.04 no detecta ficheros de configuración de DNS
+
+Tickets resueltos en módulo OpenGnSys Server:
+#426	isAlive: control de los servicios OpenGnSys
+#488	Script de comparación configuración DHCP y OpenGnSys
+#493	Configurar el modo PXE desde el cliente
+#513	Wake_on_lan por IP (opcional)
+#514 	Controlar clave de acceso del cliente
+#517	Servicio opengnsys comprobación de permisos en sistema de archivos
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#427	Postconfiguración por grupos de ordenadores (heredado de #14)
+#452	Elegir resolución en los menús
+#462	Consola: eliminar grupos de ordenadores
+#473	La cola de acciones no muestra el protocolo usado en la restauración ni sus parámetros
+#490	Usuarios y contraseñas con más de 10 caracteres
+#495	Contenido de la caché
+#496	Ejecuición procedimientos encadendos (resuelto en #501)
+#500	Iniciar sesión segunda partición Linux no habilitada
+#502	Tamaño Iframe propiedades ordenadores
+#503	Asistente con seguimiento predeterminado (no válido)
+#505	Filtrado de ordenadores para aplicar comandos
+#509	Incluir foto/imagen en propiedades de ordenadores y aulas
+#516	Restaurar desde consola: falla si esta recién particionado
+#539	Leyenda en estaus de ordenadores
+#545	Comando Restaurar de consola web: activación de unicast-cache (deploy unicast)
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#414	Instalar OpenGnSys en otras distribuciones Linux
+#515	Actualizador no actualiza cambios de la base de datos
+
+Tickets genéricos resueltos:
+#445	Limitación puertos multicast: inconsistencia consola administración y Protocol.lib
+#501	Procedimientos encadenados y clientes para Linux y Windows
+#508	Branch UMA: Script con TODOS los cambios de las propuestas 1.0.4 (#491, #494, #495, #502 y #503)
+#526	Particionado discos GPT
+#531	Integración de OpenGnSys 1.0.4 en rama principal
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.3
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #92	ogGetFsType detecta identificador de partición no sistema de archivos
+#447	Restauración por Multicast en script restoreImage
 #469	Definir fichero de configuración para el motor de clonación
 #470	Implementar mejoras en script updateCache
 #471	Test de rendimiento de sistemas de archivos en contenedor de imágenes local y remoto (duplicado de #468)
@@ -34,7 +102,8 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #492	Mejoras en páginas principal de acceso (mejora)
 
 Tickets resueltos en módulo OpenGnSys Installer:
-#504	instalador: error al instalar servidor DHCP en Ubuntu 10.04.4
+#410	Instalación de servidor común para varias subredes
+#504	Instalador: error al instalar servidor DHCP en Ubuntu 10.04.4
 #507	OpenGnSys Installer 1.0.3 no crea enlace /opt/opengnsys/tftpboot -> /var/lib/tftpboot en Ubuntu
 #510	Instalador: error en función autoConfigurePost
 
@@ -62,18 +131,26 @@ Lista de cambios incluidos en OpenGnSys 1.0.2
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #14	Crear funciones de línea de comando que permitan la gestión de los grupos de PCs (duplicado)
 #370	ogGetMacAddress en host multiples interfaces siempre usa datos eth0 aunque no esté activa
+#381	Sincronizar errores del engine -> ogAdmClient -> ogAdmServer
 #393	En acceso ssh a los clientes, no reconoce funciones de valores de la interfaz de red
 #394	crearImagen y updateCache debe considerar espacio libre para almacenar la imagen
 #402	Gestor de arranque para Windows 7/Vista/XP/2000
+#438	Modificación del fichero de boot bcd de Windows falla
 #450	Instalar Grub en sistemas Linux restaurados
-#460	updateCache usando torrent en una operación con más de 60 clientes produce error inesperado del binario ctorrent en algunos equipos
+#459	updateCache usando torrent en una operación con más de 60 clientes produce error inesperado del binario ctorrent en algunos equipos
 
 Tickets resueltos en módulo OpenGnSys Client:
 #371	ogAdmClient debería realizar proceso de actualización a la BD después de particionado, restauración (duplicado de #265)
+#404	boot-tools iso - arranque pxe, cd, usb, cache
+#420	boot-tools (oglive-ogclient) compatible con og2
 #421	boot-tools-httd-log (mejora)
 #422	boot-tools: Separar los log normales de los de seguimiento
+#429	Añadir herramienta gráfica gparted al ogclient
 #430	RAMFS del boot-tools autogestión sobre la caché: Instalación y Actualización
+#431	Instalador boot-tools incluye iso y el md5 de todos los componentes
 #432	Escalar servicios de almacenamiento
+#439	boot-tools herramientas acceso registro Windows
+#442	Consola ssh desde interfaz web
 #444	Sustitución definitiva de PXELinux por Grub4Dos en el arranque de clientes (heredado de #134)
 #451	Fase inicial para apagado programado de clientes inactivos
 
@@ -91,6 +168,9 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #458	Interfaz RestaurarImagen no pasa los parametros correctos a script updateCache
 
 Tickets resueltos en módulo OpenGnSys Installer:
+#424	opengnsys installer|update updateClient() no descarga iso cliente con nombre distinto
+#433	ogLive-natty-2.6.38-8-generic-pae-r2268.iso
+#449	Actualizar installer y update con el nuevo formato de cliente ogLive iso y adaptado al ogupdteinitrd
 #464	opengnsys_update de la 1.0.1 a la 1.0.2 no actualiza el ogAdmClient.cfg
 
 Tickets genéricos resueltos:
@@ -128,7 +208,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #256	Restaurar con caché (duplicado de #357)
-#357    Comando Restaurar admite protocolos P2P, multicast, unicast
+#270	Consola web: error en nombre canónico de imagen
 #378	Asignar letrero auxiliar en el fondo del browser, indicando que no se apague el ordenador
 #387	Opción reubicador de ordenadores, no soporta nombres de grupos de ordenadores que incluye espacios
 #388	Netboot sobre grupo de aulas muestra ordenadores que no le corresponde
@@ -170,6 +250,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 Tickets resueltos en módulo OpenGnSys Client:
 #93	Gestionar una estructura de directorios Linux debootstrap para enlazarlo al Initrd
 #115	ogAdmClient no lee correctamente el fichero de configuración
+#127	Generar cliente con Debootstrap basado en Ubuntu Lucid (duplicado de #93)
 #131	Generar paquetes deb para el cliente (no se resolverá)
 #162	Optimizar el uso del fichero-disco con particiones para su uso en entorno virtualizado (mejora)
 #163	Incluir en el cliente la clave autorizada rsa ssh del servidor
@@ -187,6 +268,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #368	Generar nuevo cliente como boot-tools
 
 Tickets resueltos en módulo OpenGnSys Server:
+#340	Menú PXE de arranque con tiempo de espera
 #350	ogAdmAgent no se inicia
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
@@ -208,6 +290,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #307	Asistente Deploy de Imagenes no muestra nombres de imágenes
 #308	Asistente Deploy de Imagenes - multicast: no lanza el repo
 #310	Instalar: no genera las propiedades del repositorio por defecto en la consola (duplicado de #248)
+#311	Consola: Añadir aula no comprueba valores
 #315	OpenGnSys distribuido: CloneRemoteFromPartition en Unicast
 #338	Validación de formularios de la consola web
 #339	Añadir opción de apagado en cliente sin menú asociado (mejora)
@@ -234,6 +317,7 @@ Lista de cambios incluidos en OpenGnSys 0.10
 --------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#128	Scripts para pruebas de rendimiento de NFS vs NBD
 #182	Clonación remota partición a partición
 #257	ogCreatePartitions: Al crear o modificar las particiones desaparece la cache
 #261	restoreImage de un XP cambia usuario inicio sesión a HOSTNAME
@@ -244,9 +328,11 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #290	ogReduceFs en Ext[234]
 #293	createImageTesting incluye el redimensionado de la partición origen pero luego no la expande
 #297	Error al detectar tipo de partición Linux marcada como activa
+#351	ogCreatePartitions() ogUpdatePartitionTable() error con equipos con ciertas disqueteras
 
 Tickets resueltos en módulo OpenGnSys Client:
 #112	Problema al arrancar Windows en discos SATA2
+#157	ogClient falla al buscar una función ogConfigureRamfs
 #237	Sustituir Partimage
 #250	En ocasiones el cliente no arranca el browser gráfico
 #255	ogClient: Si falla alguna comprobación inicial, se para el ogClient
@@ -254,6 +340,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #275	Generador de cliente Initrd no detecta versión de Ubuntu
 
 Tickets resueltos en módulo OpenGnSys Server:
+#89	Incluir binarios herramientas testing
 #260	Gestionar plantillas PXE mediante scripts
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
@@ -286,11 +373,16 @@ Lista de cambios incluidos en OpenGnSys 0.9.2
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#70	Funciones para distribuir imágenes por P2P
 #159	No reconoce Ubuntu 10.04
 #165	Función torrent no migrada correctamente desde el branch
 #166	Errores Particionando y Formateando
+#168	Protocol.lib control errores ogGenerateSintaxMcast
+#170	Redefinir proceso de creación de torrent de una imagen
 #172	Protocol.lib Error control nº parámetros sesión multicast de cliente
 #178	Adaptar funciones de generación y restauración de imágenes monolíticas
+#180	Funiocnes de generación sintaxis no detecta la existencia de mbuffer
+#183	Renombrar funciones composición de sintaxis para que sean tipo "Syntax"
 #191	ogReduceFs con ntfs, tamaño auxiliar mínimo depende del tamaño total de datos
 #216	Incluir histórico al engine, adaptarlo a doxygen
 
@@ -302,11 +394,13 @@ Tickets resueltos en módulo OpenGnSys Client:
 #155	Controlar tamaño mínimo de la caché
 #156	ogClient no encuentra ni el kernel ni el initrd
 #161	El cliente no acepta las solicitud de reboot y reiniciar del servicio ogADMClient
+#167	Cliente opengnsys 2ndFS con descarga torrent no participa en el enjambre (mejora)
 #169	No se detectan discos en placas nuevas
 #173	Arranque de cliente lento al crear enlaces simbólicos
 #174	Algunos binarios no se ejecutan en clientes de 64 bits
 #176	No se ve el vídeo en cliente basado en Ubuntu Lucid
 #181	Parámetro eliminación cache
+#186	ogadmclient -> ogGetIpAddress -> devuleve como ip la interfaz loop
 #229	Mensaje de confirmación para ejecutar algunas acciones en el Browser
 
 Tickets resueltos en módulo OpenGnSys Server:
@@ -323,7 +417,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #100	oginstaller gestor torrent
-#150	Fallo de Opengnsys Intaller (si MySQL ya instalado)
+#150	Fallo de Opengnsys Intaller (duplicado de #144)
 #171	binarios y scripts para multicast
 
 Tickets genéricos resueltos:

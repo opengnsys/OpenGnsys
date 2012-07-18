@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//____________________________________________________
 //
-//	Fichero de idiomas php: configuraciones_esp.php 
-//	Idioma: Español 
-//________________________________________________________________________________________________________
+//	Fitxer d'idiomes php: configuraciones_cat.php 
+//      Idioma: Català
+//____________________________________________________
 $TbMsg=array();
 $TbMsg[0]='Configuraciones';
 $TbMsg[1]='Ámbito';
@@ -52,9 +52,13 @@ $TbMsg[38]='Menor espacio libre (KB)';
 $TbMsg[39]='Personalizar';
 $TbMsg[40]='Sin modificar tama&ntilde;o';
 $TbMsg[41]='Generar Instrucci&oacute;n OG';
+$TbMsg["CONFIG_PARTTABLE"='Tabla de particiones';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
-
+$TbMsg[44]='Equipo sin Perfil de Hardware';
+$TbMsg[45]='Agregue Perfil para obtener datos';
+$TbMsg[495]='Contenido Cach&eacute;';
+$TbMsg[4951]='Cach&eacute; libre';
 ?>
 

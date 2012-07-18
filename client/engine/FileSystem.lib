@@ -4,7 +4,7 @@
 #@brief   Librería o clase FileSystem
 #@class   FileSystem
 #@brief   Funciones para gestión de sistemas de archivos.
-#@version 0.9
+#@version 1.0.4
 #@warning License: GNU GPLv3+
 #*/
 
@@ -27,7 +27,10 @@
 #@version 1.0.2 - Ignorar códigos de salida de comprobación (no erróneos).
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-09-23
-#*/
+#@version 1.0.4 - Soportar HFS/HFS+.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-05-21
+#*/ ##
 function ogCheckFs ()
 {
 # Variables locales.
@@ -55,6 +58,8 @@ case "$TYPE" in
     FAT32)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
     FAT16)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
     FAT12)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    HFS)          PROG="fsck.hfs" ;;
+    HFS+)         PROG="fsck.hfsplus" ;;
     *)            ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
                   return $? ;;
 esac
@@ -69,6 +74,7 @@ if ogIsLocked $1 $2; then
 fi
 # Comprobar en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 eval $PROG $PARAMS $PART
 ERRCODE=$?
 case $ERRCODE in
@@ -100,7 +106,7 @@ return $ERRCODE
 #@version 0.9 - Primera adaptacion para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
-#*/
+#*/ ##
 function ogExtendFs ()
 {
 # Variables locales.
@@ -124,6 +130,7 @@ TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])   PROG="resize2fs"; PARAMS="-f" ;;
     REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
+#    BTRFS)      PROG="btrfs"; PARAMS="filesystem resize max" ;;
     NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
     *)          ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                 return $? ;;
@@ -139,6 +146,7 @@ if ogIsLocked $1 $2; then
 fi
 # Redimensionar en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 eval $PROG $PARAMS $PART &>/dev/null
 ERRCODE=$?
 case $ERRCODE in
@@ -156,7 +164,7 @@ return $ERRCODE
 #/**
 #         ogFormat int_ndisk int_npartition | CACHE
 #@see     ogFormatFs ogFormatCache
-#*/
+#*/ ##
 function ogFormat ()
 {
 case "$*" in
@@ -183,6 +191,9 @@ esac
 #@version 0.9 - Primera versión para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-08
+#@version 1.0.4 - Solucionado error cuando no se detecta tipo de sistema de ficheros pero si se indica
+#@author  Universidad de Huelva
+#@date    2012-04-11
 #*/ ##
 function ogFormatFs ()
 {
@@ -202,15 +213,26 @@ fi
 [ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener dispositivo y tipo de sisitema de archivos.
 PART="$(ogDiskToDev $1 $2)" || return $?
-TYPE="$(ogGetFsType $1 $2)" || return $?
+TYPE="$(ogGetFsType $1 $2)"
+# Si no se detecto el tipo de sistema de ficheros
+if [ -z "$TYPE" ]; then
+    # Si no se indico ningun tipo de sistema de ficheros se retorna
+    if [ -z "$3" ]; then
+        return $?
+    else
+    # Si no se detecto, se asigna el indicado
+        TYPE="$3"
+    fi
+fi
 
 # Elegir tipo de formato segun el tipo de particion.
 case "$3" in
-    EXT2)      ID=83; PROG="mkfs.ext2";;
-    EXT3)      ID=83; PROG="mkfs.ext3";;
-    EXT4)      ID=83; PROG="mkfs.ext4";;
+    EXT2)      ID=83; PROG="mkfs.ext2" ;;
+    EXT3)      ID=83; PROG="mkfs.ext3" ;;
+    EXT4)      ID=83; PROG="mkfs.ext4" ;;
+    BTRFS)     ID=83; PROG="mkfs.btrfs" ;;
     REISERFS)  ID=83; PROG="mkfs.reiserfs"; PARAMS="-f" ;;
-    REISER4)   ID=83; PROG="mkfs.reiser4";;
+    REISER4)   ID=83; PROG="mkfs.reiser4" ;;
     XFS)       ID=83; PROG="mkfs.xfs"; PARAMS="-f" ;;
     JFS)       ID=83; PROG="mkfs.jfs"; PARAMS="<<<\"y\"";;
     NTFS)      ID=7;  PROG="mkntfs"; PARAMS="-f" ;;
@@ -221,16 +243,20 @@ case "$3" in
     HFAT16)    ID=16; PROG="mkdosfs"; PARAMS="-F 16" ;;
     FAT12)     ID=1;  PROG="mkdosfs"; PARAMS="-F 12" ;;
     HFAT12)    ID=11; PROG="mkdosfs"; PARAMS="-F 12" ;;
+    HFS)       ID=af; PROG="mkfs.hfs" ;;
+    HFS+)      ID=af; PROG="mkfs.hfsplus" ;;
+    UFS)       ID=bf; PROG="mkfs.ufs"; PARAMS="-O 2" ;;
     *)         LABEL="$3" ;;
 esac
 # Si no se indica explícitamente, detectar el tipo de sistema de archivos.
 if [ -z "$PROG" ]; then
     case "$TYPE" in
-        EXT2)         PROG="mkfs.ext2";;
-        EXT3)         PROG="mkfs.ext3";;
-        EXT4)         PROG="mkfs.ext4";;
+        EXT2)         PROG="mkfs.ext2" ;;
+        EXT3)         PROG="mkfs.ext3" ;;
+        EXT4)         PROG="mkfs.ext4" ;;
+        BTRFS)        PROG="mkfs.btrfs" ;;
         REISERFS)     PROG="mkfs.reiserfs"; PARAMS="-f" ;;
-        REISER4)      PROG="mkfs.reiser4";;
+        REISER4)      PROG="mkfs.reiser4" ;;
         XFS)          PROG="mkfs.xfs"; PARAMS="-f" ;;
         JFS)          PROG="mkfs.jfs"; PARAMS="<<<\"y\"" ;;
         LINUX-SWAP)   PROG="mkswap" ;;
@@ -238,6 +264,9 @@ if [ -z "$PROG" ]; then
         FAT32|HFAT32) PROG="mkdosfs"; PARAMS="-F 32" ;;
         FAT16|HFAT16) PROG="mkdosfs"; PARAMS="-F 16" ;;
         FAT12|HFAT12) PROG="mkdosfs"; PARAMS="-F 12" ;;
+        HFS)          PROG="mkfs.hfs" ;;
+        HFS+)         PROG="mkfs.hfsplus" ;;
+        UFS)          PROG="mkfs.ufs"; PARAMS="-O 2" ;;
         *)            ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                       return $? ;;
     esac
@@ -266,6 +295,7 @@ if ogIsLocked $1 $2; then
 fi
 # Formatear en modo uso exclusivo.
 ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
 eval $PROG $PARAMS $PART 2>/dev/null
 ERRCODE=$?
 case $ERRCODE in
@@ -275,6 +305,62 @@ case $ERRCODE in
 esac
 ogUnlock $1 $2
 return $ERRCODE
+}
+
+
+#/**
+#         ogGetFsSize int_ndisk int_npartition [str_unit]
+#@brief Muestra el tamanio del sistema de archivos indicado, permite definir la unidad de medida, por defecto GB
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_unit       unidad (opcional, por defecto: KB)
+#@return  float_size - Tamaño del sistema de archivos
+#@note 	  str_unit = { KB, MB, GB, TB }
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@exception OG_ERR_NOTFOUND Disco o partición no corresponden con un dispositivo.
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  SizeFileSystem() en FileSystem.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008-10-27
+#@version 1.0.4 - Adaptación de las salidas.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-06-18
+#*/ ##
+function ogGetFsSize ()
+{
+# Variables locales.
+local MNTDIR UNIT VALUE FACTOR SIZE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_unit]" \
+           "$FUNCNAME 1 1  =>  15624188" \
+           "$FUNCNAME 1 1 KB  =>  15624188"
+    return
+fi
+# Error si no se reciben 2 o 3 parámetros.
+[ $# == 2 ] || [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener unidad y factor de medida.
+UNIT="$3"
+UNIT=${UNIT:-"KB"}
+case "$UNIT" in
+    [kK]B)
+        FACTOR=1 ;;
+    MB) FACTOR=1024 ;;
+    GB) FACTOR=$[1024*1024] ;;
+    TB) FACTOR=$[1024*1024*1024] ;;
+    *)  ogRaiseError $OG_ERR_FORMAT "$3 != { KB, MB, GB, TB }"
+        return $? ;;
+esac
+
+# Obtener el tamaño del sistema de archivo (si no está formateado; tamaño = 0).
+MNTDIR="$(ogMount $1 $2 2>/dev/null)"
+if [ -n "$MNTDIR" ]; then
+    VALUE=$(df -BK "$MNTDIR" | awk '{getline; print $2}')
+    SIZE=$(echo "$VALUE $FACTOR" | awk '{printf "%f\n", $1/$2}')
+else
+    SIZE=0
+fi
+# Devolver el tamaño (quitar decimales si son 0).
+echo ${SIZE%.0*}
 }
 
 
@@ -313,9 +399,10 @@ fi
 # Detectar id. de tipo de partición y codificar al mnemonico.
 DISK=$(ogDiskToDev "$1") || return $?
 ID=$(ogGetPartitionId "$1" "$2") || return $?
+[ "$ID" == "a7" ] && ID="ca"    # Traducir antiguo id. de partición de caché.
 TYPE=""
 case "$ID" in
-     ca|a7)    # Detectar Caché local.
+     ca|CA00)  # Detectar caché local (revisar detección en tablas GPT).
                ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
                ;;
      *)        # Detectar sistema de ficheros.
@@ -537,6 +624,9 @@ esac
 #@version 0.9 - Primera version para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
+#@version 1.0.4 - Soportar HFS/HFS+.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-05-21
 #*/ ##
 function ogMountFs ()
 {
@@ -585,6 +675,7 @@ if [ -z "$MNTDIR" ]; then
         NTFS|HNTFS) MOUNT=ntfs-3g ;;
         FAT16|FAT32|HFAT16|HFAT32)
                     MOUNT=mount; PARAMS="-t vfat" ;;
+        HFS|HFS+)   MOUNT=mount; PARAMS="-o force" ;;
         *)  #/// Error, si la partición no es montable.
             rmdir $MNTDIR
             ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
@@ -673,18 +764,18 @@ case "$(ogGetFsType $1 $2)" in
 #	    ;;
     NTFS|HNTFS)
         ogDeleteFile $1 $2 pagefile.sys
-        ogDeleteFile $1 $2 hiberfile.sys
+        ogDeleteFile $1 $2 hiberfil.sys
         ogUnmount $1 $2 2>/dev/null
         ## NTFS: Obtiene tamaño mínimo en MB.
         #SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print int($8*1.1)}')
         #ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         #ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-		SIZE=$(ogReduceFsCheck $1 $2)
-	    [ "$SIZE" == 0 ] && return 1	
+        SIZE=$(ogReduceFsCheck $1 $2)
+        [ "$SIZE" == 0 ] && return 1	
         ntfsresize -fs "${SIZE}M" $PART <<<"y"  || ogRaiseError $OG_ERR_PARTITION "error reduciendo $1,$2" || return $?
-	    ;;
+        ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
-	    return $? ;;
+        return $? ;;
 esac
 ogGetFsSize $1 $2
 }
@@ -749,7 +840,7 @@ esac
 #/**
 #         ogUnlock int_ndisk int_npartition
 #@see     ogUnlockPartition
-#*/
+#*/ ##
 function ogUnlock ()
 {
 ogUnlockPartition "$@"
@@ -794,7 +885,7 @@ rm -f $LOCKFILE
 #/**
 #         ogUnmount int_ndisk int_npartition
 #@see     ogUnmountFs
-#*/
+#*/ ##
 function ogUnmount ()
 {
 ogUnmountFs "$@"
@@ -883,57 +974,6 @@ for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
 done
 }
 
-#/**  @function ogGetFsSize: @brief Muestra el tamanio del sistema de archivos indicado, permite definir la unidad de medida, por defecto GB
-#@param  $1 int_diskEAC
-#@param $2 int_PartitionEAC
-#@param $3 str_UnidadMediada		parametro opcional, admite [ kB MB GB -default GB]
-#@return  cadena con int_TotalSize:int_DataSize:int_DataFree
-#@warning  Salidas de errores no determinada
-#@warning
-#@attention
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:  SizeFileSystem() en FileSystem.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    2008-10-27
-#*/
-function ogGetFsSize () {
-if [ $# = 0 ]
-then
-	echo "sintaxis: ogGetFsSize int_disco int_partition str_SizeOutput [ kB MB GB -default GB]-]" red
-	echo "devuelve int_size : int_data : int_free" red
-return
-fi
-if [ $# -ge 2 ]
-then
-	particion=`ogMount $1 $2 ` #1>/dev/null 2>&1
-	if [ -z $3 ]
-		then
-			unit=kB  # s B kB MB GB TB %
-		else
-			unit=$3
-	fi
-	case $unit in
-		kB)
-			factor="1.024";
-		#	valor=`df | grep  $particion | awk -F" " '{size=$2*1.024; used=$3*1.024; free=$4*1.024; printf "%d:%d:%d", size,used,free}'`
-			valor=`df | grep  $particion | awk -F" " '{size=$2*1.024; used=$3*1.024; free=$4*1.024; printf "%d", size}'`
-		;;
-		MB)
-			factor="1.024/1000";
-			valor=`df | grep  $particion | awk -F" " '{size=$2*1.024/1000; used=$3*1.024/1000; free=$4*1.024/1000; printf "%d:%d:%d", size,used,free}'`
-		;;
-		GB)
-			factor="1.024/1000000";
-			valor=`df | grep $particion | awk -F" " '{size=$2*1.024/1000000; used=$3*1.024/1000000; free=$4*1.024/1000000; printf "%f:%f:%f", size,used,free}'`
-		;;
-	esac
-	#echo $valor
-	#NumberRound $valor
-	#valor=`NumberRound $valor`;
-	ogUnmount $1 $2 1>/dev/null 2>&1
-	echo $valor
-
-fi
-}
 
 function ogGetFreeSize () {
 if [ $# = 0 ]
@@ -975,37 +1015,3 @@ then
 fi
 }
 
-
-
-function ogDeletePartitionsLabels ()
-{
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME " \
-           "$FUNCNAME "
-    return
-fi
-rm /dev/disk/by-label/* 2>/dev/null   # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
-}
-
-function ogDeletePartitionTable ()
-{
-
-# Variables locales.
-local DISK
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME int_disk"  \
-           "$FUNCNAME 1"
-    return
-fi
-# Error si no se reciben 1 parámetros.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Obteniendo Identificador linux de la particion.
-DISK=$(ogDiskToDev $1) || return $?
-
-# Elimando las particiones con fdisk
-echo -ne "o\nw" | fdisk $DISK
-}

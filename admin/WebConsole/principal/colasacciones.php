@@ -446,15 +446,16 @@ function listaAcciones($ambito,$idambito)
 	RecopilaIpesMacs($cmd,$ambito,$idambito); // Recopila Ipes del ámbito		
  	$cadenasesion="(SELECT DISTINCT sesion FROM acciones WHERE idordenador NOT IN (".$cadenaid."))";
  
- 	$cmd->texto="SELECT acciones.*,comandos.descripcion as comando,acciones.parametros,comandos.visuparametros,
-						ordenadores.nombreordenador,procedimientos.descripcion as procedimiento,
- 						tareas.descripcion as tarea,programaciones.sesion as sesionprog
-					FROM acciones";
- 	$cmd->texto.=" INNER JOIN comandos ON comandos.idcomando=acciones.idcomando";
- 	$cmd->texto.=" INNER JOIN ordenadores ON ordenadores.idordenador=acciones.idordenador";
- 	$cmd->texto.=" LEFT OUTER JOIN procedimientos ON procedimientos.idprocedimiento=acciones.idprocedimiento";
- 	$cmd->texto.=" LEFT OUTER JOIN tareas ON tareas.idtarea=acciones.idtarea";
- 	$cmd->texto.=" LEFT OUTER JOIN programaciones ON programaciones.sesion=acciones.sesion";
+ 	$cmd->texto="SELECT acciones.*, comandos.descripcion AS comando, acciones.parametros,
+			    comandos.visuparametros, ordenadores.nombreordenador,
+			    procedimientos.descripcion AS procedimiento,
+			    tareas.descripcion AS tarea, programaciones.sesion AS sesionprog
+			FROM acciones
+ 			INNER JOIN comandos ON comandos.idcomando=acciones.idcomando
+ 			INNER JOIN ordenadores ON ordenadores.idordenador=acciones.idordenador
+ 			LEFT OUTER JOIN procedimientos ON procedimientos.idprocedimiento=acciones.idprocedimiento
+ 			LEFT OUTER JOIN tareas ON tareas.idtarea=acciones.idtarea
+ 			LEFT OUTER JOIN programaciones ON programaciones.sesion=acciones.sesion";
 	if(!empty($sesion)) // Filtro por acción
 		$cmd->texto.=" WHERE acciones.sesion =".$sesion;
 	else
@@ -466,16 +467,15 @@ function listaAcciones($ambito,$idambito)
 		if(!empty($ClausulaWhere)) 
 			$cmd->texto.=" AND (".$ClausulaWhere.")";
 	}	
-	$cmd->texto.=" ORDER BY acciones.idaccion desc,acciones.sesion desc ";
+	$cmd->texto.=" ORDER BY acciones.idaccion DESC, acciones.sesion DESC";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-	//echo $cmd->texto;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 
-	$acciones=""; // Variable que recogerá las acciones que cumplan los criterios
-				// con formato "ambito,idambito" concadenando con ";" a otro identificador
-				// Esta variable se usara para las operaciones globales de Eliminar, etc...
-				
+	$acciones=""; 	// Variable que recogerá las acciones que cumplan los criterios
+			// con formato "ambito,idambito" concadenando con ";" a otro identificador
+			// Esta variable se usara para las operaciones globales de Eliminar, etc...
+
 	// Recorre acciones
 	$html="";
 	while (!$rs->EOF){
@@ -492,6 +492,9 @@ function listaAcciones($ambito,$idambito)
 		}	
 	}
 	echo $html;
+while (!$rs->EOF){
+echo $rs->campos['descripcion'].'</br>';
+};
 }
 //	_________________________________________________________________________
 
@@ -1237,4 +1240,7 @@ function ContextualXMLComun()
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
+while (!$rs->EOF){
+echo $rs['descripcion'];
+};
 ?>

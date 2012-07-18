@@ -119,9 +119,9 @@ if  ($opcion!=$op_alta){
 		</TR>
 		<TR>
 			<TD width=20>&nbsp;</TD>
-			<TD align=right><A href=#><IMG border=0 src="../images/boton_cancelar.gif" style="cursor:hand"  onclick="cancelar()"></A></TD>
+			<TD align=right><A href=#><IMG border=0 src="../images/boton_cancelar_<? echo $idioma ?>.gif" style="cursor:hand"  onclick="cancelar()"></A></TD>
 			<TD width=20></TD>
-			<TD align=left ><A href=#><IMG border=0 src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="confirmar(<? echo $idaula?>)" ></A></TD>
+			<TD align=left ><A href=#><IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" style="cursor:hand"  onclick="confirmar(<? echo $idaula?>)" ></A></TD>
 			<TD width=20>&nbsp;</TD>
 		</TR>
 	</TABLE>

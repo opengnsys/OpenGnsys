@@ -33,6 +33,7 @@ if (isset($_POST["descripcion"])) $descripcion=$_POST["descripcion"];
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 if (isset($_POST["identificador"])) $idperfilhard=$_POST["identificador"];
+if (isset($_POST["winboot"])) $winboot=$_POST["winboot"];
 
 $tablanodo=""; // Arbol para nodos insertados
 
@@ -100,6 +101,7 @@ function Gestiona(){
 	global	$descripcion;
 	global	$comentarios;
 	global	$grupoid;
+	global	$winboot;
 
 	global $urlimgth;
 
@@ -115,10 +117,11 @@ function Gestiona(){
 	$cmd->CreaParametro("@descripcion",$descripcion,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
+	$cmd->CreaParametro("@winboot",$winboot,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO perfileshard (descripcion,comentarios,idcentro,grupoid) VALUES (@descripcion,@comentarios,@idcentro,@grupoid)";
+			$cmd->texto="INSERT INTO perfileshard (descripcion,comentarios,idcentro,grupoid,winboot) VALUES (@descripcion,@comentarios,@idcentro,@grupoid,@winboot)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idperfilhard=$cmd->Autonumerico();
@@ -130,14 +133,14 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE perfileshard SET descripcion=@descripcion,comentarios=@comentarios WHERE idperfilhard=@idperfilhard";
+			$cmd->texto="UPDATE perfileshard SET descripcion=@descripcion,comentarios=@comentarios,winboot=@winboot WHERE idperfilhard=@idperfilhard";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
 			$resul=EliminaPerfileshard($cmd,$idperfilhard,"idperfilhard");
 			break;
 		case $op_movida :
-			$cmd->texto="UPDATE perfileshard SET  grupoid=@grupoid WHERE idperfilhard=@idperfilhard";
+			$cmd->texto="UPDATE perfileshard SET grupoid=@grupoid WHERE idperfilhard=@idperfilhard";
 			$resul=$cmd->Ejecutar();
 			break;
 		default:
@@ -161,3 +164,4 @@ function SubarbolXML_perfileshard($idperfilhard,$descripcion){
 		return($cadenaXML);
 }
 ?>
+

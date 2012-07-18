@@ -332,28 +332,24 @@ ALLOWOPTIONS 1
 
 MENU TITLE  OpenGnsys ${NAMEISOCLIENT}
 
-LABEL gpxe
-MENU LABEL gpxe
-KERNEL /clonezilla/live/vmlinuz1
-APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
 
 LABEL 0
-MENU LABEL ogClient vga irqpool acpi ogdebug ip:none
+MENU LABEL ogLive vga irqpool acpi ogdebug ip:none
 KERNEL /ogclient/linuxISO
 APPEND initrd=/ogclient/oginitrd.img ro vga=788 irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=none
 
 LABEL 1
-MENU LABEL ogClient irqpoll acpi ip:none
+MENU LABEL ogLive irqpoll acpi ip:none
 KERNEL /ogclient/linuxISO
 APPEND initrd=/ogclient/oginitrd.img ro  irqpoll acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=none
 
 LABEL 2
-MENU LABEL ogClient acpi debug ip=dhcp
+MENU LABEL ogLive acpi debug ip=dhcp
 KERNEL /ogclient/linuxISO
 APPEND initrd=/ogclient/oginitrd.img ro acpi=on boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=true ip=dhcp
 
 LABEL 3
-MENU LABEL ogClient ip=dhcp
+MENU LABEL ogLive ip=dhcp
 KERNEL /ogclient/linuxISO
 APPEND initrd=/ogclient/oginitrd.img ro acpi=off boot=oginit  og2nd=sqfs ogprotocol=local ogactiveadmin=true ogdebug=false ip=dhcp
 
@@ -377,6 +373,11 @@ KERNEL gpxe.pxe
 label 8
 MENU LABEL Network boot via gPXE  iso
 KERNEL gpxe.iso
+
+label 9
+MENU LABEL gpxe
+KERNEL /clonezilla/live/vmlinuz1
+APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
 FIN
 
 

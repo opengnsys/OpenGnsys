@@ -92,7 +92,7 @@ switch($idtipousuario){
 				<?if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idtipousuario!=$SUPERADMINISTRADOR)){?>
 					<TD><?echo $usuario?>&nbsp&nbsp;<IMG src="<? echo $urlimg ?>"></TD>
 				<?}else{?>
-					<TD><INPUT type=text class=cajatexto maxlength=10 name="usuario"  style="width:100" value="<? echo $usuario?>">
+					<TD><INPUT type=text class=cajatexto name="usuario"  style="width:100" value="<? echo $usuario?>">
 					<IMG src="<? echo $urlimg ?>">
 
 				<?}?>
@@ -103,7 +103,7 @@ switch($idtipousuario){
 				<?if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idtipousuario!=$SUPERADMINISTRADOR)){?>
 					<TD><?echo $pasguor?></TD>
 				<?}else{?>
-					<TD><INPUT type=text class=cajatexto maxlength=10  name="pasguor"  style="width:100" value="<? echo $pasguor?>">
+					<TD><INPUT type=text class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>">
 				<?}?>
 			</TR>
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->

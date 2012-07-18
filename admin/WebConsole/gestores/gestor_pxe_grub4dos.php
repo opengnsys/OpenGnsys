@@ -50,15 +50,20 @@ $cmd->CreaParametro("@optboot",$optboot,0);
 $cmd->CreaParametro("@hostname",$hostname,0);
 $cmd->texto="update ordenadores set arranque=@optboot where nombreordenador=@hostname";
 $cmd->Ejecutar();
-
 $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
 			ordenadores.netiface AS netiface, aulas.netmask AS netmask,
 			aulas.router AS router, repositorios.ip AS iprepo,
-			aulas.nombreaula AS grupo
+			aulas.nombreaula AS grupo,
+			menus.resolucion AS vga,
+			perfileshard.winboot AS winboot
 			FROM ordenadores 
 			JOIN aulas ON ordenadores.idaula=aulas.idaula 
 			JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
-			WHERE ordenadores.nombreordenador='". $hostname ."'"; 
+			LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
+			LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
+			WHERE ordenadores.nombreordenador='". $hostname ."'";
+
+
 $rs=new Recordset; 
 $rs->Comando=&$cmd; 
 if (!$rs->Abrir()) echo "error";
@@ -70,6 +75,12 @@ $rs->Primero();
 	$netmask=$rs->campos["netmask"]; 
 	$repo=$rs->campos["iprepo"];   			
 	$group=cleanString($rs->campos["grupo"]);
+	if($rs->campos["vga"]== null || $rs->campos["vga"]== 0)
+		$vga="788";
+	else
+		$vga=$rs->campos["vga"];
+	$winboot=$rs->campos["winboot"];
+
 $rs->Cerrar();
 
 $cmd->texto="SELECT ipserveradm FROM entornos";
@@ -95,32 +106,31 @@ switch ($idioma) {
 }
 
 
-$infohost="'LANG=$idioma ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
+$infohost=" vga=$vga".
+	  " LANG=$idioma".
+	  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
 	  " group=$group" .
 	  " ogrepo=$repo" .
 	  " oglive=$repo" .
 	  " oglog=$server" .
-	  " ogshare=$server'";
-
+	  " ogshare=$server";
+if (! empty ($winboot)) {
+	  $infohost.=" winboot=$winboot";
+}
 
 ###################obtenemos las variables de red del aula.
 
-	#02.1 obtenemos nombre fichero mac
-	$mac=  substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-	$macfile="01-" . str_replace(":","-",strtoupper($mac));	
-	$nombre_archivo="/var/lib/tftpboot/menu.lst/" . $macfile;
+#02.1 obtenemos nombre fichero mac
+$pxedir="/opt/opengnsys/tftpboot/menu.lst";
+$mac=  substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
+$macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));	
 
 #controlar optboot
 
-	#exec("cp /var/lib/tftpboot/menu.lst/templates/". $optboot . " /var/lib/tftpboot/menu.lst/". $macfile);
-	exec("sed s/INFOHOST/".$infohost."/g /var/lib/tftpboot/menu.lst/templates/" . $optboot . " > /var/lib/tftpboot/menu.lst/" . $macfile);
-	exec("chown www-data:www-data /var/lib/tftpboot/menu.lst/". $macfile);
-	exec("chmod 777 /var/lib/tftpboot/menu.lst/". $macfile);
-	
-
-
-
+exec("sed -e 's/vga=...//g' -e 's/INFOHOST/$infohost/g' $pxedir/templates/$optboot > $macfile");
+exec("chmod 777 $macfile");
 }
+
 
 function netmask2cidr($netmask) {
           $cidr = 0;
@@ -130,7 +140,7 @@ function netmask2cidr($netmask) {
                }
            }
            return $cidr;
- }
+}
 
 // Sustituye espacio por "_" y quita acentos y tildes.
 function cleanString ($cadena) {
@@ -140,3 +150,4 @@ function cleanString ($cadena) {
 }
 
 ?>
+

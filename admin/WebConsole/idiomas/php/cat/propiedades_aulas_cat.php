@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//______________________________________________________
 //
 //	Fitxer d'idiomes php: propiedades_aulas_esp.php 
 //	Idioma: Catala 
-//________________________________________________________________________________________________________
+//______________________________________________________
 $TbMsg=array();
 $TbMsg[0]="Sense Opcio";
 $TbMsg[1]="Insertar";
@@ -26,7 +26,7 @@ $TbMsg[17]="Perfil Hardware";
 $TbMsg[18]="Propietat pert tot els ordinadors";
 $TbMsg[19]="Tamaño caché (KB)";
 $TbMsg[20]="Autoexec";
-$TbMsg[21]="";
+$TbMsg[21]="Ordinadors";
 $TbMsg[22]="Modo Multicast";
 $TbMsg[23]="IP Multicast";
 $TbMsg[24]="Port Multicast";

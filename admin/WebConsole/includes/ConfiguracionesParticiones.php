@@ -41,6 +41,7 @@
 								00000100- No agrupar por Tamaño de partición
 								00001000- No agrupar por Imagen instalada
 								00010000- No agrupar por Perfil software contenido
+								00100000- No agrupar por Contenido Cache
 				$swr: Indica  si se se tiene en cuenta las particiones no clonables (si:true o no:false)	
 ________________________________________________________________________________________________________*/
 function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
@@ -56,28 +57,30 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_tamano;
 	global $msk_imagen;
 	global $msk_perfil;	
+	global $msk_cache;
 				
-	$cmd->texto="SELECT 			
-				concat_WS( ';', 
-							ordenadores_particiones.numpar, ";
-							
+	$cmd->texto="SELECT CONCAT_WS( ';', ordenadores_particiones.numpar, ";
+
 	if($sws & $msk_tamano)						
 		$cmd->texto.="	ordenadores_particiones.tamano,";
-	
 
 	if($sws & $msk_sysFi)						
 		$cmd->texto.="	ordenadores_particiones.idsistemafichero, ";	
 		
 	if($sws & $msk_nombreSO)						
-		$cmd->texto.="	ordenadores_particiones.idnombreso, ";								
-							
-	if($sws & $msk_imagen)						
-		$cmd->texto.="	ordenadores_particiones.idimagen, ";	
-		
-	if($sws & $msk_perfil)						
-		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";										
+		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
 
-	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,	
+	if($sws & $msk_imagen)
+		$cmd->texto.="	ordenadores_particiones.idimagen, ";
+
+	if($sws & $msk_perfil)
+		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";
+
+	if($sws & $msk_cache)
+		$cmd->texto.="	ordenadores_particiones.cache, "; 
+
+	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,
+				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar ,
 				ordenadores_particiones.codpar ,
 				tipospar.tipopar,
@@ -102,21 +105,21 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 					LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
 					
 	switch($ambito){
-			case $AMBITO_AULAS :
-					$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-													WHERE aulas.idaula =".$idambito;
-					break;
-			case $AMBITO_GRUPOSORDENADORES :
-					$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-													WHERE gruposordenadores.idgrupo =".$idambito;
-					break;
-			case $AMBITO_ORDENADORES :
-					$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
-				break;
+		case $AMBITO_AULAS :
+			$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
+		case $AMBITO_GRUPOSORDENADORES :
+			$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
+			break;
+		case $AMBITO_ORDENADORES :
+			$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			break;
 	}		
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 ";
-					
+
 	$cmd->texto.=" GROUP by configuracion";
 	//echo "carga claves:".$cmd->texto;
 	$rs=new Recordset; 
@@ -126,22 +129,24 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	$idx=0; 
 	//echo $cmd->texto;
 	while (!$rs->EOF){
-			$tbKeys[$idx]["cfg"]=$rs->campos["configuracion"];
-			$tbKeys[$idx]["numpar"]=$rs->campos["numpar"];
-			$tbKeys[$idx]["codpar"]=$rs->campos["codpar"];			
-			$tbKeys[$idx]["tipopar"]=$rs->campos["tipopar"];
-			$tbKeys[$idx]["clonable"]=$rs->campos["clonable"];			
-			$tbKeys[$idx]["tamano"]=$rs->campos["tamano"];
-			$tbKeys[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
-			$tbKeys[$idx]["idnombreso"]=$rs->campos["idnombreso"];
-			$tbKeys[$idx]["nombreso"]=$rs->campos["nombreso"];			
-			$tbKeys[$idx]["idimagen"]=$rs->campos["idimagen"];
-			$tbKeys[$idx]["imagen"]=$rs->campos["imagen"];
-			$tbKeys[$idx]["nombreca"]=$rs->campos["nombreca"];
-			$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
-			$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
-			$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];			
-			$idx++;
+		$tbKeys[$idx]["cfg"]=$rs->campos["configuracion"];
+		$tbKeys[$idx]["numdisk"]=$rs->campos["numdisk"];
+		$tbKeys[$idx]["numpar"]=$rs->campos["numpar"];
+		$tbKeys[$idx]["codpar"]=$rs->campos["codpar"];
+		$tbKeys[$idx]["tipopar"]=$rs->campos["tipopar"];
+		$tbKeys[$idx]["clonable"]=$rs->campos["clonable"];
+		$tbKeys[$idx]["tamano"]=$rs->campos["tamano"];
+		$tbKeys[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
+		$tbKeys[$idx]["idnombreso"]=$rs->campos["idnombreso"];
+		$tbKeys[$idx]["nombreso"]=$rs->campos["nombreso"];
+		$tbKeys[$idx]["idimagen"]=$rs->campos["idimagen"];
+		$tbKeys[$idx]["imagen"]=$rs->campos["imagen"];
+		$tbKeys[$idx]["nombreca"]=$rs->campos["nombreca"];
+		$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
+		$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
+		$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
+		$tbKeys[$idx]["cache"]=$rs->campos["cache"];
+		$idx++;
 		$rs->Siguiente();
 	}
 	$conKeys=$idx; // Guarda contador
@@ -167,19 +172,21 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
-
+	global $TbMsg;
 	global $msk_sysFi;
 	global $msk_nombreSO;
 	global $msk_tamano;
 	global $msk_imagen;
 	global $msk_perfil;	
-		
+	global $msk_cache;
+
 	cargaCaves($cmd,$idambito,$ambito,$sws,$swr);
 	cargaSistemasFicheros($cmd,$idambito,$ambito);
 	cargaPerfiles($cmd,$idambito,$ambito);
 	cargaImagenes($cmd,$idambito,$ambito);
 	cargaNombresSO($cmd,$idambito,$ambito);
 	cargaTamano($cmd,$idambito,$ambito);
+	cargaCache($cmd,$idambito,$ambito);
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 				GROUP_CONCAT(CAST( temp2.idordenador AS CHAR(11) )  ORDER BY temp2.idordenador SEPARATOR ',' ) AS idordenadores,
@@ -206,6 +213,9 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 
 	if($sws & $msk_perfil)
 		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";
+		
+	if($sws & $msk_cache)
+		$cmd->texto.="	ordenadores_particiones.cache, ";
 			
 	$cmd->texto.="		ordenadores_particiones.codpar) AS configuracion
 						FROM ordenadores
@@ -666,6 +676,73 @@ function tomaTamano($numpar,$ordenadores)
 		}
 	}
 }
+/*________________________________________________________________________________________________________
+	
+	Selecciona los ordenadores que tienen el mismo Contenido de Cache para la misma partición
+________________________________________________________________________________________________________*/
+function cargaCache($cmd,$idambito,$ambito)
+{
+	global $tbCac;  // Tabla contenedora de ordenadores incluidos en la consulta
+	global $conCac; // Contador de elementos anteriores
+	global $AMBITO_AULAS;
+	global $AMBITO_GRUPOSORDENADORES;
+	global $AMBITO_ORDENADORES;
+	
+	$cmd->texto="SELECT	COUNT(*) AS con,
+			   	ordenadores_particiones.cache,
+				ordenadores_particiones.numpar,
+				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
+					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
+			   FROM ordenadores
+			   JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador";
 
+	switch($ambito){
+		case $AMBITO_AULAS :
+			$cmd->texto.="	JOIN aulas ON aulas.idaula = ordenadores.idaula
+					WHERE aulas.idaula =".$idambito;
+			break;
+		case $AMBITO_GRUPOSORDENADORES :
+			$cmd->texto.="	JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+					WHERE gruposordenadores.idgrupo =".$idambito;
+			break;
+		case $AMBITO_ORDENADORES :
+			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
+			break;
+	}	
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.cache";
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return; // Error al abrir recordset
+	$rs->Primero();
+	$idx=0; 
+	while (!$rs->EOF){
+			$tbCac[$idx]["cache"]=$rs->campos["cache"];
+			$tbCac[$idx]["numpar"]=$rs->campos["numpar"];
+			$tbCac[$idx]["ordenadores"]=$rs->campos["ordenadores"];
+			$idx++;
+		$rs->Siguiente();
+	}
+	$conCac=$idx; // Guarda contador
+	$rs->Cerrar();
+}
+/*________________________________________________________________________________________________________
+	
+		Toma tamaño de partición común a los ordenadores pasados como parámetros
+________________________________________________________________________________________________________*/
+function tomaCache($numpar,$ordenadores)
+{
+	global $tbCac;  // Tabla contenedora de ordenadores incluidos en la consulta
+	global $conCac; // Contador de elementos anteriores
+
+	for ($k=0; $k<$conCac; $k++) {
+		if ($tbCac[$k]["numpar"] == $numpar) {
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbCac[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				return ($tbCac[$k]["cache"]);
+			}
+		}
+	}
+}
 ?>
 

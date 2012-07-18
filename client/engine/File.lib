@@ -4,7 +4,7 @@
 #@brief   Librería o clase File
 #@class   File
 #@brief   Funciones para gestión de archivos y directorios.
-#@version 0.9.2
+#@version 1.0.4
 #@warning License: GNU GPLv3+
 #*/
 
@@ -20,6 +20,9 @@
 #@version 0.9.2 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-07-24
+#@version 1.0.4 - Calcula solo el checksum del último MB del fichero.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-03-16
 #*/ ##
 function ogCalculateChecksum ()
 {
@@ -34,7 +37,7 @@ fi
 # Comprobar que existe el fichero y devolver sus datos.
 FILE=$(ogGetPath "$@")
 [ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
-md5sum "$FILE" 2>&1 | cut -f1 -d" "
+tail -c1M "$FILE" | md5sum -b 2>&1 | cut -f1 -d" "
 }
 
 
@@ -80,10 +83,14 @@ test "$(cat "$SOURCE.sum" 2>/dev/null)" == "$(cat "$TARGET.sum" 2>/dev/null)"
 #         ogCopyFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
 #@brief   Metafunción para copiar un fichero de sistema OpenGnSys a un directorio.
 #@see     ogGetPath
+#@return  Progreso de la copia.
 #@warning Deben existir tanto el fichero origen como el directorio destino.
 #@version 0.9 - Pruebas con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-20
+#@version 1.0.4 - Copiar usando rsync.
+#@author  Universidad de Huelva
+#@date    2012-07-06
 #*/ ##
 function ogCopyFile ()
 {
@@ -111,8 +118,8 @@ esac
 [ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
 TARGET="$(ogGetPath "$@")"
 [ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
-# Copiar fichero.
-cp -a "$SOURCE" "$TARGET"                    # (definir posible error)
+# Copiar fichero (para evitar problemas de comunicaciones las copias se hacen con rsync en vez de cp).
+rsync --progress -avh "$SOURCE" "$TARGET"
 }
 
 

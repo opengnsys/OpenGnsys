@@ -96,15 +96,15 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
-			<?
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
-					echo '<TD>'.$tipopar.'</TD>';
+					echo '<td>'.$tipopar.'</td>';
 				else
-					echo '<TD>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar','tipopar',100,"","","clonable=1").'</TD>';
+					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar',"CONCAT(tipopar,' (',HEX(codpar),')')",170,"","","clonable=1").'</td>';
 			?>
-		</TR>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>

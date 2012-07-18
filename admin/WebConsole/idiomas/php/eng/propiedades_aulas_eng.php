@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_aulas_eng.php 
 //	Idioma: Inglés 
-//________________________________________________________________________________________________________
+//________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
@@ -26,7 +26,7 @@ $TbMsg[17]="Hardware profile";
 $TbMsg[18]="Properties for all computers in this class";
 $TbMsg[19]="Cache size (KB)";
 $TbMsg[20]="Autoexec";
-$TbMsg[21]="";
+$TbMsg[21]="Computers";
 $TbMsg[22]="Multicast mode";
 $TbMsg[23]="Multicast IP address";
 $TbMsg[24]="Multicast port";
@@ -35,6 +35,8 @@ $TbMsg[26]="P2P mode -seeder while downloading";
 $TbMsg[27]="P2P time -seeder time(s) after download-";
 $TbMsg[28]="Gateway";
 $TbMsg[29]="Netmask";
-
+$TbMsg[509]="Computer Photo";
+$TbMsg[5091]="Insert Photo";
+$TbMsg[5092]="View Images";
 ?>
 

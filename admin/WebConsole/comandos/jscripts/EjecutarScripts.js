@@ -11,6 +11,7 @@
 	if (comprobar_datos()){
 		var RC='@';
 		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value)+RC;
+		filtrado();
 		document.fdatosejecucion.submit();
 	}
  }

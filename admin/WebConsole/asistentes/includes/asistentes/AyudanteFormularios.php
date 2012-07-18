@@ -272,26 +272,17 @@ function htmlOPTION_typepartnotcache($cmd)
 function htmlForm_typepart($cmd,$numpar)
 {
 	$SelectHtml="";
-	$cmd->texto='SELECT DISTINCT tipopar FROM tipospar JOIN ordenadores_particiones ON ordenadores_particiones.codpar = tipospar.codpar WHERE numpar = ' .$numpar;
+	$cmd->texto='SELECT DISTINCT tipopar FROM tipospar
+			JOIN ordenadores_particiones ON ordenadores_particiones.codpar = tipospar.codpar
+			WHERE numpar = ' .$numpar;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			if ( $rs->campos["tipopar"] == "LINUX" )
-			{
-			$valor="EXT4";
-			$valormostrar="LINUX:EXT[2:3:4]";
-			}
-			else
-			{
 			$valor=$rs->campos["tipopar"];
-			$valormostrar=$rs->campos["tipopar"];
-			}
-			$SelectHtml.='<OPTION value="'.$valor . '" ';
-			$SelectHtml.='>';
-			$SelectHtml.= $valormostrar .'</OPTION>';
+			$SelectHtml.='<option value="'.$valor.'"> '.$valor.' </option>';
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();
@@ -300,35 +291,70 @@ function htmlForm_typepart($cmd,$numpar)
 }
 
 
-
 function htmlForm_typepartnotcacheEngine10($npart)
 {
 $SelectHtml="";
 if ($npart == 4) {
     $SelectHtml.='<OPTION value="CACHE"> CACHE </OPTION>';
 }
-$SelectHtml.='<OPTION value="FAT12"> FAT12 </OPTION>';
-$SelectHtml.='<OPTION value="FAT16"> FAT16 </OPTION>';
-$SelectHtml.='<OPTION value="FAT32"> FAT32 </OPTION>';
-$SelectHtml.='<OPTION value="HFAT32"> Hidden FAT32 </OPTION>';
 $SelectHtml.='<OPTION value="NTFS"> NTFS </OPTION>';
+$SelectHtml.='<OPTION value="FAT32"> FAT32 </OPTION>';
+$SelectHtml.='<OPTION value="FAT16"> FAT16 </OPTION>';
+$SelectHtml.='<OPTION value="FAT12"> FAT12 </OPTION>';
 $SelectHtml.='<OPTION value="HNTFS"> Hidden NTFS </OPTION>';
-#$SelectHtml.='<OPTION value="EXT2"> EXT2 </OPTION>';
-#$SelectHtml.='<OPTION value="EXT3"> EXT3 </OPTION>';
-$SelectHtml.='<OPTION value="EXT4"> LINUX:EXT[2:3:4] </OPTION>';
+$SelectHtml.='<OPTION value="HFAT32"> Hidden FAT32 </OPTION>';
+$SelectHtml.='<OPTION value="HFAT16"> Hidden FAT16 </OPTION>';
+$SelectHtml.='<OPTION value="HFAT12"> Hidden FAT12 </OPTION>';
+$SelectHtml.='<OPTION value="LINUX"> LINUX </OPTION>';
 $SelectHtml.='<OPTION value="LINUX-SWAP"> LINUX-SWAP </OPTION>';
-$SelectHtml.='<OPTION value="REISERFS"> REISERFS </OPTION>';
-$SelectHtml.='<OPTION value="REISER4"> RESISER4 </OPTION>';
-$SelectHtml.='<OPTION value="XFS"> XFS </OPTION>';
-$SelectHtml.='<OPTION value="JFS"> JFS </OPTION>';
 $SelectHtml.='<OPTION value="LINUX-RAID"> LINUX-RAID </OPTION>';
 $SelectHtml.='<OPTION value="LINUX-LVM"> LINUX-LVM </OPTION>';
+$SelectHtml.='<OPTION value="HFS"> HFS </OPTION>';
+$SelectHtml.='<OPTION value="FREEBSD"> FREEBSD </OPTION>';
+$SelectHtml.='<OPTION value="OPENBSD"> OPENBSD </OPTION>';
+$SelectHtml.='<OPTION value="SOLARIS"> SOLARIS </OPTION>';
+$SelectHtml.='<OPTION value="SOLARIS-BOOT"> SOLARIS-BOOT </OPTION>';
+$SelectHtml.='<OPTION value="VMFS"> VMFS </OPTION>';
+$SelectHtml.='<OPTION value="DATA"> DATA </OPTION>';
+$SelectHtml.='<OPTION value="EFI"> EFI </OPTION>';
+$SelectHtml.='<OPTION value="GPT"> GPT </OPTION>';
 if ($npart <= 4) {
     $SelectHtml.='<OPTION value="EXTENDED"> EXTENDED </OPTION>';
 }
 return($SelectHtml);
 }
 
+function htmlForm_typepartnotcacheGPT($npart)
+{
+$SelectHtml="";
+if ($npart == 4) {
+    $SelectHtml.='<OPTION value="CACHE"> CACHE </OPTION>';
+}
+$SelectHtml.='<OPTION value="WINDOWS"> Windows </OPTION>';
+$SelectHtml.='<OPTION value="WIN-RESERV"> Windows Reserved </OPTION>';
+$SelectHtml.='<OPTION value="LINUX"> Linux </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-RESERV"> Linux Reserved </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-SWAP"> Linux Swap </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-RAID"> Linux RAID </OPTION>';
+$SelectHtml.='<OPTION value="LINUX-LVM"> Linux LVM </OPTION>';
+$SelectHtml.='<OPTION value="CHROMEOS"> ChromeOS </OPTION>';
+$SelectHtml.='<OPTION value="CHROMEOS-KRN"> ChromeOS Kernel </OPTION>';
+$SelectHtml.='<OPTION value="CHROMEOS-RESERV"> ChromeOS Reserved </OPTION>';
+$SelectHtml.='<OPTION value="HFS"> MacOS HFS </OPTION>';
+$SelectHtml.='<OPTION value="HFS-RAID"> MacOS HFS RAID </OPTION>';
+$SelectHtml.='<OPTION value="FREEBSD"> FreeBSD </OPTION>';
+$SelectHtml.='<OPTION value="FREEBSD-DISK"> FreeBSD Disk </OPTION>';
+$SelectHtml.='<OPTION value="FREEBSD-BOOT"> FreeBSD Boot </OPTION>';
+$SelectHtml.='<OPTION value="FREEBSD-SWAP"> FreeBSD Swap </OPTION>';
+$SelectHtml.='<OPTION value="SOLARIS"> Solaris </OPTION>';
+$SelectHtml.='<OPTION value="SOLARIS-DISK"> Solaris Disk </OPTION>';
+$SelectHtml.='<OPTION value="SOLARIS-BOOT"> Solaris Boot </OPTION>';
+$SelectHtml.='<OPTION value="SOLARIS-SWAP"> Solaris Swap </OPTION>';
+$SelectHtml.='<OPTION value="EFI"> EFI </OPTION>';
+$SelectHtml.='<OPTION value="MBR"> MBR </OPTION>';
+$SelectHtml.='<OPTION value="BIOS-BOOT"> BIOS Boot </OPTION>';
+return($SelectHtml);
+}
 
 function htmlForm_sizepart($cmd,$numpar)
 {
@@ -355,7 +381,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;
-	
+
 	$colums=7;
 	echo '<TR height=16>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[20].'&nbsp;</TH>';	// Número de partición

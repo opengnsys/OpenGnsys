@@ -54,7 +54,7 @@ echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 
 # Si el origen(pariticion) esta bloqueada salir.
-echo "TODO comprobando si esta bloqueado el $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[1] TODO: $MSG_HEL_ogIsLocked: ogIsLocked $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
 #if ogIsLocked $1 $2; then
 #	ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $1 $2"
 #	exit $?
@@ -66,9 +66,10 @@ REPO=${4:-"REPO"}
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 [ "$REPO" == "CACHE" ] && REPO="CACHE"
 
-#Informacioin previa de la imagen
-IMGSIZE=$(ls -s `ogGetPath $REPO $3.img`| cut -f1 -d" ")
-IMGOS=$(ogGetImageInfo `ogGetPath $REPO $3.img`)
+#Informacion previa de la imagen
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO $3.img`) || exit $(echo "ERROR: $OG_ERR_NOTFOUND $MSG_ERR_NOTFOUND, IMAGEN $REPO $3" | tee -a $OGLOGSESSION $OGLOGFILE; ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND, $REPO $3"; echo $?)
+#IMGOS=$(ogGetImageInfo `ogGetPath $REPO $3.img`) || exit $(ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND, $REPO $3"; echo $?)
+IMGSIZE=$(ls -s `ogGetPath $REPO $3.img`| cut -f1 -d" ") 
 
 echo "[1] IMG-FILE=$3  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
 

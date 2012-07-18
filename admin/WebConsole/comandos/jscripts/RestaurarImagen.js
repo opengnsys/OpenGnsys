@@ -47,7 +47,8 @@
 					}
 				}					
 				document.fdatosejecucion.atributos.value=atributos;
-				document.fdatosejecucion.submit();						
+				filtrado();
+				document.fdatosejecucion.submit();	
 				break;		
 			}
 		}

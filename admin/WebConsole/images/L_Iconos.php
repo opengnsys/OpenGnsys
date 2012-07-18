@@ -13,6 +13,7 @@ include_once("../clases/XmlPhp.php");
 include_once("../clases/MenuContextual.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLCTESELECT.php");
+include_once("../idiomas/php/".$idioma."/iconos_".$idioma.".php");
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 // Captura de parámetros 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ $cmd->texto.=" order by idtipoicono,descripcion ";
 $rs=new Recordset; 
 $rs->Comando=&$cmd; 
 if (!$rs->Abrir())
-	RedireccionaError("Fallo al abrir la tabla: Iconos");
+	RedireccionaError($TbMsg["ERROR_SELECT"]);
 ?>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 <HTML>
@@ -49,20 +50,21 @@ var NS=(navigator.appName=="Netscape");
 </SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="L_Iconos.js"></SCRIPT>
+<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/iconos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
-  <P align="center"><SPAN class=textos>____ Opciones de búsqueda ____</SPAN></P>
+  <P align="center"><SPAN class=textos><? echo $TbMsg["SEARCH_OPT"]; ?> </SPAN></P>
    <FORM name="fdatos" action="L_Iconos.php" method="post">
 	<INPUT type=hidden name=identificador value="0">
 	<TABLE align=center class=tabla_busquedas>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH>&nbsp;Tipo&nbsp;</TD>
+			<TH>&nbsp;<? echo $TbMsg["TYPE"] ?>&nbsp;</TD>
 			<TD ><?
 					$parametros="0=".chr(13);
-					$parametros.="1=iconos web".chr(13);
-					$parametros.="2=iconos items".chr(13);
-					$parametros.="3=Fondo menu";
+					$parametros.=$TbMsg["SELECT_WEB"] .chr(13);
+					$parametros.=$TbMsg["SELECT_ITEMS"] .chr(13);
+					$parametros.=$TbMsg["SELECT_MENU"] ;
 					echo '<TD>'.HTMLCTESELECT($parametros, "idtipoicono","estilodesple","",$idtipoicono,100).'</TD>';?>
 			</TD>
 		</TR>
@@ -73,12 +75,12 @@ var NS=(navigator.appName=="Netscape");
 <P align=center><A href="#"><img border=0 src="../images/iconos/busquedas.gif" onclick="document.fdatos.submit()" alt="Buscar"></A></P>
 </FORM>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
-<P align="center"><SPAN class=textos>Registros encontrados : <? echo $rs->numeroderegistros?></SPAN></P>
+<P align="center"><SPAN class=textos><? echo $TbMsg["SEARCH_RESULT"]. $rs->numeroderegistros?></SPAN></P>
 <TABLE align="center" class="tabla_listados">
   <TR>
 	<TH align="center">A</TH>
-	<TH align="center">&nbsp;<? echo utf8_encode(Descripción)?>&nbsp;</TH>
-	<TH align="center">&nbsp;Nombre&nbsp;</TH>
+	<TH align="center">&nbsp;<? echo $TbMsg["DESCRIP"] ?>&nbsp;</TH>
+	<TH align="center">&nbsp;<? echo $TbMsg["NAME"] ?>&nbsp;</TH>
 	<TH align="center">&nbsp;</TH>
 	<TH align="center">&nbsp;T&nbsp;</TH>
 
@@ -90,7 +92,7 @@ var NS=(navigator.appName=="Netscape");
   while (!$rs->EOF){?>
 	<TR>
 		<TD  align=center><IMG  id=<?=$rs->campos["idicono"]?> style="cursor:hand" onclick="menu_contextual(this)" src="../images/iconos/administrar_off.gif"></TD>
-		<TD>&nbsp;<? echo basename($rs->campos["descripcion"])?>&nbsp;</TD>
+		<TD>&nbsp;<? echo  ( $TbMsg[basename($rs->campos["descripcion"])] ) ? $TbMsg[basename($rs->campos["descripcion"])] : basename($rs->campos["descripcion"]);  ?>&nbsp;</TD> 
 		<TD>&nbsp;<? echo basename($rs->campos["urlicono"])?>&nbsp;</TD>
 		<TD align=center>&nbsp;<IMG src="./iconos/<? echo $rs->campos["urlicono"] ?>"
 
@@ -110,16 +112,21 @@ var NS=(navigator.appName=="Netscape");
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 $flotante=new MenuContextual(); // Crea objeto MenuContextual
 
-$XMLcontextual=CreacontextualXMLMenu(); // Crea contextual de las acciones
+$XMLcontextual=CreacontextualXMLMenu($TbMsg); // Crea contextual de las acciones
 echo $flotante->CreaMenuContextual($XMLcontextual); 
+
+
 ?>
+
+
+
 </BODY>
 </HTML>
 <?
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 //	Menus contextuales
 //-------------------------------------------------------------------------------------------------------------------------------------------------
-function CreacontextualXMLMenu(){
+function CreacontextualXMLMenu( $TbMsg ){
 
 	$layerXML='<MENUCONTEXTUAL';
 	$layerXML.=' maxanchu=110';
@@ -133,12 +140,12 @@ function CreacontextualXMLMenu(){
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="consultar()"';
 	$layerXML.=' imgitem="../images/iconos/consultar.gif"';
-	$layerXML.=' textoitem="Consultar"';
+	$layerXML.=' textoitem="'. $TbMsg["MENU_CONS"] .'"';
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="modificar()"';
-	$layerXML.=' textoitem="Modificar"';
+	$layerXML.=' textoitem="'.$TbMsg["MENU_REPLACE"].'"';
 	$layerXML.=' imgitem="../images/iconos/modificar.gif"';
 	$layerXML.='></ITEM>';
 
@@ -148,10 +155,12 @@ function CreacontextualXMLMenu(){
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="borrar()"';
 	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
-	$layerXML.=' textoitem="Eliminar"';
+	$layerXML.=' textoitem="'. $TbMsg["MENU_DEL"]. '"';
 	$layerXML.='></ITEM>';
 
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
+
+
 ?>

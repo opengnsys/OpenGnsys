@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//______________________________________________________
 //
 //	Fichero de idiomas php: configuraciones_esp.php 
-//	Idioma: Español 
-//________________________________________________________________________________________________________
+//	Idioma: Español
+//______________________________________________________
 $TbMsg=array();
 $TbMsg[0]='Configuraciones';
 $TbMsg[1]='&Aacute;mbito';
@@ -13,7 +13,7 @@ $TbMsg[4]="Ordenadores";
 
 $TbMsg[5]="Nombre";
 $TbMsg[6]="Ubicaci&oacute;n";
-$TbMsg[7]="Ca&ntilde;&oacute;n";
+$TbMsg[7]="Proyector";
 $TbMsg[8]="Pizarra";
 $TbMsg[9]="Puestos";
 $TbMsg[10]="URL Imagen";
@@ -52,9 +52,13 @@ $TbMsg[38]='Menor espacio libre (KB)';
 $TbMsg[39]='Personalizar';
 $TbMsg[40]='Sin modificar tama&ntilde;o';
 $TbMsg[41]='Generar Instrucci&oacute;n OG';
+$TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
-
+$TbMsg[44]='Equipo sin perfil de hardware';
+$TbMsg[45]='Agregue perfil para obtener datos';
+$TbMsg[495]='Contenido cach&eacute;';
+$TbMsg[4951]='Cach&eacute; libre';
 ?>
 
