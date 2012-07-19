@@ -686,8 +686,8 @@ function getNetworkSettings()
 			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
 			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
-			let i++
 		fi
+		let i++
 	done
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
 	if [ -z "${NETIP}[*]" -o -z "${NETMASK[*]}" ]; then
