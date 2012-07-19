@@ -70,7 +70,13 @@ mountroot ()
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before configure networking: y/N "
     [ $? == 0 ] && sh || echo " "
-	ogConfigureNetworking
+	if [ -n "$oglive" ]
+	then
+		while !(ping -c 1 $oglive &> /dev/null)
+		do
+			ogConfigureNetworking
+		done
+	fi
 	log_success_msg "config networking"
 	ogConfigureLoopback
 	log_success_msg "config loopback"
@@ -85,7 +91,10 @@ mountroot ()
 		ogYesNo --timeout 5 --default no "Stop before check updating initrd: y/N "
     	[ $? == 0 ] && sh || echo " "		
 	fi
-	[ "$ogupdateinitrd" == "true" ] && ogUpdateInitrd  
+	# Actualizar Initrd si se solicita o si no se corresponde con su kernel.
+	if [ "$ogupdateinitrd" == "true" -o ! -d /lib/modules/$(uname -r) ]; then
+		ogUpdateInitrd
+	fi
 
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect and merging the rootfs -ogLive- with $OGSERVERLIVE: y/N "
     [ $? == 0 ] && sh || echo " "

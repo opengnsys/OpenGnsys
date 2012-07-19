@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//_________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_ordenadores_eng.php 
-//	Idioma: Ingés 
-//________________________________________________________________________________________________________
+//	Php language file: propiedades_ordenadores_eng.php 
+//	Language: English
+//_________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
@@ -20,5 +20,10 @@ $TbMsg[11]="Menu";
 $TbMsg[12]="Cache size";
 $TbMsg[13]="Network interface";
 $TbMsg[14]="Network driver";
-
+$TbMsg[509]="Computer Photo";
+$TbMsg[5091]="Insert Photo";
+$TbMsg[5092]="View Images";
+$TbMsg[495]="Content Cache";
+$TbMsg[4951]="Cache Free";
 ?>
+

@@ -17,4 +17,5 @@
 	<INPUT type="hidden" name="funcion" value="<? echo $funcion?>">
 	<INPUT type="hidden" name="atributos" value="<? echo $atributos?>">
 	<INPUT type="hidden" name="gestor" value="<? echo $gestor?>">
+	<INPUT type="hidden" name="filtro" value="">
 

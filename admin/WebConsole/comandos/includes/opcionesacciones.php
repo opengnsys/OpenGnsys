@@ -15,7 +15,7 @@
 <?if($idcomando!=10){?>
 	<TABLE align=center>
 		<TR>
-			<TD><IMG border=0 style="cursor:pointer" src="../images/boton_aceptar.gif" onclick="confirmar()" ></TD>
+			<TD><IMG border=0 style="cursor:pointer" src="../images/boton_aceptar_<? echo $idioma ?>.gif" onclick="confirmar()" ></TD>
 		</TR>
 	</TABLE>
 	<BR>

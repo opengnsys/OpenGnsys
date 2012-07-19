@@ -78,7 +78,12 @@ $atributos=str_replace('$',chr(9),$atributos);
 $cadenaid="";
 $cadenaip="";
 $cadenamac="";
-RecopilaIpesMacs($cmd,$ambito,$idambito);
+
+if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
+	if(substr($filtro,strlen($cadenaid)-1,1)==";") // Si el último caracter es una coma
+		$filtro=substr($filtro,0,strlen($filtro)-1); // Quita la coma
+}
+RecopilaIpesMacs($cmd,$ambito,$idambito,$filtro);
 
 /*--------------------------------------------------------------------------------------------------------------------
 	Creación de parametros para sentencias SQL
@@ -108,6 +113,9 @@ if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato
 	$cmd->ParamSetValor("@restrambito",$idambito);
 	$idambito=0;
 }
+if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores 
+	$cmd->ParamSetValor("@restrambito",$filtro);
+}
 $resul=true;
 /*--------------------------------------------------------------------------------------------------------------------
 	Switch de ejecución inmediata y de seguimiento
@@ -134,7 +142,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$cmd->ParamSetValor("@idcentro",$idcentro);
 		$auxID=split(",",$cadenaid);
 		$auxIP=split(";",$cadenaip);
-
+		$vez=0;
 		for ($i=0;$i<sizeof($auxID);$i++){
 			$cmd->ParamSetValor("@idordenador",$auxID[$i]);
 			$cmd->ParamSetValor("@ip",$auxIP[$i]);
@@ -144,8 +152,12 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idcentro)";
 			$resul=$cmd->Ejecutar();
 			//echo "<br>".$cmd->texto;
+			if(empty($vez)){
+				$idaccion=$cmd->Autonumerico();
+				$acciones=chr(13)."ids=".$idaccion.chr(13); // Para seguimiento
+			}
+			$vez++;
 		}
-		$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	}
 	if (!$resul){
 		echo '<SCRIPT language="javascript">';

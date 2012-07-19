@@ -51,7 +51,6 @@ copy_exec /bin/lsmod
 #mkdir -p ${DESTDIR}/opt/opengnsys/lib/engine
 #cp -prv /opt/opengnsys/client/lib/engine ${DESTDIR}/opt/opengnsys/lib/engine
 
-#rm -fr ${DESTDIR}/lib/modules/2.6.32-21-generic-pae/kernel/drivers/net/atl*
 manual_add_modules cifs
 manual_add_modules smbfs
 manual_add_modules atl1e

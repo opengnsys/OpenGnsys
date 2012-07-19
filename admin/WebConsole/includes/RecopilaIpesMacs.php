@@ -19,7 +19,7 @@
 //		Para ellos habrá que tener declarada tres variables globales :
 //				$cadenaid, $cadenaip y $cadenamac
 // *************************************************************************************************************************************************
-function RecopilaIpesMacs($cmd,$ambito,$idambito){
+function RecopilaIpesMacs($cmd,$ambito,$idambito,$filtroip=""){
 	global $cadenaid;
 	global $cadenaip;
 	global $cadenamac;
@@ -35,31 +35,39 @@ function RecopilaIpesMacs($cmd,$ambito,$idambito){
 	$cadenamac="";
 
 	$rs=new Recordset; 
-	switch($ambito){
-		case $AMBITO_CENTROS :
-			$cmd->texto="SELECT idcentro,nombrecentro FROM centros WHERE idcentro=".$idambito;
- 			RecorreCentro($cmd);
-			break;
-		case $AMBITO_GRUPOSAULAS :
-			$cmd->texto="SELECT idgrupo,nombregrupo   FROM grupos WHERE idgrupo=".$idambito." AND tipo=".$AMBITO_GRUPOSAULAS;
-			RecorreGruposAulas($cmd);
-			break;
-		case $AMBITO_AULAS :
-			$cmd->texto="SELECT idaula,nombreaula  FROM aulas WHERE idaula=".$idambito;
-			RecorreAulas($cmd);
-			break;
-		case $AMBITO_GRUPOSORDENADORES :
-			$cmd->texto="SELECT idgrupo,nombregrupoordenador   FROM gruposordenadores WHERE idgrupo=".$idambito;
-			RecorreGruposOrdenadores($cmd);
-			break;
-		case $AMBITO_ORDENADORES :
-			$cmd->texto="SELECT ip,mac,nombreordenador,idordenador  FROM ordenadores WHERE idordenador=".$idambito;
-			RecorreOrdenadores($cmd);
-			break;
-		default: // Se trata de un conjunto aleatorio de ordenadores
-			$cmd->texto="SELECT ip,mac,nombreordenador,idordenador  FROM ordenadores WHERE idordenador IN (".$idambito.")";
-			RecorreOrdenadores($cmd);
-			
+		
+	if(!empty($filtroip)){
+		$filtroip="'".str_replace(";","','",$filtroip)."'"; // Cambia caracter ; para consulta alfanumérica
+		$cmd->texto="SELECT ip, mac, nombreordenador, idordenador FROM ordenadores WHERE ip IN (".$filtroip.")";
+		RecorreOrdenadores($cmd);
+	}
+	else{
+		switch($ambito){
+			case $AMBITO_CENTROS :
+				$cmd->texto="SELECT idcentro,nombrecentro FROM centros WHERE idcentro=".$idambito;
+				RecorreCentro($cmd);
+				break;
+			case $AMBITO_GRUPOSAULAS :
+				$cmd->texto="SELECT idgrupo,nombregrupo   FROM grupos WHERE idgrupo=".$idambito." AND tipo=".$AMBITO_GRUPOSAULAS;
+				RecorreGruposAulas($cmd);
+				break;
+			case $AMBITO_AULAS :
+				$cmd->texto="SELECT idaula,nombreaula  FROM aulas WHERE idaula=".$idambito;
+				RecorreAulas($cmd);
+				break;
+			case $AMBITO_GRUPOSORDENADORES :
+				$cmd->texto="SELECT idgrupo,nombregrupoordenador   FROM gruposordenadores WHERE idgrupo=".$idambito;
+				RecorreGruposOrdenadores($cmd);
+				break;
+			case $AMBITO_ORDENADORES :
+				$cmd->texto="SELECT ip,mac,nombreordenador,idordenador  FROM ordenadores WHERE idordenador=".$idambito;
+				RecorreOrdenadores($cmd);
+				break;
+			default: // Se trata de un conjunto aleatorio de ordenadores
+				$cmd->texto="SELECT ip,mac,nombreordenador,idordenador  FROM ordenadores WHERE idordenador IN (".$idambito.")";
+				RecorreOrdenadores($cmd);
+				
+		}
 	}
 	$cadenaid=substr($cadenaid,0,strlen($cadenaid)-1); // Quita la coma
 	$cadenaip=substr($cadenaip,0,strlen($cadenaip)-1); // Quita la coma
@@ -147,3 +155,4 @@ function RecorreOrdenadores($cmd){
 	$rs->Cerrar();
 }
 ?>
+

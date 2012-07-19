@@ -1,9 +1,9 @@
 
-OpenGNSys Client Cloning Engine  README
+OpenGnSys Client Cloning Engine  README
 =======================================
 
 En este directorio se incluirán las funciones del motor de
-clonación de OpenGNSys y la documentación asociada.
+clonación de OpenGnSys y la documentación asociada.
 
 Este directorio estará localizado en el directorio del servidor
 /opt/opengnsys/client/lib/engine/bin
@@ -11,8 +11,8 @@ Este directorio estará localizado en el directorio del servidor
 Las funciones serán accesibles por el cliente en el directorio
 /opt/opengnsys/lib/engine/bin
 
-OpenGNSys Client Cloning Engine se distribuye en un conjunto
-de librerías que incluyen funciones BASH que deben ser exportadas
+OpenGnSys Client Cloning Engine se distribuye en un conjunto de
+librerías que incluyen funciones BASH que deben ser exportadas
 al entorno del cliente.
 
 Librerías:
@@ -27,7 +27,10 @@ Librerías:
                    sistemas operativos.
 - Inventory.lib    funciones de control de inventario e informes.
 - Net.lib          funciones básicas de control de acceso a la red.
-- Protocol.lib     funciones de implementación de protocolos de comunicación.
-- Registry.lib     funciones básicas de gestión del registro de Windows.
+- Postconf.lib     funciones de post-configuración de sistemas
+                   operativos.
+- Protocol.lib     funciones de implementación de protocolos de
+                   comunicaciones.
+- Registry.lib     funciones de gestión del registro de Windows.
 - System.lib       funciones básicas del sistema.
 

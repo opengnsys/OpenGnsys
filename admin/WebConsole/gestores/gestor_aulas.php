@@ -47,6 +47,17 @@ $netmask=0;
 $modp2p=0;
 $timep2p=0;
 ############ ADV
+//##agp
+if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG")
+{
+ $uploaddir ="../images/fotos/";
+
+ $uploadfile = $uploaddir.$_FILES['archivo']['name'];
+
+move_uploaded_file($_FILES['archivo']['tmp_name'], $uploadfile); 
+#copy($_FILES['archivo']['tmp_name'], $uploadfile);
+}
+//##agp
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
 
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];

@@ -8,13 +8,15 @@
 
 
 ####  AVISO: Editar configuración de acceso por defecto.
+####  WARNING: Edit default access configuration.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
 OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
 OPENGNSYS_DB_PASSWD="passusuog"		# Clave de acceso a la base de datos
 OPENGNSYS_CLIENT_PASSWD="og"		# Clave de acceso del cliente
 
 
-####  AVISO: NO EDITAR. 
+####  AVISO: NO EDITAR.
+####  WARNING: DO NOT EDIT. 
 OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
 OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario del cliente para acceso remoto
 
@@ -25,6 +27,11 @@ if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
+# Solo se deben aceptar números y letras en la clave de acceso del cliente.
+if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then
+	echo "ERROR: client password must be alphanumeric, edit installer variables."
+	exit 1
+fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
@@ -34,7 +41,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
 	USESVN=1
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
+SVN_URL="http://$OPENGNSYS_SERVER/svn/tags/opengnsys-1.0.4/"
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -55,11 +62,18 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - OSDISTRIB, OSCODENAME - datos de la distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
-# - APACHEINIT, APACHECFGDIR, APACHEUSER, APACHEGROUP - arranque y configuración de Apache
-# - ENABLEMOD, ENABLESITE - habilitar módulo Apache y sitio web
-# - DHCPINIT, DHCPCFGDIR - arranque y configuración de DHCP
-# - SAMBAINIT, SAMBACFGDIR - arranque y configuración de Samba
-# - TFTPCFGDIR - configuración de TFTP
+# - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
+# - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
+# - STOPSERVICE, DISABLESERVICE - parar y deshabilitar un servicio
+# - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
+# - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
+# - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
+# - INETDSERV - servicio Inetd
+# - IPTABLESSERV - servicio IPTables
+# - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
+# - MYSQLSERV - servicio MySQL
+# - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
+# - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
 function autoConfigure()
 {
 # Detectar sistema operativo del servidor (debe soportar LSB).
@@ -73,16 +87,59 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
-		APACHEINIT=/etc/init.d/apache2
+		if which service &>/dev/null; then
+			STARTSERVICE="eval service \$service restart"
+			STOPSERVICE="eval service \$service stop"
+		else
+			STARTSERVICE="eval /etc/init.d/\$service restart"
+			STOPSERVICE="eval /etc/init.d/\$service stop"
+		fi
+		ENABLESERVICE="eval update-rc.d \$service defaults"
+		DISABLESERVICE="eval update-rc.d \$service disable"
+		APACHESERV=apache2
 		APACHECFGDIR=/etc/apache2
+		APACHESITESDIR=sites-available
+		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		ENABLEMOD="a2enmod"
-		ENABLESITE="a2ensite"
-		DHCPINIT=/etc/init.d/isc-dhcp-server
+		APACHESSLMOD="a2enmod ssl"
+		APACHEENABLESSL="a2ensite default-ssl"
+		APACHEENABLEOG="a2ensite $APACHEOGSITE"
+		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
+		DHCPSERV=isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		SAMBAINIT=/etc/init.d/smbd
+		INETDSERV=openbsd-inetd
+		MYSQLSERV=mysql
+		SAMBASERV=smbd
 		SAMBACFGDIR=/etc/samba
+		SYSLINUXDIR=/usr/lib/syslinux
+		TFTPCFGDIR=/var/lib/tftpboot
+		;;
+	Fedora|CentOS)
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba unzip debootstrap schroot squashfs-tools )
+		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
+				   'pushd /tmp; wget http://download2.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -s btlaunchmany.py /usr/bin/btlaunchmany; ln -s bttrack.py /usr/bin/bttrack; popd' )
+		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+		INSTALLPKG="yum install -y"
+		CHECKPKG="rpm -q --quiet \$package"
+		STARTSERVICE="eval service \$service start"
+		STOPSERVICE="eval service \$service stop"
+		ENABLESERVICE="eval chkconfig \$service on"
+		DISABLESERVICE="eval chkconfig \$service off"
+		APACHESERV=httpd
+		APACHECFGDIR=/etc/httpd/conf.d
+		APACHEOGSITE=opengnsys.conf
+		APACHEUSER="apache"
+		APACHEGROUP="apache"
+		DHCPSERV=dhcpd
+		DHCPCFGDIR=/etc/dhcp
+		INETDSERV=xinetd
+		IPTABLESSERV=iptables
+		MYSQLSERV=mysqld
+		SAMBASERV=smb
+		SAMBACFGDIR=/etc/samba
+		SYSLINUXDIR=/usr/share/syslinux
+		TFTPSERV=tftp
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
@@ -95,9 +152,11 @@ esac
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -e $SAMBAINIT ] || SAMBAINIT=/etc/init.d/samba	# Debian 6
+[ -e /etc/init.d/$SAMBASERV ] || SAMBASERV=samba	# Debian 6
 [ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
+[ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
 }
+
 
 # Cargar lista de paquetes del sistema y actualizar algunas variables de configuración
 # dependiendo de la versión instalada.
@@ -110,16 +169,20 @@ local DHCPVERSION
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
-	Ubuntu|LinuxMint) # Postconfiguación personalizada para Ubuntu.
+	Ubuntu|LinuxMint)	# Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
 		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
 			      sort -n | tail -1)
 		if [ $DHCPVERSION = 3 ]; then
 			DEPENDENCIES=( ${DEPENDENCIES[@]/isc-dhcp-server/dhcp3-server} )
-			DHCPINIT=/etc/init.d/dhcp3-server
+			DHCPSERV=dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
+		;;
+	CentOS)	# Postconfiguación personalizada para CentOS.
+		# Incluir repositorio de paquetes EPEL.
+		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release )
 		;;
 esac
 }
@@ -266,7 +329,7 @@ function installDependencies()
 		exit 1
 	fi
 
-	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND
+	OLD_DEBIAN_FRONTEND=$DEBIAN_FRONTEND		# Debian/Ubuntu
 	export DEBIAN_FRONTEND=noninteractive
 
 	echoAndLog "${FUNCNAME}(): now $string_deps will be installed"
@@ -276,7 +339,9 @@ function installDependencies()
 		return 1
 	fi
 
-	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND
+	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND		# Debian/Ubuntu
+	test grep -q "EPEL temporal" /etc/yum.repos.d/epel.repo 2>/dev/null ] || mv -f /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo 2>/dev/null	# CentOS/RedHat EPEL
+
 	echoAndLog "${FUNCNAME}(): dependencies installed"
 }
 
@@ -579,6 +644,13 @@ function svnExportCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
+	echoAndLog "${FUNCNAME}(): Disabling IPTables."
+	if [ -n "$IPTABLESSERV" ]; then
+		service=$IPTABLESSERV
+		$STOPSERVICE; $DISABLESERVICE
+	fi
+
+	echoAndLog "${FUNCNAME}(): Checking OpenGnSys server conectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
 	wget --spider -q $OPENGNSYS_SERVER
 }
@@ -600,7 +672,7 @@ function getNetworkSettings()
 	local i=0
 	local dev=""
 
-        echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	echoAndLog "${FUNCNAME}(): Detecting network parameters."
 	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}') )
 	if [ -z "$DEVICE" ]; then
 		errorAndLog "${FUNCNAME}(): Network devices not detected."
@@ -614,8 +686,8 @@ function getNetworkSettings()
 			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
 			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
-			let i++
 		fi
+		let i++
 	done
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
 	if [ -z "${NETIP}[*]" -o -z "${NETMASK[*]}" ]; then
@@ -642,16 +714,21 @@ function getNetworkSettings()
 
 function tftpConfigure()
 {
-        echoAndLog "${FUNCNAME}(): Configuring TFTP service."
-        # reiniciamos demonio internet ????? porque ????
-        /etc/init.d/openbsd-inetd start
+	echoAndLog "${FUNCNAME}(): Configuring TFTP service."
+	# Habilitar TFTP y reiniciar Inetd.
+	if [ -n "$TFTPSERV" ]; then
+		service=$TFTPSERV
+		$ENABLESERVICE
+	fi
+	service=$INETDSERV
+	$ENABLESERVICE; $STARTSERVICE
 
-        # preparacion contenedor tftpboot
-        cp -a /usr/lib/syslinux/ $TFTPCFGDIR/syslinux
-        cp -a /usr/lib/syslinux/pxelinux.0 $TFTPCFGDIR
-        # prepamos el directorio de la configuracion de pxe
-        mkdir -p $TFTPCFGDIR/pxelinux.cfg
-        cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
+	# preparacion contenedor tftpboot
+	cp -a $SYSLINUXDIR $TFTPCFGDIR/syslinux
+	cp -a $SYSLINUXDIR/pxelinux.0 $TFTPCFGDIR
+	# prepamos el directorio de la configuracion de pxe
+	mkdir -p $TFTPCFGDIR/pxelinux.cfg
+	cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
 DEFAULT syslinux/vesamenu.c32 
 MENU TITLE Aplicacion GNSYS 
  
@@ -663,17 +740,17 @@ APPEND hd0
 PROMPT 0 
 TIMEOUT 10 
 EOF
-        # comprobamos el servicio tftp
-        sleep 1
-        testPxe
+	# comprobamos el servicio tftp
+	sleep 1
+	testPxe
 }
 
 function testPxe ()
 {
-        echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
-        cd /tmp
-        tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
-        cd /
+	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
+	pushd /tmp
+	tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	popd
 }
 
 
@@ -790,8 +867,10 @@ function smbConfigure()
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/; s/^\; *include \=.*$/   include \= ${SAMBACFGDIR//\//\\/}\/smb-og.conf/" $SAMBACFGDIR/smb.conf
-	$SAMBAINIT restart
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/" $SAMBACFGDIR/smb.conf
+	test grep -q "smb-og" $SAMBACFGDIR/smb.conf || echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
+	service=$SAMBASERV
+	$ENABLESERVICE; $STARTSERVICE
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while configure Samba"
 		return 1
@@ -836,7 +915,8 @@ function dhcpConfigure()
 		return 1
 	fi
 	ln -f $DHCPCFGDIR/dhcpd-$DEFAULTDEV.conf $DHCPCFGDIR/dhcpd.conf
-	$DHCPINIT restart
+	service=$DHCPSERV
+	$ENABLESERVICE; $STARTSERVICE
 	echoAndLog "${FUNCNAME}(): Sample DHCP configured in \"$DHCPCFGDIR\"."
 	return 0
 }
@@ -857,9 +937,9 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Descomprimir XAJAX.
-	unzip $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/iconos
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 
@@ -885,22 +965,23 @@ function installWebConsoleApacheConf()
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
 	# Activar HTTPS.
-	$ENABLESITE default-ssl
-	$ENABLEMOD ssl
-	make-ssl-cert generate-default-snakeoil --force-overwrite
+	$APACHESSLMOD
+	$APACHEENABLESSL
+	$APACHEMAKECERT
 
 	# Genera configuración de consola web a partir del fichero plantilla.
 	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
                 $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
 
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/sites-available/opengnsys
-	$ENABLESITE opengnsys
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/$APACHEOGSITE
+	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1
 	else
 		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
-		$APACHEINIT restart
+		service=$APACHESERV
+		$ENABLESERVICE; $STARTSERVICE
 		return 0
 	fi
 }
@@ -994,10 +1075,12 @@ function copyServerFiles ()
 			repoman/bin \
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
+			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
+			lib \
 			lib \
 			lib \
 			doc )
@@ -1134,17 +1217,23 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-oneiric-3.0.0-14-generic-r2439.iso
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
-	echoAndLog "${FUNCNAME}(): Loading Client"
-	# Descargar, montar imagen, copiar cliente ogclient y desmontar.
-	wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	# Descargar cliente, si es necesario.
+	if [ -s $PROGRAMDIR/$FILENAME ]; then
+		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
+		mv $PROGRAMDIR/$FILENAME $TARGETFILE
+	else
+		echoAndLog "${FUNCNAME}(): Loading Client"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	fi
 	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
 		return 1
 	fi
+	# Montar imagen, copiar cliente ogclient y desmontar.
 	echoAndLog "${FUNCNAME}(): Copying Client files"
 	mkdir -p $TMPDIR
 	mount -o loop,ro $TARGETFILE $TMPDIR
@@ -1181,7 +1270,6 @@ function openGnsysConfigure()
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin
-	update-rc.d opengnsys defaults
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -1232,7 +1320,8 @@ function openGnsysConfigure()
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
-	/etc/init.d/opengnsys start
+	service="opengnsys"
+	$ENABLESERVICE; $STARTSERVICE
 }
 
 
@@ -1264,6 +1353,7 @@ function installationSummary()
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
+	echoAndLog "Change IPTables and SELinux system configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Optional: Log-in as Web Console admin user."
@@ -1316,6 +1406,12 @@ if [ $? -ne 0 ]; then
 		exit 1
 	fi
 fi
+if [ -n "$INSTALLEXTRADEPS" ]; then
+	echoAndLog "Installing extra dependencies"
+	for (( i=0; i<${#INSTALLEXTRADEPS[*]}; i++ )); do
+		eval ${INSTALLEXTRADEPS[i]}
+	done
+fi	
 
 # Detectar datos de auto-configuración después de instalar paquetes.
 autoConfigurePost
@@ -1379,6 +1475,8 @@ fi
 # Instalar Base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
+	service=$MYSQLSERV
+	$ENABLESERVICE; $STARTSERVICE
 	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
 else
 	mysqlGetRootPassword
@@ -1440,7 +1538,7 @@ installWebFiles
 makeDoxygenFiles
 
 # creando configuracion de apache2
-installWebConsoleApacheConf $INSTALL_TARGET /etc/apache2
+installWebConsoleApacheConf $INSTALL_TARGET $APACHECFGDIR
 if [ $? -ne 0 ]; then
 	errorAndLog "Error configuring Apache for OpenGnSys Admin"
 	exit 1

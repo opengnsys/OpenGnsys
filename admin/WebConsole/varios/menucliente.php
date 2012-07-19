@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -12,6 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/CreaComando.php");
+include_once("../controlacceso.php");
 include_once("../idiomas/php/".$idioma."/menucliente_".$idioma.".php");
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
@@ -31,6 +32,22 @@ if(empty($iph))
 $UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
 $UrlPagina=dirname($UrlPagina);
 $UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
+//________________________________________________________________________________________________________
+//agp
+$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";
+$gestor = fopen($nombre_archivo, 'r');
+$contenidofichero = fread($gestor, filesize($nombre_archivo));
+fclose($gestor);
+if (! empty ($contenidofichero)) {
+	$cmd->texto="UPDATE ordenadores_particiones
+			SET cache='".$contenidofichero."'
+			WHERE idordenador=(SELECT idordenador FROM ordenadores
+					    WHERE ip='".$iph."') AND
+			      idsistemafichero=(SELECT idsistemafichero FROM sistemasficheros
+						 WHERE descripcion='CACHE')";
+	$resul=$cmd->Ejecutar();
+}
+//agp
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
 if(!empty($rsmenu)){
@@ -87,6 +104,7 @@ else{
 	}
 		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
 		echo $codeHtml;
+
 	?>
 	</body>
 	</html>
@@ -229,3 +247,4 @@ function tomaIP(){
 	return($ipcliente);
 }
 ?>
+

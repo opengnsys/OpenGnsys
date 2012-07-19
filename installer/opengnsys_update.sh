@@ -15,18 +15,18 @@
 #@version 1.0.2a - obtiene valor de dirección IP por defecto
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/01/18
-#@version 1.0.3 - Compatibilidad con Debian.
+#@version 1.0.3 - Compatibilidad con Debian y auto configuración de acceso a BD.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
-#@date    2012/02/01
+#@date    2012/03/12
+#@version 1.0.4 - Detector de distribución y compatibilidad con CentOS.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/05/04
 #*/
 
 
-####  AVISO: Editar configuración de acceso por defecto a la Base de Datos.
-OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
-OPENGNSYS_DBUSER="usuog"		# Usuario de acceso
-OPENGNSYS_DBPASSWORD="passusuog"	# Clave del usuario
-
-####  AVISO: NO Editar variables de acceso desde el cliente
+####  AVISO: NO EDITAR variables de configuración.
+####  WARNING: DO NOT EDIT configuration variables.
+INSTALL_TARGET=/opt/opengnsys		# Directorio de instalación
 OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
 
 
@@ -36,22 +36,32 @@ if [ "$(whoami)" != 'root' ]; then
         exit 1
 fi
 # Error si OpenGnSys no está instalado (no existe el directorio del proyecto)
-INSTALL_TARGET=/opt/opengnsys
 if [ ! -d $INSTALL_TARGET ]; then
         echo "ERROR: OpenGnSys is not installed, cannot update!!"
         exit 1
+fi
+# Cargar configuración de acceso a la base de datos.
+if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
+	source $INSTALL_TARGET/etc/ogAdmServer.cfg
+elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
+	source $INSTALL_TARGET/etc/ogAdmAgent.cfg
+fi
+OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base datos
+OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
+OPENGNSYS_DBPASSWORD=${OPENGNSYS_DBPASSWORD:-"$PASSWORD"}	# Clave del usuario
+if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASSWORD" ]; then
+	echo "ERROR: set OPENGNSYS_DATABASE, OPENGNSYS_DBUSER and OPENGNSYS_DBPASSWORD"
+	echo "       variables, and run this script again."
 fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
-DEPS="build-essential g++-multilib rsync ctorrent samba unzip netpipes debootstrap schroot squashfs-tools"
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
 else
 	USESVN=1
-	DEPS="$DEPS subversion"
 fi
 SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 
@@ -66,6 +76,49 @@ LOG_FILE=/tmp/opengnsys_update.log
 ####### Algunas funciones útiles de propósito general:
 #####################################################################
 
+# Generar variables de configuración del actualizador
+# Variables globales:
+# - OSDISTRIB - distribución Linux
+# - DEPENDENCIES - array de dependencias que deben estar instaladas
+# - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
+# - APACHECFGDIR, APACHESERV, DHCPSERV - configuración y servicios
+function autoConfigure()
+{
+local i
+
+# Detectar sistema operativo del servidor (debe soportar LSB).
+OSDISTRIB=$(lsb_release -is 2>/dev/null)
+
+# Configuración según la distribución de Linux.
+case "$OSDISTRIB" in
+        Ubuntu|Debian|LinuxMint)
+		DEPENDENCIES=
+		UPDATEPKGLIST="apt-get update"
+		INSTALLPKGS="apt-get -y install --force-yes"
+		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
+		APACHEUSER="www-data"
+		APACHEGROUP="www-data"
+		;;
+        Fedora|CentOS)
+		DEPENDENCIES=
+		INSTALLPKGS="yum install -y"
+		CHECKPKG="rpm -q --quiet \$package"
+		APACHEUSER="apache"
+		APACHEGROUP="apache"
+		;;
+	*)	# Otras distribuciones.
+		;;
+esac
+for i in apache2 httpd; do
+	[ -f /etc/$i ] && APACHECFGDIR="/etc/$i"
+	[ -f /etc/init.d/$i ] && APACHESERV="/etc/init.d/$i"
+done
+for i in dhcpd dhcpd3-server isc-dhcp-server; do
+	[ -f /etc/init.d/$i ] && DHCPSERV="/etc/init.d/$i"
+done
+}
+
+
 # Comprobar auto-actualización.
 function checkAutoUpdate()
 {
@@ -74,14 +127,14 @@ function checkAutoUpdate()
 	# Actaulizar el script si ha cambiado o no existe el original.
 	if [ $USESVN -eq 1 ]; then
 		svn export $SVN_URL/installer/$PROGRAMNAME
-		if ! diff --brief $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+		if ! diff -q $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			mv $PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
 		else
 			rm -f $PROGRAMNAME
 		fi
 	else
-		if ! diff --brief $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME &>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
+		if ! diff -q $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			cp -a $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
 		fi
@@ -208,18 +261,19 @@ function importSqlFile()
 # Instalar las deependencias necesarias para el actualizador.
 function installDependencies()
 {
+	local package
+
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
 	else
 		while [ $# -gt 0 ]; do
-			dpkg -s $1 2>/dev/null | grep -q "Status: install ok"
-			if [ $? -ne 0 ]; then
-				INSTALLDEPS="$INSTALLDEPS $1"
-			fi
+			package="$1"
+			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $1"
 			shift
 		done
 		if [ -n "$INSTALLDEPS" ]; then
-			apt-get update && apt-get -y install --force-yes $INSTALLDEPS
+			$UPDATEPKGLIST
+			$INSTALLPKGS $INSTALLDEPS
 			if [ $? -ne 0 ]; then
 				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
 				return 1
@@ -310,27 +364,25 @@ function updateClientFiles()
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
-	local APACHECONF=/etc/apache2
-
-	# Activar HTTPS, si es necesario.
-	if [ -e $APACHECONF/sites-available/opengnsys.conf ]; then
+	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2).
+	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
-		mv $APACHECONF/sites-available/opengnsys.conf $APACHECONF/sites-available/opengnsys
+		mv $APACHECFGDIR/sites-available/opengnsys.conf $APACHECFGDIR/sites-available/opengnsys
 		a2ensite default-ssl
 		a2enmod ssl
 		a2dissite opengnsys.conf
 		a2ensite opengnsys
-		/etc/init.d/apache2 restart
+		$APACHESERV restart
 	fi
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
 	# - APACHE_RUN_GROUP
-	if [ -f $APACHECONF/envvars ]; then
-		source $APACHECONF/envvars
+	if [ -f $APACHECFGDIR/envvars ]; then
+		source $APACHECFGDIR/envvars
 	fi
-	APACHE_RUN_USER=${APACHE_RUN_USER:-"www-data"}
-	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"www-data"}
+	APACHE_RUN_USER=${APACHE_RUN_USER:-"$APACHEUSER"}
+	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
 }
 
 # Copiar ficheros del OpenGnSys Web Console.
@@ -350,7 +402,7 @@ function updateWebFiles()
 	fi
         restoreFile $INSTALL_TARGET/www/controlacceso.php
 	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/includes $INSTALL_TARGET/www/images/iconos
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
 
@@ -449,11 +501,13 @@ function updateServerFiles()
 			server/bin \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
+			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
+			lib/install_ticket_wolunicast.sh \
 			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
@@ -468,7 +522,7 @@ function updateServerFiles()
 		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
 			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
 		else
-			rsync --exclude .svn -irplt "${SOURCES[i]}" $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}")
+			rsync -irplt "${SOURCES[i]}" $(readlink -m "$INSTALL_TARGET/${TARGETS[i]}")
 		fi
 	done
 	popd >/dev/null
@@ -476,12 +530,10 @@ function updateServerFiles()
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
 		echoAndLog "${FUNCNAME}(): updating DHCP files"
 		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
-		for i in isc-dhcp-server dhcpd3-server dhcpd; do
-			[ -f /etc/init.d/$i ] && /etc/init.d/$i restart
-		done
+		$DHCPSERV restart
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
 	fi
-	if ! diff --quiet $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
+	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new init file"
 		backupFile /etc/init.d/opengnsys
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
@@ -494,8 +546,9 @@ function updateServerFiles()
 		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
-	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
-	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	[ ! -f /etc/cron.d/opengnsys ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
+	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
+	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
 
@@ -554,11 +607,11 @@ function compileServices()
 ### Funciones instalacion cliente OpenGnSys
 ####################################################################
 
-# Actualizar nuevo cliente para OpenGnSys 1.0
+# Actualizar cliente OpenGnSys
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-oneiric-3.0.0-14-generic-r2439.iso
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
@@ -666,8 +719,11 @@ if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
 	fi
 fi
 
+# Detectar datos de auto-configuración del instalador.
+autoConfigure
+
 # Instalar dependencias.
-installDependencies $DEPS
+installDependencies $DEPENDENCIES
 if [ $? -ne 0 ]; then
 	errorAndLog "Error: you may install all needed dependencies."
 	exit 1

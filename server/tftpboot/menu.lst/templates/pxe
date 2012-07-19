@@ -19,16 +19,20 @@ chainloader +1
 savedefault fallback
 boot
 
-title OpenGnSys-CACHE
+title OpenGnsys-CACHE
 find --set-root --ignore-floppies --ignore-cd /boot/ogvmlinuz
-kernel /boot/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false INFOHOST 
+kernel /boot/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogupdateinitrd=true INFOHOST 
 initrd /boot/oginitrd.img
 savedefault fallback
 boot
 
-title OpenGnSys-NET
+title OpenGnsys-NET
 keeppxe
 kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false INFOHOST 
 initrd (pd)/ogclient/oginitrd.img
 boot
+
+
+
+
 

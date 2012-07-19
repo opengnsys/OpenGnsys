@@ -53,9 +53,11 @@ BOOLEAN tomaConfiguracion(char*);
 BOOLEAN gestionaTrama(SOCKET*);
 BOOLEAN Sondeo(SOCKET*,TRAMA*);
 BOOLEAN respuestaSondeo(SOCKET *,TRAMA*);
+BOOLEAN InclusionClienteWinLnx(SOCKET*,TRAMA*);
 BOOLEAN InclusionCliente(SOCKET*,TRAMA*);
 BOOLEAN registraCliente(char *);
 
+BOOLEAN procesoInclusionClienteWinLnx(SOCKET*,TRAMA*,int*,char*);
 BOOLEAN procesoInclusionCliente(SOCKET*,TRAMA*);
 BOOLEAN clienteExistente(char *,int *);
 BOOLEAN clienteDisponible(char *,int *);

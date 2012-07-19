@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_ordenadores_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -61,9 +62,15 @@ if  ($opcion!=$op_alta){
 	<SCRIPT language="javascript" src="../jscripts/propiedades_ordenadores.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadores_'.$idioma.'.js"></SCRIPT>'?>
+	<script language=javascript> 
+function abrir_ventana(URL){ 
+   window.open('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640') 
+} 
+</script>
+	
 </HEAD>
 <BODY>
-<FORM  name="fdatos" action="../gestores/gestor_ordenadores.php" method="post"> 
+<FORM  name="fdatos" action="../gestores/gestor_ordenadores.php" method="post" enctype="multipart/form-data"> 
 	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
 	<INPUT type=hidden name=idordenador value="<? echo $idordenador?>">
 	<INPUT type=hidden name=grupoid value="<? echo $grupoid?>">
@@ -71,21 +78,33 @@ if  ($opcion!=$op_alta){
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
+			<?php	$fotomenu=$fotoordenador;
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombreordenador.'</TD>';
 				else		
 					echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
 			?>
-			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
-		</TR>	
+<td colspan="2" valign="top" align="left" rowspan="3">
+<img border="2" style="border-color:#63676b" src="<?php
+if ($fotoordenador=="")
+{
+$fotoordenador="../images/fotos/fotoordenador.gif";
+}else{
+$fotoordenador="../images/fotos/".$fotoordenador;
+}
+echo $fotoordenador?>">
+<br />(150X110)-(jpg - gif) ---- <?php echo $TbMsg[5091]?>
+<br />
+<input name="archivo" type="file" id="archivo" size="16" />
+</td>
+		</tr>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<th align="center">&nbsp;<?php echo $TbMsg[6]?> <sup>*</sup>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
 				else
@@ -94,17 +113,51 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
+			<th align="center">&nbsp;<?php echo $TbMsg[7]?> <sup>*</sup>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$mac.'</TD>';
 				else	
 					echo '<TD><INPUT class="formulariodatos" name=mac  type=text value="'. $mac.'"></TD>';
 			?>
 		</TR>	
+		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+				<TR>
+			<th align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</th>
+			<?
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan=3>'.$fotoordenador.'</TD>';
+				else	{
+					if ($fotoordenador=="")
+					$fotoordenador="../images/fotos/fotoordenador.gif";
+					$fotoordenador;
+					
+					?>
+					<TD colspan=3><SELECT class="formulariodatos" name="fotoordenador" >
+						<?php if($fotomenu==""){
+						echo '<option value="fotoordenador.gif"></option>';}else{
+						echo '<option value="'.$fotomenu.'">'.$fotomenu.'</option>';}
+						if ($handle = opendir("../images/fotos")) {
+						while (false !== ($entry = readdir($handle))) {
+						if ($entry != "." && $entry != "..") {?>
+						
+						<option value="<? echo $entry ?>"><? echo $entry ?></option>
+						<?}
+						}
+						closedir($handle);
+						} 
+						?>
+					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><? echo $TbMsg[5092] ?></a>
+					</TD>
+					<?
+					}
+					?>
+			
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion').'</TD>';
@@ -114,7 +167,7 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
@@ -124,7 +177,7 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion').'</TD>';
@@ -134,7 +187,7 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'procedimientos',$idprocedimiento,'idprocedimiento','descripcion').'&nbsp;</TD>';
@@ -144,7 +197,7 @@ if  ($opcion!=$op_alta){
 		</TR>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+			<th align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$cache.'</TD>';
@@ -176,8 +229,11 @@ if  ($opcion!=$op_alta){
 		</tr>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
+		</tr>
 
-	</TABLE>
+	</table>
 </FORM>
 </DIV>
 <?
@@ -191,7 +247,7 @@ include_once("../includes/opcionesbotonesop.php");
 //
 // Frame con la información de la configuración
 echo '<DIV align=center>';
-echo '<IFRAME scrolling=yes height=170 width=90%
+echo '<IFRAME scrolling=auto height=500 width=90% frameborder=0
 		 src="../principal/configuraciones.php?swp=1&idambito='.$idordenador.'&ambito='.$AMBITO_ORDENADORES.'"></IFRAME>';
 echo '</DIV>';
 //________________________________________________________________________________________________________
@@ -210,6 +266,7 @@ function TomaPropiedades($cmd,$id){
 	global $nombreordenador;
 	global $ip;
 	global $mac;
+	global $fotoordenador;
 	global $idperfilhard;
 	global $idrepositorio;
 	global $idmenu;
@@ -232,6 +289,7 @@ function TomaPropiedades($cmd,$id){
 		$idprocedimiento=$rs->campos["idproautoexec"];
 		$cache=$rs->campos["cache"];
 		$netiface=$rs->campos["netiface"];
+		$fotoordenador=$rs->campos["fotoord"];	//Creado para foto
 		$netdriver=$rs->campos["netdriver"];
 		$rs->Cerrar();
 		return(true);

@@ -4,7 +4,8 @@ install man-db
 install fbset
 install gdebi-core
 install bash-static
-#install busybox-static  #la version en oneiric no incluye el reboot y poweroff -> ver compilacion software 
+#La gestion  del busybox-static (incompatibilidades reboot y poweroff) en boottoolSoftwareCompile.sh 
+#install busybox-static  
 install console-data
 install locales
 install lshw 
@@ -12,3 +13,5 @@ install gawk
 install subversion
 install python-openssl 
 install python 
+install dmidecode 
+install hwinfo

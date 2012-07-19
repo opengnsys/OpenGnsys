@@ -96,7 +96,7 @@ switch($litambito){
 						rows="'.$rows.'"></textarea></TD></TR>
 					<TR>
 						<TD align=center>
-							<BR><IMG border=0 style="cursor:pointer" src="../images/boton_confirmar.gif"
+							<BR><IMG border=0 style="cursor:pointer" src="../images/boton_confirmar_'.$idioma.'.gif"
 							onclick="confirmar()"></TD></TR>';
 			}
 			if($ambito==$AMBITO_ORDENADORES) //Mensaje de espera

@@ -2,6 +2,9 @@
 
 Alias /opengnsys CONSOLEDIR
 
+# Overrides default CentOS php.ini configuration.
+php_value short_open_tag on
+
 <Directory CONSOLEDIR>
         Options -Indexes FollowSymLinks
         DirectoryIndex index.php

@@ -21,7 +21,7 @@
 #define LONSUC 512	// Longitud de los mensajes de sucesos
 #define LONBLK 512	// Longitud de los paquetes de tramas leidos cada vez
 #define MAXPRM 10	// Máximo número de parámeros del fichero de configuración del servicio
-#define MAXPAR 16	// Máximo número de particiones manejadas por el sistema
+#define MAXPAR 128	// Maximo numero de particiones manejadas por el sistema, ahora con GPT es 128
 #define MAXLONURL 512 // Longitud máxima de una dirección url con parámetros
 
 #define LONHEXPRM 5 // Longitud del campo que contiene el tamaño de la cadena de parámetros
@@ -175,7 +175,7 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"037-Ha ocurrido algún problema en el proceso de inclusión del cliente",\
 		"038-No se ha podido establecer conexión con el Servidor de Administración",\
 		"039-Ha ocurrido algún problema al procesar la trama recibida",\
-		"040-Se han recibido parámetros conurl valores no válidos",\
+		"040-Se han recibido parámetros con valores no válidos",\
 		"041-Ha ocurrido algún problema en el proceso de inclusión del cliente",\
 		"042-Ha ocurrido algún problema al enviar una petición de comandos o tareas pendientes al Servidor de Administración",\
 		"043-Ha ocurrido algún problema al enviar una petición de comandos interactivos al Servidor de Administración",\
@@ -227,6 +227,8 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"089-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMENU",\
 		"090-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMSG",\
 		"091-Ha habido algún problema al enviar un mensaje de tipo petición al Servidor",\
+		"092-Error en el fichero de configuración del programa. No se ha definido el parámetro IPLOCAL",\
+		"093-No se puede caragar la libraria Windows para trabajar con sockets",\
 
 };
 // ________________________________________________________________________________________________________

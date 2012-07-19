@@ -83,6 +83,7 @@ function respuestaSondeo(){
 //______________________________________________________________________________________________________
 function retornorespuestaSondeo(resul)
 {
+
 	if(resul.length>0){
 		var ip=""; // Dirección IP del ordenador
 		var so=""; // Sistema operativo activo
@@ -91,7 +92,7 @@ function retornorespuestaSondeo(resul)
 		var cadena=resul.split(";"); // Trocea la cadena devuelta por el servidor de adminsitración
 		for (var i=0;i<cadena.length;i++){
 			var dual=cadena[i].split("/");
-			ip=dual[0];
+			ip=dual[0].replace(/\n*/,"");
 			so=dual[1];
 			objOrd=document.getElementById(ip);
 			if(objOrd){ // Si existe el objeto
@@ -109,43 +110,46 @@ function soIMG(so)
 {
 	var MimgOrdenador="";
 	switch(so){
-				case 'INI':
-								MimgOrdenador="ordenador_INI.gif";  // Cliente ocupado
-								break;
-				case 'BSY':
-								MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
-								break;
-				case 'OPG':
-								MimgOrdenador="ordenador_RMB.gif";  // Cliente Rembo
-								break;
-				case 'WS2': 
-								MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
-								break;
-				case 'W2K':
-								MimgOrdenador="ordenador_W2K.gif"; // Windows 2000
-								break;
-				case 'WXP':
-								MimgOrdenador="ordenador_WXP.gif"; // Windows XP
-								break;
-				case 'WNT':
-								MimgOrdenador="ordenador_WNT.gif"; // Windows NT
-								break;
-				case 'W95':
-								MimgOrdenador="ordenador_W95.gif"; // Windows 95
-								break;
-				case 'W98':
-								MimgOrdenador="ordenador_W98.gif"; // Windows 98
-								break;
-				case 'WML':
-								MimgOrdenador="ordenador_WML.gif"; // Windows Millenium
-								break;
-				case 'LNX':
-								MimgOrdenador="ordenador_LNX.gif"; // Linux
-				default:
-								MimgOrdenador="ordenador_OFF.gif"; // Linux
-								break;
+		case 'INI':
+			MimgOrdenador="ordenador_INI.gif";  // Iniciando cliente
+			break;
+		case 'BSY':
+			MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
+			break;
+		case 'OPG':
+			MimgOrdenador="ordenador_OPG.gif";  // Cliente OpenGnSys
+			break;
+		case 'WS2': 
+			MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
+			break;
+		case 'W2K':
+			MimgOrdenador="ordenador_W2K.gif"; // Windows 2000
+			break;
+		case 'WXP':
+			MimgOrdenador="ordenador_WXP.gif"; // Windows XP
+			break;
+		case 'WNT':
+			MimgOrdenador="ordenador_WNT.gif"; // Windows NT
+			break;
+		case 'W95':
+			MimgOrdenador="ordenador_W95.gif"; // Windows 95
+			break;
+		case 'W98':
+			MimgOrdenador="ordenador_W98.gif"; // Windows 98
+			break;
+		case 'WML':
+			MimgOrdenador="ordenador_WML.gif"; // Windows Millenium
+			break;
+		case 'WIN':
+			MimgOrdenador="ordenador_WXP.gif"; // Windows
+			break;
+		case 'LNX':
+			MimgOrdenador="ordenador_LNX.gif"; // Linux
+			break;
+		default:
+			MimgOrdenador="ordenador_OFF.gif"; // Apagado
+			break;
 	}
 	return(MimgOrdenador);
 }
 
-	

@@ -7,11 +7,11 @@
 #_______________________________________________________________________________________________________________________________
 
 particiones=$(ogGetPartitionsNumber 1)    # Incluir todas las particiones
-cfg="0::::$(ogGetDiskSize 1);"            # e información de disco (partición 0)
+cfg="0::::$(ogGetDiskSize 1);"          # e información de disco (partición 0)
 
 for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
-	cod=$(ogGetPartitionId 1 $par)
+	cod=$(ogGetPartitionId 1 $par 2>/dev/null)
 	# Tipo de partición o sistema de fichero
 	fsi=$(getFsType 1 $par 2>/dev/null)
 	fsi=${fsi:-"EMPTY"}
@@ -19,11 +19,11 @@ for ((par=1;par<=$particiones;par++)); do
 	tam=$(ogGetPartitionSize 1 $par 2>/dev/null)
 	tam=${tam:-"0"}
 	# Sistema de fichero instalado 
-	if [ $cod == 82 ]; then
-		soi=" "
-	else
-		soi=$(getOsVersion 1 $par 2>/dev/null | cut -f2 -d:)
-   	fi	
+	case "$cod" in
+		""|82|8200|A502|BF02|EE|EF0[012])
+			soi=" " ;;
+		*)	soi=$(getOsVersion 1 $par 2>/dev/null | cut -f2 -d:) ;;
+   	esac
 
 	cfg="$cfg$par:$cod:$fsi:$soi:$tam;"
 done
@@ -32,9 +32,8 @@ echo $cfg | awk '{
 		n=split($0,sep,";");
 		for (i=1; i<n; i++){
 			split (sep[i],dua,":");
-		 	printf ("par=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
+		 	printf ("disk=1\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
 					dua[1],dua[2],dua[3],dua[4],dua[5]);
 			}
 		}'
-
 

@@ -157,7 +157,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		}
 		else
 			nodo.NodoPadre=null; // Es el primer nodo
-		var o=nodo.Nodo; 
+		o=nodo.Nodo; 
 		var auxsplit=o.getAttribute("id");
 		var idTR=auxsplit.split("-") [0];		
         o=o.nextSibling
@@ -210,7 +210,7 @@ function clickNodo(nodov,pathimg){
 				nodov.ArbolHijos.style.display="block"
 				break;
 			case "mas_c" :
-                nodov.imgsigno.setAttribute("value","menos_c",null);
+				nodov.imgsigno.setAttribute("value","menos_c",null);
 				nodov.imgsigno.setAttribute("src",pathimg+"/menos_c.gif",null);
 				if (nodov.nivel==0)
 				    nodov.imgsigno.setAttribute("src",pathimg+"/menos_root.gif",null);
@@ -239,7 +239,7 @@ function clickLiteralNodo(oLIT,pathimg){
 	if(pathimg==null){
 		var signoimg=nodov.imgsigno.getAttribute("src");
 		var p=signoimg.lastIndexOf("/");
-		var pathimg=signoimg.substring(0,p);
+		pathimg=signoimg.substring(0,p);
 		currentpathimg=pathimg;
 	}
 	var signoimg=nodov.imgsigno.getAttribute("value");

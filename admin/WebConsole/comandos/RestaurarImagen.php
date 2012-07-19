@@ -66,23 +66,12 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </HEAD>
 <BODY>
 <?
-	switch($ambito){
-			case $AMBITO_AULAS :
-				$urlimg='../images/iconos/aula.gif';
-				$textambito=$TbMsg[2];
-				break;
-			case $AMBITO_GRUPOSORDENADORES :
-				$urlimg='../images/iconos/carpeta.gif';
-				$textambito=$TbMsg[3];
-				break;
-			case $AMBITO_ORDENADORES :
-				$urlimg='../images/iconos/ordenador.gif';
-				$textambito=$TbMsg[4];
-				break;
-	}
-	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'</span><br>'; // Cabecera
-	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
-				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>'; // Subcebecera
+	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
+	//________________________________________________________________________________________________________
+
+	include_once("./includes/FiltradoAmbito.php");
+	//________________________________________________________________________________________________________
+				
 	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
 	if($ambito!=$AMBITO_ORDENADORES){	
 		$cadenaid="";
@@ -117,7 +106,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				<TR>
 					<TD height=20 align="center" colspan=14>
 						<A href=#>
-						<IMG border=0 src="../images/boton_confirmar.gif" onclick="document.fdatos.submit()"></A></TD>			
+						<IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
 				</TR>
 			</TABLE>
 		</FORM>	
@@ -132,6 +121,9 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	include_once("./includes/opcionesacciones.php");
 	//________________________________________________________________________________________________________
 ?>
+<SCRIPT language="javascript">
+	Sondeo();
+</SCRIPT>
 </BODY>
 </HTML>
 <?
@@ -179,34 +171,29 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 					echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
 					echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
 					echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-					
-					//echo '<TD>&nbsp;'.$tbKeys[$k]["nombreso"].'&nbsp;</TD>'.chr(13);
 					echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-					
-					//echo'<TD align=center>&nbsp;'.$tbKeys[$k]["sistemafichero"].'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
-
-					//echo'<TD align=rigth>&nbsp;'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</TD>'.chr(13);
 					echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-									
 					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
 					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
+
 					//Clonación
-					
-					$metodos="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
-					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
+					$metodos="UNICAST=UNICAST-CACHE".chr(13);
+					$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
 					$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-					$metodos.="TORRENT peer:60=TORRENT-CACHE";
-					
-					$TBmetodos["UNICAST-DIRECT"]=1;
-					$TBmetodos["MULTICAST-DIRECT"]=2;
+					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
+					$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
+
+					$TBmetodos["UNICAST-CACHE"]=1;
+					$TBmetodos["UNICAST-DIRECT"]=2;
 					$TBmetodos["MULTICAST-CACHE"]=3;
-					$TBmetodos["TORRENT-CACHE"]=4;
-					
+					$TBmetodos["MULTICAST-DIRECT"]=4;
+					$TBmetodos["TORRENT-CACHE"]=5;
+
 					$idxc=$_SESSION["protclonacion"];
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 				}
-				echo '<TR>'.chr(13);
+				echo '</TR>'.chr(13);
 			}
 		}
 	}	
@@ -290,33 +277,38 @@ function mcast_syntax($cmd,$ambito,$idambito)
 //if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if ($ambito == 4) 
 {
-$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas where aulas.idaula=' . $idambito ;
+$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
+		WHERE aulas.idaula=' . $idambito ;
 }
 
 if ($ambito == 8) 
 {
-$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula where gruposordenadores.idgrupo=' . $idambito ;
+$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
+		JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula
+		WHERE gruposordenadores.idgrupo=' . $idambito ;
 }
 
 if ($ambito == 16)
 {
-$cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
+$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
+		JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+		WHERE ordenadores.idordenador=' . $idambito ;
 }
 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-if ($rs->Abrir()){
+	if ($rs->Abrir()){
 		$rs->Primero(); 
-       	$mcastsyntax.= $rs->campos["pormul"] . ':';
-        		
+		$mcastsyntax.= $rs->campos["pormul"] . ':';
+
 		$rs->Siguiente();
 		switch ($rs->campos["modomul"]) 
 		{
 			case 1:
-			    $mcastsyntax.="half-duplex:";
+				$mcastsyntax.="half-duplex:";
 				break;
 			default:
-			    $mcastsyntax.="full-duplex:";
+				$mcastsyntax.="full-duplex:";
 				break;
 		} 			
 		$rs->Siguiente();
@@ -324,25 +316,50 @@ if ($rs->Abrir()){
 		
 		$rs->Siguiente();
 		$mcastsyntax.=$rs->campos["velmul"] .'M:';
-		
+
+		$rs->Siguiente();
+		$mcastsyntax.=$rs->campos["puestos"] . ':';
+
 	$rs->Cerrar();
 	}
-	     	$mcastsyntax.="50:";
-			$mcastsyntax.="60";
+	$mcastsyntax.="60";
+
 	return($mcastsyntax);	
 }
 
 
+function torrent_syntax($cmd,$ambito,$idambito)
+{
+if ($ambito == 4) 
+{
+	$cmd->texto='SELECT modp2p, timep2p FROM aulas
+			WHERE aulas.idaula=' . $idambito ;
+}
+if ($ambito == 8) 
+{
+	$cmd->texto='SELECT modp2p, timep2p FROM aulas
+			JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula
+			WHERE gruposordenadores.idgrupo=' . $idambito ;
+}
+if ($ambito == 16)
+{
+	$cmd->texto='SELECT modp2p, timep2p FROM aulas
+			JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+			WHERE ordenadores.idordenador=' . $idambito ;
+}
 
-
-
-
-
-
-
-
-
-
-
+$rs=new Recordset; 
+$rs->Comando=&$cmd; 
+if ($rs->Abrir()){
+	$rs->Primero(); 
+	$torrentsyntax=$rs->campos["modp2p"] . ':';
+	$rs->Siguiente();
+	$torrentsyntax.=$rs->campos["timep2p"];
+	$rs->Siguiente();
+	$rs->Cerrar();
+}
+return($torrentsyntax);   
+}
 
 ?>
+

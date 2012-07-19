@@ -168,5 +168,7 @@ $msk_nombreSO=0x02;
 $msk_tamano=0x04;
 $msk_imagen=0x08;
 $msk_perfil=0x10;
+$msk_cache=0x12;
 
 ?>
+

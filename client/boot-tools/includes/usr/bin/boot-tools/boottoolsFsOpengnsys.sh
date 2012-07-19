@@ -6,13 +6,13 @@
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 apt-get -y --force-yes install  subversion
-export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
-VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
-
+#export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
+#VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
+VERSIONSVN=$(cat /tmp/versionsvn.txt)
 VERSIONBOOTTOOLS=ogLive
 
-NAMEISOCLIENT="/tmp/opengnsys_info_rootfs" 
-NAMEHOSTCLIENT="/tmp/opengnsys_chroot"
+NAMEISOCLIENTFILE="/tmp/opengnsys_info_rootfs" 
+NAMEHOSTCLIENTFILE="/tmp/opengnsys_chroot"
 	
 SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
@@ -115,10 +115,9 @@ cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
 
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENT
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENT
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/debian_chroot
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > /etc/opengnsys_chroot
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENTFILE
+echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENTFILE
+
 
 history -c
 

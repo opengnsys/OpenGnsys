@@ -13,6 +13,6 @@ echo "[50] Desmontar cache local."
 ogUnmountCache
 echo "[70] Apagando el equipo."
 ethtool -s $DEVICE wol g
-(sleep 5 && busybox poweroff) &
+(sleep 5 && busyboxOLD poweroff) &
 
 

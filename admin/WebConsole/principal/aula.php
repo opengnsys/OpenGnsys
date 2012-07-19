@@ -17,6 +17,7 @@ include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/aulas_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/estados_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/mensajes_".$idioma.".php");
 //________________________________________________________________________________________________________
 $litambito=0; 
@@ -282,6 +283,15 @@ function pintaordenadores(){
 		}
 	}
 	echo '</TABLE>';
+	echo '
+<p>
+<table style="border: #d4d0c8 1px solid; background: #eeeeee" align=center>
+  <tr align="center">';
+	foreach ( Array ("OPG", "BSY", "WXP", "LNX", "OFF") as $status) {
+		echo '    <td><img src="../images/ordenador_'.$status.'.gif" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$TbMsg["STATUS_$status"].'</font></td>';
+	}
+	echo '  </tr>';
+	echo '</table>';
 	if ($nombreaula!="")
 		echo '</DIV>';
 }

@@ -410,7 +410,7 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `grupoid` int(11) DEFAULT NULL,
   `idrepositorio` int(11) NOT NULL,
   `numpar` smallint(6) NOT NULL,
-  `codpar` smallint(6) NOT NULL,
+  `codpar` int(8) NOT NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -436,7 +436,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `grupoid` int(11) NOT NULL DEFAULT '0',
   `htmlmenupub` varchar(250) DEFAULT NULL,
   `htmlmenupri` varchar(250) DEFAULT NULL,
-  `resolucion` tinyint(4) DEFAULT NULL,
+  `resolucion` SMALLINT(4) DEFAULT NULL,
   PRIMARY KEY (`idmenu`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -476,6 +476,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '1',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
   `netdriver` VARCHAR( 30 ) NOT NULL DEFAULT 'generic',
+  `fotoord` VARCHAR( 250 ) NOT NULL,
   PRIMARY KEY (`idordenador`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -489,14 +490,16 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 
 CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idordenador` int(11) NOT NULL,
+  `numdisk` tinyint(4) NOT NULL,
   `numpar` tinyint(4) NOT NULL,
-  `codpar` smallint(11) NOT NULL,
+  `codpar` int(8) NOT NULL,
   `tamano` int(11) NOT NULL,
   `idsistemafichero` smallint(11) NOT NULL,
   `idnombreso` smallint(11) NOT NULL,
   `idimagen` int(11) NOT NULL,
   `idperfilsoft` int(11) NOT NULL,
-  UNIQUE KEY `idordenadornumpar` (`idordenador`,`numpar`)
+  `cache` varchar(500) NOT NULL,
+  UNIQUE KEY `idordenadornumdisknumpar` (`idordenador`,`numdisk`,`numpar`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -564,6 +567,7 @@ CREATE TABLE IF NOT EXISTS `perfileshard` (
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
   `idcentro` int(11) NOT NULL,
+  `winboot` enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot',
   PRIMARY KEY (`idperfilhard`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -727,7 +731,7 @@ CREATE TABLE IF NOT EXISTS `sistemasficheros` (
   `idsistemafichero` smallint(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
-  `codpar` smallint(6) NOT NULL,
+  `codpar` int(8) NOT NULL,
   PRIMARY KEY (`idsistemafichero`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -875,7 +879,7 @@ INSERT INTO `tiposos` (`idtiposo`, `tiposo`, `idplataforma`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `tipospar` (
-  `codpar` smallint(4) NOT NULL,
+  `codpar` int(8) NOT NULL,
   `tipopar` varchar(250) NOT NULL,
   `clonable` tinyint(4) NOT NULL,
   UNIQUE KEY `codpar` (`codpar`)
@@ -889,18 +893,55 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (0, 'EMPTY', 0),
 (1, 'FAT12', 1),
 (5, 'EXTENDED', 0),
+(6, 'FAT16', 1),
 (7, 'NTFS', 1),
-(11, 'FAT32', 1),
-(17, 'HFAT12', 1),
-(22, 'HFAT16', 1),
-(23, 'HNTFS', 1),
-(27, 'HFAT32', 1),
-(130, 'LINUX-SWAP', 0),
-(131, 'LINUX', 1),
-(142, 'LINUX-LVM', 1),
-(191, 'SOLARIS', 1),
-(202, 'CACHE', 0),
-(253, 'LINUX-RAID', 1);
+(CONV('0B',16,10), 'FAT32', 1),
+(CONV('11',16,10), 'HFAT12', 1),
+(CONV('16',16,10), 'HFAT16', 1),
+(CONV('17',16,10), 'HNTFS', 1),
+(CONV('1B',16,10), 'HFAT32', 1),
+(CONV('82',16,10), 'LINUX-SWAP', 0),
+(CONV('83',16,10), 'LINUX', 1),
+(CONV('8E',16,10), 'LINUX-LVM', 1),
+(CONV('A5',16,10), 'FREEBSD', 1),
+(CONV('A6',16,10), 'OPENBSD', 1),
+(CONV('AF',16,10), 'HFS', 1),
+(CONV('BE',16,10), 'SOLARIS-BOOT', 1),
+(CONV('BF',16,10), 'SOLARIS', 1),
+(CONV('CA',16,10), 'CACHE', 0),
+(CONV('DA',16,10), 'DATA', 1),
+(CONV('EE',16,10), 'GPT', 0),
+(CONV('EF',16,10), 'EFI', 0),
+(CONV('FB',16,10), 'VMFS', 1),
+(CONV('FD',16,10), 'LINUX-RAID', 1),
+(CONV('0700',16,10), 'WINDOWS', 1),
+(CONV('0C01',16,10), 'WIN-RESERV', 1),
+(CONV('7F00',16,10), 'CHROMEOS-KRN', 1),
+(CONV('7F01',16,10), 'CHROMEOS', 1),
+(CONV('7F02',16,10), 'CHROMEOS-RESERV', 1),
+(CONV('8200',16,10), 'LINUX-SWAP', 0),
+(CONV('8300',16,10), 'LINUX', 1),
+(CONV('8301',16,10), 'LINUX-RESERV', 1),
+(CONV('8E00',16,10), 'LINUX-LVM', 1),
+(CONV('A500',16,10), 'FREEBSD-DISK', 0),
+(CONV('A501',16,10), 'FREEBSD-BOOT', 1),
+(CONV('A502',16,10), 'FREEBSD-SWAP', 0),
+(CONV('A503',16,10), 'FREEBSD', 1),
+(CONV('AF00',16,10), 'HFS', 1),
+(CONV('AF01',16,10), 'HFS-RAID', 1),
+(CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
+(CONV('BF00',16,10), 'SOLARIS', 1),
+(CONV('BF01',16,10), 'SOLARIS', 1),
+(CONV('BF02',16,10), 'SOLARIS-SWAP', 0),
+(CONV('BF03',16,10), 'SOLARIS-DISK', 1),
+(CONV('BF04',16,10), 'SOLARIS', 1),
+(CONV('BF05',16,10), 'SOLARIS', 1),
+(CONV('CA00',16,10), 'CACHE', 0),
+(CONV('EF00',16,10), 'EFI', 0),
+(CONV('EF01',16,10), 'MBR', 0),
+(CONV('EF02',16,10), 'BIOS-BOOT', 0),
+(CONV('FD00',16,10), 'LINUX-RAID', 1),
+(CONV('FFFF',16,10), 'UNKNOWN', 1);
 
 -- --------------------------------------------------------
 

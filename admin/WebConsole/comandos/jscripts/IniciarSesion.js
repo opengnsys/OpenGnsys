@@ -20,6 +20,7 @@ function confirmar(){
 		}
 		var RC='@';
 		document.fdatosejecucion.atributos.value="par="+particion+RC;
+		filtrado();
 		document.fdatosejecucion.submit();
 	}
  }

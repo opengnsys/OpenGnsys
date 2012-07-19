@@ -1,9 +1,9 @@
-<?
-//________________________________________________________________________________________________________
+<?php
+//_________________________________________________
 //
-//	Fichero de idiomas php: configuraciones_eng.php
-//	Idioma: Inglés
-//________________________________________________________________________________________________________
+//	Php language file: configuraciones_eng.php 
+//	Language: English
+//_________________________________________________
 $TbMsg=array();
 $TbMsg[0]='Configurations';
 $TbMsg[1]='Scope';
@@ -52,9 +52,13 @@ $TbMsg[38]='Less free disk space (KB)';
 $TbMsg[39]='Customize';
 $TbMsg[40]='Size unchanged';
 $TbMsg[41]='Generate OG Instruction';
+$TbMsg["CONFIG_PARTTABLE"='Partition table';
 
 $TbMsg[42]='Variable';
 $TbMsg[43]='No configuration: client does not connect to server.';
-
+$TbMsg[44]='Hardware equipment without profile';
+$TbMsg[45]='Add Profile to obtain data';
+$TbMsg[495]='Content cache';
+$TbMsg[4951]='Cache free';
 ?>
 

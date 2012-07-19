@@ -17,7 +17,7 @@
 // ________________________________________________________________________________________________________
 char * encriptar(char *cadena,int*ret)
 {
-return(cadena);
+	/*
 	int i,lon;
 	char clave; 
 	
@@ -26,6 +26,7 @@ return(cadena);
 	for(i=0;i<lon;i++)
       cadena[i]=((char)cadena[i] ^ clave) & 0xFF; 
 	*ret=lon;
+	*/
 	return(cadena);
 }
 // ________________________________________________________________________________________________________
@@ -39,7 +40,7 @@ return(cadena);
 // ________________________________________________________________________________________________________
 char * desencriptar(char *cadena,int* ret)
 {
-return(cadena);
+	/*
 	int i,lon;
 	char clave; 
 	
@@ -48,7 +49,9 @@ return(cadena);
 	for(i=0;i<lon;i++)
 		cadena[i]=((char)cadena[i] ^ clave) & 0xFF;
 	*ret=lon;
+	*/
 	return(cadena);
+
 }
 // ________________________________________________________________________________________________________
 // Función: tomaHora
@@ -191,6 +194,10 @@ BOOLEAN validacionParametros(int argc, char*argv[],int eje) {
 			strcpy(szPathFileCfg, "ogAdmAgent.cfg"); // Valores por defecto de archivos
 			strcpy(szPathFileLog, "ogAdmAgent.log"); // de configuración y de logs
 			break;
+		case 6: // Agente
+			strcpy(szPathFileCfg, "ogAdmWinClient.cfg"); // Valores por defecto de archivos
+			strcpy(szPathFileLog, "ogAdmWinClient.log"); // de configuración y de logs
+			break;			
 	}
 
 	ndebug = 1; // Nivel de debuger por defecto
@@ -838,6 +845,7 @@ char * leeArchivo(char *fil)
 {
 	FILE *f;
 	long lSize;
+	char* buffer;
 
 	f=fopen(fil,"rb");
 	if (!f)
@@ -845,7 +853,7 @@ char * leeArchivo(char *fil)
 	fseek (f,0,SEEK_END); // Obtiene tamaño del fichero.
 	lSize = ftell (f);
 	rewind (f);
-	char*buffer = (char*) reservaMemoria(lSize+1); // Toma memoria para el buffer de lectura.
+	buffer = (char*) reservaMemoria(lSize+1); // Toma memoria para el buffer de lectura.
 	if (!buffer) // No hay memoria suficiente para el buffer
 		return (NULL);
 	lSize=fread (buffer,1,lSize,f); // Lee contenido del fichero
@@ -1036,7 +1044,11 @@ SOCKET abreConexion(void)
 			return(s);
 		}
 		swloop++;
-		sleep(5); // Espera cinco sgendo antes de intentar una nueva conexión
+		#ifdef  __WINDOWS__
+			Sleep(5*1000);
+		#else
+			sleep(5); // Espera cinco segundos antes de intentar una nueva conexión
+		#endif
 	}
 	return(INVALID_SOCKET);
 }

@@ -1,4 +1,4 @@
-<?
+<?php
 // ********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -38,7 +38,7 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 		}
 		//________________________________________________________________________________________________________
 		function eleccion(o,op){
-				opadre=window.parent // Toma frame padre
+				var opadre=window.parent // Toma frame padre
 				opadre.frames["frame_contenidos"].document.location.href="nada.php"
 				var href;
 				var 	href2="nada.php"

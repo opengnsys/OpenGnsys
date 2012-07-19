@@ -22,6 +22,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../idiomas/php/".$idioma."/comandos/ejecutarscripts_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/configuraciones_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
@@ -43,14 +44,14 @@ if (!$cmd)
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title> AdministraciÃ³n web de aulas </title>
+<title> Administración web de aulas </title>
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
 
 <?php 
@@ -72,8 +73,8 @@ $xajax->printJavascript('../xajax/');
 	document.getElementById('minsize').value=min;
 	document.getElementById('freedisk').value=min;
 ">
-<?
-switch($ambito){
+<?php
+	switch($ambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
 			$textambito=$TbMsg[0];
@@ -109,27 +110,49 @@ switch($ambito){
 
 	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil;
 	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
-
-	?>	
-
+?>
 
 	<form  align=center name="fdatos" > 
 
-
-	
-		<table  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
-			<?
-		 	 include_once("./includes/asistentes/formParticionado.php");
-?>
-			
+		<table class="tabla_datos">
+		<tr>
+		<td>
+			<?php echo $TbMsg[35].":\n"; 	// Disco ?>
+		        <input type="text" name="n_disk" value="1">
+		</td>
+		</tr>
+		<tr>
+		<td>
+			<?php echo $TbMsg["CONFIG_PARTTABLE"].":\n"; ?>
+			<select name="tipo_part_table" id="tipo_part_table" onchange="showPartitionForm(this.value)">
+				<option value="MSDOS">MSDOS</option>
+				<option value="GPT">GPT</option>
+			</select>
+		</td>
+		</tr>
+		</table>
+		<div id="formMSDOS">
+			<table class="tabla_datos" border="0" cellpadding="0" cellspacing="1">
+				<?php include_once("includes/asistentes/formParticionado_msdos.php");?>
+			</table>
+		</div>
+		<div id="formGPT" style="display:none">
+			<table class="tabla_datos" border="0" cellpadding="0" cellspacing="1">
+				<?php include_once("includes/asistentes/formParticionado_gpt.php");?>
+			</table>
+		</div>
+		<table class="tabla_datos">		
 			<tr> 
 				<th><input type="button" name="GenerarInstruccion" Value="<?php echo $TbMsg[41];?>" onclick="codeParticionado(this.form)" /> </th>
 				<td colspan="2"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
-		</table>	
+			<tr>
+				<th colspan="3"><?php echo $TbMsg["WARN_REBOOTAFTER"]; ?></th>
+			</tr>
+		</table>
 	</form>	
 
-<?
+<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -137,12 +160,9 @@ switch($ambito){
 	include_once("./includes/opcionesacciones.php");
 	//________________________________________________________________________________________________________
 
-
-
-
-
 ?>
 
 
 </body>
 </html>
+

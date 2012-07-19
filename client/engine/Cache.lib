@@ -4,7 +4,7 @@
 #@brief   Librería o clase Cache
 #@class   Cache
 #@brief   Funciones para gestión de la caché local de disco.
-#@version 0.9.1
+#@version 1.0.4
 #@warning License: GNU GPLv3+
 #*/
 
@@ -24,40 +24,66 @@
 #@version 0.9.2 - Corrección definición de límites.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/06/01
+#@version 1.0.4 - Soporte para discos GPT.
+#@author  Universidad de Huelva
+#@date    2012/03/13
 #*/ ##
 function ogCreateCache ()
 {
 # Variables locales.
-local DISK PART SECTORS CYLS START END SIZE MINSIZE MAXSIZE ENDPART3
+local FINDCACHE NDSK PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_partsize" "$FUNCNAME 10000000"
     return
 fi
-# Error si no se recibe 1 parámetro.
+# Error si no se recibe 1 parámetro que sea un número entero.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+[[ $1 =~ ([0-9]*) ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
 
-DISK=$(ogDiskToDev 1) || return $?
-PART="4"
-SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
-CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-END=$[SECTORS/CYLS*CYLS-1]              # Sector final del disco
-SIZE=$(echo $1|awk '{print $0*2}')      # En sectores de 512 B.
+FINDCACHE="1 4"                         # Partición de caché (ndisco npart).
+NDSK=${FINDCACHE% *}
+PART=${FINDCACHE#* }
+DISK=$(ogDiskToDev $NDSK) || return $?
+END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
+SIZE=$[$1*2]                            # Tamaño en sectores de 512 B.
 START=$[END-SIZE+1]
-ENDPART3=$(sfdisk -uS -l $DISK | awk -v P="${DISK}3" '{if ($1==P) print $3}')
-# Error si tamaño no está entre límites permitidos o si se solapa con la partición 3.
-MINSIZE=100000                          # Error de formateo si tamaño < 50 MB.
+ENDPREVPART=$[$(ogGetLastSector $NDSK $[PART-1] 2>/dev/null)]
+# Error si tamaño no está entre límites permitidos o si se solapa con la partición anterior.
+MINSIZE=25000                           # Error de formateo si tamaño < 50 MB.
 MAXSIZE=$[END/2]                        # No permitir tamaño > mitad del disco.
-if [ $SIZE -lt $MINSIZE -o $SIZE -gt $MAXSIZE -o $START -le $ENDPART3 ]; then
+if [ $SIZE -lt $MINSIZE -o $SIZE -gt $MAXSIZE -o $START -le $ENDPREVPART ]; then
     ogRaiseError $OG_ERR_FORMAT "$1" || return $?
 fi
 
 # Desmontar todos los sistemas de archivos del disco.
 ogUnmountAll 1 2>/dev/null
-# Si la tabla de particiones no es valida, volver a generarla.
-[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
 # Definir particiones y notificar al kernel.
-sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,ca" 2>/dev/null && partprobe
+# En el caso de ser disco GPT, de momento se borra la particion y se vuelve a crear,
+# por lo que se pierden los datos.
+PTTYPE=$(ogGetPartitionTableType $NDSK)
+if [ -z "$PTTYPE" ]; then
+    PTTYPE="MSDOS"                      # Por defecto para discos vacíos.
+    ogCreatePartitionTable $NDSK $PTTYPE
+fi
+case "$(ogGetPartitionTableType $NDSK)" in
+    GPT)
+        # Si la tabla de particiones no es valida, volver a generarla.
+        [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
+        # Si existe la cache se borra previamente
+        [ -n $(ogFindCache) && ogDeleteCache
+        # Capturamos el codigo de particion GPT para cache
+        ID=$(ogTypeToId CACHE GPT)
+        sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null && partprobe
+        ;;
+    MSDOS)
+        # Si la tabla de particiones no es valida, volver a generarla.
+        [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
+        # Definir particiones y notificar al kernel.
+        ID=$(ogTypeToId CACHE MSDOS)
+        sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,$ID" 2>/dev/null && partprobe
+        ;;
+esac
 }
 
 
@@ -70,6 +96,9 @@ sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,ca" 2>/dev/null && partprobe
 #@version 0.91 - Definición de caché local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/11
+#@version 1.0.4 - Soporte para discos GPT.
+#@author  Universidad de Huelva
+#@date    2012/03/13
 #*/ ##
 function ogDeleteCache ()
 {
@@ -87,10 +116,19 @@ DISK=$(ogDiskToDev $NDISK)
 
 # Desmontar todos los sistemas de archivos del disco.
 ogUnmountAll $NDISK 2>/dev/null
-# Si la tabla de particiones no es valida, volver a generarla.
-[ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
-# Eliminar (poner a 0) la partición de caché.
-sfdisk -f $DISK -N$NPART <<<"0,0,0" 2>/dev/null && partprobe
+case "$(ogGetPartitionTableType $1)" in
+    GPT)
+        # Si la tabla de particiones no es valida, volver a generarla.
+        [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
+        sgdisk $DISK -d$NPART 2>/dev/null && partprobe
+        ;;
+    MSDOS)
+        # Si la tabla de particiones no es valida, volver a generarla.
+        [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
+        # Eliminar (poner a 0) la partición de caché.
+        sfdisk -f $DISK -N$NPART <<<"0,0,0" 2>/dev/null && partprobe
+        ;;
+esac
 # Borrar etiqueta de la caché.
 rm -f /dev/disk/by-label/CACHE
 }
@@ -123,7 +161,7 @@ fi
 # Obtener el sistema de archivos etiquetado con "CACHE".
 PART=$(realpath /dev/disk/by-label/CACHE 2>/dev/null)
 # Si no, obtener la 1ª partición marcada como de tipo caché.
-PART=${PART:-$(sfdisk -l | awk '$6~/ca|a7/ {print $1}')}
+PART=${PART:-$(sfdisk -l 2>/dev/null | awk '$6~/ca|a7/ {print $1}')}
 PART=${PART%% *}
 
 ogDevToDisk $PART 2>/dev/null
@@ -160,10 +198,7 @@ DEV=$(ogDiskToDev $DEV) || return $?
 
 # Formatear sistema de ficheros.
 ogUnmountCache 2>/dev/null
-           # Orden para formateo Ext4
 mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
-           # Orden para formateo Reiser 3
-           #mkfs.reiserfs -f $DEV -l "CACHE" 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
 # Crear estructura básica.
 MNTDIR=$(ogMountCache)
 mkdir -p $MNTDIR/$OGIMG
@@ -264,7 +299,6 @@ if [ "$*" == "help" ]; then
 fi
 
 ogMountFs $(ogFindCache) 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
-
 }
 
 

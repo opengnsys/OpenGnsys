@@ -262,8 +262,10 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 		
 		/* Sólo envía por la red el primer comando, el resto, si hubiera, 
 		lo encontrará el cliente a través de los comandos pendientes */
-		if(empty($vez))
-				if(!enviaComando($parametros)) return(false);
+		if(empty($vez)){
+			$idaccion=$cmd->Autonumerico();
+			if(!enviaComando($parametros,$idaccion)) return(false);
+		}
 		$vez++;
 	}
 	return(true);
@@ -272,12 +274,11 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 //
 //	Envia un procedimiento a un grupo de ordenadores a través de la red
 //________________________________________________________________________________________________________
-function enviaComando($parametros)
+function enviaComando($parametros,$idaccion)
 {	
 	global $cadenaid;
 	global $cadenaip;
 	global $cadenamac;	
-	global $sesion;		
 	global $servidorhidra;		
 	global $hidraport;		
 	global $LONCABECERA;		
@@ -286,7 +287,7 @@ function enviaComando($parametros)
 	// Envio al servidor 
 
 	$aplicacion=chr(13)."ido=".$cadenaid.chr(13)."mac=".$cadenamac.chr(13)."iph=".$cadenaip.chr(13);
-	$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
+	$acciones=chr(13)."ids=".$idaccion.chr(13); // Para seguimiento
 	
 	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 		$parametros.=$aplicacion;
