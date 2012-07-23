@@ -1,6 +1,7 @@
 #ª/bin/bash
 
-source /tmp/net-eth0.conf
+DEVICE=${DEVICE:-"eth0"}
+source /tmp/net-$DEVICE.conf
 FILEINFOHTML=$OGLOG/`ogGetIpAddress`.info.html
 FILEINFOCACHE=$OGLOG/`ogGetIpAddress`.cache.txt
 ogMountCache 2>/dev/null
