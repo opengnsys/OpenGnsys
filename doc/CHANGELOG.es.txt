@@ -41,6 +41,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 #517	Servicio opengnsys comprobación de permisos en sistema de archivos
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#289	La consola web no actualiza los cambios en el tamaño de la caché
 #427	Postconfiguración por grupos de ordenadores (heredado de #14)
 #452	Elegir resolución en los menús
 #462	Consola: eliminar grupos de ordenadores
@@ -279,6 +280,7 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #126	Integración de consola Web con bittorent (mejora)
 #138	Configurar parámetros de red en cliente
+#143	Integración con la consola web de los nuevos sistema de ficheros
 #185	Aproximación a la gestión log de los clientes (mejora)
 #248	La consola web no muestra datos del repositorio hasta que no se asigna
 #258	Error al eliminar un perfil de software
@@ -332,6 +334,8 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 
 Tickets resueltos en módulo OpenGnSys Client:
 #112	Problema al arrancar Windows en discos SATA2
+#132	Sustitución de browser por Client Admin (no se resolverá)
+#145	Comunicación entre cliente y administrador web (no se resolverá)
 #157	ogClient falla al buscar una función ogConfigureRamfs
 #237	Sustituir Partimage
 #250	En ocasiones el cliente no arranca el browser gráfico
