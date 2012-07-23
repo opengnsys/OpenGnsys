@@ -20,3 +20,5 @@ install hfsutils
 install nilfs-tools
 install reiser4progs 
 install ufsutils
+install ubuntu-zfs
+

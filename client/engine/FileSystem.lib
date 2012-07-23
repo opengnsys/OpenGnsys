@@ -4,7 +4,7 @@
 #@brief   Librería o clase FileSystem
 #@class   FileSystem
 #@brief   Funciones para gestión de sistemas de archivos.
-#@version 1.0.4
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -106,6 +106,9 @@ return $ERRCODE
 #@version 0.9 - Primera adaptacion para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
+#@version 1.0.5 - Soporte para BTRFS.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-06-28
 #*/ ##
 function ogExtendFs ()
 {
@@ -130,7 +133,7 @@ TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])   PROG="resize2fs"; PARAMS="-f" ;;
     REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
-#    BTRFS)      PROG="btrfs"; PARAMS="filesystem resize max" ;;
+    BTRFS)      PROG="btrfs"; PARAMS="filesystem resize max" ;;
     NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
     *)          ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                 return $? ;;
@@ -624,9 +627,9 @@ esac
 #@version 0.9 - Primera version para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-28
-#@version 1.0.4 - Soportar HFS/HFS+.
+#@version 1.0.5 - Soportar BTRFS, UFS y ZFS.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2012-05-21
+#@date    2012-06-28
 #*/ ##
 function ogMountFs ()
 {
@@ -666,6 +669,7 @@ if [ -z "$MNTDIR" ]; then
     case "$TYPE" in
         CACHE)      MOUNT=mount ;;
         EXT[234])   MOUNT=mount ;;
+        BTRFS)      MOUNT=mount ;;
         REISERFS)   insmod /lib/modules/$(uname -r)/kernel/fs/reiserfs/reiserfs.ko 2>/dev/null
                     MOUNT=mount ;;
         JFS)        insmod /lib/modules/$(uname -r)/kernel/fs/jfs/jfs.ko 2>/dev/null
@@ -676,14 +680,17 @@ if [ -z "$MNTDIR" ]; then
         FAT16|FAT32|HFAT16|HFAT32)
                     MOUNT=mount; PARAMS="-t vfat" ;;
         HFS|HFS+)   MOUNT=mount; PARAMS="-o force" ;;
-        *)  #/// Error, si la partición no es montable.
+        UFS|FREEBSD-UFS)
+                    MOUNT=mount; PARAMS="-t ufs -r -o ufstype=ufs2" ;;
+        ZFS)        MOUNT=mount; PARAMS="" ;;
+        *)  # Error, si la partición no es montable.
             rmdir $MNTDIR
             ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
             return $OG_ERR_PARTITION
             ;;
     esac
-    $MOUNT $PARAMS $PART $MNTDIR 2>/dev/null || \
-               $MOUNT $PARAMS $PART $MNTDIR -o force,remove_hiberfile 2>/dev/null || \
+    $MOUNT $PARAMS $PART $MNTDIR &>/dev/null || \
+               $MOUNT $PARAMS $PART $MNTDIR -o force,remove_hiberfile &>/dev/null || \
                ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE" || return $?
 fi
 echo "$MNTDIR"
