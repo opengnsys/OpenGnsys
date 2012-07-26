@@ -4,7 +4,7 @@
 #@brief   Librería o clase Inventory
 #@class   Inventory
 #@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
-#@version 0.9.2
+#@version 1.0.4
 #@warning License: GNU GPLv3+
 #*/
 
@@ -33,15 +33,18 @@ fi
 #@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@return  OSType:OSVersion
-#@note    TipoSistema = { Linux, Windows }
+#@return  OSType:OSVersion - tipo y versión del sistema operativo.
+#@note    OSType = { Android, BSD, Linux, MacOS, Solaris, Windows }
 #@note    Requisitos: awk, head, chroot
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
 #@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
+#@version 1.0.4 - Incluir tipos BSD, MacOS y Solaris.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-06-29
 #*/ ##
 function ogGetOsVersion ()
 {
@@ -61,20 +64,27 @@ MNTDIR=$(ogMount $1 $2) || return $?
 
 # Elección del tipo de sistema operativo.
 case "$(ogGetFsType $1 $2)" in
-    EXT[234] | REISERFS | REISER4)
+    EXT[234] | BTRFS | REISERFS | REISER4)
         TYPE="Linux"
         # Para Linux: leer descripción.
-        VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null| awk -F: '{gsub (/\t/,""); print $2}')
+        VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
         # Si no se puede obtener, buscar en ficheros del sistema.
         if [ -z "$VERSION" ]; then
             FILE="$MNTDIR/etc/lsb-release"
             [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
-            for DISTRIB in redhat SuSE mandrake; do
+            for DISTRIB in redhat SuSE mandrake gentoo; do
                 FILE="$MNTDIR/etc/${DISTRIB}-release"
                 [ -r $FILE ] && VERSION="$(head -1 $FILE)"
             done
             FILE="$MNTDIR/etc/arch-release"
             [ -r $FILE ] && VERSION="Arch Linux"
+            # Para Android, leer fichero de propiedades.
+            FILE="$MNTDIR/android*/kernel"
+            if [ -r $FILE ]; then
+                TYPE="Android"
+                FILE="$MNTDIR/android*/system/build.prop"
+                [ -r $FILE ] && VERSION="Android $(awk -F= '$1~/(product.brand|build.version.release)/ {print $2}' $FILE | tr '\n' ' ')"
+            fi
         fi
         [ -e $MNTDIR/lib64 ] && VERSION="$VERSION $MSG_64BIT"
         ;;
@@ -83,6 +93,27 @@ case "$(ogGetFsType $1 $2)" in
         # Para Windows: leer la version del registro.
         VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
         [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && VERSION="$VERSION $MSG_64BIT"
+        ;;
+    HFS|HFS+)
+        TYPE="MacOS"
+        # Para MacOS: ejecutar "uname" mediante el programa "ld-mac".
+        FILE="$MNTDIR/usr/bin/uname"
+        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS $(ld-mac $FILE -sr 2>/dev/null)"
+        ;;
+    *BSD*)   ### TODO Revisar solución.
+        TYPE="BSD"
+        # Para FreeBSD: obtener datos del Kernel.
+        FILE="$MNTDIR/boot/kernel/kernel"
+        if [ -r $FILE ];then
+            VERSION="$(strings $FILE|awk '/@.*RELEASE/ {print $1,$2}')"
+            [ -n "$(file -b $FILE | grep 'x86-64')" ] && VERSION="$VERSION $MSG_64BIT"
+        fi
+        ;;
+    ZFS) ### TODO Revisar solución.
+        TYPE="Solaris"
+        # Para Solaris: leer el fichero de versión.
+        FILE="$MNTDIR/etc/release
+        [ -r $FILE ] && VERSION="$(head -1 $FILE)"
         ;;
 esac
 
@@ -97,8 +128,8 @@ return 0
 #@brief   Devuelve el tipo del sistema operativo instalado.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@return  OSType
-#@note    OSType = { Linux, Windows }
+#@return  OSType - Tipo de sistema operativo.
+#@note    OSType = { Android, BSD, Linux, MacOS, Windows }
 #@see     ogGetOsVersion
 #*/ ##
 function ogGetOsType ()
@@ -120,7 +151,7 @@ ogGetOsVersion "$@" | cut -sf1 -d:
 #@warning Se ignoran los parámetros de entrada.
 #@note    TipoDispositivo = { ata, bio, boa, cdr, cpu, dis, fir, mem, mod, mul, net, ser, vga }
 #@note    Requisitos: lshw, awk
-#@version 0.1 - Primeras pruebas con OpenGNSys
+#@version 0.1 - Primeras pruebas con OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-28
 #*/ ##
@@ -174,7 +205,7 @@ lshw | awk 'BEGIN {type="mod";}
 #@warning Se ignoran los parámetros de entrada.
 #@note    Requisitos: ...
 #@todo    Detectar software en Linux
-#@version 0.1 - Primeras pruebas con OpenGNSys
+#@version 0.1 - Primeras pruebas con OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-23
 #*/ ##
