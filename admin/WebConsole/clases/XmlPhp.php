@@ -235,7 +235,7 @@ class XmlPhp{
 	------------------------------------------------------------------------------------------------*/
 	function EliminaAtributo($nombreatributo,$info){
 		$nada="";
-		return($this->TomaAtributo($nombreatributo,&$nada,$info,true));
+		return($this->TomaAtributo($nombreatributo,$nada,$info,true));
 	}
 	/*------------------------------------------------------------------------------------------------
 		Recupera el valor del atributo y lo elimina de la información del nodo
@@ -245,7 +245,7 @@ class XmlPhp{
 				- info: La información del Nodo
 	------------------------------------------------------------------------------------------------*/
 	function TomaAtributoEspecial($nombreatributo,&$puntero,$info){
-		return($this->TomaAtributo($nombreatributo,&$puntero,$info,true));
+		return($this->TomaAtributo($nombreatributo,$puntero,$info,true));
 	}
 	/*------------------------------------------------------------------------------------------------
 		Recupera el valor del atributo 

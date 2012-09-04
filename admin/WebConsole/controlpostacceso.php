@@ -37,7 +37,7 @@ include_once("./clases/AdoPhp.php");
      $pss=$wpwd; 
  }
 
- $resul=toma_datos($cmd,$idc,&$nmc,&$idi,$usu,&$tsu,$pss); 
+ $resul=toma_datos($cmd,$idc,$nmc,$idi,$usu,$tsu,$pss); 
  // Antes la variable idioma no es la correcta
  include_once("idiomas/php/$idi/acceso_$idi.php");
  if(!$resul) 
@@ -61,7 +61,7 @@ include_once("./clases/AdoPhp.php");
  $_SESSION["wurlacceso"]=$wac; 
 
 // Variables de entorno
- $resul=toma_entorno($cmd,&$ips,&$prt,&$pclo,&$rep); 
+ $resul=toma_entorno($cmd,$ips,$prt,$pclo,$rep); 
  if(!$resul) 
      Header("Location: ".$wac."?herror=4"); // Error de conexión con servidor B.D. 
 
@@ -87,47 +87,50 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
  // 
  //    Devuelve el identificador del centro, el nombre y el idioma utilizado por el usuario  
  //_______________________________________________________________________________________________________ 
- function toma_datos($cmd,$idcentro,$nombrecentro,$idioma,$usuario,$idtipousuario,$pasguor){ 
-     $rs=new Recordset;  
-			if(!empty($idcentro)){
-				 $cmd->texto="SELECT usuarios.idtipousuario,centros.nombrecentro,idiomas.nemonico AS idioma FROM usuarios"; 
-				 $cmd->texto.=" INNER JOIN administradores_centros ON administradores_centros.idusuario=usuarios.idusuario"; 
-				 $cmd->texto.=" INNER JOIN centros ON centros.idcentro=administradores_centros.idcentro"; 
-				 $cmd->texto.=" INNER JOIN idiomas ON usuarios.ididioma=idiomas.ididioma"; 
-				 $cmd->texto.=" WHERE idtipousuario<>3 
-												AND usuarios.usuario='".$usuario."' 
-												AND usuarios.pasguor='".$pasguor."' 
-												AND administradores_centros.idcentro=".$idcentro; 
-			}			
-			else{
-				 $cmd->texto="SELECT usuarios.idtipousuario,idiomas.nemonico AS idioma FROM usuarios"; 
-				 $cmd->texto.=" INNER JOIN idiomas ON usuarios.ididioma=idiomas.ididioma"; 
-				 $cmd->texto.=" WHERE idtipousuario<>3 
-												AND usuarios.usuario='".$usuario."' 
-												AND usuarios.pasguor='".$pasguor."'"; 
+ function toma_datos($cmd,$idcentro,&$nombrecentro,&$idioma,$usuario,&$idtipousuario,$pasguor){ 
+	$rs=new Recordset;  
+	if(!empty($idcentro)){
+		 $cmd->texto="SELECT usuarios.idtipousuario, centros.nombrecentro,
+				     idiomas.nemonico AS idioma
+				FROM usuarios
+				INNER JOIN administradores_centros ON administradores_centros.idusuario=usuarios.idusuario
+				INNER JOIN centros ON centros.idcentro=administradores_centros.idcentro
+				INNER JOIN idiomas ON usuarios.ididioma=idiomas.ididioma
+				WHERE idtipousuario <> 3
+				  AND usuarios.usuario='".$usuario."'
+				  AND usuarios.pasguor='".$pasguor."'
+				  AND administradores_centros.idcentro=".$idcentro; 
+	}			
+	else{
+		 $cmd->texto="SELECT usuarios.idtipousuario, idiomas.nemonico AS idioma
+				FROM usuarios
+				INNER JOIN idiomas ON usuarios.ididioma=idiomas.ididioma
+				WHERE idtipousuario <> 3
+				  AND usuarios.usuario='".$usuario."'
+				  AND usuarios.pasguor='".$pasguor."'"; 
 				
-			}
-     $rs->Comando=&$cmd; 
+	}
+	$rs->Comando=&$cmd; 
 		 //echo $cmd->texto;
-		 if (!$rs->Abrir()) return($false); // Error al abrir recordset 
-     if(!$rs->EOF){
-		    $idtipousuario=$rs->campos["idtipousuario"]; 
-		    $idioma=$rs->campos["idioma"]; 
-		    $usuario=$rs->campos["usuario"]; 
-				if(!empty($idcentro)){
-		    	$nombrecentro=$rs->campos["nombrecentro"]; 
-			    $idtipousuario=2; // Fuerza al acceso como administrador de UNidad organizativa
-					return(true);
-				}
-				else{
-					$nombrecentro="";
-					if($idtipousuario<>1) // Si NO es superadminsitrador
-				   return(false); 	
-					else
-		       	return(true); 					
-				}
-    } 
-    return(false); 
+	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
+	if(!$rs->EOF){
+		$idtipousuario=$rs->campos["idtipousuario"]; 
+		$idioma=$rs->campos["idioma"]; 
+		$usuario=$rs->campos["usuario"]; 
+		if(!empty($idcentro)){
+			$nombrecentro=$rs->campos["nombrecentro"]; 
+			$idtipousuario=2; // Fuerza al acceso como administrador de UNidad organizativa
+			return(true);
+		}
+		else{
+			$nombrecentro="";
+			if($idtipousuario<>1) // Si NO es superadminsitrador
+				return(false); 	
+			else
+		       		return(true); 					
+		}
+	} 
+	return(false); 
  } 
 //________________________________________________________________________________________________________ 
  //    Busca datos de configuración del sistema  
@@ -140,20 +143,19 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
  // 
  //    Devuelve datos generales de configuración del sistema
  //_______________________________________________________________________________________________________ 
- function toma_entorno($cmd,$ips,$prt,$pclo,$rep){ 
+ function toma_entorno($cmd,&$ips,&$prt,&$pclo,&$rep){ 
  	$rs=new Recordset;  
 	$cmd->texto="SELECT * FROM entornos"; 
-  $rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd; 
 	//echo $cmd->texto;
 	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
-  if(!$rs->EOF){
-	  $ips=$rs->campos["ipserveradm"]; 
-	  $prt=$rs->campos["portserveradm"];
-	  $pclo=$rs->campos["protoclonacion"];
-	  $rep=$rs->campos["repositorio"];
-
+	if(!$rs->EOF){
+		$ips=$rs->campos["ipserveradm"]; 
+		$prt=$rs->campos["portserveradm"];
+		$pclo=$rs->campos["protoclonacion"];
+		$rep=$rs->campos["repositorio"];
 	}
-  return(true); 
+	return(true); 
  } 
  //_______________________________________________________________________________________________________ 
 ?> 
