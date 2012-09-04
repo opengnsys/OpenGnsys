@@ -116,16 +116,26 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba unzip debootstrap schroot squashfs-tools )
+		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-static.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba unzip debootstrap schroot squashfs-tools )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
-				   'pushd /tmp; wget http://download2.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -s btlaunchmany.py /usr/bin/btlaunchmany; ln -s bttrack.py /usr/bin/bttrack; popd' )
-		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
+		if [ "$OSDISTRIB" == "CentOS" ]; then
+			UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+		fi
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
-		STARTSERVICE="eval service \$service start"
-		STOPSERVICE="eval service \$service stop"
-		ENABLESERVICE="eval chkconfig \$service on"
-		DISABLESERVICE="eval chkconfig \$service off"
+		SYSTEMD=$(which systemctl 2>/dev/null)
+		if [ -n "$SYSTEMD" ]; then
+			STARTSERVICE="eval systemctl start \$service.service"
+			STOPSERVICE="eval systemctl stop \$service.service"
+			ENABLESERVICE="eval systemctl enable \$service.service"
+			DISABLESERVICE="eval systemctl disable \$service.service"
+		else
+			STARTSERVICE="eval service \$service start"
+			STOPSERVICE="eval service \$service stop"
+			ENABLESERVICE="eval chkconfig \$service on"
+			DISABLESERVICE="eval chkconfig \$service off"
+		fi
 		APACHESERV=httpd
 		APACHECFGDIR=/etc/httpd/conf.d
 		APACHEOGSITE=opengnsys.conf
@@ -152,9 +162,10 @@ esac
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -e /etc/init.d/$SAMBASERV ] || SAMBASERV=samba	# Debian 6
-[ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
+[ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba	# Debian 6
+[ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp		# Debian 6
 [ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
+selinuxenabled && setenforce 0				# SELinux permisivo (Fedora 17)
 }
 
 
@@ -681,7 +692,9 @@ function getNetworkSettings()
 	for dev in ${DEVICE[*]}; do
 		SERVERIP[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
 		if [ -n "${SERVERIP[i]}" ]; then
-			NETMASK[i]=$(LANG=C ifconfig $dev | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
+			NETMASK[i]=$(LANG=C ifconfig $dev | \
+						awk '/Mask/ {sub(/.*:/,"",$4); print $4}
+						     /netmask/ {print $4}')
 			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
 			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
 			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
@@ -690,7 +703,7 @@ function getNetworkSettings()
 		let i++
 	done
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
-	if [ -z "${NETIP}[*]" -o -z "${NETMASK[*]}" ]; then
+	if [ -z "${NETIP[*]}" -o -z "${NETMASK[*]}" ]; then
 		errorAndLog "${FUNCNAME}(): Network not detected."
 		exit 1
 	fi
@@ -868,7 +881,9 @@ function smbConfigure()
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
 	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/" $SAMBACFGDIR/smb.conf
-	test grep -q "smb-og" $SAMBACFGDIR/smb.conf || echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
+	if ! grep -q "smb-og" $SAMBACFGDIR/smb.conf; then
+		echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
+	fi
 	service=$SAMBASERV
 	$ENABLESERVICE; $STARTSERVICE
 	if [ $? -ne 0 ]; then
@@ -1306,7 +1321,7 @@ function openGnsysConfigure()
 			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
-				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
+				OPENGNSYS_CONSOLEURL="${CONSOLEURL/http:/https:}"
 			fi
 		fi
 		let i++
