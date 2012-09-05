@@ -145,7 +145,7 @@
 	//		que se almacenan en las tablas de procedimientos_acciones o acciones
 	//___________________________________________________________________________________
 		
-	function ParametrosValor($cmd,$parametros,$tbParametrosValor,$ch="\r")
+	function ParametrosValor($cmd,$parametros,&$tbParametrosValor,$ch="\r")
 	{
 		global $tbParametros;
 		$html="";
@@ -166,7 +166,7 @@
 							$blkprm=split(chr(10),substr($auxprm[$i],4));
 							for($j=0;$j<sizeof($blkprm);$j++){
 								$tbSubParametrosValor=array();
-								ParametrosValor($cmd,$blkprm[$j],&$tbSubParametrosValor,chr(9));
+								ParametrosValor($cmd,$blkprm[$j],$tbSubParametrosValor,chr(9));
 								for($k=0;$k<sizeof($tbSubParametrosValor);$k++){
 									$elem=current($tbSubParametrosValor);
 									$tbParametrosValor[$nemonico][$j]["valor"].=$elem["descripcion"];							

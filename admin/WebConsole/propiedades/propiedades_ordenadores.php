@@ -1,4 +1,4 @@
-<? 
+<?php
 // ****************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -81,21 +81,18 @@ function abrir_ventana(URL){
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
-			<?php	$fotomenu=$fotoordenador;
-				if ($opcion==$op_eliminacion)
-					echo '<TD>'.$nombreordenador.'</TD>';
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td>'.$nombreordenador.'</td>';
 				else		
-					echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
+					echo '<td><input class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></td>';
+				if (empty ($fotoordenador)) {
+					$fotoordenador="fotoordenador.gif";
+				}
+				$fotomenu=$fotoordenador;
+				$dirfotos="../images/fotos";
 			?>
 <td colspan="2" valign="top" align="left" rowspan="3">
-<img border="2" style="border-color:#63676b" src="<?php
-if ($fotoordenador=="")
-{
-$fotoordenador="../images/fotos/fotoordenador.gif";
-}else{
-$fotoordenador="../images/fotos/".$fotoordenador;
-}
-echo $fotoordenador?>">
+<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
 <br />(150X110)-(jpg - gif) ---- <?php echo $TbMsg[5091]?>
 <br />
 <input name="archivo" type="file" id="archivo" size="16" />

@@ -1,4 +1,4 @@
-<?  
+<?php
 // *********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -154,14 +154,9 @@ function TomaPropiedades($cmd,$id){
 	global $pathpxe;
 	global $ordenadores;
 
-	// NOTA: el parámetro "numordenadores" no se está utilizando, por lo que se
-	//	 simplifica la consulta, ignorando dicho valor.
-/*
-	$cmd->texto="SELECT repositorios.*, count(*) as numordenadores FROM repositorios 
-	 						INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
-							WHERE repositorios.idrepositorio=".$id;
-*/
-	$cmd->texto="SELECT * FROM repositorios WHERE idrepositorio=$id";
+	$cmd->texto="SELECT repositorios.*, COUNT(*) AS numordenadores FROM repositorios 
+	 		INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+			WHERE repositorios.idrepositorio=".$id;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(true); // Error al abrir recordset
@@ -179,3 +174,4 @@ function TomaPropiedades($cmd,$id){
 	return(true);
 }
 ?>
+
