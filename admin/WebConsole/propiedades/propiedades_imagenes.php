@@ -23,6 +23,9 @@ $nombreca="";
 $descripcion="";
 $idperfilsoft=0;
 $comentarios="";
+$codpar=131;		// Por defecto: LINUX (83)
+$numpar="";
+$idrepositorio=1;
 $grupoid=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"];  // Recoge parametros

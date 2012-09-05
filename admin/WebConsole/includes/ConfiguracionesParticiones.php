@@ -280,7 +280,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 //________________________________________________________________________________________________________
 function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 {
-	$tablaHtml.="";
+	$tablaHtml="";
 	$contor=0;
 	$maxcontor=10; // Número máximo de prodenadores por fila
 	$cmd->texto=" SELECT idordenador,nombreordenador,ip FROM ordenadores WHERE idordenador IN (".$idordenadores.") ORDER BY nombreordenador";
@@ -290,9 +290,9 @@ function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 	$tablaHtml.='<table align="left" border="0" id="tbOrd_'.$cc.'" value="'.$idordenadores.'"><tr>';
 	while (!$rs->EOF){
 		$contor++;
-		$tablaHtml.= '<td align="center" style="BACKGROUND-COLOR: #FFFFFF;">
-				<img src="../images/iconos/ordenador.gif" >
-				<br><span style="FONT-SIZE:9px;	COLOR: #4f4f4f;" >'.$rs->campos["nombreordenador"].'</span></td>';
+		$tablaHtml.= '<td align="center" style="background-color: #ffffff;">
+				<img src="../images/iconos/ordenador.gif" />
+				<br /><span style="font-size:9px; color: #4f4f4f;">'.$rs->campos["nombreordenador"].'</span></td>';
 		if($contor>$maxcontor){
 			$contor=0;
 			$tablaHtml.='</tr><tr>';

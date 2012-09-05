@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -282,7 +282,7 @@
 	echo '</FORM>'; // Fin formulario de criterios de busquedas
 	
 	/* Cabeceras */
-	tomaAmbito($ambito,&$urlimg,&$textambito);
+	tomaAmbito($ambito,$urlimg,$textambito);
 	echo '<DIV align=center>'; // Cabecera
 	echo '<span align=center class=subcabeceras><U>'.$TbMsg[11].':'.$textambito.'</U>,
 				&nbsp;'.$nombreambito.'</span>&nbsp;&nbsp;<IMG src="'.$urlimg.'"></span>';
@@ -872,9 +872,9 @@ function escribeResumen($oA)
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center>&nbsp;</TD>';
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center>&nbsp;</TD>';
 			/* Ámbito de aplicación */
-			tomaAmbito($oA->ambito,&$urlimg,&$textambito);
+			tomaAmbito($oA->ambito,$urlimg,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center><IMG src="'.$urlimg.'"></TD>';
-			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,&$textambito);
+			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center>&nbsp;</TD>';
 			
@@ -920,7 +920,7 @@ function escribeResumen($oA)
 			/* Ámbito de aplicación */
 			tomaAmbito($oA->ambito,&$urlimg,&$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center><IMG src="'.$urlimg.'"></TD>';
-			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,&$textambito);
+			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
 		}	
 		
@@ -952,9 +952,9 @@ function cambiaAmbito($rs,$oA)
 	$html.='<TD colspan=4 style="BACKGROUND-COLOR:'.$bgcolor.'" align=right>'.$procedimiento.'&nbsp;</TD>';
 	
 	/* Ámbito de aplicación */
-	tomaAmbito($rs->campos["ambito"],&$urlimg,&$textambito);
+	tomaAmbito($rs->campos["ambito"],$urlimg,$textambito);
 	$html.='<TD style="BACKGROUND-COLOR:'.$bgcolor.'" align=center><IMG src="'.$urlimg.'"></TD>';
-	tomaDescriAmbito($cmd,$rs->campos["ambito"],$rs->campos["idambito"],&$textambito);
+	tomaDescriAmbito($cmd,$rs->campos["ambito"],$rs->campos["idambito"],$textambito);
 	$html.='<TD style="BACKGROUND-COLOR:'.$bgcolor.'" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
 	$html.='<TD colspan=3 style="BACKGROUND-COLOR:'.$bgcolor.'" align=center>&nbsp;</TD>';
 	$html.='</TR>';
