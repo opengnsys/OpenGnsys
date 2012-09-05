@@ -918,7 +918,7 @@ function escribeResumen($oA)
 		}
 		else{
 			/* Ámbito de aplicación */
-			tomaAmbito($oA->ambito,&$urlimg,&$textambito);
+			tomaAmbito($oA->ambito,$urlimg,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center><IMG src="'.$urlimg.'"></TD>';
 			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
@@ -1068,7 +1068,7 @@ function escribeParametros($comando,$parametros,$visuparametros,$oA)
 
 	$html="";
 	$tbParametrosValor=array();
-	ParametrosValor($cmd,$parametros,&$tbParametrosValor); // Toma valores de cada parámetro
+	ParametrosValor($cmd,$parametros,$tbParametrosValor); // Toma valores de cada parámetro
 	$vprm=split(";",$visuparametros);
 
 	if($visupro==1 || ($visupro=0 && $visucmd==0)) $comando="&nbsp;"; // No se muestra el nombre del comando
