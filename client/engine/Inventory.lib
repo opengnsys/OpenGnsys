@@ -112,7 +112,7 @@ case "$(ogGetFsType $1 $2)" in
     ZFS) ### TODO Revisar solución.
         TYPE="Solaris"
         # Para Solaris: leer el fichero de versión.
-        FILE="$MNTDIR/etc/release
+        FILE="$MNTDIR/etc/release"
         [ -r $FILE ] && VERSION="$(head -1 $FILE)"
         ;;
 esac
