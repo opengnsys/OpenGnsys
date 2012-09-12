@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
 	-- Volcar la base de datos para la tabla `centros`
 	--
 	INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
-	 (1,'Unidad organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGNSys');
+	 (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
 	 
 	
 -- --------------------------------------------------------
@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
 --
 
 INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `iduniversidad`, `grupoid`) VALUES
-(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGNSys', 1, 0);
+(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGnSys', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -961,7 +961,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
 --
 
 INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`) VALUES
-(1, 'Universidad default...', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGNSys');
+(1, 'Universidad (Default)', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGnSys');
 
 -- --------------------------------------------------------
 
