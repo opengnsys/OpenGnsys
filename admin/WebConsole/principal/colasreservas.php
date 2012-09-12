@@ -564,7 +564,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 		// Año
 		if($ganno<>$rs->campos["anno"]){
 			if($swd){
-				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes);
+				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,$CntMes);
 				$cadenaXML.='</DIA> ';
 			}
 			if($swm){
@@ -597,7 +597,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 		// Mes
 		if($gmes<>$rs->campos["mes"]){
 			if($swd){
-				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes);
+				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,$CntMes);
 				$cadenaXML.='</DIA> ';
 			}
 			if($swm){
@@ -626,7 +626,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 		// Dia
 		if($gdia<>$rs->campos["dia"]){
 			if($swd){
-				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes);
+				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,$CntMes);
 				$cadenaXML.='</DIA> ';
 			}
 			$gdia=$rs->campos["dia"];
@@ -767,7 +767,7 @@ function ListaReservas($cmd,$idaula,$nombreaula){
 		$rs->Siguiente();
 	}
 	if($swd){
-				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes);
+				GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,$CntMes);
 		$cadenaXML.='</DIA> ';
 	}
 	if($swm){
@@ -858,13 +858,13 @@ function PintaHorasDias($ganno,$gmes,$gdia){
 	$cadenaXML.='</TBDIA> ';
 }
 //________________________________________________________________________________________________________
-function GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,$CntMes){
+function GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes){
 	global $cadenaXML;
 	global $calendario;
 	global $HTMLhorasdias;
 
 	$HTMLhorasdias="<TABLE cellspacing=3><TR><TD valign=top>";
-	$HTMLhorasdias.=$calendario->HorasDias($CntDia,&$porcenhoras);
+	$HTMLhorasdias.=$calendario->HorasDias($CntDia,$porcenhoras);
 	$HTMLhorasdias.="</TD></TR></TABLE>";
 
 	$CntMes[$gdia]=$porcenhoras;
