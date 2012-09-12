@@ -40,7 +40,7 @@ function ogCheckFs ()
 local PART TYPE PROG PARAMS CODES ERRCODE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "$FUNCNAME 1 1"
     return
 fi
@@ -95,7 +95,7 @@ return $ERRCODE
 
 
 #/**
-#         ogExtendFs int_ndisk int_npartition
+#         ogExtendFs int_ndisk int_nfilesys
 #@brief   Extiende un sistema de archivos al tamaño de su partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_nfilesys   nº de orden del sistema de archivos
@@ -121,7 +121,7 @@ local PART TYPE PROG PARAMS ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "$FUNCNAME 1 1"
     return
 fi
@@ -131,7 +131,6 @@ fi
 # Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-ogUnmount $1 $2 2>/dev/null
 # Redimensionar al tamano máximo según el tipo de partición.
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
@@ -143,6 +142,7 @@ case "$TYPE" in
                 return $? ;;
 esac
 # Error si el sistema de archivos está montado o bloqueado.
+ogUnmount $1 $2 2>/dev/null
 if ogIsMounted $1 $2; then
     ogRaiseError $OG_ERR_PARTITION "$1 $2"       # Indicar nuevo error
     return $?
@@ -169,7 +169,7 @@ return $ERRCODE
 
 
 #/**
-#         ogFormat int_ndisk int_npartition | CACHE
+#         ogFormat int_ndisk int_nfilesys | CACHE
 #@see     ogFormatFs ogFormatCache
 #*/ ##
 function ogFormat ()
@@ -209,7 +209,7 @@ local PART ID TYPE LABEL PROG PARAMS ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [str_label]" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys [str_label]" \
            "$FUNCNAME 1 1" \
            "$FUNCNAME 1 1 EXT4" \
            "$FUNCNAME 1 1 \"DATA\"" \
@@ -399,7 +399,7 @@ function ogGetFsType ()
 local PART ID TYPE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "$FUNCNAME 1 1  =>  NTFS"
     return
 fi
@@ -452,7 +452,7 @@ function ogGetMountPoint ()
 local PART
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "$FUNCNAME 1 1  =>  /mnt/sda1"
     return
 fi
@@ -486,7 +486,7 @@ function ogIsFormated ()
 # Variables locales
 local DISK
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
@@ -514,7 +514,7 @@ function ogIsMounted ()
 {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "if $FUNCNAME 1 1; then ... ; fi"
     return
 fi
@@ -649,7 +649,7 @@ local PART MNTDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "$FUNCNAME 1 1  =>  /mnt/sda1"
     return
 fi
@@ -732,7 +732,7 @@ local PART BLKS SIZE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "$FUNCNAME 1 1"
     return
 fi
