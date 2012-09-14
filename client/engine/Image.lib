@@ -667,7 +667,7 @@ $($COMPRESSOR -dc $IMGFILE 2>/dev/null | head > $FILEHEAD) || ogRaiseError $OG_E
 ## buscando Primera opción.
 if [ "$IMGDETECT" == "FALSE" ] 
 then 
-	PARTCLONEINFO=$(partclone.info $FILEHEAD 2>&1)
+	PARTCLONEINFO=$(LC_ALL=C partclone.info $FILEHEAD 2>&1)
 	if `echo $PARTCLONEINFO | grep size > /dev/null`
 	then
 		TOOLS=PARTCLONE
