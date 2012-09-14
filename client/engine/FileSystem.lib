@@ -417,10 +417,7 @@ case "$ID" in
                ;;
      *)        # Detectar sistema de ficheros.
                ogMount $1 $2 &>/dev/null
-               if ogIsFormated $1 $2 2>/dev/null; then
-                   TYPE=$(mount | \
-                          awk -v p=$PART '{ if ($1==p) { print toupper($5); } }')
-               fi
+               TYPE=$(mount | awk -v p=$PART '{ if ($1==p) { print toupper($5); } }')
                # Detectar otros sistemas de archivos (FUSE, VFAT).
                case "$TYPE" in
                     FUSEBLK) TYPE="NTFS" ;;    # usar "file -Ls" para detectar
