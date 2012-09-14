@@ -263,9 +263,9 @@ function datosAulas($cmd,$idaula)
 {
 	global $TbMsg;
 	
-	$cmd->texto="SELECT DISTINCT aulas.*, COUNT(*) AS numordenadores
+	$cmd->texto="SELECT DISTINCT aulas.*, COUNT(ordenadores.idordenador) AS numordenadores
 			 FROM aulas
-			 INNER JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+			 LEFT JOIN ordenadores ON ordenadores.idaula=aulas.idaula
 			 WHERE aulas.idaula=$idaula";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 

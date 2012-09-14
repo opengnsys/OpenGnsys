@@ -449,7 +449,7 @@ function TomaPropiedades($cmd,$ida)
 
 	
 	$rs=new Recordset; 
-	$cmd->texto="SELECT count( * ) AS numordenadores, aulas.* , 
+	$cmd->texto="SELECT COUNT(ordenadores.idordenador) AS numordenadores, aulas.* , 
 				group_concat(DISTINCT cast( ordenadores.idmenu AS char( 11 ) )  
 				ORDER BY ordenadores.idmenu SEPARATOR ',' ) AS idmenus,
 				group_concat(DISTINCT cast( ordenadores.idrepositorio AS char( 11 ) )  
