@@ -5,6 +5,7 @@ install drbl-ntfsprogs
 install ntfsprogs 
 install ntfs-3g 
 install dosfstools 
+install fatresize
 install dmraid 
 install dmsetup 
 install lvm2 

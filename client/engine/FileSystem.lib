@@ -138,6 +138,7 @@ case "$TYPE" in
     REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
     BTRFS)      PROG="btrfs"; PARAMS="filesystem resize max" ;;
     NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
+#    FAT32|FAT16)       # Usar "fatresize"
     *)          ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
                 return $? ;;
 esac
@@ -750,9 +751,11 @@ case "$(ogGetFsType $1 $2)" in
 		#       awk -v B=$BLKS '/minimum size/ {print int($7*1.1*B/2048)}')
         #resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         resize2fs -fpM $PART  &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-	    ;;
+        ;;
+#    BTRFS)             # Usar "btrfs"
+#	;;
 #    REISERFS)		# Usar "resize_reiserfs"
-#	    ;;
+#	;;
     NTFS)
         ogDeleteFile $1 $2 pagefile.sys
         ogDeleteFile $1 $2 hiberfil.sys
@@ -765,6 +768,8 @@ case "$(ogGetFsType $1 $2)" in
         [ "$SIZE" == 0 ] && return 1	
         ntfsresize -fs "${SIZE}M" $PART <<<"y"  || ogRaiseError $OG_ERR_PARTITION "error reduciendo $1,$2" || return $?
         ;;
+#    FAT32|FAT16)       # Usar "fatresize"
+#        ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
         return $? ;;
 esac
