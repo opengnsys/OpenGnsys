@@ -174,7 +174,7 @@ class SockHidra{
 	
 		$lon=$lSize-($LONCABECERA+$LONHEXPRM); // Longitud de los parametros aún encriptados
 		$parametros=substr($buffer,$LONCABECERA+$LONHEXPRM,$lon); // Parametros encriptados
-		$parametros=$this->encripdescrip->Desencriptar($parametros,$lonprm); // Parametros sin encriptar
+		$parametros=$this->encripdescrip->Desencriptar($parametros,$hlonprm); // Parametros sin encriptar
 		$hlonprm=str_pad(dechex($lon),$LONHEXPRM,"0",STR_PAD_LEFT);	// Rellena con ceros 									
 		$cadenaret=substr($buffer,0,$LONCABECERA).$hlonprm.$parametros;
 		return($cadenaret);

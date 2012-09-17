@@ -171,7 +171,7 @@ ________________________________________________________________________________
 function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion,$masterip){
 	$SelectHtml="";
 	$rs=new Recordset; 
-	$cmd->texto='SELECT nombrerepositorio,ip FROM  repositorios where idrepositorio="'.$idrepositorio .'" or ip="'.$masterip.'"';
+	$cmd->texto='SELECT idrepositorio, nombrerepositorio, ip FROM repositorios WHERE idrepositorio="'.$idrepositorio .'" OR ip="'.$masterip.'"';
 	$rs->Comando=&$cmd; 
 
 	if (!$rs->Abrir()) return($SelectHtml); // Error al abrir recordset
@@ -182,8 +182,8 @@ function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion,$maste
 		if($rs->campos["idrepositorio"]==$idrepositorio) $SelectHtml.=" selected ";
 		$SelectHtml.='>';
 		$SelectHtml.= $rs->campos["nombrerepositorio"];
-		$SelectHtml.='</OPTION>';				 
-		$rs->Siguiente();		
+		$SelectHtml.='</OPTION>';
+		$rs->Siguiente();
 	}
 	$SelectHtml.= '</SELECT>';
 	$rs->Cerrar();
