@@ -184,58 +184,44 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					echo'<tr height="16">'.chr(13);
 					echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
 					echo'<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
-					//echo'<td align="center">'.$tbKeys[$k]["sistemafichero"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 
-					//echo '<td align="center">'.$tbKeys[$k]["nombreso"].'</td>'.chr(13);
 					echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);					
 
-					//echo'<td align="right">'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</td>'.chr(13);
 					echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 
-					//echo'<td align="center">'.$tbKeys[$k]["imagen"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 					
-					//echo'<td align="center">'.$tbKeys[$k]["perfilsoft"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-  
-					//echo'<td align="center">'.$tbKeys[$k]["perfilsoft"].'</td>'.chr(13);
-					if ($tbKeys[$k]["numpar"] == "4")
-					{
+
+					if ($tbKeys[$k]["numpar"] == "4") {
 						$rs=new Recordset; 
 						$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4";
 						$rs->Comando=&$cmd; 
 						if (!$rs->Abrir()) return(false); // Error al abrir recordset
 						$rs->Primero(); 
 						if (!$rs->EOF){
-						$campocache=$rs->campos["cache"];
-						}$rs->Cerrar();
-						echo'<td align="leght">&nbsp;';
+							$campocache=$rs->campos["cache"];
+						}
+						$rs->Cerrar();
+						echo '<td align="leght">&nbsp;';
 						$ima=split(",",$campocache);
 						$numero=1;
-						for ($x=0;$x<count($ima); $x++)
-							{
-							
-							if(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x]))
-								{
-								if(ereg(".torrent",$ima[$x]))
-									{
-								echo '&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x].'<br/>'.'<hr>';$numero++;
-									}else{
-								echo '&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x].'<br/>';
-										}
-								}else{
-							if(ereg("MB",$ima[$x]))
-								{ echo '<hr> ## '.$TbMsg[4951].' - ( '.$ima[$x].' )<br/><hr>';}else{
-								echo $numero.".-".$ima[$x].'<br/>';
+						for ($x=0;$x<count($ima); $x++) {
+							if(substr($ima[$x],-3)==".MB") {
+								echo '<strong>'.$TbMsg[4951].':  '.$ima[$x].'</strong>';
+							} else {
+								if(substr($ima[$x],-4)==".img") {
+									echo '<br />'.$numero++.'.-'.$ima[$x];
+								} else {
+									echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
 								}
-										}
-							
 							}
+						}
 						echo '&nbsp;</td>'.chr(13);
-					}else{
+					} else {
 						echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
-						  }
+					}
 					
 					echo'</tr>'.chr(13);
 				}

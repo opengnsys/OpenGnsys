@@ -88,6 +88,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				ordenadores_particiones.tamano,
 				sistemasficheros.descripcion as sistemafichero,
 				ordenadores_particiones.idnombreso,
+				ordenadores_particiones.cache,
 				nombresos.nombreso,
 				imagenes.idimagen, 
 				imagenes.descripcion as imagen,
