@@ -1,4 +1,4 @@
-<? 
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -22,7 +22,29 @@ $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
 $idaula=0; 
+$nombreaula="";
 $grupoid=0;
+$ordenadores=0;
+$ubicacion="";
+$cagnon="";
+$pizarra="";
+$puestos=0;
+$horaresevini="";
+$horaresevfin="";
+$comentarios="";
+$router="";
+$netmask="";
+$modp2p="peer";
+$timep2p="";
+$modomul=2;
+$ipmul="";
+$pormulmetodos="";
+$pormul=9000;
+$velmul="";
+$idmenu="";
+$idrepositorio="";
+$idprocedimiento="";
+$idperfilhard="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"]; 

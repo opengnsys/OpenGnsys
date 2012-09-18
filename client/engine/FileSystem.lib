@@ -668,7 +668,7 @@ if [ -z "$MNTDIR" ]; then
     fi
     # Crear punto de montaje o enlace simbólico para caché local.
     MNTDIR=${PART/dev/mnt}
-    if [ "$(ogGetFsType $1 $2)" == "CACHE" -a -n "$OGCAC" ]; then
+    if [ "$(ogFindCache)" == "$1 $2" -a -n "$OGCAC" ]; then
         mkdir -p $OGCAC
         ln -fs $OGCAC $MNTDIR
     else
