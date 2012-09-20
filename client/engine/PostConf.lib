@@ -40,7 +40,7 @@ fi
 # Punto de montaje 
 MOUNTPOINT="$(ogMount "$1" "$2")" || return $?
 # Comprobar que existe el fichero de comandos.
-CMDFILE=$(ogGetPath "$MOUNTPOINT/windows/system32/$3")
+CMDFILE="$(ogGetPath "$MOUNTPOINT/windows/system32")/$3"
 [ -n "$CMDFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$MOUNTPOINT/windows/system32/$3" || return $?
 
 # Concatenamos el comando en el fichero de comandos
@@ -244,7 +244,7 @@ for i in winnt windows; do
     [ -n "$DIR" ] && CMDDIR=$DIR
 done
 [ -n "$CMDDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$MNTDIR/windows/system32" || return $?
-CMDFILE="$CMDDIR/$2"
+CMDFILE="$CMDDIR/$3"
 
 # Creamos el archivo cmd y creamos un par de comandos para que una vez acabe la 
 # postconfiguracion resetee el mini setup, sino lo haria en cada arranque.
@@ -253,10 +253,10 @@ REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f
 REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f
 EOF
 
-#Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
+# Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\SystemSetupInProgress" 1
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\SetupType" 4
-ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine" "cmd.exe /c $2"
+ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine" "cmd.exe /c $(basename $CMDFILE)"
 }
 
 
