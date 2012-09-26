@@ -253,9 +253,12 @@ REG ADD HKLM\System\Setup /v SystemSetupInProgress /t REG_DWORD /d 0 /f
 REG ADD HKLM\System\Setup /v CmdLine /t REG_SZ /d "" /f
 EOF
 
-# Creamos las claves de registro necesarias para que se haga la ejecucion del .cmd al aranque
+# Crear los valores de registro necesarios para que se haga la ejecución del .cmd al aranque.
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\SystemSetupInProgress" 1
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\SetupType" 4
+# Borrar y crear el valor para compatibilidad con algunos sistmeas.
+ogDeleteRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine"
+ogAddRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine"
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine" "cmd.exe /c $(basename $CMDFILE)"
 }
 

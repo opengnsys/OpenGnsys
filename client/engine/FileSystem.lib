@@ -966,7 +966,7 @@ DISK="$(ogDiskToDev $1)" || return $?
 for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
     case "$(ogGetFsType $1 $PART)" in
         CACHE) ;;
-        *)     ogUnmount $1 $PART ;;
+        *)     ogUnmount $1 $PART 2>/dev/null ;;
     esac
 done
 }
