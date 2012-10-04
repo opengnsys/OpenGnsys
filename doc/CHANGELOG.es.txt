@@ -2,6 +2,26 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.5
+---------------------------------------------
+
+
+Lista de cambios incluidos en OpenGnSys 1.0.4a (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#553	Error al entrar en sesión de usuario Windows tras restaurar sistema
+
+Tickets resueltos en módulo OpenGnSys Client:
+#554	ogclient: Al actualizar el cliente ogclient no se reinicia
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#551	Consola web compatible con PHP 5.4
+
+Tickets genéricos resueltos:
+#556	Liberar versión de mantenimiento OpenGnSys 1.0.4a en rama principal
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.4
 ---------------------------------------------
 
