@@ -70,14 +70,6 @@ include_once("./clases/AdoPhp.php");
  $_SESSION["protclonacion"]=$pclo; 
  $_SESSION["repcentralizado"]=$rep; 
 
-/*
-echo "<BR>Cadena=".$_SESSION["wcadenaconexion"];
-echo "<BR>servidorhidra=".$_SESSION["wservidorhidra"];
-echo "<BR>hidraport=".$_SESSION["whidraport"];
-echo "<BR>usuario=".$_SESSION["wusuario"];
-echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
-*/
-
  //________________________________________________________________________________________________________ 
  //    Busca datos del usuario que intenta acceder a la aplicación  
  //        Parametros:  
@@ -108,15 +100,12 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
 				WHERE idtipousuario <> 3
 				  AND usuarios.usuario='".$usuario."'
 				  AND usuarios.pasguor='".$pasguor."'"; 
-				
 	}
 	$rs->Comando=&$cmd; 
-		 //echo $cmd->texto;
 	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
 	if(!$rs->EOF){
 		$idtipousuario=$rs->campos["idtipousuario"]; 
 		$idioma=$rs->campos["idioma"]; 
-		$usuario=$rs->campos["usuario"]; 
 		if(!empty($idcentro)){
 			$nombrecentro=$rs->campos["nombrecentro"]; 
 			$idtipousuario=2; // Fuerza al acceso como administrador de UNidad organizativa
@@ -153,7 +142,7 @@ echo "<BR>idtipousuario=".$_SESSION["widtipousuario"];
 		$ips=$rs->campos["ipserveradm"]; 
 		$prt=$rs->campos["portserveradm"];
 		$pclo=$rs->campos["protoclonacion"];
-		$rep=$rs->campos["repositorio"];
+		//$rep=$rs->campos["repositorio"];
 	}
 	return(true); 
  } 

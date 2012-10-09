@@ -41,9 +41,12 @@
 	$porcendesde="";
 	$porcenhasta="";
 	$swPOST="";
+	$tiposacciones="";
+	$estados="";
 	$visupro="";
 	$visuprm="";
 	$visucmd="";	
+	$sesion="";	
 	
 	if (isset($_GET["ambito"]))	$ambito=$_GET["ambito"]; 
 	if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
@@ -70,6 +73,9 @@
 
 	if (isset($_POST["sesion"])) $sesion=$_POST["sesion"]; 
 
+	if (function_exists('date_default_timezone_set')) {
+		date_default_timezone_set('UTC');
+	}
 	if(empty($swPOST)){ // Valores por defecto 
 		$wfechainicio=mktime(0, 0, 0, date("m")  , date("d")-180, date("Y")); // Acciones desde tres días antes
 		$wfechafin=mktime(0, 0, 0, date("m")  , date("d")+1, date("Y"));
@@ -145,7 +151,7 @@
 		<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasacciones_'.$idioma.'.js"></SCRIPT>'?>
 	</HEAD>
 	<BODY oncontextmenu="return false">
-	<?
+	<?php
 	echo '<P align=center class=cabeceras><img src="../images/iconos/acciones.gif">&nbsp;'.$TbMsg[0].'&nbsp;</P>';
 
 	echo '<FORM name="fdatos" action="colasacciones.php" method="post">';
@@ -569,7 +575,7 @@ function listaComado($rs,$sesion,$idtarea=0,$idprocedimiento=0,$oA=null)
 	global $visupro;
 	
 	if($oA!=null){ // Si la función es invocada por un procedimiento...
-		$html.=recorreComando($rs,$sesion,$idtarea,$idprocedimiento,$oA);
+		$html=recorreComando($rs,$sesion,$idtarea,$idprocedimiento,$oA);
 	}
 	else{
 		$oA=new clsAccion; // Crea objeto acción para procesar comandos
@@ -1240,7 +1246,4 @@ function ContextualXMLComun()
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
-while (!$rs->EOF){
-echo $rs['descripcion'];
-};
 ?>
