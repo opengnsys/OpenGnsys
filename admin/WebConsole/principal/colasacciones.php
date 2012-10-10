@@ -1247,3 +1247,4 @@ function ContextualXMLComun()
 	return($layerXML);
 }
 ?>
+
