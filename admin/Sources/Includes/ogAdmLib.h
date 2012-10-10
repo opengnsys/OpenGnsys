@@ -275,7 +275,7 @@ void infoDebug(char*);
 BOOLEAN validacionParametros(int,char**,int);
 char* reservaMemoria(int);
 char* ampliaMemoria(char*,int);
-void liberaMemoria(char*);
+void liberaMemoria(void*);
 BOOLEAN initParametros(TRAMA*,int);
 int splitCadena(char **,char *, char);
 void sustituir(char *,char ,char );

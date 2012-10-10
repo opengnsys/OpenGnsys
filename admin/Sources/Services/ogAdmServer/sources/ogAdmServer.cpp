@@ -58,6 +58,7 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 	aulaup[0] = (char) NULL;
 
 	numlin = splitCadena(lineas, buffer, '\n');
+	liberaMemoria(buffer);
 	for (i = 0; i < numlin; i++) {
 		splitCadena(dualparametro, lineas[i], '=');
 		resul = strcmp(StrToUpper(dualparametro[0]), "SERVIDORADM");
@@ -218,6 +219,7 @@ BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 		}
 	}
 	strcat(ptrTrama->parametros, "\r");
+	liberaMemoria(Ipes);
 	if (!mandaTrama(socket_c, ptrTrama)) {
 		errorLog(modulo, 26, FALSE);
 		return (FALSE);
@@ -808,7 +810,6 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					" idperfilsoft=%d"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 					cpt, tam, idsfi, idsoi, 0, 0, ido, disk, par);
-				errorInfo(modulo,sqlstr);
 				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 					errorLog(modulo, 21, FALSE);
 					db.GetErrorErrStr(msglog);
@@ -1269,6 +1270,7 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 			close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 	}
+	liberaMemoria(Ipes);
 	return (TRUE);
 }
 //______________________________________________________________________________________________________
@@ -2222,6 +2224,7 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int idtipohardware, idperfilhard;
 	int lon, i, j, aux;
+	bool retval;
 	char *tbHardware[MAXHARDWARE];
 	int tbidhardware[MAXHARDWARE];
 	char *dualHardware[2], descripcion[250], strInt[LONINT], *idhardwares;
@@ -2357,9 +2360,13 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,
 			npc, tbidhardware, lon)) {
 		errorLog(modulo, 55, FALSE);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		retval=FALSE;
 	}
-	return (TRUE);
+	else {
+		retval=TRUE;
+	}
+	liberaMemoria(idhardwares);
+	return (retval);
 }
 // ________________________________________________________________________________________________________
 // Función: cuestionPerfilHardware
@@ -2402,6 +2409,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
 	if (tbl.ISEOF()) { // No existe un perfil hardware con esos componentes de componentes hardware, lo crea
@@ -2410,6 +2418,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 		// Recupera el identificador del nuevo perfil hardware
@@ -2417,12 +2426,14 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilhard)) {
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
+				liberaMemoria(sqlstr);
 				return (false);
 			}
 		}
@@ -2434,6 +2445,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
+				liberaMemoria(sqlstr);
 				return (false);
 			}
 		}
@@ -2441,6 +2453,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		if (!tbl.Get("idperfilhard", nwidperfilhard)) {
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 	}
@@ -2451,6 +2464,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 	}
@@ -2461,26 +2475,29 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
 
 	/* Eliminar Perfiles hardware que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfileshard WHERE idperfilhard NOT IN"
-		" (SELECT DISTINCT idperfilhard from ordenadores)");
+			" (SELECT DISTINCT idperfilhard FROM ordenadores)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
-	sprintf(sqlstr,
-			"DELETE FROM perfileshard_hardwares WHERE idperfilhard NOT IN"
-				" (SELECT idperfilhard from perfileshard)");
+	sprintf(sqlstr, "DELETE FROM perfileshard_hardwares WHERE idperfilhard NOT IN"
+			" (SELECT idperfilhard FROM perfileshard)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
+	liberaMemoria(sqlstr);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -2577,6 +2594,7 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,
 		char* ido, char* npc, char* idc) {
 	int i, j, lon, aux, idperfilsoft;
+	bool retval;
 	char *tbSoftware[MAXSOFTWARE];
 	int tbidsoftware[MAXSOFTWARE];
 	char msglog[LONSTD], sqlstr[LONSQL], strInt[LONINT], *idsoftwares;
@@ -2695,9 +2713,13 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,
 			npc, par, tbidsoftware, lon)) {
 		errorLog(modulo, 83, FALSE);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		retval=FALSE;
 	}
-	return (TRUE);
+	else {
+		retval=TRUE;
+	}
+	liberaMemoria(idsoftwares);
+	return (retval);
 }
 // ________________________________________________________________________________________________________
 // Función: CuestionPerfilSoftware
@@ -2741,6 +2763,7 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
 	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
@@ -2756,23 +2779,25 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
+				liberaMemoria(sqlstr);
 				return (false);
 			}
 		}
 		// Crea la relación entre perfiles y componenetes software
 		for (i = 0; i < lon; i++) {
-			sprintf(sqlstr,
-					"INSERT perfilessoft_softwares  (idperfilsoft,idsoftware)"
+			sprintf(sqlstr, "INSERT perfilessoft_softwares (idperfilsoft,idsoftware)"
 						" VALUES(%d,%d)", nwidperfilsoft, tbidsoftware[i]);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
+				liberaMemoria(sqlstr);
 				return (false);
 			}
 		}
@@ -2780,19 +2805,19 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		if (!tbl.Get("idperfilsoft", nwidperfilsoft)) {
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 	}
 
 	if (idperfilsoftware != nwidperfilsoft) { // No coinciden los perfiles
 		// Actualiza el identificador del perfil software del ordenador
-		sprintf(sqlstr,
-				"UPDATE ordenadores_particiones SET idperfilsoft=%d,idimagen=0"
-					" WHERE idordenador=%s AND numpar=%s", nwidperfilsoft, ido,
-				par);
+		sprintf(sqlstr, "UPDATE ordenadores_particiones SET idperfilsoft=%d,idimagen=0"
+				" WHERE idordenador=%s AND numpar=%s", nwidperfilsoft, ido, par);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
+			liberaMemoria(sqlstr);
 			return (false);
 		}
 	}
@@ -2807,6 +2832,7 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
 	/* Eliminar Perfiles software que quedan húerfanos */
@@ -2817,17 +2843,19 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
 	/* Eliminar Relación de softwares con Perfiles software que quedan húerfanos */
-	sprintf(sqlstr,
-			"DELETE FROM perfilessoft_softwares WHERE idperfilsoft NOT IN"
-				" (SELECT idperfilsoft from perfilessoft)");
+	sprintf(sqlstr, "DELETE FROM perfilessoft_softwares WHERE idperfilsoft NOT IN"
+			" (SELECT idperfilsoft from perfilessoft)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		liberaMemoria(sqlstr);
 		return (false);
 	}
+	liberaMemoria(sqlstr);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
