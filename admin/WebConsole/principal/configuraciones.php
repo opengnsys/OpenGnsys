@@ -315,7 +315,7 @@ function datosOrdenadores($cmd,$idordenador)
 {
 	global $TbMsg;
 
-	$cmd->texto="SELECT nombreordenador, ip, mac, perfileshard.descripcion AS perfilhard 
+	$cmd->texto="SELECT nombreordenador, ip, mac, fotoord, perfileshard.descripcion AS perfilhard 
 			 FROM ordenadores
 			 LEFT JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
 			 WHERE ordenadores.idordenador=$idordenador";
@@ -327,6 +327,7 @@ function datosOrdenadores($cmd,$idordenador)
 			$nombreordenador=$rs->campos["nombreordenador"];
 			$ip=$rs->campos["ip"];
 			$mac=$rs->campos["mac"];
+			$fotoordenador=$rs->campos["fotoord"];
 			$perfilhard=$rs->campos["perfilhard"];
 		}
 		$rs->Cerrar();
@@ -334,9 +335,9 @@ function datosOrdenadores($cmd,$idordenador)
 ?> 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
-			<? echo '<TD>'.$nombreordenador.'</TD>';?>
-			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
+			<TD><?php echo $nombreordenador;?></TD>
+			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotos/<?php echo $fotoordenador;?>"></TD>
 			</TR>	
 		<TR>
 				<TH align=center>&nbsp;<?echo $TbMsg[15]?>&nbsp;</TD>
