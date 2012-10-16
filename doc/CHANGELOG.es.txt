@@ -18,6 +18,9 @@ Tickets resueltos en módulo OpenGnSys Client:
 Tickets resueltos en módulo OpenGnSys Server:
 #559	El servicio ogAdmServer crece continuamente en consumo de memoria
 
+Tickets resueltos en módulo OpenGnSys Repository Server:
+#561	Crear script para borrar imágenes del repositorio
+
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #551	Consola web compatible con PHP 5.4
 #558	Correción Modulo Fotosordenadores
