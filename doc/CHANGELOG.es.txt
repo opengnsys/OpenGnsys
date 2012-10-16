@@ -21,6 +21,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #551	Consola web compatible con PHP 5.4
 #558	Correción Modulo Fotosordenadores
+#560	La pantalla de cola de acciones tarda mucho en mostrar los resultados
 
 Tickets genéricos resueltos:
 #556	Liberar versión de mantenimiento OpenGnSys 1.0.4a en rama principal

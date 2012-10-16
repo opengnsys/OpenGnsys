@@ -41,7 +41,11 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `idtarea` int(11) NOT NULL DEFAULT '0',
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `idprogramacion` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`idaccion`)
+  PRIMARY KEY (`idaccion`),
+  KEY (`idordenador`),
+  KEY (`idprocedimiento`),
+  KEY (`idtarea`),
+  KEY (`idprogramacion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
