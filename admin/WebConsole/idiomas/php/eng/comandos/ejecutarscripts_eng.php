@@ -1,10 +1,10 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Php language file: ejecutarscripts_eng.php (Comandos)
 //	Language: English
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Centers';
 	$TbMsg[1]='Group of labs';
 	$TbMsg[2]='Labs';

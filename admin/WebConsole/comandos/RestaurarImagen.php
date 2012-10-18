@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -189,7 +189,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 					$TBmetodos["MULTICAST-CACHE"]=3;
 					$TBmetodos["MULTICAST-DIRECT"]=4;
 					$TBmetodos["TORRENT-CACHE"]=5;
-
+					if ($idxc == "UNICAST") {
+						$idxc = "UNICAST-DIRECT";
+					}
 					$idxc=$_SESSION["protclonacion"];
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 				}
@@ -299,7 +301,7 @@ $cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
 		$rs->Primero(); 
-		$mcastsyntax.= $rs->campos["pormul"] . ':';
+		$mcastsyntax = $rs->campos["pormul"] . ':';
 
 		$rs->Siguiente();
 		switch ($rs->campos["modomul"]) 
