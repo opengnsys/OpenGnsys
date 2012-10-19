@@ -1,4 +1,4 @@
-<?
+<?php
 //// ******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -95,25 +95,22 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		global $AMBITO_PROCEDIMIENTOS;
 		global $TbMsg;	
 		
-		$cmd->texto="SELECT procedimientos_acciones.idprocedimientoaccion as identificador,procedimientos_acciones.orden,
-				procedimientos_acciones.parametros,procedimientos_acciones.procedimientoid,
-				comandos.idcomando,comandos.descripcion as comando,
-				procedimientostemp.descripcion as procedimiento
+		$cmd->texto="SELECT procedimientos_acciones.idprocedimientoaccion AS identificador, procedimientos_acciones.orden,
+				    procedimientos_acciones.parametros, procedimientos_acciones.procedimientoid,
+				    comandos.idcomando, comandos.descripcion AS comando,
+				    procedimientostemp.descripcion AS procedimiento
 				FROM procedimientos
 				INNER JOIN procedimientos_acciones ON procedimientos_acciones.idprocedimiento=procedimientos.idprocedimiento
 				LEFT OUTER JOIN comandos ON comandos.idcomando=procedimientos_acciones.idcomando
-				LEFT OUTER JOIN procedimientos as procedimientostemp 
-							ON procedimientostemp.idprocedimiento=procedimientos_acciones.procedimientoid 
+				LEFT OUTER JOIN procedimientos AS procedimientostemp 
+					ON procedimientostemp.idprocedimiento=procedimientos_acciones.procedimientoid 
 				WHERE procedimientos.idprocedimiento=".$idprocedimiento." 
-				ORDER by procedimientos_acciones.orden";
+				ORDER BY procedimientos_acciones.orden";
 				
-		//echo $cmd->texto;
-	
 		$idprocedimientos=escribeAcciones($cmd,$AMBITO_PROCEDIMIENTOS,true,7);
 		
-		//$idprocedimientos.=$idprocedimiento; // Excluye a él mismo de la segunda ronda
 		$idprocedimientos=$idprocedimiento; // Excluye  sólo a él para evitar dead-lock
-		$cmd->texto="SELECT idprocedimiento as identificador, 0 as orden, 0 as idcomando,descripcion as procedimiento
+		$cmd->texto="SELECT idprocedimiento AS identificador, 0 AS orden, 0 AS idcomando, descripcion AS procedimiento
 					FROM procedimientos
 					WHERE idprocedimiento NOT IN (".$idprocedimientos.") 
 					ORDER BY descripcion";
@@ -129,33 +126,31 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		global $TbMsg;	
 		
 		/* Contenido de tarea */ 
-		$cmd->texto="SELECT tareas.ambito,tareas.idambito,tareas_acciones.idtareaaccion as identificador,tareas_acciones.orden,
-				tareas_acciones.tareaid,procedimientos.idprocedimiento,procedimientos.descripcion as procedimiento,
-				tareastemp.descripcion as tarea
+		$cmd->texto="SELECT tareas.ambito, tareas.idambito, tareas_acciones.idtareaaccion AS identificador,
+				    tareas_acciones.orden, tareas_acciones.tareaid, procedimientos.idprocedimiento,
+				    procedimientos.descripcion AS procedimiento, tareastemp.descripcion AS tarea
 				FROM tareas
 				INNER JOIN tareas_acciones ON tareas_acciones.idtarea=tareas.idtarea
 				LEFT OUTER JOIN procedimientos ON procedimientos.idprocedimiento=tareas_acciones.idprocedimiento
-				LEFT OUTER JOIN tareas as tareastemp 
-							ON tareastemp.idtarea=tareas_acciones.tareaid 
+				LEFT OUTER JOIN tareas AS tareastemp 
+					ON tareastemp.idtarea=tareas_acciones.tareaid 
 				WHERE tareas.idtarea=".$idtarea." 
-				ORDER by tareas_acciones.orden";
+				ORDER BY tareas_acciones.orden";
 				
-		//echo $cmd->texto;
 		$idtareas=escribeAcciones($cmd,$AMBITO_TAREAS,true,7);
 		
 		/* Procedimientos disponibles */
 		if(!empty($ambito)){
-			$cmd->texto="SELECT idprocedimiento as identificador, 0 as orden, 0 as idcomando,descripcion as procedimiento
-						FROM procedimientos
-						ORDER BY descripcion";	
+			$cmd->texto="SELECT idprocedimiento AS identificador, 0 AS orden, 0 AS idcomando, descripcion AS procedimiento
+					FROM procedimientos
+					ORDER BY descripcion";	
 
 			escribeAcciones($cmd,$AMBITO_PROCEDIMIENTOS,false,8);	
 		}
 		
 		/* Tareas disponibles */ 
-		//$idtareas.=$idtarea; // Excluye a ella misma de la segunda ronda
 		$idtareas=$idtarea; // Excluye  sólo a ella para evitar dead-lock
-		$cmd->texto="SELECT idtarea as identificador, 0 as orden, 0 as idprocedimiento,	descripcion as tarea
+		$cmd->texto="SELECT idtarea AS identificador, 0 AS orden, 0 AS idprocedimiento,	descripcion AS tarea
 					FROM tareas
 					WHERE idtarea NOT IN (".$idtareas.") 
 					ORDER BY descripcion";
@@ -171,14 +166,14 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		global $conTR;
 		global $TbMsg;
 		
-		$rs=new Recordset; 
-		$rs->Comando=&$cmd; 		
+		$rs=new Recordset;
+		$rs->Comando=&$cmd;
 		if (!$rs->Abrir()) return("");
 	
 		$idacciones="";
 		
 		echo '<TD valign=top>';
-		if($rs->EOF && !sw){
+		if($rs->EOF && !$sw){
 			echo '</P></TD>';
 			return;
 		}
@@ -209,10 +204,9 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 					else{
 						$urlimg="../images/iconos/procedimiento.gif";
 						$accion=$rs->campos["procedimiento"];
-						$idacciones.=$rs->campos["procedimientoid"].",";
 						$value=$AMBITO_PROCEDIMIENTOS;
 					}
-					break;							
+					break;
 				case $AMBITO_TAREAS:
 					if(!empty($rs->campos["idprocedimiento"])){
 						$urlimg="../images/iconos/procedimiento.gif";
@@ -222,7 +216,6 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 					else{
 						$urlimg="../images/iconos/tareas.gif";
 						$accion=$rs->campos["tarea"];
-						$idacciones.=$rs->campos["tareaid"].",";
 						$value=$AMBITO_TAREAS;						
 					}
 					break;					
@@ -286,3 +279,4 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 			</DIV>';
 	}	
 ?>
+
