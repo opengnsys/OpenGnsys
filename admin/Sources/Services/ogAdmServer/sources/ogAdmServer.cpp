@@ -763,7 +763,6 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
 					" VALUES(%d,%s,%s,0x%s,%s,%d,%d,0)",
 					ido, disk, par, cpt, tam, idsfi, idsoi);
-			errorInfo(modulo,sqlstr);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
@@ -870,8 +869,7 @@ int checkDato(Database db, Table tbl, char *dato, const char*tabla,
 		return (0);
 	}
 	if (tbl.ISEOF()) { //  Software NO existente
-		sprintf(sqlstr, "INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato,
-				dato);
+		sprintf(sqlstr, "INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato, dato);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
@@ -2300,8 +2298,7 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,
 			}
 
 			if (tbl.ISEOF()) { //  Hardware NO existente
-				sprintf(sqlstr,
-						"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid) "
+				sprintf(sqlstr, "INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid) "
 							" VALUES(%d,'%s',%s,0)", idtipohardware,
 						dualHardware[1], idc);
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
@@ -2414,7 +2411,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 	}
 	if (tbl.ISEOF()) { // No existe un perfil hardware con esos componentes de componentes hardware, lo crea
 		sprintf(sqlstr, "INSERT perfileshard  (descripcion,idcentro,grupoid)"
-			" VALUES('Perfil hardware (%s) ',%s,0)", npc, idc);
+				" VALUES('Perfil hardware (%s) ',%s,0)", npc, idc);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
@@ -2439,8 +2436,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		}
 		// Crea la relación entre perfiles y componenetes hardware
 		for (i = 0; i < lon; i++) {
-			sprintf(sqlstr,
-					"INSERT perfileshard_hardwares  (idperfilhard,idhardware)"
+			sprintf(sqlstr, "INSERT perfileshard_hardwares  (idperfilhard,idhardware)"
 						" VALUES(%d,%d)", nwidperfilhard, tbidhardware[i]);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
@@ -2653,8 +2649,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,
 		}
 
 		if (tbl.ISEOF()) { //  Software NO existente
-			sprintf(sqlstr,
-					"INSERT INTO softwares (idtiposoftware,descripcion,idcentro,grupoid)"
+			sprintf(sqlstr, "INSERT INTO softwares (idtiposoftware,descripcion,idcentro,grupoid)"
 						" VALUES(2,'%s',%s,0)", tbSoftware[i], idc);
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
@@ -2768,7 +2763,7 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 	}
 	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
 		sprintf(sqlstr, "INSERT perfilessoft  (descripcion,idcentro,grupoid)"
-			" VALUES('Perfil Software (%s, Part:%s) ',%s,0)", npc, par, idc);
+				" VALUES('Perfil Software (%s, Part:%s) ',%s,0)", npc, par, idc);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
