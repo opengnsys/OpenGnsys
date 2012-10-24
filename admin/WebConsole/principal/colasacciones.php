@@ -498,9 +498,6 @@ function listaAcciones($ambito,$idambito)
 		}	
 	}
 	echo $html;
-while (!$rs->EOF){
-echo $rs->campos['descripcion'].'</br>';
-};
 }
 //	_________________________________________________________________________
 
