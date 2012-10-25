@@ -53,7 +53,6 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 	puerto[0] = (char) NULL;
 
 	numlin = splitCadena(lineas, buffer, '\n');
-	liberaMemoria(buffer);
 	for (i = 0; i < numlin; i++) {
 		splitCadena(dualparametro, lineas[i], '=');
 		resul = strcmp(StrToUpper(dualparametro[0]), "IPLOCAL");
