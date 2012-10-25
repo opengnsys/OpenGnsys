@@ -212,7 +212,7 @@ function bisiesto($anob){
 //________________________________________________________________________________________________________
 //		Esta función devuelve una cadena con el código HTML con las horas de reservas de las aulas
 //________________________________________________________________________________________________________
-function HorasDias($CntDia,$porcenhoras){
+function HorasDias($CntDia,&$porcenhoras){
 	$HTML_calendario="";
 	$sw=0;
 	$conthoras=0; // Contador de horas y minutos de reservas

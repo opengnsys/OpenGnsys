@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -62,7 +62,10 @@
 		$hlonprm=hexdec(substr($trama,$LONCABECERA,$LONHEXPRM));
 		$parametros=substr($trama,$LONCABECERA+$LONHEXPRM,$hlonprm);
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
-		$trama_notificacion=$ValorParametros["tso"];
-		echo $trama_notificacion; // Devuelve respuesta
-}
+		if (isset ($ValorParametros["tso"])) {
+			$trama_notificacion=$ValorParametros["tso"];
+			echo $trama_notificacion; // Devuelve respuesta
+		}
+	}
 ?>
+

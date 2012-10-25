@@ -167,7 +167,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 		$cadenaXML.=' nodoid='.$LITAMBITO_AULAS.'-'.$rs->campos["idaula"];
 		$cadenaXML.='>';
 		$cadenaXML.=SubarbolXML_aulas_ordenadores($cmd,$rs->campos["idaula"],0);
-		$cadenaXML.=SubarbolXML_aulas_operadores($cmd,$rs->campos["idaula"],&$cc);
+		$cadenaXML.=SubarbolXML_aulas_operadores($cmd,$rs->campos["idaula"],$cc);
 		$cadenaXML.='</AULA>';
 		$rs->Siguiente();
 	}
@@ -175,7 +175,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 	return($cadenaXML);
 }
 //________________________________________________________________________________________________________
-function SubarbolXML_aulas_operadores($cmd,$idaula,$cont){
+function SubarbolXML_aulas_operadores($cmd,$idaula,&$cont){
 	global $TbMsg;
 	global $LITAMBITO_USUARIOS;
 	global $cadenaXML;

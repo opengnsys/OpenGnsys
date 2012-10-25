@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________
 //
 //	Salva un fichero enviado por POST
@@ -7,7 +7,7 @@
 //		- $NombreFicheroPost: Nombre temporal que le da php al fichero post
 //		- $NombreFichero: Nombre definitivo que tendrá  el fichero
 //________________________________________________________________________________________
-function SalvaFichero_POST($UrlPagina,$NombreFicheroPost,$NombreFichero,$UrlFichero){
+function SalvaFichero_POST($UrlPagina,$NombreFicheroPost,$NombreFichero,&$UrlFichero){
 
 	$UrlCarpetaPagina=dirname($UrlPagina);
 	$UrlFichero=$UrlCarpetaPagina."/iconos/".$NombreFichero;
@@ -49,3 +49,4 @@ function TomaPathFisico($UrlPagina,$NombreFichero){
 	return($PathFisicoFichero);
 }
 ?>
+

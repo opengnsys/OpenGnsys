@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -43,11 +43,13 @@ if($op==1){ // Viene de "acciones"
 	switch($tipoaccion){
 			case $EJECUCION_PROCEDIMIENTO :
 				$urlimg='../images/iconos/procedimiento.gif';
+				$litcabecera=$TbMsg[2];
 				$litacion=$TbMsg[2];
 				$litdescri=$descripcionaccion;
 				break;
 			case $EJECUCION_TAREA :
 				$urlimg='../images/iconos/tareas.gif';
+				$litcabecera=$TbMsg[3];
 				$litacion=$TbMsg[3];
 				$litdescri=$descripcionaccion;
 				break;
@@ -55,6 +57,7 @@ if($op==1){ // Viene de "acciones"
 }
 else{ // Viene de menus
 				$urlimg='../images/iconos/menu.gif';
+				$litcabecera=$TbMsg[4];
 				$litacion=$TbMsg[4];
 				$litdescri=$descripcionmenu;
 }
@@ -76,8 +79,7 @@ else{ // Viene de menus
 		<input type=hidden value="<? echo $idtipoaccion?>" id=idtipoaccion>	 
 		<input type=hidden value="<? echo $tipoaccion?>" id=tipoaccion>	 
 	</FORM>
-	<P align=center class=cabeceras>
-		<? echo $litcabecera ?><br>
+	<P align=center class=cabeceras><?echo echo $litcabecera ?><br>
 		<span align=center class=subcabeceras><?echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/menus.gif"><br><br>
 		<span align=center class=presentaciones>
 			<img src="<? echo $urlimg?>">&nbsp;&nbsp;&nbsp;
@@ -89,7 +91,7 @@ else{ // Viene de menus
 				<TH>&nbsp;</TH>
 
 				<?
-					if($op==1) // Si viene desde "acciones" ...			
+					if($op==1) // Si viene desde "acciones" ...
 						echo '<TH>'.$TbMsg[9].'</TH>';
 					else		
 						echo '<TH align=center>'.$TbMsg[15].'</TH>';	
@@ -110,37 +112,37 @@ else{ // Viene de menus
 	
 if(!empty($idmenu)) // Viene de la página de menús
 { 
-		$cmd->texto="SELECT menus.idmenu,menus.descripcion as descripcionmenu,
-								acciones_menus.idtipoaccion,acciones_menus.tipoaccion,
-								acciones_menus.tipoitem,acciones_menus.idurlimg,
-								acciones_menus.descripitem,acciones_menus.orden
-								FROM menus 
-								INNER JOIN acciones_menus ON acciones_menus.idmenu=menus.idmenu 
-								WHERE acciones_menus.idmenu=".$idmenu."
-								ORDER BY acciones_menus.tipoitem,menus.descripcion";
+		$cmd->texto="SELECT  menus.idmenu, menus.descripcion AS descripcionmenu,
+				     acciones_menus.idtipoaccion, acciones_menus.tipoaccion,
+				     acciones_menus.tipoitem, acciones_menus.idurlimg,
+				     acciones_menus.descripitem, acciones_menus.orden
+				FROM menus 
+				INNER JOIN acciones_menus ON acciones_menus.idmenu=menus.idmenu 
+				WHERE acciones_menus.idmenu=".$idmenu."
+				ORDER BY acciones_menus.tipoitem, menus.descripcion";
 
 		pintaMenus($cmd,$idmenu,0,2);						
 }
 else
 {
-		$cmd->texto="SELECT menus.idmenu,menus.descripcion as descripcionmenu,
-								acciones_menus.idtipoaccion,acciones_menus.tipoaccion,
-								acciones_menus.tipoitem,acciones_menus.idurlimg,
-								acciones_menus.descripitem,acciones_menus.orden
-								FROM menus 
-								INNER JOIN acciones_menus ON acciones_menus.idmenu=menus.idmenu 
-								WHERE (acciones_menus.idtipoaccion=".$idtipoaccion." AND acciones_menus.tipoaccion=".$tipoaccion.")
-								ORDER BY menus.descripcion";
+		$cmd->texto="SELECT  menus.idmenu, menus.descripcion AS descripcionmenu,
+				     acciones_menus.idtipoaccion,acciones_menus.tipoaccion,
+				     acciones_menus.tipoitem,acciones_menus.idurlimg,
+				     acciones_menus.descripitem,acciones_menus.orden
+				FROM menus 
+				INNER JOIN acciones_menus ON acciones_menus.idmenu=menus.idmenu 
+				WHERE (acciones_menus.idtipoaccion=".$idtipoaccion." AND acciones_menus.tipoaccion=".$tipoaccion.")
+				ORDER BY menus.descripcion";
 							
-		$idmenus=pintaMenus($cmd,$idtipoaccion,$tipoaccion,1)."0"; // Añade el identificador 0 	
-		$cmd->texto="SELECT menus.idmenu,menus.descripcion as descripcionmenu,
-								0 as idtipoaccion,0 as tipoaccion,
-								0 as tipoitem,'' as idurlimg,
-								'' as descripitem,0 as orden
-								FROM menus 
-								WHERE idmenu NOT IN (".$idmenus.")
-								ORDER BY menus.descripcion";	
-								
+		$idmenus=pintaMenus($cmd,$idtipoaccion,$tipoaccion,1)."0"; // Añade el identificador 0
+		$cmd->texto="SELECT  menus.idmenu, menus.descripcion AS descripcionmenu,
+				     0 as idtipoaccion, 0 AS tipoaccion,
+				     0 AS tipoitem, '' AS idurlimg,
+				     '' AS descripitem,0 AS orden
+				FROM menus 
+				WHERE idmenu NOT IN (".$idmenus.")
+				ORDER BY menus.descripcion";	
+
 		pintaMenus($cmd,$idtipoaccion,$tipoaccion,1);	
 }
 //________________________________________________________________________________________________________

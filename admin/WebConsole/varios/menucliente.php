@@ -50,6 +50,7 @@ if (! empty ($contenidofichero)) {
 //agp
 //________________________________________________________________________________________________________
 $rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
+$codeHtml="";
 if(!empty($rsmenu)){
 	switch($tip){
 		case $ITEMS_PUBLICOS:
@@ -87,11 +88,11 @@ else{
 	$codeHtml.='</div>';
 }
 ?>
-	<html>
-	<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	</head>
-	<?
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+</head>
+	<?php
 
 	if(!empty($rsmenu->campos["idurlimg"])){ // Imagen de fondo
 		$urlimg=TomaDato($cmd,0,'iconos',$rsmenu->campos["idurlimg"],'idicono','urlicono');
@@ -100,15 +101,13 @@ else{
 	}
 	else{
 		echo'<body bgcolor="white" background="../images/iconos/fondo800x600.png">';
-		//echo '<p align="left"><img border=0 src="../images/iconos/logoopengnsys.png"><p>';
 	}
-		include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
-		echo $codeHtml;
-
+	include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
+	echo $codeHtml;
 	?>
-	</body>
-	</html>
-<?
+</body>
+</html>
+<?php
 //___________________________________________________________________________________________________
 //
 // Recupera Men

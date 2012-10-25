@@ -287,7 +287,7 @@ char* ampliaMemoria(char* ptr,int lon)
 //	Devuelve:
 //		Nada
 //______________________________________________________________________________________________________
-void liberaMemoria(char* ptr)
+void liberaMemoria(void* ptr)
 {
 	if(ptr)
 		free (ptr);

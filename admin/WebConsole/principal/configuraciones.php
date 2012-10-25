@@ -184,58 +184,44 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					echo'<tr height="16">'.chr(13);
 					echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
 					echo'<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
-					//echo'<td align="center">'.$tbKeys[$k]["sistemafichero"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 
-					//echo '<td align="center">'.$tbKeys[$k]["nombreso"].'</td>'.chr(13);
 					echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);					
 
-					//echo'<td align="right">'.formatomiles($tbKeys[$k]["tamano"]).'&nbsp;</td>'.chr(13);
 					echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 
-					//echo'<td align="center">'.$tbKeys[$k]["imagen"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 					
-					//echo'<td align="center">'.$tbKeys[$k]["perfilsoft"].'</td>'.chr(13);
 					echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-  
-					//echo'<td align="center">'.$tbKeys[$k]["perfilsoft"].'</td>'.chr(13);
-					if ($tbKeys[$k]["numpar"] == "4")
-					{
+
+					if ($tbKeys[$k]["numpar"] == "4") {
 						$rs=new Recordset; 
 						$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4";
 						$rs->Comando=&$cmd; 
 						if (!$rs->Abrir()) return(false); // Error al abrir recordset
 						$rs->Primero(); 
 						if (!$rs->EOF){
-						$campocache=$rs->campos["cache"];
-						}$rs->Cerrar();
-						echo'<td align="leght">&nbsp;';
+							$campocache=$rs->campos["cache"];
+						}
+						$rs->Cerrar();
+						echo '<td align="leght">&nbsp;';
 						$ima=split(",",$campocache);
 						$numero=1;
-						for ($x=0;$x<count($ima); $x++)
-							{
-							
-							if(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x]))
-								{
-								if(ereg(".torrent",$ima[$x]))
-									{
-								echo '&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x].'<br/>'.'<hr>';$numero++;
-									}else{
-								echo '&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x].'<br/>';
-										}
-								}else{
-							if(ereg("MB",$ima[$x]))
-								{ echo '<hr> ## '.$TbMsg[4951].' - ( '.$ima[$x].' )<br/><hr>';}else{
-								echo $numero.".-".$ima[$x].'<br/>';
+						for ($x=0;$x<count($ima); $x++) {
+							if(substr($ima[$x],-3)==".MB") {
+								echo '<strong>'.$TbMsg[4951].':  '.$ima[$x].'</strong>';
+							} else {
+								if(substr($ima[$x],-4)==".img") {
+									echo '<br />'.$numero++.'.-'.$ima[$x];
+								} else {
+									echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
 								}
-										}
-							
 							}
+						}
 						echo '&nbsp;</td>'.chr(13);
-					}else{
+					} else {
 						echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
-						  }
+					}
 					
 					echo'</tr>'.chr(13);
 				}
@@ -263,9 +249,9 @@ function datosAulas($cmd,$idaula)
 {
 	global $TbMsg;
 	
-	$cmd->texto="SELECT DISTINCT aulas.*, COUNT(*) AS numordenadores
+	$cmd->texto="SELECT DISTINCT aulas.*, COUNT(ordenadores.idordenador) AS numordenadores
 			 FROM aulas
-			 INNER JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+			 LEFT JOIN ordenadores ON ordenadores.idaula=aulas.idaula
 			 WHERE aulas.idaula=$idaula";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -329,7 +315,7 @@ function datosOrdenadores($cmd,$idordenador)
 {
 	global $TbMsg;
 
-	$cmd->texto="SELECT nombreordenador, ip, mac, perfileshard.descripcion AS perfilhard 
+	$cmd->texto="SELECT nombreordenador, ip, mac, fotoord, perfileshard.descripcion AS perfilhard 
 			 FROM ordenadores
 			 LEFT JOIN perfileshard ON perfileshard.idperfilhard=ordenadores.idperfilhard
 			 WHERE ordenadores.idordenador=$idordenador";
@@ -341,6 +327,7 @@ function datosOrdenadores($cmd,$idordenador)
 			$nombreordenador=$rs->campos["nombreordenador"];
 			$ip=$rs->campos["ip"];
 			$mac=$rs->campos["mac"];
+			$fotoordenador=$rs->campos["fotoord"];
 			$perfilhard=$rs->campos["perfilhard"];
 		}
 		$rs->Cerrar();
@@ -348,9 +335,9 @@ function datosOrdenadores($cmd,$idordenador)
 ?> 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
-			<? echo '<TD>'.$nombreordenador.'</TD>';?>
-			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
+			<TD><?php echo $nombreordenador;?></TD>
+			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotos/<?php echo $fotoordenador;?>"></TD>
 			</TR>	
 		<TR>
 				<TH align=center>&nbsp;<?echo $TbMsg[15]?>&nbsp;</TD>

@@ -183,14 +183,13 @@ function SubarbolXML_comandos($descricomando,$parametros,$visuparametros)
 		global $cadenaXML;
 
 		$tbParametrosValor=array();
-		ParametrosValor($cmd,$parametros,&$tbParametrosValor); // Toma valores de cada parámetro
+		ParametrosValor($cmd,$parametros,$tbParametrosValor); // Toma valores de cada parámetro
 		$visuprm=split(";",$visuparametros);
 		for($i=0;$i<sizeof($visuprm);$i++){
 			$nemo=$visuprm[$i];
-			if(isset($tbParametrosValor[$visuprm[$i]])){
+			if(isset($tbParametrosValor[$nemo])){
 				for($j=0;$j<sizeof($tbParametrosValor[$nemo])-1;$j++){
 					$descripcion=$tbParametrosValor[$nemo]["descripcion"];
-					$valor=$tbParametrosValor[$nemo][$j]["valor"];
 					if(sizeof($tbParametrosValor[$nemo])>2)
 						$valor=$tbParametrosValor[$nemo][$j]["valor"];
 					else

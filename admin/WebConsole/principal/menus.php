@@ -40,7 +40,6 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/opciones_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/menus_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>

@@ -106,11 +106,11 @@ if (isset($_GET["litambito"])) $litambito=$_GET["litambito"]; // Recoge parametr
 if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if (isset($_GET["nombreambito"])) $nombreambito=$_GET["nombreambito"]; 
 
-# ambito:   4->aulas   16->ordenadores
+# litambito:   4->aulas   16->ordenadores
 # idambito:  id de los elementos en su correspondiente tabla-ambito (aulas, ordenadores...)
 # nombreambito: nombre del elemento.
 
-switch($ambito){
+switch($litambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
 			$textambito=$TbMsg[0];
@@ -157,7 +157,9 @@ switch($ambito){
 
 <input type="hidden" name="listOfItems" value="">
 <?php
-echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
+$id_aula="";
+if (isset($_GET["id_aula"])) $id_aula=$_GET["id_aula"];
+echo "<input type='hidden' name='rungrupo' value='" . $id_aula . "'>";
 ?>
 
 

@@ -45,10 +45,11 @@ if (!$cmd)
 
 ?>
 <html>
-<title><?php echo $TbMsg["ACCESS_TITLE"];?></title>
 <head>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="estilos.css">
+<title><?php echo $TbMsg["ACCESS_TITLE"];?></title>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<link rel="shortcut icon" href="images/iconos/logocirculos.png" type="image/png" />
+<link rel="stylesheet" type="text/css" href="estilos.css" />
 <script language="javascript">
 //______________________________________________________________________________
 function confirmar(){

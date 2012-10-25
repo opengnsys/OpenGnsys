@@ -23,21 +23,18 @@ echo "<base target='principal'>";
 echo "</head>";
 echo "<body>";
 
-
-
-#echo('litambito con valor:     '. $_GET['litambito']);
-#echo ('idambito con valor:      ' . $_GET['idaula']);
-#echo ('nombreambito con valor:      ' . $_GET['nombreambito']);
-
 $lista = explode(";",$_POST['listOfItems']);
 foreach ($lista as $sublista) {
-	$elementos = explode("|",$sublista);
-	$hostname=$elementos[1];
-	$optboot=$elementos[0];
-	ogBootServer($cmd,$optboot,$hostname,$idioma);
+	if (! empty $sublista)) {
+		$elementos = explode("|",$sublista);
+		$hostname=$elementos[1];
+		$optboot=$elementos[0];
+		ogBootServer($cmd,$optboot,$hostname,$idioma);
+	}
 }
 echo " </body>";
 echo " </html> ";
+
 
 function ogBootServer($cmd,$optboot,$hostname,$idioma) 
 {	
@@ -48,7 +45,7 @@ global $retrun;
 $return="\n";
 $cmd->CreaParametro("@optboot",$optboot,0);
 $cmd->CreaParametro("@hostname",$hostname,0);
-$cmd->texto="update ordenadores set arranque=@optboot where nombreordenador=@hostname";
+$cmd->texto="UPDATE ordenadores SET arranque=@optboot WHERE nombreordenador=@hostname";
 $cmd->Ejecutar();
 $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
 			ordenadores.netiface AS netiface, aulas.netmask AS netmask,
@@ -56,13 +53,12 @@ $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac,
 			aulas.nombreaula AS grupo,
 			menus.resolucion AS vga,
 			perfileshard.winboot AS winboot
-			FROM ordenadores 
-			JOIN aulas ON ordenadores.idaula=aulas.idaula 
-			JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
-			LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
-			LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
-			WHERE ordenadores.nombreordenador='". $hostname ."'";
-
+		FROM ordenadores 
+		JOIN aulas ON ordenadores.idaula=aulas.idaula 
+		JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
+		LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
+		LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
+		WHERE ordenadores.nombreordenador='". $hostname ."'";
 
 $rs=new Recordset; 
 $rs->Comando=&$cmd; 
@@ -94,14 +90,14 @@ $rs->Cerrar();
 
 
 switch ($idioma) {
-    case eng:
-        $idioma=en_GB;
+    case "eng":
+        $idioma="en_GB";
         break;
-    case esp:
-        $idioma=es_ES;
+    case "esp":
+        $idioma="es_ES";
         break;
-    case cat:
-        $idioma=ca_ES;
+    case "cat":
+        $idioma="ca_ES";
         break;
 }
 
