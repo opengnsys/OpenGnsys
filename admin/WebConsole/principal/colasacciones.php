@@ -43,6 +43,7 @@
 	$swPOST="";
 	$tiposacciones="";
 	$estados="";
+	$resultados="";
 	$visupro="";
 	$visuprm="";
 	$visucmd="";	
@@ -130,7 +131,7 @@
 	$ClausulaWhere.=$WhereFechaReg;
 	
 	// Cuestion tipos de acciones
-	if(!empty($tipoaccion)) $ClausulaWhere.=" AND tipoaccion=".$tipoaccion;
+	if(!empty($tipoaccion)) $ClausulaWhere.=" AND acciones.tipoaccion=".$tipoaccion;
 
 	// Cuestion identificador del Centro que ha ejecutado la acción
 	$WhereCentroAccion="";
