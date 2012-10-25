@@ -690,7 +690,7 @@ function getNetworkSettings()
 		let i++
 	done
 	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
-	if [ -z "${NETIP}[*]" -o -z "${NETMASK[*]}" ]; then
+	if [ -z "${NETIP[*]}" -o -z "${NETMASK[*]}" ]; then
 		errorAndLog "${FUNCNAME}(): Network not detected."
 		exit 1
 	fi
@@ -868,7 +868,9 @@ function smbConfigure()
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
 	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/" $SAMBACFGDIR/smb.conf
-	test grep -q "smb-og" $SAMBACFGDIR/smb.conf || echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
+	if ! grep -q "smb-og" $SAMBACFGDIR/smb.conf; then
+		echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
+	fi
 	service=$SAMBASERV
 	$ENABLESERVICE; $STARTSERVICE
 	if [ $? -ne 0 ]; then
@@ -1305,7 +1307,7 @@ function openGnsysConfigure()
 			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
-				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
+				OPENGNSYS_CONSOLEURL="${CONSOLEURL/http:/https:}"
 			fi
 		fi
 		let i++
