@@ -1,3 +1,5 @@
+UPDATE ogAdmBD.parametros SET tipopa = '1', visual = '1' WHERE idparametro = 30;
+
 UPDATE ogAdmBD.idiomas SET descripcion = 'English' WHERE ididioma = 2;
 UPDATE ogAdmBD.idiomas SET descripcion = 'Català' WHERE ididioma = 3;
 
@@ -57,4 +59,16 @@ INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 ALTER TABLE ogAdmBD.ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
 UPDATE ogAdmBD.aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
+
+# Internacionalización correcta de los asistentes.
+UPDATE ogAdmBD.asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE ogAdmBD.asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
+# Mejorar el rendimiento en acceso a la cola de acciones.
+ALTER TABLE ogAdmBD.acciones
+	ADD KEY (idordenador),
+	ADD KEY (idprocedimiento),
+	ADD KEY (idtarea),
+	ADD KEY (idprogramacion);
 

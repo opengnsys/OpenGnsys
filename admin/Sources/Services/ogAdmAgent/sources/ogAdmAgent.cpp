@@ -418,13 +418,15 @@ BOOLEAN ejecutarProcedimiento(Database db,int idprocedimiento,int ambito,int ida
 			if(!tbl.Get("parametros",parametros)){
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
+				liberaMemoria(parametros);
 				return (FALSE);
-			}	
+			}
+			liberaMemoria(parametros);
 			if(!tbl.Get("idcomando",idcomando)){
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				return (FALSE);
-			}				
+			}
 
 			if(!insertaComando(db,idcomando,parametros,idprocedimiento,ambito,idambito,restrambito))
 				return(false);
@@ -457,10 +459,10 @@ BOOLEAN ejecutarTarea(Database db, int idprogramacion, int idtarea)
 	char modulo[] = "ejecutarTarea()";
 
 	sprintf(sqlstr,"SELECT tareas_acciones.orden,tareas_acciones.idprocedimiento,tareas_acciones.tareaid,"\
-					" tareas.ambito,tareas.idambito,tareas.restrambito,length(tareas.restrambito) as lonrestrambito"\
-					" FROM tareas"\
-					" INNER JOIN tareas_acciones ON tareas_acciones.idtarea=tareas.idtarea"\
-					" WHERE tareas_acciones.idtarea=%d ORDER BY tareas_acciones.orden",idtarea);
+			" tareas.ambito,tareas.idambito,tareas.restrambito,length(tareas.restrambito) as lonrestrambito"\
+			" FROM tareas"\
+			" INNER JOIN tareas_acciones ON tareas_acciones.idtarea=tareas.idtarea"\
+			" WHERE tareas_acciones.idtarea=%d ORDER BY tareas_acciones.orden",idtarea);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
@@ -508,14 +510,16 @@ BOOLEAN ejecutarTarea(Database db, int idprogramacion, int idtarea)
 			if(!tbl.Get("restrambito",restrambito)){
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
+				liberaMemoria(restrambito);
 				return (FALSE);
 			}			
+			liberaMemoria(restrambito);
 			RecopilaIpesMacs(db,ambito,idambito,restrambito); // Recopila Ipes del ámbito
 			if(!tbl.Get("idprocedimiento",idprocedimiento)){
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				return (FALSE);
-			}				
+			}
 			sesion=time(NULL);
 			
 			if(!ejecutarProcedimiento(db,idprocedimiento,ambito,idambito,restrambito))
@@ -618,8 +622,10 @@ BOOLEAN enviaPeticion(int idprogramacion)
 
 	if(!enviaMensaje(&socket_c,ptrTrama,MSG_PETICION)){
 		errorLog(modulo,91,FALSE);
+		liberaMemoria(ptrTrama);
 		return(FALSE);
 	}
+	liberaMemoria(ptrTrama);
 	return(TRUE);
 }
 // _____________________________________________________________________________________________________________

@@ -41,7 +41,11 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `idtarea` int(11) NOT NULL DEFAULT '0',
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `idprogramacion` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`idaccion`)
+  PRIMARY KEY (`idaccion`),
+  KEY (`idordenador`),
+  KEY (`idprocedimiento`),
+  KEY (`idtarea`),
+  KEY (`idprogramacion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -135,8 +139,8 @@ CREATE TABLE IF NOT EXISTS `asistentes` (
 
 INSERT INTO `asistentes` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`) VALUES
 ('8', 'Asistente Clonacion Particiones Remotas', '../asistentes/AsistenteCloneRemotePartition.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
-('8', 'Asistente "Deploy" de Imagenes', '../asistentes/AsistenteDeployImage.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
-('8', 'Asistente "UpdateCache" con Imagenes', '../asistentes/AsistenteUpdateCache.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
+('8', 'Asistente Deploy de Imagenes', '../asistentes/AsistenteDeployImage.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1'),
+('8', 'Asistente UpdateCache con Imagenes', '../asistentes/AsistenteUpdateCache.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
 ('8', 'Asistente Restauracion de Imagenes', '../asistentes/AsistenteRestoreImage.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '0'),
 ('8', 'Asistente Particionado', '../asistentes/AsistenteParticionado.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1');
 
@@ -182,7 +186,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
 	-- Volcar la base de datos para la tabla `centros`
 	--
 	INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
-	 (1,'Unidad organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGNSys');
+	 (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
 	 
 	
 -- --------------------------------------------------------
@@ -244,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
 --
 
 INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `iduniversidad`, `grupoid`) VALUES
-(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGNSys', 1, 0);
+(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGnSys', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -961,7 +965,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
 --
 
 INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`) VALUES
-(1, 'Universidad default...', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGNSys');
+(1, 'Universidad (Default)', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGnSys');
 
 -- --------------------------------------------------------
 

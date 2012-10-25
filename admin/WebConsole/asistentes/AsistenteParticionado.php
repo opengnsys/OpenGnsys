@@ -98,17 +98,11 @@ $xajax->printJavascript('../xajax/');
 			break;
 	}
 	
-	//echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
-	//echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
-	//			<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
+	echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
+	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[1].'
+			: '.$textambito.'</U></span>&nbsp;&nbsp;</span></p>';
 
-	if(!$swp){
-		echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
-		echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[1].'
-				: '.$textambito.'</U></span>&nbsp;&nbsp;</span></p>';
-	}
-
-	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil;
+	$sws=0x11111;	// Mostrar todas las configuraciones diferentes.
 	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
 ?>
 

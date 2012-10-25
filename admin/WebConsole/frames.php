@@ -1,4 +1,4 @@
-<?
+<?php
 // *******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -10,26 +10,29 @@
 // *******************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
+if (empty ($idioma)) $idioma="esp";
+include_once("./idiomas/php/$idioma/acceso_$idioma.php");
 //________________________________________________________________________________________________________
 ?>
-<HTML>
-<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<TITLE> Administración web de aulas</TITLE>
-</HEAD>
+<html>
+<head>
+<title><?php echo $TbMsg["ACCESS_TITLE"];?></title>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<link rel="shortcut icon" href="images/iconos/logocirculos.png" type="image/png" />
+</head>
 <FRAMESET rows="25,*">
 	<FRAME SRC="barramenu.php" frameborder=1  scrolling=no  NAME="frame_menus" >
 	<FRAMESET cols="22%,*">
-			<? 
-			if($idtipousuario!=$SUPERADMINISTRADOR)
+		<?php	if($idtipousuario!=$SUPERADMINISTRADOR)
 				echo '<FRAME SRC="./principal/aulas.php" frameborder=1 scrolling=auto NAME="frame_arbol" >';
 			else{
 				if($idtipousuario==$SUPERADMINISTRADOR)
 					echo '<FRAME SRC="./principal/administracion.php" frameborder=1 scrolling=auto NAME="frame_arbol" >';
 			}
-			?>
+		?>
 		<FRAME SRC="nada.php" frameborder=0  NAME="frame_contenidos">
 		</FRAMESET>
 	</FRAMESET>	
 </FRAMESET>
-</HTML>
+</html>
+

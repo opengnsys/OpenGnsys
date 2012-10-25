@@ -106,7 +106,7 @@ if  ($opcion!=$op_alta){
 			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
 			<?
 				if ($opcion==$op_eliminacion){
-					tomaDescriAmbito($cmd,$ambito,$idambito,&$textambito);				
+					tomaDescriAmbito($cmd,$ambito,$idambito,$textambito);				
 					echo '<TD>'.$textambito.'</TD>';
 				}
 				else{

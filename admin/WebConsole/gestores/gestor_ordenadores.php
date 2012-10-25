@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -37,14 +37,13 @@ $netiface="";
 $netdriver="";
 ### ADV
 //##agp
-if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG")
-{
- $uploaddir ="../images/fotos/";
-
- $uploadfile = $uploaddir.$_FILES['archivo']['name'];
-
-move_uploaded_file($_FILES['archivo']['tmp_name'], $uploadfile); 
-#copy($_FILES['archivo']['tmp_name'], $uploadfile);
+if (isset($_FILES['archivo'])) {
+	if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG") {
+		$uploaddir ="../images/fotos/";
+		$uploadfile = $uploaddir.$_FILES['archivo']['name'];
+		move_uploaded_file($_FILES['archivo']['tmp_name'], $uploadfile); 
+		#copy($_FILES['archivo']['tmp_name'], $uploadfile);
+	}
 }
 //##agp
 if (isset($_POST["fotoordenador"])) $fotoordenador=$_POST["fotoordenador"];
@@ -144,8 +143,8 @@ ________________________________________________________________________________
 function Gestiona(){
 	global	$cmd;
 	global	$opcion;
-	$fotoordenador="../images/fotos/".$fotoordenador;
 	global $fotoordenador;
+	$fotoordenador="../images/fotos/".$fotoordenador;
 	global $grupoid;
 	global $idordenador;
 	global $nombreordenador;
@@ -235,3 +234,4 @@ function SubarbolXML_ordenadores($idordenador,$nombreordenador){
 		return($cadenaXML);
 } 
 ?>
+

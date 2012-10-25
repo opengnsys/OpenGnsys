@@ -289,7 +289,7 @@ ogUpdateInitrd ()
 
 	cd /; umount /tmp/cache
 
-	[ "$DOREBOOT" == "true" ] && busybox reboot -f
+	[ "$DOREBOOT" == "true" ] && reboot -f
 
 }
 

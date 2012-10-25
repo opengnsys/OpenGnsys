@@ -1,4 +1,4 @@
-<?
+<?php
 // ********************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -90,7 +90,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 			$accion=$SIN_ACCION;
 		}
 		else{
-			if(!SalvaFichero_POST($UrlPagina,$NombreFicheroPost_urlicono,$NombreFichero_urlicono,&$UrlFichero_urlicono))
+			if(!SalvaFichero_POST($UrlPagina,$NombreFicheroPost_urlicono,$NombreFichero_urlicono,$UrlFichero_urlicono))
 				Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 			else{
 				$msg=$TbMsg["SUCCESS_SEND"];

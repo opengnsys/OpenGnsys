@@ -11,7 +11,6 @@ require_once('xajax.common.php');
 //Haciendo referencia a las funciones registradas y que seran interpretadas como funciones javascript
 
 
-
 /********HACIENDO CONSULTA A LA TABLA ordenadores***********/
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -21,15 +20,10 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../idiomas/php/".$idioma."/comandos/ejecutarscripts_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
-
-
-
-
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
-
 include_once("./includes/asistentes/AyudanteFormularios.php");
 
 
@@ -52,8 +46,8 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
 
 <?php 
@@ -64,7 +58,7 @@ $xajax->printJavascript('../xajax/');
 
 
 <body>
-<?
+<?php
 # ambito:   4->aulas   16->ordenadores
 # idambito:  id de los elementos en su correspondiente tabla-ambito (aulas, ordenadores...)
 # nombreambito: nombre del elemento.
@@ -95,34 +89,29 @@ switch($ambito){
 			if (isset($_GET["litambito"])) $litambito=$_GET["litambito"];
 			break;
 	}
-	//echo '<p align=center><span class=cabeceras>'.$descricomando.'&nbsp;</span><br>';
 	echo '<p align=center><span class=cabeceras>'.$TbMsg["WDI11"].'&nbsp;</span><br>';
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
 				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
 
-	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil;
+	$sws=0x11111;	// Mostrar todas las configuraciones diferentes.
 	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
-
-	?>	
-
+	?>
 
 	<form  align=center name="fdatos" > 
-
-
 	
 		<table  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
-			<?
-		 	 include_once("./includes/asistentes/formDeployImage.php");
-		 ?>
+			<?php
+			include_once("./includes/asistentes/formDeployImage.php");
+			?>
 			
 			<tr> 
 				<th ><INPUT TYPE="button" NAME="GenerarInstruccion" Value="<? echo $TbMsg["WDI12"] ?>" onClick="codeDeployImage(this.form)"> 	</th>
 				<td colspan="5"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
-						</table>	
+		</table>	
 	</form>	
 
-<?
+<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -130,12 +119,9 @@ switch($ambito){
 	include_once("./includes/opcionesacciones.php");
 	//________________________________________________________________________________________________________
 
-
-
-
-
 ?>
 
 
 </body>
 </html>
+

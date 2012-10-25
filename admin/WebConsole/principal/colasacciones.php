@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -41,9 +41,13 @@
 	$porcendesde="";
 	$porcenhasta="";
 	$swPOST="";
+	$tiposacciones="";
+	$estados="";
+	$resultados="";
 	$visupro="";
 	$visuprm="";
 	$visucmd="";	
+	$sesion="";	
 	
 	if (isset($_GET["ambito"]))	$ambito=$_GET["ambito"]; 
 	if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
@@ -70,6 +74,9 @@
 
 	if (isset($_POST["sesion"])) $sesion=$_POST["sesion"]; 
 
+	if (function_exists('date_default_timezone_set')) {
+		date_default_timezone_set('UTC');
+	}
 	if(empty($swPOST)){ // Valores por defecto 
 		$wfechainicio=mktime(0, 0, 0, date("m")  , date("d")-180, date("Y")); // Acciones desde tres días antes
 		$wfechafin=mktime(0, 0, 0, date("m")  , date("d")+1, date("Y"));
@@ -124,7 +131,7 @@
 	$ClausulaWhere.=$WhereFechaReg;
 	
 	// Cuestion tipos de acciones
-	if(!empty($tipoaccion)) $ClausulaWhere.=" AND tipoaccion=".$tipoaccion;
+	if(!empty($tipoaccion)) $ClausulaWhere.=" AND acciones.tipoaccion=".$tipoaccion;
 
 	// Cuestion identificador del Centro que ha ejecutado la acción
 	$WhereCentroAccion="";
@@ -145,7 +152,7 @@
 		<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasacciones_'.$idioma.'.js"></SCRIPT>'?>
 	</HEAD>
 	<BODY oncontextmenu="return false">
-	<?
+	<?php
 	echo '<P align=center class=cabeceras><img src="../images/iconos/acciones.gif">&nbsp;'.$TbMsg[0].'&nbsp;</P>';
 
 	echo '<FORM name="fdatos" action="colasacciones.php" method="post">';
@@ -282,7 +289,7 @@
 	echo '</FORM>'; // Fin formulario de criterios de busquedas
 	
 	/* Cabeceras */
-	tomaAmbito($ambito,&$urlimg,&$textambito);
+	tomaAmbito($ambito,$urlimg,$textambito);
 	echo '<DIV align=center>'; // Cabecera
 	echo '<span align=center class=subcabeceras><U>'.$TbMsg[11].':'.$textambito.'</U>,
 				&nbsp;'.$nombreambito.'</span>&nbsp;&nbsp;<IMG src="'.$urlimg.'"></span>';
@@ -492,9 +499,6 @@ function listaAcciones($ambito,$idambito)
 		}	
 	}
 	echo $html;
-while (!$rs->EOF){
-echo $rs->campos['descripcion'].'</br>';
-};
 }
 //	_________________________________________________________________________
 
@@ -569,7 +573,7 @@ function listaComado($rs,$sesion,$idtarea=0,$idprocedimiento=0,$oA=null)
 	global $visupro;
 	
 	if($oA!=null){ // Si la función es invocada por un procedimiento...
-		$html.=recorreComando($rs,$sesion,$idtarea,$idprocedimiento,$oA);
+		$html=recorreComando($rs,$sesion,$idtarea,$idprocedimiento,$oA);
 	}
 	else{
 		$oA=new clsAccion; // Crea objeto acción para procesar comandos
@@ -872,9 +876,9 @@ function escribeResumen($oA)
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center>&nbsp;</TD>';
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center>&nbsp;</TD>';
 			/* Ámbito de aplicación */
-			tomaAmbito($oA->ambito,&$urlimg,&$textambito);
+			tomaAmbito($oA->ambito,$urlimg,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center><IMG src="'.$urlimg.'"></TD>';
-			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,&$textambito);
+			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center>&nbsp;</TD>';
 			
@@ -918,9 +922,9 @@ function escribeResumen($oA)
 		}
 		else{
 			/* Ámbito de aplicación */
-			tomaAmbito($oA->ambito,&$urlimg,&$textambito);
+			tomaAmbito($oA->ambito,$urlimg,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=center><IMG src="'.$urlimg.'"></TD>';
-			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,&$textambito);
+			tomaDescriAmbito($cmd,$oA->ambito,$oA->idambito,$textambito);
 			$html.='<TD style="BACKGROUND-COLOR: #b5daad" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
 		}	
 		
@@ -952,9 +956,9 @@ function cambiaAmbito($rs,$oA)
 	$html.='<TD colspan=4 style="BACKGROUND-COLOR:'.$bgcolor.'" align=right>'.$procedimiento.'&nbsp;</TD>';
 	
 	/* Ámbito de aplicación */
-	tomaAmbito($rs->campos["ambito"],&$urlimg,&$textambito);
+	tomaAmbito($rs->campos["ambito"],$urlimg,$textambito);
 	$html.='<TD style="BACKGROUND-COLOR:'.$bgcolor.'" align=center><IMG src="'.$urlimg.'"></TD>';
-	tomaDescriAmbito($cmd,$rs->campos["ambito"],$rs->campos["idambito"],&$textambito);
+	tomaDescriAmbito($cmd,$rs->campos["ambito"],$rs->campos["idambito"],$textambito);
 	$html.='<TD style="BACKGROUND-COLOR:'.$bgcolor.'" align=left>&nbsp;'.$textambito.'&nbsp;</TD>';	
 	$html.='<TD colspan=3 style="BACKGROUND-COLOR:'.$bgcolor.'" align=center>&nbsp;</TD>';
 	$html.='</TR>';
@@ -1068,7 +1072,7 @@ function escribeParametros($comando,$parametros,$visuparametros,$oA)
 
 	$html="";
 	$tbParametrosValor=array();
-	ParametrosValor($cmd,$parametros,&$tbParametrosValor); // Toma valores de cada parámetro
+	ParametrosValor($cmd,$parametros,$tbParametrosValor); // Toma valores de cada parámetro
 	$vprm=split(";",$visuparametros);
 
 	if($visupro==1 || ($visupro=0 && $visucmd==0)) $comando="&nbsp;"; // No se muestra el nombre del comando
@@ -1077,7 +1081,6 @@ function escribeParametros($comando,$parametros,$visuparametros,$oA)
 		if(isset($tbParametrosValor[$nemo])){
 			for($j=0;$j<sizeof($tbParametrosValor[$nemo])-1;$j++){
 				$descripcion=$tbParametrosValor[$nemo]["descripcion"];
-				$valor=$tbParametrosValor[$nemo][$j]["valor"];
 				if(sizeof($tbParametrosValor[$nemo])>2)
 					$valor=$tbParametrosValor[$nemo][$j]["valor"];
 				else
@@ -1240,7 +1243,5 @@ function ContextualXMLComun()
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
-while (!$rs->EOF){
-echo $rs['descripcion'];
-};
 ?>
+

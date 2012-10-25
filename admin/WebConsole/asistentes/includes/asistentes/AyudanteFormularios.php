@@ -1,4 +1,4 @@
-<?
+<?php
 /// funciones php
 
 #devuelve los elementos [texto] multicast para un formulario.
@@ -26,8 +26,8 @@ $cmd->texto='SELECT aulas.pormul,aulas.ipmul,aulas.modomul,aulas.velmul,aulas.mo
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 if ($rs->Abrir()){
-		$rs->Primero(); 
-        $SelectHtml.= $TbMsg["WDI24"] . ':<input type="text" size="3" name="mcastpuerto" value="'.$rs->campos["pormul"] . '" /> <br />';
+	$rs->Primero(); 
+	$SelectHtml = $TbMsg["WDI24"] . ':<input type="text" size="3" name="mcastpuerto" value="'.$rs->campos["pormul"] . '" /> <br />';
 		$rs->Siguiente();
 		$SelectHtml.= $TbMsg["WDI25"] . ':<input type="text" size="15"  maxlength="15" name="mcastdireccion" value="'.$rs->campos["ipmul"] . '" /> <br />';
 		$rs->Siguiente();
@@ -113,8 +113,9 @@ $cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaul
 
 	if ($rs->Abrir()){
 		$rs->Primero(); 
+		$ucastclient="";
 		while (!$rs->EOF){
-		   $ucastclient.= $rs->campos["ip"] . ":" ;
+			$ucastclient.= $rs->campos["ip"] . ":" ;
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();

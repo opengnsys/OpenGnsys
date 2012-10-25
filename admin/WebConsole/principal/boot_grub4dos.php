@@ -100,11 +100,13 @@ if (!$cmd)
 $litambito=0; 
 $idambito=0; 
 $nombreambito=""; 
+$id_aula=0; 
 
 
 if (isset($_GET["litambito"])) $litambito=$_GET["litambito"]; // Recoge parametros
 if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if (isset($_GET["nombreambito"])) $nombreambito=$_GET["nombreambito"]; 
+if (isset($_GET["id_aula"])) $idambito=$_GET["id_aula"]; 
 
 
 switch($litambito){
@@ -131,9 +133,7 @@ switch($litambito){
 
 
 <input type="hidden" name="listOfItems" value="">
-<?php
-echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
-?>
+<input type="hidden" name="rungrupo" value="<?php echo $id_aula;?>">
 
 
 <!-- primer file, nombre de las equipos por pxe hace falta  <td>  </td>-->
@@ -144,8 +144,8 @@ echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
 <select multiple size="30" name="Lpxe" id="Lpxe">
 
 <?php
-#### listado de equipos con menu pxe
-$menupxe=pxe;
+#### Listado de equipos con menú PXE.
+$menupxe="pxe";
 $listadopxe=listaequipos($cmd,$menupxe,$seleccion);
 echo $listadopxe;
 ?>
@@ -155,7 +155,7 @@ echo $listadopxe;
 
 <?php
 
-$cmd->texto="SELECT * FROM menuboot where label <> 'pxe' "; 
+$cmd->texto="SELECT * FROM menuboot WHERE label <> 'pxe' "; 
 $rsmenu=new Recordset; 
 $rsmenu->Comando=&$cmd; 
 if (!$rsmenu->Abrir()) echo "error";
@@ -165,13 +165,11 @@ while (!$rsmenu->EOF)
 	echo "<td></td>";
 	echo "<td> ";
 	echo $rsmenu->campos['description'];
-	#echo "<a href='./muestramenu.php?labelmenu=" . $rsmenu->campos['label'] ."'>  " . $rsmenu->campos['description']  . " </a> <br>". $rs->campos['label'] . "<br>";
  	echo " <br>";
-    echo "<input type='button' onClick='move(this.form.L" . $rsmenu->campos['label'] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
+	echo "<input type='button' onClick='move(this.form.L" . $rsmenu->campos['label'] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
  	echo "<input type='button' onClick='move(this.form.Lpxe,this.form.L" . $rsmenu->campos['label'] .")' value='IN' style='height: 25px; width: 35px' >";
  	echo " <br>";
 	echo "<select multiple size='30' name='L" . $rsmenu->campos['label'] . "' >";
-    $listadopxe="";
 	$listadopxe=listaequipos($cmd,$rsmenu->campos['label'],$seleccion);
 	echo $listadopxe;
 	echo "</select>";
@@ -179,10 +177,6 @@ while (!$rsmenu->EOF)
 	$rsmenu->Siguiente();
 }
 $rsmenu->Cerrar();
-
-
-
-
 
 
 
@@ -215,3 +209,4 @@ $rs->Cerrar();
 
 </body>
 </html>
+
