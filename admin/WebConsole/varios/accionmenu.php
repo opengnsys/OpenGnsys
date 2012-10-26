@@ -79,18 +79,17 @@ else{ // Viene de menus
 		<input type=hidden value="<? echo $idtipoaccion?>" id=idtipoaccion>	 
 		<input type=hidden value="<? echo $tipoaccion?>" id=tipoaccion>	 
 	</FORM>
-	<P align=center class=cabeceras><?echo echo $litcabecera ?><br>
+	<P align=center class=cabeceras><?php echo $litcabecera ?><br>
 		<span align=center class=subcabeceras><?echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/menus.gif"><br><br>
 		<span align=center class=presentaciones>
-			<img src="<? echo $urlimg?>">&nbsp;&nbsp;&nbsp;
-			<u><? echo $litacion?></u>:&nbsp;<? echo $litdescri?></span>	
+			<img src="<?php echo $urlimg?>">&nbsp;&nbsp;&nbsp;
+			<u><?php echo $litacion?></u>:&nbsp;<? echo $litdescri?></span>	
 	</P>
 	<DIV align=center id="Layer_items">
 		<TABLE width="90%" class="tabla_listados" cellspacing=1 cellpadding=0 >
 			 <TR id="TR_menus">
 				<TH>&nbsp;</TH>
-
-				<?
+				<?php
 					if($op==1) // Si viene desde "acciones" ...
 						echo '<TH>'.$TbMsg[9].'</TH>';
 					else		
@@ -100,7 +99,7 @@ else{ // Viene de menus
 				<TH><?echo $TbMsg[11]?></TH>
 				<TH><?echo $TbMsg[12]?></TH>
 				<TH><?echo $TbMsg[13]?></TH>				
-				<?
+				<?php
 					if($op==2){ // Si viene desde "menus" ...					
 						echo '<TH style="visibility:hidden">&nbsp;</TH>';						
 						echo '<TH style="visibility:hidden">&nbsp;</TH>';						
