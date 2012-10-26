@@ -25,7 +25,7 @@ echo "<body>";
 
 $lista = explode(";",$_POST['listOfItems']);
 foreach ($lista as $sublista) {
-	if (! empty $sublista)) {
+	if (! empty ($sublista)) {
 		$elementos = explode("|",$sublista);
 		$hostname=$elementos[1];
 		$optboot=$elementos[0];
