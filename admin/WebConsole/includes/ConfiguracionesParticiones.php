@@ -88,7 +88,6 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				ordenadores_particiones.tamano,
 				sistemasficheros.descripcion as sistemafichero,
 				ordenadores_particiones.idnombreso,
-				ordenadores_particiones.cache,
 				nombresos.nombreso,
 				imagenes.idimagen, 
 				imagenes.descripcion as imagen,
@@ -291,9 +290,9 @@ function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 	$tablaHtml.='<table align="left" border="0" id="tbOrd_'.$cc.'" value="'.$idordenadores.'"><tr>';
 	while (!$rs->EOF){
 		$contor++;
-		$tablaHtml.= '<td align="center" style="background-color: #ffffff;">
-				<img src="../images/iconos/ordenador.gif" />
-				<br /><span style="font-size:9px; color: #4f4f4f;">'.$rs->campos["nombreordenador"].'</span></td>';
+		$tablaHtml.= '<td align="center" style="BACKGROUND-COLOR: #FFFFFF;">
+				<img src="../images/iconos/ordenador.gif" >
+				<br><span style="FONT-SIZE:9px;	COLOR: #4f4f4f;" >'.$rs->campos["nombreordenador"].'</span></td>';
 		if($contor>$maxcontor){
 			$contor=0;
 			$tablaHtml.='</tr><tr>';

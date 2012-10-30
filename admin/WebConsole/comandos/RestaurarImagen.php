@@ -189,10 +189,10 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 					$TBmetodos["MULTICAST-CACHE"]=3;
 					$TBmetodos["MULTICAST-DIRECT"]=4;
 					$TBmetodos["TORRENT-CACHE"]=5;
+					$idxc=$_SESSION["protclonacion"];
 					if ($idxc == "UNICAST") {
 						$idxc = "UNICAST-DIRECT";
 					}
-					$idxc=$_SESSION["protclonacion"];
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 				}
 				echo '</TR>'.chr(13);
