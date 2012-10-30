@@ -145,7 +145,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
 		$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
 		$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
-		$tbKeys[$idx]["cache"]=$rs->campos["cache"];
+		//$tbKeys[$idx]["cache"]=$rs->campos["cache"];
 		$idx++;
 		$rs->Siguiente();
 	}
@@ -280,7 +280,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 //________________________________________________________________________________________________________
 function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 {
-	$tablaHtml.="";
+	$tablaHtml="";
 	$contor=0;
 	$maxcontor=10; // Número máximo de prodenadores por fila
 	$cmd->texto=" SELECT idordenador,nombreordenador,ip FROM ordenadores WHERE idordenador IN (".$idordenadores.") ORDER BY nombreordenador";
