@@ -83,7 +83,7 @@ function abrir_ventana(URL){
 			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$nombreordenador.'</td>';
-				else		
+				else
 					echo '<td><input class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></td>';
 				if (empty ($fotoordenador)) {
 					$fotoordenador="fotoordenador.gif";
@@ -226,6 +226,37 @@ function abrir_ventana(URL){
 		</tr>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------UHU comprobar si se requiere validacion ------------------------------------------------------------------------------->
+
+                <TR>
+                        <TH align=center&nbsp;><? echo $TbMsg[15]; ?> &nbsp;</TD>
+                        <?
+                                echo '<TD colspan=3>';
+                                $validaciones="1=Si".chr(13);
+                                $validaciones.="0=No";
+                                echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</TD>';
+                        ?>
+                </TR>
+                 <TR>
+                        <TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
+                        <?
+                                if ($opcion==$op_eliminacion)
+                                        echo '<TD colspan=3>'.$paginalogin.'</TD>';
+                                else
+                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginalogin  type=text value="'.$paginalogin.'"></TD>';
+                        ?>
+                </TR>
+                <TR>
+                        <TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TD>
+                        <?
+                                if ($opcion==$op_eliminacion)
+                                        echo '<TD colspan=3>'.$paginavalidacion.'</TD>';
+                                else
+                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginavalidacion  type=text value="'.$paginavalidacion.'"></TD>';
+                        ?>
+                </TR>
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
 			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
 		</tr>
@@ -271,6 +302,12 @@ function TomaPropiedades($cmd,$id){
 	global $cache;
 	global $netiface;
 	global $netdriver;
+########################### UHU
+        global $validacion;
+        global $paginalogin;
+        global $paginavalidacion;
+########################### UHU
+
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$id;
 	$rs->Comando=&$cmd; 
@@ -288,6 +325,12 @@ function TomaPropiedades($cmd,$id){
 		$netiface=$rs->campos["netiface"];
 		$fotoordenador=$rs->campos["fotoord"];	//Creado para foto
 		$netdriver=$rs->campos["netdriver"];
+########################### UHU
+                $validacion=$rs->campos["validacion"];
+                $paginalogin=$rs->campos["paginalogin"];
+                $paginavalidacion=$rs->campos["paginavalidacion"];
+########################### UHU
+
 		$rs->Cerrar();
 		return(true);
 	}
@@ -295,3 +338,4 @@ function TomaPropiedades($cmd,$id){
 		return(false);
 }
 ?>
+

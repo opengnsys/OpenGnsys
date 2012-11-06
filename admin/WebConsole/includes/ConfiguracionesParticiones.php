@@ -145,7 +145,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
 		$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
 		$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
-		$tbKeys[$idx]["cache"]=$rs->campos["cache"];
+		//$tbKeys[$idx]["cache"]=$rs->campos["cache"];
 		$idx++;
 		$rs->Siguiente();
 	}

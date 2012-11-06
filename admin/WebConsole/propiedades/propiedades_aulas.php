@@ -377,6 +377,44 @@ function abrir_ventana(URL){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------UHU comprobar si se requiere validacion ------------------------------------------------------------------------>
+
+                <TR>
+                        <TH align=center>&nbsp;<?echo $TbMsg[30]?>&nbsp;</TD>
+                        <?
+                                if ($opcion==$op_eliminacion)
+                                        echo '<TD colspan=3>'.(($validacion == 1)?"Si":"No").'</TD>';
+                                else{
+                                         echo '<TD colspan=3>';
+                                        $validaciones="1=Si".chr(13);
+                                        $validaciones.="0=No";
+                                        echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</TD>';
+                                }
+
+                        ?>
+                </TR>
+                 <TR>
+                        <TH align=center>&nbsp;<?echo $TbMsg[31]?>&nbsp;</TD>
+                        <?
+                                if ($opcion==$op_eliminacion)
+                                        echo '<TD colspan=3>'.$paginalogin.'</TD>';
+                                else
+                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginalogin  type=text value="'.$paginalogin.'"></TD>';
+                        ?>
+                </TR>
+                <TR>
+                        <TH align=center>&nbsp;<?echo $TbMsg[32]?>&nbsp;</TD>
+                        <?
+                                if ($opcion==$op_eliminacion)
+                                        echo '<TD colspan=3>'.$paginavalidacion.'</TD>';
+                                else
+                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginavalidacion  type=text value="'.$paginavalidacion.'"></TD>';
+                        ?>
+                </TR>
+
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
 	</TABLE>
 </FORM>
 </DIV>
@@ -409,8 +447,6 @@ function TomaPropiedades($cmd,$ida)
 	global $horaresevfin;
 	global $grupoid;
 
-	
-	
 	global $idmenu;
 	global $idprocedimiento;
 	global $idrepositorio;
@@ -432,6 +468,11 @@ function TomaPropiedades($cmd,$ida)
 	global $ipmul;
 	global $pormul;
 	global $velmul;
+###################### UHU
+        global $validacion;
+        global $paginalogin;
+        global $paginavalidacion;
+###################### UHU
 	
 	$idaula=0; 
 	$nombreaula="";
@@ -448,14 +489,16 @@ function TomaPropiedades($cmd,$ida)
 ## ADV #########################################
 	$router=0;
 	$netmask=0;
-    $modp2p=0;
+	$modp2p=0;
 	$timep2p=0;
 ### ADV	 ########################################
 	$modomul=0;
 	$ipmul=0;
 	$pormul=0;
 	$velmul=0;
-	
+### UHU ########################################
+        $validacion="";
+
 	$idmenu=0;
 	$idprocedimiento=0;
 	$idrepositorio=0;
@@ -468,26 +511,22 @@ function TomaPropiedades($cmd,$ida)
 	$gidperfilhard=0;
 	$gcache=0;
 	
-
-	
 	$rs=new Recordset; 
-	$cmd->texto="SELECT COUNT(ordenadores.idordenador) AS numordenadores, aulas.* , 
-				group_concat(DISTINCT cast( ordenadores.idmenu AS char( 11 ) )  
+	$cmd->texto="SELECT	COUNT(ordenadores.idordenador) AS numordenadores, aulas.* , 
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idmenu AS char( 11 ) )  
 				ORDER BY ordenadores.idmenu SEPARATOR ',' ) AS idmenus,
-				group_concat(DISTINCT cast( ordenadores.idrepositorio AS char( 11 ) )  
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idrepositorio AS char( 11 ) )  
 				ORDER BY ordenadores.idrepositorio SEPARATOR ',' ) AS idrepositorios,
-				group_concat(DISTINCT cast( ordenadores.idperfilhard AS char( 11 ) )  
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idperfilhard AS char( 11 ) )  
 				ORDER BY ordenadores.idperfilhard SEPARATOR ',' ) AS idperfileshard,
-				group_concat(DISTINCT cast( ordenadores.cache AS char( 11 ) )  
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.cache AS char( 11 ) )  
 				ORDER BY ordenadores.cache SEPARATOR ',' ) AS caches,
-				group_concat(DISTINCT cast( ordenadores.idproautoexec AS char( 11 ) )  
-				ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos			
-				FROM aulas
-				LEFT OUTER JOIN ordenadores ON ordenadores.idaula = aulas.idaula
-				WHERE aulas.idaula =".$ida." 
-				GROUP BY aulas.idaula";
-				
-	//	echo $cmd->texto;
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idproautoexec AS char( 11 ) )  
+				ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos
+			FROM aulas
+			LEFT OUTER JOIN ordenadores ON ordenadores.idaula = aulas.idaula
+			WHERE aulas.idaula =".$ida." 
+			GROUP BY aulas.idaula";
 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
@@ -514,6 +553,11 @@ function TomaPropiedades($cmd,$ida)
 		$modp2p=$rs->campos["modp2p"];
 		$timep2p=$rs->campos["timep2p"];
 ###################### ADV
+###################### UHU
+                $validacion=$rs->campos["validacion"];
+                $paginalogin=$rs->campos["paginalogin"];
+                $paginavalidacion=$rs->campos["paginavalidacion"];
+###################### UHU
 
 		$ordenadores=$rs->campos["numordenadores"];
 		$idmenu=$rs->campos["idmenus"];
@@ -542,3 +586,4 @@ function TomaPropiedades($cmd,$ida)
 	return(false);
 }
 ?>
+

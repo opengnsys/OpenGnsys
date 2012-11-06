@@ -36,6 +36,12 @@ $cache=0;
 $netiface="";
 $netdriver="";
 ### ADV
+### UHU
+$validacion="";
+$paginalogin="";
+$paginavalidacion="";
+### UHU
+
 //##agp
 if (isset($_FILES['archivo'])) {
 	if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG") {
@@ -64,6 +70,11 @@ if(empty($cache)) $cache=0;
 
 if (isset($_POST["netiface"])) $netiface=$_POST["netiface"];
 if (isset($_POST["netdriver"])) $netdriver=$_POST["netdriver"];
+######## UHU
+if (isset($_POST["validacion"])) $validacion=$_POST["validacion"];
+if (isset($_POST["paginalogin"])) $paginalogin=$_POST["paginalogin"];
+if (isset($_POST["paginavalidacion"])) $paginavalidacion=$_POST["paginavalidacion"];
+######## UHU
 
 $tablanodo=""; // Arbol para nodos insertados
 //________________________________________________________________________________________________________
@@ -158,6 +169,11 @@ function Gestiona(){
 	global $cache;
 	global $netiface;
 	global $netdriver;
+######################## UHU
+        global $validacion;
+	global $paginalogin;
+        global $paginavalidacion;
+######################## UHU
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -180,14 +196,19 @@ function Gestiona(){
 	$cmd->CreaParametro("@netiface",$netiface,0);
 	$cmd->CreaParametro("@netdriver",$netdriver,0);
 	$cmd->CreaParametro("@fotoordenador",$fotoordenador,0);
-	
+######################################################### UHU
+        $cmd->CreaParametro("@validacion",$validacion,0);
+    	$cmd->CreaParametro("@paginalogin",$paginalogin,0);
+	$cmd->CreaParametro("@paginavalidacion",$paginavalidacion,0);
+######################################################### UHU
+
 
 	switch($opcion){
 		case $op_alta :
 		//Insertar fotoord con Values @fotoordenador
 			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
-			idmenu,idproautoexec,idaula,grupoid,cache,netiface,netdriver,fotoord) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
-			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache,@netiface,@netdriver,@fotoordenador)";
+			idmenu,idproautoexec,idaula,grupoid,cache,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
+			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
 
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
@@ -202,7 +223,7 @@ function Gestiona(){
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador 
+			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;

@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -47,15 +47,19 @@ $netmask=0;
 $modp2p=0;
 $timep2p=0;
 ############ ADV
+############ UHU
+$validacion="";
+$paginalogin="";
+$paginavalidacion="";
+############ UHU
 //##agp
-if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG")
-{
- $uploaddir ="../images/fotos/";
-
- $uploadfile = $uploaddir.$_FILES['archivo']['name'];
-
-move_uploaded_file($_FILES['archivo']['tmp_name'], $uploadfile); 
-#copy($_FILES['archivo']['tmp_name'], $uploadfile);
+if (isset($_FILES['archivo'])) {
+	if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG") {
+		$uploaddir ="../images/fotos/";
+		$uploadfile = $uploaddir.$_FILES['archivo']['name'];
+		move_uploaded_file($_FILES['archivo']['tmp_name'], $uploadfile); 
+		#copy($_FILES['archivo']['tmp_name'], $uploadfile);
+	}
 }
 //##agp
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
@@ -88,6 +92,11 @@ if (isset($_POST["netmask"])) $netmask=$_POST["netmask"];
 if (isset($_POST["modp2p"])) $modp2p=$_POST["modp2p"]; 
 if (isset($_POST["timep2p"])) $timep2p=$_POST["timep2p"]; 
 ################# ADV
+################# UHU
+if (isset($_POST["validacion"])) $validacion=$_POST["validacion"];
+if (isset($_POST["paginalogin"])) $paginalogin=$_POST["paginalogin"];
+if (isset($_POST["paginavalidacion"])) $paginavalidacion=$_POST["paginavalidacion"];
+################# UHU
 
 $gidmenu=0;
 $gidproautoexec=0;
@@ -194,6 +203,11 @@ function Gestiona(){
 	global  $modp2p;
 	global  $timep2p;
 ########################## ADV
+########################## UHU
+        global $validacion;
+        global $paginalogin;
+        global $paginavalidacion;
+########################## UHU
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -230,13 +244,18 @@ function Gestiona(){
 	$cmd->CreaParametro("@modp2p",$modp2p,0);
 	$cmd->CreaParametro("@timep2p",$timep2p,1);
 ############### ADV
+############### UHU
+        $cmd->CreaParametro("@validacion",$validacion,1);
+        $cmd->CreaParametro("@paginalogin",$paginalogin,0);
+        $cmd->CreaParametro("@paginavalidacion",$paginavalidacion,0);
+############### UHU
 
 	switch($opcion){
 		case $op_alta :
 			$cmd->texto="INSERT INTO aulas(idcentro,grupoid,nombreaula,urlfoto,cagnon,pizarra,ubicacion,comentarios,
-			puestos,horaresevini,horaresevfin,modomul,ipmul,pormul,velmul,router,netmask,modp2p,timep2p) 
+			puestos,horaresevini,horaresevfin,modomul,ipmul,pormul,velmul,router,netmask,modp2p,timep2p,validacion,paginalogin,paginavalidacion) 
 			VALUES (@idcentro,@grupoid,@nombreaula,@urlfoto,@cagnon,@pizarra,@ubicacion,@comentarios,
-			@puestos,@horaresevini,@horaresevfin,@modomul,@ipmul,@pormul,@velmul,@router,@netmask,@modp2p,@timep2p)";
+			@puestos,@horaresevini,@horaresevfin,@modomul,@ipmul,@pormul,@velmul,@router,@netmask,@modp2p,@timep2p,@validacion,@paginalogin,@paginavalidacion)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idaula=$cmd->Autonumerico();
@@ -250,7 +269,7 @@ function Gestiona(){
 		case $op_modificacion:
 			$cmd->texto="UPDATE aulas SET nombreaula=@nombreaula,urlfoto=@urlfoto,cagnon=@cagnon,pizarra=@pizarra,
 			ubicacion=@ubicacion,comentarios=@comentarios,puestos=@puestos,horaresevini=@horaresevini,
-			horaresevfin=@horaresevfin,modomul=@modomul,ipmul=@ipmul,pormul=@pormul,velmul=@velmul,router=@router,netmask=@netmask,modp2p=@modp2p,timep2p=@timep2p WHERE idaula=@idaula";
+			horaresevfin=@horaresevfin,modomul=@modomul,ipmul=@ipmul,pormul=@pormul,velmul=@velmul,router=@router,netmask=@netmask,modp2p=@modp2p,timep2p=@timep2p,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -265,6 +284,11 @@ function Gestiona(){
 					$clsUpdate.="idperfilhard=@idperfilhard,";
 				if($cache!=0 || $gcache>0)	
 					$clsUpdate.="cache=@cache,";
+				// UHU - Actualiza la validacion en los ordenadores
+		                $clsUpdate .="validacion=@validacion,";
+                                $clsUpdate .="paginalogin=@paginalogin,";
+                                $clsUpdate .="paginavalidacion=@paginavalidacion,";
+
 					
 				if(!empty($clsUpdate)){				
 					$clsUpdate=substr($clsUpdate,0,strlen($clsUpdate)-1); // Quita última coma
