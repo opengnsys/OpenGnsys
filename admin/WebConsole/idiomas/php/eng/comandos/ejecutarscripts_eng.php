@@ -14,8 +14,9 @@
 	$TbMsg[6]='Scope';
 	$TbMsg[7]='Title';
 	$TbMsg[8]='Description';
-	$TbMsg[9]='Opengnsys code';
+	$TbMsg[9]='OpenGnSys code';
 	$TbMsg[10]='Data to submit';
+	$TbMsg[11]='Delete Cache Image on Client';
 
 	$TbMsg["WDI11"]='Deploy Image Wizard';
 	$TbMsg["WDI12"]='Generate OG Code';

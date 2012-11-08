@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________
 //
 //	Fichero de idiomas php: comandos/mensajes_eng.php 
@@ -10,6 +10,7 @@ $TbMsg["COMMAND_Arrancar"]="Boot";
 $TbMsg["COMMAND_Configurar"]="Configure";
 $TbMsg["COMMAND_CrearImagen"]="Make Image";
 $TbMsg["COMMAND_EjecutarScript"]="Execute Script";
+$TbMsg["COMMAND_EliminarImagenCache"]="Delete Cache Image";
 $TbMsg["COMMAND_IniciarSesion"]="Init Session";
 $TbMsg["COMMAND_InventarioHardware"]="Hardware Inventory";
 $TbMsg["COMMAND_InventarioSoftware"]="Software Inventory";

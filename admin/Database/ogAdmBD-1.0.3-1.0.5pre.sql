@@ -56,3 +56,11 @@ ALTER TABLE ogAdmBD.ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 # Actualizar localización de foto de aula (eliminar el camino).
 UPDATE ogAdmBD.aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
 
+# Actualización SQL para crear el comando Eliminar Imagen Cache.
+INSERT INTO ogAdmBD.comandos
+	SET idcomando=11, descripcion='Eliminar Imagen Cache',
+	    pagina='../comandos/EliminarImagenCache.php',
+	    gestor='../comandos/gestores/gestor_Comandos.php',
+	    funcion='EliminarImagenCache', aplicambito=31,
+	    visuparametros='iph;tis;dcr;scp', parametros='nfn;iph;tis;dcr;scp', activo=1;
+
