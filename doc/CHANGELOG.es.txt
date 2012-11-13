@@ -5,6 +5,16 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 Lista de cambios incluidos en OpenGnSys 1.0.5
 ---------------------------------------------
 
+Tickets resueltos en módulo OpenGnSys Server:
+#567	Los comandos se ejecutan 2 veces si se incluyen en la cola de acciones
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#524	Eliminar imagen en caché del cliente
+
+Tickets genéricos resueltos:
+#453	Autenticación con LDAP u otro servicio (tarea)
+#565	Imágenes diferenciales (tarea)
+
 
 Lista de cambios incluidos en OpenGnSys 1.0.4a (versión de mantenimiento)
 ----------------------------------------------
