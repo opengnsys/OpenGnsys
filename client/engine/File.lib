@@ -117,7 +117,7 @@ esac
 # Comprobar fichero origen y directorio destino.
 [ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
 TARGET="$(ogGetPath "$@")"
-[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return $?
+[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 # Copiar fichero (para evitar problemas de comunicaciones las copias se hacen con rsync en vez de cp).
 rsync --progress -avh "$SOURCE" "$TARGET"
 }
@@ -318,7 +318,7 @@ esac
 # Comprobar que existen los ficheros origen y destino.
 [ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return 1
 TARGET=$(ogGetPath "$@")
-[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$@" || return 1
+[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return 1
 # Devolver si el primer fichero se ha modificado después que el segundo.
 test "$SOURCE" -nt "$TARGET"
 }
