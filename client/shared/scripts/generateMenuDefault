@@ -1,4 +1,8 @@
-#ª/bin/bash
+#!/bin/bash
+# generateMenuDefault - Crea fichero con la página web de inicio del cliente
+#			con información de red y de los sistemas operativos instalados,
+#			crea fichero con información del contenido de la caché local.
+
 
 DEVICE=${DEVICE:-"eth0"}
 source /tmp/net-$DEVICE.conf
@@ -22,28 +26,36 @@ esac
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 expr $CACHESIZEFREE / 1024 > $FILEINFOCACHE 2>/dev/null && echo '.MB,' >> $FILEINFOCACHE
 
-#
-#  echo '';
-#
-
-cat > $FILEINFOHTML << EOF
+# Crear menú por defecto.
+cat > $FILEINFOHTML << EOT
 <div align="center" style="font-family: Arial, Helvetica, sans-serif;">
 <p style="color:#999999; font-size: 16px; margin: 2em;">
 
 <table border=1 width="100%">
 <tr>
 <td rowspan="2"><p align="left"><img border="0" src="../images/iconos/logoopengnsys.png"><p> </td>
-<td> Hostname </td> <td> IP </td> <td> MAC </td> <td> Speed </td> <td> Duplex </td> </tr>
+<td> $MSG_HOSTNAME </td> <td> $MSG_IPADDR </td> <td> $MSG_MACADDR </td> <td> $MSG_SPEED </td> <td> $MSG_DUPLEX </td> </tr>
 <tr> <td>$HOSTNAME </td> <td> $(ogGetIpAddress) </td> <td> $(ogGetMacAddress) </td> <td> $SPEED </td> <td> $DUPLEX </td> </tr>
 </table>
+</p>
 
-</p>
-<p style="font-size: 14px; margin: 2em;">
-</p>
+<h1>$MSG_MENUTITLE</h1>
+EOT
+
+for ((d=1; d<=$(ogDiskToDev | wc -w); d++)); do
+    for ((p=1; p<=$(ogGetPartitionsNumber $d); p++)); do
+        VERSION=$(ogGetOsVersion $d $p | cut -f2 -d:)
+        [ -n "$VERSION" ] && echo "<p><a href=\"command:bootOs $d $p\">$MSG_BOOT $VERSION ($d, $p)</p>" >>$FILEINFOHTML
+    done
+done
+
+cat >> $FILEINFOHTML << EOT
+<p><a href="command:poweroff">$MSG_POWEROFF</p>
 </div>
+EOT
 
-EOF
-cat >> $FILEINFOCACHE << EOF
+# Crear contenido de la caché.
+cat >> $FILEINFOCACHE << EOT
 $CACHECONTENIDO
-EOF
+EOT
 
