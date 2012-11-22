@@ -91,20 +91,27 @@ else{
 		}			
 	}
 	else{
-		$codeHtml='<div align="center" style="font-family: Arial, Helvetica, sans-serif;">';
-		$codeHtml.='<p style="color:#999999; font-size: 16px; margin: 2em;">'.$TbMsg[2].'</p>';
-		$codeHtml.='<p style="font-size: 14px; margin: 2em;">';
-		$codeHtml.='  <a href="command:poweroff">'.$TbMsg[3].'</a>';
-		$codeHtml.='</p>';
-		$codeHtml.='</div>';
+		// Si existe, incluir menú por defecto.
+		if (file_exists("/opt/opengnsys/log/clients/$iph.info.html")) {
+			$codeHtml=(include "/opt/opengnsys/log/clients/$iph.info.html");
+		}
+		else{
+			// Componer mensaje para cliente sin menú.
+			$codeHtml='<div align="center" style="font-family: Arial, Helvetica, sans-serif;">';
+			$codeHtml.='<p style="color:#999999; font-size: 16px; margin: 2em;">'.$TbMsg[2].'</p>';
+			$codeHtml.='<p style="font-size: 14px; margin: 2em;">';
+			$codeHtml.='  <a href="command:poweroff">'.$TbMsg[3].'</a>';
+			$codeHtml.='</p>';
+			$codeHtml.='</div>';
+		}
 	}
 	?>
 		<html>
 		<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		</head>
-		<?
 
+		<?php
 		if(!empty($rsmenu->campos["idurlimg"])){ // Imagen de fondo
 			$urlimg=TomaDato($cmd,0,'iconos',$rsmenu->campos["idurlimg"],'idicono','urlicono');
 			$urlimgfondo="../images/iconos/".$urlimg;
@@ -112,15 +119,12 @@ else{
 		}
 		else{
 			echo'<body bgcolor="white" background="../images/iconos/fondo800x600.png">';
-			//echo '<p align="left"><img border=0 src="../images/iconos/logoopengnsys.png"><p>';
 		}
-			include_once("/opt/opengnsys/log/clients/".$iph.".info.html");
-			echo $codeHtml;
-
+		echo $codeHtml;
 		?>
 		</body>
 		</html>
-	<?
+<?php
 }
 ?>
 
