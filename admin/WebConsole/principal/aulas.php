@@ -1020,7 +1020,7 @@ function ContextualXMLSincronizacion($litambito,$ambito){
 	$rs=new Recordset; 
 	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
 			FROM comandos 
-			WHERE activo=1 AND submenu='Sincronización' AND aplicambito & ".$ambito.">0 
+			WHERE activo=1 AND submenu='Sincronizacion' AND aplicambito & ".$ambito.">0 
 			ORDER BY descripcion";
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
