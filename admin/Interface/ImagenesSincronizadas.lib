@@ -1,0 +1,205 @@
+#!/bin/bash
+#___________________________________________________________________
+#
+#@file    ImagenesSincronizadas.lib
+#@brief   Librería o clase ImagenesSincronizadas
+#@class   ImagenesSincronizadas
+#@brief   Funciones para la creación y restauración de imagenes por sincronización.
+#@version 1.0.4
+#@warning License: GNU GPLv3+
+#___________________________________________________________________
+
+		#Load engine configurator from engine.cfg file.
+		#Carga el configurador del engine desde el fichero engine.cfg
+		[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+		
+		# Clear temporary file used as log track by httpdlog
+		# Limpia los ficheros temporales usados como log de seguimieincludento para httpdlog
+		echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+		
+		# Registro de inicio de ejecución
+		#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+		echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+		
+		# Solo ejecutable por OpenGnSys Client.
+		PATH=$PATH:$(dirname $0)
+		PROG=$(basename $0)
+		CALLER=$(ogGetCaller)
+		if [ "$CALLER" != "ogAdmClient" ]; then
+			ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+			exit $?
+		fi
+		
+		#___________________________________________________________________
+		#	
+		# Variables globales
+		#___________________________________________________________________
+
+		TIPOPARTICION="$(ogGetPartitionId $DISCO $PARTICION)"; # Tipo de particion	
+		SISTEMAFICHERO="$(ogGetOsType $DISCO $PARTICION)" # Sistema de ficheros	
+		PARTICION=$(ogMount $DISCO $PARTICION); # Monta partición	
+		REPOSITORIO="root@$IPREPOSITORIO::imagenes" # Ruta de las imagenes en el repositorio
+		
+		# Borrar archivos en destino
+		OP_DELETE="--delete"
+		if [ $NOBORRACHIVOS -eq 1 ]; then
+			OP_DELETE=""
+		fi	
+		
+		#___________________________________________________________________
+		#
+		# Crea un fichero con la clave remota del rsync y actualiza el 
+		# parámetro "--password-file" para que no se pida ésta en el proceso.
+		#___________________________________________________________________
+		#
+		f="/tmp/passrsync" # Creación del archivo de claves
+		echo "passusuog">$f # Escribe dentro la clave remota
+		chmod 400 $f # Es obligatorio que el archivo de claves tenga estos permisos
+		FILE_PASSWD="--password-file=$f" 
+	
+	
+	#___________________________________________________________________
+	#
+	#	Función: montaCache
+	#
+	#	Descripción:
+	#
+	#		Monta la cache y devuelve la ruta hacía ella
+	#
+	#	Parámetros:
+	#	
+	#		Ninguno
+	#___________________________________________________________________
+	#
+	function montaCache()
+	{	
+		# Error si no existe caché
+		if ! $(ogFindCache >/dev/null); then
+			echo ""
+			return
+		fi
+		cache=$(ogMountCache)
+		echo $cache
+	}
+	#___________________________________________________________________
+	#
+	#	Función: editarLista
+	#
+	#	Descripción:
+	#
+	#		Edita lista de archivos a transferir para depurar lineas
+	#
+	#	Parámetros:
+	#	
+	#		$1 Lista de entrada
+	#		$2 Lista de salida
+	#___________________________________________________________________
+	#
+	function editarLista()
+	{	
+		# Edición: 
+		#	a) Quitarle lineas que contengan './' 
+		#	b) La primera linea (reporter del rsync)
+		#	c) Las dos últimas lineas del final (reporter del rsync)
+		
+		echo "Editando lista de archivos Entrada:$1 Salida:$2" | tee -a $OGLOGSESSION $OGLOGFILE
+		cat $1 | sed '/\.\//d' | sed '1d' | sed -n -e :a -e '1,2!{P;N;D;};N;ba'>$2
+	}	
+	
+	#___________________________________________________________________
+	#
+	#	Función: crearImagen
+	#
+	#	Descripción:
+	#
+	#		Sincroniza archivos entre origen y destino. Al final del
+	#		proceso el contenido de destino será igual al de origen.
+	#		La creación de imagen siempre tiene lugar entre una partición
+	#		y un repositorio como origen y destino respectivamente.
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: Vale 1=Para crear la lista de archivos a transferir
+	#				 2= Cuando se quiere sincronizar usando la lista
+	#		$5: Path a la lista de archivos 
+	#___________________________________________________________________
+	#
+	function crearImagen()
+	{
+		case "$3" in 
+			Windows)
+				OP_ARCHIVO="-aH"
+				OP_EXCLUDE="--exclude '$PARTICION/pagefile.sys'"
+			;;
+			Linux)
+				OP_ARCHIVO="-alH"
+				OP_EXCLUDE="--exclude '/tmp ..exclude '/proc' --exclude='/sys'"
+			;;
+		esac
+
+		FREG=$OGLOGCOMMAND # Por defecto se redirecciona al archivo de log de comandos	
+		
+		case "$4" in 
+			1)
+				OP_ARCHIVO=$OP_ARCHIVO"nv" # Simulación para crear lista
+				FREG=$5
+			;;
+			2)
+				OP_FILELIST="--files-from=$5"
+				OP_ARCHIVO="$OP_ARCHIVO $OP_FILELIST"
+			;;
+		esac
+
+		OP_PASSWD=$FILE_PASSWD
+		echo "rsync $OP_ARCHIVO $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2 " | tee -a $OGLOGSESSION $OGLOGFILE
+		rsync $OP_ARCHIVO $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2>$FREG;
+	}
+	
+	#___________________________________________________________________
+	#
+	#	Función: restaurarImagen
+	#
+	#	Descripción:
+	#
+	#		Sincroniza archivos entre origen y destino. Al final del
+	#		proceso el contenido de destino será igual al de origen.
+	#		La restauración de imagen siempre tiene lugar entre la caché
+	#		o un repositorio y una partición o carpeta como origen y destino
+	#		respectivamente.
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: Indica si la sincronización es local o remota
+	#			1: El origen o el destino es remoto
+	#			2: Tanto el origen como el destino son locales
+	#___________________________________________________________________
+	#
+	function restaurarImagen()
+	{
+		case "$3" in 
+			Windows)
+				OP_ARCHIVO="-aH"
+			;;
+			Linux)
+				OP_ARCHIVO="-alH"
+			;;
+		esac
+		
+		case "$4" in 
+			1)
+				OP_PASSWD=$FILE_PASSWD
+			;;
+			2)
+				OP_PASSWD=""
+			;;
+		esac
+		echo "rsync $OP_ARCHIVO $OP_DELETE $OP_PASSWD $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
+		rsync $OP_ARCHIVO $OP_DELETE $OP_PASSWD $1 $2>$OGLOGCOMMAND;
+	}
+	

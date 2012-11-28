@@ -19,12 +19,13 @@
 //		- clase: Clase que define su estilo (por defecto: formulariodatos)
 //		- clausulawhere: Clausula Where adicional
 // *************************************************************************************************************************************************
-function HTMLSELECT($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombreliteral,$ancho,$eventochg = "",$clase="",$clausulawhere=""){
+function HTMLSELECT($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombreliteral,$ancho,$eventochg = "",$clase="",$clausulawhere="",$nwname=""){
 	$nombretabla=htmlentities($nombretabla);
 	$nombreid=htmlentities($nombreid);
 	$nombreliteral=htmlentities($nombreliteral);
 	if (!empty($eventochg))	$eventochg='onchange="'.$eventochg.'(this);"';
 	if (empty($clase))	$clase='formulariodatos';
+	if (empty($nwname))	$nwname=$nombreid;
 	$SelectHtml="";
 	$rs=new Recordset; 
 	if ($idcentro>0){
@@ -41,7 +42,7 @@ function HTMLSELECT($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombre
 	//echo "<br>".$cmd->texto;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir())	return(""); // Error al abrir recordset
-	$SelectHtml.= '<SELECT  '.$eventochg.' class="'.$clase.'" name="'.$nombreid.'" style="WIDTH: '.$ancho.'">';
+	$SelectHtml.= '<SELECT  '.$eventochg.' class="'.$clase.'" name="'.$nwname.'" style="WIDTH: '.$ancho.'">';
 	$SelectHtml.= '    <OPTION value="0"></OPTION>';
 	$rs->Primero(); 
 	while (!$rs->EOF){

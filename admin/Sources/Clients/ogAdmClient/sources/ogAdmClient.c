@@ -83,28 +83,33 @@ BOOLEAN tomaConfiguracion(char* filecfg)
 	}
 
 	if (servidoradm[0] == CHARNULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo,4, FALSE); // Falta parámetro SERVIDORADM
 		return (FALSE);
 	}
 
 	if (puerto[0] == CHARNULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo,5, FALSE); // Falta parámetro PUERTO
 		return (FALSE);
 	}
 	if (pathinterface[0] == CHARNULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo,56, FALSE); // Falta parámetro PATHINTERFACE
 		return (FALSE);
 	}
 
 	if (urlmenu[0] == CHARNULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo,89, FALSE); // Falta parámetro URLMENU
 		return (FALSE);
 	}
 	if (urlmsg[0] == CHARNULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo,90, FALSE); // Falta parámetro URLMSG
 		return (FALSE);
 	}
-
+	liberaMemoria(buffer);
 	return (TRUE);
 }
 //______________________________________________________________________________________________________
@@ -368,6 +373,10 @@ BOOLEAN tomaIPlocal()
 {
 	char modulo[] = "tomaIPlocal()";
 
+	// Para debug
+	//strcpy(IPlocal,"10.1.15.203");
+	//return(TRUE);
+
 	sprintf(interface,"%s/getIpAddress",pathinterface);
 	herror=interfaceAdmin(interface,NULL,IPlocal);
 	if(herror){
@@ -389,6 +398,8 @@ BOOLEAN tomaIPlocal()
 //______________________________________________________________________________________________________
 BOOLEAN cuestionCache(char* tam)
 {
+	return(TRUE);
+	//>>>>>>>>>>>>>>>>>>>>>>>>>>
 	char msglog[LONSTD];
 	char modulo[] = "cuestionCache()";
 
@@ -473,9 +484,13 @@ void muestraMenu()
 // ________________________________________________________________________________________________________
 void muestraMensaje(int idx,char*msg)
 {
-	char url[250];
-	if(msg)
-		sprintf(url,"%s?msg=%s",urlmsg,URLEncode(msg)); // Url de la página de mensajes
+	char *msgpan,url[250];
+	
+	if(msg){
+		msgpan=URLEncode(msg);
+		sprintf(url,"%s?msg=%s",urlmsg,msgpan); // Url de la página de mensajes
+		liberaMemoria(msgpan);
+	}
 	else
 		sprintf(url,"%s?idx=%d",urlmsg,idx); // Url de la página de mensajes
 	cargaPaginaWeb(url);
@@ -513,7 +528,8 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=InclusionCliente\r"); // Nombre de la función a ejecutar en el servidor
 	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de los Sistemas Operativos del cliente
-
+	liberaMemoria(cfg);
+	
 	if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_PETICION)){
 		errorLog(modulo,37,FALSE);
 		return(FALSE);
@@ -551,15 +567,18 @@ BOOLEAN RESPUESTA_InclusionCliente(TRAMA* ptrTrama)
 
 	res=copiaParametro("res",ptrTrama); // Resultado del proceso de inclusión
 	if(atoi(res)==0){ // Error en el proceso de inclusión
+		liberaMemoria(res);
 		errorLog(modulo,41,FALSE);
 		return (FALSE);
 	}
-	strcpy(idordenador,copiaParametro("ido",ptrTrama)); // Identificador del ordenador
-	strcpy(nombreordenador,copiaParametro("npc",ptrTrama));	//  Nombre del ordenador
-	strcpy(cache,copiaParametro("che",ptrTrama)); // Tamaño de la caché reservada al cliente
-	strcpy(idproautoexec,copiaParametro("exe",ptrTrama)); // Procedimento de inicio (Autoexec)
-	strcpy(idcentro,copiaParametro("idc",ptrTrama)); // Identificador de la Unidad Organizativa
-	strcpy(idaula,copiaParametro("ida",ptrTrama)); // Identificador de la Unidad Organizativa
+	liberaMemoria(res);
+
+	idordenador=copiaParametro("ido",ptrTrama); // Identificador del ordenador
+	nombreordenador=copiaParametro("npc",ptrTrama);	//  Nombre del ordenador
+	cache=copiaParametro("che",ptrTrama); // Tamaño de la caché reservada al cliente
+	idproautoexec=copiaParametro("exe",ptrTrama); // Procedimento de inicio (Autoexec)
+	idcentro=copiaParametro("idc",ptrTrama); // Identificador de la Unidad Organizativa
+	idaula=copiaParametro("ida",ptrTrama); // Identificador del aula
 
 	if(idordenador==NULL || nombreordenador==NULL){
 		errorLog(modulo,40,FALSE);
@@ -589,10 +608,16 @@ char* LeeConfiguracion(char* dsk)
 		errorLog(modulo,3,FALSE);
 		return(NULL);
 	}
+
+	// Para debug
+	//sprintf(parametroscfg,"disk=1\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n","1","7","NTFS","Microsoft Windows XP","50000000");
+	//return(parametroscfg);
+
 	sprintf(interface,"%s/%s",pathinterface,"getConfiguration");
 	herror=interfaceAdmin(interface,NULL,parametroscfg);
 
 	if(herror){ // No se puede recuperar la configuración del cliente
+		liberaMemoria(parametroscfg);
 		errorLog(modulo,36,FALSE);
 		return(NULL);
 	}
@@ -656,11 +681,16 @@ BOOLEAN RESPUESTA_AutoexecCliente(TRAMA* ptrTrama)
 
 	res=copiaParametro("res",ptrTrama);
 	if(atoi(res)==0){ // Error en el proceso de autoexec
+		liberaMemoria(res);
 		return (FALSE);
 	}
+	liberaMemoria(res);
+
 	nfl=copiaParametro("nfl",ptrTrama);
 	initParametros(ptrTrama,0);
 	sprintf(ptrTrama->parametros,"nfn=enviaArchivo\rnfl=%s\r",nfl);
+	liberaMemoria(nfl);
+
 	/* Envía petición */
 	if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_PETICION)){
 		errorLog(modulo,42,FALSE);
@@ -879,19 +909,20 @@ BOOLEAN Sondeo(TRAMA* ptrTrama)
 BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 {
 	SOCKET socket_c;
-	char *nfn,*ids,*scp,ecosrc[LONPRM],ecodst[LONPRM],msglog[LONSTD];;
+	char *nfn,*scp,*aux,ecosrc[LONPRM],ecodst[LONPRM],msglog[LONSTD];;
 	char modulo[] = "ConsolaRemota()";
-
-	scp=URLDecode(copiaParametro("scp",ptrTrama));
-
-	nfn=copiaParametro("nfn",ptrTrama);
-	ids=copiaParametro("ids",ptrTrama);
 
 	/* Nombre del archivo de script */
 	char filescript[LONPRM];
 	sprintf(filescript,"/tmp/_script_%s",IPlocal);
+	
+	aux=copiaParametro("scp",ptrTrama);
+	scp=URLDecode(aux);
 	escribeArchivo(filescript,scp);
-
+	liberaMemoria(aux);
+	liberaMemoria(scp);
+	
+	nfn=copiaParametro("nfn",ptrTrama);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
 	sprintf(ecosrc,"/tmp/_econsola_%s",IPlocal);
 	sprintf(parametros,"%s %s %s",nfn,filescript,ecosrc);
@@ -910,6 +941,7 @@ BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 			return(FALSE);
 		}
 		 /* Espera señal para comenzar el envío */
+		liberaMemoria(ptrTrama);
 		recibeFlag(&socket_c,ptrTrama);
 		/* Envía archivo */
 		if(!sendArchivo(&socket_c,ecosrc)){
@@ -918,6 +950,7 @@ BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 		}
 		close(socket_c);
 	}
+	liberaMemoria(nfn);
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
@@ -954,6 +987,8 @@ BOOLEAN Comando(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=RESPUESTA_%s\r",nfn);
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	liberaMemoria(nfn);
+	liberaMemoria(ids);
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
@@ -985,6 +1020,7 @@ BOOLEAN Arrancar(TRAMA* ptrTrama)
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Arrancar");
 	lon+=sprintf(ptrTrama->parametros+lon,"tpc=%s\r",CLIENTE_OPENGNSYS);
 	respuestaEjecucionComando(ptrTrama,0,ids);
+	liberaMemoria(ids);
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
@@ -1019,9 +1055,13 @@ BOOLEAN Apagar(TRAMA* ptrTrama)
 	herror=interfaceAdmin(interface,NULL,NULL);
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		liberaMemoria(nfn);
+		liberaMemoria(ids);			
 		errorInfo(modulo,msglog);
 		return(FALSE);
 	}
+	liberaMemoria(nfn);
+	liberaMemoria(ids);	
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
@@ -1056,9 +1096,13 @@ BOOLEAN Reiniciar(TRAMA* ptrTrama)
 	herror=interfaceAdmin(interface,NULL,NULL);
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		liberaMemoria(nfn);
+		liberaMemoria(ids);			
 		errorInfo(modulo,msglog);
 		return(FALSE);
 	}
+	liberaMemoria(nfn);
+	liberaMemoria(ids);		
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
@@ -1089,16 +1133,21 @@ BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_IniciarSesion");
 	respuestaEjecucionComando(ptrTrama,0,ids);
+	liberaMemoria(ids);			
 
 	sprintf(interface,"%s/%s",pathinterface,nfn);
 	sprintf(parametros,"%s %s",nfn,par);
+	liberaMemoria(par);			
+	
 	herror=interfaceAdmin(interface,parametros,NULL);
 
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		liberaMemoria(nfn);
 		errorInfo(modulo,msglog);
 		return(FALSE);
 	}
+	liberaMemoria(nfn);
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1133,6 +1182,7 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	nfn=copiaParametro("nfn",ptrTrama);
 	ids=copiaParametro("ids",ptrTrama);
 	muestraMensaje(7,NULL);
+
 	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(2,NULL);
 		sprintf(interface,"%s/%s",pathinterface,nfn);
@@ -1161,6 +1211,181 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o código de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojó
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(dsk);	
+	liberaMemoria(par);	
+	liberaMemoria(cpt);	
+	liberaMemoria(idi);	
+	liberaMemoria(nci);	
+	liberaMemoria(ipr);	
+	liberaMemoria(nfn);	
+	liberaMemoria(ids);	
+	
+	return(TRUE);
+}
+//______________________________________________________________________________________________________
+// Función: CrearImagenBasica
+//
+//	 Descripción:
+//		Crea una imagen básica a traverś dela sincronización
+//	Parámetros:
+//		ptrTrama: contenido del mensaje
+//
+//	FDevuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+//______________________________________________________________________________________________________
+BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
+{
+	int lon;
+	char *nfn,*dsk,*par,*cpt,*idi,*nci,*rti,*ipr,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char modulo[] = "CrearImagenBasica()";
+
+	if (ndebug>=DEBUG_MAXIMO) {
+		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
+		infoDebug(msglog);
+	}
+	nfn=copiaParametro("nfn",ptrTrama);
+	dsk=copiaParametro("dsk",ptrTrama); // Disco
+	par=copiaParametro("par",ptrTrama); // Número de partición
+	cpt=copiaParametro("cpt",ptrTrama); // Tipo de partición
+	idi=copiaParametro("idi",ptrTrama); // Identificador de la imagen
+	nci=copiaParametro("nci",ptrTrama); // Nombre canónico de la imagen
+	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
+	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
+	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
+	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
+	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
+
+	//muestraMensaje(7,NULL); // Creando Inventario Software
+	//if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
+		muestraMensaje(30,NULL);// Creando Imagen Básica, por favor espere...
+		sprintf(interface,"%s/%s",pathinterface,nfn);
+		sprintf(parametros,"%s %s %s %s %s %s%s%s%s %s",nfn,dsk,par,nci,ipr,bpi,cpc,bpc,nba,rti);
+		herror=interfaceAdmin(interface,parametros,NULL);
+		if(herror){
+			sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+			errorInfo(modulo,msglog);
+			muestraMensaje(29,NULL);// Ha habido algún error en el proceso de creación de imagen básica
+		}
+		else
+			muestraMensaje(28,NULL);// El proceso de creación de imagen básica ha terminado correctamente
+	//}
+	//else{
+	//	sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+	//	errorInfo(modulo,msglog);
+	//}
+
+ 	muestraMenu();
+	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
+
+	/* Envia respuesta de ejecución de la función de interface */
+	initParametros(ptrTrama,0);
+	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagenBasica");
+	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición de donde se creó
+	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o código de partición
+	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojó
+	respuestaEjecucionComando(ptrTrama,herror,ids);
+		
+	liberaMemoria(nfn);	
+	liberaMemoria(dsk);	
+	liberaMemoria(par);	
+	liberaMemoria(cpt);	
+	liberaMemoria(idi);	
+	liberaMemoria(nci);	
+	liberaMemoria(rti);	
+	liberaMemoria(ipr);	
+	liberaMemoria(bpi);	
+	liberaMemoria(cpc);	
+	liberaMemoria(bpc);	
+	liberaMemoria(nba);
+	liberaMemoria(ids);		
+	
+	return(TRUE);
+}
+//______________________________________________________________________________________________________
+// Función: CrearSoftIncremental
+//
+//	 Descripción:
+//		Crea una software incremental comparando una partición con una imagen básica
+//	Parámetros:
+//		ptrTrama: contenido del mensaje
+//
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+//______________________________________________________________________________________________________
+BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
+{
+	int lon;
+	char *nfn,*dsk,*par,*idi,*idf,*ipr,*nci,*rti,*ncf,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char modulo[] = "CrearSoftIncremental()";
+
+	if (ndebug>=DEBUG_MAXIMO) {
+		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
+		infoDebug(msglog);
+	}
+	nfn=copiaParametro("nfn",ptrTrama);
+
+	dsk=copiaParametro("dsk",ptrTrama); // Disco
+	par=copiaParametro("par",ptrTrama); // Número de partición
+	idi=copiaParametro("idi",ptrTrama); // Identificador de la imagen
+	nci=copiaParametro("nci",ptrTrama); // Nombre canónico de la imagen
+	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
+	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
+	idf=copiaParametro("idf",ptrTrama); // Identificador de la imagen diferencial
+	ncf=copiaParametro("ncf",ptrTrama); // Nombre canónico de la imagen diferencial
+	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
+	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
+	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
+
+//	muestraMensaje(7,NULL); // Creando Inventario Software
+//	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
+		muestraMensaje(25,NULL);// Creando Imagen Incremental, por favor espere...
+		sprintf(interface,"%s/%s",pathinterface,nfn);
+		sprintf(parametros,"%s %s %s %s %s %s %s%s%s%s %s",nfn,dsk,par,nci,ipr,ncf,bpi,cpc,bpc,nba,rti);
+		herror=interfaceAdmin(interface,parametros,NULL);
+		if(herror){
+			sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+			errorInfo(modulo,msglog);
+			muestraMensaje(27,NULL);// Ha habido algún error en el proceso de creación de imagen básica
+		}
+		else
+			muestraMensaje(26,NULL);// El proceso de creación de imagen básica ha terminado correctamente
+//	}
+//	else{
+//		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+//		errorInfo(modulo,msglog);
+//	}
+
+ 	muestraMenu();
+	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
+
+	/* Envia respuesta de ejecución de la función de interface */
+	initParametros(ptrTrama,0);
+	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearSoftIncremental");
+	lon+=sprintf(ptrTrama->parametros+lon,"idf=%s\r",idf); // Identificador de la imagen incremental
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
+	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(nfn);	
+	liberaMemoria(dsk);	
+	liberaMemoria(par);	
+	liberaMemoria(idi);	
+	liberaMemoria(nci);	
+	liberaMemoria(rti);	
+	liberaMemoria(ipr);	
+	liberaMemoria(idf);	
+	liberaMemoria(ncf);	
+	liberaMemoria(bpi);	
+	liberaMemoria(cpc);	
+	liberaMemoria(bpc);	
+	liberaMemoria(nba);
+	liberaMemoria(ids);		
+	
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1172,7 +1397,7 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		FALSE: En bpccaso de ocurrir algún error
 //______________________________________________________________________________________________________
 BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 {
@@ -1216,6 +1441,172 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(nfn);	
+	liberaMemoria(dsk);	
+	liberaMemoria(par);	
+	liberaMemoria(idi);
+	liberaMemoria(nci);	
+	liberaMemoria(ipr);	
+	liberaMemoria(ifs);	
+	liberaMemoria(ptc);	
+	liberaMemoria(ids);			
+
+	return(TRUE);
+}
+//______________________________________________________________________________________________________
+// Función: RestaurarImagenBasica
+//
+//	 Descripción:
+//		Restaura una imagen básica en una partición
+//	Parámetros:
+//		ptrTrama: contenido del mensaje
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+//______________________________________________________________________________________________________
+BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
+{
+	int lon;
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char modulo[] = "RestaurarImagenBasica()";
+
+	if (ndebug>=DEBUG_MAXIMO) {
+		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
+		infoDebug(msglog);
+	}
+	dsk=copiaParametro("dsk",ptrTrama);
+	par=copiaParametro("par",ptrTrama);
+	idi=copiaParametro("idi",ptrTrama);
+	ipr=copiaParametro("ipr",ptrTrama);
+	met=copiaParametro("met",ptrTrama); // Método de clonación 0= desde caché 1= desde repositorio
+	nci=copiaParametro("nci",ptrTrama);
+	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
+	ifs=copiaParametro("ifs",ptrTrama);
+	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
+	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
+	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
+
+	nfn=copiaParametro("nfn",ptrTrama);
+	ids=copiaParametro("ids",ptrTrama);
+	muestraMensaje(31,NULL);
+	sprintf(interface,"%s/%s",pathinterface,nfn);
+	sprintf(parametros,"%s %s %s %s %s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,bpi,cpc,bpc,nba,met,rti);
+	herror=interfaceAdmin(interface,parametros,NULL);
+	if(herror){
+		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		errorInfo(modulo,msglog);
+		muestraMensaje(33,NULL);
+	}
+	else
+		muestraMensaje(32,NULL);
+
+	muestraMenu();
+
+	/* Envia respuesta de ejecución de la función de interface */
+	initParametros(ptrTrama,0);
+	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
+	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
+	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
+	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(nfn);	
+	liberaMemoria(dsk);	
+	liberaMemoria(par);	
+	liberaMemoria(idi);	
+	liberaMemoria(nci);	
+	liberaMemoria(rti);	
+	liberaMemoria(ifs);	
+	liberaMemoria(ipr);	
+	liberaMemoria(met);
+	liberaMemoria(bpi);	
+	liberaMemoria(cpc);	
+	liberaMemoria(bpc);	
+	liberaMemoria(nba);
+	liberaMemoria(ids);		
+	
+	return(TRUE);
+}
+//______________________________________________________________________________________________________
+// Función: RestaurarSoftIncremental
+//
+//	 Descripción:
+//		Restaura software incremental en una partición
+//	Parámetros:
+//		ptrTrama: contenido del mensaje
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+//______________________________________________________________________________________________________
+BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
+{
+	int lon;
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*ifs,*nci,*rti,*idf,*ncf,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char modulo[] = "RestaurarSoftIncremental()";
+
+	if (ndebug>=DEBUG_MAXIMO) {
+		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
+		infoDebug(msglog);
+	}
+	dsk=copiaParametro("dsk",ptrTrama);
+	par=copiaParametro("par",ptrTrama);
+	idi=copiaParametro("idi",ptrTrama);
+	idf=copiaParametro("idf",ptrTrama);
+	ipr=copiaParametro("ipr",ptrTrama);
+	met=copiaParametro("met",ptrTrama); // Método de clonación 0= desde caché 1= desde repositorio
+	ifs=copiaParametro("ifs",ptrTrama);
+	nci=copiaParametro("nci",ptrTrama);
+	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
+	ncf=copiaParametro("ncf",ptrTrama);
+	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
+	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
+	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
+
+	nfn=copiaParametro("nfn",ptrTrama);
+	ids=copiaParametro("ids",ptrTrama);
+	muestraMensaje(31,NULL);
+	sprintf(interface,"%s/%s",pathinterface,nfn);
+	sprintf(parametros,"%s %s %s %s %s %s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,ncf,bpi,cpc,bpc,nba,met,rti);
+	herror=interfaceAdmin(interface,parametros,NULL);
+	if(herror){
+		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		errorInfo(modulo,msglog);
+		muestraMensaje(35,NULL);
+	}
+	else
+		muestraMensaje(34,NULL);
+
+	muestraMenu();
+
+	/* Envia respuesta de ejecución de la función de interface */
+	initParametros(ptrTrama,0);
+	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarSoftIncremental");
+	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idf); // Identificador de la imagen incremental (Forzada a idi)
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
+	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
+
+	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(nfn);	
+	liberaMemoria(dsk);	
+	liberaMemoria(par);	
+	liberaMemoria(idi);	
+	liberaMemoria(idf);	
+	liberaMemoria(nci);	
+	liberaMemoria(rti);	
+	liberaMemoria(ncf);	
+	liberaMemoria(ifs);	
+	liberaMemoria(ipr);	
+	liberaMemoria(met);
+	liberaMemoria(bpi);	
+	liberaMemoria(cpc);	
+	liberaMemoria(bpc);	
+	liberaMemoria(nba);
+	liberaMemoria(ids);		
+	
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1274,6 +1665,12 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Configurar");
 	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Identificador de la imagen
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(dsk);
+	liberaMemoria(cfg);
+	liberaMemoria(nfn);
+	liberaMemoria(ids);
+
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1319,10 +1716,13 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 		initParametros(ptrTrama,0);
 		sprintf(ptrTrama->parametros,"nfn=recibeArchivo\rnfl=%s\r",hrddst);
 		if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_COMANDO)){
+			liberaMemoria(nfn);
+			liberaMemoria(ids);
 			errorLog(modulo,42,FALSE);
 			return(FALSE);
 		}
 		 /* Espera señal para comenzar el envío */
+		liberaMemoria(ptrTrama);
 		recibeFlag(&socket_c,ptrTrama);
 		/* Envía archivo */
 		if(!sendArchivo(&socket_c,hrdsrc)){
@@ -1339,6 +1739,8 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_InventarioHardware");
 	lon+=sprintf(ptrTrama->parametros+lon,"hrd=%s\r",hrddst);
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	liberaMemoria(nfn);
+	liberaMemoria(ids);	
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1366,6 +1768,8 @@ BOOLEAN InventarioSoftware(TRAMA* ptrTrama)
 	muestraMensaje(7,NULL);
 	InventariandoSoftware(ptrTrama,TRUE,nfn);
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	liberaMemoria(nfn);
+	liberaMemoria(ids);		
 	muestraMenu();
 	return(TRUE);
 }
@@ -1413,9 +1817,12 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 		sprintf(ptrTrama->parametros,"nfn=recibeArchivo\rnfl=%s\r",sftdst);
 		if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_COMANDO)){
 			errorLog(modulo,42,FALSE);
+			liberaMemoria(dsk);
+			liberaMemoria(par);				
 			return(FALSE);
 		}
 		/* Espera señal para comenzar el envío */
+		liberaMemoria(ptrTrama);
 		if(!recibeFlag(&socket_c,ptrTrama)){
 			errorLog(modulo,17,FALSE);
 		}
@@ -1434,6 +1841,8 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 	if(!sw)
 		respuestaEjecucionComando(ptrTrama,herror,"0");
 
+	liberaMemoria(dsk);
+	liberaMemoria(par);			
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1450,23 +1859,21 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*ids,*scp,msglog[LONSTD];
+	char *nfn,*aux,*ids,*scp,msglog[LONSTD];
 	char modulo[] = "EjecutarScript()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
 		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
 		infoDebug(msglog);
 	}
-	scp=URLDecode(copiaParametro("scp",ptrTrama));
-	ids=copiaParametro("ids",ptrTrama);
-
-	nfn=copiaParametro("nfn",ptrTrama);
-	ids=copiaParametro("ids",ptrTrama);
+	aux=copiaParametro("scp",ptrTrama);
+	scp=URLDecode(aux);
 	muestraMensaje(8,NULL);
 	/* Nombre del archivo de script */
 	char filescript[LONPRM];
 	sprintf(filescript,"/tmp/_script_%s",IPlocal);
 	escribeArchivo(filescript,scp);
+	nfn=copiaParametro("nfn",ptrTrama);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
 	sprintf(parametros,"%s %s",nfn,filescript);
 	herror=interfaceAdmin(interface,parametros,NULL);
@@ -1481,7 +1888,14 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	//herror=ejecutarCodigoBash(scp);
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_EjecutarScript");
+	ids=copiaParametro("ids",ptrTrama);
 	respuestaEjecucionComando(ptrTrama,herror,ids);
+	
+	liberaMemoria(nfn);
+	liberaMemoria(ids);		
+	liberaMemoria(aux);		
+	liberaMemoria(scp);		
+	
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1514,7 +1928,7 @@ BOOLEAN respuestaEjecucionComando(TRAMA* ptrTrama,int res,char *ids)
 	else{ // Algún error
 		lon+=sprintf(ptrTrama->parametros+lon,"res=%s\r","2");
 		if(res>MAXERRORSCRIPT)
-			lon+=sprintf(ptrTrama->parametros+lon,"der=%s (Error de script:%d)\r",tbErroresScripts[MAXERRORSCRIPT],res);// Descripción del error
+			lon+=sprintf(ptrTrama->parametros+lon,"der=%s (Error de script:%d)\r",tbErroresScripts[0],res);// Descripción del error
 		else
 			lon+=sprintf(ptrTrama->parametros+lon,"der=%s\r",tbErroresScripts[res]);// Descripción del error
 	}
@@ -1547,13 +1961,17 @@ BOOLEAN gestionaTrama(TRAMA *ptrTrama)
 	for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
 		res = strcmp(tbfuncionesClient[i].nf, nfn);
 		if (res == 0) { // Encontrada la función que procesa el mensaje
+			liberaMemoria(nfn);
 			return(tbfuncionesClient[i].fptr(ptrTrama)); // Invoca la función
 		}
 	}
-	/* Sólo puede ser un comando personalizado */
+
+	liberaMemoria(nfn);
+
+	/* Sólo puede ser un comando personalizado
 	if (ptrTrama->tipo==MSG_COMANDO)
 		return(Comando(ptrTrama));
-
+	 */
 	errorLog(modulo, 18, FALSE);
 	return (FALSE);
 }
@@ -1591,6 +2009,7 @@ BOOLEAN ejecutaArchivo(char* filecmd,TRAMA *ptrTrama)
 			}
 		}
 	}
+	liberaMemoria(buffer);
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1695,8 +2114,21 @@ int main(int argc, char *argv[])
 	strcpy(tbfuncionesClient[cf].nf, "CrearImagen");
 	tbfuncionesClient[cf++].fptr = &CrearImagen;
 
+	strcpy(tbfuncionesClient[cf].nf, "CrearImagenBasica");
+	tbfuncionesClient[cf++].fptr = &CrearImagenBasica;
+
+	strcpy(tbfuncionesClient[cf].nf, "CrearSoftIncremental");
+	tbfuncionesClient[cf++].fptr = &CrearSoftIncremental;
+
 	strcpy(tbfuncionesClient[cf].nf, "RestaurarImagen");
 	tbfuncionesClient[cf++].fptr = &RestaurarImagen;
+
+	strcpy(tbfuncionesClient[cf].nf, "RestaurarImagenBasica");
+	tbfuncionesClient[cf++].fptr = &RestaurarImagenBasica;
+
+	strcpy(tbfuncionesClient[cf].nf, "RestaurarSoftIncremental");
+	tbfuncionesClient[cf++].fptr = &RestaurarSoftIncremental;
+
 
 	strcpy(tbfuncionesClient[cf].nf, "Configurar");
 	tbfuncionesClient[cf++].fptr = &Configurar;

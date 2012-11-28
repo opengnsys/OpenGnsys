@@ -23,12 +23,12 @@
 // ________________________________________________________________________________________________________
 // Variables globales
 // ________________________________________________________________________________________________________
-char idordenador[LONPRM];	 // Identificador del ordenador
-char nombreordenador[LONPRM]; // Nombre del ordenador
-char cache[LONPRM]; // Tamaño de la caché
-char idproautoexec[LONPRM]; // Identificador del procedimiento de autoexec
-char idcentro[LONPRM]; // Identificador de la Unidad Organizativa
-char idaula[LONPRM]; // Identificador del aula
+char *idordenador;	 // Identificador del ordenador
+char *nombreordenador; // Nombre del ordenador
+char *cache; // Tamaño de la caché
+char *idproautoexec; // Identificador del procedimiento de autoexec
+char *idcentro; // Identificador de la Unidad Organizativa
+char *idaula; // Identificador del aula
 char IPlocal[LONIP]; // Ip local
 
 char servidoradm[LONPRM]; // Dirección IP del servidor de administración
@@ -56,14 +56,14 @@ MSGFUN tbfuncionesClient[MAXIMAS_FUNCIONES];
 // ________________________________________________________________________________________________________
 // Tabla de errores de la ejecución de los scripts
 // ________________________________________________________________________________________________________
-char* tbErroresScripts[]={"Se han generado errores. No se puede continuar la ejecución de este módulo",\
+char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede continuar la ejecución de este módulo",\
 		"001-Formato de ejecución incorrecto.",\
 		"002-Fichero o dispositivo no encontrado",\
 		"003-Error en partición de disco",\
 		"004-Partición o fichero bloqueado",\
 		"005-Error al crear o restaurar una imagen",\
 		"006-Sin sistema operativo",\
-		"007-Programa o función BOOLEANno ejecutable",\
+		"007-Programa o función BOOLEAN no ejecutable",\
 		"008-Error en la creación del archivo de eco para consola remota",\
 		"009-Error en la lectura del archivo temporal de intercambio",\
 		"010-Error al ejecutar la llamada a la interface de administración",\
@@ -119,7 +119,7 @@ char* tbErroresScripts[]={"Se han generado errores. No se puede continuar la eje
 		"060-Error en la conexion de una sesion UNICAST|MULTICAST con el MASTER",\
 		"Error desconocido "
 	};
-	#define MAXERRORSCRIPT 999		// Error máximo cometido
+	#define MAXERRORSCRIPT 60		// Error máximo cometido
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________
@@ -151,6 +151,9 @@ BOOLEAN Apagar(TRAMA *);
 BOOLEAN Reiniciar(TRAMA *);
 BOOLEAN IniciarSesion(TRAMA *);
 BOOLEAN CrearImagen(TRAMA *);
+BOOLEAN CrearImagenBasica(TRAMA *);
+BOOLEAN CrearSoftIncremental(TRAMA*);
+
 BOOLEAN InventarioHardware(TRAMA *);
 BOOLEAN InventariandoSoftware(TRAMA *,BOOLEAN,char*);
 BOOLEAN EjecutarScript(TRAMA *);

@@ -5,6 +5,9 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 Lista de cambios incluidos en OpenGnSys 1.0.5
 ---------------------------------------------
 
+Tickets resueltos en módulo OpenGnSys Client:
+#568	Menú por defecto para los clientes incluye acceso a sistemas operativos
+
 Tickets resueltos en módulo OpenGnSys Server:
 #567	Los comandos se ejecutan 2 veces si se incluyen en la cola de acciones
 

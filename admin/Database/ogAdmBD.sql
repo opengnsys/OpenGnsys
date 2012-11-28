@@ -182,13 +182,13 @@ CREATE TABLE IF NOT EXISTS `centros` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
-	--
-	-- Volcar la base de datos para la tabla `centros`
-	--
-	INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
-	 (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
-	 
-	
+--
+-- Volcar la base de datos para la tabla `centros`
+--
+INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
+ (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
+
+
 -- --------------------------------------------------------
 
 --
@@ -208,7 +208,7 @@ CREATE TABLE IF NOT EXISTS `comandos` (
   `comentarios` text,
   `activo` tinyint(1) NOT NULL,
   PRIMARY KEY (`idcomando`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
 
 --
 -- Volcar la base de datos para la tabla `comandos`
@@ -225,7 +225,8 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 (8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1),
 (9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1),
 (10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 0),
-(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1);
+(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1),
+(12, 'Generar Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'nfn;dsk;iph;par;idf;ncf;idi;nci;ipr', 'nfn;dsk;iph;par;idf;ncf;idi;nci;ipr', '', 1);
 
 
 
@@ -416,6 +417,9 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `idrepositorio` int(11) NOT NULL,
   `numpar` smallint(6) NOT NULL,
   `codpar` int(8) NOT NULL,
+  `tipo` tinyint NULL,
+  `imagenid` int NOT NULL DEFAULT '0',
+  `ruta` varchar(250) NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -523,7 +527,7 @@ CREATE TABLE IF NOT EXISTS `parametros` (
   `tipopa` tinyint(1) DEFAULT '0',
   `visual` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idparametro`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=31 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=33 ;
 
 --
 -- Volcar la base de datos para la tabla `parametros`
@@ -542,7 +546,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (9, 'ifh', 'Perfil Hardware', 'idperfilhard', 'perfileshard', 'descripcion', 1, 1),
 (10, 'ifs', 'Perfil Software', 'idperfilsoft', 'perfilessoft', 'descripcion', 1, 1),
 (11, 'idi', 'Imagen', 'idimagen', 'imagenes', 'descripcion', 1, 1),
-(12, 'nci', 'Nombre canonico', '', '', '', 0, 1),
+(12, 'nci', 'Nombre canónico', '', '', '', 0, 1),
 (13, 'scp', 'Código a ejecutar en formato script', '', '', '', 0, 0),
 (14, 'npc', 'Nombre del cliente', '', '', '', NULL, 0),
 (15, 'che', 'Tamaño de la cache del cliente', '', '', '', NULL, 0),
@@ -558,12 +562,15 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (26, 'sft', 'Nombre del archivo de inventario software enviado por la red', '', '', '', 0, 0),
 (27, 'tpc', 'Tipo de cliente', '', '', '', 0, 0),
 (28, 'scp', 'Código script', '', '', '', 4, 1),
-(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1);
+(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1),
+(31, 'idf', 'Imagen diferencial', 'idsoftincremental', 'softincrementales', 'descripcion', 1, 1),
+(32, 'ncf', 'Nombre de la imagen diferencial', '', '', '', 0, 1);
 
 -- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `perfileshard`
+
 --
 
 CREATE TABLE IF NOT EXISTS `perfileshard` (

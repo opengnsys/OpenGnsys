@@ -148,7 +148,7 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 			if (res == 0) { // Encontrada la función que procesa el mensaje
 				liberaMemoria(nfn);
 				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
-				liberaMemoria(ptrTrama);
+				liberaMemoria((char*)ptrTrama);
 				return(res);
 			}
 		}
@@ -1364,19 +1364,26 @@ BOOLEAN respuestaConsola(SOCKET *socket_c, TRAMA *ptrTrama, int res) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char *mac, msglog[LONSTD];
+	char *iph,*mac,*mar, msglog[LONSTD];
+	BOOLEAN res;
 	char modulo[] = "Arrancar()";
 
+	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
-	if (!Levanta(mac)) {
-		liberaMemoria(mac);
+	mar = copiaParametro("mar",ptrTrama); // Método de arranque (Broadcast o Unicast)
+
+	res=Levanta(iph,mac,mar);
+
+	liberaMemoria(iph);
+	liberaMemoria(mac);
+	liberaMemoria(mar);
+
+	if(!res){
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
 		respuestaConsola(socket_c, ptrTrama, FALSE);
 		return (FALSE);
 	}
-
-	liberaMemoria(mac);
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
@@ -1393,13 +1400,16 @@ BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //	Descripción:
 //		Enciende ordenadores a través de la red cuyas macs se pasan como parámetro
 //	Parámetros:
+//		- iph: Cadena de direcciones ip separadas por ";"
 //		- mac: Cadena de direcciones mac separadas por ";"
+//		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Levanta(char *mac) {
-	char *ptrMacs[MAXIMOS_CLIENTES];
+BOOLEAN Levanta(char* iph,char *mac, char* mar)
+{
+	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	int i, lon, res;
 	SOCKET s;
 	BOOLEAN bOpt;
@@ -1426,9 +1436,10 @@ BOOLEAN Levanta(char *mac) {
 		exit(EXIT_FAILURE);
 	}
 	/* fin creación de socket */
+	lon = splitCadena(ptrIP, iph, ';');
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
-		if (!WakeUp(&s, ptrMacs[i])) {
+		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
 			errorLog(modulo, 49, TRUE);
 			close(s);
 			return (FALSE);
@@ -1444,12 +1455,16 @@ BOOLEAN Levanta(char *mac) {
 //		Enciende el ordenador cuya MAC se pasa como parámetro
 //	Parámetros:
 //		- s : Socket para enviar trama magic packet
+//		- iph : Cadena con la dirección ip
 //		- mac : Cadena con la dirección mac en formato XXXXXXXXXXXX
+//		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
-BOOLEAN WakeUp(SOCKET *s, char *mac) {
+//
+BOOLEAN WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
+{
 	int i, res;
 	char HDaddress_bin[6];
 	struct {
@@ -1470,7 +1485,10 @@ BOOLEAN WakeUp(SOCKET *s, char *mac) {
 	/* Creación de socket del cliente que recibe la trama magic packet */
 	WakeUpCliente.sin_family = AF_INET;
 	WakeUpCliente.sin_port = htons((short) PUERTO_WAKEUP);
-	WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
+	if(atoi(mar)==2)
+		WakeUpCliente.sin_addr.s_addr = inet_addr(iph); //  Para hacerlo con IP
+	else
+		WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
 
 	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
 			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
@@ -3345,7 +3363,7 @@ BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
-	char *idp,iph[LONIP],mac[LONMAC];
+	char *idp,*mar,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
 	int idx,idcomando;
@@ -3398,11 +3416,14 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				errorInfo(modulo, msglog);
 				return (FALSE);
 			}
-			if (!Levanta(mac)) {
+			mar = copiaParametro("mar",ptrTrama); // Toma modo de arranque si el comando es Arrancar
+			if (!Levanta(iph,mac,mar)) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
+				liberaMemoria(mar);
 				return (FALSE);
 			}
+			liberaMemoria(mar);
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente

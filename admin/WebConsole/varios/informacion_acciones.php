@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -54,7 +54,7 @@ $arbol=new ArbolVistaXml($cadenaXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titu
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
-	<?
+	<?php
 		switch($tipoaccion){
 			case $AMBITO_PROCEDIMIENTOS:
 				$urlimg="../images/iconos/procedimiento.gif";
@@ -68,13 +68,13 @@ $arbol=new ArbolVistaXml($cadenaXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titu
 				break;					
 		}
 	?>
-	<P align=center class=cabeceras><?echo $litcab?><BR>
-	<SPAN align=center class=subcabeceras><?echo $litsub?></SPAN>&nbsp;<IMG src="../images/iconos/acciones.gif"><BR>
-	<IMG src="<? echo $urlimg?>"><SPAN class=presentaciones>&nbsp;&nbsp;<?echo $descripcionaccion?></SPAN></P>
-	<?echo urldecode($arbol->CreaArbolVistaXml()); // Crea arbol de configuraciones?>
+	<P align=center class=cabeceras><?php echo $litcab?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $litsub?></SPAN>&nbsp;<IMG src="../images/iconos/acciones.gif"><BR>
+	<IMG src="<?php echo $urlimg?>"><SPAN class=presentaciones>&nbsp;&nbsp;<?echo $descripcionaccion?></SPAN></P>
+	<?php echo urldecode($arbol->CreaArbolVistaXml()); // Crea arbol de configuraciones?>
 </BODY>
 </HTML>
-<?
+<?php
 /********************************************************************************************************
 	Devuelve una cadena con formato XML de toda la Información de los procedimientos o tareas
 	softwares
@@ -190,7 +190,6 @@ function SubarbolXML_comandos($descricomando,$parametros,$visuparametros)
 			if(isset($tbParametrosValor[$nemo])){
 				for($j=0;$j<sizeof($tbParametrosValor[$nemo])-1;$j++){
 					$descripcion=$tbParametrosValor[$nemo]["descripcion"];
-					$valor=$tbParametrosValor[$nemo][$j]["valor"];
 					if(sizeof($tbParametrosValor[$nemo])>2)
 						$valor=$tbParametrosValor[$nemo][$j]["valor"];
 					else

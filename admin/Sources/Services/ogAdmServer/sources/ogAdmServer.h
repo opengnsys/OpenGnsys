@@ -84,8 +84,8 @@ BOOLEAN Comando(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_Comando(SOCKET *,TRAMA *);
 
 BOOLEAN Arrancar(SOCKET *,TRAMA *);
-BOOLEAN Levanta(char*);
-BOOLEAN WakeUp(SOCKET *,char *);
+BOOLEAN Levanta(char*,char*,char*);
+BOOLEAN WakeUp(SOCKET *,char*,char*,char*);
 void PasaHexBin(char *,char *);
 BOOLEAN RESPUESTA_Arrancar(SOCKET *,TRAMA*);
 BOOLEAN Apagar(SOCKET *,TRAMA *);

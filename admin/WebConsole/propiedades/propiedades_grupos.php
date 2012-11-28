@@ -1,4 +1,4 @@
-<? 
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -36,6 +36,7 @@ if (isset($_GET["iduniversidad"])) $iduniversidad=$_GET["iduniversidad"];
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"]; 
 
 if (isset($_GET["identificador"])) $idgrupo=$_GET["identificador"];
+
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
@@ -70,10 +71,18 @@ switch($literaltipo){
 		$urlimg='../images/iconos/carpeta.gif';
 		$textambito=$TbMsg[10];
 		break;
-	case $LITAMBITO_GRUPOSIMAGENES :
+	case $LITAMBITO_GRUPOSIMAGENESMONOLITICAS :
 		$urlimg='../images/iconos/carpeta.gif';
-		$textambito=$TbMsg[11];
+		$textambito=$TbMsg[23];
 		break;
+	case $LITAMBITO_GRUPOSIMAGENESBASICAS :
+		$urlimg='../images/iconos/carpeta.gif';
+		$textambito=$TbMsg[24];
+		break;
+	case $LITAMBITO_GRUPOSIMAGENESINCREMENTALES :
+		$urlimg='../images/iconos/carpeta.gif';
+		$textambito=$TbMsg[25];
+		break;		
 	case $LITAMBITO_GRUPOSCOMPONENTESHARD  :
 		$urlimg='../images/iconos/carpeta.gif';
 		$textambito=$TbMsg[12];
@@ -145,7 +154,7 @@ switch($literaltipo){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300">'.$nombregrupo.'</TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=nombregrupo style="width:320" type=text value="'.$nombregrupo.'"></TD>';?>
@@ -153,7 +162,7 @@ switch($literaltipo){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=60>'.$comentarios.'</TEXTAREA></TD>';
@@ -162,14 +171,14 @@ switch($literaltipo){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de una grupo
 //		Parametros: 
@@ -203,3 +212,4 @@ function TomaPropiedades($cmd,$id){
 		return(false);
 }
 ?>
+

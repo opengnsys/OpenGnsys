@@ -7,9 +7,17 @@
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero Arrancar.php (Comandos)
 // *************************************************************************************************************************************************
- function confirmar(){
+ function confirmar()
+ {
+ 	var RC='@';
 	if (comprobar_datos()){
 		filtrado();
+		var obRadB=document.getElementById('broadcast');
+		if(obRadB.checked)
+			document.fdatosejecucion.atributos.value="mar=1"+RC; // Arranque Broadcast
+		else	
+			document.fdatosejecucion.atributos.value="mar=2"+RC; // Arranque unicast
+
 		document.fdatosejecucion.submit();
 	}
  }

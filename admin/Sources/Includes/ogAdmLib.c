@@ -289,8 +289,9 @@ char* ampliaMemoria(char* ptr,int lon)
 //______________________________________________________________________________________________________
 void liberaMemoria(void* ptr)
 {
-	if(ptr)
+	if(ptr){
 		free (ptr);
+	}
 }
 // ________________________________________________________________________________________________________
 // Función: splitCadena
@@ -598,6 +599,7 @@ BOOLEAN mandaTrama(SOCKET *sock, TRAMA* ptrTrama)
 {
 	int lonprm;
 	char *buffer,hlonprm[LONHEXPRM+1];
+	BOOLEAN res;
 
 	lonprm=strlen(ptrTrama->parametros);
 	ptrTrama->parametros=encriptar(ptrTrama->parametros,&lonprm); // Encripta los parámetros
@@ -608,10 +610,10 @@ BOOLEAN mandaTrama(SOCKET *sock, TRAMA* ptrTrama)
 		return(FALSE);
 	memcpy(buffer,ptrTrama,LONGITUD_CABECERATRAMA); // Copia cabecera de trama
 	memcpy(&buffer[LONGITUD_CABECERATRAMA],hlonprm,LONHEXPRM); // Copia longitud de la trama
-	memcpy(&buffer[LONGITUD_CABECERATRAMA+LONHEXPRM],ptrTrama->parametros,lonprm); // Copia parametros encriptados
-	if(!sendData(sock,buffer,LONGITUD_CABECERATRAMA+LONHEXPRM+lonprm))
-		return (FALSE);
-	return(TRUE);
+	memcpy(&buffer[LONGITUD_CABECERATRAMA+LONHEXPRM],ptrTrama->parametros,lonprm); 
+	res=sendData(sock,buffer,LONGITUD_CABECERATRAMA+LONHEXPRM+lonprm);
+	liberaMemoria(buffer);
+	return (res);
 }
 // ________________________________________________________________________________________________________
 // Función: sendData
@@ -659,7 +661,7 @@ BOOLEAN sendData(SOCKET *sock, char* datos,int lon)
 TRAMA* recibeTrama(SOCKET *sock)
 {
 	int ret,lon,lSize;
-	char *buffer,bloque[LONBLK],*hlonprm;
+	char *buffer,*bufferd,bloque[LONBLK],*hlonprm;
 	TRAMA * ptrTrama;
 
 	lon=lSize=0;
@@ -671,10 +673,10 @@ TRAMA* recibeTrama(SOCKET *sock)
 			if (strncmp(bloque, "@JMMLCAMDJ_MCDJ",15)!=0)
 				return(NULL); // No se reconoce la trama
 			hlonprm=reservaMemoria(LONHEXPRM+1);
-			if(!hlonprm)
-				return(NULL);
+			if(!hlonprm) return(NULL);
 			memcpy(hlonprm,&bloque[LONGITUD_CABECERATRAMA],LONHEXPRM);
 			lSize=strtol(hlonprm,NULL,16); // Longitud total de la trama con los parametros encriptados
+			liberaMemoria(hlonprm);
 			buffer=(char*)reservaMemoria(lSize); // Toma memoria para la trama completa
 			if(!buffer)
 				return(NULL);
@@ -687,13 +689,13 @@ TRAMA* recibeTrama(SOCKET *sock)
 	}while(lon<lSize);
 
 	ptrTrama=(TRAMA *)reservaMemoria(sizeof(TRAMA));
-	if (!ptrTrama)
-		return(NULL);
+	if (!ptrTrama)	return(NULL);
 	memcpy(ptrTrama,buffer,LONGITUD_CABECERATRAMA); // Copia cabecera de trama
 	lon=lSize-(LONGITUD_CABECERATRAMA+LONHEXPRM); // Longitud de los parametros aún encriptados
-	buffer=desencriptar(&buffer[LONGITUD_CABECERATRAMA+LONHEXPRM],&lon);
+	bufferd=desencriptar(&buffer[LONGITUD_CABECERATRAMA+LONHEXPRM],&lon);
 	initParametros(ptrTrama,lon); // Desencripta la trama
-	memcpy(ptrTrama->parametros,buffer,lon);
+	memcpy(ptrTrama->parametros,bufferd,lon);
+	liberaMemoria((char*)buffer);
 	ptrTrama->lonprm=lon; // Almacena longitud de los parámetros ya desencriptados
 	return(ptrTrama);
 }

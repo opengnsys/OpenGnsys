@@ -28,4 +28,7 @@ $TbMsg[19]="Grupos de Menús";
 $TbMsg[20]="Grupos de Reservas";
 $TbMsg[21]="Grupos de Entidades";
 $TbMsg[22]="Grupos de Ordenadores";
+$TbMsg[23]="Grupos de Imágenes Monolíticas";
+$TbMsg[24]="Grupos de Imágenes Básicas";
+$TbMsg[25]="Grupos de Imágenes Incrementales";
 ?>

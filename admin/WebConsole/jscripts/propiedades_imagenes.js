@@ -2,7 +2,7 @@
 // Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación: 2009-2010
-// Fecha Última modificación: Agosto-2010
+// Fecha Última modificación: Noviembre-2012
 // Nombre del fichero: propiedades_imagenes.js
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero propiedades_imagenes.php
@@ -74,6 +74,7 @@ function confirmar(op){
 //	Comprobar_datos 
 //________________________________________________________________________________________________________
 function comprobar_datos(){
+
 	function validate (field, validator, msgi) {
 		if (!validator (field.value)) {
 			alert(TbMsg[msgi]);
@@ -82,15 +83,20 @@ function comprobar_datos(){
 		}
 		return true;
 	}
-
-	
 	var form = document.fdatos;
-	return 	validate (form.nombreca, validate_nameimagefile, 3) &&
-			validate (form.nombreca, validate_notnull, 3) &&
-			validate (form.descripcion, validate_notnull, 0) &&			
-			validate (form.numpar, validate_notnull, 4) &&
-			validate (form.codpar, validate_notnull, 5) &&
-			validate (form.idrepositorio, validate_notnull, 6);
-
+	if(form.tipoimg.getAttribute("value")!=IMAGENES_INCREMENTALES){
+		return 	validate (form.nombreca, validate_nameimagefile, 3) &&
+				validate (form.nombreca, validate_notnull, 3) &&
+				validate (form.descripcion, validate_notnull, 0) &&			
+				validate (form.numpar, validate_notnull, 4) &&
+				validate (form.codpar, validate_notnull, 5) &&
+				validate (form.idrepositorio, validate_notnull, 6);
+	}
+	else{
+		return 	validate (form.nombreca, validate_nameimagefile, 3) &&
+				validate (form.nombreca, validate_notnull, 3) &&
+				validate (form.descripcion, validate_notnull, 0) &&			
+				validate (form.imagenid, validate_notnull, 8);	
+	}
 	return(true);
 }

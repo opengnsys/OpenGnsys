@@ -228,7 +228,10 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"090-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMSG",\
 		"091-Ha habido algún problema al enviar un mensaje de tipo petición al Servidor",\
 		"092-Error en el fichero de configuración del programa. No se ha definido el parámetro IPLOCAL",\
-		"093-No se puede caragar la libraria Windows para trabajar con sockets",\
+		"093-No se puede cargar la librería Windows para trabajar con sockets",\
+		"094-Ha habido algún problerma al procesar la actualización después de crear una imagen",\
+		"095-Ha habido algún problerma al procesar la actualización después de restaurar una imagen",\
+		"096-Ha habido algún problerma al procesar la actualización después de crear un software incremental",\
 
 };
 // ________________________________________________________________________________________________________
