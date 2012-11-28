@@ -1,6 +1,6 @@
 # Nuevos comandos "Eliminar Imagen Cache" y "Generar Software Incremental".
-ALTER TABLE ogAdmBD.parametros
-	ADD submenu VARCHAR(50) NULL;
+ALTER TABLE ogAdmBD.comandos
+	ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
 INSERT INTO ogAdmBD.comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
 	(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
 	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),

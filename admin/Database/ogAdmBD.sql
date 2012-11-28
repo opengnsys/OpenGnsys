@@ -207,6 +207,7 @@ CREATE TABLE IF NOT EXISTS `comandos` (
   `parametros` varchar(250) DEFAULT NULL,
   `comentarios` text,
   `activo` tinyint(1) NOT NULL,
+  `submenu` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`idcomando`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
 
@@ -214,19 +215,22 @@ CREATE TABLE IF NOT EXISTS `comandos` (
 -- Volcar la base de datos para la tabla `comandos`
 --
 
-INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`) VALUES
-(1, 'Arrancar', '../comandos/Arrancar.php', '../comandos/gestores/gestor_Comandos.php', 'Arrancar', '', 31, '', 'nfn;iph;mac', '', 1),
-(2, 'Apagar', '../comandos/Apagar.php', '../comandos/gestores/gestor_Comandos.php', 'Apagar', '', 31, '', 'nfn;iph;mac', '', 1),
-(3, 'Restaurar Imagen', '../comandos/RestaurarImagen.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagen', '', 28, 'dsk;par;idi;nci;ipr;ptc', 'nfn;iph;mac;dsk;par;idi;nci;ipr;ifs;ptc', '', 1),
-(4, 'Crear Imagen', '../comandos/CrearImagen.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagen', '', 16, 'dsk;par;idi;nci;ipr;cpt', 'nfn;iph;mac;dsk;par;idi;nci;ipr;cpt;', '', 1),
-(5, 'Reiniciar', '../comandos/Reiniciar.php', '../comandos/gestores/gestor_Comandos.php', 'Reiniciar', '', 31, '', 'nfn;iph;mac;', '', 1),
-(6, 'Inventario Hardware', '../comandos/InventarioHardware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioHardware', '', 16, '', 'nfn;iph;mac;', '', 1),
-(7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'par', 'nfn;iph;mac;par', '', 1),
-(8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1),
-(9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1),
-(10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 0),
-(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1),
-(12, 'Generar Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'nfn;dsk;iph;par;idf;ncf;idi;nci;ipr', 'nfn;dsk;iph;par;idf;ncf;idi;nci;ipr', '', 1);
+INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`, `submenu`) VALUES
+(1, 'Arrancar', '../comandos/Arrancar.php', '../comandos/gestores/gestor_Comandos.php', 'Arrancar', '', 31, '', 'nfn;iph;mac', '', 1, ''),
+(2, 'Apagar', '../comandos/Apagar.php', '../comandos/gestores/gestor_Comandos.php', 'Apagar', '', 31, '', 'nfn;iph;mac', '', 1, ''),
+(3, 'Restaurar Imagen', '../comandos/RestaurarImagen.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagen', '', 28, 'dsk;par;idi;nci;ipr;ptc', 'nfn;iph;mac;dsk;par;idi;nci;ipr;ifs;ptc', '', 1, ''),
+(4, 'Crear Imagen', '../comandos/CrearImagen.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagen', '', 16, 'dsk;par;idi;nci;ipr;cpt', 'nfn;iph;mac;dsk;par;idi;nci;ipr;cpt;', '', 1, ''),
+(5, 'Reiniciar', '../comandos/Reiniciar.php', '../comandos/gestores/gestor_Comandos.php', 'Reiniciar', '', 31, '', 'nfn;iph;mac;', '', 1, ''),
+(6, 'Inventario Hardware', '../comandos/InventarioHardware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioHardware', '', 16, '', 'nfn;iph;mac;', '', 1, ''),
+(7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'par', 'nfn;iph;mac;par', '', 1, ''),
+(8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
+(9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1, ''),
+(10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 0, ''),
+(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
+(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'), 
+(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba,met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'), 
+(14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'), 
+(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion'); 
 
 
 
@@ -526,7 +530,8 @@ CREATE TABLE IF NOT EXISTS `parametros` (
   `nomliteral` varchar(64) NOT NULL,
   `tipopa` tinyint(1) DEFAULT '0',
   `visual` tinyint(4) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`idparametro`)
+  PRIMARY KEY (`idparametro`),
+  KEY (`nemonico`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=33 ;
 
 --
@@ -563,8 +568,14 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (27, 'tpc', 'Tipo de cliente', '', '', '', 0, 0),
 (28, 'scp', 'Código script', '', '', '', 4, 1),
 (30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1),
-(31, 'idf', 'Imagen diferencial', 'idsoftincremental', 'softincrementales', 'descripcion', 1, 1),
-(32, 'ncf', 'Nombre de la imagen diferencial', '', '', '', 0, 1);
+(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1), 
+(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1), 
+(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1), 
+(34, 'cpc', 'Copiar también en cache', '', '', '', 5, 1), 
+(35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1), 
+(36, 'rti', 'Ruta de origen', '', '', '', 0, 1), 
+(37, 'met', 'Método clonación', '', '', '', 0, 1), 
+(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1); 
 
 -- --------------------------------------------------------
 
