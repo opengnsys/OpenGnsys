@@ -137,7 +137,7 @@ fi
 
 PARTLOOP=$(losetup -f)
 #echo "$FUNCNAME(): Formateando la particion principal $PARTLOOP"
-losetup -o 32256 $PARTLOOP $BTROOTFSIMG && mkfs.ext3 -b 4096 -L $BTROOTFSIMGLABEL $PARTLOOP
+losetup -o 32256 $PARTLOOP $BTROOTFSIMG && mkfs.ext4 -b 4096 -L $BTROOTFSIMGLABEL $PARTLOOP
 if [ $? -ne 0 ]
 then 
 	errorAndLog "$FUNCNAME(): Formateando la particion principal del disco virtual: ERROR" 
@@ -213,7 +213,7 @@ cat << EOF > /etc/schroot/schroot.conf
 [IMGogclient]
 type=loopback
 file=/var/lib/tftpboot/ogclient/ogclient.img
-description=ogclient ubuntu luc IMGi
+description=ogclient Ubuntu image
 #priority=1
 users=root
 groups=root
