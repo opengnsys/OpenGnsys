@@ -237,8 +237,8 @@ PREVFILE=""
 FILEPATH="/"
 while [ "$FILE" != "$PREVFILE" ]; do
     # Busca el nombre correcto en el directorio actual.
-    cd "$FILEPATH"
-    FILEPATH="${FILEPATH}/$(ls -A | grep -i -m1 "^${FILE%%/*}$")" || return $?
+    cd "$FILEPATH" 2>/dev/null || FILE=""
+    FILEPATH="${FILEPATH}/$(ls -A 2>/dev/null | grep -i -m1 "^${FILE%%/*}$")" || return $?
     PREVFILE="$FILE"
     FILE="${FILE#*/}"
 done
