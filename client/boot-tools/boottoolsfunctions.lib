@@ -29,11 +29,7 @@ export BTROOTFSIMGLABEL=ogClient
 
 export LOG_FILE=/tmp/boot-tools_installation.log
 
-NAMEISOCLIENT=`cat /tmp/opengnsys_info_rootfs`
-NAMEHOSTCLIENT=`cat /tmp/opengnsys_chroot`
-
-export NAMEISOCLIENT
-export NAMEHOSTCLIENT
+export VERSIONBOOTTOOLS="ogLive"
 }
 
 
@@ -62,14 +58,20 @@ function btogGetOsInfo ()
 			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
 		;;
 		host | HOST | *)
-			export OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-			export OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
+			export OSDISTRIB=$(lsb_release -is)
+			export OSCODENAME=$(lsb_release -cs)
 			export OSRELEASE=$(uname -a | awk '{print $3}')
 			uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
 			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
 	esac
-		echo $OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP
+SVNURL="http://opengnsys.es/svn/branches/version1.0/client"
+VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
+export NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
+export NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
+echo "$VERSIONSVN" > /tmp/versionsvn.txt
+echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
+echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
 }
 
 # btogSetFsVirtual: Crea y formatea el fichero - disco duro virtual
@@ -92,7 +94,7 @@ echoAndLog "$FUNCNAME(): Creación y formateo del disco virtual $BTVIRTUALDISKSI
 
 #Desmontamos el dispositivo virtual
 mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT 
-mount | grep $BTROOTFSMNTT && umount $BTROOTFSMNT 
+mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT 
 
 #echo "$FUNCNAME(): Creando el directorio donde se montará el disco virtual $BTROOTFSMNT"
 mkdir -p $BTROOTFSMNT
