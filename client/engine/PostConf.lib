@@ -182,6 +182,7 @@ cp -a $MNTDIR/$RCLOCAL /tmp/rclocal
 awk -v sbin=$SBINDIR -v etc=$ETCDIR \
         '{ if (/^#/) { print; }
            else {
+                if (/ogAdmLnxClient/) { loc=1; }
                 if (loc==0) {
                     printf "%s/ogAdmLnxClient -f %s/ogAdmLnxClient.cfg &\n",sbin,etc;
                     loc=1; }

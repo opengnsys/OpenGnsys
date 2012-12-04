@@ -44,13 +44,13 @@ EOT
 
 for ((d=1; d<=$(ogDiskToDev | wc -w); d++)); do
     for ((p=1; p<=$(ogGetPartitionsNumber $d); p++)); do
-        VERSION=$(ogGetOsVersion $d $p | cut -f2 -d:)
-        [ -n "$VERSION" ] && echo "<p><a href=\"command:bootOs $d $p\">$MSG_BOOT $VERSION ($d, $p)</p>" >>$FILEINFOHTML
+        VERSION=$(ogGetOsVersion $d $p 2>/dev/null | cut -f2 -d:)
+        [ -n "$VERSION" ] && echo "<p><a href=\"command:bootOs $d $p\">$MSG_BOOT $VERSION ($d, $p)</a></p>" >>$FILEINFOHTML
     done
 done
 
 cat >> $FILEINFOHTML << EOT
-<p><a href="command:poweroff">$MSG_POWEROFF</p>
+<p><a href="command:poweroff">$MSG_POWEROFF</a></p>
 </div>
 EOT
 

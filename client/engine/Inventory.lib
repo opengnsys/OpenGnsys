@@ -34,7 +34,7 @@ fi
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  OSType:OSVersion - tipo y versión del sistema operativo.
-#@note    OSType = { Android, BSD, Linux, MacOS, Solaris, Windows }
+#@note    OSType = { Android, BSD, Hurd, Linux, MacOS, Solaris, Windows, WinLoader }
 #@note    Requisitos: awk, head, chroot
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
