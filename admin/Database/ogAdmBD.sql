@@ -107,14 +107,16 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `ipmul` varchar(16) NOT NULL,
   `pormul` int(11) NOT NULL,
   `velmul` smallint(6) NOT NULL DEFAULT '70',
-  `router` VARCHAR( 30 ),
-  `netmask` VARCHAR( 30 ),
-  `dns` VARCHAR (30),
+  `router` varchar( 30 ),
+  `netmask` varchar( 30 ),
+  `dns` varchar (30),
   `modp2p` enum('seeder','peer','leecher') DEFAULT 'peer',
-  `timep2p` INT(11) NOT NULL DEFAULT '60',
+  `timep2p` int(11) NOT NULL DEFAULT '60',
+  `validacion` tinyint(1) DEFAULT '0',
+  `paginalogin` varchar(100),
+  `paginavalidacion` varchar(100),
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
 
 
 --
@@ -488,8 +490,11 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `idproautoexec` int(11) NOT NULL,
   `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '1',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
-  `netdriver` VARCHAR( 30 ) NOT NULL DEFAULT 'generic',
-  `fotoord` VARCHAR( 250 ) NOT NULL,
+  `netdriver` varchar( 30 ) NOT NULL DEFAULT 'generic',
+  `fotoord` varchar( 250 ) NOT NULL,
+  `validacion` tinyint(1) DEFAULT '0',
+  `paginalogin` Vvarchar100),
+  `paginavalidacion` varchar(100),
   PRIMARY KEY (`idordenador`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

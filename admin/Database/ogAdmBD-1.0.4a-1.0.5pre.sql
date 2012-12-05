@@ -1,3 +1,15 @@
+# Añadir validación del cliente.
+ALTER TABLE ogAdmBD.aulas
+	ADD validacion TINYINT(1) DEFAULT 0,
+	ADD paginalogin VARCHAR(100),
+	ADD paginavalidacion VARCHAR(100);
+
+ALTER TABLE ogAdmBD.ordenadores
+	ADD validacion TINYINT(1) DEFAULT 0,
+	ADD paginalogin VARCHAR(100),
+	ADD paginavalidacion VARCHAR(100);
+
+
 # Nuevos comandos "Eliminar Imagen Cache" y "Generar Software Incremental".
 ALTER TABLE ogAdmBD.comandos
 	ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
