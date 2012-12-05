@@ -45,6 +45,9 @@ $idmenu="";
 $idrepositorio="";
 $idprocedimiento="";
 $idperfilhard="";
+$validacion="";
+$paginalogin="";
+$paginavalidacion="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"]; 

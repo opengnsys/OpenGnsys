@@ -16,7 +16,12 @@ $TbMsg["COMMAND_InventarioHardware"]="Hardware Inventory";
 $TbMsg["COMMAND_InventarioSoftware"]="Software Inventory";
 $TbMsg["COMMAND_Reiniciar"]="Reboot";
 $TbMsg["COMMAND_RestaurarImagen"]="Restore Image";
-$TbMsg["WIZARD_Asistente Particionado"]="Partition";
+$TbMsg["COMMAND_EliminarImagenCache"]="Delete Cache Image";
+$TbMsg["COMMAND_CrearImagenBasica"]="Create Basic Image";
+$TbMsg["COMMAND_RestaurarImagenBasica"]="Restore Basic Image";
+$TbMsg["COMMAND_CrearSoftIncremental"]="Create Incremental Software";
+$TbMsg["COMMAND_RestaurarSoftIncremental"]="Restore Incremental Software";
+$TbMsg["WIZARD_Asistente Particionado"]="Partitioning";
 $TbMsg["WIZARD_Asistente Clonacion Particiones Remotas"]="Clone Remote Partitions ";
 $TbMsg["WIZARD_Asistente \"Deploy\" de Imagenes"]="Deploy image";
 ?>

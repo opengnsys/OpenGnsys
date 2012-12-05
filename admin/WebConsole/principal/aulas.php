@@ -179,7 +179,8 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 		$cadenaXML.=' nodoid='.$LITAMBITO_AULAS.'-'.$rs->campos["idaula"];
 		$cadenaXML.='>';
 		$cadenaXML.=SubarbolXML_aulas_ordenadores($cmd,$rs->campos["idaula"],0);
-		$cadenaXML.=SubarbolXML_aulas_operadores($cmd,$rs->campos["idaula"],$cc);
+		// La siguiente línea está prevista para añadir operatores de aulas.
+		//$cadenaXML.=SubarbolXML_aulas_operadores($cmd,$rs->campos["idaula"],$cc);
 		$cadenaXML.='</AULA>';
 		$rs->Siguiente();
 	}

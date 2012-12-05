@@ -46,9 +46,11 @@
 	$resultados="";
 	$visupro="";
 	$visuprm="";
-	$visucmd="";	
-	$sesion="";	
-	
+	$visucmd="";
+	$sesion="";
+	$urlimg="";
+	$textambito="";
+
 	if (isset($_GET["ambito"]))	$ambito=$_GET["ambito"]; 
 	if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 	if (isset($_GET["nombreambito"])) $nombreambito=$_GET["nombreambito"]; 
@@ -56,7 +58,7 @@
 	if (isset($_POST["ambito"]))	$ambito=$_POST["ambito"]; 
 	if (isset($_POST["idambito"])) $idambito=$_POST["idambito"]; 
 	if (isset($_POST["nombreambito"])) $nombreambito=$_POST["nombreambito"]; 
-	
+
 	if (isset($_POST["tipoaccion"])) $tipoaccion=$_POST["tipoaccion"]; 
 	if (isset($_POST["estado"])) $estado=$_POST["estado"]; 
 	if (isset($_POST["resultado"])) $resultado=$_POST["resultado"]; 
@@ -65,12 +67,11 @@
 	if (isset($_POST["fechafin"])) $fechafin=$_POST["fechafin"]; 
 	if (isset($_POST["horainicio"])) $horainicio=$_POST["horainicio"]; 
 	if (isset($_POST["horafin"])) $horafin=$_POST["horafin"]; 
-	
+
 	if (isset($_POST["swPOST"])) $swPOST=$_POST["swPOST"]; 
 	if (isset($_POST["visuprm"])) $visuprm=$_POST["visuprm"]; 
 	if (isset($_POST["visupro"])) $visupro=$_POST["visupro"]; 
 	if (isset($_POST["visucmd"])) $visucmd=$_POST["visucmd"]; 
-
 
 	if (isset($_POST["sesion"])) $sesion=$_POST["sesion"]; 
 
@@ -100,7 +101,7 @@
 	$cmd=CreaComando($cadenaconexion);
 	if (!$cmd)
 		Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
-		
+
 	$tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder a detalles de comandos 
 
 	//________________________________________________________________________________________________________
@@ -299,7 +300,7 @@
 	?>
 	<BR>
 	<BR>
-	<? 
+	<?php 
 	//	_________________________________________________________________________
 	//	
 	// Tabla de opciones que afectan a todas las acciones mostradas 

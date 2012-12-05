@@ -1,4 +1,4 @@
-<?
+<?php
 	//________________________________________________________________________________________
 	//
 	//	Trocea en elementos de una matriz la cadena enviada como parametro separando por parametros
@@ -166,7 +166,7 @@
 							$blkprm=split(chr(10),substr($auxprm[$i],4));
 							for($j=0;$j<sizeof($blkprm);$j++){
 								$tbSubParametrosValor=array();
-								ParametrosValor($cmd,$blkprm[$j],&$tbSubParametrosValor,chr(9));
+								ParametrosValor($cmd,$blkprm[$j],$tbSubParametrosValor,chr(9));
 								for($k=0;$k<sizeof($tbSubParametrosValor);$k++){
 									$elem=current($tbSubParametrosValor);
 									$tbParametrosValor[$nemonico][$j]["valor"].=$elem["descripcion"];							
@@ -261,7 +261,7 @@
 		Devuelve:
 			- Los dos parámetros pasados por referencia
 	________________________________________________________________________*/
-	function tomaAmbito($ambito,$urlimg,$textambito)
+	function tomaAmbito($ambito,&$urlimg,&$textambito)
 	{
 		global $AMBITO_CENTROS;
 		global $AMBITO_GRUPOSAULAS;
