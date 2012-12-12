@@ -6,6 +6,7 @@ install ntfsprogs
 install ntfs-3g 
 install dosfstools 
 install fatresize
+install exfat-utils
 install dmraid 
 install dmsetup 
 install lvm2 
@@ -21,5 +22,6 @@ install hfsprogs
 install hfsutils
 install nilfs-tools
 install ufsutils
-install ubuntu-zfs
+#install ubuntu-zfs
+install zfs-fuse
 

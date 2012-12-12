@@ -19,16 +19,15 @@ SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 SVNOG2=/tmp/opengnsys_installer/opengnsys2
  
-OGCLIENTMOUNT=""
+OGCLIENTMOUNT="$BTROOTFSMNT"
 
-
-OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
+OSDISTRIB=$(lsb_release -is)
+OSCODENAME=$(lsb_release -cs)
 OSRELEASE=$(uname -a | awk '{print $3}')
 uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
 OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 
-echo $OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP	
+echo "$OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP"
 
 
 LERROR=TRUE
@@ -49,10 +48,10 @@ fi
 chmod -R 775 ${SVNCLIENTDIR}/includes/usr/bin/*
 
 # los copiamos
-cp -prv ${SVNCLIENTDIR}/includes/* /
+cp -av ${SVNCLIENTDIR}/includes/* ${OGCLIENTMOUNT}/
 mkdir -p ${OGCLIENTMOUNT}/opt/opengnsys/
-cp -prv ${SVNCLIENTSTRUCTURE}/* ${OGCLIENTMOUNT}/opt/opengnsys/
-cp -prv ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
+cp -av ${SVNCLIENTSTRUCTURE}/* ${OGCLIENTMOUNT}/opt/opengnsys/
+cp -av ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
 
 if [ $? -ne 0 ]
 then 
@@ -63,14 +62,14 @@ fi
 # copiamos algunas cosas del nfsexport
 
 #### Tipos de letra para el Browser.
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/lib/fonts
+cp -a ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/lib/fonts
 #### Crear enlaces para compatibilidad con las distintas versiones del Browser.
 mkdir -p $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/
 mkdir -p $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/
 mkdir -p $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts 
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/fonts 
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/fonts
+cp -a ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts 
+cp -a ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/fonts 
+cp -a ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/fonts
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Linking Browser fonts : ERROR"
@@ -78,14 +77,14 @@ then
 fi
 
 #########################################################
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/pci.ids $OGCLIENTMOUNT/etc
+cp -a ${SVNCLIENTSTRUCTURE}/lib/pci.ids $OGCLIENTMOUNT/etc
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Copying pci.ids : ERROR"
 	exit 1
 fi
 ####### Browsser
-cp ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
+cp -av ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Copying Browser : ERROR"
@@ -94,29 +93,29 @@ fi
 
 
 #Compatiblidad con og2
-cp ${SVNCLIENTSTRUCTURE}/bin/browser2 $OGCLIENTMOUNT/bin
+cp -av ${SVNCLIENTSTRUCTURE}/bin/browser2 $OGCLIENTMOUNT/bin
 
-cp -prv ${SVNOG2}/ogr/ogr $OGCLIENTMOUNT/opt/opengnsys/bin/
+cp -av ${SVNOG2}/ogr/ogr $OGCLIENTMOUNT/opt/opengnsys/bin/
 
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.7/libogr.py
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.6/libogr.py
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/opt/opengnsys/lib/python
+cp -av ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.7/libogr.py
+cp -av ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.6/libogr.py
+cp -av ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/opt/opengnsys/lib/python
 
 
 echo "mkdir -p /opt/opengnsys/lib/engine/"
 mkdir -p /opt/opengnsys/engine/
 echo "cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/" 
-cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/
+cp -av ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/
 
 
-cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
+cp -av ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 
 
-cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
+cp -av ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
 
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENTFILE
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN}" > $OGCLIENTMOUNT/$NAMEISOCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN}" > $OGCLIENTMOUNT/$NAMEHOSTCLIENTFILE
 
 
 history -c
