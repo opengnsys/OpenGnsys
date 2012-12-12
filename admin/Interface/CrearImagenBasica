@@ -33,7 +33,7 @@
 	fi
 	
 	DISCO=$1
-	PARTICION=$2
+	NPART=$2
 	NOMBREIMG=$3
 	IPREPOSITORIO=$4
 	
@@ -56,7 +56,7 @@
 # Proceso
 #___________________________________________________________________
 
-   echo "Creacion de imagen basica..." | tee -a $OGLOGSESSION $OGLOGFILE
+  echo "Creacion de imagen basica..." | tee -a $OGLOGSESSION $OGLOGFILE
 
 	ORIGEN=$PARTICION$RUTAORIGEN/	
 	DESTINO="$REPOSITORIO/$NOMBREIMG/"
@@ -68,7 +68,8 @@
 	
 	# Creación de la imagen básica
 	echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
-	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO	
+	crearListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART	
+	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 	   exit $OG_ERR_IMAGE
@@ -93,12 +94,16 @@
 		DESTINO="$CACHE$OGIMG/$NOMBREIMG/"
 
 		echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
-		crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO	
+	
+		crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2
+		
 		RETVAL=$?	
 		if [ $RETVAL -ne 0 ]; then
 		   exit $OG_ERR_IMAGE
 		fi		
    fi	
+
+	eliminaListaAcl $ORIGEN $SISTEMAFICHERO	
 #___________________________________________________________________
 #
 # Retorno

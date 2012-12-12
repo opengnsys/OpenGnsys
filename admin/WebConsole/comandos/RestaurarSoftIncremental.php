@@ -216,8 +216,8 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 	else
 		$cmd->texto.=	"	WHERE imagesbas.codpar<>".$codpar;		
 		
-	$cmd->texto.=" AND imagenes.tipo=".$IMAGENES_INCREMENTALES." 
-					AND imagenes.idperfilsoft>0"; // La imagene debe existir y estar creada	
+	$cmd->texto.=" AND imagenes.tipo=".$IMAGENES_INCREMENTALES;
+//					AND imagenes.idperfilsoft>=0"; // La imagene debe existir y estar creada	
     
 	$idordenador1 = explode(",",$idordenadores);
 	$idordenador=$idordenador1[0];

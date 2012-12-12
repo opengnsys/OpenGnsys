@@ -9,7 +9,7 @@
 # $1 Número de disco
 # $2 Número de particion
 # $3 Nombre canónico de la imagen básica (sin extensión)
-# $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
+# $4 Dirección del repositorio
 # $5 Nombre canónico de la imagen incremental (sin extensión)
 # $6 Es una cadena "nnnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
@@ -34,7 +34,7 @@
 	fi
 	
 	DISCO=$1
-	PARTICION=$2
+	NPART=$2
 	NOMBREIMG=$3
 	IPREPOSITORIO=$4
 	NOMBREIMGINC=$5
@@ -73,12 +73,13 @@
 	
 	# Borrado previo de imagen en repositorio
 	if [ $BORRARIMG -eq 1 ]; then
-	   echo "Borrando previamente imagen del repositorio" | tee -a $OGLOGSESSION $OGLOGFILE
+	   echo "Borrando previamente imagen del $NOMBREIMGINC repositorio" | tee -a $OGLOGSESSION $OGLOGFILE
 	fi
 		
 	# Creación de la lista de archivos entre partición e imagen básica del repositorio
-	echo "Creación de la lista de archivos a transferir entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
-	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1 $TMPFILELIST	
+	echo "Creacion de la lista de archivos a transferir entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
+	crearListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART	
+	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1 1 $TMPFILELIST	
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 	   exit $OG_ERR_IMAGE
@@ -88,8 +89,9 @@
 	editarLista $TMPFILELIST $FILELIST
 	
 	# Creación de la imagen incremental en el repositorio
+	DESTINO="$REPOSITORIO/$NOMBREIMGINC/"
 	echo "Sincronizacion para crear imagen incremental entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
-	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2 $FILELIST	
+	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1 2 $FILELIST	
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 	   exit $OG_ERR_IMAGE
@@ -112,12 +114,14 @@
 
 		DESTINO="$CACHE$OGIMG/$NOMBREIMGINC/"
 		echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
-		crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2 $FILELIST	
+		crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2 2 $FILELIST	
 		RETVAL=$?	
 		if [ $RETVAL -ne 0 ]; then
 		   exit $OG_ERR_IMAGE
 		fi		
    fi	
+
+	eliminaListaAcl $ORIGEN $SISTEMAFICHERO	
 #___________________________________________________________________
 #
 # Retorno

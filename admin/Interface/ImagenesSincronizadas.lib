@@ -35,10 +35,10 @@
 		# Variables globales
 		#___________________________________________________________________
 
-		TIPOPARTICION="$(ogGetPartitionId $DISCO $PARTICION)"; # Tipo de particion	
-		SISTEMAFICHERO="$(ogGetOsType $DISCO $PARTICION)" # Sistema de ficheros	
-		PARTICION=$(ogMount $DISCO $PARTICION); # Monta partición	
-		REPOSITORIO="root@$IPREPOSITORIO::imagenes" # Ruta de las imagenes en el repositorio
+		TIPOPARTICION="$(ogGetPartitionId $DISCO $NPART)"; # Tipo de particion	
+		SISTEMAFICHERO="$(ogGetOsType $DISCO $NPART)" # Sistema de ficheros	
+		PARTICION=$(ogMount $DISCO $NPART); # Monta partición	
+		REPOSITORIO="usuog@$IPREPOSITORIO::imagenes" # Ruta de las imagenes en el repositorio
 		
 		# Borrar archivos en destino
 		OP_DELETE="--delete"
@@ -46,6 +46,8 @@
 			OP_DELETE=""
 		fi	
 		
+		FILE_ACL="ogwinimage.acl"
+
 		#___________________________________________________________________
 		#
 		# Crea un fichero con la clave remota del rsync y actualiza el 
@@ -104,6 +106,8 @@
 		
 		echo "Editando lista de archivos Entrada:$1 Salida:$2" | tee -a $OGLOGSESSION $OGLOGFILE
 		cat $1 | sed '/\.\//d' | sed '1d' | sed -n -e :a -e '1,2!{P;N;D;};N;ba'>$2
+		#sed -i -e s/"^sent.*.bytes\/sec"//g  -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g lista_img
+
 	}	
 	
 	#___________________________________________________________________
@@ -122,9 +126,13 @@
 	#		$1: Origen
 	#		$2: Destino
 	#		$3: Sistema de ficheros de la partición
-	#		$4: Vale 1=Para crear la lista de archivos a transferir
-	#				 2= Cuando se quiere sincronizar usando la lista
-	#		$5: Path a la lista de archivos 
+	#		$4: Indica si la sincronización es local o remota
+	#				1: El origen o el destino es remoto
+	#				2: Tanto el origen como el destino son locales
+	#		$5: Vale 
+	#				1=Para crear la lista de archivos a transferir
+	#				2= Cuando se quiere sincronizar usando la lista
+	#		$6: Path a la lista de archivos 
 	#___________________________________________________________________
 	#
 	function crearImagen()
@@ -132,7 +140,7 @@
 		case "$3" in 
 			Windows)
 				OP_ARCHIVO="-aH"
-				OP_EXCLUDE="--exclude '$PARTICION/pagefile.sys'"
+				OP_EXCLUDE="--exclude '$1pagefile.sys'"
 			;;
 			Linux)
 				OP_ARCHIVO="-alH"
@@ -140,20 +148,29 @@
 			;;
 		esac
 
-		FREG=$OGLOGCOMMAND # Por defecto se redirecciona al archivo de log de comandos	
-		
+
 		case "$4" in 
 			1)
-				OP_ARCHIVO=$OP_ARCHIVO"nv" # Simulación para crear lista
-				FREG=$5
+				OP_PASSWD=$FILE_PASSWD
 			;;
 			2)
-				OP_FILELIST="--files-from=$5"
+				OP_PASSWD=""
+			;;
+		esac
+		
+		FREG=$OGLOGCOMMAND # Por defecto se redirecciona al archivo de log de comandos	
+		case "$5" in 
+			1)
+				OP_ARCHIVO=$OP_ARCHIVO"nv" # Simulación para crear lista
+				FREG=$6
+			;;
+			2)
+				OP_FILELIST="--files-from=$6"
 				OP_ARCHIVO="$OP_ARCHIVO $OP_FILELIST"
 			;;
 		esac
 
-		OP_PASSWD=$FILE_PASSWD
+
 		echo "rsync $OP_ARCHIVO $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2 " | tee -a $OGLOGSESSION $OGLOGFILE
 		rsync $OP_ARCHIVO $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2>$FREG;
 	}
@@ -203,3 +220,107 @@
 		rsync $OP_ARCHIVO $OP_DELETE $OP_PASSWD $1 $2>$OGLOGCOMMAND;
 	}
 	
+	#___________________________________________________________________
+	#
+	#	Función: crearListaAcl
+	#
+	#	Descripción:
+	#
+	#		Crea la lista de control de archivos para el sistema operativo
+	#		que ocupa la partición que se quiere clonar
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: disco
+	#		$5: partición
+	#___________________________________________________________________
+	#
+	function crearListaAcl()
+	{
+		case "$3" in 
+			Windows)
+				echo "Creando lista de control de acceso a ficheros para el sistema windows de la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "Desmontando la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogUnmount $4 $5 | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "Ejecutando comando ntfs-3g.secaudit -b /dev/sda$5 /" | tee -a $OGLOGSESSION $OGLOGFILE
+				ntfs-3g.secaudit -b /dev/sda$5 / > /tmp/$FILE_ACL
+				echo "Montando de nuevo la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE				
+				ogMount $4 $5
+				echo "Copiando archivo de listas de control (ACL) desde /tmp/$FILE_ACL a $1." | tee -a $OGLOGSESSION $OGLOGFILE				
+				cp /tmp/$FILE_ACL $1.
+			;;
+			Linux)
+
+			;;
+		esac
+	}	
+	#___________________________________________________________________
+	#
+	#	Función: restauraListaAcl
+	#
+	#	Descripción:
+	#
+	#		Restaura la lista de control de archivos para el sistema operativo
+	#		que ocupa la partición que se quiere restaurar
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: disco
+	#		$5: partición
+	#___________________________________________________________________
+	#
+	function restauraListaAcl()
+	{
+		case "$3" in 
+			Windows)
+
+				echo "Restaurando lista de control de acceso a ficheros para el sistema windows de la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE	
+				echo "Copiando archivo de listas de control (ACL) desde $2$FILE_ACL a /tmp/." | tee -a $OGLOGSESSION $OGLOGFILE				
+				cp $2$FILE_ACL /tmp/.
+				echo "Desmontando la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogUnmount $4 $5 | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "Ejecutando comando ntfs-3g.secaudit -se /dev/sda$5 /" | tee -a $OGLOGSESSION $OGLOGFILE
+				ntfs-3g.secaudit -se /dev/sda$5 /tmp/$FILE_ACL
+				echo "Montando de nuevo la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE				
+				ogMount $4 $5
+				echo "Borrando archivo de listas de control (ACL) de $2$FILE_ACL" | tee -a $OGLOGSESSION $OGLOGFILE				
+				rm $2$FILE_ACL
+			;;
+			Linux)
+
+			;;
+		esac
+	}	
+	#___________________________________________________________________
+	#
+	#	Función: eliminaListaAcl
+	#
+	#	Descripción:
+	#
+	#		Elimina la lista de control de archivos creada temporalmente
+	#		para el proceso de creación e imagen
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Sistema de ficheros de la partición
+	#___________________________________________________________________
+	#
+	function eliminaListaAcl()
+	{
+		case "$2" in 
+			Windows)
+				echo "Borrando archivo de listas de control (ACL) de $1$FILE_ACL" | tee -a $OGLOGSESSION $OGLOGFILE				
+				rm $1$FILE_ACL
+			;;
+			Linux)
+
+			;;
+		esac
+	}	

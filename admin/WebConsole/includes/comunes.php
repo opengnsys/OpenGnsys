@@ -145,7 +145,7 @@
 	//		que se almacenan en las tablas de procedimientos_acciones o acciones
 	//___________________________________________________________________________________
 		
-	function ParametrosValor($cmd,$parametros,$tbParametrosValor,$ch="\r")
+	function ParametrosValor($cmd,$parametros,&$tbParametrosValor,$ch="\r")
 	{
 		global $tbParametros;
 		$html="";

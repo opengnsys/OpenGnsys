@@ -579,7 +579,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (34, 'cpc', 'Copiar también en cache', '', '', '', 5, 1), 
 (35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1), 
 (36, 'rti', 'Ruta de origen', '', '', '', 0, 1), 
-(37, 'met', 'Método clonación', '', '', '', 0, 1), 
+(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
 (38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1); 
 
 -- --------------------------------------------------------

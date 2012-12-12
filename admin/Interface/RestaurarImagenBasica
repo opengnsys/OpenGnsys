@@ -33,7 +33,7 @@
 	fi
 	
 	DISCO=$1
-	PARTICION=$2
+	NPART=$2
 	NOMBREIMG=$3
 	IPREPOSITORIO=$4
 	
@@ -52,6 +52,18 @@
 #___________________________________________________________________
 	
 	source /opt/opengnsys/interfaceAdm/ImagenesSincronizadas.lib
+
+	if [ -z $SISTEMAFICHERO ]; then
+		case "$TIPOPARTICION" in 
+			7)
+				SISTEMAFICHERO="Windows"
+			;;
+			83)
+				SISTEMAFICHERO="Linux"
+		;;
+		esac
+	fi
+
 #___________________________________________________________________
 #
 # Proceso
@@ -76,6 +88,7 @@
 
 	# Sincronización desde repositorio
 	if [ $METCLONA = 1 ]; then
+
 		if [ $COPIACACHE = 0 ]; then	
 			echo "Restaurando imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
 			ORIGEN="$REPOSITORIO/$NOMBREIMG/"	
@@ -83,6 +96,7 @@
 			# Restauración de la imagen básica
 			echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 			restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1
+			restauraListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART
 			RETVAL=$?
 			exit $RETVAL	
 		fi		
@@ -111,18 +125,20 @@
 	DESTINO="$CACHE$OGIMG/$NOMBREIMG/"
 	echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 	restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1	
+
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 	   exit $OG_ERR_IMAGE
 	fi			
 	
 	# Restauración desde caché a la partición
-	echo "Copiando imagen a la partición desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "Copiando imagen a la particion desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 			
 	ORIGEN="$CACHE$OGIMG/$NOMBREIMG/"
-	DESTINO=$PARTICION$RUTAORIGEN/	
+	DESTINO="$PARTICION$RUTAORIGEN/"	
 	echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 	restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2	
+	restauraListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 	   exit $OG_ERR_IMAGE

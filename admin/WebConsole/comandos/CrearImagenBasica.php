@@ -170,7 +170,7 @@ function tablaConfiguraciones($idordenador)
 		$sw=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]); 
 		if($sw){// Una partición es clonable si es cierta esta variable	
 			$tbPAR.=$rs->campos["numpar"].";"; // Cadena con las particiones a procesar	
-			$tablaHtml.='<TR id="trPar-'.$rs->campos["numpar"].'"';
+			$tablaHtml.='<tr id="trPar-'.$rs->campos["numpar"].'">';
 			$tablaHtml.='<td align=center><input type=radio name="particion" value="'.$rs->campos["codpar"].'"></td>';
 			$tablaHtml.='<td align="center">&nbsp;'.$rs->campos["numpar"].'&nbsp;</td>'; // Número de partición
 			$tablaHtml.='<td align=center>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</td>'; // Nombre sistema operativo
