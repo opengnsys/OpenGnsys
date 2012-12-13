@@ -925,6 +925,9 @@ function rsyncConfigure()
 
 	# Habilitar Rsync y reiniciar Inetd.
 	if [ -n "$RSYNCSERV" ]; then
+		if [ -f /etc/default/rsync ]; then
+			perl -pi -e 's/RSYNC_ENABLE=.*/RSYNC_ENABLE=inetd/' /etc/default/rsync
+		fi
 		service=$RSYNCSERV $ENABLESERVICE
 		service=$INETDSERV $STARTSERVICE
 	fi

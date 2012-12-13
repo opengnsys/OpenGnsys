@@ -56,6 +56,10 @@ if [ -r $CLIENTINITRD ]; then
 		sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
 		# TEMPORAL: solución ticket 554, actualizar cliente en caché (ogLive r3257).
 		sed -i "s/busybox reboot/reboot/" scripts/ogfunctions
+		# Ticket 565, preparar acceso Rsync.
+		echo "$SAMBAUSER:$SAMBAPASS" > etc/rsync.secrets
+		chown root.root etc/rsync.secrets
+		chmod 400 etc/rsync.secrets
 		# FIN CÓDIGO TEMPORAL.
 		find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
 	else
