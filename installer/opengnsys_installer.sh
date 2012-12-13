@@ -72,6 +72,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - IPTABLESSERV - servicio IPTables
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
 # - MYSQLSERV - servicio MySQL
+# - RSYNCSERV, RSYNCCFGDIR - servicio y configuración de Rsync
 # - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
 # - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
 function autoConfigure()
@@ -110,6 +111,8 @@ case "$OSDISTRIB" in
 		DHCPCFGDIR=/etc/dhcp
 		INETDSERV=openbsd-inetd
 		MYSQLSERV=mysql
+		RSYNCSERV=rsync
+		RSYNCCFGDIR=/etc
 		SAMBASERV=smbd
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/lib/syslinux
@@ -146,6 +149,8 @@ case "$OSDISTRIB" in
 		INETDSERV=xinetd
 		IPTABLESSERV=iptables
 		MYSQLSERV=mysqld
+		RSYNCSERV=rsync
+		RSYNCCFGDIR=/etc
 		SAMBASERV=smb
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/share/syslinux
@@ -899,6 +904,37 @@ function smbConfigure()
 
 
 ########################################################################
+## Configuracion servicio Rsync
+########################################################################
+
+# Configurar servicio Rsync.
+function rsyncConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Configuring Rsync service."
+
+	backupFile $RSYNCCFGDIR/rsyncd.conf
+
+	# Configurar acceso a Rsync.
+	sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENT_USER/g" \
+		$WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > $RSYNCCFGDIR/rsyncd.conf
+	sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENT_USER/g" \
+	    -e "s/CLIENTPASSWORD/$OPENGNSYS_CLIENT_PASSWD/g" \
+		$WORKDIR/opengnsys/repoman/etc/rsyncd.secrets.tmpl > $RSYNCCFGDIR/rsyncd.secrets
+	chown root.root $RSYNCCFGDIR/rsyncd.secrets
+	chmod 600 $RSYNCCFGDIR/rsyncd.secrets
+
+	# Habilitar Rsync y reiniciar Inetd.
+	if [ -n "$RSYNCSERV" ]; then
+		service=$RSYNCSERV $ENABLESERVICE
+		service=$INETDSERV $STARTSERVICE
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added Rsync configuration."
+	return 0
+}
+
+	
+########################################################################
 ## Configuracion servicio DHCP
 ########################################################################
 
@@ -1228,11 +1264,10 @@ function copyClientFiles()
 }
 
 
-# Crear cliente OpenGnSys 1.0.2
+# Crear cliente OpenGnSys 1.0.2 y posteriores.
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	#local FILENAME=ogLive-precise-3.2.0-23-generic-pae-r3017.iso	# 1.0.4-rc1
 	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
@@ -1464,17 +1499,20 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Configurando tftp
+# Configuración de TFTP.
 tftpConfigure
 
-# Configuración Samba
+# Configuración de Samba.
 smbConfigure
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while configuring Samba server!"
 	exit 1
 fi
 
-# Configuración ejemplo DHCP
+# Configuración de Rsync.
+rsyncConfigure
+
+# Configuración ejemplo DHCP.
 dhcpConfigure
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying your dhcp server files!"
@@ -1561,7 +1599,6 @@ if [ $? -ne 0 ]; then
 fi
 
 popd
-
 
 # Crear la estructura de los accesos al servidor desde el cliente (shared)
 copyClientFiles
