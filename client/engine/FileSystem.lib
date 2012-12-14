@@ -199,9 +199,12 @@ esac
 #@version 0.9 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-08
-#@version 1.0.4 - Solucionado error cuando no se detecta tipo de sistema de ficheros pero si se indica
+#@version 1.0.4 - Solucionado error cuando no se detecta tipo de sistema de ficheros pero si se indica.
 #@author  Universidad de Huelva
 #@date    2012-04-11
+#@version 1.0.5 - Comprobar errores al inicio y desmontar antes de formatear.
+#@author  Universidad de Huelva
+#@date    2012-12-14
 #*/ ##
 function ogFormatFs ()
 {
@@ -304,7 +307,7 @@ fi
 # Formatear en modo uso exclusivo (desmontar siempre).
 ogLock $1 $2
 trap "ogUnlock $1 $2" 1 2 3 6 9
-ogUnmount $1 $2
+umount $PART
 eval $PROG $PARAMS $PART 2>/dev/null
 ERRCODE=$?
 case $ERRCODE in
