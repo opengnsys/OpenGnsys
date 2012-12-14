@@ -3,16 +3,16 @@
 delimiter '//'
 CREATE PROCEDURE addcols() BEGIN
 	# Añadir validación del cliente.
-	IF NOT EXISTS (SELECT * FROM information_schema.columns
-			WHERE column_name='validacion' AND table_name='aulas' AND table_schema='ogAdmBD')
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='aulas' AND TABLE_SCHEMA='ogAdmBD')
 	THEN
 		ALTER TABLE ogAdmBD.aulas
 			ADD validacion TINYINT(1) DEFAULT 0,
 			ADD paginalogin VARCHAR(100),
 			ADD paginavalidacion VARCHAR(100);
 	END IF;
-	IF NOT EXISTS (SELECT * FROM information_schema.columns
-			WHERE column_name='validacion' AND table_name='ordenadores' AND table_schema='ogAdmBD')
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA='ogAdmBD')
 	THEN
 		ALTER TABLE ogAdmBD.ordenadores
 			ADD validacion TINYINT(1) DEFAULT 0,
@@ -20,22 +20,22 @@ CREATE PROCEDURE addcols() BEGIN
 			ADD paginavalidacion VARCHAR(100);
 	END IF;
 	# Submenú para comandos.
-	IF NOT EXISTS (SELECT * FROM information_schema.columns
-			WHERE column_name='submenu' AND table_name='comandos' AND table_schema='ogAdmBD')
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='submenu' AND TABLE_NAME='comandos' AND TABLE_SCHEMA='ogAdmBD')
 	THEN
 		ALTER TABLE ogAdmBD.comandos
 			ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
 	END IF;
 	# Añadir índice para mnemónicos de parámetros.
-	IF NOT EXISTS (SELECT * FROM information_schema.statisticss
-			WHERE column_name='nemonico' AND table_name='parametros' AND table_schema='ogAdmBD')
+	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
+			WHERE COLUMN_NAME='nemonico' AND TABLE_NAME='parametros' AND TABLE_SCHEMA='ogAdmBD')
 	THEN
 		ALTER TABLE ogAdmBD.parametros
 			ADD KEY (nemonico);
 	END IF;
 	# Añadir imágenes diferenciales.
-	IF NOT EXISTS (SELECT * FROM information_schema.statisticss
-			WHERE column_name='tipo' AND table_name='imagenes' AND table_schema='ogAdmBD')
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='tipo' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA='ogAdmBD')
 	THEN
 		ALTER TABLE ogAdmBD.imagenes
 			ADD tipo TINYINT NULL,
