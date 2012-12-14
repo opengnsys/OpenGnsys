@@ -21,6 +21,9 @@
 #@version 1.0.4 - Detector de distribución y compatibilidad con CentOS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/05/04
+#@version 1.0.5 - Actualizar BD en la misma versión.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2012/12/14
 #*/
 
 
@@ -751,9 +754,13 @@ fi
 # Si existe fichero de actualización de la base de datos; aplicar cambios.
 INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
 REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+if [ "$INSTVERSION" == "$REPOVERSION" ]; then
+	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION.sql"
+else
+	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+fi
 if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-	echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
+	echoAndLog "Updating tables from file: $(basename $OPENGNSYS_DBUPDATEFILE)"
 	importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
 else
 	echoAndLog "Database unchanged."
