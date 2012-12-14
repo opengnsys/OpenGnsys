@@ -1,0 +1,81 @@
+### Procedimiento para actualizar la base de datos dentro de la versión 1.0.5.
+# Procedimiento para actualización condicional de tablas.
+delimiter '//'
+CREATE PROCEDURE addcols() BEGIN
+	# Añadir validación del cliente.
+	IF NOT EXISTS (SELECT * FROM information_schema.columns
+			WHERE column_name='validacion' AND table_name='aulas' AND table_schema='ogAdmBD')
+	THEN
+		ALTER TABLE ogAdmBD.aulas
+			ADD validacion TINYINT(1) DEFAULT 0,
+			ADD paginalogin VARCHAR(100),
+			ADD paginavalidacion VARCHAR(100);
+	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.columns
+			WHERE column_name='validacion' AND table_name='ordenadores' AND table_schema='ogAdmBD')
+	THEN
+		ALTER TABLE ogAdmBD.ordenadores
+			ADD validacion TINYINT(1) DEFAULT 0,
+			ADD paginalogin VARCHAR(100),
+			ADD paginavalidacion VARCHAR(100);
+	END IF;
+	# Submenú para comandos.
+	IF NOT EXISTS (SELECT * FROM information_schema.columns
+			WHERE column_name='submenu' AND table_name='comandos' AND table_schema='ogAdmBD')
+	THEN
+		ALTER TABLE ogAdmBD.comandos
+			ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
+	END IF;
+	# Añadir índice para mnemónicos de parámetros.
+	IF NOT EXISTS (SELECT * FROM information_schema.statisticss
+			WHERE column_name='nemonico' AND table_name='parametros' AND table_schema='ogAdmBD')
+	THEN
+		ALTER TABLE ogAdmBD.parametros
+			ADD KEY (nemonico);
+	END IF;
+	# Añadir imágenes diferenciales.
+	IF NOT EXISTS (SELECT * FROM information_schema.statisticss
+			WHERE column_name='tipo' AND table_name='imagenes' AND table_schema='ogAdmBD')
+	THEN
+		ALTER TABLE ogAdmBD.imagenes
+			ADD tipo TINYINT NULL,
+			ADD imagenid INT NOT NULL DEFAULT '0',
+			ADD ruta VARCHAR(250) NULL;
+		UPDATE ogAdmBd.imagenes SET tipo=1;
+		UPDATE ogAdmBD.grupos SET tipo=70 WHERE tipo=50;
+	END IF;
+END//
+# Ejecutar actualización condicional.
+delimiter ';'
+CALL addcols();
+DROP PROCEDURE addcols;
+
+# Nuevos comandos "Eliminar Imagen Cache" y "Generar Software Incremental".
+INSERT INTO ogAdmBD.comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
+	(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
+	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
+	(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba,met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
+	(14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
+	(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion')
+	ON DUPLICATE KEY UPDATE
+		descripcion=VALUES(descripcion), pagina=VALUES(pagina),
+		gestor=VALUES(gestor), funcion=VALUES(funcion), urlimg=VALUES(urlimg),
+		aplicambito=VALUES(aplicambito), visuparametros=VALUES(visuparametros),
+		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
+		activo=VALUES(activo), submenu=VALUES(submenu);
+
+# Parámetros para el comando "Generar Software Incremental".
+INSERT INTO ogAdmBD.parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
+	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
+	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),
+	(34, 'cpc', 'Copiar también en cache', '', '', '', 5, 1),
+	(35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1),
+	(36, 'rti', 'Ruta de origen', '', '', '', 0, 1),
+	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
+	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1)
+	ON DUPLICATE KEY UPDATE
+		nemonico=VALUES(nemonico), descripcion=VALUES(descripcion),
+		nomidentificador=VALUES(nomidentificador), nomtabla=VALUES(nomtabla),
+		nomliteral=VALUES(nomliteral), tipopa=VALUES(tipopa), visual=VALUES(visual);
+
