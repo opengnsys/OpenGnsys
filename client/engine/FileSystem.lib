@@ -219,10 +219,19 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben entre 2 y 4 parámetros.
 [ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-# Obtener dispositivo y tipo de sisitema de archivos.
+# Obtener fichero de dispositivo.
 PART="$(ogDiskToDev $1 $2)" || return $?
+# Error si la partición está montada o bloqueada.
+if ogIsMounted $1 $2; then
+    ogRaiseError $OG_ERR_PARTITION "$1 $2"       # Indicar nuevo error
+    return $?
+fi
+if ogIsLocked $1 $2; then
+    ogRaiseError $OG_ERR_LOCKED "$1 $2"
+    return $?
+fi
+# Obtener tipo de sisitema de archivos.
 TYPE="$(ogGetFsType $1 $2)"
-# Si no se detecto el tipo de sistema de ficheros
 if [ -z "$TYPE" ]; then
     # Si no se indico ningun tipo de sistema de ficheros se retorna
     if [ -z "$3" ]; then
@@ -292,18 +301,10 @@ else
     PARAMS="$PARAMS -L $LABEL"
 fi
 
-# Error si la particion esta montada o está bloqueada.
-if ogIsMounted $1 $2; then
-    ogRaiseError $OG_ERR_PARTITION "$1 $2"       # Indicar nuevo error
-    return $?
-fi
-if ogIsLocked $1 $2; then
-    ogRaiseError $OG_ERR_LOCKED "$1 $2"
-    return $?
-fi
-# Formatear en modo uso exclusivo.
+# Formatear en modo uso exclusivo (desmontar siempre).
 ogLock $1 $2
 trap "ogUnlock $1 $2" 1 2 3 6 9
+ogUnmount $1 $2
 eval $PROG $PARAMS $PART 2>/dev/null
 ERRCODE=$?
 case $ERRCODE in
