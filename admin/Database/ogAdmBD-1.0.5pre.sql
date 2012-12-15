@@ -1,48 +1,50 @@
 ### Procedimiento para actualizar la base de datos dentro de la versión 1.0.5.
+#use ogAdmBD
+
 # Procedimiento para actualización condicional de tablas.
 delimiter '//'
 CREATE PROCEDURE addcols() BEGIN
 	# Añadir validación del cliente.
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='aulas' AND TABLE_SCHEMA='ogAdmBD')
+			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='aulas' AND TABLE_SCHEMA=DATABASE())
 	THEN
-		ALTER TABLE ogAdmBD.aulas
+		ALTER TABLE aulas
 			ADD validacion TINYINT(1) DEFAULT 0,
 			ADD paginalogin VARCHAR(100),
 			ADD paginavalidacion VARCHAR(100);
 	END IF;
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA='ogAdmBD')
+			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
 	THEN
-		ALTER TABLE ogAdmBD.ordenadores
+		ALTER TABLE ordenadores
 			ADD validacion TINYINT(1) DEFAULT 0,
 			ADD paginalogin VARCHAR(100),
 			ADD paginavalidacion VARCHAR(100);
 	END IF;
 	# Submenú para comandos.
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='submenu' AND TABLE_NAME='comandos' AND TABLE_SCHEMA='ogAdmBD')
+			WHERE COLUMN_NAME='submenu' AND TABLE_NAME='comandos' AND TABLE_SCHEMA=DATABASE())
 	THEN
-		ALTER TABLE ogAdmBD.comandos
+		ALTER TABLE comandos
 			ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
 	END IF;
 	# Añadir índice para mnemónicos de parámetros.
 	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
-			WHERE COLUMN_NAME='nemonico' AND TABLE_NAME='parametros' AND TABLE_SCHEMA='ogAdmBD')
+			WHERE COLUMN_NAME='nemonico' AND TABLE_NAME='parametros' AND TABLE_SCHEMA=DATABASE())
 	THEN
-		ALTER TABLE ogAdmBD.parametros
+		ALTER TABLE parametros
 			ADD KEY (nemonico);
 	END IF;
 	# Añadir imágenes diferenciales.
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='tipo' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA='ogAdmBD')
+			WHERE COLUMN_NAME='tipo' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
 	THEN
-		ALTER TABLE ogAdmBD.imagenes
+		ALTER TABLE imagenes
 			ADD tipo TINYINT NULL,
 			ADD imagenid INT NOT NULL DEFAULT '0',
 			ADD ruta VARCHAR(250) NULL;
-		UPDATE ogAdmBd.imagenes SET tipo=1;
-		UPDATE ogAdmBD.grupos SET tipo=70 WHERE tipo=50;
+		UPDATE imagenes SET tipo=1;
+		UPDATE grupos SET tipo=70 WHERE tipo=50;
 	END IF;
 END//
 # Ejecutar actualización condicional.
@@ -50,8 +52,8 @@ delimiter ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
-# Nuevos comandos "Eliminar Imagen Cache" y "Generar Software Incremental".
-INSERT INTO ogAdmBD.comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
+# Nuevos comandos.
+INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
 	(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
 	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
 	(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba,met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
@@ -64,8 +66,8 @@ INSERT INTO ogAdmBD.comandos (idcomando, descripcion, pagina, gestor, funcion, u
 		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
-# Parámetros para el comando "Generar Software Incremental".
-INSERT INTO ogAdmBD.parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+# Parámetros para los comandos nuevos.
+INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
 	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
 	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
 	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),

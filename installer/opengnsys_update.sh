@@ -245,7 +245,7 @@ function importSqlFile()
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
             -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
-        mysql -u$dbuser -p"$dbpassword" --default-character-set=utf8 "$database" < $tmpfile
+        mysql -u$dbuser -p"$dbpassword" --default-character-set=utf8 -D "$database" < $tmpfile
 	status=$?
 	rm -f $tmpfile
 	if [ $status -ne 0 ]; then
