@@ -15,3 +15,4 @@ install python-openssl
 install python 
 install dmidecode 
 install hwinfo
+install realpath
