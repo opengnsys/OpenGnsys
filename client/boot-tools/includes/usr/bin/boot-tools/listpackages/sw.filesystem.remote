@@ -1,7 +1,7 @@
 #sw.filesystem.remote
 install nfs-common 
 install sshfs 
-install smbnetfs 
+install cifs-utils
 install smbclient 
 install davfs2 
 install open-iscsi 

@@ -43,7 +43,7 @@ mkdir -p ${DESTDIR}/boot;
 copy_exec /bin/bash-static /bin/bash
 copy_exec /usr/bin/unionfs-fuse
 copy_exec /sbin/mount.cifs
-copy_exec /sbin/mount.smbfs
+#copy_exec /sbin/mount.smbfs
 copy_exec /bin/lsmod
 
 
@@ -52,7 +52,7 @@ copy_exec /bin/lsmod
 #cp -prv /opt/opengnsys/client/lib/engine ${DESTDIR}/opt/opengnsys/lib/engine
 
 manual_add_modules cifs
-manual_add_modules smbfs
+#manual_add_modules smbfs
 manual_add_modules atl1e
 manual_add_modules squashfs
 manual_add_modules md4
