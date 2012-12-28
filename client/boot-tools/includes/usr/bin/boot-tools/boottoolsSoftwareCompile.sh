@@ -2,13 +2,16 @@
 ################################################################
 ##################### SOFTWARE #####################
 ################################################################
+OLDLANGUAGE=$LANGUAGE
+OLDLC_ALL=$LC_ALL
+OLDLANG=$LANG
 export LANGUAGE=C
 export LC_ALL=C
 export LANG=C
 
 
 source /opt/opengnsys/lib/engine/bin/ToolsGNU.c &>/dev/null
-cd /tmp
+pushd /tmp
 
 echo  "ctorrent "
 which ctorrent || ctorrent install &>/dev/null
@@ -42,19 +45,21 @@ cp /bin/busybox /bin/busyboxNEW
 # en scripts reboot y poweroff hacer llamada a busyboxOLD reboot|poweroff
 
 
-
 #gpt
+echo "gptfdisk"
 apt-get install -y uuid-dev libicu-dev libpopt-dev libpopt0 ncurses-base libncurses5-dev
-wget -O download.tgz http://sourceforge.net/projects/gptfdisk/files/gptfdisk/0.8.2/gptfdisk-0.8.2.tar.gz/download
-mkdir download
-tar xzvf download.tgz -C download
-cd download/gptfdisk-0.8.2
+wget -O download.tgz http://sourceforge.net/projects/gptfdisk/files/gptfdisk/0.8.5/gptfdisk-0.8.5.tar.gz/download -O gptfdisk-0.8.5.tar.gz
+tar xzvf gptfdisk-0.8.5.tar.gz
+cd gptfdisk-0.8.5
 make
-cp sgdisk gdisk fixparts cgdisk /sbin
+cp -va sgdisk gdisk fixparts cgdisk /sbin
 cd ..
-rm -fr download*
-
-
-
-
+rm -fr gptfdisk-0.8.5*
+ 
+popd
+export LANGUAGE=$OLDLANGUAGE
+export LC_ALL=$OLDLC_ALL
+export LANG=$OLDLANG
+ 
 history -c
+
