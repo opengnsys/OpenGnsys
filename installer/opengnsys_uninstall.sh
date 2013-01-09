@@ -15,21 +15,24 @@
 #@version 1.0.4 - Compatibilidad con otras distribuciones y auto configuración de acceso a BD
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/03/28
+#@version 1.0.5 - Usar las mismas variables que el script de instalación.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2013/01/09
 
 
 ####  AVISO: Editar configuración de acceso.
 ####  WARNING: Edit access configuration
-MYSQLROOT="passwordroot"	# Clave de root de MySQL
-DATABASE="ogAdmBD"		# Base de datos de administración
-DBUSER="usuog"			# Usuario de acceso a la base de datos
+MYSQL_ROOT_PASSWORD="passwordroot"	# Clave de root de MySQL
+OPENGNSYS_DATABASE="ogAdmBD"		# Base de datos de administración
+OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
 
 
 ####  AVISO: NO EDITAR variables de configuración.
 ####  WARNING: DO NOT EDIT configuration variables.
-OPENGNSYS="/opt/opengnsys"	# Directorio de OpenGnSys
-OGIMG="images"			# Directorio de imágenes del repositorio
-CLIENTUSER="opengnsys"		# Usuario Samba
-OLDDATABASE="ogBDAdmin"		# Antigua base de datos
+OPENGNSYS="/opt/opengnsys"		# Directorio de OpenGnSys
+OGIMG="images"				# Directorio de imágenes del repositorio
+OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario Samba
+OPENGNSYS_OLDDATABASE="ogBDAdmin"	# Antigua base de datos
 
 
 # Sólo ejecutable por usuario root
@@ -52,21 +55,21 @@ fi
 # Eliminar bases de datos.
 echo "Erasing OpenGnSys database."
 DROP=1
-if ! mysql -u root -p"$MYSQLROOT" <<<"quit" 2>/dev/null; then
+if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
     stty -echo
-    read -p  "- Please, insert MySQL root password: " MYSQLROOT
+    read -p  "- Please, insert MySQL root password: " MYSQL_ROOT_PASSWORD
     echo ""
     stty echo
-    if ! mysql -u root -p"$MYSQLROOT" <<<"quit" 2>/dev/null; then
+    if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
 	DROP=0
 	echo "Warning: database not erased."
     fi
 fi
 if test $DROP; then
-    mysql -u root -p"$MYSQLROOT" <<<"DROP DATABASE $OLDDATABASE;" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP DATABASE $DATABASE;" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP USER '$DBUSER';" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP USER '$DBUSER'@'localhost';" 2>/dev/null
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP DATABASE $OPENGNSYS_OLDDATABASE;" 2>/dev/null
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP DATABASE $OPENGNSYS_DATABASE;" 2>/dev/null
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP USER '$OPENGNSYS_DB_USER';" 2>/dev/null
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP USER '$OPENGNSYS_DB_USER'@'localhost';" 2>/dev/null
 fi
 # Quitar configuración específica de Apache.
 test which a2dissite 2>/dev/null && a2dissite opengnsys
@@ -90,8 +93,8 @@ for serv in smbd smb ; do
     [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
 done
 # Eliminar usuario de OpenGnSys.
-smbpasswd -x $CLIENTUSER
-userdel $CLIENTUSER
+smbpasswd -x $OPENGNSYS_CLIENT_USER
+userdel $OPENGNSYS_CLIENT_USER
 # Tareas manuales a realizar después de desinstalar.
 echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"
