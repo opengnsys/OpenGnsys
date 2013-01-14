@@ -156,10 +156,15 @@ ogPostConfigureFS()
 	echo "order hosts,bind" > /etc/host.conf
 	echo "multi on" >> /etc/host.conf
 	
-	#configuramos el dns 
-	#echo "nameserver $ogdns" > /etc/resolv.conf 
-	echo "nameserver $ogdns" > /etc/resolvconf/resolv.conf.d/tail
+	#configuramos el dns anterior ubuntu 12.04
+	#####echo "nameserver $ogdns" > /etc/resolv.conf 
+	#configuramos el dns posterior ubuntu 12.04
+	#####echo "nameserver $ogdns" > /etc/resolvconf/resolv.conf.d/tail	
+	mkdir -p /run/resolvconf
+	touch /run/resolvconf/resolv.conf
+	echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
 	
+		
 	
 	# configuramos el /etc/networks
 	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
