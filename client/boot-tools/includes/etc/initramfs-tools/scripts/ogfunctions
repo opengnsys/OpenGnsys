@@ -164,7 +164,8 @@ ogPostConfigureFS()
 	touch /run/resolvconf/resolv.conf
 	echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
 	
-		
+	#configuramos el uso del servicio http proxy
+	export http_proxy="$ogproxy" 	
 	
 	# configuramos el /etc/networks
 	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
