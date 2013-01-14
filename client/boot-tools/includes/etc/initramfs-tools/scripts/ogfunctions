@@ -160,12 +160,12 @@ ogPostConfigureFS()
 	#####echo "nameserver $ogdns" > /etc/resolv.conf 
 	#configuramos el dns posterior ubuntu 12.04
 	#####echo "nameserver $ogdns" > /etc/resolvconf/resolv.conf.d/tail	
-	mkdir -p /run/resolvconf
-	touch /run/resolvconf/resolv.conf
-	echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
+	[ -n "${ogdns}" ]  && mkdir -p /run/resolvconf
+	[ -n "${ogdns}" ]  && touch /run/resolvconf/resolv.conf
+	[ -n "${ogdns}" ] && echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
 	
 	#configuramos el uso del servicio http proxy
-	export http_proxy="$ogproxy" 	
+	[ -n "${ogproxy}" ] && export http_proxy="$ogproxy" 	
 	
 	# configuramos el /etc/networks
 	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
