@@ -3,11 +3,11 @@
 
 #svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
 #svn checkout http://www.opengnsys.es/svn/branches/version2/  /tmp/opengnsys_installer/opengnsys2
-find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
-
-apt-get -y --force-yes install  subversion
+#find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
+#apt-get -y --force-yes install  subversion
 #export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
 #VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
+
 VERSIONSVN=$(cat /tmp/versionsvn.txt)
 VERSIONBOOTTOOLS=ogLive
 
@@ -19,13 +19,15 @@ SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
 SVNOG2=/tmp/opengnsys_installer/opengnsys2
  
-OGCLIENTMOUNT="$BTROOTFSMNT"
+OGCLIENTMOUNT=""
 
-OSDISTRIB=$(lsb_release -is)
-OSCODENAME=$(lsb_release -cs)
-OSRELEASE=$(uname -a | awk '{print $3}')
-uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
-OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+OSDISTRIB=${OSDISTRIB:-$(lsb_release -is)}
+OSCODENAME=${OSCODENAME:-$(lsb_release -cs)}
+OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
+if [ -z "$OSARCH" ]; then
+	uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
+fi
+OSHTTP=${OSHTTP:-"http://es.archive.ubuntu.com/ubuntu/"}
 
 echo "$OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP"
 
@@ -94,19 +96,15 @@ fi
 
 #Compatiblidad con og2
 cp -av ${SVNCLIENTSTRUCTURE}/bin/browser2 $OGCLIENTMOUNT/bin
-
 cp -av ${SVNOG2}/ogr/ogr $OGCLIENTMOUNT/opt/opengnsys/bin/
-
 cp -av ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.7/libogr.py
 cp -av ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.6/libogr.py
 cp -av ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/opt/opengnsys/lib/python
-
 
 echo "mkdir -p /opt/opengnsys/lib/engine/"
 mkdir -p /opt/opengnsys/engine/
 echo "cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/" 
 cp -av ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/
-
 
 cp -av ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 
@@ -114,8 +112,8 @@ cp -av ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 cp -av ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
 
-echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN}" > $OGCLIENTMOUNT/$NAMEISOCLIENTFILE
-echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN}" > $OGCLIENTMOUNT/$NAMEHOSTCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN}" > /$NAMEISOCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN}" > $NAMEHOSTCLIENTFILE
 
 
 history -c

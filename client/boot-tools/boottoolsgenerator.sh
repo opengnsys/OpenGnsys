@@ -69,8 +69,8 @@ echo "FASE 4 - Configurar acceso schroot al Segundo Sistema de archivos (img)"
 cat /etc/schroot/schroot.conf | grep $BTROOTFSIMG || btogSetFsAccess
 ###########################################################################
 echo "FASE 5 - Incorporando ficheros OpenGnSys el sistema raiz rootfs "
-cp -av ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp/
-chmod 777 /tmp/boot-tools/*.sh
+cp -a ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp
+chmod +x /tmp/boot-tools/*.sh
 umount $BTROOTFSMNT 2>/dev/null
 schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh 
 ############################################################################################
@@ -79,7 +79,6 @@ echo "Fase 6.1 instalar paquetes deb con apt-get"
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareInstall.sh 
 echo "Fase 6.2 compilar software."
 cd /
-schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
 schroot -p -c IMGogclient -- /usr/bin/boot-tools/boottoolsSoftwareCompile.sh
 cd -
 
@@ -111,7 +110,5 @@ echo "Fase 8.3 Generar la ISO"
 btogIsoGenerator
 ######################################################################3
 ########################################################################
-# Mostrar sumario de la instalaciÃ³n e instrucciones de post-instalaciÃ³n.
-installationSummary
 echoAndLog "OpenGnSys installation finished at $(date)"
 
