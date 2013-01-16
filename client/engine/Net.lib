@@ -92,25 +92,6 @@ HOST="$HOSTNAME"
 
 
 #/**
-#         ogGetNetInterface
-#@brief   Muestra la interfaz de red del sistema
-#@return  str_interface - interfaz de red
-#@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
-#@note    Usa las variables utilizadas por el initrd "/etc/net-ethX.conf
-#@author  Antonio J. Doblas Viso. Universidad de Malaga.
-#@date    2011-02-24
-#*/ ##
-function ogGetNetInterface ()
-{
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  eth0"
-    return
-fi
-[ -n "$DEVICE" ] && echo "$DEVICE"
-}
-
-
-#/**
 #         ogGetIpAddress
 #@brief   Muestra la dirección IP del sistema
 #@return  str_ip - Dirección IP
@@ -132,8 +113,8 @@ if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  192.168.0.10"
     return
 fi
-if [ -n $IPV4ADDR ]; then
-     IP=$IPV4ADDR
+if [ -n "$IPV4ADDR" ]; then
+     IP="$IPV4ADDR"
 else
     # Obtener direcciones IP.
     if [ -n "$DEVICE" ]; then
@@ -143,7 +124,7 @@ else
     fi
 fi
 # Mostrar solo la primera.
-echo ${IP%%/*}       # (comentario para Doxygen) */
+echo "${IP%%/*}"       # (comentario para Doxygen) */
 }
 
 
@@ -173,6 +154,25 @@ else
 fi
 # Mostrar sólo la primera.
 echo ${MAC%% *}
+}
+
+
+#/**
+#         ogGetNetInterface
+#@brief   Muestra la interfaz de red del sistema
+#@return  str_interface - interfaz de red
+#@version 1.0 - Integración OpenGnSys 0.10 Opengnsys 0.10-testing
+#@note    Usa las variables utilizadas por el initrd "/etc/net-ethX.conf
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011-02-24
+#*/ ##
+function ogGetNetInterface ()
+{
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  eth0"
+    return
+fi
+[ -n "$DEVICE" ] && echo "$DEVICE"
 }
 
 
