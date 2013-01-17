@@ -56,6 +56,25 @@ cp -va sgdisk gdisk fixparts cgdisk /sbin
 cd ..
 rm -fr gptfdisk-0.8.5*
  
+# Mach-O loader for Linux
+echo "maloader"
+wget https://github.com/shinh/maloader/archive/master.zip
+unzip master.zip
+cd maloader-master
+perl -pi -le 'print "#include <unistd.h>" if $. == 45' ld-mac.cc
+if [ "$(arch)" == "x86_64" ]; then
+    ln -fs /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so 2>/dev/null
+    make release
+else
+    ln -fs /lib/i386-linux-gnu/libcrypto.so.1.0.0 /lib/libcrypto.so 2>/dev/null
+    make clean
+    make all BITS=32
+fi
+cp -va ld-mac /usr/bin
+cp -va libmac.so /usr/lib
+cd ..
+rm -fr master.zip maloader-master
+
 popd
 export LANGUAGE=$OLDLANGUAGE
 export LC_ALL=$OLDLC_ALL
