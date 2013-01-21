@@ -493,7 +493,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `netdriver` varchar( 30 ) NOT NULL DEFAULT 'generic',
   `fotoord` varchar( 250 ) NOT NULL,
   `validacion` tinyint(1) DEFAULT '0',
-  `paginalogin` varchar100),
+  `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
   PRIMARY KEY (`idordenador`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
