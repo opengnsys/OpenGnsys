@@ -18,7 +18,7 @@
 
 
 #Variables
-TYPECLIENT=host
+TYPECLIENT="host"
 WORKDIR=/tmp/opengnsys_installer
 INSTALL_TARGET=/opt/opengnsys
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
@@ -43,7 +43,7 @@ echo "FASE 1 - Asignación de variables"
 #obtenemos las variables necesarias y la información del host.
 btogGetVar
 echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
-btogGetOsInfo
+btogGetOsInfo $TYPECLIENT
 ##########################################################################
 echo "FASE 2 - Instalación de software adicional."
 cat /etc/apt/sources.list | grep "http://free.nchc.org.tw/drbl-core" || echo "deb http://free.nchc.org.tw/drbl-core drbl stable " >> /etc/apt/sources.list
@@ -106,6 +106,7 @@ echo "Fase 8.1 Generar el initrd"
 btogFsInitrd
 echo "Fase 8.2 Generar fichero sqfs a partir del fichero img"
 btogFsSqfs
+umount $BTROOTFSMNT 2>/dev/null
 echo "Fase 8.3 Generar la ISO" 
 btogIsoGenerator
 ######################################################################3
