@@ -8,8 +8,8 @@
 #export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
 #VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
 
-VERSIONSVN=$(cat /tmp/versionsvn.txt)
-VERSIONBOOTTOOLS=ogLive
+#VERSIONSVN=$(cat /tmp/versionsvn.txt)
+VERSIONBOOTTOOLS="ogLive"
 
 NAMEISOCLIENTFILE="/tmp/opengnsys_info_rootfs" 
 NAMEHOSTCLIENTFILE="/tmp/opengnsys_chroot"
@@ -21,11 +21,13 @@ SVNOG2=/tmp/opengnsys_installer/opengnsys2
  
 OGCLIENTMOUNT=""
 
+OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
+[ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
 OSDISTRIB=${OSDISTRIB:-$(lsb_release -is)}
 OSCODENAME=${OSCODENAME:-$(lsb_release -cs)}
 OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
 if [ -z "$OSARCH" ]; then
-	uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
+	uname -a | grep x86_64 > /dev/null  &&  OSARCH="amd64" || OSARCH="i386"
 fi
 OSHTTP=${OSHTTP:-"http://es.archive.ubuntu.com/ubuntu/"}
 
@@ -111,7 +113,7 @@ cp -av ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
 
 cp -av ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
 
-
+# El fichero de configuración debe sustituir a los 2 ficheros (borrar las 2 líneas).
 echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN}" > /$NAMEISOCLIENTFILE
 echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN}" > $NAMEHOSTCLIENTFILE
 
