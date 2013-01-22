@@ -42,36 +42,52 @@ export VERSIONBOOTTOOLS="ogLive"
 #@date    2011/08/03
 function btogGetOsInfo ()
 {
-		case $1 in
-		lenny|LENNY)
-			export OSDISTRIB=debian
-			export OSCODENAME=lenny
-			export OSRELEASE="2.6.28-11-generic"
-			export OSARCH=i386
-			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
+OGCLIENTCFG=/tmp/ogclient.cfg
+case "${1,,}" in
+	lenny)
+		OSDISTRIB="debian"
+		OSCODENAME="lenny"
+		OSRELEASE="2.6.28-11-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-		lucid|LUCID)
-			export OSDISTRIB=ubuntu
-			export OSCODENAME=lucid
-			export OSRELEASE="2.6.32-21-generic-pae"
-			export OSARCH=i386
-			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
+	lucid)
+		OSDISTRIB="ubuntu"
+		OSCODENAME="lucid"
+		OSRELEASE="2.6.32-21-generic-pae"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-		host | HOST | *)
-			export OSDISTRIB=$(lsb_release -is)
-			export OSCODENAME=$(lsb_release -cs)
-			export OSRELEASE=$(uname -a | awk '{print $3}')
-			uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
-			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+	host | *)
+		OSDISTRIB=$(lsb_release -is)
+		OSCODENAME=$(lsb_release -cs)
+		OSRELEASE=$(uname -a | awk '{print $3}')
+		uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
+		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	esac
+esac
 SVNURL="http://opengnsys.es/svn/branches/version1.0/client"
-VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
-export NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
-export NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
+VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
+NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
+NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
+export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
+export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
+### El fichero de configuración debe sustituir a estos 3 ficheros (borrar las 3 líneas siguientes).
 echo "$VERSIONSVN" > /tmp/versionsvn.txt
 echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
 echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
+# Generar fichero de configuración.
+cat << EOT > $OGCLIENTCFG
+TYPECLIENT="$1"
+OSDISTRIB="$OSDISTRIB"
+OSCODENAME="$OSCODENAME"
+OSRELEASE="$OSRELEASE"
+OSARCH="$OSARCH"
+OSHTTP="$OSHTTP"
+VERSIONSVN="$VERSIONSVN"
+NAMEISOCLIENT="$NAMEISOCLIENT"
+NAMEHOSTCLIENT="$NAMEHOSTCLIENT"
+EOT
 }
 
 # btogSetFsVirtual: Crea y formatea el fichero - disco duro virtual
@@ -170,7 +186,7 @@ function btogSetFsBase ()
 {
 
 # Dependencias
-[ -z "$OSCODENAME" ] && btogGetOsInfo
+[ -z "$OSCODENAME" ] && btogGetOsInfo $TYPECLIENT
 
 echoAndLog "$FUNCNAME:  Iniciando la generación del sistema de archivos "
 	
@@ -178,12 +194,12 @@ echoAndLog "$FUNCNAME:  Iniciando la generación del sistema de archivos "
 mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
 mount | grep $BTROOTFSMNT && echoAndLog "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 OK   " || errorAndLog  "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 : FAILURE  "
 
-debootstrap  --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
+debootstrap --arch=$OSARCH --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
 #debootstrap --arch=$OSARCH ${OSCODENAME} ${BTROOTFSMNT} http://archive.ubuntu.com/ubuntu/
 
 
 if [ $? -ne 0 ]; then
-	errorAndLog "$FUNCNAME:  debootstrap --include=linux-image-${OSRELEASE},linux-headers-${OSRELEASE} --arch=$OSARCH --components=main,universe $OSCODENAME $BTROOTFSMNT $OSHTTP : ha fallado!"
+	errorAndLog "$FUNCNAME:  debootstrap --arch=$OSARCH --components=main,universe $OSCODENAME $BTROOTFSMNT $OSHTTP : ha fallado!"
 	mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
 	return 3
 else
@@ -259,7 +275,7 @@ function btogFsInitrd ()
 {
 #DEPENDENCIAS
 [ -z "$BTROOTFSIMG" ] && btogGetVar
-[ -z "$OSCODENAME" ] && btogGetOsInfo
+[ -z "$OSCODENAME" ] && btogGetOsInfo $TYPECLIENT
 
 cd /
 schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsInitrdGenerate.sh
@@ -294,7 +310,7 @@ function btogFsSqfs ()
 {
 #Dependencias.
 [ -z "$BTROOTFSIMG" ] && btogGetVar
-[ -z "$OSCODENAME" ] && btogGetOsInfo
+[ -z "$OSCODENAME" ] && btogGetOsInfo $TYPECLIENT
 
 echoAndLog "$FUNCNAME: Iniciando la creación del sistema de archivos en sqfs "
 # si ya existe un sqfs lo renombramos
