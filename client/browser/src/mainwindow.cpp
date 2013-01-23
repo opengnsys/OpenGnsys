@@ -14,6 +14,8 @@
 #include <QTabWidget>
 #include <QWebView>
 #include <QLineEdit>
+#include <QNetworkReply>
+#include <QSslError>
 
 #include "qtermwidget.h"
 
@@ -97,6 +99,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_web,SIGNAL(loadProgress(int)),this,SLOT(slotWebLoadProgress(int)));
     connect(m_web,SIGNAL(urlChanged(const QUrl&)),this,
             SLOT(slotUrlChanged(const QUrl&)));
+    // Ignore SSL errors.
+    connect(m_web->page()->networkAccessManager(),
+            SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)), this,
+            SLOT(slotSslErrors(QNetworkReply*)));
 
     // Process signals
     connect(m_process,SIGNAL(started()),this,SLOT(slotProcessStarted()));
@@ -232,6 +238,11 @@ void MainWindow::slotWebLoadFinished(bool ok)
 void MainWindow::slotUrlChanged(const QUrl &url)
 {
     m_webBar->setText(url.toString());
+}
+
+void MainWindow::slotSslErrors(QNetworkReply* reply)
+{
+    reply->ignoreSslErrors();
 }
 
 void MainWindow::slotProcessStarted()

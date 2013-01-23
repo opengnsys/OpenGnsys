@@ -10,6 +10,8 @@
 #include <QProcess>
 #include <QMap>
 #include <QMainWindow>
+#include <QNetworkReply>
+#include <QSslError>
 
 class QWebView;
 class QTextEdit;
@@ -38,6 +40,7 @@ class MainWindow : public QMainWindow
         void slotWebLoadStarted();
         void slotWebLoadFinished(bool ok);
         void slotWebLoadProgress(int progress);
+	void slotSslErrors(QNetworkReply* reply);
 
         // Funciones que manejan cada vez que el proceso hace algo
         void slotProcessStarted();
