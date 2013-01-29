@@ -15,28 +15,45 @@ ln -s /bin/true /sbin/initctl
 #Limpiamos y actualizamos los repositorios apt
 apt-get clean
 apt-get update
+apt-get upgrade -y
 
 #Desactivamos el hook del oginitrd.img para evitar problemas, al final de este escripts se activará
 mv /etc/initramfs-tools/hooks/oghooks /etc/initramfs-tools/
 
 # Preparamos el mtab  necesario para la instalacion correcta de paquetes.
-echo " /dev/sda1 / ext4 rw,errors=remount-ro 0 0   " > /etc/mtab
+echo "/dev/sda1 / ext4 rw,errors=remount-ro 0 0" > /etc/mtab
 
 
 #Instalamos el kernel.
 #Deteccion de la versión y kernel a usar
-export OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-export OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
-export OSRELEASE=$(uname -a | awk '{print $3}')
-uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
-export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
+[ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
+OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
+if [ -z "$OSARCH" ]; then
+	uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
+fi
 # inicio de la instalacion
-apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE} linux-image-$RELEASE 
+if [ "$OSRELEASE" == "3.7.3-030703-generic" ]; then
+	# Descargar e instalar Kernel 3.7.
+	mkdir -p /tmp/kernel
+	pushd /tmp/kernel
+	apt-get -y --force-yes install wget crda libnl-3-200 libnl-genl-3-200 wireless-regdb
+	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.3-raring/linux-image-3.7.3-030703-generic_3.7.3-030703.201301171415_$OSARCH.deb
+	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.3-raring/linux-image-extra-3.7.3-030703-generic_3.7.3-030703.201301171415_$OSARCH.deb
+	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.3-raring/linux-headers-3.7.3-030703-generic_3.7.3-030703.201301171415_$OSARCH.deb
+	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.3-raring/linux-headers-3.7.3-030703_3.7.3-030703.201301171415_all.deb
+	dpkg -i *.deb
+	popd
+	rm -fr /tmp/kernel
+else
+	# Instalar Kernel del repositorio de paquetes.
+	apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE} linux-image-$RELEASE 
+fi
 
 
 #Eliminamos cualquier busybox previo:  antes del busybox
-apt-get -y --force-yes remove busybox
-apt-get -y --force-yes remove busybox-static
+#apt-get -y --force-yes remove busybox
+#apt-get -y --force-yes remove busybox-static
 
 #estos paquetes ofrecen interaccion.
 # si es actualización, ya existe el fichero /etc/ssh/ssh_config
@@ -80,6 +97,7 @@ echo "   " > /etc/mtab
 #localepurge
 #rm /var/lib/dbus/machine-id; rm /sbin/initctl; dpkg-divert --rename --remove /sbin/initctl; 
 #FIN ADV
+
 apt-get clean
 apt-get autoclean
 apt-get autoremove

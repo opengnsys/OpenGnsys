@@ -47,7 +47,8 @@ WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
 
 INSTALL_TARGET=/opt/opengnsys
-LOG_FILE=/tmp/opengnsys_installation.log
+OGLOGFILE=$INSTALL_TARGET/log/opengnsys_installation.log
+LOG_FILE=/tmp/$(basename $OGLOGFILE)
 
 # Base de datos
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
@@ -1110,6 +1111,10 @@ function createDirs()
 		return 1
 	fi
 
+	# Mover el fichero de registro instalación al directorio de logs.
+	echoAndLog "${FUNCNAME}(): moving installation log file"
+	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE
+
 	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0
 }
@@ -1397,6 +1402,7 @@ function installationSummary()
 	echo       "=============================="
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
+	echoAndLog "Installation log file:            $LOG_FILE"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"

@@ -58,6 +58,13 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	quantal)
+		OSDISTRIB="ubuntu"
+		OSCODENAME="quantal"
+		OSRELEASE="3.7.3-030703-generic"
+		uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
 	host | *)
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
