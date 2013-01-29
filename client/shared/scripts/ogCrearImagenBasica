@@ -1,0 +1,118 @@
+#!/bin/bash
+#___________________________________________________________________
+#
+#  CREAR IMAGEN BÁSICA
+#___________________________________________________________________
+#
+# Parámetros recibidos desde el cliente:
+#
+# $1 Número de disco
+# $2 Número de particion
+# $3 Nombre canónico de la imagen básica (sin extensión)
+# $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
+# $5 Es una cadena "nnnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
+#		1XXX: Borrar la imagen del repositorio antes de crearla
+#		X1XX: Copiar Imagen básica también a la cache 
+#		XX1X: Borrar previamente la imagen de la cache antes de copiarla
+#		XXX1: No borrar archivos en destino
+#		El valor X indica que no importa el valor que tenga el dato
+# $6 Ruta de origen de la Imagen (Carpeta)
+
+#___________________________________________________________________
+#
+# Control parámetros
+#___________________________________________________________________
+
+	PROG="$(basename $0)"
+	if [ $# -lt 5 ]; then
+		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio"
+		usage="$usage copiar_a_caché Borrar_cache_previamente Ruta_origen"
+		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
+		exit $?
+	fi
+	
+	DISCO=$1
+	NPART=$2
+	NOMBREIMG=$3
+	IPREPOSITORIO=$4
+	
+	flag=$5
+	echo "flah:$flag">/tmp/log
+	BORRARIMG=${flag:0:1}
+	COPIACACHE=${flag:1:1}
+	BORRACACHE=${flag:2:1}
+	NOBORRACHIVOS=${flag:3:1}
+	
+	RUTAORIGEN=$6
+#___________________________________________________________________
+#
+# Variables y configuración logs
+#___________________________________________________________________
+	
+	source /opt/opengnsys/scripts/ImagenesSincronizadas.lib 
+#___________________________________________________________________
+#
+# Proceso
+#___________________________________________________________________
+
+  echo "Creacion de imagen basica..." | tee -a $OGLOGSESSION $OGLOGFILE
+
+	ORIGEN=$PARTICION$RUTAORIGEN/	
+	DESTINO="$REPOSITORIO/$NOMBREIMG/"
+	
+	# Borrado previo de imagen en repositorio
+	if [ $BORRARIMG -eq 1 ]; then
+	   echo "Borrando previamente imagen del repositorio" | tee -a $OGLOGSESSION $OGLOGFILE
+	fi
+	
+	# Creación de la imagen básica
+	echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
+	crearListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART	
+	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1
+	RETVAL=$?	
+	if [ $RETVAL -ne 0 ]; then
+	   exit $OG_ERR_IMAGE
+	fi	
+
+	# Copia opcional a la caché
+	if [ $COPIACACHE -eq 1 ]; then
+		echo "Copiando imagen a cache" | tee -a $OGLOGSESSION $OGLOGFILE
+		CACHE=$(montaCache)
+		if [ -z $CACHE ]; then
+			echo "No se ha podido copiar la imagen a la cache" | tee -a $OGLOGSESSION $OGLOGFILE
+		    exit 0
+		fi			
+
+		# Borrar imagen de la caché
+		if [ $BORRACACHE -eq 1 ]; then
+			echo "Borrando imagen $NOMBREIMG de la cache" | tee -a $OGLOGSESSION $OGLOGFILE
+		    rm -R $CACHE$OGIMG/$NOMBREIMG
+		fi	
+
+		# Redefinir destino	
+		DESTINO="$CACHE$OGIMG/$NOMBREIMG/"
+
+		echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
+	
+		crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2
+		
+		RETVAL=$?	
+		if [ $RETVAL -ne 0 ]; then
+		   exit $OG_ERR_IMAGE
+		fi		
+   fi	
+
+	eliminaListaAcl $ORIGEN $SISTEMAFICHERO	
+	
+	#comprimeImagen  $NOMBREIMG 
+	RETVAL=$?	
+	if [ $RETVAL -ne 0 ]; then
+	   exit $OG_ERR_IMAGE
+	fi		
+#___________________________________________________________________
+#
+# Retorno
+#___________________________________________________________________
+
+	exit 0

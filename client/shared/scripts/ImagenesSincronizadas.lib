@@ -24,6 +24,7 @@
 		# Solo ejecutable por OpenGnSys Client.
 		PATH=$PATH:$(dirname $0)
 		PROG=$(basename $0)
+
 		CALLER=$(ogGetCaller)
 		if [ "$CALLER" != "ogAdmClient" ]; then
 			ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
@@ -36,8 +37,23 @@
 		#___________________________________________________________________
 
 		TIPOPARTICION="$(ogGetPartitionId $DISCO $NPART)"; # Tipo de particion	
-		SISTEMAFICHERO="$(ogGetOsType $DISCO $NPART)" # Sistema de ficheros	
+		if [ -z $TIPOPARTICION ]; then
+		echo "No existe la partición $NPART, debe crearla" | tee -a $OGLOGSESSION $OGLOGFILE
+		exit $OG_ERR_PARTITION
+		fi
+
 		PARTICION=$(ogMount $DISCO $NPART); # Monta partición	
+		if [ -z $PARTICION ]; then
+		echo "No existe la unidad /dev/sda$NPART o no está formateada" | tee -a $OGLOGSESSION $OGLOGFILE
+		exit $OG_ERR_PARTITION
+		fi
+
+		SISTEMAFICHERO="$(ogGetFsType $DISCO $NPART)" # Sistema de ficheros	
+		if [ -z $SISTEMAFICHERO ]; then
+		echo "No se ha definido un sistema de fichero en la unidad /dev/sda$NPART. Debe formatearla previamente." | tee -a $OGLOGSESSION $OGLOGFILE
+		exit $OG_ERR_PARTITION
+		fi
+
 		REPOSITORIO="usuog@$IPREPOSITORIO::imagenes" # Ruta de las imagenes en el repositorio
 		
 		# Borrar archivos en destino
@@ -48,15 +64,16 @@
 		
 		FILE_ACL="ogwinimage.acl"
 
+		# Opción de compresión
+		OP_COMPRESS="-z"
+
 		#___________________________________________________________________
 		#
 		# Crea un fichero con la clave remota del rsync y actualiza el 
 		# parámetro "--password-file" para que no se pida ésta en el proceso.
 		#___________________________________________________________________
 		#
-		f="/tmp/passrsync" # Creación del archivo de claves
-		echo "passusuog">$f # Escribe dentro la clave remota
-		chmod 400 $f # Es obligatorio que el archivo de claves tenga estos permisos
+		f="/etc/passrsync" # Lectura del archivo de claves
 		FILE_PASSWD="--password-file=$f" 
 	
 	
@@ -138,13 +155,14 @@
 	function crearImagen()
 	{
 		case "$3" in 
-			Windows)
+			NTFS)
 				OP_ARCHIVO="-aH"
-				OP_EXCLUDE="--exclude '$1pagefile.sys'"
+				rm "$1pagefile.sys"
+				#OP_EXCLUDE="--exclude 'pagefile.sys'"
 			;;
-			Linux)
+			 EXT2 | EXT3 | EXT4 )
 				OP_ARCHIVO="-alH"
-				OP_EXCLUDE="--exclude '/tmp ..exclude '/proc' --exclude='/sys'"
+				OP_EXCLUDE="--exclude 'tmp' --exclude 'proc' --exclude 'sys'"
 			;;
 		esac
 
@@ -170,9 +188,8 @@
 			;;
 		esac
 
-
-		echo "rsync $OP_ARCHIVO $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2 " | tee -a $OGLOGSESSION $OGLOGFILE
-		rsync $OP_ARCHIVO $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2>$FREG;
+		echo "rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2 " | tee -a $OGLOGSESSION $OGLOGFILE
+		rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2>$FREG;
 	}
 	
 	#___________________________________________________________________
@@ -200,10 +217,10 @@
 	function restaurarImagen()
 	{
 		case "$3" in 
-			Windows)
+			NTFS)
 				OP_ARCHIVO="-aH"
 			;;
-			Linux)
+			EXT2 | EXT3 | EXT4)
 				OP_ARCHIVO="-alH"
 			;;
 		esac
@@ -216,8 +233,9 @@
 				OP_PASSWD=""
 			;;
 		esac
-		echo "rsync $OP_ARCHIVO $OP_DELETE $OP_PASSWD $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
-		rsync $OP_ARCHIVO $OP_DELETE $OP_PASSWD $1 $2>$OGLOGCOMMAND;
+		
+		echo "rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_PASSWD $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
+		rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_PASSWD $1 $2>$OGLOGCOMMAND;
 	}
 	
 	#___________________________________________________________________
@@ -241,7 +259,7 @@
 	function crearListaAcl()
 	{
 		case "$3" in 
-			Windows)
+			NTFS)
 				echo "Creando lista de control de acceso a ficheros para el sistema windows de la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
 				echo "Desmontando la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
 				ogUnmount $4 $5 | tee -a $OGLOGSESSION $OGLOGFILE
@@ -251,9 +269,6 @@
 				ogMount $4 $5
 				echo "Copiando archivo de listas de control (ACL) desde /tmp/$FILE_ACL a $1." | tee -a $OGLOGSESSION $OGLOGFILE				
 				cp /tmp/$FILE_ACL $1.
-			;;
-			Linux)
-
 			;;
 		esac
 	}	
@@ -278,8 +293,7 @@
 	function restauraListaAcl()
 	{
 		case "$3" in 
-			Windows)
-
+			NTFS)
 				echo "Restaurando lista de control de acceso a ficheros para el sistema windows de la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE	
 				echo "Copiando archivo de listas de control (ACL) desde $2$FILE_ACL a /tmp/." | tee -a $OGLOGSESSION $OGLOGFILE				
 				cp $2$FILE_ACL /tmp/.
@@ -291,9 +305,6 @@
 				ogMount $4 $5
 				echo "Borrando archivo de listas de control (ACL) de $2$FILE_ACL" | tee -a $OGLOGSESSION $OGLOGFILE				
 				rm $2$FILE_ACL
-			;;
-			Linux)
-
 			;;
 		esac
 	}	
@@ -315,12 +326,34 @@
 	function eliminaListaAcl()
 	{
 		case "$2" in 
-			Windows)
+			NTFS)
 				echo "Borrando archivo de listas de control (ACL) de $1$FILE_ACL" | tee -a $OGLOGSESSION $OGLOGFILE				
 				rm $1$FILE_ACL
 			;;
-			Linux)
-
-			;;
 		esac
+	}	
+	#___________________________________________________________________
+	#
+	#	Función: comprimeImagen
+	#
+	#	Descripción:
+	#
+	#		Comprimer  la carpeta donde está se ha almacenado la imagen 
+	#		recientemente creada
+	#
+	#	Parámetros:
+	#	
+	#		$1: Nombre de la imagen (Es el mismo que la carpeta que la alberga)
+	#___________________________________________________________________
+	#
+	function comprimeImagen()
+	{
+		TIME1=$SECONDS
+		RUTAIMG="/opt/opengnsys/images"
+		CARPETAIMAGEN=$RUTAIMG/$1
+		echo "Comprimiendo la imagen $1. Ruta de la imagen: $RUTAIMG" | tee -a $OGLOGSESSION $OGLOGFILE		
+		echo "find $CARPETAIMAGEN | cpio -H newc -oa | gzip -9c  en $CARPETAIMAGEN.IMG"  | tee -a $OGLOGSESSION $OGLOGFILE		
+		find $CARPETAIMAGEN | cpio -H newc -oa | gzip -9c > $CARPETAIMAGEN.IMG
+		TIME=$[SECONDS-TIME1]
+		echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 	}	
