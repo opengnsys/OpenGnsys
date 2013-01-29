@@ -160,10 +160,9 @@ ogPostConfigureFS()
 	#####echo "nameserver $ogdns" > /etc/resolv.conf 
 	#configuramos el dns posterior ubuntu 12.04
 	#####echo "nameserver $ogdns" > /etc/resolvconf/resolv.conf.d/tail	
-	if [ -n "${ogdns}" ]; then
-		mkdir -p /run/resolvconf
-		echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
-	fi
+	[ -n "${ogdns}" ]  && mkdir -p /run/resolvconf
+	[ -n "${ogdns}" ]  && touch /run/resolvconf/resolv.conf
+	[ -n "${ogdns}" ] && echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
 	
 	#configuramos el uso del servicio http proxy
 	[ -n "${ogproxy}" ] && export http_proxy="$ogproxy" 	
@@ -496,20 +495,20 @@ else
 	#echo "variable BOOTIF no exportada, intentamos detectar que interfaz se ha iniciado"
 	IP=$ip
 	#TODO Detectar que interfaz se ha iniciado
-	case "$IP" in
+	case ${IP} in
 		none|off)
-			return 0
-			;;
-		""|on|any)
-			# Bring up device
-			DEVICE=eth0
-			;;
-		dhcp|bootp|rarp|both)
-			DEVICE=eth0
-			;;
-		*)
-			DEVICE=`echo $IP | cut -f6 -d:`
-			;;
+           return 0
+        ;;
+        ""|on|any)
+          # Bring up device
+          DEVICE=eth0
+        ;;
+        dhcp|bootp|rarp|both)
+          DEVICE=eth0
+        ;;
+        *)
+          DEVICE=`echo $IP | cut -f6 -d:`
+        ;;
 	esac
 fi
 if [ -z "${DEVICE}" ]; then
@@ -517,12 +516,12 @@ if [ -z "${DEVICE}" ]; then
 	ogConfigureNetworking
 fi
 
-[ -n "${DEVICE}" ] && [ -e /run/net-"${DEVICE}".conf ] && return 0
-#if [ -n "${DEVICE}" ] && [ -e /run/net-"${DEVICE}".conf ]; then 
-#	echo "variable DEVICE con valor $DEVICE  y fichero /run/net-$DEVICE encontrados"
+[ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ] && return 0
+#if [ -n "${DEVICE}" ] && [ -e /tmp/net-"${DEVICE}".conf ]; then 
+#	echo "variable DEVICE con valor $DEVICE  y fichero /tmp/net-$DEVICE encontrados"
 #	return 0
 #else
-#	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /run/net-$DEVICE"
+#	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /tmp/net-$DEVICE"
 #fi
 
 # Activamos la interfaz antes de configurar.
@@ -543,10 +542,10 @@ for ROUNDTTT in 2 3 4 6 9 16 25 36 64 100; do
 	# The NIC is to be configured if this file does not exist.
 	# Ip-Config tries to create this file and when it succeds
 	# creating the file, ipconfig is not run again.
-	if [ -e /run/net-"${DEVICE}".conf ]; then
+	if [ -e /tmp/net-"${DEVICE}".conf ]; then
 		break;
 	fi
-	case "$IP" in
+	case ${IP} in
 		none|off)
 			return 0
 		;;
@@ -579,17 +578,16 @@ done
 
 # source ipconfig output
 if [ -n "${DEVICE}" ]; then	
+    . /tmp/net-${DEVICE}.conf
+    DEVICECFG="/tmp/net-${DEVICE}.conf"
+	export DEVICECFG
 	export DEVICE
-	export DEVICECFG="/run/net-${DEVICE}.conf"
-	source $DEVICECFG
 	echo "DEVICE=$DEVICE" >> $CFGINITRD
 	echo "DEVICECFG=$DEVICECFG" >> $CFGINITRD
-	echo "exportando variable DEVICE con valor = $DEVICE y DEVICECFG con valor $DEVICECFG"
-	# Compatibilidad con versiones anteriores.
-	ln -fs $DEVICECFG /tmp
+	echo "exportando variable DEVICE con valor = $DEVICE y el DEVICECFG con valor $DEVICECFG"    
 else
-	# source any interface as not exaclty specified
-	source /run/net-*.conf
+    # source any interface as not exaclty specified
+    . /tmp/net-*.conf
 fi
 }
 

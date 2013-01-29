@@ -8,12 +8,7 @@
 #
 # raid1
 # sd_mod
-# Kernel 3.2 video.
-#vga16b
-#vesafb
-#fbcon
-# Kernel 3.7 video.
-uvesafb
-# Kernel 3.7 meta-devices.
-dm-raid
-dm-multipath
+vga16b
+vesafb
+fbcon
+
