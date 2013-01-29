@@ -71,7 +71,8 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
 
-LOG_FILE=/tmp/opengnsys_update.log
+OGLOGFILE=$INSTALL_TARGET/log/opengnsys_installation.log 
+LOG_FILE=/tmp/$(basename $OGLOGFILE) 
 
 
 
@@ -492,6 +493,10 @@ function createDirs()
 		return 1
 	fi
 
+	# Mover el fichero de registro al directorio de logs. 
+	echoAndLog "${FUNCNAME}(): moving update log file" 
+	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE 
+
 	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0
 }
@@ -676,7 +681,7 @@ function updateSummary()
 {
 	# Actualizar fichero de versión y revisión.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
 
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
@@ -685,6 +690,7 @@ function updateSummary()
 	echoAndLog "OpenGnSys Update Summary"
 	echo       "========================"
 	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echoAndLog "Update log file:                  $LOG_FILE"
 	if [ -n "$NEWFILES" ]; then
 		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
 	fi
