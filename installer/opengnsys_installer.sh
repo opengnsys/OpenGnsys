@@ -110,7 +110,8 @@ case "$OSDISTRIB" in
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
 		DHCPSERV=isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		INETDSERV=openbsd-inetd
+		INETDSERV=xinetd
+		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysql
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
@@ -148,6 +149,7 @@ case "$OSDISTRIB" in
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
 		INETDSERV=xinetd
+		INETDCFGDIR=/etc/xinetd.d
 		IPTABLESSERV=iptables
 		MYSQLSERV=mysqld
 		RSYNCSERV=rsync
@@ -928,6 +930,23 @@ function rsyncConfigure()
 	if [ -n "$RSYNCSERV" ]; then
 		if [ -f /etc/default/rsync ]; then
 			perl -pi -e 's/RSYNC_ENABLE=.*/RSYNC_ENABLE=inetd/' /etc/default/rsync
+		fi
+		if [ -f $INETDCFGDIR/rsync ]; then
+			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/rsync
+		else
+			cat << EOT > $INETDCFGDIR/rsync
+service rsync
+{
+	disable = no
+	socket_type = stream
+	wait = no
+	user = root
+	server = $(which rsync)
+	server_args = --daemon
+	log_on_failure += USERID
+	flags = IPv6
+}
+EOT
 		fi
 		service=$RSYNCSERV $ENABLESERVICE
 		service=$INETDSERV $STARTSERVICE
