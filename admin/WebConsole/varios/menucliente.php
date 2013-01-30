@@ -95,7 +95,7 @@ else{
 	else{
 		// Si existe, incluir menú por defecto.
 		if (file_exists("/opt/opengnsys/log/clients/$iph.info.html")) {
-			$codeHtml=(include "/opt/opengnsys/log/clients/$iph.info.html");
+			$codeHtml=file_get_contents("/opt/opengnsys/log/clients/$iph.info.html");
 		}
 		else{
 			// Componer mensaje para cliente sin menú.
