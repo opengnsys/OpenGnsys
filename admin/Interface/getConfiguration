@@ -44,6 +44,9 @@ done
 cfgfile=/tmp/getconfig
 echo $cfg > $cfgfile
 
+# Generar el menú por defecto a partir del fichero generado (no dar ninguna salida).
+generateMenuDefault &>/dev/null
+
 # Componer salida formateada.
 awk '{  n=split($0,sep,";");
 	for (i=1; i<n; i++){

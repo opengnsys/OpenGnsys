@@ -53,9 +53,11 @@ else{
 	if (! empty ($contenidofichero)) {
 		$cmd->texto="UPDATE ordenadores_particiones
 				SET cache='".$contenidofichero."'
-				WHERE idordenador=(SELECT idordenador FROM ordenadores
-							WHERE ip='".$iph."') AND
-					  idsistemafichero=(SELECT idsistemafichero FROM sistemasficheros
+				WHERE idordenador=(SELECT idordenador
+						     FROM ordenadores
+						    WHERE ip='".$iph."')
+				  AND idsistemafichero=(SELECT idsistemafichero
+							  FROM sistemasficheros
 							 WHERE descripcion='CACHE')";
 		$resul=$cmd->Ejecutar();
 	}

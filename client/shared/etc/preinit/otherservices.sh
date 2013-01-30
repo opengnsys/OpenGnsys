@@ -27,8 +27,6 @@ cp -a $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
 # Activado WOL en la interfaz usada en arranque PXE.
 ethtool -s $DEVICE wol g 2>/dev/null
 
-# Crear menú por defecto para el cliente y arrancar lighttpd.
-generateMenuDefault
 # TODO Localizar correctamente el script de arranque.
 [ -f /opt/opengnsys/scripts/runhttplog.sh ] && /opt/opengnsys/scripts/runhttplog.sh 2>/dev/null
 

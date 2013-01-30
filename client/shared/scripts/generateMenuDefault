@@ -12,15 +12,15 @@ ogMountCache 2>/dev/null
 CACHECONTENIDO=`ls -m $OGCAC/$OGIMG 2>/dev/null`
 
 SPEED=$(LANG=C ethtool $DEVICE 2>/dev/null | awk '$1~/Speed/ {print $2}')
-case "$SPEED" in
-	1000[Mm]b/s)	;;
-	100[Mm]b/s)	SPEED="<font color=\"blue\">$SPEED</font>" ;;
-	10[Mm]b/s)	SPEED="<font color=\"grey\">$SPEED</font>" ;;
+case "${SPEED,,}" in
+	1000mb/s)	;;
+	100mb/s)	SPEED="<font color=\"blue\">$SPEED</font>" ;;
+	10mb/s)		SPEED="<font color=\"grey\">$SPEED</font>" ;;
 	*)		SPEED="<font color=\"red\">$SPEED</font>" ;;
 esac
 DUPLEX=$(LANG=C ethtool $DEVICE 2>/dev/null | awk '$1~/Duplex/ {print $2}')
-case "$DUPLEX" in
-	[Ff]ull)	;;
+case "${DUPLEX,,}" in
+	full)		;;
 	*)		DUPLEX="<font color=\"red\">$DUPLEX</font>"
 esac
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
@@ -31,7 +31,7 @@ cat > $FILEINFOHTML << EOT
 <div align="center" style="font-family: Arial, Helvetica, sans-serif;">
 <p style="color:#999999; font-size: 16px; margin: 2em;">
 
-<table border=1 width="100%">
+<table border="1" width="100%">
 <tr>
 <td rowspan="2"><p align="left"><img border="0" src="../images/iconos/logoopengnsys.png"><p> </td>
 <td> $MSG_HOSTNAME </td> <td> $MSG_IPADDR </td> <td> $MSG_MACADDR </td> <td> $MSG_SPEED </td> <td> $MSG_DUPLEX </td> </tr>
@@ -42,13 +42,29 @@ cat > $FILEINFOHTML << EOT
 <h1>$MSG_MENUTITLE</h1>
 EOT
 
-for ((d=1; d<=$(ogDiskToDev | wc -w); d++)); do
-    for ((p=1; p<=$(ogGetPartitionsNumber $d); p++)); do
-        VERSION=$(ogGetOsVersion $d $p 2>/dev/null | cut -f2 -d:)
-        [ -n "$VERSION" ] && echo "<p><a href=\"command:bootOs $d $p\">$MSG_BOOT $VERSION ($d, $p)</a></p>" >>$FILEINFOHTML
+# Si existe el fichero de configuración creado por el script getConfiguration, ...
+cfgfile=/tmp/getconfig
+if [ -f $cfgfile ]; then 
+    # Tomar los datos del fichero.
+    awk '{ n=split($0,sep,";");
+           for (i=1; i<n; i++) {
+               split (sep[i],dua,":");
+               if (dua[5]!="") {
+                   printf ("<p><a href=\"command:bootOs %s %s\">$MSG_BOOT %s (%s, %s)</a></p>",
+                           dua[1],dua[2],dua[5],dua[1],dua[2]);
+                   }
+               }
+         }' $cfgfile >>$FILEINFOHTML
+else
+    # Si no, obtener los datos de los discos.
+    for ((d=1; d<=$(ogDiskToDev | wc -w); d++)); do
+        for ((p=1; p<=$(ogGetPartitionsNumber $d); p++)); do
+            VERSION=$(ogGetOsVersion $d $p 2>/dev/null | cut -f2 -d:)
+            [ -n "$VERSION" ] && echo "<p><a href=\"command:bootOs $d $p\">$MSG_BOOT $VERSION ($d, $p)</a></p>" >>$FILEINFOHTML
+        done
     done
-done
-
+fi
+# Añadir opción de apagado.
 cat >> $FILEINFOHTML << EOT
 <p><a href="command:poweroff">$MSG_POWEROFF</a></p>
 </div>
