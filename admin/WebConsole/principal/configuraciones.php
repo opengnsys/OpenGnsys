@@ -174,10 +174,16 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
-					//$disksize = formatomiles ($tbKeys[$k]["tamano"]);
 					$disksize = tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
 					if (empty ($disksize)) {
 						$disksize = '<em>'.$TbMsg[42].'</em>';
+					}
+					switch ($tbKeys[$k]["codpar"]) {
+						case 1:  $disktable = "MSDOS";
+							 break;
+						case 2:  $disktable = "GPT";
+							 break;
+						default: $disktable = "";
 					}
 				}
 				else {  // Información de partición (numpart>0)
@@ -233,7 +239,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	if (!empty ($disksize)) {
 		echo'<tr height="16">'.chr(13);
 		echo'<td align="center">&nbsp;'.$TbMsg[35].'&nbsp;</td>'.chr(13);
-		echo'<td></td>'.chr(13);
+		echo'<td align="center">&nbsp;'.$disktable.'&nbsp;</td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td></td>'.chr(13);
 		echo'<td align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
