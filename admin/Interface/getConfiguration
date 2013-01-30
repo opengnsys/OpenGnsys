@@ -3,37 +3,53 @@
 #_______________________________________________________________________________________________________________________________
 #
 # Formato de salida:
-# par=Número de particion\tcod=Código de partición\tsfi=Sistema de ficheros\tsoi=Sistema instalado\ttam=Tamaño de la partición\n
+# disk=Número de disco\tpar=Número de particion\tcod=Código de partición\tsfi=Sistema de ficheros\tsoi=Sistema instalado\ttam=Tamaño de la partición\n
 #_______________________________________________________________________________________________________________________________
 
-particiones=$(ogGetPartitionsNumber 1)    # Incluir todas las particiones
-cfg="0::::$(ogGetDiskSize 1);"          # e información de disco (partición 0)
 
-for ((par=1;par<=$particiones;par++)); do
+cfg=""
+disks=$(ogDiskToDev | wc -w)
+for ((dsk=1; dsk<=$disks; dsk++)); do
+    particiones=$(ogGetPartitionsNumber $dsk)
+    # Tipo de tabla de particiones: 1=MSDOS, 2=GPT
+    ptt=$(ogGetPartitionTableType $dsk)
+    case "$ptt" in
+        MSDOS)  ptt=1 ;; 
+        GPT)    ptt=2 ;; 
+        *)      ptt=0 ;; 
+    esac
+    # Información de disco (partición 0)
+    cfg="$cfg$dsk:0:$ptt:::$(ogGetDiskSize $dsk);"
+    for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
-	cod=$(ogGetPartitionId 1 $par 2>/dev/null)
+	cod=$(ogGetPartitionId $dsk $par 2>/dev/null)
 	# Tipo de partición o sistema de fichero
-	fsi=$(getFsType 1 $par 2>/dev/null)
+	fsi=$(getFsType $dsk $par 2>/dev/null)
 	fsi=${fsi:-"EMPTY"}
 	# Tamaño de la particón
-	tam=$(ogGetPartitionSize 1 $par 2>/dev/null)
+	tam=$(ogGetPartitionSize $dsk $par 2>/dev/null)
 	tam=${tam:-"0"}
 	# Sistema de fichero instalado 
 	case "$cod" in
 		""|82|8200|A502|BF02|EE|EF0[012])
-			soi=" " ;;
-		*)	soi=$(getOsVersion 1 $par 2>/dev/null | cut -f2 -d:) ;;
+			soi="" ;;
+		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:) ;;
    	esac
 
-	cfg="$cfg$par:$cod:$fsi:$soi:$tam;"
+	cfg="$cfg$dsk:$par:$cod:$fsi:$soi:$tam;"
+    done
 done
 
-echo $cfg | awk '{
-		n=split($0,sep,";");
-		for (i=1; i<n; i++){
-			split (sep[i],dua,":");
-		 	printf ("disk=1\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
-					dua[1],dua[2],dua[3],dua[4],dua[5]);
-			}
-		}'
+# Guardar salida en fichero temporal.
+cfgfile=/tmp/getconfig
+echo $cfg > $cfgfile
+
+# Componer salida formateada.
+awk '{  n=split($0,sep,";");
+	for (i=1; i<n; i++){
+	    split (sep[i],dua,":");
+	    printf ("disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
+		    dua[1],dua[2],dua[3],dua[4],dua[5],dua[6]);
+	    }
+     }' $cfgfile
 
