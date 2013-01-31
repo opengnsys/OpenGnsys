@@ -50,7 +50,7 @@ if [ -f $cfgfile ]; then
          { n=split($0,sep,";");
            for (i=1; i<n; i++) {
                split (sep[i],dua,":");
-               if (dua[5]!="") {
+               if (dua[5]!="" && dua[5]!="DATA") {
                    printf ("<p><a href=\"command:bootOs %s %s\">%s %s (%s, %s)</a></p>\n",
                            dua[1],dua[2],boot,dua[5],dua[1],dua[2]);
                    }
