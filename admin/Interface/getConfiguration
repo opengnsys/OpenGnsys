@@ -23,19 +23,21 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
     for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
 	cod=$(ogGetPartitionId $dsk $par 2>/dev/null)
-	# Tipo de partición o sistema de fichero
+	# Tipo del sistema de ficheros
 	fsi=$(getFsType $dsk $par 2>/dev/null)
 	fsi=${fsi:-"EMPTY"}
 	# Tamaño de la particón
 	tam=$(ogGetPartitionSize $dsk $par 2>/dev/null)
 	tam=${tam:-"0"}
-	# Sistema de fichero instalado 
+	# Sistema operativo instalado 
 	case "$cod" in
 		""|82|8200|A502|BF02|EE|EF0[012])
 			soi="" ;;
-		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:) ;;
+		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
+			# Sistema de archivos para datos (sistema operativo "DATA")
+			[ -z "$soi" -a "$fsi" != "EMPTY" ] && soi="DATA"
+			;;
    	esac
-
 	cfg="$cfg$dsk:$par:$cod:$fsi:$soi:$tam;"
     done
 done
@@ -44,7 +46,7 @@ done
 cfgfile=/tmp/getconfig
 echo $cfg > $cfgfile
 
-# Generar el menú por defecto a partir del fichero generado (no dar ninguna salida).
+# Crear el menú por defecto a partir del fichero generado (no dar ninguna salida).
 generateMenuDefault &>/dev/null
 
 # Componer salida formateada.
