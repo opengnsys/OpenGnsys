@@ -61,11 +61,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarimagen_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarimagen_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 
@@ -110,7 +110,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				</TR>
 			</TABLE>
 		</FORM>	
-<?
+<?php
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);	
@@ -126,7 +126,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </SCRIPT>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Descripción:
@@ -164,9 +164,10 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
 		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
+			    if($tbKeys[$k]["numpar"]!=0){    // No es info. del disco (part. 0)
 				$swcc=$tbKeys[$k]["clonable"];
-				echo '<TR>'.chr(13);
 				if($swcc){
+					echo '<TR>'.chr(13);
 					$icp=$cc."_".$tbKeys[$k]["numpar"]; // Identificador de la configuración-partición
 					echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
 					echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
@@ -194,8 +195,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 						$idxc = "UNICAST-DIRECT";
 					}
 					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
+					echo '</TR>'.chr(13);
 				}
-				echo '</TR>'.chr(13);
+			    }
 			}
 		}
 	}	
