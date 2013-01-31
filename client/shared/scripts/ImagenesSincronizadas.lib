@@ -25,12 +25,6 @@
 		PATH=$PATH:$(dirname $0)
 		PROG=$(basename $0)
 
-		CALLER=$(ogGetCaller)
-		if [ "$CALLER" != "ogAdmClient" ]; then
-			ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
-			exit $?
-		fi
-		
 		#___________________________________________________________________
 		#	
 		# Variables globales
