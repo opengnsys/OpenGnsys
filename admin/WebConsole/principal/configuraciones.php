@@ -189,7 +189,12 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 				else {  // Información de partición (numpart>0)
 					echo'<tr height="16">'.chr(13);
 					echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-					echo'<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+					if (is_numeric ($tbKeys[$k]["tipopar"])) {
+						echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
+					}
+					else {
+						echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+					}
 					echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
 
 					echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);					
