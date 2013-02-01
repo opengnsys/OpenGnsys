@@ -48,7 +48,7 @@
 		exit $OG_ERR_PARTITION
 		fi
 
-		REPOSITORIO="usuog@$IPREPOSITORIO::imagenes" # Ruta de las imagenes en el repositorio
+		REPOSITORIO="opengnsys@$IPREPOSITORIO::images" # Ruta de las imagenes en el repositorio
 		
 		# Borrar archivos en destino
 		OP_DELETE="--delete"
@@ -63,12 +63,11 @@
 
 		#___________________________________________________________________
 		#
-		# Crea un fichero con la clave remota del rsync y actualiza el 
-		# parámetro "--password-file" para que no se pida ésta en el proceso.
+		# Fichero con la clave remota del rsync para el parámetro
+		# "--password-file" para que no se pida ésta en el proceso.
 		#___________________________________________________________________
 		#
-		f="/etc/passrsync" # Lectura del archivo de claves
-		FILE_PASSWD="--password-file=$f" 
+		FILE_PASSWD="--password-file=/scripts/passrsync"
 	
 	
 	#___________________________________________________________________

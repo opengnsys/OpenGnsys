@@ -58,9 +58,9 @@ if [ -r $CLIENTINITRD ]; then
 		sed -i "s/busybox reboot/reboot/" scripts/ogfunctions
 		# FIN CÓDIGO TEMPORAL.
 		# Ticket 565, preparar acceso Rsync cliente.
-		echo "$SAMBAPASS" > etc/passrsync
-		chown root.root etc/passrsync
-		chmod 400 etc/passrsync
+		echo "$SAMBAPASS" > scripts/passrsync
+		chown root.root scripts/passrsync
+		chmod 400 scripts/passrsync
 		# Generar Initrd del cliente.
 		find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
 		# Ticket 565, preparar acceso Rsync servidor.
