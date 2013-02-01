@@ -85,7 +85,7 @@ OSCODENAME=$(lsb_release -cs 2>/dev/null)
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
 	Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -121,7 +121,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-static.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba unzip debootstrap schroot squashfs-tools )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-static.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba rsync unzip debootstrap schroot squashfs-tools )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
 				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		if [ "$OSDISTRIB" == "CentOS" ]; then
@@ -173,7 +173,7 @@ function autoConfigurePost()
 [ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba	# Debian 6
 [ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp		# Debian 6
 [ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
-selinuxenabled && setenforce 0				# SELinux permisivo (Fedora 17)
+selinuxenabled && setenforce 0 2>/dev/null		# SELinux permisivo (Fedora 17)
 }
 
 
