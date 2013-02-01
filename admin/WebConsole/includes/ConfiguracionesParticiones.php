@@ -79,27 +79,27 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	if($sws & $msk_cache)
 		$cmd->texto.="	ordenadores_particiones.cache, "; 
 
-	$cmd->texto.=" ordenadores_particiones.codpar) as configuracion,
+	$cmd->texto.="		ordenadores_particiones.codpar) AS configuracion,
 				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar ,
 				ordenadores_particiones.codpar ,
-				tipospar.tipopar,
+				IFNULL (tipospar.tipopar, ordenadores_particiones.codpar) AS tipopar,
 				tipospar.clonable,
 				ordenadores_particiones.tamano,
-				sistemasficheros.descripcion as sistemafichero,
+				sistemasficheros.descripcion AS sistemafichero,
 				ordenadores_particiones.idnombreso,
 				nombresos.nombreso,
 				imagenes.idimagen, 
-				imagenes.descripcion as imagen,
-				imagenes.nombreca as nombreca,
-				imagenes.idrepositorio as repositorio,
+				imagenes.descripcion AS imagen,
+				imagenes.nombreca AS nombreca,
+				imagenes.idrepositorio AS repositorio,
 				ordenadores_particiones.idperfilsoft,
-				perfilessoft.descripcion as perfilsoft
+				perfilessoft.descripcion AS perfilsoft
 
 				FROM ordenadores
 					INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 					LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-					INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+					LEFT OUTER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 					LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 					LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 					LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
