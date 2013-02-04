@@ -4,7 +4,7 @@
 #@brief   Librería o clase Inventory
 #@class   Inventory
 #@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
-#@version 1.0.4
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -45,9 +45,9 @@ fi
 #@version 1.0.4 - Incluir tipos BSD, MacOS y Solaris.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-06-29
-#@version 1.0.5 - Incluir tipos Hurd y WinLoader, nuevas detecciones basadas en "os-prober".
+#@version 1.0.5 - Incluir tipos Hurd y WinLoader, leer por defecto fichero /etc/os-release.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2012-11-29
+#@date    2013-02-04
 #*/ ##
 function ogGetOsVersion ()
 {
@@ -68,11 +68,12 @@ MNTDIR=$(ogMount $1 $2) || return $?
 # Buscar tipo de sistema operativo.
 # Para GNU/Linux: leer descripción.
 TYPE="Linux"
-VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
+FILE="$MNTDIR/etc/os-release"
+[ -r $FILE ] && VERSION="$(awk -F= '$1~/PRETTY_NAME/ {gsub(/\"/,"",$2); print $2}' $FILE)"
 # Si no se puede obtener, buscar en ficheros del sistema.
 if [ -z "$VERSION" ]; then
     FILE="$MNTDIR/etc/lsb-release"
-    [ -r $FILE ] && VERSION="$(awk 'BEGIN {FS="="}; $1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+    [ -r $FILE ] && VERSION="$(awk -F= '$1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
     for DISTRIB in redhat SuSE mandrake gentoo; do
         FILE="$MNTDIR/etc/${DISTRIB}-release"
         [ -r $FILE ] && VERSION="$(head -1 $FILE)"
@@ -81,8 +82,11 @@ if [ -z "$VERSION" ]; then
     [ -r $FILE ] && VERSION="Arch Linux"
     FILE="$MNTDIR/etc/slackware-version"
     [ -r $FILE ] && VERSION="Slackware $(cat $FILE)"
-    [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
 fi
+# Si no se encuentra, intentar ejecutar "lsb_release".
+[ -z "$VERSION" ] && VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
+# Comprobar Linux de 64 bits.
+[ -n "$VERSION" ] && [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
 # Para Android, leer fichero de propiedades.
 if [ -z "$VERSION" ]; then
     TYPE="Android"
