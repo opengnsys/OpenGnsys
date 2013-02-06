@@ -48,7 +48,7 @@
 		exit $OG_ERR_PARTITION
 		fi
 
-		REPOSITORIO="opengnsys@$IPREPOSITORIO::images" # Ruta de las imagenes en el repositorio
+		REPOSITORIO="opengnsys@$IPREPOSITORIO::ogimages" # Ruta de las imagenes en el repositorio
 		
 		# Borrar archivos en destino
 		OP_DELETE="--delete"
