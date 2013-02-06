@@ -49,7 +49,7 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_repositorios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
@@ -65,7 +65,7 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
 				else	
@@ -78,9 +78,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<?php
 			if ($opcion==$op_eliminacion)
-					echo '<TD>'.$ip.'</TD>';
+				echo '<TD>'.$ip.'</TD>';
 			else	
 				echo'<TD><INPUT  class="formulariodatos" name=ip type=text style="width:200" value="'.$ip.'"></TD>';
 			?>
@@ -88,9 +88,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-		<?
+			<?php
 			if ($opcion==$op_eliminacion)
-					echo '<TD>'.$puertorepo.'</TD>';
+				echo '<TD>'.$puertorepo.'</TD>';
 			else	
 				echo'<TD><INPUT  class="formulariodatos" name=puertorepo type=text style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
@@ -98,9 +98,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
-		<?
+			<?php
 			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$pathrepod.'</TD>';
+				echo '<TD colspan=2>'.$pathrepod.'</TD>';
 			else	
 				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathrepod type=text style="width:330" value="'.$pathrepod.'"></TD>';
 			?>
@@ -108,9 +108,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
-		<?
+			<?php
 			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$pathpxe.'</TD>';
+				echo '<TD colspan=2>'.$pathpxe.'</TD>';
 			else	
 				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathpxe type=text style="width:330" value="'.$pathpxe.'"></TD>';
 			?>
@@ -118,9 +118,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
+			<?php
 			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$comentarios.'</TD>';
+				echo '<TD colspan=2>'.$comentarios.'</TD>';
 			else	
 				echo '<TD colspan=2><TEXTAREA   class="formulariodatos" name=comentarios rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
 			?>
@@ -131,7 +131,7 @@ if  ($opcion!=$op_alta){
 	</TABLE>
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
@@ -154,8 +154,9 @@ function TomaPropiedades($cmd,$id){
 	global $pathpxe;
 	global $ordenadores;
 
-	$cmd->texto="SELECT repositorios.*, COUNT(*) AS numordenadores FROM repositorios 
-	 		INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+	$cmd->texto="SELECT  repositorios.*, COUNT(ordenadores.idordenador) AS numordenadores
+			FROM repositorios 
+	 		LEFT OUTER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
 			WHERE repositorios.idrepositorio=".$id;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
