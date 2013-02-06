@@ -1130,9 +1130,10 @@ function createDirs()
 		return 1
 	fi
 
-	# Mover el fichero de registro instalación al directorio de logs.
+	# Mover el fichero de registro de instalación al directorio de logs.
 	echoAndLog "${FUNCNAME}(): moving installation log file"
 	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE
+	chmod 600 $LOG_FILE
 
 	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0

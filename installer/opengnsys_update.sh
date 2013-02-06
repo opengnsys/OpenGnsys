@@ -496,6 +496,7 @@ function createDirs()
 	# Mover el fichero de registro al directorio de logs. 
 	echoAndLog "${FUNCNAME}(): moving update log file" 
 	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE 
+	chmod 600 $LOG_FILE
 
 	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0
