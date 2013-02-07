@@ -893,7 +893,7 @@ case "$TYPE" in
             return $? ;;
 esac
 # Cambiar tipo de partición.
-ogSetPartitionId $1 $2 $NEWTYPE
+ogSetPartitionType $1 $2 $NEWTYPE
 }
 
 
@@ -1091,12 +1091,16 @@ parted -s $DISK set $2 boot on 2>/dev/null
 
 
 #/**
-#         ogSetPartitionId int_ndisk int_npartition str_type
+#         ogSetPartitionId int_ndisk int_npartition hex_partid
 #@brief   Cambia el identificador de la partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@param   str_partid     mnemónico de tipo de partición
+#@param   hex_partid     identificador de tipo de partición
 #@return  (nada)
+#@exception OG_ERR_FORMAT     Formato incorrecto.
+#@exception OG_ERR_NOTFOUND   Disco o partición no corresponden con un dispositivo.
+#@exception OG_ERR_OUTOFLIMIT Valor no válido.
+#@exception OG_ERR_PARTITION  Error al cambiar el id. de partición.
 #@attention Requisitos: fdisk, sgdisk
 #@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
@@ -1104,6 +1108,9 @@ parted -s $DISK set $2 boot on 2>/dev/null
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/13
+#@version 1.0.5 - Utiliza el id. de tipo de partición (no el mnemónico)
+#@author  Universidad de Huelva
+#@date    2012/03/07
 #*/ ##
 function ogSetPartitionId ()
 {
@@ -1119,19 +1126,27 @@ fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Sustituye nº de disco por su dispositivo.
-DISK=`ogDiskToDev $1` || return $?
-PART=`ogDiskToDev $1 $2` || return $?
+# Sustituye nº de disco y nº partición por su dispositivo.
+DISK=$(ogDiskToDev $1) || return $?
+PART=$(ogDiskToDev $1 $2) || return $?
+# Error si el id. de partición no es hexadecimal.
+ID="${3^^}"
+[[ "$ID" =~ ^[0-9A-F]+$ ]] || ogRaiseError $OG_ERR_OUTOFLIMIT "$3" || return $?
 
 # Elección del tipo de partición.
 PTTYPE=$(ogGetPartitionTableType $1)
-ID=$(ogTypeToId "$3" "$PTTYPE")
-[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$3,$PTTYPE" || return $?
 case "$PTTYPE" in
     GPT)    sgdisk $DISK -t$PART:$ID 2>/dev/null ;;
     MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK &>/dev/null ;;
+    *)      ogRaiseError $OG_ERR_OUTOFLIMIT "$1,$PTTYPE"
+            return $? ;;
 esac
-partprobe $DISK 2>/dev/null
+if [ $? == 0 ]; then
+    partprobe $DISK 2>/dev/null
+else
+    ogRaiseError $OG_ERR_PARTITION "$1,$2,$3"
+    return $?
+fi
 }
 
 
@@ -1172,6 +1187,50 @@ SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Redefinir el tamaño de la partición.
 sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 partprobe $DISK 2>/dev/null
+}
+
+
+#/**
+#         ogSetPartitionType int_ndisk int_npartition str_type
+#@brief   Cambia el identificador de la partición.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_partid     mnemónico de tipo de partición
+#@return  (nada)
+#@attention Requisitos: fdisk, sgdisk
+#@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 1.0.4 - Soporte para discos GPT.
+#@author  Universidad de Huelva
+#@date    2012/03/13
+#@version 1.0.5 - Renombrada de ogSetPartitionId.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013/03/07
+#*/ ##
+function ogSetPartitionType ()
+{
+# Variables locales
+local DISK PART PTTYPE ID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
+           "$FUNCNAME 1 1 NTFS"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Sustituye nº de disco por su dispositivo.
+DISK=`ogDiskToDev $1` || return $?
+PART=`ogDiskToDev $1 $2` || return $?
+
+# Elección del tipo de partición.
+PTTYPE=$(ogGetPartitionTableType $1)
+ID=$(ogTypeToId "$3" "$PTTYPE")
+[ -n "$ID" ] || ogRaiseError $OG_ERR_FORMAT "$3,$PTTYPE" || return $?
+ogSetPartitionId $1 $2 $ID
 }
 
 
@@ -1315,7 +1374,7 @@ case "$TYPE" in
             return $? ;;
 esac
 # Cambiar tipo de partición.
-ogSetPartitionId $1 $2 $NEWTYPE
+ogSetPartitionType $1 $2 $NEWTYPE
 }
 
 
