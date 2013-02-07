@@ -33,5 +33,7 @@
 	fi
 	
 	# Llamada a la función de sincronización.
+ 	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh	
 	ogCrearImagenBasica "$@"
+	kill $COPROC_PID
 

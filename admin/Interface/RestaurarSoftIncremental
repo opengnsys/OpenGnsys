@@ -34,5 +34,7 @@
 	fi
 	
 	# Llamada a la función de sincronización.
-        ogRestaurarSoftIncremental "$@"
+	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
+	ogRestaurarSoftIncremental "$@"
+	kill $COPROC_PID
 
