@@ -1119,8 +1119,8 @@ local DISK PART PTTYPE ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
-           "$FUNCNAME 1 1 NTFS"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition hex_partid" \
+           "$FUNCNAME 1 1 7"
     return
 fi
 # Error si no se reciben 3 parámetros.
@@ -1195,7 +1195,7 @@ partprobe $DISK 2>/dev/null
 #@brief   Cambia el identificador de la partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@param   str_partid     mnemónico de tipo de partición
+#@param   str_type       mnemónico de tipo de partición
 #@return  (nada)
 #@attention Requisitos: fdisk, sgdisk
 #@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
