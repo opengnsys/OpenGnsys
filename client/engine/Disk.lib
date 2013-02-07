@@ -464,16 +464,6 @@ esac
 
 
 #/**
-#         ogFsToId str_fstype
-#@see     ogTypeToId
-#*/ ##
-function ogFsToId ()
-{
-ogTypeToId "$@"
-}
-
-
-#/**
 #         ogTypeToId str_parttype str_tabletype
 #@brief   Devuelve el identificador correspondiente a un tipo de partición.
 #@param   str_parttype  mnemónico de tipo de partición. 
