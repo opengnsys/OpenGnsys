@@ -44,7 +44,7 @@ else{
 /**/
 // Solo se usa si se requiere validacion
 if($_SESSION["validacion"] == true &&  isset($paginavalidacion) && $paginavalidacion != "")
-	include_once($paginavalidacion);
+	@include_once($paginavalidacion);
 
 
 switch($action){
@@ -55,7 +55,13 @@ switch($action){
 			 // Comprobamos si es necesaria la validacion, y llamamos a synchronize
 	                // La funcion synchronize se usa por si hace falta sincronizar alguna base de datos externa a opengnsys
         	        // Es obligatoria en el fichero de validacion, pero puede no hacer nada
-                	synchronize($validacion);
+			if (function_exists("synchronize")) {
+                		synchronize($validacion);
+                	}
+			else {
+				// Mostrar mensaje de error si no existe la función.
+				die ("Error: P&aacute;gina de validaci&oacute;n incorrecta.");
+                	}
                 }
                 else{
                         $action="default";
@@ -64,7 +70,7 @@ switch($action){
 
         break;
         case "Login":
-                include($paginalogin);
+                @include($paginalogin);
         break;
         case "validate":
                 if(!isset($_SESSION)){
@@ -77,7 +83,7 @@ switch($action){
                 }
                 else{
                         $_error="Usuario no v&aacute;lido";
-                        include($paginalogin);
+                        @include($paginalogin);
                 }
         break;
         default:
