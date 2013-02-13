@@ -36,6 +36,10 @@
 # Parameter: Where to mount the filesystem
 mountroot ()
 {
+	[ -f /scripts/VERSION.txt ] && OGVERSION=$(cat /scripts/VERSION.txt)
+	OGVERSION=${OGVERSION:-"OpenGnSys Client"}
+	echo; echo; echo "$OGVERSION"; echo; echo
+
 	[ "$quiet" != "y" ] && log_begin_msg "Running OpenGnsys /scripts/og-top"
 	run_scripts /scripts/og-top
 	[ "$quiet" != "y" ] && log_end_msg
