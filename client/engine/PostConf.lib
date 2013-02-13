@@ -91,7 +91,7 @@ ogAddCmd $1 $2 "$3" "CSCRIPT joindomain.vbs"
 # Eliminamos el script porque tiene el usuario de administrador de dominio en claro
 ogAddCmd $1 $2 "$3" "DEL /Q C:\Windows\System32\joindomain.vbs"
 # Metemos unas claves de registro para que el dominio salga seleccionado por defecto
-ogAddCmd $1 $2 "$3" "REG ADD \"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\" /v DefaultDomainName /t REG_SZ /d \"$3\" /f"
+ogAddCmd $1 $2 "$3" "REG ADD \"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\" /v DefaultDomainName /t REG_SZ /d \"$4\" /f"
 
 # Creamos el archivo joindomain.vbs que nos introduce la maquina en el dominio
 cat > "$CMDDIR/joindomain.vbs" << EOF
@@ -336,8 +336,9 @@ ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Wi
 #/**
 #         ogInstallWindowsClient int_ndisk int_filesys
 #@brief   Instala el cliente OpenGnSys para sistemas operativos Windows.
-#@param   int_ndisk    nº de orden del disco
-#@param   int_filesys  nº de orden del sistema de archivos
+#@param   int_ndisk     nº de orden del disco
+#@param   int_filesys   nº de orden del sistema de archivos
+#@param   str_filename  nombre del fichero cmd donde se introduce el comando de ejecutar el script VBS
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
@@ -346,6 +347,9 @@ ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Wi
 #@version 1.0.4 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-11
+#@version 1.0.5 - Cambios en los parametros de entrada y funcionamiento de la funcion
+#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
+#@date    2013-02-12
 #*/ ##
 function ogInstallWindowsClient ()
 {
@@ -357,8 +361,8 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener sistema de archvios.
 PART="$(ogDiskToDev $1 $2)" || return $?
 # Comprobar si el sistema de archivos no está bloqueado.
@@ -377,8 +381,7 @@ ogLock $1 $2
 trap "ogUnlock $1 $2" 1 2 3 6 9
 # Copiar cliente, generar fichero de configuración e incluir en el arranque.
 cp -a $CLIENTFILE "$WINDIR"
-ogInstallMiniSetup $1 $2 ogclient.cmd
-ogAddCmd $1 $2 ogclient.cmd "ogAdmWinClient -install -s $(ogGetServerIp) -p 2008 -i $(ogGetIpAddress)"
+ogAddCmd $1 $2 "$3" "ogAdmWinClient -install -s $(ogGetServerIp) -p 2008 -i $(ogGetIpAddress)"
 ogUnlock $1 $2
 }
 
