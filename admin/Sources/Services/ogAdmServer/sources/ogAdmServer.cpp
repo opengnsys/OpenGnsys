@@ -731,7 +731,7 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
-	int lon, p, c, i, dato, swu, idsoi, idsfi,k;
+	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
 	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
@@ -2512,11 +2512,13 @@ BOOLEAN EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
+BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	char *iph, *ido;
+	char *iph, *ido,*cfg;
+	int res;
 
 	char modulo[] = "RESPUESTA_EjecutarScript()";
 
@@ -2537,8 +2539,12 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
 		return (FALSE); // Error al registrar notificacion
 	}
 	
+	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
+	res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+
 	liberaMemoria(iph);
-	liberaMemoria(ido);	
+	liberaMemoria(ido);
+	liberaMemoria(cfg);	
 	
 	db.Close(); // Cierra conexión
 	return (TRUE);

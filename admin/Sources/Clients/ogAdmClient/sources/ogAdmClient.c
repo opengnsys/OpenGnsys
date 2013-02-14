@@ -828,6 +828,7 @@ void procesaComandos(TRAMA* ptrTrama)
 BOOLEAN Actualizar(TRAMA* ptrTrama)
 {
 	char msglog[LONSTD];
+	int lon;
 	char modulo[] = "Actualizar()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -839,7 +840,23 @@ BOOLEAN Actualizar(TRAMA* ptrTrama)
 		errorLog(modulo,84,FALSE);
 		return(FALSE);
 	}
+
+	char *dsk=(char*)reservaMemoria(2);
+	sprintf(dsk,"1"); // Siempre el disco 1
+	char* cfg=LeeConfiguracion(dsk);
+	herror=0;
+	if(!cfg){ // No se puede recuperar la configuración del cliente
+		errorLog(modulo,36,FALSE);
+		herror=3;
+	}
+	// Envia Configuracion al servidor
+	initParametros(ptrTrama,0);
+	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Configurar");
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de los Sistemas Operativos del cliente
+	respuestaEjecucionComando(ptrTrama,herror,0);
+
 	muestraMenu();
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1663,7 +1680,7 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	/* Envia respuesta de ejecución del comando*/
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Configurar");
-	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de los Sistemas Operativos del cliente
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(dsk);
@@ -1859,7 +1876,7 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*aux,*ids,*scp,msglog[LONSTD];
+	char *nfn,*aux,*ids,*scp,*cfg,msglog[LONSTD];
 	char modulo[] = "EjecutarScript()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1885,16 +1902,30 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	else
 		muestraMensaje(22,NULL);
 	muestraMenu();
+
+
+	// Toma configuración de particiones
+	char *dsk=(char*)reservaMemoria(2);
+	sprintf(dsk,"1"); // Siempre el disco 1
+	cfg=LeeConfiguracion(dsk);
+	if(!cfg){ // No se puede recuperar la configuración del cliente
+		errorLog(modulo,36,FALSE);
+		herror=36;
+	}
+
+	ids=copiaParametro("ids",ptrTrama);
+
 	//herror=ejecutarCodigoBash(scp);
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_EjecutarScript");
-	ids=copiaParametro("ids",ptrTrama);
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de los Sistemas Operativos del cliente
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(nfn);
 	liberaMemoria(ids);		
 	liberaMemoria(aux);		
-	liberaMemoria(scp);		
+	liberaMemoria(scp);	
+	liberaMemoria(cfg);
 	
 	return(TRUE);
 }
