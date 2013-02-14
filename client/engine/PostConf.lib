@@ -334,7 +334,7 @@ ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Wi
 
 
 #/**
-#         ogInstallWindowsClient int_ndisk int_filesys
+#         ogInstallWindowsClient int_ndisk int_filesys str_filename
 #@brief   Instala el cliente OpenGnSys para sistemas operativos Windows.
 #@param   int_ndisk     nº de orden del disco
 #@param   int_filesys   nº de orden del sistema de archivos
@@ -357,7 +357,8 @@ function ogInstallWindowsClient ()
 local PART MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_filename" \
+           "$FUNCNAME 1 1 postconf.cmd"
     return
 fi
 
