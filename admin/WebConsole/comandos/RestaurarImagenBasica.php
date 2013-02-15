@@ -117,7 +117,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <?
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
-	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,true);	
 	echo "<br>";
 	opcionesAdicionales();
 //________________________________________________________________________________________________________
@@ -199,6 +199,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
+
 	global $IMAGENES_BASICAS;
 	global $AMBITO_ORDENADORES;
 	
@@ -226,6 +227,7 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
     else 
     	$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .")";
     
+	$cmd->texto.=" ORDER BY imagenes.descripcion";
 	//echo $cmd->texto;
 
 	$rs=new Recordset; 

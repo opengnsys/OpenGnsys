@@ -118,7 +118,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 			break;
 	}		
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
-		$cmd->texto.=" AND tipospar.clonable=1 ";
+		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0 ";
 
 	$cmd->texto.=" GROUP by configuracion";
 	//echo "carga claves:".$cmd->texto;
@@ -208,6 +208,9 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	if($sws & $msk_nombreSO)
 		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
 
+
+	if($sws)
+
 	if($sws & $msk_imagen)
 		$cmd->texto.="	ordenadores_particiones.idimagen, ";	
 
@@ -231,14 +234,14 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 			$cmd->texto.="	INNER JOIN aulas ON aulas.idaula = ordenadores.idaula WHERE aulas.idaula =".$idambito;
 			break;
 		case $AMBITO_GRUPOSORDENADORES :
-			$cmd->texto.="	INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid WHERE gruposordenadores.idgrupo =".$idambito;
+			$cmd->texto.="	INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid WHERE 											 	gruposordenadores.idgrupo =".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
 			$cmd->texto.="	WHERE ordenadores.idordenador=".$idambito;
 			break;
 	}					
 	if ($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
-		$cmd->texto.=" AND tipospar.clonable=1 ";
+		$cmd->texto.=" AND tipospar.clonable=1  AND ordenadores_particiones.numpar>0 ";
 	
 	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numpar) AS temp1
 					GROUP BY temp1.idordenador) AS temp2

@@ -174,6 +174,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 		$cadenaXML.='<AULA ';
 		// Atributos		
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')"';
+		$cadenaXML.=' clicksupnodo="ver_aulas();"';
 		$cadenaXML.=' imagenodo="../images/iconos/aula.gif"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreaula"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_AULAS.'-'.$rs->campos["idaula"];
@@ -246,6 +247,9 @@ function SubarbolXML_aulas_ordenadores($cmd,$idaula,$grupoid){
 		$cadenaXML.='<ORDENADOR';
 		// Atributos			
 		$cadenaXML.=' imagenodo="../images/iconos/ordenador.gif"';
+		$wpages="../propiedades/propiedades_ordenadores.php";
+		$wParam="0,0,0,0,'". $wpages."'";
+		$cadenaXML.=' clicksupnodo="modificar('.$wParam.')"';
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_ORDENADORES."'" .')"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreordenador"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_ORDENADORES.'-'.$rs->campos["idordenador"];
