@@ -54,8 +54,18 @@
 	source /opt/opengnsys/scripts/ImagenesSincronizadas.lib
 #___________________________________________________________________
 #
+# Activa navegador para ver progreso
+#___________________________________________________________________
+
+	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
+
+#___________________________________________________________________
+#
 # Proceso
 #___________________________________________________________________
+ 
+	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
+
 
 	# Llamada a la función de sincronización.
 	echo "Restauracion de imagen basica..." | tee -a $OGLOGSESSION $OGLOGFILE
@@ -70,7 +80,8 @@
 			ogFormat $DISCO $PARTICION $TIPOPARTICION
 			RETVAL=$?	
 			if [ $RETVAL -ne 0 ]; then
-			   exit $OG_ERR_PARTITION
+				kill $COPROC_PID
+			  exit $OG_ERR_PARTITION
 			fi 
 		fi	   
 	fi
@@ -87,17 +98,20 @@
 
 			RETVAL=$?
 			if [ $RETVAL -ne 0 ]; then
-	 				echo "***Error:$RETVAL. restaurando imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
-				 exit $OG_ERR_IMAGE
+	 			echo "***Error:$RETVAL. restaurando imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
+				kill $COPROC_PID
+				exit $OG_ERR_IMAGE
 			fi	
 			restauraListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART
 		
 			RETVAL=$?
 			if [ $RETVAL -ne 0 ]; then
-	 				echo "***Error:$RETVAL. restaurando listas ACL desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
-				 exit $OG_ERR_IMAGE
+	 			echo "***Error:$RETVAL. restaurando listas ACL desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
+				kill $COPROC_PID
+				exit $OG_ERR_IMAGE
 			fi
 			echo "!!! Finaliza correctamente !!! la restauración de imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
+			kill $COPROC_PID
 			exit 0	
 		fi		
 	fi	
@@ -110,8 +124,9 @@
 	CACHE=$(montaCache)
 	if [ -z $CACHE ]; then
 		echo "No se puede restaurar la imagen desde la cache ya que no existe" | tee -a $OGLOGSESSION $OGLOGFILE
+				kill $COPROC_PID
         ogRaiseError $OG_ERR_NOTCACHE "CACHE"
-        exit $?
+        exit $OG_ERR_NOTCACHE
 	fi			
 
 	# Borrar imagen de la caché
@@ -130,6 +145,7 @@
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 		echo "***Error:$RETVAL. Actualizando cache local desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
+		kill $COPROC_PID
 		exit $OG_ERR_IMAGE
 	fi			
 	
@@ -144,6 +160,7 @@
 	RETVAL=$?
 	if [ $RETVAL -ne 0 ]; then
 		echo "***Error:$RETVAL. restaurando imagen basica desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
+		kill $COPROC_PID
 		exit $OG_ERR_IMAGE
 	fi	
 
@@ -151,6 +168,7 @@
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
 	 	echo "***Error:$RETVAL. restaurando listas ACL desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
+		kill $COPROC_PID
 		exit $OG_ERR_IMAGE
 	fi	
 	echo "!!! Finaliza correctamente !!! restauración imagen basica desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -158,5 +176,5 @@
 #
 # Retorno
 #___________________________________________________________________
-
+	kill $COPROC_PID
 	exit 0
