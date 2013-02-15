@@ -57,6 +57,7 @@
 # Proceso
 #___________________________________________________________________
 
+	# Llamada a la función de sincronización.
 	echo "Restauracion de imagen basica..." | tee -a $OGLOGSESSION $OGLOGFILE
 	
 	# Borrado previo de la partición
