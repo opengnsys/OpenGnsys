@@ -64,9 +64,6 @@
 # Proceso
 #___________________________________________________________________
  
-	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
-
-
 	# Llamada a la función de sincronización.
 	echo "Restauracion de imagen basica..." | tee -a $OGLOGSESSION $OGLOGFILE
 	
@@ -110,7 +107,7 @@
 				kill $COPROC_PID
 				exit $OG_ERR_IMAGE
 			fi
-			echo "!!! Finaliza correctamente !!! la restauración de imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
+			echo "!!! Finaliza correctamente !!! la restauracion de imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
 			kill $COPROC_PID
 			exit 0	
 		fi		
@@ -171,7 +168,7 @@
 		kill $COPROC_PID
 		exit $OG_ERR_IMAGE
 	fi	
-	echo "!!! Finaliza correctamente !!! restauración imagen basica desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "!!! Finaliza correctamente !!! restauracion imagen basica desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 #___________________________________________________________________
 #
 # Retorno
