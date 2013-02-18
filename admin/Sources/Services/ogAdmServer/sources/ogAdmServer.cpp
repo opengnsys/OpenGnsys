@@ -736,6 +736,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
 
+
 	lon = sprintf(tbPar, "(");
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
@@ -776,6 +777,8 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		sprintf(sqlstr, "SELECT numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso"
 				"  FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 				ido, disk, par);
+
+
 		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 			errorLog(modulo, 21, FALSE);
 			db.GetErrorErrStr(msglog);
@@ -786,6 +789,8 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
 					" VALUES(%d,%s,%s,0x%s,%s,%d,%d,0)",
 					ido, disk, par, cpt, tam, idsfi, idsoi);
+
+
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
