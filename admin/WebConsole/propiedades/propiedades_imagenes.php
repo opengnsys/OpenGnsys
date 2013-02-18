@@ -22,16 +22,21 @@ $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
 
-$idimagen=0; 
+// Valores iniciales para variables.
+$idimagen=0;
 $nombreca="";
 $ruta="";
 $descripcion="";
+$codpar=0;
+$numpar=0;
 $idperfilsoft=0;
+$perfilsoft="";
 $comentarios="";
 $grupoid=0;
-
 $litamb="";
 $tipoimg=0;
+$idrepositorio=0;
+$imagenid=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"];  // Recoge parametros
 if (isset($_GET["idimagen"])) $idimagen=$_GET["idimagen"]; 

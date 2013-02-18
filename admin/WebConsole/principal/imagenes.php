@@ -1,4 +1,4 @@
-<?
+<?php
 // *******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -43,8 +43,8 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/imagenes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/imagenes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
 <?
@@ -56,65 +56,65 @@ echo $arbol->CreaArbolVistaXML(); // Muestra árbol en pantalla
 $flotante=new MenuContextual(); 
  
 $XMLcontextual=CreaContextualXMLTiposImagenes($AMBITO_GRUPOSIMAGENESMONOLITICAS,
-												$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
-												$AMBITO_IMAGENESMONOLITICAS,
-												$LITAMBITO_IMAGENESMONOLITICAS,
-												$IMAGENES_MONOLITICAS);
+						$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
+						$AMBITO_IMAGENESMONOLITICAS,
+						$LITAMBITO_IMAGENESMONOLITICAS,
+						$IMAGENES_MONOLITICAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreaContextualXMLTiposImagenes($AMBITO_GRUPOSIMAGENESBASICAS,
-												$LITAMBITO_GRUPOSIMAGENESBASICAS,
-												$AMBITO_IMAGENESBASICAS,
-												$LITAMBITO_IMAGENESBASICAS,
-												$IMAGENES_BASICAS);
+						$LITAMBITO_GRUPOSIMAGENESBASICAS,
+						$AMBITO_IMAGENESBASICAS,
+						$LITAMBITO_IMAGENESBASICAS,
+						$IMAGENES_BASICAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreaContextualXMLTiposImagenes($AMBITO_GRUPOSIMAGENESINCREMENTALES,
-												$LITAMBITO_GRUPOSIMAGENESINCREMENTALES,
-												$AMBITO_IMAGENESINCREMENTALES,
-												$LITAMBITO_IMAGENESINCREMENTALES,
-												$IMAGENES_INCREMENTALES);
+						$LITAMBITO_GRUPOSIMAGENESINCREMENTALES,
+						$AMBITO_IMAGENESINCREMENTALES,
+						$LITAMBITO_IMAGENESINCREMENTALES,
+						$IMAGENES_INCREMENTALES);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreaContextualXMLGruposImagenes($AMBITO_GRUPOSIMAGENESMONOLITICAS,
-												$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
-												$AMBITO_IMAGENESMONOLITICAS,
-												$LITAMBITO_IMAGENESMONOLITICAS,
-												$IMAGENES_MONOLITICAS);
+						$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
+						$AMBITO_IMAGENESMONOLITICAS,
+						$LITAMBITO_IMAGENESMONOLITICAS,
+						$IMAGENES_MONOLITICAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreaContextualXMLGruposImagenes($AMBITO_GRUPOSIMAGENESBASICAS,
-												$LITAMBITO_GRUPOSIMAGENESBASICAS,
-												$AMBITO_IMAGENESBASICAS,
-												$LITAMBITO_IMAGENESBASICAS,
-												$IMAGENES_BASICAS);
+						$LITAMBITO_GRUPOSIMAGENESBASICAS,
+						$AMBITO_IMAGENESBASICAS,
+						$LITAMBITO_IMAGENESBASICAS,
+						$IMAGENES_BASICAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreaContextualXMLGruposImagenes($AMBITO_GRUPOSIMAGENESINCREMENTALES,
-												$LITAMBITO_GRUPOSIMAGENESINCREMENTALES,
-												$AMBITO_IMAGENESINCREMENTALES,
-												$LITAMBITO_IMAGENESINCREMENTALES,
-												$IMAGENES_INCREMENTALES);
+						$LITAMBITO_GRUPOSIMAGENESINCREMENTALES,
+						$AMBITO_IMAGENESINCREMENTALES,
+						$LITAMBITO_IMAGENESINCREMENTALES,
+						$IMAGENES_INCREMENTALES);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreacontextualXMLImagen($AMBITO_IMAGENESMONOLITICAS,
-										$LITAMBITO_IMAGENESMONOLITICAS,
-										$IMAGENES_MONOLITICAS);
+					$LITAMBITO_IMAGENESMONOLITICAS,
+					$IMAGENES_MONOLITICAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 $XMLcontextual=CreacontextualXMLImagen($AMBITO_IMAGENESBASICAS,
-										$LITAMBITO_IMAGENESBASICAS,
-										$IMAGENES_BASICAS);
+					$LITAMBITO_IMAGENESBASICAS,
+					$IMAGENES_BASICAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);										
 
 $XMLcontextual=CreacontextualXMLImagen($AMBITO_IMAGENESINCREMENTALES,
-										$LITAMBITO_IMAGENESINCREMENTALES,
-										$IMAGENES_INCREMENTALES);
+					$LITAMBITO_IMAGENESINCREMENTALES,
+					$IMAGENES_INCREMENTALES);
 echo $flotante->CreaMenuContextual($XMLcontextual);											
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // ********************************************************************************************************
 //	Devuelve una cadena con formato XML con toda la información de las imáges registradas en un Centro 
 //	concreto
@@ -125,8 +125,10 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 
 function CreaArbol($cmd,$idcentro)
 {
+	// Variables globales.
 	global $TbMsg;
 
+	global $LITAMBITO_IMAGENES;
 	global $AMBITO_GRUPOSIMAGENESMONOLITICAS,
 			$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
 			$AMBITO_IMAGENESMONOLITICAS,
@@ -152,25 +154,25 @@ function CreaArbol($cmd,$idcentro)
 	$cadenaXML.=' infonodo="'.$TbMsg[9].'"';
 	$cadenaXML.='>';
 	$cadenaXML.=SubarbolXML_tiposimagenes($AMBITO_GRUPOSIMAGENESMONOLITICAS,
-											$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
-											$AMBITO_IMAGENESMONOLITICAS,
-											$LITAMBITO_IMAGENESMONOLITICAS,
-											$IMAGENES_MONOLITICAS,
-											$TbMsg[11]);
-											
+						$LITAMBITO_GRUPOSIMAGENESMONOLITICAS,
+						$AMBITO_IMAGENESMONOLITICAS,
+						$LITAMBITO_IMAGENESMONOLITICAS,
+						$IMAGENES_MONOLITICAS,
+						$TbMsg[11]);
+
 	$cadenaXML.=SubarbolXML_tiposimagenes($AMBITO_GRUPOSIMAGENESBASICAS,
-											$LITAMBITO_GRUPOSIMAGENESBASICAS,
-											$AMBITO_IMAGENESBASICAS,
-											$LITAMBITO_IMAGENESBASICAS,
-											$IMAGENES_BASICAS,
-											$TbMsg[12]);
-											
+						$LITAMBITO_GRUPOSIMAGENESBASICAS,
+						$AMBITO_IMAGENESBASICAS,
+						$LITAMBITO_IMAGENESBASICAS,
+						$IMAGENES_BASICAS,
+						$TbMsg[12]);
+
 	$cadenaXML.=SubarbolXML_tiposimagenes($AMBITO_GRUPOSIMAGENESINCREMENTALES,
-											$LITAMBITO_GRUPOSIMAGENESINCREMENTALES,
-											$AMBITO_IMAGENESINCREMENTALES,
-											$LITAMBITO_IMAGENESINCREMENTALES,
-											$IMAGENES_INCREMENTALES,
-											$TbMsg[13]);											
+						$LITAMBITO_GRUPOSIMAGENESINCREMENTALES,
+						$AMBITO_IMAGENESINCREMENTALES,
+						$LITAMBITO_IMAGENESINCREMENTALES,
+						$IMAGENES_INCREMENTALES,
+						$TbMsg[13]);											
 	$cadenaXML.='</RAIZ>';
 	return($cadenaXML);
 }
@@ -400,3 +402,4 @@ function CreacontextualXMLImagen($amb,$litamb,$tipo)
 	return($layerXML);
 }
 ?>
+
