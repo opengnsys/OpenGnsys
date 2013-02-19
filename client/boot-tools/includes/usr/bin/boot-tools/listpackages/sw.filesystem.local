@@ -24,4 +24,5 @@ install nilfs-tools
 install ufsutils
 #install ubuntu-zfs
 install zfs-fuse
-
+install android-tools-adb
+install android-tools-fastboot
