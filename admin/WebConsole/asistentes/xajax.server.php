@@ -54,9 +54,12 @@ function ListarOrigenMaster($ip){
 	}
 	
 	//Segunda consulta: Imagenes del MASTER registradas como si fuese un repo.
-	$cmd->texto='SELECT *,repositorios.ip as iprepositorio FROM  imagenes
-INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
-where repositorios.ip="' .$ip .'"';
+
+#	$cmd->texto='SELECT *,repositorios.ip as iprepositorio FROM  imagenes
+#INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
+#where repositorios.ip="' .$ip .'"';
+
+$cmd->texto='select cache  from ordenadores_particiones where codpar = 202 and  idordenador = (SELECT idordenador from ordenadores where ip="' .$ip . '")';
 	
 	$rs->Comando=&$cmd;
 	
@@ -65,9 +68,15 @@ where repositorios.ip="' .$ip .'"';
 		if($cantRegistros>0){
 			$rs->Primero(); 
 			while (!$rs->EOF){
-				$SelectHtml.='<OPTION value=" CACHE /'.$rs->campos["nombreca"].'"';				
-				$SelectHtml.='>';
-				$SelectHtml.='IMG-CACHE: ' . $rs->campos["nombreca"].'</OPTION>';
+				$files = explode(",", $rs->campos["cache"]);
+				foreach ($files as $file) {
+					if ( preg_match ( "/img$/", $file ) )  {					
+					$imgname = rtrim($file, ".img");
+					$SelectHtml.='<OPTION value=" CACHE /'.ltrim($imgname).'"';				
+					$SelectHtml.='>';
+					$SelectHtml.='IMG-CACHE: ' . ltrim($imgname).'</OPTION>';
+					}
+				}
 				$rs->Siguiente();
 			}
 		}
