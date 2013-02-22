@@ -143,7 +143,7 @@ void infoLog(int codinf) {
 //		- msgdeb : Descripción del mensaje de información
 // ________________________________________________________________________________________________________
 void infoDebug(char* msgdeb) {
-	char msglog[LONSUC];
+	char msglog[LONSUC+15];	// Cadena de registro (reserva caracteres para el prefijo).
 
 	sprintf(msglog, "*** Debug: %d-%s", ndebug, msgdeb);
 	registraLog(szPathFileLog, msglog, FALSE);

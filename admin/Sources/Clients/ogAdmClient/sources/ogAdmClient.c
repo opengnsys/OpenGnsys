@@ -246,10 +246,11 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	int  bytesleidos;	/* Bytes leidos en el mensaje */
 	int estado;
 	pid_t  pid;
-	char buffer[LONGITUD_SCRIPTSALIDA];
+	char buffer[LONBLK]	/* Buffer de lectura de fichero */
 	pipe (descr);
 	int i,nargs,resul;
-    char msglog[LONSTD],*argumentos[MAXARGS];
+	char msglog[LONSUC];	/* Mensaje de registro de sucesos */
+	char *argumentos[MAXARGS];
 	char modulo[] = "interfaceAdmin()";
 	if (ndebug>= DEBUG_MEDIO) {
 		sprintf(msglog, "%s:%s", tbMensajes[8], script);
@@ -298,10 +299,11 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 			return(resul);
 		}
 		close (descr[ESCRIBIR]);
-		bytesleidos = read (descr[LEER], buffer, LONGITUD_SCRIPTSALIDA-1);
+		bytesleidos = read (descr[LEER], buffer, LONBLK-1);
 		while(bytesleidos>0){
 			if(salida!=(char*)NULL){ // Si se solicita retorno de información...
 				buffer[bytesleidos]='\0';
+				// Error si se supera el tamaño máximo de cadena de salida.
 				if(strlen(buffer)+strlen(salida)>LONGITUD_SCRIPTSALIDA){
 					scriptLog(modulo,10);
 					resul=11;
@@ -310,9 +312,8 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 				}
 				rTrim(buffer);
 				strcat(salida,buffer);
-
 			}
-			bytesleidos = read (descr[LEER], buffer, LONGITUD_SCRIPTSALIDA-1);
+			bytesleidos = read (descr[LEER], buffer, LONBLK-1);
 		}
 		close (descr[LEER]);
 		//kill(pid,SIGQUIT);
@@ -330,7 +331,14 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	/* Muestra información de retorno */
 	if(salida!=(char*)NULL){
 		if(ndebug>2){
-			sprintf(msglog,"Información devuelta %s",salida);
+			//sprintf(msglog,"Información devuelta %s",salida);
+			// Evitar que la salida sea mayor que el tamaño del registro.
+			strcpy(msglog,"Informacion devuelta ");
+			strncat(msglog,salida,LONSUC-25);
+			// Si no se incluye toda la salida, añadir puntos suspensivos.
+			if (strlen(salida)>LONSUC-25) {
+				strcat(msglog,"...");
+			}
 			infoDebug(msglog);
 		}
 	}

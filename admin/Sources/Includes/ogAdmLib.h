@@ -19,7 +19,7 @@
 #define LONSCP 2024	// Longitud estandar de los parámetros de las tramas
 #define LONFUN 64	// Longitud estandar de los nombres de las funciones que procesan las tramas
 #define LONSUC 512	// Longitud de los mensajes de sucesos
-#define LONBLK 512	// Longitud de los paquetes de tramas leidos cada vez
+#define LONBLK 4096	// Longitud de los paquetes de tramas leidos cada vez
 #define MAXPRM 10	// Máximo número de parámeros del fichero de configuración del servicio
 #define MAXPAR 128	// Maximo numero de particiones manejadas por el sistema, ahora con GPT es 128
 #define MAXLONURL 512 // Longitud máxima de una dirección url con parámetros
