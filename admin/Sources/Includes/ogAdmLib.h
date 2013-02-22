@@ -90,14 +90,14 @@
 
 #define ANNOREF 2009 // Año de referencia base
 
-#define LONGITUD_SCRIPTSALIDA 512	// Longitud máxima de la información devuelta por una función de interface
+#define LONGITUD_SCRIPTSALIDA 131072	// Longitud máxima de la información devuelta por una función de interface
 #define MAXARGS 16	// Número máximo de argumentos enviados a un scripts
 #define MAXCNX 5	// Máximos intentos de conexión al servidor de Administración
 
 #define PUERTO_WAKEUP	9 // Puerto wake up
 
 #define MAXHARDWARE 128 //	 Máximos elementos hardware a detectar
-#define MAXSOFTWARE 2048 //	 Máximos elementos software a detectar
+#define MAXSOFTWARE 8096 //	 Máximos elementos software a detectar
 // ________________________________________________________________________________________________________
 // Tipos definidos
 // ________________________________________________________________________________________________________
