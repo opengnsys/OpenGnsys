@@ -633,21 +633,18 @@ BOOLEAN RESPUESTA_InclusionCliente(TRAMA* ptrTrama)
 //		FALSE: En caso de ocurrir algún error
 //______________________________________________________________________________________________________
 
-char* LeeConfiguracion(char* dsk)
+char* LeeConfiguracion()
 {
 	char* parametroscfg;
 	char modulo[] = "LeeConfiguracion()";
 
-	parametroscfg=(char*)reservaMemoria(LONGITUD_PARAMETROS);
+	// Reservar memoria para los datos de cofiguración.
+	parametroscfg=(char*)reservaMemoria(LONGITUD_SCRIPTSALIDA);
 	if(!parametroscfg){
 		errorLog(modulo,3,FALSE);
 		return(NULL);
 	}
-
-	// Para debug
-	//sprintf(parametroscfg,"disk=1\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n","1","7","NTFS","Microsoft Windows XP","50000000");
-	//return(parametroscfg);
-
+	// Ejecutar script y obtener datos.
 	sprintf(interface,"%s/%s",pathinterface,"getConfiguration");
 	herror=interfaceAdmin(interface,NULL,parametroscfg);
 
@@ -862,8 +859,9 @@ void procesaComandos(TRAMA* ptrTrama)
 //______________________________________________________________________________________________________
 BOOLEAN Actualizar(TRAMA* ptrTrama)
 {
-	char msglog[LONSTD];
-	int lon;
+	char msglog[LONSTD];	// Mensaje de log
+	char *cfg;		// Cadena de datos de configuración
+	int lon;		// Longitud de cadena
 	char modulo[] = "Actualizar()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -876,9 +874,7 @@ BOOLEAN Actualizar(TRAMA* ptrTrama)
 		return(FALSE);
 	}
 
-	char *dsk=(char*)reservaMemoria(2);
-	sprintf(dsk,"1"); // Siempre el disco 1
-	char* cfg=LeeConfiguracion(dsk);
+	cfg=LeeConfiguracion();
 	herror=0;
 	if(!cfg){ // No se puede recuperar la configuración del cliente
 		errorLog(modulo,36,FALSE);

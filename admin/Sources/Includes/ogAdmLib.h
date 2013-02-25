@@ -129,7 +129,7 @@ typedef struct{		// Estructura de las tramas
 	char arroba;	// Caracter arroba siempre
 	char identificador[14];	// Identificador de la trama, siempre JMMLCAMDJ_MCDJ
 	char tipo;	// Tipo de mensaje
-	int lonprm; // Longitud en hexadecimal de los parámetros
+	long lonprm;	// Longitud en hexadecimal de los parámetros
 	char *parametros; // Parámetros de la trama
 }TRAMA;
 // ________________________________________________________________________________________________________
