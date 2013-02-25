@@ -246,7 +246,7 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	int  bytesleidos;	/* Bytes leidos en el mensaje */
 	int estado;
 	pid_t  pid;
-	char buffer[LONBLK]	// Buffer de lectura de fichero
+	char buffer[LONBLK];	// Buffer de lectura de fichero
 	pipe (descr);
 	int i,nargs,resul;
 	int lon;		// Longitud de cadena
@@ -276,7 +276,6 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 			{
 				strncat (msglog, argumentos[i], strlen (argumentos[i]) - 4);
 				strcat (msglog, "...");
-);
 			}
 			infoDebug(msglog);
 		}
@@ -353,7 +352,6 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 			{
 				strncat (msglog, salida, strlen (salida) - 4);
 				strcat (msglog, "...");
-);
 			}
 			infoDebug(msglog);
 		}

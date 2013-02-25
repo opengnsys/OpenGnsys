@@ -133,7 +133,7 @@ void scriptLog(const char *,int );
 
 BOOLEAN gestionaTrama(TRAMA *);
 BOOLEAN inclusionCliente();
-char* LeeConfiguracion(char*);
+char* LeeConfiguracion();
 BOOLEAN RESPUESTA_InclusionCliente(TRAMA *);
 
 BOOLEAN comandosPendientes(TRAMA*);
