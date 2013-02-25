@@ -274,7 +274,7 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 			}
 			else
 			{
-				strncat (msglog, argumentos[i], strlen (argumentos[i]) - 4);
+				strncat (msglog, argumentos[i], LONSUC - lon - 4);
 				strcat (msglog, "...");
 			}
 			infoDebug(msglog);
@@ -350,7 +350,7 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 			}
 			else
 			{
-				strncat (msglog, salida, strlen (salida) - 4);
+				strncat (msglog, salida, LONSUC - -lon - 4);
 				strcat (msglog, "...");
 			}
 			infoDebug(msglog);
@@ -553,7 +553,7 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 		}
 		else
 		{
-			strncat (msglog, cfg, strlen (cfg) - 4);
+			strncat (msglog, cfg, LONSUC - lon - 4);
 			strcat (msglog, "...");
 		}
 		infoDebug(msglog);
