@@ -246,10 +246,11 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	int  bytesleidos;	/* Bytes leidos en el mensaje */
 	int estado;
 	pid_t  pid;
-	char buffer[LONBLK]	/* Buffer de lectura de fichero */
+	char buffer[LONBLK]	// Buffer de lectura de fichero
 	pipe (descr);
 	int i,nargs,resul;
-	char msglog[LONSUC];	/* Mensaje de registro de sucesos */
+	int lon;		// Longitud de cadena
+	char msglog[LONSUC];	// Mensaje de registro de sucesos
 	char *argumentos[MAXARGS];
 	char modulo[] = "interfaceAdmin()";
 	if (ndebug>= DEBUG_MEDIO) {
@@ -265,7 +266,18 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	/* Muestra matriz de los argumentos */
 	for(i=1;i<nargs;i++){
 		if (ndebug>= DEBUG_ALTO) {
-			sprintf(msglog, "%s: #%d-%s", tbMensajes[9],i+1,argumentos[i]);
+			// Truncar la cadena si es mayor que el tamaño de la línea de log.
+			sprintf(msglog, "%s: #%d-", tbMensajes[9], i+1);
+			lon = strlen (msglog);
+			if (lon + strlen (argumentos[i]) < LONSUC) {
+				strcat (msglog, argumentos[i]);
+			}
+			else
+			{
+				strncat (msglog, argumentos[i], strlen (argumentos[i]) - 4);
+				strcat (msglog, "...");
+);
+			}
 			infoDebug(msglog);
 		}
 	}
@@ -331,13 +343,17 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	/* Muestra información de retorno */
 	if(salida!=(char*)NULL){
 		if(ndebug>2){
-			//sprintf(msglog,"Información devuelta %s",salida);
-			// Evitar que la salida sea mayor que el tamaño del registro.
+			// Truncar la cadena si es mayor que el tamaño de la línea de log.
 			strcpy(msglog,"Informacion devuelta ");
-			strncat(msglog,salida,LONSUC-25);
-			// Si no se incluye toda la salida, añadir puntos suspensivos.
-			if (strlen(salida)>LONSUC-25) {
-				strcat(msglog,"...");
+			lon = strlen (msglog);
+			if (lon + strlen (salida) < LONSUC) {
+				strcat (msglog, salida);
+			}
+			else
+			{
+				strncat (msglog, salida, strlen (salida) - 4);
+				strcat (msglog, "...");
+);
 			}
 			infoDebug(msglog);
 		}
@@ -515,8 +531,9 @@ void muestraMensaje(int idx,char*msg)
 //______________________________________________________________________________________________________
 BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 {
-	int lon;
-	char msglog[LONSTD],*cfg;
+	int lon;		// Longitud de cadena
+	char msglog[LONSUC];	// Mensaje de registro de sucesos
+	char *cfg;		// Datos de configuración
 	SOCKET socket_c;
 	char modulo[] = "inclusionCliente()";
 
@@ -530,7 +547,17 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 		return(FALSE);
 	}
 	if (ndebug>= DEBUG_ALTO) {
-		sprintf(msglog, "%s:%s", tbMensajes[14],cfg);
+		// Truncar la cadena si es mayor que el tamaño de la línea de log.
+		sprintf(msglog, "%s:%s", tbMensajes[14]);
+		lon = strlen (msglog);
+		if (lon + strlen (cfg) < LONSUC) {
+			strcat (msglog, cfg);
+		}
+		else
+		{
+			strncat (msglog, cfg, strlen (cfg) - 4);
+			strcat (msglog, "...");
+		}
 		infoDebug(msglog);
 	}
 	initParametros(ptrTrama,0);
