@@ -995,6 +995,8 @@ function ContextualXMLComandos($litambito,$ambito){
 		$layerXML="";
 		$rs->Primero(); 
 		while (!$rs->EOF){
+			$idcomando=$rs->campos["idcomando"];
+			if ( $ambito == 1 && $idcomando == 11 ){}elseif( $ambito == 2 && $idcomando == 11 ){}else{
 			$descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];
 			if (empty ($descrip)) {
 				$descrip=$rs->campos["descripcion"];
@@ -1005,6 +1007,7 @@ function ContextualXMLComandos($litambito,$ambito){
 			$layerXML.='></ITEM>';
 			if ($maxlongdescri < strlen($descrip)) // Toma la Descripción de mayor longitud
 				$maxlongdescri=strlen($descrip);
+												}
 			$rs->Siguiente();
 		}
 	$layerXML.='</MENUCONTEXTUAL>';

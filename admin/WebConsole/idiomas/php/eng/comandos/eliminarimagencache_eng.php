@@ -19,5 +19,9 @@
 	$TbMsg[11]='Nº';
 	$TbMsg[12]='Mark';
 	$TbMsg[13]='Size';
-	$TbMsg[14]='Not in Repository';
+	$TbMsg[14]='Image is not in Repository';
+	$TbMsg[15]=' has several assigned Repositories';
+	$TbMsg[16]=' NOT have the Repository on the Server';
+	$TbMsg[17]='Version limitations: 1.1';
+	$TbMsg[18]='Image size available if Repository and Web server hosted on the same Server';
 ?>

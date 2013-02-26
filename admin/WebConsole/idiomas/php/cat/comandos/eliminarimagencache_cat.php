@@ -19,5 +19,9 @@
 	$TbMsg[11]='N&ordm;';
 	$TbMsg[12]='Marcar';
 	$TbMsg[13]='Tama&ntilde;o';
-	$TbMsg[14]='No existe en repositorio';
+	$TbMsg[14]='Imagen NO est&aacute; en Repositorio';
+	$TbMsg[15]=' tiene varios Repositorios asignados';
+	$TbMsg[16]=' NO tiene el Repositorio en el Servidor';
+	$TbMsg[17]='Limitaciones Versi&oacute;n 1.1';
+	$TbMsg[18]='Tama&ntilde;o de la imagen disponible si Repositorio y Servidor Web alojados en el mismo Servidor';
 ?>
