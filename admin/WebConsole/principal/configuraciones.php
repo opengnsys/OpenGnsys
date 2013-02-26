@@ -348,7 +348,11 @@ function datosOrdenadores($cmd,$idordenador)
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
 			<TD><?php echo $nombreordenador;?></TD>
-			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotos/<?php echo $fotoordenador;?>"></TD>
+			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b"
+src="<?php if ($fotoordenador==""){echo "../images/fotos/fotoordenador.gif";}
+                else{echo "../images/fotos/".$fotoordenador;}?>">
+			</TD>
+			
 			</TR>	
 		<TR>
 				<TH align=center>&nbsp;<?echo $TbMsg[15]?>&nbsp;</TD>
@@ -388,10 +392,29 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 		}
 		$rs->Cerrar();
 	}
+		if ($numordenadores==0)
+		{
+		$cmd->texto="SELECT *, COUNT(*) AS numordenadores
+			 FROM gruposordenadores
+			 WHERE idgrupo=".$idgrupo;
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if ($rs->Abrir()){
+			$rs->Primero(); 
+			if (!$rs->EOF){
+				$nombregrupoordenador=$rs->campos["nombregrupoordenador"];
+				$ordenadores=$rs->campos["numordenadores"];
+				$idaula=$rs->campos["idaula"];
+			}
+			$rs->Cerrar();
+					}
+		}
 	//////////////////////////////////////
-	$cmd->texto="SELECT DISTINCT * FROM aulas
-			 INNER JOIN grupoordenadores ON grupoordenadores.idaula=aulas.idaula
-			 WHERE aulas.idaula=.$idaula";			 
+    $cmd->texto="SELECT DISTINCT aulas.*,count(*) as numordenadores
+            	FROM aulas
+                INNER JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+                WHERE aulas.idaula=".$idaula;  
+				 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
@@ -409,7 +432,7 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 			<?
 					echo '<TD>'.$nombregrupoordenador.'</TD>
 								<TD colspan=2 valign=top align=center rowspan=2>
-									<IMG border=3 style="border-color:#63676b" src="'.$urlfoto.'"><br>
+					<IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"><br>
 									<center>&nbsp;'.$TbMsg[13].':&nbsp;'. $ordenadores.'</center>
 								</TD>';
 

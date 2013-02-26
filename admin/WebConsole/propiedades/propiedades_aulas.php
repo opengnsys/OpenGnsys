@@ -112,7 +112,7 @@ function abrir_ventana(URL){
 			}
 			else{
 				echo '<td><input class="formulariodatos" name=nombreaula style="width:215" type=text value="'. $nombreaula.'" /></td>';
-				echo'<td colspan="2" valign="top" align="left" rowspan="2"><img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" /><br />'.$TbMsg[21].': '. $ordenadores.'<br />(150X110)-(jpg - gif) ---- '.$TbMsg[5091].'<br /><input name="archivo" type="file" id="archivo" size="16" /></td>';
+				echo'<td colspan="2" valign="top" align="left" rowspan="2"><img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" /><br />'.$TbMsg[21].': '. $ordenadores.'<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'<br /><input name="archivo" type="file" id="archivo" size="16" /></td>';
 			}
 			?>
 		</tr>

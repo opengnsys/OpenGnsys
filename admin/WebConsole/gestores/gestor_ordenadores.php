@@ -155,7 +155,6 @@ function Gestiona(){
 	global	$cmd;
 	global	$opcion;
 	global $fotoordenador;
-	$fotoordenador="../images/fotos/".$fotoordenador;
 	global $grupoid;
 	global $idordenador;
 	global $nombreordenador;

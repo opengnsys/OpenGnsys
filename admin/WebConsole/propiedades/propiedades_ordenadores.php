@@ -93,7 +93,7 @@ function abrir_ventana(URL){
 			?>
 <td colspan="2" valign="top" align="left" rowspan="3">
 <img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
-<br />(150X110)-(jpg - gif) ---- <?php echo $TbMsg[5091]?>
+<br />(150X110)-(jpg - gif - png) ---- <?php echo $TbMsg[5091]?>
 <br />
 <input name="archivo" type="file" id="archivo" size="16" />
 </td>
