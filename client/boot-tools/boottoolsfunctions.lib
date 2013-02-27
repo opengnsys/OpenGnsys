@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot-Tools
 #@class   Boot-Tools
 #@brief   Funciones para generar un sistema operativo cliente para opengnsys
-#@version 0.9
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -40,6 +40,9 @@ export VERSIONBOOTTOOLS="ogLive"
 #@version 1.0 - Compatibilidad OpengGnsys X.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
+#@version 1.0.5 - Fichero general de configuración, Kernel 3.7 para Ubuntu 12.10.
+#@author  Ramón Gómez, ETSII Univ. Sevilla
+#@date    2013/02/06
 function btogGetOsInfo ()
 {
 OGCLIENTCFG=/tmp/ogclient.cfg
@@ -55,6 +58,13 @@ case "${1,,}" in
 		OSDISTRIB="ubuntu"
 		OSCODENAME="lucid"
 		OSRELEASE="2.6.32-21-generic-pae"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	quantal)
+		OSDISTRIB="ubuntu"
+		OSCODENAME="quantal"
+		OSRELEASE="3.7.6-030706-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
