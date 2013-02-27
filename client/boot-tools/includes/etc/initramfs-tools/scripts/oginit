@@ -27,10 +27,10 @@
 #@version 1.0.2 - RAMFS: instalación y actualización automatica en cache
 #@author  Antonio J. Doblas Viso. Universidad de Málaga. EVLT.
 #@date    2011/08/4
+#@version 1.0.5 - Cambiar resolución de pantalla para Kernel con parámetro "video".
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2013/02/18
 #*/
-
-
-
 
 
 # Parameter: Where to mount the filesystem
@@ -57,7 +57,9 @@ mountroot ()
 	set -a
 	log_success_msg "Checking kernel parameters"
 	ogExportKernelParameters 
-	log_success_msg "Checking Opengnys Environmnet"
+	# Cambiar resolución de vídeo para kernels que usan el parámetro "video".
+	[ -n "$video" ] && ogChangeVideoResolution
+	log_success_msg "Checking OpenGnSys Environmnet"
 	ogExportVarEnvironment
 	
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before configure ramfs structure for OG: y/N "

@@ -1,9 +1,11 @@
+#/**
 #@file    ogfunctions.lib
-#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnsys 
+#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnSys.
 #@class   client
-#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnsys
-#@version 0.91
+#@version 1.0.5
 #@warning License: GNU GPLv3+
+#*/ ##
+
 
 #/**
 #        ogExportKernelParameters
@@ -24,6 +26,38 @@ ogExportKernelParameters ()
 	done
 	return 0
 }
+
+
+#/**
+#         ogChangeVideoResolution
+#@brief   Cambia la resolución de vídeo utilizando el parámetro "video" del Kernel
+#         (sustituye al parámetro "vga").
+#@note    Formato del parámetro vídeo:    video=DRIVER:RESXxRESY-BITS
+#@note    El valor por defecto es:        video=uvesafb:640x480-16
+#@todo    Control de errores en el foramto de la variable "video".
+#@version 1.0.5 - Primera versión de la función.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2013/02/18
+#*/ ##
+ogChangeVideoResolution ()
+{
+# Variables locales.
+local DRIVER MODE
+# Obtener driver y resolución.
+DRIVER="$(echo $video|cut -f1 -d:)"
+MODE="$(echo $video|cut -f2 -d:)"
+case "$DRIVER" in
+    # Cambiar resolución para driver "uvesafb".
+    uvesafb)
+        grep ":$(echo $MODE|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1 || MODE="640x480-16"
+        echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
+        echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
+        ;;
+    *)  echo "Unknown video driver, using default mode."
+        ;;
+esac
+}
+
 
 #/**
 #       ogExportVarEnvironment
