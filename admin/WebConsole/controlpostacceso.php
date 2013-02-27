@@ -13,7 +13,8 @@ include_once("./clases/AdoPhp.php");
 #include_once("idiomas/php/$idi/acceso_$idi.php");
 //________________________________________________________________________________________________________
  $usu=""; 
- $pss=""; 
+ $pss="";
+ $ident=""; 
  $idc=0; 
  $iph=""; // Switch menu cliente 
   
@@ -27,6 +28,22 @@ include_once("./clases/AdoPhp.php");
  if (!$cmd)
   die($TbMsg["ACCESS_ERROR"]);
 //________________________________________________________________________________________________________
+
+if ($idc != 0)
+{
+        $rs=new Recordset;
+//      $cmd->texto="SELECT * FROM  centros WHERE idcentro='$idc'";
+        $cmd->texto="SELECT * FROM  centros WHERE idcentro=".$idc;
+        $rs->Comando=&$cmd;
+        if (!$rs->Abrir()) return(false); // Error al abrir recordset
+        $rs->Primero();
+        if (!$rs->EOF){
+        $ident=$rs->campos["identidad"];
+        }$rs->Cerrar();
+}
+
+//________________________________________________________________________________________________________
+ 
 
  $nmc=""; 
  $idi=""; 
@@ -51,6 +68,7 @@ include_once("./clases/AdoPhp.php");
 
  session_start(); // Activa variables de sesión
 
+ $_SESSION["widentidad"]=$ident;   
  $_SESSION["widcentro"]=$idc;  
  $_SESSION["wnombrecentro"]=$nmc;  
  $_SESSION["wusuario"]=$usu;  
@@ -59,6 +77,7 @@ include_once("./clases/AdoPhp.php");
  $_SESSION["wcadenaconexion"]=$cnx; 
  $_SESSION["wpagerror"]=$wer; 
  $_SESSION["wurlacceso"]=$wac; 
+ $_SESSION["wadminetboot"]=$adminetboot; 
 
 // Variables de entorno
  $resul=toma_entorno($cmd,$ips,$prt,$pclo,$rep); 
@@ -80,6 +99,7 @@ include_once("./clases/AdoPhp.php");
  //    Devuelve el identificador del centro, el nombre y el idioma utilizado por el usuario  
  //_______________________________________________________________________________________________________ 
  function toma_datos($cmd,$idcentro,&$nombrecentro,&$idioma,$usuario,&$idtipousuario,$pasguor){ 
+	global $adminetboot;
 	$rs=new Recordset;  
 	if(!empty($idcentro)){
 		 $cmd->texto="SELECT usuarios.idtipousuario, centros.nombrecentro,
@@ -104,6 +124,7 @@ include_once("./clases/AdoPhp.php");
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
 	if(!$rs->EOF){
+    	$adminetboot=$rs->campos["idtipousuario"];
 		$idtipousuario=$rs->campos["idtipousuario"]; 
 		$idioma=$rs->campos["idioma"]; 
 		if(!empty($idcentro)){

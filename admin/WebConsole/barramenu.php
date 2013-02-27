@@ -9,8 +9,16 @@
 // ********************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
+include_once("./includes/CreaComando.php");
+include_once("./clases/AdoPhp.php");
 include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 //________________________________________________________________________________________________________
+
+//________________________________________________________________________________________________________
+$cmd=CreaComando($cadenaconexion);
+if (!$cmd)
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�n con servidor B.D.
+//___________________________________________________________________________________________________
 ?>
 <HTML>
 	<TITLE>Administración web de aulas</TITLE>
@@ -77,6 +85,10 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 					case 10:
 							href="./images/L_Iconos.php"
 							href2="./images/M_Iconos.php"
+							break;
+					case 11:
+							href="./principal/administracion.php"
+							href2="./principal/boot_grub4dos.php"
 							break;
 					case 13:
 							href="./principal/usuarios.php"
@@ -161,6 +173,14 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
 											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+									
+
+											<TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/tablas.gif">
+											<SPAN class=menupral ><?echo  $TbMsg[16] ?></SPAN></A>&nbsp;</TD>
+											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+									
 									<?}?>
 							<?}?>
 
@@ -172,6 +192,63 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
 		
+
+							<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+<?php if($idtipousuario!=$SUPERADMINISTRADOR){ ?>
+<TD>
+<?php
+	$usuarioactual=$_SESSION["wusuario"];
+	$cmd->texto="SELECT * FROM centros
+				INNER JOIN administradores_centros ON administradores_centros.idcentro=centros.idcentro
+				INNER JOIN usuarios ON usuarios.idusuario=administradores_centros.idusuario
+				WHERE usuarios.usuario='".$usuarioactual."'
+				AND centros.identidad=".$_SESSION["widentidad"];
+	$rs=new Recordset;
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero(); 
+	while (!$rs->EOF){
+		$identidad=$rs->campos["identidad"];
+		$idcentro=$rs->campos["idcentro"];
+		$nombrecentro=$rs->campos["nombrecentro"];
+		$numidcentro[]=$idcentro;$numnombrecentro[]=$nombrecentro;
+	$rs->Siguiente();
+					  }//Cierre
+	$rs->Cerrar();
+echo '<form></form>';
+if (count($numidcentro) > 1)
+{
+?>
+<form name="fcentros" action="frames.php" target="_parent" method="POST">
+<select name="idmicentro" id="idmicentro" >
+<option value=""> -- <?php echo $_SESSION["wnombrecentro"] ;?> -- </option>
+<?php
+for ($i=0;$i<count($numidcentro);$i++)
+	{
+		if ($_SESSION["wnombrecentro"] == $numnombrecentro[$i])
+		{}else{
+		echo '<option value="'.$numidcentro[$i].','.$numnombrecentro[$i].'"># - '.$numnombrecentro[$i].'</option>';
+			}
+	}
+?>
+
+</select>
+<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+<TD width=4 align=middle><input name="submit" type="submit" value="Cambiar" ></input></TD>
+
+</form>
+<TD width=0 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+<TD><?php echo "Usuario : ".ucwords($_SESSION["wusuario"]); ?></TD>
+
+</TD>
+<?php } }?>
+
+
+
+
+
 
 						   </TR>
 						 </TABLE>

@@ -19,5 +19,8 @@
 	$TbMsg[11]='Ajuda';
 	$TbMsg[12]='Administradors';
 	$TbMsg[14]='Cercar';
+	$TbMsg[15]='Netboot Avan�at';
+	$TbMsg[16]='Unitat Organitzativa';
+
 ?>
 

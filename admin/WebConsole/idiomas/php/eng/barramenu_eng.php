@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: barramenu_eng.php 
-//	Idioma: Ingés 
+//	Idioma: Ingï¿½s 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Labs';
@@ -19,5 +19,7 @@
 	$TbMsg[11]='Help';
 	$TbMsg[12]='Administrators';
 	$TbMsg[14]='Search';
+	$TbMsg[15]='Advanced Netboot';
+	$TbMsg[16]='Organizational Unit';
 ?>
 
