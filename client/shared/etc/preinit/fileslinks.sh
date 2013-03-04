@@ -20,7 +20,7 @@ if [ -n "$OPENGNSYS" ]; then
     ln -fs /bin/bash /bin/sh
 
     # Enlace a la librería libmac para ld-mac.
-    ln -fs $OGLIB/libmac.so /usr/lib
+    [ -f /usr/lib/libmac.so ] || ln -fs $OGLIB/libmac.so /usr/lib
 
     # Crear directorio de bloqueos
     mkdir -p /var/lock 2>/dev/null || mkdir -p /run/lock
@@ -29,10 +29,18 @@ if [ -n "$OPENGNSYS" ]; then
     touch $OGLOGCOMMAND $OGLOGCOMMAND.tmp $OGLOGSESSION /tmp/menu.tmp
     chmod 777 $OGLOGCOMMAND $OGLOGCOMMAND.tmp $OGLOGSESSION /tmp/menu.tmp
 
-#    # Directorio de tipos de letras para el browser.
+    # Enlaces para Qt Embeded.
     QTDIR="/usr/local"
- #   mkdir -p $QTDIR/lib
-  #  ln -fs $OGLIB/fonts $QTDIR/lib
+    mkdir -p $QTDIR/{etc,lib,plugins}
+    for i in $OGLIB/qtlib/*; do
+        [ -f $QTDIR/lib/$i ] || ln -fs $i $QTDIR/lib
+    done
+    for i in $OGLIB/qtplugins/*; do
+        [ -f $QTDIR/plugins/$i ] || ln -fs $i $QTDIR/plugins
+    done
+    for i in $OGETC/*.qmap; do
+        [ -f $QTDIR/etc/$i ] || ln -fs $i $QTDIR/etc
+    done
 
 else
     # FIXME Error: entorno de OpenGNSys no configurado.
