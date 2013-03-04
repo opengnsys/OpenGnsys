@@ -11,6 +11,7 @@ cfg=""
 disks=$(ogDiskToDev | wc -w)
 for ((dsk=1; dsk<=$disks; dsk++)); do
     particiones=$(ogGetPartitionsNumber $dsk)
+    particiones=${particiones:-0}
     # Tipo de tabla de particiones: 1=MSDOS, 2=GPT
     ptt=$(ogGetPartitionTableType $dsk)
     case "$ptt" in
