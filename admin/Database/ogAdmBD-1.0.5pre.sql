@@ -1,4 +1,5 @@
-### Procedimiento para actualizar la base de datos dentro de la versión 1.0.5.
+### Procedimiento para actualización de la base de datos.
+# OpenGnSys 1.0.5
 #use ogAdmBD
 
 # Procedimiento para actualización condicional de tablas.
@@ -81,20 +82,30 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 		nomidentificador=VALUES(nomidentificador), nomtabla=VALUES(nomtabla),
 		nomliteral=VALUES(nomliteral), tipopa=VALUES(tipopa), visual=VALUES(visual);
 
-# Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga".
+# Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
      MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-UPDATE menus SET resolucion = CASE resolucion 
-                		   WHEN '355' THEN 'uvesafb:1152x864-16'
-				   WHEN '788' THEN 'uvesafb:800x600-16'
-        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
-				   WHEN '791' THEN 'uvesafb:1024x768-16'
-				   WHEN '792' THEN 'uvesafb:1024x768-24'
-				   WHEN '794' THEN 'uvesafb:1280x1024-16'
-				   WHEN '795' THEN 'uvesafb:1280x1024-24'
-				   WHEN '798' THEN 'uvesafb:1600x1200-16'
-				   WHEN '799' THEN 'uvesafb:1600x1200-24'
-				   WHEN NULL  THEN 'uvesafb:800x600-16'
-				   ELSE resolucion
-			      END;
+UPDATE menus
+	SET resolucion = CASE resolucion 
+                		WHEN '355' THEN 'uvesafb:1152x864-16'
+				WHEN '788' THEN 'uvesafb:800x600-16'
+				WHEN '789' THEN 'uvesafb:800x600-24'
+				WHEN '791' THEN 'uvesafb:1024x768-16'
+				WHEN '792' THEN 'uvesafb:1024x768-24'
+				WHEN '794' THEN 'uvesafb:1280x1024-16'
+				WHEN '795' THEN 'uvesafb:1280x1024-24'
+				WHEN '798' THEN 'uvesafb:1600x1200-16'
+				WHEN '799' THEN 'uvesafb:1600x1200-24'
+				WHEN NULL  THEN 'uvesafb:800x600-16'
+				ELSE resolucion
+			 END;
+
+# Cambios para NetBoot con ficheros dinámicos (tickets #534 #582).
+DROP TABLE menuboot;
+DROP TABLE itemboot;
+DROP TABLE menuboot_itemboot;
+ALTER TABLE ordenadores
+	MODIFY arranque VARCHAR(30) NOT NULL DEFAULT '01';
+UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
+UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
 
