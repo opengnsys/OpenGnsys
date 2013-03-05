@@ -6,7 +6,7 @@ install kexec-tools
 install mbuffer
 install parted 
 install drbl-chntpw 
-install chntpw 
+#install chntpw 
 install clonezilla
 install registry-tools
 install reglookup
