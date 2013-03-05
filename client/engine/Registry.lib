@@ -4,9 +4,19 @@
 #@brief   Librería o clase Registry
 #@class   Boot
 #@brief   Funciones para gestión del registro de Windows.
-#@version 1.0.1
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
+
+
+# Función ficticia para lanzar chntpw con timeout de 5 s., evitando cuelgues del programa.
+function chntpw ()
+{
+local CHNTPW
+CHNTPW=$(which drbl-chntpw)
+CHNTPW=${CHNTPW:-$(which chntpw)}
+timeout --foreground 5s $CHNTPW "$@"
+}
 
 
 #/**
