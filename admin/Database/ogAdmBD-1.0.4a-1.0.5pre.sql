@@ -1,5 +1,7 @@
 ### Fichero de actualización de la base de datos.
+# OpenGnSys 1.0.4a - 1.0.5
 #use ogAdmBD
+
 # Añadir validación del cliente.
 ALTER TABLE aulas
 	ADD validacion TINYINT(1) DEFAULT 0,
@@ -43,4 +45,21 @@ UPDATE imagenes SET tipo=1;
 
 # Cambio de tipo de grupo.
 UPDATE grupos SET tipo=70 WHERE tipo=50;
+
+# Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
+ALTER TABLE menus
+     MODIFY resolucion VARCHAR(50) DEFAULT NULL;
+UPDATE menus SET resolucion = CASE resolucion 
+                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+				   WHEN '788' THEN 'uvesafb:800x600-16'
+        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+				   WHEN '791' THEN 'uvesafb:1024x768-16'
+				   WHEN '792' THEN 'uvesafb:1024x768-24'
+				   WHEN '794' THEN 'uvesafb:1280x1024-16'
+				   WHEN '795' THEN 'uvesafb:1280x1024-24'
+				   WHEN '798' THEN 'uvesafb:1600x1200-16'
+				   WHEN '799' THEN 'uvesafb:1600x1200-24'
+				   WHEN NULL  THEN 'uvesafb:800x600-16'
+				   ELSE resolucion
+			      END;
 

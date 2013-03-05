@@ -1,25 +1,30 @@
-UPDATE ogAdmBD.entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
+### Fichero de actualización de la base de datos.
+# OpenGnSys 1.0.2 - 1.0.5
+#use ogAdmBD
 
-UPDATE ogAdmBD.parametros SET tipopa = '1' WHERE idparametro = 30;
+UPDATE entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
 
-UPDATE ogAdmBD.idiomas SET descripcion = 'English' WHERE ididioma = 2;
-UPDATE ogAdmBD.idiomas SET descripcion = 'Català' WHERE ididioma = 3;
+UPDATE parametros SET tipopa = '1' WHERE idparametro = 30;
 
-ALTER TABLE ogAdmBD.menus MODIFY resolucion smallint(4);
+UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
+UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
 
-ALTER TABLE ogAdmBD.perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
+# Añadir tipo de arranque Windows al perfil hardware.
+ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
 
-ALTER TABLE ogAdmBD.ordenadores_particiones
+# Soportar particiones GPT y añadir información de caché.
+ALTER TABLE ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
 	ADD numdisk tinyint(4) NOT NULL DEFAULT 1 AFTER idordenador,
 	ADD cache varchar(500),
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 
-ALTER TABLE ogAdmBD.imagenes MODIFY codpar int(8) NOT NULL;
-ALTER TABLE ogAdmBD.sistemasficheros MODIFY codpar int(8) NOT NULL;
-ALTER TABLE ogAdmBD.tipospar MODIFY codpar int(8) NOT NULL;
-INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
+# Nuevos tipos de particiones y particiones GPT.
+ALTER TABLE imagenes MODIFY codpar int(8) NOT NULL;
+ALTER TABLE sistemasficheros MODIFY codpar int(8) NOT NULL;
+ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
+INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
 	(CONV('A5',16,10), 'FREEBSD', 1),
 	(CONV('A6',16,10), 'OPENBSD', 1),
@@ -58,15 +63,68 @@ INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('FD00',16,10), 'LINUX-RAID', 1),
 	(CONV('FFFF',16,10), 'UNKNOWN', 1);
 
-ALTER TABLE ogAdmBD.ordenadores ADD fotoord VARCHAR (250) NOT NULL;
+ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
-UPDATE ogAdmBD.aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
+UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
 
-# Actualización SQL para crear el comando Eliminar Imagen Cache.
-INSERT INTO ogAdmBD.comandos
-	SET idcomando=11, descripcion='Eliminar Imagen Cache',
-	    pagina='../comandos/EliminarImagenCache.php',
-	    gestor='../comandos/gestores/gestor_Comandos.php',
-	    funcion='EliminarImagenCache', aplicambito=31,
-	    visuparametros='iph;tis;dcr;scp', parametros='nfn;iph;tis;dcr;scp', activo=1;
+# Añadir validación del cliente.
+ALTER TABLE aulas
+	ADD validacion TINYINT(1) DEFAULT 0,
+	ADD paginalogin VARCHAR(100),
+	ADD paginavalidacion VARCHAR(100);
+
+ALTER TABLE ordenadores
+	ADD validacion TINYINT(1) DEFAULT 0,
+	ADD paginalogin VARCHAR(100),
+	ADD paginavalidacion VARCHAR(100);
+
+# Nuevos comandos.
+ALTER TABLE comandos
+	ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
+INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
+	(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
+	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
+	(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
+	(14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
+	(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion');
+
+# Parámetros para los comandos nuevos.
+ALTER TABLE parametros
+	ADD KEY (nemonico);
+INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
+	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
+	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),
+	(34, 'cpc', 'Copiar también en cache', '', '', '', 5, 1),
+	(35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1),
+	(36, 'rti', 'Ruta de origen', '', '', '', 0, 1),
+	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
+	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
+
+# Imágenes incrementales.
+ALTER TABLE imagenes
+	ADD tipo TINYINT NULL,
+	ADD imagenid INT NOT NULL DEFAULT '0',
+	ADD ruta VARCHAR(250) NULL;
+UPDATE imagenes SET tipo=1;
+
+# Cambio de tipo de grupo.
+UPDATE grupos SET tipo=70 WHERE tipo=50;
+
+# Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
+ALTER TABLE menus
+     MODIFY resolucion VARCHAR(50) DEFAULT NULL;
+UPDATE menus SET resolucion = CASE resolucion 
+                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+				   WHEN '788' THEN 'uvesafb:800x600-16'
+        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+				   WHEN '791' THEN 'uvesafb:1024x768-16'
+				   WHEN '792' THEN 'uvesafb:1024x768-24'
+				   WHEN '794' THEN 'uvesafb:1280x1024-16'
+				   WHEN '795' THEN 'uvesafb:1280x1024-24'
+				   WHEN '798' THEN 'uvesafb:1600x1200-16'
+				   WHEN '799' THEN 'uvesafb:1600x1200-24'
+				   WHEN NULL  THEN 'uvesafb:800x600-16'
+				   ELSE resolucion
+			      END;
 
