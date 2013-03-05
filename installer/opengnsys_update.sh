@@ -21,7 +21,7 @@
 #@version 1.0.4 - Detector de distribución y compatibilidad con CentOS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/05/04
-#@version 1.0.5 - Actualizar BD en la misma versión.
+#@version 1.0.5 - Actualizar BD en la misma versión y compatibilidad con Fedora (systemd).
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/12/14
 #*/
@@ -487,6 +487,8 @@ function createDirs()
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
 	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
+	[ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] || mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
@@ -620,8 +622,8 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	#local FILENAME=ogLive-precise-3.2.0-23-generic-pae-r3017.iso	# 1.0.4-rc1
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	#local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	local FILENAME=ogLive-quantal-3.7.6-030706-generic-r3619.iso 	# 1.0.5-rc2
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
