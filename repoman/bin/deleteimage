@@ -1,13 +1,13 @@
 #!/bin/bash
-#         deleteimage [ -b | -r ] str_image
+#         deleteimage [ -d | -r ] str_image
 #@file    deleteimage
 #@brief   Borra del repositorio los ficheros de una imagen.
-#@param   -b           Elimina también la copia de seguridad de la imagen (opcional).
+#@param   -d           Elimina también la copia de seguridad de la imagen (opcional).
 #@param   -r           Recupera la copia de seguridad de la imagen (opcional).
 #@param   str_image    Nombre canónico de la imagen, sin extensión.
-#@version 1.0
-#@date    2012-10-14
-#@author  Ramón Gómez, ETSII Univ. Sevilla
+#@version 1.0.5
+#@date    2013-03-06
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
 
 
 PROG=$(basename $0)
@@ -20,8 +20,8 @@ BAKEXT="ant"
 if [ "$*" == "help" ]; then
     cat << EOT
 $PROG: Borra los ficheros de una imagen del repositorio.
-Formato: $PROG [ -b | -r ] str_image
-         -b  Elimina también la copia de seguridad de la imagen.
+Formato: $PROG [ -d | -r ] str_image
+         -d  Elimina también la copia de seguridad de la imagen.
          -r  Recupera la copia de seguridad de la imagen.
 Ejemplo: $PROG imagen1
 EOT
@@ -30,7 +30,7 @@ fi
 # Procesar parámetros
 while getopts dr OPTION; do
     case $OPTION in
-        b) DELETEBACKUP=1 ;;
+        d) DELETEBACKUP=1 ;;
         r) RECOVERBACKUP=1 ;;
         *) ERR=1 ;;
     esac
