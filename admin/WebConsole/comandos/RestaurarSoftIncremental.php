@@ -117,7 +117,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <?
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
-	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,true);	
 	echo "<br>";
 	opcionesAdicionales();
 //________________________________________________________________________________________________________

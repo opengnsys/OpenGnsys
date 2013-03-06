@@ -1247,8 +1247,6 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 		errorInfo(modulo,msglog);
 	}
 
-	muestraMenu();
-
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagen");
@@ -1266,6 +1264,8 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	liberaMemoria(ipr);	
 	liberaMemoria(nfn);	
 	liberaMemoria(ids);	
+
+	muestraMenu();
 	
 	return(TRUE);
 }
@@ -1323,7 +1323,6 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	//	errorInfo(modulo,msglog);
 	//}
 
- 	muestraMenu();
 	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
 
 	/* Envia respuesta de ejecución de la función de interface */
@@ -1349,6 +1348,8 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	liberaMemoria(nba);
 	liberaMemoria(ids);		
 	
+	muestraMenu();
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1407,7 +1408,6 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 //		errorInfo(modulo,msglog);
 //	}
 
- 	muestraMenu();
 	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
 
 	/* Envia respuesta de ejecución de la función de interface */
@@ -1432,6 +1432,8 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	liberaMemoria(nba);
 	liberaMemoria(ids);		
 	
+	muestraMenu();
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1478,7 +1480,6 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	else
 		muestraMensaje(11,NULL);
 
-	muestraMenu();
 
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
@@ -1497,6 +1498,8 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	liberaMemoria(ifs);	
 	liberaMemoria(ptc);	
 	liberaMemoria(ids);			
+
+	muestraMenu();
 
 	return(TRUE);
 }
@@ -1548,8 +1551,6 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	else
 		muestraMensaje(32,NULL);
 
-	muestraMenu();
-
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
@@ -1572,6 +1573,8 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	liberaMemoria(bpc);	
 	liberaMemoria(nba);
 	liberaMemoria(ids);		
+
+	muestraMenu();
 	
 	return(TRUE);
 }
@@ -1625,8 +1628,6 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	else
 		muestraMensaje(34,NULL);
 
-	muestraMenu();
-
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarSoftIncremental");
@@ -1653,6 +1654,8 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	liberaMemoria(nba);
 	liberaMemoria(ids);		
 	
+	muestraMenu();
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
@@ -1698,8 +1701,6 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	else
 		muestraMensaje(14,NULL);
 
-	muestraMenu();
-
 	cfg=LeeConfiguracion(dsk);
 	if(!cfg){ // No se puede recuperar la configuración del cliente
 		errorLog(modulo,36,FALSE);
@@ -1716,6 +1717,8 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	liberaMemoria(cfg);
 	liberaMemoria(nfn);
 	liberaMemoria(ids);
+
+	muestraMenu();
 
 	return(TRUE);
 }
@@ -1778,7 +1781,6 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 		close(socket_c);
 		muestraMensaje(17,NULL);
 	}
-	muestraMenu();
 
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
@@ -1786,7 +1788,10 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"hrd=%s\r",hrddst);
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	liberaMemoria(nfn);
-	liberaMemoria(ids);	
+	liberaMemoria(ids);
+	
+	muestraMenu();
+
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1930,8 +1935,6 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	}
 	else
 		muestraMensaje(22,NULL);
-	muestraMenu();
-
 
 	// Toma configuración de particiones
 	char *dsk=(char*)reservaMemoria(2);
@@ -1955,7 +1958,9 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	liberaMemoria(aux);		
 	liberaMemoria(scp);	
 	liberaMemoria(cfg);
-	
+
+	muestraMenu();
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
