@@ -82,7 +82,7 @@ function autoConfigure()
 OSDISTRIB=$(lsb_release -is 2>/dev/null)
 OSCODENAME=$(lsb_release -cs 2>/dev/null)
 
-# Configuración según la distribución de Linux.
+# Configuración según la distribución GNU/Linux.
 case "$OSDISTRIB" in
 	Ubuntu|Debian|LinuxMint)
 		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools )
@@ -1296,7 +1296,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	local FILENAME=ogLive-quantal-3.7.6-030706-generic-r3619.iso	# 1.0.5-rc2
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
