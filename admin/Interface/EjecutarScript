@@ -14,11 +14,11 @@ echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.t
 #echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
-echo "Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
+echo -e "\n Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
 cat  $1 >> $OGLOGFILE
 
 
-echo "Salida de las instrucciones: *****************************" >>  $OGLOGFILE
+echo -e "\n Salida de las instrucciones: *****************************" >>  $OGLOGFILE
 chmod +x $1
 $1 &>> $OGLOGCOMMAND
 RETVAL=$?
