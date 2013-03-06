@@ -55,16 +55,12 @@
 	
 	source /opt/opengnsys/scripts/ImagenesSincronizadas.lib
 
-	if [ -z $SISTEMAFICHERO ]; then
-		case "$TIPOPARTICION" in 
-			7)
-				SISTEMAFICHERO="Windows"
-			;;
-			83)
-				SISTEMAFICHERO="Linux"
-		;;
-		esac
-	fi
+#___________________________________________________________________
+#
+# Activa navegador para ver progreso
+#___________________________________________________________________
+
+	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
 #___________________________________________________________________
 #
 # Proceso
@@ -82,6 +78,7 @@
 			ogFormat $DISCO $PARTICION $TIPOPARTICION
 			RETVAL=$?	
 			if [ $RETVAL -ne 0 ]; then
+				 kill $COPROC_PID
 			   exit $OG_ERR_PARTITION
 			fi 
 		fi	   
@@ -98,6 +95,7 @@
 			restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1
 			RETVAL=$?
 			if [ $RETVAL -ne 0 ]; then
+ 				 kill $COPROC_PID
 			   exit $OG_ERR_IMAGE
 			fi 
 
@@ -111,6 +109,8 @@
 			restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1
 			restauraListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART
 			RETVAL=$?
+			kill $COPROC_PID
+			echo "!!! Finaliza correctamente !!! la restauracion de imagen incremental $NOMBREIMGINC desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
 			exit $RETVAL
 		fi		
 	fi	
@@ -123,6 +123,7 @@
 	if [ -z $CACHE ]; then
 		echo "No se ha podido restaurar la imagen desde la cache" | tee -a $OGLOGSESSION $OGLOGFILE
         ogRaiseError $OG_ERR_NOTCACHE "CACHE"
+				kill $COPROC_PID
         exit $?
 	fi			
 
@@ -143,6 +144,7 @@
 	restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1	
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
+	 	 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi			
 	ORIGEN="$REPOSITORIO/$NOMBREIMGINC/"
@@ -151,6 +153,7 @@
 	restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1	
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
+		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi	
 
@@ -163,6 +166,7 @@
 	restaurarImagen $ORIGEN $DESTINO $SISTEMAFICHERO 2	
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
+		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi
 	
@@ -175,11 +179,15 @@
 	restauraListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
+		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi
+	echo "!!! Finaliza correctamente !!! restauracion imagen incremental $NOMBREIMGINC desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 #___________________________________________________________________
 #
 # Retorno
 #___________________________________________________________________
+
+	kill $COPROC_PID
 
 	exit 0

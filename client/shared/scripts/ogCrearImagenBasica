@@ -51,6 +51,13 @@
 #___________________________________________________________________
 	
 	source /opt/opengnsys/scripts/ImagenesSincronizadas.lib 
+
+#___________________________________________________________________
+#
+# Activa navegador para ver progreso
+#___________________________________________________________________
+
+	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
 #___________________________________________________________________
 #
 # Proceso
@@ -72,8 +79,11 @@
 	crearImagen $ORIGEN $DESTINO $SISTEMAFICHERO 1
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
+		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi	
+
+	echo "!!! Finaliza correctamente !!! la creacion de imagen básica $NOMBREIMG entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 
 	# Copia opcional a la caché
 	if [ $COPIACACHE -eq 1 ]; then
@@ -81,7 +91,8 @@
 		CACHE=$(montaCache)
 		if [ -z $CACHE ]; then
 			echo "No se ha podido copiar la imagen a la cache" | tee -a $OGLOGSESSION $OGLOGFILE
-		    exit 0
+			kill $COPROC_PID
+      exit $OG_ERR_NOTCACHE
 		fi			
 
 		# Borrar imagen de la caché
@@ -99,15 +110,18 @@
 		
 		RETVAL=$?	
 		if [ $RETVAL -ne 0 ]; then
+			 kill $COPROC_PID
 		   exit $OG_ERR_IMAGE
-		fi		
-   fi	
+		fi	
+		echo "!!! Finaliza correctamente !!! la copia de imagen basica $NOMBREIMG a la cache" | tee -a $OGLOGSESSION $OGLOGFILE		
+  fi	
 
 	eliminaListaAcl $ORIGEN $SISTEMAFICHERO	
 	
 	#comprimeImagen  $NOMBREIMG 
 	RETVAL=$?	
 	if [ $RETVAL -ne 0 ]; then
+		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi		
 #___________________________________________________________________
@@ -115,4 +129,5 @@
 # Retorno
 #___________________________________________________________________
 
+	kill $COPROC_PID
 	exit 0

@@ -107,7 +107,7 @@
 				kill $COPROC_PID
 				exit $OG_ERR_IMAGE
 			fi
-			echo "!!! Finaliza correctamente !!! la restauracion de imagen basica desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
+			echo "!!! Finaliza correctamente !!! la restauracion de imagen basica $NOMBREIMG desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
 			kill $COPROC_PID
 			exit 0	
 		fi		
@@ -168,10 +168,11 @@
 		kill $COPROC_PID
 		exit $OG_ERR_IMAGE
 	fi	
-	echo "!!! Finaliza correctamente !!! restauracion imagen basica desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "!!! Finaliza correctamente !!! restauracion imagen basica $NOMBREIMG desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 #___________________________________________________________________
 #
 # Retorno
 #___________________________________________________________________
 	kill $COPROC_PID
+
 	exit 0

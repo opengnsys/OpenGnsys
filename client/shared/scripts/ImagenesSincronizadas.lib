@@ -116,7 +116,10 @@
 		
 		echo "Editando lista de archivos Entrada:$1 Salida:$2" | tee -a $OGLOGSESSION $OGLOGFILE
 		cat $1 | sed '/\.\//d' | sed '1d' | sed -n -e :a -e '1,2!{P;N;D;};N;ba'>$2
-		#sed -i -e s/"^sent.*.bytes\/sec"//g  -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g lista_img
+
+		# Otra forma
+		#sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGINFO
+		#sed -i  '/^\.\//d' $IMGINFO
 
 	}	
 	
