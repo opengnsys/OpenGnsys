@@ -26,9 +26,11 @@ fi
 
 # Obtener datos de acceso a la Base de datos.
 source $SERVERCONF
+# Sustituir caracteres ' por \' para evitar inyección SQL.
+RESOURCE="${1//\'/\'}"
 # Comprobar si se recibe nombre de aula o de equipo.
 IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-		"SELECT idaula FROM aulas WHERE nombreaula='$1';")
+		"SELECT idaula FROM aulas WHERE nombreaula='$RESOURCE';")
 
 if [ -n "$IDAULA" ]; then
 	# Aula encontrada
@@ -37,7 +39,7 @@ if [ -n "$IDAULA" ]; then
 else
 	# Buscar ordenador
 	PCNAME=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT nombreordenador FROM ordenadores WHERE nombreordenador='$1';")
+        	"SELECT nombreordenador FROM ordenadores WHERE nombreordenador='$RESOURCE';")
 fi
 if [ -z "$PCNAME" ]; then
 	echo "$PROG: No existe ningún aula o equipo con el nombre \"$1\""

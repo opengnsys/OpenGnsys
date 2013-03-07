@@ -32,18 +32,21 @@ fi
 
 # Obtener datos de acceso a la Base de datos.
 source $SERVERCONF
+# Sustituir caracteres ' por \' para evitar inyección SQL.
+BOOTMODE="${1//\'/\'}"
+RESOURCE="${2//\'/\'}"
 # Comprobar si se recibe nombre de aula o de equipo.
 IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-		"SELECT idaula FROM aulas WHERE nombreaula=\"$2\";")
+		"SELECT idaula FROM aulas WHERE nombreaula='$RESOURCE';")
 
 if [ -n "$IDAULA" ]; then
 	# Aula encontrada
 	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT mac FROM ordenadores WHERE idaula=\"$IDAULA\";")
+        	"SELECT mac FROM ordenadores WHERE idaula='$IDAULA';")
 else
 	# Buscar ordenador
 	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT mac FROM ordenadores WHERE nombreordenador=\"$2\";")
+        	"SELECT mac FROM ordenadores WHERE nombreordenador='$RESOURCE';")
 fi
 if [ -z "$ETHERNET" ]; then
 	date +"%b %d %T $PROG: No existe aula o equipo con el nombre \"$2\"" | tee -a $LOGFILE
@@ -68,11 +71,11 @@ for AUX in $ETHERNET; do
 				FROM ordenadores 
 				JOIN aulas ON ordenadores.idaula=aulas.idaula 
 				JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
-				WHERE ordenadores.mac=\"$ETHERNET\";")
+				WHERE ordenadores.mac='$ETHERNET';")
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
 		perl -pi -e "s/INFOHOST/$DATOS/g" $PXEDIR/$AUX
 		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-			"UPDATE ordenadores SET arranque=\"$1\" WHERE mac=\"$ETHERNET\";"
+			"UPDATE ordenadores SET arranque='$BOOTMODE' WHERE mac='$ETHERNET';"
 	fi
 	let NPC=NPC+1
 done
