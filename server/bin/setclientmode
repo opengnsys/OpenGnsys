@@ -63,14 +63,24 @@ for AUX in $ETHERNET; do
 	[ -e $PXEDIR/$AUX ] && rm $PXEDIR/$AUX
 	if [ "$1" != "default" ]; then
 		cp -a $TEMPLATE $PXEDIR/$AUX
+		# FALTA: Comprobar parámetros "video" y "LANG".
 		DATOS=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-			"SELECT ordenadores.ip, ':', repositorios.ip, ':',
-				aulas.router, ':', aulas.netmask, ':',
-				ordenadores.netiface, ':none group=',
-				REPLACE (aulas.nombreaula, ' ', '_')
+			"SELECT 'vga=', IFNULL (menus.resolucion, '788'),
+				' LANG=es_ES',
+				' ip=', CONCAT_WS (':', ordenadores.ip,
+				(@repoip:=repositorios.ip), aulas.router, aulas.netmask,
+				ordenadores.nombreordenador, ordenadores.netiface, 'none'),
+				' group=', REPLACE (aulas.nombreaula, ' ', '_'),
+				' ogrepo=', @repoip,
+				' oglive=', @repoip,
+				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos),
+				' ogshare=', @serverip,
+				' winboot=', IFNULL (perfileshard.winboot, 'reboot')
 				FROM ordenadores 
 				JOIN aulas ON ordenadores.idaula=aulas.idaula 
-				JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
+				JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio
+				LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
+				LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
 				WHERE ordenadores.mac='$ETHERNET';")
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
 		perl -pi -e "s/INFOHOST/$DATOS/g" $PXEDIR/$AUX
