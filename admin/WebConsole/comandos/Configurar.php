@@ -20,6 +20,8 @@ include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+
+
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -68,7 +70,8 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
-	include_once("./includes/FiltradoAmbito.php");
+	//include_once("./includes/FiltradoAmbito.php");
+
 	//________________________________________________________________________________________________________
 				
 	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
@@ -113,8 +116,9 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <?
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
+
 	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,true);	
-	
+
 	/* Dibuja tabla patron  !OJO! no insertar caracteres entre las etiquetas*/
 	
 	echo '<TABLE style="visibility:hidden"><TR id="TR_patron">';
@@ -156,6 +160,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 ________________________________________________________________________________________________________*/
 function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 {
+
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;

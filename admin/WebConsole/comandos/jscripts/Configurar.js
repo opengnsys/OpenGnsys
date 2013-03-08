@@ -86,7 +86,7 @@ function Confirmar(cc)
 			}
 		}	
 		document.fdatosejecucion.atributos.value=atributos;	
-		filtrado();		
+		//filtrado();		
 		document.fdatosejecucion.submit();		
 	}
 }
