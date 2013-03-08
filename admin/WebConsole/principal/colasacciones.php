@@ -102,7 +102,7 @@
 	if (!$cmd)
 		Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 
-	$tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder a detalles de comandos 
+	$tbParametros=CreaTablaParametros($cmd); // Crea tabla en mezmmoria para acceder a detalles de comandos 
 
 	//________________________________________________________________________________________________________
 	//
@@ -1110,15 +1110,15 @@ function escribiendoParametros($comando,$descripcion,$valor,$oA)
 	$bgcolor="#cedcec";
 	$html.='<TR id="'.$oA->sesion.'" value="A">';
 	if($sw){
-		$html.='<TD align=right style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=2>'.$comando.'</TD>';
+		$html.='<TD align=right style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=2>'.$comando.'&nbsp;&nbsp;&nbsp;</TD>';
 		$sw=false;
 	}
 	else
 		$html.='<TD style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=2>&nbsp;</TD>';
 	$html.='<TD style="BACKGROUND-COLOR: '.$bgcolor.';">&nbsp;</TD>';
-	$html.='<TD style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=4><b>'.$descripcion.'</b>: 
+	$html.='<TD style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=8><b>'.$descripcion.'</b>: 
 	'.$valor.'</TD>';
-	$html.='<TD style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=5 >&nbsp;</TD>';
+	$html.='<TD style="BACKGROUND-COLOR: '.$bgcolor.';" colspan=1 >&nbsp;</TD>';
 	$html.='</TR>';	
 	return($html);	
 }

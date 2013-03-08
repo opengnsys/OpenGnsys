@@ -9,8 +9,19 @@
 
 particiones=$(echo $2 | awk '{n=split($0,sep,"$");print n}')
 
+
+#___________________________________________________________________
+#
+# Activa navegador para ver progreso
+#___________________________________________________________________
+
+	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
+
+#___________________________________________________________________
+
 declare -a TBP
 declare -a TBF
+
 for ((par=1;par<$particiones;par++)); 
 	do
 		TBP[$par]=$(echo $2 | awk -v p=$par '{
@@ -31,6 +42,7 @@ for ((par=1;par<$particiones;par++));
 	done
 	
 # Prepara cadena de particiones _______________________________________
+
 cP=""
 for ((par=1;par<$particiones;par++)); 
 	do
@@ -64,7 +76,21 @@ for ((par=1;par<$particiones;par++));
 						}')						
 						
 	done	
-	ogCreatePartitions $1 $cP	
+
+# Crea tabla de particiones MSDOS
+ogCreatePartitionTable 1 MSDOS 
+
+# Desmonta todas las particiones y la caché
+ ogUnmountCache 
+ ogUnmountAll 1 
+
+	echo "Creando la tabla de particiones $1 $cP" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogCreatePartitions $1 $cP
+
+ #ogDeletePartitionTable 1
+ #ogSetPartitionActive 1 1 
+ #ogUpdatePartitionTable 1
+ #ms-sys /dev/sda | grep unknow && ms-sys /dev/sda 
 							
 # Formatear _______________________________________
 	
@@ -74,8 +100,17 @@ for ((par=1;par<$particiones;par++));
 	if [ $sfi == "EMPTY" ]; then
 		TBF[$par]=" "
 	else
+		echo "Formateando particion: $par con sistema de fichero: $sfi" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogFormatFs $1 $par $sfi
 	fi
 	
 	done	
+#___________________________________________________________________
+#
+# Retorno
+#___________________________________________________________________
+
+	kill $COPROC_PID
+	exit 0
+
 

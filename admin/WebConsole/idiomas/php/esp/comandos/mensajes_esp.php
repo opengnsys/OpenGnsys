@@ -7,7 +7,7 @@
 if (empty ($TbMsg)) $TbMsg=Array();
 $TbMsg["COMMAND_Apagar"]="Apagar";
 $TbMsg["COMMAND_Arrancar"]="Arrancar";
-$TbMsg["COMMAND_Configurar"]="Configurar";
+$TbMsg["COMMAND_Configurar"]="Particionar y Formatear";
 $TbMsg["COMMAND_CrearImagen"]="Crear Imagen";
 $TbMsg["COMMAND_EjecutarScript"]="Ejecutar Script";
 $TbMsg["COMMAND_EliminarImagenCache"]="Eliminar Imagen Cache";
