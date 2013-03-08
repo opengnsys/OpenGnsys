@@ -101,9 +101,9 @@ UPDATE menus
 			 END;
 
 # Cambios para NetBoot con ficheros dinámicos (tickets #534 #582).
-DROP TABLE menuboot;
-DROP TABLE itemboot;
-DROP TABLE menuboot_itemboot;
+DROP TABLE IF NOT EXISTS menuboot;
+DROP TABLE IF NOT EXISTS itemboot;
+DROP TABLE IF NOT EXISTS menuboot_itemboot;
 ALTER TABLE ordenadores
 	MODIFY arranque VARCHAR(30) NOT NULL DEFAULT '01';
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
