@@ -77,9 +77,9 @@ UPDATE menus SET resolucion = CASE resolucion
 			      END;
 
 # Cambios para NetBoot con ficheros dinámicos (tickets #534 #582).
-DROP TABLE menuboot;
-DROP TABLE itemboot;
-DROP TABLE menuboot_itemboot;
+DROP TABLE IF EXISTS menuboot;
+DROP TABLE IF EXISTS itemboot;
+DROP TABLE IF EXISTS menuboot_itemboot;
 ALTER TABLE ordenadores
 	MODIFY arranque VARCHAR(30) NOT NULL DEFAULT '01';
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
