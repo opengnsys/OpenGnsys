@@ -14,6 +14,7 @@ SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 PXEDIR=$OPENGNSYS/tftpboot/menu.lst
 TEMPLATE="$PXEDIR/templates/$1"
 LOGFILE=$OPENGNSYS/log/opengnsys.log
+MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
 if [ $# -ne 2 ]; then
@@ -35,19 +36,22 @@ source $SERVERCONF
 # Sustituir caracteres ' por \' para evitar inyección SQL.
 BOOTMODE="${1//\'/\'}"
 RESOURCE="${2//\'/\'}"
-# Comprobar si se recibe nombre de aula o de equipo.
-IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
-		"SELECT idaula FROM aulas WHERE nombreaula='$RESOURCE';")
-
-if [ -n "$IDAULA" ]; then
-	# Aula encontrada
-	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
-        	"SELECT mac FROM ordenadores WHERE idaula='$IDAULA';")
-else
-	# Buscar ordenador
-	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
-        	"SELECT mac FROM ordenadores WHERE nombreordenador='$RESOURCE';")
-fi
+# Componer fichero con credenciales de conexión. 
+touch $MYCNF 
+chmod 600 $MYCNF 
+cat << EOT > $MYCNF 
+[client] 
+user=$USUARIO 
+password=$PASSWORD 
+EOT
+# Borrar el fichero temporal si termina el proceso. 
+trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
+# Buscar ordenador individual o todos los de una aula.
+ETHERNET=$(mysql --defaults-file=$MYCNF -D "$CATALOG" -s -N -e \
+		"SELECT mac FROM ordenadores 
+ 		   JOIN aulas USING (idaula) 
+ 		  WHERE aulas.nombreaula='$RESOURCE' 
+ 		     OR nombreordenador='$RESOURCE';")
 if [ -z "$ETHERNET" ]; then
 	date +"%b %d %T $PROG: No existe aula o equipo con el nombre \"$2\"" | tee -a $LOGFILE
 	exit 1
@@ -56,16 +60,16 @@ fi
 # Copiar fichero de configuración y actualizar base de datos.
 date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\"" | tee -a $LOGFILE
 NPC=0
-for AUX in $ETHERNET; do
-	date +"%b %d %T $PROG: Detectada ethernet \"$AUX\" en \"$2\"" | tee -a $LOGFILE
-	AUX="01-${AUX:0:2}-${AUX:2:2}-${AUX:4:2}-${AUX:6:2}-${AUX:8:2}-${AUX:10:2}"
-	# Si existe anteriormente lo borra
-	[ -e $PXEDIR/$AUX ] && rm $PXEDIR/$AUX
+for MAC in $ETHERNET; do
+	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
+	# Si existe anteriormente el fichero PXE, lo borra
+	PXEFILE=$PXEDIR/01-${MAC:0:2}-${MAC:2:2}-${MAC:4:2}-${MAC:6:2}-${MAC:8:2}-${MAC:10:2}
+	[ -e $PXEFILE ] && rm $PXEFILE
 	if [ "$1" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
 		# Obtener de la BD los parámetros de arranque asociados (separador es TAB).
-		DATOS=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
+		DATOS=$(mysql --defaults-file=$MYCNF -D "$CATALOG" -s -N -e \
 			"SELECT ' LANG=$LANG',
 				' ip=', CONCAT_WS (':', ordenadores.ip,
 				(@repoip:=repositorios.ip), aulas.router, aulas.netmask,
@@ -82,14 +86,14 @@ for AUX in $ETHERNET; do
 				JOIN repositorios USING (idrepositorio)
 				LEFT JOIN perfileshard USING (idperfilhard)
 				LEFT JOIN menus USING (idmenu)
-				WHERE ordenadores.mac='$ETHERNET';")
+				WHERE ordenadores.mac='$MAC';")
 		# Quitar tabuladores y sustituir caracteres quitando acentos y tildes.
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
-		sed -e "s/vga=[0-9]*//; s/INFOHOST/$DATOS/" $TEMPLATE >$PXEDIR/$AUX
+		sed -e "s/vga=[0-9]*//g; s/INFOHOST/$DATOS/g" $TEMPLATE >$PXEFILE
 		# Actualizar en la BD el modo de arranque asociada el cliente.
-		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -e \
-			"UPDATE ordenadores SET arranque='$BOOTMODE' WHERE mac='$ETHERNET';"
+		mysql --defaults-file=$MYCNF -D "$CATALOG" -e \
+			"UPDATE ordenadores SET arranque='$BOOTMODE' WHERE mac='$MAC';"
 	fi
 	let NPC=NPC+1
 done
