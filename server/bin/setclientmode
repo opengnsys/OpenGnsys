@@ -36,16 +36,16 @@ source $SERVERCONF
 BOOTMODE="${1//\'/\'}"
 RESOURCE="${2//\'/\'}"
 # Comprobar si se recibe nombre de aula o de equipo.
-IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
 		"SELECT idaula FROM aulas WHERE nombreaula='$RESOURCE';")
 
 if [ -n "$IDAULA" ]; then
 	# Aula encontrada
-	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
         	"SELECT mac FROM ordenadores WHERE idaula='$IDAULA';")
 else
 	# Buscar ordenador
-	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+	ETHERNET=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
         	"SELECT mac FROM ordenadores WHERE nombreordenador='$RESOURCE';")
 fi
 if [ -z "$ETHERNET" ]; then
@@ -62,29 +62,33 @@ for AUX in $ETHERNET; do
 	# Si existe anteriormente lo borra
 	[ -e $PXEDIR/$AUX ] && rm $PXEDIR/$AUX
 	if [ "$1" != "default" ]; then
-		cp -a $TEMPLATE $PXEDIR/$AUX
-		# FALTA: Comprobar parámetros "video" y "LANG".
-		DATOS=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-			"SELECT 'vga=', IFNULL (menus.resolucion, '788'),
-				' LANG=es_ES',
+		# Si no está definida la variable LANG, usar idioma inglés por defecto.
+		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
+		# Obtener de la BD los parámetros de arranque asociados (separador es TAB).
+		DATOS=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -s -N -e \
+			"SELECT ' LANG=$LANG',
 				' ip=', CONCAT_WS (':', ordenadores.ip,
 				(@repoip:=repositorios.ip), aulas.router, aulas.netmask,
 				ordenadores.nombreordenador, ordenadores.netiface, 'none'),
 				' group=', REPLACE (aulas.nombreaula, ' ', '_'),
 				' ogrepo=', @repoip,
 				' oglive=', @repoip,
-				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos),
+				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
 				' ogshare=', @serverip,
-				' winboot=', IFNULL (perfileshard.winboot, 'reboot')
+				' winboot=', IFNULL (perfileshard.winboot, 'reboot'),
+				IF (menus.resolucion IS NULL, '', CONCAT (' video=', menus.resolucion))
 				FROM ordenadores 
-				JOIN aulas ON ordenadores.idaula=aulas.idaula 
-				JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio
-				LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
-				LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
+				JOIN aulas USING (idaula)
+				JOIN repositorios USING (idrepositorio)
+				LEFT JOIN perfileshard USING (idperfilhard)
+				LEFT JOIN menus USING (idmenu)
 				WHERE ordenadores.mac='$ETHERNET';")
+		# Quitar tabuladores y sustituir caracteres quitando acentos y tildes.
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
-		perl -pi -e "s/INFOHOST/$DATOS/g" $PXEDIR/$AUX
-		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
+		sed -e "s/vga=[0-9]*//; s/INFOHOST/$DATOS/" $TEMPLATE >$PXEDIR/$AUX
+		# Actualizar en la BD el modo de arranque asociada el cliente.
+		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -e \
 			"UPDATE ordenadores SET arranque='$BOOTMODE' WHERE mac='$ETHERNET';"
 	fi
 	let NPC=NPC+1
