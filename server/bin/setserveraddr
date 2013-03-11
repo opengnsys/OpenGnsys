@@ -62,8 +62,18 @@ if [ $FOUND == 1 ]; then
 	if [ $CHANGE == 1 ]; then
 		/etc/init.d/opengnsys restart
 		source $OPENGNSYS/etc/ogAdmServer.cfg
-		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+		# Componer fichero con credenciales de conexión.  
+ 		touch $MYCNF
+ 		chmod 600 $MYCNF
+ 		cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+		# Ejecutar actualización y borrar fichero de credenciales.
+		mysql --defaults-file=$MYCNF -D "$CATALOG" -e \
 			 "UPDATE entornos SET ipserveradm='$ServidorAdm' WHERE identorno=1"
+ 		rm -f $MYCNF
 		echo "Default server interface set to: $1 ($ServidorAdm)"
 	else
 		echo "Don't change the default interface: $1"
