@@ -235,6 +235,7 @@ function importSqlFile()
         local database="$3"
         local sqlfile="$4"
         local tmpfile=$(mktemp)
+        local mycnf=/tmp/.my.cnf.$$
         local status
 
         if [ ! -r $sqlfile ]; then
@@ -246,9 +247,18 @@ function importSqlFile()
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
             -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
-        mysql -u$dbuser -p"$dbpassword" --default-character-set=utf8 -D "$database" < $tmpfile
+	# Componer fichero con credenciales de conexión.  
+	touch $mycnf
+	chmod 600 $mycnf
+	cat << EOT > $mycnf
+client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+	# Ejecutar actualización y borrar fichero de credenciales.
+	mysql --defaults-file=$mycnf --default-character-set=utf8 -D "$database" < $tmpfile
 	status=$?
-	rm -f $tmpfile
+	rm -f $mycnf $tmpfile
 	if [ $status -ne 0 ]; then
                 errorAndLog "${FUNCNAME}(): error importing $sqlfile in database $database"
                 return 1

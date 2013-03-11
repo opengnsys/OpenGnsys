@@ -7,8 +7,11 @@
 # Fecha: 2011-01-25
 
 
-# Comprobar parámetros.
+# Variables globales.
 PROG="$(basename $0)"
+MYCNF=/tmp/.my.cnf.$$
+
+# Comprobar parámetros.
 if [ $# -ne 1 ]; then
 	echo "$PROG: Incorrect operand. Format: $PROG device" >&2
 	exit 1
