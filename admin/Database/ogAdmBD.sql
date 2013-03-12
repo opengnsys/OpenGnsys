@@ -488,7 +488,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `router` varchar(16) NOT NULL,
   `mascara` varchar(16) NOT NULL,
   `idproautoexec` int(11) NOT NULL,
-  `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '01',
+  `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '00unknown',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
   `netdriver` varchar( 30 ) NOT NULL DEFAULT 'generic',
   `fotoord` varchar( 250 ) NOT NULL,

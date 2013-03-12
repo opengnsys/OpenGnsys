@@ -71,7 +71,7 @@ DROP TABLE IF EXISTS menuboot;
 DROP TABLE IF EXISTS itemboot;
 DROP TABLE IF EXISTS menuboot_itemboot;
 ALTER TABLE ordenadores
-	MODIFY arranque VARCHAR(30) NOT NULL DEFAULT '01';
+	MODIFY arranque VARCHAR(30) NOT NULL DEFAULT '00unknown';
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
 UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
 

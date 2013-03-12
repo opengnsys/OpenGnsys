@@ -498,7 +498,7 @@ function createDirs()
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
 	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
-	[ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] || mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
+	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] || mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
