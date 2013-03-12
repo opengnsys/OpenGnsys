@@ -33,6 +33,7 @@ OPENGNSYS="/opt/opengnsys"		# Directorio de OpenGnSys
 OGIMG="images"				# Directorio de imágenes del repositorio
 OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario Samba
 OPENGNSYS_OLDDATABASE="ogBDAdmin"	# Antigua base de datos
+MYCNF=/tmp/.my.cnf.$$			# Fichero temporal con credenciales de acceso a la BD.
 
 
 # Sólo ejecutable por usuario root
@@ -46,13 +47,13 @@ fi
 echo "Uninstalling OpenGnSys services."
 if [ -x /etc/init.d/opengnsys ]; then
     /etc/init.d/opengnsys stop
-    if test which update-rc.d 2>/dev/null; then
+    if [ -n "$(which update-rc.d 2>/dev/null)" ]; then
         update-rc.d -f opengnsys remove
     else
 	chkconfig --del opengnsys
     fi
 fi
-# Eliminar bases de datos.
+# Comprobar acceso a la bases de datos.
 echo "Erasing OpenGnSys database."
 DROP=1
 if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
@@ -66,13 +67,26 @@ if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
     fi
 fi
 if test $DROP; then
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP DATABASE $OPENGNSYS_OLDDATABASE;" 2>/dev/null
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP DATABASE $OPENGNSYS_DATABASE;" 2>/dev/null
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP USER '$OPENGNSYS_DB_USER';" 2>/dev/null
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"DROP USER '$OPENGNSYS_DB_USER'@'localhost';" 2>/dev/null
+    # Componer fichero temporal con credenciales de conexión a la base de datos.
+    touch $MYCNF
+    600 $MYCNF
+    cat << EOT > $MYCNF
+[client]
+user=root
+password=$MYSQL_ROOT_PASSWORD
+EOT
+    # Eliminar bases de datos.
+    mysql --defaults-extra-file=$MYCNF 2> /dev/null << EOT
+DROP DATABASE $OPENGNSYS_OLDDATABASE;
+DROP DATABASE $OPENGNSYS_DATABASE;
+DROP USER '$OPENGNSYS_DB_USER';
+DROP USER '$OPENGNSYS_DB_USER'@'localhost';
+EOT
+    # Borrar el fichero temporal de credenciales.
+    rm -f $MYCNF
 fi
 # Quitar configuración específica de Apache.
-test which a2dissite 2>/dev/null && a2dissite opengnsys
+[ -n "$(which a2dissite 2>/dev/null)" ] && a2dissite opengnsys
 rm -f /etc/{apache2/{sites-available,sites-enabled},httpd/conf.d}/opengnsys*
 for serv in apache2 httpd; do
     [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
