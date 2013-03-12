@@ -251,7 +251,7 @@ function importSqlFile()
 	touch $mycnf
 	chmod 600 $mycnf
 	cat << EOT > $mycnf
-client]
+[client]
 user=$dbuser
 password=$dbpassword
 EOT

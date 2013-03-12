@@ -461,7 +461,7 @@ function mysqlTestConnection()
  	touch $TMPMYCNF
  	chmod 600 $TMPMYCNF
  	cat << EOT > $TMPMYCNF
-client]
+[client]
 user=root
 password=$root_password
 EOT
