@@ -252,11 +252,11 @@ function importSqlFile()
 	chmod 600 $mycnf
 	cat << EOT > $mycnf
 client]
-user=$USUARIO
-password=$PASSWORD
+user=$dbuser
+password=$dbpassword
 EOT
 	# Ejecutar actualización y borrar fichero de credenciales.
-	mysql --defaults-file=$mycnf --default-character-set=utf8 -D "$database" < $tmpfile
+	mysql --defaults-extra-file=$mycnf --default-character-set=utf8 -D "$database" < $tmpfile
 	status=$?
 	rm -f $mycnf $tmpfile
 	if [ $status -ne 0 ]; then

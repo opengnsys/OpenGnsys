@@ -72,7 +72,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - INETDSERV - servicio Inetd
 # - IPTABLESSERV - servicio IPTables
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
-# - MYSQLSERV - servicio MySQL
+# - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso.
 # - RSYNCSERV, RSYNCCFGDIR - servicio y configuración de Rsync
 # - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
 # - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
@@ -165,6 +165,9 @@ case "$OSDISTRIB" in
 	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
 		exit 1 ;;
 esac
+
+# Fichero de credenciales de acceso a MySQL.
+TMPMYCNF=/tmp/.my.cnf.$$
 }
 
 # Modificar variables de configuración tras instalar paquetes del sistema.
@@ -452,9 +455,20 @@ function mysqlTestConnection()
 		exit 1
 	fi
 
-	local root_password="${1}"
+	local root_password="$1"
 	echoAndLog "${FUNCNAME}(): checking connection to mysql..."
-	echo "" | mysql -uroot -p"${root_password}"
+	# Componer fichero con credenciales de conexión a MySQL.
+ 	touch $TMPMYCNF
+ 	chmod 600 $TMPMYCNF
+ 	cat << EOT > $TMPMYCNF
+client]
+user=root
+password=$root_password
+EOT
+	# Borrar el fichero temporal si termina el proceso de instalación.
+	trap "rm -f $TMPMYCNF" 0 1 2 3 6 9 15
+ 	# Comprobar conexión a MySQL.
+ 	echo "" | mysql --defaults-extra-file=$TMPMYCNF
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): connection to mysql failed, check root password and if daemon is running!"
 		return 1
@@ -467,15 +481,14 @@ function mysqlTestConnection()
 # comprueba si la base de datos existe
 function mysqlDbExists()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
+	local database="$1"
 	echoAndLog "${FUNCNAME}(): checking if $database exists..."
-	echo "show databases" | mysql -uroot -p"${root_password}" | grep "^${database}$"
+	echo "show databases" | mysql --defaults-extra-file=$TMPMYCNF | grep "^${database}$"
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}():database $database doesn't exists"
 		return 1
@@ -487,15 +500,14 @@ function mysqlDbExists()
 
 function mysqlCheckDbIsEmpty()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
+	local database="$1"
 	echoAndLog "${FUNCNAME}(): checking if $database is empty..."
-	num_tablas=`echo "show tables" | mysql -uroot -p"${root_password}" "${database}" | wc -l`
+	num_tablas=`echo "show tables" | mysql --defaults-extra-file=$TMPMYCNF "${database}" | wc -l`
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error executing query, check database and root password"
 		exit 1
@@ -514,14 +526,13 @@ function mysqlCheckDbIsEmpty()
 
 function mysqlImportSqlFileToDb()
 {
-	if [ $# -ne 3 ]; then
+	if [ $# -ne 2 ]; then
 		errorAndLog "${FNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="$1"
-	local database="$2"
-	local sqlfile="$3"
+	local database="$1"
+	local sqlfile="$2"
 	local tmpfile=$(mktemp)
 	local i=0
 	local dev=""
@@ -543,7 +554,7 @@ function mysqlImportSqlFileToDb()
 		fi
 		let i++
 	done
-	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $tmpfile
+	mysql --defaults-extra-file=$TMPMYCNF --default-character-set=utf8 "${database}" < $tmpfile
 	status=$?
 	rm -f $tmpfile
 	if [ $status -ne 0 ]; then
@@ -557,16 +568,15 @@ function mysqlImportSqlFileToDb()
 # Crea la base de datos
 function mysqlCreateDb()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
+	local database="$1"
 
 	echoAndLog "${FUNCNAME}(): creating database..."
-	mysqladmin -u root --password="${root_password}" create $database
+	mysqladmin --defaults-extra-file=$TMPMYCNF create $database
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating database $database"
 		return 1
@@ -578,16 +588,15 @@ function mysqlCreateDb()
 
 function mysqlCheckUserExists()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local userdb=$2
+	local userdb="$1"
 
 	echoAndLog "${FUNCNAME}(): checking if $userdb exists..."
-	echo "select user from user where user='${userdb}'\\G" |mysql -uroot -p"${root_password}" mysql | grep user
+	echo "select user from user where user='${userdb}'\\G" |mysql --defaults-extra-file=$TMPMYCNF mysql | grep user
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): user doesn't exists"
 		return 1
@@ -601,15 +610,14 @@ function mysqlCheckUserExists()
 # Crea un usuario administrativo para la base de datos
 function mysqlCreateAdminUserToDb()
 {
-	if [ $# -ne 4 ]; then
+	if [ $# -ne 3 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password=$1
-	local database=$2
-	local userdb=$3
-	local passdb=$4
+	local database="$1"
+	local userdb="$2"
+	local passdb="$3"
 
 	echoAndLog "${FUNCNAME}(): creating admin user ${userdb} to database ${database}"
 
@@ -618,7 +626,7 @@ GRANT USAGE ON *.* TO '${userdb}'@'localhost' IDENTIFIED BY '${passdb}' ;
 GRANT ALL PRIVILEGES ON ${database}.* TO '${userdb}'@'localhost' WITH GRANT OPTION ;
 FLUSH PRIVILEGES ;
 EOF
-	mysql -u root --password=${root_password} < $WORKDIR/create_${database}.sql
+	mysql --defaults-extra-file=$TMPMYCNF < $WORKDIR/create_${database}.sql
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating user in mysql"
 		rm -f $WORKDIR/create_${database}.sql
@@ -1560,20 +1568,20 @@ isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
 	service=$MYSQLSERV
 	$ENABLESERVICE; $STARTSERVICE
-	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
+	mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
 else
 	mysqlGetRootPassword
 fi
 
-mysqlTestConnection ${MYSQL_ROOT_PASSWORD}
+mysqlTestConnection "${MYSQL_ROOT_PASSWORD}"
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while connection to mysql"
 	exit 1
 fi
-mysqlDbExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
+mysqlDbExists ${OPENGNSYS_DATABASE}
 if [ $? -ne 0 ]; then
 	echoAndLog "Creating Web Console database"
-	mysqlCreateDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
+	mysqlCreateDb ${OPENGNSYS_DATABASE}
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while creating Web Console database"
 		exit 1
@@ -1582,10 +1590,10 @@ else
 	echoAndLog "Web Console database exists, ommiting creation"
 fi
 
-mysqlCheckUserExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DB_USER}
+mysqlCheckUserExists ${OPENGNSYS_DB_USER}
 if [ $? -ne 0 ]; then
 	echoAndLog "Creating user in database"
-	mysqlCreateAdminUserToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} ${OPENGNSYS_DB_USER} "${OPENGNSYS_DB_PASSWD}"
+	mysqlCreateAdminUserToDb ${OPENGNSYS_DATABASE} ${OPENGNSYS_DB_USER} "${OPENGNSYS_DB_PASSWD}"
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while creating database user"
 		exit 1
@@ -1593,11 +1601,11 @@ if [ $? -ne 0 ]; then
 
 fi
 
-mysqlCheckDbIsEmpty ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
+mysqlCheckDbIsEmpty ${OPENGNSYS_DATABASE}
 if [ $? -eq 0 ]; then
 	echoAndLog "Creating tables..."
 	if [ -f $WORKDIR/$OPENGNSYS_DB_CREATION_FILE ]; then
-		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_CREATION_FILE
+		mysqlImportSqlFileToDb ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_CREATION_FILE
 	else
 		errorAndLog "Unable to locate $WORKDIR/$OPENGNSYS_DB_CREATION_FILE!!"
 		exit 1
@@ -1609,11 +1617,13 @@ else
 	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
  	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
- 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
+ 		mysqlImportSqlFileToDb ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
  	else
  		echoAndLog "Database unchanged."
  	fi
 fi
+# Eliminar fichero temporal con credenciales de acceso a MySQL.
+rm -f $TMPMYCNF
 
 # copiando paqinas web
 installWebFiles
