@@ -10,11 +10,10 @@
 // *******************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
-$cambiocentro=split(",",$_POST['idmicentro']);
-if ( $_POST['idmicentro'] == "" )
-{}else{
-$_SESSION["widcentro"]=$cambiocentro[0];
-$_SESSION["wnombrecentro"]=$cambiocentro[1];
+if (! empty ($_POST['idmicentro'])) {
+	$cambiocentro=split(",",$_POST['idmicentro']);
+	$_SESSION["widcentro"]=$cambiocentro[0];
+	$_SESSION["wnombrecentro"]=$cambiocentro[1];
 	}
 if (empty ($idioma)) $idioma="esp";
 include_once("./idiomas/php/$idioma/acceso_$idioma.php");
@@ -37,8 +36,12 @@ include_once("./idiomas/php/$idioma/acceso_$idioma.php");
 			}
 		?>
 		<FRAME SRC="nada.php" frameborder=0  NAME="frame_contenidos">
-		</FRAMESET>
 	</FRAMESET>	
+	<noframes>
+		<body>
+			<p><strong><?php echo $TbMsg["ACCESS_NOFRAMES"];?></strong></p>
+		</body>
+	</noframes>
 </FRAMESET>
 </html>
 

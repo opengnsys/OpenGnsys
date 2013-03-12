@@ -29,6 +29,6 @@ $TbMsg["ACCESS_NOUNIT"]='You have not entered any Organizational Unit.\nYou will
 $TbMsg["ACCESS_ALLOWED"]='Allowed access. Please wait ...';
 $TbMsg["ACCESS_ERROR"]='Access error';
 $TbMsg["ACCESS_UNKNOWNERROR"]='Unknown error';
-
+$TbMsg["ACCESS_NOFRAMES"]='Sorry, your browser does not handle frames.';
 ?>
 
