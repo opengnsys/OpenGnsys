@@ -12,6 +12,7 @@ PROG=$(basename $0)
 DHCPFILE=${DHCPFILE:-/etc/dhcp/dhcpd.conf}
 TMP_DHCP=/tmp/$PROG-dhcp$$
 TMP_MYSQL=/tmp/$PROG-mysql$$
+TMP_MYCNF=/tmp/.my.cnf.$$
 
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
@@ -27,8 +28,16 @@ fi
 
 # Obtener datos de acceso a la Base de datos.
 source $SERVERCONF
+# Componer fichero con credenciales de conexión.
+touch $TMP_MYCNF
+chmod 600 $TMP_MYCNF
+cat << EOT > $TMP_MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
 
-trap "rm -f $TMP_DHCP $TMP_MYSQL" 1 2 3 9 15
+trap "rm -f $TMP_DHCP $TMP_MYSQL $TMP_MYCNF" 1 2 3 9 15
 # Creo fichero temporal del dhcp
 grep -v "#" $DHCPFILE |egrep -e "host " -e "hardware ethernet" -e fixed-address | sed -e 's/.$//' \
         |sed -e s/"^.*host "//g -e s/\{/\;/g -e s/"^.*hardware ethernet "/=/g -e  s/"^.*fixed-address "/=/g \
@@ -37,7 +46,7 @@ grep -v "#" $DHCPFILE |egrep -e "host " -e "hardware ethernet" -e fixed-address 
 
 
 # Creo fichero temporal del mysql, de la base de datos de opengnsys
-mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
+mysql --defaults-extra-file=$TMP_MYCNF -D "$CATALOG" -N -e \
 	"select  CONCAT_WS (';', nombreordenador,  mac, ip) from ordenadores order by nombreordenador;" > $TMP_MYSQL
 
 # Comparo los ficheros
@@ -45,5 +54,5 @@ echo "Comparamos las configuraciones: < dhcp y > mysql"
 diff -bi $TMP_DHCP $TMP_MYSQL 
 [ $? == 0 ] && echo "El ficheros del servicio dhcp y la base de datos de ogAdmBD tienen la misma configuracion"
 
-rm -f $TMP_DHCP $TMP_MYSQL
+rm -f $TMP_DHCP $TMP_MYSQL $TMP_MYCNF
 

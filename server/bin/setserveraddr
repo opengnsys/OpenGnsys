@@ -74,7 +74,7 @@ user=$USUARIO
 password=$PASSWORD
 EOT
 		# Ejecutar actualización y borrar fichero de credenciales.
-		mysql --defaults-file=$MYCNF -D "$CATALOG" -e \
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
 			 "UPDATE entornos SET ipserveradm='$ServidorAdm' WHERE identorno=1"
  		rm -f $MYCNF
 		echo "Default server interface set to: $1 ($ServidorAdm)"

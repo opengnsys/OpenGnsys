@@ -39,7 +39,7 @@ EOT
 # Borrar el fichero temporal si termina el proceso.
 trap "rm -f $MYCNF" 0 1 2 3 6 9 15
 # Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
-mysql --defaults-file=$MYCNF -D "$CATALOG" -s -N -e \
+mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 		"SELECT nombreordenador, arranque FROM ordenadores
 		   JOIN aulas USING (idaula)
 		  WHERE aulas.nombreaula='$RESOURCE'

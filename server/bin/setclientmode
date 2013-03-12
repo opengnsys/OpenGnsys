@@ -47,7 +47,7 @@ EOT
 # Borrar el fichero temporal si termina el proceso. 
 trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
 # Buscar ordenador individual o todos los de una aula.
-ETHERNET=$(mysql --defaults-file=$MYCNF -D "$CATALOG" -s -N -e \
+ETHERNET=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 		"SELECT mac FROM ordenadores 
  		   JOIN aulas USING (idaula) 
  		  WHERE aulas.nombreaula='$RESOURCE' 
@@ -69,7 +69,7 @@ for MAC in $ETHERNET; do
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
 		# Obtener de la BD los parámetros de arranque asociados (separador es TAB).
-		DATOS=$(mysql --defaults-file=$MYCNF -D "$CATALOG" -s -N -e \
+		DATOS=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 			"SELECT ' LANG=$LANG',
 				' ip=', CONCAT_WS (':', ordenadores.ip,
 				(@repoip:=repositorios.ip), aulas.router, aulas.netmask,
@@ -92,7 +92,7 @@ for MAC in $ETHERNET; do
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
 		sed -e "s/vga=[0-9]*//g; s/INFOHOST/$DATOS/g" $TEMPLATE >$PXEFILE
 		# Actualizar en la BD el modo de arranque asociada el cliente.
-		mysql --defaults-file=$MYCNF -D "$CATALOG" -e \
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
 			"UPDATE ordenadores SET arranque='$BOOTMODE' WHERE mac='$MAC';"
 	fi
 	let NPC=NPC+1
