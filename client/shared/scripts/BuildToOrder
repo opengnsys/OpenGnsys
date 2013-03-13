@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#/**
+#         BuildToOrder
+#@brief   Script de ejemplo para realizar una configuracion del sistema operativo antes de generar imagen o restaurado.
+#@brief   Activa el uso de los contralodres de disco más usados en windows 7.
+#@brief (puede usarse como complemento para el programa de creación de imágenes o de restauración).
+#@param 1 disco  
+#@param 2 particion 
+#@return  
+#@TODO  
+#@exception 
+#@version 1.0.4 - Discos ide + SATA.
+#@author 
+#@date   2012-10-05
+
+
+#Control de parametros.
+PROG="$(basename $0)"
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion"
+    exit $?
+fi
+
+
+MNTDIR=$(ogMount $1 $2)
+
+# filtro Tipo de sistema opertativo.
+OSTYPE="$(ogGetOsType $1 $2)"
+
+
+case "$OSTYPE" in 
+    Windows)
+        echo "Filtro versión de sistema operativo windows."
+		TYPE=$(ogGetOsVersion $1 $2)
+		case "$TYPE" in
+		   *Windows\ XP) 
+				echo "Versión de sistema operativo Windows XP no soportado"
+			;;
+		   *Windows\ 7*)  
+		   		echo "Windows 7"
+			   	ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\intelide\Start' '0' && echo "activado intelide"
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\intelide\Start' '0'
+			
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\pciide\Start' '0' && echo "activado pciide"
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\pciide\Start' '0'
+			
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\msahci\Start' '0' && echo "activado msahci"
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\msahci\Start' '0'
+			
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\iaStorV\Start' '0' && echo "activado iaStorV"
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\iaStorV\Start' '0'
+			
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\iaStor\Start' '0' && echo "activado iaStor"
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\iaStor\Start' '0'
+		   	;;
+		 esac
+    ;;
+    Linux)
+        echo "Versión de sistema operativo linux no soportado"
+    ;;
+    *)
+    	echo "Sistema operativo no soportado"
+    ;;
+esac
