@@ -175,7 +175,8 @@ MNTDIR=$(ogMount $1 $2) 2>/dev/null
 # Fichero de configuración de GRUB.
 CONFDIR=$MNTDIR                               # Partición de arranque /boot.
 [ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Partición raíz con directorio boot.
-CONFFILE="$CONFDIR/grub/menu.lst"
+CONFFILE="$CONFDIR/grubPARTITION/boot/grub/grub.cfg"
+[ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/menu.lst"
 [ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/grub.cfg"
 [ ! -e $CONFFILE ] && ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" && return $?
 
