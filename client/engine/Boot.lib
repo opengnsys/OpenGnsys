@@ -628,7 +628,7 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 function ogGrubInstallMbr {
 
 # Variables locales.
-local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM
+local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -645,6 +645,7 @@ fi
 DISK=$1; PART=$2;
 CHECKOS=${3:-"FALSE"}
 KERNELPARAM=$4
+BACKUPNAME=".backup.og"
 
 #Error si no es linux.
 #TODO: comprobar si se puede utilizar la particion windows como contenedor de grub.
@@ -664,10 +665,15 @@ SECONDSTAGE=$(ogMount $DISK $PART)
 PREFIXSECONDSTAGE="/boot/grubMBR"
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
-if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ]
+if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
 then 
     if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
     then
+        # Si no se reconfigura se utiliza el grub.cfg orginal
+        [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
+		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
+        [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
+        # Reactivamos el grub con el grub.cfg original.
         grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
         return $?
     fi
@@ -679,7 +685,7 @@ echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
 echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 
 #Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
-[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg.backup 
+[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME 
 
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
@@ -716,7 +722,7 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 function ogGrubInstallPartition {
 
 # Variables locales.
-local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM
+local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -732,6 +738,7 @@ fi
 DISK=$1; PART=$2;
 CHECKOS=${3:-"FALSE"}
 KERNELPARAM=$4
+BACKUPNAME=".backup.og"
 
 #error si no es linux.
 VERSION=$(ogGetOsVersion $DISK $PART) 
@@ -747,10 +754,15 @@ SECONDSTAGE=$(ogMount $DISK $PART)
 PREFIXSECONDSTAGE="/boot/grubPARTITION"
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
-if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ]
+if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
 then 
     if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
     then
+        # Si no se reconfigura se utiliza el grub.cfg orginal
+        [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
+		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
+        [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
+        # Reactivamos el grub con el grub.cfg original.
         grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
         return $?
     fi
@@ -761,8 +773,8 @@ fi
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
 echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 
-#Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
-[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg.backup 
+#Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup.og
+[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME 
 
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
