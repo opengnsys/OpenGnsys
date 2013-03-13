@@ -772,4 +772,66 @@ grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot
 grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 }
 
+###
+#En pruebas
+##
+#/**
+#         ogConfigureFstab int_ndisk int_npartition str_name
+#@brief   Establece el nombre del equipo en los ficheros hostname y hosts.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version .
+#@author  
+#@date    
+#*/ ##
+function ogConfigureFstab {
+# Variables locales.
+local PART MNTDIR  MNTLINUX DEFROOT PARTROOT PARTSWAP
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+MNTLINUX=$(ogMount $1 $2)
+
+#Test fstab . pasar a funcion tipo ogLNXfstab
+cp ${MNTLINUX}/etc/fstab ${MNTLINUX}/etc/fstab.backup
+cat ${MNTLINUX}/etc/fstab | egrep -v  " was on" > ${MNTLINUX}/etc/fstab.new
+DEFROOT=$(cat ${MNTLINUX}/etc/fstab.new | grep " / " | awk '{print $1}')
+PARTROOT=$(ogDiskToDev $1 $2)    
+#PARTROOT=LABEL=Sistema
+#configuracion de la swap
+PARTSWAP=$(fdisk -l $(ogDiskToDev $1 ) | grep swap | awk '{print $1}')
+if [ -n "$PARTSWAP" ]
+then
+    ogFormat $(ogDevToDisk $PARTSWAP)
+    #swapnew=$(fdisk -l | grep swap | awk '{print $1}')
+    echo "Existe partición swap en $PARTSWAP "
+    DEFSWAP=$(grep swap ${MNTLINUX}/etc/fstab.new | awk '{print $1}')
+    if [ -n "$DEFSWAP" ]
+    then                
+        #swapold=$(cat ${MNTLINUX}/etc/fstab.new | grep "none" | awk '{print $1}')   
+        echo "Hay definicion de swap en el fstab $DEFSWAP -> modificamos fichero con nuevo valor $DEFSWAP->$PARTSWAP"
+        sed "s|$DEFSWAP|$PARTSWAP|g ; s|$DEFROOT|$PARTROOT|g" ${MNTLINUX}/etc/fstab.new > ${MNTLINUX}/etc/fstab
+    else
+        echo "No hay definicion de swap y si hay partición swap -> moficamos fichero"
+        sed "s|$DEFROOT|$PARTROOT|g" ${MNTLINUX}/etc/fstab.renew > ${MNTLINUX}/etc/fstab
+        echo "$PARTSWAP none            swap    sw              0       0" >> ${MNTLINUX}/etc/fstab
+    fi  
+else
+    echo "No hay partición swap -> configuramos fstba"
+    cat ${MNTLINUX}/etc/fstab.new | egrep -v  "none" > ${MNTLINUX}/etc/fstab.renew
+    sed "s|$DEFROOT|$PARTROOT|g" ${MNTLINUX}/etc/fstab.renew > ${MNTLINUX}/etc/fstab
+fi
+
+}
 
