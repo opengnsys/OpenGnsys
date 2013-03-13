@@ -835,3 +835,65 @@ fi
 
 }
 
+###
+#En pruebas
+##
+#/**
+#         ogSetLinuxName int_ndisk int_npartition str_name
+#@brief   Establece el nombre del equipo en los ficheros hostname y hosts.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_name       nombre asignado
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@version .
+#@author  
+#@date    
+#*/ ##
+function ogSetLinuxName ()
+{
+# Variables locales.
+local PART MNTDIR NAME
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_name" \
+           "$FUNCNAME 1 1 PRACTICA-PC"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Montar el sistema de archivos.
+MNTDIR=$(ogMount $1 $2) 2>/dev/null
+[ -z "$MNTDIR" ] && ogRaiseError OG_ERR_PARTITION "$1, $2" && return $?
+
+[ $# == 3 ] && NAME="$3" || NAME="$(ogGetHostname)"
+NAME=${NAME:-"pc"}
+
+ETC=$(ogGetPath $1 $2 /etc)
+
+if [ -d "$ETC" ]; then 
+	#cambio de nombre en hostname
+	echo "$NAME" >$ETC/hostname 2>/dev/null
+	#Opcion A para cambio de nombre en hosts
+	#sed "/127.0.1.1/ c\127.0.1.1 \t $HOSTNAME" $ETC/hosts > /tmp/hosts && cp /tmp/hosts $ETC/ && rm /tmp/hosts
+	#Opcion B para cambio de nombre en hosts
+cat > $ETC/hosts <<EOF
+127.0.0.1       localhost
+127.0.1.1       $NAME
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+EOF
+	
+fi
+
+}
+
