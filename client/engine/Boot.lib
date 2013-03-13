@@ -606,71 +606,170 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 }
 
 
-#         ogGrubInstallPartition int_disk  int_partition
-#@brief   Instala/actualiza el gestro grub en el "boot sector" de la partición indicada
-#@param   int_disk  	
-#@param   indt_part     
+#         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
+#@brief   Instala y actualiza el gestor grub el el MBR del disco duro donde se encuentra el fichero grub.cfg
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@version 1.0.2 - Primeras pruebas.
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2011-10-29
+#@version 1.0.3 - Soporte para linux de 32 y 64 bits 
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2012-03-13
+#@version 1.0.3 - Ficheros de configuracion independientes segun ubicación de la primera etapa
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2012-03-13
+#*/ ##
+
+function ogGrubInstallMbr {
+
+# Variables locales.
+local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage bolean_Configure_2ndStage   \"param param \"  " \
+           "$FUNCNAME 1 1 FALSE " \
+           "$FUNCNAME 1 1 TRUE \"nomodeset irqpoll pci=noacpi quiet splash \" "
+    return
+fi  
+
+# Error si no se reciben 2 parÃ¡metros.
+[ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+
+DISK=$1; PART=$2;
+CHECKOS=${3:-"FALSE"}
+KERNELPARAM=$4
+
+#Error si no es linux.
+#TODO: comprobar si se puede utilizar la particion windows como contenedor de grub.
+VERSION=$(ogGetOsVersion $DISK $PART) 
+echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+
+#Localizar primera etapa del grub
+FIRSTSTAGE=$(ogDiskToDev $DISK)
+
+#localizar disco segunda etapa del grub
+SECONDSTAGE=$(ogMount $DISK $PART)
+
+#Localizar directorio segunda etapa del grub   
+PREFIXSECONDSTAGE="/boot/grubMBR"
+
+# Si Reconfigurar segunda etapa (grub.cfg) == FALSE
+if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ]
+then 
+    if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
+    then
+        grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        return $?
+    fi
+fi
+
+# SI Reconfigurar segunda etapa (grub.cfg) == TRUE 
+#Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
+echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
+echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
+
+#Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
+[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg.backup 
+
+#Preparar configuración segunda etapa: crear ubicacion
+mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
+#Preparar configuración segunda etapa: crear cabecera del fichero
+/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+#Preparar configuración segunda etapa: crear entrada del sistema operativo
+grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+
+#Instalar el grub 
+grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+}
+
+
+
+#         ogGrubInstallPartition int_disk_SECONDSTAGE  int_partition_SECONDSTAGE bolean_Check_Os_installed_and_Configure_2ndStage
+#@brief   Instala y actualiza el gestor grub en el bootsector de la particion indicada
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
+#@param   str "kernel param "   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 1.0.2 - Primeras pruebas.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2011-10-29
+#@version 1.0.3 - Soporte para linux de 32 y 64 bits 
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2012-03-13
+#@version 1.0.3 - Ficheros de configuracion independientes segun ubicación de la priemra etapa
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2012-03-13
 #*/ ##
 
 function ogGrubInstallPartition {
 
 # Variables locales.
-local PART DISK DIRCONF SCHROOTDEVICE
+local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partition" \
-           "$FUNCNAME 1 1 "
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage bolean_Configure_2ndStage   \"param param \" " \
+           "$FUNCNAME 1 1 FALSE " \
+           "$FUNCNAME 1 1 TRUE \"nomodeset irqpoll pci=noacpi quiet splash \" "
     return
-fi	
+fi  
 
 # Error si no se reciben 2 parÃ¡metros.
-[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+[ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 
-DISK=$1; PART=$2; DIRCONF="/etc/schroot"
+DISK=$1; PART=$2;
+CHECKOS=${3:-"FALSE"}
+KERNELPARAM=$4
 
-
+#error si no es linux.
+#TODO: comprobar si se puede utilizar la particion windows como contenedor de grub.
 VERSION=$(ogGetOsVersion $DISK $PART) 
 echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
-SCHROOTLOCATION=$(ogMount $DISK $PART)
-SCHROOTDEVICE=$(ogDiskToDev $DISK $PART)
+#Localizar primera etapa del grub
+FIRSTSTAGE=$(ogDiskToDev $DISK $PART)
 
-rm ${DIRCONF}/schroot.conf
+#localizar disco segunda etapa del grub
+SECONDSTAGE=$(ogMount $DISK $PART)
 
-cat >> ${DIRCONF}/schroot.conf << EOF
-[linux]
-description=$VERSION
-type=plain
-directory=$SCHROOTLOCATION
-EOF
+#Localizar directorio segunda etapa del grub    
+PREFIXSECONDSTAGE="/boot/grubPARTITION"
 
-cat >> $SCHROOTLOCATION/root/installgrub.sh <<EOF
-#!/bin/bash
-grub-install --recheck --force $SCHROOTDEVICE
-update-grub2
-EOF
+# Si Reconfigurar segunda etapa (grub.cfg) == FALSE
+if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ]
+then 
+    if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
+    then
+        grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        return $?
+    fi
+fi
 
-chmod 777 $SCHROOTLOCATION/root/installgrub.sh
+# SI Reconfigurar segunda etapa (grub.cfg) == TRUE 
+#Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
+echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
+echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 
-mount --bind /dev $SCHROOTLOCATION/dev
-mount --bind /dev/pts  $SCHROOTLOCATION/dev/pts
-mount --bind /proc $SCHROOTLOCATION/proc
-mount --bind /sys  $SCHROOTLOCATION/sys
+#Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
+[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg.backup 
 
+#Preparar configuración segunda etapa: crear ubicacion
+mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
+#Preparar configuración segunda etapa: crear cabecera del fichero
+/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+#Preparar configuración segunda etapa: crear entrada del sistema operativo
+grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
-schroot -c linux -- /root/installgrub.sh
-
-rm $SCHROOTLOCATION/root/installgrub.sh
-
-umount $SCHROOTLOCATION/dev/pts
-umount $SCHROOTLOCATION/dev
-umount $SCHROOTLOCATION/proc 
-umount $SCHROOTLOCATION/sys
+#Instalar el grub 
+grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 }
+
 
