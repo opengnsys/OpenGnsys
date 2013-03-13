@@ -608,7 +608,7 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 
 
 #         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
-#@brief   Instala y actualiza el gestor grub el el MBR del disco duro donde se encuentra el fichero grub.cfg
+#@brief   Instala y actualiza el gestor grub el el MBR del disco duro donde se encuentra el fichero grub.cfg. Admite sistemas Windows.
 #@param   int_disk_SecondStage      
 #@param   int_part_SecondStage     
 #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
@@ -648,14 +648,17 @@ KERNELPARAM=$4
 
 #Error si no es linux.
 #TODO: comprobar si se puede utilizar la particion windows como contenedor de grub.
-VERSION=$(ogGetOsVersion $DISK $PART) 
-echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
+#VERSION=$(ogGetOsVersion $DISK $PART) 
+#echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
 #Localizar primera etapa del grub
 FIRSTSTAGE=$(ogDiskToDev $DISK)
 
 #localizar disco segunda etapa del grub
 SECONDSTAGE=$(ogMount $DISK $PART)
+
+# prepara el directorio principal de la segunda etapa
+[ -d ${SECONDSTAGE}/boot/grub/ ]  || mkdir -p ${SECONDSTAGE}/boot/grub/
 
 #Localizar directorio segunda etapa del grub   
 PREFIXSECONDSTAGE="/boot/grubMBR"
@@ -731,7 +734,6 @@ CHECKOS=${3:-"FALSE"}
 KERNELPARAM=$4
 
 #error si no es linux.
-#TODO: comprobar si se puede utilizar la particion windows como contenedor de grub.
 VERSION=$(ogGetOsVersion $DISK $PART) 
 echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
