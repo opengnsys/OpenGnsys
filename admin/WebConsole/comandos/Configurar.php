@@ -179,7 +179,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				$icp=$cc."_".$k; // Identificador de la configuración-partición
 				echo '<TR id="TR_'.$icp.'">';
-				echo '<TD align=center><input type=checkbox onclick="(this,\''.$icp.'\')"></TD>';
+				echo '<TD align=center><input type=checkbox onclick="eliminaParticion(this,\''.$icp.'\')"></TD>';
 			
 				echo '<TD align=center>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</TD>';
 				echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</TD>';
