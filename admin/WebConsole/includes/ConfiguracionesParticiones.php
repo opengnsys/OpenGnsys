@@ -240,8 +240,11 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 			$cmd->texto.="	WHERE ordenadores.idordenador=".$idambito;
 			break;
 	}					
+	$cmd->texto.=" AND ordenadores_particiones.numpar>0 ";
+
 	if ($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
-		$cmd->texto.=" AND tipospar.clonable=1  AND ordenadores_particiones.numpar>0 ";
+		$cmd->texto.=" AND tipospar.clonable=1";
+
 	
 	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numpar) AS temp1
 					GROUP BY temp1.idordenador) AS temp2

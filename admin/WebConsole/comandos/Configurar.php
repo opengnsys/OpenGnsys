@@ -21,7 +21,6 @@ include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 
-
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -117,15 +116,15 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 
-	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,true);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
 
 	/* Dibuja tabla patron  !OJO! no insertar caracteres entre las etiquetas*/
 	
 	echo '<TABLE style="visibility:hidden"><TR id="TR_patron">';
 	echo '<TD align=center><input id="CHK_patron" type="checkbox"></TD>';
 	echo '<TD align=center>'.HTMLSELECT_particiones(0).'</TD>';
-	echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,0).'</TD>';
-	echo '<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,0).'</TD>';
+	echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,"").'</TD>';
+	echo '<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,"").'</TD>';
 	echo '<TD align=center><INPUT type="text" style="width:100" value="0"></TD>';
 	echo '<TD align=center>&nbsp;</TD>';
 	echo '<TD align=center>'.HTMLSELECT_operaciones().'</TD></TR></TABlE>';
@@ -137,9 +136,6 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	include_once("./includes/opcionesacciones.php");
 	//________________________________________________________________________________________________________
 ?>
-<SCRIPT language="javascript">
-	Sondeo();
-</SCRIPT>
 </BODY>
 </HTML>
 <?
@@ -183,10 +179,10 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				$icp=$cc."_".$k; // Identificador de la configuración-partición
 				echo '<TR id="TR_'.$icp.'">';
-				echo '<TD align=center><input type=checkbox onclick="eliminaParticion(\''.$icp.'\',this)"></TD>';
+				echo '<TD align=center><input type=checkbox onclick="(this,\''.$icp.'\')"></TD>';
 			
 				echo '<TD align=center>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</TD>';
-				echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["codpar"]).'</TD>';
+				echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</TD>';
 				
 				$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);	
 				echo'<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</TD>';
