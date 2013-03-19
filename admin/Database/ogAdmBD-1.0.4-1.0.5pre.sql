@@ -2,6 +2,9 @@
 # OpenGnSys 1.0.4 - 1.0.5
 #use ogAdmBD
 
+# Habilita el comando PArticionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
 # Mejorar el rendimiento en acceso a la cola de acciones.
 ALTER TABLE acciones
 	ADD KEY (idordenador),

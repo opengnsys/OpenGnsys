@@ -53,6 +53,9 @@ delimiter ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
+# Habilita el comando PArticionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
 # Nuevos comandos.
 INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
 	(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),

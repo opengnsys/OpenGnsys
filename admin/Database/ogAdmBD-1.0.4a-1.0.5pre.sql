@@ -2,6 +2,9 @@
 # OpenGnSys 1.0.4a - 1.0.5
 #use ogAdmBD
 
+# Habilita el comando PArticionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
 # Añadir validación del cliente.
 ALTER TABLE aulas
 	ADD validacion TINYINT(1) DEFAULT 0,

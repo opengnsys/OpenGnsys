@@ -1,6 +1,10 @@
 UPDATE ogAdmBD.idiomas SET descripcion = 'English' WHERE ididioma = 2;
 UPDATE ogAdmBD.idiomas SET descripcion = 'Català' WHERE ididioma = 3;
 
+# Habilita el comando PArticionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
+
 ALTER TABLE ogAdmBD.menus MODIFY resolucion smallint(4);
 
 ALTER TABLE ogAdmBD.perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';

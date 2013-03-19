@@ -227,7 +227,7 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 (7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'par', 'nfn;iph;mac;par', '', 1, ''),
 (8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
 (9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1, ''),
-(10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 0, ''),
+(10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 1, ''),
 (11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
 (12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'), 
 (13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'), 

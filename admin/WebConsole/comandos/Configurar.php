@@ -246,7 +246,7 @@ function HTMLSELECT_operaciones()
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_tipospar($cmd,$codpar)
 {
-	return(HTMLSELECT($cmd,0,"tipospar",$codpar,"codpar","tipopar",150,"","formulariodatos","codpar<256"));
+	return(HTMLSELECT($cmd,0,"tipospar",$codpar,"tipopar","tipopar",150,"","formulariodatos","codpar<256"));
 }	
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los sistemas de ficheros

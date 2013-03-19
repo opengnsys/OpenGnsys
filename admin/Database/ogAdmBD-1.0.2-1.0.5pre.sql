@@ -2,6 +2,9 @@
 # OpenGnSys 1.0.2 - 1.0.5
 #use ogAdmBD
 
+# Habilita el comando Particionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
 UPDATE entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
 
 UPDATE parametros SET tipopa = '1' WHERE idparametro = 30;

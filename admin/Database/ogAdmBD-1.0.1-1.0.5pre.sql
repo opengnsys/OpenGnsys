@@ -2,6 +2,10 @@
 # OpenGnSys 1.0.1 - 1.0.5
 #use ogAdmBD
 
+# Habilita el comando PArticionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
+
 UPDATE parametros SET tipopa = '1', visual = '1' WHERE idparametro = 30;
 
 UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;

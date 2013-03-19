@@ -2,6 +2,9 @@
 # OpenGnSys 1.0.3 - 1.0.5
 #use ogAdmBD
 
+# Habilita el comando PArticionar y formatear
+UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
 
