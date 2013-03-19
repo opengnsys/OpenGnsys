@@ -1,32 +1,84 @@
 #!/bin/bash
 
-#_______________________________________________________________________________________________________________________________
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+	
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimieincludento para httpdlog
+echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+	
+# Registro de inicio de ejecución
+#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+	
+# Solo ejecutable por OpenGnSys Client.
+PATH=$PATH:$(dirname $0)
+PROG=$(basename $0)
+
+#____________________________________________________________________
 #
+# El parámetro $2 es el que aporta toda la información y el $1 se queda obsoleto
 # Formato de entrada:
-# $1 disco
-# $2 par=Número de particion#cod=Código de partición#sfi=Sistema de ficheros#tam=Tamaño de la partición#ope=Operación$
-#_______________________________________________________________________________________________________________________________
-
-particiones=$(echo $2 | awk '{n=split($0,sep,"$");print n}')
-
-
-#___________________________________________________________________
+#		dis=Número de disco
+#		$=caracter de separación
+#		che=Vale 0 o 1
+#		$=caracter de separación
+#		$tch=tamaño cache
+#		@= caracter de separación
 #
+#   Y un numero indeterminado de cadenas del tipo siguuenteseparadas por el caracter '$':
+#		par=Número de particion#cod=Código de partición#sfi=Sistema de ficheros#tam=Tamaño de la partición#ope=Operación
+#____________________________________________________________________
+
+# Captura de parámetros
+param=$2;
+#param='dis=1$che=0$tch=70000000@par=1$cpt=NTFS$sfi=NTFS$tam=11000000$ope=0#'
+echo "Parametros recibidos"$param | tee -a $OGLOGSESSION $OGLOGFILE
+
 # Activa navegador para ver progreso
-#___________________________________________________________________
+coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
 
-	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
+# Separacion de los dos bloques separados por '@'
+declare -a TBPRM
 
-#___________________________________________________________________
+for ((i=1;i<3;i++)); 
+	do
+		TBPRM[$i]=$(echo $param | awk p=$i'{
+					n=split($0,sep,"!");
+					printf("%s",sep[p]);}')
+	done
 
+pparam=${TBPRM[1]}
+sparam=${TBPRM[2]}
+
+#echo "Parametros recibidos pparam"$pparam | tee -a $OGLOGSESSION $OGLOGFILE
+#echo "Parametros recibidos sparam"$sparam | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Toma valores de disco y caché
+# Los valores están en las variables $dis: disco,$che: vale 1 0 cero, $tch: Tamaño de la cache"
+declare -a TBP
+for ((prm=1;prm<4;prm++)); 
+	do
+		TBPRM[$prm]=$(echo $pparam | awk -v p=$prm '{
+							split($0,sep,"*");
+							printf("%s",sep[p]);						
+						}')
+		eval ${TBPRM[$prm]}
+	done
+
+# Toma valores de tamaño y distribución de particiones
 declare -a TBP
 declare -a TBF
 
+particiones=$(echo $sparam | awk '{n=split($0,sep,"%");print n}')
+
 for ((par=1;par<$particiones;par++)); 
 	do
-		TBP[$par]=$(echo $2 | awk -v p=$par '{
-							n=split($0,sep,"$");
-							split(sep[p],dua,"#");
+		TBP[$par]=$(echo $sparam | awk -v p=$par '{
+							n=split($0,sep,"%");
+							split(sep[p],dua,"*");
 							split(dua[1],prm,"=");
 							par=prm[2];
 							split(dua[2],prm,"=");
@@ -37,32 +89,23 @@ for ((par=1;par<$particiones;par++));
 							tam=prm[2];																					
 							split(dua[5],prm,"=");
 							ope=prm[2];									
-							printf("%s %x %s %s %s",par,cpt,sfi,tam,ope);
+							printf("%s %s %s %s %s",par,cpt,sfi,tam,ope);
 						}')
 	done
 	
-# Prepara cadena de particiones _______________________________________
-
+# Prepara cadena de particiones 
 cP=""
 for ((par=1;par<$particiones;par++)); 
 	do
-		cfg=${TBP[$par]} 	
-
+		cfg=${TBP[$par]}
 		cP=$cP$(echo $cfg | awk '{
 							n=split($0,prm," ");
 							par=prm[1];
 							cpt=prm[2];
 							sfi=prm[3];
 							tam=prm[4];																					
-							ope=prm[5];		
-							if(ope==1)
-								printf("%s:%s ",sfi,tam);
-							else{
-								if(ope==2)
-									printf("H%s:%s ",sfi,tam);
-								else
-									printf("%s:%s ",sfi,tam);						
-							}
+							ope=prm[5];	
+							printf("%s:%s ",cpt,tam);						
 						}')
 						
 		TBF[$par]=$(echo $cfg | awk '{
@@ -77,40 +120,65 @@ for ((par=1;par<$particiones;par++));
 						
 	done	
 
-# Crea tabla de particiones MSDOS
-ogCreatePartitionTable 1 MSDOS 
+#____________________________________________________
+# 
+# Proceso
+#____________________________________________________
+
 
 # Desmonta todas las particiones y la caché
- ogUnmountCache 
- ogUnmountAll 1 
+echo "Desmonta todas las particiones y la caché" | tee -a $OGLOGSESSION $OGLOGFILE
+ogUnmountCache 
+ogUnmountAll $dis 
 
-	echo "Creando la tabla de particiones $1 $cP" | tee -a $OGLOGSESSION $OGLOGFILE
-	ogCreatePartitions $1 $cP
+# Elimina la tabla de particiones
+echo "Elimina la tabla de particiones" | tee -a $OGLOGSESSION $OGLOGFILE
+ogDeletePartitionTable $dis  
+ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
 
- #ogDeletePartitionTable 1
- #ogSetPartitionActive 1 1 
- #ogUpdatePartitionTable 1
- #ms-sys /dev/sda | grep unknow && ms-sys /dev/sda 
-							
-# Formatear _______________________________________
-	
+echo "Creando tabla de particiones tipo MSDOS" | tee -a $OGLOGSESSION $OGLOGFILE
+# Crea tabla de particiones MSDOS
+ogCreatePartitionTable $dis MSDOS 
+
+echo "Creando entradas en la tabla de particiones $dis $cP" | tee -a $OGLOGSESSION $OGLOGFILE
+ogCreatePartitions $dis $cP  | tee -a $OGLOGSESSION $OGLOGFILE
+			
+RETVAL=$?	
+if [ $RETVAL -ne 0 ]; then
+	kill $COPROC_PID
+  exit $RETVAL
+fi 
+echo "Tabla de particiones creada" | tee -a $OGLOGSESSION $OGLOGFILE
+			
+# Formatear particiones
 for ((par=1;par<$particiones;par++)); 
 	do
 	sfi=${TBF[$par]}
-	if [ $sfi == "EMPTY" ]; then
-		TBF[$par]=" "
-	else
-		echo "Formateando particion: $par con sistema de fichero: $sfi" | tee -a $OGLOGSESSION $OGLOGFILE
-		ogFormatFs $1 $par $sfi
+	if [ "$sfi" != "EMPTY" ]; then
+		echo "Formateando disco $dis, particion $par con tipo $sfi" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogFormatFs $dis $par $sfi | tee -a $OGLOGSESSION $OGLOGFILE
+		RETVAL=$?	
+		if [ $RETVAL -ne 0 ]; then
+			kill $COPROC_PID
+			exit $OG_ERR_PARTITION
+		fi 
 	fi
-	
-	done	
+done	
+
+# Cuestión caché
+if [ "$che" == "1" ]; then
+	echo "Creando y actualizando la cache con el tamaño:$tch" | tee -a $OGLOGSESSION $OGLOGFILE
+	initCache $tch  &>/dev/null | tee -a $OGLOGSESSION $OGLOGFILE
+fi
+
+ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
+
 #___________________________________________________________________
 #
 # Retorno
 #___________________________________________________________________
 
+	echo "¡¡¡ El proceso ha terminado con exito !!!" | tee -a $OGLOGSESSION $OGLOGFILE
 	kill $COPROC_PID
 	exit 0
-
 
