@@ -100,6 +100,7 @@ export OG_ERR_NOTCACHE=15	# No hay particion cache en cliente
 export OG_ERR_CACHESIZE=16	# No hay espacio en la cache para almacenar fichero-imagen
 export OG_ERR_REDUCEFS=17	# Error al reducir sistema archivos
 export OG_ERR_EXTENDFS=18	# Error al expandir el sistema de archivos
+export OG_ERR_OUTOFLIMIT=19	# Valor fuera de rango o no válido.
 
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
 
