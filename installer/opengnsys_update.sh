@@ -96,7 +96,7 @@ OSDISTRIB=$(lsb_release -is 2>/dev/null)
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( php5-ldap )
+		DEPENDENCIES=( php5-ldap btrfs-tools )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
@@ -104,7 +104,7 @@ case "$OSDISTRIB" in
 		APACHEGROUP="www-data"
 		;;
         Fedora|CentOS)
-		DEPENDENCIES=( php-ldap )
+		DEPENDENCIES=( php-ldap btrfs-progs )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		APACHEUSER="apache"
