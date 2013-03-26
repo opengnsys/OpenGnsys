@@ -25,6 +25,8 @@
 #@version 1.0.1 - Control de espacio requerido
 #@author  Antonio J.Doblas Viso
 #@date   2011-05-10
+#@version 2.0.1 - Imagenes sincronizadas
+#@date    2013-02-20
 #*/ ##
 
 PROG="$(basename $0)"
@@ -48,9 +50,19 @@ if ! $(ogFindCache >/dev/null); then
         exit $?
 fi
 
+# Comprobar que es sincronizable
+REPOFILE=$(ogGetPath "REPO" "/$2")
+file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null
+[ $? == 0 ] && IMGTYPE="RSYNC"
+
+# La sincronizada, si hay imagen en cache uso rsync, si no otro protocolo
+CACHEFILE=$(ogGetPath "CACHE" "/$2")  && PROTOCOLO="RSYNC"
+
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE "
 #TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
-ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
+# Si es imagen sincronizada siempre da distinto md5 -> no comprobamos
+[ "$IMGTYPE" == "RSYNC" ] || ogUpdateCacheIsNecesary $1 $2
+RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
@@ -58,20 +70,31 @@ ogUpdateCacheIsNecesary $1 $2; RETVAL=$?
 CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
+REALFILESIZE=$(ls -lk $(ogGetPath $REPOSITORIO "$2") | cut -f5 -d" ")
 
+# La sincronizada, si existe la imagen en cache el espacio necesario
+#	 es la nueva menos lo que ocupa la que ya hay.
+if [ "$PROTOCOLO" == "RSYNC" ]; then
+	CACHEFILESIZE=$(ls -lk $(ogGetPath "CACHE" "$2") | cut -f5 -d" ")
+	let SIZEREQUIRED=$CACHEFILESIZE-$FILESIZE
+	[ $SIZEREQUIRED -lt 0 ] && SIZEREQUIRED=0
+else
+	SIZEREQUIRED=$FILESIZE
+
+fi
 
 echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE"
 #ERROR CACHESIZE 16
-if [ "$FILESIZE" -ge "$CACHESIZE" ]  
+if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
-	echo "WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
     exit $?
 fi
 
 echo "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO"
 #ERROR CACHESIZE 16
-if [ "$FILESIZE" -ge "$CACHESIZEFREE" ]  
+if [ "$SIZEREQUIRED" -ge "$CACHESIZEFREE" ]  
 then
 	# echo "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"  | tee -a $OGLOGSESSION $OGLOGFILE
 	case $ACTIONCACHEFULL in 
@@ -98,7 +121,8 @@ then
 	esac	
 fi
 
-ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
+[ "$IMGTYPE" == "RSYNC" ] || ogUpdateCacheIsNecesary $REPOSITORIO "$2"
+RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
@@ -122,7 +146,7 @@ case "$PROTOCOLO" in
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
 		ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
 		#TODO: comprobar que el tracker definido en el fichero es correcto.
-    	#TODO comprobar que el fichero torrent está en cache
+    		#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
 		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
 		echo "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -165,6 +189,43 @@ case "$PROTOCOLO" in
 		echo "unicast"
 		ogCopyFile $REPOSITORIO "$2" "$IMGDIR"
 	;;
+	RSYNC)
+		USERRSYNC="opengnsys"
+		OPTRSYNC=" --delete --password-file=/scripts/passrsync "
+		[ "$ogcompress" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
+		IMGEXT=${2##*.} 
+		DIRMOUNT="$(ogGetMountDir "${2%%.*}" $IMGEXT)"
+		DIRLOCAL="/tmp/$DIRMOUNT"
+		mkdir $DIRLOCAL 2>/dev/null
+		echo "Comprobamos si hay que redimensionar la imagen: cachefile: $CACHEFILESIZE -lt repofile: $REALFILESIZE "
+
+		if [ $CACHEFILESIZE -lt $REALFILESIZE ]; then
+		   # Si la imagen esta montada la desmonto
+		   mount |grep $CACHEFILE >/dev/null && umount $CACHEFILE
+		   echo "      Redimensionamos la imagen al tamaño necesario" | tee -a $OGLOGSESSION $OGLOGFILE
+                   echo "      truncate --size=>$REALFILESIZE k $CACHEFILE" | tee -a $OGLOGSESSION $OGLOGFILE
+                   truncate --size=">$REALFILESIZE"k $CACHEFILE &> $OGLOGCOMMAND
+                   echo "      mount -o compress=lzo $CACHEFILE $DIRLOCAL"
+                   mount -o compress=lzo $CACHEFILE $DIRLOCAL
+                   echo "      btrfs filesystem resize max $DIRLOCAL"
+                   btrfs filesystem resize max $DIRLOCAL
+                   TIMEAUX3=$[SECONDS-TIMEAUX3]
+                   echo "      Fin redimension de la  imagen: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+  
+
+		fi
+		ogMountImage CACHE  "${2%%.*}" $IMGEXT
+		ogMountImage REPO  "${2%%.*}" $IMGEXT
+		# Esperamos que se monte la imagen en el servidor
+		ogWaitMountImage  REPO  "${2%%.*}" $IMGEXT
+		echo -e "\nrsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
+		rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE
+		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
+		[ $? == 0 ] && RETVAL="1"|| RETVAL="2"
+		# Desmonto las imagenes
+		ogUnmountImage CACHE  "${2%%.*}" $IMGEXT
+		ogUnmountImage REPO  "${2%%.*}" $IMGEXT
+	;;
 esac
 
 TIME1=$[SECONDS-TIME1]
@@ -172,7 +233,11 @@ echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum " | tee -a $OGLOGSESSION $OGLOGFILE
 TIME2=$SECONDS
-ogUpdateCacheIsNecesary $REPOSITORIO "$2"; RETVAL=$?
+if [ "$PROTOCOLO" != "RSYNC" ]; then 
+	ogUpdateCacheIsNecesary $REPOSITORIO "$2"
+	RETVAL=$?
+fi
+
 TIME2=$[SECONDS-TIME2]
 echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
