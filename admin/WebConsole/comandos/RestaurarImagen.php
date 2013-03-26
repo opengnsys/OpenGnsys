@@ -208,6 +208,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idam
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
+	global $IMAGENES_MONOLITICAS;
+
 	$SelectHtml="";
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
 				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio"; 
@@ -216,7 +218,8 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 	else
 		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;		
 		
-	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y estar creada	
+	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y
+	$cmd->texto.=" 	AND imagenes.tipo=".$IMAGENES_MONOLITICAS;
     
 	$idordenador1 = explode(",",$idordenadores);
 	$idordenador=$idordenador1[0];
