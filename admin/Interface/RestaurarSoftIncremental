@@ -63,8 +63,8 @@ if [ $COPYCACHE -eq 1 ]; then
 fi
 if [ $DELCACHE -eq 1 ]; then
         echo "Borramos imagen de la cache" &>>$OGLOGSESSION
-        CACHEFILE=$(ogGetPath "CACHE" "$3$DIFFEXT") && rm -rf $CACHEFILE
+        CACHEFILE=$(ogGetPath "CACHE" "$5$DIFFEXT") && rm -rf $CACHEFILE
 fi
 
-restoreDiffImage "$ORIG" "$3"   "$1" "$2"  &>>$OGLOGSESSION
+restoreDiffImage "$ORIG" "$5"   "$1" "$2"  &>>$OGLOGSESSION
 

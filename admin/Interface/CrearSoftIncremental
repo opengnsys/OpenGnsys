@@ -61,8 +61,8 @@ DIFFEXT=".diff"
 echo "$3" | tee -a $OGLOGSESSION $OGLOGFILE
 
 [ "$4" == "0.0.0.0" ] && DEST="CACHE" || DEST="REPO"
-echo createDiffImage "$1" "$2" "$DEST" "$3" | tee -a $OGLOGSESSION $OGLOGFILE
-echo 1: "$1" 2: "$2" 3: "$3" 4: "$4" 5: $5 6: $6 7: $7  i| tee -a $OGLOGSESSION $OGLOGFILE
+#echo createDiffImage "$1" "$2" "$DEST" "$3" | tee -a $OGLOGSESSION $OGLOGFILE
+#echo 1: "$1" 2: "$2" 3: "$3" 4: "$4" 5: $5 6: $6 7: $7  i| tee -a $OGLOGSESSION $OGLOGFILE
 
 # Si DELIMG = 0 borramos imagen del destino.
 if [ $DELIMG -eq 1 ]; then
@@ -71,13 +71,13 @@ fi
 
 
 # Creamos la imagen.
-createDiffImage "$1" "$2" "$DEST" "$3" &>$OGLOGSESSION
+createDiffImage "$1" "$2" "$DEST" "$3" "$5" &>$OGLOGSESSION
 
 # Si COPYCACHE = 1 copiamos la imagen a la cache
 if [ $COPYCACHE -eq 1 ]; then
         # Si BORRACACHE=1 Borramos imagen de cache
-        [ $BORRACACHE -eq 1 ] && CACHEFILE=$(ogGetPath "CACHE" "$3$DIFFEXT") && rm -rf $CACHEFILE
-        updateCache "REPO" /"$3.diff" UNICAST  &>>$OGLOGSESSION
+        [ $BORRACACHE -eq 1 ] && CACHEFILE=$(ogGetPath "CACHE" "$5$DIFFEXT") && rm -rf $CACHEFILE
+        updateCache "REPO" /"$5.diff" UNICAST  &>>$OGLOGSESSION
 
 fi
 
