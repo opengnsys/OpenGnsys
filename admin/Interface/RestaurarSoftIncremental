@@ -37,4 +37,34 @@
 	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
 	ogRestaurarSoftIncremental "$@"
 	kill $COPROC_PID
+	exit
+
+# Versión 2
+# Para probar la versión 2 comentar las dos líneas anteriores
+
+# Trasferencias comprimidas
+#export ogcompress="true"
+
+DIFFEXT=".diff"
+
+[ $7 -eq  0 ] && ORIG="CACHE" || ORIG="REPO"
+
+flag=$5
+echo "flah:$flag">/tmp/log
+DELIMG=${flag:0:1}  # No se puede borra la imagen despues de restaurar la compreta
+COPYCACHE=${flag:1:1}
+DELCACHE=${flag:2:1}
+NODELETEFILE=${flag:3:1} # No tiene sentido en las diferenciales 
+
+echo -n "" &>$OGLOGSESSION
+
+if [ $COPYCACHE -eq 1 ]; then
+        ORIG="CACHE"
+fi
+if [ $DELCACHE -eq 1 ]; then
+        echo "Borramos imagen de la cache" &>>$OGLOGSESSION
+        CACHEFILE=$(ogGetPath "CACHE" "$3$DIFFEXT") && rm -rf $CACHEFILE
+fi
+
+restoreDiffImage "$ORIG" "$3"   "$1" "$2"  &>>$OGLOGSESSION
 

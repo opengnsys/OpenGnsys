@@ -34,4 +34,38 @@
 	
 	# Llamada a la función de sincronización.
  	ogRestaurarImagenBasica "$@"
+        exit
+
+# Versión 2
+# Para probar la versión 2 comentar las cuatro líneas anteriores
+
+# Trasferencias comprimidas
+#export ogcompress="true"
+
+IMGFILE=".img"
+
+[ $6 -eq  0 ] && ORIG="CACHE" || ORIG="REPO"
+
+flag=$5
+echo "flah:$flag">/tmp/log
+DELIMG=${flag:0:1}
+COPYCACHE=${flag:1:1}
+DELCACHE=${flag:2:1}
+NODELETEFILE=${flag:3:1}
+
+echo -n "" &>$OGLOGSESSION
+if [ $DELIMG -eq 1 ]; then
+        ogFormat $1 $2 &>>$OGLOGSESSION
+fi
+if [ $COPYCACHE -eq 1 ]; then
+        ORIG="CACHE"
+fi
+if [ $DELCACHE -eq 1 ]; then
+        echo "Borramos imagen de la cache" &>>$OGLOGSESSION
+        CACHEFILE=$(ogGetPath "CACHE" "$3$IMGEXT") && rm -rf $CACHEFILE
+fi
+if [ $NODELETEFILE -eq 1 ]; then
+        export ogrsyncdel=false
+fi
+restoreBaseImage $ORIG $3 $1 $2 &>>$OGLOGSESSION
 

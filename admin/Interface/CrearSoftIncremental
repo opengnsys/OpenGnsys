@@ -37,4 +37,48 @@
  	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh	
 	ogCrearSoftIncremental "$@"
 	kill $COPROC_PID
+        exit
+
+# Versión 2
+# Para probar la versión 2 comentar las cuatro líneas anteriores
+
+# Trasferencias comprimidas
+#export ogcompress="true"
+
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+flag=$6
+echo "flah:$flag">/tmp/log
+DELIMG=${flag:0:1}
+COPYCACHE=${flag:1:1}
+DELCACHE=${flag:2:1}
+NODELETEFILE=${flag:3:1}
+
+RUTAORIGEN=$7
+
+DIFFEXT=".diff"
+echo "$3" | tee -a $OGLOGSESSION $OGLOGFILE
+
+[ "$4" == "0.0.0.0" ] && DEST="CACHE" || DEST="REPO"
+echo createDiffImage "$1" "$2" "$DEST" "$3" | tee -a $OGLOGSESSION $OGLOGFILE
+echo 1: "$1" 2: "$2" 3: "$3" 4: "$4" 5: $5 6: $6 7: $7  i| tee -a $OGLOGSESSION $OGLOGFILE
+
+# Si DELIMG = 0 borramos imagen del destino.
+if [ $DELIMG -eq 1 ]; then
+        IMGFILE=$(ogGetPath "$DEST" "$3$DIFFEXT") && rm -rf $IMGFILE
+fi
+
+
+# Creamos la imagen.
+createDiffImage "$1" "$2" "$DEST" "$3" &>$OGLOGSESSION
+
+# Si COPYCACHE = 1 copiamos la imagen a la cache
+if [ $COPYCACHE -eq 1 ]; then
+        # Si BORRACACHE=1 Borramos imagen de cache
+        [ $BORRACACHE -eq 1 ] && CACHEFILE=$(ogGetPath "CACHE" "$3$DIFFEXT") && rm -rf $CACHEFILE
+        updateCache "REPO" /"$3.diff" UNICAST  &>>$OGLOGSESSION
+
+fi
+
 

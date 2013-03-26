@@ -36,4 +36,37 @@
  	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh	
 	ogCrearImagenBasica "$@"
 	kill $COPROC_PID
+        exit
+
+# Versión 2
+# Para probar la versión 2 comentar las cuatro líneas anteriores
+
+# Trasferencias comprimidas
+#export ogcompress="true"
+
+flag=$5
+echo "flah:$flag">/tmp/log
+DELIMG=${flag:0:1}
+COPYCACHE=${flag:1:1}
+DELCACHE=${flag:2:1}
+NODELETEFILE=${flag:3:1} # No borra archivos no esta contemplado en crear imagen.
+
+IMGEXT=".img"
+
+[ "$4" == "0.0.0.0" ] && DEST="CACHE" || DEST="REPO"
+
+# Si DELIMG = 1 borramos imagen del destino.
+if [ $DELIMG -eq 1 ]; then
+        IMGFILE=$(ogGetPath "$DEST" "$3$IMGEXT") && rm -rf $IMGFILE
+fi
+
+# Creamos la imagen
+createBaseImage "$1" "$2" "$DEST" "$3"
+
+# Si COPYCACHE = 1 copiamos la imagen a la cache
+if [ $COPYCACHE -eq 1 ]; then
+        # Si BORRACACHE=1 Borramos imagen de cache
+        [ $BORRACACHE -eq 1 ] && CACHEFILE=$(ogGetPath "CACHE" "$3$IMGEXT") && rm -rf $CACHEFILE
+        updateCache "REPO" /"$3.img" UNICAST
+fi
 
