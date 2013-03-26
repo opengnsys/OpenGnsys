@@ -209,8 +209,6 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
 
 
-	if($sws)
-
 	if($sws & $msk_imagen)
 		$cmd->texto.="	ordenadores_particiones.idimagen, ";	
 
@@ -270,8 +268,9 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 		$rs->Siguiente();
 	}
 	if ($cc == 0) {
-                echo '<tr><th>'.$TbMsg[43].'</th><tr>';  // Cliente sin configuración.
-        }
+    echo '<tr><th>'.$TbMsg[43].'</th><tr>';  // Cliente sin configuración.
+		echo pintaParticiones($cmd,"","",0,$ambito,$idambito);
+  }
 	echo "</table>";
 	$rs->Cerrar();
 }
