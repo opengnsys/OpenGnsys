@@ -40,6 +40,11 @@ REPOAUXNAME=ogAdmRepoAux
 REPOAUXDAEMON=$BASEDIR/sbin/$REPOAUXNAME
 REPOAUXPORT=$(awk -F= '/PUERTO/ {print $2+1}' $SERVERCFG 2>/dev/null)
 ############## ADV
+############# IRINA # para setBootMode desde el cliente
+SERVERAUXNAME=ogAdmServerAux
+SERVERAUXDAEMON=$BASEDIR/sbin/$SERVERAUXNAME
+SERVERAUXPORT=2011  
+############# IRINA
 
 #
 # Servidor de tareas programadas
@@ -139,6 +144,10 @@ arranca_demonios() {
      $ACTIONMSG "Iniciando demonio: $SERVERNAME"
      $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS $ENDOPTS
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+     # Para SetBootmode desde el cliente
+     $ACTIONMSG "Iniciando demonio: $SERVERAUXNAME"                    #
+     faucet $SERVERAUXPORT --daemon --in bash -c "$SERVERAUXDAEMON"    #   NUEVO
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG 
   fi
   if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]; then
      sleep 5 # Damos tiempo a que ogAdmServer este funcionando
