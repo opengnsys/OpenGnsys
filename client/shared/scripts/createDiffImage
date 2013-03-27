@@ -7,8 +7,8 @@
 #@param 1 disco 
 #@param 2 particion 
 #@param 3 REPO|CACHE
-#@param 4 imagen
-#@param 5 sufijo (opcional)
+#@param 4 imagen_completa
+#@param 5 imagen_diferencial
 #@return  
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
 #@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
@@ -23,178 +23,146 @@
 #@author  
 #@date   2012-12-04
 #*/ ##
-trap "ogUnlockImage "CACHE" "/$4.$IMGEXT"; ogUnlock $1 $2; umount $DIRMOUNT; exit 1" 1 2 3 6 9 14 15
+trap "ogUnlockImage $3 \"/$4.$IMGEXT\"; ogUnlockImage $3 \"/$5.$DIFFEXT\"; ogUnlock $1 $2; ogUnmountImage $3 \"$5\" $DIFFEXT; ogUnmountImage $3 \"$4\" $IMGEXT ; exit 1" 1 2 3 6 9 14 15
 
-declare -A DIFFDIR 
-declare -A DIFFFILE
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] &&  source /opt/opengnsys/etc/engine.cfg
+# opciones de rsync
+CREATESPEED=${CREATESPEED:-"100000*4"}
 
 TIME1=$SECONDS
 
-#Carga el configurador del engine desde el fichero engine.cfg
-[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 PROG="$(basename $0)"
-if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen [sufijo]"
+if [ $# -lt 5 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE base_image diff_image"
     exit $?
 fi
 
 # Valores por defecto en etc/engine.cfg
 IMGEXT="img"
 DIFFEXT="diff"
-[ -z $5 ] || SUF=".$5"
 
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
-# Necesitamos hacer la imagen en la cache -> siempre comprobamos que exista
-! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
+# Comprobamos si la imagen diferencial o la particion estan bloqueada:
+ogIsImageLocked "$3" "$5.$DIFFEXT" && exit $(ogRaiseError $OG_ERR_LOCKED "$3 $5.$DIFFEXT"; echo $?)
+ogIsLocked "$1" "$2" && exit $(ogRaiseError $OG_ERR_LOCKED  "$1 $2"; echo $?)
+
+# Comprobar si la imagen completa existe.
+IMGFILE=$(ogGetPath "$3" "$4.$IMGEXT") || exit $(ogRaiseError $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"; echo $?)
+
+# Comprobar que es sincronizable
+#echo "      Comprobamos que la imagen es sincronizable" 
+file $IMGFILE | grep " BTRFS Filesystem" >/dev/null 
+[ $? == 0 ] ||  exit  $(ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?) 
+# Comprobar que no está bloqueada
+ogIsImageLocked "$3" "$4.$IMGEXT" && exit $(ogRaiseError $OG_ERR_LOCKED "$3 $4.$IMGEXT"; echo $?)
+
+echo " " > $OGLOGCOMMAND
+# Si el repositorio es CACHE comprobamos que exista
+if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
+        ! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
+fi
 
 echo " " > $OGLOGCOMMAND
 
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || exit $(ogRaiseError $OG_ERR_PARTITION "$1 $2"; echo $?)
 
-# Comprobar si la imagen completa existe.
-IMGFILE=$(ogGetPath "$3" "$4.$IMGEXT") || exit $(ogRaiseError $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"; echo $?)
+# Comprobamos que la partición se puede montar.
+ORIG=$(ogMount $1 $2) ||  exit $(ogRaiseError $OG_ERR_PARTITION "$1 $2"; echo $?) 
 
-echo " " > $OGLOGCOMMAND
+#Comprobamos acceso de escritura.
+DIRTEMP=$(date +%Y%m%d-%H%M%S)
+ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3"; echo $?) && ogDeleteTree $3 /$4$DIRTEMP 
+DIFFDIR="$(ogGetParentPath "$3" "/$5")"
+DIFFFILE="$DIFFDIR/$5.$DIFFEXT"
 
-[ "$3" == "REPO" ] && REPOS="REPO CACHE" || REPOS="CACHE"
-for DEST in $REPOS; do
-   #Comprobamos acceso de escritura.
-   DIRTEMP=$(date +%Y%m%d-%H%M%S)
-   ogMakeDir $DEST /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$DEST"; echo $?) && ogDeleteTree $DEST /$4$DIRTEMP 
-
-   DIFFDIR[$DEST]=$(ogGetParentPath "$DEST" "/$4")
-   # Si no existe, crear subdirectorio de la imagen.
-   if [ $? != 0 ]; then
-       echo "[5] $MSG_HELP_ogMakeDir \"$DEST $(dirname "$4")." | tee -a $OGLOGSESSION $OGLOGFILE
-       ogMakeDir "$DEST" $(dirname "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$DEST /$4"; echo $?)
-       DIFFDIR[$DEST]=$(ogGetParentPath "$DEST" "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
-   fi
-
-   DIFFFILE[$DEST]=${DIFFDIR[$DEST]}/$(basename "/$4")$SUF.$DIFFEXT
-   # Renombrar el fichero de imagen si ya existe.
-   if [ -f "${DIFFFILE[$DEST]}" ]; then
-	echo "[10] $MSG_SCRIPTS_FILE_RENAME \"${DIFFFILE[$DEST]}\" ->  \"${DIFFFILE[$DEST]}.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
-	mv "${DIFFFILE[$DEST]}" "${DIFFFILE[$DEST]}.ant"
-        mv "${DIFFFILE[$DEST]}.torrent" "${DIFFFILE[$DEST]}.torrent.ant" 2>/dev/null
-   fi
-done
-
-#Comprobar espacio que requerira la imagen para ser almacenada
-##################
-### TODO: Se podria estimar restandole el tamaño de la completa
-################
-#echo " " > $OGLOGCOMMAND
-#if ogMount $1 $2 &>/dev/null
-#then
-#	SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
-#	#Aplicar factor de compresion
-#	FACTORGZIP=55/100
-#	FACTORLZOP=65/100
-#	let SIZEREQUIRED=$SIZEDATA*$FACTORLZOP
-#	#Comprobar espacio libre en el contenedor.
-#	#[ "$3" == "CACHE" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
-#	SIZEFREE=$(ogGetFreeSize `ogFindCache`)
-#	if [ "$3" == "REPO" ]; then
-#	   SIZEFREEREPO=$(df -k | grep $OGIMG | awk '{print $4}')
-#	   [ $SIZEFREEREPO -lt $SIZEFREE ] && SIZEFREE=$SIZEFREEREPO 
-#	fi
-#	
-#else
-# 	ogRaiseError $OG_ERR_PARTITION "$1 $2"
-#    exit $?
-#fi	
-#echo "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
-#[ "$SIZEREQUIRED" -gt "$SIZEFREE" ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
+ogLockImage "$3"  "/$4.$IMGEXT"
+ogLockImage "$3"  "/$5.$DIFFEXT"
+LOOPDEVICE=$(losetup -f)
 
 # Comprobar consistencia del sistema de archivos.
 echo " " > $OGLOGCOMMAND
 SIZEFS=$(ogGetFsSize  $1 $2)
-echo "[20] $MSG_HELP_ogCheckFs  $PART $SIZEFS (KB) " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[20] $MSG_HELP_ogCheckFs  $1 $2 $SIZEFS (KB) " | tee -a $OGLOGSESSION $OGLOGFILE
 ogUnmount $1 $2
-ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
+#### TODO: comprobar que la salida de errores va bien
+ogCheckFs $1 $2 >$OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
 
+TIMEAUX1=$[SECONDS-TIME1]
+echo "      Fin chequeo sistema de ficheros : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Crear la imagen.
 echo " " > $OGLOGCOMMAND
 TIME2=$SECONDS
-echo "[40] Genera imagen diferencial de la particion $3 $4 respecto a la imagen $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[40] Genera imagen diferencial de la particion $1 $2 respecto a la imagen $3 $4" | tee -a $OGLOGSESSION $OGLOGFILE
 # Creamos la lista del contenido y lo situamos en la particion a copiar.
-DIRMOUNT="/tmp/mount$$"
-DIRMOUNTDIFF="/tmp/mountDiff$$"
-IMGINFO="/tmp/ogimg.info"
-IMGACL="/tmp/ogimg.acl"
 FSTYPE=$(ogGetFsType $1 $2)
-mkdir $DIRMOUNT $DIRMOUNTDIFF
+
+IMGDIRAUX=$(ogGetMountDir "$4" $IMGEXT)
 
 # Montamos imagen completa (con la que vamos a comparar)
-echo "      mount -t squashfs -o loop $IMGFILE $DIRMOUNT"
-mount -t squashfs -o loop $IMGFILE $DIRMOUNT 1>/dev/null
+ogMountImage $3 "$4" $IMGEXT
 
-# Comprobar que la imagen se ha montado 
-[ -r "$DIRMOUNT/ogimg.info" ] || exit $(ogRaiseError "Error al montar la imagen $IMGFILE"; echo $?)
-
-# Creamos las diferencias 
-# Guardamos el contenido de las acl (Solo win) Necesario particion desmontada (esta asi)
-[ $FSTYPE == "NTFS" ] && echo "     ntfs-3g.secaudit -b $PART /" |tee -a $OGLOGSESSION $OGLOGFILE &&  ntfs-3g.secaudit -b $PART / > $IMGACL
-
-## Información solo mientras probamos
-TIMEAUX2=$[SECONDS-TIME2]
-echo "      Fin lista de control de acceso: $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-ORIG=$(ogMount $1 $2)
-echo "#SQUASH::$FSTYPE:$SIZEDATA" > $IMGINFO
-echo "      rsync -aHAXvn --delete $ORIG/ $DIRMOUNT a $IMGINFO" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXvn --delete $ORIG/ $DIRMOUNT >> $IMGINFO
-cp $IMGINFO $DIRMOUNTDIFF/ogimg.orig
-sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGINFO
-sed -i  '/^\.\//d' $IMGINFO
-
-
-# creamos directorio temporarl 
-grep -e '\->' -e  '\=>' $IMGINFO > $DIRMOUNTDIFF/ogimg.ln 
-grep -e  ^deleting  $IMGINFO | sed s/^deleting\ //g > $DIRMOUNTDIFF/ogimg.rm 
-grep -v -e '\->' -e  '\=>'  -e ^deleting  $IMGINFO > $DIRMOUNTDIFF/ogimg.info 
-# 
+# Comprobar que la imagen completa se ha montado 
+ogWaitMountImage $3 "$4" $IMGEXT || exit $(ogRaiseError "Error al montar la imagen $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
+echo "[50] Creamos información de las diferencias"
+echo ogCreateInfoImage $1 $2 $3 "$4" "$DIFFEXT"
+ogCreateInfoImage $1 $2 $3 "$4" "$DIFFEXT"
 TIMEAUX3=$[SECONDS-TIME2]
 echo "      Fin listado contenido y lista de control de acceso: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
-# Copiamos las diferencias a la cache.
+#Calculamos el tamaño de la imagen:
+ogMount $1 $2
 ogLock $1 $2
-echo "      rsync -aHq --files-from=$DIRMOUNTDIFF/ogimg.info $ORIG/  $DIRMOUNTDIFF" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHq --files-from=$DIRMOUNTDIFF/ogimg.info  $ORIG/  $DIRMOUNTDIFF &> $OGLOGCOMMAND
+cd $ORIG
 
-echo "      mksquashfs $DIRMOUNTDIFF ${DIFFFILE[CACHE]}" | tee -a $OGLOGSESSION $OGLOGFILE
+SIZEREQUIRED=$(cat /tmp/ogimg.info | tr '\n' '\0'| du -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
+let SIZEREQUIRED=SIZEREQUIRED*115/100
+# El tamaño mínimo del sistema de ficheros btrfs es 250M, ponemos 300
+[ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
+TIMEAUX4=$[SECONDS-TIMEAUX3]
 
-# Nos situamos en la cache y creamos la imagen.
-ogLockImage "CACHE"  "/$4.$IMGEXT"
-mksquashfs $DIRMOUNTDIFF ${DIFFFILE[CACHE]}  &> $OGLOGCOMMAND
-ogUnlockImage "CACHE" "/$4.$IMGEXT"
+# TODO: Comprueba que quepa en el repositorio
+[ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`) && ogMountCache >/dev/null
+[ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
+echo "     $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+[ $SIZEREQUIRED -gt $SIZEFREE ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
+echo "      Fin calculo tamaño imagen $SIZEREQUIRED: $[TIMEAUX4/60]m $[TIMEAUX4%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Creamos o redimensionamos la imagen
+echo "[60] Creamos el archivo de la imagen."  | tee -a $OGLOGSESSION $OGLOGFILE
+ogCreateFileImage $3 "$5" $DIFFEXT $SIZEREQUIRED
+
+# Esperamos que se monte la imagen despues de crarla en el servidor
+ogWaitMountImage "$3" "$5" "$DIFFEXT" $SIZEREQUIRED  ||exit $(ogRaiseError "Error al montar la imagen $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
+
+TIMEAUX6=$[SECONDS-TIMEAUX5]
+echo  -e "      Fin preparacion imagen: $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+echo "[80] Sincronizo los datos de la imagen."
+# Copio los datos a la imagen diferecial :
+ogSyncCreate $1 $2 $3 "$5" $DIFFEXT
+
+ogUnmountImage $3 "$5" $DIFFEXT
+ogUnmountImage $3 "$4" $IMGEXT
+
+TIMEAUX7=$[SECONDS-TIMEAUX6]
+echo "      Fin copia dato a diferencial: $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
+TIMEAUX8=$[SECONDS-TIME2]
+echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX8/60]m $[TIMEAUX8%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+ogUnlockImage "$3" "/$4.$IMGEXT"
+ogUnlockImage "$3" "/$5.$DIFFEXT"
 ogUnlock $1 $2
 
-TIMEAUX4=$[SECONDS-TIMEAUX3]
-echo "      Fin mksquashfs: $[TIMEAUX4/60]m $[TIMEAUX4%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
-# Enviamos la imagen a repo.
-if [ "$3" == "REPO" ]; then
-	rsync ${DIFFFILE["CACHE"]} ${DIFFFILE["REPO"]} &> $OGLOGCOMMAND
-	TIMEAUX5=$[SECONDS-TIMEAUX4]
-	echo "    Fin envio imagen a REPO: $[TIMEAUX5/60]m $[TIMEAUX5%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-fi
-
-# Comprobamos que la imagen esta bien montandola
-umount $DIRMOUNT
-mount -t squashfs -o loop ${IMGFILE["$3"]} $DIRMOUNT 1>/dev/null
-[ $? == 0 ] ||  exit $(ogRaiseError $OG_ERR_IMAGE "$3 $4 $5"; echo $?)
-umount $DIRMOUNT
-rm -rf $DIRMOUNT $DIRMOUNTDIFF
-
-RESUMECREATEIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
-TIMEAUX6=$[SECONDS-TIME2]
-echo "      $RESUMECREATEIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
-echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
+# Comprobamos que la imagen esta bien
+echo file "$DIFFFILE" |grep "BTRFS Filesystem"
+file "$DIFFFILE" |grep "BTRFS Filesystem" >/dev/null
+[ $? == 0 ] ||  exit  $(ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?)
 
 #resumen de la operacion
 IMGSIZE=$(ls -s ${DIFFFILE[CACHE]}| cut -f1 -d" ")
@@ -202,5 +170,4 @@ IMGSIZE=$(ls -s ${DIFFFILE[CACHE]}| cut -f1 -d" ")
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "      FileSystem $PART with $NEWSIZEFS KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS $ogprotocol " | tee -a $OGLOGSESSION $OGLOGFILE
-#echo "      Image-file $4 metada: $IMGOS " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      FileSystem $PART with $NEWSIZEFS KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE

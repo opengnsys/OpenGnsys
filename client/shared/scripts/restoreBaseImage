@@ -22,7 +22,10 @@
 #@author  
 #@date   2012-12-04
 #*/ ##
-trap "ogUnlockImage $1  /$2.$IMGEXT ; ogUnlock $3 $4; umount $DIRMOUNT"  1 2 3 6 9 14 15
+trap "ogUnlock $3 $4; umount $DIRMOUNT; hose $REPOIP 2009 --out sh -c \"echo -ne UMOUNT_IMAGE $2 $IMGEXT\" "  1 2 3 6 9 14 15
+
+# Limpiamos los archivo de log
+echo "" >$OGLOGCOMMAND
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -30,23 +33,36 @@ if [ $# -lt 4 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
     exit $?
 fi
-echo "[1] $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE
 
+IMGEXT="img"
+
+# Comprobamos si la imagen o la particion estan bloqueada:
+ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
+ogIsLocked "$3" "$4" && exit $(ogRaiseError $OG_ERR_LOCKED  "$3 $4"; echo $?)
+
+# Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Procesar parámetros de entrada
-IMGTYPE="img"
-IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")  || exit $(ogRaiseError $OG_ERR_NOTFOUND "$1 $2.$IMGTYPE"; echo $?)
+REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
+
+# Comprobar que es sincronizable (con REPO)
+# TODO: crear mensaje de error
+file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null
+[ $? == 0 ]  ||  exit  $(ogRaiseError  "$1 $2"; echo $?)
 
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-   echo "[10] Realizando un updateCache REPO $2.img $PROTO $6" | tee -a $OGLOGSESSION $OGLOGFILE
-   echo "   updateCache REPO" "/$2.img" "$PROTO" "$6" 
-# PARA LAS PRUEBAS lo comentamos
-#   updateCache REPO "/$2.img" "$PROTO" "$6"     &>> $OGLOGCOMMAND
+   # Las imagenes sincronizables aunque sean iguales no tienen el mismo sum. 
+   # Sincronizamos si existe el fichero y si no usamos updateCache.
+   echo "[10] Realizando un updateCache REPO $2.img $PROTO $6" | tee -a $OGLOGFILE
+   echo "      updateCache REPO" "/$2.img" "$PROTO" "$6"   | tee -a $OGLOGFILE
+   updateCache REPO "/$2.img" "$PROTO" "$6"     &>> $OGLOGCOMMAND
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
-        echo "[49] Fin del updateCache REPO $2.img $5 $6 con error $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE 
+        echo "[49] Fin del updateCache REPO $2.img $5 $6 con error $RETVAL" | tee -a $OGLOGFILE 
         # RC=15 No hay cache 
         # RC=16 no hay espacio sufiente 
         exit $RETVAL 
@@ -58,47 +74,47 @@ TIME2=$SECONDS
 PART=$(ogDiskToDev "$3" "$4") || exit $?
 
 # Restaurar la imagen.
-echo "[40] Restaurar imagen en $PART"
-DEST=$(ogMount "$3" "$4")
-DIRMOUNT="/tmp/mount$$"
-IMGINFO="$DEST/ogimg.info"
-IMGACL="ogimg.acl"
+echo "[40] Restaurar imagen en $PART"  | tee -a $OGLOGFILE
+DEST=$(ogMount "$3" "$4") 
+# Formateamos si es necesario
+if [  $? -ne 0 ] ; then
+	# TODO ogGetImageInfo
+	DIRMOUNT="/tmp/mount$$"
+	mkdir $DIRMOUNT
+	mount -o compress=lzo $REPOFILE $DIRMOUNT
+	FSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)	
+	umount $DIRMOUNT
+	echo "      Es necesario formatear la partición en $FSTYPE" | tee -a $OGLOGFILE
+	ogFormat "$3" "$4" "$FSTYPE"
+	ogMount "$3" "$4"  || exit $?
+fi
+
+ogLock $3 $4
 
 # Montamos la imagen basica.
-ogLock $3 $4
-ogLockImage "$1"  "/$2.$IMGEXT"
+ogMountImage "$1" "$2" "img" 
+#  Comprobar que la imagen completa se ha montado.
+ogWaitMountImage "$1" "$2" "img" 
+# Sincronizamos la partición con la imagen.
+echo  "[60] Sincronizando la partición con la imagen"  |tee -a $OGLOGFILE
+ogSyncRestore "$1" "$2" "img" $3 $4 
 
-mkdir $DIRMOUNT
-echo "   mount -t squashfs -o loop  $IMGFILE $DIRMOUNT"
-mount -t squashfs -o loop  $IMGFILE $DIRMOUNT 1>/dev/null 
-# Comprobamos que la imagen se ha montado -> si no se borra la particion
-[ -r "$DIRMOUNT/ogimg.info" ] || echo "Error al montar la imagen" || exit 2
-
-# Restauramos la imagen
-echo "   rsync -aHAX --delete --quiet $DIRMOUNT/ $DEST"
-rsync -aHAX --delete --quiet $DIRMOUNT/ $DEST |tee -a $OGLOGSESSION $OGLOGFILE
-umount $DIRMOUNT
-ogUnlockImage "$1"  "/$2.$IMGEXT"
 TIMEAUX2=$[SECONDS-TIME2]
-echo "   Fin Restauracion: tiempo parcial : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      Fin Restauracion: tiempo parcial : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGFILE
+
+# Desmontamos imagen basica.
+ogUnmountImage "$1" "$2" "img"
 
 # Restableciendo acl
-
-if [ $(ogGetFsType $3 $4) == "NTFS" ] ; then
-	echo "[70] Restablecioendo lista de control de acceso."
-	cp $DEST/$IMGACL /tmp
-	ogUnmount "$3" "$4"
-	echo "   ntfs-3g.secaudit -se $PART" 
-	ntfs-3g.secaudit -se $PART /tmp/$IMGACL
-	TIMEAUX3=$[SECONDS-TIMEAUX2]
-	echo "   Fin restablecer lista de control de acceso, tiempo parcial  : $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-fi
 ogUnlock $3 $4
+echo "[70] Restableciendo lista de control de acceso." |tee -a $OGLOGFILE
+ogRestoreInfoImage $3 $4  &>>$OGLOGCOMMAND
+
 
 # Llamar al script de post-configuración del sistema operativo.
-echo "[90] Post-configuracion de arranque del sistema."
-configureOs $3 $4
+echo "[90] Post-configuracion de arranque del sistema." |tee -a $OGLOGFILE
+configureOs $3 $4  &>>$OGLOGCOMMAND
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE
 
