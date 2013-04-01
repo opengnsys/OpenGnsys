@@ -2,6 +2,8 @@
 # OpenGnSys 1.0.5
 #use ogAdmBD
 
+# Eliminar procedimiento para evitar errores de ejecución.
+DROP PROCEDURE IF EXISTS addcols;
 # Procedimiento para actualización condicional de tablas.
 delimiter '//'
 CREATE PROCEDURE addcols() BEGIN
@@ -41,10 +43,9 @@ CREATE PROCEDURE addcols() BEGIN
 			WHERE COLUMN_NAME='tipo' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
 	THEN
 		ALTER TABLE imagenes
-			ADD tipo TINYINT NULL,
-			ADD imagenid INT NOT NULL DEFAULT '0',
+			ADD tipo TINYINT NOT NULL DEFAULT 1,
+			ADD imagenid INT NOT NULL DEFAULT 0,
 			ADD ruta VARCHAR(250) NULL;
-		UPDATE imagenes SET tipo=1;
 		UPDATE grupos SET tipo=70 WHERE tipo=50;
 	END IF;
 END//
@@ -53,8 +54,8 @@ delimiter ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
-# Habilita el comando PArticionar y formatear
-UPDATE `ogAdmBD`.`comandos` SET `activo` = '1' WHERE `comandos`.`idcomando` =10;
+# Habilita el comando Particionar y formatear.
+UPDATE comandos SET activo = '1' WHERE idcomando = 10;
 
 # Nuevos comandos.
 INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
