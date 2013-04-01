@@ -296,7 +296,7 @@ echo ejemplos: 1 2 administrador 3451 $equipo
 echo IMPORTANTE: cuando AutoLogonCount llegue a 0, activa el AutoAdminLogon a 0. Pero no borra los valores de DefaultPassword
 return 2
 fi
-echo la pass es $4
+#echo la pass es $4
 export temporal=/tmp/tmpregistry
 cat >> $temporal << EOF
 hive 2
