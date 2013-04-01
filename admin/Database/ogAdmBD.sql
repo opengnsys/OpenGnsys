@@ -761,7 +761,27 @@ CREATE TABLE IF NOT EXISTS `sistemasficheros` (
   `nemonico` varchar(16) DEFAULT NULL,
   `codpar` int(8) NOT NULL,
   PRIMARY KEY (`idsistemafichero`)
+  UNIQUE KEY (`descripcion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `codpar`) VALUES
+ (1, 'EMPTY', 'EMPTY', 0),
+ (2, 'CACHE', 'CACHE', 0),
+ (3, 'BTRFS', 'BTRFS', 0),
+ (4, 'EXT2', 'EXT2', 0),
+ (5, 'EXT3', 'EXT3', 0),
+ (6, 'EXT4', 'EXT4', 0),
+ (7, 'FAT12', 'FAT12', 0),
+ (8, 'FAT16', 'FAT16', 0),
+ (9, 'FAT32', 'FAT32', 0),
+ (10, 'HFS', 'HFS', 0),
+ (11, 'HFSPLUS', 'HFSPLUS', 0),
+ (12, 'JFS', 'JFS', 0),
+ (13, 'NTFS', 'NTFS', 0),
+ (14, 'REISERFS', 'REISERFS', 0),
+ (15, 'REISER4', 'REISER4', 0),
+ (16, 'UFS', 'UFS', 0),
+ (17, 'XFS', 'XFS', 0);
+
 
 -- --------------------------------------------------------
 

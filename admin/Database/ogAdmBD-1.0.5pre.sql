@@ -48,14 +48,18 @@ CREATE PROCEDURE addcols() BEGIN
 			ADD ruta VARCHAR(250) NULL;
 		UPDATE grupos SET tipo=70 WHERE tipo=50;
 	END IF;
+	# Comando Particionar y formatear.
+	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
+			WHERE INDEX_NAME='descripcion' AND TABLE_NAME='sistemasficheros' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE sistemasficheros
+			ADD UNIQUE INDEX descripcion (descripcion);
+	END IF;
 END//
 # Ejecutar actualización condicional.
 delimiter ';'
 CALL addcols();
 DROP PROCEDURE addcols;
-
-# Habilita el comando Particionar y formatear.
-UPDATE comandos SET activo = '1' WHERE idcomando = 10;
 
 # Nuevos comandos.
 INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
@@ -112,4 +116,28 @@ ALTER TABLE ordenadores
 	MODIFY arranque VARCHAR(30) NOT NULL DEFAULT '00unknown';
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
 UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
+
+
+# Habilitar el comando Particionar y formatear.
+UPDATE comandos SET activo = '1' WHERE idcomando = 10;
+INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
+	('EMPTY', 'EMPTY'),
+	('CACHE', 'CACHE'),
+	('BTRFS', 'BTRFS'),
+	('EXT2', 'EXT2'),
+	('EXT3', 'EXT3'),
+	('EXT4', 'EXT4'),
+	('FAT12', 'FAT12'),
+	('FAT16', 'FAT16'),
+	('FAT32', 'FAT32'),
+	('HFS', 'HFS'),
+	('HFSPLUS', 'HFSPLUS'),
+	('JFS', 'JFS'),
+	('NTFS', 'NTFS'),
+	('REISERFS', 'REISERFS'),
+	('REISER4', 'REISER4'),
+	('UFS', 'UFS'),
+	('XFS', 'XFS')
+	ON DUPLICATE KEY UPDATE
+		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
 
