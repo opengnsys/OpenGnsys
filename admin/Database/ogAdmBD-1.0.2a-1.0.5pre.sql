@@ -79,3 +79,28 @@ ALTER TABLE ordenadores
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
 UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
 
+# Habilita el comando Particionar y formatear.
+UPDATE comandos SET activo = '1' WHERE idcomando = 10;
+ALTER TABLE sistemasficheros
+	ADD UNIQUE INDEX descripcion (descripcion)
+INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
+	('EMPTY', 'EMPTY'),
+	('CACHE', 'CACHE'),
+	('BTRFS', 'BTRFS'),
+	('EXT2', 'EXT2'),
+	('EXT3', 'EXT3'),
+	('EXT4', 'EXT4'),
+	('FAT12', 'FAT12'),
+	('FAT16', 'FAT16'),
+	('FAT32', 'FAT32'),
+	('HFS', 'HFS'),
+	('HFSPLUS', 'HFSPLUS'),
+	('JFS', 'JFS'),
+	('NTFS', 'NTFS'),
+	('REISERFS', 'REISERFS'),
+	('REISER4', 'REISER4'),
+	('UFS', 'UFS'),
+	('XFS', 'XFS')
+	ON DUPLICATE KEY UPDATE
+		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+
