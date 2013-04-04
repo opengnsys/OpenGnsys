@@ -31,12 +31,14 @@ $idrepositorio=0;
 $idmenu=0;
 $idprocedimiento=0;
 $idaula=0;
-$cache="";
 $grupoid=0;
 ######################## ADV
 $netiface="";
 $netdriver="";
-########################### ADV
+######################## UHU
+$validacion=0;
+$paginalogin="";
+$paginavalidacion="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros 
 if (isset($_GET["idordenador"])) $idordenador=$_GET["idordenador"]; 
@@ -61,13 +63,13 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_ordenadores.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadores_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadores_'.$idioma.'.js"></SCRIPT>'?>
 	<script language=javascript> 
 function abrir_ventana(URL){ 
    window.open('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640') 
 } 
 </script>
-	
+
 </HEAD>
 <BODY>
 <FORM  name="fdatos" action="../gestores/gestor_ordenadores.php" method="post" enctype="multipart/form-data"> 
@@ -80,7 +82,7 @@ function abrir_ventana(URL){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>* +</sup>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$nombreordenador.'</td>';
 				else
@@ -91,35 +93,35 @@ function abrir_ventana(URL){
 				$fotomenu=$fotoordenador;
 				$dirfotos="../images/fotos";
 			?>
-<td colspan="2" valign="top" align="left" rowspan="3">
-<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
-<br />(150X110)-(jpg - gif - png) ---- <?php echo $TbMsg[5091]?>
-<br />
-<input name="archivo" type="file" id="archivo" size="16" />
-</td>
+			<td colspan="2" valign="top" align="left" rowspan="3">
+			<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
+			<?php	if ($opcion!=$op_eliminacion) {
+				echo '<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'><br />';
+				echo '<input name="archivo" type="file" id="archivo" size="16" />';
+				}
+			?>
+			</td>
 		</tr>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
+		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[6]?> <sup>*</sup>&nbsp;</th>
-			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD>'.$ip.'</TD>';
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td>'.$ip.'</td>';
 				else
-					echo '<TD><INPUT class="formulariodatos" name=ip  type=text value="'.$ip.'"></TD>';
+					echo '<td><input class="formulariodatos" name=ip  type=text value="'.$ip.'"></td>';
 			?>
-		</TR>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
+		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[7]?> <sup>*</sup>&nbsp;</th>
-			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD>'.$mac.'</TD>';
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td>'.$mac.'</td>';
 				else	
-					echo '<TD><INPUT class="formulariodatos" name=mac  type=text value="'. $mac.'"></TD>';
+					echo '<td><input class="formulariodatos" name=mac  type=text value="'. $mac.'"></td>';
 			?>
-		</TR>	
+		</tr>	
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-				<TR>
+		<TR>
 			<th align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</th>
 			<?
 				if ($opcion==$op_eliminacion)
@@ -192,79 +194,79 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'procedimientos',$idprocedimiento,'idprocedimiento','descripcion',250).'</TD>';
 			?>
 		</TR>		
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</th>
-			<?
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.$cache.'</TD>';
-				else	
-					echo '<TD colspan=3><INPUT style="width=250" class="formulariodatos" name="cache" type="text" readonly value="'. $cache.'"></TD>';
-			?>
-		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!-----ADV -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
 			<th align=center&nbsp;>&nbsp;<?echo $TbMsg[13]?>&nbsp;</th>
-			<?
-				echo '<td colspan="3">';
-				$iface="eth0=eth0".chr(13);
-				$iface.="eth1=eth1".chr(13);
-				$iface.="eth2=eth2";
-				echo HTMLCTESELECT($iface,"netiface","estilodesple","",$netiface,100).'</td>';
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.$netiface.'</td>';
+				} else {
+					echo '<td colspan="3">';
+					$iface="eth0=eth0".chr(13);
+					$iface.="eth1=eth1".chr(13);
+					$iface.="eth2=eth2";
+					echo HTMLCTESELECT($iface,"netiface","estilodesple","",$netiface,100).'</td>';
+				}
 			?>
 		</tr>				
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		
 		<tr>
 			<th align="center">&nbsp;<?echo $TbMsg[14]?>&nbsp;</th>
-			<?
-				echo '<td colspan="3">';
-				$driver="generic=generic";
-				echo HTMLCTESELECT($driver,"netdriver","estilodesple","",$netdriver,100).'</td>';
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.$netdriver.'</td>';
+				} else {
+					echo '<td colspan="3">';
+					$driver="generic=generic";
+					echo HTMLCTESELECT($driver,"netdriver","estilodesple","",$netdriver,100).'</td>';
+				}
 			?>
 		</tr>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------UHU comprobar si se requiere validacion ------------------------------------------------------------------------------->
 
-                <TR>
-                        <TH align=center&nbsp;><? echo $TbMsg[15]; ?> &nbsp;</TD>
-                        <?
-                                echo '<TD colspan=3>';
-                                $validaciones="1=Si".chr(13);
-                                $validaciones.="0=No";
-                                echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</TD>';
+                <tr>
+                        <th align=center&nbsp;><? echo $TbMsg[15]; ?> &nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.$validacion.'</td>';
+				} else {
+					echo '<TD colspan="3">';
+					$validaciones="1=Si".chr(13);
+					$validaciones.="0=No";
+					echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</TD>';
+				}
                         ?>
-                </TR>
-                 <TR>
-                        <TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
-                        <?
-                                if ($opcion==$op_eliminacion)
-                                        echo '<TD colspan=3>'.$paginalogin.'</TD>';
+                </tr>
+                <tr>
+                        <th align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</th>
+                        <?php	if ($opcion==$op_eliminacion)
+                                        echo '<td colspan="3">'.$paginalogin.'</td>';
                                 else
-                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginalogin  type=text value="'.$paginalogin.'"></TD>';
+                                        echo '<td colspan="3"><input class="formulariodatos" name=paginalogin  type=text value="'.$paginalogin.'" /></td>';
                         ?>
-                </TR>
-                <TR>
-                        <TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TD>
-                        <?
-                                if ($opcion==$op_eliminacion)
-                                        echo '<TD colspan=3>'.$paginavalidacion.'</TD>';
+                </tr>
+                <tr>
+                        <th align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</th>
+                        <?php	if ($opcion==$op_eliminacion)
+                                        echo '<td colspan="3">'.$paginavalidacion.'</td>';
                                 else
-                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginavalidacion  type=text value="'.$paginavalidacion.'"></TD>';
+                                        echo '<td colspan="3"><input class="formulariodatos" name=paginavalidacion  type=text value="'.$paginavalidacion.'" /></td>';
                         ?>
-                </TR>
+                </tr>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<?php	if ($opcion!=$op_eliminacion) { ?>
 		<tr>
 			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
 		</tr>
-
+		<tr>
+			<th colspan="4" align="center">&nbsp;<sup>+</sup> <?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th>
+		</tr>
+<?php	} ?>
 	</table>
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
@@ -299,7 +301,6 @@ function TomaPropiedades($cmd,$id){
 	global $idrepositorio;
 	global $idmenu;
 	global $idprocedimiento;
-	global $cache;
 	global $netiface;
 	global $netdriver;
 ########################### UHU
@@ -321,7 +322,6 @@ function TomaPropiedades($cmd,$id){
 		$idrepositorio=$rs->campos["idrepositorio"];
 		$idmenu=$rs->campos["idmenu"];
 		$idprocedimiento=$rs->campos["idproautoexec"];
-		$cache=$rs->campos["cache"];
 		$netiface=$rs->campos["netiface"];
 		$fotoordenador=$rs->campos["fotoord"];	//Creado para foto
 		$netdriver=$rs->campos["netdriver"];
