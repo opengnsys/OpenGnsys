@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -58,8 +58,9 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<tr> 
 	    <th>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</th>
-			<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
+		<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
 	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th></tr>
+	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th></tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 </table>
  </FORM>
@@ -70,7 +71,7 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="javascript:document.fdatos.submit();"></TD>
 	</TR>
 </TABLE>
-<?
+<?php
 //________________________________________________________________________________________________________
 // Mensaje con el resultado del proceso
 echo '<SCRIPT LANGUAGE="javascript">';
@@ -83,7 +84,7 @@ echo '</SCRIPT>';
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function procesaLineas($cmd,$idaula,$buffer)
 {
