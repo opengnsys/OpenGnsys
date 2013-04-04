@@ -97,3 +97,7 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
 
+# Añadir proxy para aulas.
+ALTER TABLE aulas
+       ADD proxy VARCHAR(30) AFTER dns;
+

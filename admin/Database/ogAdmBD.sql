@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `router` varchar( 30 ),
   `netmask` varchar( 30 ),
   `dns` varchar (30),
+  `proxy` varchar (30),
   `modp2p` enum('seeder','peer','leecher') DEFAULT 'peer',
   `timep2p` int(11) NOT NULL DEFAULT '60',
   `validacion` tinyint(1) DEFAULT '0',

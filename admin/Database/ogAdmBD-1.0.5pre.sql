@@ -55,6 +55,13 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE sistemasficheros
 			ADD UNIQUE INDEX descripcion (descripcion);
 	END IF;
+	# Añadir proxy para aulas.
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='proxy' AND TABLE_NAME='aulas' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE aulas
+			ADD proxy VARCHAR(30) AFTER dns;
+	END IF;
 END//
 # Ejecutar actualización condicional.
 delimiter ';'
