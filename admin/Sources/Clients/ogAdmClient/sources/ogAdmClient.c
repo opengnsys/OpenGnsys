@@ -1690,7 +1690,7 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 	muestraMensaje(4,NULL);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
-	sprintf(parametros,"%s %s %s'",nfn,dsk,cfg);
+	sprintf(parametros,"%s %s %s",nfn,dsk,cfg);
 
 	herror=interfaceAdmin(interface,parametros,NULL);
 	if(herror){
