@@ -52,7 +52,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
                 IMGSIZE=$(ls -lk $IMGFILE | awk '{print $5}')
                 if [ $IMGSIZE -lt $SIZEREQUIRED ];then
-                   echo "      Redimensionamos la imagen al tamaño necesario" | tee -a $OGLOGSESSION $OGLOGFILE
+                   echo "      $MSG_SYNC_RESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
                    echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" | tee -a $OGLOGSESSION $OGLOGFILE
                    truncate --size=">$SIZEREQUIRED"k $IMGFILE &> $OGLOGCOMMAND
                    echo "      mount -o compress=lzo $IMGFILE $DIRMOUNT"
@@ -79,15 +79,51 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        echo "      hose $REPOIP 2009 --out sh -c \"echo -ne CREATE_IMAGE $2 $3 $SIZEREQUIRED \""
+        echo "      hose $REPOIP 2009 --out sh -c \"echo -ne CREATE_IMAGE $2 $3 $SIZEREQUIRED \"" | tee -a $OGLOGSESSION $OGLOGFILE
         hose $REPOIP 2009 --out sh -c "echo -ne CREATE_IMAGE \"$2\" $3 $SIZEREQUIRED"
 fi
 
 }
 
+#/**
+# ogSetSizeInfo [REPO|CACHE] nombre_imagen extension tamaño 
+#@brief Configuramos la informacion del tamaño de los datos, para diferenciales
+#@param 1 Repositorio  [ REPO | CACHE ] (opcional en las completas)
+#@param 2 Nombre Imagen Basica (opcional en las completas)
+#@param 3 Extensión [ img | diff ]
+#@param 4 Tamaño de los datos.
+function ogSetSizeInfo () {
+local DIRMOUNT UMOUNT
+
+if [ "$*" == "help" ]; then
+	ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name  extension size_data  " \
+       	       "base image -> $FUNCNAME REPO Ubuntu12 img 34000000" \
+     	       "diff image -> $FUNCNAME CACHE Windows7 diff 500000"
+    	return
+fi
+
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  [ REPO|CACHE ] image_name  extension size_data "
+    return $?
+fi
+
+DIRMOUNT=$(ogGetMountDir  "$2" $3)
+[ "$1" == "CACHE" -o "$1" == "cache" ] && DIRMOUNT="/tmp/$DIRMOUNT" || DIRMOUNT="$OGIMG/$DIRMOUNT"
+
+# Si no esta montada la imagen se monta.
+[ -r $DIRMOUNT/ogimg.info ] && UMOUNT=false || ogMountImage $1 "$2" $3 
+# se configura el tamaño
+echo sed -i s/SIZEDATA/"$4"/g $DIRMOUNT/ogimg.info
+sed -i s/SIZEDATA/"$4"/g $DIRMOUNT/ogimg.info
+# se desmonta, si no estaba montada.
+[ "$UMOUNT" == false ] || ogUnmountImage $1 "$2" $3
+
+
+}
+
 function ogCreateInfoImage () {
 #/**
-#  ogCreateInfoImg
+#  ogCreateInfoImage
 #@brief   Crear listados con la informacion de la imagen, los situa en /tmp.
 #@param 1 num_disk
 #@param 2 num_part
@@ -113,7 +149,8 @@ fi
 if [ $3 == "img" ]; then
    IMGEXT="img"
 else
-   ogCheckStringInGroup $5 "img diff" || ogRaiseError  $OG_ERR_FORMAT "Las extensiones de la imagenes deben ser img o diff"
+   # Comprobamos que las extension sea valida
+   ogCheckStringInGroup $5 "img diff" || ogRaiseError  $OG_ERR_FORMAT $MSG_SYNC_EXTENSION
    IMGEXT=$5
    if [ "$IMGEXT" == "diff" ]; then
 	# Imagen completa con la que comparo la particion.
@@ -147,9 +184,13 @@ IMGACL="/tmp/ogimg.acl"
 rm /tmp/ogimg.* 2>/dev/null
 rm $ORIG/ogimg.* 2>/dev/null
 
-echo "      Creamos la lista del contenido."  | tee -a $OGLOGSESSION $OGLOGFILE
+# Creamos la informacion del contenido de la imagen
+#echo "      $MSG_SYNC_CREATEINFO."  | tee -a $OGLOGSESSION $OGLOGFILE
 
-echo "#BRTFS:LZO:$FSTYPE:SIZEDATA" > $IMGINFO
+# En las diferenciales no sabemos el tamaño -> ponemos una constante.
+SIZEDATA=${SIZEDATA:-"SIZEDATA"}
+
+echo "#BRTFS:LZO:$FSTYPE:$SIZEDATA" > $IMGINFO
 if [ "$IMGEXT" == "img" ]; then
 	# Imagen Basica
 	echo "      rsync -aHAXvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -211,13 +252,6 @@ PART=$(ogDiskToDev "$1" "$2" 2>/dev/null)
 
 # Informacion del contenido.
 IMGACL="ogimg.acl"
-
-
-#if [ -r $DEST/ogimg.rm ]; then
-#	cd $DEST
-#	# TODO comprobar que cuando hay archivos para borrar va bien
-#	cat $DEST/ogimg.rm 2>/dev/null | xargs rm -rf
-#fi
 
 if [ -r $DEST/ogimg.ln ]; then
 	while read dest enlace orig 
@@ -285,7 +319,7 @@ else
 	USERRSYNC="opengnsys"
         DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
 fi
-echo "      Sincronizamos los datos de la partición a la imagen"  | tee -a $OGLOGSESSION $OGLOGFILE
+# Sincronizamos los datos de la partición a la imagen
 echo "      rsync -aHAX$OPTRSYNC --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
 rsync -aHAXq$OPTRSYNC --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC"
 echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -321,7 +355,6 @@ fi
 
 
 DIRMOUNT=$(ogGetMountDir "$2" "$3")
-#DESTRSYNC=$(ogMount $4 $5)
 DESTRSYNC=$(ogGetMountPoint $4 $5)
 
 # Borramos ficheros de informacion de restauraciones antiguas
@@ -341,7 +374,9 @@ fi
 # Opciones rsync en cache y repo
 [ "$3" == "img" ] && [ "$ogrsyncdel" != "false" ] && OPTRSYNC="$OPTRSYNC --delete"
 
-echo "      Nos traemos listado ficheros y bajamos la imagen." |tee -a  $OGLOGFILE
+# Nos traemos listado ficheros y bajamos la imagen
+
+echo "      $MSG_SYNC_RESTORE" |tee -a  $OGLOGSESSION   $OGLOGFILE 
 
 # Si la imagen es diferencial nos traemos los archivos de informacion de la imagen.
 if [ "$3" == "diff" ]; then
@@ -355,13 +390,12 @@ if [ "$3" == "diff" ]; then
         sed -i   '/^\#/d' $DESTRSYNC/$IMGINFO
 
 	cd $DESTRSYNC
-	# TODO comprobar que cuando hay archivos para borrar va bien
-	echo "      Borramos archivos sobrantes"  |tee -a  $OGLOGFILE
+	# Diferencial: Borramos archivos sobrantes.
+	echo "      $MSG_SYNC_DELETE"  |tee -a  $OGLOGFILE
 	cat $DESTRSYNC/ogimg.rm 2>/dev/null | xargs rm -rf
 
 fi
 
-echo "      Sincronizamos los datos de la partición a la imagen"  | tee -a $OGLOGSESSION $OGLOGFILE
 echo "      rsync -aHAX$OPTRSYNC  $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
 rsync -aHAXq$OPTRSYNC  $FILESFROM  "$ORIG/" "$DESTRSYNC"
 
@@ -375,6 +409,7 @@ function ogMountImage () {
 #@param 1 Repositorio  [ REPO | CACHE ]
 #@param 2 Nombre Imagen
 #@param 3 Extensión [ img |diff ]
+#@return punto de montaje
 #*/
 local IMGEXT IMGFILE DIRMOUNT
 
@@ -393,17 +428,18 @@ fi
 
 [ "$3" == "" ] && IMGEXT="img" || IMGEXT="$3"
 
+DIRMOUNT=$(ogGetMountDir "$2" $IMGEXT)
+
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	IMGFILE=$(ogGetPath "$1" /"$2.$IMGEXT")
-	DIRMOUNT=/tmp/$(ogGetMountDir "$2" $IMGEXT)
-	mkdir -p "$DIRMOUNT"
-        echo "      mount -o compress=lzo  \"$IMGFILE\" \"$DIRMOUNT\"" | tee -a  $OGLOGFILE
-        mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT" 1>/dev/null
+	mkdir -p "/tmp/$DIRMOUNT"
+        mount -o compress=lzo  "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
+        echo "/tmp/$DIRMOUNT"
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-	echo "      hose $REPOIP 2009 --out sh -c echo -ne MOUNT_IMAGE $2 $IMGEXT" |tee -a  $OGLOGFILE
         hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" $IMGEXT"
+	echo "$OGIMG/$DIRMOUNT"
 
 fi
 
@@ -511,19 +547,19 @@ else
 	DIRMOUNT="$OGIMG/$(ogGetMountDir "$2" $3)"
 fi
 
-echo -n -e "      Esperamos que se monte la imagen en $DIRMOUNT\n      #"
+echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"
 
 # time-out segun el tamaño de la imagen. por defecto: 100000k -> 3s
 let TIMEOUT=$SIZE/$CREATESPEED
 [ $TIMEOUT -lt 60 ] && TIMEOUT=60
 until [ -f "$DIRMOUNT/ogimg.info" ] ; do
         TIMEAUX=$[SECONDS-TIME]
-        #[  "$TIMEAUX" -gt "$TIMEOUT" ] && return $(ogRaiseError "Error al montar la imagen $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
+        #[  "$TIMEAUX" -gt "$TIMEOUT" ] && return $(ogRaiseError "$MSG_ERR_DONTMOUNT_IMAGE $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
 	# TODO definir el error
         [  "$TIMEAUX" -gt "$TIMEOUT" ] &&  return 2
         echo -n "#"
         sleep 5
 done
-echo -e "\n"
+echo  ""
 
 }

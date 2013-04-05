@@ -32,7 +32,6 @@ CREATESPEED=${CREATESPEED:-"100000*4"}
 
 TIME1=$SECONDS
 
-
 PROG="$(basename $0)"
 if [ $# -lt 5 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE base_image diff_image"
@@ -53,7 +52,6 @@ ogIsLocked "$1" "$2" && exit $(ogRaiseError $OG_ERR_LOCKED  "$1 $2"; echo $?)
 IMGFILE=$(ogGetPath "$3" "$4.$IMGEXT") || exit $(ogRaiseError $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"; echo $?)
 
 # Comprobar que es sincronizable
-#echo "      Comprobamos que la imagen es sincronizable" 
 file $IMGFILE | grep " BTRFS Filesystem" >/dev/null 
 [ $? == 0 ] ||  exit  $(ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?) 
 # Comprobar que no está bloqueada
@@ -92,34 +90,37 @@ ogUnmount $1 $2
 ogCheckFs $1 $2 >$OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
 
 TIMEAUX1=$[SECONDS-TIME1]
-echo "      Fin chequeo sistema de ficheros : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Crear la imagen.
 echo " " > $OGLOGCOMMAND
 TIME2=$SECONDS
-echo "[40] Genera imagen diferencial de la particion $1 $2 respecto a la imagen $3 $4" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[40] $MSG_HELP_restoreDiffImage: $1 $2 $3 $4" | tee -a $OGLOGSESSION $OGLOGFILE
 # Creamos la lista del contenido y lo situamos en la particion a copiar.
 FSTYPE=$(ogGetFsType $1 $2)
 
 IMGDIRAUX=$(ogGetMountDir "$4" $IMGEXT)
 
 # Montamos imagen completa (con la que vamos a comparar)
-ogMountImage $3 "$4" $IMGEXT
+ogMountImage $3 "$4" $IMGEXT >/dev/null
 
 # Comprobar que la imagen completa se ha montado 
-ogWaitMountImage $3 "$4" $IMGEXT || exit $(ogRaiseError "Error al montar la imagen $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
-echo "[50] Creamos información de las diferencias"
-echo ogCreateInfoImage $1 $2 $3 "$4" "$DIFFEXT"
+#ogWaitMountImage $3 "$4" $IMGEXT || exit $(ogRaiseError "$MSG_ERR_DONTMOUNT_IMAGE $3 $4 $IMGEXT: time_out $TIMEAUX seg."; echo $?)
+ogWaitMountImage $3 "$4" $IMGEXT || exit $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out $TIMEAUX seg."; echo $?)
+
+# Creamos la informacion de la imagen.
+echo "[50] $MSG_HELP_ogCreateInfoImage " | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateInfoImage $1 $2 $3 "$4" "$DIFFEXT"
 TIMEAUX3=$[SECONDS-TIME2]
-echo "      Fin listado contenido y lista de control de acceso: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 #Calculamos el tamaño de la imagen:
-ogMount $1 $2
+ogMount $1 $2 >/dev/null
 ogLock $1 $2
-cd $ORIG
 
-SIZEREQUIRED=$(cat /tmp/ogimg.info | tr '\n' '\0'| du -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
-let SIZEREQUIRED=SIZEREQUIRED*115/100
+echo -n "     $MSG_SCRIPTS_CREATE_SIZE" | tee -a $OGLOGSESSION $OGLOGFILE
+cd $ORIG
+SIZEDATA=$(cat /tmp/ogimg.info | tr '\n' '\0'| du -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
+let SIZEREQUIRED=SIZEDATA*115/100
 # El tamaño mínimo del sistema de ficheros btrfs es 250M, ponemos 300
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
 TIMEAUX4=$[SECONDS-TIMEAUX3]
@@ -127,29 +128,34 @@ TIMEAUX4=$[SECONDS-TIMEAUX3]
 # TODO: Comprueba que quepa en el repositorio
 [ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`) && ogMountCache >/dev/null
 [ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
-echo "     $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+echo  " $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+
 [ $SIZEREQUIRED -gt $SIZEFREE ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
-echo "      Fin calculo tamaño imagen $SIZEREQUIRED: $[TIMEAUX4/60]m $[TIMEAUX4%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL $SIZEREQUIRED: $[TIMEAUX4/60]m $[TIMEAUX4%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Configuro la informacion del tamaño de los datos en /tmp/ogimg.info
+sed -i s/SIZEDATA/"$SIZEDATA"/g /tmp/ogimg.info
 
 # Creamos o redimensionamos la imagen
-echo "[60] Creamos el archivo de la imagen."  | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[60] $MSG_HELP_ogCreateFileImage."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateFileImage $3 "$5" $DIFFEXT $SIZEREQUIRED
 
 # Esperamos que se monte la imagen despues de crarla en el servidor
-ogWaitMountImage "$3" "$5" "$DIFFEXT" $SIZEREQUIRED  ||exit $(ogRaiseError "Error al montar la imagen $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
+ogWaitMountImage "$3" "$5" "$DIFFEXT" $SIZEREQUIRED  ||exit $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $3: time_out $TIMEAUX seg."; echo $?)
 
 TIMEAUX6=$[SECONDS-TIMEAUX5]
-echo  -e "      Fin preparacion imagen: $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo  -e "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
-echo "[80] Sincronizo los datos de la imagen."
+echo  "[80] $MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
 # Copio los datos a la imagen diferecial :
 ogSyncCreate $1 $2 $3 "$5" $DIFFEXT
 
 ogUnmountImage $3 "$5" $DIFFEXT
 ogUnmountImage $3 "$4" $IMGEXT
 
+
 TIMEAUX7=$[SECONDS-TIMEAUX6]
-echo "      Fin copia dato a diferencial: $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 
 TIMEAUX8=$[SECONDS-TIME2]
@@ -160,7 +166,6 @@ ogUnlockImage "$3" "/$5.$DIFFEXT"
 ogUnlock $1 $2
 
 # Comprobamos que la imagen esta bien
-echo file "$DIFFFILE" |grep "BTRFS Filesystem"
 file "$DIFFFILE" |grep "BTRFS Filesystem" >/dev/null
 [ $? == 0 ] ||  exit  $(ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?)
 
@@ -170,4 +175,4 @@ IMGSIZE=$(ls -s ${DIFFFILE[CACHE]}| cut -f1 -d" ")
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "      FileSystem $PART with $NEWSIZEFS KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE

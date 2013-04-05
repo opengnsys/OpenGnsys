@@ -53,56 +53,56 @@ file $REPODIFFFILE | grep " BTRFS Filesystem" >/dev/null
 PROTO=${5:-"UNICAST"}
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-   echo "[10] Realizando la actualizacion de la cache." | tee -a  $OGLOGFILE
+   echo "[10] $MSG_HELP_updateCache." | tee -a  $OGLOGFILE
    echo "     updateCache REPO" "/$2.$DIFFEXT" "$PROTO" "$6"  | tee -a  $OGLOGFILE   
    updateCache REPO "/$2.$DIFFEXT" "$PROTO" "$6"  &>> $OGLOGCOMMAND
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
-        echo "[49] Fin del updateCache REPO $2.$DIFFEXT $5 $6 con error $RETVAL" | tee -a  $OGLOGFILE 
+        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$DIFFEXT $5 $6 con error $RETVAL" | tee -a  $OGLOGFILE 
         # RC=15 No hay cache 
         # RC=16 no hay espacio sufiente 
         exit $RETVAL 
    fi 
 
    TIMEAUX1=$[SECONDS-TIME]
-   echo "     Fin actualizacion cache $1 $2 $3 $4 tiempo parcial : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a  $OGLOGFILE
+   echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGFILE
+
 fi 
 TIME2=$SECONDS
 
 PART=$(ogDiskToDev "$3" "$4" 2>/dev/null )  || exit $(ogRaiseError $OG_ERR_PARTITION "$1 $2"; echo $?)
 
 # Restaurar la imagen.
-echo "[40] Restaurar imagen en $PART"
-
+echo "[40] $MSG_RESTORE $PART"
 
 # Montamos la diferencial
-ogMountImage "$1" "$2" "diff"
+ogMountImage "$1" "$2" "diff" &>/dev/null
 #  Comprobar que la imagen diferencial se ha montado 
-ogWaitMountImage "$1" "$2" "diff"
+ogWaitMountImage "$1" "$2" "diff" || exit $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 diff: time_out $TIMEAUX seg."; echo $?)
 
 ogMount $3 $4 >/dev/null
 ogLock $3 $4
 # Sincronizamos la partición con la imagen.
+echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 diff $3 $4"  |tee -a $OGLOGFILE
 ogSyncRestore "$1" "$2" "diff" $3 $4
 
 # Desmontamos la imagen
 ogUnmountImage "$1" "$2" "diff"
-
 ogUnlock $3 $4
-# creando enlaces y restableciendo ACL (en windows)
-echo "     Diferencial: creando enlaces y borrando"  | tee -a  $OGLOGFILE
-ogRestoreInfoImage  "$3" "$4" &>$OGLOGCOMMAND
 
 TIMEAUX2=$[SECONDS-TIME2]
-echo "     Fin Restauracion $1 $2 $3 $4 tiempo parcial : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a  $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a  $OGLOGFILE
 
+# creando enlaces y restableciendo ACL (en windows)
+echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE
+ogRestoreInfoImage  "$3" "$4" &>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
-echo "[90] Post-configuracion de arranque del sistema."
+echo "[90] $MSG_HELP_configureOs."
 configureOs $3 $4
 
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE
 

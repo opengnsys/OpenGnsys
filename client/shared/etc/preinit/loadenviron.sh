@@ -101,6 +101,7 @@ export OG_ERR_CACHESIZE=16	# No hay espacio en la cache para almacenar fichero-i
 export OG_ERR_REDUCEFS=17	# Error al reducir sistema archivos
 export OG_ERR_EXTENDFS=18	# Error al expandir el sistema de archivos
 export OG_ERR_OUTOFLIMIT=19	# Valor fuera de rango o no válido.
+export OG_ERR_FILESYS=20	# Sistema de archivos desconocido o no se puede montar
 
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
 
@@ -116,4 +117,4 @@ export OG_ERR_MCASTSENDPARTITION=58  # Error en envio MULTICAST de una particion
 export OG_ERR_MCASTRECEIVERPARTITION=59  # Error en la recepcion MULTICAST de una particion
 export OG_ERR_PROTOCOLJOINMASTER=60  # Error en la conexion de una sesion UNICAST|MULTICAST con el MASTER
 
-
+export OG_ERR_DONTMOUNT_IMAGE=70 # Error al montar una imagen sincronizada.
