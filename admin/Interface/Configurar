@@ -117,7 +117,14 @@ ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE
 # Crea tabla de particiones MSDOS (NOTA: adaptar para tablas GPT).
 ogCreatePartitionTable $dis MSDOS 
 
+# Cuestión caché
+if [ "$che" == "1" ]; then
+	initCache $tch >/dev/null | tee -a $OGLOGSESSION $OGLOGFILE
+fi
+
+# Definir particionado.
 ogCreatePartitions $dis ${TBP[@]}  | tee -a $OGLOGSESSION $OGLOGFILE
+ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
 
 RETVAL=$?	
 if [ $RETVAL -ne 0 ]; then
@@ -137,13 +144,6 @@ for ((par=1; par<=$maxp; par++)); do
 		fi 
 	fi
 done	
-
-# Cuestión caché
-if [ "$che" == "1" ]; then
-	initCache $tch >/dev/null | tee -a $OGLOGSESSION $OGLOGFILE
-fi
-
-ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
 
 #___________________________________________________________________
 #
