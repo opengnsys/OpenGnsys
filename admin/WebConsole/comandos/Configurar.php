@@ -127,7 +127,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	echo '<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,"").'</TD>';
 	echo '<TD align=center><INPUT type="text" style="width:100" value="0"></TD>';
 	echo '<TD align=center>&nbsp;</TD>';
-	echo '<TD align=center>'.HTMLSELECT_operaciones().'</TD></TR></TABlE>';
+	echo '<TD align=center>'.opeFormatear().'</TD></TR></TABlE>';
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -169,7 +169,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	echo '<TH align=center>&nbsp;'.$TbMsg[27].'&nbsp;</TH>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[22].'&nbsp;</TH>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[21].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>';	
+	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
 	echo '</TR>';
 
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
@@ -192,7 +192,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 					
 				echo '<TD align=center>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</TD>';					
 			
-				echo '<TD align=center>'.HTMLSELECT_operaciones().'</TD>';
+				echo '<TD align=center>'.opeFormatear().'</TD>';
 				echo '</TR>';
 			}
 		}
@@ -226,16 +226,10 @@ function HTMLSELECT_particiones($p)
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de las operaciones
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_operaciones()
+function opeFormatear()
 {
-	global $TbMsg;
-	
-	$SelectHtml="";
-	$opciones="1=".$TbMsg[14]."".chr(13);
-	$opciones.="2=".$TbMsg[15]."".chr(13);
-	$opciones.="3=".$TbMsg[16]."";
-	$SelectHtml.=HTMLCTESELECT($opciones,"operaciones","estilodesple",$TbMsg[13],0,100,"");
-	return($SelectHtml);
+	$ckhboxtHtml='<input type="checkbox" name=operaciones/>';
+	return($ckhboxtHtml);
 }
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los tipos de particiones

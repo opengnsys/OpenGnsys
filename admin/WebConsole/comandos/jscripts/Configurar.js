@@ -161,7 +161,7 @@ function comprobarDatos(cc)
 			return(false);
 		}
 
-		var ope=tomavalorDesple(trCfg.childNodes[iope].childNodes[0]); // Operación a realizar	
+		var ope=tomavalorCheck(trCfg.childNodes[iope].childNodes[0]); // Formatar a realizar	
 
 		var sysfi=tomatextDesple(trCfg.childNodes[isysfi].childNodes[0]); // Sistema de ficheros
 		if(sysfi=="" || sysfi=="EMPTY" ){ // Si el sistema de fichero es vacio o empty...
@@ -241,6 +241,13 @@ function tomavalorDesple(desplegable)
 	var idx=desplegable.selectedIndex; // Indice seleccionado en el desplegable
 	var val=desplegable.options[idx].value; // Valor seleccionado en el desplegable
 	return(val);
+}
+
+function tomavalorCheck(chk)
+{
+	if(chk.checked) // Valor seleccionado en el desplegable
+		return(1);
+	return(0);
 }
 //________________________________________________________________________________________________________ 
 //
