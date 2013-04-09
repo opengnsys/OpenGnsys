@@ -35,8 +35,17 @@ $TbMsg[26]="P2P mode -seeder while downloading";
 $TbMsg[27]="P2P time -seeder time(s) after download-";
 $TbMsg[28]="Gateway";
 $TbMsg[29]="Netmask";
+// UHU
+$TbMsg[30]="Validation";
+$TbMsg[31]="Login page";
+$TbMsg[32]="Validation page";
+// UHU
+$TbMsg[495]="Cache content";
 $TbMsg[509]="Computer Photo";
 $TbMsg[5091]="Insert Photo";
 $TbMsg[5092]="View Images";
+// Ramón
+$TbMsg['PROP_DNSIP']="DNS Server IP <em>(optional)</em>";
+$TbMsg['PROP_PROXYURL']="Proxy Server URL <em>(optional)</em>";
 ?>
 

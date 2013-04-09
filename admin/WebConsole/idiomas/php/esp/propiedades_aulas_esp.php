@@ -43,6 +43,9 @@ $TbMsg[32]="P&aacute;gina validaci&oacute;n";
 $TbMsg[495]="Contenido cach&eacute;";
 $TbMsg[509]="Foto ordenador";
 $TbMsg[5091]="Insertar foto";
-$TbMsg[5092]="Ver fotos";	
+$TbMsg[5092]="Ver fotos";
+// Ramón
+$TbMsg['PROP_DNSIP']="IP Servidor DNS <em>(opcional)</em>";
+$TbMsg['PROP_PROXYURL']="URL Servidor Proxy <em>(opcional)</em>";
 ?>
 
