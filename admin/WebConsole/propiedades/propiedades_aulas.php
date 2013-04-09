@@ -376,41 +376,34 @@ function abrir_ventana(URL){
 			?>
 		</TR>		
 <!--------------------------------------------------------------UHU comprobar si se requiere validacion -------------------------------------------------------------------------->
-
-                <TR>
-                        <TH align=center>&nbsp;<?echo $TbMsg[30]?>&nbsp;</TH>
-                        <?
-                                if ($opcion==$op_eliminacion)
-                                        echo '<TD colspan=3>'.(($validacion == 1)?"Si":"No").'</TD>';
-                                else{
-                                         echo '<TD colspan=3>';
-                                        $validaciones="1=Si".chr(13);
-                                        $validaciones.="0=No";
-                                        echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</TD>';
-                                }
-
-                        ?>
-                </TR>
-                 <TR>
-                        <TH align=center>&nbsp;<?echo $TbMsg[31]?>&nbsp;</TH>
-                        <?
-                                if ($opcion==$op_eliminacion)
-                                        echo '<TD colspan=3>'.$paginalogin.'</TD>';
-                                else
-                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginalogin  type=text value="'.$paginalogin.'"></TD>';
-                        ?>
-                </TR>
-                <TR>
-                        <TH align=center>&nbsp;<?echo $TbMsg[32]?>&nbsp;</TH>
-                        <?
-                                if ($opcion==$op_eliminacion)
-                                        echo '<TD colspan=3>'.$paginavalidacion.'</TD>';
-                                else
-                                        echo '<TD colspan=3><INPUT class="formulariodatos" name=paginavalidacion  type=text value="'.$paginavalidacion.'"></TD>';
-                        ?>
-                </TR>
-
-
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[30]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.(($validacion == 1)?"Si":"No").'</td>';
+				else {
+					echo '<td colspan="3">';
+					$validaciones="1=Si".chr(13);
+					$validaciones.="0=No";
+					echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</td>';
+				}
+			?>
+		</tr>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[31]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$paginalogin.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="paginalogin" style="width:200" type="text" value="'.$paginalogin.'"></td>';
+			?>
+		</tr>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[32]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$paginavalidacion.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="paginavalidacion" style="width:200" type="text" value="'.$paginavalidacion.'"></td>';
+			?>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 
 	</TABLE>

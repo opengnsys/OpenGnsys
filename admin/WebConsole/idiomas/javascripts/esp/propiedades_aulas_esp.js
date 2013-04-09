@@ -6,7 +6,7 @@
 TbMsg=new Array;
 TbMsg[0]="Debe introducir un nombre para este aula";
 TbMsg[1]="Debe introducir un número de puestos para este aula";
-TbMsg[2]="ATENCIÓN.- Este aula contiene grupos de ordenadores u ordenadores. Si los elimina, eliminará también éstos. ¿ Está seguro ?";
+TbMsg[2]="ATENCIÓN.- Esta aula contiene grupos de ordenadores u ordenadores. Si los elimina, eliminará también éstos. ¿ Está seguro ?";
 TbMsg[3]="La hora de comienzo del intervalo de reservas debe ser menor que la hora final";
 TbMsg[4]="La direccion del router no es valida";
 TbMsg[5]="La mascara de red no es valida";
@@ -16,4 +16,7 @@ TbMsg[8]="Modo multicast no es valido";
 TbMsg[9]="La dirección multicast no es valida";
 TbMsg[10]="El puerto de multicast no es valida";
 TbMsg[11]="La velocidad de multicast no es válida, sólo números";
+TbMsg[12]="La dirección IP del servidor DNS no es válida";
+TbMsg[13]="La URL del servidor Proxy no es válida";
+TbMsg[14]="Deben introducirse datos de validación: página de login y página de validación";
 
