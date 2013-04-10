@@ -105,7 +105,7 @@ function abrir_ventana(URL){
 			<th align="center"><?php echo $TbMsg[5]?></th>
 			<?php	if ($opcion==$op_eliminacion){
 					echo '<td>'. $nombreaula.'</td>';
-					echo '<td colspan="2" valign="top" align=c"enter" rowspan="2">
+					echo '<td rowspan="5" colspan="2" valign="top" align=c"enter">
 							<img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" />
 							<br />'.$TbMsg[21].': '. $ordenadores.'</td>';
 			}
@@ -258,12 +258,13 @@ function abrir_ventana(URL){
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$modp2p.'</TD>';
-				else
+				else {
 					echo '<TD colspan=3>';
 					$p2pmetodos="peer=peer".chr(13);
 					$p2pmetodos.="leecher=leecher".chr(13);
 					$p2pmetodos.="seeder=seeder";
 					echo HTMLCTESELECT($p2pmetodos,"modp2p","estilodesple","",$modp2p,100).'</TD>';
+				}
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -287,13 +288,13 @@ function abrir_ventana(URL){
 					$TBMetodos[1]="Half-Duplex";
 					$TBMetodos[2]="Full-Duplex";
 					echo '<TD colspan=3>'.$TBMetodos[$modomul].'</TD>';
-				}
-				else
+				} else {
 					echo '<TD colspan=3>';
 					$metodos="0=".chr(13);
 					$metodos.="1=Half-Duplex".chr(13);
 					$metodos.="2=Full-Duplex";
 					echo HTMLCTESELECT($metodos,"modomul","estilodesple","",$modomul,100).'</TD>';
+				}
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -312,13 +313,14 @@ function abrir_ventana(URL){
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$pormul.'</TD>';
-				else
+				else {
 					echo '<td colspan="3">';
 					for ($i=9000; $i<9050; $i+=2) {
 						$pormulmetodos.="$i=$i".chr(13);
 					}
 					$pormulmetodos.="9050=9050";
 					echo HTMLCTESELECT($pormulmetodos,"pormul","estilodesple","",$pormul,100).'</td>';
+				}
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

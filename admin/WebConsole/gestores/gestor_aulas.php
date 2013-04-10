@@ -36,7 +36,6 @@ $idmenu=0;
 $idproautoexec=0;
 $idrepositorio=0;
 $idperfilhard=0;
-$cache=0;
 $modomul=0;
 $ipmul="";
 $pormul=0;
@@ -46,7 +45,9 @@ $router=0;
 $netmask=0;
 $modp2p=0;
 $timep2p=0;
-############ ADV
+############ Ramón
+$dns="";
+$proxy="";
 ############ UHU
 $validacion="";
 $paginalogin="";
@@ -81,7 +82,6 @@ if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"];
 if (isset($_POST["idprocedimiento"])) $idproautoexec=$_POST["idprocedimiento"]; 
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
 if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"]; 
-if (isset($_POST["cache"])) $cache=$_POST["cache"]; 
 if (isset($_POST["modomul"])) $modomul=$_POST["modomul"]; 
 if (isset($_POST["ipmul"])) $ipmul=$_POST["ipmul"]; 
 if (isset($_POST["pormul"])) $pormul=$_POST["pormul"]; 
@@ -91,7 +91,9 @@ if (isset($_POST["router"])) $router=$_POST["router"];
 if (isset($_POST["netmask"])) $netmask=$_POST["netmask"]; 
 if (isset($_POST["modp2p"])) $modp2p=$_POST["modp2p"]; 
 if (isset($_POST["timep2p"])) $timep2p=$_POST["timep2p"]; 
-################# ADV
+################# Ramón
+if (isset($_POST["dns"])) $dns=$_POST["dns"]; 
+if (isset($_POST["proxy"])) $proxy=$_POST["proxy"]; 
 ################# UHU
 if (isset($_POST["validacion"])) $validacion=$_POST["validacion"];
 if (isset($_POST["paginalogin"])) $paginalogin=$_POST["paginalogin"];
@@ -102,13 +104,11 @@ $gidmenu=0;
 $gidproautoexec=0;
 $gidrepositorio=0;
 $gidperfilhard=0;
-$gcache=0;
-	
+
 if (isset($_POST["gidmenu"])) $gidmenu=$_POST["gidmenu"]; 
 if (isset($_POST["gidprocedimiento"])) $gidproautoexec=$_POST["gidprocedimiento"]; 
 if (isset($_POST["gidrepositorio"])) $gidrepositorio=$_POST["gidrepositorio"]; 
 if (isset($_POST["gidperfilhard"])) $gidperfilhard=$_POST["gidperfilhard"]; 
-if (isset($_POST["gcache"])) $gcache=$_POST["gcache"]; 
 
 $tablanodo=""; // Arbol para nodos insertados
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
@@ -185,13 +185,11 @@ function Gestiona(){
 	global	$idproautoexec;
 	global	$idrepositorio;
 	global	$idperfilhard;
-	global	$cache;
 	
 	global $gidmenu;
 	global $gidproautoexec;
 	global $gidrepositorio;
 	global $gidperfilhard;
-	global $gcache;
 	
 	global	$modomul;
 	global	$ipmul;
@@ -202,7 +200,9 @@ function Gestiona(){
 	global	$netmask;
 	global  $modp2p;
 	global  $timep2p;
-########################## ADV
+########################## Ramón
+	global $dns;
+	global $proxy;
 ########################## UHU
         global $validacion;
         global $paginalogin;
@@ -215,7 +215,6 @@ function Gestiona(){
 	global	$tablanodo;
 
 
-	
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idcentro",$idcentro,1);
 
@@ -233,7 +232,8 @@ function Gestiona(){
 	$cmd->CreaParametro("@idproautoexec",$idproautoexec,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
-	$cmd->CreaParametro("@cache",$cache,1);
+	$cmd->CreaParametro("@dns",$dns,0);
+	$cmd->CreaParametro("@proxy",$proxy,0);
 	$cmd->CreaParametro("@modomul",$modomul,1);
 	$cmd->CreaParametro("@ipmul",$ipmul,0);
 	$cmd->CreaParametro("@pormul",$pormul,1);
@@ -252,10 +252,17 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO aulas(idcentro,grupoid,nombreaula,urlfoto,cagnon,pizarra,ubicacion,comentarios,
-			puestos,horaresevini,horaresevfin,modomul,ipmul,pormul,velmul,router,netmask,modp2p,timep2p,validacion,paginalogin,paginavalidacion) 
-			VALUES (@idcentro,@grupoid,@nombreaula,@urlfoto,@cagnon,@pizarra,@ubicacion,@comentarios,
-			@puestos,@horaresevini,@horaresevfin,@modomul,@ipmul,@pormul,@velmul,@router,@netmask,@modp2p,@timep2p,@validacion,@paginalogin,@paginavalidacion)";
+			$cmd->texto="INSERT INTO aulas
+						(idcentro, grupoid, nombreaula, urlfoto, cagnon,
+						 pizarra, ubicacion, comentarios, puestos,
+						 horaresevini, horaresevfin, router, netmask,
+						 dns, proxy, modomul, ipmul, pormul, velmul,
+						 modp2p, timep2p, validacion, paginalogin, paginavalidacion) 
+					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @cagnon,
+						 @pizarra, @ubicacion, @comentarios, @puestos,
+						 @horaresevini, @horaresevfin, @router, @netmask,
+						 @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
+						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idaula=$cmd->Autonumerico();
@@ -267,9 +274,16 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE aulas SET nombreaula=@nombreaula,urlfoto=@urlfoto,cagnon=@cagnon,pizarra=@pizarra,
-			ubicacion=@ubicacion,comentarios=@comentarios,puestos=@puestos,horaresevini=@horaresevini,
-			horaresevfin=@horaresevfin,modomul=@modomul,ipmul=@ipmul,pormul=@pormul,velmul=@velmul,router=@router,netmask=@netmask,modp2p=@modp2p,timep2p=@timep2p,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion WHERE idaula=@idaula";
+			$cmd->texto="UPDATE aulas SET
+					    nombreaula=@nombreaula, urlfoto=@urlfoto, cagnon=@cagnon,
+					    pizarra=@pizarra, ubicacion=@ubicacion,
+					    comentarios=@comentarios, puestos=@puestos,
+					    horaresevini=@horaresevini, horaresevfin=@horaresevfin,
+					    router=@router,netmask=@netmask, dns=@dns, proxy=@proxy,
+					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
+					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
+					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion
+					WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -282,8 +296,6 @@ function Gestiona(){
 					$clsUpdate.="idrepositorio=@idrepositorio,";
 				if($idperfilhard>0 || $gidperfilhard>0)	
 					$clsUpdate.="idperfilhard=@idperfilhard,";
-				if($cache!=0 || $gcache>0)	
-					$clsUpdate.="cache=@cache,";
 				// UHU - Actualiza la validacion en los ordenadores
 		                $clsUpdate .="validacion=@validacion,";
                                 $clsUpdate .="paginalogin=@paginalogin,";
