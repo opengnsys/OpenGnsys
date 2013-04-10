@@ -49,10 +49,10 @@ $cmd->texto="UPDATE ordenadores SET arranque=@optboot WHERE nombreordenador=@hos
 $cmd->Ejecutar();
 $cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
 			ordenadores.netiface AS netiface, aulas.netmask AS netmask,
-			aulas.router AS router, repositorios.ip AS iprepo,
-			aulas.nombreaula AS grupo,
-			menus.resolucion AS vga,
-			perfileshard.winboot AS winboot
+			aulas.router AS router, aulas.dns AS dns, aulas.proxy AS proxy,
+			aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
+			(SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
+			menus.resolucion AS vga, perfileshard.winboot AS winboot
 		FROM ordenadores 
 		JOIN aulas ON ordenadores.idaula=aulas.idaula 
 		JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
@@ -68,8 +68,11 @@ $rs->Primero();
 	$netiface=$rs->campos["netiface"];
 	$ip=$rs->campos["ip"];
 	$router=$rs->campos["router"];
-	$netmask=$rs->campos["netmask"]; 
-	$repo=$rs->campos["iprepo"];   			
+	$netmask=$rs->campos["netmask"];
+	$dns=$rs->campos["dns"];
+	$proxy=$rs->campos["proxy"];
+	$repo=$rs->campos["iprepo"];
+	$server=$rs->campos["ipserveradm"];
 	$group=cleanString($rs->campos["grupo"]);
 	if($rs->campos["vga"]== null || $rs->campos["vga"]== 0)
 		$vga="788";
@@ -78,16 +81,6 @@ $rs->Primero();
 	$winboot=$rs->campos["winboot"];
 
 $rs->Cerrar();
-
-$cmd->texto="SELECT ipserveradm FROM entornos";
-$rs=new Recordset;
-$rs->Comando=&$cmd;
-if (!$rs->Abrir()) echo "error";
-
-$rs->Primero();
-        $server=$rs->campos["ipserveradm"];
-$rs->Cerrar();
-
 
 switch ($idioma) {
     case "eng":
@@ -101,18 +94,24 @@ switch ($idioma) {
         break;
 }
 
-
-$infohost=" vga=$vga".
-	  " LANG=$idioma".
-	  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
-	  " group=$group" .
-	  " ogrepo=$repo" .
-	  " oglive=$repo" .
-	  " oglog=$server" .
-	  " ogshare=$server";
-if (! empty ($winboot)) {
-	  $infohost.=" winboot=$winboot";
+// Comprobar si se usa el parámetro "vga" (número entero) o "video" (cadena).
+if (is_int ($vga)) {
+	$infohost =" vga=$vga";
+} else {
+	$infohost =" video=$vga";
 }
+// Componer otros parámetros del kernel.
+$infohost.=" LANG=$idioma".
+	   " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
+	   " group=$group" .
+	   " ogrepo=$repo" .
+	   " oglive=$repo" .
+	   " oglog=$server" .
+	   " ogshare=$server";
+// Añadir parámetros opcionales.
+if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
+if (! empty ($proxy))	{ $infohost.=" ogproxy=$proxy"; }
+if (! empty ($winboot))	{ $infohost.=" winboot=$winboot"; }
 
 ###################obtenemos las variables de red del aula.
 
@@ -123,7 +122,7 @@ $macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));
 
 #controlar optboot
 
-exec("sed -e 's/vga=...//g' -e 's/INFOHOST/$infohost/g' $pxedir/templates/$optboot > $macfile");
+exec("sed -e 's|vga=...||g' -e 's|INFOHOST|$infohost|g' $pxedir/templates/$optboot > $macfile");
 exec("chmod 777 $macfile");
 }
 
