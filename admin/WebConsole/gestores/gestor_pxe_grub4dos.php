@@ -74,10 +74,7 @@ $rs->Primero();
 	$repo=$rs->campos["iprepo"];
 	$server=$rs->campos["ipserveradm"];
 	$group=cleanString($rs->campos["grupo"]);
-	if($rs->campos["vga"]== null || $rs->campos["vga"]== 0)
-		$vga="788";
-	else
-		$vga=$rs->campos["vga"];
+	$vga=$rs->campos["vga"];
 	$winboot=$rs->campos["winboot"];
 
 $rs->Cerrar();
@@ -94,24 +91,26 @@ switch ($idioma) {
         break;
 }
 
-// Comprobar si se usa el parámetro "vga" (número entero) o "video" (cadena).
-if (is_int ($vga)) {
-	$infohost =" vga=$vga";
-} else {
-	$infohost =" video=$vga";
-}
-// Componer otros parámetros del kernel.
-$infohost.=" LANG=$idioma".
-	   " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
-	   " group=$group" .
-	   " ogrepo=$repo" .
-	   " oglive=$repo" .
-	   " oglog=$server" .
-	   " ogshare=$server";
+// Componer parámetros del kernel.
+$infohost=" LANG=$idioma".
+	  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
+	  " group=$group" .
+	  " ogrepo=$repo" .
+	  " oglive=$repo" .
+	  " oglog=$server" .
+	  " ogshare=$server";
 // Añadir parámetros opcionales.
 if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
 if (! empty ($proxy))	{ $infohost.=" ogproxy=$proxy"; }
 if (! empty ($winboot))	{ $infohost.=" winboot=$winboot"; }
+// Comprobar si se usa el parámetro "vga" (número de 3 cifras) o "video" (cadena).
+if (! empty ($vga)) {
+	if (is_int ($vga) and strlen ($vga) == 3) {
+		$infohost.=" vga=$vga";
+	} else {
+		$infohost.=" video=$vga";
+	}
+}
 
 ###################obtenemos las variables de red del aula.
 

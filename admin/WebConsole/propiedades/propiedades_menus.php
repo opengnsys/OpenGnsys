@@ -14,6 +14,7 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
+include_once("../includes/tftputils.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_menus_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
@@ -98,10 +99,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!--<php-->
 
-		<TR>
+		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[17]?> <sup>*</sup>&nbsp;</th>
-			<?php
-				if ($opcion==$op_eliminacion){
+			<?php	if ($opcion==$op_eliminacion){
 					$tbresolucion[788]="800x600   16bits";
 					$tbresolucion[791]="1024x768  16bits";
 					$tbresolucion[355]="1152x864  16bits";
@@ -111,34 +111,50 @@ if  ($opcion!=$op_alta){
 					$tbresolucion[792]="1024x768  24bits";
 					$tbresolucion[795]="1280x1024 24bits";
 					$tbresolucion[799]="1600x1200 24bits";
-					echo '<TD style="width:150">'.$tbresolucion[$resolucion].'</TD>';
+					if (empty ($tbresolucion[$resolucion])) {
+						$res = $resolucion;
+					} else {
+						$res = $tbresolucion[$resolucion];
+					}
+					echo '<td>'.$res.'</td>';
 				}
 				else{
-					$parametros="788=800x600   16bits".chr(13);
-					$parametros.="791=1024x768  16bits".chr(13);
-					$parametros.="355=1152x864  16bits".chr(13);
-					$parametros.="794=1280x1024 16bits".chr(13);
-					$parametros.="798=1600x1200 16bits".chr(13);
-					$parametros.="789=800x600   24bits".chr(13);
-					$parametros.="792=1024x768  24bits".chr(13);
-					$parametros.="795=1280x1024 24bits".chr(13);
-					$parametros.="799=1600x1200 24bits";
-
-					echo '<TD>'.HTMLCTESELECT($parametros,"resolucion","estilodesple","",$resolucion,100).'</TD>';
+					if (clientKernelVersion() < "3.7") {
+						// Kernel anterior a 3.7 usa parámetro "vga".
+						$parametros="788=800x600   16bits".chr(13);
+						$parametros.="791=1024x768  16bits".chr(13);
+						$parametros.="355=1152x864  16bits".chr(13);
+						$parametros.="794=1280x1024 16bits".chr(13);
+						$parametros.="798=1600x1200 16bits".chr(13);
+						$parametros.="789=800x600   24bits".chr(13);
+						$parametros.="792=1024x768  24bits".chr(13);
+						$parametros.="795=1280x1024 24bits".chr(13);
+						$parametros.="799=1600x1200 24bits";
+					} else {
+						// Kernel 3.7 y superior usa parámetro "video".
+						$parametros="uvesafb:800x600-16=800x600, 16bit".chr(13);
+						$parametros="uvesafb:800x600-24=800x600, 24bit".chr(13);
+						$parametros="uvesafb:1024x768-16=1024x768, 16bit".chr(13);
+						$parametros="uvesafb:1024x768-24=1024x768, 24bit".chr(13);
+						$parametros="uvesafb:1152x864-16=1152x864, 16bit".chr(13);
+						$parametros="uvesafb:1280x1024,16=1280x1024, 16bit".chr(13);
+						$parametros="uvesafb:1280x1024,24=1280x1024, 24bit".chr(13);
+						$parametros="uvesafb:1600x1200,24=1600x1200, 24bit".chr(13);
+						$parametros="uvesafb:1600x1200,24=1600x1200, 16bit".chr(13);
+					}
+					echo '<td>'.HTMLCTESELECT($parametros,"resolucion","estilodesple","",$resolucion,100).'</td>';
 				}
 			?>
-		</TR>
-
-<!--?> -->
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</th>
+		<tr>
+			<th align="center">&nbsp;<?echo $TbMsg[7]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
-					echo '<TD >'.$comentarios.'&nbsp</TD>';
+					echo '<td>'.$comentarios.'&nbsp</TD>';
 				else
-					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TD>';
+					echo '<td><textarea   class="formulariodatos" name=comentarios rows="3" cols="55">'.$comentarios.'</textarea></TD>';
 			?>
-		</TR>
+		</tr>
 		<tr>
 			<th colspan="2" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
 		</tr>
@@ -249,13 +265,13 @@ include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
 	global	$descripcion;
-	global   $titulo;
-	global   $coorx;
-	global   $coory;
-	global   $modalidad;
-	global   $scoorx;
-	global   $scoory;
-	global   $smodalidad;
+	global  $titulo;
+	global  $coorx;
+	global  $coory;
+	global  $modalidad;
+	global  $scoorx;
+	global  $scoory;
+	global  $smodalidad;
 	global	$comentarios;
 	global	$htmlmenupub;
 	global	$htmlmenupri;
