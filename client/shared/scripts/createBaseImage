@@ -16,16 +16,27 @@
 #@exception OG_ERR_NOTWRITE   # 14 error de escritura
 #@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
 #@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
-#@note  se toma como punto de partida el script createImage, cambiando solo lo especifico para la imagen squash
+#@exception OG_ERR_DONTMOUNT_IMAGE # 70 Error al montar una imagen sincronizada
+#@note  se toma como punto de partida el script createImage, cambiando solo lo especifico para la imagen sincronizada
 #@todo: que hacer, si el tamaño de la cache es sufciente, pero no tiene espacio libre
-#@version 1.0 - creación imagen con mksquasfs
+#@version 1.0 - creación imagen con btrfs
 #@author  
 #@date   2012-12-04
 #*/ ##
 
-trap "ogUnlockImage $3 \"/$4.$IMGEXT\"; ogUnlock $1 $2;  hose $REPOIP 2009 --out sh -c 	\"echo -ne UMOUNT_IMAGE $4 $IMGEXT\" ; umount \"$DIRMOUNT\"; exit 1" 1 2 3 6 9 14 15
-#ogUnmountImage $3 "$4" $IMGEXT
+trap "onexit $1 $2 $3 \"$4\"" 1 2 3 6 9 14 15 ERR
 
+# Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
+function onexit() {
+    local exit_status=$?
+    ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
+    # Si la partición/imagen no estaba bloqueada -> la desbloqueo
+    [ $exit_status -ne 4 ] || ogUnlockImage "$3" "/$4.$IMGEXT" || ogUnlock $1 $2
+    echo ogUnmountImage $3 "$4" $IMGEXT 
+    echo ogUnlockImage "$3" "/$4.$IMGEXT"
+    echo ogUnlock $1 $2
+    exit $exit_status
+}
 
 TIME1=$SECONDS
 #Carga el configurador del engine desde el fichero engine.cfg
@@ -35,10 +46,16 @@ TIME1=$SECONDS
 CREATESPEED=${CREATESPEED:-"100000*4"}
 
 PROG="$(basename $0)"
-if [ $# -ne 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen"
-    exit $?
+echo $PROG
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp  "$PROG: $MSG_HELP_createBaseImage" \
+	    "$PROG ndisco nparticion REPO|CACHE base_image" \
+            "$PROG 1 1 REPO Windows7"
+   exit 0
 fi
+
+[ $# -ne 4 ] && ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen" 
 
 # Valores por defecto en etc/engine.cfg
 IMGEXT="img"
@@ -50,22 +67,22 @@ echo  -n ""> $OGLOGSESSION
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION  $OGLOGFILE
 
 # Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$3" "$4.$IMGEXT" && echo  "$MSG_ERR_LOCKED $3 $4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE && exit $(ogRaiseError $OG_ERR_LOCKED "$3 $4.$IMGEXT" ; echo $?)
-ogIsLocked "$1" "$2" &&  echo  "$MSG_ERR_LOCKED $1 $2"  | tee -a $OGLOGSESSION $OGLOGFILE && exit $(ogRaiseError $OG_ERR_LOCKED  "$1 $2"; echo $?)
+ogIsImageLocked "$3" "$4.$IMGEXT" && ogRaiseError $OG_ERR_LOCKED "$3 $4.$IMGEXT"
+ogIsLocked "$1" "$2" && ogRaiseError $OG_ERR_LOCKED  "$1 $2"
 
 # Si el repositorio es CACHE comprobamos que exista
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
-	! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE " | tee -a $OGLOGSESSION $OGLOGFILE ; echo $?)
+	! ogFindCache >/dev/null && ogRaiseError $OG_ERR_NOTCACHE "CACHE "
 fi
 
 echo " " > $OGLOGCOMMAND
 
 # Obtener información de los parámetros de entrada.
-PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || exit $(ogRaiseError $OG_ERR_PARTITION "$1 $2"; echo $?)
+PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "$1 $2"
 
 #Comprobamos acceso de escritura.
 DIRTEMP=$(date +%Y%m%d-%H%M%S)
-ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3"; echo $?) && ogDeleteTree $3 /$4$DIRTEMP 
+ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$3" && ogDeleteTree $3 /$4$DIRTEMP 
 
 #Comprobar espacio que requerira la imagen para ser almacenada
 echo " " > $OGLOGCOMMAND
@@ -82,10 +99,9 @@ then
 	[ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
 else
  	ogRaiseError $OG_ERR_PARTITION "$1 $2"
-    	exit $?
 fi
 echo "[16]$MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
-[ $SIZEREQUIRED -gt $SIZEFREE ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
+[ $SIZEREQUIRED -gt $SIZEFREE ] && ogRaiseError $OG_ERR_CACHESIZE "$3"
 
 IMGDIR=$(ogGetParentPath "$3" "/$4")
 IMGFILE=${IMGDIR[$3]}/$(basename "/$4").$IMGEXT
@@ -93,10 +109,9 @@ IMGFILE=${IMGDIR[$3]}/$(basename "/$4").$IMGEXT
 # Comprobar consistencia del sistema de archivos.
 echo " " > $OGLOGCOMMAND
 SIZEFS=$(ogGetFsSize  $1 $2)
-#FSTYPE=$(ogGetFsType $1 $2)   
 echo "[20] $MSG_HELP_ogCheckFs  $PART $SIZEFS (KB) " | tee -a $OGLOGSESSION $OGLOGFILE
 ogUnmount $1 $2
-ogCheckFs $1 $2 &> $OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
+ogCheckFs $1 $2 &> $OGLOGCOMMAND || ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2"
 
 # Crear la imagen.
 echo " " > $OGLOGCOMMAND
@@ -113,14 +128,13 @@ ogCreateFileImage $3 "$4" $IMGEXT $SIZEREQUIRED
 echo "[50] $MSG_HELP_ogCreateImage $1 $2 $3 $4 " | tee -a $OGLOGSESSION $OGLOGFILE
 echo "      $MSG_HELP_ogCreateInfoImage"  | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateInfoImage $1 $2 $IMGEXT
+echo $?
 
 TIMEAUX3=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
-
 # Esperamos que el servidor termine de crear y montar la imagen
-#ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED || exit $(ogRaiseError "Error al montar la imagen $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
-ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED  || exit $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out $TIMEAUX seg."; echo $?)
+ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."
 
 
 # Sincronizamos los datos de la particion con la imagen.
@@ -136,8 +150,7 @@ TIMEAUX5=$[SECONDS-TIMEAUX3]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
-file $IMGFILE|grep "BTRFS Filesystem" 2>&1 >/dev/null
-[ $? == 0 ] || exit $(ogRaiseError $OG_ERR_IMAGE "$3 $4" ; echo $?)
+file $IMGFILE|grep "BTRFS Filesystem" 2>&1 >/dev/null || ogRaiseError $OG_ERR_IMAGE "$3 $4" 
 
 TIMEAUX7=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE

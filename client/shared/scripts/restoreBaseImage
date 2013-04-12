@@ -13,39 +13,49 @@
 #@exception OG_ERR_FORMAT  # 1 formato incorrecto.
 #@exception updateCache    # 15 No hay cache 
 #@exception updateCache    # 16 no hay espacio sufiente 
-#@exception "Error al montar la imagen" INTERNACIONALIZAR
-#@todo: Probar rsync desde repo sin samba
-#@todo: Se puede dar la opcion de que mantenga los ficheros nuevos.
-#@todo: Se puede dar la opcion que la trasferencia se manden los datos comprimidos.
+#@exception OG_ERR_LOCKED          # 4 Partición o fichero bloqueado.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#@exception OG_ERR_FILESYS         # 20 Sistema de archivos desconocido o no se puede montar
+#@exception OG_ERR_DONTSYNC_IMAGE  # 71 Imagen no sincronizable (es monolitica)
+#@exception OG_ERR_DONTMOUNT_IMAGE # 70 Error al montar una imagen sincronizada.
 #@note  se toma como punto de partida el script restoreImage
 #@version 1.0 - restauración de imagen con sincronizacion.
 #@author  
 #@date   2012-12-04
 #*/ ##
-trap "ogUnlock $3 $4; umount $DIRMOUNT; hose $REPOIP 2009 --out sh -c \"echo -ne UMOUNT_IMAGE $2 $IMGEXT\" "  1 2 3 6 9 14 15
+
+trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 ERR
+
+# Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
+function onexit() {
+    local exit_status=$?
+    ogUnmountImage "$1" "$2" "$IMGEXT"  &>/dev/null
+    # Si la partición/imagen no estaba bloqueada -> la desbloqueo
+    [ $exit_status -eq 4 ] && ogUnlock $3 $4 &>/dev/null
+    exit $exit_status
+}
 
 # Limpiamos los archivo de log
 echo "" >$OGLOGCOMMAND
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
-if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
-    exit $?
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp  "$PROG: $MSG_HELP_restoreBaseImage" \
+	    "$PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]" \
+            "$PROG REPO Windows7 1 1 " \
+	    "$PROG CACHE Ubuntu12 1 6 MULTICAST 9000:full-duplex:239.194.14.00:150M:50:60"
+   exit 0
 fi
-echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE
 
-IMGEXT="img"
-
-# Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
-ogIsLocked "$3" "$4" && exit $(ogRaiseError $OG_ERR_LOCKED  "$3 $4"; echo $?)
+[ $# -lt 4 ] &&     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
 
 # Carga del configurador del engine
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Procesar parámetros de entrada
-REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
+REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
 # Comprobamos si el sistema de ficheros se puede montar
 ogMount "$3" "$4" &>/dev/null
 if [  $? -ne 0 ] ; then
@@ -55,29 +65,33 @@ if [  $? -ne 0 ] ; then
 	mount -o compress=lzo $REPOFILE $DIRMOUNT
 	FSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)	
 	umount $DIRMOUNT
-	echo "      $MSG_FORMAT: $3 $4 $FSTYPE" | tee -a $OGLOGFILE
-	ogFormat "$3" "$4" "$FSTYPE" || exit $(ogRaiseError $OG_ERR_FILESYS "$3 $4"; echo $?)
-	ogMount "$3" "$4"  || exit $(ogRaiseError $OG_ERR_FILESYS "$3 $4"; echo $?)
+	echo "      $MSG_HELP_ogFormat: $3 $4 $FSTYPE" | tee -a $OGLOGFILE
+	ogFormat "$3" "$4" "$FSTYPE" || ogRaiseError $OG_ERR_FILESYS "$3 $4"
+	ogMount "$3" "$4"  || ogRaiseError $OG_ERR_FILESYS "$3 $4"
 fi
 
 
-
 # Comprobar que es sincronizable (con REPO)
-# TODO: crear mensaje de error
-file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null
-[ $? == 0 ]  ||  exit  $(ogRaiseError  "$1 $2"; echo $?)
+file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
+
+echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE
+IMGEXT="img"
+
+# Comprobamos si la imagen o la particion estan bloqueada:
+ogIsImageLocked "$1" "$2.$IMGEXT" && ogRaiseError $OG_ERR_LOCKED "$1 $2.$IMGEXT"
+ogIsLocked "$3" "$4" && ogRaiseError $OG_ERR_LOCKED  "$3 $4"
 
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    # Las imagenes sincronizables aunque sean iguales no tienen el mismo sum. 
    # Sincronizamos si existe el fichero y si no usamos updateCache.
-   echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.img $PROTO $6" | tee -a $OGLOGFILE
-   echo "      updateCache REPO" "/$2.img" "$PROTO" "$6"   | tee -a $OGLOGFILE
-   updateCache REPO "/$2.img" "$PROTO" "$6"     &>> $OGLOGCOMMAND
+   echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE
+   echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE
+   updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"     &>> $OGLOGCOMMAND
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
-        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.img $5 $6 con error $RETVAL" | tee -a $OGLOGFILE 
+        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL" | tee -a $OGLOGFILE 
         # RC=15 No hay cache 
         # RC=16 no hay espacio sufiente 
         exit $RETVAL 
@@ -87,10 +101,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
 fi 
 
-
-
 TIME2=$SECONDS
-
 
 # Restaurar la imagen.
 echo "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  | tee -a $OGLOGFILE
@@ -98,18 +109,18 @@ echo "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  | tee -a $OGLOGFILE
 ogLock $3 $4
 
 # Montamos la imagen basica.
-ogMountImage "$1" "$2" "img"  >/dev/null
+ogMountImage "$1" "$2" "$IMGEXT"  >/dev/null
 #  Comprobar que la imagen completa se ha montado.
-ogWaitMountImage "$1" "$2" "img" 
+ogWaitMountImage "$1" "$2" "$IMGEXT"  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."
 # Sincronizamos la partición con la imagen.
-echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 img $3 $4"  |tee -a $OGLOGFILE
-ogSyncRestore "$1" "$2" "img" $3 $4 
+echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4"  |tee -a $OGLOGFILE
+ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4 
 
 TIMEAUX2=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGFILE
 
 # Desmontamos imagen basica.
-ogUnmountImage "$1" "$2" "img"
+ogUnmountImage "$1" "$2" "$IMGEXT"
 
 # Restableciendo acl
 ogUnlock $3 $4

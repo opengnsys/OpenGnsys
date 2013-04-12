@@ -184,9 +184,6 @@ IMGACL="/tmp/ogimg.acl"
 rm /tmp/ogimg.* 2>/dev/null
 rm $ORIG/ogimg.* 2>/dev/null
 
-# Creamos la informacion del contenido de la imagen
-#echo "      $MSG_SYNC_CREATEINFO."  | tee -a $OGLOGSESSION $OGLOGFILE
-
 # En las diferenciales no sabemos el tamaño -> ponemos una constante.
 SIZEDATA=${SIZEDATA:-"SIZEDATA"}
 
@@ -219,7 +216,10 @@ fi
 # Imagenes basicas  y diferenciales
 # Guardamos el contenido de las acl (Solo win) Necesario particion desmontada (esta asi)
 ogUnmount $1 $2
-[ $FSTYPE == "NTFS" ] && echo "     ntfs-3g.secaudit -b $PART /" |tee -a $OGLOGSESSION $OGLOGFILE &&  ntfs-3g.secaudit -b $PART / > $IMGACL
+if [ $FSTYPE == "NTFS" ]; then
+	echo "     ntfs-3g.secaudit -b $PART /" |tee -a $OGLOGSESSION $OGLOGFILE 
+	ntfs-3g.secaudit -b $PART / > $IMGACL
+fi
 
 }
 

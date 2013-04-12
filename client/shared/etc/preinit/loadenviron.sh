@@ -118,3 +118,4 @@ export OG_ERR_MCASTRECEIVERPARTITION=59  # Error en la recepcion MULTICAST de un
 export OG_ERR_PROTOCOLJOINMASTER=60  # Error en la conexion de una sesion UNICAST|MULTICAST con el MASTER
 
 export OG_ERR_DONTMOUNT_IMAGE=70 # Error al montar una imagen sincronizada.
+export OG_ERR_DONTSYNC_IMAGE=71 # Imagen no sincronizable (es monolitica)
