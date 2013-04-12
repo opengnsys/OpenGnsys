@@ -22,17 +22,14 @@ if [ "$OSTYPE" == "Windows" ]; then
 fi
 
 echo "[10] Desmontar todos los sistemas de archivos."
-sync
+sync 
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
-    ogUnmountAll $i 2>/dev/null
+    ogUnmountAll $i &>/dev/null
 done
 case "$OSTYPE" in
     Windows)
         echo "[30] Mostrar y activar particion de Windows $PART."
         [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
-        ogSetPartitionActive $1 $2
-        echo "[50] Asignar nombre Windows \"$NAME\" y usuario por defecto."
-        ogSetWindowsName $1 $2 "$NAME"
         ;;
     Linux)
         echo "[30] Asignar nombre Linux \"$NAME\"."

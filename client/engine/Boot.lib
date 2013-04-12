@@ -70,11 +70,6 @@ case "$TYPE" in
             [ -n "$FILE" ] && LOADER="$f"
         done
         [ -z "$LOADER" ] && ogRaiseError $OG_ERR_NOTOS && return $?
-        # Activar la partición.
-        ogSetPartitionActive $1 $2
-        ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\Cliente Opengnsys\Start' '2'
-        ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\Cliente Opengnsys\Start' '2'
-        ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet003\services\Cliente Opengnsys\Start' '2'
         if [ "$winboot" == "kexec" ]; then
             # Modo de arranque en caliente (con kexec).
             cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
@@ -85,9 +80,12 @@ case "$TYPE" in
             dd if=/dev/zero of=${MNTDIR}/ogboot.me bs=1024 count=3
             dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot bs=1024 count=3
             dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot bs=1024 count=3
-            ogLoadHiveWindows $1 $2
-            ogHiveNTRunMachine "cmd /c del c:\ogboot.*" ogcleanboot
-            ogUpdateHiveWindows
+	    if  [ -z "$(ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleannboot')" ]; then               
+            ogAddRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' 
+            ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' "cmd /c del c:\ogboot.*"
+            fi
+            # Activar la partición.
+            ogSetPartitionActive $1 $2
             reboot
         fi
         ;;
