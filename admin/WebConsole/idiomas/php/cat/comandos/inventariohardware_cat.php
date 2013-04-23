@@ -5,12 +5,12 @@
 //	Idioma: Espa�l 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Inventario Hardware';
-	$TbMsg[6]='Ámbito';
-
+	$TbMsg[0]='Centres';
+	$TbMsg[1]='Grup d\'aules';
+	$TbMsg[2]='Aules';
+	$TbMsg[3]='Grup d\'ordinadors';
+	$TbMsg[4]='Ordinadors';
+	$TbMsg[5]='Inventari Hardware';
+	$TbMsg[6]='Àmbit';
+	
 ?>

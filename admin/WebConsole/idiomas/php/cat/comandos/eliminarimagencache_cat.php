@@ -5,23 +5,23 @@
 //	Idioma: Català
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
-	$TbMsg[0]='Creaci&oacute;n de Imagen';
-	$TbMsg[1]='Caracter&iacute;sticas del ordenador';
-	$TbMsg[2]='Nombre';
-	$TbMsg[3]='Direcci&oacute;n IP';
-	$TbMsg[4]='Direcci&oacute;n MAC';
-	$TbMsg[5]='Eliminar Imagen de la Cache en Cliente';
-	$TbMsg[6]='Datos a suministrar';
-	$TbMsg[7]='Im&aacute;genes Disponibles';
+	$TbMsg[0]='Creaci&oacute; d\'Imatge';
+	$TbMsg[1]='Caracter&iacute;stiques de l\'ordinador';
+	$TbMsg[2]='Nom';
+	$TbMsg[3]='Direcci&oacute; IP';
+	$TbMsg[4]='Direcci&oacute; MAC';
+	$TbMsg[5]='Eliminar Imatge de la Cache en Client';
+	$TbMsg[6]='Dades a subministrar';
+	$TbMsg[7]='Im&aacute;tges Disponibles';
 	$TbMsg[8]='Par';
-	$TbMsg[9]='Nombre S.O.';
-	$TbMsg[10]='Nombre de la Imagen';
+	$TbMsg[9]='Nom S.O.';
+	$TbMsg[10]='Nom de la Imatge';
 	$TbMsg[11]='N&ordm;';
 	$TbMsg[12]='Marcar';
-	$TbMsg[13]='Tama&ntilde;o';
-	$TbMsg[14]='Imagen NO est&aacute; en Repositorio';
-	$TbMsg[15]=' tiene varios Repositorios asignados';
-	$TbMsg[16]=' NO tiene el Repositorio en el Servidor';
-	$TbMsg[17]='Limitaciones Versi&oacute;n 1.1';
-	$TbMsg[18]='Tama&ntilde;o de la imagen disponible si Repositorio y Servidor Web alojados en el mismo Servidor';
+	$TbMsg[13]='Grandària';
+	$TbMsg[14]='Imatge NO est&aacute; al Repositori';
+	$TbMsg[15]=' te varis Repositoris assignats';
+	$TbMsg[16]=' NO te el Repositori al Servidor';
+	$TbMsg[17]='Limitacions Versi&oacute; 1.1';
+	$TbMsg[18]='Grandària de la imatge disponible si Repositori i Servidor Web allotjats al mateix Servidor';
 ?>

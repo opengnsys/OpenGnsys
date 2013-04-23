@@ -2,18 +2,18 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: crearsoftincremental_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Generación de software Incremental' ;
-	$TbMsg[1]='Características del ordenador';
-	$TbMsg[2]='Nombre';
-	$TbMsg[3]='Dirección IP';
-	$TbMsg[4]='Dirección MAC';
+	$TbMsg[0]='Generació de software Incremental' ;
+	$TbMsg[1]='Característiques de l\'ordinador';
+	$TbMsg[2]='Nom';
+	$TbMsg[3]='Direcció IP';
+	$TbMsg[4]='Direcció MAC';
 	$TbMsg[5]='Perfil Hardware';
-	$TbMsg[6]='Datos a suministrar';
+	$TbMsg[6]='Dades a subministrar';
 	$TbMsg[7]='';
 	$TbMsg[8]='Par';
-	$TbMsg[9]='Nombre Perfil';
+	$TbMsg[9]='Nom Perfil';
 	$TbMsg[10]='Software incremental disponible';
 ?>

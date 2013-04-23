@@ -30,26 +30,26 @@ class Almanaque{
 		$this->onmouseout=$ponmouseout;
 		$this->onclick=$ponclick;
 		
-		$this->nombre_mes[1]=array ("Enero",0x0001); 
-		$this->nombre_mes[2]=array ("Febrero",0x0002);
-		$this->nombre_mes[3]=array ("Marzo",0x0004);
+		$this->nombre_mes[1]=array ("Gener",0x0001); 
+		$this->nombre_mes[2]=array ("Febrer",0x0002);
+		$this->nombre_mes[3]=array ("Març",0x0004);
 		$this->nombre_mes[4]=array ("Abril",0x0008);
-		$this->nombre_mes[5]=array ("Mayo",0x0010);
-		$this->nombre_mes[6]=array ("Junio",0x0020);
-		$this->nombre_mes[7]=array ("Julio",0x0040);
-		$this->nombre_mes[8]=array ("Agosto",0x0080);
-		$this->nombre_mes[9]=array ("Septiembre",0x0100);
+		$this->nombre_mes[5]=array ("Maig",0x0010);
+		$this->nombre_mes[6]=array ("Juny",0x0020);
+		$this->nombre_mes[7]=array ("Juliol",0x0040);
+		$this->nombre_mes[8]=array ("Agost",0x0080);
+		$this->nombre_mes[9]=array ("Setembre",0x0100);
 		$this->nombre_mes[10]=array ("Octubre",0x0200);
-		$this->nombre_mes[11]=array ("Noviembre",0x0400);
-		$this->nombre_mes[12]=array ("Diciembre",0x0800);
+		$this->nombre_mes[11]=array ("Novembre",0x0400);
+		$this->nombre_mes[12]=array ("Decembre",0x0800);
 
-		$this->nombre_dia[1]=array ("L",0x01); // tamaño 1 bytes
-		$this->nombre_dia[2]=array ("M",0x02); 
-		$this->nombre_dia[3]=array ("X",0x04); 
-		$this->nombre_dia[4]=array ("J",0x08); 
-		$this->nombre_dia[5]=array ("V",0x10); 
-		$this->nombre_dia[6]=array ("S",0x20); 
-		$this->nombre_dia[7]=array ("D",0x40); 
+		$this->nombre_dia[1]=array ("DL",0x01); // tamaño 1 bytes
+		$this->nombre_dia[2]=array ("DM",0x02); 
+		$this->nombre_dia[3]=array ("DC",0x04); 
+		$this->nombre_dia[4]=array ("DJ",0x08); 
+		$this->nombre_dia[5]=array ("DV",0x10); 
+		$this->nombre_dia[6]=array ("DS",0x20); 
+		$this->nombre_dia[7]=array ("DG",0x40); 
 
 	
 		$this->dias_meses[1]=31;

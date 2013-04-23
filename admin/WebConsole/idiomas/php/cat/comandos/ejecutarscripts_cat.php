@@ -5,48 +5,48 @@
 //	Idioma: Català
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Ejecutar script';
-	$TbMsg[6]='&Aacute;mbito';
-	$TbMsg[7]='T&iacute;tulo';
-	$TbMsg[8]='Descripci&oacute;n';
-	$TbMsg[9]='C&oacute;digo del script';
-	$TbMsg[10]='Datos a suministrar';
-	$TbMsg[11]='Eliminar Imagen de la Cach&eacute; de Cliente';
+	$TbMsg[0]='Centres';
+	$TbMsg[1]='Grupo d\'aules';
+	$TbMsg[2]='Aules';
+	$TbMsg[3]='Grup d\'ordinadors';
+	$TbMsg[4]='Ordinadors';
+	$TbMsg[5]='Executar script';
+	$TbMsg[6]='Àmbit';
+	$TbMsg[7]='Títol';
+	$TbMsg[8]='Descripció';
+	$TbMsg[9]='Codi del script';
+	$TbMsg[10]='Dades a subministrar';
+	$TbMsg[11]='Eliminar Imatge de la Cache de Client';
 
-	$TbMsg["WDI11"]='Asistente de Despliegue de la imagen';
-	$TbMsg["WDI12"]='Generar Instrucci&oacute;n OG';
-	$TbMsg["WDI13"]='Elige si solo quieres almacenar la imagen en la Cache - UpdateCache  ';
+	$TbMsg["WDI11"]='Asistent de Desplegament de la imatge';
+	$TbMsg["WDI12"]='Generar Instrucció OG';
+	$TbMsg["WDI13"]='Escull si només vols emmagatzemar la imatge en la Cache - UpdateCache  ';
 	$TbMsg["WDI14"]='deployImage (update+restore)';
-	$TbMsg["WDI15"]='updateCache (solo descarga)';
-	$TbMsg["WDI16"]='opciones basicas';
-	$TbMsg["WDI17"]='opciones multicast';
-	$TbMsg["WDI18"]='opciones torrent';
-	$TbMsg["WDI19"]='opciones unicast';
-	$TbMsg["WDI20"]='Elige la particion del disco donde se restaurar la imagen:';
-	$TbMsg["WDI21"]='Elige la imagen a distribuir:';
-	$TbMsg["WDI22"]='--Selecciona imagen --';
-	$TbMsg["WDI23"]='Elige el m&eacute;todo de transferencia';
+	$TbMsg["WDI15"]='updateCache (només descarrega)';
+	$TbMsg["WDI16"]='opcions básiques';
+	$TbMsg["WDI17"]='opcions multicast';
+	$TbMsg["WDI18"]='opcions torrent';
+	$TbMsg["WDI19"]='opcions unicast';
+	$TbMsg["WDI20"]='Escull la partició del disc on es restaurarà la imatge:';
+	$TbMsg["WDI21"]='Escull la imatge a distribuir:';
+	$TbMsg["WDI22"]='--Selecciona imatge --';
+	$TbMsg["WDI23"]='Escull el mètode de transferència';
 
-	$TbMsg["WDI24"]='puerto : ';
-	$TbMsg["WDI25"]='direccion Mcast : ';
-	$TbMsg["WDI26"]='modo      : ';
-	$TbMsg["WDI27"]='velocidad   : ';
-	$TbMsg["WDI28"]='n&ordm; M&aacute;x. clientes      : ';
-	$TbMsg["WDI29"]='Tiempo M&aacute;x. Espera (seg)   : ';
+	$TbMsg["WDI24"]='port : ';
+	$TbMsg["WDI25"]='direcció Mcast : ';
+	$TbMsg["WDI26"]='mode      : ';
+	$TbMsg["WDI27"]='velocitat   : ';
+	$TbMsg["WDI28"]='n&ordm; M&aacute;x. clients      : ';
+	$TbMsg["WDI29"]='Temps M&aacute;x. Espera (seg)   : ';
 
-	$TbMsg["WDI30"]='tiempo de semilla :';
+	$TbMsg["WDI30"]='temps de llavor :';
 
-	$TbMsg["WCRP31"]='Asistente Clonaci&oacute;n Particiones Remotas';
-	$TbMsg["WCRP32"]='Elige equipo MASTER:';
-	$TbMsg["WCRP33"]='Elige desde el Master la imagen o particion a enviar';
-	$TbMsg["WCRP34"]='Elige la identificacion de la particion destino de los clientes:';
-	$TbMsg["WCRP35"]='Elige el metodo de transferencia';
-	$TbMsg["WCRP36"]='Elige herramienta de clonaci&oacute;n:';
-	$TbMsg["WCRP37"]='Elige compresor para la herramienta de clonaci&oacute;n:';
+	$TbMsg["WCRP31"]='Assistent Clonaci&oacute; Particions Remotes';
+	$TbMsg["WCRP32"]='Escull equip MASTER:';
+	$TbMsg["WCRP33"]='Escull des de el Master la imatge o partició a enviar';
+	$TbMsg["WCRP34"]='Escull la identificació de la partició destí dels clients:';
+	$TbMsg["WCRP35"]='Escull el mètode de transferència';
+	$TbMsg["WCRP36"]='Escull eina de clonaci&oacute;:';
+	$TbMsg["WCRP37"]='Escull compressor per l\'eina de clonaci&oacute;:';
 ?>
 
