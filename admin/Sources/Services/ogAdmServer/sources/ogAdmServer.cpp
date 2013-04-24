@@ -1198,6 +1198,8 @@ BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama)
 	}
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	strcpy(tbsockets[idx].estado, tpc);
+	if(tbsockets[idx].sock!=INVALID_SOCKET)
+		close(tbsockets[idx].sock); // Cierra el socket si ya existia uno
 	tbsockets[idx].sock = *socket_c;
 	swcSocket = TRUE; // El socket permanece abierto para recibir comandos desde el servidor
 	liberaMemoria(iph);
@@ -3622,7 +3624,7 @@ int main(int argc, char *argv[]) {
 			errorLog(modulo, 15, TRUE);
 			exit(EXIT_FAILURE);
 		}
-		zswcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
+		swcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
 		if (!gestionaTrama(&socket_c)) {
 			errorLog(modulo, 39, TRUE);
 			//close(socket_c);/tmp/
