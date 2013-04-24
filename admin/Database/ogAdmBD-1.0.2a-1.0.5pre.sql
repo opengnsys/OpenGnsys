@@ -82,7 +82,7 @@ UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
 # Habilita el comando Particionar y formatear.
 UPDATE comandos SET activo = '1' WHERE idcomando = 10;
 ALTER TABLE sistemasficheros
-	ADD UNIQUE INDEX descripcion (descripcion)
+	ADD UNIQUE INDEX descripcion (descripcion);
 INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('EMPTY', 'EMPTY'),
 	('CACHE', 'CACHE'),

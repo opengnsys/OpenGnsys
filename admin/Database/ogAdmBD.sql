@@ -761,7 +761,7 @@ CREATE TABLE IF NOT EXISTS `sistemasficheros` (
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
   `codpar` int(8) NOT NULL,
-  PRIMARY KEY (`idsistemafichero`)
+  PRIMARY KEY (`idsistemafichero`),
   UNIQUE KEY (`descripcion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `codpar`) VALUES
