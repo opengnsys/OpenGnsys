@@ -3622,7 +3622,7 @@ int main(int argc, char *argv[]) {
 			errorLog(modulo, 15, TRUE);
 			exit(EXIT_FAILURE);
 		}
-		swcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
+		zswcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
 		if (!gestionaTrama(&socket_c)) {
 			errorLog(modulo, 39, TRUE);
 			//close(socket_c);/tmp/
