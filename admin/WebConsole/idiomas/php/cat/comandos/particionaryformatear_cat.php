@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: particionaryformatear_esp.php (Comandos)
+//	Fichero de idiomas php: particionaryformatear_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();

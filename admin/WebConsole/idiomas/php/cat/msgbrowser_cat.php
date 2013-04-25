@@ -2,36 +2,36 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: msgbrowser.php 
-//	Idioma: Español 
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 
 // Literales de los mensajes del browser del cliente
 $TbMsg=array();
-	$TbMsg[0]='Indice del mensaje NO identificado';
-	$TbMsg[1]='Actualizando, por favor espere...';
-	$TbMsg[2]='Creando imagen, por favor espere...';
-	$TbMsg[3]='Restaurando imagen, por favor espere...';
-	$TbMsg[4]='Modificando tabla de particiones, por favor espere...';
-	$TbMsg[5]='Formateando, por favor espere...';
-	$TbMsg[6]='Creando Inventario Hardware, por favor espere...';
-	$TbMsg[7]='Creando Inventario Software, por favor espere...';
-	$TbMsg[8]='Ejecutando script, por favor espere...';
-	$TbMsg[9]='El proceso de creación de imagen ha terminado correctamente';
-	$TbMsg[10]='ATENCIÓN, ha habido algún error en el proceso de creación de imagen';
-	$TbMsg[11]='El proceso de restauración de imagen ha terminado correctamente';
-	$TbMsg[12]='ATENCIÓN, ha habido algún error en el proceso de restauración de imagen';
-	$TbMsg[13]='El proceso de particionado ha terminado correctamente';
-	$TbMsg[14]='ATENCIÓN, ha habido algún error en el proceso de particionado';
-	$TbMsg[15]='El proceso de formateado ha terminado correctamente';
-	$TbMsg[16]='ATENCIÓN, ha habido algún error en el proceso de formateado';
-	$TbMsg[17]='El proceso de Inventario Hardware ha terminado correctamente';
-	$TbMsg[18]='ATENCIÓN, ha habido algún error en el proceso de Inventario Hardware';
-	$TbMsg[19]='El proceso de Inventario Software ha terminado correctamente';
-	$TbMsg[20]='ATENCIÓN, ha habido algún error en el proceso de Inventario Software';
-	$TbMsg[21]='El proceso de jecuación del script bash ha terminado correctamente';
-	$TbMsg[22]='ATENCIÓN, ha habido algún error en el proceso de ejecución del script bash';
-	$TbMsg[23]='ATENCIÓN';
-	$TbMsg[24]='NO UTILICE NI APAGUE ESTE ORDENADOR.';
+	$TbMsg[0]='Índex del missatge NO identificat';
+	$TbMsg[1]='Actualitzant, si us plau esperi...';
+	$TbMsg[2]='Creant imatge, si us plau esperi...';
+	$TbMsg[3]='Restaurant imatge, si us plau esperi...';
+	$TbMsg[4]='Modificant taula de particions, si us plau esperi...';
+	$TbMsg[5]='Formatejant, si us plau esperi...';
+	$TbMsg[6]='Creant Inventari Hardware, si us plau esperi...';
+	$TbMsg[7]='Creant Inventari Software, si us plau esperi...';
+	$TbMsg[8]='Executant script, si us plau esperi...';
+	$TbMsg[9]='El procés de creació de imatge ha finalitzat correctament';
+	$TbMsg[10]='ATENCIÓ, ha ocorregut algun error en el procés de creació de imatge';
+	$TbMsg[11]='El procés de restauració imatge ha finalitzat correctament';
+	$TbMsg[12]='ATENCIÓ, ha ocorregut algun error en el procés de restauració de imatge';
+	$TbMsg[13]='El procés de particionat ha finalitzat correctament';
+	$TbMsg[14]='ATENCIÓ, ha ocorregut algun error en el procés de particionat';
+	$TbMsg[15]='El procés de formatejat ha finalitzat correctament';
+	$TbMsg[16]='ATENCIÓ, ha ocorregut algun error en el procés de formatejat';
+	$TbMsg[17]='El procés de Inventari Hardware ha finalitzat correctament';
+	$TbMsg[18]='ATENCIÓ, ha ocorregut algun error en el procés de Inventari Hardware';
+	$TbMsg[19]='El procés de Inventari Software ha finalitzat correctament';
+	$TbMsg[20]='ATENCIÓ, ha ocorregut algun error en el procés de Inventari Software';
+	$TbMsg[21]='El procés de execució del script bash ha finalitzat correctament';
+	$TbMsg[22]='ATENCIÓ, ha ocorregut algun error en el procés d\'execució del script bash';
+	$TbMsg[23]='ATENCIÓ';
+	$TbMsg[24]='NO UTILITZI NI APAGUI AQUEST ORDINADOR.';
 	
 
 

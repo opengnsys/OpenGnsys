@@ -1,18 +1,18 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_aulas_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: propiedades_aulas_cat.php 
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sin Opción";
-$TbMsg[1]="Insertar";
+$TbMsg[0]="Sense Opció";
+$TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestión de Variables de Entorno";
-$TbMsg[5]="IP Servidor de administración";
-$TbMsg[6]="Puerto Servidor de administración";
-$TbMsg[7]="Método de clonación preferido";
+$TbMsg[4]="Gestió de Variables d\'Entorn";
+$TbMsg[5]="IP Servidor d\'administració";
+$TbMsg[6]="Port Servidor d\'administració";
+$TbMsg[7]="Mètode de clonació preferit";
 $TbMsg[8]="";
 $TbMsg[9]="";
 $TbMsg[10]="";

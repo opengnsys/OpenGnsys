@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: crearperfilsoftware_esp.php (Comandos)
+//	Fichero de idiomas php: crearperfilsoftware_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();

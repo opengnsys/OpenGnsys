@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: gestor_ejecutarscripts_esp.php (Comandos)
+//	Fichero de idiomas php: gestor_ejecutarscripts_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();

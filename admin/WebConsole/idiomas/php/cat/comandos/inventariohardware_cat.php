@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: inventariohardware__esp.php (Comandos)
+//	Fichero de idiomas php: inventariohardware__cat.php (Comandos)
 //	Idioma: Espa�l 
 //________________________________________________________________________________________________________
 	$TbMsg=array();

@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: opcionesacciones_esp.php (Comandos)
+//	Fichero de idiomas php: opcionesacciones_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsgAux=array();

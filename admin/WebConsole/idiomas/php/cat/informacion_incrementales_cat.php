@@ -1,8 +1,8 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fitxer d'idiomes php: informacion_incrementales_esp.php 
-//	Idioma: Català 
+//	Fitxer d'idiomes php: informacion_incrementales_cat.php 
+//	Idioma: Català
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Software Incremental';

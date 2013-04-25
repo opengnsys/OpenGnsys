@@ -6,18 +6,18 @@
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="Sense Opció";
-$TbMsg[1]="Insertar";
+$TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
 $TbMsg[4]="Gestió Tasques";
-$TbMsg[5]="Nom Tascaa";
+$TbMsg[5]="Nom Tasca";
 $TbMsg[6]="Comentaris";
-$TbMsg[7]="Tipo ámbito";
-$TbMsg[8]="Ámbito de aplicación";
+$TbMsg[7]="Tipus àmbit";
+$TbMsg[8]="Àmbit d\'aplicació";
 $TbMsg[9]="";
-$TbMsg[10]="Centros";
-$TbMsg[11]="Grupos de Aulas";
-$TbMsg[12]="Aulas";
-$TbMsg[13]="Grupos de Ordenadores";
-$TbMsg[14]="Ordenadores";
+$TbMsg[10]="Centres";
+$TbMsg[11]="Grups d\'Aules";
+$TbMsg[12]="Aules";
+$TbMsg[13]="Grups d\Ordinadors";
+$TbMsg[14]="Ordinadors";
 ?>

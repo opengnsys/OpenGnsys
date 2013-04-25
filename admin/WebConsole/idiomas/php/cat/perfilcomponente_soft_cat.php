@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fitxer d'idiomes php: perfilcomponente_soft_esp.php 
+//	Fitxer d'idiomes php: perfilcomponente_soft_cat.php 
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
@@ -9,5 +9,5 @@
 	$TbMsg[1]='Gestió de components software';
 	$TbMsg[2]='Perfil software';
 	$TbMsg[3]='Nom del component';
-	$TbMsg[4]='(*)Per a incloure algún component en aquest perfil deu fer click sobre la casella de verificació corresponent.';
+	$TbMsg[4]='(*)Per incloure algun component en aquest perfil ha de fer click sobre la casella de verificació corresponent.';
 ?>

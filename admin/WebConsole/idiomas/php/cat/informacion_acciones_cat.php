@@ -1,15 +1,15 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: informacion_perfileshard_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: informacion_perfileshard_cat.php 
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Acciones';
-	$TbMsg[1]='Procedimientos';
-	$TbMsg[2]='Información sobre Procedimientos';
-	$TbMsg[3]='Tareas';
-	$TbMsg[4]='Información sobre Tareas';
-	$TbMsg[5]='Información';
-	$TbMsg[6]='Sin parámetros';	
+	$TbMsg[0]='Accions';
+	$TbMsg[1]='Procediments';
+	$TbMsg[2]='Informació sobre Procediments';
+	$TbMsg[3]='Tasques';
+	$TbMsg[4]='Informació sobre Tasques';
+	$TbMsg[5]='Informació';
+	$TbMsg[6]='Sense paràmetres';	
 ?>

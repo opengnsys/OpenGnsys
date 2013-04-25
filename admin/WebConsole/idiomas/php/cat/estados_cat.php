@@ -6,9 +6,9 @@
 //____________________________________________
 
 if (empty ($TbMsg)) $TbMsg=array();
-$TbMsg["STATUS_BSY"]="Ocupado";
-$TbMsg["STATUS_INI"]="Iniciando";
-$TbMsg["STATUS_OFF"]="Apagado";
+$TbMsg["STATUS_BSY"]="Ocupat";
+$TbMsg["STATUS_INI"]="Iniciant";
+$TbMsg["STATUS_OFF"]="Apagat";
 $TbMsg["STATUS_OPG"]="OpenGnSys";
 $TbMsg["STATUS_LNX"]="GNU/Linux";
 $TbMsg["STATUS_WXP"]="Windows";

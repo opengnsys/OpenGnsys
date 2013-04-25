@@ -1,24 +1,24 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: incorporaordenadores_esp.php (Comandos)
-//	Idioma: Español
+//	Fichero de idiomas php: incorporaordenadores_cat.php (Comandos)
+//	Idioma: Català
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Apagar ordenadores';
-	$TbMsg[6]='Ámbito';	
+	$TbMsg[0]='Centres';
+	$TbMsg[1]='Grup d\'aules';
+	$TbMsg[2]='Aules';
+	$TbMsg[3]='Grupo d\'ordinadors';
+	$TbMsg[4]='Ordinadors';
+	$TbMsg[5]='Apagar ordinadors';
+	$TbMsg[6]='Àmbit';	
 	$TbMsg[7]='Consola remota';
-	$TbMsg[8]='Atención para ejecutar un comando teclee su sintaxis en la caja de texto de comandos y pulse enter';
-	$TbMsg[9]='Se ha enviado una petición de consola remota a este ámbito, puede empezar a escribir comandos en la ventana para recibir el eco en la ventana de salida';
-	$TbMsg[10]='ATENCIÓN: Ha habido algún problema al enviar una petición de consola remota a este ámbito';
-	$TbMsg[11]='Código del script';
-	$TbMsg[12]='Eco remoto';
-	$TbMsg[13]='ATENCIÓN.- Ha elegido un ámbito de aplicación para la consola remota distinto al de "ordenador". <BR>Para visulizar el eco de cualquier cliente pulse sobre él con el botón secundario y elija "Eco de consola"; <BR>Se abrirá una ventana que se referescará automáticamente donde podrá hacer un seguiento del comando/script introducido';
-	$TbMsg[14]='...Espere por favor, se está enviando el código del script';
-	$TbMsg[15]='...El código del script se ha enviado, para ver la salida de cualquier ordenador elija "Eco de Consola"';
+	$TbMsg[8]='ATENCIÓ: Per executar una comanda teclegi la seva sintaxis en la caixa de text de comandes i premi enter';
+	$TbMsg[9]='S\'ha enviat una petició de consola remota a aquest àmbit, pot començar a escriure comandes en la finestra per rebre l\'eco en la finestra de sortida';
+	$TbMsg[10]='ATENCIÓ: Ha ocorregut algun problema en l\'enviament d\'una petició de consola remota en aquest àmbit';
+	$TbMsg[11]='Codi del script';
+	$TbMsg[12]='Eco remot';
+	$TbMsg[13]='ATENCIÓ: Ha escollit un àmbit d\'aplicació per la consola remota diferent al "d\'ordinador". <BR>Per visualitzar l\'eco de qualsevol client premi sobre ell amb el botón secundari i seleccioni "Eco de consola"; <BR>S\'obrirà una finestra que es refrescarà automàticament on podrà fer un seguiment de la/el comanda/script introduït';
+	$TbMsg[14]='...Esperi si us plau, enviant el codi del script';
+	$TbMsg[15]='...El codi del script s\'ha enviat, per veure la sortida de qualsevol ordinador seleccioni "Eco de Consola"';
 ?>

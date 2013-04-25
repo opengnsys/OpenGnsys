@@ -1,19 +1,19 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fitxcher d'idiomes php: imagenes_esp.php 
+//	Fitxcher d'idiomes php: imagenes_cat.php 
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Nou grup d'imátges"';
+	$TbMsg[0]='"Nou grup d\'imatges"';
 	$TbMsg[1]='"Definir nova imatge"';
-	$TbMsg[2]='"Col.locar imatge"';
+	$TbMsg[2]='"Col·locar imatge"';
 	$TbMsg[3]='"Renombrar"';
-	$TbMsg[4]='"Eliminar grup d'imátges"';
+	$TbMsg[4]='"Eliminar grup d\'imatges"';
 	$TbMsg[5]='"Imatge informació"';
 	$TbMsg[6]='"Moure imatge"';
 	$TbMsg[7]='"Propietats"';
 	$TbMsg[8]='"Eliminar Imatge"';
-	$TbMsg[9]='"Imátges"';
+	$TbMsg[9]='"Imatges"';
 	$TbMsg[10]='"Gestió incrementals"';
 ?>

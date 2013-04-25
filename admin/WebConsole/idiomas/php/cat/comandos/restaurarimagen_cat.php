@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: restaurarimagen_esp.php (Comandos)
+//	Fichero de idiomas php: restaurarimagen_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();

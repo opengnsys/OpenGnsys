@@ -1,12 +1,12 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fitxer d'idiomes php: programaciones_esp.php 
+//	Fitxer d'idiomes php: programaciones_cat.php 
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 // Literals dels tipus d'accions
-$LITEJECUCION_COMANDO="Comandaments";
-$LITEJECUCION_PROCEDIMIENTO="Procedimentss";
+$LITEJECUCION_COMANDO="Comandes";
+$LITEJECUCION_PROCEDIMIENTO="Procediments";
 $LITEJECUCION_TAREA="Tasques";
 $LITEJECUCION_TRABAJO="Treballs";
 $LITEJECUCION_RESERVA="Reserves";

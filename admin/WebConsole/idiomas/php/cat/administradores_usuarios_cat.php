@@ -1,14 +1,14 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: administradores_centros_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: administradores_centros_cat.php 
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Unidades Administrativas';
-	$TbMsg[1]='Asignar centros';
-	$TbMsg[2]='Centros asignados';
-	$TbMsg[3]='Nombre del centro';
-	$TbMsg[4]='(*)Para asignar algún centro a un administrador determinado debe hacer click sobre la casilla de verificación correspondiente.';
-	$TbMsg[5]='Centros disponibles';
+	$TbMsg[0]='Unitats Administratives';
+	$TbMsg[1]='Assignar centres';
+	$TbMsg[2]='Centres assignats';
+	$TbMsg[3]='Nom del centre';
+	$TbMsg[4]='(*)Per assignar algun centre a un administrador ha de fer click sobre la casella de verificació corresponent.';
+	$TbMsg[5]='Centres disponibles';
 ?>
