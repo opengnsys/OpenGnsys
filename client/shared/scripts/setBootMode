@@ -11,6 +11,7 @@ PORT=2011
 TEMPLATE="/opt/oglive/tftpboot/menu.lst/templates/$1"
 PCNAME="$(hostname)"
 
+PROG="$(basename $0)"
 if [ "$*" == "help" ]; then
     ogHelp "$PROG" "$PROG template" \
            "$PROG pxe" \
