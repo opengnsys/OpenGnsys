@@ -16,6 +16,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #581	El comando chntpw se cuelga cuando el registro de Windows está corrompido
 
 Tickets resueltos en módulo OpenGnSys Client:
+#245	Teclado internacional en el cliente (mejora)
 #263	Consola Web: Particionar y formatear
 #457	Seguridad: ogclient en modo usuario permite abrir una consola bash (no se resolverá)
 #463	ogLive no espera el link para configurar la red y da error
@@ -36,6 +37,7 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 #583	Script deleteimage no admite correctamente parámetro de borrado de copia de seguridad de la imagen
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#149	Controlar tamaño de caché en la consola
 #265	Consola Web: Actualización información al terminar los comandos (duplicado de #577)
 #416	Clonar partición sólo datos
 #524	Eliminar imagen en caché del cliente

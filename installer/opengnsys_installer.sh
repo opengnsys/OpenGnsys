@@ -46,11 +46,14 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
 
+# Directorio destino de OpenGnSys.
 INSTALL_TARGET=/opt/opengnsys
-OGLOGFILE=$INSTALL_TARGET/log/opengnsys_installation.log
+
+# Registro de incidencias.
+OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log
 LOG_FILE=/tmp/$(basename $OGLOGFILE)
 
-# Base de datos
+# Fichero SQL para crear la base de datos.
 OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 
 
@@ -1160,6 +1163,8 @@ function copyServerFiles ()
 	local SOURCES=( server/tftpboot \
 			server/bin \
 			repoman/bin \
+			admin/Sources/Services/ogAdmServerAux
+			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
 			installer/install_ticket_wolunicast.sh \
@@ -1167,6 +1172,8 @@ function copyServerFiles ()
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
+			sbin \
+			sbin \
 			lib \
 			lib \
 			lib \
@@ -1354,9 +1361,8 @@ function openGnsysConfigure()
 	local CONSOLEURL
 
 	echoAndLog "${FUNCNAME}(): Copying init files."
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin
+	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator

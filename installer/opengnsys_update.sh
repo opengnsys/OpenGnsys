@@ -49,7 +49,7 @@ if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
 elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
 	source $INSTALL_TARGET/etc/ogAdmAgent.cfg
 fi
-OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base datos
+OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base de datos
 OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
 OPENGNSYS_DBPASSWORD=${OPENGNSYS_DBPASSWORD:-"$PASSWORD"}	# Clave del usuario
 if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASSWORD" ]; then
@@ -71,7 +71,8 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
 
-OGLOGFILE=$INSTALL_TARGET/log/opengnsys_installation.log 
+# Registro de incidencias.
+OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log 
 LOG_FILE=/tmp/$(basename $OGLOGFILE) 
 
 
@@ -520,12 +521,16 @@ function updateServerFiles()
 	# No copiar ficheros del antiguo cliente Initrd
 	local SOURCES=(	repoman/bin \
 			server/bin \
+			admin/Sources/Services/ogAdmServerAux \
+			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
 			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
+			sbin \
+			sbin \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
 			lib/install_ticket_wolunicast.sh \
