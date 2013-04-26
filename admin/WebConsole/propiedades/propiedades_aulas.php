@@ -384,8 +384,8 @@ function abrir_ventana(URL){
 					echo '<td colspan="3">'.(($validacion == 1)?"Si":"No").'</td>';
 				else {
 					echo '<td colspan="3">';
-					$validaciones="1=Si".chr(13);
-					$validaciones.="0=No";
+					$validaciones="0=No".chr(13);
+					$validaciones.="1=Si";
 					echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</td>';
 				}
 			?>
