@@ -50,7 +50,6 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 	fclose(fcfg);
 
 	servidoradm[0] = (char) NULL; //inicializar variables globales
-	puerto[0] = (char) NULL;
 	usuario[0] = (char) NULL;
 	pasguor[0] = (char) NULL;
 	datasource[0] = (char) NULL;
@@ -1187,8 +1186,10 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama) 
 {
 	char *iph, *tpc;
-	int idx;
+	int idx,port_old=0,port_new;
 	char modulo[] = "DisponibilidadComandos()";
+	
+
 
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
@@ -1198,8 +1199,16 @@ BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama)
 	}
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	strcpy(tbsockets[idx].estado, tpc);
-	if(tbsockets[idx].sock!=INVALID_SOCKET)
-		close(tbsockets[idx].sock); // Cierra el socket si ya existia uno
+
+	port_new=tomaPuerto(*socket_c);
+
+	if(tbsockets[idx].sock!=INVALID_SOCKET){
+		port_old=tomaPuerto(tbsockets[idx].sock);
+		if(port_old!=port_new){
+			close(tbsockets[idx].sock); // Cierra el socket si ya existia uno
+		}
+	}
+
 	tbsockets[idx].sock = *socket_c;
 	swcSocket = TRUE; // El socket permanece abierto para recibir comandos desde el servidor
 	liberaMemoria(iph);

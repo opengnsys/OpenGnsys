@@ -1111,3 +1111,25 @@ TRAMA* recibeMensaje(SOCKET *socket_c)
 	}
 	return(ptrTrama);
 }
+
+// ________________________________________________________________________________________________________
+
+int tomaPuerto(SOCKET s)
+{
+	struct sockaddr_in sin;
+	socklen_t addrlen = sizeof(sin);
+	int local_port;
+
+	if(getpeername(s, (struct sockaddr *)&sin, &addrlen) == 0 
+		&&	sin.sin_family == AF_INET &&
+   	addrlen == sizeof(sin))
+		{
+  	  local_port = ntohs(sin.sin_port);
+		}
+	else
+	  local_port=-1;
+
+	return(local_port);
+
+}
+
