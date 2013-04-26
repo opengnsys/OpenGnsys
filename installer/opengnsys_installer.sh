@@ -35,6 +35,7 @@ fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
+PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
@@ -1442,8 +1443,7 @@ function installationSummary()
 	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
-	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
-	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
+	echoAndLog "Web Console access data:          specified in installer script"
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
