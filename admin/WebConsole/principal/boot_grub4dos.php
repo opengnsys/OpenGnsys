@@ -64,23 +64,21 @@ $ultimonumero=substr($ultimofichero,0,2);
 
 //Comprobamos que no se mayor que 99 (tendria 3 caracteres)
 if ($ultimonumero==99)
-{$ultimonumero=20;}else{$ultimonumero++;}
+	{$ultimonumero=20;
+}else{
+	$ultimonumero++;
+}
 
 //Buscamos si el siguiente numero esta disponible
-While($encontrado==0)
+$encontrado=FALSE;
+while($encontrado==FALSE)
 {
 	if (in_array($ultimonumero, $pn))
 	{
-	//echo "SI esta el numero - ".$ultimonumero;
-	$encontrado=o;
-	$ultimonumero++;
+		$ultimonumero++;
 	}else{
-		//echo "NO esta el numero - ".$ultimonumero;
-		$encontrado=1;
-		$ultimonumero;
-		}
-
-
+		$encontrado=TRUE;
+	}
 }
 ?>
 <html>
@@ -147,7 +145,7 @@ echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
  <!-- <a href="./muestramenu.php?labelmenu=pxe">  OGlive </a><br> pxe <br> -->
 <?php 
 //Leer fichero pxe
-$description=exec("cat ".$dirtemplates."pxe"." | awk 'NR==1  {print $2}'");//$text=trim($text);
+$description=exec("awk 'NR==1 {print $2}' ".$dirtemplates."pxe");//$text=trim($text);
 ?> 
 <br><?php echo $description;?> <br><br>
 <select multiple size="28" name="Lpxe" id="Lpxe">
@@ -179,7 +177,7 @@ for($i=0; $i<count($pn); $i++)
 	{$listadopxe=listadesconocido($cmd,$desconocido,$seleccion);
 		if ($existe==""){}else{
 
-			$description=exec("cat ".$dirtemplates.$pn[$i]." | awk 'NR==1  {print $2}'");//$text=trim($text);
+			$description=exec("awk 'NR==1 {print $2}' ".$dirtemplates.$pn[$i]);	//$text=trim($text);
 			echo "<td></td>";
 			echo "<td> <font color=red>";
 			echo $description;
@@ -203,7 +201,7 @@ for($i=0; $i<count($pn); $i++)
 					}
 
 	}else{
-	$description=exec("cat ".$dirtemplates.$pn[$i]." | awk 'NR==1  {print $2}'");//$text=trim($text);
+	$description=exec("awk 'NR==1 {print $2}' ".$dirtemplates.$pn[$i]);	//$text=trim($text);
 	echo "<td></td>";
 	echo "<td> ";
 	echo $description;
@@ -236,18 +234,16 @@ if (!empty($_SESSION["widcentro"]))
 // esta funcion genera los elementos de un select(formulario html) donde aparecen los nombres de los ordenadores, según su menu pxe
 function listaequipos($cmd,$menupxe,$seleccion)
 {
-$cmd->texto="SELECT * FROM ordenadores where arranque='" . $menupxe ."' " . $seleccion; 
+$cmd->texto="SELECT  idordenador, nombreordenador
+		FROM ordenadores
+		WHERE arranque='" . $menupxe ."' " . $seleccion;
 $rs=new Recordset; 
 $rs->Comando=&$cmd; 
 if (!$rs->Abrir()) echo "error";
 $rs->Primero(); 
 while (!$rs->EOF)
 { 
-	echo "<option value='";
-	echo $rs->campos["nombreordenador"];
-	echo "'>";
-	echo $rs->campos["nombreordenador"];
-	echo "</option>";
+	echo "<option value='".$rs->campos["idordenador"]."'>".$rs->campos["nombreordenador"]."</option>";
 	$rs->Siguiente();
 }
 $rs->Cerrar();

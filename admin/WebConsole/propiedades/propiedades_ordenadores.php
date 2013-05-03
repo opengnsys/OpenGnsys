@@ -39,6 +39,8 @@ $netdriver="";
 $validacion=0;
 $paginalogin="";
 $paginavalidacion="";
+######################## Ramón
+$arranque="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros 
 if (isset($_GET["idordenador"])) $idordenador=$_GET["idordenador"]; 
@@ -56,33 +58,34 @@ if  ($opcion!=$op_alta){
 }
 //________________________________________________________________________________________________________
 ?>
-<HTML>
-<TITLE>Administración web de aulas</TITLE>
-<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
-	<SCRIPT language="javascript" src="../jscripts/propiedades_ordenadores.js"></SCRIPT>
-	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadores_'.$idioma.'.js"></SCRIPT>'?>
+<html>
+<title>Administración web de aulas</title>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<link rel="stylesheet" type="text/css" href="../estilos.css" />
+	<script language="javascript" src="../jscripts/propiedades_ordenadores.js"></script>
+	<script language="javascript" src="../jscripts/opciones.js"></script>
+	<?php echo '<script language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadores_'.$idioma.'.js"></script>'?>
 	<script language=javascript> 
 function abrir_ventana(URL){ 
    window.open('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640') 
 } 
 </script>
 
-</HEAD>
-<BODY>
-<FORM  name="fdatos" action="../gestores/gestor_ordenadores.php" method="post" enctype="multipart/form-data"> 
-	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
-	<INPUT type=hidden name=idordenador value="<? echo $idordenador?>">
-	<INPUT type=hidden name=grupoid value="<? echo $grupoid?>">
-	<INPUT type=hidden name=idaula value="<? echo $idaula?>">
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+</head>
+<body>
+<form name="fdatos" action="../gestores/gestor_ordenadores.php" method="post" enctype="multipart/form-data"> 
+	<input type="hidden" name="opcion" value="<?php echo $opcion?>" />
+	<input type="hidden" name="idordenador" value="<?php echo $idordenador?>" />
+	<input type="hidden" name="grupoid" value="<?php echo $grupoid?>" />
+	<input type="hidden" name="idaula" value="<?php echo $idaula?>" />
+	<input type="hidden" name="arranque" value="<?php echo $arranque?>" />
+	<p align="center" class="cabeceras"><?echo $TbMsg[4]?><br />
+	<span align="center" class="subcabeceras"><? echo $opciones[$opcion]?></span></p>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>* +</sup>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$nombreordenador.'</td>';
 				else
@@ -104,7 +107,7 @@ function abrir_ventana(URL){
 		</tr>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[6]?> <sup>*</sup>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[6]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$ip.'</td>';
 				else
@@ -113,9 +116,9 @@ function abrir_ventana(URL){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[7]?> <sup>*</sup>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[7]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
-					echo '<td>'.$mac.'</td>';
+					echo '<td><input type="hidden" name="mac" value="'.$mac.'" />'.$mac.'</td>';
 				else	
 					echo '<td><input class="formulariodatos" name=mac  type=text value="'. $mac.'"></td>';
 			?>
@@ -257,34 +260,30 @@ function abrir_ventana(URL){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <?php	if ($opcion!=$op_eliminacion) { ?>
 		<tr>
-			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
-		</tr>
-		<tr>
-			<th colspan="4" align="center">&nbsp;<sup>+</sup> <?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th>
+			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th>
 		</tr>
 <?php	} ?>
 	</table>
-</FORM>
-</DIV>
+</form>
 <?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
-<BR>
-<?
+<br />
+<?php
 //________________________________________________________________________________________________________
 //
 // Frame con la información de la configuración
-echo '<DIV align=center>';
-echo '<IFRAME scrolling=auto height=500 width=90% frameborder=0
-		 src="../principal/configuraciones.php?swp=1&idambito='.$idordenador.'&ambito='.$AMBITO_ORDENADORES.'"></IFRAME>';
-echo '</DIV>';
+echo '<div align="center">';
+echo '<iframe scrolling="auto" height="500" width="90%" frameborder="0"
+		 src="../principal/configuraciones.php?swp=1&idambito='.$idordenador.'&ambito='.$AMBITO_ORDENADORES.'"></iframe>';
+echo '</div>';
 //________________________________________________________________________________________________________
 ?>
-</BODY>
-</HTML>
-<?
+</body>
+</html>
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un ordenador
 //		Parametros: 
@@ -307,7 +306,8 @@ function TomaPropiedades($cmd,$id){
         global $validacion;
         global $paginalogin;
         global $paginavalidacion;
-########################### UHU
+########################### Ramón
+        global $arranque;
 
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$id;
@@ -329,7 +329,8 @@ function TomaPropiedades($cmd,$id){
                 $validacion=$rs->campos["validacion"];
                 $paginalogin=$rs->campos["paginalogin"];
                 $paginavalidacion=$rs->campos["paginavalidacion"];
-########################### UHU
+########################### Ramón
+                $arranque=$rs->campos["arranque"];
 
 		$rs->Cerrar();
 		return(true);

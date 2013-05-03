@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -15,6 +15,7 @@ include_once("../clases/ArbolVistaXML.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 include_once("../includes/opciones.php");
+include_once("../includes/tftputils.php");
 include_once("./relaciones/perfileshard_eliminacion.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
@@ -102,8 +103,8 @@ function Gestiona(){
 	global	$comentarios;
 	global	$grupoid;
 	global	$winboot;
-
-	global $urlimgth;
+	global	$idioma;
+	global	$urlimgth;
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -135,6 +136,8 @@ function Gestiona(){
 		case $op_modificacion:
 			$cmd->texto="UPDATE perfileshard SET descripcion=@descripcion,comentarios=@comentarios,winboot=@winboot WHERE idperfilhard=@idperfilhard";
 			$resul=$cmd->Ejecutar();
+			// Actualizar ficheros PXE de todos los ordenadores afectados.
+			updateBootMode ($cmd, "idperfilhard", $idperfilhard, $idioma)
 			break;
 		case $op_eliminacion :
 			$resul=EliminaPerfileshard($cmd,$idperfilhard,"idperfilhard");

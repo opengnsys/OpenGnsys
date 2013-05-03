@@ -17,6 +17,7 @@ include_once("../includes/constantes.php");
 include_once("./relaciones/aulas_eliminacion.php");
 include_once("./relaciones/ordenadores_eliminacion.php");
 include_once("../includes/opciones.php");
+include_once("../includes/tftputils.php");
 include_once("./relaciones/gruposordenadores_eliminacion.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
@@ -124,7 +125,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_aulas.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_alta :
@@ -159,7 +160,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /**************************************************************************************************************************************************
 	Inserta, modifica o elimina datos en la tabla aulas
 ________________________________________________________________________________________________________*/
@@ -203,6 +204,7 @@ function Gestiona(){
 ########################## Ramón
 	global $dns;
 	global $proxy;
+	global $idioma;
 ########################## UHU
         global $validacion;
         global $paginalogin;
@@ -285,7 +287,6 @@ function Gestiona(){
 					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion
 					WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
-			//echo $cmd->texto;
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$clsUpdate="";	
 				if($idmenu>0 || $gidmenu>0)	
@@ -306,8 +307,9 @@ function Gestiona(){
 					$clsUpdate=substr($clsUpdate,0,strlen($clsUpdate)-1); // Quita última coma
 					$cmd->texto="UPDATE ordenadores SET ".$clsUpdate." WHERE idaula=@idaula";
 					$resul=$cmd->Ejecutar();
-					//echo $cmd->texto;
 				}	
+				// Actualizar ficheros PXE de todos los ordenadores afectados.
+				updateBootMode ($cmd, "idaula", $idaula, $idioma);
 			}
 			break;
 		case $op_eliminacion :

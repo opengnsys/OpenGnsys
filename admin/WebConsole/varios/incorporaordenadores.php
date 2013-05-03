@@ -11,6 +11,7 @@
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
+include_once("../includes/tftputils.php");
 include_once("../idiomas/php/".$idioma."/incorporaordenadores_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -59,7 +60,6 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	<tr> 
 	    <th>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</th>
 		<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
-	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th></tr>
 	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th></tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 </table>
@@ -134,6 +134,7 @@ function procesaLineas($cmd,$idaula,$buffer)
 function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 {
 	global $ordDup;
+	global $idioma;
 	
 	$grupoid=0;
 	$nombreordenador=trim($nombre);
@@ -163,6 +164,11 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	
 	$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,idaula,grupoid) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,@idaula,@grupoid)";
 	$resul=$cmd->Ejecutar();
+	// Crear fichero de arranque PXE con plantilla por defecto.
+	if ($resul) {
+		$idordenador=$cmd->Autonumerico();
+		createBootMode ($cmd, "", $idordenador, $idioma);
+	}
 	return($resul);
 }
 //________________________________________________________________________________________________________
