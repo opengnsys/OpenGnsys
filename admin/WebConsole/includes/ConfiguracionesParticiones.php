@@ -237,29 +237,26 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 		case $AMBITO_ORDENADORES :
 			$cmd->texto.="	WHERE ordenadores.idordenador=".$idambito;
 			break;
-	}					
-	$cmd->texto.=" AND ordenadores_particiones.numpar>0 ";
+	}
 
 	if ($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
-		$cmd->texto.=" AND tipospar.clonable=1";
+		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0";
 
-	
 	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numpar) AS temp1
 					GROUP BY temp1.idordenador) AS temp2
 					GROUP BY temp2.configuraciones
 					ORDER BY con desc,idordenadores";
-								
-	//echo 	$cmd->texto;
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$cc=0; // Contador de configuraciones
-	echo '<table  id="tabla_conf" width="95%" class="tabla_listados_sin" align=center border=0 cellPadding=0 cellSpacing=1>';
+	echo '<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">';
 	while (!$rs->EOF){
 		$cc++;
 		//Muestra ordenadores
-		echo '<tr><td colspan='.$colums.' style="background-color: #ffffff;">';
+		echo '<tr><td colspan="'.$colums.'" style="background-color: #ffffff;">';
 		echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc);
 		echo '</td></tr>';
 		//Muestra particiones y configuración
