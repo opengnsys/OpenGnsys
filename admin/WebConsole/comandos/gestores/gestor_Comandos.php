@@ -170,7 +170,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
 				$parametros.=$acciones;
-				die($parametros);
+				//die($parametros);
 				$resul=$shidra->envia_comando($parametros);
 				if($resul)
 					$trama=$shidra->recibe_respuesta();
