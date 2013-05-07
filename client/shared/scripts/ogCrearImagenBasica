@@ -10,14 +10,20 @@
 # $2 Número de particion
 # $3 Nombre canónico de la imagen básica (sin extensión)
 # $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
-# $5 Es una cadena "nnnn" tipo flags que codifica varios parametros.
+# $5 Es una cadena "nnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
+#		1XX: Gestionar fichero completo en lugar de diferencas
+#		X1X: Eliminar archivos de la imagen que no estén en la partición 
+#		XX1: Comprimir archivos para enviarlos por la red
+#		El valor X indica que no importa el valor que tenga el dato
+# $6 Es una cadena "nnnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
 #		1XXX: Borrar la imagen del repositorio antes de crearla
 #		X1XX: Copiar Imagen básica también a la cache 
 #		XX1X: Borrar previamente la imagen de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $6 Ruta de origen de la Imagen (Carpeta)
+# $7 Ruta de origen de la Imagen (Carpeta)
 
 #___________________________________________________________________
 #
@@ -25,7 +31,7 @@
 #___________________________________________________________________
 
 	PROG="$(basename $0)"
-	if [ $# -lt 5 ]; then
+	if [ $# -lt 6 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio"
 		usage="$usage copiar_a_caché Borrar_cache_previamente Ruta_origen"
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
@@ -38,6 +44,12 @@
 	IPREPOSITORIO=$4
 	
 	flag=$5
+	echo "flah:$flag">/tmp/log
+	WHLFILE=${flag:0:1}
+	RMVFILE=${flag:1:1}
+	CMPFILE=${flag:2:1}
+	
+	flag=$6
 	echo "flah:$flag">/tmp/log
 	BORRARIMG=${flag:0:1}
 	COPIACACHE=${flag:1:1}

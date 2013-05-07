@@ -50,16 +50,29 @@
 
 		REPOSITORIO="opengnsys@$IPREPOSITORIO::ogimages" # Ruta de las imagenes en el repositorio
 		
+		FILE_ACL="ogwinimage.acl"
+
+			
+		# Envío de archivo completo
+		OP_WHOLE="--whole"
+		if [ $WHLFILE -eq 0 ]; then
+			OP_WHOLE=""
+		fi	
+		
 		# Borrar archivos en destino
 		OP_DELETE="--delete"
 		if [ $NOBORRACHIVOS -eq 1 ]; then
 			OP_DELETE=""
 		fi	
-		
-		FILE_ACL="ogwinimage.acl"
+		if [ $RMVFILE -eq 0 ]; then
+			OP_DELETE=""
+		fi			
 
 		# Opción de compresión
 		OP_COMPRESS="-z"
+		if [ $CMPFILE -eq 0 ]; then
+			OP_COMPRESS=""
+		fi			
 
 		#___________________________________________________________________
 		#
