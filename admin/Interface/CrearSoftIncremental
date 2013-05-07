@@ -11,14 +11,20 @@
 # $3 Nombre canónico de la imagen básica (sin extensión)
 # $4 Dirección del repositorio
 # $5 Nombre canónico de la imagen incremental (sin extensión)
-# $6 Es una cadena "nnnn" tipo flags que codifica varios parametros.
+# $6 Es una cadena "nnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
+#		1XX: Gestionar fichero completo en lugar de diferencas
+#		X1X: Eliminar archivos de la imagen que no estén en la partición 
+#		XX1: Comprimir archivos para enviarlos por la red
+#		El valor X indica que no importa el valor que tenga el dato
+# $7 Es una cadena "nnnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
 #		1XXX: Borrar la imagen incremental del repositorio antes de crearla
 #		X1XX: Copiar imagen incremental también a la cache 
 #		XX1X: Borrar previamente la imagen incremental de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $7 Ruta de origen de la Imagen (Carpeta)
+# $8 Ruta de origen de la Imagen (Carpeta)
 
 #___________________________________________________________________
 #
@@ -26,7 +32,7 @@
 #___________________________________________________________________
 
 	PROG="$(basename $0)"
-	if [ $# -lt 6 ]; then
+	if [ $# -lt 7 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio nombre_imagen_incremental"
 		usage="$usage copiar_a_caché Borrar_cache_previamente Ruta_origen"
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
@@ -34,51 +40,5 @@
 	fi
 	
 	# Llamada a la función de sincronización.
- 	coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh	
 	ogCrearSoftIncremental "$@"
-	kill $COPROC_PID
-        exit
-
-# Versión 2
-# Para probar la versión 2 comentar las cuatro líneas anteriores
-
-# Trasferencias comprimidas
-#export ogcompress="true"
-
-#Carga del configurador del engine
-[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
-
-flag=$6
-echo "flah:$flag">/tmp/log
-DELIMG=${flag:0:1}
-COPYCACHE=${flag:1:1}
-DELCACHE=${flag:2:1}
-NODELETEFILE=${flag:3:1}
-
-RUTAORIGEN=$7
-
-DIFFEXT=".diff"
-echo "$3" | tee -a $OGLOGSESSION $OGLOGFILE
-
-[ "$4" == "0.0.0.0" ] && DEST="CACHE" || DEST="REPO"
-#echo createDiffImage "$1" "$2" "$DEST" "$3" | tee -a $OGLOGSESSION $OGLOGFILE
-#echo 1: "$1" 2: "$2" 3: "$3" 4: "$4" 5: $5 6: $6 7: $7  i| tee -a $OGLOGSESSION $OGLOGFILE
-
-# Si DELIMG = 0 borramos imagen del destino.
-if [ $DELIMG -eq 1 ]; then
-        IMGFILE=$(ogGetPath "$DEST" "$3$DIFFEXT") && rm -rf $IMGFILE
-fi
-
-
-# Creamos la imagen.
-createDiffImage "$1" "$2" "$DEST" "$3" "$5" &>$OGLOGSESSION
-
-# Si COPYCACHE = 1 copiamos la imagen a la cache
-if [ $COPYCACHE -eq 1 ]; then
-        # Si BORRACACHE=1 Borramos imagen de cache
-        [ $BORRACACHE -eq 1 ] && CACHEFILE=$(ogGetPath "CACHE" "$5$DIFFEXT") && rm -rf $CACHEFILE
-        updateCache "REPO" /"$5.diff" UNICAST  &>>$OGLOGSESSION
-
-fi
-
 

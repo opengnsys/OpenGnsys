@@ -195,8 +195,14 @@ function tablaConfiguraciones($idordenador)
 function opcionesAdicionales()
 {
 	global $TbMsg;	
-
-	$tablaHtml.='<table width="90%" align=center border=0 cellPadding=0 cellSpacing=0 class="tabla_accesos">';
+	global $funcion;
+	
+	$tablaHtml.='<table width="90%" ';
+	
+	//if($funcion!="CrearImagenBasica")
+		$tablaHtml.='style="display:none"';
+			
+	$tablaHtml.=' center border=0 cellPadding=0 cellSpacing=0 class="tabla_accesos">';
 	$tablaHtml.='<tr><th colspan=8 align=center><b>&nbsp;'.$TbMsg[12].'&nbsp;</b></th></tr>';
 	$tablaHtml.='<tr id="trOpc">
 					<td align=right>'.$TbMsg[13].'</td>

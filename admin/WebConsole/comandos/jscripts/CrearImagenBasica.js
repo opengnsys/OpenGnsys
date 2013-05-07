@@ -16,6 +16,7 @@
  	
 	var disco=1; // Siempre disco 1
 	document.fdatosejecucion.atributos.value="dsk="+disco+RC+prm;
+	//alert(document.fdatosejecucion.atributos.value)
 	document.fdatosejecucion.submit();
 }
 //________________________________________________________________________________________________________
@@ -64,6 +65,14 @@ function comprobar_datos()
 				prm+="ipr="+ipr+RC;	
 				prm+="rti="+rti+RC;	
 
+				
+				var chrChk=document.getElementById('whl-'+par); // Recupera objeto fila de la tabla opciones adicionales
+				if(chrChk.checked)	prm+="whl=1"+RC; else prm+="whl=0"+RC;
+				chrChk=document.getElementById('eli-'+par); // Recupera objeto fila de la tabla opciones adicionales
+				if(chrChk.checked)	prm+="eli=1"+RC;	 else prm+="eli=0"+RC;
+				chrChk=document.getElementById('cmp-'+par); // Recupera objeto fila de la tabla opciones adicionales
+				if(chrChk.checked)	prm+="cmp=1"+RC; else prm+="cmp=0"+RC;
+				
 				var trObj=document.getElementById('trOpc'); // Recupera objeto fila de la tabla opciones adicionales
 				var obChk=trObj.childNodes[3].childNodes[0]; // Recupera  objeto checkbox borrar de la Imagen	
 				if(obChk.checked)	prm+="bpi=1"+RC; else prm+="bpi=0"+RC;
