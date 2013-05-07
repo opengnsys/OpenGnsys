@@ -1339,7 +1339,7 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 				errorLog(modulo, 26, FALSE);
 				return (FALSE);
 			}
-			close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
+			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 	}
 	liberaMemoria(Ipes);
@@ -3453,7 +3453,7 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				errorLog(modulo, 26, FALSE);
 				return (FALSE);
 			}
-			close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
+			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 		tbl.MoveNext();
 	}

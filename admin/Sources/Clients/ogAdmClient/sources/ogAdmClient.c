@@ -572,6 +572,7 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 		errorLog(modulo,45,FALSE);
 		return(FALSE);
 	}
+
 	close(socket_c);
 
 	if(!gestionaTrama(ptrTrama)){	// Análisis de la trama
@@ -773,6 +774,7 @@ BOOLEAN comandosPendientes(TRAMA* ptrTrama)
 			errorLog(modulo,45,FALSE);
 			return(FALSE);
 		}
+
  		close(socket_c);
 
 		if(!gestionaTrama(ptrTrama)){	// Análisis de la trama
@@ -2001,6 +2003,7 @@ BOOLEAN respuestaEjecucionComando(TRAMA* ptrTrama,int res,char *ids)
 		errorLog(modulo,44,FALSE);
 		return(FALSE);
 	}
+
 	close(socket_c);
 	return(TRUE);
 }

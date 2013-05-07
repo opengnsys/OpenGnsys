@@ -60,9 +60,12 @@ $funcion="nfn=".$funcion.chr(13); // Nombre de la función que procesa el comand
 $aplicacion=""; // Ámbito de aplicación (cadena de ipes separadas por ";" y de identificadores de ordenadores por ","
 $acciones=""; // Cadena de identificadores de acciones separadas por ";" para seguimiento
 
+
+
 $atributos=str_replace('@',chr(13),$atributos); // Reemplaza caracters
 $atributos=str_replace('#',chr(10),$atributos); 
 $atributos=str_replace('$',chr(9),$atributos);
+
 
 //__________________________________________________________________
 ?>
@@ -167,7 +170,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
 				$parametros.=$acciones;
-				//echo $parametros;
+				die($parametros);
 				$resul=$shidra->envia_comando($parametros);
 				if($resul)
 					$trama=$shidra->recibe_respuesta();

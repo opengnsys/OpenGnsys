@@ -79,6 +79,9 @@ if (!$resul){
 			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>			
 			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[10]?>&nbsp;</TH>
+			<TH align=center>&nbsp;W&nbsp;</TH>
+			<TH align=center>&nbsp;E&nbsp;</TH>
+			<TH align=center>&nbsp;C&nbsp;</TH>
 		</TR>
 <!------------------------------------------------------------------------------------------
  Detalle 
@@ -175,6 +178,9 @@ function tablaConfiguraciones($idordenador)
 			$tablaHtml.='<td align="center">&nbsp;'.$rs->campos["numpar"].'&nbsp;</td>'; // Número de partición
 			$tablaHtml.='<td align=center>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</td>'; // Nombre sistema operativo
 			$tablaHtml.='<td align=center>'.HTMLSELECT_imagenes($rs->campos["idimagen"]).'</td>';	
+			$tablaHtml.='<td align=center><input type=checkbox name="whole" id="whl-'.$rs->campos["numpar"].'"></td>';	
+			$tablaHtml.='<td align=center><input type=checkbox name="paramb" checked id="eli-'.$rs->campos["numpar"].'"></td>';	
+			$tablaHtml.='<td align=center><input type=checkbox name="compres" id="cmp-'.$rs->campos["numpar"].'"></td>';	
 			$tablaHtml.='</tr>';			
 		}
 		$rs->Siguiente();
