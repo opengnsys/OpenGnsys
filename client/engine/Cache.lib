@@ -51,7 +51,7 @@ START=$[END-SIZE+1]
 ENDPREVPART=$[$(ogGetLastSector $NDSK $[PART-1] 2>/dev/null)]
 # Error si tamaño no está entre límites permitidos o si se solapa con la partición anterior.
 MINSIZE=25000                           # Error de formateo si tamaño < 50 MB.
-MAXSIZE=$[END/2]                        # No permitir tamaño > mitad del disco.
+MAXSIZE=$[END/1]                        # No permitir tamaño > tamaño maximo del disco.
 if [ $SIZE -lt $MINSIZE -o $SIZE -gt $MAXSIZE -o $START -le $ENDPREVPART ]; then
     ogRaiseError $OG_ERR_FORMAT "$1" || return $?
 fi
