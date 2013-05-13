@@ -53,6 +53,8 @@ for IMG in *.{img,pgz}; do
 	else
 		echo "`date` : ERROR en creación de fichero $TORRENT" >> $LOGFILE
 	fi
+	# Modificación realizada en la corrección temporal de la incidencia #535
+	break	
 done
 	
 popd >/dev/null
