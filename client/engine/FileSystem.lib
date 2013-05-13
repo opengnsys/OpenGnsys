@@ -30,7 +30,7 @@
 #@version 1.0.4 - Soportar HFS/HFS+.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-05-21
-#@version 1.0.5 - Desmontar antes de comprobar.
+#@version 1.0.5 - Desmontar antes de comprobar, soportar Btrfs.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-09-05
 #*/ ##
@@ -53,6 +53,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])     PROG="e2fsck"; PARAMS="-y"; CODES=(1 2) ;;
+    BTRFS)        PROG="btrfsck"; CODES=1 ;;
     REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
     REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
     JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
@@ -135,8 +136,8 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])   PROG="resize2fs"; PARAMS="-f" ;;
-    REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
     BTRFS)      PROG="btrfs"; PARAMS="filesystem resize max" ;;
+    REISERFS)   PROG="resize_reiserfs"; PARAMS="-f" ;;
     NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
 #    FAT32|FAT16)       # Usar "fatresize"
     *)          ogRaiseError $OG_ERR_PARTITION "$1 $2 $TYPE"
@@ -421,12 +422,14 @@ case "$ID" in
                ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
                ;;
      *)        # Detectar sistema de ficheros.
-               ogMount $1 $2 &>/dev/null
-               TYPE=$(mount | awk -v p=$PART '{ if ($1==p) { print toupper($5); } }')
-               # Detectar otros sistemas de archivos (FUSE, VFAT).
+               TYPE=$(blkid -o export $PART | awk -F= '$1~/^TYPE/ { print toupper($2) }')
+               # Componer valores correctos.
                case "$TYPE" in
-                    FUSEBLK) TYPE="NTFS" ;;    # usar "file -Ls" para detectar
-                    VFAT)    TYPE="FAT32" ;;   # usar "file -Ls" para detectar
+                    VFAT)      TYPE="FAT32" ;;  # Nota: usar "file -Ls" para detectar.
+                    SWAP)      TYPE="LINUX-SWAP" ;;
+                    LVM*)      TYPE="LINUX-LVM" ;;
+                    *RAID*)    TYPE="LINUX-RAID" ;;
+                    *_MEMBER)  TYPE="${TYPE/_MEMBER/}" ;;
                esac
                ;;
 esac
