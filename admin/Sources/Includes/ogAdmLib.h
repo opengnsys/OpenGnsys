@@ -11,22 +11,22 @@
 // ________________________________________________________________________________________________________
 #define LONSTD 1024	// Longitud de memoria estandar
 #define LONINT 16	// Longitud de memoria estandar para un número entero
-#define LONFIL 256	// Longitud de memoria estandar para nombres de archivo completos (incluido path)
+#define LONFIL 1024	// Longitud de memoria estandar para nombres de archivo completos (incluido path)
 #define LONIP 16	// Longitud de memoria estandar para cadenas que contiene una dirección IP
 #define LONMAC 16	// Longitud de memoria estandar para cadenas que contiene una dirección MAC
-#define LONSQL 4096	// Longitud de memoria estandar para una sentencia SQL
-#define LONPRM 512	// Longitud estandar de los parámetros del fichero de configuración del servicio
-#define LONSCP 2024	// Longitud estandar de los parámetros de las tramas
-#define LONFUN 64	// Longitud estandar de los nombres de las funciones que procesan las tramas
-#define LONSUC 512	// Longitud de los mensajes de sucesos
-#define LONBLK 4096	// Longitud de los paquetes de tramas leidos cada vez
-#define MAXPRM 10	// Máximo número de parámeros del fichero de configuración del servicio
+#define LONSQL 8192	// Longitud de memoria estandar para una sentencia SQL
+#define LONPRM 4098	// Longitud estandar de los parámetros del fichero de configuración del servicio
+#define LONSCP 4098	// Longitud estandar de los parámetros de las tramas
+#define LONFUN 512	// Longitud estandar de los nombres de las funciones que procesan las tramas
+#define LONSUC 4098	// Longitud de los mensajes de sucesos
+#define LONBLK 8192	// Longitud de los paquetes de tramas leidos cada vez
+#define MAXPRM 20	// Máximo número de parámeros del fichero de configuración del servicio
 #define MAXPAR 128	// Maximo numero de particiones manejadas por el sistema, ahora con GPT es 128
-#define MAXLONURL 512 // Longitud máxima de una dirección url con parámetros
+#define MAXLONURL 1024 // Longitud máxima de una dirección url con parámetros
 
 #define LONHEXPRM 5 // Longitud del campo que contiene el tamaño de la cadena de parámetros
 #define LONGITUD_CABECERATRAMA 16	// Longitud de la cabecera de las tramas
-#define LONGITUD_PARAMETROS 1024	// Longitud estandar de la información de la trama (parámetros)
+#define LONGITUD_PARAMETROS 8192	// Longitud estandar de la información de la trama (parámetros)
 #define MAXCMD_PARAMETROS  200  // Máximo número de parámetros de una trama
 
 #define MAXIMOS_CLIENTES	4000	// Máximo número de conexiones con ordenadores clientes

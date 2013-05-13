@@ -1286,7 +1286,7 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*cpt,*idi,*nci,*rti,*ipr,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*cpt,*idi,*nci,*rti,*ipr,*whl,*eli,*cmp,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "CrearImagenBasica()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1301,6 +1301,11 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	nci=copiaParametro("nci",ptrTrama); // Nombre canónico de la imagen
 	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
 	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
+
+	whl=copiaParametro("whl",ptrTrama); // Envío del fichero completo si hay diferencias	
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estén en origen	
+	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
+
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
 	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
@@ -1310,7 +1315,7 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	//if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(30,NULL);// Creando Imagen Básica, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
-		sprintf(parametros,"%s %s %s %s %s %s%s%s%s %s",nfn,dsk,par,nci,ipr,bpi,cpc,bpc,nba,rti);
+		sprintf(parametros,"%s %s %s %s %s %s%s%s %s%s%s%s %s",nfn,dsk,par,nci,ipr,whl,eli,cmp,bpi,cpc,bpc,nba,rti);
 		herror=interfaceAdmin(interface,parametros,NULL);
 		if(herror){
 			sprintf(msglog,"%s:%s",tbErrores[86],nfn);
