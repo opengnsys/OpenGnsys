@@ -828,10 +828,8 @@ cp -a ${FSTAB} ${FSTAB}.backup
 # Dispositivo del raíz en fichero fstab: 1er campo (si no tiene "#") con 2º campo = "/".
 DEFROOT=$(awk '$1!~/#/ && $2=="/" {print $1}' ${FSTAB})
 PARTROOT=$(ogDiskToDev $1 $2)
-# Configuración de swap (para cualquier tipo de tabla de particiones).
-# AVISO: puede producirse un error si hay más de 1 partición de swap.
-swapon -a
-PARTSWAP=$(swapon -s | awk '$1~/^\// {print $1}')
+# Configuración de swap (solo 1ª partición detectada).
+PARTSWAP=$(blkid -t TYPE=swap | awk -F: 'NR==1 {print $1}')
 if [ -n "$PARTSWAP" ]
 then
     # Dispositivo de swap en fichero fstab: 1er campo (si no tiene "#") con 3er campo = "swap".
