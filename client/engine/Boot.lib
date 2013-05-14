@@ -136,10 +136,10 @@ ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerN
 
 
 #/**
-#         ogLinuxBootParameters int_ndisk int_npartition
+#         ogLinuxBootParameters int_ndisk int_nfilesys
 #@brief   Muestra los parámetros de arranque de un sistema de archivos Linux.
 #@param   int_ndisk      nº de orden del disco
-#@param   int_npartition nº de orden de la partición
+#@param   int_nfilesys   nº de orden del sistema de archivos
 #@return  str_kernel str_initrd str_parameters ...
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -151,6 +151,9 @@ ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerN
 #@version 0.9.2 - Soporta partición /boot independiente.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-07-20
+#@version 1.0.5 - Mejoras en tratamiento de GRUB2.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013-05-14
 #*/ ##
 function ogLinuxBootParameters ()
 {
@@ -159,8 +162,8 @@ local MNTDIR CONFDIR CONFFILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-           "$FUNCNAME 1 2  ==>  ..."
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 2  ==>  /vmlinuz-3.5.0-21-generic /initrd.img-3.5.0-21-generic root=/dev/sda2 ro splash"
     return
 fi
 # Error si no se reciben 2 parámetros.
@@ -176,6 +179,7 @@ CONFDIR=$MNTDIR                               # Partición de arranque /boot.
 CONFFILE="$CONFDIR/grubPARTITION/boot/grub/grub.cfg"
 [ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/menu.lst"
 [ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/grub.cfg"
+[ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub2/grub.cfg"
 [ ! -e $CONFFILE ] && ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" && return $?
 
 # Toma del fichero de configuracion los valores del kernel, initrd
@@ -184,14 +188,16 @@ CONFFILE="$CONFDIR/grubPARTITION/boot/grub/grub.cfg"
 #       y los formatea para que sean compatibles con \c kexec .  */
 # /* (comentario Doxygen)
 awk 'BEGIN {cont=-1;}
-     $1~/^default/      {sub(/=/," "); def=$2;}
-     $1~/^set/ && $2~/^default/ {gsub(/[="]/," "); def=$3;}
-     $1~/^title|^menuentry/ {cont++}
-     $1~/^kernel|^linux/ {if (def==cont) {
-                            kern=$2;
-                            sub($1,"");sub($1,"");sub(/^[ \t]*/,"");app=$0}  # /* (comentario Doxygen)
-                        }
-     $1~/^initrd/       {if (def==cont) init=$2}
+     $1~/^default$/     {sub(/=/," "); def=$2;}
+     $1~/^set$/ && $2~/^default$/ {gsub(/[="]/," "); def=$3;
+                                   if (def ~ /saved_entry/) def=0;
+                                  }
+     $1~/^(title|menuentry)$/ {cont++}
+     $1~/^(kernel|linux)$/ {if (def==cont) {
+                               kern=$2;
+                               sub($1,"");sub($1,"");sub(/^[ \t]*/,"");app=$0}  # /* (comentario Doxygen)
+                           }
+     $1~/^initrd$/      {if (def==cont) init=$2}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}
     ' $CONFFILE
 # */ (comentario Doxygen)
