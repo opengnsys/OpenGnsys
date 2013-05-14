@@ -1113,7 +1113,7 @@ parted -s $DISK set $2 boot on 2>/dev/null
 #@date    2012/03/13
 #@version 1.0.5 - Utiliza el id. de tipo de partición (no el mnemónico)
 #@author  Universidad de Huelva
-#@date    2012/03/07
+#@date    2012/05/14
 #*/ ##
 function ogSetPartitionId ()
 {
@@ -1139,7 +1139,7 @@ ID="${3^^}"
 # Elección del tipo de partición.
 PTTYPE=$(ogGetPartitionTableType $1)
 case "$PTTYPE" in
-    GPT)    sgdisk $DISK -t$PART:$ID 2>/dev/null ;;
+    GPT)    sgdisk -t$2:$ID $DISK 2>/dev/null ;;
     MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK &>/dev/null ;;
     *)      ogRaiseError $OG_ERR_OUTOFLIMIT "$1,$PTTYPE"
             return $? ;;
