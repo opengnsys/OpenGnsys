@@ -29,12 +29,12 @@ fi
 
 
 #/**
-#         ogGetOsVersion int_ndisk int_npartition
+#         ogGetOsVersion int_ndisk int_nfilesys
 #@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
-#@param   int_npartition nº de orden de la partición
+#@param   int_nfilesys   nº de orden de la partición
 #@return  OSType:OSVersion - tipo y versión del sistema operativo.
-#@note    OSType = { Android, BSD, Hurd, Linux, MacOS, Solaris, Windows, WinLoader }
+#@note    OSType = { Android, BSD, GrubLoader, Hurd, Linux, MacOS, Solaris, Windows, WinLoader }
 #@note    Requisitos: awk, head, chroot
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
@@ -45,9 +45,9 @@ fi
 #@version 1.0.4 - Incluir tipos BSD, MacOS y Solaris.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-06-29
-#@version 1.0.5 - Incluir tipos Hurd y WinLoader, leer por defecto fichero /etc/os-release.
+#@version 1.0.5 - Incluir tipos GrubLoader, Hurd y WinLoader, leer por defecto fichero /etc/os-release.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2013-02-04
+#@date    2013-05-14
 #*/ ##
 function ogGetOsVersion ()
 {
@@ -55,8 +55,8 @@ function ogGetOsVersion ()
 local MNTDIR TYPE DISTRIB VERSION IS64BIT FILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-           "$FUNCNAME 1 2  =>  Linux:Ubuntu 11.04 64 bits"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 2  =>  Linux:Ubuntu precise (12.04 LTS) 64 bits"
     return
 fi
 # Error si no se reciben 2 parametros.
@@ -87,6 +87,16 @@ fi
 [ -z "$VERSION" ] && VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
 # Comprobar Linux de 64 bits.
 [ -n "$VERSION" ] && [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
+# Para cargador GRUB, comprobar fichero de configuración.
+if [ -z "$VERSION" ]; then
+    TYPE="GrubLoader"
+    for FILE in $MNTDIR/{,boot/}grub/menu.lst; do
+        [ -r $FILE ] && VERSION="GRUB Loader"
+    done
+    for FILE in $MNTDIR/{,boot/}grub{,2}/grub.cfg; do
+        [ -r $FILE ] && VERSION="GRUB2 Loader"
+    done
+fi
 # Para Android, leer fichero de propiedades.
 if [ -z "$VERSION" ]; then
     TYPE="Android"
