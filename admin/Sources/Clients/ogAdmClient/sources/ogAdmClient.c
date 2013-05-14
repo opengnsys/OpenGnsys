@@ -350,7 +350,7 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 			}
 			else
 			{
-				strncat (msglog, salida, LONSUC - -lon - 4);
+				strncat (msglog, salida, LONSUC-lon-4);
 				strcat (msglog, "...");
 			}
 			infoDebug(msglog);
@@ -535,10 +535,8 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 	SOCKET socket_c;
 	char modulo[] = "inclusionCliente()";
 
-	char *dsk=(char*)reservaMemoria(2);
-	sprintf(dsk,"1"); // Siempre el disco 1
-
-	cfg=LeeConfiguracion(dsk);
+	cfg=LeeConfiguracion();
+	
 	if(!cfg){ // No se puede recuperar la configuración del cliente
 		errorLog(modulo,36,FALSE);
 		errorLog(modulo,37,FALSE);
@@ -546,7 +544,7 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 	}
 	if (ndebug>= DEBUG_ALTO) {
 		// Truncar la cadena si es mayor que el tamaño de la línea de log.
-		sprintf(msglog, "%s:%s", tbMensajes[14]);
+		sprintf(msglog, "%s", tbMensajes[14]);
 		lon = strlen (msglog);
 		if (lon + strlen (cfg) < LONSUC) {
 			strcat (msglog, cfg);
@@ -1708,7 +1706,7 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	else
 		muestraMensaje(14,NULL);
 
-	cfg=LeeConfiguracion(dsk);
+	cfg=LeeConfiguracion();
 	if(!cfg){ // No se puede recuperar la configuración del cliente
 		errorLog(modulo,36,FALSE);
 		return(FALSE);
@@ -1944,9 +1942,7 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 		muestraMensaje(22,NULL);
 
 	// Toma configuración de particiones
-	char *dsk=(char*)reservaMemoria(2);
-	sprintf(dsk,"1"); // Siempre el disco 1
-	cfg=LeeConfiguracion(dsk);
+	cfg=LeeConfiguracion();
 	if(!cfg){ // No se puede recuperar la configuración del cliente
 		errorLog(modulo,36,FALSE);
 		herror=36;
