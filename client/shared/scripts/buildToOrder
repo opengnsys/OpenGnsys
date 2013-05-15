@@ -57,9 +57,9 @@ case "$OSTYPE" in
 		 esac
     ;;
     Linux)
-        echo "Versión de sistema operativo linux no soportado"
+        echo "Versión de Sistema Operativo GNU/Linux no soportado"
     ;;
     *)
-    	echo "Sistema operativo no soportado"
+    	echo "Sistema Operativo no soportado"
     ;;
 esac
