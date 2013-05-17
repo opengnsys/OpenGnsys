@@ -86,10 +86,6 @@ $XMLcontextual=ContextualXMLComandos($LITAMBITO_ORDENADORES,$AMBITO_ORDENADORES)
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
 // Crea contextual de los comandos para los distintos �bitos
-$XMLcontextual=ContextualXMLSincronizacion($LITAMBITO_CENTROS,$AMBITO_CENTROS);
-echo $flotante->CreaMenuContextual($XMLcontextual);
-$XMLcontextual=ContextualXMLSincronizacion($LITAMBITO_GRUPOSAULAS,$AMBITO_GRUPOSAULAS);
-echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLSincronizacion($LITAMBITO_AULAS,$AMBITO_AULAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLSincronizacion($LITAMBITO_GRUPOSORDENADORES,$AMBITO_GRUPOSORDENADORES);
@@ -101,10 +97,6 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 
 
 // Crea contextual de los comandos para los distintos �bitos
-$XMLcontextual=ContextualXMLDiferenciacion($LITAMBITO_CENTROS,$AMBITO_CENTROS);
-echo $flotante->CreaMenuContextual($XMLcontextual);
-$XMLcontextual=ContextualXMLDiferenciacion($LITAMBITO_GRUPOSAULAS,$AMBITO_GRUPOSAULAS);
-echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLDiferenciacion($LITAMBITO_AULAS,$AMBITO_AULAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLDiferenciacion($LITAMBITO_GRUPOSORDENADORES,$AMBITO_GRUPOSORDENADORES);
@@ -618,6 +610,14 @@ function ContextualXMLAulas(){
 	$layerXML.=' textoitem='.$TbMsg[49];
 	$layerXML.='></ITEM>';
 	
+
+	$layerXML.='<ITEM';
+	$layerXML.=' subflotante="flo_diferenciacion_'.$LITAMBITO_AULAS.'"';
+	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
+	$layerXML.=' textoitem='.$TbMsg[50];
+	$layerXML.='></ITEM>';
+	
+
 	$layerXML.='<ITEM';
 	$layerXML.=' subflotante="flo_asistentes_'.$LITAMBITO_AULAS.'"';
 	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
