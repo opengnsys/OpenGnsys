@@ -92,7 +92,6 @@ case "$PARM1" in
 		    # Redimensionamos la imagen al tamaño necesario
 		    # TODO modificar ogGetImageSize
 		    IMGSIZE=$(ls -lk $IMGFILE| cut -f5 -d" ")
-		    echolog "$IMGSIZE"
 		    if [ $IMGSIZE -lt $SIZEREQUIRED ];then
 		        echolog "truncate --size=\">$SIZEREQUIRED\"k $IMGFILE" 
 		        truncate --size=">$SIZEREQUIRED"k $IMGFILE 2>&1 > $REPOLOG
@@ -155,6 +154,35 @@ case "$PARM1" in
 		echolog "Desmontamos la imagen $IMGFILE "
 		umount $MOUNTDIR
 
+	;;
+	REDUCE_IMAGE)
+		# Reduce el archivo de la imagen a tamaño datos + 500M
+		#1 REDUCE_IMAGE
+		#2 Nombre Imagen
+		#3 Extensión [ img |diff ]
+		IMGEXT="$PARM3"
+                IMGFILE="$REPODIR$PARM2.$IMGEXT"
+		[ ! -f $IMGFILE ] && echolog "Imagen no existe" && exit 1 
+		MOUNTDIR="$REPODIR""mount/${PARM2}"
+                [ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
+
+		mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"	
+		AVAILABLE=$(df -k|grep $MOUNTDIR|awk '{print $4}')
+
+        	# Si el espacio libre menor que 500Mb desmontamos la imagen y nos salimos
+        	if [ $AVAILABLE -lt 500000 ]; then
+		     umount $MOUNTDIR 
+		     exit 0
+		fi
+
+		USED=$(df -k|grep $MOUNTDIR|awk '{print $3}')
+		let ENDSIZE=USED+500000
+        	echolog "reducir imagen REPO $PARM2 $IMGEXT, tamaño final: $ENDSIZE"
+        	echolog btrfs filesystem resize "$ENDSIZE"k $MOUNTDIR
+        	btrfs filesystem resize "$ENDSIZE"k $MOUNTDIR
+		umount $MOUNTDIR
+		echolog "truncate --size=\"$ENDSIZE\"k $IMGFILE"
+        	truncate --size="$ENDSIZE"k $IMGFILE
 	;;
 	default)
 	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"

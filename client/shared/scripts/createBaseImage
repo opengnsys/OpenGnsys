@@ -26,6 +26,10 @@
 
 trap "onexit $1 $2 $3 \"$4\"" 1 2 3 6 9 14 15 ERR
 
+# Establecemos factor de compresion
+COMPRESS=90/100
+COMPRESSLINUX=70/100 
+
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
@@ -42,11 +46,10 @@ TIME1=$SECONDS
 #Carga el configurador del engine desde el fichero engine.cfg
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
-# Opciones rsync
+# Factor de calculo de Time out al crear imagen: valor por defecto en engine.cfg 
 CREATESPEED=${CREATESPEED:-"100000*4"}
 
 PROG="$(basename $0)"
-echo $PROG
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp  "$PROG: $MSG_HELP_createBaseImage" \
@@ -79,27 +82,35 @@ echo " " > $OGLOGCOMMAND
 
 # Obtener información de los parámetros de entrada.
 PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "$1 $2"
+# Comprobamos que la particion se puede montar
+ORIG=$(ogMount $1 $2) || ogRaiseError $OG_ERR_PARTITION "$1 $2"
 
 #Comprobamos acceso de escritura.
 DIRTEMP=$(date +%Y%m%d-%H%M%S)
 ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$3" && ogDeleteTree $3 /$4$DIRTEMP 
 
+# Borramos ficheros de paginacion y configuracion
+case "$(ogGetFsType $1 $2)" in 
+    EXT[234])
+	ogCleanLinuxDevices $1 $2
+	rm -rf $ORIG/tmp/*
+	COMPRESS=$COMPRESSLINUX
+	;;
+    NTFS)
+        ogDeleteFile $1 $2 pagefile.sys || echo "$?" 
+        ogDeleteFile $1 $2 hiberfil.sys || echo "$?"
+	;;
+esac
+
 #Comprobar espacio que requerira la imagen para ser almacenada
-echo " " > $OGLOGCOMMAND
-if ogMount $1 $2 &>/dev/null
-then
-	SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
-	#Aplicar factor de compresion
-	FACTORSYNC=90/100
-        let SIZEREQUIRED=$SIZEDATA*$FACTORSYNC
-	# El tamaño mínimo del sistema de ficheros btrfs es 250M, ponemos 300
-	[ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
-	#Comprobar espacio libre en el contenedor.
-	[ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
-	[ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
-else
- 	ogRaiseError $OG_ERR_PARTITION "$1 $2"
-fi
+SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
+#Aplicar factor de compresion
+let SIZEREQUIRED=$SIZEDATA*$COMPRESS
+# El tamaño mínimo del sistema de ficheros btrfs es 250M, ponemos 300
+[ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
+#Comprobar espacio libre en el contenedor.
+[ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
+[ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
 echo "[16]$MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
 [ $SIZEREQUIRED -gt $SIZEFREE ] && ogRaiseError $OG_ERR_CACHESIZE "$3"
 
@@ -128,7 +139,6 @@ ogCreateFileImage $3 "$4" $IMGEXT $SIZEREQUIRED
 echo "[50] $MSG_HELP_ogCreateImage $1 $2 $3 $4 " | tee -a $OGLOGSESSION $OGLOGFILE
 echo "      $MSG_HELP_ogCreateInfoImage"  | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateInfoImage $1 $2 $IMGEXT
-echo $?
 
 TIMEAUX3=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -141,9 +151,11 @@ ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMO
 echo "      $MSG_HELP_ogSyncCreate."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogSyncCreate $1 $2 $3 "$4"  $IMGEXT
 
-echo "      $MSG_HELP_ogUnmountImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
-ogUnmountImage $3 "$4" $IMGEXT
+# Reducimos la imagen
+echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
+ogReduceImage $3 "$4" $IMGEXT
 
+#ogUnmountImage $3 "$4" $IMGEXT
 ogUnlockImage "$3" "/$4.$IMGEXT"
 ogUnlock $1 $2
 TIMEAUX5=$[SECONDS-TIMEAUX3]
@@ -158,10 +170,7 @@ echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -
 
 #resumen de la operacion
 IMGSIZE=$(ls -s $IMGFILE | cut -f1 -d" ")
-# TODO: Hay que cambiar la funcion ogGetImageInfo
-#IMGOS=$(ogGetImageInfo `ogGetPath $3 $4.img`) NO FUNCIONA Hay que modificar la funcion para las imagenes squash
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE
-#echo "      Image-file $4 metada: $IMGOS " | tee -a $OGLOGSESSION $OGLOGFILE

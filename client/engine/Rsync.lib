@@ -42,6 +42,13 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         LOOPDEVICE=$(losetup -f)
         # Si existe el fichero de la imagen se hace copia de seguridad, si  no existe se crea.
         if [ -f "$IMGFILE" ]; then
+		# Si la imagen esta montada la desmonto
+                if [ -r "$DIRMOUNT/ogimg.info" ]; then
+                    echolog "umount $DIRMOUNT"
+                    umount "$DIRMOUNT"
+                    [ $? -ne 0 ] && return $(ogRaiseError $OG_ERR_DONTUNMOUNT_IMAGE "$1 $2.$3"; echo $?)
+                fi
+
 		if [ "$BACKUP" == "true" ]; then
                     # Copia seguridad 
                     echo "     $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
@@ -431,19 +438,22 @@ fi
 DIRMOUNT=$(ogGetMountDir "$2" $IMGEXT)
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-	IMGFILE=$(ogGetPath "$1" /"$2.$IMGEXT")
-	mkdir -p "/tmp/$DIRMOUNT"
+        IMGFILE=$(ogGetPath "$1" /"$2.$IMGEXT")
+        mkdir -p "/tmp/$DIRMOUNT"
         mount -o compress=lzo  "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
         echo "/tmp/$DIRMOUNT"
 
 else
-	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
         hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" $IMGEXT"
-	echo "$OGIMG/$DIRMOUNT"
+        echo "$OGIMG/$DIRMOUNT"
 
 fi
 
 }
+
+
+
 
 
 function ogUnmountImage () {
@@ -563,3 +573,63 @@ done
 echo  ""
 
 }
+
+function ogReduceImage () {
+#/**
+# ogReduceImage
+#@brief   Reduce el archivo de la imagen a tamaño datos + 500M
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Extensión [ img |diff ]
+#@return 
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#*/
+local IMGEXT DIRMOUNT AVAILABLE USED IMGDIR IMGFILE ENDSIZE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+           "$FUNCNAME REPO Ubuntu12" \
+           "$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ] image_name [ extension ]"
+    return $?
+fi
+
+[ "$3" == "" ] && IMGEXT="img" || IMGEXT="$3"
+
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+        # Al montar se comprueba la existencia de la imagen
+        DIRMOUNT=$(ogMountImage $1 $2 $IMGEXT) 
+
+        AVAILABLE=$(df -k|grep $DIRMOUNT|awk '{print $4}')
+        # Si el espacio libre menor que 500Mb nos salimos
+        [ $AVAILABLE -lt 500000 ] && return 0
+
+        # Reducimos el archivo de imagen:
+        IMGDIR=$(ogGetParentPath "$1" "/$2")
+        IMGFILE=${IMGDIR}/$(basename "/$2").$IMGEXT
+        USED=$(df -k|grep $DIRMOUNT|awk '{print $3}')
+        let ENDSIZE=USED+500000
+        echo -e -n "      btrfs filesystem resize "$ENDSIZE"k $DIRMOUNT \n      "
+        btrfs filesystem resize "$ENDSIZE"k $DIRMOUNT
+        ogUnmountImage $1 $2 $IMGEXT
+        echo "      truncate --size=\"$ENDSIZE\"k $IMGFILE  "
+        truncate --size="$ENDSIZE"k $IMGFILE
+else
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" $IMGEXT"
+        hose $REPOIP 2009 --out sh -c "echo -ne REDUCE_IMAGE \"$2\" $IMGEXT"
+fi
+
+
+}
+
+
+
+
+
+
+
+
