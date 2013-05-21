@@ -12,14 +12,16 @@ function confirmar(){
 	 	// Compone atributos del comando
 		tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT')
-		var particion;
+		var diskPart;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
-				particion=ochecks[i].value
+				diskPart=ochecks[i].value.split(";");
 			}
 		}
 		var RC='@';
-		document.fdatosejecucion.atributos.value="par="+particion+RC;
+		var disk = diskPart[0];
+		var particion = diskPart[1];
+		document.fdatosejecucion.atributos.value="dsk="+disk+RC+"par="+particion+RC;
 		filtrado();
 		document.fdatosejecucion.submit();
 	}

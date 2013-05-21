@@ -1,31 +1,37 @@
 <?php
+include_once("pintaParticiones.php");
+
 /*________________________________________________________________________________________________________
-	La clave de configuración está formada por una serie de valores separados por ";" 
-		Ejemplo:1;7;30000000;3;3;0;11
+	UHU  - 2013/05/14 - Se añade la clave número de disco
+	La clave de configuración está formada por una serie de valores separados por ";"
+	 
+		Ejemplo:1;1;7;30000000;3;3;0;11
 		
 		Parámetros:
-			1) Número de partición
-			2) Código de la partición
-			3) Tamaño
-			4) Identificador del sistema de ficheros instalado en la partición
-			5) Identificador del nombre del sistema operativo instalado en la partición
-			6) Identificador de la imagen restaurada en la partición
-			7) Identificador del perfil software que contiene el S.O. instalado en la partición
+			1) Número de disco
+			2) Número de partición
+			3) Código de la partición
+			4) Tamaño
+			5) Identificador del sistema de ficheros instalado en la partición
+			6) Identificador del nombre del sistema operativo instalado en la partición
+			7) Identificador de la imagen restaurada en la partición
+			8) Identificador del perfil software que contiene el S.O. instalado en la partición
 			
 		Además de este campo, la consulta almacena la descripción de los identificadores que forman parte
 		 de esta clave compuesta de manera que el tiempo de acceso para recuperlarlos sean corto
 		 ya que están en memoria y no en tablas.
 		  
 		En el ejempo anterior podríamos tener datos	
-			1 	 NTFS 	30000000 	Windows NTFS 	Windows XP profesional  	NULL 	Perfil Software (CUR-8, Part:1) 
+			1	1 	 NTFS 	30000000 	Windows NTFS 	Windows XP profesional  	NULL 	Perfil Software (CUR-8, Part:1) 
 		Que indica:
-			1) Número de partición
-			2) Código de la partición
-			3) Tamaño
-			4) Descripción del sistema de ficheros instalado en la partición
-			5) Descripción del nombre del sistema operativo instalado en la partición
-			6) Descripción de la imagen restaurada en la partición
-			7) Descripción del perfil software que contiene el S.O. instalado en la partición
+			1) Número de disco
+			2) Número de partición
+			3) Código de la partición
+			4) Tamaño
+			5) Descripción del sistema de ficheros instalado en la partición
+			6) Descripción del nombre del sistema operativo instalado en la partición
+			7) Descripción de la imagen restaurada en la partición
+			8) Descripción del perfil software que contiene el S.O. instalado en la partición
 			
 			Estos datos se guardan en la misma tabla de claves que será una matriz asociativa.
 			
@@ -59,7 +65,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_perfil;	
 	global $msk_cache;
 				
-	$cmd->texto="SELECT CONCAT_WS( ';', ordenadores_particiones.numpar, ";
+	$cmd->texto="SELECT CONCAT_WS( ';',ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ";
 
 	if($sws & $msk_tamano)						
 		$cmd->texto.="	ordenadores_particiones.tamano,";
@@ -116,11 +122,13 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		case $AMBITO_ORDENADORES :
 			$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
 			break;
-	}		
+	}
+	
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0 ";
 
 	$cmd->texto.=" GROUP by configuracion";
+
 	//echo "carga claves:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -153,6 +161,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	$rs->Cerrar();
 }
 /*________________________________________________________________________________________________________
+			UHU  - 2013/05/14 - Se añade la clave número de disco
 			Dibuja la tabla de configuración de las particiones de un grupo de ordenadores
 			
 			Parámetros de la función:
@@ -167,7 +176,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				configuración de los ordenadores o la pantalla de los comandos "Configurar" o "RestaurarImagen" 
 				para permitir introducir los	datos necesarios.		
 ________________________________________________________________________________________________________*/
-function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
+function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaParticionesFunction="pintaParticiones")
 {
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
@@ -194,9 +203,9 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 				FROM (SELECT 
 					temp1.idordenador AS idordenador,
 					GROUP_CONCAT(CAST( temp1.configuracion AS CHAR(250) )  ORDER BY temp1.configuracion SEPARATOR '@' ) AS configuraciones
-					FROM (SELECT ordenadores_particiones.idordenador,
+					FROM (SELECT ordenadores_particiones.idordenador,ordenadores_particiones.numdisk,
 						ordenadores_particiones.numpar,
-						concat_WS( ';', 
+						concat_WS( ';', ordenadores_particiones.numdisk,
 						ordenadores_particiones.numpar, ";
 
 	if($sws & $msk_tamano)
@@ -242,7 +251,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 	if ($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0";
 
-	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numpar) AS temp1
+	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numdisk, ordenadores_particiones.numpar) AS temp1
 					GROUP BY temp1.idordenador) AS temp2
 					GROUP BY temp2.configuraciones
 					ORDER BY con desc,idordenadores";
@@ -261,11 +270,11 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr)
 		echo '</td></tr>';
 		//Muestra particiones y configuración
 
-		echo pintaParticiones($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc,$ambito,$idambito);
+		echo $pintaParticionesFunction($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc,$ambito,$idambito);
 		$rs->Siguiente();
 	}
 	if ($cc == 0) {
-		echo '<tr><th>'.$TbMsg[43].'</th><tr>';  // Cliente sin configuración.
+		echo '<tr><th>'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>';  // Cliente sin configuración.
 	}
 	echo "</table>";
 	$rs->Cerrar();
@@ -307,6 +316,7 @@ function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 /*________________________________________________________________________________________________________
 	
 	Selecciona los ordenadores que tienen el mismo sistema de ficheros del ámbito elegido
+	UHU 2013/05/17 - Ahora se carga también el numero de disco en la consulta
 ________________________________________________________________________________________________________*/
 function cargaSistemasFicheros($cmd,$idambito,$ambito)
 {
@@ -318,6 +328,7 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 				ordenadores_particiones.idsistemafichero,
+				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar,
 				sistemasficheros.descripcion AS sistemafichero,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) ) 
@@ -339,8 +350,8 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-		$cmd->texto.="		GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idsistemafichero";
-	//echo "carga sistemas de ficheros:".$cmd->texto;
+	$cmd->texto.="		GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idsistemafichero";
+	
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
@@ -349,6 +360,7 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 	//echo $cmd->texto;
 	while (!$rs->EOF){
 			$tbSysFi[$idx]["idsistemafichero"]=$rs->campos["idsistemafichero"];
+			$tbSysFi[$idx]["numdisk"]=$rs->campos["numdisk"];			
 			$tbSysFi[$idx]["numpar"]=$rs->campos["numpar"];			
 			$tbSysFi[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
 			$tbSysFi[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
@@ -361,14 +373,16 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 /*________________________________________________________________________________________________________
 	
 	Toma sistema de ficheros común a los ordenadores pasados como parámetros
+	UHU 2013/05/17 - Ahora se tienen en cuenta el disco, sino se le pasa ningun parametro, se asigna 1
+
 ________________________________________________________________________________________________________*/
-function tomaSistemasFicheros($numpar,$ordenadores,$sw=false)
+function tomaSistemasFicheros($numpar,$ordenadores,$sw=false,$numdisk = 1)
 {
 	global $tbSysFi;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conSysFi; // Contador de elementos anteriores
 
 	for ($k=0; $k<$conSysFi; $k++){
-		if ($tbSysFi[$k]["numpar"] == $numpar){
+		if ($tbSysFi[$k]["numdisk"] == $numdisk && $tbSysFi[$k]["numpar"] == $numpar) {
 			//$pos = strpos($tbSysFi[$k]["ordenadores"], $ordenadores);
 			//if ($pos !== false) { // Cadena encontrada
 			$pcs = explode (",", $ordenadores);
@@ -386,6 +400,7 @@ function tomaSistemasFicheros($numpar,$ordenadores,$sw=false)
 /*________________________________________________________________________________________________________
 	
 	Selecciona los ordenadores que tienen el mismo perfil software en la misma partición
+	UHU 2013/05/17 - Ahora se carga también el numero de disco en la consulta
 ________________________________________________________________________________________________________*/
 function cargaPerfiles($cmd,$idambito,$ambito)
 {
@@ -397,6 +412,7 @@ function cargaPerfiles($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT count(*) AS con,
 			    ordenadores_particiones.idperfilsoft,
+			    ordenadores_particiones.numdisk,
 			    ordenadores_particiones.numpar,
 			    perfilessoft.descripcion AS perfilsoft,
 			    GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) ) 
@@ -418,7 +434,7 @@ function cargaPerfiles($cmd,$idambito,$ambito)
 			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idperfilsoft";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idperfilsoft";
 	//echo "carga perfiles:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -428,6 +444,7 @@ function cargaPerfiles($cmd,$idambito,$ambito)
 	while (!$rs->EOF){
 			$tbPerfil[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
 			$tbPerfil[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
+			$tbPerfil[$idx]["numdisk"]=$rs->campos["numdisk"];
 			$tbPerfil[$idx]["numpar"]=$rs->campos["numpar"];					
 			$tbPerfil[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
 			$idx++;
@@ -439,8 +456,9 @@ function cargaPerfiles($cmd,$idambito,$ambito)
 /*________________________________________________________________________________________________________
 	
 		Toma perfilsoft común a los ordenadores pasados como parámetros
+		UHU 2013/05/17 - Ahora se tienen en cuenta el disco, sino se le pasa ningun parametro, se asigna 1
 ________________________________________________________________________________________________________*/
-function tomaPerfiles($numpar,$ordenadores)
+function tomaPerfiles($numpar,$ordenadores,$numdisk = 1)
 {
 	global $tbPerfil;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conPerfil; // Contador de elementos anteriores
@@ -449,7 +467,7 @@ function tomaPerfiles($numpar,$ordenadores)
 		//$pos = strpos($tbPerfil[$k]["ordenadores"], $ordenadores);
 		//if ($pos !== false) { // Cadena encontrada
 			//if($tbPerfil[$k]["numpar"]==$numpar)
-		if ($tbPerfil[$k]["numpar"] == $numpar) {
+		if ($tbPerfil[$k]["numdisk"] == $numdisk && $tbPerfil[$k]["numpar"] == $numpar) {
 			$pcs = explode (",", $ordenadores);
 			$intersec = array_intersect (explode(",", $tbPerfil[$k]["ordenadores"]), $pcs);
 			if (array_diff ($pcs, $intersec) == NULL) {
@@ -461,6 +479,7 @@ function tomaPerfiles($numpar,$ordenadores)
 /*________________________________________________________________________________________________________
 	
 	Selecciona los ordenadores que tienen la misma imagen en la misma partición
+		UHU 2013/05/17 - Ahora se carga también el numero de disco en la consulta
 ________________________________________________________________________________________________________*/
 function cargaImagenes($cmd,$idambito,$ambito)
 {
@@ -472,6 +491,7 @@ function cargaImagenes($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	count(*) as con,
 				ordenadores_particiones.idimagen,
+				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar,
 				imagenes.descripcion as imagen,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
@@ -493,7 +513,7 @@ function cargaImagenes($cmd,$idambito,$ambito)
 			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idimagen";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idimagen";
 	//echo "carga imagenes:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -503,6 +523,7 @@ function cargaImagenes($cmd,$idambito,$ambito)
 	while (!$rs->EOF){
 			$tbImg[$idx]["idimagen"]=$rs->campos["idimagen"];
 			$tbImg[$idx]["imagen"]=$rs->campos["imagen"];
+			$tbImg[$idx]["numdisk"]=$rs->campos["numdisk"];			
 			$tbImg[$idx]["numpar"]=$rs->campos["numpar"];			
 			$tbImg[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
 			$idx++;
@@ -514,8 +535,9 @@ function cargaImagenes($cmd,$idambito,$ambito)
 /*________________________________________________________________________________________________________
 	
 		Toma sistema operativo común a los ordenadores pasados como parámetros
+		UHU 2013/05/17 - Ahora se tienen en cuenta el disco, sino se le pasa ningun parametro, se asigna 1
 ________________________________________________________________________________________________________*/
-function tomaImagenes($numpar,$ordenadores)
+function tomaImagenes($numpar,$ordenadores, $numdisk = 1)
 {
 	global $tbImg;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conImg; // Contador de elementos anteriores
@@ -524,7 +546,7 @@ function tomaImagenes($numpar,$ordenadores)
 		//$pos = strpos($tbImg[$k]["ordenadores"], $ordenadores);
 		//if ($pos !== false) { // Cadena encontrada
 			//if($tbImg[$k]["numpar"]==$numpar){
-		if ($tbImg[$k]["numpar"] == $numpar) {
+		if ($tbImg[$k]["numdisk"] == $numdisk && $tbImg[$k]["numpar"] == $numpar) {
 			$pcs = explode (",", $ordenadores);
 			$intersec = array_intersect (explode(",", $tbImg[$k]["ordenadores"]), $pcs);
 			if (array_diff ($pcs, $intersec) == NULL) {
@@ -536,6 +558,7 @@ function tomaImagenes($numpar,$ordenadores)
 /*________________________________________________________________________________________________________
 	
 	Selecciona los ordenadores que tienen el mismo sistema de ficheros en la misma partición
+	UHU 2013/05/17 - Ahora se carga también el numero de disco en la consulta
 ________________________________________________________________________________________________________*/
 function cargaNombresSO($cmd,$idambito,$ambito)
 {
@@ -547,7 +570,7 @@ function cargaNombresSO($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 				ordenadores_particiones.idnombreso,
-				ordenadores_particiones.numpar,nombresos.nombreso,
+				ordenadores_particiones.numdisk,ordenadores_particiones.numpar,nombresos.nombreso,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
 					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
 			   FROM ordenadores
@@ -567,7 +590,7 @@ function cargaNombresSO($cmd,$idambito,$ambito)
 			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.idnombreso";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idnombreso";
 	//echo "carga nombresos:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -577,6 +600,7 @@ function cargaNombresSO($cmd,$idambito,$ambito)
 	while (!$rs->EOF){
 			$tbSO[$idx]["idnombreso"]=$rs->campos["idnombreso"];
 			$tbSO[$idx]["nombreso"]=$rs->campos["nombreso"];
+			$tbSO[$idx]["numdisk"]=$rs->campos["numdisk"];			
 			$tbSO[$idx]["numpar"]=$rs->campos["numpar"];			
 			$tbSO[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
 			$idx++;
@@ -588,14 +612,15 @@ function cargaNombresSO($cmd,$idambito,$ambito)
 /*________________________________________________________________________________________________________
 	
 		Toma sistema operativo común a los ordenadores pasados como parámetros
+		UHU 2013/05/17 - Ahora se tienen en cuenta el disco, sino se le pasa ningun parametro, se asigna 1
 ________________________________________________________________________________________________________*/
-function tomaNombresSO($numpar,$ordenadores)
+function tomaNombresSO($numpar,$ordenadores,$numdisk = 1)
 {
 	global $tbSO;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conSO; // Contador de elementos anteriores
 
 	for($k=0; $k<$conSO; $k++) {
-		if ($tbSO[$k]["numpar"]==$numpar) {
+		if ($tbSO[$k]["numdisk"] == $numdisk && $tbSO[$k]["numpar"] == $numpar) {
 			//$pos = strpos($tbSO[$k]["ordenadores"], $ordenadores);
 			//if ($pos !== false) { // Cadena encontrada
 			$pcs = explode (",", $ordenadores);
@@ -609,6 +634,7 @@ function tomaNombresSO($numpar,$ordenadores)
 /*________________________________________________________________________________________________________
 	
 	Selecciona los ordenadores que tienen el mismo tamaño para la misma partición
+	UHU 2013/05/17 - Ahora se carga también el numero de disco en la consulta
 ________________________________________________________________________________________________________*/
 function cargaTamano($cmd,$idambito,$ambito)
 {
@@ -620,6 +646,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 			   	ordenadores_particiones.tamano,
+				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
 					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
@@ -639,7 +666,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.tamano";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.tamano";
 	//echo "carga tamaños:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -648,6 +675,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 	$idx=0; 
 	while (!$rs->EOF){
 			$tbTam[$idx]["tamano"]=$rs->campos["tamano"];
+            $tbTam[$idx]["numdisk"]=$rs->campos["numdisk"];
 			$tbTam[$idx]["numpar"]=$rs->campos["numpar"];			
 			$tbTam[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
 			$idx++;
@@ -659,14 +687,15 @@ function cargaTamano($cmd,$idambito,$ambito)
 /*________________________________________________________________________________________________________
 	
 		Toma tamaño de partición común a los ordenadores pasados como parámetros
+		UHU 2013/05/17 - Ahora se tienen en cuenta el disco, sino se le pasa ningun parametro, se asigna 1
 ________________________________________________________________________________________________________*/
-function tomaTamano($numpar,$ordenadores)
+function tomaTamano($numpar,$ordenadores,$numdisk = 1)
 {
 	global $tbTam;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conTam; // Contador de elementos anteriores
 
 	for ($k=0; $k<$conTam; $k++) {
-		if ($tbTam[$k]["numpar"] == $numpar) {
+		if ($tbTam[$k]["numdisk"] == $numdisk && $tbTam[$k]["numpar"] == $numpar) {
 //			$pos = strpos ($tbTam[$k]["ordenadores"], $ordenadores);
 //			if ($pos !== FALSE) { // Cadena encontrada
 			$pcs = explode (",", $ordenadores);
@@ -680,6 +709,7 @@ function tomaTamano($numpar,$ordenadores)
 /*________________________________________________________________________________________________________
 	
 	Selecciona los ordenadores que tienen el mismo Contenido de Cache para la misma partición
+	UHU 2013/05/17 - Ahora se carga también el numero de disco en la consulta
 ________________________________________________________________________________________________________*/
 function cargaCache($cmd,$idambito,$ambito)
 {
@@ -691,7 +721,8 @@ function cargaCache($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 			   	ordenadores_particiones.cache,
-				ordenadores_particiones.numpar,
+			   	ordenadores_particiones.numdisk,
+			   	ordenadores_particiones.numpar,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
 					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
 			   FROM ordenadores
@@ -710,7 +741,7 @@ function cargaCache($cmd,$idambito,$ambito)
 			$cmd->texto.="	WHERE ordenadores.idordenador =".$idambito;
 			break;
 	}	
-	$cmd->texto.="			GROUP BY ordenadores_particiones.numpar, ordenadores_particiones.cache";
+	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.cache";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
@@ -718,6 +749,7 @@ function cargaCache($cmd,$idambito,$ambito)
 	$idx=0; 
 	while (!$rs->EOF){
 			$tbCac[$idx]["cache"]=$rs->campos["cache"];
+			$tbCac[$idx]["numdisk"]=$rs->campos["numdisk"];
 			$tbCac[$idx]["numpar"]=$rs->campos["numpar"];
 			$tbCac[$idx]["ordenadores"]=$rs->campos["ordenadores"];
 			$idx++;
@@ -729,14 +761,15 @@ function cargaCache($cmd,$idambito,$ambito)
 /*________________________________________________________________________________________________________
 	
 		Toma tamaño de partición común a los ordenadores pasados como parámetros
+		UHU 2013/05/17 - Ahora se tienen en cuenta el disco, sino se le pasa ningun parametro, se asigna 1
 ________________________________________________________________________________________________________*/
-function tomaCache($numpar,$ordenadores)
+function tomaCache($numpar,$ordenadores,$numdisk = 1)
 {
 	global $tbCac;  // Tabla contenedora de ordenadores incluidos en la consulta
 	global $conCac; // Contador de elementos anteriores
 
 	for ($k=0; $k<$conCac; $k++) {
-		if ($tbCac[$k]["numpar"] == $numpar) {
+		if ($tbCac[$k]["numdisk"] == $numdisk && $tbCac[$k]["numpar"] == $numpar) {
 			$pcs = explode (",", $ordenadores);
 			$intersec = array_intersect (explode(",", $tbCac[$k]["ordenadores"]), $pcs);
 			if (array_diff ($pcs, $intersec) == NULL) {

@@ -10,15 +10,18 @@
  function confirmar(){
 	if(comprobar_datos()){
 		var RC="@";
-		var disco=1; // Siempre disco 1
-		var atributos="dsk="+disco+RC;
+		// UHU - Ahora puede ser cualquier disco
+		var disco;
+		var atributos="";
 		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT')
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
-				var idradio=ochecks[i].id;	
-				var numpar=ochecks[i].value;		
-			
+				var idradio=ochecks[i].id;
+				var diskPart = ochecks[i].value.split(";");
+				disco =diskPart[0];
+				var numpar=	diskPart[1];	
+				atributos+="dsk="+disco+RC; // Número de disco
 				atributos+="par="+numpar+RC; // Número de partición
 				var despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1");
 				var despleimagen;

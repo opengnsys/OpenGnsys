@@ -12,23 +12,25 @@
 	if (!comprobar_datos()) return;
 	
 	var RC="@";
-	var disco=1; // Siempre disco 1
-	var atributos="dsk="+disco+RC;
+	// UHU - Ahora puede ser cualquier disco
+	var disco;
+	var atributos="";
 	
 	var tb_conf=document.getElementById("tabla_conf");
 	var ochecks=tb_conf.getElementsByTagName('INPUT')
 	for(var i=0;i<ochecks.length;i++){
 		if(ochecks[i].checked){
-			var parcod=ochecks[i].value.split("_");		
-			atributos+="par="+parcod[0]+RC; // Número de partición
-			atributos+="cpt="+parcod[1]+RC;	// Código de partición				
+			var parcod=ochecks[i].value.split("_");
+			atributos+="dsk="+parcod[0]+RC; // Número de disco
+			atributos+="par="+parcod[1]+RC; // Número de partición
+			atributos+="cpt="+parcod[2]+RC;	// Código de partición				
 			
-			var despleimagen=document.getElementById("despleimagen_"+parcod[0]);
+			var despleimagen=document.getElementById("despleimagen_"+parcod[0]+"_"+parcod[1]);
 			var imgcan=despleimagen.value.split("_");
 			atributos+="idi="+imgcan[0]+RC; // Identificador de la imagen
 			atributos+="nci="+imgcan[1]+RC;	// Nonbre canónico		
 		
-			var desplerepositorios=document.getElementById("desplerepositorios_"+parcod[0]);
+			var desplerepositorios=document.getElementById("desplerepositorios_"+parcod[0]+"_"+parcod[1]);
 			var idx=desplerepositorios.selectedIndex;
 			atributos+="ipr="+desplerepositorios.options[idx].value+RC;
 			break;		

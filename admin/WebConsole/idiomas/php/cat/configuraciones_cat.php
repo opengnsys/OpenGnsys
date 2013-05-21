@@ -4,7 +4,7 @@
 //	Fitxer d'idiomes php: configuraciones_cat.php 
 //      Idioma: Català
 //____________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]='Configuracions';
 $TbMsg[1]='Àmbit';
 $TbMsg[2]="Aules";
@@ -55,7 +55,7 @@ $TbMsg[41]='Generar Instrucció OG';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particions';
 
 $TbMsg[42]='Variable';
-$TbMsg[43]='Sense configuració: client no connectat al servidor.';
+$TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
 $TbMsg[44]='Equip sense Perfil de Hardware';
 $TbMsg[45]='Afegeixi Perfil per obtenir dades';
 $TbMsg[495]='Contingut Caché';

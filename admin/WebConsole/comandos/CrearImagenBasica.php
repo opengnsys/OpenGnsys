@@ -1,12 +1,12 @@
 <?php
 // *************************************************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2012
-// Fecha Última modificación: Noviembre-2012
+// Aplicaciï¿½n WEB: ogAdmWebCon
+// Autor: Josï¿½ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaciï¿½n: Aï¿½o 2012
+// Fecha ï¿½ltima modificaciï¿½n: Noviembre-2012
 // Nombre del fichero: CrearImagenBas.php
-// Descripción : 
-//		Implementación del comando "CrearImagenBas.php"
+// Descripciï¿½n : 
+//		Implementaciï¿½n del comando "CrearImagenBas.php"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../idiomas/php/".$idioma."/comandos/crearimagenbasica_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+include_once("../includes/pintaTablaConfiguraciones.php");
 //________________________________________________________________________________________________________
 //
 include_once("./includes/capturaacciones.php");
@@ -24,17 +25,17 @@ include_once("./includes/capturaacciones.php");
 //
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiï¿½n con servidor B.D.
 //________________________________________________________________________________________________________
 //
 $resul=tomaPropiedades($cmd,$idambito);
 if (!$resul){
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
+		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaciï¿½n de datos.
 }
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
+<TITLE>Administraciï¿½n web de aulas</TITLE>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
@@ -73,12 +74,12 @@ if (!$resul){
 -------------------------------------------------------------------------------------------> 	
 	<P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[6] ?></SPAN></p>
 	<FORM  align=center name="fdatos"> 
-	<TABLE  width=90% align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+		<TABLE  width=90% align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
 			<TH align=center>&nbsp;&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>			
-			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[10]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg["PARTITION"] ?>&nbsp;</TH>			
+			<TH align=center>&nbsp;<?php echo $TbMsg["SO_NAME"] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg["IMAGE_REPOSITORY"]?>&nbsp;</TH>
 			<TH align=center>&nbsp;W&nbsp;</TH>
 			<TH align=center>&nbsp;E&nbsp;</TH>
 			<TH align=center>&nbsp;C&nbsp;</TH>
@@ -87,9 +88,9 @@ if (!$resul){
  Detalle 
 -------------------------------------------------------------------------------------------> 					
 		<?
-				$tbPar=tablaConfiguraciones($idambito);
+				$tbPar=tablaConfiguracionesSincronizacion1($idambito);
 		?>
-	</TABLE>
+		</TABLE>
 	<input type=hidden id="cadPar" value="<? echo $tbPar ?>">
 	<br>
 		<?
@@ -139,56 +140,7 @@ function tomaPropiedades($cmd,$ido)
 	else
 		return(false);
 }
-/*----------------------------------------------------------------------------------------------
-	Dibuja una tabla con los datos de particiones y parametros a elegir
-	
-		Parametros: 
-		- idordenador: El identificador del ordenador
-----------------------------------------------------------------------------------------------*/
-function tablaConfiguraciones($idordenador)
-{
-	global $idcentro;
-	global $TbMsg;	
-	global $cmd;
-	
-	$tablaHtml="";
-	$cmd->texto="SELECT DISTINCT	ordenadores_particiones.numpar, ordenadores_particiones.idnombreso, nombresos.nombreso,
-					ordenadores_particiones.idimagen, ordenadores_particiones.codpar,
-					tipospar.clonable, perfilessoft.idperfilsoft,
-					nombresos.idnombreso, nombresos.nombreso
-					FROM ordenadores_particiones 
-					INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar		
-					LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-					LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft										
-					WHERE ordenadores_particiones.idordenador=$idordenador 
-					ORDER BY ordenadores_particiones.numpar";
-	//echo 	$cmd->texto;
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
-	$rs->Primero(); 
-	$tbPAR="";
-	while (!$rs->EOF){
-		//$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]) && !empty($rs->campos["idperfilsoft"]); 
-		$sw=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]); 
-		if($sw){// Una partición es clonable si es cierta esta variable	
-			$tbPAR.=$rs->campos["numpar"].";"; // Cadena con las particiones a procesar	
-			$tablaHtml.='<tr id="trPar-'.$rs->campos["numpar"].'">';
-			$tablaHtml.='<td align=center><input type=radio name="particion" value="'.$rs->campos["codpar"].'"></td>';
-			$tablaHtml.='<td align="center">&nbsp;'.$rs->campos["numpar"].'&nbsp;</td>'; // Número de partición
-			$tablaHtml.='<td align=center>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</td>'; // Nombre sistema operativo
-			$tablaHtml.='<td align=center>'.HTMLSELECT_imagenes($rs->campos["idimagen"]).'</td>';	
-			$tablaHtml.='<td align=center><input type=checkbox name="whole" id="whl-'.$rs->campos["numpar"].'"></td>';	
-			$tablaHtml.='<td align=center><input type=checkbox name="paramb" checked id="eli-'.$rs->campos["numpar"].'"></td>';	
-			$tablaHtml.='<td align=center><input type=checkbox name="compres" id="cmp-'.$rs->campos["numpar"].'"></td>';	
-			$tablaHtml.='</tr>';			
-		}
-		$rs->Siguiente();
-	}
-	$rs->Cerrar();
-	echo $tablaHtml;
-	return($tbPAR);
-}
+
 /*----------------------------------------------------------------------------------------------
 	Dibuja una tabla con las opciones generales
 ----------------------------------------------------------------------------------------------*/
@@ -197,7 +149,7 @@ function opcionesAdicionales()
 	global $TbMsg;	
 	global $funcion;
 	
-	$tablaHtml.='<table width="90%" ';
+	$tablaHtml='<table width="90%" ';
 	
 	//if($funcion!="CrearImagenBasica")
 		$tablaHtml.='style="display:none"';
@@ -209,10 +161,10 @@ function opcionesAdicionales()
 					<td><input  type=checkbox name="bpi"></td>'; // Borrar imagen previamente del servidor 			
 	$tablaHtml.='		
 					<td  align=right>'.$TbMsg[14].'</td>
-					<td><input type=checkbox name="cpc"></td>'; // Copiar además la imagen a la caché
+					<td><input type=checkbox name="cpc"></td>'; // Copiar ademï¿½s la imagen a la cachï¿½
 	$tablaHtml.='		
 					<td  align=right>'.$TbMsg[15].'</td>
-					<td><input type=checkbox name="bpc"></td>'; // Borrar imagen de la caché previamente antes de copiarla 						
+					<td><input type=checkbox name="bpc"></td>'; // Borrar imagen de la cachï¿½ previamente antes de copiarla 						
 	$tablaHtml.='		
 					<td  align=right>'.$TbMsg[16].'</td>
 					<td><input type=checkbox name="nba"></td>'; // No borrar archivos en destino  	

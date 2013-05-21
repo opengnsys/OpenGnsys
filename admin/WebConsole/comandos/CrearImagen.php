@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../idiomas/php/".$idioma."/comandos/crearimagen_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+include_once("../includes/pintaTablaConfiguraciones.php");
 
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
@@ -53,20 +54,21 @@ if (!$resul){
 ?>	
 <P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[6] ?></SPAN></P>
 
-<FORM  align=center name="fdatos"> 
-		<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+<FORM  align=center name="fdatos">
+	<TABLE  id='tabla_conf' align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 			<TR>
 				<TH align=center>&nbsp;&nbsp;</TH>
-				<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>
-				<TH align=center>&nbsp;<? echo $TbMsg[13] ?>&nbsp;</TH>
-				<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
-				<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TD>
-				<TH align=center>&nbsp;<? echo $TbMsg[11] ?>&nbsp;</TD>
-			</TR>
+				<TH align=center>&nbsp;<?php echo $TbMsg["PARTITION"] ?>&nbsp;</TH>
+				<TH align=center>&nbsp;<?php echo $TbMsg["PARTITION_TYPE"] ?>&nbsp;</TH>
+				<TH align=center>&nbsp;<?php echo $TbMsg["SO_NAME"] ?>&nbsp;</TH>
+				<TH align=center>&nbsp;<?php echo $TbMsg["IMAGE_TO_CREATE"] ?>&nbsp;</TD>
+				<TH align=center>&nbsp;<?php echo $TbMsg["DESTINATION_REPOSITORY"] ?>&nbsp;</TD>
+			</TR> 
+		
 				<?					
-					echo tablaConfiguraciones($cmd,$idambito,$idrepositorio);
+					echo tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio);
 				?>
-		</TABLE>
+	</TABLE>
 </FORM>		
 
 <?
@@ -111,8 +113,9 @@ function tomaPropiedades($cmd,$ido){
 }
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
+	UHU - 2013/05/17 - Ahora las imagenes pueden ser en cualquier disco
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$particion,$masterip)
+function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,$masterip)
 {
 	$SelectHtml="";
 	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.idperfilsoft, repositorios.nombrerepositorio
@@ -121,7 +124,7 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$particion,$maste
 	//echo $cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$particion.'" style="WIDTH: 300">';
+	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$disk."_".$particion.'" style="WIDTH: 300">';
 	$SelectHtml.= '    <OPTION value="0"></OPTION>';
 	if ($rs->Abrir()){
 		$rs->Primero(); 
@@ -167,15 +170,16 @@ function HTMLSELECT_imagenesORIGINAL($cmd,$idrepositorio,$idperfilsoft,$particio
 
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los repositorios
+	UHU - 2013/05/17 - Ahora las imagenes pueden ser en cualquier disco
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion,$masterip){
+function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$disk,$particion,$masterip){
 	$SelectHtml="";
 	$rs=new Recordset; 
 	$cmd->texto='SELECT idrepositorio, nombrerepositorio, ip FROM repositorios WHERE idrepositorio="'.$idrepositorio .'" OR ip="'.$masterip.'"';
 	$rs->Comando=&$cmd; 
 
 	if (!$rs->Abrir()) return($SelectHtml); // Error al abrir recordset
-	$SelectHtml.= '<SELECT class="formulariodatos" id="desplerepositorios_'.$particion.'" style="WIDTH: 250">';
+	$SelectHtml.= '<SELECT class="formulariodatos" id="desplerepositorios_'.$disk."_".$particion.'" style="WIDTH: 250">';
 	$rs->Primero(); 
 	while (!$rs->EOF){
 		$SelectHtml.='<OPTION value="'.$rs->campos["ip"].'"';
@@ -189,54 +193,5 @@ function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion,$maste
 	$rs->Cerrar();
 	return($SelectHtml);
 }
-/*________________________________________________________________________________________________________
-	Crea la tabla de configuraciones y perfiles a crear
-________________________________________________________________________________________________________*/
-function tablaConfiguraciones($cmd,$idordenador,$idrepositorio)
-{
-	global $idcentro;
-	global $TbMsg;
-	$tablaHtml="";
-	$rs=new Recordset; 
-	$cmd->texto="SELECT ordenadores.ip AS masterip,ordenadores_particiones.numpar,ordenadores_particiones.codpar,ordenadores_particiones.tamano,
-				ordenadores_particiones.idnombreso,nombresos.nombreso,tipospar.tipopar,tipospar.clonable,
-				imagenes.nombreca,imagenes.descripcion as imagen,perfilessoft.idperfilsoft,
-				perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
-				FROM ordenadores
-				INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-				LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-				INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
-				LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-				LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-				LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
-				WHERE ordenadores.idordenador=$idordenador ORDER BY ordenadores_particiones.numpar";
-	//echo 	$cmd->texto;
-	$rs->Comando=&$cmd; 
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
-	$rs->Primero(); 
-	while (!$rs->EOF){
-		$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
-		$swc=$rs->campos["idperfilsoft"]>0; // Una partición es clonable si posee un identificador de perfil software		
-		$swccc=$swcc && $swcc;
-		$tablaHtml.='<TR>'.chr(13);
-		if($swccc){
-			$tablaHtml.='<TD><input type=radio name="particion" value="'.$rs->campos["numpar"]."_".$rs->campos["codpar"].'"></TD>'.chr(13);
-			$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["numpar"].'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["tipopar"].'&nbsp;</TD>'.chr(13);
-			if(empty($rs->campos["nombreso"]) && !empty($rs->campos["idnombreso"])) // Si el identificador del S.O. no es nulo pero no hay descripción
-				$tablaHtml.='<TD align=center>&nbsp;'.'<span style="FONT-SIZE:10px;	COLOR: red;" >'.$TbMsg[12].'</span></TD>'.chr(13);
-			else
-				$tablaHtml.='<TD>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='<TD>'.HTMLSELECT_imagenes($cmd,$idrepositorio,$rs->campos["idperfilsoft"],$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
-			$tablaHtml.='<TD>'.HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
-			$tablaHtml.='<TD>&nbsp;</TD>';
-		}
-		$tablaHtml.='</TR>'.chr(13);	
-		$rs->Siguiente();
-	}
-	$rs->Cerrar();
-	return($tablaHtml);
-}
+
 ?>

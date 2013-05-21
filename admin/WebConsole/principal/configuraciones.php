@@ -13,8 +13,9 @@ include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/comunes.php");
 include_once("../includes/constantes.php");
-include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../idiomas/php/".$idioma."/configuraciones_".$idioma.".php");
+include_once("../includes/ConfiguracionesParticiones.php");
+
 //________________________________________________________________________________________________________
 //
 // Captura parámetros
@@ -141,7 +142,9 @@ if (!$cmd)
 </BODY>
 </HTML>
 <?
+/*
 // *************************************************************************************************************************************************
+//	UHU - 2013/15/14 - Se pintan los discos ademas de las particiones
 //	Descripción:
 //		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
 //		grupo de ordenadores o aula
@@ -156,8 +159,21 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;
 
-	$colums=8;
+	// Recorremos las configuraciones para separalas segun el disco al que pertenezcan
+	$diskConfigs = array();
+	$configs = split("@",$configuraciones);
+	foreach($configs as $config){
+		$parts = split(";",$config);
+		if($diskConfigs[$parts[0]] != "")
+			$diskConfigs[$parts[0]] .= "@";
+		// Concatenamos la configuracion en el disco que corresponda
+		$diskConfigs[$parts[0]] .= $config;
+	}
+	
+
+	$columns=9;
 	echo '<tr height="16">';
+	echo '<th align="center">&nbsp;'.$TbMsg[35].'&nbsp;</th>'; // Número de  disco
 	echo '<th align="center">&nbsp;'.$TbMsg[20].'&nbsp;</th>'; // Número de partición
 	echo '<th align="center">&nbsp;'.$TbMsg[24].'&nbsp;</th>'; // Tipo de partición
 	echo '<th align="center">&nbsp;'.$TbMsg[27].'&nbsp;</th>'; // Sistema de ficheros
@@ -168,93 +184,121 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	echo '<th align="center">&nbsp;'.$TbMsg[495].'&nbsp;</th>';
 	echo '</tr>';
 
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
-	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
-					$disksize = tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-					if (empty ($disksize)) {
-						$disksize = '<em>'.$TbMsg[42].'</em>';
-					}
-					switch ($tbKeys[$k]["codpar"]) {
-						case 1:  $disktable = "MSDOS";
-							 break;
-						case 2:  $disktable = "GPT";
-							 break;
-						default: $disktable = "";
-					}
-				}
-				else {  // Información de partición (numpart>0)
-					echo'<tr height="16">'.chr(13);
-					echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-					if (is_numeric ($tbKeys[$k]["tipopar"])) {
-						echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
-					}
-					else {
-						echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
-					}
-					echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
+	// Recorremos todas las configuraciones encontradas para cada disco
+	
+	foreach($diskConfigs as $disk => $diskConfig){
+		 echo'<tr height="16">'.chr(13);
+	         echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg[35].'&nbsp;'.$disk.'</td>'.chr(13);
 
-					echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);					
 
-					echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-
-					echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-					
-					echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-
-					if ($tbKeys[$k]["numpar"] == "4") {
-						$rs=new Recordset; 
-						$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4";
-						$rs->Comando=&$cmd; 
-						if (!$rs->Abrir()) return(false); // Error al abrir recordset
-						$rs->Primero(); 
-						if (!$rs->EOF){
-							$campocache=$rs->campos["cache"];
+		
+		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
+		for($i=0;$i<sizeof($auxCfg);$i++){
+			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
+				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
+					if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
+						$disksize[$tbKeys[$k]["numdisk"]] = tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]);
+						if (empty ($disksize)) {
+							$disksize = '<em>'.$TbMsg[42].'</em>';
 						}
-						$rs->Cerrar();
-						echo '<td align="leght">&nbsp;';
-						$ima=split(",",$campocache);
-						$numero=1;
-						for ($x=0;$x<count($ima); $x++) {
-							if(substr($ima[$x],-3)==".MB") {
-								echo '<strong>'.$TbMsg[4951].':  '.$ima[$x].'</strong>';
-							} else {
-								if(substr($ima[$x],-4)==".img") {
-									echo '<br />'.$numero++.'.-'.$ima[$x];
+						switch ($tbKeys[$k]["codpar"]) {
+							case 1:  $disktable[$tbKeys[$k]["numdisk"]] = "MSDOS";
+								 break;
+							case 2:  $disktable[$tbKeys[$k]["numdisk"]] = "GPT";
+								 break;
+							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
+						}
+					}
+					else {  // Información de partición (numpart>0)
+						echo'<tr height="16">'.chr(13);
+                                	        echo'<td align="center">&nbsp;</td>'.chr(13);
+						echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
+						if (is_numeric ($tbKeys[$k]["tipopar"])) {
+							echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
+						}
+						else {
+							echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+						}
+						echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
+	
+						echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);					
+	
+						echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
+	
+						echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
+						
+						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
+	
+						if ($tbKeys[$k]["numpar"] == "4") {
+							$rs=new Recordset; 
+							$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4";
+							$rs->Comando=&$cmd; 
+							if (!$rs->Abrir()) return(false); // Error al abrir recordset
+							$rs->Primero(); 
+							if (!$rs->EOF){
+								$campocache=$rs->campos["cache"];
+							}
+							$rs->Cerrar();
+							echo '<td align="leght">&nbsp;';
+							$ima=split(",",$campocache);
+							$numero=1;
+							for ($x=0;$x<count($ima); $x++) {
+								if(substr($ima[$x],-3)==".MB") {
+									echo '<strong>'.$TbMsg[4951].':  '.$ima[$x].'</strong>';
 								} else {
-									echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
+									if(substr($ima[$x],-4)==".img") {
+										echo '<br />'.$numero++.'.-'.$ima[$x];
+									} else {
+										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
+									}
 								}
 							}
+							echo '&nbsp;</td>'.chr(13);
+						} else {
+							echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
 						}
-						echo '&nbsp;</td>'.chr(13);
-					} else {
-						echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
-					}
 					
-					echo'</tr>'.chr(13);
+						echo'</tr>'.chr(13);
+					}
+					break;
 				}
-				break;
 			}
+		}	
+		// Mostrar información del disco, si se ha obtenido.
+		if (!empty ($disksize)) {
+			echo'<tr height="16">'.chr(13);
+                        echo'<td align="center">&nbsp;</td>'.chr(13);
+                        echo'<td align="center">&nbsp;'.$disktable[$disk].'&nbsp;</td>'.chr(13);
+                        echo'<td></td>'.chr(13);
+                        echo'<td></td>'.chr(13);
+                        echo'<td></td>'.chr(13);
+                        echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</strong>&nbsp;</td>'.chr(13);
+                        echo'<td></td>'.chr(13);
+	                echo'<td></td>'.chr(13);
+			echo'<td></td>'.chr(13);
+                        echo'</tr>'.chr(13);
+
+			/*
+			foreach($disksize as $disk=>$size){
+				echo'<tr height="16">'.chr(13);
+				echo'<td align="center">&nbsp;'.$TbMsg[35].'&nbsp;'.$disk.'</td>'.chr(13);
+				echo'<td align="center">&nbsp;'.$disktable[$disk].'&nbsp;</td>'.chr(13);
+				echo'<td></td>'.chr(13);
+				echo'<td></td>'.chr(13);
+				echo'<td align="right">&nbsp;'.$size.'&nbsp;</td>'.chr(13);
+				echo'<td></td>'.chr(13);
+				echo'<td></td>'.chr(13);
+				echo'<td></td>'.chr(13);
+				echo'<td></td>'.chr(13);
+				echo'</tr>'.chr(13);
+			}
+			*
 		}
-	}	
-	// Mostrar información del disco, si se ha obtenido.
-	if (!empty ($disksize)) {
-		echo'<tr height="16">'.chr(13);
-		echo'<td align="center">&nbsp;'.$TbMsg[35].'&nbsp;</td>'.chr(13);
-		echo'<td align="center">&nbsp;'.$disktable.'&nbsp;</td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'</tr>'.chr(13);
-	}	
-	echo '<tr height="5"><td colspan="'.$colums.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
+	}
+	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
 }
+/**/
 //________________________________________________________________________________________________________
 function datosAulas($cmd,$idaula)
 {

@@ -1,4 +1,4 @@
-<?php
+<?
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -16,10 +16,10 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
-include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+include_once("../includes/ConfiguracionesParticiones.php");
 
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
@@ -61,11 +61,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/configurar_'.$idioma.'.js"></SCRIPT>'?>
+<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/configurar_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?php
+<?
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
@@ -112,11 +112,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				</TR>
 			</TABLE>
 		</FORM>	
-<?php
+<?
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 
-	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false,"pintaParticionesConfigurar");	
 
 	/* Dibuja tabla patron  !OJO! no insertar caracteres entre las etiquetas*/
 	
@@ -138,76 +138,8 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 ?>
 </BODY>
 </HTML>
-<?php
-/*________________________________________________________________________________________________________
+<?
 
-	Descripción:
-		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
-		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-		grupo de ordenadores o aula
-	Parametros:
-		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
-						sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
-						Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-		$idordenadores: cadena con los identificadores de los ordenadores que forman parte del bloque 
-		$cc: Identificador de la configuración
-	Devuelve:
-		El código html de la tabla
-________________________________________________________________________________________________________*/
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
-{
-
-	global $tbKeys; // Tabla contenedora de claves de configuración
-	global $conKeys; // Contador de claves de configuración
-	global $TbMsg;
-
-	$colums=7;
-	echo '<TR id="TR_'.$cc.'">';
-	echo '<TH align=center><IMG src="../images/iconos/eliminar.gif"></TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[24].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[27].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[22].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[21].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
-	echo '</TR>';
-
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
-	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				$icp=$cc."_".$k; // Identificador de la configuración-partición
-				echo '<TR id="TR_'.$icp.'">';
-				echo '<TD align=center><input type=checkbox onclick="eliminaParticion(this,\''.$icp.'\')"></TD>';
-			
-				echo '<TD align=center>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</TD>';
-				echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</TD>';
-				
-				$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);	
-				echo'<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</TD>';
-
-				$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-				echo'<TD align=center><INPUT type="text" style="width:100" value="'.$tm.'"></TD>';		
-					
-				echo '<TD align=center>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</TD>';					
-			
-				echo '<TD align=center>'.opeFormatear().'</TD>';
-				echo '</TR>';
-			}
-		}
-	}
-	/* Botones de añadir y confirmar */	
-	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-	echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
-	echo '	<A href="#add" style="text-decoration:none">
-						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
-						value="'.$k.'" onclick="addParticion(this,'.$cc.')"></A>
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<A href="#add" style="text-decoration:none">
-						<IMG border=0 src="../images/boton_aceptar.gif" onclick="Confirmar('.$cc.')"></A></TD>
-					</TR>';
-}
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los número de particiones
 ________________________________________________________________________________________________________*/
@@ -246,3 +178,4 @@ function HTMLSELECT_sistemasficheros($cmd,$idsistemafichero)
 	return(HTMLSELECT($cmd,0,"sistemasficheros",$idsistemafichero,"idsistemafichero","descripcion",150,"","formulariodatos"));
 }	
 ?>
+

@@ -378,7 +378,8 @@ function htmlForm_sizepart($cmd,$numpar)
 	return($SelectHtml);	
 }
 
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
+
+function pintaParticionesAsistenteDeployImage($cmd,$configuraciones,$idordenadores,$cc)
 {
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración

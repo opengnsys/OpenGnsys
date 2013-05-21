@@ -1,10 +1,10 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: configurar_cat.php (Comandos)
+//	Fitxer d'idiomes php: configurar_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Centres';
 	$TbMsg[1]='Grup d\'aules';
 	$TbMsg[2]='Aules';

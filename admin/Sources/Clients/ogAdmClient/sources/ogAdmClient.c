@@ -1165,7 +1165,7 @@ BOOLEAN Reiniciar(TRAMA* ptrTrama)
 BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*ids,*par,msglog[LONSTD];
+	char *nfn,*ids,*disk,*par,msglog[LONSTD];
 	char modulo[] = "IniciarSesion()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1174,6 +1174,7 @@ BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 	}
 	nfn=copiaParametro("nfn",ptrTrama);
 	ids=copiaParametro("ids",ptrTrama);
+	disk=copiaParametro("dsk",ptrTrama);
 	par=copiaParametro("par",ptrTrama);
 	
 	initParametros(ptrTrama,0);
@@ -1182,7 +1183,7 @@ BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 	liberaMemoria(ids);			
 
 	sprintf(interface,"%s/%s",pathinterface,nfn);
-	sprintf(parametros,"%s %s",nfn,par);
+	sprintf(parametros,"%s %s %s",nfn,disk,par);
 	liberaMemoria(par);			
 	
 	herror=interfaceAdmin(interface,parametros,NULL);

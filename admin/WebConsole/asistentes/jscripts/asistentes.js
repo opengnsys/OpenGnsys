@@ -43,7 +43,9 @@ switch (form.idmetodo.value)
 //form.codigo.value="deployImage REPO /";
 if (form.modo[0].checked) 
 {
-	command="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
+	var diskPart = form.idparticion.value.split(";");
+	command="deployImage REPO /" + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 echo [0] $MSG_SCRIPTS_TASK_START " + command +" | tee -a $OGLOGSESSION \n \ " +
 command + " | tee -a $OGLOGCOMMAND";
@@ -81,9 +83,13 @@ function codeParticionadoMSDOS (form) {
 	var extended=false;
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
+	var maxParts = 4;
+	
+	// Comprobamos si esta seleccionada la cuarta particion y no es CACHE
+        if(form.check4.checked && form.part4.value != "CACHE")
+                maxParts = 5;
 
-
-	for (var nPart=1; nPart<4; nPart++) {
+	for (var nPart=1; nPart<maxParts; nPart++) {
 		var partCheck=eval("form.check"+nPart);
 		if (partCheck.checked) {
 			var partType=eval("form.part"+nPart);
@@ -110,36 +116,43 @@ function codeParticionadoMSDOS (form) {
 			partCode += " EMPTY:0";
 		}
 	}
-	if (form.check4.checked) {
-		if (form.size4.value == "0") {
-			cacheCode="\
+
+	var cacheCode="";
+
+	// Si se selecciono la particion 4 y es CACHE
+	if(form.part4.value == "CACHE"){
+		if (form.check4.checked) {
+			if (form.size4.value == "0") {
+				cacheCode="\
 echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
-sizecache=`ogGetPartitionSize 1 4` \n \
+sizecache=`ogGetCacheSize` \n \
 echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
 ogDeletePartitionTable "+n_disk+"  \n \
 ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
 echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
-		} else {
-			if (form.size4.value == "CUSTOM") { 
-				cacheSize = form.size4custom.value; 
+initCache "+n_disk+" $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
 			} else {
-				cacheSize = form.size4.value;
-			} 
-			cacheCode="\
+				if (form.size4.value == "CUSTOM") { 
+					cacheSize = form.size4custom.value; 
+				} else {
+					cacheSize = form.size4.value;
+				} 
+				cacheCode="\
 echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
 ogDeletePartitionTable "+n_disk+"  \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
-		} 
-	} else {
-		cacheCode="\
+initCache " + n_disk + " " + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
+			} 
+		} else {
+			cacheCode="\
 echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n";
 partCode += " EMPTY:0";
+		}
 	}
+
 	if (extended) {
 		var lastLogical=5;
 		for (var nPart=9; nPart>5; nPart--) {
@@ -196,7 +209,7 @@ reboot \n";
 function codeParticionadoGPT (form) {
         var partCode="";
         var logicalCode="";
-        var cacheCode;
+        var cacheCode="";
         var cacheSize;
         var extended=false;
         var n_disk = form.n_disk.value;
@@ -207,16 +220,17 @@ function codeParticionadoGPT (form) {
                 var partCheck=eval("form.checkGPT"+nPart);
                 if (partCheck.checked) {
 			// Distinguimos entre cache y el resto de particiones
-			if(nPart == 4) {
+			// Solo tratamos la particion 4 como cache, si se selecciono este tipo
+			if(nPart == 4 && form.partGPT4.value == "CACHE") {
 				if (form.sizeGPT4.value == "0") {
 					cacheCode="\
 echo \"[20] $MSG_HELP_ogGetPartitionSize CACHE\" | tee -a $OGLOGSESSION \n \
-sizecache=`ogGetPartitionSize 1 4` \n \
+sizecache=`ogGetCacheSize` \n \
 echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 1\" | tee -a $OGLOGSESSION \n \
 ogDeletePartitionTable "+n_disk+"  \n \
 ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
 echo \"[50] $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-initCache $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
+initCache "+ n_disk +" $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
 				} else {
 					if (form.sizeGPT4.value == "CUSTOM") {
 						cacheSize = form.sizeGPT4custom.value;
@@ -228,7 +242,7 @@ echo \"[30] $MSG_HELP_ogDeletePartitionTable - $MSG_HELP_ogUpdatePartitionTable 
 ogDeletePartitionTable "+n_disk+"  \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 echo \"[50]  $MSG_HELP_ogCreateCache \" | tee -a $OGLOGSESSION \n \
-initCache "  + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";
+initCache "  + n_disk +" "+ cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";
 				}
 			} else{
 				var partType=eval("form.partGPT"+nPart);
@@ -322,7 +336,9 @@ function clickPartitionCheckbox (form, npart, isGPT) {
 	} else {
 		partType.disabled=true;
 		partSize.disabled=true;
-		partTypeCustom.disabled=true;
+		// El campo TypeCustom no existe para la particion 4
+		if(npart != 4)
+			partTypeCustom.disabled=true;
 		partSizeCustom.disabled=true;
 	}
 	if (npart <= 4) {
@@ -482,20 +498,24 @@ function deleteGPTPartition(){
 function checkExtendedPartition(form) {
 	var logical=document.getElementById("logicas");
 	var visible=false;
-	for (npart=1; npart<4; npart++) {
+	for (npart=1; npart<=4; npart++) {
 		var partCheck=eval("form.check"+npart);
 		var partType=eval("form.part"+npart);
 		var partTypeCustom=eval("form.part"+npart+"custom");
 		if (partCheck.checked) {
 			partType.style.fontWeight = "normal";
-			partTypeCustom.style.fontWeight = "normal";
+
 			if (partType.value == "EXTENDED") {
 				visible=true;
 				partType.style.fontWeight = "bold";
 			}
-			if (partType.value == "CUSTOM" && partTypeCustom.value == "EXTENDED") {
-				visible=true;
-				partTypeCustom.style.fontWeight = "bold";
+			// La particion 4 no tiene partTypeCustom
+                        if(npart != 4){
+                        	partTypeCustom.style.fontWeight = "normal";
+				if (partType.value == "CUSTOM" && partTypeCustom.value == "EXTENDED") {
+					visible=true;
+					partTypeCustom.style.fontWeight = "bold";
+				}
 			}
 		}
 	}
