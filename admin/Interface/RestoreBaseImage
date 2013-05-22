@@ -1,0 +1,35 @@
+#!/bin/bash
+#___________________________________________________________________
+#
+#  RESTAURAR IMAGEN BÁSICA
+#___________________________________________________________________
+#
+# Parámetros recibidos desde el cliente:
+#
+# $1 Número de disco
+# $2 Número de particion
+# $3 Nombre canónico de la imagen básica (sin extensión)
+# $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
+# $5 Tipo de transmisión 0=Unicast 1=Multicast
+# $6 Es una cadena "nnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
+#		1XX: Gestionar fichero completo en lugar de diferencas
+#		X1X: Eliminar archivos de la partición que no estén en la imagen 
+#		XX1: Comprimir archivos para enviarlos por la red
+#		El valor X indica que no importa el valor que tenga el dato
+
+#___________________________________________________________________
+#
+# Control parámetros
+#___________________________________________________________________
+
+	PROG="$(basename $0)"
+	if [ $# -lt 6 ]; then
+		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio copiar_a_caché "
+		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
+		exit $?
+	fi
+	
+	# Llamada a la función de sincronización.
+ 	RestoreBaseImage "$@"
+
