@@ -46,6 +46,8 @@
 	$TbMsg[35]='Borrar la Partición Previamente';	
 	$TbMsg[36]='Copiar Imagen en cache';
 	$TbMsg[37]='Borrarla previamente de la cache';
-	$TbMsg[38]='No borrar archivos en destino';			
-	
+	$TbMsg[38]='No borrar archivos en destino';	
+	$TbMsg[39]='Método';	
+	$TbMsg[40]='Unicast';						
+	$TbMsg[41]='Multicast';	
 ?>	
