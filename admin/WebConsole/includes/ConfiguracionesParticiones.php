@@ -231,7 +231,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 						FROM ordenadores
 						INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 						LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-						INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+						LEFT JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 						LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 						LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 						LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";

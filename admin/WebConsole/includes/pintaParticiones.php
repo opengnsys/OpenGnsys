@@ -305,7 +305,7 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
 		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
+		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				$icp=$cc."_".$k; // Identificador de la configuración-partición
 				echo '<TR id="TR_'.$icp.'">';
