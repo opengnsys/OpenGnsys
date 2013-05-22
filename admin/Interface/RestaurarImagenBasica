@@ -10,22 +10,29 @@
 # $2 Número de particion
 # $3 Nombre canónico de la imagen básica (sin extensión)
 # $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
-# $5 Es una cadena "nnnn" tipo flags que codifica varios parametros.
+# $5 Tipo de transmisión 0=Unicast 1=Multicast
+# $6 Es una cadena "nnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
+#		1XX: Gestionar fichero completo en lugar de diferencas
+#		X1X: Eliminar archivos de la partición que no estén en la imagen 
+#		XX1: Comprimir archivos para enviarlos por la red
+#		El valor X indica que no importa el valor que tenga el dato
+# $7 Es una cadena "nnnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
 #		1XXX: Borrar la particion de destino antes de restaurar la imagen basica
 #		X1XX: Copiar Imagen básica también a la cache 
 #		XX1X: Borrar previamente la imagen basica de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $6 Método de clonación 0=Desde caché 1=Desde repositorio
-# $7 Ruta de origen de la Imagen (Carpeta)
+# $8 Método de clonación 0=Desde caché 1=Desde repositorio
+# $9 Ruta de origen de la Imagen (Carpeta)
 #___________________________________________________________________
 #
 # Control parámetros
 #___________________________________________________________________
 
 	PROG="$(basename $0)"
-	if [ $# -lt 6 ]; then
+	if [ $# -lt 8 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio copiar_a_caché "
 		usage="$usage Borrar_cache_previamente metodo_clonación Ruta_origen"
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
@@ -34,38 +41,4 @@
 	
 	# Llamada a la función de sincronización.
  	ogRestaurarImagenBasica "$@"
-        exit
-
-# Versión 2
-# Para probar la versión 2 comentar las cuatro líneas anteriores
-
-# Trasferencias comprimidas
-#export ogcompress="true"
-
-IMGFILE=".img"
-
-[ $6 -eq  0 ] && ORIG="CACHE" || ORIG="REPO"
-
-flag=$5
-echo "flah:$flag">/tmp/log
-DELIMG=${flag:0:1}
-COPYCACHE=${flag:1:1}
-DELCACHE=${flag:2:1}
-NODELETEFILE=${flag:3:1}
-
-echo -n "" &>$OGLOGSESSION
-if [ $DELIMG -eq 1 ]; then
-        ogFormat $1 $2 &>>$OGLOGSESSION
-fi
-if [ $COPYCACHE -eq 1 ]; then
-        ORIG="CACHE"
-fi
-if [ $DELCACHE -eq 1 ]; then
-        echo "Borramos imagen de la cache" &>>$OGLOGSESSION
-        CACHEFILE=$(ogGetPath "CACHE" "$3$IMGEXT") && rm -rf $CACHEFILE
-fi
-if [ $NODELETEFILE -eq 1 ]; then
-        export ogrsyncdel=false
-fi
-restoreBaseImage $ORIG $3 $1 $2 &>>$OGLOGSESSION
 
