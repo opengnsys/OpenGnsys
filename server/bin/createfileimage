@@ -1,17 +1,16 @@
 #!/bin/bash
 #/**
-#        mountimage
-#@brief  Monta imagen sincronizable en el repositorio con permisos de escritura
+#       createtimage
+#@brief  Crea o redimensiona el archivo de la imagen.
 #@param 1 imagen
-#@param 2 extension [ img|diff ] opcional, por defecto img
+#@param 2 extension [ img|diff ]
+#@param 3 tamaño de la imagen en kb.
 #@return  
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
-#@exception OG_ERR_NOTFOUND # 2 Fichero o dispositivo no encontrado
 #@exception OG_ERR_DONTSYNC_IMAGE  #71 Imagen no sincronizable (es monolitica)
-#@exception OG_ERR_DONTMOUNT_IMAGE # 70 Error al montar una imagen sincronizada
 #@version 1.0 - Montar imagen sincronizable
 #@author  Irina Gomez
-#@date   2013-05-15
+#@date   2013-05-23
 #*/ ##
 BASEDIR=/opt/opengnsys
 REPODIR="$BASEDIR/images"
@@ -46,7 +45,7 @@ if [ -f $IMGFILE ]; then
    fi
 fi
 
-# El tamaño minimo de la imagen es 300000 para podre formatear en fs btrfs.
+# El tamaño minimo de la imagen es 300000 para poder formatear en fs btrfs.
 SIZEREQUIRED=$3
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
 
