@@ -220,7 +220,6 @@ else
 
 fi
 
-# Imagenes basicas  y diferenciales
 # Guardamos el contenido de las acl (Solo win) Necesario particion desmontada (esta asi)
 ogUnmount $1 $2
 if [ $FSTYPE == "NTFS" ]; then
@@ -232,12 +231,12 @@ fi
 
 #/**
 #  ogRestoreInfoImage
-#@brief Restaurar las ACL y en las diferenciales crear enlaces y borrar ficheros sobrantes.
+#@brief Crear o modificar enlaces y restaurar las ACL.
 #@param 1 num_disk
 #@param 2 num_part
 #*/
 function ogRestoreInfoImage () {
-local  
+local  DEST PART IMGACL IMGLN OPTLN LINEA DESTLN ORIGLN TYPELN 
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" ]; then
@@ -252,39 +251,49 @@ if [ $# -lt 2 ]; then
     return $?
 fi
 
-
-
 DEST=$(ogMount $1 $2)
 PART=$(ogDiskToDev "$1" "$2" 2>/dev/null)
-
-# Informacion del contenido.
 IMGACL="ogimg.acl"
+IMGLN="ogimg.ln"
 
-if [ -r $DEST/ogimg.ln ]; then
-	while read dest enlace orig 
-	do
-	   if [ "$enlace" == "->" ]
-	   then
-	        OPTLN='-s'
-	   else
-	        OPTLN=''
-	   fi
-	   cd $DEST/$(dirname $dest)
-	   ln $OPTLN $orig $(basename $dest) 2>/dev/null
-	   echo -n "."
-	done < $DEST/ogimg.ln  2>/dev/null
-	echo ""
+#Creamos o modificamos los enlaces.
+# La imagen diferencial tiene ogimg.ln 
+# para la completa lo generamos con los enlaces que contengan  /mnt/
+[ -r $DEST/$IMGLN ] || grep -e "->" -e "=>" $DEST/ogimg.info|grep "/mnt/" > $DEST/$IMGLN
+if [ $(wc -l $DEST/$IMGLN|cut -f1 -d" ") -ne 0 ]; then
+   while read LINEA
+   do
+        ORIGLN="${LINEA#*> }"
+        # Si origen hace referencia a la particion lo modificamos
+        echo $ORIGLN|grep "/mnt/"> /dev/null && ORIGLN="$DEST/${ORIGLN#/mnt/*/}"
+	# rsync marca - los enlaces simbolicos y = enlaces "duros"
+        LINEA="${LINEA%>*}"
+        TYPELN="${LINEA##* }"
+        DESTLN="${LINEA% *}"
+
+   	if [ "$TYPELN" == "-" ]
+   	then
+           OPTLN='-s'
+   	else
+           OPTLN=''
+   	fi
+   	cd "$DEST/$(dirname $DESTLN)"
+	rm "$(basename $DESTLN)"
+   	ln $OPTLN "$ORIGLN" "$(basename $DESTLN)"
+   	echo -n "."
+   done < $DEST/$IMGLN  2>/dev/null
+   echo ""
 
 fi
 
-# Imagen basica y diferencial.
-   if [ "$(ogGetFsType $1 $2)" == "NTFS" ] ; then
+# Restauramos acl
+if [ "$(ogGetFsType $1 $2)" == "NTFS" ] ; then
 	cd /
         cp $DEST/$IMGACL /tmp
         ogUnmount "$1" "$2"
         echo "      ntfs-3g.secaudit -se $PART" |tee -a $OGLOGSESSION $OGLOGFILE
         ntfs-3g.secaudit -se $PART /tmp/$IMGACL 
-   fi
+fi
 
 }
 
@@ -429,7 +438,7 @@ fi
 
 
 if [ $# -lt 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME image_name [ extension ]"
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ]  image_name [ extension ]"
     return $?
 fi
 
