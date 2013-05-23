@@ -82,7 +82,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 		touch "$DIRMOUNT/ogimg.info"
 
         #fi
-        losetup -d $LOOPDEVICE 2>&1 &>/dev/null
+	# Si existe dispositivo de loop lo borro.
+        [ $LOOPDEVICE ] && losetup -d $LOOPDEVICE 2>&1 &>/dev/null
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
@@ -483,7 +484,7 @@ if [ "$*" == "help" ]; then
 fi
 
 if [ $# -lt 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME image_name [ extension ]"
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME  [ REPO|CACHE ]  image_name [ extension ]"
     return $?
 fi
 
@@ -492,6 +493,7 @@ fi
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	DIRMOUNT=/tmp/$(ogGetMountDir "$2" $IMGEXT)
 	umount "$DIRMOUNT"
+	rmdir "$DIRMOUNT"
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
         echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGEXT" |tee -a  $OGLOGFILE

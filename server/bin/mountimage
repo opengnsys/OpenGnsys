@@ -1,0 +1,55 @@
+#!/bin/bash
+#/**
+#        mountimage
+#@brief  Monta imagen sincronizable en el repositorio con permisos de escritura
+#@param 1 imagen
+#@param 2 extension [ img|diff ] opcional, por defecto img
+#@return  
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND # 2 Fichero o dispositivo no encontrado
+#@exception OG_ERR_DONTSYNC_IMAGE  #71 Imagen no sincronizable (es monolitica)
+#@exception OG_ERR_DONTMOUNT_IMAGE # 70 Error al montar una imagen sincronizada
+#@version 1.0 - Montar imagen sincronizable
+#@author  Irina Gomez
+#@date   2013-05-15
+#*/ ##
+BASEDIR=/opt/opengnsys
+REPODIR="$BASEDIR/images"
+source $BASEDIR/client/etc/lang.$LANG.conf
+
+PROG="$(basename $0)"
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    echo -e " $PROG: $MSG_HELP_ogMountImage \n" \
+            "$MSG_FORMAT: $PROG nombre_image [ img|diff ] \n" \
+            "base -> $PROG Windows7 \n" \
+	    "diff -> $PROG Ubuntu12 diff"
+   exit 0
+fi
+
+[ $# -lt 1 ] && echo -e "$PROG: Error: $MSG_ERR_FORMAT \n     $MSG_FORMAT: $PROG image [ img | diff ]" && exit 1
+
+if [ "$USER" != "root" ]; then
+        echo "$PROG: Error: solo ejecutable por root" >&2
+        exit 1
+fi
+
+[ "$2" == "" ] && IMGEXT="img" || IMGEXT="$2"
+# Comprobamos que existe imagen
+IMGFILE="$REPODIR/$1.$IMGEXT"
+[ ! -f $IMGFILE ] && echo "$PROG: Error: $MSG_ERR_NOTFOUND $1 $IMGEXT" && exit 2
+
+
+# Comprobar que la imagen  es sincronizable
+if ! file $IMGFILE | grep " BTRFS Filesystem" >/dev/null ; then
+	echo "$PROG: Error: $MSG_ERR_DONTSYNC_IMAGE $1 $2"
+	exit 71
+fi
+
+MOUNTDIR="$REPODIR/mount/$1"
+[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
+mkdir -p "$MOUNTDIR"
+mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"
+[ "$?" == "0" ] || ( echo "$MSG_ERR_DONTMOUNT_IMAGE  $1 $2" ; exit 70)
+echo  "$MOUNTDIR"
+

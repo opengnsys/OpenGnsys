@@ -67,10 +67,9 @@ case "$PARM1" in
 
 		MOUNTDIR="$REPODIR/mount/${PARM2}"
 		[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
+		mkdir -p "$MOUNTDIR"
 
-		# Aumentamos El tamaño por el error de rsycn -> Probar con menos tamaño
 		SIZEREQUIRED="$PARM4"
-		#let SIZEREQUIRED=$PARM4*4/3
 
 		if [ -f "$IMGFILE" ]; then
 		    echolog "Redimensionamos la imagen $IMGFILE al tamaño necesario: $SIZEREQUIRED"
@@ -117,15 +116,14 @@ case "$PARM1" in
 	
 		fi
 		# Montamos la imagen.
-		mkdir -p "$MOUNTDIR"
 		echolog "mount -o compress=lzo  $IMGFILE $MOUNTDIR"
 		mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"
 		[ "$?" == "0" -o "$?" == "32" ] || (echolog "Error al crear/redimensionar la imagen"; exit 1)
 		touch "$MOUNTDIR/ogimg.info"
 		TIME2=$[SECONDS-TIME]
 		echolog "Fin creación/redimension de la  imagen: $[TIME2/60]m $[TIME2%60]s"
-		echo losetup -d $LOOPDEVICE
-		losetup -d $LOOPDEVICE
+		# Si existe dispositivo loop lo borramos.
+ 		[ $LOOPDEVICE ] &&  losetup -d $LOOPDEVICE
 		# TODO: comprobar que no se quede el losetup bloqueado.
 
 	;;
@@ -151,8 +149,9 @@ case "$PARM1" in
 		IMGEXT="$PARM3"
 		MOUNTDIR="$REPODIR/mount/$PARM2"
 		[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
-		echolog "Desmontamos la imagen $IMGFILE "
+		echolog "Desmontamos la imagen $PARM2 $PARM3 "
 		umount $MOUNTDIR
+		rmdir $MOUNTDIR
 
 	;;
 	REDUCE_IMAGE)
@@ -162,7 +161,7 @@ case "$PARM1" in
 		#3 Extensión [ img |diff ]
 		IMGEXT="$PARM3"
                 IMGFILE="$REPODIR$PARM2.$IMGEXT"
-		[ ! -f $IMGFILE ] && echolog "Imagen no existe" && exit 1 
+		[ ! -f $IMGFILE ] && echolog "Imagen $IMGFILE no existe" && exit 1 
 		MOUNTDIR="$REPODIR""mount/${PARM2}"
                 [ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
 
