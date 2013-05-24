@@ -2,7 +2,7 @@
 install squashfs-tools
 install unionfs-fuse
 install drbl-ntfsprogs 
-install ntfsprogs 
+#install ntfsprogs 
 install ntfs-3g 
 install dosfstools 
 install fatresize
@@ -26,3 +26,5 @@ install ufsutils
 install zfs-fuse
 install android-tools-adb
 install android-tools-fastboot
+install android-tools-fsutils
+install f2fs-tools

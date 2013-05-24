@@ -72,7 +72,8 @@ case "${1,,}" in
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
 		OSRELEASE=$(uname -a | awk '{print $3}')
-		uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
+		#uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
+		OSARCH="i386"
 		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
 esac

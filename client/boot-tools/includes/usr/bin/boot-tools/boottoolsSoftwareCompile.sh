@@ -45,15 +45,15 @@ which spartlnx.run || $(wget http://damien.guibouret.free.fr/savepart.zip &>/dev
 
 
 #gpt
-echo "gptfdisk"
-apt-get install -y uuid-dev libicu-dev libpopt-dev libpopt0 ncurses-base libncurses5-dev
-wget -O download.tgz http://sourceforge.net/projects/gptfdisk/files/gptfdisk/0.8.5/gptfdisk-0.8.5.tar.gz/download -O gptfdisk-0.8.5.tar.gz
-tar xzvf gptfdisk-0.8.5.tar.gz
-cd gptfdisk-0.8.5
-make
-cp -va sgdisk gdisk fixparts cgdisk /sbin
-cd ..
-rm -fr gptfdisk-0.8.5*
+#echo "gptfdisk"
+#apt-get install -y uuid-dev libicu-dev libpopt-dev libpopt0 ncurses-base libncurses5-dev
+#wget -O download.tgz http://sourceforge.net/projects/gptfdisk/files/gptfdisk/0.8.5/gptfdisk-0.8.5.tar.gz/download -O gptfdisk-0.8.5.tar.gz
+#tar xzvf gptfdisk-0.8.5.tar.gz
+#cd gptfdisk-0.8.5
+#make
+#cp -va sgdisk gdisk fixparts cgdisk /sbin
+#cd ..
+#rm -fr gptfdisk-0.8.5*
  
 # Mach-O loader for Linux
 echo "maloader"
