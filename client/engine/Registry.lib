@@ -231,9 +231,9 @@ fi
 
 # Camino del fichero de registro en NT/2000 o XP/Vista/7.
 FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
+[ -f "$FILENT" ] && FILE="$FILENT"
 FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
+[ -f "$FILEXP" ] && FILE="$FILEXP"
 [ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
 
 echo "$FILE"
