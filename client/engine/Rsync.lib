@@ -93,42 +93,6 @@ fi
 
 }
 
-#/**
-# ogSetSizeInfo [REPO|CACHE] nombre_imagen extension tamaño 
-#@brief Configuramos la informacion del tamaño de los datos, para diferenciales
-#@param 1 Repositorio  [ REPO | CACHE ] (opcional en las completas)
-#@param 2 Nombre Imagen Basica (opcional en las completas)
-#@param 3 Extensión [ img | diff ]
-#@param 4 Tamaño de los datos.
-function ogSetSizeInfo () {
-local DIRMOUNT UMOUNT
-
-if [ "$*" == "help" ]; then
-	ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name  extension size_data  " \
-       	       "base image -> $FUNCNAME REPO Ubuntu12 img 34000000" \
-     	       "diff image -> $FUNCNAME CACHE Windows7 diff 500000"
-    	return
-fi
-
-if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  [ REPO|CACHE ] image_name  extension size_data "
-    return $?
-fi
-
-DIRMOUNT=$(ogGetMountDir  "$2" $3)
-[ "$1" == "CACHE" -o "$1" == "cache" ] && DIRMOUNT="/tmp/$DIRMOUNT" || DIRMOUNT="$OGIMG/$DIRMOUNT"
-
-# Si no esta montada la imagen se monta.
-[ -r $DIRMOUNT/ogimg.info ] && UMOUNT=false || ogMountImage $1 "$2" $3 
-# se configura el tamaño
-echo sed -i s/SIZEDATA/"$4"/g $DIRMOUNT/ogimg.info
-sed -i s/SIZEDATA/"$4"/g $DIRMOUNT/ogimg.info
-# se desmonta, si no estaba montada.
-[ "$UMOUNT" == false ] || ogUnmountImage $1 "$2" $3
-
-
-}
-
 function ogCreateInfoImage () {
 #/**
 #  ogCreateInfoImage

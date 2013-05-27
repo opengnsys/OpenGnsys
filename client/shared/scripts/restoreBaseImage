@@ -56,23 +56,23 @@ fi
 
 # Procesar parámetros de entrada
 REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
+
+# Comprobar que es sincronizable (con REPO)
+file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
+
 # Comprobamos si el sistema de ficheros se puede montar
-ogMount "$3" "$4" &>/dev/null
-if [  $? -ne 0 ] ; then
+ogMount "$3" "$4" &>/dev/null || RETVAL=$?
+# Si da error formateamos el sistema de ficheros.
+if [  "$RETVAL" ] ; then
 	# TODO ogGetImageInfo
-	DIRMOUNT="/tmp/mount$$"
-	mkdir $DIRMOUNT
-	mount -o compress=lzo $REPOFILE $DIRMOUNT
+	DIRMOUNT=$(ogMountImage "$1" "$2")
+	ogWaitMountImage "$1" "$2" "$IMGEXT"  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."
 	FSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)	
-	umount $DIRMOUNT
+	ogUnmountImage $1 "$2"
 	echo "      $MSG_HELP_ogFormat: $3 $4 $FSTYPE" | tee -a $OGLOGFILE
 	ogFormat "$3" "$4" "$FSTYPE" || ogRaiseError $OG_ERR_FILESYS "$3 $4"
 	ogMount "$3" "$4"  || ogRaiseError $OG_ERR_FILESYS "$3 $4"
 fi
-
-
-# Comprobar que es sincronizable (con REPO)
-file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
 
 echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE
 IMGEXT="img"
