@@ -747,8 +747,12 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		splitCadena(ptrDual, ptrCfg[1], '=');
 		par = ptrDual[1]; // Número de partición
 
-		splitCadena(ptrDual, ptrCfg[2], '=');
-		cpt = ptrDual[1]; // Código de partición
+		k=splitCadena(ptrDual, ptrCfg[2], '=');
+		if(k==2){
+			cpt = ptrDual[1]; // Código de partición
+		}else{
+			cpt = "0";
+		}
 
 		k=splitCadena(ptrDual, ptrCfg[3], '=');
 		if(k==2){
