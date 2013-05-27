@@ -25,7 +25,7 @@ fi
 
 MNTDIR=$(ogMount $1 $2)
 
-# filtro Tipo de sistema opertativo.
+# filtro Tipo de sistema operativo.
 OSTYPE="$(ogGetOsType $1 $2)"
 
 
