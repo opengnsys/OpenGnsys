@@ -1348,6 +1348,11 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	liberaMemoria(nci);	
 	liberaMemoria(rti);	
 	liberaMemoria(ipr);	
+
+	liberaMemoria(whl);	
+	liberaMemoria(eli);	
+	liberaMemoria(cmp);	
+
 	liberaMemoria(bpi);	
 	liberaMemoria(cpc);	
 	liberaMemoria(bpc);	
@@ -1373,7 +1378,7 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*idf,*ipr,*nci,*rti,*ncf,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*idf,*ipr,*nci,*rti,*ncf,*whl,*eli,*cmp,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "CrearSoftIncremental()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1390,6 +1395,11 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
 	idf=copiaParametro("idf",ptrTrama); // Identificador de la imagen diferencial
 	ncf=copiaParametro("ncf",ptrTrama); // Nombre canónico de la imagen diferencial
+
+	whl=copiaParametro("whl",ptrTrama); // Envío del fichero completo si hay diferencias	
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estén en origen	
+	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
+
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
 	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
@@ -1399,7 +1409,8 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 //	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(25,NULL);// Creando Imagen Incremental, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
-		sprintf(parametros,"%s %s %s %s %s %s %s%s%s%s %s",nfn,dsk,par,nci,ipr,ncf,bpi,cpc,bpc,nba,rti);
+		sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s",nfn,dsk,par,nci,ipr,ncf,whl,eli,cmp,bpi,cpc,bpc,nba,rti);
+
 		herror=interfaceAdmin(interface,parametros,NULL);
 		if(herror){
 			sprintf(msglog,"%s:%s",tbErrores[86],nfn);
@@ -1432,6 +1443,9 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	liberaMemoria(ipr);	
 	liberaMemoria(idf);	
 	liberaMemoria(ncf);	
+	liberaMemoria(whl);
+	liberaMemoria(eli);
+	liberaMemoria(cmp);
 	liberaMemoria(bpi);	
 	liberaMemoria(cpc);	
 	liberaMemoria(bpc);	
@@ -1523,7 +1537,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "RestaurarImagenBasica()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1538,6 +1552,15 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	nci=copiaParametro("nci",ptrTrama);
 	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
 	ifs=copiaParametro("ifs",ptrTrama);
+
+	tpt=copiaParametro("tpt",ptrTrama); // Tipo de trasnmisión unicast o multicast	
+
+	whl=copiaParametro("whl",ptrTrama); // Envío del fichero completo si hay diferencias	
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estén en origen	
+	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
+
+
+
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
 	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
@@ -1547,7 +1570,7 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 	muestraMensaje(31,NULL);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
-	sprintf(parametros,"%s %s %s %s %s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,bpi,cpc,bpc,nba,met,rti);
+	sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,tpt,whl,eli,cmp,bpi,cpc,bpc,nba,met,rti);
 	herror=interfaceAdmin(interface,parametros,NULL);
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
@@ -1574,6 +1597,13 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	liberaMemoria(ifs);	
 	liberaMemoria(ipr);	
 	liberaMemoria(met);
+
+	liberaMemoria(tpt);	
+
+	liberaMemoria(whl);	
+	liberaMemoria(eli);	
+	liberaMemoria(cmp);	
+
 	liberaMemoria(bpi);	
 	liberaMemoria(cpc);	
 	liberaMemoria(bpc);	
