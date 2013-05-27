@@ -4,7 +4,7 @@
 #         BuildToOrder
 #@brief   Script de ejemplo para realizar una configuracion del sistema operativo antes de generar imagen o restaurado.
 #@brief   Activa el uso de los contralodres de disco más usados en windows 7.
-#@brief (puede usarse como complemento para el programa de creación de imágenes o de restauración).
+#@brief (puede  usarse como complemento para el programa de creación de imágenes o de restauración).
 #@param 1 disco  
 #@param 2 particion 
 #@return  
