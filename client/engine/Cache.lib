@@ -4,14 +4,15 @@
 #@brief   Librería o clase Cache
 #@class   Cache
 #@brief   Funciones para gestión de la caché local de disco.
-#@version 1.0.4
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
 
 #/**
-#         ogCreateCache int_partsize
+#         ogCreateCache [int_ndisk] int_partsize
 #@brief   Define la caché local en la partición 4 del disco 1
+#@param   int_ndisk  numero de disco donde crear la cache, si no se indica es el 1 por defecto
 #@param   int_partsize   tamaño de la partición (en KB)
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT   formato incorrecto.
@@ -27,37 +28,54 @@
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/13
+#@version 1.0.5 - Posibilidad de crear la cache en cualquier disco duro
+#@author  Universidad de Huelva
+#@date    2012/09/18
 #*/ ##
 function ogCreateCache ()
 {
 # Variables locales.
-local FINDCACHE NDSK PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
+local FINDCACHE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_partsize" "$FUNCNAME 10000000"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partsize" "$FUNCNAME 1 10000000"
     return
 fi
-# Error si no se recibe 1 parámetro que sea un número entero.
-[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-[[ $1 =~ ([0-9]*) ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
+# Si se recibe un parametro, sera el tamano de la cache
+case $# in
+    1)  # Error, si no es un entero positivo
+        [[ $1 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
+        NDSK=1
+        SIZECACHE=$1
+        ;;
+    2)  # Error, si no son enteros positivos
+        [[ $1 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
+        [[ $2 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$2" || return $?
+        NDSK=$1
+        SIZECACHE=$2
+        ;;
+    *)  ogRaiseError $OG_ERR_FORMAT
+        return $?
+        ;;
+esac
 
-FINDCACHE="1 4"                         # Partición de caché (ndisco npart).
-NDSK=${FINDCACHE% *}
-PART=${FINDCACHE#* }
+# De momento la cache sigue siendo siempre la cuarta particion
+PART=4
+
 DISK=$(ogDiskToDev $NDSK) || return $?
 END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
-SIZE=$[$1*2]                            # Tamaño en sectores de 512 B.
+SIZE=$[$SIZECACHE*2]                            # Tamaño en sectores de 512 B.
 START=$[END-SIZE+1]
 ENDPREVPART=$[$(ogGetLastSector $NDSK $[PART-1] 2>/dev/null)]
 # Error si tamaño no está entre límites permitidos o si se solapa con la partición anterior.
-MINSIZE=25000                           # Error de formateo si tamaño < 50 MB.
-MAXSIZE=$[END/1]                        # No permitir tamaño > tamaño maximo del disco.
+MINSIZE=25000                   # Error de formateo si tamaño < 50 MB.
+MAXSIZE=$END                    # Para restringir tamaño > mitad del disco:  MAXSIZE=$[END/2]
 if [ $SIZE -lt $MINSIZE -o $SIZE -gt $MAXSIZE -o $START -le $ENDPREVPART ]; then
     ogRaiseError $OG_ERR_FORMAT "$1" || return $?
 fi
 
 # Desmontar todos los sistemas de archivos del disco.
-ogUnmountAll 1 2>/dev/null
+ogUnmountAll $NDSK 2>/dev/null
 # Definir particiones y notificar al kernel.
 # En el caso de ser disco GPT, de momento se borra la particion y se vuelve a crear,
 # por lo que se pierden los datos.
@@ -246,19 +264,25 @@ ogGetPartitionSize $PART
 #@version 0.91 - Definicion de cache local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/09
+#@version 1.0.5 - Uso de ogFindCache para detectar disco y particion
+#@author  Universidad de Huelva
+#@date    2012/09/18
 #*/ ##
 function ogGetCacheSpace ()
 {
-
 # Variables locales.
-local DISK SECTORS CYLS ENDPART3
+local NDISK DISK NPART SECTORS CYLS ENDPART3
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  23165386"
     return
 fi
+# Parche UHU para usar ogFindCache en lugar de 1
+# Error si no se encuentra partición de caché.
+read NDISK NPART <<<"$(ogFindCache)"
+[ -n "$NDISK" -a -n "$NPART" ] || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
+DISK=$(ogDiskToDev $NDISK) || return $?
 
-DISK=$(ogDiskToDev 1) || return $?
 SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
 CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
 SECTORS=$[SECTORS/CYLS*CYLS-1]
