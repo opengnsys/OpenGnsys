@@ -4,7 +4,7 @@
 <tr>
 	<td class="op_basic">
 	    <?echo $TbMsg["WCRP32"] ?> 
-		<select name="ipMaster" id="ipMaster" style="WIDTH:220" onChange="xajax_ListarOrigenMaster(this.value);">
+		<select name="ipMaster" id="ipMaster" style="width:220" onChange="xajax_ListarOrigenMaster(this.value);">
 				<option value=""> -- <?echo $TbMsg["WCRP32"] ?> -- </option>
 				<?php echo ''.htmlOPTION_equipos($cmd,$ambito,$idambito).'';   ?>
 		</select>		
@@ -14,7 +14,7 @@
 		<div id="divListado"></div>
 		<br />
 		<?echo $TbMsg["WCRP34"] ?> 
-		<select name="targetpart" id="targetpart" style="WIDTH:220";">
+		<select name="targetpart" id="targetpart" style="width:220;">
 			<option value="1 1"> 1er disco - 1ª particion </option>
 			<option value="1 2"> 1er disco - 2ª particion </option>
 			<option value="1 3"> 1er disco - 3ª particion </option>
@@ -22,23 +22,23 @@
 		</select>
 		<br />
 		<?echo $TbMsg["WCRP35"] ?>
-		<select name="idmetodo" id="idmetodo" style="WIDTH:220";">
+		<select name="idmetodo" id="idmetodo" style="width:220;">
 			<option value="MULTICAST"> MULTICAST </option>
 			<option value="UNICAST"> UNICAST </option> 			
 		</select>
 		<br />
 		<?echo $TbMsg["WCRP36"] ?>
-		<select name="tool" id="tool" style="WIDTH:220";">
+		<select name="tool" id="tool" style="width:220;">
 			<option value="partclone"> partclone </option>
 		<!--	<option value="partimage"> partimage </option> -->
 		</select>
 		<br />
 		<?echo $TbMsg["WCRP37"] ?>
-		<select name="compresor" id="compresor" style="WIDTH:220";">
+		<select name="compresor" id="compresor" style="width:220;">
 				<option value="lzop"> lzop </option>
 				<option value="gzip"> gzip </option>
 		</select>
-		<br />		
+		<br />
 		<br />
 
 	</td>
