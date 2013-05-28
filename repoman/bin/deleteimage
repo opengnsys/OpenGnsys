@@ -28,7 +28,7 @@ EOT
     exit 0
 fi
 # Procesar parámetros
-while getopts dr OPTION; do
+while getopts br OPTION; do
     case $OPTION in
         b) DELETEBACKUP=1 ;;
         r) RECOVERBACKUP=1 ;;
