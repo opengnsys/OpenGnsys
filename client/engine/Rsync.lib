@@ -594,6 +594,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         echo "      truncate --size=\"$ENDSIZE\"k $IMGFILE  "
         truncate --size="$ENDSIZE"k $IMGFILE
 else
+	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
         echo "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" $IMGEXT"
         hose $REPOIP 2009 --out sh -c "echo -ne REDUCE_IMAGE \"$2\" $IMGEXT"
 fi
