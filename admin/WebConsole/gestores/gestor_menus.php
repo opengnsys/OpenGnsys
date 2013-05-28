@@ -156,7 +156,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@htmlmenupub",$htmlmenupub,0);
 	$cmd->CreaParametro("@htmlmenupri",$htmlmenupri,0);
-	$cmd->CreaParametro("@resolucion",$resolucion,1);
+	$cmd->CreaParametro("@resolucion",$resolucion,0);
 	$cmd->CreaParametro("@idurlimg",$idurlimg,1);
 
 	switch($opcion){
