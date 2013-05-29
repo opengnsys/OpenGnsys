@@ -53,6 +53,10 @@ case "$OSTYPE" in
 			
 				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\iaStor\Start' '0' && echo "activado iaStor"
 				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\iaStor\Start' '0'
+				
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\LSI_SAS\Start' '0' && echo "activado iaStor"
+				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\LSI_SAS\Start' '0'
+				
 		   	;;
 		 esac
     ;;
