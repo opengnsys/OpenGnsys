@@ -388,7 +388,7 @@ fi
 #TODO, solo si es ntfs o fat
 PARTYPE=$(ogGetPartitionId $1 $2) 
 case "$PARTYPE" in
-	1|4|6|7|b|c|e|f)
+	1|4|6|7|b|c|e|f|17|700)
 	;;
 	*)
 	return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
