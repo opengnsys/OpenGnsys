@@ -122,8 +122,8 @@ case "$(ogGetFsType $1 $2)" in
 	COMPRESS=$COMPRESSLINUX
         ;;
     NTFS)
-        ogDeleteFile $1 $2 pagefile.sys || echo "$?"
-        ogDeleteFile $1 $2 hiberfil.sys || echo "$?"
+	[ $(ogGetPath $1 $2 pagefile.sys) ] && ogDeleteFile $1 $2 pagefile.sys 
+        [ $(ogGetPath $1 $2 hiberfil.sys) ] && ogDeleteFile $1 $2 hiberfil.sys
         ;;
 esac
 
