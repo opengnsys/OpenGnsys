@@ -5,6 +5,9 @@
 #	y se eliminan los enlaces para equipos con la plantilla por defecto.
 # Uso:	clienmode NombrePlatilla { NombrePC | NombreAula }
 # Autores: Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
+#@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
+#@author Irina Gomez - Univ. Sevilla
+#@date 2013-05-31
 
 
 # Variables.
@@ -12,22 +15,22 @@ PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 PXEDIR=$OPENGNSYS/tftpboot/menu.lst
-TEMPLATE="$PXEDIR/templates/$1"
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
 if [ $# -ne 2 ]; then
 	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG Archivo_platilla [NOMBRE_PC|NOMBRE_AULA]"
+	echo "Formato: $PROG template [pc_name|group_name]"
 	exit 1
 fi
 if [ ! -r $SERVERCONF ]; then
 	echo "$PROG: Sin acceso a fichero de configuración"
 	exit 2
 fi
-if [ ! -e $TEMPLATE ]; then
-	echo "No existe archivo platilla: $TEMPLATE"
+TEMPLATE=$(grep "^#.* $1 *$" $PXEDIR/templates/*|cut -d: -f1)
+if [ -z "$TEMPLATE" ]; then
+	echo "No existe archivo platilla: $1"
 	exit
 fi
 
