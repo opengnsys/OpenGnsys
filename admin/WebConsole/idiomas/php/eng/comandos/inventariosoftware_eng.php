@@ -1,7 +1,7 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: inventariosoftware_esp.php (Comandos)
+//	Fichero de idiomas php: inventariosoftware_eng.php (Comandos)
 //	Idioma: Español
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();

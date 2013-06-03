@@ -53,13 +53,16 @@
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				op++;
-				var particion=ochecks[i].value.split("_")[0];		
-				despleimagen=document.getElementById("despleimagen_"+particion);
+				// Los checks tienen en su nombre disco_nparticion_idparticion (Ej. 1_1_7 -> disco 1, part 1, NTFS
+				var disco=ochecks[i].value.split("_")[0];
+				var particion=ochecks[i].value.split("_")[1];
+				// El desplegable de imagen ahora indica disco y particion en su nombre
+				despleimagen=document.getElementById("despleimagen_"+disco+"_"+particion);
 				var  p=despleimagen.selectedIndex
 				if (p==0){  
-				  alert(TbMsg[0])
+					alert(TbMsg[0])
 				 	despleimagen.focus()
-			    return(false)
+					return(false)
 				}
 			}
 		}

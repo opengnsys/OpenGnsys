@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -14,6 +14,7 @@ include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
+include_once("../includes/pintaTablaConfiguraciones.php");
 include_once("../idiomas/php/".$idioma."/comandos/inventariosoftware_".$idioma.".php");
 include_once("./includes/capturaacciones.php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
@@ -36,7 +37,7 @@ if (!$cmd)
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 switch($ambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
@@ -72,8 +73,8 @@ switch($ambito){
 			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
 		</TR>
-			<?
-				echo tabla_configuraciones($cmd,$idambito);
+			<?php
+				echo tablaConfiguracionesIniciarSesion($cmd,$idambito);
 			?>
 	</TABLE>
 
