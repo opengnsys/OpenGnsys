@@ -152,20 +152,6 @@ $LONHEXPRM=5; // Longitud de la cadena hexdecimal que contiene la longitud total
 $LONCABECERA=16; // Longitud de la cabecera de las tramas 
 $LONBLK=512; // Longitud de los paquetes de tramas leidos cada vez	
 
-$tbTiposParticiones=""; 
-$tbTiposParticiones[0]="EMPTY";
-$tbTiposParticiones[1]="BIGDOS";
-$tbTiposParticiones[2]="FAT32";
-$tbTiposParticiones[3]="NTFS";
-$tbTiposParticiones[4]="EXT2";
-$tbTiposParticiones[5]="EXT3";
-$tbTiposParticiones[6]="EXT4";
-$tbTiposParticiones[7]="LINUX-SWAP";
-$tbTiposParticiones[8]="CACHE";
-$tbTiposParticiones[9]="VFAT";
-$tbTiposParticiones[10]="UNKNOW";
-
-
 //Codificaci� de los estados de las reservas
 $RESERVA_CONFIRMADA=1; // Reserva confirmada
 $RESERVA_PENDIENTE=2; // Reserva pendiente
