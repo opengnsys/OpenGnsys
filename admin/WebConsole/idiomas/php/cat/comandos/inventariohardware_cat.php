@@ -1,10 +1,10 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: inventariohardware__cat.php (Comandos)
-//	Idioma: Espa�l 
+//	Fichero de idiomas php: inventariohardware_cat.php (Comandos)
+//	Idioma: Català
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Centres';
 	$TbMsg[1]='Grup d\'aules';
 	$TbMsg[2]='Aules';

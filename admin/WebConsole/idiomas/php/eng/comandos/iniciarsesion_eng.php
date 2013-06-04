@@ -11,7 +11,7 @@
         $TbMsg[3]='Group of computers';
         $TbMsg[4]='Computers';
 	$TbMsg[5]='Login';
-	$TbMsg[6]='Environment';
+	$TbMsg[6]='Scope';
 	$TbMsg[7]='Providing data';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='O.S. name';
