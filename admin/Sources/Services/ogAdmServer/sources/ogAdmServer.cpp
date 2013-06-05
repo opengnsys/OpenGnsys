@@ -735,6 +735,15 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
 
+	// UHU -  2013/06/05 - se borra la configuracion actual
+	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d", ido);
+	// Ejecutamos la consulta
+	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
 
 	lon = sprintf(tbPar, "(");
 	p = splitCadena(ptrPar, cfg, '\n');
