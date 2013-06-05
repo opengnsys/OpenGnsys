@@ -19,7 +19,7 @@
 		}
 		var RC="@";
 		// UHU - Ahora se puede hacer de cualquier disco
-		var disk = diskPart[0];
+		var disco = diskPart[0];
 		var particion = diskPart[1];
 		document.fdatosejecucion.atributos.value="dsk="+disco+RC+"par="+particion+RC;
 		document.fdatosejecucion.submit();
