@@ -17,6 +17,6 @@ ethtool -s $DEVICE wol g 2>/dev/null
 # Detectar Busybox.
 BUSYBOX=$(which busyboxOLD)
 BUSYBOX=${BUSYBOX:-"busybox"}
-(sleep 5 && $BUSYBOX poweroff)
-
+# Retardo en 2º plano para dar lugar al registro en cola de acciones.
+(sleep 5; $BUSYBOX poweroff) &
 
