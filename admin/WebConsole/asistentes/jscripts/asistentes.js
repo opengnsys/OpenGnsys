@@ -63,15 +63,29 @@ command + " | tee -a $OGLOGCOMMAND";
 }
 
 function codeParticionado(form){
+	var errorMsg = "¡El espacio libre en disco no puede ser menor que 0!";
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	// Comprobamos si la opcion elejida es GPT o MSDOS para llamar a una funcion u otra
 	if(tipo_part_table == "GPT"){
-		codeParticionadoGPT(form);
+		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
+		if(parseInt(document.getElementById("freediskGPT").value) < 0){
+			alert(errorMsg);
+		}
+		else{
+			codeParticionadoGPT(form);
+		}
 	}
 	else{
-		codeParticionadoMSDOS(form);
+		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
+		if(parseInt(document.getElementById("freedisk").value) < 0){
+			alert(errorMsg);
+		}
+		else{
+			codeParticionadoMSDOS(form);
+		}
 	}
+	
 }
 
 
@@ -357,8 +371,13 @@ function calculateFreeDisk(form) {
 	if(document.getElementById("tipo_part_table").value == "GPT"){
 		calculateFreeGPTDisk(form);
 	}
+	// Capturamos el disco seleccionado
+	var disk = document.getElementById("n_disk").value;
+	// Buscamos el input hidden para el disco seleccionado
+	var diskSize = document.getElementById("disksize_"+disk).value;
+		
 	var freeDisk=document.getElementById("freedisk");
-	freeDisk.value=form.minsize.value;
+	freeDisk.value=diskSize;
 	for (npart=1; npart<=4; npart++) {
 		var partCheck=eval("form.check"+npart);
 		var partSize=eval("form.size"+npart);
@@ -386,36 +405,40 @@ function calculateFreeDisk(form) {
 // Código para calcular el espacio libre del disco. en el formulario GPT
 function calculateFreeGPTDisk(form) {
 	// Si esta seleccionada la opcion MSDOS, se llama a la funcion correspondiente
-        if(document.getElementById("tipo_part_table").value == "MSDOS"){
-                calculateFreeDisk(form);
-        }
-
+    if(document.getElementById("tipo_part_table").value == "MSDOS"){
+            calculateFreeDisk(form);
+    }
+    // Capturamos el disco seleccionado
+	var disk = document.getElementById("n_disk").value;
+	// Buscamos el input hidden para el disco seleccionado
+	var diskSize = document.getElementById("disksize_"+disk).value;
+	document.getElementById('freediskGPT').value=diskSize;
+	
 	var freeDisk=document.getElementById("freediskGPT");
-        freeDisk.value=form.minsize.value;
 	// Capturamos el numero de particiones que hay hechas
 	numParts=document.getElementById("numGPTpartitions").value;
-        for (npart=1; npart<=numParts; npart++) {
-                var partCheck=eval("form.checkGPT"+npart);
-                var partSize=eval("form.sizeGPT"+npart);
-                var partSizeCustom=eval("form.sizeGPT"+npart+"custom");
-                if (partCheck.checked) {
-                        if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
-                                freeDisk.value -= parseInt(partSizeCustom.value);
-                        } else {
-                                freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
-                        }
-                }
-        }
-        if (parseInt(freeDisk.value) < 0) {
-                freeDisk.style.fontWeight = "bold";
-                freeDisk.style.fontStyle = "italic";
-        } else {
-                freeDisk.style.fontWeight = "normal";
-                freeDisk.style.fontStyle = "normal";
-        }
-        if (form.size4.value == 0) {
-                freeDisk.value += " (- cache)";         // Aviso de caché sin modificar.
-        }
+    for (npart=1; npart<=numParts; npart++) {
+            var partCheck=eval("form.checkGPT"+npart);
+            var partSize=eval("form.sizeGPT"+npart);
+            var partSizeCustom=eval("form.sizeGPT"+npart+"custom");
+            if (partCheck.checked) {
+                    if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
+                            freeDisk.value -= parseInt(partSizeCustom.value);
+                    } else {
+                            freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
+                    }
+            }
+    }
+    if (parseInt(freeDisk.value) < 0) {
+            freeDisk.style.fontWeight = "bold";
+            freeDisk.style.fontStyle = "italic";
+    } else {
+            freeDisk.style.fontWeight = "normal";
+            freeDisk.style.fontStyle = "normal";
+    }
+    if (form.size4.value == 0) {
+            freeDisk.value += " (- cache)";         // Aviso de caché sin modificar.
+    }
 }
 
 // Agrega una nueva fila a la tabla de particiones con una nueva particion

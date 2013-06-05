@@ -58,21 +58,16 @@ if (!$cmd)
 //indicamos al objeto xajax se encargue de generar el javascript de las funciones registradas por ejm: ListarParticionesXip
 $xajax->printJavascript('../xajax/'); 
 ?>
+<script>
+function doOnload(){
+	calculateFreeDisk(document.fdatos);
+}
+
+</script>
 </head>
 
 
-<body onload="
-	var disks=document.getElementsByName('disksize');
-	var min=null;
-	for (var i=0; i<disks.length; i++) {
-		var val=parseInt(disks[i].textContent);
-		if (min==null || val<min) {
-			min=val;
-		}
-	}
-	document.getElementById('minsize').value=min;
-	document.getElementById('freedisk').value=min;
-">
+<body onload="doOnload()">
 <?php
 	switch($ambito){
 		case $AMBITO_CENTROS :
@@ -112,7 +107,7 @@ $xajax->printJavascript('../xajax/');
 		<tr>
 		<td>
 			<?php echo $TbMsg[35].":\n"; 	// Disco ?>
-		        <input type="text" name="n_disk" value="1">
+		        <input type="text" id="n_disk" name="n_disk" value="1" onchange="calculateFreeDisk(document.fdatos)">
 		</td>
 		</tr>
 		<tr>

@@ -60,8 +60,6 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	echo '<th align="center">&nbsp;'.$TbMsg["IMAGE"].'&nbsp;</th>'; // Imagen instalada
 	echo '<th align="center">&nbsp;'.$TbMsg["SOFT_PROFILE"].'&nbsp;</th>'; // Perfil software 
 	echo '<th align="center">&nbsp;'.$TbMsg["CACHE_CONTENT"].'&nbsp;</th>';
-	echo '</TR>';
-
 	echo '</tr>';
 
 	// Recorremos todas las configuraciones encontradas para cada disco
@@ -153,7 +151,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
                         echo'<td></td>'.chr(13);
                         echo'<td></td>'.chr(13);
                         echo'<td></td>'.chr(13);
-                        echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</strong>&nbsp;</td>'.chr(13);
+                        echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</span></strong>&nbsp;</td>'.chr(13);
+                        // Creamos un campo oculto para guardar información sobre el disco y su tamaño separados por ;
+                        echo "<input type='hidden' id='disksize_".$disk."' value='".$disksize[$disk]."'/>";
                         echo'<td></td>'.chr(13);
 	                echo'<td></td>'.chr(13);
 			echo'<td></td>'.chr(13);
@@ -367,7 +367,7 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	// Separamos las configuraciones segun el disco al que pertenezcan
 	$diskConfigs = splitConfigurationsByDisk($configuraciones);
 	
-	$columns=13;
+	$columns=9;
 	echo '<TR>';
 	echo '<TH align=center>&nbsp;&nbsp;</TH>';
 	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
@@ -378,11 +378,6 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
 	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
-	echo '<TH align=center>&nbsp;'.$TbMsg[39].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;W&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;E&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;C&nbsp;</TH>';
-
 	echo '</TR>';
 
 	
@@ -412,12 +407,7 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						$metodos="CACHE=".$TbMsg[13].chr(13);
 						$metodos.="REPO=".$TbMsg[9];		
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
-						$tipotran="0=".$TbMsg[40].chr(13);
-						$tipotran.="1=".$TbMsg[41];	
-						echo '<TD align=center>'.HTMLCTESELECT($tipotran,"despletipotran_".$icp,"estilodesple","",1,100).'</TD>';
-						echo'<td align=center><input type=checkbox name="whole" id="whl-'.$tbKeys[$k]["numpar"].'"></td>';	
-						echo '<td align=center><input type=checkbox name="paramb" checked id="eli-'.$tbKeys[$k]["numpar"].'"></td>';	
-						echo '<td align=center><input type=checkbox name="compres" id="cmp-'.$tbKeys[$k]["numpar"].'"></td>';								
+							
 					}
 					echo '</TR>'.chr(13);
 				}
