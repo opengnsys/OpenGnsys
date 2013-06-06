@@ -961,7 +961,9 @@ done
 }
 
 
+/* AVISO: Componer corretcamente esta función. */
 function ogGetFreeSize () {
+local particion unit factor valor
 if [ $# = 0 ]
 then
 	echo "sintaxis: ogGetFreeSize int_disco int_partition str_SizeOutput [ kB MB GB -default GB]-]" red
@@ -995,7 +997,6 @@ then
 	#echo $valor
 	#NumberRound $valor
 	#valor=`NumberRound $valor`;
-	ogUnmount $1 $2 1>/dev/null 2>&1
 	echo $valor
 
 fi
