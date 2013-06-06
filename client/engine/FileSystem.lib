@@ -961,7 +961,7 @@ done
 }
 
 
-/* AVISO: Componer corretcamente esta función. */
+# AVISO:  Componer corretcamente esta función.
 function ogGetFreeSize () {
 local particion unit factor valor
 if [ $# = 0 ]
@@ -998,7 +998,6 @@ then
 	#NumberRound $valor
 	#valor=`NumberRound $valor`;
 	echo $valor
-
 fi
 }
 
