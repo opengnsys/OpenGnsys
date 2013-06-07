@@ -162,6 +162,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 }
 /*________________________________________________________________________________________________________
 			UHU  - 2013/05/14 - Se añade la clave número de disco
+			UHU - 2013/06/06 - Se añade un return de las configuraciones detectadas
 			Dibuja la tabla de configuración de las particiones de un grupo de ordenadores
 			
 			Parámetros de la función:
@@ -261,6 +262,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$cc=0; // Contador de configuraciones
+	$configuraciones = array();
 	echo '<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">';
 	while (!$rs->EOF){
 		$cc++;
@@ -269,7 +271,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 		echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc);
 		echo '</td></tr>';
 		//Muestra particiones y configuración
-
+		$configuraciones[$cc-1] = $rs->campos["configuraciones"];
 		echo $pintaParticionesFunction($cmd,$rs->campos["configuraciones"],$rs->campos["idordenadores"],$cc,$ambito,$idambito);
 		$rs->Siguiente();
 	}
@@ -278,6 +280,8 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 	}
 	echo "</table>";
 	$rs->Cerrar();
+	
+	return $configuraciones;
 }
 //________________________________________________________________________________________________________
 //	Descripción:

@@ -98,7 +98,17 @@ function doOnload(){
 			: '.$textambito.'</U></span>&nbsp;&nbsp;</span></p>';
 
 	$sws=0x11111;	// Mostrar todas las configuraciones diferentes.
-	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);	
+	$configuraciones = pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);
+	global $tbKeys; // Tabla contenedora de claves de configuración
+	global $conKeys; // Contador de claves de configuración
+	$mindisks = 1;
+	foreach($configuraciones as $configuracion){
+		// Separamos las configuraciones segun el disco al que pertenezcan
+		$diskConfigs = splitConfigurationsByDisk($configuracion);
+		// En diskconfigs tendremos un array con tantas configuraciones como discos, 
+		// no quedamos con su length que será el minimo numero de discos
+		$mindisks = count($diskConfigs);
+	}	
 ?>
 
 	<form  align=center name="fdatos" > 
@@ -107,7 +117,11 @@ function doOnload(){
 		<tr>
 		<td>
 			<?php echo $TbMsg[35].":\n"; 	// Disco ?>
-		        <input type="text" id="n_disk" name="n_disk" value="1" onchange="calculateFreeDisk(document.fdatos)">
+		        <select id="n_disk" onchange="calculateFreeDisk(document.fdatos)">
+			<?php	for($d = 1; $d <= $mindisks; $d++){
+					echo "<option value=\"$d\">$d</option>\n";
+		      		} ?>
+		        </select>
 		</td>
 		</tr>
 		<tr>

@@ -364,6 +364,19 @@ function clickPartitionCheckbox (form, npart, isGPT) {
 	}
 }
 
+/**
+ * Dado un numero de disco, recorre todos los input hidden con nombre disksize_"disco"
+ * y devuelve el de menor valor
+ */
+function getMinDiskSize(disk){
+	var diskSizeArray = document.getElementsByName("disksize_"+disk);
+	var minSize = diskSizeArray[0].value;
+	for(var i= 1; i < diskSizeArray.length; i++){
+		if(diskSizeArray[i].value < minSize)
+			minSize = diskSizeArray[i].value;
+	}
+	return minSize;
+}
 
 // Código para calcular el espacio libre del disco.
 function calculateFreeDisk(form) {
@@ -373,8 +386,9 @@ function calculateFreeDisk(form) {
 	}
 	// Capturamos el disco seleccionado
 	var disk = document.getElementById("n_disk").value;
-	// Buscamos el input hidden para el disco seleccionado
-	var diskSize = document.getElementById("disksize_"+disk).value;
+	// Buscamos por nombre todos los campos disksize_"disk" y nos quedamos con el de menor valor
+	var diskSize = getMinDiskSize(disk);
+	
 		
 	var freeDisk=document.getElementById("freedisk");
 	freeDisk.value=diskSize;
@@ -411,7 +425,7 @@ function calculateFreeGPTDisk(form) {
     // Capturamos el disco seleccionado
 	var disk = document.getElementById("n_disk").value;
 	// Buscamos el input hidden para el disco seleccionado
-	var diskSize = document.getElementById("disksize_"+disk).value;
+	var diskSize = getMinDiskSize(disk);
 	document.getElementById('freediskGPT').value=diskSize;
 	
 	var freeDisk=document.getElementById("freediskGPT");

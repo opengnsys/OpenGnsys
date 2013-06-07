@@ -146,34 +146,18 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 		// Mostrar información del disco, si se ha obtenido.
 		if (!empty ($disksize)) {
 			echo'<tr height="16">'.chr(13);
-                        echo'<td align="center">&nbsp;</td>'.chr(13);
-                        echo'<td align="center">&nbsp;'.$disktable[$disk].'&nbsp;</td>'.chr(13);
-                        echo'<td></td>'.chr(13);
-                        echo'<td></td>'.chr(13);
-                        echo'<td></td>'.chr(13);
-                        echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</span></strong>&nbsp;</td>'.chr(13);
-                        // Creamos un campo oculto para guardar información sobre el disco y su tamaño separados por ;
-                        echo "<input type='hidden' id='disksize_".$disk."' value='".$disksize[$disk]."'/>";
-                        echo'<td></td>'.chr(13);
-	                echo'<td></td>'.chr(13);
+			echo'<td align="center">&nbsp;</td>'.chr(13);
+			echo'<td align="center">&nbsp;'.$disktable[$disk].'&nbsp;</td>'.chr(13);
+			echo'<td></td>'.chr(13);
+			echo'<td></td>'.chr(13);
+			echo'<td></td>'.chr(13);
+			echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</span></strong>&nbsp;</td>'.chr(13);
+			// Creamos un campo oculto para guardar información sobre el disco y su tamaño separados por ;
+			echo "<input type='hidden' name='disksize_".$disk."' value='".$disksize[$disk]."'/>\n";
+			echo'<td></td>'.chr(13);
+			echo'<td></td>'.chr(13);
 			echo'<td></td>'.chr(13);
                         echo'</tr>'.chr(13);
-
-			/*
-			foreach($disksize as $disk=>$size){
-				echo'<tr height="16">'.chr(13);
-				echo'<td align="center">&nbsp;'.$TbMsg[35].'&nbsp;'.$disk.'</td>'.chr(13);
-				echo'<td align="center">&nbsp;'.$disktable[$disk].'&nbsp;</td>'.chr(13);
-				echo'<td></td>'.chr(13);
-				echo'<td></td>'.chr(13);
-				echo'<td align="right">&nbsp;'.$size.'&nbsp;</td>'.chr(13);
-				echo'<td></td>'.chr(13);
-				echo'<td></td>'.chr(13);
-				echo'<td></td>'.chr(13);
-				echo'<td></td>'.chr(13);
-				echo'</tr>'.chr(13);
-			}
-			*/
 		}
 	}
 	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
