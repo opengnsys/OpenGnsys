@@ -118,7 +118,7 @@ if (!$cmd)
 									opadre.frames["frame_contenidos"].document.location.href=href5
 									break;
 							case 23:                
-                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade_".$idioma.".php"
+                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade.php"
                                                                         break;
 						}
 				}
