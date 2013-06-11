@@ -128,20 +128,27 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	if (! empty ($winboot))	{ $infohost.=" winboot=$winboot"; }
 	// Comprobar si se usa el parámetro "vga" (número de 3 cifras) o "video" (cadena).
 	if (! empty ($vga)) {
-		if (is_int ($vga) and strlen ($vga) == 3) {
+		// UHU - Se sustituye la función is_int por is_numeric, ya que al ser un string no funciona bien con is_int
+		if (is_numeric($vga) && strlen($vga) == 3) {
 			$infohost.=" vga=$vga";
 		} else {
 			$infohost.=" video=$vga";
 		}
 	}
-
+	
 	// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
 	$pxedir="/opt/opengnsys/tftpboot/menu.lst";
 	$mac = substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
 	$macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));	
 
 	// Crear fichero de arranque a partir de la plantilla y los datos del cliente.
-	exec ("sed -e 's|vga=...||g' -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+	// UHU - si el parametro vga no existe, no se quita.
+	if (! empty ($vga)) {
+		exec ("sed -e 's|vga=...||g' -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+	}
+	else{
+		exec ("sed -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+	}
 	exec ("chmod 777 $macfile");
 }
 
