@@ -117,6 +117,9 @@ if (!$cmd)
 							case 22: 		
 									opadre.frames["frame_contenidos"].document.location.href=href5
 									break;
+							case 23:                
+                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade_".$idioma.".php"
+                                                                        break;
 						}
 				}
 		}
@@ -188,6 +191,15 @@ if (!$cmd)
 							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+                                                        <TD  onclick=eleccion(this,23) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+                                                        <A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;
+                                                        <SPAN class=menupral ><?echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
+                                                                <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+
+
 							<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
 							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
