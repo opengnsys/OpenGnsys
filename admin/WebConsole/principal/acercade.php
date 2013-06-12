@@ -3,6 +3,7 @@
 // Descripción : 
 //              Pagina de informacion sobre el proyecto OpenGnSys
 //********************************************************************
+include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/acercade_".$idioma.".php");
 
 ?>
