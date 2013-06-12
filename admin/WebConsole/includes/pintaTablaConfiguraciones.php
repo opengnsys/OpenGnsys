@@ -49,6 +49,27 @@ function tablaConfiguracionesIniciarSesion($cmd,$idordenador){
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
+
+        if ( $tablaHtml == "" ) {
+                // Equipo sin configuracion en base de datos.
+		$tablaHtml='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+		$tablaHtml.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
+        }
+       else
+        {
+                // Equipo con configuracion en BD
+                // Incluimos primera linea de la tabla.
+		$inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
+		$inicioTabla.='        <TR>'.chr(13);
+		$inicioTabla.='                <TH align=center>&nbsp;&nbsp;</TH>'.chr(13);
+		$inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION"] .'&nbsp;</TH>'.chr(13);
+		$inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["SO_NAME"] .'&nbsp;</TH>'.chr(13);
+		$inicioTabla.='        </TR>'.chr(13);
+		$tablaHtml=$inicioTabla.$tablaHtml;
+        }
+
+	$tablaHtml.="</table>".chr(13);
+
 	return($tablaHtml);
 }
 
@@ -112,22 +133,22 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 	$rs->Cerrar();
         if ( $tablaHtml == "" ) {
                 // Equipo sin configuracion en base de datos.
-                $tablaHtml='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">';
-                $tablaHtml.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>';
+                $tablaHtml='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+                $tablaHtml.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
         }
         else
         {
                 // Equipo con configuracion en BD
                 // Incluimos primera linea de la tabla.
-                $inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>';
-                $inicioTabla.='        <TR>';
-                $inicioTabla.='                <TH align=center>&nbsp;&nbsp;</TH>';
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION"] .'&nbsp;</TH>';
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION_TYPE"] .'&nbsp;</TH>';
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["SO_NAME"] .'&nbsp;</TH>';
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["IMAGE_TO_CREATE"] .'&nbsp;</TH>';
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["DESTINATION_REPOSITORY"] .'&nbsp;</TH>';
-                $inicioTabla.='        </TR>';
+                $inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
+                $inicioTabla.='        <TR>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION_TYPE"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["SO_NAME"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["IMAGE_TO_CREATE"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["DESTINATION_REPOSITORY"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='        </TR>'.chr(13);
 
                 $tablaHtml=$inicioTabla.$tablaHtml;
 

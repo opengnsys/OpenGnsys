@@ -49,17 +49,8 @@ if (!$cmd)
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
 	</BR>
 <form  align=center name="fdatos"> 
-	<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-		<TR>
-			<TH align=center>&nbsp;&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
-		</TR>
-			<?php
-				echo tablaConfiguracionesIniciarSesion($cmd,$idambito);
-			?>
-	</TABLE>
-</FORM>
+	<?php echo tablaConfiguracionesIniciarSesion($cmd,$idambito); ?>
+</form>
 <?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
