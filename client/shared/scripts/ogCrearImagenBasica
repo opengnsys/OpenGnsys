@@ -23,7 +23,9 @@
 #		XX1X: Borrar previamente la imagen de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $7 Ruta de origen de la Imagen (Carpeta)
+# $7 Método de syncronización 1=Sincronización1  2=Sincronizacion2
+# $8 Ruta de origen de la Imagen (Carpeta)
+
 
 #___________________________________________________________________
 #
@@ -31,7 +33,7 @@
 #___________________________________________________________________
 
 	PROG="$(basename $0)"
-	if [ $# -lt 6 ]; then
+	if [ $# -lt 7 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio"
 		usage="$usage copiar_a_caché Borrar_cache_previamente Ruta_origen"
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
@@ -56,7 +58,7 @@
 	BORRACACHE=${flag:2:1}
 	NOBORRACHIVOS=${flag:3:1}
 	
-	RUTAORIGEN=$7
+	RUTAORIGEN=$8
 #___________________________________________________________________
 #
 # Variables y configuración logs
