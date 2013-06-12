@@ -66,6 +66,17 @@ function comprobar_datos()
 				prm+="rti="+rti+RC;	
 
 				
+				var desplemet=document.getElementById("desplesync_"+par); // Desplegable metodo de syncronización
+				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				
+				// No ha elegido ninguna partición
+				if(p==0){
+					alert(TbMsg[3])
+					return("");
+				}
+				prm+="msy="+p+RC;	// Método de syncronización 1=Sincronización1 2=Sincronizacion2					
+	
+								
 				var chrChk=document.getElementById('whl-'+par); // Recupera objeto fila de la tabla opciones adicionales
 				if(chrChk.checked)	prm+="whl=1"+RC; else prm+="whl=0"+RC;
 				chrChk=document.getElementById('eli-'+par); // Recupera objeto fila de la tabla opciones adicionales
