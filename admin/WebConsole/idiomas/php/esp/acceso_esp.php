@@ -31,4 +31,3 @@ $TbMsg["ACCESS_ERROR"]='Error de acceso';
 $TbMsg["ACCESS_UNKNOWNERROR"]='Error desconocido';
 $TbMsg["ACCESS_NOFRAMES"]='El navegador necesita soporte para "frames" para mostrar la p&aacute;gina.';
 ?>
-
