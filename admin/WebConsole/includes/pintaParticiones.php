@@ -391,6 +391,10 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						$metodos="CACHE=".$TbMsg[13].chr(13);
 						$metodos.="REPO=".$TbMsg[9];		
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
+						
+						$metodos="SYNC1="."SYNC1".chr(13);
+						$metodos.="SYNC2="."SYNC2";		
+						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100).'</TD>';								
 							
 					}
 					echo '</TR>'.chr(13);

@@ -191,7 +191,7 @@ function tablaConfiguracionesSincronizacion1($idordenador)
 	$rs->Primero(); 
 	$tbPAR="";
 	$actualDisk = 0;
-	$columns = 7;
+	$columns = 9;
 	while (!$rs->EOF){
 		if($actualDisk != $rs->campos["numdisk"]){
 			$actualDisk = $rs->campos["numdisk"];
@@ -206,6 +206,12 @@ function tablaConfiguracionesSincronizacion1($idordenador)
 			$tablaHtml.='<td align="center">&nbsp;'.$rs->campos["numpar"].'&nbsp;</td>'; // N�mero de partici�n
 			$tablaHtml.='<td align=center>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</td>'; // Nombre sistema operativo
 			$tablaHtml.='<td align=center>'.HTMLSELECT_imagenes($rs->campos["idimagen"]).'</td>';	
+			
+			$metodos="SYNC0="." ".chr(13);			
+			$metodos.="SYNC1="."SYNCRO1".chr(13);						
+			$metodos.="SYNC2="."SYNCRO2";		
+			$tablaHtml.= '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$rs->campos["numpar"],"estilodesple","",1,100).'</TD>';			
+					
 			$tablaHtml.='<td align=center><input type=checkbox name="whole" id="whl-'.$rs->campos["numpar"].'"></td>';	
 			$tablaHtml.='<td align=center><input type=checkbox name="paramb" checked id="eli-'.$rs->campos["numpar"].'"></td>';	
 			$tablaHtml.='<td align=center><input type=checkbox name="compres" id="cmp-'.$rs->campos["numpar"].'"></td>';	
@@ -327,4 +333,8 @@ function tablaConfiguracionesCrearSoftIncremental($idordenador)
 	echo $tablaHtml;
 	return($tbPAR);
 }
+<<<<<<< .mine
 /**/
+=======
+/**/
+>>>>>>> .r3872
