@@ -35,7 +35,7 @@ $TbMsg["DESTINATION_REPOSITORY"]='Repositorio de destino';
 $TbMsg["IMAGE_REPOSITORY"]='Imagen / Repositorio';
 $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Imagen Incremental / Repositorio';
 
-
+$TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
 
 ?>
 

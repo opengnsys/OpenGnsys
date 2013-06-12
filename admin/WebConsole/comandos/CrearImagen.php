@@ -55,20 +55,7 @@ if (!$resul){
 <P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[6] ?></SPAN></P>
 
 <FORM  align=center name="fdatos">
-	<TABLE  id='tabla_conf' align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-			<TR>
-				<TH align=center>&nbsp;&nbsp;</TH>
-				<TH align=center>&nbsp;<?php echo $TbMsg["PARTITION"] ?>&nbsp;</TH>
-				<TH align=center>&nbsp;<?php echo $TbMsg["PARTITION_TYPE"] ?>&nbsp;</TH>
-				<TH align=center>&nbsp;<?php echo $TbMsg["SO_NAME"] ?>&nbsp;</TH>
-				<TH align=center>&nbsp;<?php echo $TbMsg["IMAGE_TO_CREATE"] ?>&nbsp;</TD>
-				<TH align=center>&nbsp;<?php echo $TbMsg["DESTINATION_REPOSITORY"] ?>&nbsp;</TD>
-			</TR> 
-		
-				<?					
-					echo tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio);
-				?>
-	</TABLE>
+	<? echo tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio); ?>
 </FORM>		
 
 <?
