@@ -54,7 +54,7 @@
 	$TbMsg[46]='Identificador ámbito';
 	$TbMsg[47]='"Log historico"';
 	$TbMsg[48]='"Log en tiempo real"';
-	$TbMsg[49]='"Sincronización 1"';	
+	$TbMsg[49]='"Sincronización"';	
 	$TbMsg[50]='"Sincronización 2"';	
 ?>
 
