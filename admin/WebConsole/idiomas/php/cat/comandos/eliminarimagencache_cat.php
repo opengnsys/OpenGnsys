@@ -24,4 +24,5 @@
 	$TbMsg[16]=' NO te el Repositori al Servidor';
 	$TbMsg[17]='Limitacions Versi&oacute; 1.1';
 	$TbMsg[18]='Grandària de la imatge disponible si Repositori i Servidor Web allotjats al mateix Servidor';
+	$TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
 ?>

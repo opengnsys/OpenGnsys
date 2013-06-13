@@ -24,4 +24,5 @@
 	$TbMsg[16]=' NOT have the Repository on the Server';
 	$TbMsg[17]='Version limitations: 1.1';
 	$TbMsg[18]='Image size available if Repository and Web server hosted on the same Server';
+	$TbMsg["CONFIG_NOCONFIG"]='No configuration: client does not connect to server.';
 ?>

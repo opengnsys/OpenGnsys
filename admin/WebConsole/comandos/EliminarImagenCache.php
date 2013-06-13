@@ -3,6 +3,8 @@
 // Nombre del fichero: EliminarImagenCache.php
 // Descripci????n : 
 //              Implementaci????n?????? del comando "Eliminar Imagen Cache"
+// date: 13-junio-2013
+// Cambio: se incluye mensaje equipos sin configuracion. En la funcion tabla_configuracion incluye cabecera de la tabla.
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -136,58 +138,32 @@ switch($ambito){
         echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
         echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
 ?>
-<!//#agp-->
-<?php if ($cuentarepos >1){ ?>
-        <TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-		   <TR>
-       		<TH align=center >&nbsp;<? if ($ambito==16){echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[16]."</br>".$TbMsg[18];}else{
-echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[15]."</br>".$TbMsg[18];
-}?>&nbsp;</TH> 
-                </TR>
-        </TABLE>
+<!-- //#agp-->
+<?php 
+    // Mensaje aviso limitacion version si hay dos repositorios
+    if ($cuentarepos >1){ ?>
+         <TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+		<TR>
+       		<TH align=center >&nbsp;
+		<? if ($ambito==16){
+			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[16]."</br>".$TbMsg[18];
+		}else{ 
+			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[15]."</br>".$TbMsg[18]; }
+		?>&nbsp;</TH> </TR>
+
+        </TABLE>  
 <?php }?>
-<!//#agp-->
+<!-- //#agp-->
 
         <P align=center>
         <SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
-        </BR>
-<!//#agp-->
-<?php if ($cuentarepos >1){ ?>
-        <TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+	</P>
 
-
-		   <TR>
-
-                        <TH align=center>&nbsp;<? echo $TbMsg[11] ?>&nbsp;</TH>
-                        <TH align=center>&nbsp;<? echo $TbMsg[12] ?>&nbsp;</TH>
-                        <TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TH>
-                        
-                </TR>
-                        <?php
-                                echo tabla_configuraciones($cmd,$idambito);
-                        ?>
-        </TABLE>
-
-<?php }else{ ?>
-<!//#agp-->
 <form  align=center name="fdatos"> 
-        <TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-                <TR>
-                        <TH align=center>&nbsp;<? echo $TbMsg[11] ?>&nbsp;</TH>
-                        <TH align=center>&nbsp;<? echo $TbMsg[12] ?>&nbsp;</TH>
-                        <TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TH>
-                        <TH align=center>&nbsp;<? echo $TbMsg[13] ?>&nbsp;</TH>
-
-
-                </TR>
-                        <?php
-                                echo tabla_configuraciones($cmd,$idambito);
-                        ?>
-        </TABLE>
-</FORM>
-
-<!//#agp-->
-<?php } ?>
+     <?php echo tabla_configuraciones($cmd,$idambito); ?>
+</form>
+<P></P>
+<!-- //#agp-->
 
 <?php
         //________________________________________________________________________________________________________
@@ -398,6 +374,26 @@ switch($ambito){
 
                                         $sin_duplicados=array_unique($nombreimagenes);
                                         $contar=1;
+					if (empty($sin_duplicados)) {
+                                                // Equipo sin configuracion en base de datos.
+                                                $inicioTabla='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+                                                $inicioTabla.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
+                                        }
+                                        else {
+                                                // Equipo con configuracion en BD
+                                                // Incluimos primera linea de la tabla.
+                                                $inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
+                                                $inicioTabla.='         <TR>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>'.chr(13);
+                                                if ($cuentarepos==1)
+                                                        $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[13].'&nbsp;</TH>'.chr(13);
+
+
+
+                                        }
+                                        echo $inicioTabla;
                                         foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
                                         {
 
@@ -418,7 +414,7 @@ switch($ambito){
                                         $contar++;
                                         }
 
-
+			echo "</table>".chr(13);
                         return($tablaHtml);
 }
 

@@ -24,4 +24,5 @@
 	$TbMsg[16]=' NO tiene el Repositorio en el Servidor';
 	$TbMsg[17]='Limitaciones Versi&oacute;n 1.1';
 	$TbMsg[18]='Tama&ntilde;o de la imagen disponible si Repositorio y Servidor Web alojados en el mismo Servidor';
+	$TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
 ?>
