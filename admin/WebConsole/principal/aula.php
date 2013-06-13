@@ -368,12 +368,6 @@ function ContextualXMLAulas(){
 	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
 	$layerXML.=' textoitem='.$TbMsg[49];
 	$layerXML.='></ITEM>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' subflotante="flo_diferenciacion_'.$LITAMBITO_AULAS.'"';
-	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
-	$layerXML.=' textoitem='.$TbMsg[50];
-	$layerXML.='></ITEM>';
 		
 	$layerXML.='<ITEM';
 	$layerXML.=' subflotante="flo_asistentes_'.$LITAMBITO_AULAS.'"';
@@ -528,12 +522,6 @@ function ContextualXMLOrdenadores(){
 	$layerXML.=' textoitem='.$TbMsg[49];
 	$layerXML.='></ITEM>';
 		
-	$layerXML.='<ITEM';
-	$layerXML.=' subflotante="flo_diferenciacion_'.$LITAMBITO_ORDENADORES.'"';
-	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
-	$layerXML.=' textoitem='.$TbMsg[50];
-	$layerXML.='></ITEM>';
-
 	$layerXML.='<ITEM';
 	$layerXML.=' subflotante="flo_asistentes_'.$LITAMBITO_ORDENADORES.'"';
 	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
