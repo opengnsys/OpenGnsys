@@ -137,7 +137,7 @@ function Gestiona(){
 			$cmd->texto="UPDATE perfileshard SET descripcion=@descripcion,comentarios=@comentarios,winboot=@winboot WHERE idperfilhard=@idperfilhard";
 			$resul=$cmd->Ejecutar();
 			// Actualizar ficheros PXE de todos los ordenadores afectados.
-			updateBootMode ($cmd, "idperfilhard", $idperfilhard, $idioma)
+			updateBootMode ($cmd, "idperfilhard", $idperfilhard, $idioma);
 			break;
 		case $op_eliminacion :
 			$resul=EliminaPerfileshard($cmd,$idperfilhard,"idperfilhard");

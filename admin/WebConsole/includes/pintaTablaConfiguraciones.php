@@ -335,6 +335,4 @@ function tablaConfiguracionesCrearSoftIncremental($idordenador)
 }
 <<<<<<< .mine
 /**/
-=======
-/**/
->>>>>>> .r3872
+
