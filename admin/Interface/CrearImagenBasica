@@ -43,8 +43,5 @@
 		#sincronizacion1 
 		ogCrearImagenBasica "$@"
 	fi		
-	
-	if [ $7 -eq 2 ]; then
-		#sincronizacion2 	
-	fi		
+
 
