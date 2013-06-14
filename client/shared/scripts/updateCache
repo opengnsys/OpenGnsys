@@ -50,19 +50,25 @@ if ! $(ogFindCache >/dev/null); then
         exit $?
 fi
 
-# Comprobar que es sincronizable
-REPOFILE=$(ogGetPath "REPO" "/$2")
-file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null
-[ $? == 0 ] && IMGTYPE="RSYNC"
-
-# La sincronizada, si hay imagen en cache uso rsync, si no otro protocolo
-CACHEFILE=$(ogGetPath "CACHE" "/$2")  && PROTOCOLO="RSYNC"
+# comprobar si la imagen existe
+REPOFILE=$(ogGetPath "REPO" "/$2")  || ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"
 
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE "
-#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
-# Si es imagen sincronizada siempre da distinto md5 -> no comprobamos
-[ "$IMGTYPE" == "RSYNC" ] || ogUpdateCacheIsNecesary $1 $2
-RETVAL=$?
+# Distingo si es monolitica o sincronizable
+file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null
+if [ $? == 0 ]; then
+	IMGTYPE="RSYNC"
+	# Para imagen sincronizada, si hay imagen en cache uso rsync, si no otro protocolo
+	CACHEFILE=$(ogGetPath "CACHE" "/$2")  && PROTOCOLO="RSYNC"
+
+	# Si es imagen sincronizada siempre da distinto md5. No podemos comprobar -> actualizamos.
+	RETVAL=0
+else
+	IMGTYPE="MONOLITICA"
+	#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
+	ogUpdateCacheIsNecesary $1 $2
+	RETVAL=$?
+fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
@@ -70,12 +76,12 @@ RETVAL=$?
 CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
-REALFILESIZE=$(ls -lk $(ogGetPath $REPOSITORIO "$2") | cut -f5 -d" ")
+REALFILESIZE=$(ls -l --block-size=1024 $(ogGetPath $REPOSITORIO "$2") | cut -f5 -d" ")
 
 # La sincronizada, si existe la imagen en cache el espacio necesario
 #	 es la nueva menos lo que ocupa la que ya hay.
 if [ "$PROTOCOLO" == "RSYNC" ]; then
-	CACHEFILESIZE=$(ls -lk $(ogGetPath "CACHE" "$2") | cut -f5 -d" ")
+	CACHEFILESIZE=$(ls -l --block-size=1024 $(ogGetPath "CACHE" "$2") | cut -f5 -d" ")
 	let SIZEREQUIRED=$CACHEFILESIZE-$FILESIZE
 	[ $SIZEREQUIRED -lt 0 ] && SIZEREQUIRED=0
 else
@@ -121,6 +127,7 @@ then
 	esac	
 fi
 
+# Comprobamos que imagen cache igual a la del repo. Si sincronizada no podemos comprobar. 
 [ "$IMGTYPE" == "RSYNC" ] || ogUpdateCacheIsNecesary $REPOSITORIO "$2"
 RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
@@ -197,12 +204,13 @@ case "$PROTOCOLO" in
 		DIRMOUNT="$(ogGetMountDir "${2%%.*}" $IMGEXT)"
 		DIRLOCAL="/tmp/$DIRMOUNT"
 		mkdir $DIRLOCAL 2>/dev/null
-		echo "Comprobamos si hay que redimensionar la imagen: cachefile: $CACHEFILESIZE -lt repofile: $REALFILESIZE "
+		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG" 
+
 
 		if [ $CACHEFILESIZE -lt $REALFILESIZE ]; then
 		   # Si la imagen esta montada la desmonto
 		   mount |grep $CACHEFILE >/dev/null && umount $CACHEFILE
-		   echo "      Redimensionamos la imagen al tamaño necesario" | tee -a $OGLOGSESSION $OGLOGFILE
+		   echo "      $MSG_SYNC_RESIZE." | tee -a $OGLOGSESSION $OGLOGFILE
                    echo "      truncate --size=>$REALFILESIZE k $CACHEFILE" | tee -a $OGLOGSESSION $OGLOGFILE
                    truncate --size=">$REALFILESIZE"k $CACHEFILE &> $OGLOGCOMMAND
                    echo "      mount -o compress=lzo $CACHEFILE $DIRLOCAL"
@@ -210,15 +218,16 @@ case "$PROTOCOLO" in
                    echo "      btrfs filesystem resize max $DIRLOCAL"
                    btrfs filesystem resize max $DIRLOCAL
                    TIMEAUX3=$[SECONDS-TIMEAUX3]
-                   echo "      Fin redimension de la  imagen: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+                   echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
   
 
 		fi
-		ogMountImage CACHE  "${2%%.*}" $IMGEXT
-		ogMountImage REPO  "${2%%.*}" $IMGEXT
+		# Montamos las imagenes para sincronizarlas
+		ogMountImage CACHE  "${2%%.*}" $IMGEXT >/dev/null
+		ogMountImage REPO  "${2%%.*}" $IMGEXT >/dev/null
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "${2%%.*}" $IMGEXT
-		echo -e "\nrsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
+		echo -e "\n      rsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
 		rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ $? == 0 ] && RETVAL="1"|| RETVAL="2"
@@ -233,7 +242,7 @@ echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum " | tee -a $OGLOGSESSION $OGLOGFILE
 TIME2=$SECONDS
-if [ "$PROTOCOLO" != "RSYNC" ]; then 
+if [ "$IMGTYPE" == "MONOLITICA" ]; then 
 	ogUpdateCacheIsNecesary $REPOSITORIO "$2"
 	RETVAL=$?
 fi
