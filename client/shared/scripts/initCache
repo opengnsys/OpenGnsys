@@ -67,7 +67,7 @@ else
     if [ "$SIZE" != "$CACHESIZE" ]; then
         echo "[10] Crar partición de caché local."
         ogUnmountCache 2>/dev/null
-        ogCreateCache "$SIZE"
+        ogCreateCache $NDISK "$SIZE"
     fi
     # Si caché no montada y no formateada, formatear.
     CACHE=$(ogFindCache) || exit $?
