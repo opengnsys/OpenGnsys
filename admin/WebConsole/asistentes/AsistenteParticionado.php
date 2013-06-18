@@ -101,13 +101,16 @@ function doOnload(){
 	$configuraciones = pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
-	$mindisks = 1;
+	// numero de discos minimo: partimos de un valor alto y comparamos con la configuracion de cada pc.
+	$mindisks = 10;
 	foreach($configuraciones as $configuracion){
 		// Separamos las configuraciones segun el disco al que pertenezcan
 		$diskConfigs = splitConfigurationsByDisk($configuracion);
 		// En diskconfigs tendremos un array con tantas configuraciones como discos, 
-		// no quedamos con su length que será el minimo numero de discos
-		$mindisks = count($diskConfigs);
+		// no quedamos con su length que será el numero de discos
+		$aux = count($diskConfigs);
+		if ( $mindisks > $aux ) 
+			 $mindisks = $aux;
 	}	
 ?>
 
