@@ -154,7 +154,10 @@ if [ "$DOMOUNT" ]; then
     [ -n "$PART" ] || ogRaiseError $OG_ERR_PARTITION "$1 $2" || return $?   # Indicar nuevo error
 else
     ogUnmount $1 $2 2>/dev/null
-    ogIsMounted $1 $2 && ogRaiseError $OG_ERR_PARTITION "$1 $2" || return $?   # Indicar nuevo error
+    if ogIsMounted $1 $2; then
+         ogRaiseError $OG_ERR_PARTITION "$1 $2"             # Indicar nuevo error
+         return $?
+    fi
 fi
 # Error si el sistema de archivos está bloqueado.
 if ogIsLocked $1 $2; then
