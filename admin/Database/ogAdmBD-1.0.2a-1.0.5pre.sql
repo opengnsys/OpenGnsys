@@ -108,3 +108,8 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 ALTER TABLE aulas
        ADD proxy VARCHAR(30) AFTER dns;
 
+# Valores por defecto para incorporar ordenadores (ticket #609).
+ALTER TABLE ordenadores
+	MODIFY fotoord SET DEFAULT 'fotoordenador.gif',
+	MODIFY idproautoexec SET DEFAULT 0;
+

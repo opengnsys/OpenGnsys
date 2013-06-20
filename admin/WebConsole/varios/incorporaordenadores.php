@@ -111,11 +111,13 @@ function procesaLineas($cmd,$idaula,$buffer)
 			if ('fixed-address'==substr($buffer,$posa,13)){
 				$posa=$posa+13;
 				$posb=$posa;
-				while(	substr($buffer,$posb,1)!=";") $posb++;
+				while(	substr($buffer,$posb,1)!=";") 
+					$posb++;
 				$IP=substr($buffer,$posa,$posb-$posa);
 			}
 			if(!empty($nombre) && !empty($MAC) && !empty($IP)){
-				if(!Inserta($cmd,$idaula,$nombre,$MAC,$IP)) return(4);
+				if(!Inserta($cmd,$idaula,$nombre,$MAC,$IP)) 
+					return(4);
 				$sw=true;
 				$nombre="";
 				$MAC="";
@@ -144,11 +146,24 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	for($i=0;$i<strlen($auxmac);$i++)
 		if(substr($auxmac,$i,1)!=":")
 			$mac.=substr($auxmac,$i,1);
-	
 	if(existeOrdenador($cmd,$nombreordenador,$mac,$ip)){
 		$ordDup.="Nombre=".$nombre.",Mac=".$mac.",Dirección ip=".$ip." \\n";
 		return(true);	
-	}			
+	}
+	// UHU - Capturamos las opciones de router y mascara del aula
+	$cmd->texto = "SELECT router,netmask FROM aulas WHERE idaula=".$idaula;
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()){
+		return(false); // Error al abrir recordset
+	}
+	$rs->Primero(); 
+	if (!$rs->EOF){
+		$router=$rs->campos["router"];
+		$mascara=$rs->campos["netmask"];
+		$rs->Cerrar();
+	}
+	
 	$idperfilhard=0;
 ## ADV: modificacion para asignar a los ordenadores, cuando se crean desde "incorpoar ordenadores" el repositorio "default"
 	$idrepositorio=1;
@@ -160,10 +175,14 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	$cmd->CreaParametro("@mac",$mac,0);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@router",$router,0);
+	$cmd->CreaParametro("@mascara",$mascara,0);
 	$cmd->CreaParametro("@idconfiguracion",$idconfiguracion,1);
 	
-	$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,idaula,grupoid) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,@idaula,@grupoid)";
+	
+	$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,router,mascara,idaula,grupoid) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,@router,@mascara,@idaula,@grupoid)";
 	$resul=$cmd->Ejecutar();
+	
 	// Crear fichero de arranque PXE con plantilla por defecto.
 	if ($resul) {
 		$idordenador=$cmd->Autonumerico();

@@ -128,7 +128,6 @@ ALTER TABLE ordenadores
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
 UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
 
-
 # Habilitar el comando Particionar y formatear.
 UPDATE comandos SET activo = '1' WHERE idcomando = 10;
 INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
@@ -151,4 +150,9 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('XFS', 'XFS')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+
+# Valores por defecto para incorporar ordenadores (ticket #609).
+ALTER TABLE ordenadores
+	MODIFY fotoord SET DEFAULT 'fotoordenador.gif',
+	MODIFY idproautoexec SET DEFAULT 0;
 
