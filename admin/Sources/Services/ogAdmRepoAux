@@ -90,7 +90,7 @@ case "$PARM1" in
 
 		    # Redimensionamos la imagen al tamaño necesario
 		    # TODO modificar ogGetImageSize
-		    IMGSIZE=$(ls -lk $IMGFILE| cut -f5 -d" ")
+		    IMGSIZE=$(ls -l --block-size=1024 $IMGFILE| cut -f5 -d" ")
 		    if [ $IMGSIZE -lt $SIZEREQUIRED ];then
 		        echolog "truncate --size=\">$SIZEREQUIRED\"k $IMGFILE" 
 		        truncate --size=">$SIZEREQUIRED"k $IMGFILE 2>&1 > $REPOLOG

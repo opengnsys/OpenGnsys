@@ -44,7 +44,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         if [ -f "$IMGFILE" ]; then
 		# Si la imagen esta montada la desmonto
                 if [ -r "$DIRMOUNT/ogimg.info" ]; then
-                    echolog "umount $DIRMOUNT"
+                    echo "umount $DIRMOUNT" | tee -a $OGLOGSESSION $OGLOGFILE
                     umount "$DIRMOUNT"
                     [ $? -ne 0 ] && return $(ogRaiseError $OG_ERR_DONTUNMOUNT_IMAGE "$1 $2.$3"; echo $?)
                 fi
@@ -57,7 +57,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                     rm -f "$IMGFILE.sum"
 		fi
 
-                IMGSIZE=$(ls -lk $IMGFILE | awk '{print $5}')
+                IMGSIZE=$(ls -l --block-size=1024 $IMGFILE | awk '{print $5}')
                 if [ $IMGSIZE -lt $SIZEREQUIRED ];then
                    echo "      $MSG_SYNC_RESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
                    echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -579,15 +579,15 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         # Al montar se comprueba la existencia de la imagen
         DIRMOUNT=$(ogMountImage $1 $2 $IMGEXT) 
 
-        AVAILABLE=$(df -k|grep $DIRMOUNT|awk '{print $4}')
+        AVAILABLE=$(df -k|grep "$DIRMOUNT$"|awk '{print $4}')
         # Si el espacio libre menor que 500Mb nos salimos
         [ $AVAILABLE -lt 500000 ] && return 0
 
         # Reducimos el archivo de imagen:
         IMGDIR=$(ogGetParentPath "$1" "/$2")
         IMGFILE=${IMGDIR}/$(basename "/$2").$IMGEXT
-        USED=$(df -k|grep $DIRMOUNT|awk '{print $3}')
-        let ENDSIZE=USED+500000
+        USED=$(df -k|grep "$DIRMOUNT$"|awk '{print $3}')
+        let ENDSIZE=$USED+500000
         echo -e -n "      btrfs filesystem resize "$ENDSIZE"k $DIRMOUNT \n      "
         btrfs filesystem resize "$ENDSIZE"k $DIRMOUNT
         ogUnmountImage $1 $2 $IMGEXT

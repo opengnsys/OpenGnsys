@@ -29,20 +29,18 @@
 trap "onexit $1 $2 $3 \"$4\" \"$5\"" 1 2 3 6 9 14 15 ERR
 function onexit() {
     local exit_status=$?
+    echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage $3 "$5" $DIFFEXT &>/dev/null
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
-    # Si la partición/imagen no estaba bloqueada -> la desbloqueo
-    if [ $exit_status -ne 4 ]; then
-    	ogUnlockImage "$3" "/$4.$IMGEXT" &>/dev/null
-    	ogUnlockImage "$3" "/$5.$DIFFEXT" &>/dev/null
-    	ogUnlock $1 $2 &>/dev/null
-    fi
+    ogUnlockImage "$3" "/$4.$IMGEXT" &>/dev/null
+    ogUnlockImage "$3" "/$5.$DIFFEXT" &>/dev/null
+    ogUnlock $1 $2 &>/dev/null
     exit $exit_status
 }
 
 # Establecemos factor de compresion
 COMPRESS=90/100
-COMPRESSLINUX=70/100 
+COMPRESSLINUX=80/100 
 
 #Carga el configurador del engine desde el fichero engine.cfg
 [ -z $OGENGINECONFIGURATE ] &&  source /opt/opengnsys/etc/engine.cfg
@@ -204,7 +202,7 @@ ogUnlock $1 $2
 file "$DIFFFILE" |grep "BTRFS Filesystem" >/dev/null ||  ogRaiseError $OG_ERR_IMAGE "$3 $4"
 
 #resumen de la operacion
-IMGSIZE=$(ls -s ${DIFFFILE[CACHE]}| cut -f1 -d" ")
+IMGSIZE=$(ls -l --block-size=1024 ${DIFFFILE}| cut -f5 -d" ")
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE

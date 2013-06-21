@@ -29,9 +29,9 @@ trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 ERR
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
+    echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage "$1" "$2" "$IMGEXT"  &>/dev/null
-    # Si la partición/imagen no estaba bloqueada -> la desbloqueo
-    [ $exit_status -eq 4 ] && ogUnlock $3 $4 &>/dev/null
+    ogUnlock $3 $4 &>/dev/null
     exit $exit_status
 }
 

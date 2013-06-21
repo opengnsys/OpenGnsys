@@ -11,7 +11,7 @@
 #@return  
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
 #@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
-#@exception OG_ERR_LOCKED     # Imagen o particion bloqueada
+#@exception OG_ERR_LOCKED     # 4 Imagen o particion bloqueada
 #@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
 #@exception OG_ERR_NOTWRITE   # 14 error de escritura
 #@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
@@ -28,17 +28,18 @@ trap "onexit $1 $2 $3 \"$4\"" 1 2 3 6 9 14 15 ERR
 
 # Establecemos factor de compresion
 COMPRESS=90/100
-COMPRESSLINUX=70/100 
+COMPRESSLINUX=80/100 
 
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
-    ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
-    # Si la partición/imagen no estaba bloqueada -> la desbloqueo
-    [ $exit_status -ne 4 ] || ogUnlockImage "$3" "/$4.$IMGEXT" || ogUnlock $1 $2
+    echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     echo ogUnmountImage $3 "$4" $IMGEXT 
+    ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
     echo ogUnlockImage "$3" "/$4.$IMGEXT"
+    ogUnlockImage "$3" "/$4.$IMGEXT" 
     echo ogUnlock $1 $2
+    ogUnlock $1 $2
     exit $exit_status
 }
 
@@ -128,7 +129,6 @@ ogCheckFs $1 $2 &> $OGLOGCOMMAND || ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1
 echo " " > $OGLOGCOMMAND
 TIME2=$SECONDS
 
-
 ogLockImage "$3"  "/$4.$IMGEXT"
 
 # Si existe el fichero de la imagen se hace copia de seguridad y se redimensiona, si  no existe se crea.
@@ -169,7 +169,7 @@ echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -
 
 
 #resumen de la operacion
-IMGSIZE=$(ls -s $IMGFILE | cut -f1 -d" ")
+IMGSIZE=$(ls -l --block-size=1024 $IMGFILE | cut -f5 -d" ")
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
