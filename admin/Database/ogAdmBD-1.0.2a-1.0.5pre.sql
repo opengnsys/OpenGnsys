@@ -110,6 +110,6 @@ ALTER TABLE aulas
 
 # Valores por defecto para incorporar ordenadores (ticket #609).
 ALTER TABLE ordenadores
-	MODIFY fotoord SET DEFAULT 'fotoordenador.gif',
-	MODIFY idproautoexec SET DEFAULT 0;
+	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
+	ALTER idproautoexec SET DEFAULT 0;
 

@@ -150,20 +150,7 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 		$ordDup.="Nombre=".$nombre.",Mac=".$mac.",Dirección ip=".$ip." \\n";
 		return(true);	
 	}
-	// UHU - Capturamos las opciones de router y mascara del aula
-	$cmd->texto = "SELECT router,netmask FROM aulas WHERE idaula=".$idaula;
-	$rs=new Recordset;
-	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()){
-		return(false); // Error al abrir recordset
-	}
-	$rs->Primero(); 
-	if (!$rs->EOF){
-		$router=$rs->campos["router"];
-		$mascara=$rs->campos["netmask"];
-		$rs->Cerrar();
-	}
-	
+
 	$idperfilhard=0;
 ## ADV: modificacion para asignar a los ordenadores, cuando se crean desde "incorpoar ordenadores" el repositorio "default"
 	$idrepositorio=1;
@@ -175,12 +162,14 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	$cmd->CreaParametro("@mac",$mac,0);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
-	$cmd->CreaParametro("@router",$router,0);
-	$cmd->CreaParametro("@mascara",$mascara,0);
 	$cmd->CreaParametro("@idconfiguracion",$idconfiguracion,1);
-	
-	
-	$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,router,mascara,idaula,grupoid) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,@router,@mascara,@idaula,@grupoid)";
+
+	$cmd->texto="INSERT INTO ordenadores (nombreordenador, ip, mac, idperfilhard,
+				 idrepositorio, router, mascara, idaula, grupoid)
+			  SELECT @nombreordenador, @ip, @mac, @idperfilhard,
+				 @idrepositorio, router, netmask, @idaula, @grupoid
+			    FROM aulas
+			   WHERE idaula=".$idaula;
 	$resul=$cmd->Ejecutar();
 	
 	// Crear fichero de arranque PXE con plantilla por defecto.
