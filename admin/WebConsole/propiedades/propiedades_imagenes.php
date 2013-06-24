@@ -37,7 +37,7 @@ $tipoimg=0;
 $idrepositorio=0;
 $imagenid=0;
 if (isset($_POST["validnombreca"])) {$opcion=$_POST["validnombreca"];}else{$validnombreca="";} // Recoge parametros
-if (isset($_POST["datospost"])) $datospost=$_POST["datospost"]; // Recoge parametros
+if (isset($_POST["datospost"])) {$datospost=$_POST["datospost"];}else{$datospost=0;} // Recoge parametros
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"];  // Recoge parametros
 if (isset($_GET["idimagen"])) $idimagen=$_GET["idimagen"]; 
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"]; 
@@ -55,9 +55,9 @@ if  ($opcion!=$op_alta){
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 }
 
-if ( $_POST["opcion"] == 1 && $datospost == 1)
+if ( $opcion == 1 && $datospost == 1)
 	{
-	if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; echo $op;// Recoge parametros
+	if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];// Recoge parametros
 	if (isset($_POST["idimagen"])) $idimagen=$_POST["idimagen"];
 	if (isset($_POST["nombreca"])) 
 		{$nombreca=$_POST["nombreca"];ValidaNombre($cmd,$nombreca);}if ($validnombreca != 1 ) {$validnombreca=0;}
