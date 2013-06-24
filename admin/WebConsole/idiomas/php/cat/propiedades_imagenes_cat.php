@@ -2,15 +2,27 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: propiedades_imagenes_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sense Opció";
+$TbMsg[0]="Sense Opciï¿½";
 $TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestió Imatges";
+$TbMsg[4]="Gestiï¿½ Imatges";
 $TbMsg[5]="Nom Imatge";
 $TbMsg[6]="Perfil Software";
 $TbMsg[7]="Comentaris";
+$TbMsg[8]="Particiï¿½n";
+$TbMsg[9]="Tipo particiï¿½n";
+$TbMsg[10]="Repositorio";
+$TbMsg[11]="Nombre Canï¿½nico";
+$TbMsg[12]="Gestiï¿½n Imï¿½genes Bï¿½sicas";
+$TbMsg[13]="Gestiï¿½n Imï¿½genes Incrementales";
+$TbMsg[14]="Imagen bï¿½sica";
+$TbMsg[15]="ATENCIï¿½N.- Una imagen que tiene perfil software indica que en algï¿½n momento se ha creado < br>
+			y por tanto no pueden modificarse ciertos datos a menos que la elimine y la vuelva a crear";
+$TbMsg[16]="Ruta Origen";
+$TbMsg[17]='"Nombre canï¿½nico fichero-imagen existe :  Introduzca otro nombre"';
+$TbMsg[18]="Introduzca otro Nombre";
 ?>

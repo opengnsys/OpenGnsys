@@ -17,5 +17,13 @@ $TbMsg[8]="Partition";
 $TbMsg[9]="Partition Type";
 $TbMsg[10]="Repository";
 $TbMsg[11]="Canonical Name";
+$TbMsg[12]="Basic Image Management";
+$TbMsg[13]="Incremental Image Management";
+$TbMsg[14]="Basic Picture";
+$TbMsg[15]="ATTENTION. - A software image that has profile indicates that at some point has been created <br>
+			and therefore some data can not be changed unless you delete and recreate";
+$TbMsg[16]="Route Origin";
+$TbMsg[17]='"Canonical name-image file exists: Enter another name"';
+$TbMsg[18]="Enter another Name";
 ?>
 
