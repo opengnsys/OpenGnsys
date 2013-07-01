@@ -103,7 +103,7 @@ function ogCreateInfoImage () {
 #@param 4 Nombre Imagen Basica (opcional en las completas)
 #@param 5 Extensión [ img | diff ]
 #*/
-local  IMGEXT IMGDIRAUX DIRMOUNT DESTRSYNC OPTRSYNC USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL 
+local  IMGEXT IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD OPTRSYNC USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL 
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" -o   $# -lt 5 -a "$3" != "img"  ]; then
@@ -130,12 +130,11 @@ else
 	if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
            DIRMOUNT="/tmp/$IMGDIRAUX"
            DESTRSYNC=$DIRMOUNT
-	   OPTRSYNC=""
 	else
 	   [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
            DIRMOUNT="$OGIMG/$IMGDIRAUX"
            USERRSYNC="opengnsys"
-           OPTRSYNC="$OPTRSYNC --password-file=/scripts/passrsync"
+           PASSWORD="--password-file=/scripts/passrsync"
            DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$IMGDIRAUX"
 	fi
    fi
@@ -171,7 +170,7 @@ else
 	# Imagen Diferencial
 	# TODO en el echo quitar la $OPTRSYNC  para que no se vea el fichero de claves
 	echo "      rsync -aHAXvn$OPTRSYNC  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" | tee -a $OGLOGSESSION $OGLOGFILE
-	rsync -aHAXvn$OPTRSYNC   --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
+	rsync -aHAXvn$OPTRSYNC $PASSWORD   --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
 	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGLIST
 	sed -i  '/^\.\//d' $IMGLIST
 
@@ -272,7 +271,7 @@ function ogSyncCreate () {
 #@param 4 Nombre Imagen
 #@param 5 Extensión [ img | diff ]
 #*/
-local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC OPTRSYNC
+local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC
 
 if [ "$*" == "help" ]; then
 	ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part [ REPO|CACHE ] image_name extension  " \
@@ -295,16 +294,17 @@ if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
         DESTRSYNC="/tmp/$DIRMOUNT"
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        OPTRSYNC=" --password-file=/scripts/passrsync"
-        [ "$ogcompress" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
+        PASSWORD="--password-file=/scripts/passrsync"
+        [ "$ogrsyncz" ==  "true" ] && OPTRSYNC="z "
+	[ "$ogrsyncw" == "true" ] && OPTRSYNC="W$OPTRSYNC"
 	USERRSYNC="opengnsys"
         DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
 fi
 # Sincronizamos los datos de la partición a la imagen
 echo "      rsync -aHAX$OPTRSYNC --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC"
+rsync -aHAXq$OPTRSYNC $PASSWORD  --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC"
 echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC
+rsync -aHAXq$OPTRSYNC  $PASSWORD --inplace /tmp/ogimg* $DESTRSYNC
 
 }
 
@@ -319,7 +319,7 @@ rsync -aHAXq$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC
 #@param 5 num_part
 #*/
 function ogSyncRestore () {
-local DIRMOUNT ORIG DESTRSYNC OPTRSYNC USERRSYNC IMGINFO FILESFROM
+local DIRMOUNT ORIG DESTRSYNC PASSWORD OPTRSYNC USERRSYNC IMGINFO FILESFROM
 
 if [ "$*" == "help" ]; then
 	ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name extension  num_disk num_part  " \
@@ -346,8 +346,9 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         ORIG="/tmp/$DIRMOUNT"
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        OPTRSYNC=" --password-file=/scripts/passrsync"
-        [ "$ogcompress" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
+        PASSWORD="--password-file=/scripts/passrsync"
+        [ "$ogrsyncz" ==  "true" ] && OPTRSYNC="z "
+	[ "$ogrsyncw" == "true" ] && OPTRSYNC="W$OPTRSYNC"
 	USERRSYNC="opengnsys"
         ORIG="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
 fi
@@ -366,7 +367,7 @@ if [ "$3" == "diff" ]; then
 	FILESFROM=" --files-from=$DESTRSYNC/$IMGINFO"
 
         echo "      rsync -aHAXq$OPTRSYNC  $ORIG/ogimg* $DESTRSYNC" |tee -a  $OGLOGFILE
-        rsync -aHAXq$OPTRSYNC  $ORIG/ogimg* $DESTRSYNC
+        rsync -aHAXq$OPTRSYNC $PASSWORD  $ORIG/ogimg* $DESTRSYNC
         # Borramos linea de información de la imagen, sino busca un fichero con ese nombre
         sed -i   '/^\#/d' $DESTRSYNC/$IMGINFO
 
@@ -378,7 +379,7 @@ if [ "$3" == "diff" ]; then
 fi
 
 echo "      rsync -aHAX$OPTRSYNC  $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC  $FILESFROM  "$ORIG/" "$DESTRSYNC"
+rsync -aHAXq$OPTRSYNC $PASSWORD  $FILESFROM  "$ORIG/" "$DESTRSYNC"
 
 
 }
