@@ -200,7 +200,7 @@ function opcionesAdicionales()
 {
 	global $TbMsg;	
 	
-	$tablaHtml='<table width="95%" align=center border=0 cellPadding=0 cellSpacing=0 class="tabla_accesos">';
+	$tablaHtml='<table style="display:none" width="95%" align=center border=0 cellPadding=0 cellSpacing=0 class="tabla_accesos">';
 	$tablaHtml.='<tr><th colspan=8 align=center><b>&nbsp;'.$TbMsg[11].'&nbsp;</b></th></tr>';
 	$tablaHtml.='<tr id="trOpc">
 					<td align=right>'.$TbMsg[35].'</td>
