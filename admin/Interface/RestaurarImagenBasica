@@ -25,20 +25,29 @@
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
 # $8 Método de clonación 0=Desde caché 1=Desde repositorio
-# $9 Ruta de origen de la Imagen (Carpeta)
+# $9 Metodo de sincronizacion
+# $10 Ruta de origen de la Imagen (Carpeta)
+
+
+
+
 #___________________________________________________________________
 #
 # Control parámetros
 #___________________________________________________________________
 
 	PROG="$(basename $0)"
-	if [ $# -lt 8 ]; then
+	if [ $# -lt 9 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio copiar_a_caché "
 		usage="$usage Borrar_cache_previamente metodo_clonación Ruta_origen"
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
 		exit $?
 	fi
 	
+	if [ $9 -eq 1 ]; then
+		#sincronizacion1 
+ 		ogRestaurarImagenBasica "$@"
+	fi			
 	# Llamada a la función de sincronización.
- 	ogRestaurarImagenBasica "$@"
+
 
