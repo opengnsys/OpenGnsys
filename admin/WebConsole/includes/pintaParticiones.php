@@ -351,7 +351,7 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	// Separamos las configuraciones segun el disco al que pertenezcan
 	$diskConfigs = splitConfigurationsByDisk($configuraciones);
 	
-	$columns=9;
+	$columns=14;
 	echo '<TR>';
 	echo '<TH align=center>&nbsp;&nbsp;</TH>';
 	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
@@ -362,6 +362,11 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
 	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
+	echo '<TH align=center>&nbsp;Método&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;Envío&nbsp;</TH>';	
+	echo '	<TH align=center>&nbsp;W&nbsp;</TH>';
+	echo '	<TH align=center>&nbsp;E&nbsp;</TH>';
+	echo '	<TH align=center>&nbsp;C&nbsp;</TH>';	
 	echo '</TR>';
 
 	
@@ -392,10 +397,19 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						$metodos.="REPO=".$TbMsg[9];		
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
 						
-						$metodos="SYNC1="."SYNC1".chr(13);
+						$metodos="SYNC0="."  ".chr(13);
+						$metodos.="SYNC1="."SYNC1".chr(13);						
 						$metodos.="SYNC2="."SYNC2";		
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100).'</TD>';								
 							
+						$metodos="Unicast="."Unicast".chr(13);						
+						$metodos.="Multicast="."Multicast";		
+						echo '<TD align=center>'.HTMLCTESELECT($metodos,"despletpt_".$icp,"estilodesple","",1,100).'</TD>';								
+						
+						echo '<td align=center><input type=checkbox name="whole" id="whl-'.$icp.'"></td>';	
+						echo '<td align=center><input type=checkbox name="paramb" checked id="eli-'.$icp.'"></td>';	
+						echo '<td align=center><input type=checkbox name="compres" id="cmp-'.$icp.'"></td>';	
+										
 					}
 					echo '</TR>'.chr(13);
 				}
