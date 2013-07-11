@@ -15,13 +15,6 @@ OPENGNSYS_DB_PASSWD="passusuog"		# Clave de acceso a la base de datos
 OPENGNSYS_CLIENT_PASSWD="og"		# Clave de acceso del cliente
 
 
-####  AVISO: NO EDITAR.
-####  WARNING: DO NOT EDIT. 
-OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
-OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario del cliente para acceso remoto
-
-
-
 # Sólo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
@@ -54,8 +47,12 @@ INSTALL_TARGET=/opt/opengnsys
 OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log
 LOG_FILE=/tmp/$(basename $OGLOGFILE)
 
-# Fichero SQL para crear la base de datos.
-OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
+# Usuario del cliente para acceso remoto.
+OPENGNSYS_CLIENT_USER="opengnsys"
+
+# Nombre de la base datos y fichero SQL para su creación.
+OPENGNSYS_DATABASE="ogAdmBD"
+OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 
 
 #####################################################################
