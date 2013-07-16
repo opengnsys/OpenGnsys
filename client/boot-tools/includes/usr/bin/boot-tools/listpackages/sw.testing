@@ -1,7 +1,9 @@
 #sw.other
 install screen 
 install schroot 
-#install grub 
+#install grub
+install xmlstarlet 
+install efibootmgr 
 ##############
 #install discover 
 #install laptop-detect 
