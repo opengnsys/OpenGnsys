@@ -27,21 +27,22 @@ echo  "spartlnx"
 which spartlnx.run || $(wget http://damien.guibouret.free.fr/savepart.zip &>/dev/null; unzip -o savepart.zip -d /sbin/)
 
 #echo "xvesa"
-#gdebi -n /var/cache/apt/archivesOG/xvesa.deb
+gdebi -n /var/cache/apt/archivesOG/xvesa.deb
 
 #echo "partclone"
 #gdebi -n /var/cache/apt/archivesOG/partclone_0.2.38_i386.deb
 
+#echo "comenzamos con el busybox"
 #echo "busybox-static 1.17.1 en rootfs"
-#apt-get remove -y busybox-static
-#gdebi -n /var/cache/apt/archivesOG/busybox-static_1.17.1-10ubuntu1_i386.deb
-#cp /bin/busybox /bin/busyboxOLD
-#/bin/busyboxOLD
-#echo "busybox-static 1.18.5 en initrd"
-#apt-get install -y busybox-static
-#cp /bin/busybox /bin/busyboxNEW
-#/bin/busyboxNEW
-# en scripts reboot y poweroff hacer llamada a busyboxOLD reboot|poweroff
+apt-get remove -y busybox-static
+gdebi -n /var/cache/apt/archivesOG/busybox-static_1.17.1-10ubuntu1_i386.deb
+cp /bin/busybox /bin/busyboxOLD
+/bin/busyboxOLD
+echo "busybox-static 1.18.5 en initrd"
+apt-get install -y busybox-static
+cp /bin/busybox /bin/busyboxNEW
+/bin/busyboxNEW
+echo " en scripts reboot y poweroff hacer llamada a busyboxOLD reboot|poweroff "
 
 
 #gpt
