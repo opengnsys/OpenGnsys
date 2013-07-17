@@ -5,7 +5,7 @@ install fbset
 install gdebi-core
 install bash-static
 #La gestion  del busybox-static (incompatibilidades reboot y poweroff) en boottoolSoftwareCompile.sh 
-install busybox-static  
+#install busybox-static  
 install console-data
 install locales
 install lshw 
