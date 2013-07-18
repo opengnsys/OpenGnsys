@@ -1,12 +1,13 @@
 #!/bin/bash
-#         deleteimage [ -b | -r ] str_image
+#         deleteimage [ -b | -r | i ] str_image
 #@file    deleteimage
 #@brief   Borra del repositorio los ficheros de una imagen.
 #@param   -b           Elimina también la copia de seguridad de la imagen (opcional).
 #@param   -r           Recupera la copia de seguridad de la imagen (opcional).
+#@param   -i           Elimina imagen Incremental o Basica
 #@param   str_image    Nombre canónico de la imagen, sin extensión.
-#@version 1.0
-#@date    2012-10-14
+#@version 1.2
+#@date    2013-07-17
 #@author  Ramón Gómez, ETSII Univ. Sevilla
 
 
@@ -15,38 +16,36 @@ OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 OGIMG=$OPENGNSYS/images
 IMGEXT="img"
 BAKEXT="ant"
- 
+DIFFEXT="diff"
+
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     cat << EOT
 $PROG: Borra los ficheros de una imagen del repositorio.
-Formato: $PROG [ -b | -r ] str_image
+Formato: $PROG [ -b | -r | -i ] str_image
          -b  Elimina también la copia de seguridad de la imagen.
          -r  Recupera la copia de seguridad de la imagen.
+         -i  Elimina imagen Incremental o Basica
 Ejemplo: $PROG imagen1
 EOT
     exit 0
 fi
+
 # Procesar parámetros
-while getopts br OPTION; do
+while getopts bri OPTION; do
     case $OPTION in
         b) DELETEBACKUP=1 ;;
         r) RECOVERBACKUP=1 ;;
+        i) DELETEINCREMEN=1 ;;
         *) ERR=1 ;;
     esac
     shift $((OPTIND-1))
 done
-[ -n "$DELETEBACKUP" ] && [ -n "$RECOVERBACKUP" ] && ERR=1
+[ -n "$DELETEBACKUP" ] && [ -n "$RECOVERBACKUP" ] && [ -n "$DELETEINCREMEN" ] && ERR=1
 if [ $# != 1 -o -n "$ERR" ]; then
-    echo "$PROG Error: Formato: $PROG [ -b | -r ] str_image" 
+    echo "$PROG Error: Formato: $PROG [ -b | -r | -i ] str_image" 
     exit 1
 fi
-
-# Fichero principal de la imagen.
-IMGFILE="$OGIMG/$1.$IMGEXT"
-
-# Eliminar ficheros de la imagen.
-rm -f $IMGFILE && rm -f $IMGFILE.{sum,torrent}
 
 # Recuperar copia de seguridad de la imagen.
 if [ -n "$RECOVERBACKUP" ]; then
@@ -60,3 +59,39 @@ if [ -n "$DELETEBACKUP" ]; then
     rm -f $IMGFILE.$BAKEXT && rm -f $IMGFILE.{sum,torrent}.$BAKEXT
 fi
 
+# Borrar directorio de imagen
+IMGFILECA="$OGIMG/$1"
+if [ -n "$DELETEINCREMEN" ];then
+rm -R $IMGFILECA && exit
+fi
+
+# Si el Nombre canonico es un directorio eliminamos
+# o si la opcion es i tambien eliminamos
+IMGFILECA="$OGIMG/$1"
+if [ -d "$IMGFILECA" ];then
+rm -R $IMGFILECA 
+# Si el Nomobre canonico NO es un directorio
+else
+	# Comprobamos si es un archivo backup .ant
+	NOMBREANT=$(echo $1 | awk -F. '{print $1}')
+	if [ $1 == "$NOMBREANT.$BAKEXT" ]; then
+	 	IMGFILE="$OGIMG/$NOMBREANT.$IMGEXT.$BAKEXT"
+		# Eliminar fichero de seguridad .img.ant
+		rm -f $IMGFILE
+	else
+		        # Comprobamos si es un archivo diferencial .diff
+			NOMBREDIF="$OGIMG/$1.$IMGEXT.$DIFFEXT"
+		        if [ -f $NOMBREDIF ]; then
+        	        	IMGFILE="$OGIMG/$1.$IMGEXT.$DIFFEXT"
+        		        # Eliminar fichero diferencial .diff .torrent .sum
+	                	rm -f $IMGFILE && rm -f $IMGFILE.{sum,torrent}
+
+	                else
+                        	# Fichero principal de la imagen.
+	                        IMGFILE="$OGIMG/$1.$IMGEXT"
+        	                # Eliminar ficheros de la imagen.
+                	        rm -f $IMGFILE && rm -f $IMGFILE.{sum,torrent}
+			fi
+	fi
+
+fi
