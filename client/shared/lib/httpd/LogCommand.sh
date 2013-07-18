@@ -13,7 +13,8 @@ echo "<tr>"
 
 echo "<TEXTAREA NAME='trackloghead' ROWS='13' COLS='175'>"
 #echo "$(head -n 10 /tmp/command.log.tmp | uniq)"
-echo "$(grep -v '^Elapsed:\|^Total [Tt]ime:\|^-\|^|\|^bytes\|^\[' /tmp/command.log.tmp | uniq | head -n 10)" 
+# UHU - 2013/07/05 - Se incluye el simbolo % y la palabra sent para que se muestre la salida de rsync
+echo "$(egrep -v '%|sent|^Elapsed:\|^Total [Tt]ime:\|^-\|^|\|^bytes\|^\[' /tmp/command.log.tmp | uniq | head -n 15)" 
 echo "</TEXTAREA>"
 
 echo "</tr>"
@@ -23,7 +24,8 @@ echo "<tr>"
 
 echo "<TEXTAREA NAME='tracklogtail' ROWS='2' COLS='175'>"
 #echo "$(tail -n 5 /tmp/command.log.tmp | uniq)"
-echo "$(grep '^Elapsed:\|^Total [Tt]ime:\|^-\|^|\|^bytes' /tmp/command.log.tmp | uniq | tail -n 2)" 
+# UHU - 2013/07/05 - Se incluye el simbolo % y la palabra sent para que se muestre la salida de rsync
+echo "$(egrep '%|sent|^Elapsed:\|^Total [Tt]ime:\|^-\|^|\|^bytes' /tmp/command.log.tmp | uniq | tail -n 2)" 
 echo "</TEXTAREA>"
 
 
