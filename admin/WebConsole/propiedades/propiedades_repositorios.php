@@ -1,4 +1,4 @@
-<?php
+<?  
 // *********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -26,11 +26,13 @@ $pathpxe="/opt/opengnsys/tftpboot/pxelinux.cfg";
 $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
+$numordenadores=0; // Número de ordenador a los que da servicio
+$repolocal="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"]; 
-if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"]; 
+if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
@@ -41,6 +43,44 @@ if  ($opcion!=$op_alta){
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci�n de datos.
 }
 //________________________________________________________________________________________________________
+//#########################################################################
+$iprepositorio="";
+$ipservidor=$_SERVER['SERVER_ADDR'];
+
+	$cmd->texto="SELECT * FROM repositorios WHERE idrepositorio=$idrepositorio";
+	$rs=new Recordset;
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF){
+		$nombrerepositorio=$rs->campos["nombrerepositorio"];
+		$iprepositorio=$rs->campos["ip"];
+	}
+	$rs->Cerrar();
+
+if ($iprepositorio == $ipservidor)
+{
+	$repolocal="si";
+	$espaciorepo=exec("df -h /opt/opengnsys/images");
+	$espaciorepo=split(" ",$espaciorepo);
+	for ($j=0;$j<count($espaciorepo);$j++)
+	{
+	        if ($espaciorepo[$j]!="")
+	                {$espaciorepos[]=$espaciorepo[$j];}
+	}
+	for ($k=0;$k<count($espaciorepos);$k++)
+	{
+	        $totalrepo=$espaciorepos[1];
+    	    $ocupadorepo=$espaciorepos[2];
+	        $librerepo=$espaciorepos[3];
+	        $porcentajerepo=$espaciorepos[4];
+	}
+}
+else{
+	$repolocaL="no";
+	}
+
+//#########################################################################
 ?>
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
@@ -49,7 +89,7 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_repositorios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
+	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
@@ -65,7 +105,7 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?php
+			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
 				else	
@@ -78,9 +118,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?php
+			<?
 			if ($opcion==$op_eliminacion)
-				echo '<TD>'.$ip.'</TD>';
+					echo '<TD>'.$ip.'</TD>';
 			else	
 				echo'<TD><INPUT  class="formulariodatos" name=ip type=text style="width:200" value="'.$ip.'"></TD>';
 			?>
@@ -88,9 +128,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-			<?php
+		<?
 			if ($opcion==$op_eliminacion)
-				echo '<TD>'.$puertorepo.'</TD>';
+					echo '<TD>'.$puertorepo.'</TD>';
 			else	
 				echo'<TD><INPUT  class="formulariodatos" name=puertorepo type=text style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
@@ -98,9 +138,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
-			<?php
+		<?
 			if ($opcion==$op_eliminacion)
-				echo '<TD colspan=2>'.$pathrepod.'</TD>';
+					echo '<TD colspan=2>'.$pathrepod.'</TD>';
 			else	
 				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathrepod type=text style="width:330" value="'.$pathrepod.'"></TD>';
 			?>
@@ -108,9 +148,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
-			<?php
+		<?
 			if ($opcion==$op_eliminacion)
-				echo '<TD colspan=2>'.$pathpxe.'</TD>';
+					echo '<TD colspan=2>'.$pathpxe.'</TD>';
 			else	
 				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathpxe type=text style="width:330" value="'.$pathpxe.'"></TD>';
 			?>
@@ -118,9 +158,9 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?php
+			<?
 			if ($opcion==$op_eliminacion)
-				echo '<TD colspan=2>'.$comentarios.'</TD>';
+					echo '<TD colspan=2>'.$comentarios.'</TD>';
 			else	
 				echo '<TD colspan=2><TEXTAREA   class="formulariodatos" name=comentarios rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
 			?>
@@ -129,9 +169,43 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	
 	</TABLE>
+		<?php	if ( $opcion == 1 ){} else { ?>
+
+	<TABLE  align=center border=0 cellPadding=2 cellSpacing=2 class=tabla_datos >
+    <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+		<TR>
+			<TH align=center width=125>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
+			<TH align=center width=101>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
+		</TR>
+		<?php  if ($repolocal == "si" )
+		{?>
+                <TR>
+			<TD align=center width=125>&nbsp;<?echo $totalrepo?>&nbsp;</TD>
+            		<TD align=center width=120>&nbsp;<?echo $ocupadorepo?>&nbsp;</TD>
+           		<TD align=center width=120>&nbsp;<?echo $librerepo?>&nbsp;</TD>
+           		<TD align=center width=101>&nbsp;<?echo $porcentajerepo?>&nbsp;</TD>
+                </TR>
+		<?php }else {
+				include_once("../idiomas/php/".$idioma."/propiedades_repositorios_".$idioma.".php");
+		?>
+        			<TR>
+            <TH colspan="5" align=center>&nbsp;<?echo $TbMsg[15].'</br>'?>&nbsp;</TD>
+            <?echo $TbMsg[16].'</br>'?>&nbsp;</TD>
+            <?echo $TbMsg[17]?>&nbsp;</TD>
+            &nbsp;</TD>
+            </TR>
+        		<?php } ?>
+		<?php } ?>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+    
+   	</TABLE>
+	
 </FORM>
 </DIV>
-<?php
+<?
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
@@ -154,10 +228,15 @@ function TomaPropiedades($cmd,$id){
 	global $pathpxe;
 	global $ordenadores;
 
-	$cmd->texto="SELECT  repositorios.*, COUNT(ordenadores.idordenador) AS numordenadores
-			FROM repositorios 
-	 		LEFT OUTER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
-			WHERE repositorios.idrepositorio=".$id;
+
+	// NOTA: el parámetro "numordenadores" no se está utilizando, por lo que se
+	//	 simplifica la consulta, ignorando dicho valor.
+/*
+	$cmd->texto="SELECT repositorios.*, count(*) as numordenadores FROM repositorios 
+	 						INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+							WHERE repositorios.idrepositorio=".$id;
+*/
+	$cmd->texto="SELECT * FROM repositorios WHERE idrepositorio=$id";
 	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(true); // Error al abrir recordset
@@ -169,10 +248,9 @@ function TomaPropiedades($cmd,$id){
 		$puertorepo=$rs->campos["puertorepo"];
 		$pathrepod=$rs->campos["pathrepod"];
 		$pathpxe=$rs->campos["pathpxe"];
-		$ordenadores=$rs->campos["numordenadores"];
+//		$ordenadores=$rs->campos["numordenadores"];
 	}
 	$rs->Cerrar();
 	return(true);
 }
 ?>
-
