@@ -26,6 +26,11 @@ else
 $baseurlimg="../images/signos"; // Url de las imágenes de signo
 $clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
 $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
+
+$flotante=new MenuContextual();	 // Crea objeto MenuContextual
+$XMLcontextual=ContextualXMLComandos($LITAMBITO_CENTROS,$AMBITO_CENTROS);
+//echo $flotante->CreaMenuContextual($XMLcontextual);
+
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -44,6 +49,15 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/repositorios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
+<FORM name="fcomandos" action="" method="post" target="frame_contenidos">
+	<INPUT type="hidden" name="idcomando" value="">
+	<INPUT type="hidden" name="descricomando" value="">
+	<INPUT type="hidden" name="ambito" value="">
+	<INPUT type="hidden" name="idambito" value="">
+	<INPUT type="hidden" name="nombreambito" value="">
+	<INPUT type="hidden" name="gestor" value="">
+	<INPUT type="hidden" name="funcion" value="">
+</FORM>
 <?
 //________________________________________________________________________________________________________
 echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
@@ -271,6 +285,22 @@ function CreacontextualXMLRepositorio(){
 	$wTop=115;
 	$wWidth=550;
 	$wHeight=280;
+	$wpages="../comandos/EliminarImagenRepositorio.php";
+	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
+	$layerXML.=' textoitem='.$TbMsg[10];
+	$layerXML.=' imgitem="../images/iconos/comandos.gif"';
+	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
+	$wLeft=140;
+	$wTop=115;
+	$wWidth=550;
+	$wHeight=280;
 	$wpages="../propiedades/propiedades_repositorios.php";
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
 
@@ -288,5 +318,45 @@ function CreacontextualXMLRepositorio(){
 
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
+}
+
+
+//________________________________________________________________________________________________________
+function ContextualXMLComandos($litambito,$ambito){
+	global $cmd;
+	global $TbMsg;
+ 	$maxlongdescri=0;
+	$rs=new Recordset; 
+	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
+			FROM comandos 
+			WHERE activo=1 AND aplicambito & ".$ambito.">0 
+			ORDER BY descripcion";
+	$rs->Comando=&$cmd; 
+	if ($rs->Abrir()){
+		$layerXML="";
+		$rs->Primero(); 
+		while (!$rs->EOF){
+			if (isset($TbMsg["COMMAND_".$rs->campos["funcion"]])) {$descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];}else{$descrip;}
+			//$descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];
+			if (empty ($descrip)) {
+				$descrip=$rs->campos["funcion"];
+			}
+			$layerXML.='<ITEM';
+			$layerXML.=' alpulsar="confirmarcomando('."'".$ambito."'".','.$rs->campos["idcomando"].',\''.$rs->campos["descripcion"].'\',\''.$rs->campos["pagina"]. '\',\''.$rs->campos["gestor"]. '\',\''.$rs->campos["funcion"]. '\')"';
+			$layerXML.=' textoitem="'.$descrip.'"';
+			$layerXML.='></ITEM>';
+			if ($maxlongdescri < strlen($descrip)) // Toma la Descripción de mayor longitud
+				$maxlongdescri=strlen($descrip);
+			$rs->Siguiente();
+		}
+	$layerXML.='</MENUCONTEXTUAL>';
+	$prelayerXML='<MENUCONTEXTUAL';
+	$prelayerXML.=' idctx="flo_comandos_'.$litambito.'"';
+	$prelayerXML.=' maxanchu='.$maxlongdescri*7;
+	$prelayerXML.=' clase="menu_contextual"';
+	$prelayerXML.='>';
+	$finallayerXML=$prelayerXML.$layerXML;
+	return($finallayerXML);
+	}
 }
 ?>

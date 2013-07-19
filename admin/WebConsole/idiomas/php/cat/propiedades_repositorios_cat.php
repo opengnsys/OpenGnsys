@@ -1,8 +1,8 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_servidoresrembo_cat.php 
-//	Idioma: Català 
+//	Fichero de idiomas php: propiedades_servidoresrembo_esp.php 
+//	Idioma: EspaÃ±ol 
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="Sense Opció";
@@ -15,5 +15,12 @@ $TbMsg[6]="Direcció IP";
 $TbMsg[7]="Comentaris";
 $TbMsg[8]="Port"; 
 $TbMsg[9]="Directori Base"; 
-$TbMsg[10]="Directori PXE"; 
+$TbMsg[10]="Directori PXE";
+$TbMsg[11]="Espai TOTAL"; 
+$TbMsg[12]="Espai Ocupat"; 
+$TbMsg[13]="Espai Lliure"; 
+$TbMsg[14]="% Ocupat"; 
+$TbMsg[15]="No hi ha connexió amb el Repositori";
+$TbMsg[16]='Limitacions Versió 1.3';
+$TbMsg[17]='Informació Espai és permès si Repositori i Servidor Web allotjats al mateix Servidor';
 ?>
