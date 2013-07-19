@@ -1,8 +1,8 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_servidoresrembo_esp.php 
-//	Idioma: EspaÃ±ol 
+//	Fichero de idiomas php: propiedades_servidoresrembo_cat.php 
+//	Idioma: Català
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="Sense Opció";

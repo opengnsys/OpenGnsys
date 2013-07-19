@@ -1,14 +1,17 @@
 #!/bin/bash
-#         deleteimage [ -b | -r | i ] str_image
+#         deleteimage [ -b | -r | -i ] str_image
 #@file    deleteimage
 #@brief   Borra del repositorio los ficheros de una imagen.
 #@param   -b           Elimina también la copia de seguridad de la imagen (opcional).
 #@param   -r           Recupera la copia de seguridad de la imagen (opcional).
 #@param   -i           Elimina imagen Incremental o Basica
 #@param   str_image    Nombre canónico de la imagen, sin extensión.
-#@version 1.2
-#@date    2013-07-17
+#@version 1.0 - Versión inicial.
+#@date    2012-10-14
 #@author  Ramón Gómez, ETSII Univ. Sevilla
+#@version 1.2 - Eliminar imagen incremental.
+#@date    2013-07-17
+#@author  Alberto García, Univ. Málaga
 
 
 PROG=$(basename $0)
