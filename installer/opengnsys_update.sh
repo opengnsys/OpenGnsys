@@ -849,6 +849,9 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
+# Configurar Rsync.
+rsyncConfigure
+
 # Actualizar ficheros del cliente
 updateClientFiles
 updateInterfaceAdm
