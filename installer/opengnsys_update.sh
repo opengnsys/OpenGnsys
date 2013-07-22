@@ -101,6 +101,12 @@ case "$OSDISTRIB" in
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
+		if which service &>/dev/null; then
+			STARTSERVICE="eval service \$service restart"
+		else
+			STARTSERVICE="eval /etc/init.d/\$service restart"
+		fi
+		ENABLESERVICE="eval update-rc.d \$service defaults"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
 		;;
@@ -108,6 +114,13 @@ case "$OSDISTRIB" in
 		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
+		if which systemctl &>/dev/null; then
+			STARTSERVICE="eval systemctl start \$service.service"
+			ENABLESERVICE="eval systemctl enable \$service.service"
+		else
+			STARTSERVICE="eval service \$service start"
+			ENABLESERVICE="eval chkconfig \$service on"
+		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
 		;;
@@ -400,6 +413,43 @@ function apacheConfiguration ()
 	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
 }
 
+# Configurar servicio Rsync.
+function rsyncConfigure()
+{
+	local service 
+
+	# Configurar acceso a Rsync.
+	if [ ! -f /etc/rsyncd.conf ]; then
+		echoAndLog "${FUNCNAME}(): Configuring Rsync service."
+		sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENTUSER/g" \
+		    $WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > /etc/rsyncd.conf
+		# Habilitar Rsync.
+		if [ -f /etc/default/rsync ]; then
+			perl -pi -e 's/RSYNC_ENABLE=.*/RSYNC_ENABLE=inetd/' /etc/default/rsync
+		fi
+		if [ -f $INETDCFGDIR/rsync ]; then
+			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/rsync
+		else
+			cat << EOT > $INETDCFGDIR/rsync
+service rsync
+{
+	disable = no
+	socket_type = stream
+	wait = no
+	user = root
+	server = $(which rsync)
+	server_args = --daemon
+	log_on_failure += USERID
+	flags = IPv6
+}
+EOT
+		fi
+		# Activar e iniciar Rsync.
+		service="rsync"  $ENABLESERVICE
+		service="xinetd" $STARTSERVICE
+	fi
+}
+
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
@@ -639,8 +689,8 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	#local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
-	local FILENAME=ogLive-quantal-3.7.6-030706-generic-r3619.iso 	# 1.0.5-rc2
+	#local FILENAME=ogLive-quantal-3.7.6-030706-generic-r3619.iso 	# 1.0.5-rc2
+	local FILENAME=ogLive-raring-3.8.0-22-generic-r3836.iso 	# 1.0.5-rc3
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH

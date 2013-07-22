@@ -1310,7 +1310,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-quantal-3.7.6-030706-generic-r3619.iso	# 1.0.5-rc2
+	local FILENAME=ogLive-raring-3.8.0-22-generic-r3836.iso		# 1.0.5-rc3
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  

@@ -34,6 +34,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #579	El cliente no inicia cuando se conecta un dispositivo USB
 #563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
 #587	buildToOrder: activación controladores de disco para Windows 7
+#612	Log en tiempo real no muestra salida de Unicast.
 #613	Script reboot con parámetro de tiempo
 
 Tickets resueltos en módulo OpenGnSys Server:
@@ -74,6 +75,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 Tickets genéricos resueltos:
 #453	Autenticación con LDAP u otro servicio (tarea)
 #455	Comunicacion SSH entre un Servidor central y repositorios (opcional)
+#564	Eliminar imagen de repositorio (tarea)
 #565	Imágenes diferenciales (tarea)
 #577	Enviar al servidor la configuración de particiones cada vez que un cliente e ejecuta un comando
 
