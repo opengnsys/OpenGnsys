@@ -1,5 +1,5 @@
 #!/bin/bash
-# Eliminar las imagenees del repositiro seg�raca de la onsola web .img
+# Eliminar las imagenes del repositiro seg�raca de la onsola web .img
 #Version 0.3   Ejecuci�n desde cron cada minuto,o.
 #echo "* * * * *   root   /opt/opengnsys/bin/image-delete" > /etc/cron.d/imagedelete
 
