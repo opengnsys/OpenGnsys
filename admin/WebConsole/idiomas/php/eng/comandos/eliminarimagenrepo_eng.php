@@ -28,7 +28,7 @@
 	$TbMsg[20]="Space Release"; 
 	$TbMsg[21]="% Occupied"; 
 	$TbMsg[22]="No connection to the Repository";
-	$TbMsg[23]='Version Limitations 1.3';
+	$TbMsg[23]='Version Limitations 1.5';
 	$TbMsg[24]='Clear Image is permitted if Repository and Web server hosted on the same server';
 	$TbMsg[25]='NOT Created';
 	$TbMsg[26]='Delete Image object';

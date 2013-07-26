@@ -28,7 +28,7 @@
 	$TbMsg[20]="Espaci Lliure"; 
 	$TbMsg[21]="% Ocupat"; 
 	$TbMsg[22]="No hi ha connexió amb el Repositori";
-	$TbMsg[23]='Limitacions Versió 1.3';
+	$TbMsg[23]='Limitacions Versió 1.5';
 	$TbMsg[24]='Informació Espai és permès si Repositori i Servidor Web allotjats al mateix Servidor';
 	$TbMsg[25]='NO Creat';
 	$TbMsg[26]='Eliminar Objecte Imatge';

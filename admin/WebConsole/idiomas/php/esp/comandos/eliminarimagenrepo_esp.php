@@ -28,7 +28,7 @@
 	$TbMsg[20]="Espacio Libre"; 
 	$TbMsg[21]="% Ocupado"; 
 	$TbMsg[22]="No hay conexion con el Repositorio";
-	$TbMsg[23]='Limitaciones Versi&oacute;n 1.3';
+	$TbMsg[23]='Limitaciones Versi&oacute;n 1.5';
 	$TbMsg[24]='Eliminar Imagen es permitido si Repositorio y Servidor Web alojados en el mismo Servidor';
 	$TbMsg[25]='NO Creado';
 	$TbMsg[26]='Eliminar Objeto Imagen';

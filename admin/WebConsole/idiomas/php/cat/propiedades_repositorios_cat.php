@@ -21,6 +21,6 @@ $TbMsg[12]="Espai Ocupat";
 $TbMsg[13]="Espai Lliure"; 
 $TbMsg[14]="% Ocupat"; 
 $TbMsg[15]="No hi ha connexió amb el Repositori";
-$TbMsg[16]='Limitacions Versió 1.3';
+$TbMsg[16]='Limitacions Versió 1.5';
 $TbMsg[17]='Informació Espai és permès si Repositori i Servidor Web allotjats al mateix Servidor';
 ?>

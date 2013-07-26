@@ -21,6 +21,6 @@ $TbMsg[12]="Space Taken";
 $TbMsg[13]="Space Free"; 
 $TbMsg[14]="% Taken";
 $TbMsg[15]="No connection to the repository";
-$TbMsg[16]='Limitations Versi&oacute;n 1.3';
+$TbMsg[16]='Limitations Versi&oacute;n 1.5';
 $TbMsg[17]='Information Space is allowed if Repository and Web server hosted on the same server';
 ?>
