@@ -69,7 +69,7 @@ fi
 if test $DROP; then
     # Componer fichero temporal con credenciales de conexión a la base de datos.
     touch $MYCNF
-    600 $MYCNF
+    chmod 600 $MYCNF
     cat << EOT > $MYCNF
 [client]
 user=root
