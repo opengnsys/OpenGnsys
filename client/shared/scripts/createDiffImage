@@ -30,7 +30,7 @@ trap "onexit $1 $2 $3 \"$4\" \"$5\"" 1 2 3 6 9 14 15 ERR
 function onexit() {
     local exit_status=$?
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
-    ogUnmountImage $3 "$5" $DIFFEXT &>/dev/null
+    ogUnmountImage $3 "$5" $DIFFTYPE &>/dev/null
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
     ogUnlockImage "$3" "/$4.$IMGEXT" &>/dev/null
     ogUnlockImage "$3" "/$5.$DIFFEXT" &>/dev/null
@@ -63,8 +63,8 @@ fi
 
 # Valores por defecto en etc/engine.cfg
 IMGEXT="img"
-DIFFEXT="diff"
-
+DIFFEXT="img.diff"
+DIFFTYPE="diff"
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Comprobamos si la imagen diferencial o la particion estan bloqueada:
@@ -142,7 +142,7 @@ ogWaitMountImage $3 "$4" $IMGEXT || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 
 
 # Creamos la informacion de la imagen.
 echo "[50] $MSG_HELP_ogCreateInfoImage " | tee -a $OGLOGSESSION $OGLOGFILE
-ogCreateInfoImage $1 $2 $3 "$4" "$DIFFEXT"
+ogCreateInfoImage $1 $2 $3 "$4" "${DIFFTYPE}"
 TIMEAUX3=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 #Calculamos el tamaño de la imagen:
@@ -170,20 +170,24 @@ sed -i s/SIZEDATA/"$SIZEDATA"/g /tmp/ogimg.info
 
 # Creamos o redimensionamos la imagen
 echo "[60] $MSG_HELP_ogCreateFileImage."  | tee -a $OGLOGSESSION $OGLOGFILE
-ogCreateFileImage $3 "$5" $DIFFEXT $SIZEREQUIRED
+ogCreateFileImage $3 "$5" $DIFFTYPE $SIZEREQUIRED
 
 # Esperamos que se monte la imagen despues de crarla en el servidor
-ogWaitMountImage "$3" "$5" "$DIFFEXT" $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $5 $DIFFEXT: time_out."
+ogWaitMountImage "$3" "$5" "$DIFFTYPE" $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $5 $DIFFTYPE: time_out."
 TIMEAUX6=$[SECONDS-TIMEAUX5]
 echo  -e "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 echo  "[80] $MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
 # Copio los datos a la imagen diferecial :
-ogSyncCreate $1 $2 $3 "$5" $DIFFEXT
+ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
 
+# DA ERROR -> ERROR: unable to resize 'imagen' - File too large
 # Reducimos la imagen diferencial
-echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
-ogReduceImage  $3 "$5" $DIFFEXT
+#echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
+#ogReduceImage  $3 "$5" $DIFFTYPE
+
+# Desmontamos las imagenes
+ogUnmountImage $3 "$5" $DIFFTYPE
 ogUnmountImage $3 "$4" $IMGEXT
 
 

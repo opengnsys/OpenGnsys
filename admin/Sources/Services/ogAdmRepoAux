@@ -58,15 +58,19 @@ case "$PARM1" in
 		# Creamos/Redimensionamos el fichero de imagen y lo montamos para que se pueda escribir sobre el
 		#1 CREATE_IMAGE
 		#2 nombre imagen
-		#3 extension imagen
+		#3 tipo de imagen [ img | diff ]
 		#4 tamaño imagen 
-		IMGEXT="$PARM3"
+		MOUNTDIR="$REPODIR/mount/$PARM2"
+		if [ "$PARM3" == "img" ] ; then
+			IMGEXT="img" 
+		else
+			IMGEXT="img.diff"
+			MOUNTDIR="$MOUNTDIR.diff"
+		fi
 		IMGFILE="$REPODIR/$PARM2.$IMGEXT"
 		IMGDIR="$(dirname $IMGFILE)"
 		[ -d  $IMGDIR ] || mkdir -p $IMGDIR
 
-		MOUNTDIR="$REPODIR/mount/${PARM2}"
-		[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
 		mkdir -p "$MOUNTDIR"
 
 		SIZEREQUIRED="$PARM4"
@@ -131,10 +135,15 @@ case "$PARM1" in
 		# Montamos el fichero imagen para que se pueda 
 		#1 MOUNT_IMAGE
 		#2 nombre imagen
-		#3 extension imagen
-		IMGFILE="$REPODIR/$PARM2.$PARM3"
+		#3 tipo de imagen [ img | diff ]
 		MOUNTDIR="$REPODIR/mount/$PARM2"
-		[ "$PARM3" == "diff" ] && MOUNTDIR="$MOUNTDIR.$PARM3"
+		if [ "$PARM3" == "img" ] ; then
+			IMGEXT="img" 
+		else
+			IMGEXT="img.diff"
+			MOUNTDIR="$MOUNTDIR.diff"
+		fi
+		IMGFILE="$REPODIR/$PARM2.$IMGEXT"
 		echolog "Montamos la imagen $IMGFILE "
 		mkdir -p "$MOUNTDIR"
 		mount -o ro,compress=lzo  "$IMGFILE" "$MOUNTDIR"
@@ -145,10 +154,10 @@ case "$PARM1" in
 		# Si el directorio esta ocupado no se desmontará
                 #1 UMOUNT_IMAGE
                 #2 nombre imagen
-                #3 extension imagen
-		IMGEXT="$PARM3"
+                #3 tipo de imagen [ img | diff ]
+		IMGTYPE="$PARM3"
 		MOUNTDIR="$REPODIR/mount/$PARM2"
-		[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
+		[ "$IMGTYPE" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGTYPE"
 		echolog "Desmontamos la imagen $PARM2 $PARM3 "
 		umount $MOUNTDIR
 		rmdir $MOUNTDIR
@@ -158,19 +167,26 @@ case "$PARM1" in
 		# Reduce el archivo de la imagen a tamaño datos + 500M
 		#1 REDUCE_IMAGE
 		#2 Nombre Imagen
-		#3 Extensión [ img |diff ]
-		IMGEXT="$PARM3"
+		#3 Tipo de imagen [ img |diff ]
+		MOUNTDIR="$REPODIR""mount/${PARM2}"
+		if [ "$PARM3" == "img" ] ; then
+			IMGEXT="img" 
+		else
+			IMGEXT="img.diff"
+			MOUNTDIR="$MOUNTDIR.diff"
+		fi
                 IMGFILE="$REPODIR$PARM2.$IMGEXT"
 		[ ! -f $IMGFILE ] && echolog "Imagen $IMGFILE no existe" && exit 1 
-		MOUNTDIR="$REPODIR""mount/${PARM2}"
-                [ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
 
+		[ -d $MOUNTDIR ] || mkdir $MOUNTDIR
 		mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"	
 		AVAILABLE=$(df -k|grep $MOUNTDIR|awk '{print $4}')
 
         	# Si el espacio libre menor que 500Mb desmontamos la imagen y nos salimos
         	if [ $AVAILABLE -lt 500000 ]; then
+        	     echolog "reducir imagen REPO $PARM2 $IMGEXT. tamaño minimo, nada que hacer"
 		     umount $MOUNTDIR 
+		     rmdir $MOUNTDIR
 		     exit 0
 		fi
 
@@ -182,9 +198,10 @@ case "$PARM1" in
 		umount $MOUNTDIR
 		echolog "truncate --size=\"$ENDSIZE\"k $IMGFILE"
         	truncate --size="$ENDSIZE"k $IMGFILE
+
+		rmdir $MOUNTDIR
 	;;
 	default)
 	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"
 	;;
 esac
-

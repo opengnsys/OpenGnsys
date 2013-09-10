@@ -4,13 +4,13 @@
 #@brief   Crear el archivo 
 #@param 1 Repositorio  [ REPO | CACHE ]
 #@param 2 Nombre Imagen
-#@param 3 Extensión [ img |diff ]
+#@param 3 Tipo imagen [ img |diff ]
 #@param 4 Tamaño de la imagen
 #@return  instrucción para ser ejecutada.
 #*/
 
 function ogCreateFileImage () {
-local SIZEREQUIRED IMGDIR IMGFILE DIRMOUNT LOOPDEVICE  IMGSIZE
+local SIZEREQUIRED IMGDIR IMGFILE DIRMOUNT LOOPDEVICE  IMGSIZE IMGEXT
 
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name extension  size(K)" \
@@ -30,7 +30,8 @@ SIZEREQUIRED=$4
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	IMGDIR=$(ogGetParentPath "$1" "/$2")
-	IMGFILE=${IMGDIR}/$(basename "/$2").$3
+	[ "$3" == "img" ] && IMGEXT="img" ||  IMGEXT="img.diff"
+	IMGFILE=${IMGDIR}/$(basename "/$2").$IMGEXT
 	## Si no existe, crear subdirectorio de la imagen.
 	if [ $? != 0 ]; then
             echo "      $MSG_HELP_ogMakeDir \"$1 $(dirname "$2")." | tee -a $OGLOGSESSION $OGLOGFILE
@@ -46,7 +47,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 if [ -r "$DIRMOUNT/ogimg.info" ]; then
                     echo "umount $DIRMOUNT" | tee -a $OGLOGSESSION $OGLOGFILE
                     umount "$DIRMOUNT"
-                    [ $? -ne 0 ] && return $(ogRaiseError $OG_ERR_DONTUNMOUNT_IMAGE "$1 $2.$3"; echo $?)
+                    [ $? -ne 0 ] && return $(ogRaiseError $OG_ERR_DONTUNMOUNT_IMAGE "$1 $2.$IMGEXT"; echo $?)
                 fi
 
 		if [ "$BACKUP" == "true" ]; then
@@ -101,9 +102,9 @@ function ogCreateInfoImage () {
 #@param 2 num_part
 #@param 3 Repositorio  [ REPO | CACHE ] (opcional en las completas)
 #@param 4 Nombre Imagen Basica (opcional en las completas)
-#@param 5 Extensión [ img | diff ]
+#@param 5 Tipo imagen [ img | diff ]
 #*/
-local  IMGEXT IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD OPTRSYNC USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL 
+local  IMGTYPE IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD OPTRSYNC USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL 
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" -o   $# -lt 5 -a "$3" != "img"  ]; then
@@ -119,12 +120,12 @@ if [ $# -lt 3 ]; then
 fi
 
 if [ $3 == "img" ]; then
-   IMGEXT="img"
+   IMGTYPE="img"
 else
    # Comprobamos que las extension sea valida
    ogCheckStringInGroup $5 "img diff" || ogRaiseError  $OG_ERR_FORMAT $MSG_SYNC_EXTENSION
-   IMGEXT=$5
-   if [ "$IMGEXT" == "diff" ]; then
+   IMGTYPE=$5
+   if [ "$IMGTYPE" == "diff" ]; then
 	# Imagen completa con la que comparo la particion.
 	IMGDIRAUX=$(ogGetMountDir "$4" "img")
 	if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
@@ -159,7 +160,7 @@ rm $ORIG/ogimg.* 2>/dev/null
 SIZEDATA=${SIZEDATA:-"SIZEDATA"}
 
 echo "#BRTFS:LZO:$FSTYPE:$SIZEDATA" > $IMGINFO
-if [ "$IMGEXT" == "img" ]; then
+if [ "$IMGTYPE" == "img" ]; then
 	# Imagen Basica
 	echo "      rsync -aHAXvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" | tee -a $OGLOGSESSION $OGLOGFILE
 	rsync -aHAXvn --delete $ORIG/ $DIREMPTY>> $IMGINFO
@@ -195,7 +196,7 @@ fi
 
 #/**
 #  ogRestoreInfoImage
-#@brief Crear o modificar enlaces y restaurar las ACL.
+#@brief Crear o modificar enlaces y restaurar las ACL. La informacion esta ya copiada a la particion.
 #@param 1 num_disk
 #@param 2 num_part
 #*/
@@ -264,12 +265,12 @@ fi
 function ogSyncCreate () {
 #/**
 # ogSyncCreate 
-#@brief   sincroniza los datos de la partición a la imagen para crearla.
+#@brief   sincroniza los datos de la partición a la imagen para crearla. La imagen esta montada en un directorio.
 #@param 1 num_disk
 #@param 2 num_part
 #@param 3 Repositorio  [ REPO | CACHE ]
 #@param 4 Nombre Imagen
-#@param 5 Extensión [ img | diff ]
+#@param 5 Tipo imagen [ img | diff ]
 #*/
 local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC
 
@@ -288,6 +289,7 @@ fi
 
 ORIG=$(ogMount $1 $2)
 DIRMOUNT=$(ogGetMountDir "$4" $5)
+# Si la imagen es diferencial la lista de ficheros a transferir esta dentro de la imagen.
 [ "$5" == "diff" ] && FILESFROM=" --files-from=/tmp/ogimg.info" || FILESFROM=""
 
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
@@ -314,7 +316,7 @@ rsync -aHAXq$OPTRSYNC  $PASSWORD --inplace /tmp/ogimg* $DESTRSYNC
 #@brief   sincroniza los datos de la imagen a la partición para restaurarla.
 #@param 1 Repositorio  [ REPO | CACHE ]
 #@param 2 Nombre Imagen
-#@param 3 Extensión [ img | diff ]
+#@param 3 Tipo imagen [ img | diff ]
 #@param 4 num_disk
 #@param 5 num_part
 #*/
@@ -354,6 +356,7 @@ else
 fi
 
 # Opciones rsync en cache y repo
+# Para la imagen basica, opcion de borrar archivos de la particion que no existen en la imagen
 [ "$3" == "img" ] && [ "$ogrsyncdel" != "false" ] && OPTRSYNC="$OPTRSYNC --delete"
 
 # Nos traemos listado ficheros y bajamos la imagen
@@ -390,7 +393,7 @@ function ogMountImage () {
 #@brief   Monta la imagen para sincronizar.
 #@param 1 Repositorio  [ REPO | CACHE ]
 #@param 2 Nombre Imagen
-#@param 3 Extensión [ img |diff ]
+#@param 3 Tipo imagen [ img |diff ]
 #@return punto de montaje
 #*/
 local IMGEXT IMGFILE DIRMOUNT
@@ -408,9 +411,9 @@ if [ $# -lt 2 ]; then
     return $?
 fi
 
-[ "$3" == "" ] && IMGEXT="img" || IMGEXT="$3"
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
 
-DIRMOUNT=$(ogGetMountDir "$2" $IMGEXT)
+DIRMOUNT=$(ogGetMountDir "$2" ${IMGEXT#*\.})
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         IMGFILE=$(ogGetPath "$1" /"$2.$IMGEXT")
@@ -420,7 +423,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
 else
         [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" $IMGEXT"
+        hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" ${IMGEXT#*\.}"
         echo "$OGIMG/$DIRMOUNT"
 
 fi
@@ -437,9 +440,9 @@ function ogUnmountImage () {
 #@brief   Desmonta la imagen para sincronizar.
 #@param 1 Repositorio  [ REPO | CACHE ]
 #@param 2 Nombre Imagen
-#@param 3 Extensión [ img |diff ]
+#@param 3 Tipo imagen [ img |diff ]
 #*/
-local IMGEXT DIRMOUNT
+local IMGTYPE DIRMOUNT
 
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
@@ -453,16 +456,16 @@ if [ $# -lt 2 ]; then
     return $?
 fi
 
-[ "$3" == "" ] && IMGEXT="img" || IMGEXT="$3"
+[ "$3" == "" ] && IMGTYPE="img" || IMGTYPE="$3"
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-	DIRMOUNT=/tmp/$(ogGetMountDir "$2" $IMGEXT)
+	DIRMOUNT=/tmp/$(ogGetMountDir "$2" $IMGTYPE)
 	umount "$DIRMOUNT"
 	rmdir "$DIRMOUNT"
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGEXT" |tee -a  $OGLOGFILE
-        hose $REPOIP 2009 --out sh -c "echo -ne UMOUNT_IMAGE \"$2\" $IMGEXT"
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE" |tee -a  $OGLOGFILE
+        hose $REPOIP 2009 --out sh -c "echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE"
 fi
 
 }
@@ -472,7 +475,7 @@ function ogGetMountDir () {
 # ogGetMountDir
 #@brief   Devuelve el directorio de montaje de la imagen.
 #@param 1 Nombre Imagen
-#@param 2 Extensión [ img |diff ]
+#@param 2 Tipo imagen [ img |diff ]
 #*/
 local DIRMOUNT
 if [ "$*" == "help" ]; then
@@ -503,7 +506,7 @@ echo $DIRMOUNT
 #@brief Cuando se esta creando la imagen hay que dar el tamaño, para que espere el tiempo de creación.	
 #@param 1 Respositorio [ REPO | CACHE ]
 #@param 2 Nombre Imagen 
-#@param 3 Extensión [ img | diff ] 
+#@param 3 Tipo imagen [ img | diff ] 
 #@param 4 Tamaño imagen (opcional)
 #*/
 function ogWaitMountImage () {
@@ -550,13 +553,16 @@ echo  ""
 
 }
 
+
+# DA ERROR
+# ERROR: unable to resize 'imagen' - File too large
 function ogReduceImage () {
 #/**
 # ogReduceImage
 #@brief   Reduce el archivo de la imagen a tamaño datos + 500M
 #@param 1 Repositorio  [ REPO | CACHE ]
 #@param 2 Nombre Imagen
-#@param 3 Extensión [ img |diff ]
+#@param 3 Tipo Imagen [ img |diff ]
 #@return 
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
 #@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
@@ -574,15 +580,18 @@ if [ $# -lt 2 ]; then
     return $?
 fi
 
-[ "$3" == "" ] && IMGEXT="img" || IMGEXT="$3"
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         # Al montar se comprueba la existencia de la imagen
-        DIRMOUNT=$(ogMountImage $1 $2 $IMGEXT) 
+        DIRMOUNT=$(ogMountImage $1 $2 ${IMGEXT#*\.}) 
 
         AVAILABLE=$(df -k|grep "$DIRMOUNT$"|awk '{print $4}')
         # Si el espacio libre menor que 500Mb nos salimos
-        [ $AVAILABLE -lt 500000 ] && return 0
+        if [ $AVAILABLE -lt 500000 ]; then
+        	ogUnmountImage $1 $2 ${IMGEXT#*\.}
+	 	return 0
+	fi
 
         # Reducimos el archivo de imagen:
         IMGDIR=$(ogGetParentPath "$1" "/$2")
@@ -591,13 +600,13 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         let ENDSIZE=$USED+500000
         echo -e -n "      btrfs filesystem resize "$ENDSIZE"k $DIRMOUNT \n      "
         btrfs filesystem resize "$ENDSIZE"k $DIRMOUNT
-        ogUnmountImage $1 $2 $IMGEXT
+        ogUnmountImage $1 $2 ${IMGEXT#*\.}
         echo "      truncate --size=\"$ENDSIZE\"k $IMGFILE  "
         truncate --size="$ENDSIZE"k $IMGFILE
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        echo "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" $IMGEXT"
-        hose $REPOIP 2009 --out sh -c "echo -ne REDUCE_IMAGE \"$2\" $IMGEXT"
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
+        hose $REPOIP 2009 --out sh -c "echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
 fi
 
 

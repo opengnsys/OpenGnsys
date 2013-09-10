@@ -7,6 +7,7 @@
 #@return  
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
 #@exception OG_ERR_NOTFOUND # 2 Fichero o dispositivo no encontrado
+#@exception OG_ERR_LOCKED          # 4 Partición o fichero bloqueado
 #@exception OG_ERR_DONTSYNC_IMAGE  #71 Imagen no sincronizable (es monolitica)
 #@version 1.0 - Reducir tamaño imagen sincronizable
 #@author  Irina Gomez
@@ -34,16 +35,20 @@ if [ "$USER" != "root" ]; then
         exit 1
 fi
 
-[ "$2" == "" ] && IMGEXT="img" || IMGEXT="$2"
-# Comprobamos que existe imagen
+[ "$2" == "" -o "$2" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+# Comprobamos que existe imagen y que no este bloqueada
 IMGFILE="$REPODIR/$1.$IMGEXT"
 [ ! -f $IMGFILE ] && echo "$PROG: Error: $MSG_ERR_NOTFOUND $1 $IMGEXT" && exit 2
-
+[ -f $IMGFILE.lock ] && echo "$PROG: Error: $MSG_ERR_LOCKED $1 $IMGEXT" && exit 4 
 
 # Comprobar que la imagen  es sincronizable
 if ! file $IMGFILE | grep " BTRFS Filesystem" >/dev/null ; then
 	echo "$PROG: Error: $MSG_ERR_DONTSYNC_IMAGE $1 $2"
 	exit 71
 fi
-echo -ne REDUCE_IMAGE "$1" $IMGEXT | /opt/opengnsys/sbin/ogAdmRepoAux
+
+touch $IMGFILE.lock
+echo -ne REDUCE_IMAGE "$1" ${IMGEXT#*\.} | /opt/opengnsys/sbin/ogAdmRepoAux
 echo "Los resultado se registran en $REPOLOG. "
+
+rm $IMGFILE.lock

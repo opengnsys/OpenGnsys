@@ -200,13 +200,16 @@ case "$PROTOCOLO" in
 		USERRSYNC="opengnsys"
 		OPTRSYNC=" --delete --password-file=/scripts/passrsync "
 		[ "$ogcompress" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
-		IMGEXT=${2##*.} 
-		DIRMOUNT="$(ogGetMountDir "${2%%.*}" $IMGEXT)"
+		
+		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
+		IMGNAME="${2%.img*}"
+
+		DIRMOUNT="$(ogGetMountDir "$IMGNAME" $IMGTYPE)"
 		DIRLOCAL="/tmp/$DIRMOUNT"
 		mkdir $DIRLOCAL 2>/dev/null
 		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG" 
 
-
+		# Si la imagen del repositorio es mayor, redimensiono la imagen de cache
 		if [ $CACHEFILESIZE -lt $REALFILESIZE ]; then
 		   # Si la imagen esta montada la desmonto
 		   mount |grep $CACHEFILE >/dev/null && umount $CACHEFILE
@@ -223,17 +226,17 @@ case "$PROTOCOLO" in
 
 		fi
 		# Montamos las imagenes para sincronizarlas
-		ogMountImage CACHE  "${2%%.*}" $IMGEXT >/dev/null
-		ogMountImage REPO  "${2%%.*}" $IMGEXT >/dev/null
+		ogMountImage CACHE  "$IMGNAME" $IMGTYPE >/dev/null
+		ogMountImage REPO  "$IMGNAME" $IMGTYPE >/dev/null
 		# Esperamos que se monte la imagen en el servidor
-		ogWaitMountImage  REPO  "${2%%.*}" $IMGEXT
+		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
 		echo -e "\n      rsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
 		rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ $? == 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes
-		ogUnmountImage CACHE  "${2%%.*}" $IMGEXT
-		ogUnmountImage REPO  "${2%%.*}" $IMGEXT
+		ogUnmountImage CACHE  "$IMGNAME" $IMGTYPE
+		ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
 	;;
 esac
 

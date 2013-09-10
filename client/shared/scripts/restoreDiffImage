@@ -30,7 +30,7 @@ trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 ERR
 function onexit() {
     local exit_status=$?
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
-    ogUnmountImage "$1" "$2" "$DIFFEXT" &>/dev/null
+    ogUnmountImage "$1" "$2" "$DIFFTYPE" &>/dev/null
     ogUnlock $3 $4 &>/dev/null
     exit $exit_status
 }
@@ -55,7 +55,8 @@ fi
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a  $OGLOGFILE
 
 # Procesar parámetros de entrada
-DIFFEXT="diff"
+DIFFTYPE="diff"
+DIFFEXT="img.diff"
 REPODIFFFILE=$(ogGetPath "REPO" "$2.$DIFFEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO $2.$DIFFEXT"
 
 # Comprobamos si la imagen o la particion estan bloqueada:
@@ -96,18 +97,18 @@ TIME2=$SECONDS
 echo "[40] $MSG_RESTORE $PART"
 
 # Montamos la diferencial
-ogMountImage "$1" "$2" "$DIFFEXT" &>/dev/null
+ogMountImage "$1" "$2" "$DIFFTYPE" &>/dev/null
 #  Comprobar que la imagen diferencial se ha montado 
-ogWaitMountImage "$1" "$2" "$DIFFEXT" || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $DIFFEXT: time_out $TIMEAUX seg."
+ogWaitMountImage "$1" "$2" "$DIFFTYPE" || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $DIFFTYPE: time_out $TIMEAUX seg."
 
 ogMount $3 $4 >/dev/null
 ogLock $3 $4
 # Sincronizamos la partición con la imagen.
-echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $DIFFEXT $3 $4"  |tee -a $OGLOGFILE
-ogSyncRestore "$1" "$2" "$DIFFEXT" $3 $4
+echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $DIFFTYPE $3 $4"  |tee -a $OGLOGFILE
+ogSyncRestore "$1" "$2" "$DIFFTYPE" $3 $4
 
 # Desmontamos la imagen
-ogUnmountImage "$1" "$2" "$DIFFEXT"
+ogUnmountImage "$1" "$2" "$DIFFTYPE"
 ogUnlock $3 $4
 
 TIMEAUX2=$[SECONDS-TIME2]

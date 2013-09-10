@@ -34,7 +34,8 @@ if [ "$USER" != "root" ]; then
         exit 1
 fi
 
-[ "$2" == "" ] && IMGEXT="img" || IMGEXT="$2"
+[ "$2" == "" -o "$2" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+
 # Comprobamos que existe imagen
 IMGFILE="$REPODIR/$1.$IMGEXT"
 [ ! -f $IMGFILE ] && echo "$PROG: Error: $MSG_ERR_NOTFOUND $1 $IMGEXT" && exit 2
@@ -47,7 +48,7 @@ if ! file $IMGFILE | grep " BTRFS Filesystem" >/dev/null ; then
 fi
 
 MOUNTDIR="$REPODIR/mount/$1"
-[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
+[ "$IMGEXT" == "img.diff" ] && MOUNTDIR="$MOUNTDIR.${IMGEXT#*\.}"
 mkdir -p "$MOUNTDIR"
 mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"
 [ "$?" == "0" ] || ( echo "$MSG_ERR_DONTMOUNT_IMAGE  $1 $2" ; exit 70)

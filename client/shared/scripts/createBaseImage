@@ -151,11 +151,13 @@ ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMO
 echo "      $MSG_HELP_ogSyncCreate."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogSyncCreate $1 $2 $3 "$4"  $IMGEXT
 
+# Lo comantamos hasta probar -> da error de ERROR: unable to resize '/tmp/mount/IMG' - No space left on device
 # Reducimos la imagen
-echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
-ogReduceImage $3 "$4" $IMGEXT
+#echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
+#ogReduceImage $3 "$4" $IMGEXT
 
-#ogUnmountImage $3 "$4" $IMGEXT
+# Desmontamos la Imagen
+ogUnmountImage $3 "$4" $IMGEXT
 ogUnlockImage "$3" "/$4.$IMGEXT"
 ogUnlock $1 $2
 TIMEAUX5=$[SECONDS-TIMEAUX3]
