@@ -838,8 +838,9 @@ case "$ID" in
      A502)      TYPE="FREEBSD-SWAP" ;;
      a6)        TYPE="OPENBSD" ;;
      a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
+     AB00)      TYPE="APPLE-BOOT" ;;
      af|AF00)   TYPE="HFS" ;;
-     Af01)      TYPE="HFS-RAID" ;;
+     AF01)      TYPE="HFS-RAID" ;;
      be|BE00)   TYPE="SOLARIS-BOOT" ;;
      bf|BF0[0145]) TYPE="SOLARIS" ;;
      BF02)      TYPE="SOLARIS-SWAP" ;;
@@ -1291,6 +1292,7 @@ case "$PTTYPE" in
             FREEBSD-BOOT) ID=A501 ;;
             FREEBSD-SWAP) ID=A502 ;;
             FREEBSD)    ID=A503 ;;
+            APPLE-BOOT) ID=AB00 ;;
             HFS|HFS+)   ID=AF00 ;;
             HFS-RAID)   ID=AF01 ;;
             SOLARIS-BOOT) ID=BE00 ;;
