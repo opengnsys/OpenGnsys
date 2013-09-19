@@ -113,6 +113,8 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('XFS', 'XFS')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
+	(CONV('AB00',16,10), 'HFS-BOOT', 1);
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas

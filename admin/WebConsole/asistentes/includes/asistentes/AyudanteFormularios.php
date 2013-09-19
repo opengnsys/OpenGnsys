@@ -343,6 +343,7 @@ $SelectHtml.='<OPTION value="CHROMEOS"> ChromeOS </OPTION>';
 $SelectHtml.='<OPTION value="CHROMEOS-KRN"> ChromeOS Kernel </OPTION>';
 $SelectHtml.='<OPTION value="CHROMEOS-RESERV"> ChromeOS Reserved </OPTION>';
 $SelectHtml.='<OPTION value="HFS"> MacOS HFS </OPTION>';
+$SelectHtml.='<OPTION value="HFS-BOOT"> MacOS HFS Boot </OPTION>';
 $SelectHtml.='<OPTION value="HFS-RAID"> MacOS HFS RAID </OPTION>';
 $SelectHtml.='<OPTION value="FREEBSD"> FreeBSD </OPTION>';
 $SelectHtml.='<OPTION value="FREEBSD-DISK"> FreeBSD Disk </OPTION>';

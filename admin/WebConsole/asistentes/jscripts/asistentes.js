@@ -469,6 +469,7 @@ function addGPTPartition(){
 	partitionTypes+='<OPTION value="CHROMEOS-KRN"> ChromeOS Kernel </OPTION>';
 	partitionTypes+='<OPTION value="CHROMEOS-RESERV"> ChromeOS Reserved </OPTION>';
 	partitionTypes+='<OPTION value="HFS"> MacOS HFS </OPTION>';
+	partitionTypes+='<OPTION value="HFS-BOOT"> MacOS HFS Boot </OPTION>';
 	partitionTypes+='<OPTION value="HFS-RAID"> MacOS HFS RAID </OPTION>';
 	partitionTypes+='<OPTION value="FREEBSD"> FreeBSD </OPTION>';
 	partitionTypes+='<OPTION value="FREEBSD-DISK"> FreeBSD Disk </OPTION>';

@@ -42,6 +42,7 @@ INSERT INTO ogAdmBD.tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('A501',16,10), 'FREEBSD-BOOT', 1),
 	(CONV('A502',16,10), 'FREEBSD-SWAP', 0),
 	(CONV('A503',16,10), 'FREEBSD', 1),
+	(CONV('AB00',16,10), 'HFS-BOOT', 1),
 	(CONV('AF00',16,10), 'HFS', 1),
 	(CONV('AF01',16,10), 'HFS-RAID', 1),
 	(CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
