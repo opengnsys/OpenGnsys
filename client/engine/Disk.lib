@@ -810,51 +810,7 @@ fi
 
 # Detectar id. de tipo de partición y codificar al mnemonico.
 ID=$(ogGetPartitionId "$1" "$2") || return $?
-case "$ID" in
-     0)         TYPE="EMPTY" ;;
-     1)         TYPE="FAT12" ;;
-     5|f)       TYPE="EXTENDED" ;;
-     6|e)       TYPE="FAT16" ;;
-     7)         TYPE="NTFS" ;;
-     700|0700)  TYPE="WINDOWS" ;;
-     b|c)       TYPE="FAT32" ;;
-     C01|0C01)  TYPE="WIN-RESERV" ;;
-     11)        TYPE="HFAT12" ;;
-     12)        TYPE="COMPAQDIAG" ;;
-     16|1e)     TYPE="HFAT16" ;;
-     17)        TYPE="HNTFS" ;;
-     1b|1c)     TYPE="HFAT32" ;;
-     42)        TYPE="WIN-DYNAMIC" ;;
-     7F00)      TYPE="CHROMEOS-KRN" ;;
-     7F01)      TYPE="CHROMEOS" ;;
-     7F02)      TYPE="CHROMEOS-RESERV" ;;
-     82|8200)   TYPE="LINUX-SWAP" ;;
-     83|8300)   TYPE="LINUX" ;;
-     8301)      TYPE="LINUX-RESERV" ;;
-     8e|8E00)   TYPE="LINUX-LVM" ;;
-     a5|A503)   TYPE="FREEBSD" ;;
-     A500)      TYPE="FREEBSD-DISK" ;;
-     A501)      TYPE="FREEBSD-BOOT" ;;
-     A502)      TYPE="FREEBSD-SWAP" ;;
-     a6)        TYPE="OPENBSD" ;;
-     a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     AB00)      TYPE="APPLE-BOOT" ;;
-     af|AF00)   TYPE="HFS" ;;
-     AF01)      TYPE="HFS-RAID" ;;
-     be|BE00)   TYPE="SOLARIS-BOOT" ;;
-     bf|BF0[0145]) TYPE="SOLARIS" ;;
-     BF02)      TYPE="SOLARIS-SWAP" ;;
-     BF03)      TYPE="SOLARIS-DISK" ;;
-     ca|CA00)   TYPE="CACHE" ;;
-     da)        TYPE="DATA" ;;
-     ee)        TYPE="GPT" ;;
-     ef|EF00)   TYPE="EFI" ;;
-     EF01)      TYPE="MBR" ;;
-     EF02)      TYPE="BIOS-BOOT" ;;
-     fb)        TYPE="VMFS" ;;
-     fd|FD00)   TYPE="LINUX-RAID" ;;
-     *)         TYPE="UNKNOWN" ;;
-esac
+TYPE=$(ogIdToType "$ID")
 echo "$TYPE"
 }
 
@@ -943,7 +899,7 @@ case "${ID,,}" in
      0082|8200) TYPE="LINUX-SWAP" ;;
      0083|8300) TYPE="LINUX" ;;
      008e|8E00) TYPE="LINUX-LVM" ;;
-     00a5|1503) TYPE="FREEBSD" ;;
+     00a5|a503) TYPE="FREEBSD" ;;
      00a6)      TYPE="OPENBSD" ;;
      00a7)      TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
      00af|af00) TYPE="HFS" ;;
@@ -964,6 +920,7 @@ case "${ID,,}" in
      a500)      TYPE="FREEBSD-DISK" ;;
      a501)      TYPE="FREEBSD-BOOT" ;;
      a502)      TYPE="FREEBSD-SWAP" ;;
+     ab00)      TYPE="HFS-BOOT" ;;
      af01)      TYPE="HFS-RAID" ;;
      bf02)      TYPE="SOLARIS-SWAP" ;;
      bf03)      TYPE="SOLARIS-DISK" ;;
@@ -1292,7 +1249,7 @@ case "$PTTYPE" in
             FREEBSD-BOOT) ID=A501 ;;
             FREEBSD-SWAP) ID=A502 ;;
             FREEBSD)    ID=A503 ;;
-            APPLE-BOOT) ID=AB00 ;;
+            HFS-BOOT)   ID=AB00 ;;
             HFS|HFS+)   ID=AF00 ;;
             HFS-RAID)   ID=AF01 ;;
             SOLARIS-BOOT) ID=BE00 ;;
