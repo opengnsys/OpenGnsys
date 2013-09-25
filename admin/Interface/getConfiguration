@@ -43,6 +43,9 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
     done
 done
 
+# Crear configuración por defecto para cliente sin disco.
+[ -z "$cfg" ] && cfg="1:0:0:::0;"
+
 # Guardar salida en fichero temporal.
 cfgfile=/tmp/getconfig
 echo $cfg > $cfgfile
