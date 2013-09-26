@@ -214,13 +214,15 @@ fi
 # Procesar camino según el número de parámetros.
 case $# in
     1)	FILE="$1" ;;
-    2)	case "$1" in
-            REPO|repo)
+    2)	case "{$1^^}" in
+            REPO)
                 FILE="$OGIMG/$2" ;;
-            CACHE|cache)
-                FILE="$(ogMountCache)/$OGIMG/$2" ;;
-            CDROM|cdrom)
-                FILE="$(ogMountCdrom)/$2" ;;
+            CACHE)
+                MNTDIR="$(ogMountCache)" || return $?
+                FILE="$MNTDIR/$OGIMG/$2" ;;
+            CDROM)
+                MNTDIR="$(ogMountCdrom)" || return $?
+                FILE="$MNTDIR/$2" ;;
             *)  ogRaiseError $OG_ERR_FORMAT
                 return $? ;;
         esac ;;
