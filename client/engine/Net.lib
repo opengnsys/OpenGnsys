@@ -148,9 +148,9 @@ if [ "$*" == "help" ]; then
 fi
 # Obtener direcciones Ethernet.
 if [ -n "$DEVICE" ]; then
-    MAC=$(ip -o address show up dev "$DEVICE" 2>/dev/null | awk '{sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
+    MAC=$(ip -o link show up dev "$DEVICE" 2>/dev/null | awk '{sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
 else
-    MAC=$(ip -o address show up | awk '$2!~/lo/ {sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
+    MAC=$(ip -o link show up | awk '$2!~/lo/ {sub (/.*\\/, ""); if ($1~/ether/) printf ("%s ", toupper($2));}')
 fi
 # Mostrar sólo la primera.
 echo ${MAC%% *}
@@ -228,6 +228,42 @@ if [ -n "$OPENGNSYS" ]; then
         nfs)  mount | grep " on $OPENGNSYS " | cut -f1 -d: ;;
         smb)  mount | grep " on $OPENGNSYS " | cut -f3 -d/ ;;
     esac
+fi
+}
+
+
+#/**
+#         ogMakeGroupDir [ str_repo ]
+#@brief   Crea el directorio para el grupo del cliente.
+#@param   str_repo     repositorio de imágenes (opcional)
+#@return  (nada)
+#@note    repo = { REPO, CACHE }     REPO por defecto
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@version 1.0.5 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013-09-26
+#*/ 
+function ogMakeGroupDir ()
+{
+local REPO DIR GROUP
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo" \
+           "$FUNCNAME" "$FUNCNAME REPO"
+    return
+fi
+# Error si se recibe más de 1 parámetro.
+case $# in
+    0)  REPO="REPO" ;;
+    1)  REPO="$1" ;;
+    *)  ogRaiseError $OG_ERR_FORMAT "$*"
+        return $? ;;
+esac
+# Comprobar tipo de repositorio.
+DIR=$(ogGetPath "$REPO" / 2>/dev/null)
+[ -n "$DIR" ] || ogRaiseError $OG_ERR_FORMAT "$1"
+GROUP="$(ogGetGroupName)"
+if [ -n "$GROUP" ]; then
+    mkdir -p "$DIR/groups/$GROUP" 2>/dev/null
 fi
 }
 
