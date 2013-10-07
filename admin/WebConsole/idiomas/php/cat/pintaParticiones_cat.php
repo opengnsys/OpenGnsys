@@ -36,6 +36,8 @@ $TbMsg["IMAGE_REPOSITORY"]='Imagen / Repositorio';
 $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Imagen Incremental / Repositorio';
 
 $TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
+$TbMsg["CONFIG_NODISK1MSDOS"]='Avís: aquest comandament sol tracta el disc 1 amb taula de particions MSDOS.';
+
 
 ?>
 

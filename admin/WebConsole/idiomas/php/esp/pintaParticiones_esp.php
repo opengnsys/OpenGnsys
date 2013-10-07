@@ -36,7 +36,7 @@ $TbMsg["IMAGE_REPOSITORY"]='Imagen / Repositorio';
 $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Imagen Incremental / Repositorio';
 
 $TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
-
+$TbMsg["CONFIG_NODISK1MSDOS"]='Aviso: este comando solo trata el disco 1 con tabla de particiones MSDOS.';
 
 ?>
 

@@ -36,6 +36,7 @@ $TbMsg["IMAGE_REPOSITORY"]='Imagen / Repositorio';
 $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Imagen Incremental / Repositorio';
 
 $TbMsg["CONFIG_NOCONFIG"]='No configuration: client does not connect to server.';
+TbMsg["CONFIG_NODISK1MSDOS"]='Warning: this command only uses disk 1 with a MSDOS partition table.';
 
 ?>
 

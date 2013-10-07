@@ -288,30 +288,39 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
 	echo '</TR>';
 
+	$aviso=false;
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
 		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
 		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				$icp=$cc."_".$k; // Identificador de la configuración-partición
-				echo '<TR id="TR_'.$icp.'">';
-				echo '<TD align=center><input type=checkbox onclick="eliminaParticion(this,\''.$icp.'\')"></TD>';
-			
-				echo '<TD align=center>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</TD>';
-				echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</TD>';
-				
-				$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);	
-				echo'<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</TD>';
-
-				$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-				echo'<TD align=center><INPUT type="text" style="width:100" value="'.$tm.'"></TD>';		
-					
-				echo '<TD align=center>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</TD>';					
-			
-				echo '<TD align=center>'.opeFormatear().'</TD>';
-				echo '</TR>';
+				if($tbKeys[$k]["numdisk"]==1){ // Solo tratar disco 1
+					if($tbKeys[$k]["numpar"]>0){ // Solo particiones (número>0)
+						$icp=$cc."_".$k; // Identificador de la configuración-partición
+						echo '<tr id="TR_'.$icp.'" align="center">';
+						echo '<td><input type="checkbox" onclick="eliminaParticion(this,\''.$icp.'\')"></td>';
+						echo '<td>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</td>';
+						echo '<td>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</td>';
+						$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);
+						echo '<td>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</td>';
+						$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
+						echo '<td><input type="text" style="width:100" value="'.$tm.'"></td>';		
+						echo '<td>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</td>';					
+						echo '<td>'.opeFormatear().'</td>';
+						echo '</tr>';
+					} else {
+						if ($tbKeys[$k]["codpar"]!=1) { // Aviso tabla no MSDOS.
+							$aviso=true;
+						}
+					}
+				} else {			// Aviso: más de un disco.
+					$aviso=true;
+				}
 			}
 		}
+	}
+	if ($aviso) {			// Mostrar aviso: solo disco 1 con tabla MSDOS.
+		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
 	}
 	/* Botones de añadir y confirmar */
 	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
