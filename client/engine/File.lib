@@ -214,7 +214,7 @@ fi
 # Procesar camino según el número de parámetros.
 case $# in
     1)  FILE="$1" ;;
-    2)  case "{$1^^}" in
+    2)  case "${1^^}" in
             REPO)
                 FILE="$OGIMG/$2" ;;
             CACHE)
