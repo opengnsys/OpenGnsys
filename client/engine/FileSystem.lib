@@ -486,34 +486,6 @@ test -n "$(ogMount "$1" "$2")"
 
 
 #/**
-#         ogIsMounted int_ndisk int_nfilesys
-#@brief   Comprueba si un sistema de archivos está montado.
-#@param   int_ndisk      nº de orden del disco
-#@param   int_nfilesys   nº de orden del sistema de archivos
-#@return  Código de salida: 0 - montado, 1 - sin montar o error.
-#@version 0.9 - Primera versión para OpenGnSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-10-15
-#@version 1.0.1 - Devolver falso en caso de error.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-05-18
-#*/ ##
-function ogIsMounted ()
-{
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
-           "if $FUNCNAME 1 1; then ... ; fi"
-    return
-fi
-# Falso, en caso de error.
-[ $# == 2 ] || return 1
-
-test -n "$(ogGetMountPoint $1 $2)"
-}
-
-
-#/**
 #         ogIsLocked int_ndisk int_npartition
 #@brief   Comprueba si una partición está bloqueada por una operación de uso exclusivo.
 #@param   int_ndisk      nº de orden del disco
@@ -547,6 +519,65 @@ PART="$(ogDiskToDev $1 $2)" || return 1
 # Comprobar existencia del fichero de bloqueo.
 LOCKFILE="/var/lock/lock${PART//\//-}"
 test -f $LOCKFILE
+}
+
+
+#/**
+#         ogIsMounted int_ndisk int_nfilesys
+#@brief   Comprueba si un sistema de archivos está montado.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@return  Código de salida: 0 - montado, 1 - sin montar o error.
+#@version 0.9 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-10-15
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogIsMounted ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "if $FUNCNAME 1 1; then ... ; fi"
+    return
+fi
+# Falso, en caso de error.
+[ $# == 2 ] || return 1
+
+test -n "$(ogGetMountPoint $1 $2)"
+}
+
+
+#/**
+#         ogIsWritable int_ndisk int_nfilesys
+#@brief   Comprueba si un sistema de archivos está montado de lectura y escritura.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@return  Código de salida: 0 - lectura y escritura, 1 - solo lectura o no montado.
+#@version 1.0.5 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013-10-09
+#/**
+function ogIsWritable ()
+{
+# Variables locales
+local PART
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "if $FUNCNAME 1 1; then ... ; fi"
+    return
+fi
+# Falso, en caso de error.
+[ $# == 2 ] || return 1
+
+# Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return 1
+
+test -n "$(findmnt -n -o OPTIONS $PART | awk 'BEGIN {RS=","} /^rw$/ {print}')"
 }
 
 
