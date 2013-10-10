@@ -9,6 +9,13 @@
 #*/
 
 
+# Función ficticia para lanzar parted con timeout, evitando cuelgues del programa.
+function parted ()
+{
+timeout -k 5s -s KILL 3s $(which parted) "$@"
+}
+
+
 #/**
 #         ogCreatePartitions int_ndisk str_parttype:int_partsize ...
 #@brief   Define el conjunto de particiones de un disco.
@@ -781,7 +788,7 @@ parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}'
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  Mnemonico
-#@note    Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note    Mnemonico: valor devuelto por ogIdToType.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
@@ -793,6 +800,9 @@ parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}'
 #@version 1.0.3 - Código trasladado de antigua función ogGetFsType.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-12-01
+#@version 1.0.5 - Usar función ogIdToType para hacer la conversión id. a tipo.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013-09-19
 #*/ ##
 function ogGetPartitionType ()
 {
