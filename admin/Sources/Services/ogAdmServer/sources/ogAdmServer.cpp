@@ -1009,6 +1009,7 @@ BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 		lon += sprintf(ptrTrama->parametros + lon, "res=0\r");
 	}
 
+	db.Close();
 	fclose(fileexe);
 
 	if (!mandaTrama(socket_c, ptrTrama)) {
@@ -3425,6 +3426,7 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
+	db.Close();
 	if(tbl.ISEOF())
 		return (TRUE); // No existen registros
 
