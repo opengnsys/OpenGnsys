@@ -40,8 +40,9 @@ IMGEXT="$2"
 IMGFILE="$REPODIR/$1.$IMGEXT"
 if [ -f $IMGFILE ]; then
    [ -f $IMGFILE.lock ] && echo "$PROG: Error: $MSG_ERR_LOCKED $1 $IMGEXT" && exit 4
-	
-   if ! file $IMGFILE | grep " BTRFS Filesystem" >/dev/null ; then
+   
+ 
+   if ! file $IMGFILE | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null ; then
 	echo "$PROG: Error: $MSG_ERR_DONTSYNC_IMAGE $1 $2"
 	exit 71
    fi

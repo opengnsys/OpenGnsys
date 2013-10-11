@@ -32,11 +32,16 @@ if [ "$USER" != "root" ]; then
         exit 1
 fi
 
-[ "$2" == "" ] && IMGEXT="img" || IMGEXT="$2"
 # Comprobamos que imagen la imagen esta montada
 MOUNTDIR="$REPODIR/mount/$1"
-[ "$IMGEXT" == "diff" ] && MOUNTDIR="$MOUNTDIR.$IMGEXT"
-[ ! -r $MOUNTDIR/ogimg.info ] && echo "La imagen REPO $1 $2 no esta montada" && exit 0
+if [ "$2" == "diff" ]; then
+	IMGEXT="diff"
+	MOUNTDIR="$MOUNTDIR.diff"
+else
+	IMGEXT="img" 
+fi
+# Si la imaen no está montada me salgo
+df |grep "$MOUNTDIR$"  2>&1 >/dev/null || exit 0
 
 echo -ne UMOUNT_IMAGE "$1" $IMGEXT | /opt/opengnsys/sbin/ogAdmRepoAux
 echo "Los resultado se registran en $REPOLOG. "

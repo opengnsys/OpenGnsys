@@ -69,7 +69,8 @@ PART=$(ogDiskToDev "$3" "$4" 2>/dev/null )  || ogRaiseError $OG_ERR_PARTITION "$
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Comprobar que es sincronizable
-file $REPODIFFFILE | grep " BTRFS Filesystem" >/dev/null || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
+#file $REPODIFFFILE | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
+ogIsImageSync $3 "$4" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
 
 PROTO=${5:-"UNICAST"}
 
@@ -120,7 +121,8 @@ ogRestoreInfoImage  "$3" "$4" &>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
 echo "[90] $MSG_HELP_configureOs."
-configureOs $3 $4
+# el || echo es para evitar que se maneje el error.
+configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
 
 
 TIME=$[SECONDS-TIME1]

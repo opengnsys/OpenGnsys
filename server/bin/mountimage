@@ -42,7 +42,9 @@ IMGFILE="$REPODIR/$1.$IMGEXT"
 
 
 # Comprobar que la imagen  es sincronizable
-if ! file $IMGFILE | grep " BTRFS Filesystem" >/dev/null ; then
+file $IMGFILE | grep -i -e " BTRFS Filesystem " >/dev/null && IMGFS=BTRFS
+file $IMGFILE | grep -i -e " ext4 filesystem " >/dev/null && IMGFS=EXT4
+if [ "$IMGFS" != "BTRFS" -a "$IMGFS" != "EXT4" ] ; then
 	echo "$PROG: Error: $MSG_ERR_DONTSYNC_IMAGE $1 $2"
 	exit 71
 fi
@@ -50,7 +52,15 @@ fi
 MOUNTDIR="$REPODIR/mount/$1"
 [ "$IMGEXT" == "img.diff" ] && MOUNTDIR="$MOUNTDIR.${IMGEXT#*\.}"
 mkdir -p "$MOUNTDIR"
-mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"
-[ "$?" == "0" ] || ( echo "$MSG_ERR_DONTMOUNT_IMAGE  $1 $2" ; exit 70)
+
+# Comprobamos si la imagen esta montada y si es así nos salimos.
+df |grep "$MOUNTDIR$"  2>&1  >/dev/null && echo "$MOUNTDIR" && exit 0
+
+if [ "$IMGFS" == "EXT4" ] ; then
+	mount -t ext4 "$IMGFILE" "$MOUNTDIR"
+else
+	mount -o compress=lzo  "$IMGFILE" "$MOUNTDIR"
+fi
+[ $? -eq 0 ] || ( echo "$MSG_ERR_DONTMOUNT_IMAGE  $1 $2" ; exit 70)
 echo  "$MOUNTDIR"
 

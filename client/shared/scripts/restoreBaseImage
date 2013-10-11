@@ -58,7 +58,8 @@ fi
 REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
 
 # Comprobar que es sincronizable (con REPO)
-file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
+#file $REPOFILE | grep -i -e " BTRFS Filesystem" -e " ext4 filesystem " 2>&1 > /dev/null ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
+ogIsImageSync $1 "$2" $IMGEXT  ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
 
 # Comprobamos si el sistema de ficheros se puede montar
 ogMount "$3" "$4" &>/dev/null || RETVAL=$?
@@ -87,7 +88,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    # Sincronizamos si existe el fichero y si no usamos updateCache.
    echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE
    echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE
-   updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"     &>> $OGLOGCOMMAND
+   #updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"    &>> $OGLOGCOMMAND
+   updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"  2>&1 | tee -a   $OGLOGCOMMAND
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
@@ -127,10 +129,10 @@ ogUnlock $3 $4
 echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE
 ogRestoreInfoImage $3 $4  &>>$OGLOGCOMMAND
 
-
 # Llamar al script de post-configuración del sistema operativo.
 echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE
-configureOs $3 $4  &>>$OGLOGCOMMAND
+# el || echo es para evitar que se maneje el error.
+configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE

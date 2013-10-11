@@ -55,16 +55,18 @@ REPOFILE=$(ogGetPath "REPO" "/$2")  || ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"
 
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE "
 # Distingo si es monolitica o sincronizable
-file $REPOFILE | grep " BTRFS Filesystem" 2>&1 > /dev/null
+file $REPOFILE | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " 2>&1 > /dev/null
 if [ $? == 0 ]; then
-	IMGTYPE="RSYNC"
-	# Para imagen sincronizada, si hay imagen en cache uso rsync, si no otro protocolo
+	IMGSYNC=TRUE
+	# Para imagen sincronizada, si hay imagen en cache siempre protocolo = rsync.
 	CACHEFILE=$(ogGetPath "CACHE" "/$2")  && PROTOCOLO="RSYNC"
 
 	# Si es imagen sincronizada siempre da distinto md5. No podemos comprobar -> actualizamos.
 	RETVAL=0
 else
-	IMGTYPE="MONOLITICA"
+	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
+	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE "REPO $2"; exit 1)
+	IMGSYNC=FALSE
 	#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 	ogUpdateCacheIsNecesary $1 $2
 	RETVAL=$?
@@ -81,12 +83,15 @@ REALFILESIZE=$(ls -l --block-size=1024 $(ogGetPath $REPOSITORIO "$2") | cut -f5 
 # La sincronizada, si existe la imagen en cache el espacio necesario
 #	 es la nueva menos lo que ocupa la que ya hay.
 if [ "$PROTOCOLO" == "RSYNC" ]; then
-	CACHEFILESIZE=$(ls -l --block-size=1024 $(ogGetPath "CACHE" "$2") | cut -f5 -d" ")
-	let SIZEREQUIRED=$CACHEFILESIZE-$FILESIZE
+	if [ "$CACHEFILE" == "" ]; then
+		CACHEFILESIZE=0
+	else
+		CACHEFILESIZE=$(ls -l --block-size=1024 "$CACHEFILE" | cut -f5 -d" ")
+	fi
+	let SIZEREQUIRED=$REALFILESIZE-$CACHEFILESIZE
 	[ $SIZEREQUIRED -lt 0 ] && SIZEREQUIRED=0
 else
 	SIZEREQUIRED=$FILESIZE
-
 fi
 
 echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE"
@@ -128,7 +133,7 @@ then
 fi
 
 # Comprobamos que imagen cache igual a la del repo. Si sincronizada no podemos comprobar. 
-[ "$IMGTYPE" == "RSYNC" ] || ogUpdateCacheIsNecesary $REPOSITORIO "$2"
+[ "$IMGSYNC" == "TRUE" ] || ogUpdateCacheIsNecesary $REPOSITORIO "$2"
 RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
@@ -204,26 +209,17 @@ case "$PROTOCOLO" in
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
 		IMGNAME="${2%.img*}"
 
-		DIRMOUNT="$(ogGetMountDir "$IMGNAME" $IMGTYPE)"
+		DIRMOUNT=$(ogGetMountDir "$IMGNAME" $IMGTYPE)
 		DIRLOCAL="/tmp/$DIRMOUNT"
 		mkdir $DIRLOCAL 2>/dev/null
 		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG" 
 
+		# Si la imagen no existe la creo
 		# Si la imagen del repositorio es mayor, redimensiono la imagen de cache
-		if [ $CACHEFILESIZE -lt $REALFILESIZE ]; then
-		   # Si la imagen esta montada la desmonto
-		   mount |grep $CACHEFILE >/dev/null && umount $CACHEFILE
-		   echo "      $MSG_SYNC_RESIZE." | tee -a $OGLOGSESSION $OGLOGFILE
-                   echo "      truncate --size=>$REALFILESIZE k $CACHEFILE" | tee -a $OGLOGSESSION $OGLOGFILE
-                   truncate --size=">$REALFILESIZE"k $CACHEFILE &> $OGLOGCOMMAND
-                   echo "      mount -o compress=lzo $CACHEFILE $DIRLOCAL"
-                   mount -o compress=lzo $CACHEFILE $DIRLOCAL
-                   echo "      btrfs filesystem resize max $DIRLOCAL"
-                   btrfs filesystem resize max $DIRLOCAL
+		if [ "$CACHEFILE" == "" -o  $CACHEFILESIZE -lt $REALFILESIZE ]; then
+		   ogCreateFileImage CACHE "$IMGNAME" $IMGTYPE $REALFILESIZE	
                    TIMEAUX3=$[SECONDS-TIMEAUX3]
                    echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-  
-
 		fi
 		# Montamos las imagenes para sincronizarlas
 		ogMountImage CACHE  "$IMGNAME" $IMGTYPE >/dev/null
@@ -245,7 +241,11 @@ echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum " | tee -a $OGLOGSESSION $OGLOGFILE
 TIME2=$SECONDS
-if [ "$IMGTYPE" == "MONOLITICA" ]; then 
+# Si es imagen sincronizada siempre da distinto md5. No podemos comprobar 
+if [ "$IMGSYNC" == "TRUE" ]; then 
+	# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
+	[ $PROTOCOLO == "RSYNC" ] || RETVAL=1
+else
 	ogUpdateCacheIsNecesary $REPOSITORIO "$2"
 	RETVAL=$?
 fi
