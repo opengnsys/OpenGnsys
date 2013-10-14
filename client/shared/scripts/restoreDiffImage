@@ -31,7 +31,7 @@ function onexit() {
     local exit_status=$?
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage "$1" "$2" "$DIFFTYPE" &>/dev/null
-    ogUnlock $3 $4 &>/dev/null
+    [ $exit_status -ne 4 ] && ogUnlock $3 $4 &>/dev/null
     exit $exit_status
 }
 
@@ -69,8 +69,7 @@ PART=$(ogDiskToDev "$3" "$4" 2>/dev/null )  || ogRaiseError $OG_ERR_PARTITION "$
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Comprobar que es sincronizable
-#file $REPODIFFFILE | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
-ogIsImageSync $3 "$4" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
+ogIsSyncImage $1 "$2" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
 
 PROTO=${5:-"UNICAST"}
 

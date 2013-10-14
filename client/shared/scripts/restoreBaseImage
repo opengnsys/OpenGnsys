@@ -31,7 +31,7 @@ function onexit() {
     local exit_status=$?
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage "$1" "$2" "$IMGEXT"  &>/dev/null
-    ogUnlock $3 $4 &>/dev/null
+    [ $exit_status -ne 4 ] && ogUnlock $3 $4 &>/dev/null
     exit $exit_status
 }
 
@@ -58,8 +58,7 @@ fi
 REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
 
 # Comprobar que es sincronizable (con REPO)
-#file $REPOFILE | grep -i -e " BTRFS Filesystem" -e " ext4 filesystem " 2>&1 > /dev/null ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
-ogIsImageSync $1 "$2" $IMGEXT  ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
+ogIsSyncImage $1 "$2" $IMGEXT  ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
 
 # Comprobamos si el sistema de ficheros se puede montar
 ogMount "$3" "$4" &>/dev/null || RETVAL=$?

@@ -221,9 +221,9 @@ case "$PROTOCOLO" in
                    TIMEAUX3=$[SECONDS-TIMEAUX3]
                    echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 		fi
-		# Montamos las imagenes para sincronizarlas
-		ogMountImage CACHE  "$IMGNAME" $IMGTYPE >/dev/null
-		ogMountImage REPO  "$IMGNAME" $IMGTYPE >/dev/null
+		# Montamos las imagenes para sincronizarlas. Quitamos / inicial.
+		ogMountImage CACHE  "${IMGNAME#\/}" $IMGTYPE >/dev/null
+		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE >/dev/null
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
 		echo -e "\n      rsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"

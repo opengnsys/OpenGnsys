@@ -36,9 +36,11 @@ function onexit() {
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage $3 "$5" $DIFFTYPE &>/dev/null
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
-    ogUnlockImage "$3" "/$4.$IMGEXT" &>/dev/null
-    ogUnlockImage "$3" "/$5.$DIFFEXT" &>/dev/null
-    ogUnlock $1 $2 &>/dev/null
+    if [ $exit_status -ne 4 ]; then
+    	ogUnlockImage "$3" "/$4.$IMGEXT" &>/dev/null
+    	ogUnlockImage "$3" "/$5.$DIFFEXT" &>/dev/null
+    	ogUnlock $1 $2 &>/dev/null
+    fi
     exit $exit_status
 }
 
@@ -77,8 +79,7 @@ ogIsLocked "$1" "$2" && ogRaiseError $OG_ERR_LOCKED  "$1 $2"
 IMGFILE=$(ogGetPath "$3" "$4.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"
 
 # Comprobar que la imagen completa es sincronizable
-#file $IMGFILE | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
-ogIsImageSync "$3" "$4" "img" || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
+ogIsSyncImage "$3" "$4" "img" || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
 # Comprobar que no está bloqueada
 ogIsImageLocked "$3" "$4.$IMGEXT" && ogRaiseError $OG_ERR_LOCKED "$3 $4.$IMGEXT"
 
@@ -210,8 +211,7 @@ ogUnlockImage "$3" "/$5.$DIFFEXT"
 ogUnlock $1 $2
 
 # Comprobamos que la imagen esta bien
-#file "$DIFFFILE" |grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null ||  ogRaiseError $OG_ERR_IMAGE "$3 $5"
-ogIsImageSync $3 "$5" diff ||  ogRaiseError $OG_ERR_IMAGE "$3 $5"
+ogIsSyncImage $3 "$5" diff ||  ogRaiseError $OG_ERR_IMAGE "$3 $5"
 
 #resumen de la operacion
 IMGSIZE=$(ls -l --block-size=1024 ${DIFFFILE}| cut -f5 -d" ")

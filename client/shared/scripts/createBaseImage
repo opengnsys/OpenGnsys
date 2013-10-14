@@ -34,8 +34,7 @@ function onexit() {
     local exit_status=$?
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
-    ogUnlockImage "$3" "/$4.$IMGEXT" 
-    ogUnlock $1 $2
+    [ $exit_status -ne 4 ] && ogUnlockImage "$3" "/$4.$IMGEXT" && ogUnlock $1 $2
     exit $exit_status
 }
 
@@ -165,8 +164,7 @@ TIMEAUX5=$[SECONDS-TIMEAUX3]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
-#file $IMGFILE|grep -i -e "BTRFS Filesystem"  -e " ext4 filesystem " 2>&1 >/dev/null || ogRaiseError $OG_ERR_IMAGE "$3 $4" 
-ogIsImageSync $3 "$4" "img" || ogRaiseError $OG_ERR_IMAGE "$3 $4"
+ogIsSyncImage $3 "$4" "img" || ogRaiseError $OG_ERR_IMAGE "$3 $4"
 
 TIMEAUX7=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
