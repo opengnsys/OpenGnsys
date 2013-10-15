@@ -785,7 +785,8 @@ INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `
  (14, 'REISERFS', 'REISERFS', 0),
  (15, 'REISER4', 'REISER4', 0),
  (16, 'UFS', 'UFS', 0),
- (17, 'XFS', 'XFS', 0);
+ (17, 'XFS', 'XFS', 0),
+ (18, 'EXFAT', 'EXFAT', 0);
 
 
 -- --------------------------------------------------------
@@ -964,7 +965,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('CA',16,10), 'CACHE', 0),
 (CONV('DA',16,10), 'DATA', 1),
 (CONV('EE',16,10), 'GPT', 0),
-(CONV('EF',16,10), 'EFI', 0),
+(CONV('EF',16,10), 'EFI', 1),
 (CONV('FB',16,10), 'VMFS', 1),
 (CONV('FD',16,10), 'LINUX-RAID', 1),
 (CONV('0700',16,10), 'WINDOWS', 1),
@@ -991,7 +992,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('BF04',16,10), 'SOLARIS', 1),
 (CONV('BF05',16,10), 'SOLARIS', 1),
 (CONV('CA00',16,10), 'CACHE', 0),
-(CONV('EF00',16,10), 'EFI', 0),
+(CONV('EF00',16,10), 'EFI', 1),
 (CONV('EF01',16,10), 'MBR', 0),
 (CONV('EF02',16,10), 'BIOS-BOOT', 0),
 (CONV('FD00',16,10), 'LINUX-RAID', 1),
