@@ -110,11 +110,14 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('REISERFS', 'REISERFS'),
 	('REISER4', 'REISER4'),
 	('UFS', 'UFS'),
-	('XFS', 'XFS')
+	('XFS', 'XFS'),
+	('EXFAT', 'EXFAT')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
-	(CONV('AB00',16,10), 'HFS-BOOT', 1);
+	(CONV('EF',16,10), 'EFI', 1),
+	(CONV('AB00',16,10), 'HFS-BOOT', 1),
+	(CONV('EF00',16,10), 'EFI', 1);
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas
