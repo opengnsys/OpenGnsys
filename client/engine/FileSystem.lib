@@ -830,10 +830,13 @@ ogUnmount $1 $2 &>/dev/null
 case $MODE in
 	STAGE1)
 	#	echo "primera etapa $*"
-		ntfsresize -fi $PART &>/dev/null
+		# Mostramos el error
+		#ntfsresize -fi $PART &>/dev/null
+		ntfsresize -fi $PART | grep -A 10 -e ERROR >&2
 		RC=`echo $?`
 	#	echo "RC es" $RC
-		if [ "$RC" -eq "1" ]
+		# if [ "$RC" -eq "1" ] # con error la salida del grep es 0
+		if [ "$RC" -eq "0" ]
 		then 
 			echo "0" 
      			return 1	
