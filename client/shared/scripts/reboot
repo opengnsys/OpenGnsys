@@ -31,5 +31,4 @@ ethtool -s $DEVICE wol g 2>/dev/null
 BUSYBOX=$(which busyboxOLD)
 BUSYBOX=${BUSYBOX:-"busybox"}
 # Retardo en 2º plano para dar lugar al registro en cola de acciones.
-echo sleep $TIME - $BUSYBOX reboot
 (sleep $TIME; $BUSYBOX reboot) &
