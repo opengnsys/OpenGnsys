@@ -216,7 +216,7 @@ echo \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\" | tee -a $OGLOGSESSION $OG
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
 ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n \
-reboot 20 \n";
+reboot \n";
 }
 
 
@@ -303,7 +303,7 @@ echo \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\" | tee -a $OGLOGSESSION $OG
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
 ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n \
-reboot 20 \n";
+reboot \n";
 }
 
 

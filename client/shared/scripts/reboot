@@ -2,6 +2,9 @@
 # Script de ejemplo para reiniciar un ordenador
 # (puede usarse como base para el programa de reinicio usado por OpenGNSys Admin).
 
+# Cargamos el valor por defecto del tiempo de sleep
+[ -z $OGSLEEP ] && source /opt/opengnsys/etc/engine.cfg
+
 # Si se recibe un parametro sera el tiempo de sleep antes de realizar el reboot
 if [ $# == 1 ] && [ "${1//[^0-9]/}" == "$1" ]
 then
@@ -10,7 +13,7 @@ then
 else
         # Sin parametros, o el parametro introducido no es un numero
         echo "[5] No se ha introducido un retardo, 5 segundos para reiniciar"
-        TIME=5
+        TIME=$OGSLEEP
 fi
 
 # Desmontar los sistemas de archivos y la caché local.
@@ -28,4 +31,5 @@ ethtool -s $DEVICE wol g 2>/dev/null
 BUSYBOX=$(which busyboxOLD)
 BUSYBOX=${BUSYBOX:-"busybox"}
 # Retardo en 2º plano para dar lugar al registro en cola de acciones.
+echo sleep $TIME - $BUSYBOX reboot
 (sleep $TIME; $BUSYBOX reboot) &
