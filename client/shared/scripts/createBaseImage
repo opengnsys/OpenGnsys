@@ -34,7 +34,10 @@ function onexit() {
     local exit_status=$?
     echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
-    [ $exit_status -ne 4 ] && ogUnlockImage "$3" "/$4.$IMGEXT" && ogUnlock $1 $2
+    if [ $exit_status -ne 4 ]; then
+	ogUnlockImage "$3" "/$4.$IMGEXT" 
+	ogUnlock $1 $2
+    fi
     exit $exit_status
 }
 
@@ -151,8 +154,7 @@ ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMO
 echo "      $MSG_HELP_ogSyncCreate."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogSyncCreate $1 $2 $3 "$4"  $IMGEXT
 
-# Lo comantamos hasta probar -> da error de ERROR: unable to resize '/tmp/mount/IMG' - No space left on device
-# Reducimos la imagen
+# Reducimos la imagen: solo para kernel <= 3.7, imagenes con FS ext4.
 echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
 ogReduceImage $3 "$4" $IMGEXT
 
