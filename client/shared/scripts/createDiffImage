@@ -153,6 +153,14 @@ echo "[50] $MSG_HELP_ogCreateInfoImage " | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateInfoImage $1 $2 $3 "$4" "${DIFFTYPE}"
 TIMEAUX3=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial
+echo "[60] $MSG_HELP_ogAclFilter " | tee -a $OGLOGSESSION $OGLOGFILE
+ogAclFilter
+TIMEAUX5=$[SECONDS-TIMEAUX3]
+echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX5/60]m $[TIMEAUX5%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
 #Calculamos el tamaño de la imagen:
 ogMount $1 $2 >/dev/null
 ogLock $1 $2
@@ -163,21 +171,18 @@ SIZEDATA=$(cat /tmp/ogimg.info | tr '\n' '\0'| du -c --files0-from=- 2>/dev/null
 let SIZEREQUIRED=$SIZEDATA*$COMPRESS 
 # Tamaño minimo fichero imagen 300000
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
-TIMEAUX4=$[SECONDS-TIMEAUX3]
 
 # Comprueba que quepa en el repositorio
 [ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`) && ogMountCache >/dev/null
 [ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
 echo  " $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
-
 [ $SIZEREQUIRED -gt $SIZEFREE ] && ogRaiseError $OG_ERR_CACHESIZE "$3"
-echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX4/60]m $[TIMEAUX4%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Configuro la informacion del tamaño de los datos en /tmp/ogimg.info
 sed -i s/SIZEDATA/"$SIZEDATA"/g /tmp/ogimg.info
 
 # Creamos o redimensionamos la imagen
-echo "[60] $MSG_HELP_ogCreateFileImage."  | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[70] $MSG_HELP_ogCreateFileImage."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateFileImage $3 "$5" $DIFFTYPE $SIZEREQUIRED
 
 # Esperamos que se monte la imagen despues de crarla en el servidor
@@ -189,10 +194,9 @@ echo  "[80] $MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
 # Copio los datos a la imagen diferecial :
 ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
 
-# DA ERROR -> ERROR: unable to resize 'imagen' - File too large
-# Reducimos la imagen diferencial
-#echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
-#ogReduceImage  $3 "$5" $DIFFTYPE
+# Reducimos la imagen diferencial -> solo para kernel <= 3.7, imagenes con FS ext4
+echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
+ogReduceImage  $3 "$5" $DIFFTYPE
 
 # Desmontamos las imagenes
 ogUnmountImage $3 "$5" $DIFFTYPE
@@ -217,4 +221,4 @@ ogIsSyncImage $3 "$5" diff ||  ogRaiseError $OG_ERR_IMAGE "$3 $5"
 IMGSIZE=$(ls -l --block-size=1024 ${DIFFFILE}| cut -f5 -d" ")
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $5 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE

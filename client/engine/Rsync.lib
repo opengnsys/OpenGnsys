@@ -213,6 +213,41 @@ fi
 
 }
 
+
+#/**
+#  ogAclFilter
+#@brief Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial
+#@param No.
+#@return  (nada)
+#*/
+function ogAclFilter () {
+local  IMGACL IMGINFO FILES ACLTMP
+
+IMGACL="/tmp/ogimg.acl"
+IMGINFO="/tmp/ogimg.info"
+FILES="/tmp/files$$"
+ACLTMP="/tmp/acl$$.tmp"
+
+# comprobamos que existan los archivos de origen. Si no salimos sin error.
+[ -f $IMGACL -a -f $IMGINFO ] || ogRaiseError  $OG_ERR_NOTFOUND "$IMGACL, $IMGINFO" || return 0
+
+echo "" > $ACLTMP
+
+# Al fichero le quitamos las líneas sobrantes: comentarios y lineas vacias.
+sed -e s/"^#.*$"//g $IMGINFO > $FILES
+sed -i '/^$/d'  $FILES
+
+# Recorremos el listado y extraemos la acl correspondiente al fichero o directorio.
+while read LINE; do
+    read END INI <<< "$(grep -n  -e "File" -e "Directory" $IMGACL| grep -A 1 "$LINE"| awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
+    let NUM=$END-$INI-1
+    sed -n -e $INI,+"$NUM"p  $IMGACL &>> $ACLTMP
+done < $FILES
+
+cp $ACLTMP $IMGACL
+
+}
+
 #/**
 #  ogRestoreInfoImage
 #@brief Crear o modificar enlaces y restaurar las ACL. La informacion esta ya copiada a la particion.
