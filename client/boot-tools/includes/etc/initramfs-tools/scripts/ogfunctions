@@ -162,8 +162,8 @@ ogLoadNetModule ()
 {
 	if [ -n "$ognetmodule" ]
 	then
-   		echo "Cargando modulo de red $netmodule"
-   		insmod `find /lib/modules/ -name ${netmodule}*`
+   		echo "Cargando modulo de red $ognetmodule"
+   		modprobe ${ognetmodule}
 	fi
 }
 
