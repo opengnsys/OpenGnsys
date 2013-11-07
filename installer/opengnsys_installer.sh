@@ -6,25 +6,79 @@
 #####################################################################
 
 
-
-####  AVISO: Editar configuración de acceso por defecto.
-####  WARNING: Edit default access configuration.
-MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
-OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
-OPENGNSYS_DB_PASSWD="passusuog"		# Clave de acceso a la base de datos
-OPENGNSYS_CLIENT_PASSWD="og"		# Clave de acceso del cliente
-
+####  AVISO: Puede editar configuración de acceso por defecto.
+####  WARNING: Edit default access configuration if you wish.
+DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
+DEFAULT_OPENGNSYS_DB_USER="usuog"		    # Usuario por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
 
 # Sólo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
-# Solo se deben aceptar números y letras en la clave de acceso del cliente.
-if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then
-	echo "ERROR: client password must be alphanumeric, edit installer variables."
-	exit 1
-fi
+
+echo -e "\\nOpenGnSys Installation"
+echo "=============================="
+
+# Clave root de MySQL
+while : ; do
+	echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): ";
+	read MYSQL_ROOT_PASSWORD
+	if [ -n "${MYSQL_ROOT_PASSWORD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $MYSQL_ROOT_PASSWORD ]; then # Si esta vacio ponemos el valor por defecto
+			MYSQL_ROOT_PASSWORD=$DEFAULT_MYSQL_ROOT_PASSWORD
+		fi
+		break
+	fi
+done
+
+# Usuario de acceso a la base de datos
+while : ; do
+	echo -n -e "\\nEnter username for OpenGnSys console (${DEFAULT_OPENGNSYS_DB_USER}): "
+	read OPENGNSYS_DB_USER
+	if [ -n "${OPENGNSYS_DB_USER//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $OPENGNSYS_DB_USER ]; then # Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_DB_USER=$DEFAULT_OPENGNSYS_DB_USER
+		fi
+		break
+	fi
+done
+
+# Clave de acceso a la base de datos
+while : ; do
+	echo -n -e "\\nEnter password for OpenGnSys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
+	read OPENGNSYS_DB_PASSWD
+	if [ -n "${OPENGNSYS_DB_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $OPENGNSYS_DB_PASSWD ]; then # Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_DB_PASSWD=$DEFAULT_OPENGNSYS_DB_PASSWD
+		fi
+		break
+	fi
+done
+
+# Clave de acceso del cliente
+while : ; do
+	echo -n -e "\\nEnter root password for OpenGnSys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
+	read OPENGNSYS_CLIENT_PASSWD
+	if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $OPENGNSYS_CLIENT_PASSWD ]; then # Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_CLIENT_PASSWD=$DEFAULT_OPENGNSYS_CLIENT_PASSWD
+		fi
+		break
+	fi
+done
+
+echo -e "\\n=============================="
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
