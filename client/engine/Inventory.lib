@@ -47,7 +47,7 @@ fi
 #@date    2012-06-29
 #@version 1.0.5 - Incluir tipos GrubLoader, Hurd y WinLoader, leer por defecto fichero /etc/os-release.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2013-05-14
+#@date    2013-10-07
 #*/ ##
 function ogGetOsVersion ()
 {
@@ -130,11 +130,22 @@ if [ -z "$VERSION" ]; then
         done
     fi
 fi
-# Para MacOS: ejecutar "uname" mediante el programa "ld-mac".
+# Para MacOS: detectar kernel y completar con fichero plist de información del sistema.
 if [ -z "$VERSION" ]; then
     TYPE="MacOS"
-    FILE="$MNTDIR/usr/bin/uname"
-    [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS $(ld-mac $FILE -sr 2>/dev/null)"
+    # Kernel de Mac OS.
+    FILE="$MNTDIR/mach_kernel"
+    [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS"
+    [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
+    # Datos de configuración de versión de Mac OS.
+    FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
+    [ -r $FILE ] && VERSION=$(awk -F"[<>]" '
+                                  /ProductName/ {getline;s=$3}
+                                  /ProductVersion/ {getline;v=$3}
+                                  END {print s,v}' $FILE)
+    # Datos de recuperación de Mac OS.
+    FILE="$MNTDIR/com.apple.recovery.boot"
+    [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
 fi
 # Para FreeBSD: obtener datos del Kernel.
 ### TODO Revisar solución.
