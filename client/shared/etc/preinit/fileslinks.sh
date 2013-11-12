@@ -17,10 +17,10 @@ if [ -n "$OPENGNSYS" ]; then
     echo "${MSG_MAKELINKS:-.}"
 
     # Shell BASH por defecto (para usar "runtest")
-    ln -fs /bin/bash /bin/sh
+    ln -fs /bin/bash /bin/sh 2>/dev/null
 
     # Enlace a la librería libmac para ld-mac.
-    [ -f /usr/lib/libmac.so ] || ln -fs $OGLIB/libmac.so /usr/lib
+    [ -f /usr/lib/libmac.so ] || ln -fs $OGLIB/libmac.so /usr/lib 2>/dev/null
 
     # Crear directorio de bloqueos
     mkdir -p /var/lock 2>/dev/null || mkdir -p /run/lock
@@ -33,17 +33,17 @@ if [ -n "$OPENGNSYS" ]; then
     QTDIR="/usr/local"
     mkdir -p $QTDIR/{etc,lib,plugins}
     for i in $OGLIB/qtlib/*; do
-        [ -f $QTDIR/lib/$i ] || ln -fs $i $QTDIR/lib
+        [ -f $QTDIR/lib/$i ] || ln -fs $i $QTDIR/lib 2>/dev/null
     done
     for i in $OGLIB/qtplugins/*; do
-        [ -f $QTDIR/plugins/$i ] || ln -fs $i $QTDIR/plugins
+        [ -f $QTDIR/plugins/$i ] || ln -fs $i $QTDIR/plugins 2>/dev/null
     done
     for i in $OGETC/*.qmap; do
-        [ -f $QTDIR/etc/$i ] || ln -fs $i $QTDIR/etc
+        [ -f $QTDIR/etc/$i ] || ln -fs $i $QTDIR/etc 2>/dev/null
     done
 
 else
-    # FIXME Error: entorno de OpenGNSys no configurado.
+    # FIXME Error: entorno de OpenGnSys no configurado.
     echo "Error: OpenGnSys environment is not configured."   # FIXME: definir mensaje.
     exit 1
 fi
