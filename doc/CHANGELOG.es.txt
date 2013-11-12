@@ -21,6 +21,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #593	Engine: optimizar inicio sesión en Windows
 #598	Eliminar imagen de caché no funciona si caché desmontada
 #600	Eliminar el límite de tamaño de la caché
+#602	Adaptar funciones para soportar los sistemas de ficheros del Kernel 3.7
 
 Tickets resueltos en módulo OpenGnSys Client:
 #245	Teclado internacional en el cliente (mejora)
@@ -58,6 +59,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #552	Permitir crear caché en cualquier disco
 #566	Asistente de gestión Master muestra todas las imágenes de su caché para enviarlas
 #585	Incluir en la administración web las opciones DNS y proxy para el ogLive
+#594	Reactivar el comando Formatear y Particionar
 #596	Gestión automática de fichero PXE al administrar clientes
 #599	Consola Web: opción de ejecución por defecto de los comandos
 #601	Mostrar configuraciones de más de un disco en la consola web
@@ -65,6 +67,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #608	Consola Web: mostrar mensaje cuando equipo no tenga la configuración del disco en la BD
 #609	Fallo al incorporar ordenadores
 #610	Validación nombre canónico de image
+#619	Consola web asistente particionado: error si se incluye en la cola de acciones
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #562	Log de instalación ubicarlo en directorio log del server
