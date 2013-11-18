@@ -9,7 +9,7 @@
 # $1 Número de disco
 # $2 Número de particion
 # $3 Nombre canónico de la imagen básica (sin extensión)
-# $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
+# $4 Dirección del repositorio 
 # $5 Tipo de transmisión 0=Unicast 1=Multicast
 # $6 Es una cadena "nnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
@@ -25,7 +25,8 @@
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
 # $8 Método de clonación 0=Desde caché 1=Desde repositorio
-# $9 Ruta de origen de la Imagen (Carpeta)
+# $9 Metodo de sincronizacion  1=Sincronización1  2=Sincronizacion2
+# $10 Ruta de origen de la Imagen (Carpeta)
 #___________________________________________________________________
 #
 # Control parámetros
@@ -44,8 +45,6 @@
 	NOMBREIMG=$3
 	IPREPOSITORIO=$4
 	
-	TIPOTRAN=$5
-
 	flag=$6
 	echo "flah:$flag">/tmp/log
 	WHLFILE=${flag:0:1}
@@ -60,7 +59,7 @@
 	NOBORRACHIVOS=${flag:3:1}
 	
 	METCLONA=$8
-	RUTAORIGEN=$9
+	RUTAORIGEN=${10}
 #___________________________________________________________________
 #
 # Variables y configuración logs
@@ -159,8 +158,10 @@
 		echo "***Error:$RETVAL. Actualizando cache local desde repositorio $IPREPOSITORIO" | tee -a $OGLOGSESSION $OGLOGFILE
 		kill $COPROC_PID
 		exit $OG_ERR_IMAGE
-	fi			
-	
+	fi		
+
+ echo "!!! Finaliza correctamente !!! copia de imagen basica a cache local" | tee -a $OGLOGSESSION $OGLOGFILE
+
 	# Restauración desde caché a la partición
 	echo "Copiando imagen a la particion desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 			

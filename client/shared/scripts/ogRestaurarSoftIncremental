@@ -11,15 +11,23 @@
 # $3 Nombre canónico de la imagen básica (sin extensión)
 # $4 Dirección del repositorio
 # $5 Nombre canónico del software incremental (sin extensión)
-# $5 Es una cadena "nnnn" tipo flags que codifica varios parametros.
+# $6 Tipo de transmisión 0=Unicast 1=Multicast
+# $7 Es una cadena "nnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
+#		1XX: Gestionar fichero completo en lugar de diferencas
+#		X1X: Eliminar archivos de la partición que no estén en la imagen 
+#		XX1: Comprimir archivos para enviarlos por la red
+#		El valor X indica que no importa el valor que tenga el dato
+# $8 Es una cadena "nnnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
-#		1XXX: Borrar la particion de destino antes de restaurar la imagen incremental
-#		X1XX: Copiar Imagen incremental también a la cache 
-#		XX1X: Borrar previamente la imagen incremental de la cache antes de copiarla
+#		1XXX: Borrar la particion de destino antes de restaurar la imagen basica
+#		X1XX: Copiar Imagen básica también a la cache 
+#		XX1X: Borrar previamente la imagen basica de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $7 Método de clonación 0=Desde caché 1=Desde repositorio
-# $8 Ruta de origen de la Imagen (Carpeta)
+# $9 Método de clonación 0=Desde caché 1=Desde repositorio
+# $10 Metodo de sincronizacion  1=Sincronización1  2=Sincronizacion2
+# $11 Ruta de origen de la Imagen (Carpeta)
 #___________________________________________________________________
 #
 # Control parámetros
@@ -39,15 +47,21 @@
 	IPREPOSITORIO=$4
 	NOMBREIMGINC=$5
 	
-	flag=$6
+	flag=$7
+	echo "flah:$flag">/tmp/log
+	WHLFILE=${flag:0:1}
+	RMVFILE=${flag:1:1}
+	CMPFILE=${flag:2:1}
+
+	flag=$8
 	echo "flah:$flag">/tmp/log
 	BORRARIMG=${flag:0:1}
 	COPIACACHE=${flag:1:1}
 	BORRACACHE=${flag:2:1}
 	NOBORRACHIVOS=${flag:3:1}
 	
-	METCLONA=$7
-	RUTAORIGEN=$8
+	METCLONA=$9
+	RUTAORIGEN=${11}
 #___________________________________________________________________
 #
 # Variables y configuración logs
@@ -156,6 +170,8 @@
 		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi	
+
+ echo "!!! Finaliza correctamente !!! copia de imagen basica e incremental a cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 
 	# Restauración desde caché a la partición
 	
