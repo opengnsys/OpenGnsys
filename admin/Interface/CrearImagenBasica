@@ -9,7 +9,7 @@
 # $1 Número de disco
 # $2 Número de particion
 # $3 Nombre canónico de la imagen básica (sin extensión)
-# $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
+# $4 Dirección del repositorio 
 # $5 Es una cadena "nnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
 #		1XX: Gestionar fichero completo en lugar de diferencas

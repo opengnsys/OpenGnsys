@@ -9,7 +9,7 @@
 # $1 Número de disco
 # $2 Número de particion
 # $3 Nombre canónico de la imagen básica (sin extensión)
-# $4 Dirección del repositorio (Si es 0.0.0.0 es caché)
+# $4 Dirección del repositorio 
 # $5 Tipo de transmisión 0=Unicast 1=Multicast
 # $6 Es una cadena "nnn" tipo flags que codifica varios parametros.
 #		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
@@ -25,11 +25,8 @@
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
 # $8 Método de clonación 0=Desde caché 1=Desde repositorio
-# $9 Metodo de sincronizacion
+# $9 Metodo de sincronizacion  1=Sincronización1  2=Sincronizacion2
 # $10 Ruta de origen de la Imagen (Carpeta)
-
-
-
 
 #___________________________________________________________________
 #
@@ -48,6 +45,7 @@
 		#sincronizacion1 
  		ogRestaurarImagenBasica "$@"
 	fi			
-	# Llamada a la función de sincronización.
 
+	#if [ $9 -eq 2 ]; then
 
+	#fi

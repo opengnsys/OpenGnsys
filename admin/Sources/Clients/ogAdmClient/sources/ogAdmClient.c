@@ -1,30 +1,30 @@
 // ********************************************************************************************************
 // Cliernte: ogAdmClient
-// Autor: Jos√© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci√≥n: Marzo-2010
-// Fecha √öltima modificaci√≥n: Abril-2010
+// Autor: JosÈ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÛn: Marzo-2010
+// Fecha ⁄ltima modificaciÛn: Abril-2010
 // Nombre del fichero: ogAdmClient.c
-// Descripci√≥n :Este fichero implementa el cliente general del sistema
+// DescripciÛn :Este fichero implementa el cliente general del sistema
 // ********************************************************************************************************
 #include "ogAdmClient.h"
 #include "ogAdmLib.c"
 //________________________________________________________________________________________________________
-//	Funci√≥n: tomaConfiguracion
+//	FunciÛn: tomaConfiguracion
 //
-//	Descripci√≥n:
-//		Lee el fichero de configuraci√≥n del servicio
-//	Par√°metros:
-//		filecfg : Ruta completa al fichero de configuraci√≥n
+//	DescripciÛn:
+//		Lee el fichero de configuraciÛn del servicio
+//	Par·metros:
+//		filecfg : Ruta completa al fichero de configuraciÛn
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error 
+//		FALSE: En caso de ocurrir alg˙n error 
 //________________________________________________________________________________________________________
 BOOLEAN tomaConfiguracion(char* filecfg)
 {
 	char modulo[] = "tomaConfiguracion()";
 
 	if (filecfg == NULL || strlen(filecfg) == 0) {
-		errorLog(modulo, 1, FALSE); // Fichero de configuraci√≥n del cliente vac√≠o
+		errorLog(modulo, 1, FALSE); // Fichero de configuraciÛn del cliente vacÌo
 		return (FALSE);
 	}
 	FILE *fcfg;
@@ -34,12 +34,12 @@ BOOLEAN tomaConfiguracion(char* filecfg)
 
 	fcfg = fopen(filecfg, "rt");
 	if (fcfg == NULL) {
-		errorLog(modulo, 2, FALSE); // No existe fichero de configuraci√≥n del cliente
+		errorLog(modulo, 2, FALSE); // No existe fichero de configuraciÛn del cliente
 		return (FALSE);
 	}
 
 	fseek(fcfg, 0, SEEK_END);
-	lSize = ftell(fcfg); // Obtiene tama√±o del fichero.
+	lSize = ftell(fcfg); // Obtiene tamaÒo del fichero.
 	rewind(fcfg);
 	buffer = (char*) reservaMemoria(lSize+1); // Toma memoria para el buffer de lectura.
 	if (buffer == NULL) { // No hay memoria suficiente para el buffer
@@ -84,55 +84,55 @@ BOOLEAN tomaConfiguracion(char* filecfg)
 
 	if (servidoradm[0] == CHARNULL) {
 		liberaMemoria(buffer);
-		errorLog(modulo,4, FALSE); // Falta par√°metro SERVIDORADM
+		errorLog(modulo,4, FALSE); // Falta par·metro SERVIDORADM
 		return (FALSE);
 	}
 
 	if (puerto[0] == CHARNULL) {
 		liberaMemoria(buffer);
-		errorLog(modulo,5, FALSE); // Falta par√°metro PUERTO
+		errorLog(modulo,5, FALSE); // Falta par·metro PUERTO
 		return (FALSE);
 	}
 	if (pathinterface[0] == CHARNULL) {
 		liberaMemoria(buffer);
-		errorLog(modulo,56, FALSE); // Falta par√°metro PATHINTERFACE
+		errorLog(modulo,56, FALSE); // Falta par·metro PATHINTERFACE
 		return (FALSE);
 	}
 
 	if (urlmenu[0] == CHARNULL) {
 		liberaMemoria(buffer);
-		errorLog(modulo,89, FALSE); // Falta par√°metro URLMENU
+		errorLog(modulo,89, FALSE); // Falta par·metro URLMENU
 		return (FALSE);
 	}
 	if (urlmsg[0] == CHARNULL) {
 		liberaMemoria(buffer);
-		errorLog(modulo,90, FALSE); // Falta par√°metro URLMSG
+		errorLog(modulo,90, FALSE); // Falta par·metro URLMSG
 		return (FALSE);
 	}
 	liberaMemoria(buffer);
 	return (TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: FinterfaceAdmin
+// FunciÛn: FinterfaceAdmin
 //
-//	 Descripci√≥n:
-//		Esta funci√≥n es la puerta de comunicaci√≥n entre el m√≥dulo de administraci√≥n y el motor de clonaci√≥n.
-//		La Aplicaci√≥n de administraci√≥n utiliza una interface para ejecutar funciones del motor de clonaci√≥n;
-//		esta interface llamar√° a la API del motor con lo que cambiando el comportamiento de esta interface
-//		podremos hacer llamadas a otras API de clonaci√≥n y de esta manera probar distintos motores.
+//	 DescripciÛn:
+//		Esta funciÛn es la puerta de comunicaciÛn entre el mÛdulo de administraciÛn y el motor de clonaciÛn.
+//		La AplicaciÛn de administraciÛn utiliza una interface para ejecutar funciones del motor de clonaciÛn;
+//		esta interface llamar· a la API del motor con lo que cambiando el comportamiento de esta interface
+//		podremos hacer llamadas a otras API de clonaciÛn y de esta manera probar distintos motores.
 //
-//	Par√°metros:
-//		- script: Nombre del m√≥dulo,funci√≥n o script de la interface
-//		- parametros: Par√°metros que se le pasar√°n a la interface
+//	Par·metros:
+//		- script: Nombre del mÛdulo,funciÛn o script de la interface
+//		- parametros: Par·metros que se le pasar·n a la interface
 //		- salida: Recoge la salida que genera la llamada a la interface
 
 // 	Devuelve:
-//		C√≥digo de error de la ejecuci√≥n al m√≥dulo , funci√≥n o script de la interface
+//		CÛdigo de error de la ejecuciÛn al mÛdulo , funciÛn o script de la interface
 //
 //	Especificaciones:
-//		El par√°metro salida recoge la salida desde un fichero que se genera en la ejecuci√≥n del script siempre que
-//		sea distinto de NULL, esto es, si al llamar a la funci√≥n este par√°metro es NULL no se recoger√° dicha salida.
-//		Este fichero tiene una ubicaci√≥n fija: /tmp/_retinterface
+//		El par·metro salida recoge la salida desde un fichero que se genera en la ejecuciÛn del script siempre que
+//		sea distinto de NULL, esto es, si al llamar a la funciÛn este par·metro es NULL no se recoger· dicha salida.
+//		Este fichero tiene una ubicaciÛn fija: /tmp/_retinterface
 //______________________________________________________________________________________________________
 
 int FinterfaceAdmin( char *script,char* parametros,char* salida)
@@ -164,7 +164,7 @@ int FinterfaceAdmin( char *script,char* parametros,char* salida)
 	/* Elimina fichero de retorno */
 	if(salida!=(char*)NULL){
 		f = fopen("/tmp/_retinterface_","w" );
-		if (f==NULL){  // Error de eliminaci√≥n
+		if (f==NULL){  // Error de eliminaciÛn
 			scriptLog(modulo,10);
 			resul=8;
 			scriptLog(modulo,resul);
@@ -177,7 +177,7 @@ int FinterfaceAdmin( char *script,char* parametros,char* salida)
 		strcat(script," ");
 		strcat(script,parametros);
 	}
-	/* LLamada funci√≥n interface */
+	/* LLamada funciÛn interface */
 	resul=system(script);
 	if(resul){
 		scriptLog(modulo,10);
@@ -194,7 +194,7 @@ int FinterfaceAdmin( char *script,char* parametros,char* salida)
 			return(resul);
 		}
 		else{
-			fseek (f ,0,SEEK_END);  // Obtiene tama√±o del fichero.
+			fseek (f ,0,SEEK_END);  // Obtiene tamaÒo del fichero.
 			lSize = ftell (f);
 			rewind (f);
 			if(lSize>LONGITUD_SCRIPTSALIDA){
@@ -208,41 +208,41 @@ int FinterfaceAdmin( char *script,char* parametros,char* salida)
 			fclose(f);
 		}
 	}
-	/* Muestra informaci√≥n de retorno */
+	/* Muestra informaciÛn de retorno */
 	if(salida!=(char*)NULL){
 		if(ndebug>2){
-			sprintf(msglog,"Informaci√≥n devuelta %s",salida);
+			sprintf(msglog,"InformaciÛn devuelta %s",salida);
 			infoDebug(msglog);
 		}
 	}
 	return(resul);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: interfaceAdmin
+// FunciÛn: interfaceAdmin
 //
-//	 Descripci√≥n:
-//		Esta funci√≥n es la puerta de comunicaci√≥n entre el m√≥dulo de administraci√≥n y el motor de clonaci√≥n.
-//		La Aplicaci√≥n de administraci√≥n utiliza una interface para ejecutar funciones del motor de clonaci√≥n;
-//		esta interface llamar√° a la API del motor con lo que cambiando el comportamiento de esta interface
-//		podremos hacer llamadas a otras API de clonaci√≥n y de esta manera probar distintos motores.
+//	 DescripciÛn:
+//		Esta funciÛn es la puerta de comunicaciÛn entre el mÛdulo de administraciÛn y el motor de clonaciÛn.
+//		La AplicaciÛn de administraciÛn utiliza una interface para ejecutar funciones del motor de clonaciÛn;
+//		esta interface llamar· a la API del motor con lo que cambiando el comportamiento de esta interface
+//		podremos hacer llamadas a otras API de clonaciÛn y de esta manera probar distintos motores.
 //
-//	Par√°metros:
-//		- script: Nombre del m√≥dulo,funci√≥n o script de la interface
-//		- parametros: Par√°metros que se le pasar√°n a la interface
+//	Par·metros:
+//		- script: Nombre del mÛdulo,funciÛn o script de la interface
+//		- parametros: Par·metros que se le pasar·n a la interface
 //		- salida: Recoge la salida que genera la llamada a la interface
 
 // 	Devuelve:
-//		C√≥digo de error de la ejecuci√≥n al m√≥dulo , funci√≥n o script de la interface
+//		CÛdigo de error de la ejecuciÛn al mÛdulo , funciÛn o script de la interface
 //
 //	Especificaciones:
-//		El par√°metro salida recoge la salida desde el procedimiento hijo que se genera en la ejecuci√≥n de √©ste
-//		siempre que sea distinto de NULL, esto es, si al llamar a la funci√≥n este par√°metro es NULL no se
-//		recoger√° dicha salida.
+//		El par·metro salida recoge la salida desde el procedimiento hijo que se genera en la ejecuciÛn de Èste
+//		siempre que sea distinto de NULL, esto es, si al llamar a la funciÛn este par·metro es NULL no se
+//		recoger· dicha salida.
 //______________________________________________________________________________________________________
 
 int interfaceAdmin( char *script,char* parametros,char* salida)
 {
-	int  descr[2];	/* Descriptores de E y S de la turber√≠a */
+	int  descr[2];	/* Descriptores de E y S de la turberÌa */
 	int  bytesleidos;	/* Bytes leidos en el mensaje */
 	int estado;
 	pid_t  pid;
@@ -266,7 +266,7 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	/* Muestra matriz de los argumentos */
 	for(i=1;i<nargs;i++){
 		if (ndebug>= DEBUG_ALTO) {
-			// Truncar la cadena si es mayor que el tama√±o de la l√≠nea de log.
+			// Truncar la cadena si es mayor que el tamaÒo de la lÌnea de log.
 			sprintf(msglog, "%s: #%d-", tbMensajes[9], i+1);
 			lon = strlen (msglog);
 			if (lon + strlen (argumentos[i]) < LONSUC) {
@@ -285,7 +285,7 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	{
 		//_______________________________________________________________
 
-		/* Proceso hijo que ejecuta la funci√≥n de interface */
+		/* Proceso hijo que ejecuta la funciÛn de interface */
 
 		close (descr[LEER]);
 		dup2 (descr[ESCRIBIR], 1);
@@ -301,9 +301,9 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	{
 		//_______________________________________________________________
 
-		/* Proceso padre que espera la ejecuci√≥n del hijo */
+		/* Proceso padre que espera la ejecuciÛn del hijo */
 
-		if (pid ==-1){ // Error en la creaci√≥n del proceso hijo
+		if (pid ==-1){ // Error en la creaciÛn del proceso hijo
 			scriptLog(modulo,10);
 			resul=13;
 			scriptLog(modulo,resul);
@@ -312,9 +312,9 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 		close (descr[ESCRIBIR]);
 		bytesleidos = read (descr[LEER], buffer, LONBLK-1);
 		while(bytesleidos>0){
-			if(salida!=(char*)NULL){ // Si se solicita retorno de informaci√≥n...
+			if(salida!=(char*)NULL){ // Si se solicita retorno de informaciÛn...
 				buffer[bytesleidos]='\0';
-				// Error si se supera el tama√±o m√°ximo de cadena de salida.
+				// Error si se supera el tamaÒo m·ximo de cadena de salida.
 				if(strlen(buffer)+strlen(salida)>LONGITUD_SCRIPTSALIDA){
 					scriptLog(modulo,10);
 					resul=11;
@@ -339,10 +339,10 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 		//_______________________________________________________________
 	}
 
-	/* Muestra informaci√≥n de retorno */
+	/* Muestra informaciÛn de retorno */
 	if(salida!=(char*)NULL){
 		if(ndebug>2){
-			// Truncar la cadena si es mayor que el tama√±o de la l√≠nea de log.
+			// Truncar la cadena si es mayor que el tamaÒo de la lÌnea de log.
 			strcpy(msglog,"Informacion devuelta ");
 			lon = strlen (msglog);
 			if (lon + strlen (salida) < LONSUC) {
@@ -359,37 +359,37 @@ int interfaceAdmin( char *script,char* parametros,char* salida)
 	return(resul);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: scriptLog
+// FunciÛn: scriptLog
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Registra los sucesos de errores de scripts en el fichero de log
 //	Parametros:
-//		- modulo: M√≥dulo donde se produjo el error
-//		- coderr : C√≥digo del mensaje de error del script
+//		- modulo: MÛdulo donde se produjo el error
+//		- coderr : CÛdigo del mensaje de error del script
 //______________________________________________________________________________________________________
 void scriptLog(const char *modulo,int coderr)
 {
 	char msglog[LONSUC];
 
 	if(coderr<MAXERRORSCRIPT)
-		errorInfo(modulo,tbErroresScripts[coderr]); // Se ha producido alg√∫n error registrado
+		errorInfo(modulo,tbErroresScripts[coderr]); // Se ha producido alg˙n error registrado
 	else{
 		sprintf(msglog,"%s: %d",tbErroresScripts[MAXERRORSCRIPT],coderr);
 		errorInfo(modulo,msglog);
 	}
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: TomaIPlocal
+// FunciÛn: TomaIPlocal
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Recupera la IP local
-//	Par√°metros:
+//	Par·metros:
 //		Ninguno
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //	Especificaciones:
-//		En caso de no encontrar la IP o generarse alg√∫n error la IP local ser√≠a 0.0.0.0
+//		En caso de no encontrar la IP o generarse alg˙n error la IP local serÌa 0.0.0.0
 //______________________________________________________________________________________________________
 BOOLEAN tomaIPlocal()
 {
@@ -408,15 +408,15 @@ BOOLEAN tomaIPlocal()
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: cuestionCache
+// FunciÛn: cuestionCache
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Procesa la cache en caso de existir.
-//	Par√°metros:
-//		tam : Tama√±o de la cache
+//	Par·metros:
+//		tam : TamaÒo de la cache
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN cuestionCache(char* tam)
 {
@@ -438,15 +438,15 @@ BOOLEAN cuestionCache(char* tam)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: cargaPaginaWeb
+// FunciÛn: cargaPaginaWeb
 //
-//	Descripci√≥n:
-// 		Muestra una p√©gina web usando el browser
-//	Par√°metros:
-//	  urp: Direcci√≥n url de la p√°gina
+//	DescripciÛn:
+// 		Muestra una pÈgina web usando el browser
+//	Par·metros:
+//	  urp: DirecciÛn url de la p·gina
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 // ________________________________________________________________________________________________________
 int cargaPaginaWeb(char *url)
 {
@@ -455,10 +455,10 @@ int cargaPaginaWeb(char *url)
 	char modulo[] = "cargaPaginaWeb()";
 
 	if(pidbash>0)
-		kill(pidbash,SIGQUIT); // Destruye el proceso hijo del proceso bash si existiera una conmutaci√≥n
+		kill(pidbash,SIGQUIT); // Destruye el proceso hijo del proceso bash si existiera una conmutaciÛn
 
 	if(pidbrowser>0)
-		kill(pidbrowser,SIGQUIT); // Destruye el proceso hijo anterior y se queda s√≥lo el actual
+		kill(pidbrowser,SIGQUIT); // Destruye el proceso hijo anterior y se queda sÛlo el actual
 
 	sprintf(interface,"/opt/opengnsys/bin/browser");
 	sprintf(parametros,"browser -qws %s",url);
@@ -481,28 +481,28 @@ int cargaPaginaWeb(char *url)
 	return(resul);
 }
 //________________________________________________________________________________________________________
-//	Funci√≥n: muestraMenu
+//	FunciÛn: muestraMenu
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Muestra el menu inicial del cliente
-//	Par√°metros:
+//	Par·metros:
 //		Ninguno
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //________________________________________________________________________________________________________
 void muestraMenu()
 {
 	cargaPaginaWeb(urlmenu);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: muestraMensaje
+// FunciÛn: muestraMensaje
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 // 		Muestra un mensaje en pantalla
-//	Par√°metros:
+//	Par·metros:
 //		- idx: Indice del mensaje
-//		- msg: Descripci√≥n Mensaje
+//		- msg: DescripciÛn Mensaje
 // ________________________________________________________________________________________________________
 void muestraMensaje(int idx,char*msg)
 {
@@ -510,40 +510,40 @@ void muestraMensaje(int idx,char*msg)
 	
 	if(msg){
 		msgpan=URLEncode(msg);
-		sprintf(url,"%s?msg=%s",urlmsg,msgpan); // Url de la p√°gina de mensajes
+		sprintf(url,"%s?msg=%s",urlmsg,msgpan); // Url de la p·gina de mensajes
 		liberaMemoria(msgpan);
 	}
 	else
-		sprintf(url,"%s?idx=%d",urlmsg,idx); // Url de la p√°gina de mensajes
+		sprintf(url,"%s?idx=%d",urlmsg,idx); // Url de la p·gina de mensajes
 	cargaPaginaWeb(url);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: InclusionCliente
-//	 Descripci√≥n:
-//		Abre una sesi√≥n en el servidor de administraci√≥n y registra al cliente en el sistema
-//	Par√°metros:
+// FunciÛn: InclusionCliente
+//	 DescripciÛn:
+//		Abre una sesiÛn en el servidor de administraciÛn y registra al cliente en el sistema
+//	Par·metros:
 //		Ninguno
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 {
 	int lon;		// Longitud de cadena
 	char msglog[LONSUC];	// Mensaje de registro de sucesos
-	char *cfg;		// Datos de configuraci√≥n
+	char *cfg;		// Datos de configuraciÛn
 	SOCKET socket_c;
 	char modulo[] = "inclusionCliente()";
 
 	cfg=LeeConfiguracion();
 	
-	if(!cfg){ // No se puede recuperar la configuraci√≥n del cliente
+	if(!cfg){ // No se puede recuperar la configuraciÛn del cliente
 		errorLog(modulo,36,FALSE);
 		errorLog(modulo,37,FALSE);
 		return(FALSE);
 	}
 	if (ndebug>= DEBUG_ALTO) {
-		// Truncar la cadena si es mayor que el tama√±o de la l√≠nea de log.
+		// Truncar la cadena si es mayor que el tamaÒo de la lÌnea de log.
 		sprintf(msglog, "%s", tbMensajes[14]);
 		lon = strlen (msglog);
 		if (lon + strlen (cfg) < LONSUC) {
@@ -557,8 +557,8 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 		infoDebug(msglog);
 	}
 	initParametros(ptrTrama,0);
-	lon=sprintf(ptrTrama->parametros,"nfn=InclusionCliente\r"); // Nombre de la funci√≥n a ejecutar en el servidor
-	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuraci√≥n de los Sistemas Operativos del cliente
+	lon=sprintf(ptrTrama->parametros,"nfn=InclusionCliente\r"); // Nombre de la funciÛn a ejecutar en el servidor
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // ConfiguraciÛn de los Sistemas Operativos del cliente
 	liberaMemoria(cfg);
 	
 	if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_PETICION)){
@@ -573,7 +573,7 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 
 	close(socket_c);
 
-	if(!gestionaTrama(ptrTrama)){	// An√°lisis de la trama
+	if(!gestionaTrama(ptrTrama)){	// An·lisis de la trama
 		errorLog(modulo,39,FALSE);
 		return(FALSE);
 	}
@@ -581,24 +581,24 @@ BOOLEAN inclusionCliente(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: RESPUESTA_InclusionCliente
+// FunciÛn: RESPUESTA_InclusionCliente
 //
-//	Descripci√≥n:
-//  	Respuesta del servidor de administraci√≥n a la petici√≥n de inicio
+//	DescripciÛn:
+//  	Respuesta del servidor de administraciÛn a la peticiÛn de inicio
 //		enviando los datos identificativos del cliente y otras configuraciones
-//	Par√°metros:
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los par√°metros
+//	Par·metros:
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los par·metros
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN RESPUESTA_InclusionCliente(TRAMA* ptrTrama)
 {
 	char* res;
 	char modulo[] = "RESPUESTA_InclusionCliente()";
 
-	res=copiaParametro("res",ptrTrama); // Resultado del proceso de inclusi√≥n
-	if(atoi(res)==0){ // Error en el proceso de inclusi√≥n
+	res=copiaParametro("res",ptrTrama); // Resultado del proceso de inclusiÛn
+	if(atoi(res)==0){ // Error en el proceso de inclusiÛn
 		liberaMemoria(res);
 		errorLog(modulo,41,FALSE);
 		return (FALSE);
@@ -607,7 +607,7 @@ BOOLEAN RESPUESTA_InclusionCliente(TRAMA* ptrTrama)
 
 	idordenador=copiaParametro("ido",ptrTrama); // Identificador del ordenador
 	nombreordenador=copiaParametro("npc",ptrTrama);	//  Nombre del ordenador
-	cache=copiaParametro("che",ptrTrama); // Tama√±o de la cach√© reservada al cliente
+	cache=copiaParametro("che",ptrTrama); // TamaÒo de la cachÈ reservada al cliente
 	idproautoexec=copiaParametro("exe",ptrTrama); // Procedimento de inicio (Autoexec)
 	idcentro=copiaParametro("idc",ptrTrama); // Identificador de la Unidad Organizativa
 	idaula=copiaParametro("ida",ptrTrama); // Identificador del aula
@@ -620,14 +620,14 @@ BOOLEAN RESPUESTA_InclusionCliente(TRAMA* ptrTrama)
 }
 //______________________________________________________________________________________________________
 //
-// Funci√≥n: LeeConfiguracion
-//	 Descripci√≥n:
-//		Abre una sesi√≥n en el servidor de administraci√≥n y registra al cliente en el sistema
-//	Par√°metros:
+// FunciÛn: LeeConfiguracion
+//	 DescripciÛn:
+//		Abre una sesiÛn en el servidor de administraciÛn y registra al cliente en el sistema
+//	Par·metros:
 //		Ninguno
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 
 char* LeeConfiguracion()
@@ -635,7 +635,7 @@ char* LeeConfiguracion()
 	char* parametroscfg;
 	char modulo[] = "LeeConfiguracion()";
 
-	// Reservar memoria para los datos de cofiguraci√≥n.
+	// Reservar memoria para los datos de cofiguraciÛn.
 	parametroscfg=(char*)reservaMemoria(LONGITUD_SCRIPTSALIDA);
 	if(!parametroscfg){
 		errorLog(modulo,3,FALSE);
@@ -645,7 +645,7 @@ char* LeeConfiguracion()
 	sprintf(interface,"%s/%s",pathinterface,"getConfiguration");
 	herror=interfaceAdmin(interface,NULL,parametroscfg);
 
-	if(herror){ // No se puede recuperar la configuraci√≥n del cliente
+	if(herror){ // No se puede recuperar la configuraciÛn del cliente
 		liberaMemoria(parametroscfg);
 		errorLog(modulo,36,FALSE);
 		return(NULL);
@@ -653,24 +653,23 @@ char* LeeConfiguracion()
 	return(parametroscfg);
 }
 //________________________________________________________________________________________________________
-//	Funci√≥n: autoexecCliente
+//	FunciÛn: autoexecCliente
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Solicita procedimiento de autoexec para el cliebnte
-//	Par√°metros:
+//	Par·metros:
 //		Ninguno
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //________________________________________________________________________________________________________
 BOOLEAN autoexecCliente(TRAMA* ptrTrama)
 {
-	int lon;
 	SOCKET socket_c;
 	char modulo[] = "autoexecCliente()";
 
 	initParametros(ptrTrama,0);
-	lon=sprintf(ptrTrama->parametros,"nfn=AutoexecCliente\rexe=%s\r",idproautoexec);
+	sprintf(ptrTrama->parametros,"nfn=AutoexecCliente\rexe=%s\r",idproautoexec);
 
 	if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_PETICION)){
 		errorLog(modulo,42,FALSE);
@@ -684,7 +683,7 @@ BOOLEAN autoexecCliente(TRAMA* ptrTrama)
 
 	close(socket_c);
 
-	if(!gestionaTrama(ptrTrama)){	// An√°lisis de la trama
+	if(!gestionaTrama(ptrTrama)){	// An·lisis de la trama
 		errorLog(modulo,39,FALSE);
 		return(FALSE);
 	}
@@ -692,15 +691,15 @@ BOOLEAN autoexecCliente(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //________________________________________________________________________________________________________
-//	Funci√≥n: autoexecCliente
+//	FunciÛn: autoexecCliente
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Ejecuta un script de autoexec personalizado en todos los inicios para el cliente
-//	Par√°metros:
+//	Par·metros:
 //		Ninguno
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //________________________________________________________________________________________________________
 BOOLEAN RESPUESTA_AutoexecCliente(TRAMA* ptrTrama)
 {
@@ -720,7 +719,7 @@ BOOLEAN RESPUESTA_AutoexecCliente(TRAMA* ptrTrama)
 	sprintf(ptrTrama->parametros,"nfn=enviaArchivo\rnfl=%s\r",nfl);
 	liberaMemoria(nfl);
 
-	/* Env√≠a petici√≥n */
+	/* EnvÌa peticiÛn */
 	if(!enviaMensajeServidor(&socket_c,ptrTrama,MSG_PETICION)){
 		errorLog(modulo,42,FALSE);
 		return(FALSE);
@@ -743,15 +742,15 @@ BOOLEAN RESPUESTA_AutoexecCliente(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: comandosPendientes
+// FunciÛn: comandosPendientes
 //
-//	 Descripci√≥n:
-// 		 B√∫squeda de acciones pendientes en el servidor de administraci√≥n
-//	Par√°metros:
+//	 DescripciÛn:
+// 		 B˙squeda de acciones pendientes en el servidor de administraciÛn
+//	Par·metros:
 //		Ninguno
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN comandosPendientes(TRAMA* ptrTrama)
 {
@@ -775,7 +774,7 @@ BOOLEAN comandosPendientes(TRAMA* ptrTrama)
 
  		close(socket_c);
 
-		if(!gestionaTrama(ptrTrama)){	// An√°lisis de la trama
+		if(!gestionaTrama(ptrTrama)){	// An·lisis de la trama
 			errorLog(modulo,39,FALSE);
 			return(FALSE);
 		}
@@ -783,17 +782,17 @@ BOOLEAN comandosPendientes(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: NoComandosPtes
+// FunciÛn: NoComandosPtes
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		 Conmuta el switch de los comandos pendientes y lo pone a false
-//	Par√°metros:
+//	Par·metros:
 //		- ptrTrama: contenido del mensaje
 // 	Devuelve:
 //		TRUE siempre
 //	Especificaciones:
-//		Cuando se ejecuta esta funci√≥n se sale del bucle que recupera los comandos pendientes en el
-//		servidor y el cliente pasa a a estar disponible para recibir comandos desde el √©ste.
+//		Cuando se ejecuta esta funciÛn se sale del bucle que recupera los comandos pendientes en el
+//		servidor y el cliente pasa a a estar disponible para recibir comandos desde el Èste.
 //______________________________________________________________________________________________________
 BOOLEAN NoComandosPtes(TRAMA* ptrTrama)
 {
@@ -801,15 +800,15 @@ BOOLEAN NoComandosPtes(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: ProcesaComandos
+// FunciÛn: ProcesaComandos
 //
-//	Descripci√≥n:
-// 		Espera comando desde el Servidor de Administraci√≥n para ejecutarlos
-//	Par√°metros:
+//	DescripciÛn:
+// 		Espera comando desde el Servidor de AdministraciÛn para ejecutarlos
+//	Par·metros:
 //		Ninguno
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 // ________________________________________________________________________________________________________
 void procesaComandos(TRAMA* ptrTrama)
 {
@@ -834,7 +833,7 @@ void procesaComandos(TRAMA* ptrTrama)
 
 		close(socket_c);
 
-		if(!gestionaTrama(ptrTrama)){	// An√°lisis de la trama
+		if(!gestionaTrama(ptrTrama)){	// An·lisis de la trama
 			errorLog(modulo,39,FALSE);
 			return;
 		}
@@ -844,21 +843,21 @@ void procesaComandos(TRAMA* ptrTrama)
 	}
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: Actualizar
+// FunciÛn: Actualizar
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Actualiza los datos de un ordenador como si volviera a solicitar la entrada
-//		en el sistema al  servidor de administraci√≥n
-//	Par√°metros:
+//		en el sistema al  servidor de administraciÛn
+//	Par·metros:
 //		ptrTrama: contenido del mensajede
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN Actualizar(TRAMA* ptrTrama)
 {
 	char msglog[LONSTD];	// Mensaje de log
-	char *cfg;		// Cadena de datos de configuraci√≥n
+	char *cfg;		// Cadena de datos de configuraciÛn
 	int lon;		// Longitud de cadena
 	char modulo[] = "Actualizar()";
 
@@ -874,14 +873,14 @@ BOOLEAN Actualizar(TRAMA* ptrTrama)
 
 	cfg=LeeConfiguracion();
 	herror=0;
-	if(!cfg){ // No se puede recuperar la configuraci√≥n del cliente
+	if(!cfg){ // No se puede recuperar la configuraciÛn del cliente
 		errorLog(modulo,36,FALSE);
 		herror=3;
 	}
 	// Envia Configuracion al servidor
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Configurar");
-	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuraci√≥n de los Sistemas Operativos del cliente
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // ConfiguraciÛn de los Sistemas Operativos del cliente
 	respuestaEjecucionComando(ptrTrama,herror,0);
 
 	muestraMenu();
@@ -889,68 +888,46 @@ BOOLEAN Actualizar(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: Purgar
+// FunciÛn: Purgar
 //
-//	 Descripci√≥n:
-//		Detiene la ejecuci√≥n del browser
-//	Par√°metros:
+//	 DescripciÛn:
+//		Detiene la ejecuciÛn del browser
+//	Par·metros:
 //		ptrTrama: contenido del mensajede
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 int Purgar(TRAMA* ptrTrama)
 {
-	int resul=0;
-	char modulo[] = "Purgar()";
 
-	if(pidbrowser>0)
-		kill(pidbrowser,SIGQUIT); // Destruye el proceso hijo anterior y se queda s√≥lo el actual
-
-	if(pidbash>0)
-		kill(pidbash,SIGQUIT); // Destruye el proceso hijo del proceso bash si existiera una conmutaci√≥n
-
-	sprintf(interface,"/opt/opengnsys/bin/bash");
-	if((pidbash=fork())==0){
-		/* Proceso hijo que ejecuta el script */
-		resul=execv(interface,NULL);
-		exit(resul);
-	}
-	else {
-		if (pidbash ==-1){
-			scriptLog(modulo,10);
-			resul=13;
-			scriptLog(modulo,resul);
-			return(resul);
-		}
-	}
 	exit(EXIT_SUCCESS);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: Sondeo
+// FunciÛn: Sondeo
 //
-//	 Descripci√≥n:
-//		Env√≠a al servidor una confirmaci√≥n de que est√° dentro del sistema
-//	Par√°metros:
+//	 DescripciÛn:
+//		EnvÌa al servidor una confirmaciÛn de que est· dentro del sistema
+//	Par·metros:
 //		ptrTrama: contenido del mensajede
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN Sondeo(TRAMA* ptrTrama)
 {
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: ConsolaRemota
+// FunciÛn: ConsolaRemota
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 // 		Ejecuta un comando de la Shell y envia el eco al servidor (Consola remota)
-//	Par√°metros:
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 {
@@ -978,7 +955,7 @@ BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 		errorInfo(modulo,msglog);
 	}
 	else{
-		/* Env√≠a fichero de inventario al servidor */
+		/* EnvÌa fichero de inventario al servidor */
 		sprintf(ecodst,"/tmp/_Seconsola_%s",IPlocal); // Nombre que tendra el archivo en el Servidor
 		initParametros(ptrTrama,0);
 		sprintf(ptrTrama->parametros,"nfn=recibeArchivo\rnfl=%s\r",ecodst);
@@ -986,13 +963,13 @@ BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 			errorLog(modulo,42,FALSE);
 			return(FALSE);
 		}
-		 /* Espera se√±al para comenzar el env√≠o */
+		 /* Espera seÒal para comenzar el envÌo */
 		liberaMemoria(ptrTrama);
 		recibeFlag(&socket_c,ptrTrama);
-		/* Env√≠a archivo */
+		/* EnvÌa archivo */
 		if(!sendArchivo(&socket_c,ecosrc)){
 			errorLog(modulo,57, FALSE);
-			herror=12; // Error de env√≠o de fichero por la red
+			herror=12; // Error de envÌo de fichero por la red
 		}
 		close(socket_c);
 	}
@@ -1000,19 +977,18 @@ BOOLEAN ConsolaRemota(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
-// Funci√≥n: Comando
+// FunciÛn: Comando
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		COmando personalizado enviado desde el servidor
-//	Par√°metros:
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //_____________________________________________________________________________________________________
 BOOLEAN Comando(TRAMA* ptrTrama)
 {
-	int lon;
 	char *ids,*nfn,msglog[LONSTD];
 	char modulo[] = "Comando()";
 
@@ -1029,24 +1005,24 @@ BOOLEAN Comando(TRAMA* ptrTrama)
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
 		errorInfo(modulo,msglog);
 	}
-	/* Envia respuesta de ejecucuci√≥n del comando */
+	/* Envia respuesta de ejecucuciÛn del comando */
 	initParametros(ptrTrama,0);
-	lon=sprintf(ptrTrama->parametros,"nfn=RESPUESTA_%s\r",nfn);
+	sprintf(ptrTrama->parametros,"nfn=RESPUESTA_%s\r",nfn);
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	liberaMemoria(nfn);
 	liberaMemoria(ids);
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
-// Funci√≥n: Arrancar
+// FunciÛn: Arrancar
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Responde a un comando de encendido por la red
-//	Par√°metros:
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //_____________________________________________________________________________________________________
 BOOLEAN Arrancar(TRAMA* ptrTrama)
 {
@@ -1061,7 +1037,7 @@ BOOLEAN Arrancar(TRAMA* ptrTrama)
 
 	ids=copiaParametro("ids",ptrTrama);
 
-	/* Envia respuesta de ejecucuci√≥n del script */
+	/* Envia respuesta de ejecucuciÛn del script */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Arrancar");
 	lon+=sprintf(ptrTrama->parametros+lon,"tpc=%s\r",CLIENTE_OPENGNSYS);
@@ -1070,19 +1046,18 @@ BOOLEAN Arrancar(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
-// Funci√≥n: Apagar
+// FunciÛn: Apagar
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Apaga el cliente
-//	Par√°metros:
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //_____________________________________________________________________________________________________
 BOOLEAN Apagar(TRAMA* ptrTrama)
 {
-	int lon;
 	char *ids,*nfn,msglog[LONSTD];
 	char modulo[] = "Apagar()";
 
@@ -1094,7 +1069,7 @@ BOOLEAN Apagar(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 
 	initParametros(ptrTrama,0);
-	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Apagar");
+	sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Apagar");
 	respuestaEjecucionComando(ptrTrama,0,ids);
 
 	sprintf(interface,"%s/%s",pathinterface,nfn);
@@ -1111,19 +1086,18 @@ BOOLEAN Apagar(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
-// Funci√≥n: Reiniciar
+// FunciÛn: Reiniciar
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Apaga el cliente
-//	Par√°metros:
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //_____________________________________________________________________________________________________
 BOOLEAN Reiniciar(TRAMA* ptrTrama)
 {
-	int lon;
 	char *nfn,*ids,msglog[LONSTD];
 	char modulo[] = "Reiniciar()";
 
@@ -1135,7 +1109,7 @@ BOOLEAN Reiniciar(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 
 	initParametros(ptrTrama,0);
-	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Reiniciar");
+	sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Reiniciar");
 	respuestaEjecucionComando(ptrTrama,0,ids);
 
 	sprintf(interface,"%s/%s",pathinterface,nfn);
@@ -1152,19 +1126,18 @@ BOOLEAN Reiniciar(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //_____________________________________________________________________________________________________
-// Funci√≥n: IniciarSesion
+// FunciÛn: IniciarSesion
 //
-//	 Descripci√≥n:
-//		Inicia sesi√≥n en el Sistema Operativo de una de las particiones
-//	Par√°metros:
+//	 DescripciÛn:
+//		Inicia sesiÛn en el Sistema Operativo de una de las particiones
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //_____________________________________________________________________________________________________
 BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 {
-	int lon;
 	char *nfn,*ids,*disk,*par,msglog[LONSTD];
 	char modulo[] = "IniciarSesion()";
 
@@ -1178,7 +1151,7 @@ BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 	par=copiaParametro("par",ptrTrama);
 	
 	initParametros(ptrTrama,0);
-	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_IniciarSesion");
+	sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_IniciarSesion");
 	respuestaEjecucionComando(ptrTrama,0,ids);
 	liberaMemoria(ids);			
 
@@ -1198,15 +1171,15 @@ BOOLEAN IniciarSesion(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: CrearImagen
+// FunciÛn: CrearImagen
 //
-//	 Descripci√≥n:
-//		Crea una imagen de una partici√≥n
-//	Par√°metros:
+//	 DescripciÛn:
+//		Crea una imagen de una particiÛn
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN CrearImagen(TRAMA* ptrTrama)
 {
@@ -1220,10 +1193,10 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	}
 
 	dsk=copiaParametro("dsk",ptrTrama); // Disco
-	par=copiaParametro("par",ptrTrama); // N√∫mero de partici√≥n
-	cpt=copiaParametro("cpt",ptrTrama); // C√≥digo de la partici√≥n
+	par=copiaParametro("par",ptrTrama); // N˙mero de particiÛn
+	cpt=copiaParametro("cpt",ptrTrama); // CÛdigo de la particiÛn
 	idi=copiaParametro("idi",ptrTrama); // Identificador de la imagen
-	nci=copiaParametro("nci",ptrTrama); // Nombre can√≥nico de la imagen
+	nci=copiaParametro("nci",ptrTrama); // Nombre canÛnico de la imagen
 	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
 
 	nfn=copiaParametro("nfn",ptrTrama);
@@ -1248,13 +1221,13 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 		errorInfo(modulo,msglog);
 	}
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagen");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
-	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N√∫mero de partici√≥n de donde se cre√≥
-	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o c√≥digo de partici√≥n
-	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se aloj√≥
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N˙mero de particiÛn de donde se creÛ
+	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o cÛdigo de particiÛn
+	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojÛ
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(dsk);	
@@ -1271,16 +1244,16 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: CrearImagenBasica
+// FunciÛn: CrearImagenBasica
 //
-//	 Descripci√≥n:
-//		Crea una imagen b√°sica a traver≈õ dela sincronizaci√≥n
-//	Par√°metros:
+//	 DescripciÛn:
+//		Crea una imagen b·sica a travers dela sincronizaciÛn
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //
 //	FDevuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 {
@@ -1294,52 +1267,52 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	}
 	nfn=copiaParametro("nfn",ptrTrama);
 	dsk=copiaParametro("dsk",ptrTrama); // Disco
-	par=copiaParametro("par",ptrTrama); // N√∫mero de partici√≥n
-	cpt=copiaParametro("cpt",ptrTrama); // Tipo de partici√≥n
+	par=copiaParametro("par",ptrTrama); // N˙mero de particiÛn
+	cpt=copiaParametro("cpt",ptrTrama); // Tipo de particiÛn
 	idi=copiaParametro("idi",ptrTrama); // Identificador de la imagen
-	nci=copiaParametro("nci",ptrTrama); // Nombre can√≥nico de la imagen
+	nci=copiaParametro("nci",ptrTrama); // Nombre canÛnico de la imagen
 	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
 	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
 
-	msy=copiaParametro("msy",ptrTrama); // M√©todo de sincronizaci√≥n
+	msy=copiaParametro("msy",ptrTrama); // MÈtodo de sincronizaciÛn
 	
-	whl=copiaParametro("whl",ptrTrama); // Env√≠o del fichero completo si hay diferencias		
-	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no est√©n en origen	
+	whl=copiaParametro("whl",ptrTrama); // EnvÌo del fichero completo si hay diferencias		
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estÈn en origen	
 	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
 
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
-	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambi√©n imagen a la cache
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambiÈn imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
 	//muestraMensaje(7,NULL); // Creando Inventario Software
 	//if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
-		muestraMensaje(30,NULL);// Creando Imagen B√°sica, por favor espere...
+		muestraMensaje(30,NULL);// Creando Imagen B·sica, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
 		sprintf(parametros,"%s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,whl,eli,cmp,bpi,cpc,bpc,nba,msy,rti);
 		herror=interfaceAdmin(interface,parametros,NULL);
 		if(herror){
 			sprintf(msglog,"%s:%s",tbErrores[86],nfn);
 			errorInfo(modulo,msglog);
-			muestraMensaje(29,NULL);// Ha habido alg√∫n error en el proceso de creaci√≥n de imagen b√°sica
+			muestraMensaje(29,NULL);// Ha habido alg˙n error en el proceso de creaciÛn de imagen b·sica
 		}
 		else
-			muestraMensaje(28,NULL);// El proceso de creaci√≥n de imagen b√°sica ha terminado correctamente
+			muestraMensaje(28,NULL);// El proceso de creaciÛn de imagen b·sica ha terminado correctamente
 	//}
 	//else{
 	//	sprintf(msglog,"%s:%s",tbErrores[86],nfn);
 	//	errorInfo(modulo,msglog);
 	//}
 
-	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesi√≥n
+	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesiÛn
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagenBasica");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
-	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N√∫mero de partici√≥n de donde se cre√≥
-	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o c√≥digo de partici√≥n
-	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se aloj√≥
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N˙mero de particiÛn de donde se creÛ
+	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o cÛdigo de particiÛn
+	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojÛ
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 		
 	liberaMemoria(nfn);	
@@ -1368,21 +1341,21 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: CrearSoftIncremental
+// FunciÛn: CrearSoftIncremental
 //
-//	 Descripci√≥n:
-//		Crea una software incremental comparando una partici√≥n con una imagen b√°sica
-//	Par√°metros:
+//	 DescripciÛn:
+//		Crea una software incremental comparando una particiÛn con una imagen b·sica
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*idf,*ipr,*nci,*rti,*ncf,*whl,*eli,*cmp,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*idf,*ipr,*nci,*rti,*ncf,*msy,*whl,*eli,*cmp,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "CrearSoftIncremental()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1392,20 +1365,22 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	nfn=copiaParametro("nfn",ptrTrama);
 
 	dsk=copiaParametro("dsk",ptrTrama); // Disco
-	par=copiaParametro("par",ptrTrama); // N√∫mero de partici√≥n
+	par=copiaParametro("par",ptrTrama); // N˙mero de particiÛn
 	idi=copiaParametro("idi",ptrTrama); // Identificador de la imagen
-	nci=copiaParametro("nci",ptrTrama); // Nombre can√≥nico de la imagen
+	nci=copiaParametro("nci",ptrTrama); // Nombre canÛnico de la imagen
 	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
 	ipr=copiaParametro("ipr",ptrTrama); // Ip del repositorio
 	idf=copiaParametro("idf",ptrTrama); // Identificador de la imagen diferencial
-	ncf=copiaParametro("ncf",ptrTrama); // Nombre can√≥nico de la imagen diferencial
+	ncf=copiaParametro("ncf",ptrTrama); // Nombre canÛnico de la imagen diferencial
 
-	whl=copiaParametro("whl",ptrTrama); // Env√≠o del fichero completo si hay diferencias	
-	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no est√©n en origen	
+	msy=copiaParametro("msy",ptrTrama); // MÈtodo de sincronizaciÛn
+
+	whl=copiaParametro("whl",ptrTrama); // EnvÌo del fichero completo si hay diferencias	
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estÈn en origen	
 	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
 
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
-	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambi√©n imagen a la cache
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambiÈn imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
@@ -1413,29 +1388,29 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 //	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(25,NULL);// Creando Imagen Incremental, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
-		sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s",nfn,dsk,par,nci,ipr,ncf,whl,eli,cmp,bpi,cpc,bpc,nba,rti);
+		sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,ncf,whl,eli,cmp,bpi,cpc,bpc,nba,msy,rti);
 
 		herror=interfaceAdmin(interface,parametros,NULL);
 		if(herror){
 			sprintf(msglog,"%s:%s",tbErrores[86],nfn);
 			errorInfo(modulo,msglog);
-			muestraMensaje(27,NULL);// Ha habido alg√∫n error en el proceso de creaci√≥n de imagen b√°sica
+			muestraMensaje(27,NULL);// Ha habido alg˙n error en el proceso de creaciÛn de imagen b·sica
 		}
 		else
-			muestraMensaje(26,NULL);// El proceso de creaci√≥n de imagen b√°sica ha terminado correctamente
+			muestraMensaje(26,NULL);// El proceso de creaciÛn de imagen incremental ha terminado correctamente
 //	}
 //	else{
 //		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
 //		errorInfo(modulo,msglog);
 //	}
 
-	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesi√≥n
+	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesiÛn
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearSoftIncremental");
 	lon+=sprintf(ptrTrama->parametros+lon,"idf=%s\r",idf); // Identificador de la imagen incremental
-	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N√∫mero de partici√≥n
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N˙mero de particiÛn
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(nfn);	
@@ -1447,6 +1422,7 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	liberaMemoria(ipr);	
 	liberaMemoria(idf);	
 	liberaMemoria(ncf);	
+	liberaMemoria(msy);	
 	liberaMemoria(whl);
 	liberaMemoria(eli);
 	liberaMemoria(cmp);
@@ -1461,15 +1437,15 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: RestaurarImagen
+// FunciÛn: RestaurarImagen
 //
-//	 Descripci√≥n:
-//		Restaura una imagen en una partici√≥n
-//	Par√°metros:
+//	 DescripciÛn:
+//		Restaura una imagen en una particiÛn
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En bpccaso de ocurrir alg√∫n error
+//		FALSE: En bpccaso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 {
@@ -1505,11 +1481,11 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 		muestraMensaje(11,NULL);
 
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagen");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
-	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N√∫mero de partici√≥n
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N˙mero de particiÛn
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
@@ -1528,20 +1504,20 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: RestaurarImagenBasica
+// FunciÛn: RestaurarImagenBasica
 //
-//	 Descripci√≥n:
-//		Restaura una imagen b√°sica en una partici√≥n
-//	Par√°metros:
+//	 DescripciÛn:
+//		Restaura una imagen b·sica en una particiÛn
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*msy,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "RestaurarImagenBasica()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1552,21 +1528,22 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	par=copiaParametro("par",ptrTrama);
 	idi=copiaParametro("idi",ptrTrama);
 	ipr=copiaParametro("ipr",ptrTrama);
-	met=copiaParametro("met",ptrTrama); // M√©todo de clonaci√≥n 0= desde cach√© 1= desde repositorio
+	met=copiaParametro("met",ptrTrama); // MÈtodo de clonaciÛn 0= desde cachÈ 1= desde repositorio
 	nci=copiaParametro("nci",ptrTrama);
 	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
 	ifs=copiaParametro("ifs",ptrTrama);
 
-	tpt=copiaParametro("tpt",ptrTrama); // Tipo de trasnmisi√≥n unicast o multicast	
+	tpt=copiaParametro("tpt",ptrTrama); // Tipo de trasnmisiÛn unicast o multicast	
+	msy=copiaParametro("msy",ptrTrama); // Metodo de sincronizacion 
 
-	whl=copiaParametro("whl",ptrTrama); // Env√≠o del fichero completo si hay diferencias	
-	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no est√©n en origen	
+	whl=copiaParametro("whl",ptrTrama); // EnvÌo del fichero completo si hay diferencias	
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estÈn en origen	
 	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
 
 
 
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
-	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambi√©n imagen a la cache
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambiÈn imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
@@ -1574,7 +1551,7 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 	muestraMensaje(31,NULL);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
-	sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,tpt,whl,eli,cmp,bpi,cpc,bpc,nba,met,rti);
+	sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s %s %s",nfn,dsk,par,nci,ipr,tpt,whl,eli,cmp,bpi,cpc,bpc,nba,met,msy,rti);
 	herror=interfaceAdmin(interface,parametros,NULL);
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
@@ -1584,11 +1561,11 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	else
 		muestraMensaje(32,NULL);
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
-	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N√∫mero de partici√≥n
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N˙mero de particiÛn
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
@@ -1603,6 +1580,7 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	liberaMemoria(met);
 
 	liberaMemoria(tpt);	
+	liberaMemoria(msy);	
 
 	liberaMemoria(whl);	
 	liberaMemoria(eli);	
@@ -1619,20 +1597,20 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: RestaurarSoftIncremental
+// FunciÛn: RestaurarSoftIncremental
 //
-//	 Descripci√≥n:
-//		Restaura software incremental en una partici√≥n
-//	Par√°metros:
+//	 DescripciÛn:
+//		Restaura software incremental en una particiÛn
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*met,*ifs,*nci,*rti,*idf,*ncf,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*ifs,*nci,*rti,*idf,*ncf,*msy,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "RestaurarSoftIncremental()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1644,13 +1622,21 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	idi=copiaParametro("idi",ptrTrama);
 	idf=copiaParametro("idf",ptrTrama);
 	ipr=copiaParametro("ipr",ptrTrama);
-	met=copiaParametro("met",ptrTrama); // M√©todo de clonaci√≥n 0= desde cach√© 1= desde repositorio
+	met=copiaParametro("met",ptrTrama); // MÈtodo de clonaciÛn 0= desde cachÈ 1= desde repositorio
 	ifs=copiaParametro("ifs",ptrTrama);
 	nci=copiaParametro("nci",ptrTrama);
 	rti=copiaParametro("rti",ptrTrama); // Ruta de origen de la imagen
 	ncf=copiaParametro("ncf",ptrTrama);
+
+	tpt=copiaParametro("tpt",ptrTrama); // Tipo de trasnmisiÛn unicast o multicast	
+	msy=copiaParametro("msy",ptrTrama); // Metodo de sincronizacion 
+
+	whl=copiaParametro("whl",ptrTrama); // EnvÌo del fichero completo si hay diferencias	
+	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estÈn en origen	
+	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
+
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
-	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambi√©n imagen a la cache
+	cpc=copiaParametro("cpc",ptrTrama); // Copiar tambiÈn imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
@@ -1658,7 +1644,7 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	ids=copiaParametro("ids",ptrTrama);
 	muestraMensaje(31,NULL);
 	sprintf(interface,"%s/%s",pathinterface,nfn);
-	sprintf(parametros,"%s %s %s %s %s %s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,ncf,bpi,cpc,bpc,nba,met,rti);
+	sprintf(parametros,"%s %s %s %s %s %s %s %s%s%s %s%s%s%s %s %s %s",nfn,dsk,par,nci,ipr,ncf,tpt,whl,eli,cmp,bpi,cpc,bpc,nba,met,msy,rti);
 	herror=interfaceAdmin(interface,parametros,NULL);
 	if(herror){
 		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
@@ -1668,11 +1654,11 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	else
 		muestraMensaje(34,NULL);
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarSoftIncremental");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idf); // Identificador de la imagen incremental (Forzada a idi)
-	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N√∫mero de partici√≥n
+	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // N˙mero de particiÛn
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 
 	respuestaEjecucionComando(ptrTrama,herror,ids);
@@ -1688,6 +1674,14 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	liberaMemoria(ifs);	
 	liberaMemoria(ipr);	
 	liberaMemoria(met);
+
+	liberaMemoria(tpt);	
+	liberaMemoria(msy);	
+
+	liberaMemoria(whl);	
+	liberaMemoria(eli);	
+	liberaMemoria(cmp);	
+
 	liberaMemoria(bpi);	
 	liberaMemoria(cpc);	
 	liberaMemoria(bpc);	
@@ -1699,15 +1693,15 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: Configurar
+// FunciÛn: Configurar
 //
-//	 Descripci√≥n:
+//	 DescripciÛn:
 //		Configura la tabla de particiones y formatea
-//	Par√°metros:
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN Configurar(TRAMA* ptrTrama)
 {
@@ -1742,15 +1736,15 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 		muestraMensaje(14,NULL);
 
 	cfg=LeeConfiguracion();
-	if(!cfg){ // No se puede recuperar la configuraci√≥n del cliente
+	if(!cfg){ // No se puede recuperar la configuraciÛn del cliente
 		errorLog(modulo,36,FALSE);
 		return(FALSE);
 	}
 
-	/* Envia respuesta de ejecuci√≥n del comando*/
+	/* Envia respuesta de ejecuciÛn del comando*/
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_Configurar");
-	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuraci√≥n de los Sistemas Operativos del cliente
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // ConfiguraciÛn de los Sistemas Operativos del cliente
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(dsk);
@@ -1763,16 +1757,16 @@ BOOLEAN Configurar(TRAMA* ptrTrama)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funci√≥n: InventarioHardware
+// FunciÛn: InventarioHardware
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Envia al servidor el nombre del archivo de inventario de su hardware para posteriormente
-//		esperar que √©ste lo solicite y enviarlo por la red.
-//	Par√°metros:
+//		esperar que Èste lo solicite y enviarlo por la red.
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 {
@@ -1800,7 +1794,7 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 		muestraMensaje(18,NULL);
 	}
 	else{
-		/* Env√≠a fichero de inventario al servidor */
+		/* EnvÌa fichero de inventario al servidor */
 		sprintf(hrddst,"/tmp/Shrd-%s",IPlocal); // Nombre que tendra el archivo en el Servidor
 		initParametros(ptrTrama,0);
 		sprintf(ptrTrama->parametros,"nfn=recibeArchivo\rnfl=%s\r",hrddst);
@@ -1810,19 +1804,19 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 			errorLog(modulo,42,FALSE);
 			return(FALSE);
 		}
-		 /* Espera se√±al para comenzar el env√≠o */
+		 /* Espera seÒal para comenzar el envÌo */
 		liberaMemoria(ptrTrama);
 		recibeFlag(&socket_c,ptrTrama);
-		/* Env√≠a archivo */
+		/* EnvÌa archivo */
 		if(!sendArchivo(&socket_c,hrdsrc)){
 			errorLog(modulo,57, FALSE);
-			herror=12; // Error de env√≠o de fichero por la red
+			herror=12; // Error de envÌo de fichero por la red
 		}
 		close(socket_c);
 		muestraMensaje(17,NULL);
 	}
 
-	/* Envia respuesta de ejecuci√≥n de la funci√≥n de interface */
+	/* Envia respuesta de ejecuciÛn de la funciÛn de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_InventarioHardware");
 	lon+=sprintf(ptrTrama->parametros+lon,"hrd=%s\r",hrddst);
@@ -1835,15 +1829,15 @@ BOOLEAN InventarioHardware(TRAMA* ptrTrama)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funci√≥n: InventarioSoftware
+// FunciÛn: InventarioSoftware
 //
-//	Descripci√≥n:
-//		Crea el inventario software de un sistema operativo instalado en una partici√≥n.
-//	Par√°metros:
+//	DescripciÛn:
+//		Crea el inventario software de un sistema operativo instalado en una particiÛn.
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN InventarioSoftware(TRAMA* ptrTrama)
 {
@@ -1866,18 +1860,18 @@ BOOLEAN InventarioSoftware(TRAMA* ptrTrama)
 }
 // ________________________________________________________________________________________________________
 //
-// Funci√≥n: InventariandoSoftware
+// FunciÛn: InventariandoSoftware
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Envia al servidor el nombre del archivo de inventario de su software para posteriormente
-//		esperar que √©ste lo solicite y enviarlo por la red.
-//	Par√°metros:
+//		esperar que Èste lo solicite y enviarlo por la red.
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
-//		sw: switch que indica si la funci√≥n es llamada por el comando InventarioSoftware(true) o CrearImagen(false)
-//		nfn: Nombre de la funci√≥n del Interface que implementa el comando
+//		sw: switch que indica si la funciÛn es llamada por el comando InventarioSoftware(true) o CrearImagen(false)
+//		nfn: Nombre de la funciÛn del Interface que implementa el comando
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 {
@@ -1901,7 +1895,7 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 		muestraMensaje(20,NULL);
 	}
 	else{
-		/* Env√≠a fichero de inventario al servidor */
+		/* EnvÌa fichero de inventario al servidor */
 		sprintf(sftdst,"/tmp/Ssft-%s-%s",IPlocal,par); // Nombre que tendra el archivo en el Servidor
 		initParametros(ptrTrama,0);
 
@@ -1912,15 +1906,15 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 			liberaMemoria(par);				
 			return(FALSE);
 		}
-		/* Espera se√±al para comenzar el env√≠o */
+		/* Espera seÒal para comenzar el envÌo */
 		liberaMemoria(ptrTrama);
 		if(!recibeFlag(&socket_c,ptrTrama)){
 			errorLog(modulo,17,FALSE);
 		}
-		/* Env√≠a archivo */
+		/* EnvÌa archivo */
 		if(!sendArchivo(&socket_c,sftsrc)){
 			errorLog(modulo,57, FALSE);
-			herror=12; // Error de env√≠o de fichero por la red
+			herror=12; // Error de envÌo de fichero por la red
 		}
 		close(socket_c);
 		muestraMensaje(19,NULL);
@@ -1937,15 +1931,15 @@ BOOLEAN InventariandoSoftware(TRAMA* ptrTrama,BOOLEAN sw,char *nfn)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funci√≥n: EjecutarScript
+// FunciÛn: EjecutarScript
 //
-//	Descripci√≥n:
-//		Ejecuta c√≥digo de script
-//	Par√°metros:
+//	DescripciÛn:
+//		Ejecuta cÛdigo de script
+//	Par·metros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //______________________________________________________________________________________________________
 BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 {
@@ -1976,9 +1970,9 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	else
 		muestraMensaje(22,NULL);
 
-	// Toma configuraci√≥n de particiones
+	// Toma configuraciÛn de particiones
 	cfg=LeeConfiguracion();
-	if(!cfg){ // No se puede recuperar la configuraci√≥n del cliente
+	if(!cfg){ // No se puede recuperar la configuraciÛn del cliente
 		errorLog(modulo,36,FALSE);
 		herror=36;
 	}
@@ -1988,7 +1982,7 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	//herror=ejecutarCodigoBash(scp);
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_EjecutarScript");
-	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuraci√≥n de los Sistemas Operativos del cliente
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // ConfiguraciÛn de los Sistemas Operativos del cliente
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(nfn);
@@ -2002,17 +1996,17 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: respuestaEjecucionComando
+// FunciÛn: respuestaEjecucionComando
 //
-//	Descripci√≥n:
-// 		Envia una respuesta a una ejecucion de comando al servidor de Administraci√≥n
-//	Par√°metros:
+//	DescripciÛn:
+// 		Envia una respuesta a una ejecucion de comando al servidor de AdministraciÛn
+//	Par·metros:
 //		- ptrTrama: contenido del mensaje
-//		- res: Resultado de la ejecuci√≥n (C√≥digo de error devuelto por el script ejecutado)
+//		- res: Resultado de la ejecuciÛn (CÛdigo de error devuelto por el script ejecutado)
 //		- ids: Identificador de la sesion (En caso de no haber seguimiento es NULO)
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 // ________________________________________________________________________________________________________
 BOOLEAN respuestaEjecucionComando(TRAMA* ptrTrama,int res,char *ids)
 {
@@ -2022,18 +2016,18 @@ BOOLEAN respuestaEjecucionComando(TRAMA* ptrTrama,int res,char *ids)
 
 	lon=strlen(ptrTrama->parametros);
 	if(ids){ // Existe seguimiento
-		lon+=sprintf(ptrTrama->parametros+lon,"ids=%s\r",ids); // A√±ade identificador de la sesi√≥n
+		lon+=sprintf(ptrTrama->parametros+lon,"ids=%s\r",ids); // AÒade identificador de la sesiÛn
 	}
 	if (res==0){ // Resultado satisfactorio
 		lon+=sprintf(ptrTrama->parametros+lon,"res=%s\r","1");
 		lon+=sprintf(ptrTrama->parametros+lon,"der=%s\r","");
 	}
-	else{ // Alg√∫n error
+	else{ // Alg˙n error
 		lon+=sprintf(ptrTrama->parametros+lon,"res=%s\r","2");
 		if(res>MAXERRORSCRIPT)
-			lon+=sprintf(ptrTrama->parametros+lon,"der=%s (Error de script:%d)\r",tbErroresScripts[0],res);// Descripci√≥n del error
+			lon+=sprintf(ptrTrama->parametros+lon,"der=%s (Error de script:%d)\r",tbErroresScripts[0],res);// DescripciÛn del error
 		else
-			lon+=sprintf(ptrTrama->parametros+lon,"der=%s\r",tbErroresScripts[res]);// Descripci√≥n del error
+			lon+=sprintf(ptrTrama->parametros+lon,"der=%s\r",tbErroresScripts[res]);// DescripciÛn del error
 	}
 	if(!(enviaMensajeServidor(&socket_c,ptrTrama,MSG_NOTIFICACION))){
 		errorLog(modulo,44,FALSE);
@@ -2044,15 +2038,15 @@ BOOLEAN respuestaEjecucionComando(TRAMA* ptrTrama,int res,char *ids)
 	return(TRUE);
 }
 // ________________________________________________________________________________________________________
-// Funci√≥n: gestionaTrama
+// FunciÛn: gestionaTrama
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Procesa las tramas recibidas.
 //	Parametros:
 //		ptrTrama: contenido del mensaje
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 // ________________________________________________________________________________________________________
 BOOLEAN gestionaTrama(TRAMA *ptrTrama)
 {
@@ -2061,18 +2055,18 @@ BOOLEAN gestionaTrama(TRAMA *ptrTrama)
 	char modulo[] = "gestionaTrama()";
 
 	INTROaFINCAD(ptrTrama);
-	nfn = copiaParametro("nfn", ptrTrama); // Toma nombre de funci√≥n
+	nfn = copiaParametro("nfn", ptrTrama); // Toma nombre de funciÛn
 	for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
 		res = strcmp(tbfuncionesClient[i].nf, nfn);
-		if (res == 0) { // Encontrada la funci√≥n que procesa el mensaje
+		if (res == 0) { // Encontrada la funciÛn que procesa el mensaje
 			liberaMemoria(nfn);
-			return(tbfuncionesClient[i].fptr(ptrTrama)); // Invoca la funci√≥n
+			return(tbfuncionesClient[i].fptr(ptrTrama)); // Invoca la funciÛn
 		}
 	}
 
 	liberaMemoria(nfn);
 
-	/* S√≥lo puede ser un comando personalizado
+	/* SÛlo puede ser un comando personalizado
 	if (ptrTrama->tipo==MSG_COMANDO)
 		return(Comando(ptrTrama));
 	 */
@@ -2080,17 +2074,17 @@ BOOLEAN gestionaTrama(TRAMA *ptrTrama)
 	return (FALSE);
 }
 //________________________________________________________________________________________________________
-//	Funci√≥n: ejecutaArchivo
+//	FunciÛn: ejecutaArchivo
 //
-//	Descripci√≥n:
+//	DescripciÛn:
 //		Ejecuta los comando contenido en un archivo (cada comando y sus parametros separados por un
 //		salto de linea.
-//	Par√°metros:
+//	Par·metros:
 //		filecmd: Nombre del archivo de comandos
 //		ptrTrama: Puntero a una estructura TRAMA usada en las comunicaciones por red (No debe ser NULL)
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 //________________________________________________________________________________________________________
 BOOLEAN ejecutaArchivo(char* filecmd,TRAMA *ptrTrama)
 {
@@ -2106,7 +2100,7 @@ BOOLEAN ejecutaArchivo(char* filecmd,TRAMA *ptrTrama)
 			if(strlen(lineas[i])>0){
 				strcpy(ptrTrama->parametros,lineas[i]);
 				strcat(ptrTrama->parametros,"\rMCDJ@");	// Fin de trama
-				if(!gestionaTrama(ptrTrama)){	// An√°lisis de la trama
+				if(!gestionaTrama(ptrTrama)){	// An·lisis de la trama
 					errorLog(modulo,39,FALSE);
 					//return(FALSE);
 				}
@@ -2117,18 +2111,18 @@ BOOLEAN ejecutaArchivo(char* filecmd,TRAMA *ptrTrama)
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
-// Funci√≥n: enviaMensajeServidor
+// FunciÛn: enviaMensajeServidor
 //
-//	Descripci√≥n:
-// 		Envia un mensaje al servidor de Administraci√≥n
-//	Par√°metros:
-//		- socket_c: (Salida) Socket utilizado para el env√≠o
+//	DescripciÛn:
+// 		Envia un mensaje al servidor de AdministraciÛn
+//	Par·metros:
+//		- socket_c: (Salida) Socket utilizado para el envÌo
 //		- ptrTrama: contenido del mensaje
 //		- tipo: Tipo de mensaje
-//				C=Comando, N=Respuesta a un comando, P=Peticion,R=Respuesta a una petici√≥n, I=Informacion
+//				C=Comando, N=Respuesta a un comando, P=Peticion,R=Respuesta a una peticiÛn, I=Informacion
 // 	Devuelve:
 //		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir alg√∫n error
+//		FALSE: En caso de ocurrir alg˙n error
 // ________________________________________________________________________________________________________
 BOOLEAN enviaMensajeServidor(SOCKET *socket_c,TRAMA *ptrTrama,char tipo)
 {
@@ -2137,7 +2131,7 @@ BOOLEAN enviaMensajeServidor(SOCKET *socket_c,TRAMA *ptrTrama,char tipo)
 
 	*socket_c=abreConexion();
 	if(*socket_c==INVALID_SOCKET){
-		errorLog(modulo,38,FALSE); // Error de conexi√≥n con el servidor
+		errorLog(modulo,38,FALSE); // Error de conexiÛn con el servidor
 		return(FALSE);
 	}
 	ptrTrama->arroba='@'; // Cabecera de la trama
@@ -2170,15 +2164,15 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	/*--------------------------------------------------------------------------------------------------------
-		Validaci√≥n de par√°metros de ejecuci√≥n y fichero de configuraci√≥n 
+		ValidaciÛn de par·metros de ejecuciÛn y fichero de configuraciÛn 
 	 ---------------------------------------------------------------------------------------------------------*/
-	if (!validacionParametros(argc, argv,3)) // Valida par√°metros de ejecuci√≥n
+	if (!validacionParametros(argc, argv,3)) // Valida par·metros de ejecuciÛn
 		exit(EXIT_FAILURE);
 
-	if (!tomaConfiguracion(szPathFileCfg)) // Toma parametros de configuraci√≥n
+	if (!tomaConfiguracion(szPathFileCfg)) // Toma parametros de configuraciÛn
 		exit(EXIT_FAILURE);
 	/*--------------------------------------------------------------------------------------------------------
-		Carga cat√°logo de funciones que procesan las tramas 
+		Carga cat·logo de funciones que procesan las tramas 
 	 ---------------------------------------------------------------------------------------------------------*/
 	int cf = 0;
 
@@ -2247,21 +2241,21 @@ int main(int argc, char *argv[])
 	tbfuncionesClient[cf++].fptr = &InventarioSoftware;
 
 	/*--------------------------------------------------------------------------------------------------------
-		Toma direcci√≥n IP del cliente 	
+		Toma direcciÛn IP del cliente 	
 	 ---------------------------------------------------------------------------------------------------------*/
 	if(!tomaIPlocal()){ // Error al recuperar la IP local
 		errorLog(modulo,0,FALSE);
 		exit(EXIT_FAILURE);
 	}
 	/*--------------------------------------------------------------------------------------------------------
-		Inicio de sesi√≥n
+		Inicio de sesiÛn
 	 ---------------------------------------------------------------------------------------------------------*/
-	infoLog(1); // Inicio de sesi√≥n
-	infoLog(3); // Abriendo sesi√≥n en el servidor de Administraci√≥n;		
+	infoLog(1); // Inicio de sesiÛn
+	infoLog(3); // Abriendo sesiÛn en el servidor de AdministraciÛn;		
 	/*--------------------------------------------------------------------------------------------------------
-		Inclusi√≥n del cliente en el sistema
+		InclusiÛn del cliente en el sistema
 	 ---------------------------------------------------------------------------------------------------------*/
-	if(!inclusionCliente(ptrTrama)){	// Ha habido alg√∫n problema al abrir sesi√≥n
+	if(!inclusionCliente(ptrTrama)){	// Ha habido alg˙n problema al abrir sesiÛn
 		errorLog(modulo,0,FALSE);
 		exit(EXIT_FAILURE);
 	}
@@ -2270,17 +2264,17 @@ int main(int argc, char *argv[])
 	/*--------------------------------------------------------------------------------------------------------
 		Procesamiento de la cache
 	 ---------------------------------------------------------------------------------------------------------*/
-	infoLog(23); // Abriendo sesi√≥n en el servidor de Administraci√≥n;
+	infoLog(23); // Abriendo sesiÛn en el servidor de AdministraciÛn;
 	if(!cuestionCache(cache)){
 		errorLog(modulo,0,FALSE);
 		exit(EXIT_FAILURE);
 	}
 	/*--------------------------------------------------------------------------------------------------------
-		Ejecuci√≥n del autoexec
+		EjecuciÛn del autoexec
 	 ---------------------------------------------------------------------------------------------------------*/
-	if(atoi(idproautoexec)>0){  // Ejecuci√≥n de procedimiento Autoexec
+	if(atoi(idproautoexec)>0){  // EjecuciÛn de procedimiento Autoexec
 		infoLog(5);
-		if(!autoexecCliente(ptrTrama)){  // Ejecuci√≥n fichero autoexec
+		if(!autoexecCliente(ptrTrama)){  // EjecuciÛn fichero autoexec
 			errorLog(modulo,0,FALSE);
 			exit(EXIT_FAILURE);
 		}
@@ -2289,18 +2283,18 @@ int main(int argc, char *argv[])
 		Comandos pendientes
 	 ---------------------------------------------------------------------------------------------------------*/
 	infoLog(6); // Procesa comandos pendientes
-	if(!comandosPendientes(ptrTrama)){  // Ejecuci√≥n de acciones pendientes
+	if(!comandosPendientes(ptrTrama)){  // EjecuciÛn de acciones pendientes
 		errorLog(modulo,0,FALSE);
 		exit(EXIT_FAILURE);
 	}
 	infoLog(7); // Acciones pendientes procesadas
 	/*--------------------------------------------------------------------------------------------------------
-		Bucle de recepci√≥n de comandos
+		Bucle de recepciÛn de comandos
 	 ---------------------------------------------------------------------------------------------------------*/
 	muestraMenu();
 	procesaComandos(ptrTrama); // Bucle para procesar comandos interactivos
 	/*--------------------------------------------------------------------------------------------------------
-		Fin de la sesi√≥n
+		Fin de la sesiÛn
 	 ---------------------------------------------------------------------------------------------------------*/
 	exit(EXIT_SUCCESS);
 }

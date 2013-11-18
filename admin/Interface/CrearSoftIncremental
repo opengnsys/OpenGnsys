@@ -24,7 +24,8 @@
 #		XX1X: Borrar previamente la imagen incremental de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $8 Ruta de origen de la Imagen (Carpeta)
+# $8 Método de syncronización 1=Sincronización1  2=Sincronizacion2
+# $9 Ruta de origen de la Imagen (Carpeta)
 
 #___________________________________________________________________
 #
@@ -32,13 +33,21 @@
 #___________________________________________________________________
 
 	PROG="$(basename $0)"
-	if [ $# -lt 7 ]; then
+	if [ $# -lt 8 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio nombre_imagen_incremental"
 		usage="$usage copiar_a_caché Borrar_cache_previamente Ruta_origen"
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
 		exit $?
 	fi
 	
-	# Llamada a la función de sincronización.
-	ogCrearSoftIncremental "$@"
+	
+	if [ $8 -eq 1 ]; then
+		#sincronizacion1 
+		ogCrearSoftIncremental "$@"
+	fi		
+	
+
+	#if [ $8 -eq 2 ]; then
+
+	#fi
 
