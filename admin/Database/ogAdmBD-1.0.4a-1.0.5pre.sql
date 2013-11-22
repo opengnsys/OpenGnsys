@@ -21,11 +21,7 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
 	(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
 	(14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
-	(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion'),
-(16, 'Crear Imagen Básica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CreateBaseImage', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'diferenciacion'),
-(17, 'Restaurar Imagen Básica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestoreBaseImage', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'diferenciacion'),
-(18, 'Crear Imagen Diferencial', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CreateDiffImage', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'diferenciacion'),
-(19, 'Restaurar Imagen Diferencial', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestoreDiffImage', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'diferenciacion');
+	(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion');
 
 # Parámetros para los comandos nuevos.
 ALTER TABLE parametros
@@ -52,11 +48,11 @@ UPDATE grupos SET tipo=70 WHERE tipo=50;
 
 # Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
-     MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-UPDATE menus SET resolucion = CASE resolucion 
-                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+	MODIFY resolucion VARCHAR(50) DEFAULT NULL;
+UPDATE menus SET resolucion = CASE resolucion
+				   WHEN '355' THEN 'uvesafb:1152x864-16'
 				   WHEN '788' THEN 'uvesafb:800x600-16'
-        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+				   WHEN '789' THEN 'uvesafb:800x600-24'
 				   WHEN '791' THEN 'uvesafb:1024x768-16'
 				   WHEN '792' THEN 'uvesafb:1024x768-24'
 				   WHEN '794' THEN 'uvesafb:1280x1024-16'
@@ -101,6 +97,7 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('EXFAT', 'EXFAT')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+# Nuevas particiones marcadas como clonables.
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('EF',16,10), 'EFI', 1),
 	(CONV('AB00',16,10), 'HFS-BOOT', 1),
