@@ -16,13 +16,14 @@
 		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT')
 		for(var i=0;i<ochecks.length;i++){
-			if(ochecks[i].checked){
+			if(ochecks[i].checked && ochecks[i].name=="particion"){
 				var idradio=ochecks[i].id;	
 				var diskPart = ochecks[i].value.split(";");
 				disco =diskPart[0];
 				var numpar=	diskPart[1];	
 				atributos+="dsk="+disco+RC; // Número de disco
 				atributos+="par="+numpar+RC; // Número de partición
+
 				var despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1");
 				var despleimagen;
 					
@@ -40,6 +41,21 @@
 				var desplemet=document.getElementById("desplemet_"+idradio); // Desplegable metodo de restauración
 				var  p=desplemet.selectedIndex // Toma índice seleccionado
 				atributos+="met="+p+RC;	// Método de clonación 0=caché 1=repositorio	
+
+				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
+				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				atributos+="msy="+p+RC;	// Método de clonación 
+				
+				var desplemet=document.getElementById("despletpt_"+idradio); // Desplegable metodo de syncronización
+				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				atributos+="tpt="+p+RC;	// Método de transmision 
+
+				var chrChk=document.getElementById('whl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				if(chrChk.checked)	atributos+="whl=1"+RC; else atributos+="whl=0"+RC;
+				chrChk=document.getElementById('eli-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				if(chrChk.checked)	atributos+="eli=1"+RC;	 else atributos+="eli=0"+RC;
+				chrChk=document.getElementById('cmp-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				if(chrChk.checked)	atributos+="cmp=1"+RC; else atributos+="cmp=0"+RC;
 
 				var cc=ochecks[i].getAttribute('idcfg'); // Toma identificador del bloque de configuración
 				if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){	
@@ -64,6 +80,7 @@
 	
 				document.fdatosejecucion.atributos.value=atributos;
 				filtrado();
+				//alert(atributos)
 				document.fdatosejecucion.submit();	
 				break;		
 			}
@@ -82,7 +99,7 @@
 		var ochecks=tb_conf.getElementsByTagName('INPUT')
 		var op=0
 		for(var i=0;i<ochecks.length;i++){
-			if(ochecks[i].checked){
+			if(ochecks[i].checked && ochecks[i].name=="particion"){
 				op++;
 				var idradio=ochecks[i].id; // Toma idemtificador del desplegable de imagenes
 				despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable imagenes.
@@ -91,6 +108,13 @@
 						alert(TbMsg[0])
 						despleimagenizda.focus()
 			      return(false)
+				}
+				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
+				var  p1=desplemet.selectedIndex // Toma índice seleccionado
+				if (p1==0){  
+						alert(TbMsg[7])
+						desplemet.focus()
+			   return(false)
 				}
 			}
 		}
