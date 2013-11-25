@@ -29,14 +29,17 @@ trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 ERR
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
-    echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
+    local MSG="$(ogRaiseError $exit_status \"$1 $2 $3 $4\" 2>&1)"
+    echo "$MSG" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage "$1" "$2" "$IMGEXT"  &>/dev/null
     [ $exit_status -ne 4 ] && ogUnlock $3 $4 &>/dev/null
     exit $exit_status
 }
 
 # Limpiamos los archivo de log
-echo "" >$OGLOGCOMMAND
+echo -n "" >$OGLOGCOMMAND; echo -n "" $OGLOGFILE; echo -n ""  $OGLOGSESSION
+
+echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE  $OGLOGSESSION
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -58,7 +61,7 @@ fi
 REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
 
 # Comprobar que es sincronizable (con REPO)
-ogIsSyncImage $1 "$2" $IMGEXT  ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
+ogIsSyncImage REPO "$2" $IMGEXT  ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
 
 # Comprobamos si el sistema de ficheros se puede montar
 ogMount "$3" "$4" &>/dev/null || RETVAL=$?
@@ -74,7 +77,6 @@ if [  "$RETVAL" ] ; then
 	ogMount "$3" "$4"  || ogRaiseError $OG_ERR_FILESYS "$3 $4"
 fi
 
-echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE
 IMGEXT="img"
 
 # Comprobamos si la imagen o la particion estan bloqueada:
@@ -85,14 +87,14 @@ PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    # Las imagenes sincronizables aunque sean iguales no tienen el mismo sum. 
    # Sincronizamos si existe el fichero y si no usamos updateCache.
-   echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE
-   echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE
+   echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE $OGLOGSESSION
+   echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE $OGLOGSESSION
    #updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"    &>> $OGLOGCOMMAND
    updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"  2>&1 | tee -a   $OGLOGCOMMAND
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
-        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL" | tee -a $OGLOGFILE 
+        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL" | tee -a $OGLOGFILE $OGLOGSESSION
         # RC=15 No hay cache 
         # RC=16 no hay espacio sufiente 
         exit $RETVAL 
@@ -105,7 +107,7 @@ fi
 TIME2=$SECONDS
 
 # Restaurar la imagen.
-echo "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  | tee -a $OGLOGFILE
+echo "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  | tee -a $OGLOGFILE $OGLOGSESSION
 
 ogLock $3 $4
 
@@ -114,25 +116,25 @@ ogMountImage "$1" "$2" "$IMGEXT"  >/dev/null
 #  Comprobar que la imagen completa se ha montado.
 ogWaitMountImage "$1" "$2" "$IMGEXT"  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."
 # Sincronizamos la partición con la imagen.
-echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4"  |tee -a $OGLOGFILE
+echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4"  |tee -a $OGLOGFILE $OGLOGSESSION
 ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4 
 
 TIMEAUX2=$[SECONDS-TIME2]
-echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGFILE $OGLOGSESSION
 
 # Desmontamos imagen basica.
 ogUnmountImage "$1" "$2" "$IMGEXT"
 
 # Restableciendo acl
 ogUnlock $3 $4
-echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE
+echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE $OGLOGSESSION
 ogRestoreInfoImage $3 $4  &>>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
-echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE
+echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE $OGLOGSESSION
 # el || echo es para evitar que se maneje el error.
 configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
 
 TIME=$[SECONDS-TIME1]
-echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE
+echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE $OGLOGSESSION
 

@@ -40,12 +40,43 @@
 		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
 		exit $?
 	fi
+
+        #Load engine configurator from engine.cfg file.
+        #Carga el configurador del engine desde el fichero engine.cfg
+        [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+        # Clear temporary file used as log track by httpdlog
+        # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+        echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+
+	
 	
 	if [ $9 -eq 1 ]; then
 		#sincronizacion1 
  		ogRestaurarImagenBasica "$@"
 	fi			
 
-	#if [ $9 -eq 2 ]; then
+	if [ $9 -eq 2 ]; then
+		#sincronizacion2
+		# Opciones de clonacion
+		flag=$6
+                WHOLE=${flag:0:1}
+                DELFILE=${flag:1:1}
+                COMPRESS=${flag:2:1}
 
-	#fi
+                # Nota los valores se pasan como variables de entorno, 
+                #       la idea es que mas adelante vayan en el fichero PXE.
+                [ $WHOLE -eq 1 ] && export ogrsyncw=true || export ogrsyncw=false
+                [ $DELFILE -eq 1 ] && export ogrsyncdel=true || export ogrsyncdel=false
+                [ $COMPRESS -eq 1 ] && export ogrsyncz=true || export ogrsyncz=false
+
+		# Origen de la imagen.
+		[ $8 -eq 0 ] && DEST="CACHE" || DEST="REPO"
+
+		# Protocolo de clonacion y opciones
+		PROTO=${5%_*}
+		OPT=${5#*_}
+
+		restoreBaseImage $DEST "$3" $1 $2  $PROTO $OPT
+
+	fi

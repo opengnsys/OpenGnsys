@@ -411,8 +411,10 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						$metodos.="SYNC2="."SYNC2";		
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100).'</TD>';								
 							
-						$metodos="Unicast="."Unicast".chr(13);						
-						$metodos.="Multicast="."Multicast";		
+						$metodos="UNICAST="."Unicast".chr(13);						
+						$metodos.="MULTICAST_". mcast_syntax($cmd,$ambito,$idambito) ."="."Multicast".chr(13);		
+						$metodos.="TORRENT_". torrent_syntax($cmd,$ambito,$idambito) ."="."Torrent".chr(13);
+						$metodos.="RSYNC=Rsync";
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"despletpt_".$icp,"estilodesple","",1,100).'</TD>';								
 						
 						echo '<td align=center><input type=checkbox name="whole" id="whl-'.$icp.'"></td>';	

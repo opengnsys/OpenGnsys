@@ -31,7 +31,6 @@
 #
 # Control parámetros
 #___________________________________________________________________
-
 	PROG="$(basename $0)"
 	if [ $# -lt 8 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio nombre_imagen_incremental"
@@ -40,6 +39,13 @@
 		exit $?
 	fi
 	
+        #Load engine configurator from engine.cfg file.
+        #Carga el configurador del engine desde el fichero engine.cfg
+        [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+        # Clear temporary file used as log track by httpdlog
+        # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+        echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
 	
 	if [ $8 -eq 1 ]; then
 		#sincronizacion1 
@@ -47,7 +53,23 @@
 	fi		
 	
 
-	#if [ $8 -eq 2 ]; then
+	if [ $8 -eq 2 ]; then
+		#sincronizacion 2
+		flag=$6
+                WHOLE=${flag:0:1}
+                DELFILE=${flag:1:1}
+                COMPRESS=${flag:2:1}
 
-	#fi
+                # Nota los valores se pasan como variables de entorno, 
+                #       la idea es que mas adelante vayan en el fichero PXE.
+                [ $WHOLE -eq 1 ] && export ogrsyncw=true || export ogrsyncw=false
+                [ $DELFILE -eq 1 ] && export ogrsyncdel=true || export ogrsyncdel=false
+                [ $COMPRESS -eq 1 ] && export ogrsyncz=true || export ogrsyncz=false
+
+		# REPOSITORIO: Si la ip es la del propio equipo CACHE, si no REPO
+		CLIENTIP=$(ogGetIpAddress)
+		[ "$4" == "$CLIENTIP" ] && DEST=CACHE || DEST=REPO
+		createDiffImage $1 $2 $DEST "$3" "$5" 
+
+	fi
 

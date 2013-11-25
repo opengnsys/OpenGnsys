@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/RecopilaIpesMacs.php");
+include_once("../includes/opcionesprotocolos.php");
 include_once("../idiomas/php/".$idioma."/comandos/restaurarimagenbasica_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 include_once("./includes/capturaacciones.php");
@@ -71,6 +72,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </HEAD>
 <BODY>
 <?
+
 //________________________________________________________________________________________________________
 //
 //
@@ -82,6 +84,9 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	include_once("./includes/FiltradoAmbito.php");
 //________________________________________________________________________________________________________
 //
+
+
+
 	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
 	if($ambito!=$AMBITO_ORDENADORES){	
 		$cadenaid="";
@@ -218,5 +223,6 @@ function opcionesAdicionales()
 	$tablaHtml.='	</table>';
 	echo $tablaHtml;
 }
+
 ?>
 

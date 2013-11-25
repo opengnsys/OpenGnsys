@@ -31,6 +31,7 @@
 # Control parámetros
 #___________________________________________________________________
 
+
 	PROG="$(basename $0)"
 	if [ $# -lt 7 ]; then
 		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio"
@@ -39,6 +40,14 @@
 		exit $?
 	fi
 	
+	#Load engine configurator from engine.cfg file.
+	#Carga el configurador del engine desde el fichero engine.cfg
+	[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+	# Clear temporary file used as log track by httpdlog
+	# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+	echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+
 	if [ $7 -eq 1 ]; then
 		#sincronizacion1 
 		ogCrearImagenBasica "$@"

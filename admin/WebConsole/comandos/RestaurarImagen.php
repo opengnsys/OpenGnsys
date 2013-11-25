@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/RecopilaIpesMacs.php");
+include_once("../includes/opcionesprotocolos.php");
 include_once("../idiomas/php/".$idioma."/comandos/restaurarimagen_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 include_once("../includes/ConfiguracionesParticiones.php");
@@ -205,94 +206,6 @@ function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion){
 }
 
 
-function mcast_syntax($cmd,$ambito,$idambito)
-{
-//if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if ($ambito == 4) 
-{
-$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
-		WHERE aulas.idaula=' . $idambito ;
-}
-
-if ($ambito == 8) 
-{
-$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
-		JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula
-		WHERE gruposordenadores.idgrupo=' . $idambito ;
-}
-
-if ($ambito == 16)
-{
-$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
-		JOIN ordenadores ON ordenadores.idaula=aulas.idaula
-		WHERE ordenadores.idordenador=' . $idambito ;
-}
-
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	if ($rs->Abrir()){
-		$rs->Primero(); 
-		$mcastsyntax = $rs->campos["pormul"] . ':';
-
-		$rs->Siguiente();
-		switch ($rs->campos["modomul"]) 
-		{
-			case 1:
-				$mcastsyntax.="half-duplex:";
-				break;
-			default:
-				$mcastsyntax.="full-duplex:";
-				break;
-		} 			
-		$rs->Siguiente();
-		$mcastsyntax.=$rs->campos["ipmul"] . ':';
-		
-		$rs->Siguiente();
-		$mcastsyntax.=$rs->campos["velmul"] .'M:';
-
-		$rs->Siguiente();
-		$mcastsyntax.=$rs->campos["puestos"] . ':';
-
-	$rs->Cerrar();
-	}
-	$mcastsyntax.="60";
-
-	return($mcastsyntax);	
-}
-
-
-function torrent_syntax($cmd,$ambito,$idambito)
-{
-if ($ambito == 4) 
-{
-	$cmd->texto='SELECT modp2p, timep2p FROM aulas
-			WHERE aulas.idaula=' . $idambito ;
-}
-if ($ambito == 8) 
-{
-	$cmd->texto='SELECT modp2p, timep2p FROM aulas
-			JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula
-			WHERE gruposordenadores.idgrupo=' . $idambito ;
-}
-if ($ambito == 16)
-{
-	$cmd->texto='SELECT modp2p, timep2p FROM aulas
-			JOIN ordenadores ON ordenadores.idaula=aulas.idaula
-			WHERE ordenadores.idordenador=' . $idambito ;
-}
-
-$rs=new Recordset; 
-$rs->Comando=&$cmd; 
-if ($rs->Abrir()){
-	$rs->Primero(); 
-	$torrentsyntax=$rs->campos["modp2p"] . ':';
-	$rs->Siguiente();
-	$torrentsyntax.=$rs->campos["timep2p"];
-	$rs->Siguiente();
-	$rs->Cerrar();
-}
-return($torrentsyntax);   
-}
 
 ?>
 

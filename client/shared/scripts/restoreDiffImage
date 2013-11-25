@@ -29,7 +29,8 @@ trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 ERR
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
-    echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
+    local MSG="$(ogRaiseError $exit_status \"$1 $2 $3 $4\"  2>&1)"
+    echo "$MSG" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage "$1" "$2" "$DIFFTYPE" &>/dev/null
     [ $exit_status -ne 4 ] && ogUnlock $3 $4 &>/dev/null
     exit $exit_status
@@ -37,6 +38,7 @@ function onexit() {
 
 
 # Limpiamos los archivo de log
+echo  -n ""> $OGLOGSESSION
 echo "" >$OGLOGCOMMAND
 
 TIME1=$SECONDS
@@ -52,7 +54,7 @@ fi
 
 [ $# -lt 4 ] &&  ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE diff_imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
 
-echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a  $OGLOGFILE
+echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a  $OGLOGFILE  $OGLOGSESSION
 
 # Procesar parámetros de entrada
 DIFFTYPE="diff"
@@ -69,13 +71,13 @@ PART=$(ogDiskToDev "$3" "$4" 2>/dev/null )  || ogRaiseError $OG_ERR_PARTITION "$
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Comprobar que es sincronizable
-ogIsSyncImage $1 "$2" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
+ogIsSyncImage REPO "$2" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
 
 PROTO=${5:-"UNICAST"}
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-   echo "[10] $MSG_HELP_updateCache." | tee -a  $OGLOGFILE
-   echo "     updateCache REPO" "/$2.$DIFFEXT" "$PROTO" "$6"  | tee -a  $OGLOGFILE   
+   echo "[10] $MSG_HELP_updateCache." | tee -a  $OGLOGFILE  $OGLOGSESSION
+   echo "     updateCache REPO" "/$2.$DIFFEXT" "$PROTO" "$6"  | tee -a  $OGLOGFILE  $OGLOGSESSION
    updateCache REPO "/$2.$DIFFEXT" "$PROTO" "$6"  &>> $OGLOGCOMMAND
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
@@ -87,7 +89,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    fi 
 
    TIMEAUX1=$[SECONDS-TIME]
-   echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGFILE
+   echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGFILE  $OGLOGSESSION
 
 fi 
 TIME2=$SECONDS
@@ -104,7 +106,7 @@ ogWaitMountImage "$1" "$2" "$DIFFTYPE" || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "
 ogMount $3 $4 >/dev/null
 ogLock $3 $4
 # Sincronizamos la partición con la imagen.
-echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $DIFFTYPE $3 $4"  |tee -a $OGLOGFILE
+echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $DIFFTYPE $3 $4"  |tee -a $OGLOGFILE  $OGLOGSESSION
 ogSyncRestore "$1" "$2" "$DIFFTYPE" $3 $4
 
 # Desmontamos la imagen
@@ -112,10 +114,10 @@ ogUnmountImage "$1" "$2" "$DIFFTYPE"
 ogUnlock $3 $4
 
 TIMEAUX2=$[SECONDS-TIME2]
-echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a  $OGLOGFILE
+echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a  $OGLOGFILE  $OGLOGSESSION
 
 # creando enlaces y restableciendo ACL (en windows)
-echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE
+echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE  $OGLOGSESSION
 ogRestoreInfoImage  "$3" "$4" &>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
@@ -125,5 +127,5 @@ configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
 
 
 TIME=$[SECONDS-TIME1]
-echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE
+echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE  $OGLOGSESSION
 

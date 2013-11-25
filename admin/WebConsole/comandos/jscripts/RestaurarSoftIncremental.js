@@ -47,7 +47,7 @@
 				atributos+="msy="+p+RC;	// Método de clonación 
 				
 				var desplemet=document.getElementById("despletpt_"+idradio); // Desplegable metodo de syncronización
-				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				var  p=desplemet.value // Toma índice seleccionado
 				atributos+="tpt="+p+RC;	// Método de transmision 
 
 				var chrChk=document.getElementById('whl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales

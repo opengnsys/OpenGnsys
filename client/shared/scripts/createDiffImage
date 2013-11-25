@@ -33,7 +33,8 @@ trap "onexit $1 $2 $3 \"$4\" \"$5\"" 1 2 3 6 9 14 15 ERR
 
 function onexit() {
     local exit_status=$?
-    echo "$MSG_ERR_GENERIC $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
+    local MSG="$(ogRaiseError $exit_status \"$1 $2 $3 $4 $5\" 2>&1)"
+    echo "$MSG" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage $3 "$5" $DIFFTYPE &>/dev/null
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
     if [ $exit_status -ne 4 ]; then
@@ -69,6 +70,10 @@ fi
 IMGEXT="img"
 DIFFEXT="img.diff"
 DIFFTYPE="diff"
+
+# Limpiamos los archivo de log
+echo -n "" >$OGLOGCOMMAND;  echo -n ""  $OGLOGSESSION
+
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Comprobamos si la imagen diferencial o la particion estan bloqueada:
@@ -83,7 +88,6 @@ ogIsSyncImage "$3" "$4" "img" || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
 # Comprobar que no está bloqueada
 ogIsImageLocked "$3" "$4.$IMGEXT" && ogRaiseError $OG_ERR_LOCKED "$3 $4.$IMGEXT"
 
-echo " " > $OGLOGCOMMAND
 # Si el repositorio es CACHE comprobamos que exista
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
         ! ogFindCache >/dev/null && ogRaiseError $OG_ERR_NOTCACHE "CACHE "
