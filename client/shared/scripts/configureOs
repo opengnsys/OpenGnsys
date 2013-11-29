@@ -58,8 +58,8 @@ case "$OSTYPE" in
         ogWindowsRegisterPartition $1 $2 C $1 $2
         #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
         # Instalar cliente para Windows (no activar en sistema en produccion ver ticket 604).
-		#ogInstallMiniSetup $1 $2 postconf.cmd
-		#ogInstallWindowsClient $1 $2 postconf.cmd
+	ogInstallMiniSetup $1 $2 postconf.cmd
+	ogInstallWindowsClient $1 $2 postconf.cmd
         ;;
     Linux)
         ## Install and Configure Grub based on OS installed and Grub 1st stage location.
