@@ -10,6 +10,7 @@
  function confirmar(){
 	if (comprobar_datos()){
 		var RC='@';
+		document.fdatos.codigo.value+="\n";
 		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value)+RC;
 		filtrado();
 		document.fdatosejecucion.submit();
