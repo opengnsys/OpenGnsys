@@ -38,8 +38,8 @@ fi
 #Carga del configurador del engine
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
-REPOSITORIO="$1"
-PROTOCOLO="$3"
+REPOSITORIO="${1^^}"
+PROTOCOLO="${3^^}"
 OPTPROTOCOLO="$4"
 REPOIP=$(ogGetRepoIp)
 echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
@@ -98,7 +98,7 @@ echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE"
 #ERROR CACHESIZE 16
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
-	echo "WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
     exit $?
 fi
@@ -108,7 +108,7 @@ echo "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO"
 if [ "$SIZEREQUIRED" -ge "$CACHESIZEFREE" ]  
 then
 	# echo "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"  | tee -a $OGLOGSESSION $OGLOGFILE
-	case $ACTIONCACHEFULL in 
+	case "$ACTIONCACHEFULL" in 
 	NONE)
 		NEXTOPERATION=UNICAST
 	;;
@@ -120,14 +120,14 @@ then
 	    NEXTOPERATION=REPEAT
 	;;
 	DELETE)
-		echo "[51] #MSG_HELP_ogDeleteTree $OGCAC$OGIMG/* "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    echo "[51] #MSG_HELP_ogDeleteTree $OGCAC$OGIMG/* "  | tee -a $OGLOGSESSION $OGLOGFILE
 	    rm -fr  $OGCAC$OGIMG/*
 	    NEXOPERATION=REPEAT
 	;;
 	*)
-	 	echo "WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+	 	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
-    	exit $?
+		exit $?
 	;;
 	esac	
 fi
@@ -152,7 +152,7 @@ fi
 TIME1=$SECONDS
 
 case "$PROTOCOLO" in
-	torrent | TORRENT )
+	TORRENT)
 		echo "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
 		# tiempos 
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
@@ -167,11 +167,11 @@ case "$PROTOCOLO" in
 		ogTorrentStart CACHE "$2.torrent" $4
 		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND | grep -B1 "Download") 
 	;;
-	multicast | MULTICAST )
+	MULTICAST)
 		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
 		let PORTAUX=$PORT+1
 		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKMCASTSESSION : $REPOIP:$PORTAUX:$PORT"
-        #TODO: ticket 379
+		#TODO: ticket 379
 		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
 		sleep $NUMBER
 		#FIN TODO
@@ -197,7 +197,7 @@ case "$PROTOCOLO" in
 		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
 		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete")
 	;;
-	unicast | UNICAST )
+	UNICAST)
 		echo "unicast"
 		ogCopyFile $REPOSITORIO "$2" "$IMGDIR"
 	;;
@@ -253,7 +253,7 @@ fi
 TIME2=$[SECONDS-TIME2]
 echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
-# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
+# si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizamos-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
