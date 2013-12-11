@@ -1,75 +1,185 @@
 #!/bin/bash
-
 #/**
-#         deployImage
-#@brief   Actualiza la cache del cliente con una imagen, y la restaura en la partición.
-#@param 1 
-#@param ejemplo:  
-#@return  
-#@exception OG_ERR_FORMAT     formato incorrecto.
-#@note   
-#@todo: 
-#@version 0.9.1 - integracion EAC
-#@author  Antonio J. Doblas Viso. Universidad de Malaga.
-#@date    2008/03/17
-#@version 0.9.2 - integracion OpenGnsys
-#@author  Antonio J. Doblas Viso. Universidad de Malaga.
-#@date    2010/07/27
-#@version 1.0.2 - Separacion de log
-#@author  Antonio J. Doblas Viso. Universidad de Malaga.
-#@date    2010/08/04
-#*/ ##
+#@file    deployImage
+#@brief   Proceso completo de despliegue de imagen, incluyendo actualización de la caché, restauración y post-configuración (este script es llamado por la interfaz RestaurarImagen).
+#@param   $1 disco
+#@param   $2 Número de particion
+#@param   $3 Nombre canónico de la imagen (sin extensión)
+#@param   $4 Repositorio (CACHE, REPO o dirección IP)
+#@param   $5 Protocolo (UNICAST, por defecto, MULTICAST o TORRENT)
+#@param   $6 Opciones del protocolo
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception OG_ERR_PARTITION 3	# Error en partición de disco.
+#@exception OG_ERR_LOCKED    4 partición bloqueada por otra operación.
+#@exception OG_ERR_IMAGE    5 error al restaurar la imagen del sistema.
+#@exception OG_ERR_IMGSIZEPARTITION  30 Tamaño de la particion es menor al tamaño de la imagen.
+#@version 1.0.1 - Separación en protocolos de transferencia y postconfiguracion
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2011-05-11
+#@version 1.0.1 - Separación de los ficheros-log para ser gestionado por el httpd-log
+#@author  Antonio J. Doblas Viso. Universidad de Málaga  
+#@date    2011-05-11
+#@version 1.0.2 - Logica basada en fichero de configuracion engine.cfg
+#@author  Antonio J. Doblas Viso. Universidad de Málaga  
+#@date    2012-01-11
+#@version 1.0.5 - Renominación del script como "deployImage".
+#@author  Antonio J. Doblas Viso y Ramón M. Gómez.
+#@date    2013-12-04
+#**/
 
-TIME1=$SECONDS
 
-#Carga del configurador del engine
-[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+#Descripcion:
+# La interfaz detecta:
+#    Si Repositorio es el global (REPO) realiza un deploy.
+#    Si Repositorio es local (CACHE) realiza un restoreImage CACHE
+# El deploy, si detecta que el cliente no tiene una cache con espacio suficiente 
+#  -- reazlia un ogRestore REPO
+
 
 
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST|UNICAST-CACHE|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
     exit $?
 fi
 
-#controlar param1 REPO
-echo "[1] $MSG_SCRIPTS_TASK_START  updateCache REPO $2.img $5 $6" | tee -a $OGLOGSESSION $OGLOGFILE
-updateCache REPO $2.img $5 $6 | tee -a $OGLOGCOMMAND
-RETVAL=$?
+# Asignación de variables (repositorio y protocolo se convierten a mayúsculas).
+TIME1=$SECONDS
+REPO="${1^^}"
+IMGNAME="$2"
+DISK="$3"
+PART="$4"
+PROTO="${5^^}"
+PROTO="${PROTO:-"UNICAST"}"
+PROTOOPT="$6"
 
-TIME2=$[SECONDS-TIME1]
-echo "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
 
+# Registro de inicio de ejecución
+echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
-if [ "$RETVAL" != "0" ]
-then
-	echo "[100] $MSG_SCRIPTS_TASK_ERR = $RETVAL  ; updateCache REPO $2.img $5 $6 " | tee -a $OGLOGSESSION $OGLOGFILE
-	# RC=15 No hay cache
-	# RC=16 no hay espacio sufiente
-	exit $RETVAL	
+# Si el origen(pariticion) esta bloqueada salir.
+if ogIsLocked $DISK $PART; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"
+    exit $?
 fi
 
+echo "Desmontando $DISK $PART" | tee -a $OGLOGSESSION $OGLOGFILE
+ogUnmount $DISK $PART 2>/dev/null
 
+# Valor por defecto para el repositorio.
+REPO=${1:-"REPO"}
+[ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 
+#Informacioin previa de la imagen
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(echo "ERROR: $OG_ERR_NOTFOUND $MSG_ERR_NOTFOUND, IMAGEN $REPO $3" | tee -a $OGLOGSESSION $OGLOGFILE; ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND, $REPO $3"; echo $?)
+IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
 
-TIME2=$SECONDS
-echo "[50] $MSG_SCRIPTS_TASK_START  ogRestore CACHE /$2 $3 $4" | tee -a $OGLOGSESSION $OGLOGFILE
-ogRestoreImage CACHE /$2 $3 $4 &>> $OGLOGCOMMAND
-RETVAL=$?
-if [ "$RETVAL" == "0" ] 
-then
-	RESUMERESTOREIMAGE=$(cat $OGLOGCOMMAND | grep "Total Time:")
-	echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
-	echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-	TIME2=$[SECONDS-TIME2]
-	echo "[90] $MSG_SCRIPTS_OS_CONFIGURE " | tee -a $OGLOGSESSION $OGLOGFILE
-	configureOs $3 $4 | tee -a $OGLOGCOMMAND
+echo "[1] IMG-FILE=$3  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Procesar repositorio.
+case "$REPO" in
+    CACHE)  # Repositorio en caché local.
+        NEXTOPERATION=CACHE
+    ;;
+    REPO)   # Repositorio remoto por defecto.
+        case "$PROTO" in
+            MULTICAST-DIRECT)
+                NEXTOPERATION=MULTICAST
+            ;;
+            UNICAST-DIRECT)
+                NEXTOPERATION=UNICAST
+            ;;
+
+            # Si protocolo es torrent|torrent-cache o multicast|multicast-cache
+            TORRENT|TORRENT-CACHE|MULTICAST|MULTICAST-CACHE|UNICAST|UNICAST-CACHE)
+                echo "[2] updateCache REPO \"/$IMGNAME.img\" $PROTO $PROTOOPT"	 | tee -a $OGLOGSESSION $OGLOGFILE
+                TIME2=$SECONDS
+                updateCache REPO "/$IMGNAME.img" "$PROTO" "$PROTOOPT"	 	
+                RETVAL=$?
+                TIME2=$[SECONDS-TIME2]
+                echo "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+                case $RETVAL in
+                    0)
+                        echo "[50] updateCache (OK)" | tee -a $OGLOGSESSION $OGLOGFILE
+                        NEXTOPERATION=CACHE
+                    ;;
+                    15|16)
+                        echo "[50] $MSG_ERR_NOTCACHE ;  $MSG_ERR_CACHESIZE " | tee -a $OGLOGSESSION $OGLOGFILE
+                        echo "[50] $MSG_SCRIPTS_CHECK_ENGINE " | tee -a $OGLOGSESSION $OGLOGFILE
+                        if [ "$RESTOREPROTOCOLNOCACHE" == "MULTICAST" ]; then
+                            case "$PROTO" in
+                                MULTICAST)  NEXTOPERATION=MULTICAST ;;
+                                TORRENT)    NEXTOPERATION=UNICAST ;;
+                                UNICAST)    NEXTOPERATION=UNICAST ;;
+                            esac
+                        else
+                            NEXTOPERATION=UNICAST
+                        fi
+                    ;;
+                esac
+            ;;
+            *)  # Error: protocolo desconocido.
+                ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $PROTO" | tee -a $OGLOGSESSION $OGLOGFILE
+                exit $?
+            ;;
+        esac
+    ;;
+    *)  # Error: repositorio desconocido.
+        ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" | tee -a $OGLOGSESSION $OGLOGFILE
+        exit $?
+    ;;
+esac
+
+TIME3=$SECONDS
+
+case "$NEXTOPERATION" in
+    CACHE)
+        echo "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
+        restoreImage CACHE "$IMGNAME" "$DISK" "$PART" | tee -a $OGLOGCOMMAND
+        RETVAL=$? 
+        RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
+    ;;
+    UNICAST)
+        echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
+        restoreImage REPO "$IMGNAME" "$DISK" "$PART"
+        RETVAL=$?
+        RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
+    ;;
+    MULTICAST)
+        echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" | tee -a $OGLOGSESSION $OGLOGFILE
+        restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT
+        RETVAL=$?    
+        RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
+    ;;
+esac
+
+echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+TIME3=$[SECONDS-TIME3]
+echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+if which configureOsCustom &>/dev/null; then
+    echo "[90] configureOsCustom" | tee -a $OGLOGSESSION $OGLOGFILE
+    configureOsCustom "$DISK" "$PART"
+else
+    echo "[90] $MSG_SCRIPTS_OS_CONFIGURE " | tee -a $OGLOGSESSION $OGLOGFILE
+    configureOs "$DISK" "$PART"
 fi
- 
+
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
-
+# Registro de fin de ejecución
+echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
 
 exit $RETVAL
+
