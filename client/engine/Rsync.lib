@@ -38,7 +38,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
             ogMakeDir "$1" $(dirname "/$2") || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
             IMGDIR=$(ogGetParentPath "$1" "/$2") || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
 	fi
-	DIRMOUNT=/tmp/$(ogGetMountDir "$2" "$3")
+	DIRMOUNT=/tmp/$(ogGetMountImageDir "$2" "$3")
         mkdir -p "$DIRMOUNT"
         LOOPDEVICE=$(losetup -f)
         # Si existe el fichero de la imagen se hace copia de seguridad, si  no existe se crea.
@@ -140,7 +140,7 @@ else
    IMGTYPE=$5
    if [ "$IMGTYPE" == "diff" ]; then
 	# Imagen completa con la que comparo la particion.
-	IMGDIRAUX=$(ogGetMountDir "$4" "img")
+	IMGDIRAUX=$(ogGetMountImageDir "$4" "img")
 	if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
            DIRMOUNT="/tmp/$IMGDIRAUX"
            DESTRSYNC=$DIRMOUNT
@@ -344,7 +344,7 @@ if [ $# -lt 4 ]; then
 fi
 
 ORIG=$(ogMount $1 $2)
-DIRMOUNT=$(ogGetMountDir "$4" $5)
+DIRMOUNT=$(ogGetMountImageDir "$4" $5)
 # Si la imagen es diferencial la lista de ficheros a transferir esta dentro de la imagen.
 [ "$5" == "diff" ] && FILESFROM=" --files-from=/tmp/ogimg.info" || FILESFROM=""
 
@@ -393,7 +393,7 @@ if [ $# -lt 5 ]; then
 fi
 
 
-DIRMOUNT=$(ogGetMountDir "$2" "$3")
+DIRMOUNT=$(ogGetMountImageDir "$2" "$3")
 DESTRSYNC=$(ogGetMountPoint $4 $5)
 
 # Borramos ficheros de informacion de restauraciones antiguas
@@ -469,7 +469,7 @@ fi
 
 [ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
 
-DIRMOUNT=$(ogGetMountDir "$2" ${IMGEXT#*\.})
+DIRMOUNT=$(ogGetMountImageDir "$2" ${IMGEXT#*\.})
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Si está montado nada que hacer.
@@ -528,7 +528,7 @@ fi
 [ "$3" == "" ] && IMGTYPE="img" || IMGTYPE="$3"
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-	DIRMOUNT=/tmp/$(ogGetMountDir "$2" $IMGTYPE)
+	DIRMOUNT=/tmp/$(ogGetMountImageDir "$2" $IMGTYPE)
 	umount "$DIRMOUNT"
 	rmdir "$DIRMOUNT"
 else
@@ -539,9 +539,9 @@ fi
 
 }
 
-function ogGetMountDir () {
+function ogGetMountImageDir () {
 #/**
-# ogGetMountDir
+# ogGetMountImageDir
 #@brief   Devuelve el directorio de montaje de la imagen.
 #@param 1 Nombre Imagen
 #@param 2 Tipo imagen [ img |diff ]
@@ -600,9 +600,9 @@ fi
 SIZE=${4:-"300000"}
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-	DIRMOUNT="/tmp/$(ogGetMountDir "$2" $3)"
+	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" $3)"
 else
-	DIRMOUNT="$OGIMG/$(ogGetMountDir "$2" $3)"
+	DIRMOUNT="$OGIMG/$(ogGetMountImageDir "$2" $3)"
 fi
 
 echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"

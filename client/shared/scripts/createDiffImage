@@ -144,7 +144,7 @@ echo "[40] $MSG_HELP_createDiffImage: $1 $2 $3 $4" | tee -a $OGLOGSESSION $OGLOG
 # Creamos la lista del contenido y lo situamos en la particion a copiar.
 FSTYPE=$(ogGetFsType $1 $2)
 
-IMGDIRAUX=$(ogGetMountDir "$4" $IMGEXT)
+IMGDIRAUX=$(ogGetMountImageDir "$4" $IMGEXT)
 
 # Montamos imagen completa (con la que vamos a comparar)
 ogMountImage $3 "$4" $IMGEXT >/dev/null

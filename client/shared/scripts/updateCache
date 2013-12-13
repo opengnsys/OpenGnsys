@@ -209,7 +209,7 @@ case "$PROTOCOLO" in
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
 		IMGNAME="${2%.img*}"
 
-		DIRMOUNT=$(ogGetMountDir "$IMGNAME" $IMGTYPE)
+		DIRMOUNT=$(ogGetMountImageDir "$IMGNAME" $IMGTYPE)
 		DIRLOCAL="/tmp/$DIRMOUNT"
 		mkdir $DIRLOCAL 2>/dev/null
 		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG" 

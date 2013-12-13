@@ -4,7 +4,8 @@
 #@brief Script de ejemplo para restaurar una imagen diferencial.
 #@brief (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
 #@param 1 REPO|CACHE
-#@param 2 imagen
+#@param 2 imagen basica
+#@param 2 imagen diferencial
 #@param 3 disco 
 #@param 4 particion 
 #@param 5 protocolo 
@@ -24,15 +25,15 @@
 #@author  
 #@date   2012-12-04
 #*/ ##
-trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 ERR
+trap "onexit $1 \"$3\" $4 $5" 1 2 3 6 9 14 15 ERR
 
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
-    local MSG="$(ogRaiseError $exit_status \"$1 $2 $3 $4\"  2>&1)"
+    local MSG="$(ogRaiseError $exit_status \"$1 $3 $4 $5\"  2>&1)"
     echo "$MSG" |tee -a $OGLOGFILE  $OGLOGSESSION
-    ogUnmountImage "$1" "$2" "$DIFFTYPE" &>/dev/null
-    [ $exit_status -ne 4 ] && ogUnlock $3 $4 &>/dev/null
+    ogUnmountImage "$1" "$3" "$DIFFTYPE" &>/dev/null
+    [ $exit_status -ne 4 ] && ogUnlock $4 $5 &>/dev/null
     exit $exit_status
 }
 
@@ -46,43 +47,46 @@ PROG="$(basename $0)"
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp  "$PROG: $MSG_HELP_restoreDiffImage" \
-            "$PROG REPO|CACHE diff_image ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]" \
-            "$PROG REPO Windows7_pc123 1 1 " \
-            "$PROG CACHE Ubuntu12_aula21 1 6 MULTICAST 9000:full-duplex:239.194.14.00:150M:50:60"
+            "$PROG REPO|CACHE base_image diff_image ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]" \
+            "$PROG REPO Windows7 Windows7_pc123 1 1 " \
+            "$PROG CACHE Ubuntu12 Ubuntu12_aula21 1 6 MULTICAST 9000:full-duplex:239.194.14.00:150M:50:60"
     exit 0
 fi
 
-[ $# -lt 4 ] &&  ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE diff_imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
+[ $# -lt 5 ] &&  ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE base_image diff_imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
 
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a  $OGLOGFILE  $OGLOGSESSION
 
 # Procesar parámetros de entrada
 DIFFTYPE="diff"
 DIFFEXT="img.diff"
-REPODIFFFILE=$(ogGetPath "REPO" "$2.$DIFFEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO $2.$DIFFEXT"
+REPODIFFFILE=$(ogGetPath "REPO" "$3.$DIFFEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO $3.$DIFFEXT"
 
 # Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$1" "$2.$DIFFEXT" && ogRaiseError $OG_ERR_LOCKED "$1 $2.$DIFFEXT"
-ogIsLocked "$3" "$4" && ogRaiseError $OG_ERR_LOCKED  "$3 $4"
+ogIsImageLocked "$1" "$3.$DIFFEXT" && ogRaiseError $OG_ERR_LOCKED "$1 $3.$DIFFEXT"
+ogIsLocked "$4" "$5" && ogRaiseError $OG_ERR_LOCKED  "$4 $5"
 
-PART=$(ogDiskToDev "$3" "$4" 2>/dev/null )  || ogRaiseError $OG_ERR_PARTITION "$1 $2"
+PART=$(ogDiskToDev "$4" "$5" 2>/dev/null )  || ogRaiseError $OG_ERR_PARTITION "$1 $3"
 
 # Carga del configurador del engine
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Comprobar que es sincronizable
-ogIsSyncImage REPO "$2" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
+ogIsSyncImage REPO "$3" diff || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$1 $3"
 
-PROTO=${5:-"UNICAST"}
+# Restauramos la imagen Basica.
+restoreBaseImage $1 "$2" "$4" "$5" "$6" "$7"
+
+PROTO=${6:-"UNICAST"}
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    echo "[10] $MSG_HELP_updateCache." | tee -a  $OGLOGFILE  $OGLOGSESSION
-   echo "     updateCache REPO" "/$2.$DIFFEXT" "$PROTO" "$6"  | tee -a  $OGLOGFILE  $OGLOGSESSION
-   updateCache REPO "/$2.$DIFFEXT" "$PROTO" "$6"  &>> $OGLOGCOMMAND
-   RETVAL=$?
+   echo "     updateCache REPO" "/$3.$DIFFEXT" "$PROTO" "$7"  | tee -a  $OGLOGFILE  $OGLOGSESSION
+   updateCache REPO "/$3.$DIFFEXT" "$PROTO" "$7" | tee -a $OGLOGCOMMAND
+   RETVAL=${PIPESTATUS[0]}
    if [ "$RETVAL" != "0" ] 
         then 
-        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$DIFFEXT $5 $6 con error $RETVAL" | tee -a  $OGLOGFILE 
+        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $3.$DIFFEXT $6 $7 con error $RETVAL" | tee -a  $OGLOGFILE 
         # RC=15 No hay cache 
         # RC=16 no hay espacio sufiente 
         exit $RETVAL 
@@ -99,31 +103,31 @@ TIME2=$SECONDS
 echo "[40] $MSG_RESTORE $PART"
 
 # Montamos la diferencial
-ogMountImage "$1" "$2" "$DIFFTYPE" &>/dev/null
+ogMountImage "$1" "$3" "$DIFFTYPE" &>/dev/null
 #  Comprobar que la imagen diferencial se ha montado 
-ogWaitMountImage "$1" "$2" "$DIFFTYPE" || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $DIFFTYPE: time_out $TIMEAUX seg."
+ogWaitMountImage "$1" "$3" "$DIFFTYPE" || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $3 $DIFFTYPE: time_out $TIMEAUX seg."
 
-ogMount $3 $4 >/dev/null
-ogLock $3 $4
+ogMount $4 $5 >/dev/null
+ogLock $4 $5
 # Sincronizamos la partición con la imagen.
-echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $DIFFTYPE $3 $4"  |tee -a $OGLOGFILE  $OGLOGSESSION
-ogSyncRestore "$1" "$2" "$DIFFTYPE" $3 $4
+echo  "[60] $MSG_HELP_ogSyncRestore: $1 $3 $DIFFTYPE $4 $5"  |tee -a $OGLOGFILE  $OGLOGSESSION
+ogSyncRestore "$1" "$3" "$DIFFTYPE" $4 $5
 
 # Desmontamos la imagen
-ogUnmountImage "$1" "$2" "$DIFFTYPE"
-ogUnlock $3 $4
+ogUnmountImage "$1" "$3" "$DIFFTYPE"
+ogUnlock $4 $5
 
 TIMEAUX2=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a  $OGLOGFILE  $OGLOGSESSION
 
 # creando enlaces y restableciendo ACL (en windows)
 echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE  $OGLOGSESSION
-ogRestoreInfoImage  "$3" "$4" &>$OGLOGCOMMAND
+ogRestoreInfoImage  "$4" "$5" &>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
 echo "[90] $MSG_HELP_configureOs."
 # el || echo es para evitar que se maneje el error.
-configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
+configureOs $4 $5  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
 
 
 TIME=$[SECONDS-TIME1]
