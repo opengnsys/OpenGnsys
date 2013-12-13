@@ -146,7 +146,7 @@ case "$NEXTOPERATION" in
     CACHE)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage CACHE "$IMGNAME" "$DISK" "$PART" | tee -a $OGLOGCOMMAND
-        RETVAL=$? 
+        RETVAL=${PIPESTATUS[0]}
         RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
     ;;
     UNICAST)
@@ -158,7 +158,7 @@ case "$NEXTOPERATION" in
     MULTICAST)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT
-        RETVAL=$?    
+        RETVAL=$?
         RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
     ;;
 esac

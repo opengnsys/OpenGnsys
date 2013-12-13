@@ -89,9 +89,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    # Sincronizamos si existe el fichero y si no usamos updateCache.
    echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE $OGLOGSESSION
    echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE $OGLOGSESSION
-   #updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"    &>> $OGLOGCOMMAND
    updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"  2>&1 | tee -a   $OGLOGCOMMAND
-   RETVAL=$?
+   RETVAL=${PIPESTATUS[0]}
    if [ "$RETVAL" != "0" ] 
         then 
         echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL" | tee -a $OGLOGFILE $OGLOGSESSION

@@ -229,7 +229,7 @@ case "$PROTOCOLO" in
 		echo -e "\n      rsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
 		rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
-		[ $? == 0 ] && RETVAL="1"|| RETVAL="2"
+		[ ${PIPESTATUS[0]} == 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes
 		ogUnmountImage CACHE  "$IMGNAME" $IMGTYPE
 		ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
