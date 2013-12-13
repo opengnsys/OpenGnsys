@@ -4,7 +4,7 @@
 #@brief   Librería o clase Protocol
 #@class   Protocol
 #@brief   Funciones para transmisión de datos
-#@version 1.0
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -704,6 +704,46 @@ else
 	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDPARTITION " "; return $?
 fi
 
+}
+
+
+#/**
+#         ogMcastRequest
+#@brief   Función temporal para solicitar al ogRepoAux el envio de un fichero por multicast
+#@param 1  Fichero a enviar ubicado en el REPO. puede ser ruta absoluta o relatica a /opt/opengnsys/images
+#@param 2  PROTOOPT   opciones protocolo multicast
+#@return
+#@exception 
+#@note
+#@todo:
+#@version 1.0.5
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2012/05/29
+#*/ ##
+function ogMcastRequest {
+# Variables locales
+local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT
+FILE="$1"
+PROTOOPT="$2"
+
+#TODO AYUDA
+#TODO: CONTROL PARAMETROS
+
+PORT=$(echo $2 | cut -f1 -d":")
+let PORTAUX=$PORT+1
+REPOIP=$(ogGetRepoIp)
+REPOPORTAUX=2009
+REPEAT=0
+until nmap -n -sU -p $PORTAUX $REPOIP | grep open
+do
+    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $1 $2""
+    #update-cache:
+    hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST "$FILE" "$PROTOOPT""
+    #multicas-direct:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$IMAGE.img $OPTPROTOCOLO"
+    let REPEAT=$REPEAT+1
+    [ "$REPEAT" -eq 5 ] && return
+    sleep 10
+done
 }
 
 
