@@ -73,11 +73,11 @@ case "$PARM1" in
 		sendFileMcast $FILE $MCASTOPT &>> $MCASTLOG
 		case $? in
 			1)  echolog "Parametros insuficientes"
-			    return 1 ;;
+			    exit 1 ;;
 			2)  echolog "Fichero no accesible"
-			    return 2 ;;
+			    exit 2 ;;
 			3)  echolog "Sesion multicast no valida"
-			    return 3 ;;
+			    exit 3 ;;
 		esac
 	;;
 	CREATE_IMAGE)
