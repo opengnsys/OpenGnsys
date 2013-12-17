@@ -1002,27 +1002,22 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-#TODO:  return 0->true, 1->false; si error, aunque sintaxis devuelve > 1
-
-# Error si no se reciben los argumentos ARG necesarios segÃºn la opcion.
-#[ $# == "2" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
-#ogCheckStringInGroup "$1" "REPO repo" || ogRaiseError $OG_ERR_FORMAT "El contendor $1 no es valido, solo se admite REPO" || return $?
+#Control de la cache
+ogFindCache || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 
 [ $# == "2" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
-
-
 FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
 #echo "paso 1. si no existe la imagen, confirmamos que es necesaria la actualizacion de la cache."
 FILETARGET=`ogGetPath CACHE $2`
 if [ -z $FILETARGET ]
 then
-	# borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
-	ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
-	ogDeleteFile CACHE "/$2.sum" &> /dev/null
-	echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
-	return 0 
+    # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
+    ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+    ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
+    return 0 
 fi
 
 #echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
@@ -1033,14 +1028,13 @@ then
     return 0
 fi
 
-
 ## En este punto la imagen en el repo y en la cache se llaman igual, 
 #echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
 if [ -f $FILESOURCE.sum ]
 then
-	MD5SOURCE=$(cat $FILESOURCE.sum)
+    MD5SOURCE=$(cat $FILESOURCE.sum)
 else
-	MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
+    MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
 fi
 [ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
 MD5TARGET=$(cat $FILETARGET.sum)
@@ -1049,15 +1043,12 @@ MD5TARGET=$(cat $FILETARGET.sum)
 #TODO: que hacer cuando los md5 son distintos. Por defecto borrar.
 if [ "$MD5SOURCE" == "$MD5TARGET" ]
 then
-	echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
-	return 1
+    echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
+    return 1
 else
     echo "TRUE=0, Si es necesario actualizar. paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
-	rm -f $FILETARGET
-	return 0
+    rm -f $FILETARGET $FILETARGET.sum $FILETARGET.torrent
+    return 0
 fi
-
 }
-
-
 
