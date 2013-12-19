@@ -81,7 +81,7 @@ ogIsImageLocked "$3" "$5.$DIFFEXT" && ogRaiseError $OG_ERR_LOCKED "$3 $5.$DIFFEX
 ogIsLocked "$1" "$2" && ogRaiseError $OG_ERR_LOCKED  "$1 $2"
 
 # Comprobar si la imagen completa existe.
-IMGFILE=$(ogGetPath "$3" "$4.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"
+IMGFILE="$(ogGetPath "$3" "$4.$IMGEXT")" || ogRaiseError $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"
 
 # Comprobar que la imagen completa es sincronizable
 ogIsSyncImage "$3" "$4" "img" || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"
@@ -101,8 +101,8 @@ PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "$1 
 ORIG=$(ogMount $1 $2) ||  ogRaiseError $OG_ERR_PARTITION "$1 $2"
 
 #Comprobamos acceso de escritura.
-DIRTEMP=$(date +%Y%m%d-%H%M%S)
-ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$3" && ogDeleteTree $3 /$4$DIRTEMP 
+DIRTEMP="/$4$(date +%Y%m%d-%H%M%S)"
+ogMakeDir $3 "$DIRTEMP" 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$3" && ogDeleteTree $3 "$DIRTEMP" 
 DIFFDIR="$(ogGetParentPath "$3" "/$5")"
 DIFFFILE="$DIFFDIR/$5.$DIFFEXT"
 
@@ -171,7 +171,7 @@ ogLock $1 $2
 
 echo -n "     $MSG_SCRIPTS_CREATE_SIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 cd $ORIG
-SIZEDATA=$(cat /tmp/ogimg.info | tr '\n' '\0'| du -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
+SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
 let SIZEREQUIRED=$SIZEDATA*$COMPRESS 
 # Tamaño minimo fichero imagen 300000
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
@@ -222,7 +222,7 @@ ogUnlock $1 $2
 ogIsSyncImage $3 "$5" diff ||  ogRaiseError $OG_ERR_IMAGE "$3 $5"
 
 #resumen de la operacion
-IMGSIZE=$(ls -l --block-size=1024 ${DIFFFILE}| cut -f5 -d" ")
+IMGSIZE=$(ls -l --block-size=1024 "${DIFFFILE}"| cut -f5 -d" ")
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $5 and used $IMGSIZE KB acros DFS rsync " | tee -a $OGLOGSESSION $OGLOGFILE

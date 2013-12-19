@@ -55,11 +55,11 @@ REPOFILE=$(ogGetPath "REPO" "/$2")  || ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"
 
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE "
 # Distingo si es monolitica o sincronizable
-file $REPOFILE | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " 2>&1 > /dev/null
+file "$REPOFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " 2>&1 > /dev/null
 if [ $? == 0 ]; then
 	IMGSYNC=TRUE
 	# Para imagen sincronizada, si hay imagen en cache siempre protocolo = rsync.
-	CACHEFILE=$(ogGetPath "CACHE" "/$2")  && PROTOCOLO="RSYNC"
+	CACHEFILE="$(ogGetPath "CACHE" "/$2")"  && PROTOCOLO="RSYNC"
 
 	# Si es imagen sincronizada siempre da distinto md5. No podemos comprobar -> actualizamos.
 	RETVAL=0
@@ -211,7 +211,7 @@ case "$PROTOCOLO" in
 
 		DIRMOUNT=$(ogGetMountImageDir "$IMGNAME" $IMGTYPE)
 		DIRLOCAL="/tmp/$DIRMOUNT"
-		mkdir $DIRLOCAL 2>/dev/null
+		mkdir "$DIRLOCAL" 2>/dev/null
 		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG" 
 
 		# Si la imagen no existe la creo
@@ -226,8 +226,8 @@ case "$PROTOCOLO" in
 		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE >/dev/null
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
-		echo -e "\n      rsync -aHAX OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
-		rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE
+		echo -e "\n      rsync -aHAX --delete  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
+		rsync -aHAX$OPTRSYNC  --quiet "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ ${PIPESTATUS[0]} == 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes

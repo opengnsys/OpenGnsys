@@ -91,8 +91,8 @@ PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || ogRaiseError $OG_ERR_PARTITION "$1 
 ORIG=$(ogMount $1 $2) || ogRaiseError $OG_ERR_PARTITION "$1 $2"
 
 #Comprobamos acceso de escritura.
-DIRTEMP=$(date +%Y%m%d-%H%M%S)
-ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$3" && ogDeleteTree $3 /$4$DIRTEMP 
+DIRTEMP="/$4$(date +%Y%m%d-%H%M%S)"
+ogMakeDir $3 "$DIRTEMP" 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$3" && ogDeleteTree $3 "$DIRTEMP" 
 
 # Borramos ficheros de paginacion y configuracion
 case "$(ogGetFsType $1 $2)" in 
@@ -122,7 +122,7 @@ let SIZEREQUIRED=$SIZEDATA*$COMPRESS
 echo "[16]$MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
 [ $SIZEREQUIRED -gt $SIZEFREE ] && ogRaiseError $OG_ERR_CACHESIZE "$3"
 
-IMGDIR=$(ogGetParentPath "$3" "/$4")
+IMGDIR="$(ogGetParentPath "$3" "/$4")"
 IMGFILE=${IMGDIR[$3]}/$(basename "/$4").$IMGEXT
 
 # Comprobar consistencia del sistema de archivos.
@@ -177,7 +177,7 @@ echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -
 
 
 #resumen de la operacion
-IMGSIZE=$(ls -l --block-size=1024 $IMGFILE | cut -f5 -d" ")
+IMGSIZE=$(ls -l --block-size=1024 "$IMGFILE" | cut -f5 -d" ")
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE

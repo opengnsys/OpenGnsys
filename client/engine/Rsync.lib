@@ -29,16 +29,16 @@ SIZEREQUIRED=$4
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-	IMGDIR=$(ogGetParentPath "$1" "/$2")
+	IMGDIR="$(ogGetParentPath "$1" "/$2")"
 	[ "$3" == "img" ] && IMGEXT="img" ||  IMGEXT="img.diff"
-	IMGFILE=${IMGDIR}/$(basename "/$2").$IMGEXT
+	IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
 	## Si no existe, crear subdirectorio de la imagen.
 	if [ $? != 0 ]; then
             echo "      $MSG_HELP_ogMakeDir \"$1 $(dirname "$2")." | tee -a $OGLOGSESSION $OGLOGFILE
-            ogMakeDir "$1" $(dirname "/$2") || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
-            IMGDIR=$(ogGetParentPath "$1" "/$2") || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
+            ogMakeDir "$1" "$(dirname "/$2")" || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
+            IMGDIR="$(ogGetParentPath "$1" "/$2")" || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
 	fi
-	DIRMOUNT=/tmp/$(ogGetMountImageDir "$2" "$3")
+	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" "$3")"
         mkdir -p "$DIRMOUNT"
         LOOPDEVICE=$(losetup -f)
         # Si existe el fichero de la imagen se hace copia de seguridad, si  no existe se crea.
@@ -57,7 +57,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                     rm -f "$IMGFILE.sum"
 		fi
 
-                IMGSIZE=$(ls -l --block-size=1024 $IMGFILE | awk '{print $5}')
+                IMGSIZE=$(ls -l --block-size=1024 "$IMGFILE" | awk '{print $5}')
                 if [ $IMGSIZE -lt $SIZEREQUIRED ];then
                    echo "      $MSG_SYNC_RESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
                    echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -140,10 +140,10 @@ else
    IMGTYPE=$5
    if [ "$IMGTYPE" == "diff" ]; then
 	# Imagen completa con la que comparo la particion.
-	IMGDIRAUX=$(ogGetMountImageDir "$4" "img")
+	IMGDIRAUX="$(ogGetMountImageDir "$4" "img")"
 	if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
            DIRMOUNT="/tmp/$IMGDIRAUX"
-           DESTRSYNC=$DIRMOUNT
+           DESTRSYNC="$DIRMOUNT"
 	else
 	   [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
            DIRMOUNT="$OGIMG/$IMGDIRAUX"
@@ -229,9 +229,12 @@ FILES="/tmp/files$$"
 ACLTMP="/tmp/acl$$.tmp"
 
 # comprobamos que existan los archivos de origen. Si no salimos sin error.
-[ -f $IMGACL -a -f $IMGINFO ] || ogRaiseError  $OG_ERR_NOTFOUND "$IMGACL, $IMGINFO" || return 0
+[ -f $IMGACL -a -f $IMGINFO ] || (echo "OpenGnSys Warning: $MSG_ERR_NOTFOUND $IMGACL, $IMGINFO"; return 0)
 
 echo "" > $ACLTMP
+
+echo aqui 
+return 0
 
 # Al fichero le quitamos las líneas sobrantes: comentarios y lineas vacias.
 sed -e s/"^#.*$"//g $IMGINFO > $FILES
@@ -278,8 +281,8 @@ IMGLN="ogimg.ln"
 #Creamos o modificamos los enlaces.
 # La imagen diferencial tiene ogimg.ln 
 # para la completa lo generamos con los enlaces que contengan  /mnt/
-[ -r $DEST/$IMGLN ] || grep -e "->" -e "=>" $DEST/ogimg.info|grep "/mnt/" > $DEST/$IMGLN
-if [ $(wc -l $DEST/$IMGLN|cut -f1 -d" ") -ne 0 ]; then
+[ -r "$DEST/$IMGLN" ] || grep -e "->" -e "=>" "$DEST/ogimg.info"|grep "/mnt/" > "$DEST/$IMGLN"
+if [ $(wc -l "$DEST/$IMGLN"|cut -f1 -d" ") -ne 0 ]; then
    while read LINEA
    do
         ORIGLN="${LINEA#*> }"
@@ -296,19 +299,19 @@ if [ $(wc -l $DEST/$IMGLN|cut -f1 -d" ") -ne 0 ]; then
    	else
            OPTLN=''
    	fi
-   	cd "$DEST/$(dirname $DESTLN)"
-	rm "$(basename $DESTLN)"
-   	ln $OPTLN "$ORIGLN" "$(basename $DESTLN)"
+   	cd "$DEST/$(dirname "$DESTLN")"
+	rm "$(basename "$DESTLN")"
+   	ln $OPTLN "$ORIGLN" "$(basename "$DESTLN")"
    	echo -n "."
-   done < $DEST/$IMGLN  2>/dev/null
+   done < "$DEST/$IMGLN"  2>/dev/null
    echo ""
 
 fi
 
 # Restauramos acl
-if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f $DEST/$IMGACL ] ; then
+if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f "$DEST/$IMGACL" ] ; then
 	cd /
-        cp $DEST/$IMGACL /tmp
+        cp "$DEST/$IMGACL" /tmp
         ogUnmount "$1" "$2"
         echo "      ntfs-3g.secaudit -se $PART" |tee -a $OGLOGSESSION $OGLOGFILE
         ntfs-3g.secaudit -se $PART /tmp/$IMGACL 
@@ -344,9 +347,15 @@ if [ $# -lt 4 ]; then
 fi
 
 ORIG=$(ogMount $1 $2)
-DIRMOUNT=$(ogGetMountImageDir "$4" $5)
+DIRMOUNT="$(ogGetMountImageDir "$4" $5)"
 # Si la imagen es diferencial la lista de ficheros a transferir esta dentro de la imagen.
-[ "$5" == "diff" ] && FILESFROM=" --files-from=/tmp/ogimg.info" || FILESFROM=""
+if [ "$5" == "diff" ]; then
+	FILESFROM=" --files-from=/tmp/ogimg.info"
+	# Borramos los directorios
+	sed -i '/\/$/d' /tmp/ogimg.info
+else
+	FILESFROM=""
+fi
 
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
         DESTRSYNC="/tmp/$DIRMOUNT"
@@ -362,7 +371,7 @@ fi
 echo "      rsync -aHAX$OPTRSYNC --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
 rsync -aHAXq$OPTRSYNC $PASSWORD  --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC"
 echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC  $PASSWORD --inplace /tmp/ogimg* $DESTRSYNC
+rsync -aHAXq$OPTRSYNC  $PASSWORD --inplace /tmp/ogimg* "$DESTRSYNC"
 
 }
 
@@ -393,7 +402,7 @@ if [ $# -lt 5 ]; then
 fi
 
 
-DIRMOUNT=$(ogGetMountImageDir "$2" "$3")
+DIRMOUNT="$(ogGetMountImageDir "$2" "$3")"
 DESTRSYNC=$(ogGetMountPoint $4 $5)
 
 # Borramos ficheros de informacion de restauraciones antiguas
@@ -426,14 +435,14 @@ if [ "$3" == "diff" ]; then
 	FILESFROM=" --files-from=$DESTRSYNC/$IMGINFO"
 
         echo "      rsync -aHAXq$OPTRSYNC  $ORIG/ogimg* $DESTRSYNC" |tee -a  $OGLOGFILE
-        rsync -aHAXq$OPTRSYNC $PASSWORD  $ORIG/ogimg* $DESTRSYNC
+        rsync -aHAXq$OPTRSYNC $PASSWORD  "$ORIG"/ogimg* $DESTRSYNC
         # Borramos linea de información de la imagen, sino busca un fichero con ese nombre
         sed -i   '/^\#/d' $DESTRSYNC/$IMGINFO
 
 	cd $DESTRSYNC
 	# Diferencial: Borramos archivos sobrantes.
 	echo "      $MSG_SYNC_DELETE"  |tee -a  $OGLOGFILE
-	cat $DESTRSYNC/ogimg.rm 2>/dev/null | xargs rm -rf
+	cat "$DESTRSYNC/ogimg.rm" 2>/dev/null | xargs rm -rf
 
 fi
 
@@ -469,17 +478,16 @@ fi
 
 [ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
 
-DIRMOUNT=$(ogGetMountImageDir "$2" ${IMGEXT#*\.})
+DIRMOUNT="$(ogGetMountImageDir "$2" ${IMGEXT#*\.})"
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Si está montado nada que hacer.
 	df | grep "$DIRMOUNT$" 2>&1 >/dev/null && echo "/tmp/$DIRMOUNT" && return 0
 
-        IMGFILE=$(ogGetPath "$1" /"$2.$IMGEXT")
+        IMGFILE="$(ogGetPath "$1" /"$2.$IMGEXT")"
         mkdir -p "/tmp/$DIRMOUNT"
 	
    	# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
-	#if [[ "$(uname -r)" < "3.7" ]]; then
 	if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
 	    mount -t ext4 -o loop "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
 	else
@@ -528,7 +536,7 @@ fi
 [ "$3" == "" ] && IMGTYPE="img" || IMGTYPE="$3"
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-	DIRMOUNT=/tmp/$(ogGetMountImageDir "$2" $IMGTYPE)
+	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" $IMGTYPE)"
 	umount "$DIRMOUNT"
 	rmdir "$DIRMOUNT"
 else
@@ -563,7 +571,7 @@ fi
 
 DIRMOUNT="mount/$1"
 [ "$2" == "diff" ] && DIRMOUNT="$DIRMOUNT.diff"
-echo $DIRMOUNT
+echo "$DIRMOUNT"
 
 
 }
@@ -612,8 +620,6 @@ let TIMEOUT=$SIZE/$CREATESPEED
 [ $TIMEOUT -lt 60 ] && TIMEOUT=60
 until [ -f "$DIRMOUNT/ogimg.info" ] ; do
         TIMEAUX=$[SECONDS-TIME]
-        #[  "$TIMEAUX" -gt "$TIMEOUT" ] && return $(ogRaiseError "$MSG_ERR_DONTMOUNT_IMAGE $1 $2 $3: time_out $TIMEAUX seg."; echo $?)
-	# TODO definir el error
         [  "$TIMEAUX" -gt "$TIMEOUT" ] &&  return 2
         echo -n "#"
         sleep 5
@@ -649,51 +655,51 @@ fi
 
 
 [ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
-IMGDIR=$(ogGetParentPath "$1" "/$2")
-IMGFILE="${IMGDIR}"/$(basename "/$2").$IMGEXT
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
 
 # Solo es posible para imagenes EXT4. Si no es EXT4 salimos sin error
-file $IMGFILE | grep -i " ext4 filesystem " 2>&1 > /dev/null || return 0
+file "$IMGFILE" | grep -i " ext4 filesystem " 2>&1 > /dev/null || return 0
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         # Al montar se comprueba la existencia de la imagen
-        DIRMOUNT=$(ogMountImage $1 $2 ${IMGEXT#*\.}) 
+        DIRMOUNT="$(ogMountImage $1 "$2" ${IMGEXT#*\.}) "
 
         AVAILABLE=$(df -k|grep "$DIRMOUNT$"|awk '{print $4}')
         # Si el espacio libre menor que 500Mb nos salimos
         if [ $AVAILABLE -lt 200000 ]; then
-        	ogUnmountImage $1 $2 ${IMGEXT#*\.}
+        	ogUnmountImage $1 "$2" ${IMGEXT#*\.}
 	 	return 0
 	fi
 
 
         # Calculamos la diferencia entre el tamaño interno y externo
-        EXTSIZE=$(ls -l --block-size=1024 $IMGFILE | cut -f5 -d" ")
+        EXTSIZE=$(ls -l --block-size=1024 "$IMGFILE" | cut -f5 -d" ")
         INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
         let EDGESIZE=$EXTSIZE-$INTSIZE
 
-        ogUnmountImage $1 $2 ${IMGEXT#*\.}
+        ogUnmountImage $1 "$2" ${IMGEXT#*\.}
 	LOOPDEVICE=$(losetup -f)
 	losetup $LOOPDEVICE "$IMGFILE"
 
 	# Redimensiono sistema de ficheros
 	echo resize2fs -fpM $LOOPDEVICE
 	resize2fs -fpM $LOOPDEVICE |tee -a $OGLOGCOMMAND
-        ogMountImage $1 $2 ${IMGEXT#*\.}
+        ogMountImage $1 "$2" ${IMGEXT#*\.}
 
 	# Calculamos el tamaño final del archivo
         INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
         let EXTSIZE=$INTSIZE+$EDGESIZE
-        umount $DIRMOUNT
+        umount "$DIRMOUNT"
 
 	# Si existe dispositivo de loop lo borro.
 	[ $LOOPDEVICE ] && losetup -d $LOOPDEVICE
 
 	# Corto el archivo al tamaño del sistema de ficheros.
         echo "      truncate --size=\"$EXTSIZE\"k $IMGFILE  "
-        truncate --size="$EXTSIZE"k $IMGFILE
+        truncate --size="$EXTSIZE"k "$IMGFILE"
 
-	rmdir $DIRMOUNT
+	rmdir "$DIRMOUNT"
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
@@ -732,7 +738,7 @@ if [ $# -lt 2 ]; then
 fi
 
 [ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
-IMGDIR=$(ogGetParentPath "$1" "/$2")
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
 IMGFILE="${IMGDIR}"/$(basename "/$2").$IMGEXT
 
 file "$IMGFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null

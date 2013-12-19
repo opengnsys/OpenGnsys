@@ -58,7 +58,7 @@ fi
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Procesar parámetros de entrada
-REPOFILE=$(ogGetPath "REPO" "$2.$IMGEXT") || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
+REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")" || ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"
 
 # Comprobar que es sincronizable (con REPO)
 ogIsSyncImage REPO "$2" $IMGEXT  ||  ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"
@@ -130,9 +130,13 @@ echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE $OGLOGSESSION
 ogRestoreInfoImage $3 $4  &>>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
-echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE $OGLOGSESSION
-# el || echo es para evitar que se maneje el error.
-configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
+# Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
+ps -ef|grep -v "grep" |grep "$PPID.*restoreDiffImage " &>/dev/null || RETVAL=$?
+if [ $RETVAL -ne 0 ]; then
+	echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE $OGLOGSESSION
+	# el || echo es para evitar que se maneje el error.
+	configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
+fi
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE $OGLOGSESSION
