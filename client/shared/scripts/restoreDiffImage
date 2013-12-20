@@ -125,7 +125,8 @@ echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE  $OGLOGSESSION
 ogRestoreInfoImage  "$4" "$5" &>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
-echo "[90] $MSG_HELP_configureOs."
+echo "[90] $MSG_HELP_configureOs." | tee -a  $OGLOGFILE  $OGLOGSESSION
+
 # el || echo es para evitar que se maneje el error.
 configureOs $4 $5  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND
 

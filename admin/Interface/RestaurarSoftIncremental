@@ -68,7 +68,7 @@
 		PROTO=${6%_*}
                 OPT=${6#*_}
 
-		restoreDiffImage $DEST "$5" $1 $2  $PROTO $OPT
+		restoreDiffImage $DEST "$3" "$5" $1 $2  $PROTO $OPT
 
 	fi
 
