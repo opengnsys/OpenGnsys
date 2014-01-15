@@ -43,6 +43,15 @@
         #Carga el configurador del engine desde el fichero engine.cfg
         [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
+	# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
+	if [ "$REPO" == "REPO" -a "$boot" != "admin"  ]
+	then
+       		 CambiarAcceso admin &>> $OGLOGFILE
+       		 RETVAL=$?
+       		 [ $RETVAL -gt 0 ] && exit $RETVAL
+	fi
+
+
         # Clear temporary file used as log track by httpdlog
         # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
         echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
@@ -73,3 +82,4 @@
 
 	fi
 
+	[ "$REPO" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user

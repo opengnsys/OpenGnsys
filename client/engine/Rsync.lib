@@ -13,7 +13,8 @@ function ogCreateFileImage () {
 local SIZEREQUIRED IMGDIR IMGFILE DIRMOUNT LOOPDEVICE  IMGSIZE IMGEXT
 
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name extension  size(K)" \
+    ogHelp "$FUNCNAME" : "$MSG_HELP_ogCreateFileImage" \
+	   "$FUNCNAME [ REPO|CACHE ] image_name extension  size(K)" \
            "$FUNCNAME REPO Ubuntu12 img 300000" \
            "$FUNCNAME CACHE Windows7 diff 20000000"
     return
@@ -121,9 +122,10 @@ local  IMGTYPE IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD OPTRSYNC USERRSYNC ORIG FST
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" -o   $# -lt 5 -a "$3" != "img"  ]; then
-	ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part [ REPO|CACHE ] [ base_image_name ] extension  " \
-       	       "base image -> $FUNCNAME 1 2 img" \
-     	       "diff image -> $FUNCNAME 1 1 CACHE Windows7 diff "
+	ogHelp "$FUNCNAME" : "$MSG_HELP_ogCreateInfoImage" \
+		"$FUNCNAME num_disk num_part [ REPO|CACHE ] [ base_image_name ] extension  " \
+       		"base image -> $FUNCNAME 1 2 img" \
+     		"diff image -> $FUNCNAME 1 1 CACHE Windows7 diff "
     	return
 fi
 
@@ -262,9 +264,10 @@ local  DEST PART IMGACL IMGLN OPTLN LINEA DESTLN ORIGLN TYPELN
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part" \
-               "base image -> $FUNCNAME 1 2 " \
-               "diff image -> $FUNCNAME 1 1 "
+        ogHelp 	"$FUNCNAME": "$MSG_HELP_ogRestoreInfoImage" \
+		"$FUNCNAME num_disk num_part" \
+       		"base image -> $FUNCNAME 1 2 " \
+		"diff image -> $FUNCNAME 1 1 "
         return
 fi
 
@@ -334,9 +337,10 @@ function ogSyncCreate () {
 local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC
 
 if [ "$*" == "help" ]; then
-	ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part [ REPO|CACHE ] image_name extension  " \
-       	       "$FUNCNAME 1 2 REPO Ubuntu12 img" \
-     	       "$FUNCNAME 1 1 CACHE Windows7 diff "
+	ogHelp 	"$FUNCNAME": "$MSG_HELP_ogSyncCreate" \
+		"$FUNCNAME num_disk num_part [ REPO|CACHE ] image_name extension  " \
+       		"$FUNCNAME 1 2 REPO Ubuntu12 img" \
+     		"$FUNCNAME 1 1 CACHE Windows7 diff "
     	return
 fi
 
@@ -389,9 +393,10 @@ function ogSyncRestore () {
 local DIRMOUNT ORIG DESTRSYNC PASSWORD OPTRSYNC USERRSYNC IMGINFO FILESFROM
 
 if [ "$*" == "help" ]; then
-	ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name extension  num_disk num_part  " \
-       	       "$FUNCNAME REPO Ubuntu12 img 1 2" \
-     	       "$FUNCNAME CACHE Windows7 diff 1 1"
+	ogHelp 	"$FUNCNAME": "$MSG_HELP_ogSyncRestore" \
+		"$FUNCNAME [ REPO|CACHE ] image_name extension  num_disk num_part  " \
+		"$FUNCNAME REPO Ubuntu12 img 1 2" \
+		"$FUNCNAME CACHE Windows7 diff 1 1"
     	return
 fi
 
@@ -464,10 +469,11 @@ function ogMountImage () {
 local IMGEXT IMGFILE DIRMOUNT
 
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
-           "$FUNCNAME REPO Ubuntu12" \
-           "$FUNCNAME CACHE Windows7 diff"
-    return
+	ogHelp "$FUNCNAME": "$MSG_HELP_ogMountImage" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+	return
 fi
 
 
@@ -522,9 +528,10 @@ function ogUnmountImage () {
 local IMGTYPE DIRMOUNT
 
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
-           "$FUNCNAME REPO Ubuntu12" \
-           "$FUNCNAME CACHE Windows7 diff"
+    ogHelp "$FUNCNAME": "$MSG_HELP_ogUnmountImage" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
     return
 fi
 
@@ -556,9 +563,10 @@ function ogGetMountImageDir () {
 #*/
 local DIRMOUNT
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME image_name [ extension ]" \
-           "$FUNCNAME Ubuntu12" \
-           "$FUNCNAME Windows7 diff"
+    ogHelp "$FUNCNAME": "$MSG_HELP_ogGetMountImageDir" \
+		"$FUNCNAME image_name [ extension ]" \
+		"$FUNCNAME Ubuntu12" \
+		"$FUNCNAME Windows7 diff"
     return
 fi
 
@@ -593,9 +601,10 @@ TIME=$SECONDS
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$FUNCNAME [ REPO | CACHE ] image_name extension [ image_size ] " \
-               "$FUNCNAME REPO Ubuntu12 img 30000000" \
-               "$FUNCNAME CACHE Windows7 diff "
+        ogHelp 	"$FUNCNAME": "$MSG_HELP_ogWaitMountImage" \
+		"$FUNCNAME [ REPO | CACHE ] image_name extension [ image_size ] " \
+		"$FUNCNAME REPO Ubuntu12 img 30000000" \
+		"$FUNCNAME CACHE Windows7 diff "
         return
 fi
 
@@ -642,9 +651,10 @@ function ogReduceImage () {
 #*/
 local IMGEXT DIRMOUNT AVAILABLE USED IMGDIR IMGFILE ENDSIZE LOOPDEVICE
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
-           "$FUNCNAME REPO Ubuntu12" \
-           "$FUNCNAME CACHE Windows7 diff"
+    ogHelp "$FUNCNAME": "$MSG_HELP_ogReduceImage" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
     return
 fi
 
@@ -726,9 +736,10 @@ function ogIsSyncImage () {
 local IMGEXT IMGDIR IMGFILE 
 
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
-           "$FUNCNAME REPO Ubuntu12" \
-           "$FUNCNAME CACHE Windows7 diff"
+    ogHelp "$FUNCNAME": "$MSG_HELP_ogIsSyncImage" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
     return
 fi
 
@@ -745,4 +756,50 @@ file "$IMGFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/n
 [ $? -eq 0 ] && return 0 || return $OG_ERR_DONTSYNC_IMAGE 
 
 
+}
+
+#/**
+# ogCheckSyncImage
+#@brief   Muestra el contenido de la imagen para comprobarla.
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo Imagen [ img |diff ]
+#@return 
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#*/
+ogCheckSyncImage (){
+local IMGEXT  IMGDIR  IMGFILE DIRMOUNT
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME":  "$MSG_HELP_ogCheckSyncImage" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ] image_name [ extension ]"
+    return $?
+fi
+
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
+
+ogIsSyncImage $1 "$2" "${IMGEXT#*\.}" || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4" || return $?
+
+DIRMOUNT="/tmp/ogCheckImage$$"
+mkdir "$DIRMOUNT"
+# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
+if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
+	mount -t ext4 -o loop "$IMGFILE" "$DIRMOUNT" 1>/dev/null
+else
+	mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT" 1>/dev/null
+fi
+ls "$DIRMOUNT"
+umount "$DIRMOUNT"
+
+rmdir "$DIRMOUNT"
 }

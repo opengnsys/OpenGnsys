@@ -199,7 +199,7 @@ echo  "[80] $MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
 ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
 
 # Reducimos la imagen diferencial -> solo para kernel <= 3.7, imagenes con FS ext4
-echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
 ogReduceImage  $3 "$5" $DIFFTYPE
 
 # Desmontamos las imagenes
@@ -219,7 +219,10 @@ ogUnlockImage "$3" "/$5.$DIFFEXT"
 ogUnlock $1 $2
 
 # Comprobamos que la imagen esta bien
-ogIsSyncImage $3 "$5" diff ||  ogRaiseError $OG_ERR_IMAGE "$3 $5"
+echo "[95] $MSG_HELP_ogCheckSyncImage" | tee -a $OGLOGSESSION $OGLOGFILE
+ogCheckSyncImage $3 "$5" diff | tee -a $OGLOGSESSION $OGLOGFILE
+RETVAL=${PIPESTATUS[0]}
+[ "$RETVAL" == "0" ] ||  ogRaiseError $OG_ERR_IMAGE "$3 $5 diff"
 
 #resumen de la operacion
 IMGSIZE=$(ls -l --block-size=1024 "${DIFFFILE}"| cut -f5 -d" ")

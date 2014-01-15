@@ -159,7 +159,7 @@ echo "      $MSG_HELP_ogSyncCreate."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogSyncCreate $1 $2 $3 "$4"  $IMGEXT
 
 # Reducimos la imagen: solo para kernel <= 3.7, imagenes con FS ext4.
-echo "[90] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
 ogReduceImage $3 "$4" $IMGEXT
 
 # Desmontamos la Imagen
@@ -170,7 +170,11 @@ TIMEAUX5=$[SECONDS-TIMEAUX3]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
-ogIsSyncImage $3 "$4" "img" || ogRaiseError $OG_ERR_IMAGE "$3 $4"
+echo "[95] $MSG_HELP_ogCheckSyncImage" | tee -a $OGLOGSESSION $OGLOGFILE
+ogCheckSyncImage $3 "$4" "img" | tee -a $OGLOGSESSION $OGLOGFILE
+RETVAL=${PIPESTATUS[0]}
+[ "$RETVAL" == "0" ] || ogRaiseError $OG_ERR_IMAGE "$3 $4 img" 
+
 
 TIMEAUX7=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
