@@ -112,3 +112,8 @@ ALTER TABLE ordenadores
 	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
 	ALTER idproautoexec SET DEFAULT 0;
 
+# Cambio en script genérico de despliegue de imágenes.
+UPDATE procedimientos_acciones
+	SET parametros = REPLACE (parametros, 'restoreImage%20', 'deployImage%20')
+	WHERE idcomando = 8;
+

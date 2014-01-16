@@ -35,6 +35,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #579	El cliente no inicia cuando se conecta un dispositivo USB
 #563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
 #587	buildToOrder: activación controladores de disco para Windows 7
+#604	Agente de sistema operativo windows bloquea conexión a internet
 #612	Log en tiempo real no muestra salida de Unicast.
 #613	Script reboot con parámetro de tiempo
 
@@ -45,7 +46,9 @@ Tickets resueltos en módulo OpenGnSys Server:
 #575	Archivo de configuración Rsync para imagenes sincronizadas
 #584	Script setclientmode trunca el fichero PXE
 #586	Mejorar seguridad en scripts para no mostrar los parámetros de ejecución de mysql
+#597	El ogadmserver.cpp deja conexiones mysql abiertas en la funcion AutoexecCliente
 #607	Script setclientmode: Identificacion de la plantilla por nombre en consola
+#621	Servicio ogAdmServer consume toda la CPU en ciertas circunstancias.
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #583	Script deleteimage no admite correctamente parámetro de borrado de copia de seguridad de la imagen
@@ -55,6 +58,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #265	Consola Web: Actualización información al terminar los comandos (duplicado de #577)
 #416	Clonar partición sólo datos
 #524	Eliminar imagen en caché del cliente
+#533	Scritps de interfaceAdm no deben incluir lógica de proceso
 #551	Consola web compatible con PHP 5.4 (tarea)
 #552	Permitir crear caché en cualquier disco
 #566	Asistente de gestión Master muestra todas las imágenes de su caché para enviarlas
@@ -74,12 +78,14 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #569	Aplicar actualizaciones de la base de datos en la misma versión de OpenGnSys
 #576	Varias cuestiones relacionadas con la sincronización de imágenes
 #582	Nebtoot basado en ficheros (ticket #534) requiere proceso para actualización de ficheros y de la base de datos
+#622	Script de instalacion interactivo
 
 Tickets genéricos resueltos:
 #453	Autenticación con LDAP u otro servicio (tarea)
 #455	Comunicacion SSH entre un Servidor central y repositorios (opcional)
 #564	Eliminar imagen de repositorio (tarea)
 #565	Imágenes diferenciales (tarea)
+#537	Revisión proceso de creación y restauración de imágenes: interfazAdm -> scripts -> engine
 #577	Enviar al servidor la configuración de particiones cada vez que un cliente e ejecuta un comando
 
 
