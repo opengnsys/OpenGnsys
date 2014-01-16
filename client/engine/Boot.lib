@@ -455,7 +455,10 @@ ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 
 VERSION=$(ogGetOsVersion $1 $2)
 
-if echo "$VERSION" | grep "Windows 7"
+if echo "$VERSION" | grep "Windows 8"
+then
+	WINVER="Windows 8"
+elif echo "$VERSION" | grep "Windows 7"
 then
 	WINVER="Windows 7"
 elif echo "$VERSION" | grep "Windows Seven"
