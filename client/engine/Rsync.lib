@@ -231,22 +231,21 @@ FILES="/tmp/files$$"
 ACLTMP="/tmp/acl$$.tmp"
 
 # comprobamos que existan los archivos de origen. Si no salimos sin error.
-[ -f $IMGACL -a -f $IMGINFO ] || (echo "OpenGnSys Warning: $MSG_ERR_NOTFOUND $IMGACL, $IMGINFO"; return 0)
+[ -f $IMGACL -a -f $IMGINFO ] || return 0
 
 echo "" > $ACLTMP
-
-echo aqui 
-return 0
 
 # Al fichero le quitamos las líneas sobrantes: comentarios y lineas vacias.
 sed -e s/"^#.*$"//g $IMGINFO > $FILES
 sed -i '/^$/d'  $FILES
 
+
 # Recorremos el listado y extraemos la acl correspondiente al fichero o directorio.
 while read LINE; do
     read END INI <<< "$(grep -n  -e "File" -e "Directory" $IMGACL| grep -A 1 "$LINE"| awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
     let NUM=$END-$INI-1
-    sed -n -e $INI,+"$NUM"p  $IMGACL &>> $ACLTMP
+    # Si algún archivo no se encuentra, el error lo mandamos a /dev/null
+    sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null | tee -a $ACLTMP > $OGLOGCOMMAND
 done < $FILES
 
 cp $ACLTMP $IMGACL
