@@ -55,7 +55,7 @@ SIZEREQUIRED=$3
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
 
 echo  CREATE_IMAGE "$1" $IMGEXT $SIZEREQUIRED
-echo -ne CREATE_IMAGE "$1" $IMGEXT $SIZEREQUIRED| /opt/opengnsys/sbin/ogAdmRepoAux
+echo -ne CREATE_IMAGE "$1" $IMGEXT $SIZEREQUIRED| /opt/opengnsys/sbin/ogAdmRepoAux  || exit $?
 echo "Los resultado se registran en $REPOLOG. "
 
 rm $IMGFILE.lock

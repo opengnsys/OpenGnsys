@@ -31,7 +31,12 @@ KERNEL=$(file $BASEDIR/tftpboot/ogclient/ogvmlinuz |awk -F . '{print $2}')
 
 # Añade registro de incidencias.
 function echolog () {
-	date +"%Y%m%d-%H%M%S $*" >> $REPOLOG
+	if [ "$1" == "-o" ]; then
+		shift
+		date +"%Y%m%d-%H%M%S $*"|tee -a $REPOLOG
+	else
+		date +"%Y%m%d-%H%M%S $*" >> $REPOLOG
+	fi
 }
 
 function mountImage () {
@@ -104,6 +109,7 @@ case "$PARM1" in
 
 		# Si existe la imagen hacemos copia de seguridad y la redimesionamos 
 		if [ -f "$IMGFILE" ]; then
+		    echolog "La imagen $IMGFILE ya existe."
 		    # TODO modificar ogGetImageSize
 		    IMGSIZE=$(ls -l --block-size=1024 $IMGFILE| cut -f5 -d" ")
 
@@ -161,7 +167,12 @@ case "$PARM1" in
 		fi
 		# Montamos la imagen.
 		mountImage "$IMGFILE" "$DIRMOUNT" 
-		[ "$?" == "0" ] || (echo salida=$?; echolog "Error al crear/redimensionar la imagen"; exit 1)
+		RETVAL=$?
+		if [ $RETVAL -ne 0 ]; then
+			rmdir "$DIRMOUNT"
+			echolog -o "Error al crear/redimensionar la imagen" 
+			exit $RETVAL
+		fi
 
 		touch "$DIRMOUNT/ogimg.info"
 		TIME2=$[SECONDS-TIME]
