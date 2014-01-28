@@ -10,11 +10,8 @@
 #@date    2011/08/03
 #*/
 
- #mkdir -p /tmp/opengnsys_installer/opengnsys;
- #mkdir -p /tmp/opengnsys_installer/opengnsys2;
- #cp -prv /home/administrador/workspace/OpenGnsys/branches/version2/* /tmp/opengnsys_installer/opengnsys2/;
- #cp -prv /home/administrador/workspace/OpenGnsys/branches/version1.0/client/ /tmp/opengnsys_installer/opengnsys/;
-#find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
+ #mkdir -p /tmp/opengnsys_installer/opengnsys
+ #svn export http://opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys
 
 
 #Variables
@@ -47,7 +44,7 @@ btogGetOsInfo $TYPECLIENT
 ##########################################################################
 echo "FASE 2 - Instalación de software adicional."
 cat /etc/apt/sources.list | grep "http://free.nchc.org.tw/drbl-core" || echo "deb http://free.nchc.org.tw/drbl-core drbl stable " >> /etc/apt/sources.list
-apt-get update; apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage gpxe qemu
+apt-get update; apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage gpxe qemu lsof
 ###################################################################3
 echo "FASE 3 - Creación del Sistema raiz RootFS (Segundo Sistema archivos (img)) "
 echo "Fase 3.1 Generar y formatear el disco virtual. Generar el dispositivo loop."
@@ -71,7 +68,8 @@ cat /etc/schroot/schroot.conf | grep $BTROOTFSIMG || btogSetFsAccess
 echo "FASE 5 - Incorporando ficheros OpenGnSys el sistema raiz rootfs "
 cp -a ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp
 chmod +x /tmp/boot-tools/*.sh
-umount $BTROOTFSMNT 2>/dev/null
+# En Ubuntu 13.04+ es necesario matar proceso de "udev" antes de desmontar.
+umount $BTROOTFSMNT 2>/dev/null || (kill -9 $(lsof -t $BTROOTFSMNT); umount $BTROOTFSMNT 2>/dev/null)
 schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh 
 ############################################################################################
 echo "FASE 6 - Instalar software"
