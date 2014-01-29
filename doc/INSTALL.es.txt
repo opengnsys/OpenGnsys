@@ -1,24 +1,24 @@
-Instalación de OpenGnSys Server v 1.0.3
+Instalación de OpenGnSys Server v 1.0.5
 =======================================
 
 Notas iniciales
 ---------------
 
-Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Linux a partir de la versión 9.04 (también ha sido probado en sistemas Debian 6 y Linux Mint 12).
+Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 12.04 LTS (también ha sido probado en sistemas basados en Fedora 17).
 
-El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el rpositorio código y el cliente preconfigurado.
+El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el repositorio de código y el cliente preconfigurado.
 
 Requisitos mínimos de almacenamiento:
-- 350 MB en el directorio /tmp (solo durante la instalación)
-- 300 MB en el directorio /var/lib/tftpboot (o /srv en sistemas Debian)
-- 50 MB en el directorio de instalación /opt/opengnsys
-- Estimar la capacidad necesaria para el repositorio de imágenes en /opt/opengnsys/images
+- 100 MB en el directorio /tmp (solo durante la instalación)
+- 450 MB en el directorio /var/lib/tftpboot (o /srv en sistemas Debian)
+- 500 MB en el directorio de instalación /opt/opengnsys sin contar el espacio para logs (100 MB si el cliente ogLive está previamente descargado).
+- Estimar la capacidad necesaria para el repositorio de imágenes en /opt/opengnsys/images (es recomendable que este directorio se monte sobre un sistema de archivos independiente).
 
 
 Instalación
 -----------
 
-La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: http://www.opengnsys.es/browser/branches/version1.0/installer/opengnsys_installer.sh?format=txt
+La instalación de OpenGnSys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh
 
 Ejemplos de descompresión del programa:
 
@@ -33,18 +33,19 @@ Ejemplos de descarga con varias herramientas:
     * Descargar con curl.
 	curl http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh > opengnsys_installer.sh
 
-Como medida de seguridad, resulta muy importante modificar los usuarios y claves por defecto de acceso al sistema. Para ello, editar el fichero de instalación opengnsys_installer.sh y modificar los valores de las variables de configuración:
 
-    MYSQL_ROOT_PASSWORD - clave del usuario root de MySQL.
-    OPENGNSYS_DB_USER - usuario de acceso y super-administrador de OpenGnSys.
-    OPENGNSYS_DB_PASSWD - clave del usuario.
-    OPENGNSYS_CLIENT_PASSWD - clave de acceso del cliente a servicios remotos. 
-
-El script debe ser ejecutado como usuario root:
+El script de instalación debe ser ejecutado como usuario root:
 	sudo bash opengnsys_installer.sh
 
+
+Dicho script solicitará por teclado la siguiente información para configurar el acceso al servicio (si no se indica un parámetro, toma el valor por defecto):
+    * Clave del usuario root de MySQL.
+    * Usuario de acceso a la consola web y super-administrador de OpenGnSys.
+    * Clave del usuario de acceso a la consola web.
+    * Clave de acceso del cliente a servicios remotos. 
+
 Se realizan los siguientes procesos:
-    * Obtenener los parámetros básicos de la red.
+    * Obtener los parámetros básicos de la red.
     * Comprobar los paquetes instalados.
     * Descargar e instalar las dependencias que faltan.
     * Crear la estructura básica de directorios de OpenGnSys.
