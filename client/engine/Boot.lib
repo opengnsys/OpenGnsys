@@ -429,17 +429,15 @@ rm -f $FILE
 #@version 1.0.1 - Adapatacion para OpenGnsys.
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2011-05-20
+#@version 1.0.5 - Soporte para Windows 8 y Windows 8.1.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-01-28
 #*/ ##
-
 
 function ogWindowsBootParameters ()
 {
 # Variables locales.
 local PART DISK FILE VERSION WINVER MOUNT
-#Preparando variables adaptadas a sintaxis windows.
-let DISK=$1-1
-PART=$2	
-FILE=/tmp/temp$$
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -453,9 +451,17 @@ fi
 
 ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 
+#Preparando variables adaptadas a sintaxis windows.
+let DISK=$1-1
+PART=$2	
+FILE=/tmp/temp$$
+
 VERSION=$(ogGetOsVersion $1 $2)
 
-if echo "$VERSION" | grep "Windows 8"
+if echo "$VERSION" | grep "Windows 8.1"
+then
+	WINVER="Windows 8.1"
+elif echo "$VERSION" | grep "Windows 8"
 then
 	WINVER="Windows 8"
 elif echo "$VERSION" | grep "Windows 7"
