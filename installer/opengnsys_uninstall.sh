@@ -75,10 +75,12 @@ if test $DROP; then
 user=root
 password=$MYSQL_ROOT_PASSWORD
 EOT
+    # Borrar fichero de credenciales si se corta el proceso de acceso a la BD.
+    trap "rm -f $MYCNF" 0 1 2 3 6 9 15
     # Eliminar bases de datos.
     mysql --defaults-extra-file=$MYCNF 2> /dev/null << EOT
-DROP DATABASE $OPENGNSYS_OLDDATABASE;
-DROP DATABASE $OPENGNSYS_DATABASE;
+DROP DATABASE IF EXISTS $OPENGNSYS_OLDDATABASE;
+DROP DATABASE IF EXISTS $OPENGNSYS_DATABASE;
 DROP USER '$OPENGNSYS_DB_USER';
 DROP USER '$OPENGNSYS_DB_USER'@'localhost';
 EOT
