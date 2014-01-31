@@ -71,6 +71,8 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #608	Consola Web: mostrar mensaje cuando equipo no tenga la configuración del disco en la BD
 #609	Fallo al incorporar ordenadores
 #610	Validación nombre canónico de image
+#614	Compatibilidad múltiples dispositivos (mejora)
+#617	Botones barra menú (duplicado de #614)
 #619	Consola web asistente particionado: error si se incluye en la cola de acciones
 
 Tickets resueltos en módulo OpenGnSys Installer:
@@ -79,6 +81,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #576	Varias cuestiones relacionadas con la sincronización de imágenes
 #582	Nebtoot basado en ficheros (ticket #534) requiere proceso para actualización de ficheros y de la base de datos
 #622	Script de instalacion interactivo
+#627	Corrección errores SQL
 
 Tickets genéricos resueltos:
 #453	Autenticación con LDAP u otro servicio (tarea)
