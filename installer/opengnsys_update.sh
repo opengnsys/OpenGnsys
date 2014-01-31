@@ -469,6 +469,31 @@ function updateWebFiles()
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+	#  Inicio Compatibilidad Dispositivos
+	DIRCOMPATI="/opt/opengnsys/www/principal/"
+	cp $DIRCOMPATI"acciones.php" $DIRCOMPATI"acciones.device.php"
+	cp $DIRCOMPATI"administracion.php" $DIRCOMPATI"administracion.device.php"
+	cp $DIRCOMPATI"aula.php" $DIRCOMPATI"aula.device.php"
+	cp $DIRCOMPATI"aulas.php" $DIRCOMPATI"aulas.device.php"
+	cp $DIRCOMPATI"hardwares.php" $DIRCOMPATI"hardwares.device.php"
+	cp $DIRCOMPATI"imagenes.php" $DIRCOMPATI"imagenes.device.php"
+	cp $DIRCOMPATI"imagenes.php" $DIRCOMPATI"imagenes.device4.php"
+	cp $DIRCOMPATI"menus.php" $DIRCOMPATI"menus.device.php"
+	cp $DIRCOMPATI"repositorios.php" $DIRCOMPATI"repositorios.device.php"
+	cp $DIRCOMPATI"softwares.php" $DIRCOMPATI"softwares.device.php"
+
+	CAMBCOMPATI="s/clickcontextualnodo/clicksupnodo/g"
+	cat  $DIRCOMPATI"acciones.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"acciones.device.php"
+	cat  $DIRCOMPATI"administracion.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"administracion.device.php"
+	cat  $DIRCOMPATI"aula.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"aula.device.php"
+	cat  $DIRCOMPATI"aulas.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"aulas.device.php"
+	cat  $DIRCOMPATI"hardwares.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"hardwares.device.php"
+	cat  $DIRCOMPATI"imagenes.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"imagenes.device.php"
+	cat  $DIRCOMPATI"imagenes.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"imagenes.device4.php"
+	cat  $DIRCOMPATI"menus.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"menus.device.php"
+	cat  $DIRCOMPATI"repositorios.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"repositorios.device.php"
+	cat  $DIRCOMPATI"softwares.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"softwares.device.php"
+	# Fin Compatibilidad Dispositivos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
 
