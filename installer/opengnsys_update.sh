@@ -453,47 +453,34 @@ EOT
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
-        local ERRCODE
+	local ERRCODE COMPATDIR f
+
 	echoAndLog "${FUNCNAME}(): Updating web files..."
-        backupFile $INSTALL_TARGET/www/controlacceso.php
-        mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
+
+	# Copiar los ficheros nuevos conservando el archivo de configuración de acceso.
+	backupFile $INSTALL_TARGET/www/controlacceso.php
+	mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
-        ERRCODE=$?
-        mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
+	ERRCODE=$?
+	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	if [ $ERRCODE != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating web files."
 		exit 1
 	fi
-        restoreFile $INSTALL_TARGET/www/controlacceso.php
+	restoreFile $INSTALL_TARGET/www/controlacceso.php
+
+	# Compatibilidad con dispositivos móviles.
+	COMPATDIR="$INSTALL_TARGET/www/principal"
+	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
+		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
+	done
+	cp -a $COMPATDIR/imagenes.device.php > $COMPATDIR/imagenes.device4.php
+
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
-	#  Inicio Compatibilidad Dispositivos
-	DIRCOMPATI="/opt/opengnsys/www/principal/"
-	cp $DIRCOMPATI"acciones.php" $DIRCOMPATI"acciones.device.php"
-	cp $DIRCOMPATI"administracion.php" $DIRCOMPATI"administracion.device.php"
-	cp $DIRCOMPATI"aula.php" $DIRCOMPATI"aula.device.php"
-	cp $DIRCOMPATI"aulas.php" $DIRCOMPATI"aulas.device.php"
-	cp $DIRCOMPATI"hardwares.php" $DIRCOMPATI"hardwares.device.php"
-	cp $DIRCOMPATI"imagenes.php" $DIRCOMPATI"imagenes.device.php"
-	cp $DIRCOMPATI"imagenes.php" $DIRCOMPATI"imagenes.device4.php"
-	cp $DIRCOMPATI"menus.php" $DIRCOMPATI"menus.device.php"
-	cp $DIRCOMPATI"repositorios.php" $DIRCOMPATI"repositorios.device.php"
-	cp $DIRCOMPATI"softwares.php" $DIRCOMPATI"softwares.device.php"
 
-	CAMBCOMPATI="s/clickcontextualnodo/clicksupnodo/g"
-	cat  $DIRCOMPATI"acciones.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"acciones.device.php"
-	cat  $DIRCOMPATI"administracion.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"administracion.device.php"
-	cat  $DIRCOMPATI"aula.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"aula.device.php"
-	cat  $DIRCOMPATI"aulas.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"aulas.device.php"
-	cat  $DIRCOMPATI"hardwares.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"hardwares.device.php"
-	cat  $DIRCOMPATI"imagenes.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"imagenes.device.php"
-	cat  $DIRCOMPATI"imagenes.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"imagenes.device4.php"
-	cat  $DIRCOMPATI"menus.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"menus.device.php"
-	cat  $DIRCOMPATI"repositorios.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"repositorios.device.php"
-	cat  $DIRCOMPATI"softwares.device.php" | sed -i $CAMBCOMPATI $DIRCOMPATI"softwares.device.php"
-	# Fin Compatibilidad Dispositivos
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
 
@@ -501,7 +488,7 @@ function updateWebFiles()
 function updateInterfaceAdm()
 { 
 	local errcode=0 
-         
+
 	# Crear carpeta y copiar Interface 
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder" 
 	mv $INSTALL_TARGET/client/interfaceAdm $INSTALL_TARGET/client/Interface
