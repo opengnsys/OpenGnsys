@@ -7,6 +7,15 @@
 // Nombre del fichero: barramenu.php
 // Descripción :Este fichero implementa el menu general de la Aplicación
 // ********************************************************************************************************
+// Compatibilidad
+$device="";$device = strtolower($_SERVER['HTTP_USER_AGENT']);
+if(stripos($device,'iphone') !== false ){$device="iphone";}
+elseif  (stripos($device,'ipad') !== false) {$device="ipad";}
+elseif (stripos($device,'android') !== false){$device="android";}
+else{$device=0;}
+$version=exec("cat /opt/opengnsys/doc/VERSION.txt");
+if(ereg("1.0.4",$version) == TRUE ){$version=4;}
+// ********************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
 include_once("./includes/CreaComando.php");
@@ -53,43 +62,78 @@ if (!$cmd)
 				var 	href3="./api/tree.html"
 				var 	href4="./api/main.html"
 				var 	href5="./api/index.html"
+				var	device="<?php echo $device;?>";
+				var	version="<?php echo $version;?>";
+
 
 				switch(op){
 					case 1: 
-						href="./principal/aulas.php"
-						break;
+							if (device!="0"){
+							href="./principal/aulas.device.php"
+							break;}
+							else{href="./principal/aulas.php" 
+							break;}
+							
 					case 2:
-							href="./principal/acciones.php"
-							break;
+							if (device!="0"){
+							href="./principal/acciones.device.php"
+							break;}
+							else{href="./principal/acciones.php"
+							break;}
 					case 3:
-							href="./principal/imagenes.php"
-							break;
+							if (device!="0"){
+								if (version=="4"){
+								href="./principal/imagenes.device4.php"
+								break;}
+								else{href="./principal/imagenes.device.php"
+								break;}
+							}else{href="./principal/imagenes.php"
+							break;}
 					case 4:
-							href="./principal/hardwares.php"
-							break;
+							if (device!="0"){
+							href="./principal/hardwares.device.php"
+							break;}
+							else{href="./principal/hardwares.php"
+							break;}
 					case 5:
-							href="./principal/softwares.php"
-							break;
+							if (device!="0"){
+							href="./principal/softwares.device.php"
+							break;}
+							else{href="./principal/softwares.php"
+							break;}
 					case 6:
-							href="./principal/repositorios.php"
-							break;
+							if (device!="0"){
+							href="./principal/repositorios.device.php"
+							break;}
+							else{href="./principal/repositorios.php"
+							break;}
 					case 7:
-							href="./principal/menus.php"
-							break;
+							if (device!="0"){
+							href="./principal/menus.device.php"
+							break;}
+							else{href="./principal/menus.php"
+							break;}
 					case 8:
 							href="./principal/reservas.php"
 							break;
 					case 9:
-							href="./principal/administracion.php"
-							break;
+							if (device!="0"){
+							href="./principal/administracion.device.php"
+							break;}
+							else{href="./principal/administracion.php"
+							break;}
 					case 10:
 							href="./images/L_Iconos.php"
 							href2="./images/M_Iconos.php"
 							break;
 					case 11:
-							href="./principal/administracion.php"
+							if (device!="0"){
+							href="./principal/administracion.device.php"
 							href2="./principal/boot_grub4dos.php"
-							break;
+							break;}
+							else{href="./principal/administracion.php"
+							href2="./principal/boot_grub4dos.php"
+							break;}
 					case 13:
 							href="./principal/usuarios.php"
 							break;
@@ -187,25 +231,19 @@ if (!$cmd)
 									<?}?>
 							<?}?>
 
-							<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;
-							<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
-								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-
-                                                        <TD  onclick=eleccion(this,23) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-                                                        <A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;
-                                                        <SPAN class=menupral ><?echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
-                                                                <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+											<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
+ 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
+											<TD  onclick=eleccion(this,23) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
+											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
-							<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
-							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
-		
-
-							<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+											<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
+											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
 <?php if($idtipousuario!=$SUPERADMINISTRADOR){ ?>
@@ -252,7 +290,7 @@ for ($i=0;$i<count($numidcentro);$i++)
 
 </form>
 <TD width=0 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-<TD><?php echo "Usuario : ".ucwords($_SESSION["wusuario"]); ?></TD>
+<TD><?php echo "Usuario.:.".ucwords($_SESSION["wusuario"]); ?></TD>
 
 </TD>
 <?php } }?>
