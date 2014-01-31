@@ -55,7 +55,9 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('EF01',16,10), 'MBR', 0),
 	(CONV('EF02',16,10), 'BIOS-BOOT', 0),
 	(CONV('FD00',16,10), 'LINUX-RAID', 1),
-	(CONV('FFFF',16,10), 'UNKNOWN', 1);
+	(CONV('FFFF',16,10), 'UNKNOWN', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
 # Añadir foto de ordenador.
 ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
@@ -82,7 +84,13 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
 	(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
 	(14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
-	(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion');
+	(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion')
+	ON DUPLICATE KEY UPDATE
+		descripcion=VALUES(descripcion), pagina=VALUES(pagina),
+		gestor=VALUES(gestor), funcion=VALUES(funcion), urlimg=VALUES(urlimg),
+		aplicambito=VALUES(aplicambito), visuparametros=VALUES(visuparametros),
+		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
+		activo=VALUES(activo), submenu=VALUES(submenu);
 
 # Parámetros para los comandos nuevos.
 ALTER TABLE parametros
@@ -162,7 +170,9 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('EF',16,10), 'EFI', 1),
 	(CONV('AB00',16,10), 'HFS-BOOT', 1),
-	(CONV('EF00',16,10), 'EFI', 1);
+	(CONV('EF00',16,10), 'EFI', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas
