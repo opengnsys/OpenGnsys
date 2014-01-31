@@ -51,7 +51,7 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1 filename.cmd"
     return
 fi
-# Error si no se reciben 2 parámetros.
+# Error si no se reciben 3 parámetros.
 [ $# == 3 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 # Comprobar que existe el directorio del fichero de comandos.
 MNTDIR=$(ogMount "$1" "$2") || return $?
@@ -121,7 +121,7 @@ done
 CMDFILE="$CMDDIR/$3"
 
 if [ $6 == 0 ]; then
-    # Si no volem fer autologin despres de la postconfiguracio o indiquem a las claus de registre
+    # Si no queremos hacer autologin despues de la postconfiguracion lo indicamos en las claves de registro
     cat > "$CMDFILE" << EOF
 DEL C:\ogboot.*
 REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 0 /f
@@ -129,7 +129,7 @@ REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultU
 REG DELETE "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /f
 EOF
 else
-    # Si volem fer autologin despres de la postconfiguracio introduim l'informacio a les claus de registre
+    # Si queremos hacer autologin despues de la postconfiguracion introducimos la informacion en las claves de registro
     cat > "$CMDFILE" << EOF
 DEL C:\ogboot.*
 REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 1 /f
@@ -286,7 +286,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Error si no se reciben 2 parámetros.
+# Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener sistema de archvios.
 PART="$(ogDiskToDev $1 $2)" || return $?
@@ -303,6 +303,7 @@ done
 [ -n "$WINDIR " ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 windows" || return $?
 # Copiar cliente e incluir en el fichero de configuracion dado que instale el cliente en el arranque.
 cp -a $CLIENTFILE "$WINDIR"
+ogAddCmd $1 $2 $3 "ogAdmWinClient -remove"
 ogAddCmd $1 $2 $3 "ogAdmWinClient -install -s $(ogGetServerIp) -p 2008 -i $(ogGetIpAddress)"
 }
 
