@@ -72,8 +72,7 @@ EOF
 # Crear los valores de registro necesarios para que se haga la ejecución del .cmd al aranque.
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\SystemSetupInProgress" 1
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\SetupType" 4
-# Borrar y crear el valor para compatibilidad con algunos sistmeas.
-ogDeleteRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine"
+#ogDeleteRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine"
 ogAddRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine"
 ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine" "cmd.exe /c $(basename $CMDFILE)"
 }
