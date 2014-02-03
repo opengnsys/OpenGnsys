@@ -729,7 +729,7 @@ echo $MNTDIR
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Partición desconocida o no accesible.
-#@warning En Windows, se borran los ficheros pagefile.sys e hiberfile.sys
+#@warning En Windows, se borran los ficheros de hiberanción y de paginación.
 #@warning El sistema de archivos se amplía al mínimo + 10%.
 #@note    Requisitos:	*resize*
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:   ReduceFileSystem() en ATA.lib
@@ -790,8 +790,10 @@ case "$(ogGetFsType $1 $2)" in
     JFS)    ;;          # No se reduce (por el momento).
     XFS)    ;;          # No se reduce (por el momento).
     NTFS)
-        ogDeleteFile $1 $2 pagefile.sys
-        ogDeleteFile $1 $2 hiberfil.sys
+        # Borrar ficheros de hibernación y paginación de Windows.
+        ogDeleteFile $1 $2 hiberfil.sys 2>/dev/null
+        ogDeleteFile $1 $2 pagefile.sys 2>/dev/null
+        ogDeleteFile $1 $2 swapfile.sys 2>/dev/null
         ogUnmount $1 $2 2>/dev/null
         ## NTFS: Obtiene tamaño mínimo en MB.
         #SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print int($8*1.1)}')

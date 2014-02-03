@@ -32,7 +32,7 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
 	tam=${tam:-"0"}
 	# Sistema operativo instalado 
 	case "$cod" in
-		""|82|8200|A502|BF02|EE|EF0[012])
+		""|82|8200|A502|BF02|EE)
 			soi="" ;;
 		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
 			# Sistema de archivos para datos (sistema operativo "DATA")
