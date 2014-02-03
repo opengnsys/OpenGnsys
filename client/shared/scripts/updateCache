@@ -50,16 +50,18 @@ if ! $(ogFindCache >/dev/null); then
         exit $?
 fi
 
-# comprobar si la imagen existe
+# comprobar si la imagen existe (.img, .img.diff o directorio)
 REPOFILE=$(ogGetPath "REPO" "/$2")  || ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"
 
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE "
 # Distingo si es monolitica o sincronizable
-file "$REPOFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " 2>&1 > /dev/null
+file "$REPOFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " -e " directory" 2>&1 > /dev/null
 if [ $? == 0 ]; then
 	IMGSYNC=TRUE
 	# Para imagen sincronizada, si hay imagen en cache siempre protocolo = rsync.
 	CACHEFILE="$(ogGetPath "CACHE" "/$2")"  && PROTOCOLO="RSYNC"
+	# Si es sincronizada tipo directorio  siempre protocolo = rsync.
+	[ -d $REPOFILE ] && PROTOCOLO="RSYNC" && IMGTYPE="dir"
 
 	# Si es imagen sincronizada siempre da distinto md5. No podemos comprobar -> actualizamos.
 	RETVAL=0
@@ -75,10 +77,17 @@ fi
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
 
+echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE"
 CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
-REALFILESIZE=$(ls -l --block-size=1024 $(ogGetPath $REPOSITORIO "$2") | cut -f5 -d" ")
+if [ "$IMGTYPE" == "dir" ]; then
+	echo "   * $MSG_SCRIPTS_UPDATECACHE_CHECKSIZEDIR"
+	echo "     du -sk $REPOFILE"
+	REALFILESIZE=$(du -sk "$REPOFILE"|awk '{print $1}')
+else
+	REALFILESIZE=$(ls -l --block-size=1024 $REPOFILE | cut -f5 -d" ")
+fi
 
 # La sincronizada, si existe la imagen en cache el espacio necesario
 #	 es la nueva menos lo que ocupa la que ya hay.
@@ -86,7 +95,13 @@ if [ "$PROTOCOLO" == "RSYNC" ]; then
 	if [ "$CACHEFILE" == "" ]; then
 		CACHEFILESIZE=0
 	else
+	   if [ "$IMGTYPE" == "dir" ]; then
+		echo "   * $MSG_SCRIPTS_UPDATECACHE_CHECKSIZEDIR $CACHEFILESIZE"
+		echo "     du -sk $CACHEFILE"
+		CACHEFILESIZE=$(du -sk $CACHEFILE |awk '{print $1}')
+	   else
 		CACHEFILESIZE=$(ls -l --block-size=1024 "$CACHEFILE" | cut -f5 -d" ")
+	   fi
 	fi
 	let SIZEREQUIRED=$REALFILESIZE-$CACHEFILESIZE
 	[ $SIZEREQUIRED -lt 0 ] && SIZEREQUIRED=0
@@ -94,7 +109,6 @@ else
 	SIZEREQUIRED=$FILESIZE
 fi
 
-echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE"
 #ERROR CACHESIZE 16
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
@@ -202,10 +216,20 @@ case "$PROTOCOLO" in
 		ogCopyFile $REPOSITORIO "$2" "$IMGDIR"
 	;;
 	RSYNC)
-		USERRSYNC="opengnsys"
-		OPTRSYNC=" --delete --password-file=/scripts/passrsync "
-		[ "$ogcompress" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
-		
+	   # Opciones de rsync
+	   USERRSYNC="opengnsys"
+	   PASSWORD=" --password-file=/scripts/passrsync "
+	   OPTRSYNC=" --delete "
+	   [ "$ogrsyncz" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
+	   [ "$ogrsyncw" ==  "true" ] && OPTRSYNC="w$OPTRSYNC"
+
+	   if [ -d $REPOFILE ]; then
+		# Si es sincronizada tipo directorio.
+		[ -d "$OGCAC$OGIMG/$2" ] || mkdir "$OGCAC$OGIMG/$2"
+		echo "rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2" |tee -a $OGLOGSESSION $OGLOGFILE
+		rsync -aHAX$OPTRSYNC  --quiet $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" |tee -a $OGLOGSESSION $OGLOGFILE
+           else
+		# Si es sincronizada tipo archivo.
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
 		IMGNAME="${2%.img*}"
 
@@ -226,13 +250,14 @@ case "$PROTOCOLO" in
 		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE >/dev/null
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
-		echo -e "\n      rsync -aHAX --delete  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL |tee -a $OGLOGSESSION $OGLOGFILE"
-		rsync -aHAX$OPTRSYNC  --quiet "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
+		echo -e "\n      rsync -aHAX --delete  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
+		rsync -aHAX$OPTRSYNC  --quiet $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ ${PIPESTATUS[0]} == 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes
 		ogUnmountImage CACHE  "$IMGNAME" $IMGTYPE
 		ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
+	   fi
 	;;
 esac
 
