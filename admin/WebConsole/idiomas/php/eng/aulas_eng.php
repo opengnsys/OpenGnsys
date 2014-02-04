@@ -54,5 +54,7 @@
 	$TbMsg[46]='Scope id';
 	$TbMsg[47]='"Historical log"';
 	$TbMsg[48]='"Real time log"';
+	$TbMsg[49]='"Synchronization';
+	$TbMsg[50]='"Synchronization 2';
 ?>
 

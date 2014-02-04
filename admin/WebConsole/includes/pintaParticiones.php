@@ -371,11 +371,11 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
 	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
 	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
-	echo '<TH align=center>&nbsp;Método&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;Envío&nbsp;</TH>';	
-	echo '	<TH align=center>&nbsp;W&nbsp;</TH>';
-	echo '	<TH align=center>&nbsp;E&nbsp;</TH>';
-	echo '	<TH align=center>&nbsp;C&nbsp;</TH>';	
+	echo '<TH align=center>&nbsp;'.$TbMsg["SYNC_METHOD"].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg["SEND"].'&nbsp;</TH>';
+	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_W"].'">W</dfn> &nbsp;</TH>';
+	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_E"].'">E</dfn> &nbsp;</TH>';
+	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_C"].'">C</dfn> &nbsp;</TH>';
 	echo '</TR>';
 
 	

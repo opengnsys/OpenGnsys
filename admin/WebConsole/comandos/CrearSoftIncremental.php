@@ -81,10 +81,10 @@ if (!$resul){
 			<TH align=center>&nbsp;<?php echo $TbMsg["PARTITION"] ?>&nbsp;</TH>			
 			<TH align=center>&nbsp;<?php echo $TbMsg["SO_NAME"] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<?php echo $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]?>&nbsp;</TH>
-			<TH align=center>&nbsp;Método&nbsp;</TH>			
-			<TH align=center>&nbsp;W&nbsp;</TH>
-			<TH align=center>&nbsp;E&nbsp;</TH>
-			<TH align=center>&nbsp;C&nbsp;</TH>			
+			<TH align=center>&nbsp;<?php echo $TbMsg["SYNC_METHOD"]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<dfn  title='<?php echo $TbMsg["TITLE_W"]?>'> W </dfn> &nbsp;</TH>
+			<TH align=center>&nbsp;<dfn  title='<?php echo $TbMsg["TITLE_E"]?>'> E </dfn> &nbsp;</TH>
+			<TH align=center>&nbsp;<dfn  title='<?php echo $TbMsg["TITLE_C"]?>'> C </dfn> &nbsp;</TH>
 		</TR>
 <!------------------------------------------------------------------------------------------
  Detalle 
