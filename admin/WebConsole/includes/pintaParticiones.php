@@ -407,8 +407,8 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
 						
 						$metodos="SYNC0="."  ".chr(13);
-						$metodos.="SYNC1="."SYNC1".chr(13);						
-						$metodos.="SYNC2="."SYNC2";		
+						$metodos.="SYNC1=".$TbMsg["SYNC1_DIR"].chr(13);						
+						$metodos.="SYNC2=".$TbMsg["SYNC2_FILE"];		
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100).'</TD>';								
 							
 						$metodos="UNICAST="."Unicast".chr(13);						

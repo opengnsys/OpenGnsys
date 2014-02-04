@@ -39,6 +39,9 @@ $TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.
 $TbMsg["CONFIG_NODISK1MSDOS"]='Avís: aquest comandament sol tracta el disc 1 amb taula de particions MSDOS.';
 
 $TbMsg["SYNC_METHOD"]='Método';
+$TbMsg["SYNC1_DIR"]='Basada en directorio';
+$TbMsg["SYNC2_FILE"]='Basada en archivo';
+
 $TbMsg["TITLE_W"]='Opción de rsync: El algoritmo incremental rsync no se usa y se envía todo el archivo. Rsync lo usa por defecto cuando el origen y destino locales. ';
 $TbMsg["TITLE_E"]='Opción de rsync: Se compara el destino con el origen y se borran los ficheros que no existen en el primero.';
 $TbMsg["TITLE_C"]='Opción de rsync: Comprime los archivos de datos que se envían a la máquina de destino, lo que reduce la cantidad de datos que se transmiten. ';

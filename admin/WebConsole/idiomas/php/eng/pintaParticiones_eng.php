@@ -39,6 +39,9 @@ $TbMsg["CONFIG_NOCONFIG"]='No configuration: client does not connect to server.'
 $TbMsg["CONFIG_NODISK1MSDOS"]='Warning: this command only uses disk 1 with a MSDOS partition table.';
 
 $TbMsg["SYNC_METHOD"]='Method';
+$TbMsg["SYNC1_DIR"]='Based on directory';
+$TbMsg["SYNC2_FILE"]='Based on file';
+
 $TbMsg["TITLE_W"]='Rsync option:  delta-transfer algorithm is not used and the whole file is sent as-is instead. This is the default when both the source and  destination   are   specified  as  local  paths.'
 $TbMsg["TITLE_E"]="Rsync option: delete extraneous files from  the  receiving side  (ones  that  aren't on the sending side)."
 $TbMsg["TITLE_C"]='Rsync option: compresses the file data as it  is  sent to  the  destination  machine,  which reduces the amount of data being transmitted.';

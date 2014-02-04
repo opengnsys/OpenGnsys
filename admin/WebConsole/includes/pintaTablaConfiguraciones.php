@@ -208,8 +208,8 @@ function tablaConfiguracionesSincronizacion1($idordenador)
 			$tablaHtml.='<td align=center>'.HTMLSELECT_imagenes($rs->campos["idimagen"]).'</td>';	
 			
 			$metodos="SYNC0="." ".chr(13);			
-			$metodos.="SYNC1="."SYNCRO1".chr(13);						
-			$metodos.="SYNC2="."SYNCRO2";		
+			$metodos.="SYNC1=".$TbMsg["SYNC1_DIR"].chr(13);						
+			$metodos.="SYNC2=".$TbMsg["SYNC2_FILE"];		
 			$tablaHtml.= '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$rs->campos["numpar"],"estilodesple","",1,100).'</TD>';			
 					
 			$tablaHtml.='<td align=center><input type=checkbox name="whole" id="whl-'.$rs->campos["numpar"].'"></td>';	
