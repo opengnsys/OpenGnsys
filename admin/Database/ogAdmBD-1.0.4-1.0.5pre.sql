@@ -134,3 +134,9 @@ ALTER TABLE ordenadores
 	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
 	ALTER idproautoexec SET DEFAULT 0;
 
+# Corregir errata en particiones vacías con número de partición asignado al código de partición.
+UPDATE ordenadores_particiones 
+	SET codpar = 0
+	WHERE codpar = numpar AND tamano = 0;
+
+

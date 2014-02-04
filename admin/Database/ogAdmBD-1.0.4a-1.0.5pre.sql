@@ -125,3 +125,8 @@ UPDATE procedimientos_acciones
 	SET parametros = REPLACE (parametros, 'restoreImage%20', 'deployImage%20')
 	WHERE idcomando = 8;
 
+# Corregir errata en particiones vacías con número de partición asignado al código de partición.
+UPDATE ordenadores_particiones
+	SET codpar = 0
+	WHERE codpar = numpar AND tamano = 0;
+
