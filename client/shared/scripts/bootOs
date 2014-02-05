@@ -36,9 +36,10 @@ case "$OSTYPE" in
         ETC=$(ogGetPath $1 $2 /etc)
         [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
         if [ -f "$ETC/fstab" ]; then
+            # Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
             echo "[50] Actaualizar fstab con particion raiz \"$PART\"."
-            awk -v P="$PART " '{ if ($2=="/") {sub(/^.*$/, P, $1)}
-                                 print } ' $ETC/fstab >/tmp/fstab
+            awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
+                                 print }' $ETC/fstab >/tmp/fstab
             mv /tmp/fstab $ETC/fstab
         fi
         ;;
