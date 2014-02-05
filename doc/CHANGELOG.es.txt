@@ -22,6 +22,9 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #598	Eliminar imagen de caché no funciona si caché desmontada
 #600	Eliminar el límite de tamaño de la caché
 #602	Adaptar funciones para soportar los sistemas de ficheros del Kernel 3.7
+#624	Reboot con valor por defecto de tiempo de sleep configurable.
+#628	Problema postconfiguración Windows dos veces seguidas
+#634	Problema si cliente de OpenGnSys ya se encuentra instalado en Windows
 
 Tickets resueltos en módulo OpenGnSys Client:
 #245	Teclado internacional en el cliente (mejora)

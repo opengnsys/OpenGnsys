@@ -592,8 +592,8 @@ function updateServerFiles()
 			doc )
 	local TARGETS=(	bin \
 			bin \
-			sbin \
-			sbin \
+			sbin/ogAdmServerAux \
+			sbin/ogAdmRepoAux \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
 			lib/install_ticket_wolunicast.sh \
