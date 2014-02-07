@@ -2,10 +2,10 @@
 #/**
 #@file    deployImage
 #@brief   Proceso completo de despliegue de imagen, incluyendo actualización de la caché, restauración y post-configuración (este script es llamado por la interfaz RestaurarImagen).
-#@param   $1 disco
-#@param   $2 Número de particion
-#@param   $3 Nombre canónico de la imagen (sin extensión)
-#@param   $4 Repositorio (CACHE, REPO o dirección IP)
+#@param   $1 Repositorio (CACHE, REPO o dirección IP)
+#@param   $2 Nombre canónico de la imagen (sin extensión)
+#@param   $3 Número de disco
+#@param   $4 Número de particion
 #@param   $5 Protocolo (UNICAST, por defecto, MULTICAST o TORRENT)
 #@param   $6 Opciones del protocolo
 #@exception OG_ERR_FORMAT   1 formato incorrecto.
@@ -47,6 +47,7 @@ fi
 # Asignación de variables (repositorio y protocolo se convierten a mayúsculas).
 TIME1=$SECONDS
 REPO="${1^^}"
+REPO=${REPO:-"REPO"}
 IMGNAME="$2"
 DISK="$3"
 PART="$4"
@@ -75,7 +76,6 @@ echo "Desmontando $DISK $PART" | tee -a $OGLOGSESSION $OGLOGFILE
 ogUnmount $DISK $PART 2>/dev/null
 
 # Valor por defecto para el repositorio.
-REPO=${1:-"REPO"}
 [ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 
@@ -83,7 +83,6 @@ REPO=${1:-"REPO"}
 IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(echo "ERROR: $OG_ERR_NOTFOUND $MSG_ERR_NOTFOUND, IMAGEN $REPO $3" | tee -a $OGLOGSESSION $OGLOGFILE; ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND, $REPO $3"; echo $?)
 IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
 
-echo "[1] IMG-FILE=$3  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
 echo "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Procesar repositorio.
