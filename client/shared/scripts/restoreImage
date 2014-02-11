@@ -16,7 +16,8 @@ fi
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+echo " " > $OGLOGCOMMAND
+[ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION; 
 
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
@@ -37,8 +38,8 @@ IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME") || ogRaiseError $OG_ERR_NOTFOUND "$
 case "$PROTO" in
     UNICAST|UNICAST-DIRECT)
         # Restaurar la imagen.
-        echo "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST"
-        ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" UNICAST | tee -a $OGLOGCOMMAND
+        echo "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" UNICAST 2>&1 | tee -a $OGLOGCOMMAND
         RETVAL=${PIPESTATUS[0]}
         ;;
     MULTICAST|MULTICAST-DIRECT)
@@ -46,8 +47,9 @@ case "$PROTO" in
         TOOL=$(ogGetImageProgram REPO $IMGNAME)
         COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
         #TODO comprobar parametros anteriores
-        ogMcastRequest "$IMGNAME.img" "$PROTOOPT"
-        ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS" | tee -a $OGLOGCOMMAND
+	echo "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
+        ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS" 2>&1 | tee -a $OGLOGCOMMAND
         RETVAL=${PIPESTATUS[0]}
         ;;
     *)  # Protocolo desconocido.
@@ -56,7 +58,7 @@ case "$PROTO" in
 esac
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Código de salida del comando prinicpal de restauración.
 exit $RETVAL

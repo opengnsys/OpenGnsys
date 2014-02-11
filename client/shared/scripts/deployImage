@@ -61,7 +61,7 @@ PROTOOPT="$6"
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+echo -n "" > $OGLOGSESSION; echo " " > $OGLOGCOMMAND
 
 # Registro de inicio de ejecución
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -144,7 +144,7 @@ TIME3=$SECONDS
 case "$NEXTOPERATION" in
     CACHE)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
-        restoreImage CACHE "$IMGNAME" "$DISK" "$PART" | tee -a $OGLOGCOMMAND
+        restoreImage CACHE "$IMGNAME" "$DISK" "$PART"
         RETVAL=${PIPESTATUS[0]}
         RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
     ;;
