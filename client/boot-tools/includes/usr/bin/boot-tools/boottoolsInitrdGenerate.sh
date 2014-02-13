@@ -5,8 +5,7 @@ OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
 OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
 
 
-cd /usr/lib/initramfs-tools/bin/
-rm *
+rm -f /usr/lib/initramfs-tools/bin/*
 cp /bin/busybox ./
 cd /tmp/
 mkinitramfs -o /tmp/initrd.img-$OSRELEASE -v $OSRELEASE

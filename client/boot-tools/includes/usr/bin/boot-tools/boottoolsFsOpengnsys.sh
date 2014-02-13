@@ -13,7 +13,7 @@ VERSIONBOOTTOOLS="ogLive"
 
 NAMEISOCLIENTFILE="/tmp/opengnsys_info_rootfs" 
 NAMEHOSTCLIENTFILE="/tmp/opengnsys_chroot"
-	
+
 SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
@@ -37,8 +37,8 @@ LERROR=TRUE
 
 echo "$FUNCNAME: Iniciando la personalización con datos del SVN "
 
-# parseamos del apt.source
-sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.ubuntu > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
+# parseamos el apt.source de la distribución
+sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.$OSDISTRIB > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Parsing apt.sources : ERROR"
