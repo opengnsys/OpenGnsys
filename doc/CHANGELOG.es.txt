@@ -18,6 +18,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #589	Función ogConfigureFstab en Boot.lib
 #590	Función ogSetLinuxName en Boot.lib
 #591	Función ogCleanLinuxDevices en Boot.lib
+#592	Función ogBoot sobre un sistema GNU/Linux depende del valor default de grub.cfg
 #593	Engine: optimizar inicio sesión en Windows
 #598	Eliminar imagen de caché no funciona si caché desmontada
 #600	Eliminar el límite de tamaño de la caché
@@ -30,6 +31,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #245	Teclado internacional en el cliente (mejora)
 #263	Consola Web: Particionar y formatear
 #457	Seguridad: ogclient en modo usuario permite abrir una consola bash (no se resolverá)
+#461	Actualizar Grub4DOS (no se resolverá)
 #463	ogLive no espera el link para configurar la red y da error
 #547	ogLive basado en ubuntu 12.04 no detecta ficheros de configuración de DNS
 #568	Menú por defecto para los clientes incluye acceso a sistemas operativos
@@ -38,9 +40,10 @@ Tickets resueltos en módulo OpenGnSys Client:
 #579	El cliente no inicia cuando se conecta un dispositivo USB
 #563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
 #587	buildToOrder: activación controladores de disco para Windows 7
-#604	Agente de sistema operativo windows bloquea conexión a internet
-#612	Log en tiempo real no muestra salida de Unicast.
+#604	Agente de sistema operativo Windows bloquea conexión a Internet
+#612	Log en tiempo real no muestra salida de Unicast
 #613	Script reboot con parámetro de tiempo
+#635	Opción para deshabilitar el apagado automático de clientes (mejora)
 
 Tickets resueltos en módulo OpenGnSys Server:
 #534	Netboot con ficheros dinámicos
@@ -49,7 +52,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 #575	Archivo de configuración Rsync para imagenes sincronizadas
 #584	Script setclientmode trunca el fichero PXE
 #586	Mejorar seguridad en scripts para no mostrar los parámetros de ejecución de mysql
-#597	El ogadmserver.cpp deja conexiones mysql abiertas en la funcion AutoexecCliente
+#597	El ogadmserver.cpp deja conexiones MySQL abiertas en la funcion AutoexecCliente
 #607	Script setclientmode: Identificacion de la plantilla por nombre en consola
 #621	Servicio ogAdmServer consume toda la CPU en ciertas circunstancias.
 
