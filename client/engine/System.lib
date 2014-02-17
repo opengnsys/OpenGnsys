@@ -118,8 +118,8 @@ return $CODE
 function ogGetCaller () {
 
 # Obtener el nombre del programa o del script que ha llamado al proceso actual.
-basename $(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
-                                else print $13;}')
+basename "$(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
+                                 else { sub(/^-/,"",$13); print $13; } }')"
 }
 
 
