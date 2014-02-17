@@ -1,12 +1,12 @@
 #!/bin/bash
-# Scirpt de ejemplo para restaurar una imagen.
+# Script de ejemplo para restaurar una imagen.
 # (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]"
-    exit $?
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+    exit ${PIPESTATUS[0]}
 fi
 
 #Load engine configurator from engine.cfg file.
@@ -31,8 +31,12 @@ PROTO=${PROTO:-"UNICAST"}
 PROTOOPT="$6"
 IMGTYPE="${IMGTYPE:-"img"}"
 # Comprobar que existe la imagen del origen.
-IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE") || ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}" || exit $?
-IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME") || ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}" || exit $?
+IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
+IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
+if [ "$IMGFILE" == "" -o "$IMGDIR" == "" ]; then
+	ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+        exit ${PIPESTATUS[0]}
+fi
 
 # Procesar protocolos de transferencia.
 case "$PROTO" in
@@ -53,7 +57,8 @@ case "$PROTO" in
         RETVAL=${PIPESTATUS[0]}
         ;;
     *)  # Protocolo desconocido.
-        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]"
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+
         exit $?
 esac
 

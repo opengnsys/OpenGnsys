@@ -8,10 +8,9 @@ TIME1=$SECONDS
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+echo -n "" > $OGLOGSESSION; echo -n  "" > $OGLOGCOMMAND
 
 # Registro de inicio de ejecución
-#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 echo -e "\n Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
@@ -20,7 +19,9 @@ cat  $1 >> $OGLOGFILE
 
 echo -e "\n Salida de las instrucciones: *****************************" >>  $OGLOGFILE
 chmod +x $1
-$1 &>> $OGLOGCOMMAND
+# Si mandamos la salida a OGLOGCOMMAND reescribimos lo que manda el comando.
+#$1 &>> $OGLOGCOMMAND
+$1
 RETVAL=$?
 
 
@@ -35,7 +36,6 @@ fi
 
 
 # Registro de fin de ejecución
-#echo "[END Interface] Command finished with this code:  $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
 
 

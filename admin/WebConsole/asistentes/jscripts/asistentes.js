@@ -48,7 +48,7 @@ if (form.modo[0].checked)
 	command="deployImage REPO /" + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 echo [0] $MSG_SCRIPTS_TASK_START " + command +" | tee -a $OGLOGSESSION \n \ " +
-command + " | tee -a $OGLOGCOMMAND";
+command + " \n";
 	//form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
 }
 else
@@ -56,7 +56,7 @@ else
 	command="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
 	form.codigo.value="\
 echo [0] $MSG_SCRIPTS_TASK_START " + command +" | tee -a $OGLOGSESSION \n \ " +
-command + " | tee -a $OGLOGCOMMAND";		
+command + " \n";		
 	//form.codigo.value="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
 }
 

@@ -31,12 +31,17 @@
 
 PROG="$(basename $0)"
 if [ $# -lt 3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
-    exit $?
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE" 2>&1  | tee -a $OGLOGSESSION $OGLOGFILE
+    exit ${PIPESTATUS[0]}
 fi
 
 #Carga del configurador del engine
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+[ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION;
 
 REPOSITORIO="${1^^}"
 PROTOCOLO="${3^^}"
@@ -46,12 +51,16 @@ echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 
 # Si el repositorio local CACHE no existe error 15.
 if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTCACHE "CACHE" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogRaiseError $OG_ERR_NOTCACHE "CACHE" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
         exit ${PIPESTATUS[0]}
 fi
 
 # comprobar si la imagen existe (.img, .img.diff o directorio)
-REPOFILE=$(ogGetPath "REPO" "/$2")  || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO /$2")
+REPOFILE=$(ogGetPath "REPO" "/$2") 
+if [ "$REPOFILE" == "" ]; then
+	ogRaiseError $OG_ERR_NOTFOUND "REPO /$2" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+	exit ${PIPESTATUS[0]}
+fi
 
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE " | tee -a $OGLOGSESSION $OGLOGFILE
 # Distingo si es monolitica o sincronizable
@@ -67,7 +76,10 @@ if [ $? == 0 ]; then
 	RETVAL=0
 else
 	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
-	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE "REPO $2")
+	if [ $PROTOCOLO == "RSYNC" ]; then
+		ogRaiseError $OG_ERR_DONTSYNC_IMAGE "REPO $2" 2>&1| tee -a $OGLOGSESSION $OGLOGFILE
+		exit ${PIPESTATUS[0]}
+	fi	
 	IMGSYNC=FALSE
 	#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 	ogUpdateCacheIsNecesary $1 $2
@@ -113,8 +125,8 @@ fi
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
 	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
-	ogRaiseError $OG_ERR_CACHESIZE "CACHE" | tee -a $OGLOGSESSION $OGLOGFILE
-    exit ${PIPESTATUS[0]}
+	ogRaiseError $OG_ERR_CACHESIZE "CACHE" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+	exit ${PIPESTATUS[0]}
 fi
 
 echo "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -140,8 +152,8 @@ then
 	;;
 	*)
 	 	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
-		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
-		exit $?
+		ogRaiseError $OG_ERR_CACHESIZE "CACHE" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+		exit ${PIPESTATUS[0]}
 	;;
 	esac	
 fi
@@ -179,7 +191,7 @@ case "$PROTOCOLO" in
 		sleep $P2PWAIT
 		echo "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogTorrentStart CACHE "$2.torrent" $4 2>&1 | tee -a   $OGLOGCOMMAND
-		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND | grep -B1 "Download") 
+		RESUMEUPDATECACHE=$(grep -m 1 -B1 "Download" $OGLOGCOMMAND) 
 	;;
 	MULTICAST)
 		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
@@ -211,11 +223,13 @@ case "$PROTOCOLO" in
 		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
 		sleep 5
 		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
-		RESUMEUPDATECACHE=$(cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete")
+		RESUMEUPDATECACHE=$(grep -m 1  -B1 "Transfer complete" $OGLOGCOMMAND.tmp)
 	;;
 	UNICAST)
 		echo "unicast" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogCopyFile $REPOSITORIO "$2" "$IMGDIR" 2>&1  | tee -a   $OGLOGCOMMAND
+		sleep 5
+		RESUMEUPDATECACHE=$(grep -m 1  "100%" $OGLOGCOMMAND.tmp)
 	;;
 	RSYNC)
 	   # Opciones de rsync
@@ -264,6 +278,7 @@ case "$PROTOCOLO" in
 esac
 
 TIME1=$[SECONDS-TIME1]
+
 echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 echo "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum " | tee -a $OGLOGSESSION $OGLOGFILE
@@ -277,9 +292,10 @@ else
 	RETVAL=$?
 fi
 
-TIME2=$[SECONDS-TIME2]
-echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
+if [ "$(ogGetCaller)" != "deployImage" ]; then
+	TIME2=$[SECONDS-TIME2]
+	echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizamos-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
 [ "$RETVAL" == "1" ] && exit 0

@@ -61,7 +61,8 @@ PROTOOPT="$6"
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo -n "" > $OGLOGSESSION; echo " " > $OGLOGCOMMAND
+echo " " > $OGLOGCOMMAND
+[ "$(ogGetCaller)" == "EjecutarScript" ] || echo -n "" > $OGLOGSESSION
 
 # Registro de inicio de ejecución
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -134,11 +135,13 @@ case "$REPO" in
         esac
     ;;
     *)  # Error: repositorio desconocido.
-        ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" | tee -a $OGLOGSESSION $OGLOGFILE
-        exit $?
+        ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+        exit ${PIPESTATUS[0]}
     ;;
 esac
 
+echo Borrar
+cp $OGLOGCOMMAND.tmp $OGLOGCOMMAND.update
 TIME3=$SECONDS
 
 case "$NEXTOPERATION" in
@@ -146,23 +149,27 @@ case "$NEXTOPERATION" in
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage CACHE "$IMGNAME" "$DISK" "$PART"
         RETVAL=${PIPESTATUS[0]}
-        RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
     ;;
     UNICAST)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage REPO "$IMGNAME" "$DISK" "$PART"
-        RETVAL=$?
-        RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
+        RETVAL=${PIPESTATUS[0]}
     ;;
     MULTICAST)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" | tee -a $OGLOGSESSION $OGLOGFILE
-        restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT
-        RETVAL=$?
-        RESUMERESTOREIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
+        restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT 
+	RETVAL=${PIPESTATUS[0]}
     ;;
 esac
-
+RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
 echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+# Si la transferencia ha dado error me salgo.
+if [ $RETVAL -ne 0 ] ; then
+	ogRaiseError $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+	# Muestro registro de fin de ejecución si no viene de Ejecutar Script
+	[ "$(ogGetCaller)" == "EjecutarScript" ] || echo "$MSG_INTERFACE_END $OG_ERR_IMAGE" | tee -a $OGLOGSESSION $OGLOGFILE
+        exit $OG_ERR_IMAGE
+fi
 TIME3=$[SECONDS-TIME3]
 echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
@@ -178,7 +185,9 @@ TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Registro de fin de ejecución
-echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
-
-exit $RETVAL
+# Si se ha llamado desde ejecutar script no lo muestro para no repetir.
+if [ "$(ogGetCaller)" != "EjecutarScript" ] 
+	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+	exit $RETVAL
+fi
 
