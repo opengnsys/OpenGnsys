@@ -186,7 +186,7 @@ echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESS
 
 # Registro de fin de ejecución
 # Si se ha llamado desde ejecutar script no lo muestro para no repetir.
-if [ "$(ogGetCaller)" != "EjecutarScript" ] 
+if [ "$(ogGetCaller)" != "EjecutarScript" ] ; then
 	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
 	exit $RETVAL
 fi
