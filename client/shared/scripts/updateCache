@@ -235,15 +235,15 @@ case "$PROTOCOLO" in
 	   # Opciones de rsync
 	   USERRSYNC="opengnsys"
 	   PASSWORD=" --password-file=/scripts/passrsync "
-	   OPTRSYNC=" --delete "
+	   OPTRSYNC=" --delete --progress "
 	   [ "$ogrsyncz" ==  "true" ] && OPTRSYNC="z $OPTRSYNC"
 	   [ "$ogrsyncw" ==  "true" ] && OPTRSYNC="w$OPTRSYNC"
 
 	   if [ -d $REPOFILE ]; then
 		# Si es sincronizada tipo directorio.
 		[ -d "$OGCAC$OGIMG/$2" ] || mkdir "$OGCAC$OGIMG/$2"
-		echo "rsync -aHAX$OPTRSYNC  --quiet $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2" |tee -a $OGLOGSESSION $OGLOGFILE
-		rsync -aHAX$OPTRSYNC  --quiet $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>&1  | tee -a   $OGLOGCOMMAND
+		echo "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2" |tee -a $OGLOGSESSION $OGLOGFILE
+		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>&1  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
            else
 		# Si es sincronizada tipo archivo.
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
@@ -257,7 +257,8 @@ case "$PROTOCOLO" in
 		# Si la imagen no existe la creo
 		# Si la imagen del repositorio es mayor, redimensiono la imagen de cache
 		if [ "$CACHEFILE" == "" -o  $CACHEFILESIZE -lt $REALFILESIZE ]; then
-		   ogCreateFileImage CACHE "$IMGNAME" $IMGTYPE $REALFILESIZE 2>&1  | tee -a   $OGLOGCOMMAND	
+		   echo "$MSG_HELP_ogCreateFileImage" | tee -a $OGLOGSESSION $OGLOGFILE
+		   ogCreateFileImage CACHE "$IMGNAME" $IMGTYPE $REALFILESIZE 
                    TIMEAUX3=$[SECONDS-TIMEAUX3]
                    echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 		fi
@@ -266,8 +267,9 @@ case "$PROTOCOLO" in
 		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE >/dev/null
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
-		echo -e "\n      rsync -aHAX --delete  --quiet $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
-		rsync -aHAX$OPTRSYNC  --quiet $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>&1  | tee -a   $OGLOGCOMMAND
+		echo "$MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
+		echo "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
+		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>&1  | egrep "^sent|^sending|^total|%" >>   $OGLOGCOMMAND
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ ${PIPESTATUS[0]} == 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes

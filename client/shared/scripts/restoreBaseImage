@@ -37,7 +37,8 @@ function onexit() {
 }
 
 # Limpiamos los archivo de log
-echo -n "" >$OGLOGCOMMAND; echo -n "" $OGLOGFILE; echo -n ""  $OGLOGSESSION
+echo -n "" >$OGLOGCOMMAND;
+[ "$(ogGetCaller)" == "RestaurarImagenBasica" -o "$(ogGetCaller)" == "restoreDiffImage" ] ||  echo -n "" > $OGLOGSESSION
 
 echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE  $OGLOGSESSION
 
@@ -89,7 +90,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    # Sincronizamos si existe el fichero y si no usamos updateCache.
    echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE $OGLOGSESSION
    echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE $OGLOGSESSION
-   updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6"  2>&1 | tee -a   $OGLOGCOMMAND
+   updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6" 
    RETVAL=${PIPESTATUS[0]}
    if [ "$RETVAL" != "0" ] 
         then 
@@ -116,7 +117,7 @@ ogMountImage "$1" "$2" "$IMGEXT"  >/dev/null
 ogWaitMountImage "$1" "$2" "$IMGEXT"  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."
 # Sincronizamos la partición con la imagen.
 echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4"  |tee -a $OGLOGFILE $OGLOGSESSION
-ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4 
+ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4
 
 TIMEAUX2=$[SECONDS-TIME2]
 echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGFILE $OGLOGSESSION
@@ -127,12 +128,11 @@ ogUnmountImage "$1" "$2" "$IMGEXT"
 # Restableciendo acl
 ogUnlock $3 $4
 echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE $OGLOGSESSION
-ogRestoreInfoImage $3 $4  &>>$OGLOGCOMMAND
+ogRestoreInfoImage $3 $4
 
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
-ps -ef|grep -v "grep" |grep "$PPID.*restoreDiffImage " &>/dev/null || RETVAL=$?
-if [ $RETVAL -ne 0 ]; then
+if [ "$(ogGetCaller)" == "restoreDiffImage" ];then
 	echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE $OGLOGSESSION
 	# el || echo es para evitar que se maneje el error.
 	configureOs $3 $4  &>>$OGLOGCOMMAND || echo "$?" &>>$OGLOGCOMMAND

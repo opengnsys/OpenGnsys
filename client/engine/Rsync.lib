@@ -53,7 +53,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 		if [ "$BACKUP" == "true" ]; then
                     # Copia seguridad 
                     echo "     $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
-                    cp -f  "$IMGFILE" "$IMGFILE.ant"  &> $OGLOGCOMMAND
+                    cp -f  "$IMGFILE" "$IMGFILE.ant"  
                     mv -f "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
                     rm -f "$IMGFILE.sum"
 		fi
@@ -79,17 +79,17 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 fi
         else
                 echo "      dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED"
-                dd if=/dev/zero of="$IMGFILE" bs=1024 count=$SIZEREQUIRED &> $OGLOGCOMMAND
+                dd if=/dev/zero of="$IMGFILE" bs=1024 count=$SIZEREQUIRED 2>&1 | tee -a $OGLOGCOMMAND
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
 		#if [[ "$(uname -r)" < "3.7" ]]; then
 		if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
 		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
-		   mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE &> $OGLOGCOMMAND
+		   mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE 2>&1 |tee -a $OGLOGCOMMAND
 		else
                    echo "      mkfs.btrfs  -L ${2##*\/} $LOOPDEVICE "
-                   mkfs.btrfs  -L "${2##*\/}" $LOOPDEVICE &> $OGLOGCOMMAND
+                   mkfs.btrfs  -L "${2##*\/}" $LOOPDEVICE 2>&1 | tee -a $OGLOGCOMMAND
 		fi
 	fi
 	# Monto la imagen 
@@ -192,7 +192,7 @@ if [ "$IMGTYPE" == "img" ]; then
 else
 	# Imagen Diferencial
 	echo "      rsync -aHAXvn$OPTRSYNC  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" | tee -a $OGLOGSESSION $OGLOGFILE
-	rsync -aHAXvn$OPTRSYNC $PASSWORD   --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
+	rsync -aHAXvn$OPTRSYNC $PASSWORD  --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
 	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGLIST
 	sed -i  '/^\.\//d' $IMGLIST
 
@@ -204,14 +204,21 @@ else
 
 	rm $IMGLIST
 
+	# Comprobamos que los ficheros de diferencias no esten vacios o salimos con error.
+	if [ $(grep -v -e "^$"  -e "^#" $IMGINFO /tmp/ogimg.ln /tmp/ogimg.rm |wc -l) -eq 0 ]; then 
+		ogRaiseError $OG_ERR_NOTDIFERENT "$1 $2 $3 $4 $5" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE 
+		return ${PIPESTATUS[0]}	
+	fi
+
 fi
 
 # Guardamos el contenido de las acl (Solo win) Necesario particion desmontada (esta asi)
 ogUnmount $1 $2
 if [ $FSTYPE == "NTFS" ]; then
 	echo "      ntfs-3g.secaudit -b $PART /" |tee -a $OGLOGSESSION $OGLOGFILE 
-	ntfs-3g.secaudit -b $PART / > $IMGACL
+	ntfs-3g.secaudit -b $PART / > $IMGACL 2>$OGLOGCOMMAND
 fi
+
 
 }
 
@@ -245,7 +252,7 @@ while read LINE; do
     read END INI <<< "$(grep -n  -e "File" -e "Directory" $IMGACL| grep -A 1 "$LINE"| awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
     let NUM=$END-$INI-1
     # Si algún archivo no se encuentra, el error lo mandamos a /dev/null
-    sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null | tee -a $ACLTMP > $OGLOGCOMMAND
+    sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null | tee -a $ACLTMP
 done < $FILES
 
 cp $ACLTMP $IMGACL
@@ -316,7 +323,7 @@ if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f "$DEST/$IMGACL" ] ; then
         cp "$DEST/$IMGACL" /tmp
         ogUnmount "$1" "$2"
         echo "      ntfs-3g.secaudit -se $PART" |tee -a $OGLOGSESSION $OGLOGFILE
-        ntfs-3g.secaudit -se $PART /tmp/$IMGACL 
+        ntfs-3g.secaudit -se $PART /tmp/$IMGACL
 	# Para evitar que de falso error
 	echo ""	
 fi
@@ -334,6 +341,9 @@ function ogSyncCreate () {
 #@param 5 Tipo imagen [ img | diff ]
 #*/
 local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC
+
+# Limpiamos los archivo de log
+echo  "" >$OGLOGCOMMAND;
 
 if [ "$*" == "help" ]; then
 	ogHelp 	"$FUNCNAME": "$MSG_HELP_ogSyncCreate" \
@@ -371,10 +381,10 @@ else
         DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
 fi
 # Sincronizamos los datos de la partición a la imagen
-echo "      rsync -aHAX$OPTRSYNC --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC $PASSWORD  --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC"
+echo "      rsync -aHAX$OPTRSYNC --progress --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
+rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>&1| egrep "^sent|^sending|^total|%" >> $OGLOGCOMMAND
 echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC  $PASSWORD --inplace /tmp/ogimg* "$DESTRSYNC"
+rsync -aHAX$OPTRSYNC  $PASSWORD  --inplace /tmp/ogimg* "$DESTRSYNC"
 
 }
 
@@ -390,6 +400,9 @@ rsync -aHAXq$OPTRSYNC  $PASSWORD --inplace /tmp/ogimg* "$DESTRSYNC"
 #*/
 function ogSyncRestore () {
 local DIRMOUNT ORIG DESTRSYNC PASSWORD OPTRSYNC USERRSYNC IMGINFO FILESFROM
+
+# Limpiamos los archivo de log
+echo  "" >$OGLOGCOMMAND;
 
 if [ "$*" == "help" ]; then
 	ogHelp 	"$FUNCNAME": "$MSG_HELP_ogSyncRestore" \
@@ -438,8 +451,8 @@ if [ "$3" == "diff" ]; then
 	IMGINFO="ogimg.info"
 	FILESFROM=" --files-from=$DESTRSYNC/$IMGINFO"
 
-        echo "      rsync -aHAXq$OPTRSYNC  $ORIG/ogimg* $DESTRSYNC" |tee -a  $OGLOGFILE
-        rsync -aHAXq$OPTRSYNC $PASSWORD  "$ORIG"/ogimg* $DESTRSYNC
+        echo "      rsync -aHAX$OPTRSYNC --progress  $ORIG/ogimg* $DESTRSYNC" |tee -a $OGLOGSESSION  $OGLOGFILE 
+        rsync -aHAX$OPTRSYNC $PASSWORD --progress  "$ORIG"/ogimg* $DESTRSYNC 
         # Borramos linea de información de la imagen, sino busca un fichero con ese nombre
         sed -i   '/^\#/d' $DESTRSYNC/$IMGINFO
 
@@ -450,8 +463,8 @@ if [ "$3" == "diff" ]; then
 
 fi
 
-echo "      rsync -aHAX$OPTRSYNC  $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAXq$OPTRSYNC $PASSWORD  $FILESFROM  "$ORIG/" "$DESTRSYNC"
+echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
+rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>&1 | egrep "^sent|^sending|^total|%" >> $OGLOGCOMMAND
 
 
 }
@@ -608,10 +621,9 @@ if [ "$*" == "help" ]; then
 fi
 
 if [ $# -lt 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension [ image_size ] "
-    return $?
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension [ image_size ] " 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE 
+    return ${PIPESTATUS[0]}
 fi
-
 
 SIZE=${4:-"300000"}
 
@@ -621,18 +633,19 @@ else
 	DIRMOUNT="$OGIMG/$(ogGetMountImageDir "$2" $3)"
 fi
 
-echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"
+echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"  | tee -a $OGLOGSESSION $OGLOGFILE
 
 # time-out segun el tamaño de la imagen. por defecto: 100000k -> 3s
 let TIMEOUT=$SIZE/$CREATESPEED
 [ $TIMEOUT -lt 60 ] && TIMEOUT=60
 until [ -f "$DIRMOUNT/ogimg.info" ] ; do
         TIMEAUX=$[SECONDS-TIME]
-        [  "$TIMEAUX" -gt "$TIMEOUT" ] &&  return 2
-        echo -n "#"
+        [  "$TIMEAUX" -lt "$TIMEOUT" ] ||  ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT"  2>&1  | tee -a $OGLOGSESSION $OGLOGFILE
+	[ ${PIPESTATUS[0]} -eq 0 ] || return ${PIPESTATUS[0]}
+        echo -n "#"  | tee -a $OGLOGSESSION $OGLOGFILE
         sleep 5
 done
-echo  ""
+echo  "" | tee -a $OGLOGSESSION $OGLOGFILE
 
 }
 
@@ -797,7 +810,7 @@ if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
 else
 	mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT" 1>/dev/null
 fi
-ls "$DIRMOUNT"
+ls -C "$DIRMOUNT" | tee -a $OGLOGCOMMAND
 umount "$DIRMOUNT"
 
 rmdir "$DIRMOUNT"

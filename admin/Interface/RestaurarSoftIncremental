@@ -39,7 +39,10 @@
 
         # Clear temporary file used as log track by httpdlog
         # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-        echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+        echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND
+
+	# Registro de inicio de ejecución
+	echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 
 	if [ ${10} -eq 1 ]; then

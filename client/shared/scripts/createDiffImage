@@ -28,13 +28,9 @@
 #*/ ##
 trap "onexit $1 $2 $3 \"$4\" \"$5\"" 1 2 3 6 9 14 15 ERR
 
-# Establecemos factor de compresion
-# !!! Se configura en las lineas 122 y 128.
-
 function onexit() {
     local exit_status=$?
-    local MSG="$(ogRaiseError $exit_status \"$1 $2 $3 $4 $5\" 2>&1)"
-    echo "$MSG" |tee -a $OGLOGFILE  $OGLOGSESSION
+    echo -e "\n $PROG error: ${MSG_INTERFACE_END#*\]} $exit_status" |tee -a $OGLOGFILE  $OGLOGSESSION
     ogUnmountImage $3 "$5" $DIFFTYPE &>/dev/null
     ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
     if [ $exit_status -ne 4 ]; then
@@ -52,6 +48,11 @@ function onexit() {
 CREATESPEED=${CREATESPEED:-"100000*4"}
 # Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
 [  $(uname -r|cut -d. -f2) -lt 7 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
+# % de compresion para estimacion tamaño imagen IMGFS="EXT4"
+ZSYNC=${ZSYNC:-"120"}
+# Si IMGFS="BTRFS" la compresion es mayor.
+[ $IMGFS == "BTRFS" ] && let ZSYNC=$ZSYNC-30
+
 
 TIME1=$SECONDS
 
@@ -72,7 +73,8 @@ DIFFEXT="img.diff"
 DIFFTYPE="diff"
 
 # Limpiamos los archivo de log
-echo -n "" >$OGLOGCOMMAND;  echo -n ""  $OGLOGSESSION
+echo -n "" >$OGLOGCOMMAND
+[ "$(ogGetCaller)" == "RestaurarSoftIncremental" ] ||  echo -n "" > $OGLOGSESSION
 
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
@@ -108,7 +110,6 @@ DIFFFILE="$DIFFDIR/$5.$DIFFEXT"
 
 ogLockImage "$3"  "/$4.$IMGEXT"
 ogLockImage "$3"  "/$5.$DIFFEXT"
-LOOPDEVICE=$(losetup -f)
 
 # Comprobar consistencia del sistema de archivos.
 echo " " > $OGLOGCOMMAND
@@ -117,23 +118,18 @@ echo "[20] $MSG_HELP_ogCheckFs  $1 $2 $SIZEFS (KB) " | tee -a $OGLOGSESSION $OGL
 ogUnmount $1 $2
 ogCheckFs $1 $2 >$OGLOGCOMMAND || ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" 
 
-TIMEAUX1=$[SECONDS-TIME1]
-echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Borramos ficheros de paginacion y configuracion
-# Establecemos factor de compresion, varia segun el sistema operativo y el kernel.
-case "$(ogGetFsType $1 $2)" in
+FSTYPE=$(ogGetFsType $1 $2)
+case "$FSTYPE" in
     EXT[234])
         ogCleanLinuxDevices $1 $2
 	rm -rf $ORIG/tmp/*
-	# Compresion linux && ext4 || btrfs
-	[ $IMGFS == "EXT4" ] && COMPRESS=110/100 || COMPRESS=80/100
         ;;
     NTFS)
-	[ $(ogGetPath $1 $2 pagefile.sys) ] && ogDeleteFile $1 $2 pagefile.sys 
-        [ $(ogGetPath $1 $2 hiberfil.sys) ] && ogDeleteFile $1 $2 hiberfil.sys
-	# Compresion windows && ext4 || btrfs
-	[  $IMGFS == "EXT4" ] && COMPRESS=130/100 || COMPRESS=90/100
+	[ $(ogGetPath $1 $2 pagefile.sys) ] && ogDeleteFile $1 $2 pagefile.sys
+	[ $(ogGetPath $1 $2 hiberfil.sys) ] && ogDeleteFile $1 $2 hiberfil.sys
+	[ $(ogGetPath $1 $2 swapfile.sys) ] && ogDeleteFile $1 $2 swapfile.sys
         ;;
 esac
 
@@ -142,9 +138,6 @@ echo " " > $OGLOGCOMMAND
 TIME2=$SECONDS
 echo "[40] $MSG_HELP_createDiffImage: $1 $2 $3 $4" | tee -a $OGLOGSESSION $OGLOGFILE
 # Creamos la lista del contenido y lo situamos en la particion a copiar.
-FSTYPE=$(ogGetFsType $1 $2)
-
-IMGDIRAUX=$(ogGetMountImageDir "$4" $IMGEXT)
 
 # Montamos imagen completa (con la que vamos a comparar)
 ogMountImage $3 "$4" $IMGEXT >/dev/null
@@ -155,24 +148,14 @@ ogWaitMountImage $3 "$4" $IMGEXT || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 
 # Creamos la informacion de la imagen.
 echo "[50] $MSG_HELP_ogCreateInfoImage " | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateInfoImage $1 $2 $3 "$4" "${DIFFTYPE}"
-TIMEAUX3=$[SECONDS-TIME2]
-echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
-# Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial
-echo "[60] $MSG_HELP_ogAclFilter " | tee -a $OGLOGSESSION $OGLOGFILE
-ogAclFilter
-TIMEAUX5=$[SECONDS-TIMEAUX3]
-echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX5/60]m $[TIMEAUX5%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
 
 #Calculamos el tamaño de la imagen:
 ogMount $1 $2 >/dev/null
 ogLock $1 $2
-
 echo -n "     $MSG_SCRIPTS_CREATE_SIZE" | tee -a $OGLOGSESSION $OGLOGFILE
 cd $ORIG
 SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
-let SIZEREQUIRED=$SIZEDATA*$COMPRESS 
+let SIZEREQUIRED=$SIZEDATA*$ZSYNC/100
 # Tamaño minimo fichero imagen 300000
 [ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
 
@@ -182,21 +165,34 @@ let SIZEREQUIRED=$SIZEDATA*$COMPRESS
 echo  " $SIZEREQUIRED $SIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
 [ $SIZEREQUIRED -gt $SIZEFREE ] && ogRaiseError $OG_ERR_CACHESIZE "$3"
 
+TIMEAUX3=$[SECONDS-TIME2]
+echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial
+if [ "$FSTYPE" == "NTFS" ]; then
+	echo "[55] $MSG_HELP_ogAclFilter " | tee -a $OGLOGSESSION $OGLOGFILE
+	ogAclFilter
+	TIMEAUX4=$[SECONDS-TIMEAUX3]
+	echo "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX4/60]m $[TIMEAUX4%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+fi
+TIMEAUX5=$[SECONDS-TIMEAUX3]
+
+
 # Configuro la informacion del tamaño de los datos en /tmp/ogimg.info
 sed -i s/SIZEDATA/"$SIZEDATA"/g /tmp/ogimg.info
 
 # Creamos o redimensionamos la imagen
-echo "[70] $MSG_HELP_ogCreateFileImage."  | tee -a $OGLOGSESSION $OGLOGFILE
+echo "[60] $MSG_HELP_ogCreateFileImage."  | tee -a $OGLOGSESSION $OGLOGFILE
 ogCreateFileImage $3 "$5" $DIFFTYPE $SIZEREQUIRED
 
 # Esperamos que se monte la imagen despues de crarla en el servidor
 ogWaitMountImage "$3" "$5" "$DIFFTYPE" $SIZEREQUIRED  || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $5 $DIFFTYPE: time_out."
-TIMEAUX6=$[SECONDS-TIMEAUX5]
-echo  -e "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
-echo  "[80] $MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
+echo  "[70] $MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
 # Copio los datos a la imagen diferecial :
 ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
+TIMEAUX6=$[SECONDS-TIMEAUX5]
+echo  -e "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Reducimos la imagen diferencial -> solo para kernel <= 3.7, imagenes con FS ext4
 echo "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -206,23 +202,16 @@ ogReduceImage  $3 "$5" $DIFFTYPE
 ogUnmountImage $3 "$5" $DIFFTYPE
 ogUnmountImage $3 "$4" $IMGEXT
 
-
-TIMEAUX7=$[SECONDS-TIMEAUX6]
-echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX7/60]m $[TIMEAUX7%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
-
-TIMEAUX8=$[SECONDS-TIME2]
-echo "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX8/60]m $[TIMEAUX8%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
+# Desbloqueo las imagenes y la particion.
 ogUnlockImage "$3" "/$4.$IMGEXT"
 ogUnlockImage "$3" "/$5.$DIFFEXT"
 ogUnlock $1 $2
 
+echo " " > $OGLOGCOMMAND
 # Comprobamos que la imagen esta bien
 echo "[95] $MSG_HELP_ogCheckSyncImage" | tee -a $OGLOGSESSION $OGLOGFILE
-ogCheckSyncImage $3 "$5" diff | tee -a $OGLOGSESSION $OGLOGFILE
-RETVAL=${PIPESTATUS[0]}
-[ "$RETVAL" == "0" ] ||  ogRaiseError $OG_ERR_IMAGE "$3 $5 diff"
+ogCheckSyncImage $3 "$5" diff 
+[ ${PIPESTATUS[0]} -eq 0 ] ||  ogRaiseError $OG_ERR_IMAGE "$3 $5 diff"
 
 #resumen de la operacion
 IMGSIZE=$(ls -l --block-size=1024 "${DIFFFILE}"| cut -f5 -d" ")

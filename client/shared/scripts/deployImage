@@ -140,8 +140,6 @@ case "$REPO" in
     ;;
 esac
 
-echo Borrar
-cp $OGLOGCOMMAND.tmp $OGLOGCOMMAND.update
 TIME3=$SECONDS
 
 case "$NEXTOPERATION" in

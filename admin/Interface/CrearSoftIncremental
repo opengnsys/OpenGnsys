@@ -43,6 +43,13 @@
         #Carga el configurador del engine desde el fichero engine.cfg
         [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
+	# Clear temporary file used as log track by httpdlog
+	# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+	echo -n "" > $OGLOGSESSION; echo -n  "" > $OGLOGCOMMAND
+
+	# Registro de inicio de ejecución
+	echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+
 	# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
 	if [ "$REPO" == "REPO" -a "$boot" != "admin"  ]
 	then
@@ -52,10 +59,6 @@
 	fi
 
 
-        # Clear temporary file used as log track by httpdlog
-        # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-        echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
-	
 	if [ $8 -eq 1 ]; then
 		#sincronizacion1 
 		ogCrearSoftIncremental "$@"
