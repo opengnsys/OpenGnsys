@@ -75,10 +75,10 @@ char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede con
 		"016-No hay espacio en la cache para almacenar fichero-imagen",\
 		"017-Error al Reducir el Sistema Archivos",\
 		"018-Error al Expandir el Sistema Archivos",\
-		"019-Error no definido",\
-		"020-Error no definido",\
-		"021-Error no definido",\
-		"022-Error no definido",\
+		"019-Valor fuera de rango o no válido.",\
+		"020-Sistema de archivos desconocido o no se puede montar",\
+		"021-Error en partición de caché local",\
+		"022-El disco indicado no contiene una particion GPT",\
 		"023-Error no definido",\
 		"024-Error no definido",\
 		"025-Error no definido",\
@@ -96,7 +96,7 @@ char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede con
 		"037-Error no definido",\
 		"038-Error no definido",\
 		"039-Error no definido",\
-		"040-Error no definido",\
+		"040-Error imprevisto no definido",\
 		"041-Error no definido",\
 		"042-Error no definido",\
 		"043-Error no definido",\
@@ -117,9 +117,22 @@ char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede con
 		"058-Error en envio MULTICAST de una particion",\
 		"059-Error en la recepcion MULTICAST de una particion",\
 		"060-Error en la conexion de una sesion UNICAST|MULTICAST con el MASTER",\
+		"061-Error no definido",\
+		"062-Error no definido",\
+		"063-Error no definido",\
+		"064-Error no definido",\
+		"065-Error no definido",\
+		"066-Error no definido",\
+		"067-Error no definido",\
+		"068-Error no definido",\
+		"069-Error no definido",\
+		"070-Error al montar una imagen sincronizada.",\
+		"071-Imagen no sincronizable (es monolitica).",\
+		"072-Error al desmontar la imagen.",\
+		"073-No se detectan diferencias entre la imagen basica y la particion.",\
 		"Error desconocido "
 	};
-	#define MAXERRORSCRIPT 60		// Error máximo cometido
+	#define MAXERRORSCRIPT 73		// Error máximo cometido
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________
