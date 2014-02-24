@@ -120,4 +120,4 @@ export OG_ERR_PROTOCOLJOINMASTER=60  # Error en la conexion de una sesion UNICAS
 export OG_ERR_DONTMOUNT_IMAGE=70 # Error al montar una imagen sincronizada.
 export OG_ERR_DONTSYNC_IMAGE=71 # Imagen no sincronizable (es monolitica)
 export OG_ERR_DONTUNMOUNT_IMAGE=72 # Error al desmontar la imagen
-export OG_ERR_NOTDIFERENT=73	# No se detectan diferencias entre la imagen basica y la particion.
+export OG_ERR_NOTDIFFERENT=73	# No se detectan diferencias entre la imagen basica y la particion.

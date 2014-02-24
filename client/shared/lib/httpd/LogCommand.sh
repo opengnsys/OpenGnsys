@@ -6,7 +6,7 @@ echo "<meta charset='utf-8'>"
 echo "<meta http-equiv='Refresh' content='5,URL=./LogCommand.sh'> <link rel='stylesheet' type='text/css' href='oglive.css' />"
 echo "<title>Bash as CGI</title></head><body>"
 
-$(strings /tmp/command.log > /tmp/command.log.tmp)
+$(strings -e S /tmp/command.log > /tmp/command.log.tmp)
 
 echo "<table>"
 
