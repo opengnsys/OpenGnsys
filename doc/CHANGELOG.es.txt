@@ -9,23 +9,28 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #142	Ampliar el soporte al mayor número de sistemas de ficheros posible
 #295	Función ogSetPartitionId: partición errónea o desconocida
 #397	Separación completa de objetos partición y sistema de archivos (tarea)
+#484	Arranque dual (tarea)
 #548	Ampliar la detección de sistemas operativos
 #550	Error al restaurar en equipos recién particionados o recién incluidos en OpenGnSys
 #555	Longitud máxima de nombres Netbios
 #571	NTAutoLogon: muestra la clave del usuario de autologon
 #578	Problema con la instalación del cliente de Windows
 #581	El comando chntpw se cuelga cuando el registro de Windows está corrompido
+#588	Grub para GNU/Linux de 32 y 64 bits incluye configurador del fichero cfg
 #589	Función ogConfigureFstab en Boot.lib
 #590	Función ogSetLinuxName en Boot.lib
 #591	Función ogCleanLinuxDevices en Boot.lib
 #592	Función ogBoot sobre un sistema GNU/Linux depende del valor default de grub.cfg
-#593	Engine: optimizar inicio sesión en Windows
+#593	Engine: optimizar inicio de sesión en Windows
 #598	Eliminar imagen de caché no funciona si caché desmontada
 #600	Eliminar el límite de tamaño de la caché
 #602	Adaptar funciones para soportar los sistemas de ficheros del Kernel 3.7
+#605	builtToOrder para discos SCSI con controlador lsi_sas
 #624	Reboot con valor por defecto de tiempo de sleep configurable.
 #628	Problema postconfiguración Windows dos veces seguidas
 #634	Problema si cliente de OpenGnSys ya se encuentra instalado en Windows
+#636	Recupearar log en tiempo real para comados de restauración
+#637	Función ogRaiseError sin parámetros devuelve mensaje erróneo
 
 Tickets resueltos en módulo OpenGnSys Client:
 #245	Teclado internacional en el cliente (mejora)
@@ -40,6 +45,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #579	El cliente no inicia cuando se conecta un dispositivo USB
 #563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
 #587	buildToOrder: activación controladores de disco para Windows 7
+#595	Internacionalización mensajes del cliente
 #604	Agente de sistema operativo Windows bloquea conexión a Internet
 #612	Log en tiempo real no muestra salida de Unicast
 #613	Script reboot con parámetro de tiempo
@@ -52,9 +58,9 @@ Tickets resueltos en módulo OpenGnSys Server:
 #575	Archivo de configuración Rsync para imagenes sincronizadas
 #584	Script setclientmode trunca el fichero PXE
 #586	Mejorar seguridad en scripts para no mostrar los parámetros de ejecución de mysql
-#597	El ogadmserver.cpp deja conexiones MySQL abiertas en la funcion AutoexecCliente
+#597	Servicio ogAdmServer deja conexiones MySQL abiertas en la funcion AutoexecCliente
 #607	Script setclientmode: Identificacion de la plantilla por nombre en consola
-#621	Servicio ogAdmServer consume toda la CPU en ciertas circunstancias.
+#621	Servicio ogAdmServer consume toda la CPU en ciertas circunstancias
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #583	Script deleteimage no admite correctamente parámetro de borrado de copia de seguridad de la imagen
@@ -94,7 +100,7 @@ Tickets genéricos resueltos:
 #455	Comunicacion SSH entre un Servidor central y repositorios (opcional)
 #564	Eliminar imagen de repositorio (tarea)
 #565	Imágenes diferenciales (tarea)
-#537	Revisión proceso de creación y restauración de imágenes: interfazAdm -> scripts -> engine
+#537	Revisión proceso de creación y restauración de imágenes: interfazAdm -> scripts -> engine (mejora)
 #577	Enviar al servidor la configuración de particiones cada vez que un cliente e ejecuta un comando
 
 
