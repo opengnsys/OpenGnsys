@@ -1,18 +1,34 @@
 #!/bin/bash
-# Comprobamos si los servicios de opengnsys están levantado y si no es así los iniciamos.
+# opengnsys.cron - Script para comprobar si los servicios de OpenGnSys están levantados
+#                  e iniciarlos automáticamente.
+# Nota: este script debe ser lanzado por Cron cada minuto.
+
+
 # Variables.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 LOGDIR="$OPENGNSYS/log"
 DEFAULTFILE=/etc/default/opengnsys
+typeset -i OGCPU	# % uso CPU
 
 # Comprobar servicios que deben estar activos.
 [ -f $DEFAULTFILE ] && source $DEFAULTFILE
 
-# Si un servicio debe estar activo y no se está ejecutando, reiniciar OpenGnSys.
-if [ "$RUN_OGADMSERVER" == "yes" -a $(pgrep ogAdmServer | wc -w) == 0 ]; then
-	date +"%d/%m/%Y %T ERROR: El servicio ogAdmServer  estaba caido, se reinicia" >> $LOGDIR/ogAdmServer.log
-	/etc/init.d/opengnsys restart
+# Comprobar si está activo el servidor OpenGnSys.
+if [ "$RUN_OGADMSERVER" == "yes" ]; then
+	# Parar procesos ogAdmServer si consume más de 90% de CPU.
+	OGPID=$(pgrep ogAdmServer)
+	OGCPU=$(printf "%d" $(ps -p $OGPID -o %cpu= 2>/dev/null) 2>/dev/null)
+	if [ $OGCPU -gt 90 ]; then
+		date +"%d/%m/%Y %T AVISO: ogAdmServer (PID=$OGPID) parado, consumiendo $OGCPU % de CPU" >> $LOGDIR/ogAdmServer.log
+		kill -9 $OGPID
+	fi
+	# Reiniciar servicios si proceso ogAdmServer está caído.
+	if ! pgrep ogAdmServer >/dev/null; then
+		date +"%d/%m/%Y %T ERROR: El servicio ogAdmServer  estaba caido, se reinicia" >> $LOGDIR/ogAdmServer.log
+		/etc/init.d/opengnsys restart
+	fi
 fi
+# Reiniciar servicios si es repositorio y proceso ogAdmRepo está caído.
 if [ "$RUN_OGADMREPO" == "yes" -a $(pgrep ogAdmRepo | wc -w) == 0 ]; then
 	date +"%d/%m/%Y %T ERROR: El servicio ogAdmRepo estaba caido, se reinicia" >> $LOGDIR/ogAdmRepo.log
 	/etc/init.d/opengnsys restart
