@@ -37,9 +37,7 @@ esac
 DATETIME=$(date +"%F %T")
 
 if [ -n "$LOGLEVEL" ]; then
-    logger -s -t "OpenGnSys $LOGLEVEL" -f $OGLOGFILE "$DATETIME $*"
-    logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGCOMMAND "$DATETIME $*"
-    logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGSESSION "$DATETIME $*"
+    logger -s -t "OpenGnSys $LOGLEVEL" "$DATETIME $*" 2>&1 | tee -a $OGLOGFILE $OGLOGCOMMAND $OGLOGSESSION
 else
     echo "$*"
 fi
