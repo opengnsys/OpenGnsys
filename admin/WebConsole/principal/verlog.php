@@ -45,8 +45,9 @@ else
 
 
 <HTML>
-<TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
 <HEAD>
+<TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
+<meta charset="utf-8">
 <?
 #echo "<meta http-equiv='Refresh' content='2;URL=./verlog.php?nombreordenador=". $_GET["nombreordenador"] ."&ip=".$ip ."'";
 ?>
