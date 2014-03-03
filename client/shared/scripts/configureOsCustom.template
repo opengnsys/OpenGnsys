@@ -1,0 +1,12 @@
+#!/bin/bash
+# configureOsCustom.template
+#	Plantilla para fichero de configuración del cliente tras restaurar una imagen.
+# Recibe los mismos parámetros que el script "configureOsCustom".
+# Nota: para usar este fichero, renombrar como "createImageCustomPost".
+
+
+# Control de parámetros.
+[ $# -ne 4 ] || exit
+
+
+
