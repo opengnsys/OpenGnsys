@@ -6,7 +6,7 @@
 // Nombre del fichero: ogAdmClient.c
 // Descripción :Este fichero implementa el cliente general del sistema
 // ********************************************************************************************************
-//?????
+
 #include "ogAdmClient.h"
 #include "ogAdmLib.c"
 //________________________________________________________________________________________________________

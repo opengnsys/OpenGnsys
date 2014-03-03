@@ -22,7 +22,7 @@
 //______________________________________________________________________________________________________
 BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 {
-	int lon,resul;
+	int lon,resul,res;
 	char *nfn,*ids,*scp,msglog[LONSTD];
 	char modulo[] = "EjecutarScript()";
 
@@ -36,16 +36,20 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	nfn=copiaParametro("nfn",ptrTrama);
 	ids=copiaParametro("ids",ptrTrama);
 
+	res=0;
 	/* Nombre del archivo de script */
 	char filescript[LONPRM];
 	sprintf(filescript,"/tmp/_script_%s",IPlocal);
 	if(!escribeArchivo(filescript,scp)){
 		errorLog(modulo, 52, FALSE); 
+		res=52; // Error al crear fichero de comandos
 	}
 
-	resul=system(filescript);
-	if (resul>0) {
-		errorLog(modulo, 86, FALSE); 
+	if(res==0){
+		resul=system(filescript);
+		if (resul>0) {
+			errorLog(modulo, 86, FALSE); 
+		}
 	}
 
 	initParametros(ptrTrama,0);
