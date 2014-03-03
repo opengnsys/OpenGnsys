@@ -8,6 +8,51 @@
 // ********************************************************************************************************
 #include "ogAdmLnxClient.h"
 #include "ogAdmLib.c"
+
+// ________________________________________________________________________________________________________
+// Función: EjecutarScript
+//
+//	Descripción:
+//		Ejecuta código de script
+//	Parámetros:
+//		ptrTrama: contenido del mensaje
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+//______________________________________________________________________________________________________
+BOOLEAN EjecutarScript(TRAMA* ptrTrama)
+{
+	int lon,resul;
+	char *nfn,*ids,*scp,msglog[LONSTD];
+	char modulo[] = "EjecutarScript()";
+
+	if (ndebug>=DEBUG_MAXIMO) {
+		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
+		infoDebug(msglog);
+	}
+	scp=URLDecode(copiaParametro("scp",ptrTrama));
+	ids=copiaParametro("ids",ptrTrama);
+
+	nfn=copiaParametro("nfn",ptrTrama);
+	ids=copiaParametro("ids",ptrTrama);
+
+	/* Nombre del archivo de script */
+	char filescript[LONPRM];
+	sprintf(filescript,"/tmp/_script_%s",IPlocal);
+	if(!escribeArchivo(filescript,scp)){
+		errorLog(modulo, 52, FALSE); 
+	}
+
+	resul=system(filescript);
+	if (resul>0) {
+		errorLog(modulo, 86, FALSE); 
+	}
+
+	initParametros(ptrTrama,0);
+	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_EjecutarScript");
+	respuestaEjecucionComando(ptrTrama,resul,ids);
+	return(TRUE);
+}
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
 //
@@ -419,6 +464,9 @@ int main(int argc, char *argv[])
 	
 	strcpy(tbfuncionesClient[cf].nf, "Sondeo");
 	tbfuncionesClient[cf++].fptr = &Sondeo;	
+
+	strcpy(tbfuncionesClient[cf].nf, "EjecutarScript");
+	tbfuncionesClient[cf++].fptr = &EjecutarScript;
 
 	/*--------------------------------------------------------------------------------------------------------
 		Inicio de sesión
