@@ -23,32 +23,40 @@
 BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 {
 	int lon,resul,res;
-	char *nfn,*ids,*scp,msglog[LONSTD];
+	char *nfn,*ids,*cod,*scp,msglog[LONSTD];
 	char modulo[] = "EjecutarScript()";
+
 
 	if (ndebug>=DEBUG_MAXIMO) {
 		sprintf(msglog, "%s:%s",tbMensajes[21],modulo);
 		infoDebug(msglog);
 	}
-	scp=URLDecode(copiaParametro("scp",ptrTrama));
-	ids=copiaParametro("ids",ptrTrama);
 
 	nfn=copiaParametro("nfn",ptrTrama);
 	ids=copiaParametro("ids",ptrTrama);
+
+	scp=copiaParametro("scp",ptrTrama);
+	cod=URLDecode(scp);
 
 	res=0;
 	/* Nombre del archivo de script */
 	char filescript[LONPRM];
 	sprintf(filescript,"/tmp/_script_%s",IPlocal);
-	if(!escribeArchivo(filescript,scp)){
+	if(!escribeArchivo(filescript,cod)){
 		errorLog(modulo, 52, FALSE); 
 		res=52; // Error al crear fichero de comandos
 	}
 
 	if(res==0){
+		sprintf(filescript,"chmod 0777 /tmp/_script_%s",IPlocal);
+
 		resul=system(filescript);
-		if (resul>0) {
-			errorLog(modulo, 86, FALSE); 
+		if (resul==0) {
+			sprintf(filescript,"/tmp/_script_%s",IPlocal);
+			resul=system(filescript);
+			if (resul>0) {
+				errorLog(modulo, 86, FALSE); 
+			}
 		}
 	}
 
@@ -352,7 +360,7 @@ BOOLEAN respuestaEjecucionComando(TRAMA* ptrTrama,int res,char *ids)
 	}
 	else{ // Algún error
 		lon+=sprintf(ptrTrama->parametros+lon,"res=%s\r","2");
-		lon+=sprintf(ptrTrama->parametros+lon,"der=%s\r",tbErrores[res]);// Descripción del error
+		lon+=sprintf(ptrTrama->parametros+lon,"der=(Errno:%d)-%s\r",res,tbErrores[res]);// Descripción del error
 	}
 	if(!(enviaMensajeServidor(&socket_c,ptrTrama,MSG_NOTIFICACION))){
 		errorLog(modulo,44,FALSE);
@@ -380,6 +388,7 @@ BOOLEAN gestionaTrama(TRAMA *ptrTrama)
 
 	INTROaFINCAD(ptrTrama);
 	nfn = copiaParametro("nfn", ptrTrama); // Toma nombre de función
+
 	for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
 		res = strcmp(tbfuncionesClient[i].nf, nfn);
 		if (res == 0) { // Encontrada la función que procesa el mensaje
@@ -446,7 +455,7 @@ int main(int argc, char *argv[])
 	/*--------------------------------------------------------------------------------------------------------
 		Validación de parámetros de ejecución y fichero de configuración 
 	 ---------------------------------------------------------------------------------------------------------*/
-	if (!validacionParametros(argc, argv,6)) // Valida parámetros de ejecución
+	if (!validacionParametros(argc, argv,7)) // Valida parámetros de ejecución
 		exit(EXIT_FAILURE);
 
 	if (!tomaConfiguracion(szPathFileCfg)) // Toma parametros de configuración

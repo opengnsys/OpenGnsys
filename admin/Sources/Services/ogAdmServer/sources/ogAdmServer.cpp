@@ -2570,11 +2570,15 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 	}
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
-	res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+	
+	if(cfg){
+		res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		liberaMemoria(cfg);	
+	}
 
 	liberaMemoria(iph);
 	liberaMemoria(ido);
-	liberaMemoria(cfg);	
+
 	
 	db.Close(); // Cierra conexión
 	return (TRUE);

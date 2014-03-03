@@ -197,6 +197,10 @@ BOOLEAN validacionParametros(int argc, char*argv[],int eje) {
 		case 6: // Agente
 			strcpy(szPathFileCfg, "ogAdmWinClient.cfg"); // Valores por defecto de archivos
 			strcpy(szPathFileLog, "ogAdmWinClient.log"); // de configuración y de logs
+			break;	
+		case 7: // Agente
+			strcpy(szPathFileCfg, "ogAdmnxClient.cfg"); // Valores por defecto de archivos
+			strcpy(szPathFileLog, "ogAdmLnxClient.log"); // de configuración y de logs
 			break;			
 	}
 
