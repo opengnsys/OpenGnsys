@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 #/**
 #         updateCache
 #@brief   Actualiza la cache del cliente con imagen o fichero iso.
@@ -31,8 +29,8 @@
 
 PROG="$(basename $0)"
 if [ $# -lt 3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE" 2>&1  | tee -a $OGLOGSESSION $OGLOGFILE
-    exit ${PIPESTATUS[0]}
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
+    exit $?
 fi
 
 #Carga del configurador del engine
@@ -41,7 +39,7 @@ fi
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
 echo " " > $OGLOGCOMMAND
-[ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION;
+[ "$(ogGetCaller)" == "deployImage" -o "$(ogGetCaller)" == "restoreBaseImage" -o "$(ogGetCaller)" == "restoreDiffImage" ] || echo -n "" > $OGLOGSESSION;
 
 REPOSITORIO="${1^^}"
 PROTOCOLO="${3^^}"
@@ -51,16 +49,12 @@ echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 
 # Si el repositorio local CACHE no existe error 15.
 if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTCACHE "CACHE" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-        exit ${PIPESTATUS[0]}
+        ogRaiseError $OG_ERR_NOTCACHE "CACHE"
+        exit $0
 fi
 
 # comprobar si la imagen existe (.img, .img.diff o directorio)
-REPOFILE=$(ogGetPath "REPO" "/$2") 
-if [ "$REPOFILE" == "" ]; then
-	ogRaiseError $OG_ERR_NOTFOUND "REPO /$2" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-	exit ${PIPESTATUS[0]}
-fi
+REPOFILE=$(ogGetPath "REPO" "/$2") || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"; echo $?) 
 
 echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE " | tee -a $OGLOGSESSION $OGLOGFILE
 # Distingo si es monolitica o sincronizable
@@ -76,10 +70,7 @@ if [ $? == 0 ]; then
 	RETVAL=0
 else
 	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
-	if [ $PROTOCOLO == "RSYNC" ]; then
-		ogRaiseError $OG_ERR_DONTSYNC_IMAGE "REPO $2" 2>&1| tee -a $OGLOGSESSION $OGLOGFILE
-		exit ${PIPESTATUS[0]}
-	fi	
+	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE "REPO $2"; echo $?)
 	IMGSYNC=FALSE
 	#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 	ogUpdateCacheIsNecesary $1 $2
@@ -125,8 +116,8 @@ fi
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
 	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
-	ogRaiseError $OG_ERR_CACHESIZE "CACHE" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-	exit ${PIPESTATUS[0]}
+	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+	exit $?
 fi
 
 echo "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -152,8 +143,8 @@ then
 	;;
 	*)
 	 	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
-		ogRaiseError $OG_ERR_CACHESIZE "CACHE" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-		exit ${PIPESTATUS[0]}
+		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+		exit $?
 	;;
 	esac	
 fi
@@ -226,12 +217,14 @@ case "$PROTOCOLO" in
 		RESUMEUPDATECACHE=$(grep -m 1  -B1 "Transfer complete" $OGLOGCOMMAND.tmp)
 	;;
 	UNICAST)
-		echo "unicast" | tee -a $OGLOGSESSION $OGLOGFILE
+		#echo "unicast" | tee -a $OGLOGSESSION $OGLOGFILE
 		ogCopyFile $REPOSITORIO "$2" "$IMGDIR" 2>&1  | tee -a   $OGLOGCOMMAND
 		sleep 5
 		RESUMEUPDATECACHE=$(grep -m 1  "100%" $OGLOGCOMMAND.tmp)
 	;;
 	RSYNC)
+	   # Si parametro de protocolo no era rsync, mensaje de cambio protocolo
+	   [ "${3^^}" == "RSYNC" ] || echo $MSG_SCRIPTS_UPDATECACHE_RSYNCPROTOCOLCHANGE |tee -a $OGLOGSESSION $OGLOGFILE
 	   # Opciones de rsync
 	   USERRSYNC="opengnsys"
 	   PASSWORD=" --password-file=/scripts/passrsync "
@@ -267,8 +260,8 @@ case "$PROTOCOLO" in
 		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE >/dev/null
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
-		echo "$MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
-		echo "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
+		#echo "$MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
+		echo "      rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
 		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>&1  | egrep "^sent|^sending|^total|%" >>   $OGLOGCOMMAND
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ ${PIPESTATUS[0]} == 0 ] && RETVAL="1"|| RETVAL="2"

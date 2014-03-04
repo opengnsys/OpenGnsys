@@ -68,10 +68,7 @@ echo " " > $OGLOGCOMMAND
 echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Si el origen(pariticion) esta bloqueada salir.
-if ogIsLocked $DISK $PART; then
-    ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"
-    exit $?
-fi
+ogIsLocked $DISK $PART && exit $(ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"; echo $?)
 
 echo "Desmontando $DISK $PART" | tee -a $OGLOGSESSION $OGLOGFILE
 ogUnmount $DISK $PART 2>/dev/null
@@ -81,7 +78,7 @@ ogUnmount $DISK $PART 2>/dev/null
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 
 #Informacioin previa de la imagen
-IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(echo "ERROR: $OG_ERR_NOTFOUND $MSG_ERR_NOTFOUND, IMAGEN $REPO $3" | tee -a $OGLOGSESSION $OGLOGFILE; ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND, $REPO $3"; echo $?)
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(ogRaiseError $OG_ERR_NOTFOUND "$REPO $3"; echo $?)
 IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
 
 echo "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
@@ -129,14 +126,14 @@ case "$REPO" in
                 esac
             ;;
             *)  # Error: protocolo desconocido.
-                ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $PROTO" | tee -a $OGLOGSESSION $OGLOGFILE
+                ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $PROTO"
                 exit $?
             ;;
         esac
     ;;
     *)  # Error: repositorio desconocido.
-        ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-        exit ${PIPESTATUS[0]}
+        ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" 
+        exit $?
     ;;
 esac
 
@@ -146,24 +143,24 @@ case "$NEXTOPERATION" in
     CACHE)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage CACHE "$IMGNAME" "$DISK" "$PART"
-        RETVAL=${PIPESTATUS[0]}
+        RETVAL=$0
     ;;
     UNICAST)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage REPO "$IMGNAME" "$DISK" "$PART"
-        RETVAL=${PIPESTATUS[0]}
+        RETVAL=$0
     ;;
     MULTICAST)
         echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" | tee -a $OGLOGSESSION $OGLOGFILE
         restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT 
-	RETVAL=${PIPESTATUS[0]}
+        RETVAL=$0
     ;;
 esac
 RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
 echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
 # Si la transferencia ha dado error me salgo.
 if [ $RETVAL -ne 0 ] ; then
-	ogRaiseError $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
+	ogRaiseError $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1
 	# Muestro registro de fin de ejecución si no viene de Ejecutar Script
 	[ "$(ogGetCaller)" == "EjecutarScript" ] || echo "$MSG_INTERFACE_END $OG_ERR_IMAGE" | tee -a $OGLOGSESSION $OGLOGFILE
         exit $OG_ERR_IMAGE

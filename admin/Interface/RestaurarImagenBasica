@@ -47,7 +47,7 @@
 
         # Clear temporary file used as log track by httpdlog
         # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-        echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND
+        echo -n  "" > $OGLOGSESSION; echo " " > $OGLOGCOMMAND
 
 	# Registro de inicio de ejecución
 	echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -55,6 +55,7 @@
 	if [ $9 -eq 1 ]; then
 		#sincronizacion1 
  		ogRestaurarImagenBasica "$@"
+		RETVAL=$?
 	fi			
 
 	if [ $9 -eq 2 ]; then
@@ -79,5 +80,10 @@
 		OPT=${5#*_}
 
 		restoreBaseImage $DEST "$3" $1 $2  $PROTO $OPT
-
+		RETVAL=$?
 	fi
+
+	# Registro de fin de ejecución
+	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+
+	exit $RETVAL

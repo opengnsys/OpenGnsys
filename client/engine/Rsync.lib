@@ -94,7 +94,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	fi
 	# Monto la imagen 
 	ogMountImage $1 "$2" $3 &>/dev/null
-	[ $? -eq 0 ] || ogRaiseError $OG_ERR_IMAGE "$3 $4"
+	[ $? -eq 0 ] || return $( ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?)
 	touch "$DIRMOUNT/ogimg.info"
 
 	# Si existe dispositivo de loop lo borro.
@@ -138,7 +138,7 @@ if [ $3 == "img" ]; then
    IMGTYPE="img"
 else
    # Comprobamos que las extension sea valida
-   ogCheckStringInGroup $5 "img diff" || ogRaiseError  $OG_ERR_FORMAT $MSG_SYNC_EXTENSION
+   ogCheckStringInGroup $5 "img diff" || return $( ogRaiseError  $OG_ERR_FORMAT "$MSG_SYNC_EXTENSION"; echo $?)
    IMGTYPE=$5
    if [ "$IMGTYPE" == "diff" ]; then
 	# Imagen completa con la que comparo la particion.
@@ -206,8 +206,8 @@ else
 
 	# Comprobamos que los ficheros de diferencias no esten vacios o salimos con error.
 	if [ $(grep -v -e "^$"  -e "^#" $IMGINFO /tmp/ogimg.ln /tmp/ogimg.rm |wc -l) -eq 0 ]; then 
-		ogRaiseError $OG_ERR_NOTDIFERENT "$1 $2 $3 $4 $5" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE 
-		return ${PIPESTATUS[0]}	
+		ogRaiseError $OG_ERR_NOTDIFFERENT "$1 $2 $3 $4 $5" 
+		return $0	
 	fi
 
 fi
@@ -232,15 +232,24 @@ fi
 function ogAclFilter () {
 local  IMGACL IMGINFO FILES ACLTMP
 
+# Ayuda o menos de 5 parametros y la imagen no es basica
+if [ "$*" == "help" ]; then
+	ogHelp "$MSG_HELP_ogAclFilter" \
+		"$FUNCNAME [ no parameters ]  "
+    	return
+fi
+
 IMGACL="/tmp/ogimg.acl"
 IMGINFO="/tmp/ogimg.info"
 FILES="/tmp/files$$"
 ACLTMP="/tmp/acl$$.tmp"
+ACLFILES="/tmp/aclfiles$$"
 
 # comprobamos que existan los archivos de origen. Si no salimos sin error.
 [ -f $IMGACL -a -f $IMGINFO ] || return 0
 
 echo "" > $ACLTMP
+grep -n  -e "File" -e "Directory" $IMGACL > $ACLFILES
 
 # Al fichero le quitamos las líneas sobrantes: comentarios y lineas vacias.
 sed -e s/"^#.*$"//g $IMGINFO > $FILES
@@ -249,13 +258,17 @@ sed -i '/^$/d'  $FILES
 
 # Recorremos el listado y extraemos la acl correspondiente al fichero o directorio.
 while read LINE; do
-    read END INI <<< "$(grep -n  -e "File" -e "Directory" $IMGACL| grep -A 1 "$LINE"| awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
+    #read END INI <<< "$(grep -n  -e "File" -e "Directory" $IMGACL| grep -A 1 "$LINE"| awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
+    read END INI <<< "$(grep -A 1 "$LINE" $ACLFILES | awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
     let NUM=$END-$INI-1
     # Si algún archivo no se encuentra, el error lo mandamos a /dev/null
-    sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null | tee -a $ACLTMP
+    #sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null | tee -a $ACLTMP
+    sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null >> $ACLTMP
+    echo "aclfilter: $LINE" >> $OGLOGCOMMAND
 done < $FILES
 
 cp $ACLTMP $IMGACL
+rm $FILES $ACLTMP $ACLFILES 
 
 }
 
@@ -382,7 +395,7 @@ else
 fi
 # Sincronizamos los datos de la partición a la imagen
 echo "      rsync -aHAX$OPTRSYNC --progress --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>&1| egrep "^sent|^sending|^total|%" >> $OGLOGCOMMAND
+rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>&1| egrep "^deleting|^sent|^sending|^total|%"  &>> $OGLOGCOMMAND
 echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
 rsync -aHAX$OPTRSYNC  $PASSWORD  --inplace /tmp/ogimg* "$DESTRSYNC"
 
@@ -464,7 +477,7 @@ if [ "$3" == "diff" ]; then
 fi
 
 echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
-rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>&1 | egrep "^sent|^sending|^total|%" >> $OGLOGCOMMAND
+rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>&1 | egrep "^deleting|^sent|^sending|^total|%"  &>> $OGLOGCOMMAND
 
 
 }
@@ -513,7 +526,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	fi
 
 	# Comprobamos que se ha montado bien
-	[ $? -eq 0 ] || ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $3" || return $?
+	[ $? -eq 0 ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $3"; echo $?)
         echo "/tmp/$DIRMOUNT"
 
 else

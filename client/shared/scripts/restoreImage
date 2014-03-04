@@ -5,8 +5,8 @@
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-    exit ${PIPESTATUS[0]}
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]"
+    exit $?
 fi
 
 #Load engine configurator from engine.cfg file.
@@ -34,8 +34,8 @@ IMGTYPE="${IMGTYPE:-"img"}"
 IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
 IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
 if [ "$IMGFILE" == "" -o "$IMGDIR" == "" ]; then
-	ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-        exit ${PIPESTATUS[0]}
+	ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
+        exit $?
 fi
 
 # Procesar protocolos de transferencia.
@@ -57,8 +57,7 @@ case "$PROTO" in
         RETVAL=${PIPESTATUS[0]}
         ;;
     *)  # Protocolo desconocido.
-        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE
-
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 
         exit $?
 esac
 

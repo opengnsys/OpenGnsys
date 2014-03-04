@@ -63,6 +63,7 @@
 	if [ $7 -eq 1 ]; then
 		#sincronizacion1 
 		ogCrearImagenBasica "$@"
+        	RETVAL=$?
 	fi		
 	
 
@@ -83,8 +84,16 @@
 		[ "$4" == "0.0.0.0" ] && DEST="CACHE" || DEST="REPO"
 
 		createBaseImage $1 $2 $DEST "$3" 
+        	RETVAL=$?
 
 	fi
 
 	[ "$REPO" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
+
+	# Registro de fin de ejecución
+	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+
+
+
+	exit $RETVAL
 
