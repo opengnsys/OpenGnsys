@@ -82,7 +82,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    echo "[10] $MSG_HELP_updateCache." | tee -a  $OGLOGFILE  $OGLOGSESSION
    echo "     updateCache REPO" "/$3.$DIFFEXT" "$PROTO" "$7"  | tee -a  $OGLOGFILE  $OGLOGSESSION
    updateCache REPO "/$3.$DIFFEXT" "$PROTO" "$7"
-   RETVAL=${PIPESTATUS[0]}
+   RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
         echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $3.$DIFFEXT $6 $7 con error $RETVAL" | tee -a  $OGLOGFILE 
@@ -123,7 +123,7 @@ ogRestoreInfoImage  "$4" "$5" &>$OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
 echo "[90] $MSG_HELP_configureOs." | tee -a  $OGLOGFILE  $OGLOGSESSION
-configureOs $4 $5  2>&1 | tee -a $OGLOGCOMMAND
+configureOs $4 $5 
 
 TIME=$[SECONDS-TIME1]
 echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE  $OGLOGSESSION

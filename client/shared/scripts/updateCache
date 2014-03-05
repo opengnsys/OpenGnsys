@@ -236,7 +236,7 @@ case "$PROTOCOLO" in
 		# Si es sincronizada tipo directorio.
 		[ -d "$OGCAC$OGIMG/$2" ] || mkdir "$OGCAC$OGIMG/$2"
 		echo "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2" |tee -a $OGLOGSESSION $OGLOGFILE
-		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>&1  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
+		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>> $OGLOGCOMMAND  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
            else
 		# Si es sincronizada tipo archivo.
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
@@ -256,15 +256,15 @@ case "$PROTOCOLO" in
                    echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
 		fi
 		# Montamos las imagenes para sincronizarlas. Quitamos / inicial.
-		ogMountImage CACHE  "${IMGNAME#\/}" $IMGTYPE >/dev/null
-		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE >/dev/null
+		ogMountImage CACHE  "${IMGNAME#\/}" $IMGTYPE || exit $?
+		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE 
 		# Esperamos que se monte la imagen en el servidor
-		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE
+		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE || exit $?
 		#echo "$MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
 		echo "      rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
-		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>&1  | egrep "^sent|^sending|^total|%" >>   $OGLOGCOMMAND
+		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>>$OGLOGCOMMAND  | egrep "^sent|^sending|^total|%" >>   $OGLOGCOMMAND
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
-		[ ${PIPESTATUS[0]} == 0 ] && RETVAL="1"|| RETVAL="2"
+		[ ${PIPESTATUS[0]} -eq 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes
 		ogUnmountImage CACHE  "$IMGNAME" $IMGTYPE
 		ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
@@ -286,7 +286,6 @@ else
 	ogUpdateCacheIsNecesary $REPOSITORIO "$2"
 	RETVAL=$?
 fi
-
 if [ "$(ogGetCaller)" != "deployImage" ]; then
 	TIME2=$[SECONDS-TIME2]
 	echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE

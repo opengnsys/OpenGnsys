@@ -216,7 +216,7 @@ fi
 ogUnmount $1 $2
 if [ $FSTYPE == "NTFS" ]; then
 	echo "      ntfs-3g.secaudit -b $PART /" |tee -a $OGLOGSESSION $OGLOGFILE 
-	ntfs-3g.secaudit -b $PART / > $IMGACL 2>$OGLOGCOMMAND
+	ntfs-3g.secaudit -b $PART / > $IMGACL 
 fi
 
 
@@ -511,11 +511,16 @@ fi
 
 DIRMOUNT="$(ogGetMountImageDir "$2" ${IMGEXT#*\.})"
 
-if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+if [ "$1" == "REPO" -o "$1" == "repo" ]; then
+        [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" ${IMGEXT#*\.}"
+        echo "$OGIMG/$DIRMOUNT"
+else
 	# Si está montado nada que hacer.
 	df | grep "$DIRMOUNT$" 2>&1 >/dev/null && echo "/tmp/$DIRMOUNT" && return 0
 
-        IMGFILE="$(ogGetPath "$1" /"$2.$IMGEXT")"
+        IMGFILE="$(ogGetPath "$1" /"$2.$IMGEXT")" \
+		|| return $(ogRaiseError $OG_ERR_NOTFOUND "$1 $2.$IMGEXT"; echo $?)
         mkdir -p "/tmp/$DIRMOUNT"
 	
    	# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
@@ -528,12 +533,6 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Comprobamos que se ha montado bien
 	[ $? -eq 0 ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $3"; echo $?)
         echo "/tmp/$DIRMOUNT"
-
-else
-        [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" ${IMGEXT#*\.}"
-        echo "$OGIMG/$DIRMOUNT"
-
 fi
 
 }
@@ -634,8 +633,8 @@ if [ "$*" == "help" ]; then
 fi
 
 if [ $# -lt 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension [ image_size ] " 2>&1 | tee -a $OGLOGSESSION $OGLOGFILE 
-    return ${PIPESTATUS[0]}
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension [ image_size ] " 
+    return $?
 fi
 
 SIZE=${4:-"300000"}
@@ -653,8 +652,7 @@ let TIMEOUT=$SIZE/$CREATESPEED
 [ $TIMEOUT -lt 60 ] && TIMEOUT=60
 until [ -f "$DIRMOUNT/ogimg.info" ] ; do
         TIMEAUX=$[SECONDS-TIME]
-        [  "$TIMEAUX" -lt "$TIMEOUT" ] ||  ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT"  2>&1  | tee -a $OGLOGSESSION $OGLOGFILE
-	[ ${PIPESTATUS[0]} -eq 0 ] || return ${PIPESTATUS[0]}
+        [  "$TIMEAUX" -lt "$TIMEOUT" ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT"; echo $?)
         echo -n "#"  | tee -a $OGLOGSESSION $OGLOGFILE
         sleep 5
 done
@@ -813,7 +811,7 @@ fi
 IMGDIR="$(ogGetParentPath "$1" "/$2")"
 IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
 
-ogIsSyncImage $1 "$2" "${IMGEXT#*\.}" || ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4" || return $?
+ogIsSyncImage $1 "$2" "${IMGEXT#*\.}" || return $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"; echo $?)
 
 DIRMOUNT="/tmp/ogCheckImage$$"
 mkdir "$DIRMOUNT"
