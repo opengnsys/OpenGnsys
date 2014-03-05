@@ -30,10 +30,9 @@ if (!$cmd)
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-	<TITLE>Administración web de aulas</TITLE>
 	<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-		<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
+		<TITLE>Administración web de aulas</TITLE>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 		<SCRIPT language="javascript">
 			var currentOp=null;
@@ -170,7 +169,7 @@ if (!$cmd)
 	//________________________________________________________________________________________________________
 		</SCRIPT>
 	</HEAD>
-	<BODY bgcolor="#d4d0c8">
+	<BODY style="background-color: #d4d0c8;">
 		<FORM name=fdatos>
 			<TABLE border=0 width=100% style="POSITION:absolute;LEFT:0px;TOP:0px" cellPadding=2 cellSpacing=0>
 				<TR>
