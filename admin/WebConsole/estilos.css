@@ -1,4 +1,7 @@
-﻿.acceso {
+﻿body {
+	background-color: white;
+}
+.acceso {
 	font: normal normal 12px sans-serif;
 }
 .acceso h1 {
