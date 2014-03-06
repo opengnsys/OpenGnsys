@@ -50,6 +50,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #612	Log en tiempo real no muestra salida de Unicast
 #613	Script reboot con parámetro de tiempo
 #635	Opción para deshabilitar el apagado automático de clientes (mejora)
+#639	Cliente OpenGnSys para Linux permite ejecutar script
 
 Tickets resueltos en módulo OpenGnSys Server:
 #534	Netboot con ficheros dinámicos
@@ -61,6 +62,7 @@ Tickets resueltos en módulo OpenGnSys Server:
 #597	Servicio ogAdmServer deja conexiones MySQL abiertas en la funcion AutoexecCliente
 #607	Script setclientmode: Identificacion de la plantilla por nombre en consola
 #621	Servicio ogAdmServer consume toda la CPU en ciertas circunstancias
+#638	Script de servidor para listar el software instalado en una imagen
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
 #583	Script deleteimage no admite correctamente parámetro de borrado de copia de seguridad de la imagen
