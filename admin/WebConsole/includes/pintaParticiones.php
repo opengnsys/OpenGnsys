@@ -292,6 +292,13 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
 		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+		// Detectamos tamaño de disco y tipo de tabla de particiones.
+		$tamanoDisco=tomaTamano(0,$idordenadores);
+		if ($tbKeys[0]["codpar"]==1)
+			$tipotablapar="MSDOS";
+		else
+			$tipotablapar="GPT";
+		
 		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				if($tbKeys[$k]["numdisk"]==1){ // Solo tratar disco 1
@@ -319,6 +326,17 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 			}
 		}
 	}
+	// Tamaño del disco
+        echo '<tr id="TR_'.$icp.'" align="center">';
+        echo '<td></td>';
+        echo '<td></td>';
+        echo '<td>'.$tipotablapar.'</td>';
+        echo '<td></td>';
+        echo '<td><strong>'.$tamanoDisco.'</strong></td>';
+        echo '<td></td>';
+        echo '<td></td>';
+        echo '</tr>';	
+
 	if ($aviso) {			// Mostrar aviso: solo disco 1 con tabla MSDOS.
 		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
 	}
