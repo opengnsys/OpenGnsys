@@ -34,7 +34,7 @@ IMGTYPE="${IMGTYPE:-"img"}"
 IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
 IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
 if [ "$IMGFILE" == "" -o "$IMGDIR" == "" ]; then
-	ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
+        ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
         exit $?
 fi
 
@@ -42,7 +42,7 @@ fi
 case "$PROTO" in
     UNICAST|UNICAST-DIRECT)
         # Restaurar la imagen.
-        echo "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogEcho log session "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST"
         ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" UNICAST 2>&1 | tee -a $OGLOGCOMMAND
         RETVAL=${PIPESTATUS[0]}
         ;;
@@ -51,7 +51,7 @@ case "$PROTO" in
         TOOL=$(ogGetImageProgram REPO $IMGNAME)
         COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
         #TODO comprobar parametros anteriores
-	echo "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
         ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
         ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS" 2>&1 | tee -a $OGLOGCOMMAND
         RETVAL=${PIPESTATUS[0]}
@@ -62,7 +62,7 @@ case "$PROTO" in
 esac
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 
 # Código de salida del comando prinicpal de restauración.
 exit $RETVAL

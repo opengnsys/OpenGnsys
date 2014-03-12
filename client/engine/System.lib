@@ -4,7 +4,7 @@
 #@brief    Librería o clase System
 #@class    System
 #@brief    Funciones básicas del sistema.
-#@version  1.0.4
+#@version  1.0.5
 #@warning  License: GNU GPLv3+
 #*/
 
@@ -12,7 +12,7 @@
 #/**
 #         ogEcho [str_logtype ...] [str_loglevel] "str_message" ...
 #@brief   Muestra mensajes en consola y lo registra en fichero de incidencias.
-#@param   str_logfile  tipo de registro de incidencias.
+#@param   str_logtype  tipo de registro de incidencias.
 #@param   str_loglevel nivel de registro de incidencias.
 #@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
@@ -63,7 +63,7 @@ fi
 #/**
 #         ogRaiseError [str_logtype ...] int_errcode ["str_errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.
-#@param   str_logfile    tipo de registro de incidencias.
+#@param   str_logtype    tipo de registro de incidencias.
 #@param   int_errcode    código de error.
 #@param   str_errmessage mensajes complementarios de error.
 #@return  str_message - Mensaje de error.

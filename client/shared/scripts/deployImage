@@ -65,12 +65,12 @@ echo " " > $OGLOGCOMMAND
 [ "$(ogGetCaller)" == "EjecutarScript" ] || echo -n "" > $OGLOGSESSION
 
 # Registro de inicio de ejecución
-echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
 # Si el origen(pariticion) esta bloqueada salir.
 ogIsLocked $DISK $PART && exit $(ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"; echo $?)
 
-echo "Desmontando $DISK $PART" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "Desmontando $DISK $PART"
 ogUnmount $DISK $PART 2>/dev/null
 
 # Valor por defecto para el repositorio.
@@ -81,7 +81,7 @@ ogUnmount $DISK $PART 2>/dev/null
 IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(ogRaiseError $OG_ERR_NOTFOUND "$REPO $3"; echo $?)
 IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
 
-echo "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"  | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
 
 # Procesar repositorio.
 case "$REPO" in
@@ -99,20 +99,20 @@ case "$REPO" in
 
             # Si protocolo es torrent|torrent-cache o multicast|multicast-cache
             TORRENT|TORRENT-CACHE|MULTICAST|MULTICAST-CACHE|UNICAST|UNICAST-CACHE)
-                echo "[2] updateCache REPO \"/$IMGNAME.img\" $PROTO $PROTOOPT"	 | tee -a $OGLOGSESSION $OGLOGFILE
+                ogEcho log session "[2] updateCache REPO \"/$IMGNAME.img\" $PROTO $PROTOOPT"
                 TIME2=$SECONDS
                 updateCache REPO "/$IMGNAME.img" "$PROTO" "$PROTOOPT"	 	
                 RETVAL=$?
                 TIME2=$[SECONDS-TIME2]
-                echo "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+                ogEcho log session "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s"
                 case $RETVAL in
                     0)
-                        echo "[50] updateCache (OK)" | tee -a $OGLOGSESSION $OGLOGFILE
+                        ogEcho log session "[50] updateCache (OK)"
                         NEXTOPERATION=CACHE
                     ;;
                     15|16)
-                        echo "[50] $MSG_ERR_NOTCACHE ;  $MSG_ERR_CACHESIZE " | tee -a $OGLOGSESSION $OGLOGFILE
-                        echo "[50] $MSG_SCRIPTS_CHECK_ENGINE " | tee -a $OGLOGSESSION $OGLOGFILE
+                        ogEcho log session "[50] $MSG_ERR_NOTCACHE ;  $MSG_ERR_CACHESIZE "
+                        ogEcho log session "[50] $MSG_SCRIPTS_CHECK_ENGINE "
                         if [ "$RESTOREPROTOCOLNOCACHE" == "MULTICAST" ]; then
                             case "$PROTO" in
                                 MULTICAST)  NEXTOPERATION=MULTICAST ;;
@@ -141,48 +141,48 @@ TIME3=$SECONDS
 
 case "$NEXTOPERATION" in
     CACHE)
-        echo "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogEcho log session "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST"
         restoreImage CACHE "$IMGNAME" "$DISK" "$PART"
         RETVAL=$?
     ;;
     UNICAST)
-        echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART UNICAST" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogEcho log session "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART UNICAST"
         restoreImage REPO "$IMGNAME" "$DISK" "$PART"
         RETVAL=$?
     ;;
     MULTICAST)
-        echo "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" | tee -a $OGLOGSESSION $OGLOGFILE
+        ogEcho log session "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT"
         restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT 
         RETVAL=$?
     ;;
 esac
 RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
-echo "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
 # Si la transferencia ha dado error me salgo.
 if [ $RETVAL -ne 0 ] ; then
 	ogRaiseError $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1
 	# Muestro registro de fin de ejecución si no viene de Ejecutar Script
-	[ "$(ogGetCaller)" == "EjecutarScript" ] || echo "$MSG_INTERFACE_END $OG_ERR_IMAGE" | tee -a $OGLOGSESSION $OGLOGFILE
+	[ "$(ogGetCaller)" == "EjecutarScript" ] || ogEcho log session "$MSG_INTERFACE_END $OG_ERR_IMAGE"
         exit $OG_ERR_IMAGE
 fi
 TIME3=$[SECONDS-TIME3]
-echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s"
 
 if which configureOsCustom &>/dev/null; then
-    echo "[90] configureOsCustom" | tee -a $OGLOGSESSION $OGLOGFILE
+    ogEcho log session "[90] configureOsCustom"
     configureOsCustom "$DISK" "$PART"
 else
-    echo "[90] $MSG_SCRIPTS_OS_CONFIGURE " | tee -a $OGLOGSESSION $OGLOGFILE
+    ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE "
     configureOs "$DISK" "$PART"
 fi
 
 TIME=$[SECONDS-TIME1]
-echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 
 # Registro de fin de ejecución
 # Si se ha llamado desde ejecutar script no lo muestro para no repetir.
 if [ "$(ogGetCaller)" != "EjecutarScript" ] ; then
-	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 	exit $RETVAL
 fi
 

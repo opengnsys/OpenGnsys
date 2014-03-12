@@ -56,7 +56,7 @@ fi
 # comprobar si la imagen existe (.img, .img.diff o directorio)
 REPOFILE=$(ogGetPath "REPO" "/$2") || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"; echo $?) 
 
-echo "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE " | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE"
 # Distingo si es monolitica o sincronizable
 file "$REPOFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " -e " directory" 2>&1 > /dev/null
 if [ $? == 0 ]; then
@@ -85,8 +85,8 @@ CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
 if [ "$IMGTYPE" == "dir" ]; then
-	echo "   * $MSG_SCRIPTS_UPDATECACHE_CHECKSIZEDIR" | tee -a $OGLOGSESSION $OGLOGFILE
-	echo "     du -sk $REPOFILE" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "   * $MSG_SCRIPTS_UPDATECACHE_CHECKSIZEDIR"
+	ogEcho log session "     du -sk $REPOFILE"
 	REALFILESIZE=$(du -sk "$REPOFILE"|awk '{print $1}')
 else
 	REALFILESIZE=$(ls -l --block-size=1024 $REPOFILE | cut -f5 -d" ")
@@ -99,8 +99,8 @@ if [ "$PROTOCOLO" == "RSYNC" ]; then
 		CACHEFILESIZE=0
 	else
 	   if [ "$IMGTYPE" == "dir" ]; then
-		echo "   * $MSG_SCRIPTS_UPDATECACHE_CHECKSIZEDIR $CACHEFILESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
-		echo "     du -sk $CACHEFILE" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "   * $MSG_SCRIPTS_UPDATECACHE_CHECKSIZEDIR $CACHEFILESIZE"
+		ogEcho log session "     du -sk $CACHEFILE"
 		CACHEFILESIZE=$(du -sk $CACHEFILE |awk '{print $1}')
 	   else
 		CACHEFILESIZE=$(ls -l --block-size=1024 "$CACHEFILE" | cut -f5 -d" ")
@@ -115,34 +115,34 @@ fi
 #ERROR CACHESIZE 16
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
-	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE"
 	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
 	exit $?
 fi
 
-echo "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO"
 #ERROR CACHESIZE 16
 if [ "$SIZEREQUIRED" -ge "$CACHESIZEFREE" ]  
 then
-	# echo "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"  | tee -a $OGLOGSESSION $OGLOGFILE
+	# ogEcho log session "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"
 	case "$ACTIONCACHEFULL" in 
 	NONE)
 		NEXTOPERATION=UNICAST
 	;;
 	FORMAT)
-	    echo "[51] $MSG_HELP_ogFormatCache "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    ogEcho log session  "[51] $MSG_HELP_ogFormatCache "
 	    ogUnmountCache
 	    ogFormatCache
 	    ogMountCache
 	    NEXTOPERATION=REPEAT
 	;;
 	DELETE)
-	    echo "[51] #MSG_HELP_ogDeleteTree $OGCAC$OGIMG/* "  | tee -a $OGLOGSESSION $OGLOGFILE
+	    ogEcho log session "[51] #MSG_HELP_ogDeleteTree $OGCAC$OGIMG/* "
 	    rm -fr  $OGCAC$OGIMG/*
 	    NEXOPERATION=REPEAT
 	;;
 	*)
-	 	echo "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE" | tee -a $OGLOGSESSION $OGLOGFILE
+	 	ogEcho log session "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE"
 		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
 		exit $?
 	;;
@@ -161,7 +161,7 @@ ogMountCache >/dev/null
 ## Si no existe, crear subdirectorio para el fichero en la cache.
 IMGDIR=$(ogGetParentPath CACHE "/$2")
 if [ $? != 0 ]; then
-    echo "[5] $MSG_HELP_ogMakeDir  \"$2 $(dirname "$2")." | tee -a $OGLOGSESSION $OGLOGFILE
+    ogEcho log session "[5] $MSG_HELP_ogMakeDir  \"$2 $(dirname "$2")."
     ogMakeDir CACHE $(dirname "/$2")
     IMGDIR=$(ogGetParentPath CACHE "/$2") || exit $?
 fi
@@ -170,7 +170,7 @@ TIME1=$SECONDS
 
 case "$PROTOCOLO" in
 	TORRENT)
-		echo "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
 		# tiempos 
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
 		ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR" 2>&1 | tee -a   $OGLOGCOMMAND
@@ -178,16 +178,16 @@ case "$PROTOCOLO" in
     		#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
 		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
-		echo "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4"
 		sleep $P2PWAIT
-		echo "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4"
 		ogTorrentStart CACHE "$2.torrent" $4 2>&1 | tee -a   $OGLOGCOMMAND
 		RESUMEUPDATECACHE=$(grep -m 1 -B1 "Download" $OGLOGCOMMAND) 
 	;;
 	MULTICAST)
 		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
 		let PORTAUX=$PORT+1
-		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKMCASTSESSION : $REPOIP:$PORTAUX:$PORT" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_CHECKMCASTSESSION : $REPOIP:$PORTAUX:$PORT"
 		#TODO: ticket 379
 		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
 		sleep $NUMBER
@@ -198,17 +198,16 @@ case "$PROTOCOLO" in
 
 		else
 		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
-	   		echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"" | tee -a $OGLOGSESSION $OGLOGFILE
+	   		ogEcho log session "$MSG_SCRIPTS_TASK_START :  hose $REPOIP 2009 --out sh -c \"echo -ne START_MULTICAST $2 $OPTPROTOCOLO\""
 	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
 	   		sleep 10
 	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 	   		then 
 	   			ogMcastReceiverFile $PORT CACHE "$2" 2>&1  | tee -a   $OGLOGCOMMAND
-
 			else
-			    echo "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO" | tee -a $OGLOGSESSION $OGLOGFILE
-	   		    exit 1
+				ogEcho log session "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+	   			exit 1
 	   		fi
 		fi
 		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
@@ -217,14 +216,14 @@ case "$PROTOCOLO" in
 		RESUMEUPDATECACHE=$(grep -m 1  -B1 "Transfer complete" $OGLOGCOMMAND.tmp)
 	;;
 	UNICAST)
-		#echo "unicast" | tee -a $OGLOGSESSION $OGLOGFILE
+		#ogEcho log session "unicast"
 		ogCopyFile $REPOSITORIO "$2" "$IMGDIR" 2>&1  | tee -a   $OGLOGCOMMAND
 		sleep 5
 		RESUMEUPDATECACHE=$(grep -m 1  "100%" $OGLOGCOMMAND.tmp)
 	;;
 	RSYNC)
 	   # Si parametro de protocolo no era rsync, mensaje de cambio protocolo
-	   [ "${3^^}" == "RSYNC" ] || echo $MSG_SCRIPTS_UPDATECACHE_RSYNCPROTOCOLCHANGE |tee -a $OGLOGSESSION $OGLOGFILE
+	   [ "${3^^}" == "RSYNC" ] || ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_RSYNCPROTOCOLCHANGE"
 	   # Opciones de rsync
 	   USERRSYNC="opengnsys"
 	   PASSWORD=" --password-file=/scripts/passrsync "
@@ -235,7 +234,7 @@ case "$PROTOCOLO" in
 	   if [ -d $REPOFILE ]; then
 		# Si es sincronizada tipo directorio.
 		[ -d "$OGCAC$OGIMG/$2" ] || mkdir "$OGCAC$OGIMG/$2"
-		echo "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2" |tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2"
 		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>> $OGLOGCOMMAND  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
            else
 		# Si es sincronizada tipo archivo.
@@ -245,23 +244,22 @@ case "$PROTOCOLO" in
 		DIRMOUNT=$(ogGetMountImageDir "$IMGNAME" $IMGTYPE)
 		DIRLOCAL="/tmp/$DIRMOUNT"
 		mkdir "$DIRLOCAL" 2>/dev/null
-		echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG"  | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZEIMG"
 
 		# Si la imagen no existe la creo
 		# Si la imagen del repositorio es mayor, redimensiono la imagen de cache
 		if [ "$CACHEFILE" == "" -o  $CACHEFILESIZE -lt $REALFILESIZE ]; then
-		   echo "$MSG_HELP_ogCreateFileImage" | tee -a $OGLOGSESSION $OGLOGFILE
-		   ogCreateFileImage CACHE "$IMGNAME" $IMGTYPE $REALFILESIZE 
-                   TIMEAUX3=$[SECONDS-TIMEAUX3]
-                   echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+			ogEcho log session "$MSG_HELP_ogCreateFileImage"
+			ogCreateFileImage CACHE "$IMGNAME" $IMGTYPE $REALFILESIZE 
+                	TIMEAUX3=$[SECONDS-TIMEAUX3]
+                	ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
 		fi
 		# Montamos las imagenes para sincronizarlas. Quitamos / inicial.
 		ogMountImage CACHE  "${IMGNAME#\/}" $IMGTYPE || exit $?
 		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE 
 		# Esperamos que se monte la imagen en el servidor
 		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE || exit $?
-		#echo "$MSG_HELP_ogSyncCreate" | tee -a $OGLOGSESSION $OGLOGFILE
-		echo "      rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL" |tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "      rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL"
 		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>>$OGLOGCOMMAND  | egrep "^sent|^sending|^total|%" >>   $OGLOGCOMMAND
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
 		[ ${PIPESTATUS[0]} -eq 0 ] && RETVAL="1"|| RETVAL="2"
@@ -274,9 +272,9 @@ esac
 
 TIME1=$[SECONDS-TIME1]
 
-echo "   [ ] $RESUMEUPDATECACHE " | tee -a $OGLOGSESSION $OGLOGFILE
-echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum " | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "   [ ] $RESUMEUPDATECACHE "
+ogEcho log session "   [ ] $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME1/60]m $[TIME1%60]s"
+ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_START $MSG_HELP_ogCalculateChecksum "
 TIME2=$SECONDS
 # Si es imagen sincronizada siempre da distinto md5. No podemos comprobar 
 if [ "$IMGSYNC" == "TRUE" ]; then 
@@ -288,7 +286,7 @@ else
 fi
 if [ "$(ogGetCaller)" != "deployImage" ]; then
 	TIME2=$[SECONDS-TIME2]
-	echo "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s"
 fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizamos-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "0" ] && exit 1
