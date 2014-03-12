@@ -10,43 +10,60 @@
 
 
 #/**
-#         ogEcho [str_loglevel] "str_message..."
+#         ogEcho [str_logtype ...] [str_loglevel] "str_message" ...
 #@brief   Muestra mensajes en consola y lo registra en fichero de incidencias.
+#@param   str_logfile  tipo de registro de incidencias.
 #@param   str_loglevel nivel de registro de incidencias.
 #@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@warning Si no se indica nivel de registro, solo muestra mensaje en pantalla.
+#@note    logfile = { log, command, session }; usa "log" si se indica nivel de registro.
+#@note    loglevel = { help, info, warning, error }
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
 #@version 0.9 - Primera versión para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-07-23
+#@version 1.0.5 - Elegir fichero de log.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-23
 #*/
 function ogEcho () {
 
 # Variables locales
-local LOGLEVEL DATETIME
+local CONT=1 LOGS LOGLEVEL DATETIME
+
+# Selección de ficheros de rgistro de incidencias.
+while [ $CONT ]; do
+    case "${1,,}" in
+        log)     LOGS="$LOGS $OGLOGFILE";    shift ;;
+        command) LOGS="$LOGS $OGLOGCOMMAND"; shift ;;
+        session) LOGS="$LOGS $OGLOGSESSION"; shift ;;
+        *)       CONT= ;;
+    esac
+done
 
 # Selección del nivel de registro (opcional).
-case "$1" in
+case "${1,,}" in
      help)    shift ;;
      info)    LOGLEVEL="$1"; shift ;;
      warning) LOGLEVEL="$1"; shift ;;
      error)   LOGLEVEL="$1"; shift ;;
      *)       ;;
 esac
-DATETIME=$(date +"%F %T")
 
 if [ -n "$LOGLEVEL" ]; then
-    logger -s -t "OpenGnSys $LOGLEVEL" "$DATETIME $*" 2>&1 | tee -a $OGLOGFILE $OGLOGCOMMAND $OGLOGSESSION
+    DATETIME=$(date +"%F %T")
+    logger -s -t "OpenGnSys $LOGLEVEL" "$DATETIME $*" 2>&1 | tee -a $OGLOGFILE $LOGS
 else
-    echo "$*"
+    echo "$*" | tee -a $LOGS
 fi
 }
 
 
 #/**
-#         ogRaiseError int_errcode ["str_errmessage" ...]
+#         ogRaiseError [str_logtype ...] int_errcode ["str_errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.
+#@param   str_logfile    tipo de registro de incidencias.
 #@param   int_errcode    código de error.
 #@param   str_errmessage mensajes complementarios de error.
 #@return  str_message - Mensaje de error.
@@ -59,10 +76,18 @@ fi
 function ogRaiseError () {
 
 # Variables locales
-local MSG CODE
+local CONT=1 LOGS MSG CODE
+
+# Selección de rgistros de incidencias.
+while [ $CONT ]; do
+    case "${1,,}" in
+        log|command|session)  LOGS="$LOGS $1"; shift ;;
+        *)                    CONT= ;;
+    esac
+done
 
 # Obtener código y mensaje de error.
-CODE=$1
+CODE="$1"
 case "$CODE" in
      $OG_ERR_FORMAT)     MSG="$MSG_ERR_FORMAT \"$2\"" ;;
      $OG_ERR_NOTFOUND)   MSG="$MSG_ERR_NOTFOUND \"$2\"" ;;
@@ -100,7 +125,7 @@ case "$CODE" in
 esac
 
 # Mostrar mensaje de error y salir con el código indicado.
-ogEcho error "${FUNCNAME[1]}: $MSG" >&2
+ogEcho $LOGS error "${FUNCNAME[1]}: $MSG" >&2
 return $CODE
 }
 
