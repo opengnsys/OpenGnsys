@@ -29,7 +29,7 @@
 
 PROG="$(basename $0)"
 if [ $# -lt 3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_Relative_Path_OGIMG_with_/ PROTOCOLO OPCIONES_PROTOCOLO OPCIONES_UPDATECACHE"
     exit $?
 fi
 
@@ -45,16 +45,16 @@ REPOSITORIO="${1^^}"
 PROTOCOLO="${3^^}"
 OPTPROTOCOLO="$4"
 REPOIP=$(ogGetRepoIp)
-echo $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
+ogEcho log session  $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 
 # Si el repositorio local CACHE no existe error 15.
 if ! $(ogFindCache >/dev/null); then
-        ogRaiseError $OG_ERR_NOTCACHE "CACHE"
+        ogRaiseError session $OG_ERR_NOTCACHE "CACHE"
         exit $0
 fi
 
 # comprobar si la imagen existe (.img, .img.diff o directorio)
-REPOFILE=$(ogGetPath "REPO" "/$2") || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO /$2"; echo $?) 
+REPOFILE=$(ogGetPath "REPO" "/$2") || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO /$2"; echo $?) 
 
 ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE"
 # Distingo si es monolitica o sincronizable
@@ -70,7 +70,7 @@ if [ $? == 0 ]; then
 	RETVAL=0
 else
 	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
-	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE "REPO $2"; echo $?)
+	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE "REPO $2"; echo $?)
 	IMGSYNC=FALSE
 	#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 	ogUpdateCacheIsNecesary $1 $2
@@ -80,7 +80,7 @@ fi
 [ "$RETVAL" == "1" ] && exit 0
 [ "$RETVAL" -gt  "1" ] && exit 1
 
-echo "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session  "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE" 
 CACHESIZE=$(ogGetCacheSize)
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
 FILESIZE=$(ls -sk $(ogGetPath $REPOSITORIO "$2") | cut -f1 -d" ")
@@ -116,7 +116,7 @@ fi
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
 	ogEcho log session "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE"
-	ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+	ogRaiseError session $OG_ERR_CACHESIZE "CACHE"
 	exit $?
 fi
 
@@ -143,7 +143,7 @@ then
 	;;
 	*)
 	 	ogEcho log session "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $FILESIZE > CACHE = $CACHESIZEFREE"
-		ogRaiseError $OG_ERR_CACHESIZE "CACHE"
+		ogRaiseError session $OG_ERR_CACHESIZE "CACHE"
 		exit $?
 	;;
 	esac	

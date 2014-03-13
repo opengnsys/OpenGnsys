@@ -5,7 +5,7 @@
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]"
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]"
     exit $?
 fi
 
@@ -19,7 +19,7 @@ fi
 echo " " > $OGLOGCOMMAND
 [ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION; 
 
-echo "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 
 # Procesar parámetros de entrada
 REPO="${1^^}"
@@ -34,7 +34,7 @@ IMGTYPE="${IMGTYPE:-"img"}"
 IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
 IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
 if [ "$IMGFILE" == "" -o "$IMGDIR" == "" ]; then
-        ogRaiseError $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
+        ogRaiseError session $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
         exit $?
 fi
 
@@ -57,7 +57,7 @@ case "$PROTO" in
         RETVAL=${PIPESTATUS[0]}
         ;;
     *)  # Protocolo desconocido.
-        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 
+        ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 
         exit $?
 esac
 

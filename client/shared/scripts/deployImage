@@ -40,7 +40,7 @@
 
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST|UNICAST-CACHE|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST|UNICAST-CACHE|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
     exit $?
 fi
 
@@ -68,9 +68,9 @@ echo " " > $OGLOGCOMMAND
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
 # Si el origen(pariticion) esta bloqueada salir.
-ogIsLocked $DISK $PART && exit $(ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"; echo $?)
+ogIsLocked $DISK $PART && exit $(ogRaiseError session $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"; echo $?)
 
-ogEcho log session "Desmontando $DISK $PART"
+ogEcho log session "$MSG_HELP_ogUnmount $DISK $PART"
 ogUnmount $DISK $PART 2>/dev/null
 
 # Valor por defecto para el repositorio.
@@ -78,7 +78,7 @@ ogUnmount $DISK $PART 2>/dev/null
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 
 #Informacioin previa de la imagen
-IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(ogRaiseError $OG_ERR_NOTFOUND "$REPO $3"; echo $?)
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2"; echo $?)
 IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
 
 ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
@@ -126,13 +126,13 @@ case "$REPO" in
                 esac
             ;;
             *)  # Error: protocolo desconocido.
-                ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $PROTO"
+                ogRaiseError session $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $PROTO"
                 exit $?
             ;;
         esac
     ;;
     *)  # Error: repositorio desconocido.
-        ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" 
+        ogRaiseError session $OG_ERR_FORMAT "$MSG_ERR_FORMAT, $REPO" 
         exit $?
     ;;
 esac
@@ -160,7 +160,7 @@ RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
 ogEcho log session "   [ ]      $RESUMERESTOREIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
 # Si la transferencia ha dado error me salgo.
 if [ $RETVAL -ne 0 ] ; then
-	ogRaiseError $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1
+	ogRaiseError session $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1
 	# Muestro registro de fin de ejecución si no viene de Ejecutar Script
 	[ "$(ogGetCaller)" == "EjecutarScript" ] || ogEcho log session "$MSG_INTERFACE_END $OG_ERR_IMAGE"
         exit $OG_ERR_IMAGE
