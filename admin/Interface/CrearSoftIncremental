@@ -48,7 +48,7 @@
 	echo -n "" > $OGLOGSESSION; echo -n  "" > $OGLOGCOMMAND
 
 	# Registro de inicio de ejecución
-	echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
 	# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
 	if [ "$REPO" == "REPO" -a "$boot" != "admin"  ]
@@ -90,6 +90,6 @@
 	[ "$REPO" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
 
 	# Registro de fin de ejecución
-	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 
 	exit $RETVAL

@@ -11,7 +11,7 @@ TIME1=$SECONDS
 echo -n "" > $OGLOGSESSION; echo -n  "" > $OGLOGCOMMAND
 
 # Registro de inicio de ejecución
-echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
 echo -e "\n Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
 cat  $1 >> $OGLOGFILE
@@ -29,15 +29,15 @@ RETVAL=$?
 TIME=$[SECONDS-TIME1]
 if [ $RETVAL == 0 ]
 then
-	echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 else
-	echo "ERROR no operacion no realizada" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "ERROR: operacion no realizada"
 fi
 
 
 # Registro de fin de ejecución
-echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
-
+ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 
 
 exit $RETVAL
+

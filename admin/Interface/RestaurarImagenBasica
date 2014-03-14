@@ -50,7 +50,7 @@
         echo -n  "" > $OGLOGSESSION; echo " " > $OGLOGCOMMAND
 
 	# Registro de inicio de ejecución
-	echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "$MSG_INTERFACE_START $0 $*"
 	
 	if [ $9 -eq 1 ]; then
 		#sincronizacion1 
@@ -84,6 +84,6 @@
 	fi
 
 	# Registro de fin de ejecución
-	echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 
 	exit $RETVAL

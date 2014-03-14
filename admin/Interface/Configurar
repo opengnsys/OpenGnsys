@@ -10,7 +10,7 @@
 echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
 	
 # Registro de inicio de ejecución
-echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
 # Solo ejecutable por OpenGnSys Client.
 PATH=$PATH:$(dirname $0)

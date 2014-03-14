@@ -9,10 +9,11 @@ TIME1=$SECONDS
 echo -n " " | tee  $OGLOGSESSION $OGLOGCOMMAND ${OGLOGCOMMAND}.tmp
 
 # Registro de inicio de ejecución
-echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
 file=$(listSoftwareInfo $1 $2)
 cp $file $3
 
 TIME=$[SECONDS-TIME1]
-echo "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME/60]m $[TIME%60]s"
+

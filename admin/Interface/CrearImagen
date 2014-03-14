@@ -40,8 +40,7 @@ TIME1=$SECONDS
 echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
 
 # Registro de inicio de ejecución
-#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
 # Solo ejecutable por OpenGnSys Client.
 PATH=$PATH:$(dirname $0)
@@ -94,8 +93,7 @@ RETVAL=$?
 #fi
 
 # Registro de fin de ejecución
-#echo "[END Interface] Command finished with this code:  $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 
 exit $RETVAL
 
