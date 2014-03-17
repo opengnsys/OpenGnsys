@@ -471,7 +471,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 4 parámetros.
-[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?)
+[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Procesar parámetros.
 PART="$(ogDiskToDev $3 $4)" || return $(ogRaiseError $OG_ERR_NOTFOUND " $3 $4"; echo $?)
 #IMGTYPE=$(ogGetImageType "$1" "$2")

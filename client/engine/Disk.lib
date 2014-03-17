@@ -101,13 +101,13 @@ while [ $# -gt 0 ]; do
     SIZE=$[SIZE*2]
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
-        [ $PART -gt 4 ] && return (ogRaiseError $OG_ERR_FORMAT; echo $?)
+        [ $PART -gt 4 ] && return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
         EXTSTART=$START
         EXTSIZE=$SIZE
     fi
     # Incluir particiones lógicas dentro de la partición extendida.
     if [ $PART = 5 ]; then
-        [ -z "$EXTSTART" ] && return (ogRaiseError $OG_ERR_FORMAT; echo $?)
+        [ -z "$EXTSTART" ] && return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
         START=$EXTSTART
         SECTORS=$[EXTSTART+EXTSIZE]
     fi
