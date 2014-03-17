@@ -229,12 +229,12 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
+# Camino del fichero de registro en NT/2000 o en XP y posteriores.
 FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
 [ -f "$FILENT" ] && FILE="$FILENT"
 FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
 [ -f "$FILEXP" ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
+[ -f $FILE ] || ogRaiseError OG_ERR_NOTFOUND "$1,$2" || return $?
 
 echo "$FILE"
 }

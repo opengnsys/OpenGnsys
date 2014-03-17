@@ -39,7 +39,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben al menos los 2 parámetros para obtener el valor default.
-[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 
 PART="$1"
@@ -130,7 +130,7 @@ if [ "$*" == "help" ]; then
 fi
 
 # Error si no se reciben al menos 2 parámetros.
-[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # controlamos que el parametro 1 (imagen) es tipo file.
 [ -f $1 ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
@@ -241,7 +241,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 4 parámetros.
-[ $# -lt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Comprobar que no está bloqueada ni la partición, ni la imagen.
 PART="$(ogDiskToDev $1 $2)" || return $?
@@ -249,10 +249,11 @@ if ogIsLocked $1 $2; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION $1, $2"
     return $?
 fi
+
 IMGTYPE="img"			# Extensión genérica de imágenes.
 IMGDIR=$(ogGetParentPath "$3" "$4")
-
 [ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$3 $(dirname $4)" || return $?
+
 IMGFILE="$IMGDIR/$(basename "$4").$IMGTYPE"
 if ogIsImageLocked "$IMGFILE"; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $3, $4"
@@ -312,7 +313,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 3 parámetros.
-[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 DISK=$(ogDiskToDev "$1") || return $?
 IMGDIR=$(ogGetParentPath "$2" "$3")
@@ -350,7 +351,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 3 parámetros.
-[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 DISK=$(ogDiskToDev "$1") || return $?
 IMGDIR=$(ogGetParentPath "$2" "$3")
@@ -420,11 +421,11 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
-[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 1 -o $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Comprobar que existe directorio de imagen
 IMGDIR=$(ogGetParentPath $@) || return $?
 # Crear fichero de bloqueo.
-touch $IMGDIR/$(basename "${!#}").lock
+touch $IMGDIR/$(basename "${!#}").lock 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$*" || return $?
 }
 
 
@@ -470,7 +471,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 4 parámetros.
-[ $# -lt 4 ] && return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?)
 # Procesar parámetros.
 PART="$(ogDiskToDev $3 $4)" || return $(ogRaiseError $OG_ERR_NOTFOUND " $3 $4"; echo $?)
 #IMGTYPE=$(ogGetImageType "$1" "$2")
@@ -485,8 +486,6 @@ IMGSIZE=$(ogGetImageSize "$1" "$2") || return $(ogRaiseError $OG_ERR_IMAGE " $1 
 #TODO:
 #Si la particion no esta formateado o tiene problemas formateamos
 ogMount $3 $4 || ogFormat $3 $4
-#PARTSIZE=$(parted -sm $DISK unit kB print | \
-#              awk -F: -v np=$4 '{if ($1==np) {gsub(/kB/,""); print $4} } ')
 PARTSIZE=$(ogGetPartitionSize $3 $4)
 if [ $IMGSIZE -gt $PARTSIZE ]; then
     ogRaiseError $OG_ERR_IMGSIZEPARTITION "  $PARTSIZE < $IMGSIZE"
@@ -503,7 +502,7 @@ if ogIsLocked $3 $4; then
 fi
 # Desmontar y bloquear partición.
 ogUnmount $3 $4 2>/dev/null || return $(ogRaiseError $OG_ERR_PARTITION " $3 $4"; echo $?)
-ogLock $3 $4 || return $(ogRaiseError $OG_ERR_PARTITION " $3 $4"; echo $?)
+ogLock $3 $4 || return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
 # Restaurar según el tipo de imagen.
@@ -551,7 +550,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 3 parámetros.
-[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Procesar parámetros.
 DISK=$(ogDiskToDev "$3") || return $?
 IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
@@ -587,7 +586,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 3 parámetros.
-[ $# -lt 3 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Procesar parámetros.
 DISK=$(ogDiskToDev "$3") || return $?
 IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
@@ -620,7 +619,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
-[ $# -lt 1 -o $# -gt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+[ $# == 1 -o $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Borrar fichero de bloqueo para la imagen.
 rm -f $(ogGetPath $@.lock)
@@ -754,8 +753,8 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME REPO /aula1/winxp  ==>  5642158"
     return
 fi
-# Error si no se reciben menos de 2 parámetros.
-[ $# -lt 2 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Error si el fichero de imagen no es accesible.
 IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError OG_ERR_NOTFOUND "$IMGFILE" || return $?
