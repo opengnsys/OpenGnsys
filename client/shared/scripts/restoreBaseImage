@@ -39,7 +39,7 @@ echo -n "" >$OGLOGCOMMAND;
 [ "$(ogGetCaller)" == "RestaurarImagenBasica" -o "$(ogGetCaller)" == "restoreDiffImage" ] ||  echo -n "" > $OGLOGSESSION
 
 # Mensaje de inicio de script salvo si es llamado desde restoreDiffImage.
-[ "$(ogGetCaller)" == "restoreDiffImage" ] || echo "[1] $MSG_SCRIPTS_START  $0 $*" | tee -a $OGLOGFILE  $OGLOGSESSION
+[ "$(ogGetCaller)" == "restoreDiffImage" ] || ogEcho log session "[1] $MSG_SCRIPTS_START  $0 $*" 
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -52,90 +52,95 @@ if [ "$*" == "help" ]; then
     exit 0
 fi
 
-[ $# -lt 4 ] &&     exit $(ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"; echo $?)
+[ $# -lt 4 ] &&     exit $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"; echo $?)
 
 # Carga del configurador del engine
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Procesar parámetros de entrada
-REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")" || exit $(ogRaiseError $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
+REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")" || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
 
 # Comprobar que es sincronizable (con REPO)
-ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE  "$1 $2"; echo $?)
+ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE  "$1 $2"; echo $?)
+
+# Detectamos el sistema de ficheros de la imagen
+# TODO ogGetImageInfo
+DIRMOUNT=$(ogMountImage "$1" "$2")
+ogWaitMountImage "$1" "$2" "$IMGEXT"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+IMGFSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)
 
 # Comprobamos si el sistema de ficheros se puede montar
 ogMount "$3" "$4" &>/dev/null || RETVAL=$?
 # Si da error formateamos el sistema de ficheros.
 if [  "$RETVAL" ] ; then
-	# TODO ogGetImageInfo
-	DIRMOUNT=$(ogMountImage "$1" "$2")
-	ogWaitMountImage "$1" "$2" "$IMGEXT"  || exit $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
-	FSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)	
 	ogUnmountImage $1 "$2"
-	echo "      $MSG_HELP_ogFormat: $3 $4 $FSTYPE" | tee -a $OGLOGFILE
-	ogFormat "$3" "$4" "$FSTYPE" || exit $(ogRaiseError $OG_ERR_FILESYS "$3 $4"; echo $?)
-	ogMount "$3" "$4"  || exit $(ogRaiseError $OG_ERR_FILESYS "$3 $4"; echo $?)
+	ogEcho log session "      $MSG_HELP_ogFormat: $3 $4 $IMGFSTYPE" 
+	ogFormat "$3" "$4" "$IMGFSTYPE" || exit $(ogRaiseError session $OG_ERR_FILESYS "$3 $4"; echo $?)
+	ogMount "$3" "$4"  || exit $(ogRaiseError session $OG_ERR_FILESYS "$3 $4"; echo $?)
 fi
+
+# Warning si el sistema de ficheros de la imagen es distinto del de la particion destino
+[ "$IMGFSTYPE" == "$(ogGetFsType $3 $4)" ] || ogEcho session warning "$MSG_SYNC_DIFFERENTFS"
 
 IMGEXT="img"
 
 # Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
-ogIsLocked "$3" "$4" && exit $(ogRaiseError $OG_ERR_LOCKED  "$3 $4"; echo $?)
+ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
+ogIsLocked "$3" "$4" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$3 $4"; echo $?)
 
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    # Las imagenes sincronizables aunque sean iguales no tienen el mismo sum. 
    # Sincronizamos si existe el fichero y si no usamos updateCache.
-   echo "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" | tee -a $OGLOGFILE $OGLOGSESSION
-   echo "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"   | tee -a $OGLOGFILE $OGLOGSESSION
+   ogEcho log session "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" 
+   ogEcho log session "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"  
    updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6" 
    RETVAL=$?
    if [ "$RETVAL" != "0" ] 
         then 
-        echo "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL" | tee -a $OGLOGFILE $OGLOGSESSION
+        ogEcho log session "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL"
         # RC=15 No hay cache 
         # RC=16 no hay espacio sufiente 
         exit $RETVAL 
    fi 
    TIMEAUX1=$[SECONDS-TIME]
-   echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" | tee -a $OGLOGFILE
+   ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" 
 
 fi 
 
 TIME2=$SECONDS
 
 # Restaurar la imagen.
-echo "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  | tee -a $OGLOGFILE $OGLOGSESSION
+ogEcho log session "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  
 
 ogLock $3 $4
 
 # Montamos la imagen basica.
 ogMountImage "$1" "$2" "$IMGEXT"  >/dev/null
 #  Comprobar que la imagen completa se ha montado.
-ogWaitMountImage "$1" "$2" "$IMGEXT"  || exit $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+ogWaitMountImage "$1" "$2" "$IMGEXT"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
 # Sincronizamos la partición con la imagen.
-echo  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4"  |tee -a $OGLOGFILE $OGLOGSESSION
+ogEcho log session  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4" 
 ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4
 
 TIMEAUX2=$[SECONDS-TIME2]
-echo "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" | tee -a $OGLOGFILE $OGLOGSESSION
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" 
 
 # Desmontamos imagen basica.
 ogUnmountImage "$1" "$2" "$IMGEXT"
 
 # Restableciendo acl
 ogUnlock $3 $4
-echo "[70] $MSG_HELP_ogRestoreInfoImage" |tee -a $OGLOGFILE $OGLOGSESSION
+ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage" 
 ogRestoreInfoImage $3 $4
 
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
-	echo "[90] $MSG_HELP_configureOs" |tee -a $OGLOGFILE $OGLOGSESSION
+	ogEcho log session "[90] $MSG_HELP_configureOs" 
 	configureOs $3 $4 
 fi
 
 TIME=$[SECONDS-TIME1]
-echo "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" |tee -a $OGLOGFILE $OGLOGSESSION
+ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" 
 

@@ -271,6 +271,18 @@ case "$PARM1" in
 		rmdir $DIRMOUNT
 
 	;;
+	LOCK_IMAGE)
+		# Bloquea el archivo de la imagen.
+		#1 LOCK_IMAGE
+		#2 Nombre_Imagen.extension
+		touch "$REPODIR$PARM2.lock"
+	;;
+	UNLOCK_IMAGE)
+		# Desloquea el archivo de la imagen.
+		#1 UNLOCK_IMAGE
+		#2 Nombre_Imagen.extension
+		rm "$REPODIR$PARM2.lock"
+	;;
 	default)
 	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"
 	;;
