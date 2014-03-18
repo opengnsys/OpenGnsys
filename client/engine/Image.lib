@@ -4,7 +4,7 @@
 #@brief   Librería o clase Image
 #@class   Image
 #@brief   Funciones para creación, restauración y clonación de imágenes de sistemas.
-#@version 1.0
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -63,7 +63,7 @@ case "$TOOL" in
         PARAM1="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $PART stdout"
         ;;
     partclone)
-        FS="$(ogGetFsType $(ogDevToDisk $PART 2>/dev/null))"
+        FS="$(ogGetFsType $(ogDevToDisk $PART 2>/dev/null) 2>/dev/null)"
         umount $PART 2>/dev/null
         case "$FS" in
             EXT[234]) PARAM1="partclone.extfs" ;;

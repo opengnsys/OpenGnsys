@@ -66,17 +66,20 @@ fi
 #@param   str_logtype    tipo de registro de incidencias.
 #@param   int_errcode    código de error.
 #@param   str_errmessage mensajes complementarios de error.
-#@return  str_message - Mensaje de error.
+#@return  str_message - Mensaje de error, incluyendo las funciones relacionadas.
 #@warning No definidas
 #@note    Mensajes internacionales del fichero de idiomas.
 #@version 0.9 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-21
+#@version 1.0.5 - Muestra en el mensaje todas las funciones relacionadas (separadas por <-).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-03-17
 #*/ 
 function ogRaiseError () {
 
 # Variables locales
-local CONT=1 LOGS MSG CODE
+local CONT=1 LOGS MSG CODE FUNCS
 
 # Selección de rgistros de incidencias.
 while [ $CONT ]; do
@@ -125,7 +128,8 @@ case "$CODE" in
 esac
 
 # Mostrar mensaje de error y salir con el código indicado.
-ogEcho $LOGS error "${FUNCNAME[1]}: $MSG" >&2
+FUNCS="${FUNCNAME[@]:1}"
+ogEcho $LOGS error "${FUNCS// /<-}: $MSG" >&2
 return $CODE
 }
 

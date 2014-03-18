@@ -30,7 +30,8 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #628	Problema postconfiguración Windows dos veces seguidas
 #634	Problema si cliente de OpenGnSys ya se encuentra instalado en Windows
 #636	Recupearar log en tiempo real para comados de restauración
-#637	Función ogRaiseError sin parámetros devuelve mensaje erróneo
+#637	Función ogRaiseError sin parámetros devuelve mensaje erróneo y revisión de control de errores
+#640	Evitar información repetida en ficheros de logs
 
 Tickets resueltos en módulo OpenGnSys Client:
 #245	Teclado internacional en el cliente (mejora)
