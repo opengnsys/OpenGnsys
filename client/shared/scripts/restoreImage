@@ -19,7 +19,7 @@ fi
 echo " " > $OGLOGCOMMAND
 [ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION; 
 
-ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
 # Procesar parámetros de entrada
 REPO="${1^^}"
