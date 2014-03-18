@@ -50,7 +50,7 @@ ogEcho log session  $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 # Si el repositorio local CACHE no existe error 15.
 if ! $(ogFindCache >/dev/null); then
         ogRaiseError session $OG_ERR_NOTCACHE "CACHE"
-        exit $0
+        exit $?
 fi
 
 # comprobar si la imagen existe (.img, .img.diff o directorio)
@@ -78,7 +78,7 @@ else
 fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
-[ "$RETVAL" -gt  "1" ] && exit 1
+[ "$RETVAL" -gt  "1" ] && exit $OG_ERR_UPDATECACHE
 
 ogEcho log session  "$MSG_SCRIPTS_UPDATECACHE_CHECKSIZECACHE" 
 CACHESIZE=$(ogGetCacheSize)
@@ -154,7 +154,7 @@ fi
 RETVAL=$?
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
 [ "$RETVAL" == "1" ] && exit 0
-[ "$RETVAL" -gt  "1" ] && exit 1
+[ "$RETVAL" -gt  "1" ] && exit $OG_ERR_UPDATECACHE
 
 ogMountCache >/dev/null
 
@@ -207,7 +207,7 @@ case "$PROTOCOLO" in
 	   			ogMcastReceiverFile $PORT CACHE "$2" 2>&1  | tee -a   $OGLOGCOMMAND
 			else
 				ogEcho log session "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
-	   			exit 1
+	   			exit $OG_ERR_UPDATECACHE
 	   		fi
 		fi
 		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
@@ -289,7 +289,7 @@ if [ "$(ogGetCaller)" != "deployImage" ]; then
 	ogEcho log session "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $MSG_HELP_ogCalculateChecksum $[TIME2/60]m $[TIME2%60]s"
 fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizamos-exit 0  || si RETVAL>2 exit 1
-[ "$RETVAL" == "0" ] && exit 1
+[ "$RETVAL" == "0" ] && exit $OG_ERR_UPDATECACHE
 [ "$RETVAL" == "1" ] && exit 0
-[ "$RETVAL" -gt  "1" ] && exit 1
+[ "$RETVAL" -gt  "1" ] && exit $OG_ERR_UPDATECACHE
 

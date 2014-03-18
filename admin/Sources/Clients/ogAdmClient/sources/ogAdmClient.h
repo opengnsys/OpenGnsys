@@ -87,7 +87,7 @@ char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede con
 		"028-Error no definido",\
 		"029-Error no definido",\
 		"030-Error al restaurar imagen - Imagen mas grande que particion",\
-		"031-Error no definido",\
+		"031-Error al realizar el comando updateCache",\
 		"032-Error no definido",\
 		"033-Error no definido",\
 		"034-Error no definido",\

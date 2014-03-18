@@ -106,6 +106,7 @@ export OG_ERR_CACHE=21 		# Error en partición de caché local
 export OG_ERR_NOGPT=22		# El disco indicado no contiene una particion GPT
 
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
+export OG_ERR_UPDATECACHE=31	# Error al realizar el comando updateCache
 export OG_ERR_GENERIC=40 	# Error imprevisto no definido
 export OG_ERR_UCASTSYNTAXT=50   # Error en la generación de sintaxis de transferenica UNICAST
 export OG_ERR_UCASTSENDPARTITION=51  # Error en envío UNICAST de partición
