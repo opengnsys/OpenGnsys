@@ -281,7 +281,7 @@ case "$PARM1" in
 		# Desloquea el archivo de la imagen.
 		#1 UNLOCK_IMAGE
 		#2 Nombre_Imagen.extension
-		rm "$REPODIR$PARM2.lock"
+		rm -f "$REPODIR$PARM2.lock"
 	;;
 	default)
 	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"

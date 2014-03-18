@@ -35,7 +35,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
 	## Si no existe, crear subdirectorio de la imagen.
 	if [ $? != 0 ]; then
-            ogEcho log session  "      $MSG_HELP_ogMakeDir \"$1 $(dirname "$2")." | tee -a $OGLOGSESSION $OGLOGFILE
+            ogEcho log session  "      $MSG_HELP_ogMakeDir \"$1 $(dirname "$2")." 
             ogMakeDir "$1" "$(dirname "/$2")" || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
             IMGDIR="$(ogGetParentPath "$1" "/$2")" || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
 	fi
@@ -52,7 +52,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
 		if [ "$BACKUP" == "true" ]; then
                     # Copia seguridad 
-                    ogEcho log session  "     $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." | tee -a $OGLOGSESSION $OGLOGFILE
+                    ogEcho log session  "     $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." 
                     cp -f  "$IMGFILE" "$IMGFILE.ant"  
                     mv -f "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
                     rm -f "$IMGFILE.sum"
@@ -60,35 +60,35 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
                 IMGSIZE=$(ls -l --block-size=1024 "$IMGFILE" | awk '{print $5}')
                 if [ $IMGSIZE -lt $SIZEREQUIRED ];then
-                   ogEcho log session  "      $MSG_SYNC_RESIZE" | tee -a $OGLOGSESSION $OGLOGFILE
-                   ogEcho log session "      truncate --size=>$SIZEREQUIRED k $IMGFILE" | tee -a $OGLOGSESSION $OGLOGFILE
+                   ogEcho log session  "      $MSG_SYNC_RESIZE" 
+                   echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" 
                    truncate --size=">$SIZEREQUIRED"k "$IMGFILE" &> $OGLOGCOMMAND
 		   # FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
 		   #if [[ "$(uname -r)" < "3.7" ]]; then
 		   if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
                 	losetup $LOOPDEVICE "$IMGFILE"
-			ogEcho log session "      resize2fs -f $LOOPDEVICE"
+			echo "      resize2fs -f $LOOPDEVICE"
 			resize2fs -f $LOOPDEVICE &> $OGLOGCOMMAND
 			
 		   else
-		   	ogEcho log session "      ogMountImage $1 "$2" $3"
+		   	echo "      ogMountImage $1 "$2" $3"
 		   	ogMountImage $1 "$2" $3
-                   	ogEcho log session "      btrfs filesystem resize max $DIRMOUNT"
+                   	echo "      btrfs filesystem resize max $DIRMOUNT"
                    	btrfs filesystem resize max "$DIRMOUNT" &> $OGLOGCOMMAND
 		   fi
                 fi
         else
-                ogEcho log session "      dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED"
+                echo "      dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED"
                 dd if=/dev/zero of="$IMGFILE" bs=1024 count=$SIZEREQUIRED 2>&1 | tee -a $OGLOGCOMMAND
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
 		#if [[ "$(uname -r)" < "3.7" ]]; then
 		if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
-		   ogEcho log session "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
+		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
 		   mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE 2>&1 |tee -a $OGLOGCOMMAND
 		else
-                   ogEcho log session "      mkfs.btrfs  -L ${2##*\/} $LOOPDEVICE "
+                   echo "      mkfs.btrfs  -L ${2##*\/} $LOOPDEVICE "
                    mkfs.btrfs  -L "${2##*\/}" $LOOPDEVICE 2>&1 | tee -a $OGLOGCOMMAND
 		fi
 	fi
@@ -102,7 +102,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        ogEcho log session "      hose $REPOIP 2009 --out sh -c \"echo -ne CREATE_IMAGE $2 $3 $SIZEREQUIRED \"" | tee -a $OGLOGSESSION $OGLOGFILE
+        echo "      hose $REPOIP 2009 --out sh -c \"echo -ne CREATE_IMAGE $2 $3 $SIZEREQUIRED \"" 
         hose $REPOIP 2009 --out sh -c "echo -ne CREATE_IMAGE \"$2\" $3 $SIZEREQUIRED"
 fi
 
@@ -168,8 +168,8 @@ IMGINFO="/tmp/ogimg.info"
 IMGACL="/tmp/ogimg.acl"
 
 # Borramos archivos antiguos.
-rm /tmp/ogimg.* 2>/dev/null
-rm $ORIG/ogimg.* 2>/dev/null
+rm -f /tmp/ogimg.* 2>/dev/null
+rm -f $ORIG/ogimg.* 2>/dev/null
 
 # En las diferenciales no sabemos el tamaño -> ponemos una constante.
 SIZEDATA=${SIZEDATA:-"SIZEDATA"}
@@ -184,14 +184,14 @@ fi
 
 if [ "$IMGTYPE" == "img" ]; then
 	# Imagen Basica
-	ogEcho log session "      rsync -aHAXvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "      rsync -aHAXvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" 
 	rsync -aHAXvn --delete $ORIG/ $DIREMPTY>> $IMGINFO
 	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGINFO
 	sed -i  '/^\.\//d' $IMGINFO
 
 else
 	# Imagen Diferencial
-	ogEcho log session "      rsync -aHAXvn$OPTRSYNC  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" | tee -a $OGLOGSESSION $OGLOGFILE
+	echo "      rsync -aHAXvn$OPTRSYNC  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" 
 	rsync -aHAXvn$OPTRSYNC $PASSWORD  --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
 	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGLIST
 	sed -i  '/^\.\//d' $IMGLIST
@@ -202,7 +202,7 @@ else
 	#grep -v -e '\->' -e  '\=>'  -e ^deleting  $IMGLIST >> $IMGINFO
 	grep -v -e '\->' -e  '\=>'  -e ^deleting -e ^created  $IMGLIST >> $IMGINFO
 
-	rm $IMGLIST
+	rm -f $IMGLIST
 
 	# Comprobamos que los ficheros de diferencias no esten vacios o salimos con error.
 	if [ $(grep -v -e "^$"  -e "^#" $IMGINFO /tmp/ogimg.ln /tmp/ogimg.rm |wc -l) -eq 0 ]; then 
@@ -215,7 +215,7 @@ fi
 # Guardamos el contenido de las acl (Solo win) Necesario particion desmontada (esta asi)
 ogUnmount $1 $2
 if [ $FSTYPE == "NTFS" ]; then
-	ogEcho log session "      ntfs-3g.secaudit -b $PART /" |tee -a $OGLOGSESSION $OGLOGFILE 
+	echo "      ntfs-3g.secaudit -b $PART /"
 	ntfs-3g.secaudit -b $PART / > $IMGACL 
 fi
 
@@ -262,13 +262,12 @@ while read LINE; do
     read END INI <<< "$(grep -A 1 "$LINE" $ACLFILES | awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
     let NUM=$END-$INI-1
     # Si algún archivo no se encuentra, el error lo mandamos a /dev/null
-    #sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null | tee -a $ACLTMP
     sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null >> $ACLTMP
     echo "aclfilter: $LINE" >> $OGLOGCOMMAND
 done < $FILES
 
 cp $ACLTMP $IMGACL
-rm $FILES $ACLTMP $ACLFILES 
+rm -f $FILES $ACLTMP $ACLFILES 
 
 }
 
@@ -322,7 +321,7 @@ if [ $(wc -l "$DEST/$IMGLN"|cut -f1 -d" ") -ne 0 ]; then
            OPTLN=''
    	fi
    	cd "$DEST/$(dirname "$DESTLN")"
-	rm "$(basename "$DESTLN")"
+	rm -f "$(basename "$DESTLN")"
    	ln $OPTLN "$ORIGLN" "$(basename "$DESTLN")"
    	echo -n "."
    done < "$DEST/$IMGLN"  2>/dev/null
@@ -335,7 +334,7 @@ if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f "$DEST/$IMGACL" ] ; then
 	cd /
         cp "$DEST/$IMGACL" /tmp
         ogUnmount "$1" "$2"
-        ogEcho log session "      ntfs-3g.secaudit -se $PART" |tee -a $OGLOGSESSION $OGLOGFILE
+        echo "ntfs-3g.secaudit -se $PART /tmp/$IMGACL"
         ntfs-3g.secaudit -se $PART /tmp/$IMGACL
 	# Para evitar que de falso error
 	echo ""	
@@ -394,9 +393,9 @@ else
         DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
 fi
 # Sincronizamos los datos de la partición a la imagen
-ogEcho log session "      rsync -aHAX$OPTRSYNC --progress --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      rsync -aHAX$OPTRSYNC --progress --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" 
 rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>&1| egrep "^deleting|^sent|^sending|^total|%"  &>> $OGLOGCOMMAND
-ogEcho log session "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" 
 rsync -aHAX$OPTRSYNC  $PASSWORD  --inplace /tmp/ogimg* "$DESTRSYNC"
 
 }
@@ -456,7 +455,7 @@ fi
 
 # Nos traemos listado ficheros y bajamos la imagen
 
-ogEcho log session "      $MSG_SYNC_RESTORE" |tee -a  $OGLOGSESSION   $OGLOGFILE 
+ogEcho log session "      $MSG_SYNC_RESTORE"
 
 # Si la imagen es diferencial nos traemos los archivos de informacion de la imagen.
 if [ "$3" == "diff" ]; then
@@ -464,19 +463,19 @@ if [ "$3" == "diff" ]; then
 	IMGINFO="ogimg.info"
 	FILESFROM=" --files-from=$DESTRSYNC/$IMGINFO"
 
-        ogEcho log session "      rsync -aHAX$OPTRSYNC --progress  $ORIG/ogimg* $DESTRSYNC" |tee -a $OGLOGSESSION  $OGLOGFILE 
+        echo "      rsync -aHAX$OPTRSYNC --progress  $ORIG/ogimg* $DESTRSYNC" 
         rsync -aHAX$OPTRSYNC $PASSWORD --progress  "$ORIG"/ogimg* $DESTRSYNC 
         # Borramos linea de información de la imagen, sino busca un fichero con ese nombre
         sed -i   '/^\#/d' $DESTRSYNC/$IMGINFO
 
 	cd $DESTRSYNC
 	# Diferencial: Borramos archivos sobrantes.
-	ogEcho log session "      $MSG_SYNC_DELETE"  |tee -a  $OGLOGFILE
+	ogEcho log session "      $MSG_SYNC_DELETE"  
 	cat "$DESTRSYNC/ogimg.rm" 2>/dev/null | xargs rm -rf
 
 fi
 
-ogEcho log session "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC" | tee -a $OGLOGSESSION $OGLOGFILE
+echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC"
 rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>&1 | egrep "^deleting|^sent|^sending|^total|%"  &>> $OGLOGCOMMAND
 
 
@@ -572,7 +571,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	rmdir "$DIRMOUNT"
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE" |tee -a  $OGLOGFILE
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE"
         hose $REPOIP 2009 --out sh -c "echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE"
 fi
 
@@ -716,7 +715,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	losetup $LOOPDEVICE "$IMGFILE"
 
 	# Redimensiono sistema de ficheros
-	ogEcho log session resize2fs -fpM $LOOPDEVICE
+	echo "      resize2fs -fpM $LOOPDEVICE"
 	resize2fs -fpM $LOOPDEVICE |tee -a $OGLOGCOMMAND
         ogMountImage $1 "$2" ${IMGEXT#*\.}
 
@@ -729,16 +728,16 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	[ $LOOPDEVICE ] && losetup -d $LOOPDEVICE
 
 	# Corto el archivo al tamaño del sistema de ficheros.
-        ogEcho log session "      truncate --size=\"$EXTSIZE\"k $IMGFILE  "
+        echo "      truncate --size=\"$EXTSIZE\"k $IMGFILE  "
         truncate --size="$EXTSIZE"k "$IMGFILE"
 
 	# Desmonto y desbloqueo la imagen
-	rm "$IMGFILE.lock"
+	rm -f "$IMGFILE.lock"
 	rmdir "$DIRMOUNT"
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
-        ogEcho log session "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
         hose $REPOIP 2009 --out sh -c "echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
 fi
 

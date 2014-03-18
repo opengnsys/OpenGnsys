@@ -157,7 +157,7 @@ ogCreateInfoImage $1 $2 $3 "$4" "${DIFFTYPE}"
 #Calculamos el tamaño de la imagen:
 ogMount $1 $2 >/dev/null
 ogLock $1 $2
-ogEcho log session -n "     $MSG_SCRIPTS_CREATE_SIZE"
+ogEcho log session  "     $MSG_SCRIPTS_CREATE_SIZE"
 cd $ORIG
 SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
 let SIZEREQUIRED=$SIZEDATA*$ZSYNC/100
@@ -167,7 +167,7 @@ let SIZEREQUIRED=$SIZEDATA*$ZSYNC/100
 # Comprueba que quepa en el repositorio
 [ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`) && ogMountCache >/dev/null
 [ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
-ogEcho log session  " $SIZEREQUIRED $SIZEFREE"
+ogEcho log session  "      $SIZEREQUIRED $SIZEFREE"
 [ $SIZEREQUIRED -gt $SIZEFREE ] && exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
 
 TIMEAUX3=$[SECONDS-TIME2]
@@ -196,7 +196,7 @@ ogEcho log session  "[70] $MSG_HELP_ogSyncCreate"
 # Copio los datos a la imagen diferecial :
 ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
 TIMEAUX6=$[SECONDS-TIMEAUX5]
-ogEcho log session  -e "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s"
+ogEcho log session   "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s"
 
 # Reducimos la imagen diferencial -> solo para kernel <= 3.7, imagenes con FS ext4
 ogEcho log session "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT"
