@@ -106,6 +106,14 @@
 						despleimagenizda.focus()
 			      return(false)
 				}
+				// Comprobamos tipo de sincronizacion.
+				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
+				var  p1=desplemet.selectedIndex // Toma índice seleccionado
+				if (p1==0){
+					alert(TbMsg[7])
+					desplemet.focus()
+					return(false)
+				}
 			}
 		}
 		if(op==0){
