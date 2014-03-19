@@ -195,6 +195,7 @@ ogWaitMountImage "$3" "$5" "$DIFFTYPE" $SIZEREQUIRED  || exit $(ogRaiseError ses
 ogEcho log session  "[70] $MSG_HELP_ogSyncCreate"
 # Copio los datos a la imagen diferecial :
 ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
+[ $? == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
 TIMEAUX6=$[SECONDS-TIMEAUX5]
 ogEcho log session   "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s"
 

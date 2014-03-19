@@ -153,7 +153,8 @@ ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED || exit $(ogRaiseError session 
 
 # Sincronizamos los datos de la particion con la imagen.
 ogEcho log session "[70] $MSG_HELP_ogSyncCreate." 
-ogSyncCreate $1 $2 $3 "$4"  $IMGEXT
+ogSyncCreate $1 $2 $3 "$4"  $IMGEXT 
+[ $? == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
 
 TIMEAUX5=$[SECONDS-TIMEAUX3]
 ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX5/60]m $[TIMEAUX5%60]s"

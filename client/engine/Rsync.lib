@@ -394,10 +394,12 @@ else
 fi
 # Sincronizamos los datos de la partición a la imagen
 echo "      rsync -aHAX$OPTRSYNC --progress --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" 
-rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>&1| egrep "^deleting|^sent|^sending|^total|%"  &>> $OGLOGCOMMAND
+rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>$OGLOGCOMMAND | egrep "^deleting|^sent|^sending|^total|%" |tee -a $OGLOGCOMMAND
+RETVAL=${PIPESTATUS[0]}
 echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" 
 rsync -aHAX$OPTRSYNC  $PASSWORD  --inplace /tmp/ogimg* "$DESTRSYNC"
 
+return $RETVAL
 }
 
 
@@ -476,8 +478,8 @@ if [ "$3" == "diff" ]; then
 fi
 
 echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC"
-rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>&1 | egrep "^deleting|^sent|^sending|^total|%"  &>> $OGLOGCOMMAND
-
+rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>$OGLOGCOMMAND | egrep "^deleting|^sent|^sending|^total|%"  |tee -a $OGLOGCOMMAND
+return ${PIPESTATUS[0]}
 
 }
 
@@ -821,7 +823,7 @@ if [ $(uname -r|cut -d. -f2) -lt 7 ]; then
 	mount -t ext4 -o loop "$IMGFILE" "$DIRMOUNT" 2>&1 | tee -a $OGLOGCOMMAND
 	RETVAL=${PIPESTATUS[0]}
 else
-	mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT" 1>/dev/null | tee -a $OGLOGCOMMAND
+	mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT" 2>&1 | tee -a $OGLOGCOMMAND
 	RETVAL=${PIPESTATUS[0]}
 fi
 ls -C "$DIRMOUNT" | tee -a $OGLOGCOMMAND
