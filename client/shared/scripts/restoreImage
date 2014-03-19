@@ -43,7 +43,7 @@ case "$PROTO" in
     UNICAST|UNICAST-DIRECT)
         # Restaurar la imagen.
         ogEcho log session "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST"
-        ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" UNICAST 2>&1 | tee -a $OGLOGCOMMAND
+        ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" 2>&1 | tee -a $OGLOGCOMMAND
         RETVAL=${PIPESTATUS[0]}
         ;;
     MULTICAST|MULTICAST-DIRECT)

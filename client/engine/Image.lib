@@ -11,10 +11,10 @@
 
 
 #/**
-#         ogCreateImageSyntax path_device path_imagefile [str_tool] [str_compressionlevel]
+#         ogCreateImageSyntax path_device path_filename [str_tool] [str_compressionlevel]
 #@brief   Genera una cadena de texto con la instrucción para crear un fichero imagen
 #@param   path_device           dispositivo Linux del sistema de archivos
-#@param   path_imagefile        path absoluto del fichero imagen
+#@param   path_fileneme         path absoluto del fichero imagen
 #@param   [opcional] str_tool   herrmaienta de clonacion [partimage, partclone, ntfsclone]
 #@param   [opcional] str_compressionlevel nivel de compresion. [0 -none-, 1-lzop-, 2-gzip]
 #@return  str_command - cadena con el comando que se debe ejecutar.
@@ -38,10 +38,10 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME /dev/sda1 /opt/opengnsys/images/prueba.img"
     return
 fi
-# Error si no se reciben al menos los 2 parámetros para obtener el valor default.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Error si no se reciben entre 2 y 4 parámetros.
+[ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT "$*" || return $?
 
-
+# Asignación de parámetros.
 PART="$1"
 IMGFILE="$2"
 case "$#" in
@@ -101,12 +101,12 @@ esac
 
 
 #/**
-#         ogRestoreImageSyntax filename partition [tools]  [levelcompresor]
+#         ogRestoreImageSyntax path_filename path_device [str_tools] [str_compressionlevel]
 #@brief   Genera una cadena de texto con la instrucción para crear un fichero imagen
-#@param 1  filename           path absoluto del fichero imagen
-#@param 2  partition             identificador linux del dispositivo particion.
-#@param 3  [opcional] str_tools          herrmaienta de clonacion [partimage, partclone, ntfsclone]
-#@param 4  [opcional] str_levelcompresor nivel de compresion. [0 -none-, 1-lzop-, 2-gzip]
+#@param   path_device           dispositivo Linux del sistema de archivos
+#@param   path_fileneme         path absoluto del fichero imagen
+#@param   [opcional] str_tools  herrmaienta de clonacion [partimage, partclone, ntfsclone]
+#@param   [opcional] str_compressionlevel nivel de compresion. [0 -none-, 1-lzop-, 2-gzip]
 #@return  cadena con el comando que se debe ejecutar.
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@warning En pruebas iniciales
@@ -129,8 +129,8 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Error si no se reciben al menos 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Error si no se reciben entre 2 y 4 parámetros.
+[ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT "$*" || return $?
 
 # controlamos que el parametro 1 (imagen) es tipo file.
 [ -f $1 ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
@@ -202,12 +202,14 @@ fi
 
 
 #/**
-#         ogCreateImage int_ndisk int_npartition str_repo path_image
+#         ogCreateImage int_ndisk int_npartition str_repo path_image [str_tools] [str_compressionlevel]
 #@brief   Crea una imagen a partir de una partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@param   str_repo       repositorio de imágenes (remoto o caché local)
 #@param   path_image     camino de la imagen (sin extensión)
+#@param   [opcional] str_tools  herrmaienta de clonacion [partimage, partclone, ntfsclone]
+#@param   [opcional] str_compressionlevel nivel de compresion. [0 -none-, 1-lzop-, 2-gzip]
 #@return  (nada, por determinar)
 #@note    repo = { REPO, CACHE }
 #@exception OG_ERR_FORMAT    formato incorrecto.
@@ -240,8 +242,8 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1 REPO /aula1/winxp"
     return
 fi
-# Error si no se reciben 4 parámetros.
-[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Error si no se reciben entre 4 y 6 parámetros.
+[ $# -ge 4 -a $# -le 6 ] || ogRaiseError $OG_ERR_FORMAT "$*" || return $?
 
 # Comprobar que no está bloqueada ni la partición, ni la imagen.
 PART="$(ogDiskToDev $1 $2)" || return $?
@@ -268,7 +270,6 @@ ogLockImage "$3" "$4.$IMGTYPE" || return $?
 
 # Crear Imagen.
 trap "ogUnlock $1 $2; ogUnlockImage "$3" "$4.$IMGTYPE"; rm -f $IMGFILE" 1 2 3 6 9
-echo $PROGRAM
 eval $PROGRAM
 
 # Controlar salida de error y desbloquear partición.
@@ -500,17 +501,18 @@ if ogIsLocked $3 $4; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION $3, $4"
     return $?
 fi
+
+# Solicitamos la generación de la instruccion a ejecutar
+# Atención: no se comprueba el tipo de sistema de archivos.
+# Atención: no se comprueba incongruencia entre partición e imagen.
+PROGRAM=`ogRestoreImageSyntax  $IMGFILE $PART`
+
 # Desmontar y bloquear partición.
 ogUnmount $3 $4 2>/dev/null || return $(ogRaiseError $OG_ERR_PARTITION " $3 $4"; echo $?)
 ogLock $3 $4 || return $?
 trap "ogUnlock $3 $4" 1 2 3 6 9
 
-# Restaurar según el tipo de imagen.
-# Atención: no se comprueba el tipo de sistema de archivos.
-# Atención: no se comprueba incongruencia entre partición e imagen.
-#Solicitamos la generación de la instruccion a ejecutar
-PROGRAM=`ogRestoreImageSyntax  $IMGFILE $PART`
-echo $PROGRAM
+# Ejecutar restauración según el tipo de imagen.
 eval $PROGRAM
 
 ERRCODE=$?
