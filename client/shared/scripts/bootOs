@@ -8,8 +8,11 @@ if [ $# -ne 2 ]; then
     exit $?
 fi
 
-echo "[0] Inicio del proceso de arranque."
+# Comprobar errores.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
+ogMount $1 $2 || exit $?
+
+echo "[0] Inicio del proceso de arranque."
 NAME="$(ogGetHostname)"
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $1 $2)
