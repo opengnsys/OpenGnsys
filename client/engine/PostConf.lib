@@ -278,7 +278,7 @@ EOF
 function ogInstallLinuxClient ()
 {
 # Variables locales.
-local PART MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
+local MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
@@ -289,10 +289,8 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener sistema de archvios.
-PART="$(ogDiskToDev $1 $2)" || return $?
-# Comprobar si el sistema de archivos no está bloqueado.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
+
 # Comprobar si existe el cliente y los directorios y ficheros destino.
 CLIENTFILE=$OGLIB/ogclient/ogAdmLnxClient
 [ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?
@@ -355,7 +353,7 @@ ogUnlock $1 $2
 function ogInstallWindowsClient ()
 {
 # Variables locales.
-local PART MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
+local MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
@@ -365,10 +363,8 @@ fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener sistema de archvios.
-PART="$(ogDiskToDev $1 $2)" || return $?
-# Comprobar si el sistema de archivos no está bloqueado.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
+
 # Comprobar si existe el cliente y los directorios y ficheros destino.
 CLIENTFILE=$OGLIB/ogclient/ogAdmWinClient.exe
 [ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?

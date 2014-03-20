@@ -134,6 +134,10 @@ if [ $# -lt 3 ]; then
     return $?
 fi
 
+# Comprobar errores.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+ORIG=$(ogMount $1 $2) || return $?
+
 if [ $3 == "img" ]; then
    IMGTYPE="img"
 else
@@ -157,9 +161,7 @@ else
 fi
 
 
-ORIG=$(ogMount $1 $2)
 FSTYPE=$(ogGetFsType $1 $2)
-PART=$(ogDiskToDev "$1" "$2" 2>/dev/null)
 
 # Creamos la lista del contenido y lo situamos en la particion a copiar.
 DIREMPTY="/tmp/empty$$"
@@ -294,8 +296,10 @@ if [ $# -lt 2 ]; then
     return $?
 fi
 
-DEST=$(ogMount $1 $2)
-PART=$(ogDiskToDev "$1" "$2" 2>/dev/null)
+# Control de errores.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+DEST=$(ogMount $1 $2) || return $?
+
 IMGACL="ogimg.acl"
 IMGLN="ogimg.ln"
 
@@ -371,7 +375,8 @@ if [ $# -lt 4 ]; then
     return $?
 fi
 
-ORIG=$(ogMount $1 $2)
+ORIG=$(ogMount $1 $2) || return $?
+
 DIRMOUNT="$(ogGetMountImageDir "$4" $5)"
 # Si la imagen es diferencial la lista de ficheros a transferir esta dentro de la imagen.
 if [ "$5" == "diff" ]; then

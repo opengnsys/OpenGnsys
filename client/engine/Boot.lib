@@ -47,9 +47,8 @@ fi
 # Detectar tipo de sistema de archivos y montarlo.
 PART=$(ogDiskToDev $1 $2) || return $?
 TYPE=$(ogGetFsType $1 $2) || return $?
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
 # Error si no puede montar sistema de archivos.
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
 
 case "$TYPE" in
     EXT[234]|REISERFS|REISER4|JFS|XFS)
@@ -128,8 +127,7 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Montar el sistema de archivos.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
 
 # Obtener dato del valor de registro.
 ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName'
@@ -171,8 +169,7 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Detectar id. de tipo de partición y codificar al mnemonico.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
 
 # Fichero de configuración de GRUB.
 CONFDIR=$MNTDIR                               # Partición de arranque /boot.
@@ -240,8 +237,9 @@ fi
 [ ${#3} -le 15 ] || ogRaiseError $OG_ERR_OUTOFLIMIT "\"${3:0:15}...\"" || return $?
 
 # Montar el sistema de archivos.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Asignar nombre.
 NAME="$3"
 
 # Modificar datos de los valores de registro.
@@ -282,8 +280,9 @@ fi
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Montar el sistema de archivos.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Asignar nombre.
 NAME="$3"
 
 # Modificar datos en el registro.
@@ -908,8 +907,7 @@ case $# in
 esac
 
 # Montar el sistema de archivos.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
 
 ETC=$(ogGetPath $1 $2 /etc)
 
@@ -965,8 +963,7 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Montar el sistema de archivos.
-MNTDIR=$(ogMount $1 $2) 2>/dev/null
-[ -n "$MNTDIR" ] || ogRaiseError OG_ERR_PARTITION "$1, $2" || return $?
+MNTDIR=$(ogMount $1 $2) || return $?
 
 # Eliminar fichero de configuración de udev para dispositivos fijos de red.
 rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules

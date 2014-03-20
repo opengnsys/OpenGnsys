@@ -128,8 +128,11 @@ case "$CODE" in
      *)                  MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 
-# Mostrar mensaje de error y salir con el código indicado.
+# Obtener lista de funciones afectadas, incluyendo el script que las llama.
 FUNCS="${FUNCNAME[@]:1}"
+FUNCS="${FUNCS/main/$(basename $0 2>/dev/null)}"
+
+# Mostrar mensaje de error y salir con el código indicado.
 ogEcho $LOGS error "${FUNCS// /<-}: $MSG" >&2
 return $CODE
 }
