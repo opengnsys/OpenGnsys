@@ -97,7 +97,7 @@ OSDISTRIB=$(lsb_release -is 2>/dev/null)
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools )
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools top )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
@@ -111,7 +111,7 @@ case "$OSDISTRIB" in
 		APACHEGROUP="www-data"
 		;;
         Fedora|CentOS)
-		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs )
+		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs top )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		if which systemctl &>/dev/null; then
