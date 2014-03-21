@@ -33,4 +33,7 @@
 	$TbMsg[25]='NOT Created';
 	$TbMsg[26]='Delete Image object';
 	$TbMsg[27]='Type';
+	$TbMsg[28]='Manager Mode';
+	$TbMsg[29]='User Mode';
+	$TbMsg[30]='Organizational Unit';
 ?>

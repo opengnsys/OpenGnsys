@@ -29,6 +29,7 @@ if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"]; 
 if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"]; 
+if (isset($_POST["modov"])) {$modov=$_POST["modov"];}else{$modov=0;}
 //___________________________________________________________________________
 //________________________________________________________________________________________________________
 $idcomando=10;
@@ -45,6 +46,20 @@ $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
 	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiÃƒÂ³n con servidor B.D.
 //___________________________________________________________________________________________________
+//#########################################################################
+//##### BUSCAMOS QUE TIPO DE USUARIO SE HA LOGUEADO
+//#########################################################################
+$logusu=$_SESSION["wusuario"];
+$cmd->texto="SELECT * FROM usuarios WHERE usuario='$logusu'";
+$rs=new Recordset;
+$rs->Comando=&$cmd; 
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF)
+	{
+		$tipologusu=$rs->campos["idtipousuario"];
+	}
+	$rs->Cerrar();
 //#########################################################################
 // BUSCANDO INFORMACION SOBRE EL ESPACIO EN EL REPOSITORIO
 //#########################################################################
@@ -85,6 +100,21 @@ if (!$rs->Abrir()) return(true); // Error al abrir recordset
 //#########################################################################
 if ($iprepositorio == $ipservidor)
 {
+//#########################################################################
+//#### BUSCAMOS EL ID DEL REPOSITORIO
+//#########################################################################
+$cmd->texto="SELECT * FROM repositorios WHERE ip='$iprepositorio'";
+$rs=new Recordset;
+$rs->Comando=&$cmd; 
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF)
+	{
+		$idrepodefault=$rs->campos["idrepositorio"];
+	}
+	$rs->Cerrar();
+//#########################################################################
+
 $repolocal="si";
 	//#########################################################################
 	// LEYENDO EL DIRECTORIO local en el server
@@ -97,7 +127,7 @@ $repolocal="si";
 	while ($archivo = $directorio->read())
 	{
 		//no mostrar ni "." ni ".." ni "pxe"
-		if(($archivo!=".")&&($archivo!=".."))
+		if(($archivo!=".")&&($archivo!="..")&&($archivo!="mount")&&($archivo!="lost+found"))
 		{
 		array_push($imarepo, $archivo);
 		}
@@ -268,12 +298,25 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
       	</TABLE>
 
 	<P align=center>
-	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
-	</BR>
-
-
-
-
+	<div align=center class=subcabeceras><? echo $TbMsg[7] ?>
+	<?php if ($tipologusu==1){?>
+		
+			<form  align="center" name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
+			<INPUT type="hidden" name="opcion" value="<? echo $opcion?>">
+			<INPUT type="hidden" name="idrepositorio" value="<? echo $idrepositorio?>">
+			<INPUT type="hidden" name="grupoid" value="<? echo $grupoid ?>">
+			<?php if ($modov !=1){?>
+				<INPUT type="hidden" name="modov" value="1">
+				<input type=button onclick=submit() value="<?php echo $TbMsg[28]; ?>"/>
+			<?php }else{ ?>
+				<INPUT type="hidden" name="modov" value="0">
+				<input type=button onclick=submit() value="<?php echo $TbMsg[29]; ?>"/>
+				<?php } ?>
+			</form>
+		</div>
+	<?php } ?>
+	
+	
 
 
 <form  align=center name="eliimarepo" action="./EliminarImagenRepositorio.php" method="post"> 
@@ -286,6 +329,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[13] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[26] ?>&nbsp;</TH>
+			<?php if ($tipologusu == 1 && $modov == 1){ ?><TH align=center>&nbsp;<? echo $TbMsg[30] ?>&nbsp;</TH><?php } ?>
 
 
 		</TR>
@@ -317,9 +361,13 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 							}
 				   		}
 			}else{
-				$imarepo[$x]=trim($imarepo[$x]);
-				$nombreimagenes[]=$imarepo[$x];
-				$tipo[]="D";
+				// Compruebo si es un directorio
+				$buscodir="/opt/opengnsys/images/".$imarepo[$x];
+				if(is_dir($buscodir)){
+					$imarepo[$x]=trim($imarepo[$x]);
+					$nombreimagenes[]=$imarepo[$x];
+					$tipo[]="D";
+							}
 				}
 		} //Fin Llave For
 
@@ -356,6 +404,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			$nombrefichero=$value.'.img';$marcadif=0;
 			}
 
+###################################################################################################################################
+###################################################################################################################################
+###############	COMIENZO DE SI EL TIPO DE USUARIO NO ES 1 (USUARIO)	###########################################
+###################################################################################################################################
+###################################################################################################################################
+		if ($tipologusu != 1 || $modov != 1){
 
 		// ####################################################################################
 		// ########## Si el nombre imagen existe en la Unidad Organizativa ####################
@@ -481,6 +535,167 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		$contandotipo++;
 
 						}else{$contandotipo++;}//Fin de Condicion si es nombrecaidcentro
+###########################################################################################################################
+###########################################################################################################################	
+			}
+###########################################################################################################################
+###########################################################################################################################
+###############	FIN DE SI EL TIPO DE USUARIO NO ES 1 (USUARIO)	##################################################
+###########################################################################################################################
+
+###########################################################################################################################
+###################################################################################################################################
+###################################################################################################################################
+###############	COMIENZO DE SI EL TIPO DE USUARIO ES 1 (SUPERADMINISTRADOR)	###########################################
+###################################################################################################################################
+###################################################################################################################################
+		else{
+
+		// ####################################################################################
+		// ########## Buscamos el Nombre de la Unidad Organizativa de la Imagen ###############
+		// ####################################################################################
+		$nombrecaidcentro=$idrepodefault;
+		//echo $value." - ".$idcentro."</br>";
+		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' ";
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return(0); // Error al abrir recordset
+		$rs->Primero(); 
+		if (!$rs->EOF){
+		$nombrecacentro=$rs->campos["nombreca"];
+		$nombrecaidcentro=$rs->campos["idcentro"];
+						}
+		$rs->Cerrar();
+
+		$cmd->texto="SELECT * FROM centros WHERE idcentro='$nombrecaidcentro' ";
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return(0); // Error al abrir recordset
+		$rs->Primero(); 
+		if (!$rs->EOF){
+		$nombrecentro=$rs->campos["nombrecentro"];
+				}
+		$rs->Cerrar();
+
+	
+		// ####################################################################################
+		// ####################################################################################
+		// ########## Buscando si existe objeto imagen ########################################
+		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
+		if(ereg(".diff",$value)){ $valuediff=$value; $value = str_replace(".diff", "", $value);} //quitar todos los .diff y continuamos
+		// ####################################################################################
+
+		$encontradoobjetoimagen="";
+		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' AND idcentro='$idcentro'";
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return(0); // Error al abrir recordset
+		$rs->Primero(); 
+		if (!$rs->EOF){
+		$encontradoobjetoimagen=$rs->campos["nombreca"];
+					}
+		if($encontradoobjetoimagen == $value){$encontradoobjetoimagen;}else{$encontradoobjetoimagen="";}
+		$rs->Cerrar();
+		// ####################################################################################		
+
+		// ########################## VARIABLES FICHERO DELETE ################################
+		$nombredirectorio="/opt/opengnsys/images/".$value;
+		$ficherodelete="../tmp/".$nombrefichero.".delete";
+		// ########################## VARIABLES FICHERO DELETE ################################
+		// ####################################################################################	
+		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
+
+		if (is_dir ($nombredirectorio))
+			{
+			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
+			}
+		else
+			{
+			$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
+			$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+			}
+		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
+												
+		$todo=".delete";
+		$ruta='touch%20/opt/opengnsys/images/'.$value.$todo;//////////////////////////////////////echo $value;//
+
+		echo '<TR>'.chr(13);
+
+		// ########## Nº ######################################################################
+		echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
+
+		// ########## Marcar ##################################################################
+		if ($bustor<>"") 
+			{
+			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
+			}
+			elseif (file_exists($ficherodelete))
+				{
+					echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[15].'</strong></TD>'.chr(13);}
+				else
+				{
+					echo '<TD align=center ><input type="checkbox" name="checkbox'.$contar.'"  value="si"></TD>'.chr(13);
+				}
+
+		// ########## Tipo ####################################################################
+		if ($tipo[$contandotipo]=="D")
+		{
+			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
+		}
+		else
+		{
+			echo '<TD align=center >'.$tipo[$contandotipo].'</TD>'.chr(13);
+		}
+
+		echo '<input type="hidden" name="nombre'.$contar.'" value='.$value.'></TD>'.chr(13);;
+		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
+		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
+
+		// ########## Nombre de Imagen ########################################################
+		if ($tipo[$contandotipo]=="D")
+		{
+			echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
+		}
+		else
+		{
+			echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
+		}
+
+		// ########## Tamaño de Imagen ########################################################
+		if (is_dir ($nombredirectorio))
+		{echo '<TD align=center>&nbsp;'.$tamanofich.'</TD>'.chr(13);}
+		else{echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
+
+		// ########## Objeto Imagen ###########################################################
+		if($encontradoobjetoimagen<>"")
+		{
+			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
+		}
+		else
+		{
+			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
+		}
+		// #####################################################################################
+		// ########## Unidad Organizativa ######################################################
+
+			echo '<TD align=center >'.$nombrecentro.'</TD>'.chr(13);
+
+		// #####################################################################################
+		echo '</TR>'.chr(13);
+		$contar++;
+		$contandotipo++;
+
+//						}else{$contandotipo++;}//Fin de Condicion si es nombrecaidcentro
+###########################################################################################################################
+###########################################################################################################################	
+			}
+###########################################################################################################################
+###########################################################################################################################
+###############	FIN DE SI EL TIPO DE USUARIO ES 1 (SUPERADMINISTRADOR)	##########################################
+###########################################################################################################################
+###########################################################################################################################
+
+
 	} //Fin Llave Forach
 
 	?>
@@ -489,6 +704,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	<INPUT type="hidden" name="opcion" value="<? echo $opcion?>">
 	<INPUT type="hidden" name="idrepositorio" value="<? echo $idrepositorio?>">
 	<INPUT type="hidden" name="grupoid" value="<? echo $grupoid ?>">
+	<INPUT type="hidden" name="modov" value="<?php echo $modov; ?>">
 
 	</TABLE><BR/>
 	<TABLE align=center>

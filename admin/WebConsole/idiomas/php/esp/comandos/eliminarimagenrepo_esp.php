@@ -33,4 +33,7 @@
 	$TbMsg[25]='NO Creado';
 	$TbMsg[26]='Eliminar Objeto Imagen';
 	$TbMsg[27]='Tipo';
+	$TbMsg[28]='Modo Administrador';
+	$TbMsg[29]='Modo Usuario';
+	$TbMsg[30]='Unidad Organizativa';
 ?>

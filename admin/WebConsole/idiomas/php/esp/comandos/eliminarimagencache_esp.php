@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: eliminarimagencache_esp.php (Comandos)
-//	Idioma: Español 
+//	Idioma: Espaï¿½ol 
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Creaci&oacute;n de Imagen';
@@ -24,5 +24,6 @@
 	$TbMsg[16]=' NO tiene el Repositorio en el Servidor';
 	$TbMsg[17]='Limitaciones Versi&oacute;n 1.1';
 	$TbMsg[18]='Tama&ntilde;o de la imagen disponible si Repositorio y Servidor Web alojados en el mismo Servidor';
+	$TbMsg[19]='Tipo';
 	$TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
 ?>

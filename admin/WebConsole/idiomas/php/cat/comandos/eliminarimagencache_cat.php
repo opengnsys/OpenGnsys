@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: eliminarimagencache_cat.php (Comandos)
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Creaci&oacute; d\'Imatge';
@@ -18,11 +18,12 @@
 	$TbMsg[10]='Nom de la Imatge';
 	$TbMsg[11]='N&ordm;';
 	$TbMsg[12]='Marcar';
-	$TbMsg[13]='Grandària';
+	$TbMsg[13]='Grandï¿½ria';
 	$TbMsg[14]='Imatge NO est&aacute; al Repositori';
 	$TbMsg[15]=' te varis Repositoris assignats';
 	$TbMsg[16]=' NO te el Repositori al Servidor';
 	$TbMsg[17]='Limitacions Versi&oacute; 1.1';
-	$TbMsg[18]='Grandària de la imatge disponible si Repositori i Servidor Web allotjats al mateix Servidor';
-	$TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
+	$TbMsg[18]='Grandï¿½ria de la imatge disponible si Repositori i Servidor Web allotjats al mateix Servidor';
+	$TbMsg[19]='Tipus';
+	$TbMsg["CONFIG_NOCONFIG"]='Sense configuraciï¿½: client no connectat al servidor.';
 ?>

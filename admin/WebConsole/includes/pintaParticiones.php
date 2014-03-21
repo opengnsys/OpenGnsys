@@ -125,11 +125,18 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 								if(substr($ima[$x],-3)==".MB") {
 									echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
 								} else {
-									if(substr($ima[$x],-4)==".img") {
-										echo '<br />'.$numero++.'.-'.$ima[$x];
-									} else {
-										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
-									}
+									// $dir=is_dir('$ima');echo $dir;
+									// if ($ima == "directorio"){$dir="si";}
+									// Esto para la informacion de la imagen
+									if (substr($ima[$x],-5)==".diff"){$info="F";}elseif(substr($ima[$x],-4)==".img"){$info="F";}else{$info="D";}
+									// Esto para numerarla
+									if(substr($ima[$x],-4)==".img" || substr($ima[$x],-5)==".diff" || substr($ima[$x],-4)=="") {
+										echo '<br />('.$info.') &nbsp;'.$numero++.'.-'.$ima[$x];
+									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x])) {
+										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
+										}else{
+											echo '<br /><font color=blue>('.$info.') </font>'.$numero++.'.-<font color=blue>'.$ima[$x]."</font>";
+											}
 								}
 							}
 							echo '&nbsp;</td>'.chr(13);

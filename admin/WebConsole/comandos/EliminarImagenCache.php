@@ -355,15 +355,28 @@ switch($ambito){
                                 
                                 for ($x=0;$x<count($ima); $x++)
                                 {
-                                    if(ereg(".img",$ima[$x])  ) //si contiene .img
+                                    if(ereg(".img",$ima[$x])  ) //si contiene .img son ficheros de imagen
                                         {
                                                 if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x])  )//Si el nombre contiene .img.sum o img.torrent
-                                                  {}else{
-                                                        $ima[$x] = str_replace(".img", "", $ima[$x]); //quitar todos los .img
-                                                        $ima[$x]=trim($ima[$x]);
-                                                        $nombreimagenes[]=$ima[$x];
+                                                  {}else{$esdir[]="f";
+								if (ereg(".img.diff",$ima[$x]))
+									{
+									$ima[$x] = str_replace(".img.diff", "", $ima[$x]); //quitar todos los .img
+									$ima[$x]=trim($ima[$x]);
+									$nombreimagenes[]=$ima[$x];
+									}else{
+										$ima[$x] = str_replace(".img", "", $ima[$x]); //quitar todos los .img
+										$ima[$x]=trim($ima[$x]);
+										$nombreimagenes[]=$ima[$x];
+										
+										}
                                                         }
-                                         }else{}
+                                         }elseif (ereg("MB",$ima[$x]))
+							{}else{	// Es un directorio
+								$ima[$x]=trim($ima[$x]);
+								$nombreimagenes[]=$ima[$x];
+								$esdir[]="d";
+								}
                                  }
         
                                  $rs->Siguiente();
@@ -385,6 +398,7 @@ switch($ambito){
                                                 $inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
                                                 $inicioTabla.='         <TR>'.chr(13);
                                                 $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[19].'&nbsp;</TH>'.chr(13);
                                                 $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>'.chr(13);
                                                 $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>'.chr(13);
                                                 if ($cuentarepos==1)
@@ -394,6 +408,12 @@ switch($ambito){
 
                                         }
                                         echo $inicioTabla;
+					     $numdir=0;
+                                for ($x=0;$x<count($esdir); $x++)
+                                {
+					// echo $esdir[$x];		
+					}
+					     
                                         foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
                                         {
 
@@ -403,15 +423,20 @@ switch($ambito){
                                         $tamanofich=split("/",$tamanofich);     
                                                 
                                         $todo=".*";
-                                        $ruta='rm%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;
+					     if ($esdir[$numdir] == "d"){
+	                                        $ruta[]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;
+					     }else{
+							$ruta[]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;
+						    }
 
                                         echo '<TR>'.chr(13);
                                         echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
-                                        echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta.'></TD>'.chr(13);
-                                        echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
-                   if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;D&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
+                                        echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta[$numdir].'></TD>'.chr(13);
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
+					     if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
                                         echo '</TR>'.chr(13);
-                                        $contar++;
+                                        $contar++;$numdir++;
                                         }
 
 			echo "</table>".chr(13);
@@ -419,4 +444,3 @@ switch($ambito){
 }
 
 ?>
-
