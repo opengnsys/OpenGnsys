@@ -357,7 +357,7 @@ switch($ambito){
                                 {
                                     if(ereg(".img",$ima[$x])  ) //si contiene .img son ficheros de imagen
                                         {
-                                                if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x])  )//Si el nombre contiene .img.sum o img.torrent
+                                                if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x]) || ereg(".img.diff.sum",$ima[$x]) || ereg(".img.diff.torrent",$ima[$x])  )//Si el nombre contiene .img.sum o img.torrent
                                                   {}else{$esdir[]="f";
 								if (ereg(".img.diff",$ima[$x]))
 									{
