@@ -1293,9 +1293,9 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 	res = copiaParametro("res",ptrTrama); // Toma resultado
 	der = copiaParametro("der",ptrTrama); // Toma descripción del error (si hubiera habido)
 	
-	sprintf(
-			sqlstr,
-			"UPDATE acciones SET resultado='%s',estado='%d',fechahorafin='%s',descrinotificacion='%s'"\
+	sprintf(sqlstr,
+			"UPDATE acciones"\
+			"   SET resultado='%s',estado='%d',fechahorafin='%s',descrinotificacion='%s'"\
 			" WHERE idordenador=%s AND idaccion=%d",
 			res, ACCION_FINALIZADA, fechafin, der, ido, idaccion);
 			
@@ -1307,12 +1307,14 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 		return (FALSE);
 	}
 	
-	liberaMemoria(res);
 	liberaMemoria(der);
 	
-	if (atoi(res) == ACCION_FALLIDA)
+	if (atoi(res) == ACCION_FALLIDA) {
+		liberaMemoria(res);
 		return (FALSE); // Error en la ejecución del comando
+	}
 
+	liberaMemoria(res);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1385,7 +1387,7 @@ BOOLEAN respuestaConsola(SOCKET *socket_c, TRAMA *ptrTrama, int res) {
 // Función: Arrancar
 //
 //	Descripción:
-//		Procesa el comando Apagar
+//		Procesa el comando Arrancar
 //	Parámetros:
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
@@ -1566,7 +1568,7 @@ void PasaHexBin(char *cadena, char *numero) {
 // Función: RESPUESTA_Arrancar
 //
 //	Descripción:
-//		Respuesta del cliente al comando Apagar
+//		Respuesta del cliente al comando Arrancar
 //	Parámetros:
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
