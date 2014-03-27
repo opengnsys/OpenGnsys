@@ -17,8 +17,11 @@ ethtool -s $DEVICE wol g 2>/dev/null
 # Detectar Busybox.
 BUSYBOX=$(which busyboxOLD)
 BUSYBOX=${BUSYBOX:-"busybox"}
+
+# Retardo para dar lugar al registro en cola de acciones.
+sleep 5
 # Parar Browser para evitar "cuelgues".
 pkill browser
-# Retardo en 2º plano para dar lugar al registro en cola de acciones.
-(sleep 5; $BUSYBOX poweroff) &
+# Apagar.
+$BUSYBOX poweroff
 

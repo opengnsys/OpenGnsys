@@ -93,9 +93,6 @@ case "$TYPE" in
         return $?
         ;;
 esac
-
-# Parar Browser para evitar cuelgues.
-pkill browser
 }
 
 

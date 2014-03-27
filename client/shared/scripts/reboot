@@ -8,12 +8,12 @@
 # Si se recibe un parametro sera el tiempo de sleep antes de realizar el reboot
 if [ $# == 1 ] && [ "${1//[^0-9]/}" == "$1" ]
 then
-        echo "[5] Se ha introducido un retardo de "$1" segundos para reiniciar"
-        TIME=$1
+    TIME=$1
+    echo "[5] Se ha introducido un retardo de $TIME segundos para reiniciar"
 else
-        # Sin parametros, o el parametro introducido no es un numero
-        echo "[5] No se ha introducido un retardo, 5 segundos para reiniciar"
-        TIME=$OGSLEEP
+    # Sin parámetros, o el parámetro introducido no es un número
+    TIME=${OGSLEEP:-5}
+    echo "[5] No se ha introducido un retardo, $TIME segundos para reiniciar"
 fi
 
 # Desmontar los sistemas de archivos y la caché local.
@@ -30,5 +30,11 @@ ethtool -s $DEVICE wol g 2>/dev/null
 # Detectar Busybox.
 BUSYBOX=$(which busyboxOLD)
 BUSYBOX=${BUSYBOX:-"busybox"}
-# Retardo en 2º plano para dar lugar al registro en cola de acciones.
-(sleep $TIME; $BUSYBOX reboot) &
+
+# Retardo para dar lugar al registro en cola de acciones.
+sleep $TIME
+# Parar Browser para evitar "cuelgues".
+pkill browser
+# Reiniciar.
+$BUSYBOX reboot
+
