@@ -446,7 +446,8 @@ EOT
 		fi
 		# Activar e iniciar Rsync.
 		service="rsync"  $ENABLESERVICE
-		service="xinetd" $STARTSERVICE
+		service="xinetd"
+		$ENABLESERVICE; $STARTSERVICE
 	fi
 }
 
