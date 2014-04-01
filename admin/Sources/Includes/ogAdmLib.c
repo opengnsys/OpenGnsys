@@ -673,6 +673,9 @@ TRAMA* recibeTrama(SOCKET *sock)
 		if(!recData(sock,bloque,LONBLK,&ret)) // Lee bloque
 			return(NULL);
 
+		if (lon==0 && lSize==0 && ret==0) // Comprueba trama válida
+			return(NULL);
+
 		if(lSize==0){ // Comprueba tipo de trama y longitud total de los parámetros
 			if (strncmp(bloque, "@JMMLCAMDJ_MCDJ",15)!=0)
 				return(NULL); // No se reconoce la trama
