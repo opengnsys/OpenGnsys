@@ -97,7 +97,7 @@ OSDISTRIB=$(lsb_release -is 2>/dev/null)
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools top )
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps)
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
@@ -111,7 +111,7 @@ case "$OSDISTRIB" in
 		APACHEGROUP="www-data"
 		;;
         Fedora|CentOS)
-		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs top )
+		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		if which systemctl &>/dev/null; then
@@ -476,7 +476,7 @@ function updateWebFiles()
 	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
 		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
 	done
-	cp -a $COMPATDIR/imagenes.device.php > $COMPATDIR/imagenes.device4.php
+	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
@@ -816,7 +816,7 @@ fi
 autoConfigure
 
 # Instalar dependencias.
-installDependencies $DEPENDENCIES
+installDependencies ${DEPENDENCIES[*]}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error: you may install all needed dependencies."
 	exit 1

@@ -52,6 +52,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #613	Script reboot con parámetro de tiempo
 #635	Opción para deshabilitar el apagado automático de clientes (mejora)
 #639	Cliente OpenGnSys para Linux permite ejecutar script
+#641	Crear Código de error específico para script updateCache
 
 Tickets resueltos en módulo OpenGnSys Server:
 #534	Netboot con ficheros dinámicos
@@ -89,6 +90,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #614	Compatibilidad múltiples dispositivos (mejora)
 #617	Botones barra menú (duplicado de #614)
 #619	Consola web asistente particionado: error si se incluye en la cola de acciones
+#642	Mejoras en comandos de eliminación de imágenes
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #562	Log de instalación ubicarlo en directorio log del server
