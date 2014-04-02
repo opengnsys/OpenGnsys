@@ -15,5 +15,5 @@
 	$TbMsg[7]='';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Profile name';
-	$TbMsg[10]='Availables incremetnal software ';
+	$TbMsg[10]='Availables incremental software ';
 ?>

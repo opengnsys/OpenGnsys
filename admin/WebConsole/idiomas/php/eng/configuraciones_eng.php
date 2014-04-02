@@ -52,7 +52,7 @@ $TbMsg[38]='Less free disk space (KB)';
 $TbMsg[39]='Customize';
 $TbMsg[40]='Size unchanged';
 $TbMsg[41]='Generate OG Instruction';
-$TbMsg["CONFIG_PARTTABLE"='Partition table';
+$TbMsg["CONFIG_PARTTABLE"]='Partition table';
 
 $TbMsg[42]='Variable';
 $TbMsg["CONFIG_NOCONFIG"]='No configuration: client does not connect to server.';

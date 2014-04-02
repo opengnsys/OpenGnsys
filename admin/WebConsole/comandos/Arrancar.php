@@ -43,7 +43,7 @@ if (!$cmd)
 	//
 	include_once("./includes/FiltradoAmbito.php");
 ?>
-	<P align=center><SPAN align=center class=subcabeceras>Datos suministrar<? echo $TbMsg[7] ?></SPAN></p>
+	<P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN></p>
 	</BR>
 	<TABLE id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
