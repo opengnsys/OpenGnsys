@@ -1955,6 +1955,8 @@ BOOLEAN EjecutarScript(TRAMA* ptrTrama)
 	}
 	aux=copiaParametro("scp",ptrTrama);
 	scp=URLDecode(aux);
+
+
 	muestraMensaje(8,NULL);
 	/* Nombre del archivo de script */
 	char filescript[LONPRM];
@@ -2101,7 +2103,7 @@ BOOLEAN ejecutaArchivo(char* filecmd,TRAMA *ptrTrama)
 		for (i = 0; i < numlin; i++) {
 			if(strlen(lineas[i])>0){
 				strcpy(ptrTrama->parametros,lineas[i]);
-				strcat(ptrTrama->parametros,"\rMCDJ@");	// Fin de trama
+				//strcat(ptrTrama->parametros,"\rMCDJ@");	// Fin de trama
 				if(!gestionaTrama(ptrTrama)){	// Análisis de la trama
 					errorLog(modulo,39,FALSE);
 					//return(FALSE);
