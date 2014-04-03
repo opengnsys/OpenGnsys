@@ -1,8 +1,8 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: restaurarimagenbasica_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: restaurarimagenbasica_cat.php (Comandos)
+//	Idioma: Catalán
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -10,7 +10,7 @@
 	$TbMsg[2]='Aulas';
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Restaurar Imagen Básica';
+	$TbMsg[5]='Restaurar Imagen Básica  <br> (experimental)';
 	$TbMsg[6]='Ámbito';
 	$TbMsg[7]='Datos a suministrar';
 	$TbMsg[8]='Par';

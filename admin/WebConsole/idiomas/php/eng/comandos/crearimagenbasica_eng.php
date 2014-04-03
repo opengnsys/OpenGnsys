@@ -1,11 +1,11 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: crearimagenbasica_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: crearimagenbasica_eng.php (Comandos)
+//	Idioma: Ingles
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Generation of base image' ;
+	$TbMsg[0]='Generation of base image  <br> (experimental)' ;
 	$TbMsg[1]='Computer features';
         $TbMsg[2]='Name';
         $TbMsg[3]='IP Address';

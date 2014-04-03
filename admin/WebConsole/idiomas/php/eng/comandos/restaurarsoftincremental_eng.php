@@ -1,8 +1,8 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: restaurarsoftincremental_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: restaurarsoftincremental_eng.php (Comandos)
+//	Idioma: Ingles
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centros';
@@ -10,7 +10,7 @@
 	$TbMsg[2]='Aulas';
 	$TbMsg[3]='Grupo de ordenadores';
 	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Restaurar Software Incremental';
+	$TbMsg[5]='Restaurar Software Incremental <br> (experimental)';
 	$TbMsg[6]='Ámbito';
 	$TbMsg[7]='Datos a suministrar';
 	$TbMsg[8]='Par';

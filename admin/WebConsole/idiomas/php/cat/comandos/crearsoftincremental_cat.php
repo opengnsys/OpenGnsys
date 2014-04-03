@@ -5,7 +5,7 @@
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Generació de software Incremental' ;
+	$TbMsg[0]='Generació de software Incremental  <br> (experimental) ' ;
 	$TbMsg[1]='Característiques de l\'ordinador';
 	$TbMsg[2]='Nom';
 	$TbMsg[3]='Direcció IP';

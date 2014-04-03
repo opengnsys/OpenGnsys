@@ -10,7 +10,7 @@
 	$TbMsg[2]='Labs';
 	$TbMsg[3]='Group of computers';
 	$TbMsg[4]='Computers';
-	$TbMsg[5]='Rebootf computers';
+	$TbMsg[5]='Reboot computers';
 	$TbMsg[6]='Environment';
 
 ?>
