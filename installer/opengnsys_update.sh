@@ -86,7 +86,7 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 # - OSDISTRIB - distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
-# - APACHECFGDIR, APACHESERV, DHCPSERV - configuración y servicios
+# - APACHECFGDIR, APACHESERV, DHCPSERV, INETDCFGDIR - configuración y servicios
 function autoConfigure()
 {
 local i
@@ -109,6 +109,7 @@ case "$OSDISTRIB" in
 		ENABLESERVICE="eval update-rc.d \$service defaults"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		INETDCFGDIR=/etc/xinetd.d
 		;;
         Fedora|CentOS)
 		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng )
@@ -123,6 +124,7 @@ case "$OSDISTRIB" in
 		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
+		INETDCFGDIR=/etc/xinetd.d
 		;;
 	*)	# Otras distribuciones.
 		;;
@@ -421,6 +423,7 @@ function rsyncConfigure()
 	# Configurar acceso a Rsync.
 	if [ ! -f /etc/rsyncd.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Rsync service."
+		NEWFILES="$NEWFILES /etc/rsyncd.conf"
 		sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENTUSER/g" \
 		    $WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > /etc/rsyncd.conf
 		# Habilitar Rsync.
@@ -727,7 +730,7 @@ function updateClient()
 		if [ -f $OGINITRD ]; then
 			SAMBAPASS=$(gzip -dc $OGINITRD | \
 				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
-				    grep "^[ 	]*OPTIONS=" | \
+				    grep "^[ 	].*OPTIONS=" | \
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 		fi
 		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
@@ -755,7 +758,18 @@ function updateClient()
 		
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
-		echoAndLog "${FUNCNAME}(): Client is already updated"
+		# Si no existe, crear el fichero de claves de Rsync.
+		if [ ! -f /etc/rsyncd.secrets ]; then
+			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			SAMBAPASS=$(gzip -dc $OGINITRD | \
+				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+				    grep "^[ 	].*OPTIONS=" | \
+				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
+					$INSTALL_TARGET/bin/setsmbpass
+		else
+			echoAndLog "${FUNCNAME}(): Client is already updated"
+		fi
 	fi
 }
 
