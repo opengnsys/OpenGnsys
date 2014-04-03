@@ -28,17 +28,21 @@ fi
 
 # Crear clave para usuario de acceso a los recursos.
 if [ -r $CLIENTINITRD ]; then
+	# Recuperar eco de consola si se corta el proceso.
+	trap "stty echo 2>/dev/null" KILL
+	# Obtener clave del teclado sin eco en pantalla.
 	stty -echo 2>/dev/null
 	echo -n "Clave del usuario Samba: "
 	read SAMBAPASS
 	# Solo se deben aceptar números y letras para la clave de acceso.
-	if [ -n "${SAMBAPASS//[a-zA-Z0-9]/}" ]; then
+	if [[ "$SAMBAPASS" =~ [^a-zA-Z0-9] ]]; then
 		echo
 		echo "$PROG: Error: la clave solo debe contener caracteres alfanuméricos" >&2
 		stty echo 2>/dev/null
 		exit 2
 	fi
 	echo
+	# Obtener confirmación clave sin eco en pantalla.
 	echo -n "Confirmar clave: "
 	read SAMBAPASS2
 	echo
