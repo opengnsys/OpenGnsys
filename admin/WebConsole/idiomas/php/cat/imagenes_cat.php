@@ -16,4 +16,7 @@
 	$TbMsg[8]='"Eliminar Imatge"';
 	$TbMsg[9]='"Imatges"';
 	$TbMsg[10]='"Gestió incrementals"';
+	$TbMsg[11]='"Imagenes Monoliticas"';
+	$TbMsg[12]='"Imagenes Basicas"';
+	$TbMsg[13]='"Imagenes Incrementales"';
 ?>

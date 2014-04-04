@@ -1,18 +1,18 @@
 <?php
 //______________________________________________________
 //
-//	Fichero de idiomas php: pintaParticiones_esp.php 
-//	Idioma: Español
+//	Fichero de idiomas php: acercade_eng.php 
+//	Idioma: Ingles
 //______________________________________________________
 // Si ya existe TbMsg, solo agregamos lo nuevo
 if(!isset($TbMsg)){
 	$TbMsg=array();
 }
 
-$TbMsg["TITLE"]='Aplicaci&oacute;n libre y abierta para la gesti&oacute;n y el despliegue de sistemas operativos';
-$TbMsg["DESCRIPTION"]='OpenGnSys <em>(l&eacute;ase OpenG&eacute;nesis)</em> re&uacute;ne el esfuerzo conjunto de varias Universidades P&uacute;blicas Espa&ntilde;olas, para disponer de una serie de herramientas libres y abiertas que constituyan un sistema completo, vers&aacute;til e intuitivo, para la gesti&oacute;n y clonaci&oacute;n de equipos. Esta aplicaci&oacute;n permite la distribuci&oacute;n, instalaci&oacute;n y despliegue de distintos sistemas operativos. ';
-$TbMsg["LICENSE"]='OpenGnSys es un proyecto de Software Libre, todo el c&oacute;digo est&aacute; licenciado bajo ';
-$TbMsg["LINK"]='Web del proyecto: ';
+$TbMsg["TITLE"]='Free and open-source application for deployment and management of operating systems.';
+$TbMsg["DESCRIPTION"]='OpenGnSys <em> (Open Genesis)</em> Project brings together the combined efforts of several Spanish Public Universities. OpenGnSys provide a number of free and open tools for managing and deploying computers. These tools supplies a complete, versatile and intuitive sytem. This system allows the arrangement, installation and deployment of different operating systems.';
+$TbMsg["LICENSE"]='OpenGnSys is a Free Software project. As such, all code is licensed under ';
+$TbMsg["LINK"]='Web project:';
 
 
 ?>

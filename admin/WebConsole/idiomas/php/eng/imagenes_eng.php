@@ -16,4 +16,7 @@
 	$TbMsg[8]='"Remove Image"';
 	$TbMsg[9]='"Images"';
 	$TbMsg[10]='"Incrementals management"';
+        $TbMsg[11]='"Monolithic Image"';
+        $TbMsg[12]='"Base Image"';
+        $TbMsg[13]='"Incremental Image"';
 ?>
