@@ -356,7 +356,7 @@ function ogSyncCreate () {
 #@param 4 Nombre Imagen
 #@param 5 Tipo imagen [ img | diff ]
 #*/
-local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC
+local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC RETVAL
 
 # Limpiamos los archivo de log
 echo  "" >$OGLOGCOMMAND;
@@ -800,7 +800,7 @@ file "$IMGFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/n
 #@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
 #*/
 ogCheckSyncImage (){
-local IMGEXT  IMGDIR  IMGFILE DIRMOUNT
+local IMGEXT  IMGDIR  IMGFILE DIRMOUNT RETVAL
 
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME":  "$MSG_HELP_ogCheckSyncImage" \

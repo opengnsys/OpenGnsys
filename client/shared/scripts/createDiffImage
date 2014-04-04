@@ -195,7 +195,8 @@ ogWaitMountImage "$3" "$5" "$DIFFTYPE" $SIZEREQUIRED  || exit $(ogRaiseError ses
 ogEcho log session  "[70] $MSG_HELP_ogSyncCreate"
 # Copio los datos a la imagen diferecial :
 ogSyncCreate $1 $2 $3 "$5" $DIFFTYPE
-[ $? == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
+RETVAL=$?
+[ $RETVAL == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
 TIMEAUX6=$[SECONDS-TIMEAUX5]
 ogEcho log session   "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX6/60]m $[TIMEAUX6%60]s"
 
@@ -214,3 +215,6 @@ IMGSIZE=$(ls -l --block-size=1024 "${DIFFFILE}"| cut -f5 -d" ")
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 ogEcho log session "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $5 and used $IMGSIZE KB acros DFS rsync "
+
+# Si ha habido problema al sincronizar nos salimos con error 
+[ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING

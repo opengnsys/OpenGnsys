@@ -130,9 +130,10 @@ char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede con
 		"071-Imagen no sincronizable (es monolitica).",\
 		"072-Error al desmontar la imagen.",\
 		"073-No se detectan diferencias entre la imagen basica y la particion.",\
+		"074-Error al sincronizar, puede afectar la creacion/restauracion de la imagen.",\
 		"Error desconocido "
 	};
-	#define MAXERRORSCRIPT 73		// Error máximo cometido
+	#define MAXERRORSCRIPT 74		// Error máximo cometido
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________

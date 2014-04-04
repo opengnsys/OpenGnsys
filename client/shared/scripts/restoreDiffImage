@@ -109,7 +109,8 @@ ogLock $4 $5
 # Sincronizamos la partición con la imagen.
 ogEcho log session  "[60] $MSG_HELP_ogSyncRestore: $1 $3 $DIFFTYPE $4 $5" 
 ogSyncRestore "$1" "$3" "$DIFFTYPE" $4 $5
-[ $? == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
+RETVAL=$?
+[ $RETVAL == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
 
 # Desmontamos la imagen
 ogUnmountImage "$1" "$3" "$DIFFTYPE"
@@ -128,4 +129,7 @@ configureOs $4 $5
 
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s"
+
+# Si ha habido problema al sincronizar nos salimos con error 
+[ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING
 

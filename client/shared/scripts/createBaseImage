@@ -133,8 +133,10 @@ TIME2=$SECONDS
 if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
 	ogLockImage "$3"  "/$4.$IMGEXT"
 else
+	ogEcho log session "hose $REPOIP 2009 --out sh -c echo -ne LOCK_IMAGE $4.$IMGEXT"	
 	hose $REPOIP 2009 --out sh -c "echo -ne LOCK_IMAGE \"$4.$IMGEXT\" "	
 fi
+exit
 
 ogEcho log session "[40] $MSG_HELP_ogCreateImage $1 $2 $3 $4 "
 # Si existe el fichero de la imagen se hace copia de seguridad y se redimensiona, si  no existe se crea.
@@ -154,7 +156,8 @@ ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED || exit $(ogRaiseError session 
 # Sincronizamos los datos de la particion con la imagen.
 ogEcho log session "[70] $MSG_HELP_ogSyncCreate." 
 ogSyncCreate $1 $2 $3 "$4"  $IMGEXT 
-[ $? == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
+RETVAL=$?
+[ $RETVAL == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
 
 TIMEAUX5=$[SECONDS-TIMEAUX3]
 ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX5/60]m $[TIMEAUX5%60]s"
@@ -175,3 +178,6 @@ IMGSIZE=$(ls -l --block-size=1024 "$IMGFILE" | cut -f5 -d" ")
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 ogEcho log session "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync "
+
+# Si ha habido problema al sincronizar nos salimos con error 
+[ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING
