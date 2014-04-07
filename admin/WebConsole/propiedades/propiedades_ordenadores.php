@@ -63,6 +63,7 @@ if  ($opcion!=$op_alta){
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<link rel="stylesheet" type="text/css" href="../estilos.css" />
+	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<script language="javascript" src="../jscripts/propiedades_ordenadores.js"></script>
 	<script language="javascript" src="../jscripts/opciones.js"></script>
 	<?php echo '<script language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadores_'.$idioma.'.js"></script>'?>

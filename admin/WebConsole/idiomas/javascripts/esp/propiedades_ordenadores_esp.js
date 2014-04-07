@@ -10,3 +10,4 @@ TbMsg[2]="Debe introducir a una dirección MAC";
 TbMsg[3]="";
 TbMsg[4]="";
 TbMsg[5]="Debe elegir un repositorio por defecto";
+TbMsg[6]="Deben introducirse datos de validación: página de login y página de validación";
