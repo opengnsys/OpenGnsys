@@ -50,7 +50,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                     [ $? -ne 0 ] && return $(ogRaiseError $OG_ERR_DONTUNMOUNT_IMAGE "$1 $2.$IMGEXT"; echo $?)
                 fi
 
-		if [ "$BACKUP" == "true" ]; then
+		if [ "$BACKUP" == "true" -o "$BACKUP" == "TRUE" ]; then
                     # Copia seguridad 
                     ogEcho log session  "     $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." 
                     cp -f  "$IMGFILE" "$IMGFILE.ant"  
