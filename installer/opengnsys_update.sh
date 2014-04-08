@@ -21,9 +21,9 @@
 #@version 1.0.4 - Detector de distribución y compatibilidad con CentOS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/05/04
-#@version 1.0.5 - Actualizar BD en la misma versión y compatibilidad con Fedora (systemd).
+#@version 1.0.5 - Actualizar BD en la misma versión, compatibilidad con Fedora (systemd) y configuración de Rsync.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
-#@date    2012/12/14
+#@date    2014/04/03
 #*/
 
 
@@ -103,8 +103,10 @@ case "$OSDISTRIB" in
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
 		if which service &>/dev/null; then
 			STARTSERVICE="eval service \$service restart"
+			STOPSERVICE="eval service \$service stop"
 		else
 			STARTSERVICE="eval /etc/init.d/\$service restart"
+			STOPSERVICE="eval /etc/init.d/\$service stop"
 		fi
 		ENABLESERVICE="eval update-rc.d \$service defaults"
 		APACHEUSER="www-data"
@@ -117,9 +119,11 @@ case "$OSDISTRIB" in
 		CHECKPKG="rpm -q --quiet \$package"
 		if which systemctl &>/dev/null; then
 			STARTSERVICE="eval systemctl start \$service.service"
+			STOPSERVICE="eval systemctl stop \$service.service"
 			ENABLESERVICE="eval systemctl enable \$service.service"
 		else
 			STARTSERVICE="eval service \$service start"
+			STOPSERVICE="eval service \$service stop"
 			ENABLESERVICE="eval chkconfig \$service on"
 		fi
 		APACHEUSER="apache"
@@ -650,6 +654,27 @@ function updateServerFiles()
 ### Funciones de compilación de código fuente de servicios
 ####################################################################
 
+# Mueve el fichero del nuevo servicio si es distinto al del directorio destino.
+function moveNewService()
+{
+	local service 
+
+	# Recibe 2 parámetros: fichero origen y directorio destino.
+	[ $# == 2 ] || return 1
+	[ -f  $1 && -d $2 ] || return 1
+
+	# Comparar los ficheros.
+	if diff -q $1 $2/$(basename $1) &>/dev/null; then
+		# Parar los servicios si fuese necesario.
+		[ -z "$NEWSERVICES" ] && service="opengnsys" $STOPSERVICE
+		# Nuevo servicio.
+		NEWSERVICES="$NEWSERVICES $(basename $1)"
+		# Mover el nuevo fichero de servicio
+		mv $1 $2
+	fi
+}
+
+
 # Recompilar y actualiza los serivicios y clientes.
 function compileServices()
 {
@@ -658,7 +683,7 @@ function compileServices()
 	# Compilar OpenGnSys Server
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
-	make && mv ogAdmServer $INSTALL_TARGET/sbin
+	make && moveNewService ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
 		hayErrores=1
@@ -667,7 +692,7 @@ function compileServices()
 	# Compilar OpenGnSys Repository Manager
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && mv ogAdmRepo $INSTALL_TARGET/sbin
+	make && moveNewService ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
 		hayErrores=1
@@ -676,7 +701,7 @@ function compileServices()
 	# Compilar OpenGnSys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && mv ogAdmAgent $INSTALL_TARGET/sbin
+	make && moveNewService ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
 		hayErrores=1
@@ -790,6 +815,16 @@ function updateSummary()
 	echoAndLog "Update log file:                  $LOG_FILE"
 	if [ -n "$NEWFILES" ]; then
 		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
+	fi
+	if [ -n "$NEWSERVICES" ]; then
+		echoAndLog "New compiled services:            $(echo $NEWSERVICES)"
+		# Indicar si se debe reiniciar servicios manualmente o usando el Cron.
+		[ -f /etc/default/opengnsys ] && source /etc/default/opengnsys
+		if [ "$RUN_CRONJOB" == "no" ]; then
+			echoAndLog "        WARNING: you must restart OpenGnSys services manually."
+		else
+			echoAndLog "        New OpenGnSys services will be restarted by the cronjob."
+		fi
 	fi
 	echo
 }
