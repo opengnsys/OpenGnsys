@@ -13,11 +13,15 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../idiomas/php/".$idioma."/comandos/eliminarimagenrepo_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+
 include_once("../gestores/relaciones/imagenes_eliminacion.php");
 
 if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion;} // Recoge parametros
+//$opcion=$_POST["opcion"]; // Recoge parametros
 if (isset($_POST["idrepositorio"])) {$idrepositorio=$_POST["idrepositorio"];}else{$idrepositorio;}
+//$idrepositorio=$_POST["idrepositorio"]; 
 if (isset($_POST["grupoid"])) {$grupoid=$_POST["grupoid"];}else{$grupoid;}
+//$grupoid=$_POST["grupoid"]; 
 $idcentro=$_SESSION["widcentro"];
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
@@ -28,8 +32,13 @@ if (isset($_POST["modov"])) {$modov=$_POST["modov"];}else{$modov=0;}
 //________________________________________________________________________________________________________
 $idcomando=10;
 $descricomando="Ejecutar Script";
+//echo $ambito."<br>";
+//echo $idambito."<br>";
 $funcion="EjecutarScript";
+//echo $atributos."<br>";
+//echo $gestor;
 $gestor="../comandos/gestores/gestor_Comandos.php";
+//$gestor="./ElimininarImagenRepositorio.php";
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -90,9 +99,13 @@ if (!$rs->Abrir()) return(true); // Error al abrir recordset
 		$idrepodefault=$rs->campos["idrepositorio"];
 	}
 	$rs->Cerrar();
+//#########################################################################
 
 $repolocal="si";
-
+	//#########################################################################
+	// LEYENDO EL DIRECTORIO local en el server
+	// /opt/opengnsys/images/
+	//#########################################################################
 	$dirtemplates="/opt/opengnsys/images/";
 	$directorio=dir($dirtemplates);
 	$imarepo= array();//pila de nombres
@@ -106,11 +119,15 @@ $repolocal="si";
 		}
 	}
 	$directorio->close();
+	sort($imarepo); // Ordenamos el Array
 
 	if (isset($_POST["contar"])) {$cuantos=$_POST["contar"];}else{$cuantos=0;$contar;}
 	//$cuantos=$_POST["contar"];
 	for ($i=1;$i<=$cuantos;$i++)
 	{
+		//#########################################################################
+		// PARA SELECCIONAR EL FICHERO IMAGEN
+		//$checkbox=$_POST["checkbox".$i];
 		if (isset($_POST["checkbox".$i])){$checkbox=$_POST["checkbox".$i];}else{$checkbox="checkbox".$i;}
 		$nombre=$_POST["nombre".$i];
 		$nombre=trim($nombre);
@@ -130,11 +147,12 @@ $repolocal="si";
 			exec("touch ../tmp/$delete");
 			exec("(echo '.$nombre.') > ../tmp/$delete");
 		}
-
+	//#########################################################################
+	// PARA SELECCIONAR EL OBJETO IMAGEN
 		if (isset($_POST["checkboxobjeto".$i])){$checkboxobjeto=$_POST["checkboxobjeto".$i];}else{$checkboxobjeto="checkboxobjeto".$i;}
 		if ($checkboxobjeto == "si")
 		{
-
+	//#########################################################################
 		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$nombre' AND idcentro='$idcentro'";
 		$rs=new Recordset; 
 		$rs->Comando=&$cmd; 
@@ -152,6 +170,8 @@ $repolocal="si";
 
 		EliminaImagenes($cmd,$idimagen,"idimagen");// EliminaciÃƒÂ³n en cascada
 
+		//echo $nombrecanonico." - ".$centroimagen."<br />";
+		//#########################################################################
 	   }
 }
 
@@ -174,27 +194,6 @@ $repolocal="no";
                echo '</TR>';
        echo '</TABLE>';
 
-
-/*
-$espaciorepo=exec("ssh root@$ip 'df -h /opt/opengnsys/images'");
-if ($espaciorepo != "")
-	{
-	$espaciorepo=split(" ",$espaciorepo);
-	for ($j=0;$j<count($espaciorepo);$j++)
-		{
-		if ($espaciorepo[$j]!="")
-	       {$espaciorepos[]=$espaciorepo[$j];}
-		}
-	for ($k=0;$k<count($espaciorepos);$k++)
-		{
-		 $totalrepo=$espaciorepos[1];
-    		 $ocupadorepo=$espaciorepos[2];
-	    	 $librerepo=$espaciorepos[3];
-	    	 $porcentajerepo=$espaciorepos[4];
-		}
-	}
-		
-*/
 
  }
 
@@ -255,13 +254,13 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 
 	<P align=center>
 	<div align=center class=subcabeceras><? echo $TbMsg[7] ?>
-	<?php if ($tipologusu==1){?>
+
 		
 			<form  align="center" name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
 			<INPUT type="hidden" name="opcion" value="<? echo $opcion?>">
 			<INPUT type="hidden" name="idrepositorio" value="<? echo $idrepositorio?>">
 			<INPUT type="hidden" name="grupoid" value="<? echo $grupoid ?>">
-			<?php if ($modov !=1){?>
+			<?php if ($modov == "0"){?>
 				<INPUT type="hidden" name="modov" value="1">
 				<input type=button onclick=submit() value="<?php echo $TbMsg[28]; ?>"/>
 			<?php }else{ ?>
@@ -270,12 +269,23 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 				<?php } ?>
 			</form>
 		</div>
-	<?php } ?>
+
 	
 	
 
 
 <form  align=center name="eliimarepo" action="./EliminarImagenRepositorio.php" method="post"> 
+	<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+		<TR>
+			<TD align=center>&nbsp;</TD>
+			<TH align=center>&nbsp;<? echo $TbMsg[27] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<? echo "F => ".$TbMsg[31];  ?>&nbsp;</TH>
+			<TD align=center>&nbsp;</TD>
+			<TD align=center>&nbsp;</TD>
+			<TH align=center>&nbsp;<? echo "D => ".$TbMsg[32]; ?>&nbsp;</TH>
+			<TD align=center>&nbsp;</TD>
+		</TR>
+	</TABLE>
 
 	<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
@@ -285,7 +295,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[13] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[26] ?>&nbsp;</TH>
-			<?php if ($tipologusu == 1 && $modov == 1){ ?><TH align=center>&nbsp;<? echo $TbMsg[30] ?>&nbsp;</TH><?php } ?>
+			<?php if ($modov == 1){ ?><TH align=center>&nbsp;<? echo $TbMsg[30] ?>&nbsp;</TH><?php } ?>
 
 
 		</TR>
@@ -319,19 +329,21 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			}else{
 				// Compruebo si es un directorio
 				$buscodir="/opt/opengnsys/images/".$imarepo[$x];
-				if(is_dir($buscodir)){
-					$imarepo[$x]=trim($imarepo[$x]);
-					$nombreimagenes[]=$imarepo[$x];
-					$tipo[]="D";
-							}
+				$buscopengnsys=$buscodir."/.marcimg";
+				if(is_dir($buscodir)  && file_exists($buscopengnsys)){
+						$imarepo[$x]=trim($imarepo[$x]);
+						$nombreimagenes[]=$imarepo[$x];
+						$tipo[]="D";
 				}
+			}
 		} //Fin Llave For
 
 
 
-
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					// Tenemos los nombres en un Array[]
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	$sin_duplicados=array_unique($nombreimagenes);
-	sort($sin_duplicados); // Ordenamos el Array
 	$contandotipo=0;
 	$contar=1;
 	foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
@@ -343,7 +355,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		$gensum=$value.".img.sum.lock";
 		$gentor=$value.".img.lock";
 		if(ereg(".diff",$value))$gendif=$value.".img.diff";
-
+		// ########### Buscando si existe fichero imagen #####################
 		$buscando="find /opt/opengnsys/images/ -maxdepth 1 -name ".$gentor." -print";
 		$generando="Generando .torrent";
 		$bustor=exec($buscando);
@@ -360,7 +372,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			}
 
 
-		if ($tipologusu != 1 || $modov != 1){
+		if ($modov != 1){
+
+		// ####################################################################################
+		// ########## Si el nombre imagen existe en la Unidad Organizativa ####################
+		// ####################################################################################
+		//echo $value." - ".$idcentro."</br>";
 
 		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' ";//AND idcentro='$idcentro'";
 		$rs=new Recordset; 
@@ -378,10 +395,15 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			{	//Comienzo de Condicion si es nombrecaidcentro
 			//echo "Value   -  ".$value."/   -  Id Centro - ".$idc." /Nombrecacentro -  ".$nombrecacentro." /Base ID Centro ".$nombrecaidcentro."</br>";
 		
+		// ####################################################################################
+		// ####################################################################################
+		// ########## Buscando si existe objeto imagen ########################################
+		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
 		if(ereg(".diff",$value)){ $valuediff=$value; $value = str_replace(".diff", "", $value);} //quitar todos los .diff y continuamos
+		// ####################################################################################
 
 		$encontradoobjetoimagen="";
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value'"; // AND idcentro='$idcentro'";
+		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' AND idcentro='$idcentro'";
 		$rs=new Recordset; 
 		$rs->Comando=&$cmd; 
 		if (!$rs->Abrir()) return(0); // Error al abrir recordset
@@ -391,9 +413,14 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 					}
 		if($encontradoobjetoimagen == $value){$encontradoobjetoimagen;}else{$encontradoobjetoimagen="";}
 		$rs->Cerrar();
+		// ####################################################################################		
 
+		// ########################## VARIABLES FICHERO DELETE ################################
 		$nombredirectorio="/opt/opengnsys/images/".$value;
 		$ficherodelete="../tmp/".$nombrefichero.".delete";
+		// ########################## VARIABLES FICHERO DELETE ################################
+		// ####################################################################################	
+		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 
 		if (is_dir ($nombredirectorio))
 			{
@@ -404,14 +431,17 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
 			$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
 			}
+		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 												
 		$todo=".delete";
 		$ruta='touch%20/opt/opengnsys/images/'.$value.$todo;//////////////////////////////////////echo $value;//
 
 		echo '<TR>'.chr(13);
 
+		// ########## Nº ######################################################################
 		echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
 
+		// ########## Marcar ##################################################################
 		if ($bustor<>"") 
 			{
 			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
@@ -424,7 +454,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 					echo '<TD align=center ><input type="checkbox" name="checkbox'.$contar.'"  value="si"></TD>'.chr(13);
 				}
 
-
+		// ########## Tipo ####################################################################
 		if ($tipo[$contandotipo]=="D")
 		{
 			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
@@ -438,6 +468,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
 
+		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
 		{
 			echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
@@ -447,11 +478,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
 		}
 
+		// ########## Tamaño de Imagen ########################################################
 		if (is_dir ($nombredirectorio))
 		{echo '<TD align=center>&nbsp;'.$tamanofich.'</TD>'.chr(13);}
 		else{echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
 
-
+		// ########## Objeto Imagen ###########################################################
 		if($encontradoobjetoimagen<>"")
 		{
 			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
@@ -460,7 +492,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
 		}
-
+		// #####################################################################################
 		echo '</TR>'.chr(13);
 		$contar++;
 		$contandotipo++;
@@ -470,6 +502,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			}
 
 		else{
+
 
 		$nombrecaidcentro=$idrepodefault;
 		//echo $value." - ".$idcentro."</br>";
@@ -495,10 +528,15 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		$rs->Cerrar();
 
 	
+		// ####################################################################################
+		// ####################################################################################
+		// ########## Buscando si existe objeto imagen ########################################
+		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
 		if(ereg(".diff",$value)){ $valuediff=$value; $value = str_replace(".diff", "", $value);} //quitar todos los .diff y continuamos
+		// ####################################################################################
 
 		$encontradoobjetoimagen="";
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' AND idcentro='$idcentro'";
+		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value'";// AND idcentro='$idcentro'";
 		$rs=new Recordset; 
 		$rs->Comando=&$cmd; 
 		if (!$rs->Abrir()) return(0); // Error al abrir recordset
@@ -508,9 +546,14 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 					}
 		if($encontradoobjetoimagen == $value){$encontradoobjetoimagen;}else{$encontradoobjetoimagen="";}
 		$rs->Cerrar();
+		// ####################################################################################		
 
+		// ########################## VARIABLES FICHERO DELETE ################################
 		$nombredirectorio="/opt/opengnsys/images/".$value;
 		$ficherodelete="../tmp/".$nombrefichero.".delete";
+		// ########################## VARIABLES FICHERO DELETE ################################
+		// ####################################################################################	
+		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 
 		if (is_dir ($nombredirectorio))
 			{
@@ -521,14 +564,17 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
 			$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
 			}
+		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 												
 		$todo=".delete";
 		$ruta='touch%20/opt/opengnsys/images/'.$value.$todo;//////////////////////////////////////echo $value;//
 
 		echo '<TR>'.chr(13);
 
+		// ########## Nº ######################################################################
 		echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
 
+		// ########## Marcar ##################################################################
 		if ($bustor<>"") 
 			{
 			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
@@ -541,6 +587,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 					echo '<TD align=center ><input type="checkbox" name="checkbox'.$contar.'"  value="si"></TD>'.chr(13);
 				}
 
+		// ########## Tipo ####################################################################
 		if ($tipo[$contandotipo]=="D")
 		{
 			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
@@ -554,6 +601,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
 
+		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
 		{
 			echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
@@ -563,12 +611,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
 		}
 
-
+		// ########## Tamaño de Imagen ########################################################
 		if (is_dir ($nombredirectorio))
 		{echo '<TD align=center>&nbsp;'.$tamanofich.'</TD>'.chr(13);}
 		else{echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
 
-
+		// ########## Objeto Imagen ###########################################################
 		if($encontradoobjetoimagen<>"")
 		{
 			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
@@ -577,11 +625,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
 		}
-
+		// #####################################################################################
+		// ########## Unidad Organizativa ######################################################
 
 			echo '<TD align=center >'.$nombrecentro.'</TD>'.chr(13);
 
-
+		// #####################################################################################
 		echo '</TR>'.chr(13);
 		$contar++;
 		$contandotipo++;

@@ -93,6 +93,15 @@
 	if [ $BORRARIMG -eq 1 ]; then
 	   echo "Borrando previamente imagen del $NOMBREIMGINC repositorio" | tee -a $OGLOGSESSION $OGLOGFILE
 	fi
+	
+	## Marca de localizacion Repositorio
+	FILE_IMG=".marcimg"
+	MARCAORIGEN=$ORIGEN$FILE_IMG
+	## Marca de localizacion Repositorio en Imagen
+	if [ ! -f $MARCAORIGEN  ]; then
+		##echo "Creando Marca Repositorio en Particion $MARCAORIGEN"  | tee -a $OGLOGSESSION $OGLOGFILE
+		touch $MARCAORIGEN
+	fi
 		
 	# Creación de la lista de archivos entre partición e imagen básica del repositorio
 	echo "Creacion de la lista de archivos a transferir entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
@@ -116,6 +125,15 @@
 		 kill $COPROC_PID
 	   exit $OG_ERR_IMAGE
 	fi	
+	## Marca de localizacion Repositorio
+	FILE_IMG=".marcimg"
+	MARCA=$DESTINO$FILE_IMG
+	## Marca de localizacion Repositorio en Imagen
+	if [ ! -f $MARCA  ]; then
+		##echo "Creando Marca Repositorio en Imagen $MARCA"  | tee -a $OGLOGSESSION $OGLOGFILE
+		touch $MARCA
+	fi
+	
 	echo "!!! Finaliza correctamente !!! la creacion de imagen incremental $NOMBREIMGINC entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 
 	# Copia opcional a la caché
@@ -145,6 +163,17 @@
 		echo "!!! Finaliza correctamente !!! la copia de imagen incremental $NOMBREIMGINC a la cache" | tee -a $OGLOGSESSION $OGLOGFILE	
   fi	
 
+	## Marca de localizacion Repositorio
+	FILE_IMG=".marcimg"
+	MARCA=$DESTINO$FILE_IMG
+	## Marca de localizacion Repositorio en CACHE
+	if [ ! -f $MARCA  ]; then
+		##echo "Creando Marca Repositorio en CACHE $MARCA"  | tee -a $OGLOGSESSION $OGLOGFILE
+		touch $MARCA
+	fi
+
+	## Eliminando Marca Origen Repositorio
+	rm $MARCAORIGEN
 	eliminaListaAcl $ORIGEN $SISTEMAFICHERO	
 #___________________________________________________________________
 #

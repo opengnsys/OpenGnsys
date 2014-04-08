@@ -36,4 +36,6 @@
 	$TbMsg[28]='Mode Administrador';
 	$TbMsg[29]='Mode Usuari';
 	$TbMsg[30]='Unitat Organitzativa';
+	$TbMsg[31]='Arxiu';
+	$TbMsg[32]='Directori';
 ?>

@@ -87,6 +87,15 @@
 	   echo "Borrando previamente imagen del repositorio" | tee -a $OGLOGSESSION $OGLOGFILE
 	fi
 	
+	## Marca de localizacion Repositorio
+	FILE_IMG=".marcimg"
+	MARCA=$ORIGEN$FILE_IMG
+	## Marca de localizacion Repositorio en Imagen
+	if [[ ! -f $MARCA  ]]; then
+		##echo "Creando Marca Repositorio en Imagen $MARCA"  | tee -a $OGLOGSESSION $OGLOGFILE
+		touch $MARCA
+	fi
+	
 	# Creación de la imagen básica
 	echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 	crearListaAcl $ORIGEN $DESTINO $SISTEMAFICHERO $DISCO $NPART	
@@ -117,6 +126,15 @@
 
 		# Redefinir destino	
 		DESTINO="$CACHE$OGIMG/$NOMBREIMG/"
+		
+		## Marca de localizacion Repositorio
+		FILE_IMG=".marcimg"
+		MARCA=$ORIGEN$FILE_IMG
+		## Marca de localizacion Repositorio en Imagen
+		if [[ ! -f $MARCA  ]]; then
+			##echo "Creando Marca Repositorio en Imagen $MARCA"  | tee -a $OGLOGSESSION $OGLOGFILE
+			touch $MARCA
+		fi
 
 		echo "Sincronizando imagen entre $ORIGEN y $DESTINO" | tee -a $OGLOGSESSION $OGLOGFILE
 	
@@ -131,6 +149,8 @@
   fi	
 
 	eliminaListaAcl $ORIGEN $SISTEMAFICHERO	
+	## Eliminar Marca Repositorio
+	rm $MARCA
 	
 	#comprimeImagen  $NOMBREIMG 
 	RETVAL=$?	
