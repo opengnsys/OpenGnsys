@@ -187,9 +187,9 @@ $subconsultarepo='SELECT idrepositorio FROM  ordenadores where idordenador=' . $
 	
 	
 	$SelectHtml="";
+	// 1.0.5  imagenes.tipo =1 para que solo muestre las monoloticas.
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
-				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio AND repositorios.idrepositorio=(" . $subconsultarepo . ")"; 
-	
+				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio AND repositorios.idrepositorio=(" . $subconsultarepo . ") WHERE imagenes.tipo=1"; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	
