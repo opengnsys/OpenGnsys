@@ -276,10 +276,13 @@ include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 //
 // Frame con la información de la configuración
-echo '<div align="center">';
-echo '<iframe scrolling="auto" height="500" width="90%" frameborder="0"
+// Si es la opcion insertar no muestra nada -> opcion=$op_alta
+if ($opcion!=$op_alta) {
+	echo '<div align="center">';
+	echo '<iframe scrolling="auto" height="500" width="90%" frameborder="0"
 		 src="../principal/configuraciones.php?swp=1&idambito='.$idordenador.'&ambito='.$AMBITO_ORDENADORES.'"></iframe>';
-echo '</div>';
+	echo '</div>';
+}
 //________________________________________________________________________________________________________
 ?>
 </body>
