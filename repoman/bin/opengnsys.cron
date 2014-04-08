@@ -13,6 +13,9 @@ typeset -i OGCPU	# % uso CPU
 # Comprobar servicios que deben estar activos.
 [ -f $DEFAULTFILE ] && source $DEFAULTFILE
 
+# Salir si no se debe ejecutar la revisión en el cron.
+[ "$RUN_CRONJOB" == "no" ] && exit
+
 # Comprobar si está activo el servidor OpenGnSys.
 if [ "$RUN_OGADMSERVER" == "yes" ]; then
 	# Parar procesos ogAdmServer si consume más de 90% de CPU.

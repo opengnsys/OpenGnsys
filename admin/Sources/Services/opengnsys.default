@@ -2,8 +2,10 @@
 # RUN_OGADMREPO run OpenGnSys Repository Manager service.
 # RUN_BTTRACKER run Bittorrent Tracker
 # RUN_BTSEEDER starts seeding of selected torrent files
+# RUN_CRON run Cron script to check started processes
 RUN_OGADMSERVER="yes"
 RUN_OGADMREPO="yes"
 RUN_OGADMAGENT="yes"
 RUN_BTTRACKER="yes"
 RUN_BTSEEDER="yes"
+RUN_CRONJOB="yes"
