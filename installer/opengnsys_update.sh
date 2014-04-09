@@ -661,10 +661,10 @@ function moveNewService()
 
 	# Recibe 2 parámetros: fichero origen y directorio destino.
 	[ $# == 2 ] || return 1
-	[ -f  $1 && -d $2 ] || return 1
+	[ -f  $1 -a -d $2 ] || return 1
 
 	# Comparar los ficheros.
-	if diff -q $1 $2/$(basename $1) &>/dev/null; then
+	if ! diff -q $1 $2/$(basename $1) &>/dev/null; then
 		# Parar los servicios si fuese necesario.
 		[ -z "$NEWSERVICES" ] && service="opengnsys" $STOPSERVICE
 		# Nuevo servicio.
