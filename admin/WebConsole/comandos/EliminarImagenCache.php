@@ -1,600 +1,447 @@
 <?php
-
-include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
-
-/**
- * Separa las distintas configuraciones de una cadena por disco.
- * Ej. 1;0;1@1;1;7@1;2;131@2;0;1@2;1;7
- * Serian dos configuraciones, para el disco 1 -> 1;0;1@1;1;7@1;2;131 y
- * para el disco 2 -> 2;0;1@2;1;7
- */
-function splitConfigurationsByDisk($configuraciones){
-	// Recorremos las configuraciones para separalas segun el disco al que pertenezcan
-	$diskConfigs = array();
-	$configs = split("@",$configuraciones);
-	foreach($configs as $config){
-		$parts = split(";",$config);
-		if(!isset($diskConfigs[$parts[0]])){
-			$diskConfigs[$parts[0]] = "@";
-		}
-		else if($diskConfigs[$parts[0]] != ""){
-			$diskConfigs[$parts[0]] .= "@";
-		}
-		
-		// Concatenamos la configuracion en el disco que corresponda
-		$diskConfigs[$parts[0]] .= $config;
-	}
-	return $diskConfigs;
-}
-
-
-
 // *************************************************************************************************************************************************
-//	UHU - 2013/15/14 - Se pintan los discos ademas de las particiones
-//	Descripción:
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
-//		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
+// Nombre del fichero: EliminarImagenCache.php
+// Descripci????n : 
+//              Implementaci????n?????? del comando "Eliminar Imagen Cache"
+// date: 13-junio-2013
+// Cambio: se incluye mensaje equipos sin configuracion. En la funcion tabla_configuracion incluye cabecera de la tabla.
+// *************************************************************************************************************************************************
+include_once("../includes/ctrlacc.php");
+include_once("../clases/AdoPhp.php");
+include_once("../includes/constantes.php");
+include_once("../includes/comunes.php");
+include_once("../includes/CreaComando.php");
+include_once("../includes/HTMLSELECT.php");
+include_once("../includes/HTMLCTESELECT.php");
+include_once("../includes/TomaDato.php");
+include_once("../idiomas/php/".$idioma."/comandos/eliminarimagencache_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
+include_once("./includes/capturaacciones.php");
+$funcion=EjecutarScript;
+$idc=$_SESSION["widcentro"];
+$ipservidor=$_SERVER['SERVER_ADDR'];
+//________________________________________________________________________________________________________
+$cmd=CreaComando($cadenaconexion);
+if (!$cmd)
+        Header('Location: '.$pagerror.'?herror=2'); // Error de conexi??n con servidor B.D.
+//___________________________________________________________________________________________________
+?>
+<HTML>
+<TITLE>Administraci??n web de aulas</TITLE>
+<HEAD>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
+<SCRIPT language="javascript" src="./jscripts/EliminarImagenCache.js"></SCRIPT>
+<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
+<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/eliminarimagencache_'.$idioma.'.js"></SCRIPT>'?>
+<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
+</HEAD>
+<BODY>
+<?php
+
+switch($ambito){
+                case $AMBITO_CENTROS :
+                        $urlimg='../images/iconos/centros.gif';
+                        $textambito=$TbMsg[0];
+                        break;
+                case $AMBITO_GRUPOSAULAS :
+                        $urlimg='../images/iconos/carpeta.gif';
+                        $textambito=$TbMsg[1];
+                        break;
+                case $AMBITO_AULAS :
+                        $urlimg='../images/iconos/aula.gif';
+                        $textambito=$TbMsg[2];//#agp
+                                $cmd->texto="SELECT DISTINCT ordenadores.idrepositorio
+                                FROM aulas
+                                LEFT JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+                                WHERE aulas.idaula=$idambito";
+                        $rs=new Recordset;
+                        $rs->Comando=&$cmd; 
+                        if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+                        $rs->Primero();
+                        $idx=0;
+                        while (!$rs->EOF){
+                        $rs->Siguiente();
+                        $idx++;     }
+                        $cuentarepos=$idx; // Guarda contador
+                        $rs->Cerrar();
+					if ($cuentarepos==1){
+					$cmd->texto="SELECT repositorios.ip
+					FROM repositorios
+					INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+					AND ordenadores.idaula='$idambito'
+					GROUP BY ip";
+					$rs=new Recordset;
+					$rs->Comando=&$cmd; 
+					if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+					$rs->Primero();
+					$iprepositorioord=$rs->campos["ip"];
+					if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
+					$rs->Cerrar();
+										}//#agp 
+                        break;
+
+                case $AMBITO_GRUPOSORDENADORES :
+                        $urlimg='../images/iconos/carpeta.gif';
+                        $textambito=$TbMsg[3];//#agp
+                                $cmd->texto="SELECT DISTINCT ordenadores.idrepositorio
+                                 FROM aulas
+                                 LEFT JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+                                 WHERE aulas.idaula=ordenadores.idaula
+                                 AND aulas.idcentro='$idc'
+                                 AND ordenadores.grupoid=".$idambito;
+                        $rs=new Recordset;
+                        $rs->Comando=&$cmd; 
+                        if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+                        $rs->Primero();
+                        $idx=0;
+                        while (!$rs->EOF){
+                        $rs->Siguiente();
+                        $idx++;     }
+                        $cuentarepos=$idx; // Guarda contador
+                        $rs->Cerrar();
+					if ($cuentarepos==1){
+					$cmd->texto="SELECT repositorios.ip
+					FROM repositorios
+					INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+					AND ordenadores.grupoid='$idambito'
+					GROUP BY ip";
+					$rs=new Recordset;
+					$rs->Comando=&$cmd; 
+					if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+					$rs->Primero();
+					$iprepositorioord=$rs->campos["ip"];
+					if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
+					$rs->Cerrar();
+										}//#agp 
+                        break;
+
+                case $AMBITO_ORDENADORES :
+                        $urlimg='../images/iconos/ordenador.gif';
+                        $textambito=$TbMsg[4];//#agp 
+                                $cmd->texto="SELECT repositorios.ip
+                                 FROM repositorios
+                                 INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+                                 AND ordenadores.idordenador=$idambito";//#agp
+                        $rs=new Recordset;
+                        $rs->Comando=&$cmd; 
+                        if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+                        $rs->Primero();
+			    $iprepositorioord=$rs->campos["ip"];
+			    if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
+                        $rs->Cerrar();//#agp 
+                        break;
+        }
+
+        echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
+        echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
+?>
+<!-- //#agp-->
+<?php 
+    // Mensaje aviso limitacion version si hay dos repositorios
+    if ($cuentarepos >1){ ?>
+         <TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+		<TR>
+       		<TH align=center >&nbsp;
+		<? if ($ambito==16){
+			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[16]."</br>".$TbMsg[18];
+		}else{ 
+			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[15]."</br>".$TbMsg[18]; }
+		?>&nbsp;</TH> </TR>
+
+        </TABLE>  
+<?php }?>
+<!-- //#agp-->
+
+        <P align=center>
+        <SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
+	</P>
+
+<form  align=center name="fdatos"> 
+     <?php echo tabla_configuraciones($cmd,$idambito); ?>
+</form>
+<P></P>
+<!-- //#agp-->
+
+<?php
+        //________________________________________________________________________________________________________
+        include_once("./includes/formularioacciones.php");
+        //________________________________________________________________________________________________________
+        include_once("./includes/opcionesacciones.php");
+        //________________________________________________________________________________________________________
+?>
+</BODY>
+</HTML>
+
+<?php
+/**************************************************************************************************************************************************
+        Recupera los datos de un ordenador
+                Parametros: 
+                - cmd: Una comando ya operativo (con conexi??nabierta)  
+                - ido: El identificador del ordenador
+________________________________________________________________________________________________________*/
+function TomaPropiedades($cmd,$idambito)
 {
-	global $tbKeys; // Tabla contenedora de claves de configuración
-	global $conKeys; // Contador de claves de configuración
-	global $TbMsg;
+        
+        $rs=new Recordset; 
+        $cmd->texto="SELECT     COUNT(ordenadores.idordenador) AS numordenadores, aulas.* , 
+                                GROUP_CONCAT(DISTINCT CAST( ordenadores.idmenu AS char( 11 ) )  
+                                ORDER BY ordenadores.idmenu SEPARATOR ',' ) AS idmenus,
+                                GROUP_CONCAT(DISTINCT CAST( ordenadores.idrepositorio AS char( 11 ) )  
+                                ORDER BY ordenadores.idrepositorio SEPARATOR ',' ) AS idrepositorios,
+                                GROUP_CONCAT(DISTINCT CAST( ordenadores.idperfilhard AS char( 11 ) )  
+                                ORDER BY ordenadores.idperfilhard SEPARATOR ',' ) AS idperfileshard,
+                                GROUP_CONCAT(DISTINCT CAST( ordenadores.cache AS char( 11 ) )  
+                                ORDER BY ordenadores.cache SEPARATOR ',' ) AS caches,
+                                GROUP_CONCAT(DISTINCT CAST( ordenadores.idproautoexec AS char( 11 ) )  
+                                ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos
+                        FROM aulas
+                        LEFT OUTER JOIN ordenadores ON ordenadores.idaula = aulas.idaula
+                        WHERE aulas.idaula =".$idambito." 
+                        GROUP BY aulas.idaula";
 
+        $rs->Comando=&$cmd; 
+        if (!$rs->Abrir()) return(false); // Error al abrir recordset
+        if (!$rs->EOF){
+                $idaula=$rs->campos["idaula"];
+                $nombreaula=$rs->campos["nombreaula"];
+                $urlfoto=$rs->campos["urlfoto"];
+                if ($urlfoto=="" ) $urlfoto="aula.jpg";
+                $cagnon=$rs->campos["cagnon"];
+                $pizarra=$rs->campos["pizarra"];
+                $ubicacion=$rs->campos["ubicacion"];
+                $comentarios=$rs->campos["comentarios"];
+                $puestos=$rs->campos["puestos"];
+                $horaresevini=$rs->campos["horaresevini"];
+                $horaresevfin=$rs->campos["horaresevfin"];
+                $grupoid=$rs->campos["grupoid"];
+                $modomul=$rs->campos["modomul"];
+                $ipmul=$rs->campos["ipmul"];
+                $pormul=$rs->campos["pormul"];
+                $velmul=$rs->campos["velmul"];
+#################### ADV                
+                $router=$rs->campos["router"];
+                $netmask=$rs->campos["netmask"];
+                $modp2p=$rs->campos["modp2p"];
+                $timep2p=$rs->campos["timep2p"];
+###################### ADV
+###################### UHU
+                $validacion=$rs->campos["validacion"];
+                $paginalogin=$rs->campos["paginalogin"];
+                $paginavalidacion=$rs->campos["paginavalidacion"];
+###################### UHU
 
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=9;
-	echo '<tr height="16">';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</th>'; // Número de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<th align="center">&nbsp;'.$TbMsg["IMAGE"].'&nbsp;</th>'; // Imagen instalada
-	echo '<th align="center">&nbsp;'.$TbMsg["SOFT_PROFILE"].'&nbsp;</th>'; // Perfil software 
-	echo '<th align="center">&nbsp;'.$TbMsg["CACHE_CONTENT"].'&nbsp;</th>';
-	echo '</tr>';
-
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	         echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-
-
-		
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-					if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
-						$disksize[$tbKeys[$k]["numdisk"]] = tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]);
-						if (empty ($disksize)) {
-							$disksize = '<em>'.$TbMsg["VARIABLE"].'</em>';
-						}
-						switch ($tbKeys[$k]["codpar"]) {
-							case 1:  $disktable[$tbKeys[$k]["numdisk"]] = "MSDOS";
-								 break;
-							case 2:  $disktable[$tbKeys[$k]["numdisk"]] = "GPT";
-								 break;
-							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
-						}
-					}
-					else {  // Información de partición (numpart>0)
-						echo'<tr height="16">'.chr(13);
-                                	        echo'<td align="center">&nbsp;</td>'.chr(13);
-						echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-						if (is_numeric ($tbKeys[$k]["tipopar"])) {
-							echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
-						}
-						else {
-							echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
-						}
-						echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-	
-						echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);					
-	
-						echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-	
-						echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-						
-						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-	
-						if ($tbKeys[$k]["numpar"] == "4") {
-							$rs=new Recordset; 
-							$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4 AND numdisk = ".$tbKeys[$k]["numdisk"];
-							$rs->Comando=&$cmd; 
-							if (!$rs->Abrir()) return(false); // Error al abrir recordset
-							$rs->Primero(); 
-							if (!$rs->EOF){
-								$campocache=$rs->campos["cache"];
-							}
-							$rs->Cerrar();
-							echo '<td align="leght">&nbsp;';
-							$campocache = eregi_replace("[\n|\r|\n\r]", '', $campocache);
-							$ima=split(",",$campocache);
-							$numero=1;
-							for ($x=0;$x<count($ima); $x++) {
-								if(substr($ima[$x],-3)==".MB") {
-									echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
-								}elseif ($ima[1] != ""){
-									// $dir=is_dir('$ima');echo $dir;
-									// if ($ima == "directorio"){$dir="si";}
-									// Esto para la informacion de la imagen
-									if (substr($ima[$x],-5)==".diff"){$info="F";}elseif(substr($ima[$x],-4)==".img"){$info="F";}else{$info="D";}
-									// Esto para numerarla
-									if(substr($ima[$x],-4)==".img" || substr($ima[$x],-5)==".diff" || substr($ima[$x],-4)=="") {
-										echo '<br />('.$info.') &nbsp;'.$numero++.'.-'.$ima[$x];
-									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x])) {
-										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
-										}else{
-											echo '<br /><font color=blue>('.$info.') </font>'.$numero++.'.-<font color=blue>'.$ima[$x]."</font>";
-											}
-								}
-							}
-							echo '&nbsp;</td>'.chr(13);
-
-						} else {
-							echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
-						}
-					
-						echo'</tr>'.chr(13);
-					}
-					break;
-				}
-			}
-		}	
-		// Mostrar información del disco, si se ha obtenido.
-		if (!empty ($disksize)) {
-			echo'<tr height="16">'.chr(13);
-			echo'<td align="center">&nbsp;</td>'.chr(13);
-			echo'<td align="center">&nbsp;'.$disktable[$disk].'&nbsp;</td>'.chr(13);
-			echo'<td></td>'.chr(13);
-			echo'<td></td>'.chr(13);
-			echo'<td></td>'.chr(13);
-			echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</span></strong>&nbsp;</td>'.chr(13);
-			// Creamos un campo oculto para guardar información sobre el disco y su tamaño separados por ;
-			echo "<input type='hidden' name='disksize_".$disk."' value='".$disksize[$disk]."'/>\n";
-			echo'<td></td>'.chr(13);
-			echo'<td></td>'.chr(13);
-			echo'<td></td>'.chr(13);
-                        echo'</tr>'.chr(13);
-		}
-	}
-	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
-}
-
-
-//________________________________________________________________________________________________________
-//
-//	Descripción:
-//		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
-//		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El código html de la tabla
-//________________________________________________________________________________________________________
-function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuración
-	global $conKeys; // Contador de claves de configuración
-	global $TbMsg;
-	global $_SESSION;
-	
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=10;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<TH align=center>&nbsp;'.$TbMsg["SAMESYSTEM_IMAGE"].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg["DIFFERENTSYSTEM_IMAGE"].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg["RESTORE_METHOD"].'&nbsp;</TH>';
-	echo '</TR>';
-	
-	
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	         
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				    if($tbKeys[$k]["numpar"]!=0){    // No es info. del disco (part. 0)
-					$swcc=$tbKeys[$k]["clonable"];
-					if($swcc){
-						echo '<TR>'.chr(13);
-						echo '<TD align=center>&nbsp;&nbsp;</TD>';
-						$icp=$cc."_".$tbKeys[$k]["numdisk"]."_".$tbKeys[$k]["numpar"]; // Identificador de la configuración-partición
-						echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
-						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);
-						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
-						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
-	
-						//Clonación
-						$metodos="UNICAST=UNICAST-CACHE".chr(13);
-						$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
-						$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-						$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
-						$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
-	
-						$TBmetodos["UNICAST-CACHE"]=1;
-						$TBmetodos["UNICAST-DIRECT"]=2;
-						$TBmetodos["MULTICAST-CACHE"]=3;
-						$TBmetodos["MULTICAST-DIRECT"]=4;
-						$TBmetodos["TORRENT-CACHE"]=5;
-						$idxc=$_SESSION["protclonacion"];
-						if ($idxc == "UNICAST") {
-							$idxc = "UNICAST-DIRECT";
-						}
-						echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
-						echo '</TR>'.chr(13);
-					}
-				    }
-				}
-			}
-		}
-	}
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+                $ordenadores=$rs->campos["numordenadores"];
+                $idmenu=$rs->campos["idmenus"];
+                if(count(split(",",$idmenu))>1) $idmenu=0;              
+                $idrepositorio=$rs->campos["idrepositorios"];
+                if(count(split(",",$idrepositorio))>1) $idrepositorio=0;                
+                $idperfilhard=$rs->campos["idperfileshard"];            
+                if(count(split(",",$idperfilhard))>1) $idperfilhard=0;          
+                $cache=$rs->campos["caches"];           
+                if(count(split(",",$cache))>1) $cache=0;        
+                $idmenu=$rs->campos["idmenus"];
+                if(count(split(",",$idmenu))>1) $idmenu=0;              
+                $idprocedimiento=$rs->campos["idprocedimientos"];
+                if(count(split(",",$idprocedimiento))>1) $idprocedimiento=0;    
+        
+                $gidmenu=$idmenu;
+                $gidprocedimiento=$idprocedimiento;
+                $gidrepositorio=$idrepositorio;
+                $gidperfilhard=$idperfilhard;
+                $gcache=$cache; 
+        
+                $rs->Cerrar();
+                
+                return(true);
+        }
+        return(false);
 }
 
 /*________________________________________________________________________________________________________
-
-	Descripción:
-		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
-		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-		grupo de ordenadores o aula
-	Parametros:
-		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
-						sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
-						Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-		$idordenadores: cadena con los identificadores de los ordenadores que forman parte del bloque 
-		$cc: Identificador de la configuración
-	Devuelve:
-		El código html de la tabla
+        Crea la tabla de configuraciones y perfiles a crear
 ________________________________________________________________________________________________________*/
-function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
-{
 
-	global $tbKeys; // Tabla contenedora de claves de configuración
-	global $conKeys; // Contador de claves de configuración
-	global $TbMsg;
+function tabla_configuraciones($cmd,$idambito){
 
-	$colums=7;
-	echo '<TR id="TR_'.$cc.'">';
-	echo '<TH align=center><IMG src="../images/iconos/eliminar.gif"></TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[24].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[27].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[22].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[21].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
-	echo '</TR>';
+        global $TbMsg;
+		global $cuentarepos;
+        global $idc;
+        global $ambito;
+        global $idambito;
+        global $nombreambito;
 
-	$aviso=false;
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
-	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				if($tbKeys[$k]["numdisk"]==1){ // Solo tratar disco 1
-					if($tbKeys[$k]["numpar"]>0){ // Solo particiones (número>0)
-						$icp=$cc."_".$k; // Identificador de la configuración-partición
-						echo '<tr id="TR_'.$icp.'" align="center">';
-						echo '<td><input type="checkbox" onclick="eliminaParticion(this,\''.$icp.'\')"></td>';
-						echo '<td>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</td>';
-						echo '<td>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</td>';
-						$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);
-						echo '<td>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</td>';
-						$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-						echo '<td><input type="text" style="width:100" value="'.$tm.'"></td>';		
-						echo '<td>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</td>';					
-						echo '<td>'.opeFormatear().'</td>';
-						echo '</tr>';
-					} else {
-						if ($tbKeys[$k]["codpar"]!=1) { // Aviso tabla no MSDOS.
-							$aviso=true;
-						}
-					}
-				} else {			// Aviso: más de un disco.
-					$aviso=true;
-				}
-			}
-		}
-	}
-	if ($aviso) {			// Mostrar aviso: solo disco 1 con tabla MSDOS.
-		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
-	}
-	/* Botones de añadir y confirmar */
-	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-	echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
-	echo '	<A href="#add" style="text-decoration:none">
-						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
-						value="'.$k.'" onclick="addParticion(this,'.$cc.')"></A>
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<A href="#add" style="text-decoration:none">
-						<IMG border=0 src="../images/boton_aceptar.gif" onclick="Confirmar('.$cc.')"></A></TD>
-					</TR>';
-}
+        global $AMBITO_CENTROS;
+        global $AMBITO_GRUPOSAULAS;
+        global $AMBITO_AULAS;
+        global $AMBITO_GRUPOSORDENADORES;
+        global $AMBITO_ORDENADORES;
 
-/*
-//
-//	Descripcion:
-//		(Esta funci�n es llamada por pintaConfiguraciones que est� incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del �mbito. El formato 
-//		ser�a una secuencia de cadenas del tipo "clave de configuraci�n" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El c�digo html de la tabla
-//________________________________________________________________________________________________________
-//
-//
-*/
-function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuraci�n
-	global $conKeys; // Contador de claves de configuraci�n
-	global $TbMsg;
-	global $_SESSION;
-	
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=14;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
-	echo '<TH align=center>&nbsp;'.$TbMsg["SYNC_METHOD"].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg["SEND"].'&nbsp;</TH>';
-	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_W"].'">W</dfn> &nbsp;</TH>';
-	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_E"].'">E</dfn> &nbsp;</TH>';
-	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_C"].'">C</dfn> &nbsp;</TH>';
-	echo '</TR>';
+switch($ambito){
+                case $AMBITO_CENTROS :
+                        $urlimg='../images/iconos/centros.gif';
+                        //echo "ambito - ".$ambito."<br>";
+                        //echo "idcentro - ".$idc;
+                        break;
 
-	
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-					$swcc=$tbKeys[$k]["clonable"];
-					echo '<TR>'.chr(13);
-					echo '<TD align=center>&nbsp;&nbsp;</TD>';
-					if($swcc){
-						$icp=$cc."_".$tbKeys[$k]["numdisk"]."_".$tbKeys[$k]["numpar"]; // Identificador de la configuraci�n-partici�n
-						echo '<TD align=center><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
-						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);
-						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
-						echo '<TD align=center>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						$metodos="CACHE=".$TbMsg[13].chr(13);
-						$metodos.="REPO=".$TbMsg[9];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
-						
-						$metodos="SYNC0="."  ".chr(13);
-						$metodos.="SYNC1=".$TbMsg["SYNC1_DIR"].chr(13);						
-						$metodos.="SYNC2=".$TbMsg["SYNC2_FILE"];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100).'</TD>';								
-							
-						$metodos="UNICAST="."Unicast".chr(13);						
-						$metodos.="MULTICAST_". mcast_syntax($cmd,$ambito,$idambito) ."="."Multicast".chr(13);		
-						$metodos.="TORRENT_". torrent_syntax($cmd,$ambito,$idambito) ."="."Torrent".chr(13);
-						$metodos.="RSYNC=Rsync";
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"despletpt_".$icp,"estilodesple","",1,100).'</TD>';								
-						
-						echo '<td align=center><input type=checkbox name="whole" id="whl-'.$icp.'"></td>';	
-						echo '<td align=center><input type=checkbox name="paramb" checked id="eli-'.$icp.'"></td>';	
-						echo '<td align=center><input type=checkbox name="compres" id="cmp-'.$icp.'"></td>';	
+                case $AMBITO_GRUPOSAULAS :
+
+        $cmd->texto="SELECT * FROM grupos WHERE nombregrupo='$nombreambito' AND idcentro='$idc'";
+        $rs=new Recordset;
+        $rs->Comando=&$cmd; 
+        if (!$rs->Abrir()) return(true); // Error al abrir recordset
+        $rs->Primero(); 
+        if (!$rs->EOF){
+                $identificadorgrupo=$rs->campos["idgrupo"];
+        }
+        $rs->Cerrar();
+
+                        $cmd->texto="SELECT * FROM aulas,grupos
+                                        WHERE grupos.nombregrupo='$nombreambito'
+                                        AND aulas.idcentro='$idc'
+                                        AND aulas.grupoid='$identificadorgrupo'
+                                        AND aulas.grupoid=grupos.idgrupo";
+
+
+                        break;
+
+                case $AMBITO_AULAS :
+                        $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones 
+                                        WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
+                                        AND ordenadores.idaula=aulas.idaula
+                                        AND aulas.nombreaula='$nombreambito'
+                                   AND aulas.idcentro='$idc'
+                                        AND ordenadores_particiones.numpar=4  
+                                        GROUP BY ordenadores_particiones.cache";
+
+                        break;
+
+                case $AMBITO_GRUPOSORDENADORES :
+                        $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones,gruposordenadores 
+                                        WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
+                                        AND ordenadores.idaula=aulas.idaula
+                                   AND gruposordenadores.idaula=aulas.idaula
+                                   AND aulas.idcentro='$idc'
+                                        AND ordenadores_particiones.numpar=4  
+                                        AND ordenadores.grupoid='$idambito'
+                                        GROUP BY ordenadores_particiones.cache";
+
+                        break;
+                case $AMBITO_ORDENADORES :
+                        $cmd->texto="SELECT * FROM ordenadores,ordenadores_particiones 
+                                        WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
+                                        AND ordenadores.nombreordenador='$nombreambito'
+                                        AND ordenadores_particiones.numpar=4  
+                                        GROUP BY ordenadores_particiones.cache";
+                        break;
+        }
+
+        $tablaHtml="";
+
+
+        $rs->Comando=&$cmd;  
+        $rs=new Recordset; 
+        $rs->Comando=&$cmd; 
+        if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+        $rs->Primero(); 
+
+        while (!$rs->EOF){
+
+                                $cache=$rs->campos["cache"];
+                                $idordenador=$rs->campos["idordenador"];
+                                $ima=split(",",$cache);
+                                
+                                for ($x=0;$x<count($ima); $x++)
+                                {
+                                    if(ereg(".img",$ima[$x])  ) //si contiene .img son ficheros de imagen
+                                        {
+                                                if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x])  )//Si el nombre contiene .img.sum o img.torrent
+                                                  {}else{$esdir[]="f";
+								if (ereg(".img.diff",$ima[$x]))
+									{
+									$ima[$x] = str_replace(".img.diff", "", $ima[$x]); //quitar todos los .img
+									$ima[$x]=trim($ima[$x]);
+									$nombreimagenes[]=$ima[$x];
+									}else{
+										$ima[$x] = str_replace(".img", "", $ima[$x]); //quitar todos los .img
+										$ima[$x]=trim($ima[$x]);
+										$nombreimagenes[]=$ima[$x];
 										
-					}
-					echo '</TR>'.chr(13);
-				}
-			}
-		}
-	}	
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-}
-/**
- * Las funcion pintaParticionesRestaurarImagenSincronizacion1 sustituye a las funciones 
- * pintaParticionesRestaurarSoftIncremental y pintaParticionesRestaurarImagenBasica
- * para volver a usarlas tan sólo hay que ir al fichero comandos/RestaurarImagenBasica o comandos/RestaurarSoftIncremental y cambiar la
- * llamada a la función que queramos en el parametro de pintaConfiguraciones.
- * Actualmente en ambos ficheros llaman a la función pintaParticionesRestaurarImagenSincronizacion1 ya que pintan
- * exactamente lo mismo.
- *
+										}
+                                                        }
+                                         }elseif (ereg("MB",$ima[$x]))
+							{}else{	// Es un directorio
+								$ima[$x]=trim($ima[$x]);
+								$nombreimagenes[]=$ima[$x];
+								$esdir[]="d";
+								}
+                                 }
+        
+                                 $rs->Siguiente();
+                        }
+                        $rs->Cerrar();
 
-//*********************************************************************************************
-//	FUNCIONES
-//*********************************************************************************************
-//
-//	Descripci�n:
-//		(Esta funci�n es llamada por pintaConfiguraciones que est� incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del �mbito. El formato 
-//		ser�a una secuencia de cadenas del tipo "clave de configuraci�n" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El c�digo html de la tabla
-//________________________________________________________________________________________________________
-//
-//
-function pintaParticionesRestaurarSoftIncremental($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuraci�n
-	global $conKeys; // Contador de claves de configuraci�n
-	global $TbMsg;
-	global $_SESSION;
-	
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=9;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
-	echo '</TR>';
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+                                        $sin_duplicados=array_unique($nombreimagenes);
+                                        $contar=1;
+					if (empty($sin_duplicados)) {
+                                                // Equipo sin configuracion en base de datos.
+                                                $inicioTabla='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+                                                $inicioTabla.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
+					}else{
+                                                // Equipo con configuracion en BD
+                                                // Incluimos primera linea de la tabla.
+                                                $inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
+                                                $inicioTabla.='         <TR>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[19].'&nbsp;</TH>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>'.chr(13);
+                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>'.chr(13);
+                                                if ($cuentarepos==1)
+                                                        $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[13].'&nbsp;</TH>'.chr(13);
 
-	
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-					$swcc=$tbKeys[$k]["clonable"];
-					echo '<TR>'.chr(13);
-					echo '<TD align=center>&nbsp;&nbsp;</TD>';
-					if($swcc){
-						$icp=$cc."_".$tbKeys[$k]["numpar"]; // Identificador de la configuraci�n-partici�n
-						echo '<TD align=center><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
-						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo '<TD align=center>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						$metodos="CACHE=".$TbMsg[13].chr(13);
-						$metodos.="REPO=".$TbMsg[9];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
+
+
+                                        }
+
+					echo $inicioTabla;
+					$numdir=0;
+					     
+                                        foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
+                                        {
+						if (empty($value)){
+                                                // Equipo sin imagenes en la cache.
+                                                $inicioTabla='<table id="tabla_conf" width="25%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+                                                $inicioTabla.='<tr><th align="center" >NO '.$TbMsg["7"].'</th><tr>'.chr(13);
+							echo $inicioTabla;
+						}else{
+							$nombrefichero=$value.'.img';
+							$tamanofich=exec("du -h /opt/opengnsys/images/$nombrefichero");
+							if ($tamanofich==""){$tamanofich=$TbMsg[14];}
+							$tamanofich=split("/",$tamanofich);     
+							$todo=".*";
+							if ($esdir[$numdir] == "d"){
+								$ruta[]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;
+							}else{
+								$ruta[]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;
+							}
+							echo '<TR>'.chr(13);
+							echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
+							if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;D&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
+							echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta[$numdir].'></TD>'.chr(13);
+							if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
+							if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
+							echo '</TR>'.chr(13);
+							$contar++;$numdir++;
+							}
+						}
+						echo "</table>".chr(13);
 							
-					}
-					echo '</TR>'.chr(13);
-				}
-			}
-		}
-	}	
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+
+                        return($tablaHtml);
 }
 
-//*********************************************************************************************
-//	FUNCIONES
-//*********************************************************************************************
-//
-//	Descripci�n:
-//		(Esta funci�n es llamada por pintaConfiguraciones que est� incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del �mbito. El formato 
-//		ser�a una secuencia de cadenas del tipo "clave de configuraci�n" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El c�digo html de la tabla
-//________________________________________________________________________________________________________
-//
-//
-function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuraci�n
-	global $conKeys; // Contador de claves de configuraci�n
-	global $TbMsg;
-	global $_SESSION;
-	
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=9;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';
-	echo '</TR>';
-
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-					$swcc=$tbKeys[$k]["clonable"];
-					if($swcc){
-						echo '<TR>'.chr(13);
-						echo '<TD align=center>&nbsp;&nbsp;</TD>';
-						$icp=$cc."_".$tbKeys[$k]["numpar"]; // Identificador de la configuraci�n-partici�n
-						echo '<TD align=center><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
-						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo '<TD align=center>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						$metodos="CACHE=".$TbMsg[13].chr(13);
-						$metodos.="REPO=".$TbMsg[9];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
-					}
-				}
-			}
-		}
-	}	
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-}
-/**/
+?>
