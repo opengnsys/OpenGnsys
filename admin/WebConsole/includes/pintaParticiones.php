@@ -125,7 +125,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							for ($x=0;$x<count($ima); $x++) {
 								if(substr($ima[$x],-3)==".MB") {
 									echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
-								}elseif ($ima[1] != ""){
+								}elseif (! empty($ima[1])){
 									// $dir=is_dir('$ima');echo $dir;
 									// if ($ima == "directorio"){$dir="si";}
 									// Esto para la informacion de la imagen
@@ -597,4 +597,4 @@ function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenado
 	}	
 	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
 }
-/**/
+
