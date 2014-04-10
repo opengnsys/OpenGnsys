@@ -231,7 +231,7 @@ case "$PARM1" in
 		file $IMGFILE |grep -i -e " ext4 filesystem " 2>&1 > /dev/null || exit 0
 
 		[ -d $DIRMOUNT ] || mkdir $DIRMOUNT
-		mountImage "$IMGFILE" "$DIRMOUNT" || (echolog "Error al montar la imagen"; exit 1)
+		mountImage "$IMGFILE" "$DIRMOUNT" || (echolog "Error al montar la imagen $IMGFILE"; exit 1)
 		
         	# Si el espacio libre menor que 500Mb desmontamos la imagen y nos salimos
 		AVAILABLE=$(df -k|grep $DIRMOUNT|awk '{print $4}')
@@ -259,30 +259,15 @@ case "$PARM1" in
 		# Calculamos el tamaño final del archivo
 		INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
 		let EXTSIZE=$INTSIZE+$EDGESIZE
-		umount $DIRMOUNT
+		umount $DIRMOUNT  || (echolog "Error al desmontar la imagen $IMGFILE"; exit 1)
 		# Si existe dispositivo loop lo borramos.
 		[ $LOOPDEVICE ] && losetup -a| grep $LOOPDEVICE &> /dev/null  &&  losetup -d $LOOPDEVICE
 		# Corto el archivo al tamaño del sistema de ficheros
 		echo "truncate --size=\"$EXTSIZE\"k $IMGFILE"
 		echolog "truncate --size=\"$EXTSIZE\"k $IMGFILE"
         	truncate --size="$EXTSIZE"k $IMGFILE
-
 		rmdir $DIRMOUNT
 
-	;;
-	LOCK_IMAGE)
-		# Bloquea el archivo de la imagen.
-		#1 LOCK_IMAGE
-		#2 Nombre_Imagen.extension
-		echolog "Bloqueamos imagen $REPODIR$PARM2"
-		touch "$REPODIR$PARM2.lock"
-	;;
-	UNLOCK_IMAGE)
-		# Desloquea el archivo de la imagen.
-		#1 UNLOCK_IMAGE
-		#2 Nombre_Imagen.extension
-		echolog "Desbloqueamos imagen $REPODIR$PARM2"
-		rm -f "$REPODIR$PARM2.lock"
 	;;
 	default)
 	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"

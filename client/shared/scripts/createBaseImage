@@ -29,13 +29,8 @@ trap "onexit $1 $2 $3 \"$4\"" 1 2 3 6 9 14 15 EXIT
 # Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
 function onexit() {
     local exit_status=$?
-    ogUnmountImage $3 "$4" $IMGEXT &>/dev/null
     if [ $exit_status -ne 4 ]; then
-	if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
-		ogUnlockImage "$3" "/$4.$IMGEXT" 
-	else
-		hose $REPOIP 2009 --out sh -c "echo -ne UNLOCK_IMAGE \"$4.$IMGEXT\" "	
-	fi
+	ogUnlockImage "$3" "/$4.$IMGEXT" 
 	ogUnlock $1 $2
     fi
     exit $exit_status
@@ -130,17 +125,10 @@ IMGFILE=${IMGDIR[$3]}/$(basename "/$4").$IMGEXT
 echo " " > $OGLOGCOMMAND
 TIME2=$SECONDS
 
-if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
-	ogLockImage "$3"  "/$4.$IMGEXT"
-else
-	ogEcho log session "hose $REPOIP 2009 --out sh -c echo -ne LOCK_IMAGE $4.$IMGEXT"	
-	hose $REPOIP 2009 --out sh -c "echo -ne LOCK_IMAGE \"$4.$IMGEXT\" "	
-fi
-exit
-
 ogEcho log session "[40] $MSG_HELP_ogCreateImage $1 $2 $3 $4 "
 # Si existe el fichero de la imagen se hace copia de seguridad y se redimensiona, si  no existe se crea.
 ogEcho log session "[50] $MSG_HELP_ogCreateFileImage."
+ogLockImage "$3"  "/$4.$IMGEXT"
 ogCreateFileImage $3 "$4" $IMGEXT $SIZEREQUIRED
 
 # Creamos la lista del contenido y lo situamos en la particion a copiar.
@@ -165,11 +153,12 @@ ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TI
 # Reducimos la imagen: solo para kernel <= 3.7, imagenes con FS ext4. (Desmonta y desbloquea la imagen)
 ogEcho log session "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT"
 ogReduceImage $3 "$4" $IMGEXT
-sleep 10
+# TODO: necesaria funcion que espere a que se reduzca la imagen para continuar el script
 
 echo  " " > $OGLOGCOMMAND
 # Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
 ogEcho log session "[95] $MSG_HELP_ogCheckSyncImage"
+sleep 10
 ogCheckSyncImage $3 "$4" "img" || exit $(ogRaiseError session $OG_ERR_IMAGE "$3 $4 img" ; echo $?)
 
 #resumen de la operacion

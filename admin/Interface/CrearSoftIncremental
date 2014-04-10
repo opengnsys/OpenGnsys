@@ -50,6 +50,17 @@
 	# Registro de inicio de ejecución
 	ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
+
+	# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
+	PATH=$PATH:$(dirname $0)
+	CLIENTIP=$(ogGetIpAddress)
+	[ "$4" == "$CLIENTIP" ] && DEST=CACHE || DEST=REPO
+	if [ "$DEST" == "REPO" -a "$boot" != "admin"  ]; then
+		CambiarAcceso admin &>> $OGLOGFILE
+		RETVAL=$?
+		[ $RETVAL -gt 0 ] && exit $RETVAL
+	fi
+
 	if [ $8 -eq 1 ]; then
 		#sincronizacion1 
 		ogCrearSoftIncremental "$@"
@@ -71,12 +82,15 @@
                 [ $COMPRESS -eq 1 ] && export ogrsyncz=true || export ogrsyncz=false
 
 		# REPOSITORIO: Si la ip es la del propio equipo CACHE, si no REPO
-		CLIENTIP=$(ogGetIpAddress)
-		[ "$4" == "$CLIENTIP" ] && DEST=CACHE || DEST=REPO
+		#CLIENTIP=$(ogGetIpAddress)
+		#[ "$4" == "$CLIENTIP" ] && DEST=CACHE || DEST=REPO
 		createDiffImage $1 $2 $DEST "$3" "$5" 
 		RETVAL=$?
 
 	fi
+
+	# Si estamos en modo user montamos el repositorio en modo lectura.
+	[ "$DEST" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
 
 	# Registro de fin de ejecución
 	ogEcho log session "$MSG_INTERFACE_END $RETVAL"

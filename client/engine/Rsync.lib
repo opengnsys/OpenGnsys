@@ -209,7 +209,7 @@ else
 	# Comprobamos que los ficheros de diferencias no esten vacios o salimos con error.
 	if [ $(grep -v -e "^$"  -e "^#" $IMGINFO /tmp/ogimg.ln /tmp/ogimg.rm |wc -l) -eq 0 ]; then 
 		ogRaiseError $OG_ERR_NOTDIFFERENT "$1 $2 $3 $4 $5" 
-		return $0	
+		return $?	
 	fi
 
 fi

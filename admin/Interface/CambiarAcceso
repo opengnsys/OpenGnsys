@@ -9,7 +9,7 @@
 # Error si llamada no se realliza desde OpenGnSys Client.
 PROG=$(basename $0)
 CALLER=$(ogGetCaller)
-if [ "$CALLER" != "CrearImagen" -a "$CALLER" != "ConsolaRemota" ]; then
+if ! $(ogCheckStringInGroup "$CALLER" "CrearImagen ConsolaRemota CrearImagenBasica CrearSoftIncremental"); then
     ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
     exit $?
 fi
