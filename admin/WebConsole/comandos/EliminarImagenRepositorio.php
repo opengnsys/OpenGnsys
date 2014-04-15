@@ -343,7 +343,8 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					// Tenemos los nombres en un Array[]
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	$sin_duplicados=array_unique($nombreimagenes);
+//	$sin_duplicados=array_unique($nombreimagenes);
+	$sin_duplicados=$nombreimagenes;
 	$contandotipo=0;
 	$contar=1;
 	foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
@@ -422,7 +423,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ####################################################################################	
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 
-		if (is_dir ($nombredirectorio))
+		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
 			{
 			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
 			}
@@ -479,7 +480,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		}
 
 		// ########## Tamaño de Imagen ########################################################
-		if (is_dir ($nombredirectorio))
+		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
 		{echo '<TD align=center>&nbsp;'.$tamanofich.'</TD>'.chr(13);}
 		else{echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
 
