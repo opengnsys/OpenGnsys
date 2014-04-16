@@ -1121,7 +1121,7 @@ function installWebConsoleApacheConf()
 	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
                 $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
 
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/$APACHEOGSITE
+	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
