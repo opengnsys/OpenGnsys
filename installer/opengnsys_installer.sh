@@ -1099,8 +1099,8 @@ function installWebConsoleApacheConf()
 		exit 1
 	fi
 
-	local path_opengnsys_base=$1
-	local path_apache2_confd=$2
+	local path_opengnsys_base="$1"
+	local path_apache2_confd="$2"
 	local CONSOLEDIR=${path_opengnsys_base}/www
 
 	if [ ! -d $path_apache2_confd ]; then
@@ -1118,10 +1118,17 @@ function installWebConsoleApacheConf()
 	$APACHEMAKECERT
 
 	# Genera configuración de consola web a partir del fichero plantilla.
-	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
-                $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
-
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
+		# Configuración para versiones anteriores de Apache.
+		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_opengnsys_base/etc/apache.conf
+		ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
+	else
+		# Configuración específica a partir de Apache 2.4
+		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
+		ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+	fi
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
