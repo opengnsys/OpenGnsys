@@ -556,7 +556,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ####################################################################################	
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 
-		if (is_dir ($nombredirectorio))
+		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
 			{
 			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
 			}
@@ -613,7 +613,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		}
 
 		// ########## Tamaño de Imagen ########################################################
-		if (is_dir ($nombredirectorio))
+		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
 		{echo '<TD align=center>&nbsp;'.$tamanofich.'</TD>'.chr(13);}
 		else{echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
 
