@@ -63,17 +63,21 @@ REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")" || exit $(ogRaiseError session $OG_E
 # Comprobar que es sincronizable (con REPO)
 ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE  "$1 $2"; echo $?)
 
+IMGEXT="img"
+# Comprobamos si la imagen o la particion estan bloqueada:
+ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
+ogIsLocked "$3" "$4" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$3 $4"; echo $?)
+
 # Detectamos el sistema de ficheros de la imagen
 # TODO ogGetImageInfo
 DIRMOUNT=$(ogMountImage "$1" "$2")
-ogWaitMountImage "$1" "$2" "$IMGEXT"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+ogWaitSyncImage "$1" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
 IMGFSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)
 
 # Comprobamos si el sistema de ficheros se puede montar
 ogMount "$3" "$4" &>/dev/null || RETVAL=$?
 # Si da error formateamos el sistema de ficheros.
 if [  "$RETVAL" ] ; then
-	ogUnmountImage $1 "$2"
 	ogEcho log session "      $MSG_HELP_ogFormat: $3 $4 $IMGFSTYPE" 
 	ogFormat "$3" "$4" "$IMGFSTYPE" || exit $(ogRaiseError session $OG_ERR_FILESYS "$3 $4"; echo $?)
 	ogMount "$3" "$4"  || exit $(ogRaiseError session $OG_ERR_FILESYS "$3 $4"; echo $?)
@@ -82,11 +86,6 @@ fi
 # Warning si el sistema de ficheros de la imagen es distinto del de la particion destino
 [ "$IMGFSTYPE" == "$(ogGetFsType $3 $4)" ] || ogEcho session warning "$MSG_SYNC_DIFFERENTFS"
 
-IMGEXT="img"
-
-# Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
-ogIsLocked "$3" "$4" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$3 $4"; echo $?)
 
 PROTO=${5:-"UNICAST"}
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
@@ -106,6 +105,9 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
    TIMEAUX1=$[SECONDS-TIME]
    ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" 
 
+   # Montamos la imagen de cache
+   ogMountImage "$1" "$2" >/dev/null
+   ogWaitSyncImage "$1" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
 fi 
 
 TIME2=$SECONDS
@@ -115,10 +117,6 @@ ogEcho log session "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"
 
 ogLock $3 $4
 
-# Montamos la imagen basica.
-ogMountImage "$1" "$2" "$IMGEXT"  >/dev/null
-#  Comprobar que la imagen completa se ha montado.
-ogWaitMountImage "$1" "$2" "$IMGEXT"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
 # Sincronizamos la partición con la imagen.
 ogEcho log session  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4" 
 ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4
@@ -134,7 +132,7 @@ ogUnmountImage "$1" "$2" "$IMGEXT"
 # Restableciendo acl
 ogUnlock $3 $4
 ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage" 
-ogRestoreInfoImage $3 $4
+ogRestoreInfoImage $3 $4  2>&1 | tee -a $OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos

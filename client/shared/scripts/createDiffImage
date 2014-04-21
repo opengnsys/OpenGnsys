@@ -138,7 +138,7 @@ ogEcho log session "[40] $MSG_HELP_createDiffImage: $1 $2 $3 $4"
 ogMountImage $3 "$4" $IMGEXT >/dev/null
 
 # Comprobar que la imagen completa se ha montado 
-ogWaitMountImage $3 "$4" $IMGEXT || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
+ogWaitSyncImage $3 "$4" $IMGEXT "mounted" || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
 
 # Creamos la informacion de la imagen.
 ogEcho log session "[50] $MSG_HELP_ogCreateInfoImage "
@@ -181,7 +181,7 @@ ogEcho log session "[60] $MSG_HELP_ogCreateFileImage."
 ogCreateFileImage $3 "$5" $DIFFTYPE $SIZEREQUIRED
 
 # Esperamos que se monte la imagen despues de crarla en el servidor
-ogWaitMountImage "$3" "$5" "$DIFFTYPE" $SIZEREQUIRED  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $5 $DIFFTYPE: time_out."; echo $?)
+ogWaitSyncImage "$3" "$5" "$DIFFTYPE" "mounted" $SIZEREQUIRED  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $5 $DIFFTYPE: time_out."; echo $?)
 
 ogEcho log session  "[70] $MSG_HELP_ogSyncCreate"
 # Copio los datos a la imagen diferecial :
@@ -194,6 +194,8 @@ ogEcho log session   "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[
 # Reducimos la imagen diferencial -> solo para kernel <= 3.7, imagenes con FS ext4
 ogEcho log session "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT"
 ogReduceImage  $3 "$5" $DIFFTYPE
+# Esperamos que el servidor termine de reducir la imagen
+ogWaitSyncImage "$3" "$5" $DIFFTYPE "reduced" $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
 # TODO: necesaria funcion que espere a que se reduzca la imagen para continuar el script
 
 echo " " > $OGLOGCOMMAND

@@ -101,8 +101,9 @@ case "$PARM1" in
 		IMGFILE="$REPODIR/$PARM2.$IMGEXT"
 		IMGDIR="$(dirname $IMGFILE)"
 		[ -d  $IMGDIR ] || mkdir -p $IMGDIR
-
 		mkdir -p "$DIRMOUNT"
+
+		LOCKFILE="$IMGFILE.lock"
 
 		SIZEREQUIRED="$PARM4"
 
@@ -173,7 +174,8 @@ case "$PARM1" in
 			exit $RETVAL
 		fi
 
-		touch "$DIRMOUNT/ogimg.info"
+		#touch "$DIRMOUNT/ogimg.info"
+		echo "mounted"> "$LOCKFILE"
 		TIME2=$[SECONDS-TIME]
 		echolog "Fin creación/redimension de la  imagen: $[TIME2/60]m $[TIME2%60]s"
 		# Si existe dispositivo loop lo borramos.
@@ -194,22 +196,30 @@ case "$PARM1" in
 			DIRMOUNT="$DIRMOUNT.diff"
 		fi
 		IMGFILE="$REPODIR/$PARM2.$IMGEXT"
+		LOCKFILE="$IMGFILE.lock"
 		echolog "Montamos la imagen $IMGFILE "
 		mkdir -p "$DIRMOUNT"
 		mountImage "$IMGFILE" "$DIRMOUNT"  ro || (echolog "Error al montar la imagen"; exit 1)
 	;;
 	UMOUNT_IMAGE)
                 # Desmontamos el fichero imagen.
-			# Si el directorio esta ocupado no se desmontará
+		# Si el directorio esta ocupado no se desmontará
                 #1 UMOUNT_IMAGE
                 #2 nombre imagen
                 #3 tipo de imagen [ img | diff ]
 		IMGTYPE="$PARM3"
 		DIRMOUNT="$REPODIR/mount/$PARM2"
-		[ "$IMGTYPE" == "diff" ] && DIRMOUNT="$DIRMOUNT.$IMGTYPE"
+		if [ "$IMGTYPE" == "img" ]; then
+			IMGEXT="img"
+		else
+			DIRMOUNT="$DIRMOUNT.$IMGTYPE"
+			IMGEXT="img.diff"
+		fi
+		LOCKFILE="$REPODIR/$PARM2.$IMGEXT.lock"
 		echolog "Desmontamos la imagen $PARM2 $PARM3 "
 		umount $DIRMOUNT
 		rmdir $DIRMOUNT
+		[ -f $LOCKFILE ] && sed -i s/mounted//g $LOCKFILE
 
 	;;
 	REDUCE_IMAGE)
@@ -217,7 +227,7 @@ case "$PARM1" in
 		#1 REDUCE_IMAGE
 		#2 Nombre Imagen
 		#3 Tipo de imagen [ img |diff ]
-		DIRMOUNT="$REPODIR""mount/${PARM2}"
+		DIRMOUNT="${REPODIR}mount/${PARM2}"
 		if [ "$PARM3" == "img" ] ; then
 			IMGEXT="img" 
 		else
@@ -225,6 +235,7 @@ case "$PARM1" in
 			DIRMOUNT="$DIRMOUNT.diff"
 		fi
                 IMGFILE="$REPODIR$PARM2.$IMGEXT"
+		LOCKFILE="$IMGFILE.lock"
 		[ ! -f $IMGFILE ] && echolog "Imagen $IMGFILE no existe" && exit 1 
 
 		# Solo funciona si la imagen es ext4, si no nos salimos sin error
@@ -267,6 +278,7 @@ case "$PARM1" in
 		echolog "truncate --size=\"$EXTSIZE\"k $IMGFILE"
         	truncate --size="$EXTSIZE"k $IMGFILE
 		rmdir $DIRMOUNT
+		echo "reduced" >$LOCKFILE
 
 	;;
 	default)

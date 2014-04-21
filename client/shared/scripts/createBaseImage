@@ -139,7 +139,7 @@ TIMEAUX3=$[SECONDS-TIME2]
 ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
 
 # Esperamos que el servidor termine de crear y montar la imagen
-ogWaitMountImage "$3" "$4" $IMGEXT $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
+ogWaitSyncImage "$3" "$4" $IMGEXT "mounted" $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
 
 # Sincronizamos los datos de la particion con la imagen.
 ogEcho log session "[70] $MSG_HELP_ogSyncCreate." 
@@ -153,12 +153,12 @@ ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TI
 # Reducimos la imagen: solo para kernel <= 3.7, imagenes con FS ext4. (Desmonta y desbloquea la imagen)
 ogEcho log session "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT"
 ogReduceImage $3 "$4" $IMGEXT
-# TODO: necesaria funcion que espere a que se reduzca la imagen para continuar el script
+# Esperamos que el servidor termine de reducir la imagen
+ogWaitSyncImage "$3" "$4" $IMGEXT "reduced" $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
 
 echo  " " > $OGLOGCOMMAND
 # Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
 ogEcho log session "[95] $MSG_HELP_ogCheckSyncImage"
-sleep 10
 ogCheckSyncImage $3 "$4" "img" || exit $(ogRaiseError session $OG_ERR_IMAGE "$3 $4 img" ; echo $?)
 
 #resumen de la operacion

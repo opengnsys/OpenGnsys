@@ -95,7 +95,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Monto la imagen 
 	ogMountImage $1 "$2" $3 &>/dev/null
 	[ $? -eq 0 ] || return $( ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?)
-	touch "$DIRMOUNT/ogimg.info"
+	#touch "$DIRMOUNT/ogimg.info"
+	echo "mounted"> $IMGFILE.lock
 
 	# Si existe dispositivo de loop lo borro.
         [ $LOOPDEVICE ] && losetup -d $LOOPDEVICE 2>&1 &>/dev/null
@@ -576,6 +577,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" $IMGTYPE)"
 	umount "$DIRMOUNT"
 	rmdir "$DIRMOUNT"
+	[ -f $IMGFILE.lock ] && sed -i s/"mounted"//g $IMGFILE.lock
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
         echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE"
@@ -616,34 +618,42 @@ echo "$DIRMOUNT"
 
 
 #/**
-#  ogWaitMountImage image_name extension imagen_size
+#  ogWaitSyncImage image_name extension stado imagen_size
 #@brief Se espera un tiempo a que se monte la imagen en el servidor.
 #@brief Cuando se esta creando la imagen hay que dar el tamaño, para que espere el tiempo de creación.	
 #@param 1 Respositorio [ REPO | CACHE ]
 #@param 2 Nombre Imagen 
 #@param 3 Tipo imagen [ img | diff ] 
-#@param 4 Tamaño imagen (opcional)
+#@param 4 Estado [ mounted | reduced ]
+#@param 5 Tamaño imagen (opcional)
 #*/
-function ogWaitMountImage () {
-local SIZE TIME DIRMOUNT TIMEOUT TIMEAUX
+function ogWaitSyncImage () {
+local SIZE TIME DIRMOUNT TIMEOUT TIMEAUX LOCKFILE IMGDIR IMGEXT STATE
 
 TIME=$SECONDS
 
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" ]; then
         ogHelp 	"$FUNCNAME": "$MSG_HELP_ogWaitMountImage" \
-		"$FUNCNAME [ REPO | CACHE ] image_name extension [ image_size ] " \
+		"$FUNCNAME [ REPO | CACHE ] image_name extension state [ image_size ] " \
 		"$FUNCNAME REPO Ubuntu12 img 30000000" \
 		"$FUNCNAME CACHE Windows7 diff "
         return
 fi
 
-if [ $# -lt 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension [ image_size ] " 
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension state [ image_size ] " 
     return $?
 fi
 
-SIZE=${4:-"300000"}
+SIZE=${5:-"300000"}
+STATE="$4"
+ogCheckStringInGroup "$STATE" "mounted reduced" || \
+	return $(ogRaiseError  command $OG_ERR_FORMAT "STATE = [ mounted | reduced  ]" ) 
+
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+[ "$3" == "img" ] && IMGEXT="img" ||  IMGEXT="img.diff"
+LOCKFILE="${IMGDIR}/$(basename "/$2").$IMGEXT.lock"
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" $3)"
@@ -653,10 +663,14 @@ fi
 
 echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"  | tee -a $OGLOGSESSION $OGLOGFILE
 
+# Comprobamos: mounted -> que exista $DIRMOUNT/ogimg.info o que el fichero de lock contenga mounted
+#              reduced -> que el fichero de lock contenga reduced.
+
 # time-out segun el tamaño de la imagen. por defecto: 100000k -> 3s
 let TIMEOUT=$SIZE/$CREATESPEED
 [ $TIMEOUT -lt 60 ] && TIMEOUT=60
-until [ -f "$DIRMOUNT/ogimg.info" ] ; do
+until $(grep -i $STATE $LOCKFILE &>/dev/null) ; do
+	[ $STATE = "mounted" -a -f "$DIRMOUNT/ogimg.info" ] && ogEcho session "" && return 0
         TIMEAUX=$[SECONDS-TIME]
         [  "$TIMEAUX" -lt "$TIMEOUT" ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT"; echo $?)
         echo -n "#"  | tee -a $OGLOGSESSION $OGLOGFILE
@@ -702,21 +716,19 @@ file "$IMGFILE" | grep -i " ext4 filesystem " 2>&1 > /dev/null || return 0
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         # Al montar se comprueba la existencia de la imagen
-        DIRMOUNT="$(ogMountImage $1 "$2" ${IMGEXT#*\.}) "
-
+        DIRMOUNT="$(ogMountImage $1 "$2" ${IMGEXT#*\.})"
         AVAILABLE=$(df -k|grep "$DIRMOUNT$"|awk '{print $4}')
         # Si el espacio libre menor que 500Mb nos salimos
         if [ $AVAILABLE -lt 200000 ]; then
         	ogUnmountImage $1 "$2" ${IMGEXT#*\.}
+		echo "reduced" > "$IMGFILE.lock"
 	 	return 0
 	fi
-
 
         # Calculamos la diferencia entre el tamaño interno y externo
         EXTSIZE=$(ls -l --block-size=1024 "$IMGFILE" | cut -f5 -d" ")
         INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
         let EDGESIZE=$EXTSIZE-$INTSIZE
-
         ogUnmountImage $1 "$2" ${IMGEXT#*\.}
 	LOOPDEVICE=$(losetup -f)
 	losetup $LOOPDEVICE "$IMGFILE"
@@ -724,7 +736,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Redimensiono sistema de ficheros
 	echo "      resize2fs -fpM $LOOPDEVICE"
 	resize2fs -fpM $LOOPDEVICE |tee -a $OGLOGCOMMAND
-        ogMountImage $1 "$2" ${IMGEXT#*\.}
+        ogMountImage $1 "$2" ${IMGEXT#*\.} >/dev/null
 
 	# Calculamos el tamaño final del archivo
         INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
@@ -738,8 +750,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
         echo "      truncate --size=\"$EXTSIZE\"k $IMGFILE  "
         truncate --size="$EXTSIZE"k "$IMGFILE"
 
-	# Desmonto y desbloqueo la imagen
-	rm -f "$IMGFILE.lock"
+	# Desmonto  la imagen
+	echo "reduced" > "$IMGFILE.lock"
 	rmdir "$DIRMOUNT"
 
 else
@@ -799,7 +811,7 @@ file "$IMGFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/n
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
 #@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
 #*/
-ogCheckSyncImage (){
+function ogCheckSyncImage () {
 local IMGEXT  IMGDIR  IMGFILE DIRMOUNT RETVAL
 
 if [ "$*" == "help" ]; then
