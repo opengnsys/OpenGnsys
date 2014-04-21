@@ -597,4 +597,5 @@ function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenado
 	}	
 	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
 }
+**/
 
