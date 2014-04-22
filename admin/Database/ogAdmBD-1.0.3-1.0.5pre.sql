@@ -118,19 +118,19 @@ UPDATE grupos SET tipo=70 WHERE tipo=50;
 # Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
      MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-UPDATE menus SET resolucion = CASE resolucion 
-                		   WHEN '355' THEN 'uvesafb:1152x864-16'
-				   WHEN '788' THEN 'uvesafb:800x600-16'
-        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
-				   WHEN '791' THEN 'uvesafb:1024x768-16'
-				   WHEN '792' THEN 'uvesafb:1024x768-24'
-				   WHEN '794' THEN 'uvesafb:1280x1024-16'
-				   WHEN '795' THEN 'uvesafb:1280x1024-24'
-				   WHEN '798' THEN 'uvesafb:1600x1200-16'
-				   WHEN '799' THEN 'uvesafb:1600x1200-24'
-				   WHEN NULL  THEN 'uvesafb:800x600-16'
-				   ELSE resolucion
-			      END;
+#UPDATE menus SET resolucion = CASE resolucion 
+#                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+#				   WHEN '788' THEN 'uvesafb:800x600-16'
+#        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+#				   WHEN '791' THEN 'uvesafb:1024x768-16'
+#				   WHEN '792' THEN 'uvesafb:1024x768-24'
+#				   WHEN '794' THEN 'uvesafb:1280x1024-16'
+#				   WHEN '795' THEN 'uvesafb:1280x1024-24'
+#				   WHEN '798' THEN 'uvesafb:1600x1200-16'
+#				   WHEN '799' THEN 'uvesafb:1600x1200-24'
+#				   WHEN NULL  THEN 'uvesafb:800x600-16'
+#				   ELSE resolucion
+#			       END;
 
 # Cambios para NetBoot con ficheros dinámicos (tickets #534 #582).
 DROP TABLE IF EXISTS menuboot;
@@ -182,4 +182,11 @@ ALTER TABLE aulas
 ALTER TABLE ordenadores
 	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
 	ALTER idproautoexec SET DEFAULT 0;
+UPDATE ordenadores
+	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
+
+# Corregir errata en particiones vacías con número de partición asignado al código de partición.
+UPDATE ordenadores_particiones
+	SET codpar = 0
+	WHERE codpar = numpar AND tamano = 0;
 
