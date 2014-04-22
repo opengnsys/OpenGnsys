@@ -29,9 +29,34 @@ mv /opt/opengnsys/www/tmp/*.* /opt/opengnsys/images/
 ls /opt/opengnsys/images/*.delete &>/dev/null || exit
 
 for IMG in `ls /opt/opengnsys/images/*.delete`; do
+	## Obtenemos el nombre de la imagen
         DELETEIMAGE=$(echo $IMG | awk -F"." '{print $1}' | awk -F"/opt/opengnsys/images/" '{print $2}')
+
         # Borramos marca .delete para que el proximo cron no trabaje sobre este conjunto.
         [ -f  $IMG ] &&  rm $IMG
+
+	## Comprobamos si es un Directorio .delete
+	DELETEdir=$(echo $IMG | awk -F"." '{print $2}')	## .delete
+	DELETEant=$(echo $IMG | awk -F"." '{print $3}')	## .ant
+	DELETEdiff=$(echo $IMG | awk -F"." '{print $3}')	## .diff
+	## Si NO es ninguno es un img
+
         ## se llama al escript de borrado de imagen.
-        /opt/opengnsys/bin/deleteimage $DELETEIMAGE
+	## Si es un Directorio Borramos
+	if [[ $DELETEdir == "delete" ]]; then
+		/opt/opengnsys/bin/deleteimage $DELETEIMAGE d
+
+		# Si es un Imagen Backup Borramos
+		elif [[ $DELETEant == "ant" ]]; then
+			DELETEIMAGE=$DELETEIMAGE".ant"
+			/opt/opengnsys/bin/deleteimage $DELETEIMAGE
+
+			# Si es un Imagen diff Borramos
+			elif [[ $DELETEdiff == "diff" ]]; then
+				/opt/opengnsys/bin/deleteimage $DELETEIMAGE
+
+				# Si no es una de las anteriores lo que queda es img
+				else
+					/opt/opengnsys/bin/deleteimage $DELETEIMAGE
+	fi
 done

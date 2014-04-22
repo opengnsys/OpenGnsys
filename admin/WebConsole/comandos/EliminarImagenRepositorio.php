@@ -132,20 +132,36 @@ $repolocal="si";
 		$nombre=$_POST["nombre".$i];
 		$nombre=trim($nombre);
 		$chekmarcadif=$_POST["marcadif".$i];
+		$tipoimg=$_POST["tipoimg".$i];
 
 		if ($checkbox == "si" && $chekmarcadif == 1)
 		{
 			$delete=$nombre.".img.diff.delete";
 			//echo $delete;
 			exec("touch ../tmp/$delete");
-			exec("(echo '$nombre') > ../tmp/$delete");
+			exec("(echo '$nombre.img.diff') > ../tmp/$delete");
 		}
 		if ($checkbox == "si" && $chekmarcadif == 0)
 		{
-			$delete=$nombre.".img.delete";
-			//echo $delete;
-			exec("touch ../tmp/$delete");
-			exec("(echo '.$nombre.') > ../tmp/$delete");
+			if(ereg(".ant",$nombre))
+			{
+				$nombre = str_replace(".ant", "", $nombre); //quitar todos los .backup y continuamos
+				$delete=$nombre.".img.ant.delete";
+				//echo $nombre;
+				//echo $delete;
+				exec("touch ../tmp/$delete");
+				exec("(echo '$nombre.img.ant') > ../tmp/$delete");
+			}elseif ($tipoimg == "D"){
+					$delete=$nombre.".delete";
+					//echo $delete;
+					exec("touch ../tmp/$delete");
+					exec("(echo '$nombre') > ../tmp/$delete");
+			}else{
+					$delete=$nombre.".img.delete";
+					//echo $delete;
+					exec("touch ../tmp/$delete");
+					exec("(echo '$nombre.img') > ../tmp/$delete");
+				}
 		}
 	//#########################################################################
 	// PARA SELECCIONAR EL OBJETO IMAGEN
@@ -284,6 +300,9 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			<TD align=center>&nbsp;</TD>
 			<TH align=center>&nbsp;<? echo "D => ".$TbMsg[32]; ?>&nbsp;</TH>
 			<TD align=center>&nbsp;</TD>
+			<TD align=center>&nbsp;</TD>
+			<TH align=center>&nbsp;<? echo "B => Backup" ?>&nbsp;</TH>
+			<TD align=center>&nbsp;</TD>
 		</TR>
 	</TABLE>
 
@@ -318,12 +337,17 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 							$imarepo[$x]=trim($imarepo[$x]);
 							$nombreimagenes[]=$imarepo[$x].'.diff';
 							$tipo[]="F";
-						}
-						else{
-							$imarepo[$x] = str_replace(".img", "", $imarepo[$x]); //quitar todos los .img
-							$imarepo[$x]=trim($imarepo[$x]);
-							$nombreimagenes[]=$imarepo[$x];
-							$tipo[]="F";
+						}elseif(ereg(".ant",$imarepo[$x]))
+							{
+								$imarepo[$x] = str_replace(".img", "", $imarepo[$x]); //quitar todos los .img
+								$imarepo[$x]=trim($imarepo[$x]);
+								$nombreimagenes[]=$imarepo[$x];
+								$tipo[]="B";
+							}else{
+								$imarepo[$x] = str_replace(".img", "", $imarepo[$x]); //quitar todos los .img
+								$imarepo[$x]=trim($imarepo[$x]);
+								$nombreimagenes[]=$imarepo[$x];
+								$tipo[]="F";
 							}
 				   		}
 			}else{
@@ -367,9 +391,13 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			$nombrefichero=trim($value);
 			$nombrefichero=$value.'.img.diff';
 			}
-		else
+		elseif(ereg(".ant",$value))
 			{
-			$nombrefichero=$value.'.img';$marcadif=0;
+				$nombrefichero=str_replace(".ant", "", $value);
+				$nombrefichero=$nombrefichero.".img.ant";$marcadif=0;
+			}else
+			{
+				$nombrefichero=$value.'.img';$marcadif=0;
 			}
 
 
@@ -418,19 +446,31 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 
 		// ########################## VARIABLES FICHERO DELETE ################################
 		$nombredirectorio="/opt/opengnsys/images/".$value;
-		$ficherodelete="../tmp/".$nombrefichero.".delete";
+		// ####################################################################################	
+		if ($tipo[$contandotipo] == "D")
+		{
+			$nombrefichero=str_replace(".img", "", $nombrefichero);
+			$ficherodelete="../tmp/".$nombrefichero.".delete";
+		}else{
+			$ficherodelete="../tmp/".$nombrefichero.".delete";
+			}
 		// ########################## VARIABLES FICHERO DELETE ################################
 		// ####################################################################################	
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
-
 		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
 			{
 			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
 			}
-		else
+		elseif (ereg(".ant",$nombrefichero))
 			{
-			$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
-			$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+				$nombreficheroant=str_replace(".ant", "", $nombrefichero); //quitar todos los .ant y continuamos
+
+				$nombreficheroant=$nombreficheroant.".ant";
+				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombreficheroant");
+				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+			}else{
+				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
+				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
 			}
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 												
@@ -443,6 +483,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
 
 		// ########## Marcar ##################################################################
+
 		if ($bustor<>"") 
 			{
 			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
@@ -460,14 +501,17 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
 		}
-		else
+		elseif ($tipo[$contandotipo]=="B")
 		{
+			echo '<TD align=center><font color=red>&nbsp;'.$tipo[$contandotipo].'&nbsp;</TD>'.chr(13);
+			}else{
 			echo '<TD align=center >'.$tipo[$contandotipo].'</TD>'.chr(13);
 		}
 
 		echo '<input type="hidden" name="nombre'.$contar.'" value='.$value.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
+		echo '<input type="hidden" name="tipoimg'.$contar.'"  value='.$tipo[$contandotipo].'></TD>'.chr(13);;
 
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
@@ -476,6 +520,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		}
 		else
 		{
+
 			echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
 		}
 
@@ -489,9 +534,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
 		}
-		else
-		{
-			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
+		elseif (ereg(".ant",$nombrefichero))
+			{
+				echo '<TD align=center><font color=red>&nbsp;------</strong></TD>'.chr(13);
+			}else{
+				echo '<TD align=center><font color=red>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
 		}
 		// #####################################################################################
 		echo '</TR>'.chr(13);
@@ -551,19 +598,32 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 
 		// ########################## VARIABLES FICHERO DELETE ################################
 		$nombredirectorio="/opt/opengnsys/images/".$value;
-		$ficherodelete="../tmp/".$nombrefichero.".delete";
+		// ####################################################################################	
+		if ($tipo[$contandotipo] == "D")
+		{
+			$nombrefichero=str_replace(".img", "", $nombrefichero);
+			$ficherodelete="../tmp/".$nombrefichero.".delete";
+		}else{
+			$ficherodelete="../tmp/".$nombrefichero.".delete";
+			}
 		// ########################## VARIABLES FICHERO DELETE ################################
+
 		// ####################################################################################	
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
-
 		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
 			{
 			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
 			}
-		else
+		elseif (ereg(".ant",$nombrefichero))
 			{
-			$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
-			$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+				$nombreficheroant=str_replace(".ant", "", $nombrefichero); //quitar todos los .ant y continuamos
+
+				$nombreficheroant=$nombreficheroant.".ant";
+				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombreficheroant");
+				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+			}else{
+				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
+				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
 			}
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 												
@@ -593,14 +653,17 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
 		}
-		else
+		elseif ($tipo[$contandotipo]=="B")
 		{
+			echo '<TD align=center><font color=red>&nbsp;'.$tipo[$contandotipo].'&nbsp;</TD>'.chr(13);
+			}else{
 			echo '<TD align=center >'.$tipo[$contandotipo].'</TD>'.chr(13);
 		}
 
 		echo '<input type="hidden" name="nombre'.$contar.'" value='.$value.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
+		echo '<input type="hidden" name="tipoimg'.$contar.'"  value='.$tipo[$contandotipo].'></TD>'.chr(13);;
 
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
@@ -622,9 +685,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
 		}
-		else
-		{
-			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
+		elseif (ereg(".ant",$nombrefichero))
+			{
+				echo '<TD align=center><font color=red>&nbsp;------</strong></TD>'.chr(13);
+			}else{
+				echo '<TD align=center><font color=red>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
 		}
 		// #####################################################################################
 		// ########## Unidad Organizativa ######################################################
