@@ -9,6 +9,9 @@
 #@version 1.0.3 - Limpiar código y configuración modo off-line
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-01-12
+#@version 1.0.5 - Compatibilidad para usar proxy y servidor DNS.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-04-23
 #*/
 
 # Idioma por defecto.
@@ -84,6 +87,15 @@ if [ -d $OPENGNSYS ]; then
    
     # Fichero de registros.
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
+fi
+
+# Compatibilidad para usar proxy en clientes ogLive.
+[ -z "$http_proxy" -a -n "$ogproxy" ] && export http_proxy="$ogproxy" 
+
+# Compatibilidad para usar servidor DNS en clientes ogLive.
+if [ ! -f /run/resolvconf/resolv.conf -a -n "$ogdns" ]; then
+	mkdir -p /run/resolvconf
+	echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
 fi
 
 # Declaración de códigos de error.
