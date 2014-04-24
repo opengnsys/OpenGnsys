@@ -83,6 +83,8 @@ for MAC in $ETHERNET; do
 				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
 				' ogshare=', @serverip,
 				' winboot=', IFNULL (perfileshard.winboot, 'reboot'),
+				IF (aulas.dns IS NULL, '', CONCAT (' ogdns=', aulas.dns)),
+				IF (aulas.proxy IS NULL, '', CONCAT (' ogproxy=', aulas.proxy)),
 				IF (menus.resolucion IS NULL, '', CONCAT (' video=', menus.resolucion))
 				FROM ordenadores 
 				JOIN aulas USING (idaula)
