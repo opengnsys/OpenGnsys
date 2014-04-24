@@ -29,7 +29,7 @@ function cleanString ($cadena) {
  * Función que obtiene la versión del Kernel del cliente que se ejecuta durante el
  * proceso de arranque mediante TFTP/PXE.
  * @brief    Obtiene la versión del Kernel usada en arranque TFTP/PXE.
- * @return   {String}  Versión del Kernel.
+ * @return   float    Versión del Kernel (Versión.Revisión, con 2 decimales).
  * @versión  1.0.5 - Versión inicial.
  * @authors  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-11
@@ -38,8 +38,8 @@ function clientKernelVersion () {
 	$tftpDir = "/opt/opengnsys/tftpboot";		// Directorio TFTP.
 	$kernelFile = "$tftpDir/ogclient/ogvmlinuz";	// Fichero del Kernel
 
-	// Devolver versión del Kernel (8ª palabra del tipo de fichero).
-	return exec ("file -b $kernelFile 2>/dev/null | cut -f8 -d' '");
+	// Devolver versión del Kernel (Versión.Revisión, con 2 decimales).
+	return exec ("file -bkr $kernelFile 2>/dev/null | awk '/Linux/ {for(i=1;i<=NF;i++) if(\$i~/version/) {v=\$(i+1); printf(\"%d\",v); sub(/[0-9]*\./,\"\",v); printf(\".%02d\",v)}}'");
 }
 
 

@@ -118,7 +118,7 @@ if  ($opcion!=$op_alta){
 					echo '<td>'.$res.'</td>';
 				}
 				else{
-					if (clientKernelVersion() < "3.7") {
+					if (clientKernelVersion() < "3.07") {
 						// Kernel anterior a 3.7 usa parámetro "vga".
 						$parametros ="788=800x600   16bits".chr(13);
 						$parametros.="791=1024x768  16bits".chr(13);
