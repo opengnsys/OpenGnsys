@@ -26,7 +26,7 @@ REPODIR="$BASEDIR/images/"
 eval $(grep BACKUP $BASEDIR/client/etc/engine.cfg)
 # FS segun kernel. ext4 para < 3.7, para >= BTRFS
 KERNEL=$(file -bkr /opt/opengnsys/tftpboot/ogclient/ogvmlinuz |awk '/Linux/ {for(i=1;i<=NF;i++) if($i~/version/) {v=$(i+1);printf("%d",v);sub(/[0-9]*\./,"",v);printf(".%02d",v)}}')
-[ $KERNEL \< 3.7 ] && IMGFS="EXT4" || IMGFS="BTRFS"
+[ $KERNEL \< 3.07 ] && IMGFS="EXT4" || IMGFS="BTRFS"
 
 
 # Añade registro de incidencias.

@@ -65,7 +65,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                    echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" 
                    truncate --size=">$SIZEREQUIRED"k "$IMGFILE" &> $OGLOGCOMMAND
 		   # FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
-		   if [ $KERNELVERSION \< 3.7 ]; then
+		   if [ $KERNELVERSION \< 3.07 ]; then
                 	losetup $LOOPDEVICE "$IMGFILE"
 			echo "      resize2fs -f $LOOPDEVICE"
 			resize2fs -f $LOOPDEVICE &> $OGLOGCOMMAND
@@ -83,7 +83,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
-		if [ $KERNELVERSION \< 3.7 ]; then
+		if [ $KERNELVERSION \< 3.07 ]; then
 		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
 		   mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE 2>&1 |tee -a $OGLOGCOMMAND
 		else
@@ -177,7 +177,7 @@ SIZEDATA=${SIZEDATA:-"SIZEDATA"}
 
 # Incluimos información de la imagen. Segun el kernel sera ext4 o btrfs.
 KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-if [ $KERNELVERSION \< 3.7 ]; then
+if [ $KERNELVERSION \< 3.07 ]; then
 	echo "#EXT4:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
 else
 	echo "#BTRFS:LZO:$FSTYPE:$SIZEDATA" > $IMGINFO
@@ -530,7 +530,7 @@ else
 	
    	# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
 	KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-	if [ $KERNELVERSION \< 3.7 ]; then
+	if [ $KERNELVERSION \< 3.07 ]; then
 	    mount -t ext4 -o loop "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
 	else
 	    mount -o compress=lzo  "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
@@ -844,7 +844,7 @@ DIRMOUNT="/tmp/ogCheckImage$$"
 mkdir "$DIRMOUNT"
 # FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
 KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-if [ $KERNELVERSION \< 3.7 ]; then
+if [ $KERNELVERSION \< 3.07 ]; then
 	mount -t ext4 -o loop "$IMGFILE" "$DIRMOUNT" 2>&1 | tee -a $OGLOGCOMMAND
 	RETVAL=${PIPESTATUS[0]}
 else

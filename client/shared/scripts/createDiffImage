@@ -47,7 +47,7 @@ function onexit() {
 CREATESPEED=${CREATESPEED:-"100000*4"}
 # Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
 KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-[ $KERNELVERSION \< 3.7 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
+[ $KERNELVERSION \< 3.07 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
 # % de compresion para estimacion tamaño imagen IMGFS="EXT4"
 ZSYNC=${ZSYNC:-"120"}
 # Si IMGFS="BTRFS" la compresion es mayor.
