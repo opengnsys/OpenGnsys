@@ -87,7 +87,8 @@ for MAC in $ETHERNET; do
 				IF (aulas.proxy IS NULL, '', CONCAT (' ogproxy=', aulas.proxy)),
 				CASE
 				    WHEN menus.resolucion IS NULL THEN ''
-				    WHEN menus.resolucion < 999 THEN CONCAT (' vga=', menus.resolucion)
+				    WHEN menus.resolucion <= '999' THEN CONCAT (' vga=', menus.resolucion)
+				    WHEN menus.resolucion LIKE '%:%' THEN CONCAT (' video=', menus.resolucion)
 				    ELSE menus.resolucion
 				END
 				FROM ordenadores 
