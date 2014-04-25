@@ -85,7 +85,11 @@ for MAC in $ETHERNET; do
 				' winboot=', IFNULL (perfileshard.winboot, 'reboot'),
 				IF (aulas.dns IS NULL, '', CONCAT (' ogdns=', aulas.dns)),
 				IF (aulas.proxy IS NULL, '', CONCAT (' ogproxy=', aulas.proxy)),
-				IF (menus.resolucion IS NULL, '', CONCAT (' video=', menus.resolucion))
+				CASE
+				    WHEN menus.resolucion IS NULL THEN ''
+				    WHEN menus.resolucion < 999 THEN CONCAT (' vga=', menus.resolucion)
+				    ELSE menus.resolucion
+				END
 				FROM ordenadores 
 				JOIN aulas USING (idaula)
 				JOIN repositorios USING (idrepositorio)
