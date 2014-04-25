@@ -738,7 +738,9 @@ function updateClient()
 	local TARGETLENGTH
 	local TMPDIR=/tmp/${FILENAME%.iso}
 	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	local SAMBAPASS
+	local KERNELVERSION
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
@@ -781,6 +783,22 @@ function updateClient()
 		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
 		cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 		
+		# Obtiene versión del Kernel del cliente (con 2 decimales).
+		KERNELVERSION=$(file -bkr $OGVMLINUZ 2>/dev/null | \
+				awk '/Linux/ { for (i=1; i<=NF; i++)
+						   if ($i~/version/) {
+						      v=$(i+1);
+						      printf ("%d",v);
+						      sub (/[0-9]*\./,"",v);
+						      printf (".%02d",v)
+					     } }'
+		# Actaulizar la base de datos adaptada al Kernel del cliente.
+		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
+		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
+			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
+			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
+		fi
+
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
 		# Si no existe, crear el fichero de claves de Rsync.
