@@ -44,7 +44,9 @@ TIME1=$SECONDS
 CREATESPEED=${CREATESPEED:-"100000*4"}
 
 # Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
-[  $(uname -r|cut -d. -f2) -lt 7 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
+KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
+[ $KERNELVERSION \< 3.7 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
+
 # % de compresion para estimacion tamaño imagen IMGFS="EXT4"
 ZSYNC=${ZSYNC:-"120"}
 
