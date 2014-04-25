@@ -791,7 +791,7 @@ function updateClient()
 						      printf ("%d",v);
 						      sub (/[0-9]*\./,"",v);
 						      printf (".%02d",v)
-					     } }'
+					     } }')
 		# Actaulizar la base de datos adaptada al Kernel del cliente.
 		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
 		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
