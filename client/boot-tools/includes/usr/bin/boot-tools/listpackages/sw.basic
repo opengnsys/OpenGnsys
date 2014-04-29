@@ -14,5 +14,5 @@ install subversion
 install python-openssl 
 install python 
 install dmidecode 
-install hwinfo
+#install hwinfo
 install realpath

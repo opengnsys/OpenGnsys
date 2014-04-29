@@ -27,6 +27,9 @@ then
         exit 1
 fi
 
+# Cambiar a directorio temporal.
+cd /tmp
+
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
 for i in `mount | grep IMGogclient | grep /var | cut -f3 -d" "`; do echo $i; umount $i; done
