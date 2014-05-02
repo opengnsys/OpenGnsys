@@ -801,8 +801,12 @@ function tftpConfigure()
 	echoAndLog "${FUNCNAME}(): Configuring TFTP service."
 	# Habilitar TFTP y reiniciar Inetd.
 	if [ -n "$TFTPSERV" ]; then
-		service=$TFTPSERV
-		$ENABLESERVICE
+		if [ -f $INETDCFGDIR/$TFTPSERV ]; then
+			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/$TFTPSERV
+		else
+			service=$TFTPSERV
+			$ENABLESERVICE
+		fi
 	fi
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
