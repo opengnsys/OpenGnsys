@@ -115,7 +115,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 
 # Generar variables de configuración del instalador
 # Variables globales:
-# - OSDISTRIB, OSCODENAME - datos de la distribución Linux
+# - OSDISTRIB - tipo de distribución GNU/Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
@@ -133,9 +133,13 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
 function autoConfigure()
 {
-# Detectar sistema operativo del servidor (debe soportar LSB).
-OSDISTRIB=$(lsb_release -is 2>/dev/null)
-OSCODENAME=$(lsb_release -cs 2>/dev/null)
+# Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
+if [ -f /etc/os-release ]; then
+	source /etc/os-release
+	OSDISTRIB="$NAME"
+else
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+fi
 
 # Configuración según la distribución GNU/Linux.
 case "$OSDISTRIB" in
@@ -228,10 +232,14 @@ TMPMYCNF=/tmp/.my.cnf.$$
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba	# Debian 6
-[ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp		# Debian 6
-[ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
-selinuxenabled && setenforce 0 2>/dev/null		# SELinux permisivo (Fedora 17)
+# Configuraciones específicas para Samba y TFTP en Debian 6.
+[ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba
+[ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp
+
+# Configuraciones específicas para SELinux permisivo en distintas versiones de Fedora.
+[ -f /selinux/enforce ] && echo 0 > /selinux/enforce
+[ -f /etc/sysconfig/selinux ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux
+selinuxenabled && setenforce 0 2>/dev/null
 }
 
 
