@@ -742,7 +742,14 @@ function checkNetworkConnection()
 
 	echoAndLog "${FUNCNAME}(): Checking OpenGnSys server conectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
-	wget --spider -q $OPENGNSYS_SERVER
+	if which wget &>/dev/null; then
+		wget --spider -q $OPENGNSYS_SERVER
+	elif which curl &>/dev/null; then
+		curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
+	else
+		echoAndLog "${FUNCNAME}(): Cannot execute \"wget\" nor \"curl\"."
+		return 1
+	fi
 }
 
 # Obtener los parámetros de red de la interfaz por defecto.
