@@ -127,7 +127,8 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - INETDSERV - servicio Inetd
 # - IPTABLESSERV - servicio IPTables
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
-# - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso.
+# - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso
+# - MARIADBSERV - servicio MariaDB (sustituto de MySQL en algunas distribuciones)
 # - RSYNCSERV, RSYNCCFGDIR - servicio y configuración de Rsync
 # - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
 # - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
@@ -172,6 +173,7 @@ case "$OSDISTRIB" in
 		INETDSERV=xinetd
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysql
+		MARIADBSERV=mariadb
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
 		SAMBASERV=smbd
@@ -211,6 +213,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		IPTABLESSERV=iptables
 		MYSQLSERV=mysqld
+		MARIADBSERV=mariadb
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
 		SAMBASERV=smb
@@ -1662,8 +1665,8 @@ fi
 # Instalar Base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
-	service=$MYSQLSERV
-	$ENABLESERVICE; $STARTSERVICE
+	service=$MYSQLSERV $ENABLESERVICE || service=$MARIADBSERV $ENABLESERVICE
+	$STARTSERVICE
 	mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
 else
 	mysqlGetRootPassword
