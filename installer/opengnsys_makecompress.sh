@@ -17,11 +17,20 @@ SVNREV=$(LANG=C svn info $SVNURL | awk '/Last Changed Rev:/ {print "r"$4}')
 cd /tmp
 rm -fr opengnsys
 svn export $SVNURL opengnsys || exit 1
+
+# Asisgnar propietario de los ficheros descargados.
+chown -R root.root opengnsys
+WARNING=$?
+
 # Parchear datos de revisión del código.
 perl -pi -e "s/$/ $SVNREV/" opengnsys/doc/VERSION.txt
+
 # Generar fichero comprimido.
 VERSION=$(awk '{print $2"-"$3}' opengnsys/doc/VERSION.txt)
 tar cvzf opengnsys-$VERSION.tar.gz opengnsys
 rm -fr opengnsys
+
+# Revisar salida.
+[ $WARNING != 0 ] && echo "*** WARNING: cannot change owner of files to \"root\" user before compressing."
 ls -lh $(readlink -e opengnsys-$VERSION.tar.gz)
 
