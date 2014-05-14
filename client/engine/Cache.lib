@@ -89,7 +89,7 @@ case "$(ogGetPartitionTableType $NDSK)" in
         # Si la tabla de particiones no es valida, volver a generarla.
         [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
         # Si existe la cache se borra previamente
-        [ -n $(ogFindCache) && ogDeleteCache
+        [ -n "$(ogFindCache)" ] && ogDeleteCache
         # Capturamos el codigo de particion GPT para cache
         ID=$(ogTypeToId CACHE GPT)
         sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null && partprobe
