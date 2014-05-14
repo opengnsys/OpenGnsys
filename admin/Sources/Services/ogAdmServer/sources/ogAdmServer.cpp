@@ -735,17 +735,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
 
-	// UHU -  2013/06/05 - se borra la configuracion actual
-	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d", ido);
-	// Ejecutamos la consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-
-	lon = sprintf(tbPar, "(");
+	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
 		c = splitCadena(ptrCfg, ptrPar[i], '\t');
@@ -784,7 +774,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		splitCadena(ptrDual, ptrCfg[5], '=');
 		tam = ptrDual[1]; // Tamaño de la partición
 
-		lon += sprintf(tbPar + lon, "%s,", par);
+		lon += sprintf(tbPar + lon, "(%s, %s),", disk, par);
 
 		sprintf(sqlstr, "SELECT numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso"
 				"  FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
@@ -858,10 +848,10 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			}
 		}
 	}
-	lon += sprintf(tbPar + lon, "%d)", 0);
+	lon += sprintf(tbPar + lon, "(0,0)");
 	// Eliminar particiones almacenadas que ya no existen
-	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar NOT IN %s",
-			ido, disk, tbPar);
+	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
+			ido, tbPar);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
