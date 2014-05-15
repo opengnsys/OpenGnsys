@@ -805,7 +805,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 				errorInfo(modulo, msglog);
 				return (FALSE);
 			}
-			if (atoi(cpt) == dato) {// Parámetro tipo de partición igual al almacenado
+			if (strtol(cpt, NULL, 16) == dato) {// Parámetro tipo de partición (hexadecimal) igual al almacenado (decimal)
 				if (!tbl.Get("tamano", dato)) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 					errorInfo(modulo, msglog);
