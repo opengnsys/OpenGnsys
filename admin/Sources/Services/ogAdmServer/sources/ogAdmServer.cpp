@@ -1991,8 +1991,11 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 	char modulo[] = "actualizaCreacionImagen()";
 	int idr,ifs;
 
-	/* Toma identificador del repositorio */
-	sprintf(sqlstr, "SELECT idrepositorio FROM repositorios WHERE ip='%s'", ipr);
+	/* Toma identificador del repositorio correspondiente al ordenador modelo */
+	sprintf(sqlstr, "SELECT repositorios.idrepositorio"
+			"  FROM repositorios"
+			"  LEFT JOIN ordenadores USING (idrepositorio)"
+			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
