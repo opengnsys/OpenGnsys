@@ -1,4 +1,4 @@
-<?  
+<?php
 // *********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -174,29 +174,23 @@ else{
 	<TABLE  align=center border=0 cellPadding=2 cellSpacing=2 class=tabla_datos >
     <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 
+		<?php  if ($repolocal == "si" ) { ?>
 		<TR>
 			<TH align=center width=125>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
 			<TH align=center width=120>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
 			<TH align=center width=120>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
 			<TH align=center width=101>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
 		</TR>
-		<?php  if ($repolocal == "si" )
-		{?>
                 <TR>
 			<TD align=center width=125>&nbsp;<?echo $totalrepo?>&nbsp;</TD>
             		<TD align=center width=120>&nbsp;<?echo $ocupadorepo?>&nbsp;</TD>
            		<TD align=center width=120>&nbsp;<?echo $librerepo?>&nbsp;</TD>
            		<TD align=center width=101>&nbsp;<?echo $porcentajerepo?>&nbsp;</TD>
                 </TR>
-		<?php }else {
-				include_once("../idiomas/php/".$idioma."/propiedades_repositorios_".$idioma.".php");
-		?>
-        			<TR>
-            <TH colspan="5" align=center>&nbsp;<?echo $TbMsg[15].'</br>'?>&nbsp;</TD>
-            <?echo $TbMsg[16].'</br>'?>&nbsp;</TD>
-            <?echo $TbMsg[17]?>&nbsp;</TD>
-            &nbsp;</TD>
-            </TR>
+		<?php }else { ?>
+		<tr>
+			<th align="center">&nbsp;<?php echo '<strong>'.$TbMsg[15].'</strong></br>'.$TbMsg[16] ?></th>
+		</tr>
         		<?php } ?>
 		<?php } ?>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

@@ -20,7 +20,6 @@ $TbMsg[11]="Espacio TOTAL";
 $TbMsg[12]="Espacio Ocupado"; 
 $TbMsg[13]="Espacio Libre"; 
 $TbMsg[14]="% Ocupado"; 
-$TbMsg[15]="No hay conexion con el Repositorio";
-$TbMsg[16]='Limitaciones Versi&oacute;n 1.5';
-$TbMsg[17]='Información Espacio es permitido si Repositorio y Servidor Web alojados en el mismo Servidor';
+$TbMsg[15]='Limitaciones de esta versi&oacute;n';
+$TbMsg[16]='Informaci&oacute;n de espacio solo disponible si Repositorio y Servidor Web est&aacute;n alojados en el mismo servidor';
 ?>
