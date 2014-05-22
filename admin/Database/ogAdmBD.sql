@@ -422,7 +422,8 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
   `idrepositorio` int(11) NOT NULL,
-  `numpar` smallint(6) NOT NULL,
+  `numdisk` smallint NOT NULL DEFAULT 1,
+  `numpar` smallint NOT NULL,
   `codpar` int(8) NOT NULL,
   `tipo` tinyint NULL,
   `imagenid` int NOT NULL DEFAULT '0',
@@ -509,8 +510,8 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 
 CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idordenador` int(11) NOT NULL,
-  `numdisk` tinyint(4) NOT NULL,
-  `numpar` tinyint(4) NOT NULL,
+  `numdisk` smallint NOT NULL,
+  `numpar` smallint NOT NULL,
   `codpar` int(8) NOT NULL,
   `tamano` int(11) NOT NULL,
   `idsistemafichero` smallint(11) NOT NULL,

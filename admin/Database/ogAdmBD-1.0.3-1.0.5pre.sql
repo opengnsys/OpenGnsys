@@ -8,10 +8,12 @@ ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 
 # Soportar particiones GPT y añadir información de caché.
 ALTER TABLE ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
-	ADD numdisk tinyint(4) NOT NULL DEFAULT 1 AFTER idordenador,
+	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idordenador,
 	ADD cache varchar(500),
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
+ALTER TABLE imagenes
+	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio;
 
 # Nuevos tipos de particiones y particiones GPT.
 ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;

@@ -42,8 +42,9 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
 	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
 
-# Imágenes incrementales.
+# Imágenes incrementales y completar soporte para varios discos.
 ALTER TABLE imagenes
+	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio,
 	ADD tipo TINYINT NULL,
 	ADD imagenid INT NOT NULL DEFAULT '0',
 	ADD ruta VARCHAR(250) NULL;

@@ -48,6 +48,16 @@ CREATE PROCEDURE addcols() BEGIN
 			ADD ruta VARCHAR(250) NULL;
 		UPDATE grupos SET tipo=70 WHERE tipo=50;
 	END IF;
+	# Soporte completo para varios discos.
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='numdisk' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE imagenes
+			ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio;
+		ALTER TABLE ordenadores_particiones
+			MODIFY numdisk smallint NOT NULL,
+			MODIFY numpar smallint NOT NULL;
+	END IF;
 	# Comando Particionar y formatear.
 	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
 			WHERE INDEX_NAME='descripcion' AND TABLE_NAME='sistemasficheros' AND TABLE_SCHEMA=DATABASE())
