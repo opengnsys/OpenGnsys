@@ -1147,13 +1147,11 @@ function installWebConsoleApacheConf()
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 		# Configuración para versiones anteriores de Apache.
 		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
-			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_opengnsys_base/etc/apache.conf
-		ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
+			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
 	else
 		# Configuración específica a partir de Apache 2.4
 		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
-			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
-		ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
 	fi
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
