@@ -125,7 +125,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
 # - INETDSERV - servicio Inetd
-# - IPTABLESSERV - servicio IPTables
+# - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
 # - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso
 # - MARIADBSERV - servicio MariaDB (sustituto de MySQL en algunas distribuciones)
@@ -209,9 +209,13 @@ case "$OSDISTRIB" in
 		APACHEGROUP="apache"
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
+		if firewall-cmd --state &>/dev/null; then
+			FIREWALLSERV=firewalld
+		else
+			FIREWALLSERV=iptables
+		fi
 		INETDSERV=xinetd
 		INETDCFGDIR=/etc/xinetd.d
-		IPTABLESSERV=iptables
 		MYSQLSERV=mysqld
 		MARIADBSERV=mariadb
 		RSYNCSERV=rsync
@@ -232,17 +236,22 @@ esac
 TMPMYCNF=/tmp/.my.cnf.$$
 }
 
+
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
+local f
+
 # Configuraciones específicas para Samba y TFTP en Debian 6.
 [ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba
 [ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp
 
-# Configuraciones específicas para SELinux permisivo en distintas versiones de Fedora.
+# Configuraciones específicas para SELinux permisivo en distintas versiones.
 [ -f /selinux/enforce ] && echo 0 > /selinux/enforce
-[ -f /etc/sysconfig/selinux ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux
-selinuxenabled && setenforce 0 2>/dev/null
+for f in /etc/sysconfig/selinux /etc/selinux/config; then
+	[ -f $i ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $i
+done
+selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
 }
 
 
@@ -741,9 +750,9 @@ function svnExportCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	echoAndLog "${FUNCNAME}(): Disabling IPTables."
-	if [ -n "$IPTABLESSERV" ]; then
-		service=$IPTABLESSERV
+	echoAndLog "${FUNCNAME}(): Disabling Firewall: $FIREWALLSERV."
+	if [ -n "$FIREWALLSERV" ]; then
+		service=$FIREWALLSERV
 		$STOPSERVICE; $DISABLESERVICE
 	fi
 
@@ -1542,7 +1551,9 @@ function installationSummary()
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
-	echoAndLog "Change IPTables and SELinux system configuration, if needed."
+	echoAndLog "OpenGnSys installation has disabled $FIREWALLSERV firewall"
+	echoAndLog "   service and set SELinux to permissive. Please review"
+	echoAndLog "   $FIREWALLSERV and SELinux configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Optional: Log-in as Web Console admin user."
