@@ -1666,13 +1666,22 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Instalar Base de datos de OpenGnSys Admin.
+# Instalar base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
-	service=$MYSQLSERV $ENABLESERVICE || service=$MARIADBSERV $ENABLESERVICE
+	# Habilitar gestor de base de datos (MySQL, si falla, MariaDB).
+	service=$MYSQLSERV
+	$ENABLESERVICE
+	if [ $? != 0 ]; then
+		service=$MARIADBSERV
+		$ENABLESERVICE
+	fi
+	# Activar gestor de base de datos.
 	$STARTSERVICE
+	# Asignar clave del usuario "root".
 	mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
 else
+	# Si ya está instalado el gestor de bases de datos, obtener clave de "root", 
 	mysqlGetRootPassword
 fi
 
