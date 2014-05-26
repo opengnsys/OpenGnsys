@@ -1551,8 +1551,8 @@ function installationSummary()
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
-	echoAndLog "OpenGnSys installation has disabled $FIREWALLSERV firewall"
-	echoAndLog "   service and set SELinux to permissive. Please review"
+	echoAndLog "Firewall service has been disabled and SELinux mode set to"
+	echoAndLog "   permissive during OpenGnSys installation. Please check"
 	echoAndLog "   $FIREWALLSERV and SELinux configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
