@@ -248,7 +248,7 @@ local f
 
 # Configuraciones específicas para SELinux permisivo en distintas versiones.
 [ -f /selinux/enforce ] && echo 0 > /selinux/enforce
-for f in /etc/sysconfig/selinux /etc/selinux/config; then
+for f in /etc/sysconfig/selinux /etc/selinux/config; do
 	[ -f $i ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $i
 done
 selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
