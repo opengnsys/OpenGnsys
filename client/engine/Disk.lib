@@ -1261,6 +1261,7 @@ case "$PTTYPE" in
             FREEBSD)    ID=A503 ;;
             HFS-BOOT)   ID=AB00 ;;
             HFS|HFS+)   ID=AF00 ;;
+	    HFSPLUS)	ID=AF00 ;;
             HFS-RAID)   ID=AF01 ;;
             SOLARIS-BOOT) ID=BE00 ;;
             SOLARIS)    ID=BF00 ;;
