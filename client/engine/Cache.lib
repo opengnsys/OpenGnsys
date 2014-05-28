@@ -166,42 +166,34 @@ rm -f /dev/disk/by-label/CACHE
 #@version 0.91 - Adaptacion a la cache local de OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/16
+#@version 1.0.5 - Obtener caché en discos GPT.
+#@author  Alberto García, Universidad de Málaga y Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014/05/28
 #*/ ##
 function ogFindCache ()
 {
 # Variables locales
-local PART
+local DISK PART
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  1 4"
     return
 fi
-# Obtener el sistema de archivos etiquetado con "CACHE".
-PART=$(realpath /dev/disk/by-label/CACHE 2>/dev/null)
-# Si no, obtener la 1ª partición marcada como de tipo caché.
+# Obtener el dispositivo del sistema de archivos etiquetado como "CACHE".
+PART=$(blkid -L "CACHE")
+
+# Si no se detecta, obtener particiones marcadas de tipo caché en discos MSDOS.
 PART=${PART:-$(sfdisk -l 2>/dev/null | awk '$6~/ca|a7/ {print $1}')}
-PART=${PART%% *}
 
-# Si Tipo de de Disco es GPT #agp
-TIPODISK=$(ogGetPartitionTableType 1)
-if [ "$TIPODISK" == "GPT" ]; then
-	if [ ! -z $(blkid | grep 'CACHE' | cut -d ':' -f1 ) ]; then  ## Si esta creada la etiqueta CACHE
-		PART=$(blkid | grep 'CACHE' | cut -d ':' -f1 )
-	else
-		if [ -z $(sgdisk /dev/sda -p | grep CACHE | cut -d" " -f3) ];then  ## Busco el tercer campo si tiene numero
-			PART=$(sgdisk /dev/sda -p | grep CACHE | cut -d" " -f4)		## Si tiene numero la particion < 10
-		else
-			PART=$(sgdisk /dev/sda -p | grep CACHE | cut -d" " -f3-4)	## Si tiene numero la particion > 10
-		fi
-		PART=$(ogDiskToDev 1 $PART)
-	fi
-else
-	# Si no, obtener la 1ª partición marcada como de tipo caché.
-	PART=$(sfdisk -l 2>/dev/null | awk '$6~/ca|a7/ {print $1}')
-fi	
-#agp
+# Por último revisar todos los discos GPT y obtener las particiones etiquetadas como caché.
+if [ -z "$PART" ]; then
+    for DISK in $(ogDiskToDev); do
+         PART="$PART $(sgdisk -p $DISK 2>/dev/null | awk -v d=$DISK '$7~/CACHE/ {printf "%s%s",d,$1;}')"
+    done  
+fi
 
-ogDevToDisk $PART 2>/dev/null
+# Devolver número de disco y número de partición de la 1ª partición encontrada.
+ogDevToDisk ${PART%% *} 2>/dev/null
 }
 
 
