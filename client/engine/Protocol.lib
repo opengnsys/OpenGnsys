@@ -885,8 +885,11 @@ if [ "$OPTION" == "DOWNLOAD" ]
 then
 	case "$MODE" in
         peer|PEER)
-        	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
-            ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf 
+        	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}"
+			# Creamos el fichero de resumen por defecto
+			touch ${SOURCE}.bf
+			# ctorrent controla otro fichero -b ${SOURCE}.bfog
+			ctorrent -f -c -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bfog
         ;;
         leecher|LEECHER)
            	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep 30; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
@@ -894,7 +897,10 @@ then
         ;;
         seeder|SEEDER)
         	echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
-           	ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
+			# Creamos el fichero de resumen por defecto
+			touch ${SOURCE}.bf
+			# ctorrent controla otro fichero -b ${SOURCE}.bfog
+           	ctorrent -f -c -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bfog
 		;;
 	esac
 fi

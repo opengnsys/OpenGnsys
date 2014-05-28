@@ -183,6 +183,10 @@ case "$PROTOCOLO" in
 		ogEcho log session "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4"
 		ogTorrentStart CACHE "$2.torrent" $4 2>&1 | tee -a   $OGLOGCOMMAND
 		RESUMEUPDATECACHE=$(grep -m 1 -B1 "Download" $OGLOGCOMMAND) 
+		RESUMEUPDATECACHEbf=$(grep -m 1 "Download" $OGLOGCOMMAND) 
+		if [ "$RESUMEUPDATECACHEbf" == "Download complete." ]; then
+			rm $IMGDIR$2".torrent.bf" 2>&1 | tee -a   $OGLOGCOMMAND
+		fi
 	;;
 	MULTICAST)
 		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
