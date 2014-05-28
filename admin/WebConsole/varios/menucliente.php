@@ -50,16 +50,45 @@ else{
 	$gestor = fopen($nombre_archivo, 'r');
 	$contenidofichero = fread($gestor, filesize($nombre_archivo));
 	fclose($gestor);
+	// Buscamos si el disco es GPT
+	$cmd->texto="SELECT codpar FROM ordenadores_particiones 
+					WHERE idordenador=(SELECT idordenador FROM ordenadores WHERE ip='".$iph."') 
+					AND numpar=0"; 
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) echo "error";
+	$rs->Primero(); 
+	while (!$rs->EOF)
+	{ 
+	$CODPART= $rs->campos["codpar"];
+		$rs->Siguiente();
+	}
+	$rs->Cerrar();
+	
 	if (! empty ($contenidofichero)) {
-		$cmd->texto="UPDATE ordenadores_particiones
-				SET cache='".$contenidofichero."'
-				WHERE idordenador=(SELECT idordenador
-						     FROM ordenadores
-						    WHERE ip='".$iph."')
-				  AND idsistemafichero=(SELECT idsistemafichero
-							  FROM sistemasficheros
-							 WHERE descripcion='CACHE')";
-		$resul=$cmd->Ejecutar();
+		## Si el codigo de la particion es 2 = GPT
+		if ( $CODPART == 2 ) { 
+			$cmd->texto="UPDATE ordenadores_particiones
+					SET cache='".$contenidofichero."'
+					WHERE idordenador=(SELECT idordenador
+										FROM ordenadores
+										WHERE ip='".$iph."')
+					AND idsistemafichero=(SELECT idsistemafichero
+										FROM sistemasficheros
+										WHERE descripcion='EXT4')";
+			$resul=$cmd->Ejecutar();
+		}else{
+			$cmd->texto="UPDATE ordenadores_particiones
+					SET cache='".$contenidofichero."'
+					WHERE idordenador=(SELECT idordenador
+										FROM ordenadores
+										WHERE ip='".$iph."')
+					AND idsistemafichero=(SELECT idsistemafichero
+										FROM sistemasficheros
+										WHERE descripcion='CACHE')";
+			$resul=$cmd->Ejecutar();
+			}
+		## Fin de si el codigo de la particion es 2 = GPT
 	}
 	//agp
 	//________________________________________________________________________________________________________
