@@ -221,33 +221,17 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-TYPEDISK=$(ogGetPartitionTableType 1)	#agp
-if [ "$TYPEDISK" == "GPT" ]; then
-	# Error si no hay definida partición de caché.
-	DEV=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
-	DEV=$(ogDiskToDev $DEV) || return $?
-	# buscamos el nombre de la particion CACHE
-	# si la encuentra formateamos la formateamos
-	if [ `sgdisk /dev/sda -p | grep -o CACHE` == "CACHE" ]; then
-		# Formatear sistema de ficheros.
-		ogUnmountCache 2>/dev/null
-		mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
-		# Crear estructura básica.
-		MNTDIR=$(ogMountCache)
-		mkdir -p $MNTDIR/$OGIMG
-	fi
-else
-	# Error si no hay definida partición de caché.
-	DEV=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $?
-	DEV=$(ogDiskToDev $DEV) || return $?
-	# Formatear sistema de ficheros.
-	ogUnmountCache 2>/dev/null
-	mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
-	# Crear estructura básica.
-	MNTDIR=$(ogMountCache)
-	mkdir -p $MNTDIR/$OGIMG
-fi	
-#agp
+# Error si no hay definida partición de caché. 
+DEV=$(ogFindCache) || ogRaiseError $OG_ERR_PARTITION "$MSG_NOCACHE" || return $? 
+DEV=$(ogDiskToDev $DEV) || return $? 
+
+# Formatear sistema de ficheros. 
+ogUnmountCache 2>/dev/null 
+mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $? 
+
+# Crear estructura básica. 
+MNTDIR=$(ogMountCache) 
+mkdir -p $MNTDIR/$OGIMG 
 }
 
 
