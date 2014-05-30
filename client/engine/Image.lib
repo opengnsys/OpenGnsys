@@ -677,7 +677,7 @@ then
 	then
 		TOOLS=PARTCLONE
 		FS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($8);}')
-		if [ "$FS" == "HFS" || "$FS" == "HFSPLUS" || "$FS" == "FAT32" ]; then
+		if [[ "$FS" == "HFS" || "$FS" == "HFSPLUS" || "$FS" == "FAT32" ]]; then
 			FSPLUS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($9);}')
 			echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1000000 || SIZEFACTOR=1024
 			if [ "$FSPLUS" -eq "PLUS" ]; then
