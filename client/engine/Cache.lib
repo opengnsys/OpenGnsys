@@ -188,7 +188,8 @@ PART=${PART:-$(sfdisk -l 2>/dev/null | awk '$6~/ca|a7/ {print $1}')}
 # Por último revisar todos los discos GPT y obtener las particiones etiquetadas como caché.
 if [ -z "$PART" ]; then
     for DISK in $(ogDiskToDev); do
-         PART="$(sgdisk -p $DISK 2>/dev/null | awk -v d=$DISK '$7~/CACHE/ {printf "%s%s",d,$1;}') "
+        # Nota: se añade espacio separador solo si existe valor previo.
+        PART="${PART:+"$PART "}$(sgdisk -p $DISK 2>/dev/null | awk -v d=$DISK '$7~/CACHE/ {printf "%s%s",d,$1;}')"
     done  
 fi
 
