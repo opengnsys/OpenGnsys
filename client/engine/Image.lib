@@ -680,7 +680,7 @@ then
 		if [[ "$FS" == "HFS" || "$FS" == "HFSPLUS" || "$FS" == "FAT32" ]]; then
 			FSPLUS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($9);}')
 			echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1000000 || SIZEFACTOR=1024
-			if [ "$FSPLUS" -eq "PLUS" ]; then
+			if [ "$FSPLUS" == "PLUS" ]; then
 				FS=$FS$FSPLUS
 				SIZE=$(echo $PARTCLONEINFO | awk -v FACTOR=$SIZEFACTOR '{printf "%d\n", $17*FACTOR;}')
 			else
