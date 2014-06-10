@@ -365,7 +365,7 @@ echo ${SIZE%.0*}
 #@param   int_ndisk      nº de orden del disco
 #@param   int_nfilesys   nº de orden del sistema de archivos
 #@return  Mnemonico
-#@note 	  Mnemonico: { EXT2, EXT3, EXT4, BTRFS, REISERFS, XFS, JFS, FAT32, NTFS, CACHE }
+#@note 	  Mnemonico: { EXT2, EXT3, EXT4, BTRFS, REISERFS, XFS, JFS, FAT12, FAT16, FAT32, NTFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, HFS, HFSPLUS, CACHE }
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
@@ -377,9 +377,9 @@ echo ${SIZE%.0*}
 #@version 1.0.2 - Obtención de datos reales de sistemas de ficheros.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-12-02
-#@version 1.0.5 - Usar "mount" en vez de "parted".
+#@version 1.0.5 - Usar "blkid" para detectar tipo de sistema de archivo.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2012-09-04
+#@date    2014-06-10
 #*/ ##
 function ogGetFsType ()
 {
@@ -394,28 +394,22 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Detectar id. de tipo de partición.
+# Detectar tipo de sistema de archivo (independientemente del tipo de partición).
 PART=$(ogDiskToDev "$1" "$2") || return $?
-ID=$(ogGetPartitionId "$1" "$2")
-[ "$ID" == "a7" ] && ID="ca"    # Traducir antiguo id. de partición de caché.
-TYPE=""
-case "$ID" in
-     ca|CA00)  # Detectar caché local (revisar detección en tablas GPT).
-               ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
+TYPE=$(blkid -o export $PART | awk -F= '$1~/^TYPE/ { print toupper($2) }')
+
+# Componer valores correctos.
+case "$TYPE" in
+    EXT4)      # Comprobar si es caché o Ext4.
+               if [ "$1 $2" == "$(ogFindCache)" ]; then
+                   ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
+               fi
                ;;
-     *)        # Detectar sistema de ficheros.
-               TYPE=$(blkid -o export $PART | awk -F= '$1~/^TYPE/ { print toupper($2) }')
-               # Componer valores correctos.
-               case "$TYPE" in
-                    VFAT)      TYPE="FAT32" ;;  # Nota: usar "file -Ls" para detectar.
-                    SWAP)      TYPE="LINUX-SWAP" ;;
-                    LVM*)      TYPE="LINUX-LVM" ;;
-		HFSPLUS)   TYPE="HFSPLUS" ;;
-		HFS)	   TYPE="HFS" ;;
-                    *RAID*)    TYPE="LINUX-RAID" ;;
-                    *_MEMBER)  TYPE="${TYPE/_MEMBER/}" ;;
-               esac
-               ;;
+    VFAT)      TYPE="$(dosfsck -nv $PART | awk '/bit entries/ {printf "FAT%s",$3}')" ;;
+    SWAP)      TYPE="LINUX-SWAP" ;;
+    LVM*)      TYPE="LINUX-LVM" ;;
+    *RAID*)    TYPE="LINUX-RAID" ;;
+    *_MEMBER)  TYPE="${TYPE/_MEMBER/}" ;;
 esac
 
 [ -n "$TYPE" ] && echo "$TYPE"
