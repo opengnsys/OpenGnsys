@@ -80,7 +80,12 @@ fi
 
 # Configuración de arranque según la distribución Linux usada.
 config() {
-    OSDISTRIB=$(lsb_release -is 2>/dev/null)
+    if [ -f /etc/os-release ]; then
+	source /etc/os-release
+	OSDISTRIB="$NAME"
+    else
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+    fi
     case "$OSDISTRIB" in
         Ubuntu|Debian|LinuxMint)
             INITFUNCTIONS=/lib/lsb/init-functions
