@@ -98,7 +98,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						else {
 							echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
 						}
-						echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
+						$filesys=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]);
+						echo'<td align="center">&nbsp;'.$filesys.'&nbsp;</td>'.chr(13);
 	
 						echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);					
 	
@@ -108,9 +109,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						
 						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 	
-						if ($tbKeys[$k]["numpar"] == "4") {
+						if ($filesys == "CACHE") {
 							$rs=new Recordset; 
-							$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4 AND numdisk = ".$tbKeys[$k]["numdisk"];
+							$cmd->texto="SELECT cache FROM ordenadores_particiones WHERE idordenador=".$idordenadores." AND numdisk=".$tbKeys[$k]["numdisk"]." AND numpar=".$tbKeys[$k]["numpar"];
 							$rs->Comando=&$cmd; 
 							if (!$rs->Abrir()) return(false); // Error al abrir recordset
 							$rs->Primero(); 
