@@ -93,7 +93,7 @@ if [ -z "$VERSION" ]; then
     for FILE in $MNTDIR/{,boot/}grub/menu.lst; do
         [ -r $FILE ] && VERSION="GRUB Loader"
     done
-    for FILE in $MNTDIR/{,boot/}grub{,2}/grub.cfg; do
+    for FILE in $MNTDIR/{,boot/}{grub{,2},EFI/*}/grub.cfg; do
         [ -r $FILE ] && VERSION="GRUB2 Loader"
     done
 fi
