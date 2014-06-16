@@ -182,7 +182,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba rsync unzip debootstrap schroot squashfs-tools )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba rsync unzip debootstrap schroot squashfs-tools python-crypto )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
 				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		if [ "$OSDISTRIB" == "CentOS" ]; then
@@ -249,7 +249,7 @@ local f
 # Configuraciones específicas para SELinux permisivo en distintas versiones.
 [ -f /selinux/enforce ] && echo 0 > /selinux/enforce
 for f in /etc/sysconfig/selinux /etc/selinux/config; do
-	[ -f $i ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $i
+	[ -f $f ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $f
 done
 selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
 }
