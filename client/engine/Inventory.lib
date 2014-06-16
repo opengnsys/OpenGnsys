@@ -113,7 +113,7 @@ fi
 # Para Windows: leer la version del registro.
 if [ -z "$VERSION" ]; then
     TYPE="Windows"
-    VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName')
+    VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
     [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
 fi
 # Para cargador Windows: buscar versión en fichero BCD (basado en os-prober).
