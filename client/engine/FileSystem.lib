@@ -405,7 +405,7 @@ case "$TYPE" in
                    ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
                fi
                ;;
-    VFAT)      TYPE="$(dosfsck -nv $PART | awk '/bit entries/ {printf "FAT%s",$3}')" ;;
+    VFAT)      TYPE="$(blkid -po export $PART | awk -F= '$1~/^VERSION$/ { print toupper($2) }')" ;;
     SWAP)      TYPE="LINUX-SWAP" ;;
     LVM*)      TYPE="LINUX-LVM" ;;
     *RAID*)    TYPE="LINUX-RAID" ;;
