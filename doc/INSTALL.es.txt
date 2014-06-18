@@ -4,7 +4,7 @@ Instalación de OpenGnSys Server v 1.0.5
 Notas iniciales
 ---------------
 
-Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 12.04 LTS (también ha sido probado en sistemas basados en Fedora 17).
+Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 12.04 LTS (también ha sido probado en sistemas basados en Fedora 20).
 
 El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el repositorio de código y el cliente preconfigurado.
 
@@ -22,7 +22,7 @@ La instalación de OpenGnSys se realiza ejecutando el script de instalación ope
 
 Ejemplos de descompresión del programa:
 
-	tar xvzf opengnsys-1.0.3.tar.gz
+	tar xvzf opengnsys-1.0.5.tar.gz
 	cd opengnsys/installer
 
 Ejemplos de descarga con varias herramientas:
@@ -72,6 +72,7 @@ Actualización
 
 Se dispone de un script de auto-actualización del sistema, con las siguientes características:
     * Es necesario conexión a Internet para obtener las últimas actualizaciones.
+    * Si el script se actualiza a sí mismo, debe ser ejecutado de nuevo.
     * No se actualizan los servicios asociados al sistema operativo.
     * No se modifican los ficheros de configuración.
 
@@ -85,7 +86,7 @@ Desinstalación
 --------------
 
 También existe un script de desinstalación de los componentes de OpenGnSys, con las siguientes características:
-    * Se iliminan los ficheros de OpenGnSys y su base de datos.
+    * Se eliminan los ficheros de OpenGnSys y su base de datos.
     * No se eliminan ni paquetes del sistema operativo ni sus ficheros de configuración.
     * No se elimina el directorio de las imágenes ni su contenido.
 
@@ -93,3 +94,4 @@ También existe un script de desinstalación de los componentes de OpenGnSys, co
 El script debe ser ejecutado como usuario root:
 	sudo /opt/opengnsys/lib/opengnsys_uninstall.sh
  
+

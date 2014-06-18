@@ -32,6 +32,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #636	Recupearar log en tiempo real para comados de restauración
 #637	Función ogRaiseError sin parámetros devuelve mensaje erróneo y revisión de control de errores
 #640	Evitar información repetida en ficheros de logs
+#644	Continuar comunicación en torrent
 
 Tickets resueltos en módulo OpenGnSys Client:
 #245	Teclado internacional en el cliente (mejora)
@@ -91,6 +92,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #617	Botones barra menú (duplicado de #614)
 #619	Consola web asistente particionado: error si se incluye en la cola de acciones
 #642	Mejoras en comandos de eliminación de imágenes
+#643	Validacion formulario propiedades del ordenador
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #562	Log de instalación ubicarlo en directorio log del server
