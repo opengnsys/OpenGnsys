@@ -8,19 +8,20 @@ TIME1=$SECONDS
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+echo -n "" > $OGLOGSESSION; echo -n  "" > $OGLOGCOMMAND
 
 # Registro de inicio de ejecución
-#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
-echo "Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
+echo -e "\n Instrucciones a ejecutar: *****************************" >>  $OGLOGFILE
 cat  $1 >> $OGLOGFILE
 
 
-echo "Salida de las instrucciones: *****************************" >>  $OGLOGFILE
+echo -e "\n Salida de las instrucciones: *****************************" >>  $OGLOGFILE
 chmod +x $1
-$1 &>> $OGLOGCOMMAND
+# Si mandamos la salida a OGLOGCOMMAND reescribimos lo que manda el comando.
+#$1 &>> $OGLOGCOMMAND
+$1
 RETVAL=$?
 
 
@@ -28,16 +29,15 @@ RETVAL=$?
 TIME=$[SECONDS-TIME1]
 if [ $RETVAL == 0 ]
 then
-	echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 else
-	echo "ERROR no operacion no realizada" | tee -a $OGLOGSESSION $OGLOGFILE
+	ogEcho log session "ERROR: operacion no realizada"
 fi
 
 
 # Registro de fin de ejecución
-#echo "[END Interface] Command finished with this code:  $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
-echo "$MSG_INTERFACE_END $RETVAL" | tee -a $OGLOGSESSION $OGLOGFILE
-
+ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 
 
 exit $RETVAL
+

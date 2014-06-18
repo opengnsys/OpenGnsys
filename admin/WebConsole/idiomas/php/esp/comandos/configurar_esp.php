@@ -1,10 +1,10 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: configurar_esp.php (Comandos)
 //	Idioma: Espa�l 
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Centros';
 	$TbMsg[1]='Grupo de aulas';
 	$TbMsg[2]='Aulas';

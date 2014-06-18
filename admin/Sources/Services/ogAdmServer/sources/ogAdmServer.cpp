@@ -50,7 +50,6 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 	fclose(fcfg);
 
 	servidoradm[0] = (char) NULL; //inicializar variables globales
-	puerto[0] = (char) NULL;
 	usuario[0] = (char) NULL;
 	pasguor[0] = (char) NULL;
 	datasource[0] = (char) NULL;
@@ -83,32 +82,40 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 			strcpy(catalog, dualparametro[1]);
 	}
 	if (servidoradm[0] == (char) NULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo, 4, FALSE); // Falta parámetro SERVIDORADM
 		return (FALSE);
 	}
 	if (puerto[0] == (char) NULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo, 5, FALSE); // Falta parámetro PUERTO
 		return (FALSE);
 	}
 	if (usuario[0] == (char) NULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo, 6, FALSE); // Falta parámetro USUARIO
 		return (FALSE);
 	}
 	if (pasguor[0] == (char) NULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo, 7, FALSE); // Falta parámetro PASSWORD
 		return (FALSE);
 	}
 	if (datasource[0] == (char) NULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo, 8, FALSE); // Falta parámetro DATASOURCE
 		return (FALSE);
 	}
 	if (catalog[0] == (char) NULL) {
+		liberaMemoria(buffer);
 		errorLog(modulo, 9, FALSE); // Falta parámetro CATALOG
 		return (FALSE);
 	}
 	if (aulaup[0] == (char) NULL) {
 		strcpy(aulaup, "0"); // Por defecto el conmutador de registro automático esta en off
+
 	}
+	liberaMemoria(buffer);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -133,14 +140,20 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 	
 	if (ptrTrama){
 		INTROaFINCAD(ptrTrama);
-		nfn = copiaParametro("nfn",ptrTrama); // Toma dirección/es IP
+		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
+
 		for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
 			res = strcmp(tbfuncionesServer[i].nf, nfn);
 			if (res == 0) { // Encontrada la función que procesa el mensaje
-				return (tbfuncionesServer[i].fptr(socket_c, ptrTrama)); // Invoca la función
+				liberaMemoria(nfn);
+				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
+				liberaMemoria((char*)ptrTrama);
+				return(res);
 			}
 		}
-		/* Sólo puede ser un comando personalizado o su notificación */
+		
+		/*
+		 Sólo puede ser un comando personalizado o su notificación
 		if (ptrTrama->tipo == MSG_COMANDO)
 			return (Comando(socket_c, ptrTrama));
 		else {
@@ -149,6 +162,7 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 			else
 				errorLog(modulo, 18, FALSE); // No se reconoce el mensaje
 		}
+		*/
 	}
 	else
 		errorLog(modulo, 17, FALSE); // Error en la recepción
@@ -205,6 +219,7 @@ BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 		return (FALSE);
 	}
 	strcpy(Ipes, iph); // Copia cadena de IPES
+	liberaMemoria(iph);
 	initParametros(ptrTrama,0);
 	strcpy(ptrTrama->parametros, "tso="); // Compone retorno tso (sistemas operativos de los clientes )
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
@@ -307,6 +322,7 @@ BOOLEAN ConsolaRemota(SOCKET *socket_c, TRAMA* ptrTrama)
 		f = fopen(fileco, "wt");
 		fclose(f);
 	}
+	liberaMemoria(iph);
 	respuestaConsola(socket_c, ptrTrama, TRUE);
 	return (TRUE);
 }
@@ -337,6 +353,7 @@ BOOLEAN EcoConsola(SOCKET *socket_c, TRAMA* ptrTrama)
 		initParametros(ptrTrama,lSize+LONGITUD_PARAMETROS);
 		buffer=leeArchivo(fileco);
 		sprintf(ptrTrama->parametros,"res=%s\r",buffer);
+		liberaMemoria(buffer);
 	}
 	else{
 		initParametros(ptrTrama,0);
@@ -527,9 +544,11 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 	db.Close();
 	
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
+		liberaMemoria(iph);
 		errorLog(modulo, 25, FALSE);
 		return (25);
 	}
+	liberaMemoria(iph);
 	return(0);
 }
 // ________________________________________________________________________________________________________
@@ -651,14 +670,17 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	}
 
 	resul = actualizaConfiguracion(db, tbl, cfg, idordenador); // Actualiza la configuración del ordenador
+	liberaMemoria(cfg);
 	db.Close();
 
 	if (!resul) {
+		liberaMemoria(iph);
 		errorLog(modulo, 29, FALSE);
 		return (FALSE);
 	}
 
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
+		liberaMemoria(iph);
 		errorLog(modulo, 25, FALSE);
 		return (FALSE);
 	}
@@ -681,6 +703,7 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 		errorLog(modulo, 26, FALSE);
 		return (FALSE);
 	}
+	liberaMemoria(iph);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -707,12 +730,12 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
-	int lon, p, c, i, dato, swu, idsoi, idsfi,k;
+	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
 	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
 
-	lon = sprintf(tbPar, "(");
+	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
 		c = splitCadena(ptrCfg, ptrPar[i], '\t');
@@ -723,13 +746,17 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		splitCadena(ptrDual, ptrCfg[1], '=');
 		par = ptrDual[1]; // Número de partición
 
-		splitCadena(ptrDual, ptrCfg[2], '=');
-		cpt = ptrDual[1]; // Código de partición
+		k=splitCadena(ptrDual, ptrCfg[2], '=');
+		if(k==2){
+			cpt = ptrDual[1]; // Código de partición
+		}else{
+			cpt = "0";
+		}
 
 		k=splitCadena(ptrDual, ptrCfg[3], '=');
 		if(k==2){
 			sfi = ptrDual[1]; // Sistema de ficheros
-			/* Comprueba existencia del sistema de ficheros instalado */
+			/* Comprueba existencia del s0xistema de ficheros instalado */
 			idsfi = checkDato(db, tbl, sfi, "sistemasficheros", "descripcion","idsistemafichero");
 		}
 		else
@@ -747,11 +774,13 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		splitCadena(ptrDual, ptrCfg[5], '=');
 		tam = ptrDual[1]; // Tamaño de la partición
 
-		lon += sprintf(tbPar + lon, "%s,", par);
+		lon += sprintf(tbPar + lon, "(%s, %s),", disk, par);
 
 		sprintf(sqlstr, "SELECT numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso"
 				"  FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 				ido, disk, par);
+
+
 		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 			errorLog(modulo, 21, FALSE);
 			db.GetErrorErrStr(msglog);
@@ -762,6 +791,8 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
 					" VALUES(%d,%s,%s,0x%s,%s,%d,%d,0)",
 					ido, disk, par, cpt, tam, idsfi, idsoi);
+
+
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
@@ -774,7 +805,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 				errorInfo(modulo, msglog);
 				return (FALSE);
 			}
-			if (atoi(cpt) == dato) {// Parámetro tipo de partición igual al almacenado
+			if (strtol(cpt, NULL, 16) == dato) {// Parámetro tipo de partición (hexadecimal) igual al almacenado (decimal)
 				if (!tbl.Get("tamano", dato)) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 					errorInfo(modulo, msglog);
@@ -817,10 +848,10 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			}
 		}
 	}
-	lon += sprintf(tbPar + lon, "%d)", 0);
+	lon += sprintf(tbPar + lon, "(0,0)");
 	// Eliminar particiones almacenadas que ya no existen
-	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar NOT IN %s",
-			ido, disk, tbPar);
+	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
+			ido, tbPar);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
@@ -945,6 +976,7 @@ BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	exe = copiaParametro("exe",ptrTrama); // Toma identificador del procedimiento inicial
 
 	sprintf(fileautoexec, "/tmp/Sautoexec-%s", iph);
+	liberaMemoria(iph);
 	fileexe = fopen(fileautoexec, "wb"); // Abre fichero de script
 	if (fileexe == NULL) {
 		errorLog(modulo, 52, FALSE);
@@ -967,13 +999,15 @@ BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 		lon += sprintf(ptrTrama->parametros + lon, "res=0\r");
 	}
 
+	db.Close();
 	fclose(fileexe);
 
 	if (!mandaTrama(socket_c, ptrTrama)) {
+		liberaMemoria(exe);
 		errorLog(modulo, 26, FALSE);
 		return (FALSE);
 	}
-
+	liberaMemoria(exe);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1042,15 +1076,18 @@ BOOLEAN recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama) {
-	char *ido, pids[LONPRM], iph[LONIP];
+BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama) 
+{
+	char *ido,*iph,pids[LONPRM];
 	int ids, idx;
 	char modulo[] = "ComandosPendientes()";
 
-	strcpy(iph, copiaParametro("iph",ptrTrama)); // Toma direción IP
+	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 47, FALSE);
 		return (FALSE);
 	}
@@ -1064,9 +1101,13 @@ BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama) {
 		strcpy(ptrTrama->parametros, "nfn=NoComandosPtes\r");
 	}
 	if (!mandaTrama(socket_c, ptrTrama)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
 		errorLog(modulo, 26, FALSE);
 		return (FALSE);
 	}
+	liberaMemoria(iph);
+	liberaMemoria(ido);	
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1077,7 +1118,7 @@ BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama) {
 //	Parámetros:
 //		- ido: Identificador del ordenador
 //		- cmd: Parámetros del comando (Salida)
-//		- ids: Identificador de la acción (Salida)
+//		- ids: Identificador de la sesion(Salida)
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
@@ -1097,7 +1138,7 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
-	sprintf(sqlstr,"SELECT idaccion,parametros,length( parametros) as lonprm"\
+	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
 			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
@@ -1109,7 +1150,7 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		db.Close();
 		return (FALSE); // No hay comandos pendientes
 	} else { // Busca entre todas las acciones de diversos ambitos
-		if (!tbl.Get("idaccion", *ids)) { // Toma identificador de la acción
+		if (!tbl.Get("sesion", *ids)) { // Toma identificador de la sesion
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
 			return (FALSE);
@@ -1145,22 +1186,37 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama) {
-	char *iph, *tpc,msglog[LONSTD];
-	int idx;
+//
+BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama) 
+{
+	char *iph, *tpc;
+	int idx,port_old=0,port_new;
 	char modulo[] = "DisponibilidadComandos()";
-
-
-	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
-		iph = copiaParametro("iph",ptrTrama); // Toma ip
 	
+
+
+	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
+		liberaMemoria(iph);
 		errorLog(modulo, 47, FALSE);
 		return (FALSE);
 	}
+	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	strcpy(tbsockets[idx].estado, tpc);
+
+	port_new=tomaPuerto(*socket_c);
+
+	if(tbsockets[idx].sock!=INVALID_SOCKET){
+		port_old=tomaPuerto(tbsockets[idx].sock);
+		if(port_old!=port_new){
+			close(tbsockets[idx].sock); // Cierra el socket si ya existia uno
+		}
+	}
+
 	tbsockets[idx].sock = *socket_c;
 	swcSocket = TRUE; // El socket permanece abierto para recibir comandos desde el servidor
+	liberaMemoria(iph);
+	liberaMemoria(tpc);		
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1172,7 +1228,7 @@ BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama) {
 //		- res: resultado de la ejecución del comando
 //		- der: Descripción del error si hubiese habido
 //		- iph: Dirección IP
-//		- ids: identificador de la acción notificada
+//		- ids: identificador de la sesión
 //		- ido: Identificador del ordenador que notifica
 //		- db: Objeto base de datos (operativo)
 //		- tbl: Objeto tabla
@@ -1186,18 +1242,25 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 	char *res, *ids, *der;
 	char fechafin[LONPRM];
 	struct tm* st;
+	int idaccion;
 	char modulo[] = "respuestaEstandar()";
 
-	res = copiaParametro("res",ptrTrama); // Toma resultado
 	ids = copiaParametro("ids",ptrTrama); // Toma identificador de la sesión
-	der = copiaParametro("der",ptrTrama); // Toma descripción del error (si hubiera habido)
 
 	if (ids == NULL) // No existe seguimiento de la acción
 		return (TRUE);
+		
+	if (atoi(ids) == 0){ // No existe seguimiento de la acción
+		liberaMemoria(ids);
+		return (TRUE);
+	}
 
 	sprintf(sqlstr,
-			"SELECT * FROM acciones WHERE idordenador=%s AND idaccion=%s", ido,
-			ids);
+			"SELECT * FROM acciones WHERE idordenador=%s"
+			" AND sesion=%s ORDER BY idaccion", ido,ids);
+
+	liberaMemoria(ids);
+
 	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
@@ -1208,25 +1271,40 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 		errorLog(modulo, 31, FALSE);
 		return (TRUE);
 	}
-
+	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
+		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
 	st = tomaHora();
 	sprintf(fechafin, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
 			st->tm_mday, st->tm_hour, st->tm_min, st->tm_sec);
 
-	sprintf(
-			sqlstr,
-			"UPDATE acciones SET resultado='%s',estado='%d',fechahorafin='%s',descrinotificacion='%s'"\
-			" WHERE idordenador=%s AND idaccion=%s",
-			res, ACCION_FINALIZADA, fechafin, der, ido, ids);
+	res = copiaParametro("res",ptrTrama); // Toma resultado
+	der = copiaParametro("der",ptrTrama); // Toma descripción del error (si hubiera habido)
+	
+	sprintf(sqlstr,
+			"UPDATE acciones"\
+			"   SET resultado='%s',estado='%d',fechahorafin='%s',descrinotificacion='%s'"\
+			" WHERE idordenador=%s AND idaccion=%d",
+			res, ACCION_FINALIZADA, fechafin, der, ido, idaccion);
+			
 	if (!db.Execute(sqlstr, tbl)) { // Error al actualizar
+		liberaMemoria(res);
+		liberaMemoria(der);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
-
-	if (atoi(res) == ACCION_FALLIDA)
+	
+	liberaMemoria(der);
+	
+	if (atoi(res) == ACCION_FALLIDA) {
+		liberaMemoria(res);
 		return (FALSE); // Error en la ejecución del comando
+	}
 
+	liberaMemoria(res);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -1254,7 +1332,10 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 		errorLog(modulo, 3, FALSE);
 		return (FALSE);
 	}
+	
 	strcpy(Ipes, iph); // Copia cadena de IPES
+	liberaMemoria(iph);
+
 	lon = splitCadena(ptrIpes, Ipes, ';');
 	FINCADaINTRO(ptrTrama);
 	for (i = 0; i < lon; i++) {
@@ -1264,7 +1345,7 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 				errorLog(modulo, 26, FALSE);
 				return (FALSE);
 			}
-			close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
+			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 	}
 	liberaMemoria(Ipes);
@@ -1296,7 +1377,7 @@ BOOLEAN respuestaConsola(SOCKET *socket_c, TRAMA *ptrTrama, int res) {
 // Función: Arrancar
 //
 //	Descripción:
-//		Procesa el comando Apagar
+//		Procesa el comando Arrancar
 //	Parámetros:
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
@@ -1305,16 +1386,27 @@ BOOLEAN respuestaConsola(SOCKET *socket_c, TRAMA *ptrTrama, int res) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char *mac, msglog[LONSTD];
+	char *iph,*mac,*mar, msglog[LONSTD];
+	BOOLEAN res;
 	char modulo[] = "Arrancar()";
 
+	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
-	if (!Levanta(mac)) {
+	mar = copiaParametro("mar",ptrTrama); // Método de arranque (Broadcast o Unicast)
+
+	res=Levanta(iph,mac,mar);
+
+	liberaMemoria(iph);
+	liberaMemoria(mac);
+	liberaMemoria(mar);
+
+	if(!res){
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
 		respuestaConsola(socket_c, ptrTrama, FALSE);
 		return (FALSE);
 	}
+
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
@@ -1330,13 +1422,16 @@ BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //	Descripción:
 //		Enciende ordenadores a través de la red cuyas macs se pasan como parámetro
 //	Parámetros:
+//		- iph: Cadena de direcciones ip separadas por ";"
 //		- mac: Cadena de direcciones mac separadas por ";"
+//		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Levanta(char *mac) {
-	char *ptrMacs[MAXIMOS_CLIENTES];
+BOOLEAN Levanta(char* iph,char *mac, char* mar)
+{
+	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	int i, lon, res;
 	SOCKET s;
 	BOOLEAN bOpt;
@@ -1363,9 +1458,10 @@ BOOLEAN Levanta(char *mac) {
 		exit(EXIT_FAILURE);
 	}
 	/* fin creación de socket */
+	lon = splitCadena(ptrIP, iph, ';');
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
-		if (!WakeUp(&s, ptrMacs[i])) {
+		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
 			errorLog(modulo, 49, TRUE);
 			close(s);
 			return (FALSE);
@@ -1381,12 +1477,16 @@ BOOLEAN Levanta(char *mac) {
 //		Enciende el ordenador cuya MAC se pasa como parámetro
 //	Parámetros:
 //		- s : Socket para enviar trama magic packet
+//		- iph : Cadena con la dirección ip
 //		- mac : Cadena con la dirección mac en formato XXXXXXXXXXXX
+//		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
-BOOLEAN WakeUp(SOCKET *s, char *mac) {
+//
+BOOLEAN WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
+{
 	int i, res;
 	char HDaddress_bin[6];
 	struct {
@@ -1407,7 +1507,10 @@ BOOLEAN WakeUp(SOCKET *s, char *mac) {
 	/* Creación de socket del cliente que recibe la trama magic packet */
 	WakeUpCliente.sin_family = AF_INET;
 	WakeUpCliente.sin_port = htons((short) PUERTO_WAKEUP);
-	WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
+	if(atoi(mar)==2)
+		WakeUpCliente.sin_addr.s_addr = inet_addr(iph); //  Para hacerlo con IP
+	else
+		WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
 
 	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
 			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
@@ -1455,7 +1558,7 @@ void PasaHexBin(char *cadena, char *numero) {
 // Función: RESPUESTA_Arrancar
 //
 //	Descripción:
-//		Respuesta del cliente al comando Apagar
+//		Respuesta del cliente al comando Arrancar
 //	Parámetros:
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
@@ -1483,6 +1586,8 @@ BOOLEAN RESPUESTA_Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
@@ -1490,7 +1595,11 @@ BOOLEAN RESPUESTA_Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	if (clienteExistente(iph, &i)) // Actualiza estado
 		strcpy(tbsockets[i].estado, tpc);
-
+		
+	liberaMemoria(iph);
+	liberaMemoria(ido);
+	liberaMemoria(tpc);
+	
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -1531,7 +1640,8 @@ BOOLEAN Comando(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Comando(SOCKET *socket_c, TRAMA* ptrTrama) {
+BOOLEAN RESPUESTA_Comando(SOCKET *socket_c, TRAMA* ptrTrama)
+ {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
@@ -1549,9 +1659,13 @@ BOOLEAN RESPUESTA_Comando(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
+	liberaMemoria(iph);
+	liberaMemoria(ido);
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -1611,13 +1725,18 @@ BOOLEAN RESPUESTA_Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
 		strcpy(tbsockets[i].estado, CLIENTE_APAGADO);
-
+	
+	liberaMemoria(iph);
+	liberaMemoria(ido);
+	
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -1677,12 +1796,17 @@ BOOLEAN RESPUESTA_Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
 		strcpy(tbsockets[i].estado, CLIENTE_APAGADO);
+	
+	liberaMemoria(iph);
+	liberaMemoria(ido);
 
 	db.Close(); // Cierra conexión
 	return (TRUE);
@@ -1743,13 +1867,18 @@ BOOLEAN RESPUESTA_IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
 		strcpy(tbsockets[i].estado, CLIENTE_APAGADO);
-
+		
+	liberaMemoria(iph);
+	liberaMemoria(ido);
+		
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -1790,12 +1919,14 @@ BOOLEAN CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
+BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) 
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	char *iph, *par, *cpt, *ipr, *ido;
 	char *idi;
+	BOOLEAN res;
 	char modulo[] = "RESPUESTA_CrearImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
@@ -1809,6 +1940,8 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
@@ -1819,8 +1952,15 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 	cpt = copiaParametro("cpt",ptrTrama);
 	ipr = copiaParametro("ipr",ptrTrama);
 
-	if (!actualizaCreacionImagen(db, tbl, idi, par, cpt, ipr, ido)) {
-		errorLog(modulo, 53, FALSE);
+	res=actualizaCreacionImagen(db, tbl, idi, par, cpt, ipr, ido);
+
+	liberaMemoria(idi);
+	liberaMemoria(par);
+	liberaMemoria(cpt);
+	liberaMemoria(ipr);
+	
+	if(!res){
+		errorLog(modulo, 94, FALSE);
 		db.Close(); // Cierra conexión
 		return (FALSE);
 	}
@@ -1846,13 +1986,16 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
-		char* cpt, char* ipr, char *ido) {
+	char* cpt, char* ipr, char *ido) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaCreacionImagen()";
 	int idr,ifs;
 
-	/* Toma identificador del repositorio */
-	sprintf(sqlstr, "SELECT idrepositorio FROM repositorios WHERE ip='%s'", ipr);
+	/* Toma identificador del repositorio correspondiente al ordenador modelo */
+	sprintf(sqlstr, "SELECT repositorios.idrepositorio"
+			"  FROM repositorios"
+			"  LEFT JOIN ordenadores USING (idrepositorio)"
+			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
@@ -1867,7 +2010,7 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 	}
 
 	/* Toma identificador del perfilsoftware */
-	sprintf(sqlstr, "SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s", ido,par);
+	sprintf(sqlstr,"SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s", ido,par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
@@ -1887,6 +2030,188 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 				" WHERE idimagen=%s", par, cpt, ifs, idr, idi);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	return (TRUE);
+}
+// ________________________________________________________________________________________________________
+// Función: CrearImagenBasica
+//
+//	Descripción:
+//		Crea una imagen basica usando sincronización
+//	Parámetros:
+//		- socket_c: Socket de la consola al envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN CrearImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
+	char msglog[LONSTD];
+	char modulo[] = "CrearImagenBasica()";
+
+	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
+		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
+		errorInfo(modulo, msglog);
+		respuestaConsola(socket_c, ptrTrama, FALSE);
+		return (FALSE);
+	}
+	respuestaConsola(socket_c, ptrTrama, TRUE);
+	return (TRUE);
+}
+// ________________________________________________________________________________________________________
+// Función: RESPUESTA_CrearImagenBasica
+//
+//	Descripción:
+//		Respuesta del cliente al comando CrearImagenBasica
+//	Parámetros:
+//		- socket_c: Socket del cliente que envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN RESPUESTA_CrearImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
+	return(RESPUESTA_CrearImagen(socket_c,ptrTrama)); // La misma respuesta que la creación de imagen monolítica
+}
+// ________________________________________________________________________________________________________
+// Función: CrearSoftIncremental
+//
+//	Descripción:
+//		Crea una imagen incremental entre una partición de un disco y una imagen ya creada guardandola en el
+//		mismo repositorio y en la misma carpeta donde está la imagen básica
+//	Parámetros:
+//		- socket_c: Socket de la consola al envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
+	char msglog[LONSTD];
+	char modulo[] = "CrearSoftIncremental()";
+
+	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
+		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
+		errorInfo(modulo, msglog);
+		respuestaConsola(socket_c, ptrTrama, FALSE);
+		return (FALSE);
+	}
+	respuestaConsola(socket_c, ptrTrama, TRUE);
+	return (TRUE);
+}
+// ________________________________________________________________________________________________________
+// Función: RESPUESTA_CrearSoftIncremental
+//
+//	Descripción:
+//		Respuesta del cliente al comando crearImagenDiferencial
+//	Parámetros:
+//		- socket_c: Socket del cliente que envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN RESPUESTA_CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama)
+{
+	Database db;
+	Table tbl;
+	char *iph,*par,*ido,*idf;
+	int ifs;
+	char msglog[LONSTD],sqlstr[LONSQL];
+	char modulo[] = "RESPUESTA_CrearSoftIncremental()";
+
+	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
+		errorLog(modulo, 20, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+
+	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
+	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
+
+	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
+		errorLog(modulo, 30, FALSE);
+		return (FALSE); // Error al registrar notificacion
+	}
+
+	par = copiaParametro("par",ptrTrama);
+
+	/* Toma identificador del perfilsoftware creado por el inventario de software */
+	sprintf(sqlstr,"SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s",ido,par);
+	
+	liberaMemoria(iph);
+	liberaMemoria(ido);	
+	liberaMemoria(par);	
+		
+	if (!db.Execute(sqlstr, tbl)) { // Error al leer
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
+		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+
+	/* Actualizar los datos de la imagen */
+	idf = copiaParametro("idf",ptrTrama);
+	sprintf(sqlstr,"UPDATE imagenes SET idperfilsoft=%d WHERE idimagen=%s",ifs,idf);
+	liberaMemoria(idf);	
+	
+	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	db.Close(); // Cierra conexión
+	return (TRUE);
+}
+// ________________________________________________________________________________________________________
+// Función: actualizaCreacionSoftIncremental
+//
+//	Descripción:
+//		Esta función actualiza la base de datos con el resultado de la creación de software incremental
+//	Parámetros:
+//		- db: Objeto base de datos (ya operativo)
+//		- tbl: Objeto tabla
+//		- idi: Identificador de la imagen
+//		- idf: Identificador del software incremental
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char* idf)
+{
+	char msglog[LONSTD], sqlstr[LONSQL];
+	char modulo[] = "actualizaCreacionSoftIncremental()";
+
+
+	/* Comprueba si existe ya relación entre la imagen y el software incremental */
+	sprintf(sqlstr, "SELECT * FROM imagenes_softincremental"
+					" WHERE idimagen=%s AND idsoftincremental=%s", idi,idf);
+
+	if (!db.Execute(sqlstr, tbl)) { // Error al leer
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	if (!tbl.ISEOF())
+		return (TRUE); // Ya existe relación
+
+	// Crea relación entre la imagen y el software incremental
+	sprintf(sqlstr,"INSERT INTO imagenes_softincremental (idimagen,idsoftincremental) VALUES (%s,%s)",idi,idf);
+	if (!db.Execute(sqlstr, tbl)) { // Error al ejecutar la sentencia
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
@@ -1920,6 +2245,56 @@ BOOLEAN RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
+// Función: RestaurarImagenBasica
+//
+//	Descripción:
+//		Restaura una imagen básica en una partición
+//	Parámetros:
+//		- socket_c: Socket de la consola al envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN RestaurarImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
+	char msglog[LONSTD];
+	char modulo[] = "RestaurarImagenBasica()";
+
+	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
+		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
+		errorInfo(modulo, msglog);
+		respuestaConsola(socket_c, ptrTrama, FALSE);
+		return (FALSE);
+	}
+	respuestaConsola(socket_c, ptrTrama, TRUE);
+	return (TRUE);
+}
+// ________________________________________________________________________________________________________
+// Función: RestaurarSoftIncremental
+//
+//	Descripción:
+//		Restaura una imagen básica junto con software incremental en una partición
+//	Parámetros:
+//		- socket_c: Socket de la consola al envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
+	char msglog[LONSTD];
+	char modulo[] = "RestaurarSoftIncremental()";
+
+	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
+		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
+		errorInfo(modulo, msglog);
+		respuestaConsola(socket_c, ptrTrama, FALSE);
+		return (FALSE);
+	}
+	respuestaConsola(socket_c, ptrTrama, TRUE);
+	return (TRUE);
+}
+// ________________________________________________________________________________________________________
 // Función: RESPUESTA_RestaurarImagen
 //
 //	Descripción:
@@ -1931,10 +2306,13 @@ BOOLEAN RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
+//
+BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) 
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
+	BOOLEAN res;
 	char *iph, *ido, *idi, *par, *ifs;
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
@@ -1949,6 +2327,8 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
@@ -1957,8 +2337,17 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 	idi = copiaParametro("idi",ptrTrama); // Toma identificador de la imagen
 	par = copiaParametro("par",ptrTrama); // Número de partición
 	ifs = copiaParametro("ifs",ptrTrama); // Identificador del perfil software contenido
-	if (!actualizaRestauracionImagen(db, tbl, idi, par, ido, ifs)) {
-		errorLog(modulo, 53, FALSE);
+	
+	res=actualizaRestauracionImagen(db, tbl, idi, par, ido, ifs);
+	
+	liberaMemoria(iph);
+	liberaMemoria(ido);	
+	liberaMemoria(idi);
+	liberaMemoria(par);
+	liberaMemoria(ifs);
+
+	if(!res){
+		errorLog(modulo, 95, FALSE);
 		db.Close(); // Cierra conexión
 		return (FALSE);
 	}
@@ -1967,10 +2356,42 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
+//
+// Función: RESPUESTA_RestaurarImagenBasica
+//
+//	Descripción:
+//		Respuesta del cliente al comando RestaurarImagen
+//	Parámetros:
+//		- socket_c: Socket del cliente que envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+//
+BOOLEAN RESPUESTA_RestaurarImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
+	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
+}
+// ________________________________________________________________________________________________________
+// Función: RESPUESTA_RestaurarSoftIncremental
+//
+//	Descripción:
+//		Respuesta del cliente al comando RestaurarSoftIncremental
+//	Parámetros:
+//		- socket_c: Socket del cliente que envió el mensaje
+//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
+	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
+}
+// ________________________________________________________________________________________________________
 // Función: actualizaRestauracionImagen
 //
 //	Descripción:
-//		Esta función actualiza la base de datos con el resultado de la creación de una imagen
+//		Esta función actualiza la base de datos con el resultado de la restauración de una imagen
 //	Parámetros:
 //		- db: Objeto base de datos (ya operativo)
 //		- tbl: Objeto tabla
@@ -1983,7 +2404,7 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
-		char* par, char* ido, char* ifs) {
+	char* par, char* ido, char* ifs) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaRestauracionImagen()";
 
@@ -2037,10 +2458,13 @@ BOOLEAN Configurar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama) {
+//
+BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama) 
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
+	BOOLEAN res;
 	char *iph, *ido,*cfg;
 	char modulo[] = "RESPUESTA_Configurar()";
 
@@ -2055,15 +2479,24 @@ BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
-	if(!actualizaConfiguracion(db, tbl, cfg, atoi(ido))){ // Actualiza la configuración del ordenador
+	res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+	
+	liberaMemoria(iph);
+	liberaMemoria(ido);	
+	liberaMemoria(cfg);	
+		
+	if(!res){	
 		errorLog(modulo, 24, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
+	
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -2104,11 +2537,13 @@ BOOLEAN EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
+BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	char *iph, *ido;
+	char *iph, *ido,*cfg;
+	int res;
 
 	char modulo[] = "RESPUESTA_EjecutarScript()";
 
@@ -2123,11 +2558,23 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
+	
+	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
+	
+	if(cfg){
+		res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		liberaMemoria(cfg);	
+	}
 
-	// Acciones posteriores
+	liberaMemoria(iph);
+	liberaMemoria(ido);
+
+	
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -2172,6 +2619,7 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
+	BOOLEAN res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
 	char modulo[] = "RESPUESTA_InventarioHardware()";
 
@@ -2181,25 +2629,37 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del cliente
-	npc = copiaParametro("npc",ptrTrama); // Toma Nombre del cliente
-	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 	// Lee archivo de inventario enviado anteriormente
 	hrd = copiaParametro("hrd",ptrTrama);
 	buffer = rTrim(leeArchivo(hrd));
-
-	if (buffer) {
-		if (!actualizaHardware(db, tbl, buffer, ido, npc, idc)) {
-			errorLog(modulo, 53, FALSE);
-			return (FALSE);
-		}
+	
+	npc = copiaParametro("npc",ptrTrama); 
+	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro
+	
+	if (buffer) 
+		res=actualizaHardware(db, tbl, buffer, ido, npc, idc);
+	
+	liberaMemoria(iph);
+	liberaMemoria(ido);			
+	liberaMemoria(npc);			
+	liberaMemoria(idc);		
+	liberaMemoria(buffer);		
+	
+	if(!res){
+		errorLog(modulo, 53, FALSE);
+		return (FALSE);
 	}
+		
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -2216,15 +2676,16 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //			- npc: Nombre del ordenador
 //			- idc: Identificador del centro o Unidad organizativa
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,
-		char* npc, char *idc) {
+//
+BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, char *idc) 
+{
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int idtipohardware, idperfilhard;
 	int lon, i, j, aux;
 	bool retval;
-	char *tbHardware[MAXHARDWARE];
+	char *whard;
 	int tbidhardware[MAXHARDWARE];
-	char *dualHardware[2], descripcion[250], strInt[LONINT], *idhardwares;
+	char *tbHardware[MAXHARDWARE],*dualHardware[2], descripcion[250], strInt[LONINT], *idhardwares;
 	char modulo[] = "actualizaHardware()";
 
 	/* Toma Centro (Unidad Organizativa) */
@@ -2241,11 +2702,11 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
-	hrd=escaparCadena(hrd); // Codificar comillas simples
-	if(!hrd)
+	whard=escaparCadena(hrd); // Codificar comillas simples
+	if(!whard)
 		return (FALSE);
 	/* Recorre componentes hardware*/
-	lon = splitCadena(tbHardware, hrd, '\n');
+	lon = splitCadena(tbHardware, whard, '\n');
 	if (lon > MAXHARDWARE)
 		lon = MAXHARDWARE; // Limita el número de componentes hardware
 	/*
@@ -2361,6 +2822,7 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,
 	else {
 		retval=TRUE;
 	}
+	liberaMemoria(whard);
 	liberaMemoria(idhardwares);
 	return (retval);
 }
@@ -2536,6 +2998,7 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
+	BOOLEAN res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
 	char modulo[] = "RESPUESTA_InventarioSoftware()";
 
@@ -2548,24 +3011,35 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
-	npc = copiaParametro("npc",ptrTrama); // Toma Nombre del cliente
-	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);	
 		errorLog(modulo, 30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
+	
+	npc = copiaParametro("npc",ptrTrama); 
+	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro	
 	par = copiaParametro("par",ptrTrama);
-	// Lee archivo de inventario enviado anteriormente
 	sft = copiaParametro("sft",ptrTrama);
 
 	buffer = rTrim(leeArchivo(sft));
-	if (buffer) {
-		if (!actualizaSoftware(db, tbl, buffer, par, ido, npc, idc)) {
-			errorLog(modulo, 82, FALSE);
-			return (FALSE);
-		}
-	}
+	if (buffer)
+		res=actualizaSoftware(db, tbl, buffer, par, ido, npc, idc);
+
+	liberaMemoria(iph);
+	liberaMemoria(ido);	
+	liberaMemoria(npc);	
+	liberaMemoria(idc);	
+	liberaMemoria(par);	
+	liberaMemoria(sft);	
+
+	if(!res){
+		errorLog(modulo, 82, FALSE);
+		return (FALSE);
+	}	
+	
 	db.Close(); // Cierra conexión
 	return (TRUE);
 }
@@ -2586,13 +3060,13 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,
-		char* ido, char* npc, char* idc) {
+BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, char* npc, char* idc) 
+{
 	int i, j, lon, aux, idperfilsoft;
 	bool retval;
-	char *tbSoftware[MAXSOFTWARE];
+	char *wsft;
 	int tbidsoftware[MAXSOFTWARE];
-	char msglog[LONSTD], sqlstr[LONSQL], strInt[LONINT], *idsoftwares;
+	char *tbSoftware[MAXSOFTWARE],msglog[LONSTD], sqlstr[LONSQL], strInt[LONINT], *idsoftwares;
 	char modulo[] = "actualizaSoftware()";
 
 	/* Toma Centro (Unidad Organizativa) y perfil software */
@@ -2623,12 +3097,13 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,
 		}
 		tbl.MoveNext();
 	}
-	sft=escaparCadena(sft); // Codificar comillas simples
-	if(!sft)
+	wsft=escaparCadena(sft); // Codificar comillas simples
+	if(!wsft)
 		return (FALSE);
 
 	/* Recorre componentes software*/
-	lon = splitCadena(tbSoftware, sft, '\n');
+	lon = splitCadena(tbSoftware, wsft, '\n');
+
 	if (lon == 0)
 		return (true); // No hay lineas que procesar
 	if (lon > MAXSOFTWARE)
@@ -2712,6 +3187,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,
 	else {
 		retval=TRUE;
 	}
+	liberaMemoria(wsft);
 	liberaMemoria(idsoftwares);
 	return (retval);
 }
@@ -2871,9 +3347,11 @@ BOOLEAN enviaArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 	// Toma parámetros
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
 	if (!sendArchivo(socket_c, nfl)) {
+		liberaMemoria(nfl);
 		errorLog(modulo, 57, FALSE);
 		return (FALSE);
 	}
+	liberaMemoria(nfl);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -2897,9 +3375,11 @@ BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 	ptrTrama->tipo = MSG_NOTIFICACION;
 	enviaFlag(socket_c, ptrTrama);
 	if (!recArchivo(socket_c, nfl)) {
+		liberaMemoria(nfl);
 		errorLog(modulo, 58, FALSE);
 		return (FALSE);
 	}
+	liberaMemoria(nfl);
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
@@ -2918,7 +3398,7 @@ BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
-	char *idp,iph[LONIP],mac[LONMAC];
+	char *idp,*mar,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
 	int idx,idcomando;
@@ -2931,17 +3411,21 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 		return (FALSE);
 	}
 
-	idp = copiaParametro("idp",ptrTrama); // Toma identificador de laprogramación de la tabla acciones
+	idp = copiaParametro("idp",ptrTrama); // Toma identificador de la programación de la tabla acciones
 
 	sprintf(sqlstr, "SELECT ordenadores.ip,ordenadores.mac,acciones.idcomando FROM acciones "\
 			" INNER JOIN ordenadores ON ordenadores.ip=acciones.ip"\
 			" WHERE acciones.idprogramacion=%s",idp);
+	
+	liberaMemoria(idp);
+			
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
+	db.Close();
 	if(tbl.ISEOF())
 		return (TRUE); // No existen registros
 
@@ -2968,11 +3452,14 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				errorInfo(modulo, msglog);
 				return (FALSE);
 			}
-			if (!Levanta(mac)) {
+			mar = copiaParametro("mar",ptrTrama); // Toma modo de arranque si el comando es Arrancar
+			if (!Levanta(iph,mac,mar)) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
+				liberaMemoria(mar);
 				return (FALSE);
 			}
+			liberaMemoria(mar);
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
@@ -2980,7 +3467,7 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				errorLog(modulo, 26, FALSE);
 				return (FALSE);
 			}
-			close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
+			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 		tbl.MoveNext();
 	}
@@ -3068,10 +3555,30 @@ int main(int argc, char *argv[]) {
 	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearImagen");
 	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearImagen;
 
+	strcpy(tbfuncionesServer[cf].nf, "CrearImagenBasica");
+	tbfuncionesServer[cf++].fptr = &CrearImagenBasica;
+	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearImagenBasica");
+	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearImagenBasica;
+
+	strcpy(tbfuncionesServer[cf].nf, "CrearSoftIncremental");
+	tbfuncionesServer[cf++].fptr = &CrearSoftIncremental;
+	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearSoftIncremental");
+	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearSoftIncremental;
+
 	strcpy(tbfuncionesServer[cf].nf, "RestaurarImagen");
 	tbfuncionesServer[cf++].fptr = &RestaurarImagen;
 	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarImagen");
 	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarImagen;
+
+	strcpy(tbfuncionesServer[cf].nf, "RestaurarImagenBasica");
+	tbfuncionesServer[cf++].fptr = &RestaurarImagenBasica;
+	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarImagenBasica");
+	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarImagenBasica;
+
+	strcpy(tbfuncionesServer[cf].nf, "RestaurarSoftIncremental");
+	tbfuncionesServer[cf++].fptr = &RestaurarSoftIncremental;
+	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarSoftIncremental");
+	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarSoftIncremental;
 
 	strcpy(tbfuncionesServer[cf].nf, "Configurar");
 	tbfuncionesServer[cf++].fptr = &Configurar;
@@ -3143,7 +3650,7 @@ int main(int argc, char *argv[]) {
 		swcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
 		if (!gestionaTrama(&socket_c)) {
 			errorLog(modulo, 39, TRUE);
-			//close(socket_c);
+			//close(socket_c);/tmp/
 			//break;
 		}
 		if (!swcSocket) // Sólo se cierra cuando el cliente NO espera comandos ineractivos

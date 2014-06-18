@@ -4,7 +4,7 @@
 #@brief   Librería o clase Protocol
 #@class   Protocol
 #@brief   Funciones para transmisión de datos
-#@version 1.0
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -707,6 +707,46 @@ fi
 }
 
 
+#/**
+#         ogMcastRequest
+#@brief   Función temporal para solicitar al ogRepoAux el envio de un fichero por multicast
+#@param 1  Fichero a enviar ubicado en el REPO. puede ser ruta absoluta o relatica a /opt/opengnsys/images
+#@param 2  PROTOOPT   opciones protocolo multicast
+#@return
+#@exception 
+#@note
+#@todo:
+#@version 1.0.5
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2012/05/29
+#*/ ##
+function ogMcastRequest {
+# Variables locales
+local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT
+FILE="$1"
+PROTOOPT="$2"
+
+#TODO AYUDA
+#TODO: CONTROL PARAMETROS
+
+PORT=$(echo $2 | cut -f1 -d":")
+let PORTAUX=$PORT+1
+REPOIP=$(ogGetRepoIp)
+REPOPORTAUX=2009
+REPEAT=0
+until nmap -n -sU -p $PORTAUX $REPOIP | grep open
+do
+    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $1 $2""
+    #update-cache:
+    hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST "$FILE" "$PROTOOPT""
+    #multicas-direct:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$IMAGE.img $OPTPROTOCOLO"
+    let REPEAT=$REPEAT+1
+    [ "$REPEAT" -eq 5 ] && return
+    sleep 10
+done
+}
+
+
 ##########################################
 ############## funciones torrent
 #/**
@@ -845,8 +885,11 @@ if [ "$OPTION" == "DOWNLOAD" ]
 then
 	case "$MODE" in
         peer|PEER)
-        	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}.bf"
-            ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf 
+        	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}"
+			# Creamos el fichero de resumen por defecto
+			touch ${SOURCE}.bf
+			# ctorrent controla otro fichero -b ${SOURCE}.bfog
+			ctorrent -f -c -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bfog
         ;;
         leecher|LEECHER)
            	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep 30; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
@@ -854,7 +897,10 @@ then
         ;;
         seeder|SEEDER)
         	echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
-           	ctorrent -f -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bf
+			# Creamos el fichero de resumen por defecto
+			touch ${SOURCE}.bf
+			# ctorrent controla otro fichero -b ${SOURCE}.bfog
+           	ctorrent -f -c -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bfog
 		;;
 	esac
 fi
@@ -962,27 +1008,22 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-#TODO:  return 0->true, 1->false; si error, aunque sintaxis devuelve > 1
-
-# Error si no se reciben los argumentos ARG necesarios segÃºn la opcion.
-#[ $# == "2" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
-#ogCheckStringInGroup "$1" "REPO repo" || ogRaiseError $OG_ERR_FORMAT "El contendor $1 no es valido, solo se admite REPO" || return $?
+#Control de la cache
+ogFindCache || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 
 [ $# == "2" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
-
-
 FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
 #echo "paso 1. si no existe la imagen, confirmamos que es necesaria la actualizacion de la cache."
 FILETARGET=`ogGetPath CACHE $2`
 if [ -z $FILETARGET ]
 then
-	# borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
-	ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
-	ogDeleteFile CACHE "/$2.sum" &> /dev/null
-	echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
-	return 0 
+    # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
+    ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+    ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
+    return 0 
 fi
 
 #echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
@@ -993,14 +1034,13 @@ then
     return 0
 fi
 
-
 ## En este punto la imagen en el repo y en la cache se llaman igual, 
 #echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
 if [ -f $FILESOURCE.sum ]
 then
-	MD5SOURCE=$(cat $FILESOURCE.sum)
+    MD5SOURCE=$(cat $FILESOURCE.sum)
 else
-	MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
+    MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
 fi
 [ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
 MD5TARGET=$(cat $FILETARGET.sum)
@@ -1009,15 +1049,12 @@ MD5TARGET=$(cat $FILETARGET.sum)
 #TODO: que hacer cuando los md5 son distintos. Por defecto borrar.
 if [ "$MD5SOURCE" == "$MD5TARGET" ]
 then
-	echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
-	return 1
+    echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
+    return 1
 else
     echo "TRUE=0, Si es necesario actualizar. paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
-	rm -f $FILETARGET
-	return 0
+    rm -f $FILETARGET $FILETARGET.sum $FILETARGET.torrent
+    return 0
 fi
-
 }
-
-
 

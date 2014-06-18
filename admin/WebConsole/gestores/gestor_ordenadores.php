@@ -15,6 +15,7 @@ include_once("../clases/ArbolVistaXML.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 include_once("./relaciones/ordenadores_eliminacion.php");
+include_once("../includes/tftputils.php");
 include_once("../includes/opciones.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
@@ -31,11 +32,16 @@ $idrepositorio=0;
 $idmenu=0;
 $idprocedimiento=0;
 $idimagen=0;
-$cache=0;
 #### ADV
 $netiface="";
 $netdriver="";
-### ADV
+### UHU
+$validacion="";
+$paginalogin="";
+$paginavalidacion="";
+### Ramón
+$arranque="";
+
 //##agp
 if (isset($_FILES['archivo'])) {
 	if($_FILES['archivo']['type']=="image/gif" || $_FILES['archivo']['type']=="image/jpeg" || $_FILES['archivo']['type']=="image/jpg" || $_FILES['archivo']['type']=="image/png" || $_FILES['archivo']['type']=="image/JPG") {
@@ -59,11 +65,15 @@ if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"];
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"];
 if (isset($_POST["idprocedimiento"])) $idprocedimiento=$_POST["idprocedimiento"];
-if (isset($_POST["cache"])) $cache=$_POST["cache"];
-if(empty($cache)) $cache=0;
 
 if (isset($_POST["netiface"])) $netiface=$_POST["netiface"];
 if (isset($_POST["netdriver"])) $netdriver=$_POST["netdriver"];
+######## UHU
+if (isset($_POST["validacion"])) $validacion=$_POST["validacion"];
+if (isset($_POST["paginalogin"])) $paginalogin=$_POST["paginalogin"];
+if (isset($_POST["paginavalidacion"])) $paginavalidacion=$_POST["paginavalidacion"];
+######## Ramón
+if (isset($_POST["arranque"])) $arranque=$_POST["arranque"];
 
 $tablanodo=""; // Arbol para nodos insertados
 //________________________________________________________________________________________________________
@@ -141,10 +151,9 @@ function toma_aula($cmd,$idgrupo){
 	Inserta, modifica o elimina datos en la tabla ordenadores
 ________________________________________________________________________________________________________*/
 function Gestiona(){
-	global	$cmd;
-	global	$opcion;
+	global $cmd;
+	global $opcion;
 	global $fotoordenador;
-	$fotoordenador="../images/fotos/".$fotoordenador;
 	global $grupoid;
 	global $idordenador;
 	global $nombreordenador;
@@ -155,15 +164,21 @@ function Gestiona(){
 	global $idrepositorio;
 	global $idmenu;
 	global $idprocedimiento;
-	global $cache;
 	global $netiface;
 	global $netdriver;
+######################## UHU
+        global $validacion;
+	global $paginalogin;
+        global $paginavalidacion;
+######################## Ramón
+        global $arranque;
+        global $idioma;
 
-	global	$op_alta;
-	global	$op_modificacion;
-	global	$op_eliminacion;
-	global	$op_movida;
-	global	$tablanodo;
+	global $op_alta;
+	global $op_modificacion;
+	global $op_eliminacion;
+	global $op_movida;
+	global $tablanodo;
 
 	
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
@@ -176,18 +191,22 @@ function Gestiona(){
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idprocedimiento",$idprocedimiento,1);
-	$cmd->CreaParametro("@cache",$cache,1);
 	$cmd->CreaParametro("@netiface",$netiface,0);
 	$cmd->CreaParametro("@netdriver",$netdriver,0);
 	$cmd->CreaParametro("@fotoordenador",$fotoordenador,0);
-	
+######################################################### UHU
+        $cmd->CreaParametro("@validacion",$validacion,0);
+    	$cmd->CreaParametro("@paginalogin",$paginalogin,0);
+	$cmd->CreaParametro("@paginavalidacion",$paginavalidacion,0);
+######################################################### UHU
+
 
 	switch($opcion){
 		case $op_alta :
-		//Insertar fotoord con Values @fotoordenador
+			//Insertar fotoord con Values @fotoordenador
 			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
-			idmenu,idproautoexec,idaula,grupoid,cache,netiface,netdriver,fotoord) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
-			@idmenu,@idprocedimiento,@idaula,@grupoid,@cache,@netiface,@netdriver,@fotoordenador)";
+			idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
+			@idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
 
 			$resul=$cmd->Ejecutar();
 			//echo $cmd->texto;
@@ -199,16 +218,21 @@ function Gestiona(){
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
+			// Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
+			createBootMode ($cmd, "", $idordenador, $idioma);
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,cache=@cache,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador 
+			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
-			//echo $cmd->texto;
+			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
+			createBootMode ($cmd, $arranque, $idordenador, $idioma);
 			break;
 		case $op_eliminacion :
 			$resul=EliminaOrdenadores($cmd,$idordenador,"idordenador");// Eliminación en cascada
+			// Borrar fichero PXE.
+			deleteBootFile ($mac);
 			break;
 		case $op_movida :
 			$cmd->texto="UPDATE ordenadores SET idaula=@idaula, grupoid=@grupoid WHERE idordenador=@idordenador";

@@ -35,9 +35,17 @@ $TbMsg[26]="Modo P2P -semillero durante la descarga-";
 $TbMsg[27]="Tiempo P2P -semillero despu&eacute;s de descarga-";
 $TbMsg[28]="Direcci&oacute;n gateway del aula";
 $TbMsg[29]="M&aacute;scara de red del aula";
+// UHU
+$TbMsg[30]="Validaci&oacute;n";
+$TbMsg[31]="P&aacute;gina login";
+$TbMsg[32]="P&aacute;gina validaci&oacute;n";
+// UHU
 $TbMsg[495]="Contenido cach&eacute;";
 $TbMsg[509]="Foto ordenador";
 $TbMsg[5091]="Insertar foto";
-$TbMsg[5092]="Ver fotos";	
+$TbMsg[5092]="Ver fotos";
+// Ramón
+$TbMsg['PROP_DNSIP']="IP Servidor DNS <em>(opcional)</em>";
+$TbMsg['PROP_PROXYURL']="URL Servidor Proxy <em>(opcional)</em>";
 ?>
 

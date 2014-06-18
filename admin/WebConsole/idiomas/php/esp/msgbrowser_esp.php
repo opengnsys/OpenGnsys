@@ -32,7 +32,16 @@ $TbMsg=array();
 	$TbMsg[22]='ATENCIÓN, ha habido algún error en el proceso de ejecución del script bash';
 	$TbMsg[23]='ATENCIÓN';
 	$TbMsg[24]='NO UTILICE NI APAGUE ESTE ORDENADOR.';
-	
-
+	$TbMsg[25]='Creando Imagen Incremental, por favor espere...';
+	$TbMsg[26]='El proceso de creación de imagen incremental ha terminado correctamente';
+	$TbMsg[27]='ATENCIÓN, ha habido algún error en el proceso de creación de imagen incremental';
+	$TbMsg[28]='El proceso de creación de imagen básica ha terminado correctamente';
+	$TbMsg[29]='ATENCIÓN, ha habido algún error en el proceso de creación de imagen básica';		
+	$TbMsg[30]='Creando Imagen Básica, por favor espere...';	
+	$TbMsg[31]='Restaurando Imagen Básica, por favor espere...';
+	$TbMsg[32]='El proceso de restauración de imagen básica ha terminado correctamente';
+	$TbMsg[33]='ATENCIÓN, ha habido algún error en el proceso de restauración de imagen básica';	
+	$TbMsg[34]='El proceso de restauración de imagen básica ha terminado correctamente';
+	$TbMsg[35]='ATENCIÓN, ha habido algún error en el proceso de restauración de imagen básica';			
 
 ?>

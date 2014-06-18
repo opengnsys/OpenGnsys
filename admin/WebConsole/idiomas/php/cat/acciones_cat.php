@@ -10,7 +10,7 @@
 	$TbMsg[2]='"Col.locar procediment"';
 	$TbMsg[3]='"Renombrar"';
 	$TbMsg[4]='"Eliminar grup de procediments"';
-	$TbMsg[5]='"Gestió d'ordres"';
+	$TbMsg[5]='"Gestió d\'ordres"';
 	$TbMsg[6]='"Informació Procediment"';
 	$TbMsg[7]='"Moure procediment"';
 	$TbMsg[8]='"Propietats"';

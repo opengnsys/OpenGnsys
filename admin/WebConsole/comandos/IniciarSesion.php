@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -15,6 +15,7 @@ include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
+include_once("../includes/pintaTablaConfiguraciones.php");
 include_once("../idiomas/php/".$idioma."/comandos/iniciarsesion_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -32,12 +33,12 @@ if (!$cmd)
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/IniciarSesion.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/iniciarsesion_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/iniciarsesion_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
@@ -48,18 +49,9 @@ if (!$cmd)
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
 	</BR>
 <form  align=center name="fdatos"> 
-	<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-		<TR>
-			<TH align=center>&nbsp;&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[8] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[9] ?>&nbsp;</TH>
-		</TR>
-			<?
-				echo tabla_configuraciones($cmd,$idambito);
-			?>
-	</TABLE>
-</FORM>
-<?
+	<?php echo tablaConfiguracionesIniciarSesion($cmd,$idambito); ?>
+</form>
+<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -71,7 +63,7 @@ if (!$cmd)
 </SCRIPT>
 </BODY>
 </HTML>
-<?
+<?php
 /**************************************************************************************************************************************************
 	Recupera los datos de un ordenador
 		Parametros: 
@@ -107,16 +99,23 @@ ________________________________________________________________________________
 function tabla_configuraciones($cmd,$idordenador){
 	global $idcentro;
 	$tablaHtml="";
-	$cmd->texto="SELECT ordenadores_particiones.idnombreso,ordenadores_particiones.numpar,ordenadores_particiones.tamano,nombresos.nombreso,tipospar.tipopar,
-				imagenes.descripcion as imagen,perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
-				FROM ordenadores
-				INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-				LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-				INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
-				LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-				LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-				LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
-				WHERE ordenadores.idordenador=".$idordenador." AND tipospar.clonable=1 ORDER BY ordenadores_particiones.numpar";
+	$cmd->texto="SELECT	ordenadores_particiones.numpar,
+				ordenadores_particiones.tamano,
+				ordenadores_particiones.idnombreso, nombresos.nombreso,
+				tipospar.tipopar, imagenes.descripcion AS imagen,
+				perfilessoft.descripcion AS perfilsoft,
+				sistemasficheros.descripcion AS sistemafichero
+			FROM ordenadores
+			INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+			LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
+			INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+			LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
+			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
+			LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
+			WHERE ordenadores.idordenador=".$idordenador."
+			  AND tipospar.clonable=1
+			  AND nombresos.nombreso!='DATA'
+			ORDER BY ordenadores_particiones.numpar";
 				
 	$rs->Comando=&$cmd; 
 	$rs=new Recordset; 
@@ -137,3 +136,4 @@ function tabla_configuraciones($cmd,$idordenador){
 	return($tablaHtml);
 }
 ?>
+

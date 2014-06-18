@@ -1,81 +1,155 @@
 #!/bin/bash
 
-#_______________________________________________________________________________________________________________________________
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+	
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimieincludento para httpdlog
+echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+	
+# Registro de inicio de ejecución
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
+
+# Solo ejecutable por OpenGnSys Client.
+PATH=$PATH:$(dirname $0)
+PROG=$(basename $0)
+
+#____________________________________________________________________
 #
+# El parámetro $2 es el que aporta toda la información y el $1 se queda obsoleto
 # Formato de entrada:
-# $1 disco
-# $2 par=Número de particion#cod=Código de partición#sfi=Sistema de ficheros#tam=Tamaño de la partición#ope=Operación$
-#_______________________________________________________________________________________________________________________________
+#		dis=Número de disco
+#		*=caracter de separación
+#		che=Vale 0 o 1
+#		*=caracter de separación
+#		$tch=tamaño cache
+#		!= caracter de separación
+#
+#   Y un numero indeterminado de cadenas del tipo siguuenteseparadas por el caracter '$':
+#		par=Número de particion*cod=Código de partición*sfi=Sistema de ficheros*tam=Tamaño de la partición*ope=Operación
+#		@= caracter de separación
+#____________________________________________________________________
 
-particiones=$(echo $2 | awk '{n=split($0,sep,"$");print n}')
+# Captura de parámetros (se ignora el 1er parámetro y se eliminan espacios y tabuladores).
+#param='dis=1*che=0*tch=70000000!par=1*cpt=NTFS*sfi=NTFS*tam=11000000*ope=0%'
+shift
+param="$(echo $* | sed 's/[ 	]//g')"
 
-declare -a TBP
-declare -a TBF
-for ((par=1;par<$particiones;par++)); 
-	do
-		TBP[$par]=$(echo $2 | awk -v p=$par '{
-							n=split($0,sep,"$");
-							split(sep[p],dua,"#");
-							split(dua[1],prm,"=");
-							par=prm[2];
-							split(dua[2],prm,"=");
-							cpt=prm[2];
-							split(dua[3],prm,"=");
-							sfi=prm[2];
-							split(dua[4],prm,"=");
-							tam=prm[2];																					
-							split(dua[5],prm,"=");
-							ope=prm[2];									
-							printf("%s %x %s %s %s",par,cpt,sfi,tam,ope);
-						}')
-	done
-	
-# Prepara cadena de particiones _______________________________________
-cP=""
-for ((par=1;par<$particiones;par++)); 
-	do
-		cfg=${TBP[$par]} 	
+# Activa navegador para ver progreso
+coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
 
-		cP=$cP$(echo $cfg | awk '{
-							n=split($0,prm," ");
-							par=prm[1];
-							cpt=prm[2];
-							sfi=prm[3];
-							tam=prm[4];																					
-							ope=prm[5];		
-							if(ope==1)
-								printf("%s:%s ",sfi,tam);
-							else{
-								if(ope==2)
-									printf("H%s:%s ",sfi,tam);
-								else
-									printf("%s:%s ",sfi,tam);						
-							}
-						}')
-						
-		TBF[$par]=$(echo $cfg | awk '{
-							n=split($0,prm," ");
-							sfi=prm[3];
-							ope=prm[5];		
-							if(ope==1)
-								printf("%s",sfi);
-							else
-								printf("EMPTY");	
-						}')						
-						
-	done	
-	ogCreatePartitions $1 $cP	
-							
-# Formatear _______________________________________
-	
-for ((par=1;par<$particiones;par++)); 
-	do
-	sfi=${TBF[$par]}
-	if [ $sfi == "EMPTY" ]; then
-		TBF[$par]=" "
-	else
-		ogFormatFs $1 $par $sfi
+# Leer los dos bloques de parámetros, separados por '!'.
+declare -a TBPRM
+
+IFS='!' read -a TBPRM <<<"$param"
+pparam="${TBPRM[0]}"	# Parámetros generales del disco.
+sparam="${TBPRM[1]}"	# Parámetros de particionado y formateo.
+
+
+# Toma valores de disco y caché, separados por "*".
+# Los valores están en las variables $dis: disco, $che: existe cache (1, 0), $tch: Tamaño de la cache.
+unset TBPRM
+IFS='*' read -a TBPRM <<<"$pparam"
+[[ ${TBPRM} =~ = ]] && eval ${TBPRM[@]}		# Comprobar asignación antes de exportar valores.
+
+# Error si no se define el parámetro de disco (dis).
+[ -z "$dis" ] && exit $OG_ERR_FORMAT
+
+# Toma valores de distribución de particiones, separados por "%".
+declare -a CFG		# Valores de configuración.
+declare -a TBP		# Tabla de particionado.
+declare -a TBF		# Tabla de formateo.
+
+unset TBPRM
+IFS='%' read -a TBPRM <<<"$sparam"
+
+maxp=0
+for ((i=0; i<${#TBPRM[@]}; i++)); do
+	# Leer datos de la partición, separados por "*".
+	unset par
+	IFS='*' read -a CFG <<<"${TBPRM[i]}" 2>/dev/null
+	[[ ${CFG} =~ = ]] && eval ${CFG[@]}	# Comprobar asignación antes de exportar valores.
+	# Saltar si no existe definición de partición.
+	if [ -n "$par" -a $par != 0 ]; then
+		# Componer datos de particionado. 
+		TBP[par]="$cpt:$tam"
+		# Si se activa operación de formatear, componer datos de formateo.
+		if [ "$ope" == 1 ]; then
+			TBF[par]="$sfi"
+		else
+			TBF[par]="EMPTY"
+		fi
+		# Obtener la partición mayor por si hay que rellenar con valores EMPTY.
+		[ $par -gt $maxp ] && maxp=$par
 	fi
-	
-	done	
+done
+
+# Control de datos.
+for ((par=1; par<=maxp; par++)); do
+	# Ignorar partición 4 si existe caché.
+	if [ $che != 1 -o $par -ne 4 ]; then
+		# Rellenar con "EMPTY:0" la configuración de particiones no definidas.
+		[ -z "${TBP[par]}" ] && TBP[par]="EMPTY:0"
+	fi
+	# Ignorar formateo en particiones que no soportan sistemas de archivos.
+	case "${TBP[par]%:*}" in
+		""|EMPTY|EXTENDED|LINUX-SWAP|LINUX-LVM)
+			TBF[par]="EMPTY" ;;
+	esac
+done
+
+#____________________________________________________
+# 
+# Proceso
+#____________________________________________________
+
+
+# Desmonta todas las particiones y la caché
+ogUnmountCache 
+ogUnmountAll $dis &>/dev/null
+
+# Elimina la tabla de particiones
+ogDeletePartitionTable $dis  
+ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
+
+# Crea tabla de particiones MSDOS (NOTA: adaptar para tablas GPT).
+ogCreatePartitionTable $dis MSDOS 
+
+# Cuestión caché
+if [ "$che" == "1" ]; then
+	initCache $tch >/dev/null | tee -a $OGLOGSESSION $OGLOGFILE
+fi
+
+# Definir particionado.
+ogCreatePartitions $dis ${TBP[@]}  | tee -a $OGLOGSESSION $OGLOGFILE
+ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
+
+RETVAL=$?	
+if [ $RETVAL -ne 0 ]; then
+	kill $COPROC_PID
+	exit $RETVAL
+fi 
+
+# Formatear particiones, excepto las marcadas como "EMPTY".
+for ((par=1; par<=$maxp; par++)); do
+	sfi="${TBF[par]}"
+	if [ "$sfi" != "EMPTY" ]; then
+		ogFormatFs $dis $par $sfi | tee -a $OGLOGSESSION $OGLOGFILE
+		RETVAL=$?
+		if [ $RETVAL -ne 0 ]; then
+			kill $COPROC_PID
+			exit $OG_ERR_PARTITION
+		fi 
+	fi
+done	
+
+#___________________________________________________________________
+#
+# Retorno
+#___________________________________________________________________
+
+kill $COPROC_PID
+exit 0
 

@@ -1,4 +1,7 @@
-﻿.acceso {
+﻿body {
+	background-color: white;
+}
+.acceso {
 	font: normal normal 12px sans-serif;
 }
 .acceso h1 {
@@ -54,6 +57,10 @@
 }
 .pie span {
 	float: right;
+}
+.acercade {
+        color: black;
+        font-family: sans-serif;
 }
 .textos{
 	COLOR: #A53B2D;

@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -137,7 +137,7 @@ function actualizaAutoexec($idprocedimiento)
 	$resul=$cmd->Ejecutar();
 	return(resul);
 }
-//________________________________________________________________________________________________________
+//________________________________________recorreProcedimientos________________________________________________________________
 //
 // Ejecuta un procedimiento: lo registra en acciones y lo envía por la red
 //________________________________________________________________________________________________________
@@ -232,7 +232,8 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 	global $cadenaid;
 	global $cadenaip;
 	global $cmd;	
-	global $vez;	
+	global $sesion;
+	global $vez;
 	
 	if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 		$cmd->ParamSetValor("@restrambito",$idambito);
@@ -255,7 +256,7 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 		$cmd->ParamSetValor("@idordenador",$auxID[$i]);
 		$cmd->ParamSetValor("@ip",$auxIP[$i]);
 		$cmd->texto="INSERT INTO acciones (idordenador,tipoaccion,idtipoaccion,descriaccion,ip,sesion,idcomando,parametros,fechahorareg,estado,resultado,ambito,idambito,restrambito,idprocedimiento,idtarea,idcentro)
-								VALUES (@idordenador,@tipoaccion,@idtipoaccion,@descriaccion,@ip,@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idprocedimiento,@idtarea,@idcentro)";
+					VALUES (@idordenador,@tipoaccion,@idtipoaccion,@descriaccion,@ip,@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idprocedimiento,@idtarea,@idcentro)";
 		$resul=$cmd->Ejecutar();
 		//echo $cmd->texto;
 		if(!$resul) return(false);
@@ -263,10 +264,9 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 		/* Sólo envía por la red el primer comando, el resto, si hubiera, 
 		lo encontrará el cliente a través de los comandos pendientes */
 		if(empty($vez)){
-			$idaccion=$cmd->Autonumerico();
-			if(!enviaComando($parametros,$idaccion)) return(false);
+			if(!enviaComando($parametros,$sesion)) return(false);
+			$vez++;
 		}
-		$vez++;
 	}
 	return(true);
 }
@@ -274,7 +274,7 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 //
 //	Envia un procedimiento a un grupo de ordenadores a través de la red
 //________________________________________________________________________________________________________
-function enviaComando($parametros,$idaccion)
+function enviaComando($parametros,$sesion)
 {	
 	global $cadenaid;
 	global $cadenaip;
@@ -287,7 +287,7 @@ function enviaComando($parametros,$idaccion)
 	// Envio al servidor 
 
 	$aplicacion=chr(13)."ido=".$cadenaid.chr(13)."mac=".$cadenamac.chr(13)."iph=".$cadenaip.chr(13);
-	$acciones=chr(13)."ids=".$idaccion.chr(13); // Para seguimiento
+	$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	
 	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 		$parametros.=$aplicacion;
@@ -299,3 +299,4 @@ function enviaComando($parametros,$idaccion)
 	return(true);
 }
 ?>
+

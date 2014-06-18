@@ -74,26 +74,26 @@ function confirmar(op){
 //	Comprobar_datos 
 //________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.nombreordenador.value=="") {
-		alert(TbMsg[0]);
-		document.fdatos.nombreordenador.focus();
-		return(false);
+	function validate (field, validator, msgi) {
+		if (!validator (field.value)) {
+			alert(TbMsg[msgi]);
+			validation_highlight (field);
+			return false;
+		}
+	return true;
 	}
-	if (document.fdatos.ip.value=="") {
-		alert(TbMsg[1]);
-		document.fdatos.ip.focus();
-		return(false);
-	}
-	if (document.fdatos.mac.value=="") {
-		alert(TbMsg[2]);
-		document.fdatos.mac.focus();
-		return(false);
-	}
-	var  p=document.fdatos.idrepositorio.selectedIndex
-	 if (p==0){  
-         alert(TbMsg[5])
-         document.forms.fdatos.idrepositorio.focus()
-         return(false)
-	}
-	return(true);
+
+        var form = document.fdatos;
+        // Si se activa la validación, comprobar que se incluyen los datos adecuados.
+        if (form.validacion.options[form.validacion.selectedIndex].value == 1 && (form.paginalogin.value == '' || form.paginavalidacion.value == '')) {
+                alert(TbMsg[6]);
+                validation_highlight (document.fdatos.paginalogin);
+                validation_highlight (document.fdatos.paginavalidacion);
+                return(false);
+        }
+
+	return 	validate (form.nombreordenador, validate_notnull, 0) &&
+		validate (form.ip, validate_ipadress_notnull, 1) &&
+		validate (form.mac, validate_macaddress_notnull, 2) &&
+		validate (form.idrepositorio, validate_number_notnull, 5) ;
 }

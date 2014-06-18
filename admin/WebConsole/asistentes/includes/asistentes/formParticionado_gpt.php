@@ -46,7 +46,9 @@ for ($p=1; $p<4; $p++) {
 
 <tr id="trPartition4">
 <td><input type="checkbox" name="checkGPT4" value="checkGPT4" onclick="clickPartitionCheckbox(this.form, 4,true);" /> <?php echo $TbMsg[20].' '.$p;?> </td>
-<td><input type="label" readonly size="8" name="partGPT4" disabled="true" value="CACHE" /></td>
+<td>
+<select name="partGPT4" id="partGPT4" style="width:220" disabled="true" onchange="checkExtendedPartition(form);"><? echo htmlForm_typepartnotcacheGPT(4) ?></select>
+</td>
 <td><select name="sizeGPT4" id="sizeGPT4" style="width:220" disabled="true" onclick="if (this.form.sizeGPT4.options[this.form.sizeGPT4.selectedIndex].value == 'CUSTOM') { this.form.sizeGPT4custom.disabled=false } else { this.form.sizeGPT4custom.disabled=true }" onchange="calculateFreeGPTDisk(this.form);" />
 	<option value="0"> <?php echo $TbMsg[40];?> </option>
 	<?php echo ''. htmlForm_sizepart($cmd,4) .''; ?>

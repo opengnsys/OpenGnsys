@@ -1,17 +1,40 @@
 #!/bin/bash
-# Scirpt de ejemplo para reiniciar un ordenador
+# Script de ejemplo para reiniciar un ordenador
 # (puede usarse como base para el programa de reinicio usado por OpenGNSys Admin).
 
-PROG="$(basename $0)"
+# Cargamos el valor por defecto del tiempo de sleep
+[ -z $OGSLEEP ] && source /opt/opengnsys/etc/engine.cfg
 
+# Si se recibe un parametro sera el tiempo de sleep antes de realizar el reboot
+if [ $# == 1 ] && [ "${1//[^0-9]/}" == "$1" ]
+then
+    TIME=$1
+    echo "[5] Se ha introducido un retardo de $TIME segundos para reiniciar"
+else
+    # Sin parámetros, o el parámetro introducido no es un número
+    TIME=${OGSLEEP:-5}
+    echo "[5] No se ha introducido un retardo, $TIME segundos para reiniciar"
+fi
+
+# Desmontar los sistemas de archivos y la caché local.
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
     ogUnmountAll $i 2>/dev/null
 done
 echo "[50] Desmontar cache local."
-ogUnmountCache
+ogUnmountCache 2>/dev/null
 echo "[90] Reiniciar el equipo."
-ethtool -s $DEVICE wol g
-(sleep 5 && busyboxOLD reboot) &
+# Estado correcto de Wake-On-Lan antes de reiniciar.
+ethtool -s $DEVICE wol g 2>/dev/null
+# Detectar Busybox.
+BUSYBOX=$(which busyboxOLD)
+BUSYBOX=${BUSYBOX:-"busybox"}
+
+# Retardo para dar lugar al registro en cola de acciones.
+sleep $TIME
+# Parar Browser para evitar "cuelgues".
+pkill browser
+# Reiniciar.
+$BUSYBOX reboot
 

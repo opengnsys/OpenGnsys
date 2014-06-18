@@ -16,21 +16,21 @@ $LITRESERVA_PARADA='Suspesa';  // Literal reserva momentàniament aturada
 $LITRESERVA_ACTIVA='Activa'; // Literal reserva activa
 
 $TbMsg=array();
-	$TbMsg[0]='Reserves d'aules';
+	$TbMsg[0]='Reserves d\'aules';
 	$TbMsg[1]='Opcions de búsqueda';
 	$TbMsg[2]='Tipus';
 	$TbMsg[3]='';
 	$TbMsg[4]='Estats';
-	$TbMsg[5]='Percentatge desde';
+	$TbMsg[5]='Percentatge des de';
 	$TbMsg[6]='Percentatge fins ';
 	$TbMsg[7]='Data inici';
 	$TbMsg[8]='Data final';
 	$TbMsg[9]='Hora inici';
 	$TbMsg[10]='Hora final';
-	$TbMsg[11]='Ámbit';
+	$TbMsg[11]='Àmbit';
 
 	$TbMsg[12]='Centres';
-	$TbMsg[13]='Grup d'aules';
+	$TbMsg[13]='Grup d\'aules';
 	$TbMsg[14]='Aules';
 
 	$TbMsg[15]='Any';
@@ -38,13 +38,13 @@ $TbMsg=array();
 	$TbMsg[17]='Día';
 	$TbMsg[18]='Aula';
 	$TbMsg[19]='Ocupació';
-	$TbMsg[20]='Imatge asociada';
+	$TbMsg[20]='Imatge associada';
 	$TbMsg[21]='Descripció';
 
 	$TbMsg[22]='Programació reserves';
 	$TbMsg[23]='(Sense especificar)';
 	$TbMsg[24]='Aula';
-	$TbMsg[25]='Solicitant';
+	$TbMsg[25]='Sol·licitant';
 	$TbMsg[26]="Anticipació previa";
 	$TbMsg[27]="(Sense acció previa)";
 	$TbMsg[28]="Tasca previa";

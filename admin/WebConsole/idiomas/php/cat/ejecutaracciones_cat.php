@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fitxer d'idiomes php: acciones_esp.php 
+//	Fitxer d'idiomes php: acciones_cat.php 
 //	Idioma: Català
 //________________________________________________________________________________________________________
 	$TbMsg=array();
@@ -11,8 +11,9 @@
 	$TbMsg[3]='Grup d\'ordinadors';
 	$TbMsg[4]='Ordinadors';
 	$TbMsg[5]='Execució de procediments';
-	$TbMsg[6]='Ámbit';
+	$TbMsg[6]='Àmbit';
 	$TbMsg[7]='Procediments';
-	$TbMsg[8]='Procedimients';
+	$TbMsg[8]='Procediments';
 	$TbMsg[9]='"Executar procediment"';
+	$TbMsg[10]='"Afegir com autoexec"';
 	?>

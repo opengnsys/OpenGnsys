@@ -7,6 +7,7 @@ include_once("../clases/SockHidra.php");
 include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
+include_once("../includes/tftputils.php");
 include_once("../idiomas/php/".$idioma."/aulas_".$idioma.".php");
 
 $cmd=CreaComando($cadenaconexion);
@@ -29,103 +30,11 @@ foreach ($lista as $sublista) {
 		$elementos = explode("|",$sublista);
 		$hostname=$elementos[1];
 		$optboot=$elementos[0];
-		ogBootServer($cmd,$optboot,$hostname,$idioma);
+		createBootMode ($cmd, $optboot, $hostname, $idioma);
 	}
 }
 echo " </body>";
 echo " </html> ";
-
-
-function ogBootServer($cmd,$optboot,$hostname,$idioma) 
-{	
-global $cmd;
-global $hostname;
-global $optboot;
-global $retrun;
-$return="\n";
-$cmd->CreaParametro("@optboot",$optboot,0);
-$cmd->CreaParametro("@hostname",$hostname,0);
-$cmd->texto="UPDATE ordenadores SET arranque=@optboot WHERE nombreordenador=@hostname";
-$cmd->Ejecutar();
-$cmd->texto="SELECT ordenadores.ip AS ip, ordenadores.mac AS mac, 
-			ordenadores.netiface AS netiface, aulas.netmask AS netmask,
-			aulas.router AS router, repositorios.ip AS iprepo,
-			aulas.nombreaula AS grupo,
-			menus.resolucion AS vga,
-			perfileshard.winboot AS winboot
-		FROM ordenadores 
-		JOIN aulas ON ordenadores.idaula=aulas.idaula 
-		JOIN repositorios ON ordenadores.idrepositorio=repositorios.idrepositorio 
-		LEFT JOIN menus ON ordenadores.idmenu=menus.idmenu 
-		LEFT JOIN perfileshard ON ordenadores.idperfilhard=perfileshard.idperfilhard
-		WHERE ordenadores.nombreordenador='". $hostname ."'";
-
-$rs=new Recordset; 
-$rs->Comando=&$cmd; 
-if (!$rs->Abrir()) echo "error";
-$rs->Primero(); 
-	$mac=$rs->campos["mac"];
-	$netiface=$rs->campos["netiface"];
-	$ip=$rs->campos["ip"];
-	$router=$rs->campos["router"];
-	$netmask=$rs->campos["netmask"]; 
-	$repo=$rs->campos["iprepo"];   			
-	$group=cleanString($rs->campos["grupo"]);
-	if($rs->campos["vga"]== null || $rs->campos["vga"]== 0)
-		$vga="788";
-	else
-		$vga=$rs->campos["vga"];
-	$winboot=$rs->campos["winboot"];
-
-$rs->Cerrar();
-
-$cmd->texto="SELECT ipserveradm FROM entornos";
-$rs=new Recordset;
-$rs->Comando=&$cmd;
-if (!$rs->Abrir()) echo "error";
-
-$rs->Primero();
-        $server=$rs->campos["ipserveradm"];
-$rs->Cerrar();
-
-
-switch ($idioma) {
-    case "eng":
-        $idioma="en_GB";
-        break;
-    case "esp":
-        $idioma="es_ES";
-        break;
-    case "cat":
-        $idioma="ca_ES";
-        break;
-}
-
-
-$infohost=" vga=$vga".
-	  " LANG=$idioma".
-	  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
-	  " group=$group" .
-	  " ogrepo=$repo" .
-	  " oglive=$repo" .
-	  " oglog=$server" .
-	  " ogshare=$server";
-if (! empty ($winboot)) {
-	  $infohost.=" winboot=$winboot";
-}
-
-###################obtenemos las variables de red del aula.
-
-#02.1 obtenemos nombre fichero mac
-$pxedir="/opt/opengnsys/tftpboot/menu.lst";
-$mac=  substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-$macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));	
-
-#controlar optboot
-
-exec("sed -e 's/vga=...//g' -e 's/INFOHOST/$infohost/g' $pxedir/templates/$optboot > $macfile");
-exec("chmod 777 $macfile");
-}
 
 
 function netmask2cidr($netmask) {
@@ -137,13 +46,4 @@ function netmask2cidr($netmask) {
            }
            return $cidr;
 }
-
-// Sustituye espacio por "_" y quita acentos y tildes.
-function cleanString ($cadena) {
-	$patron = array ('/ /','/á/','/é/','/í/','/ó/','/ú/','/ñ/','/Á/','/É/','/Í/','/Ó/','/Ú/','/Ñ/');
-	$reemplazo = array ('_','a','e','i','o','u','n','A','E','I','O','U','N');
-	return  preg_replace($patron,$reemplazo,$cadena);
-}
-
-?>
 

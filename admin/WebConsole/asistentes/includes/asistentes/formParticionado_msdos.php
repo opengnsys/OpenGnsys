@@ -51,7 +51,16 @@ for ($p=1; $p<4; $p++) {
 
 <tr>
 <td><input type="checkbox" name="check4" value="check4" onclick="clickPartitionCheckbox(this.form, 4);" /> <?php echo $TbMsg[20].' '.$p;?> </td>
-<td><input type="label" readonly size="8" name="part4" disabled="true" value="CACHE" /></td>
+<td>
+<!--
+<select disabled="true" name="part4" id="part4" size="1"  onclick="if (this.form.part4.options[this.form.part4.selectedIndex].value == 'PART') { this.form.part4custom.disabled=false } else { this.form.part4custom.disabled=true }"  onchange="checkExtendedPartition(form);" />
+	<option value="CACHE" selected="selected">CACHE</option>
+	<option value="PART">Particion</option>
+</select>
+<br />
+-->
+<select name="part4" id="part4" style="width:220" disabled="true" onchange="checkExtendedPartition(form);"><? echo htmlForm_typepartnotcacheEngine10(4) ?></select>
+</td>
 <td><select name="size4" id="size4" style="width:220" disabled="true" onclick="if (this.form.size4.options[this.form.size4.selectedIndex].value == 'CUSTOM') { this.form.size4custom.disabled=false } else { this.form.size4custom.disabled=true }" onchange="calculateFreeDisk(this.form);" />
 	<option value="0"> <?php echo $TbMsg[40];?> </option>
 	<?php echo ''. htmlForm_sizepart($cmd,4) .''; ?>

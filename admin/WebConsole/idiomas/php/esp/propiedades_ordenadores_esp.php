@@ -20,6 +20,11 @@ $TbMsg[11]="Men&uacute;";
 $TbMsg[12]="Tama&ntilde;o cach&eacute; (KB)";
 $TbMsg[13]="Interfaz de red";
 $TbMsg[14]="Driver de red";
+// UHU
+$TbMsg[15]="Validación";
+$TbMsg[16]="Pagina login";
+$TbMsg[17]="Pagina validación";
+// UHU
 $TbMsg[509]="Foto ordenador";
 $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";

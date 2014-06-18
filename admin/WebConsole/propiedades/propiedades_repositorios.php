@@ -1,4 +1,4 @@
-<?  
+<?php
 // *********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -26,11 +26,13 @@ $pathpxe="/opt/opengnsys/tftpboot/pxelinux.cfg";
 $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
+$numordenadores=0; // Número de ordenador a los que da servicio
+$repolocal="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"]; 
-if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"]; 
+if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
@@ -41,6 +43,44 @@ if  ($opcion!=$op_alta){
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci�n de datos.
 }
 //________________________________________________________________________________________________________
+//#########################################################################
+$iprepositorio="";
+$ipservidor=$_SERVER['SERVER_ADDR'];
+
+	$cmd->texto="SELECT * FROM repositorios WHERE idrepositorio=$idrepositorio";
+	$rs=new Recordset;
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero(); 
+	if (!$rs->EOF){
+		$nombrerepositorio=$rs->campos["nombrerepositorio"];
+		$iprepositorio=$rs->campos["ip"];
+	}
+	$rs->Cerrar();
+
+if ($iprepositorio == $ipservidor)
+{
+	$repolocal="si";
+	$espaciorepo=exec("df -h /opt/opengnsys/images");
+	$espaciorepo=split(" ",$espaciorepo);
+	for ($j=0;$j<count($espaciorepo);$j++)
+	{
+	        if ($espaciorepo[$j]!="")
+	                {$espaciorepos[]=$espaciorepo[$j];}
+	}
+	for ($k=0;$k<count($espaciorepos);$k++)
+	{
+	        $totalrepo=$espaciorepos[1];
+    	    $ocupadorepo=$espaciorepos[2];
+	        $librerepo=$espaciorepos[3];
+	        $porcentajerepo=$espaciorepos[4];
+	}
+}
+else{
+	$repolocaL="no";
+	}
+
+//#########################################################################
 ?>
 <HTML>
 <TITLE>Administración web de aulas</TITLE>
@@ -129,6 +169,34 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	
 	</TABLE>
+		<?php	if ( $opcion == 1 ){} else { ?>
+
+	<TABLE  align=center border=0 cellPadding=2 cellSpacing=2 class=tabla_datos >
+    <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+		<?php  if ($repolocal == "si" ) { ?>
+		<TR>
+			<TH align=center width=125>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
+			<TH align=center width=101>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
+		</TR>
+                <TR>
+			<TD align=center width=125>&nbsp;<?echo $totalrepo?>&nbsp;</TD>
+            		<TD align=center width=120>&nbsp;<?echo $ocupadorepo?>&nbsp;</TD>
+           		<TD align=center width=120>&nbsp;<?echo $librerepo?>&nbsp;</TD>
+           		<TD align=center width=101>&nbsp;<?echo $porcentajerepo?>&nbsp;</TD>
+                </TR>
+		<?php }else { ?>
+		<tr>
+			<th align="center">&nbsp;<?php echo '<strong>'.$TbMsg[15].'</strong></br>'.$TbMsg[16] ?></th>
+		</tr>
+        		<?php } ?>
+		<?php } ?>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+    
+   	</TABLE>
+	
 </FORM>
 </DIV>
 <?
@@ -154,6 +222,7 @@ function TomaPropiedades($cmd,$id){
 	global $pathpxe;
 	global $ordenadores;
 
+
 	// NOTA: el parámetro "numordenadores" no se está utilizando, por lo que se
 	//	 simplifica la consulta, ignorando dicho valor.
 /*
@@ -173,7 +242,7 @@ function TomaPropiedades($cmd,$id){
 		$puertorepo=$rs->campos["puertorepo"];
 		$pathrepod=$rs->campos["pathrepod"];
 		$pathpxe=$rs->campos["pathpxe"];
-		$ordenadores=$rs->campos["numordenadores"];
+//		$ordenadores=$rs->campos["numordenadores"];
 	}
 	$rs->Cerrar();
 	return(true);

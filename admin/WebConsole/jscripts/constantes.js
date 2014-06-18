@@ -116,3 +116,9 @@ var MSG_NOTIFICACION=0x02; // Respuesta a la ejecución un comando
 var MSG_PETICION=0x03; // Petición de cualquier actuación
 var MSG_RESPUESTA=0x04; // Respuesta a una petición
 var MSG_INFORMACION=0x05; // Envío de cualquier información sin espera de confirmación o respuesta
+
+
+// Tipos de imagenes
+var IMAGENES_MONOLITICAS=0x01;
+var IMAGENES_BASICAS=0x02;
+var IMAGENES_INCREMENTALES=0x03;

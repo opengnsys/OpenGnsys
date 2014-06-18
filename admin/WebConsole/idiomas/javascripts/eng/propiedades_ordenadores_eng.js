@@ -10,3 +10,4 @@ TbMsg[2]="You must introduce a MAC Address";
 TbMsg[3]="You must link this computer with some of a hardware profile";
 TbMsg[4]="You must introduce a DHCP server";
 TbMsg[5]="You must introduce a OpenGnsys server";
+TbMsg[6]="Deben introducirse datos de validación: página de login y página de validación";

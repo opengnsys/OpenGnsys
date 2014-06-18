@@ -7,16 +7,32 @@
 // Nombre del fichero: barramenu.php
 // Descripción :Este fichero implementa el menu general de la Aplicación
 // ********************************************************************************************************
+// Compatibilidad
+$device="";$device = strtolower($_SERVER['HTTP_USER_AGENT']);
+if(stripos($device,'iphone') !== false ){$device="iphone";}
+elseif  (stripos($device,'ipad') !== false) {$device="ipad";}
+elseif (stripos($device,'android') !== false){$device="android";}
+else{$device=0;}
+$version=exec("cat /opt/opengnsys/doc/VERSION.txt");
+if(ereg("1.0.4",$version) == TRUE ){$version=4;}
+// ********************************************************************************************************
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
+include_once("./includes/CreaComando.php");
+include_once("./clases/AdoPhp.php");
 include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 //________________________________________________________________________________________________________
+
+//________________________________________________________________________________________________________
+$cmd=CreaComando($cadenaconexion);
+if (!$cmd)
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�n con servidor B.D.
+//___________________________________________________________________________________________________
 ?>
 <HTML>
-	<TITLE>Administración web de aulas</TITLE>
 	<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-		<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1"> 
+		<TITLE>Administración web de aulas</TITLE>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 		<SCRIPT language="javascript">
 			var currentOp=null;
@@ -45,39 +61,78 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 				var 	href3="./api/tree.html"
 				var 	href4="./api/main.html"
 				var 	href5="./api/index.html"
+				var	device="<?php echo $device;?>";
+				var	version="<?php echo $version;?>";
+
 
 				switch(op){
 					case 1: 
-						href="./principal/aulas.php"
-						break;
+							if (device!="0"){
+							href="./principal/aulas.device.php"
+							break;}
+							else{href="./principal/aulas.php" 
+							break;}
+							
 					case 2:
-							href="./principal/acciones.php"
-							break;
+							if (device!="0"){
+							href="./principal/acciones.device.php"
+							break;}
+							else{href="./principal/acciones.php"
+							break;}
 					case 3:
-							href="./principal/imagenes.php"
-							break;
+							if (device!="0"){
+								if (version=="4"){
+								href="./principal/imagenes.device4.php"
+								break;}
+								else{href="./principal/imagenes.device.php"
+								break;}
+							}else{href="./principal/imagenes.php"
+							break;}
 					case 4:
-							href="./principal/hardwares.php"
-							break;
+							if (device!="0"){
+							href="./principal/hardwares.device.php"
+							break;}
+							else{href="./principal/hardwares.php"
+							break;}
 					case 5:
-							href="./principal/softwares.php"
-							break;
+							if (device!="0"){
+							href="./principal/softwares.device.php"
+							break;}
+							else{href="./principal/softwares.php"
+							break;}
 					case 6:
-							href="./principal/repositorios.php"
-							break;
+							if (device!="0"){
+							href="./principal/repositorios.device.php"
+							break;}
+							else{href="./principal/repositorios.php"
+							break;}
 					case 7:
-							href="./principal/menus.php"
-							break;
+							if (device!="0"){
+							href="./principal/menus.device.php"
+							break;}
+							else{href="./principal/menus.php"
+							break;}
 					case 8:
 							href="./principal/reservas.php"
 							break;
 					case 9:
-							href="./principal/administracion.php"
-							break;
+							if (device!="0"){
+							href="./principal/administracion.device.php"
+							break;}
+							else{href="./principal/administracion.php"
+							break;}
 					case 10:
 							href="./images/L_Iconos.php"
 							href2="./images/M_Iconos.php"
 							break;
+					case 11:
+							if (device!="0"){
+							href="./principal/administracion.device.php"
+							href2="./principal/boot_grub4dos.php"
+							break;}
+							else{href="./principal/administracion.php"
+							href2="./principal/boot_grub4dos.php"
+							break;}
 					case 13:
 							href="./principal/usuarios.php"
 							break;
@@ -105,13 +160,16 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 							case 22: 		
 									opadre.frames["frame_contenidos"].document.location.href=href5
 									break;
+							case 23:                
+                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade.php"
+                                                                        break;
 						}
 				}
 		}
 	//________________________________________________________________________________________________________
 		</SCRIPT>
 	</HEAD>
-	<BODY bgcolor="#d4d0c8">
+	<BODY style="background-color: #d4d0c8;">
 		<FORM name=fdatos>
 			<TABLE border=0 width=100% style="POSITION:absolute;LEFT:0px;TOP:0px" cellPadding=2 cellSpacing=0>
 				<TR>
@@ -161,17 +219,85 @@ include_once("./idiomas/php/".$idioma."/barramenu_".$idioma.".php");
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
 											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+                                            <TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+                                            <A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/tablas.gif">
+                                            <SPAN class=menupral ><?echo  $TbMsg[15] ?></SPAN></A>&nbsp;</TD>
+                                            <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+									
 									<?}?>
 							<?}?>
 
-							<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;
-							<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
-								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-							<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
-							<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;
-							<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
-		
+											<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
+ 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+											<TD  onclick=eleccion(this,23) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
+											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+											<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
+											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+
+
+<?php if($idtipousuario!=$SUPERADMINISTRADOR){ ?>
+<TD>
+<?php
+	$usuarioactual=$_SESSION["wusuario"];
+	$cmd->texto="SELECT * FROM centros
+				INNER JOIN administradores_centros ON administradores_centros.idcentro=centros.idcentro
+				INNER JOIN usuarios ON usuarios.idusuario=administradores_centros.idusuario
+				WHERE usuarios.usuario='".$usuarioactual."'
+				AND centros.identidad=".$_SESSION["widentidad"];
+	$rs=new Recordset;
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero(); 
+	while (!$rs->EOF){
+		$identidad=$rs->campos["identidad"];
+		$idcentro=$rs->campos["idcentro"];
+		$nombrecentro=$rs->campos["nombrecentro"];
+		$numidcentro[]=$idcentro;$numnombrecentro[]=$nombrecentro;
+	$rs->Siguiente();
+					  }//Cierre
+	$rs->Cerrar();
+echo '<form></form>';
+if (count($numidcentro) > 1)
+{
+?>
+<form name="fcentros" action="frames.php" target="_parent" method="POST">
+<select name="idmicentro" id="idmicentro" >
+<option value=""> -- <?php echo $_SESSION["wnombrecentro"] ;?> -- </option>
+<?php
+for ($i=0;$i<count($numidcentro);$i++)
+	{
+		if ($_SESSION["wnombrecentro"] == $numnombrecentro[$i])
+		{}else{
+		echo '<option value="'.$numidcentro[$i].','.$numnombrecentro[$i].'"># - '.$numnombrecentro[$i].'</option>';
+			}
+	}
+?>
+
+</select>
+<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+<TD width=4 align=middle><input name="submit" type="submit" value="Cambiar" ></input></TD>
+
+</form>
+<TD width=0 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
+<TD><?php echo "Usuario.:.".ucwords($_SESSION["wusuario"]); ?></TD>
+
+</TD>
+<?php } }?>
+
+
+
+
+
 
 						   </TR>
 						 </TABLE>

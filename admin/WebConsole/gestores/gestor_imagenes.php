@@ -21,6 +21,7 @@ $opcion=0; // Inicializa parametros
  
 $idimagen=0; 
 $nombreca="";
+$ruta="";
 $descripcion="";
 $grupoid=0; 
 $idperfilsoft=0;
@@ -28,11 +29,15 @@ $comentarios="";
 $numpar=0;
 $codpar=0;
 $idrepositorio=0;
+$imagenid=0;
+$tipoimg=0;
+$litamb="";
 
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
 
 if (isset($_POST["idimagen"])) $idimagen=$_POST["idimagen"];
 if (isset($_POST["nombreca"])) $nombreca=$_POST["nombreca"]; 
+if (isset($_POST["ruta"])) $ruta=$_POST["ruta"]; 
 if (isset($_POST["descripcion"])) $descripcion=$_POST["descripcion"]; 
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
@@ -41,6 +46,9 @@ if (isset($_POST["identificador"])) $idimagen=$_POST["identificador"];
 if (isset($_POST["numpar"])) $numpar=$_POST["numpar"]; 
 if (isset($_POST["codpar"])) $codpar=$_POST["codpar"]; 
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
+if (isset($_POST["imagenid"])) $imagenid=$_POST["imagenid"]; 
+if (isset($_POST["tipoimg"])) $tipoimg=$_POST["tipoimg"]; 
+if (isset($_POST["litamb"])) $litamb=$_POST["litamb"]; 
 
 $tablanodo=""; // Arbol para nodos insertados
 
@@ -95,9 +103,9 @@ if($opcion!=$op_movida){
 	echo '</BODY>	';
 	echo '</HTML>';	
 }
-/**************************************************************************************************************************************************
+/*********************************************************************************************************
 	Inserta, modifica o elimina datos en la tabla imagenes
-________________________________________________________________________________________________________*/
+/*********************************************************************************************************/
 function Gestiona(){
 	global	$cmd;
 	global	$opcion;
@@ -105,13 +113,16 @@ function Gestiona(){
 	global	$idcentro;
 	global	$idimagen;
 	global	$nombreca;
+	global	$ruta;
 	global	$descripcion;
 	global	$grupoid;
 	global	$comentarios;
 	global	$numpar;
 	global	$codpar;
 	global	$idrepositorio;
+	global	$imagenid;
 	global	$idperfilsoft;
+	global	$tipoimg;
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -124,6 +135,7 @@ function Gestiona(){
 
 	$cmd->CreaParametro("@idimagen",$idimagen,1);
 	$cmd->CreaParametro("@nombreca",$nombreca,0);
+	$cmd->CreaParametro("@ruta",$ruta,0);
 	$cmd->CreaParametro("@descripcion",$descripcion,0);
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idperfilsoft",$idperfilsoft,1);
@@ -131,11 +143,13 @@ function Gestiona(){
 	$cmd->CreaParametro("@numpar",$numpar,1);
 	$cmd->CreaParametro("@codpar",$codpar,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@imagenid",$imagenid,1);
+	$cmd->CreaParametro("@tipo",$tipoimg,1);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO imagenes (nombreca,descripcion,idperfilsoft,comentarios,numpar,codpar,idrepositorio,idcentro,grupoid)
-								 VALUES (@nombreca,@descripcion,@idperfilsoft,@comentarios,@numpar,@codpar,@idrepositorio,@idcentro,@grupoid)";
+			$cmd->texto="INSERT INTO imagenes (nombreca,ruta,descripcion,idperfilsoft,comentarios,numpar,codpar,idrepositorio,imagenid,idcentro,grupoid,tipo)
+								 VALUES (@nombreca,@ruta,@descripcion,@idperfilsoft,@comentarios,@numpar,@codpar,@idrepositorio,@imagenid,@idcentro,@grupoid,@tipo)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idimagen=$cmd->Autonumerico();
@@ -147,9 +161,10 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE imagenes SET  nombreca=@nombreca,descripcion=@descripcion,idperfilsoft=@idperfilsoft,
-									 comentarios=@comentarios,numpar=@numpar,codpar=@codpar,idrepositorio=@idrepositorio
-									  WHERE idimagen=@idimagen";
+			$cmd->texto="UPDATE imagenes SET  nombreca=@nombreca,ruta=@ruta,descripcion=@descripcion,idperfilsoft=@idperfilsoft,
+						 comentarios=@comentarios,numpar=@numpar,codpar=@codpar,idrepositorio=@idrepositorio,
+						 imagenid=@imagenid
+						WHERE idimagen=@idimagen";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
@@ -167,14 +182,16 @@ function Gestiona(){
 /*________________________________________________________________________________________________________
 	Crea un arbol XML para el nuevo nodo insertado 
 ________________________________________________________________________________________________________*/
-function SubarbolXML_imagenes($idimagen,$descripcion){
-		global 	$LITAMBITO_IMAGENES;
+function SubarbolXML_imagenes($idimagen,$descripcion)
+{
+		global $litamb;
+
 		$cadenaXML='<IMAGEN';
 		// Atributos
 		$cadenaXML.=' imagenodo="../images/iconos/imagen.gif"';
 		$cadenaXML.=' infonodo="'.$descripcion.'"';
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_IMAGENES."'" .')"';
-		$cadenaXML.=' nodoid='.$LITAMBITO_IMAGENES.'-'.$idimagen;
+		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$litamb."'" .')"';
+		$cadenaXML.=' nodoid='.$litamb.'-'.$idimagen;
 		$cadenaXML.='>';
 		$cadenaXML.='</IMAGEN>';
 		return($cadenaXML);

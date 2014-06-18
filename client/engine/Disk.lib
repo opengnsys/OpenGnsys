@@ -4,9 +4,16 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 1.0.4
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
+
+
+# Función ficticia para lanzar parted con timeout, evitando cuelgues del programa.
+function parted ()
+{
+timeout -k 5s -s KILL 3s $(which parted) "$@"
+}
 
 
 #/**
@@ -24,7 +31,7 @@
 #@attention No puede definirse partición de cache y no se modifica si existe.
 #@note    Requisitos: sfdisk, parted, partprobe, awk
 #@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/09
 #@version 0.9.1 - Corrección del redondeo del tamaño del disco.
@@ -44,7 +51,7 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 NTFS:10000000 EXT3:5000000 LINUX-SWAP:1000000"
     return
 fi
-# Error si no se reciben menos de 2 parámetros.
+# Error si no se reciben al menos 2 parámetros.
 [ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Nº total de sectores, para evitar desbordamiento (evitar redondeo).
@@ -94,13 +101,13 @@ while [ $# -gt 0 ]; do
     SIZE=$[SIZE*2]
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
-        [ $PART -gt 4 ] && ogRaiseError $OG_ERR_FORMAT && return $?
+        [ $PART -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
         EXTSTART=$START
         EXTSIZE=$SIZE
     fi
     # Incluir particiones lógicas dentro de la partición extendida.
     if [ $PART = 5 ]; then
-        [ -z "$EXTSTART" ] && ogRaiseError $OG_ERR_FORMAT && return $?
+        [ -n "$EXTSTART" ] || ogRaiseError $OG_ERR_FORMAT || return $?
         START=$EXTSTART
         SECTORS=$[EXTSTART+EXTSIZE]
     fi
@@ -247,7 +254,7 @@ sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    tabletype: { MSDOS, GPT }
 #@note    Requisitos: sfdisk, sgdisk
-#@version 1.0.4 - Primera versión compatible con OpenGNSys.
+#@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/03/06
 #*/ ##
@@ -355,7 +362,7 @@ esac
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: DiskEAC() en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
+#@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009/07/20
 #*/ ##
@@ -402,9 +409,12 @@ return $OG_ERR_NOTFOUND
 #@Date    2008/06/19
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
+#@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-07-20
+#@version 1.0.5 - Comprobación correcta de parámetros para soportar valores > 9.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2013-05-07
 #*/ ##
 function ogDiskToDev ()
 {
@@ -430,15 +440,15 @@ case $# in
     0)  # Muestra todos los discos, separados por espacios.
         echo $ALLDISKS
         ;;
-    1)  # Error si el parámetro no es un digito.
-        [ -z "${1/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+    1)  # Error si el parámetro no es un número positivo.
+        [[ "$1" =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
         DISK=$(echo "$ALLDISKS" | awk -v n=$1 '{print $n}')
         # Error si el fichero no existe.
         [ -e "$DISK" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
         echo "$DISK"
         ;;
-    2)  # Error si los 2 parámetros no son digitos.
-        [ -z "${1/[1-9]/}" -a -z "${2/[1-9]/}" ] || ogRaiseError $OG_ERR_FORMAT|| return $?
+    2)  # Error si los 2 parámetros no son números positivos.
+        [[ "$1" =~ ^[1-9][0-9]*$ ]] && [[ "$2" =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1 $2" || return $?
         DISK=$(echo "$ALLDISKS" | awk -v n=$1 '{print $n}')
         [ -e "$DISK" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
         PART="$DISK$2"
@@ -460,118 +470,6 @@ case $# in
         return $OG_ERR_FORMAT
         ;;
 esac
-}
-
-
-#/**
-#         ogFsToId str_fstype
-#@see     ogTypeToId
-#*/ ##
-function ogFsToId ()
-{
-ogTypeToId "$@"
-}
-
-
-#/**
-#         ogTypeToId str_parttype str_tabletype
-#@brief   Devuelve el identificador correspondiente a un tipo de partición.
-#@param   str_parttype  mnemónico de tipo de partición. 
-#@param   str_tabletype mnemónico de tipo de tabla de particiones (MSDOS por defecto).
-#@return  int_idpart    identificador de tipo de partición.
-#@exception OG_ERR_FORMAT   Formato incorrecto.
-#@note    tabletype = { MSDOS, GPT }
-#@version 0.1 -  Integracion para Opengnsys  -  EAC: TypeFS () en ATA.lib 
-#@author  Antonio J. Doblas Viso, Universidad de Malaga
-#@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
-#@author  Ramon Gomez, ETSII Universidad Sevilla
-#@date    2009-12-14
-#@version 1.0.4 - Soportar discos GPT (sustituye a ogFsToId).
-#@author  Universidad de Huelva
-#@date    2012/03/30
-#*/ ##
-function ogTypeToId ()
-{
-# Variables locales
-local PTTYPE ID
-
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME str_parttype [str_tabletype]" \
-           "$FUNCNAME LINUX  =>  83" \
-           "$FUNCNAME LINUX MSDOS  =>  83"
-    return
-fi
-# Error si no se reciben 2 parámetro.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Asociar id. de partición para su mnemónico.
-PTTYPE=${2:-"MSDOS"}
-case "$PTTYPE" in
-    GPT) # Se incluyen mnemónicos compatibles con tablas MSDOS.
-        case "$1" in
-            EMPTY)      ID=0 ;;
-            WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12|HNTFS|HFAT32|HFAT16|HFAT12)
-                        ID=0700 ;;
-            WIN-RESERV) ID=0C01 ;;
-            CHROMEOS-KRN) ID=7F00 ;;
-            CHROMEOS)   ID=7F01 ;;
-            CHROMEOS-RESERV) ID=7F02 ;;
-            LINUX-SWAP) ID=8200 ;;
-            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
-                        ID=8300 ;;
-            LINUX-RESERV) ID=8301 ;;
-            LINUX-LVM)  ID=8E00 ;;
-            FREEBSD-DISK) ID=A500 ;;
-            FREEBSD-BOOT) ID=A501 ;;
-            FREEBSD-SWAP) ID=A502 ;;
-            FREEBSD)    ID=A503 ;;
-            HFS|HFS+)   ID=AF00 ;;
-            HFS-RAID)   ID=AF01 ;;
-            SOLARIS-BOOT) ID=BE00 ;;
-            SOLARIS)    ID=BF00 ;;
-            SOLARIS-SWAP) ID=BF02 ;;
-            SOLARIS-DISK) ID=BF03 ;;
-            CACHE)      ID=CA00;;
-            EFI)        ID=EF00 ;;
-            LINUX-RAID) ID=FD00 ;;
-            *)          ID="" ;;
-        esac
-        ;;
-    MSDOS)
-        case "$1" in
-            EMPTY)      ID=0  ;;
-            FAT12)      ID=1  ;;
-            EXTENDED)   ID=5  ;;
-            FAT16)      ID=6  ;;
-            WINDOWS|NTFS|EXFAT) 
-                        ID=7  ;;
-            FAT32)      ID=b  ;;
-            HFAT12)     ID=11 ;;
-            HFAT16)     ID=16 ;;
-            HNTFS)      ID=17 ;;
-            HFAT32)     ID=1b ;;
-            LINUX-SWAP) ID=82 ;;
-            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
-                        ID=83 ;;
-            LINUX-LVM)  ID=8e ;;
-            FREEBSD)    ID=a5 ;;
-            OPENBSD)    ID=a6 ;;
-            HFS|HFS+)   ID=af ;;
-            SOLARIS-BOOT) ID=be ;;
-            SOLARIS)    ID=bf ;;
-            CACHE)      ID=ca ;;
-            DATA)       ID=da ;;
-            GPT)        ID=ee ;;
-            EFI)        ID=ef ;;
-            VMFS)       ID=fb ;;
-            LINUX-RAID) ID=fd ;;
-            *)          ID="" ;;
-        esac
-        ;;
-esac
-echo $ID
 }
 
 
@@ -702,7 +600,7 @@ echo $LASTSECTOR
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@note    Requisitos: parted
 #@todo    Queda definir formato para atributos (arranque, oculta, ...).
-#@version 0.9 - Primera version compatible con OpenGNSys.
+#@version 0.9 - Primera version compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/17
 #*/ ##
@@ -780,7 +678,7 @@ echo $ID
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: SizePartition () en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version para OpenGNSys
+#@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
@@ -890,7 +788,7 @@ parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}'
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
 #@return  Mnemonico
-#@note    Mnemonico: { EXT2, EXT3, EXT4, REISERFS, XFS, JFS, LINUX-SWAP, LINUX-LVM, LINUX-RAID, SOLARIS, FAT16, HFAT16, FAT32, HFAT32, NTFS, HNTFS, WIN-DYNAMIC, CACHE, EMPTY, EXTENDED, UNKNOWN }
+#@note    Mnemonico: valor devuelto por ogIdToType.
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:   TypeFS() en ATA.lib
@@ -902,6 +800,9 @@ parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}'
 #@version 1.0.3 - Código trasladado de antigua función ogGetFsType.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-12-01
+#@version 1.0.5 - Usar función ogIdToType para hacer la conversión id. a tipo.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013-09-19
 #*/ ##
 function ogGetPartitionType ()
 {
@@ -919,50 +820,7 @@ fi
 
 # Detectar id. de tipo de partición y codificar al mnemonico.
 ID=$(ogGetPartitionId "$1" "$2") || return $?
-case "$ID" in
-     0)         TYPE="EMPTY" ;;
-     1)         TYPE="FAT12" ;;
-     5|f)       TYPE="EXTENDED" ;;
-     6|e)       TYPE="FAT16" ;;
-     7)         TYPE="NTFS" ;;
-     700|0700)  TYPE="WINDOWS" ;;
-     b|c)       TYPE="FAT32" ;;
-     C01|0C01)  TYPE="WIN-RESERV" ;;
-     11)        TYPE="HFAT12" ;;
-     12)        TYPE="COMPAQDIAG" ;;
-     16|1e)     TYPE="HFAT16" ;;
-     17)        TYPE="HNTFS" ;;
-     1b|1c)     TYPE="HFAT32" ;;
-     42)        TYPE="WIN-DYNAMIC" ;;
-     7F00)      TYPE="CHROMEOS-KRN" ;;
-     7F01)      TYPE="CHROMEOS" ;;
-     7F02)      TYPE="CHROMEOS-RESERV" ;;
-     82|8200)   TYPE="LINUX-SWAP" ;;
-     83|8300)   TYPE="LINUX" ;;
-     8301)      TYPE="LINUX-RESERV" ;;
-     8e|8E00)   TYPE="LINUX-LVM" ;;
-     a5|A503)   TYPE="FREEBSD" ;;
-     A500)      TYPE="FREEBSD-DISK" ;;
-     A501)      TYPE="FREEBSD-BOOT" ;;
-     A502)      TYPE="FREEBSD-SWAP" ;;
-     a6)        TYPE="OPENBSD" ;;
-     a7)        TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     af|AF00)   TYPE="HFS" ;;
-     Af01)      TYPE="HFS-RAID" ;;
-     be|BE00)   TYPE="SOLARIS-BOOT" ;;
-     bf|BF0[0145]) TYPE="SOLARIS" ;;
-     BF02)      TYPE="SOLARIS-SWAP" ;;
-     BF03)      TYPE="SOLARIS-DISK" ;;
-     ca|CA00)   TYPE="CACHE" ;;
-     da)        TYPE="DATA" ;;
-     ee)        TYPE="GPT" ;;
-     ef|EF00)   TYPE="EFI" ;;
-     EF01)      TYPE="MBR" ;;
-     EF02)      TYPE="BIOS-BOOT" ;;
-     fb)        TYPE="VMFS" ;;
-     fd|FD00)   TYPE="LINUX-RAID" ;;
-     *)         TYPE="UNKNOWN" ;;
-esac
+TYPE=$(ogIdToType "$ID")
 echo "$TYPE"
 }
 
@@ -1005,7 +863,82 @@ case "$TYPE" in
             return $? ;;
 esac
 # Cambiar tipo de partición.
-ogSetPartitionId $1 $2 $NEWTYPE
+ogSetPartitionType $1 $2 $NEWTYPE
+}
+
+
+#/**
+#         ogIdToType int_idpart
+#@brief   Devuelve el identificador correspondiente a un tipo de partición.
+#@param   int_idpart    identificador de tipo de partición.
+#@return  str_parttype  mnemónico de tipo de partición. 
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@version 1.0.5 - Primera version para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2013-02-07
+#*/ ##
+function ogIdToType ()
+{
+# Variables locales
+local ID TYPE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_idpart" \
+           "$FUNCNAME 83  =>  LINUX"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener valor hexadecimal de 4 caracteres rellenado con 0 por delante.
+ID=$(printf "%4s" "$1" | tr ' ' '0')
+case "${ID,,}" in
+     0000)      TYPE="EMPTY" ;;
+     0001)      TYPE="FAT12" ;;
+     0005|000f) TYPE="EXTENDED" ;;
+     0006|000e) TYPE="FAT16" ;;
+     0007)      TYPE="NTFS" ;;
+     000b|000c) TYPE="FAT32" ;;
+     0011)      TYPE="HFAT12" ;;
+     0012)      TYPE="COMPAQDIAG" ;;
+     0016|001e) TYPE="HFAT16" ;;
+     0017)      TYPE="HNTFS" ;;
+     001b|001c) TYPE="HFAT32" ;;
+     0042)      TYPE="WIN-DYNAMIC" ;;
+     0082|8200) TYPE="LINUX-SWAP" ;;
+     0083|8300) TYPE="LINUX" ;;
+     008e|8E00) TYPE="LINUX-LVM" ;;
+     00a5|a503) TYPE="FREEBSD" ;;
+     00a6)      TYPE="OPENBSD" ;;
+     00a7)      TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
+     00af|af00) TYPE="HFS" ;;
+     00be|be00) TYPE="SOLARIS-BOOT" ;;
+     00bf|bf0[0145]) TYPE="SOLARIS" ;;
+     00ca|ca00) TYPE="CACHE" ;;
+     00da)      TYPE="DATA" ;;
+     00ee)      TYPE="GPT" ;;
+     00ef|ef00) TYPE="EFI" ;;
+     00fb)      TYPE="VMFS" ;;
+     00fd|fd00) TYPE="LINUX-RAID" ;;
+     0700)      TYPE="WINDOWS" ;;
+     0c01)      TYPE="WIN-RESERV" ;;
+     7f00)      TYPE="CHROMEOS-KRN" ;;
+     7f01)      TYPE="CHROMEOS" ;;
+     7f02)      TYPE="CHROMEOS-RESERV" ;;
+     8301)      TYPE="LINUX-RESERV" ;;
+     a500)      TYPE="FREEBSD-DISK" ;;
+     a501)      TYPE="FREEBSD-BOOT" ;;
+     a502)      TYPE="FREEBSD-SWAP" ;;
+     ab00)      TYPE="HFS-BOOT" ;;
+     af01)      TYPE="HFS-RAID" ;;
+     bf02)      TYPE="SOLARIS-SWAP" ;;
+     bf03)      TYPE="SOLARIS-DISK" ;;
+     ef01)      TYPE="MBR" ;;
+     ef02)      TYPE="BIOS-BOOT" ;;
+     *)         TYPE="UNKNOWN" ;;
+esac
+echo "$TYPE"
 }
 
 
@@ -1019,7 +952,7 @@ ogSetPartitionId $1 $2 $NEWTYPE
 #@note    Requisitos: \c parted \c awk
 #@attention El nº de partición se indica por el orden de los párametros \c parttype:partsize
 #@attention Las tuplas de valores están separadas por espacios.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
@@ -1103,7 +1036,7 @@ echo $PARTS | cut -sf5- -d" "
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: SetPartitionActive() en ATA.lib
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2008/10/27
-#@version 0.9 - Primera version compatible con OpenGNSys.
+#@version 0.9 - Primera version compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/09/17
 #*/ ##
@@ -1129,12 +1062,16 @@ parted -s $DISK set $2 boot on 2>/dev/null
 
 
 #/**
-#         ogSetPartitionId int_ndisk int_npartition str_type
+#         ogSetPartitionId int_ndisk int_npartition hex_partid
 #@brief   Cambia el identificador de la partición.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_npartition nº de orden de la partición
-#@param   str_partid     mnemónico de tipo de partición
+#@param   hex_partid     identificador de tipo de partición
 #@return  (nada)
+#@exception OG_ERR_FORMAT     Formato incorrecto.
+#@exception OG_ERR_NOTFOUND   Disco o partición no corresponden con un dispositivo.
+#@exception OG_ERR_OUTOFLIMIT Valor no válido.
+#@exception OG_ERR_PARTITION  Error al cambiar el id. de partición.
 #@attention Requisitos: fdisk, sgdisk
 #@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
@@ -1142,6 +1079,9 @@ parted -s $DISK set $2 boot on 2>/dev/null
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/13
+#@version 1.0.5 - Utiliza el id. de tipo de partición (no el mnemónico)
+#@author  Universidad de Huelva
+#@date    2012/05/14
 #*/ ##
 function ogSetPartitionId ()
 {
@@ -1150,26 +1090,34 @@ local DISK PART PTTYPE ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
-           "$FUNCNAME 1 1 NTFS"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition hex_partid" \
+           "$FUNCNAME 1 1 7"
     return
 fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Sustituye nº de disco por su dispositivo.
-DISK=`ogDiskToDev $1` || return $?
-PART=`ogDiskToDev $1 $2` || return $?
+# Sustituye nº de disco y nº partición por su dispositivo.
+DISK=$(ogDiskToDev $1) || return $?
+PART=$(ogDiskToDev $1 $2) || return $?
+# Error si el id. de partición no es hexadecimal.
+ID="${3^^}"
+[[ "$ID" =~ ^[0-9A-F]+$ ]] || ogRaiseError $OG_ERR_OUTOFLIMIT "$3" || return $?
 
 # Elección del tipo de partición.
 PTTYPE=$(ogGetPartitionTableType $1)
-ID=$(ogTypeToId "$3" "$PTTYPE")
-[ -n "$ID" ] || ogRaiseError $OG_ERR_PARTITION "$3,$PTTYPE" || return $?
 case "$PTTYPE" in
-    GPT)    sgdisk $DISK -t$PART:$ID 2>/dev/null ;;
+    GPT)    sgdisk -t$2:$ID $DISK 2>/dev/null ;;
     MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK &>/dev/null ;;
+    *)      ogRaiseError $OG_ERR_OUTOFLIMIT "$1,$PTTYPE"
+            return $? ;;
 esac
-partprobe $DISK 2>/dev/null
+if [ $? == 0 ]; then
+    partprobe $DISK 2>/dev/null
+else
+    ogRaiseError $OG_ERR_PARTITION "$1,$2,$3"
+    return $?
+fi
 }
 
 
@@ -1184,7 +1132,7 @@ partprobe $DISK 2>/dev/null
 #@exception OG_ERR_NOTFOUND disco o particion no detectado (no es un dispositivo).
 #@note    Requisitos: sfdisk, awk
 #@todo    Compruebar que el tamaño sea numérico positivo y evitar que pueda solaparse con la siguiente partición.
-#@version 0.9 - Primera versión para OpenGNSys
+#@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
 #*/ ##
@@ -1210,6 +1158,154 @@ SIZE=$[$3*2] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Redefinir el tamaño de la partición.
 sfdisk -f -uS -N$2 $DISK <<< ",$SIZE" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
 partprobe $DISK 2>/dev/null
+}
+
+
+#/**
+#         ogSetPartitionType int_ndisk int_npartition str_type
+#@brief   Cambia el identificador de la partición.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_type       mnemónico de tipo de partición
+#@return  (nada)
+#@attention Requisitos: fdisk, sgdisk
+#@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 1.0.4 - Soporte para discos GPT.
+#@author  Universidad de Huelva
+#@date    2012/03/13
+#@version 1.0.5 - Renombrada de ogSetPartitionId.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013/03/07
+#*/ ##
+function ogSetPartitionType ()
+{
+# Variables locales
+local DISK PART PTTYPE ID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_type" \
+           "$FUNCNAME 1 1 NTFS"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Sustituye nº de disco por su dispositivo.
+DISK=`ogDiskToDev $1` || return $?
+PART=`ogDiskToDev $1 $2` || return $?
+
+# Elección del tipo de partición.
+PTTYPE=$(ogGetPartitionTableType $1)
+ID=$(ogTypeToId "$3" "$PTTYPE")
+[ -n "$ID" ] || ogRaiseError $OG_ERR_FORMAT "$3,$PTTYPE" || return $?
+ogSetPartitionId $1 $2 $ID
+}
+
+
+#/**
+#         ogTypeToId str_parttype [str_tabletype]
+#@brief   Devuelve el identificador correspondiente a un tipo de partición.
+#@param   str_parttype  mnemónico de tipo de partición.
+#@param   str_tabletype mnemónico de tipo de tabla de particiones (MSDOS por defecto).
+#@return  int_idpart    identificador de tipo de partición.
+#@exception OG_ERR_FORMAT   Formato incorrecto.
+#@note    tabletype = { MSDOS, GPT },   (MSDOS, por defecto)
+#@version 0.1 -  Integracion para Opengnsys  -  EAC: TypeFS () en ATA.lib 
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Primera version para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2009-12-14
+#@version 1.0.4 - Soportar discos GPT (sustituye a ogFsToId).
+#@author  Universidad de Huelva
+#@date    2012/03/30
+#*/ ##
+function ogTypeToId ()
+{
+# Variables locales
+local PTTYPE ID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_parttype [str_tabletype]" \
+           "$FUNCNAME LINUX  =>  83" \
+           "$FUNCNAME LINUX MSDOS  =>  83"
+    return
+fi
+# Error si no se reciben 1 o 2 parámetros.
+[ $# -lt 1 -o $# -gt 2 ] && (ogRaiseError $OG_ERR_FORMAT; return $?)
+
+# Asociar id. de partición para su mnemónico.
+PTTYPE=${2:-"MSDOS"}
+case "$PTTYPE" in
+    GPT) # Se incluyen mnemónicos compatibles con tablas MSDOS.
+        case "$1" in
+            EMPTY)      ID=0 ;;
+            WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12|HNTFS|HFAT32|HFAT16|HFAT12)
+                        ID=0700 ;;
+            WIN-RESERV) ID=0C01 ;;
+            CHROMEOS-KRN) ID=7F00 ;;
+            CHROMEOS)   ID=7F01 ;;
+            CHROMEOS-RESERV) ID=7F02 ;;
+            LINUX-SWAP) ID=8200 ;;
+            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
+                        ID=8300 ;;
+            LINUX-RESERV) ID=8301 ;;
+            LINUX-LVM)  ID=8E00 ;;
+            FREEBSD-DISK) ID=A500 ;;
+            FREEBSD-BOOT) ID=A501 ;;
+            FREEBSD-SWAP) ID=A502 ;;
+            FREEBSD)    ID=A503 ;;
+            HFS-BOOT)   ID=AB00 ;;
+            HFS|HFS+)   ID=AF00 ;;
+	    HFSPLUS)	ID=AF00 ;;
+            HFS-RAID)   ID=AF01 ;;
+            SOLARIS-BOOT) ID=BE00 ;;
+            SOLARIS)    ID=BF00 ;;
+            SOLARIS-SWAP) ID=BF02 ;;
+            SOLARIS-DISK) ID=BF03 ;;
+            CACHE)      ID=CA00;;
+            EFI)        ID=EF00 ;;
+            LINUX-RAID) ID=FD00 ;;
+            *)          ID="" ;;
+        esac
+        ;;
+    MSDOS)
+        case "$1" in
+            EMPTY)      ID=0  ;;
+            FAT12)      ID=1  ;;
+            EXTENDED)   ID=5  ;;
+            FAT16)      ID=6  ;;
+            WINDOWS|NTFS|EXFAT) 
+                        ID=7  ;;
+            FAT32)      ID=b  ;;
+            HFAT12)     ID=11 ;;
+            HFAT16)     ID=16 ;;
+            HNTFS)      ID=17 ;;
+            HFAT32)     ID=1b ;;
+            LINUX-SWAP) ID=82 ;;
+            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
+                        ID=83 ;;
+            LINUX-LVM)  ID=8e ;;
+            FREEBSD)    ID=a5 ;;
+            OPENBSD)    ID=a6 ;;
+            HFS|HFS+)   ID=af ;;
+            SOLARIS-BOOT) ID=be ;;
+            SOLARIS)    ID=bf ;;
+            CACHE)      ID=ca ;;
+            DATA)       ID=da ;;
+            GPT)        ID=ee ;;
+            EFI)        ID=ef ;;
+            VMFS)       ID=fb ;;
+            LINUX-RAID) ID=fd ;;
+            *)          ID="" ;;
+        esac
+        ;;
+esac
+echo $ID
 }
 
 
@@ -1251,7 +1347,7 @@ case "$TYPE" in
             return $? ;;
 esac
 # Cambiar tipo de partición.
-ogSetPartitionId $1 $2 $NEWTYPE
+ogSetPartitionType $1 $2 $NEWTYPE
 }
 
 

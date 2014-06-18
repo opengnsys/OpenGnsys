@@ -1,0 +1,38 @@
+#!/bin/bash
+#/**
+#        clean-mountdirimage
+#@brief  Borra los directorios de montaje de las imagenes que no se estén usando.
+#@param No
+#@return  Información sobre los directorios borrardos o no.
+#@exception # Usuario distinto de root.
+#@version 1.0 
+#@author  Irina Gomez
+#@date   2014-01-20
+#*/ ##
+
+BASEDIR="/opt/opengnsys/images/mount"
+DIR=$(ls $BASEDIR)
+if [ "$USER" != "root" ]; then
+        echo "$PROG: Error: solo ejecutable por root" >&2
+        exit 1
+fi
+
+# Desmontamos los directorios que no se esten usando.
+umount  /opt/opengnsys/images/mount/* &>/dev/null
+# Guardamos los directorios que siguen montados.
+MOUNTEDDIR=$(df |grep /opt/opengnsys/images/mount)
+# Comprobamos que no esta montado y borramos.
+echo "Borrando los directorios de montaje de las imagenes:"
+for IMGDIR in $DIR
+do	
+	echo -n "   $IMGDIR:"
+	if ! echo $MOUNTEDDIR |grep -e "$BASEDIR/$IMGDIR " -e "$BASEDIR/$IMGDIR$" >/dev/null ; then
+		rm -rf $BASEDIR/$IMGDIR
+		echo "directorio borrado."
+	else
+		echo "directorio ocupado, no se puede borrar."
+
+	fi
+done
+
+

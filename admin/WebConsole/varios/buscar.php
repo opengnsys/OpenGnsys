@@ -1,4 +1,4 @@
-<?
+<?php
 // *********************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: Ramón M. Gómez, ETSII - Universidad de Sevilla
@@ -15,8 +15,12 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/TomaDato.php");
 include_once("../idiomas/php/".$idioma."/buscar_".$idioma.".php");
 
-session_start(); // Activa variables de sesión.
 
+# Inicializar variables.
+$criterio="";
+$valor="";
+
+# Tomar varlores de sesión.
 if (isset($_POST["criterio"])) $criterio=htmlspecialchars($_POST["criterio"]);
 if (isset($_POST["valor"])) $valor=htmlspecialchars($_POST["valor"]); 
 if (!empty ($valor) || $criterio == "duplic") {

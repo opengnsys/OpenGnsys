@@ -1,0 +1,13 @@
+##NO-TOCAR-ESTA-LINEA ogAdmin
+default saved
+timeout 1
+hiddenmenu
+fallback 1 2 3
+
+
+title OpenGnSys-NET
+keeppxe
+kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true ogupdateinitrd=true INFOHOST 
+initrd (pd)/ogclient/oginitrd.img
+boot
+

@@ -54,3 +54,7 @@ deb http://free.nchc.org.tw/ubuntu OSCODENAME-security main restricted universe 
 deb http://ppa.launchpad.net/freenx-team/ubuntu/ OSCODENAME main
 deb http://ppa.launchpad.net/randomaction/ppa/ubuntu OSCODENAME main
 deb-src http://ppa.launchpad.net/randomaction/ppa/ubuntu OSCODENAME main
+# Ubuntu-ZFS
+deb http://ppa.launchpad.net/zfs-native/stable/ubuntu OSCODENAME main
+deb-src http://ppa.launchpad.net/zfs-native/stable/ubuntu OSCODENAME main
+

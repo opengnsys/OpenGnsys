@@ -3,41 +3,71 @@
 # (puede usarse como base para el programa de restauración de imágenes usado por OpenGnSys Admin).
 # Versión: 0.9.1, 2009/03/17, - Ramón Gómez, Univ. Sevilla - Versión inicial.
 # Versión: 0.9.2, 2010/07/27, - Ramón Gómez, Univ. Sevilla - redefinir parámetro.
+# Version: 1.0.5, 2012/09/18, - Univ. Huelva - Nuevo parametro para indicar el disco donde se creara la CACHE, si no se indica, se usa 1
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
-if [ $# -ne 1 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG -1 | 0 | tamaño"
+# Si el numero de parametros es 1, es el tamano de la CACHE
+if [ $# == 1 ]
+then
+	NDISK=1
+	SIZE=$1
+elif [ $# == 2 ]
+then
+	NDISK=$1
+	SIZE=$2
+else
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG [int_ndisk] -1 | 0 | size"
+    exit $?
+fi
+
+# Si disco no es mayor o igual que 1, error.
+if [ -n "${NDISK//[-0-9]/}" ] || [ $NDISK -lt 1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG [int_ndisk] -1 | 0 | size"
     exit $?
 fi
 
 # Si tamaño no es numérico o tamaño<-1, error.
-if [ -n "${1//[-0-9]/}" ] || [ $1 -lt -1 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG -1 | 0 | tamaño"
+if [ -n "${SIZE//[-0-9]/}" ] || [ $SIZE -lt -1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG int_ndisk [-1 | 0 | size]"
     exit $?
 fi
 # Si tamaño=0, no hacer nada.
-if [ $1 -eq 0 ]; then
+if [ $SIZE -eq 0 ]; then
     echo "No modificar la caché local."
     exit
 fi
 # Si tamaño=-1, borrar caché.
-if [ $1 -eq -1 ]; then
+if [ $SIZE -eq -1 ]; then
     echo "[10] Trabajar sin caché local."
     ogUnmountCache 2>/dev/null
     ogDeleteCache
 else
+    # Comprobar disco y particion donde se aloja la cache actualmente, si la hay
+    FINDCACHE=`ogFindCache`
+    echo "[5] ogFindCache: "$FINDCACHE
+    CACHEDISK=${FINDCACHE% *}
+    PART=${FINDCACHE#* }
+
+    # Si la CACHE actual esta definida en otro disco, se elimina
+    if [ "$NDISK" != "$CACHEDISK" ]
+    then
+	echo "[10] Detectada cache en otro disco, eliminarla"
+	ogUnmountCache 2>/dev/null
+	ogDeleteCache
+    fi
+
     # Si tamaño>0, ...
-    if [ ! $1 -gt 0 ]; then
-	ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT: !($1>0)"
+    if [ ! $SIZE -gt 0 ]; then
+	ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT: !($SIZE>0)"
 	exit $?
     fi
     # Si no existe caché o si cambia su tamaño, crearla.
-    SIZE=$(ogGetCacheSize 2>/dev/null)
-    if [ "$1" != "$SIZE" ]; then
+    CACHESIZE=$(ogGetCacheSize 2>/dev/null)
+    if [ "$SIZE" != "$CACHESIZE" ]; then
         echo "[10] Crar partición de caché local."
         ogUnmountCache 2>/dev/null
-        ogCreateCache "$1"
+        ogCreateCache $NDISK "$SIZE"
     fi
     # Si caché no montada y no formateada, formatear.
     CACHE=$(ogFindCache) || exit $?

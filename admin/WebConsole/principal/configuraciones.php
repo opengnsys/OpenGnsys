@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -13,8 +13,9 @@ include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/comunes.php");
 include_once("../includes/constantes.php");
-include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../idiomas/php/".$idioma."/configuraciones_".$idioma.".php");
+include_once("../includes/ConfiguracionesParticiones.php");
+
 //________________________________________________________________________________________________________
 //
 // Captura parámetros
@@ -59,7 +60,7 @@ if (!$cmd)
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <BODY>
-<?
+<?php
 	switch($ambito){
 			case $AMBITO_AULAS :
 				$urlimg='../images/iconos/aula.gif';
@@ -133,117 +134,15 @@ if (!$cmd)
 				</TR>
 			</TABLE>
 		</FORM>	
-<?
+<?php
 	}
 	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil | $fk_cache;	
-	pintaConfiguraciones($cmd,$idambito,$ambito,8,$sws,false);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);	
 ?>
 </BODY>
 </HTML>
-<?
-// *************************************************************************************************************************************************
-//	Descripción:
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
-//		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//________________________________________________________________________________________________________
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuración
-	global $conKeys; // Contador de claves de configuración
-	global $TbMsg;
 
-	$colums=8;
-	echo '<tr height="16">';
-	echo '<th align="center">&nbsp;'.$TbMsg[20].'&nbsp;</th>'; // Número de partición
-	echo '<th align="center">&nbsp;'.$TbMsg[24].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg[27].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg[21].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg[22].'&nbsp;</th>'; // Tamaño
-	echo '<th align="center">&nbsp;'.$TbMsg[25].'&nbsp;</th>'; // Imagen instalada
-	echo '<th align="center">&nbsp;'.$TbMsg[26].'&nbsp;</th>'; // Perfil software 
-	echo '<th align="center">&nbsp;'.$TbMsg[495].'&nbsp;</th>';
-	echo '</tr>';
-
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
-	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
-					//$disksize = formatomiles ($tbKeys[$k]["tamano"]);
-					$disksize = tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-					if (empty ($disksize)) {
-						$disksize = '<em>'.$TbMsg[42].'</em>';
-					}
-				}
-				else {  // Información de partición (numpart>0)
-					echo'<tr height="16">'.chr(13);
-					echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-					echo'<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
-					echo'<td align="center">&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-
-					echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);					
-
-					echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-
-					echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-					
-					echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</td>'.chr(13);
-
-					if ($tbKeys[$k]["numpar"] == "4") {
-						$rs=new Recordset; 
-						$cmd->texto="SELECT * FROM  ordenadores_particiones WHERE idordenador='".$idordenadores."' AND numpar=4";
-						$rs->Comando=&$cmd; 
-						if (!$rs->Abrir()) return(false); // Error al abrir recordset
-						$rs->Primero(); 
-						if (!$rs->EOF){
-							$campocache=$rs->campos["cache"];
-						}
-						$rs->Cerrar();
-						echo '<td align="leght">&nbsp;';
-						$ima=split(",",$campocache);
-						$numero=1;
-						for ($x=0;$x<count($ima); $x++) {
-							if(substr($ima[$x],-3)==".MB") {
-								echo '<strong>'.$TbMsg[4951].':  '.$ima[$x].'</strong>';
-							} else {
-								if(substr($ima[$x],-4)==".img") {
-									echo '<br />'.$numero++.'.-'.$ima[$x];
-								} else {
-									echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
-								}
-							}
-						}
-						echo '&nbsp;</td>'.chr(13);
-					} else {
-						echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
-					}
-					
-					echo'</tr>'.chr(13);
-				}
-				break;
-			}
-		}
-	}	
-	// Mostrar información del disco, si se ha obtenido.
-	if (!empty ($disksize)) {
-		echo'<tr height="16">'.chr(13);
-		echo'<td align="center">&nbsp;'.$TbMsg[35].'&nbsp;</td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td align="right">&nbsp;'.$disksize.'&nbsp;</td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'<td></td>'.chr(13);
-		echo'</tr>'.chr(13);
-	}	
-	echo '<tr height="5"><td colspan="'.$colums.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
-}
+<?php
 //________________________________________________________________________________________________________
 function datosAulas($cmd,$idaula)
 {
@@ -337,7 +236,11 @@ function datosOrdenadores($cmd,$idordenador)
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
 			<TD><?php echo $nombreordenador;?></TD>
-			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b" src="../images/fotos/<?php echo $fotoordenador;?>"></TD>
+			<TD colspan=2 valign=top align=left rowspan=4><IMG border=2 style="border-color:#63676b"
+src="<?php if ($fotoordenador==""){echo "../images/fotos/fotoordenador.gif";}
+                else{echo "../images/fotos/".$fotoordenador;}?>">
+			</TD>
+			
 			</TR>	
 		<TR>
 				<TH align=center>&nbsp;<?echo $TbMsg[15]?>&nbsp;</TD>
@@ -377,10 +280,29 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 		}
 		$rs->Cerrar();
 	}
+		if ($numordenadores==0)
+		{
+		$cmd->texto="SELECT *, COUNT(*) AS numordenadores
+			 FROM gruposordenadores
+			 WHERE idgrupo=".$idgrupo;
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if ($rs->Abrir()){
+			$rs->Primero(); 
+			if (!$rs->EOF){
+				$nombregrupoordenador=$rs->campos["nombregrupoordenador"];
+				$ordenadores=$rs->campos["numordenadores"];
+				$idaula=$rs->campos["idaula"];
+			}
+			$rs->Cerrar();
+					}
+		}
 	//////////////////////////////////////
-	$cmd->texto="SELECT DISTINCT * FROM aulas
-			 INNER JOIN grupoordenadores ON grupoordenadores.idaula=aulas.idaula
-			 WHERE aulas.idaula=.$idaula";			 
+    $cmd->texto="SELECT DISTINCT aulas.*,count(*) as numordenadores
+            	FROM aulas
+                INNER JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+                WHERE aulas.idaula=".$idaula;  
+				 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if ($rs->Abrir()){
@@ -398,14 +320,14 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 			<?
 					echo '<TD>'.$nombregrupoordenador.'</TD>
 								<TD colspan=2 valign=top align=center rowspan=2>
-									<IMG border=3 style="border-color:#63676b" src="'.$urlfoto.'"><br>
+					<IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"><br>
 									<center>&nbsp;'.$TbMsg[13].':&nbsp;'. $ordenadores.'</center>
 								</TD>';
 
 			?>
 		</TR>
 	</TABLE>
-<?
+<?php
 }
 ?>	
 

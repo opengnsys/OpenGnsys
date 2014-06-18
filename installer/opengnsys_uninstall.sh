@@ -15,21 +15,25 @@
 #@version 1.0.4 - Compatibilidad con otras distribuciones y auto configuración de acceso a BD
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/03/28
+#@version 1.0.5 - Usar las mismas variables que el script de instalación.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2013/01/09
 
 
 ####  AVISO: Editar configuración de acceso.
 ####  WARNING: Edit access configuration
-MYSQLROOT="passwordroot"	# Clave de root de MySQL
-DATABASE="ogAdmBD"		# Base de datos de administración
-DBUSER="usuog"			# Usuario de acceso a la base de datos
+MYSQL_ROOT_PASSWORD="passwordroot"	# Clave de root de MySQL
+OPENGNSYS_DATABASE="ogAdmBD"		# Base de datos de administración
+OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
 
 
 ####  AVISO: NO EDITAR variables de configuración.
 ####  WARNING: DO NOT EDIT configuration variables.
-OPENGNSYS="/opt/opengnsys"	# Directorio de OpenGnSys
-OGIMG="images"			# Directorio de imágenes del repositorio
-CLIENTUSER="opengnsys"		# Usuario Samba
-OLDDATABASE="ogBDAdmin"		# Antigua base de datos
+OPENGNSYS="/opt/opengnsys"		# Directorio de OpenGnSys
+OGIMG="images"				# Directorio de imágenes del repositorio
+OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario Samba
+OPENGNSYS_OLDDATABASE="ogBDAdmin"	# Antigua base de datos
+MYCNF=/tmp/.my.cnf.$$			# Fichero temporal con credenciales de acceso a la BD.
 
 
 # Sólo ejecutable por usuario root
@@ -43,33 +47,48 @@ fi
 echo "Uninstalling OpenGnSys services."
 if [ -x /etc/init.d/opengnsys ]; then
     /etc/init.d/opengnsys stop
-    if test which update-rc.d 2>/dev/null; then
+    if [ -n "$(which update-rc.d 2>/dev/null)" ]; then
         update-rc.d -f opengnsys remove
     else
 	chkconfig --del opengnsys
     fi
 fi
-# Eliminar bases de datos.
+# Comprobar acceso a la bases de datos.
 echo "Erasing OpenGnSys database."
 DROP=1
-if ! mysql -u root -p"$MYSQLROOT" <<<"quit" 2>/dev/null; then
+if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
     stty -echo
-    read -p  "- Please, insert MySQL root password: " MYSQLROOT
+    read -p  "- Please, insert MySQL root password: " MYSQL_ROOT_PASSWORD
     echo ""
     stty echo
-    if ! mysql -u root -p"$MYSQLROOT" <<<"quit" 2>/dev/null; then
+    if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
 	DROP=0
 	echo "Warning: database not erased."
     fi
 fi
 if test $DROP; then
-    mysql -u root -p"$MYSQLROOT" <<<"DROP DATABASE $OLDDATABASE;" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP DATABASE $DATABASE;" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP USER '$DBUSER';" 2>/dev/null
-    mysql -u root -p"$MYSQLROOT" <<<"DROP USER '$DBUSER'@'localhost';" 2>/dev/null
+    # Componer fichero temporal con credenciales de conexión a la base de datos.
+    touch $MYCNF
+    chmod 600 $MYCNF
+    cat << EOT > $MYCNF
+[client]
+user=root
+password=$MYSQL_ROOT_PASSWORD
+EOT
+    # Borrar fichero de credenciales si se corta el proceso de acceso a la BD.
+    trap "rm -f $MYCNF" 0 1 2 3 6 9 15
+    # Eliminar bases de datos.
+    mysql --defaults-extra-file=$MYCNF 2> /dev/null << EOT
+DROP DATABASE IF EXISTS $OPENGNSYS_OLDDATABASE;
+DROP DATABASE IF EXISTS $OPENGNSYS_DATABASE;
+DROP USER '$OPENGNSYS_DB_USER';
+DROP USER '$OPENGNSYS_DB_USER'@'localhost';
+EOT
+    # Borrar el fichero temporal de credenciales.
+    rm -f $MYCNF
 fi
 # Quitar configuración específica de Apache.
-test which a2dissite 2>/dev/null && a2dissite opengnsys
+[ -n "$(which a2dissite 2>/dev/null)" ] && a2dissite opengnsys
 rm -f /etc/{apache2/{sites-available,sites-enabled},httpd/conf.d}/opengnsys*
 for serv in apache2 httpd; do
     [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
@@ -90,8 +109,8 @@ for serv in smbd smb ; do
     [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
 done
 # Eliminar usuario de OpenGnSys.
-smbpasswd -x $CLIENTUSER
-userdel $CLIENTUSER
+smbpasswd -x $OPENGNSYS_CLIENT_USER
+userdel $OPENGNSYS_CLIENT_USER
 # Tareas manuales a realizar después de desinstalar.
 echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"

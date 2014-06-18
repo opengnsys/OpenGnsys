@@ -54,7 +54,6 @@
 #@version 1.0.3 - Habilita el uso de la variable OGWINREDUCE=TRUE|TRUE para reducir el sistema de archivos a enviar
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/12/22
-
 #*/ ##
 
 #test 1. cliente sin particiones.    Detectado  TODO: crear estrucutras de particiones
@@ -89,27 +88,27 @@ then
 	source /tmp/net-eth* 
 	HOSTIP=`ogGetIpAddress`
 fi
-MASTERIP=$1
-PROTOCOL=$4
-case $PROTOCOL in 
- 	MULTICAST|multicast)
+MASTERIP="$1"
+PROTOCOL="$4"
+case "${PROTOCOL^^}" in 
+ 	MULTICAST)
 		SESSIONMCASTSERVER=$5
 		SESSIONMCASTCLIENT=`echo $5 | awk -F: '{print $1}'`
 	;;
-	UNICAST|unicast) 
+	UNICAST) 
 		SESSIONUCASTSERVER=$5
-    	SESSIONUCASTCLIENT=`echo $5 | awk -F: '{print $1}'`:$MASTERIP
-    ;;
-    *)
-     exit $(ogRaiseError $OG_ERR_FORMAT "Protocolo $PROTOCOL no soportado en esta operacion"; echo $?)
-    ;;
+    		SESSIONUCASTCLIENT=`echo $5 | awk -F: '{print $1}'`:$MASTERIP
+	;;
+	*)
+		exit $(ogRaiseError $OG_ERR_FORMAT "Protocolo $PROTOCOL no soportado en esta operacion"; echo $?)
+;;
 esac
 # contenedor destino (disco particion)
-DISKTARGET=$6
-PARTTARGET=$7
+DISKTARGET="$6"
+PARTTARGET="$7"
 #herramienta de compresión.
-TOOLCLONE=$8
-COMPRESOR=$9
+TOOLCLONE="$8"
+COMPRESOR="$9"
 
 pkill faucet
 
@@ -131,35 +130,35 @@ case $MASTERIP in
 		# Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}					
 		case "$MODEMASTER" in
 			SENDPARTITION)
-				echo "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogEcho log session "[5] Master en modo $MODEMASTER: informacion inicial a los clientes-slaves"
 				if ps aux | grep -v grep | grep "faucet 4000" 
 				then
 					ogRaiseError $OG_ERR_NOTFOUND "MASTER: puerto en uso: 118"; exit $?	
 				else
 					faucet 4000 --out echo "WORKING" &	
 				fi				
-				echo "[10]: Desmontando DISK:$DISKSOURCE PARTITION:$PARTSOURCE" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogEcho log session "[10]: Desmontando DISK:$DISKSOURCE PARTITION:$PARTSOURCE"
 				ogUnmount $2 $3 ||  exit $(ogRaiseError $OG_ERR_LOCKED "no se puede desmontar $2 $3  l124"; echo $?)
 				#Obtener tamaño de la partición.
 				SIZE=$(ogGetPartitionSize $2 $3)  || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar tamaño partcion $2 $3  l127"; echo $?)
 				
-				if [ "$OGWINREDUCE" == "TRUE"   ]
+				if [ "$OGWINREDUCE" == "TRUE" ]
 				then 
-						echo "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE" | tee -a $OGLOGSESSION $OGLOGFILE
-						ogReduceFs $2 $3 || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al reducir el FS $2 $3  l129"; echo $?)
+					ogEcho log session "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE"
+					ogReduceFs $2 $3 || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al reducir el FS $2 $3  l129"; echo $?)
 				fi
 					
 				REDSIZE=$(ogGetFsSize $2 $3) || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar el nuevo FS $2 $3  l130"; echo $?)	
 				TIMEAUX=$[SECONDS-TIME1]
-				echo "[20]: Preparada para enviar el sistema de archivos: Tamaño datos: $REDSIZE  origne: $DISKSOURCE $PARTSOURCE" | tee -a $OGLOGSESSION $OGLOGFILE
-				echo "      tiempo de reducción del sistema de archivos: $[TIMEAUX/60]m $[TIMEAUX%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogEcho log session "[20]: Preparada para enviar el sistema de archivos: Tamaño datos: $REDSIZE  origne: $DISKSOURCE $PARTSOURCE"
+				ogEcho log session "      tiempo de reducción del sistema de archivos: $[TIMEAUX/60]m $[TIMEAUX%60]s"
 				
 				#if [ $REDSIZE -lt $SIZE ]; then
     			#		echo "[24] Redimensionar partición a $REDSIZE KB."
     			#		ogSetPartitionSize $2 $3 $REDSIZE
 				#fi
 
-				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogEcho log session "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
 				pkill faucet
 				if ps aux | grep -v grep | grep "faucet 4000" 
 				then
@@ -167,22 +166,24 @@ case $MASTERIP in
 				else
 					faucet 4000 --out echo "READY $TOOLCLONE $COMPRESOR $REDSIZE" &
 				fi
-				case $PROTOCOL in
-					MULTICAST|multicast)
-						echo "[29] ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR"  | tee -a $OGLOGSESSION $OGLOGFILE
+				case "${PROTOCOL^^}" in
+					MULTICAST)
+ 						ogEcho log session "[29] Transferencia Multicast"
+						ogEcho log "ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR"
  						ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR || RETVAL=$?
  					;;
- 					UNICAST|unicast)
+ 					UNICAST)
  						sleep 60
- 						echo "[29] ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR" | tee -a $OGLOGSESSION $OGLOGFILE
+ 						ogEcho log session "[29] Transferencia Unicast"
+ 						ogEcho log "ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
  						ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR || RETVAL=$?
  					;;
- 				esac	
+ 				esac
  				
  				#if [ $REDSIZE -lt $SIZE ]; then
    				#	echo "[85] Redimensionar partición a $SIZE KB."
    		 		#	ogSetPartitionSize $2 $3 $SIZE
-   		 			echo "[90] Extender sistema de archivos." | tee -a $OGLOGSESSION $OGLOGFILE
+   		 			ogEcho log session "[90] Extender sistema de archivos."
    		 			ogExtendFs $2 $3
 				#fi
 				pkill faucet
@@ -192,27 +193,28 @@ case $MASTERIP in
 				else
 				    exit $(ogRaiseError $OG_ERR_MCASTSENDPARTITION "Error al enviar la particion  $2 $3 con protocolo $PROTOCOL l167"; echo $?)
 				fi
-				
+
 			;;
 			SENDFILE)				
-				echo "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves"
-				echo "[10]: Preparando Imagen: $IMG"
+				ogEcho log session "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves"
+				ogEcho log session "[10]: Preparando Imagen: $IMG"
 				TOOLCLONE=$(ogGetImageProgram $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "TOOLCLONE no detectado l174"; echo $?)
 				COMPRESOR=$(ogGetImageCompressor $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "COMPRESOR NO DETECTADO l175"; echo $?)
 				REDSIZE=$(ogGetImageSize $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "REDSIZE NO DETECTADO l176"; echo $?)
-				echo "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
+				ogEcho log session "[25] Master en Modo $MODEMASTER"
+				ogEcho log "Informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
 				if ps aux | grep -v grep | grep "faucet 4000" 
 				then
 					ogRaiseError $OG_ERR_NOTFOUND "MASTER: puerto en uso: 140"; exit $?	
 				else
 					faucet 4000 --out echo "READY $TOOLCLONE $COMPRESOR $REDSIZE" &
-				fi				
-				case $PROTOCOL in
-					MULTICAST|multicast)
+				fi
+				case "${PROTOCOL^^}" in
+					MULTICAST)
 						echo "[29] ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
 						ogMcastSendFile  $2 $3.img $SESSIONMCASTSERVER	|| RETVAL=$?
 						;;
- 					UNICAST|unicast)
+ 					UNICAST)
  						sleep 60
  						echo "[29] ogUcastSendFile $2 $3.img $SESSIONUCASTSERVER"
  						ogUcastSendFile $2 $3.img $SESSIONUCASTSERVER || RETVAL=$?
@@ -223,24 +225,24 @@ case $MASTERIP in
 				then 
 					exit 0
 				else
-				    exit $(ogRaiseError $OG_ERR_MCASTSENDFILE "Error al enviar la image $2 $3.img con protocolo $PROTOCOL l200"; echo $?)
+					exit $(ogRaiseError $OG_ERR_MCASTSENDFILE "Error al enviar la image $2 $3.img con protocolo $PROTOCOL l200"; echo $?)
 				fi
 			;;
 		esac
 		# FIN Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}
 	;;
 	*)	
-		echo "[1] Equipo -Client- preparando para recibir datos $PROTOCOL" | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session "[1] Equipo -Client- preparando para recibir datos $PROTOCOL"
 		ogDiskToDev $DISKTARGET $PARTTARGET &>/dev/null || exit $(ogRaiseError $OG_ERR_LOCKED "El cliente no tiene esas particiones $DISKTARGET $PARTTARGET l211"; echo $?) 	
 		# TODO: si el cliente no está en la lista de clientes UNICAST salir.
-		case $PROTOCOL in
-			UNICAST|unicast)
+		case "${PROTOCOL^^}" in
+			UNICAST)
  				echo "$SESSIONUCASTSERVER" | grep $HOSTIP || exit $(ogRaiseError $OG_ERR_PROTOCOLJOINMASTER "Este cliente no pertence a la sesion UNICAST l214"; echo $?)
 			;;
  		esac	
- 		echo "[2] Desmontando particion destino" | tee -a $OGLOGSESSION $OGLOGFILE	 
+ 		ogEcho log session "[2] Desmontando particion destino"
 		ogUnmount $DISKTARGET $PARTTARGET || exit $(ogRaiseError $OG_ERR_LOCKED "no se puede desmontar la particion destino $2 $3  l218"; echo $?)
-		echo -n "[25] Buscando informacion extra sobre la clonacion con el master $MASTERIP: " | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session  "[25] Buscando informacion extra sobre la clonacion con el master $MASTERIP: "
 		sleep 10
 		TIMEWAITMASTER=120
 		TIMEWAITING=0
@@ -254,33 +256,32 @@ case $MASTERIP in
 			[ "$TIMEWAITMASTER" -gt "0" ] || exit $(ogRaiseError $OG_ERR_PROTOCOLJOINMASTER " l230 "; echo $?)
 			#Si primer parametro desde el server es READY, salimos del bucle
 			GETINFO=$(echo $INFOEXTRA | awk '{print $1}')
-			[ "$GETINFO" == "READY" ] && GETINFO=OK 
+			[ "$GETINFO" == "READY" ] && GETINFO="OK"
 		done		
 		echo $INFOEXTRA
 		TOOLCLONE=$(echo $INFOEXTRA | awk '{print $2}')
 		COMPRESOR=$(echo $INFOEXTRA | awk '{print $3}')
 		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $4}')
-		echo "[26] $INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE " | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log "$INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE"
 		ogMount $DISKTARGET $PARTTARGET || ogFormat $DISKTARGET $PARTTARGET
-		#SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | awk '{y=x; x=$4};END{print y}' | tr -d kB) 
 		SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | grep Disk | awk -F" " '{print $3}' | tr -d kB);
 
-		echo "[28] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"	 | tee -a $OGLOGSESSION $OGLOGFILE
+		ogEcho log session  "[28] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"
 		# comprobamos que el tamaño de a imagen es menor que la del cliente.
 		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
  		then 				
-			echo "[30] Iniciando Cliente $PROTOCOL " | tee -a $OGLOGSESSION $OGLOGFILE
-				case $PROTOCOL in
-					MULTICAST|multicast)
-						echo "ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR" | tee -a $OGLOGSESSION $OGLOGFILE 
+			ogEcho log session "[30] Iniciando Cliente $PROTOCOL "
+				case "${PROTOCOL^^}" in
+					MULTICAST)
+						ogEcho log session  "ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR"
 						ogMcastReceiverPartition "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR"  || exit $(ogRaiseError $OG_ERR_MCASTRECEIVERPARTITION " l251 "; echo $?)
 		 			;;
- 					UNICAST|unicast)
- 						echo "ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR" | tee -a $OGLOGSESSION $OGLOGFILE
+ 					UNICAST)
+ 						ogEcho log session "ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR"
  						ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR || exit $(ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " l230 "; echo $?)
  					;;
  				esac						
-			echo "[90] llamando a configureOS $DISKTARGET $PARTTARGET" | tee -a $OGLOGSESSION $OGLOGFILE
+			ogEcho log session "[90] llamando a configureOS $DISKTARGET $PARTTARGET"
 			configureOs $DISKTARGET $PARTTARGET			
 		else
 		    # Si el tamaño de los datos recibidos es más grande que la particion destino
@@ -289,6 +290,5 @@ case $MASTERIP in
 	;;
 esac
 TIME=$[SECONDS-TIME1]
-echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
-
+ogEcho log session "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
 

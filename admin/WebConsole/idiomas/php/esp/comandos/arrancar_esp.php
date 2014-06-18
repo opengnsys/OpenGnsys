@@ -12,5 +12,9 @@
 	$TbMsg[4]='Ordenadores';
 	$TbMsg[5]='Arrancar ordenadores';
 	$TbMsg[6]='Ámbito';
+	$TbMsg[7]='Datos a suministrar';
+	$TbMsg[8]='Broadcast';
+	$TbMsg[9]='Unicast';
+	$TbMsg[10]='Método de arranque';
 
 ?>

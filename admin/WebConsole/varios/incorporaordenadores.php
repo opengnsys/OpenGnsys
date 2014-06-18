@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -11,6 +11,7 @@
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
+include_once("../includes/tftputils.php");
 include_once("../idiomas/php/".$idioma."/incorporaordenadores_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -58,8 +59,8 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<tr> 
 	    <th>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</th>
-			<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
-	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th></tr>
+		<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
+	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th></tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 </table>
  </FORM>
@@ -70,7 +71,7 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="javascript:document.fdatos.submit();"></TD>
 	</TR>
 </TABLE>
-<?
+<?php
 //________________________________________________________________________________________________________
 // Mensaje con el resultado del proceso
 echo '<SCRIPT LANGUAGE="javascript">';
@@ -83,7 +84,7 @@ echo '</SCRIPT>';
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function procesaLineas($cmd,$idaula,$buffer)
 {
@@ -110,11 +111,13 @@ function procesaLineas($cmd,$idaula,$buffer)
 			if ('fixed-address'==substr($buffer,$posa,13)){
 				$posa=$posa+13;
 				$posb=$posa;
-				while(	substr($buffer,$posb,1)!=";") $posb++;
+				while(	substr($buffer,$posb,1)!=";") 
+					$posb++;
 				$IP=substr($buffer,$posa,$posb-$posa);
 			}
 			if(!empty($nombre) && !empty($MAC) && !empty($IP)){
-				if(!Inserta($cmd,$idaula,$nombre,$MAC,$IP)) return(4);
+				if(!Inserta($cmd,$idaula,$nombre,$MAC,$IP)) 
+					return(4);
 				$sw=true;
 				$nombre="";
 				$MAC="";
@@ -133,6 +136,7 @@ function procesaLineas($cmd,$idaula,$buffer)
 function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 {
 	global $ordDup;
+	global $idioma;
 	
 	$grupoid=0;
 	$nombreordenador=trim($nombre);
@@ -142,11 +146,11 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	for($i=0;$i<strlen($auxmac);$i++)
 		if(substr($auxmac,$i,1)!=":")
 			$mac.=substr($auxmac,$i,1);
-	
 	if(existeOrdenador($cmd,$nombreordenador,$mac,$ip)){
 		$ordDup.="Nombre=".$nombre.",Mac=".$mac.",Dirección ip=".$ip." \\n";
 		return(true);	
-	}			
+	}
+
 	$idperfilhard=0;
 ## ADV: modificacion para asignar a los ordenadores, cuando se crean desde "incorpoar ordenadores" el repositorio "default"
 	$idrepositorio=1;
@@ -159,9 +163,20 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
 	$cmd->CreaParametro("@idconfiguracion",$idconfiguracion,1);
-	
-	$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,idaula,grupoid) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,@idaula,@grupoid)";
+
+	$cmd->texto="INSERT INTO ordenadores (nombreordenador, ip, mac, idperfilhard,
+				 idrepositorio, router, mascara, idaula, grupoid)
+			  SELECT @nombreordenador, @ip, @mac, @idperfilhard,
+				 @idrepositorio, router, netmask, @idaula, @grupoid
+			    FROM aulas
+			   WHERE idaula=".$idaula;
 	$resul=$cmd->Ejecutar();
+	
+	// Crear fichero de arranque PXE con plantilla por defecto.
+	if ($resul) {
+		$idordenador=$cmd->Autonumerico();
+		createBootMode ($cmd, "", $idordenador, $idioma);
+	}
 	return($resul);
 }
 //________________________________________________________________________________________________________

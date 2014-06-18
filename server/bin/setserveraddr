@@ -5,12 +5,17 @@
 # Uso:	setserveraddr iface
 # Autor: Ramon Gomez - Univ. Sevilla
 # Fecha: 2011-01-25
+# Versión: 1.0.5 - Regenerar ficheros de configuración.
+# Autor: Ramon Gomez - Univ. Sevilla
+# Fecha: 2014-06-06
 
+
+# Variables globales.
+PROG="$(basename $0)"
 
 # Comprobar parámetros.
-PROG="$(basename $0)"
 if [ $# -ne 1 ]; then
-	echo "$PROG: Incorrect operand. Format: $PROG device" >&2
+	echo "$PROG: Incorrect operand. Format: $PROG interface" >&2
 	exit 1
 fi
 if [ "$USER" != "root" ]; then
@@ -18,21 +23,41 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
+# Aviso informando de que los clientes iniciados pueden quedarse colgados.
+read -p "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
+if [ "${ANSWER^^}" != "Y" ]; then
+	echo "Operation canceled."
+	exit 0
+fi
+
 # Detectar la interfaz de red.
 DEVICES=$(ip -o link show up|awk -F: '$2!~/lo/ {print $2}')
-FOUND=0
-for dev in $DEVICES; do
-	[ "$dev" == "$1" ] && FOUND=1;
+for DEV in $DEVICES; do
+	# Si se encuentra la interfaz de red, obtener su dirección IP.
+	[ "$DEV" == "$1" ] && SERVERIP=$(ip -o addr show dev $DEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
 done
 
-if [ $FOUND == 1 ]; then
+# Comprobar si se ha detectado dirección IP.
+if [ -n "$SERVERIP" ]; then
+	# Ficheros temporales.
+	tmpfile=$(mktemp /tmp/og.XXXXX)
+	MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
+	trap "rm -f $tmpfile $MYCNF" 1 2 3 6 9 15
+
 	# Comprobar si hay que modificar la configuración de DHCP.
 	CHANGE=0
-	for f in /etc/{dhcp,dhcp3}/dhcpd.conf; do
-		file="${f/./-$1.}"
-		if [ -f $file -a ! $f -ef $file ]; then
-			ln -f $file $f
-			CHANGE=1
+	for f in /etc/{dhcp,hcp3}/dhcpd.conf; do
+		if [ -f $f ]; then
+			# Cambiar el parámetro "next-server" de DHCP.
+			sed "s/next-server.*/next-server $SERVERIP/" $f >$tmpfile
+			file="${f/./-$1.}"
+			# Copiar el fichero y enlazarlo si hay cambios.
+			if ! diff -q $tmpfile $file &>/dev/null; then
+				mv $tmpfile $file
+				chmod 644 $file
+				ln -f $file $f
+				CHANGE=1
+			fi
 		fi
 	done
 	# Si ha cambiado la configuración, reiniciar DHCP.
@@ -43,33 +68,77 @@ if [ $FOUND == 1 ]; then
 	else
 		echo "Don't change the DHCP configuration."
 	fi
-	# Comprobar si hay que modificar la configuración de OpenGnsys.
+
+	# Guardar la IP anterior del repositorio.
 	OPENGNSYS=/opt/opengnsys
+	source $OPENGNSYS/etc/ogAdmRepo.cfg
+	OLDSERVERIP=$IPlocal
+
+	# Comprobar si hay que modificar la configuración de OpenGnsys.
 	CHANGE=0
-	for f in etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg www/controlacceso.php client/etc/ogAdmClient.cfg; do
-		file="$OPENGNSYS/${f/./-$1.}"
-		if [ ! -f $file ]; then
+	# Procesar los ficheros de configuración de OpenGnSys.
+	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
+		# Error si no existe algún fichero de configuración.
+		if [ ! -f $f ]; then
 			echo "$PROG: File $file does not exist." >&2
 			exit 2
 		fi
-		cfg=$OPENGNSYS/$f
-		if [ ! $cfg -ef $file ]; then
-			ln -f $file $cfg
+		# Cambiar la IP del servidor:
+		# - variables  ServidorAdm  e  IPlocal,
+		# - servidor o IP en URLs excepto si contienen "localhost".
+		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
+		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
+		    -e '/localhost/!s,http://[^/]*/\(.*\),http://'$SERVERIP'/\1,' $f >$tmpfile
+		file="${f/./-$1.}"
+		# Copiar el fichero y enlazarlo si hay cambios.
+		if ! diff -q $tmpfile $file &>/dev/null; then
+			mv $tmpfile $file
+			chmod 644 $file
+			ln -f $file $f
 			CHANGE=1
 		fi
 	done
+
 	# Si ha cambiado la configuración, reiniciar OpenGnSys y actualizar la BD.
 	if [ $CHANGE == 1 ]; then
 		/etc/init.d/opengnsys restart
 		source $OPENGNSYS/etc/ogAdmServer.cfg
-		mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-			 "UPDATE entornos SET ipserveradm='$ServidorAdm' WHERE identorno=1"
-		echo "Default server interface set to: $1 ($ServidorAdm)"
+		# Componer fichero con credenciales de conexión.  
+ 		cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+		# Actualizar IP del servidor en la BD.
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+			 "UPDATE entornos
+			     SET ipserveradm='$SERVERIP'
+			   WHERE identorno=1"
+
+		# Actualizar IP del repositorio en la BD.
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+			 "UPDATE repositorios
+			     SET ip='$SERVERIP'
+			   WHERE ip='$OLDSERVERIP'"
+
+		# Mostrar instrucciones a realizar tras la ejecución.
+		cat << EOT
+Default server interface set to: $1 ($SERVERIP)
+
+Manual tasks:
+Check DHCP configuration file and restart service, if needed.
+Log-in as Web Console organization user.
+ - Check URLs in all menus.
+ - Run Advanced Netboot in all rooms.
+
+EOT
 	else
+		# Mensaje indicando que no se han cambiado datos.
 		echo "Don't change the default interface: $1"
 	fi
 else
-	echo "$PROG: Network device not found. Format: $PROG device" >&2
+	# Error: interfaz de red no encontrado.
+	echo "$PROG: Network device not found. Format: $PROG interface" >&2
 	exit 1
 fi
 

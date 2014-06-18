@@ -6,7 +6,8 @@ Alias /opengnsys CONSOLEDIR
 php_value short_open_tag on
 
 <Directory CONSOLEDIR>
-        Options -Indexes FollowSymLinks
-        DirectoryIndex index.php
+	Require all granted
+	Options -Indexes +FollowSymLinks
+	DirectoryIndex index.php
 </Directory>
 

@@ -4,7 +4,7 @@
 //	Fichero de idiomas php: configuraciones_esp.php 
 //	Idioma: Español
 //______________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]='Configuraciones';
 $TbMsg[1]='&Aacute;mbito';
 $TbMsg[2]="Aulas";
@@ -55,7 +55,7 @@ $TbMsg[41]='Generar Instrucci&oacute;n OG';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 
 $TbMsg[42]='Variable';
-$TbMsg[43]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
+$TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
 $TbMsg[44]='Equipo sin perfil de hardware';
 $TbMsg[45]='Agregue perfil para obtener datos';
 $TbMsg[495]='Contenido cach&eacute;';

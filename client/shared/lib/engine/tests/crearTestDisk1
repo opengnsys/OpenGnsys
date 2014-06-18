@@ -99,11 +99,14 @@ $ ogDiskToDev 1
 $ ogDiskToDev 1 1
 /dev/sda1
 
-$ ogFsToId NTFS
+$ ogTypeToId NTFS
 7
 
-$ ogFsToId EXT4
+$ ogTypeToId LINUX
 83
+
+$ ogTypeToId LINUX GPT
+8300
 
 
 # Tamaño de disco  (cuando haya informacion en la base de datos)

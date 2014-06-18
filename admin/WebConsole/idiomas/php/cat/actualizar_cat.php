@@ -5,6 +5,6 @@
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Aquest àmbit s'ha actualitzat correctament';
-	$TbMsg[1]='ATENCIÓ: Ha hagut un problema al actualitzar l'àmbit';
+	$TbMsg[0]='Aquest àmbit s\'ha actualitzat correctament';
+	$TbMsg[1]='ATENCIÓ: Hi ha hagut un problema al actualitzar l\'àmbit';
 ?>

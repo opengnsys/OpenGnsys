@@ -27,7 +27,7 @@ ogMountCache || exit 1
 	
 	#comparamos los de la cache
 	CACHEVMLINUZ=`cat ${OGCAC}/boot/ogvmlinuz.sum`
-	CACHEINITRD=`cat  ${OGCAC}/cache/boot/oginitrd.img.sum`
+	CACHEINITRD=`cat  ${OGCAC}/boot/oginitrd.img.sum`
 	
 	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
 	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"

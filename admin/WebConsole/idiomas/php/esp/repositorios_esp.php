@@ -15,7 +15,7 @@
 	$TbMsg[7]='"Propiedades"';
 	$TbMsg[8]='"Eliminar Repositorio"';
 	$TbMsg[9]='"Nuevo grupo de Repositorios"';
-	$TbMsg[10]='';
+	$TbMsg[10]='"Eliminar Imagen Repositorio"';
 	$TbMsg[11]='';
 	$TbMsg[12]='"Repositorios"';
 	$TbMsg[13]='""';

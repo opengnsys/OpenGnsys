@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -67,7 +67,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_grupos.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_alta :
@@ -100,7 +100,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /**************************************************************************************************************************************************
 	Inserta, modifica o elimina datos en la tabla grupos
 ________________________________________________________________________________________________________*/
@@ -184,7 +184,9 @@ function	EliminaGrupos($cmd,$identificador,$nombreid,$literaltipo,$swid=1){
 	if (empty($identificador)) return(true);
 
 	global $LITAMBITO_GRUPOSAULAS ;
-	global $LITAMBITO_GRUPOSIMAGENES ;
+	global $LITAMBITO_GRUPOSIMAGENESMONOLITICAS ;
+	global $LITAMBITO_GRUPOSIMAGENESBASICAS ;
+	global $LITAMBITO_GRUPOSIMAGENESINCREMENTALES ;
 	global $LITAMBITO_GRUPOSPROCEDIMIENTOS ;
 	global $LITAMBITO_GRUPOSTAREAS ;
 	global $LITAMBITO_GRUPOSTRABAJOS ;
@@ -223,9 +225,15 @@ function	EliminaGrupos($cmd,$identificador,$nombreid,$literaltipo,$swid=1){
 				case $LITAMBITO_GRUPOSTRABAJOS :
 					$resul=EliminaTrabajos($cmd,$rs->campos["idgrupo"],"grupoid");
 					break;
-				case $LITAMBITO_GRUPOSIMAGENES :
+				case $LITAMBITO_GRUPOSIMAGENESMONOLITICAS :
 					$resul=EliminaImagenes($cmd,$rs->campos["idgrupo"],"grupoid");
 					break;
+				case $LITAMBITO_GRUPOSIMAGENESBASICAS :
+					$resul=EliminaImagenes($cmd,$rs->campos["idgrupo"],"grupoid");
+					break;
+				case $LITAMBITO_GRUPOSIMAGENESINCREMENTALES :
+					$resul=EliminaImagenes($cmd,$rs->campos["idgrupo"],"grupoid");
+					break;					
 				case $LITAMBITO_GRUPOSCOMPONENTESHARD  :
 					$resul=EliminaHardwares($cmd,$rs->campos["idgrupo"],"grupoid");
 					break;
@@ -271,3 +279,4 @@ function	EliminaGrupos($cmd,$identificador,$nombreid,$literaltipo,$swid=1){
 	return($resul);
 }
 ?>
+

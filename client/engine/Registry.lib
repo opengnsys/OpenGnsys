@@ -4,9 +4,19 @@
 #@brief   Librería o clase Registry
 #@class   Boot
 #@brief   Funciones para gestión del registro de Windows.
-#@version 1.0.1
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
+
+
+# Función ficticia para lanzar chntpw con timeout de 5 s., evitando cuelgues del programa.
+function chntpw ()
+{
+local CHNTPW
+CHNTPW=$(which drbl-chntpw)
+CHNTPW=${CHNTPW:-$(which chntpw)}
+timeout --foreground 5s $CHNTPW "$@"
+}
 
 
 #/**
@@ -219,12 +229,12 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Camino del fichero de registro en NT/2000 o XP/Vista/7.
+# Camino del fichero de registro en NT/2000 o en XP y posteriores.
 FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f $FILENT ] && FILE="$FILENT"
+[ -f "$FILENT" ] && FILE="$FILENT"
 FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f $FLEHXP ] && FILE="$FILEXP"
-[ ! -f $FILE ] && ogRaiseError OG_ERR_NOTFOUND "$1,$2" && return $?
+[ -f "$FILEXP" ] && FILE="$FILEXP"
+[ -f "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
 
 echo "$FILE"
 }

@@ -16,10 +16,12 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
-include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/RecopilaIpesMacs.php");
+include_once("../includes/opcionesprotocolos.php");
 include_once("../idiomas/php/".$idioma."/comandos/restaurarimagen_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+include_once("../includes/ConfiguracionesParticiones.php");
+
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -61,11 +63,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarimagen_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarimagen_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 
@@ -110,10 +112,10 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				</TR>
 			</TABLE>
 		</FORM>	
-<?
+<?php
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
-	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false,"pintaParticionesRestaurarImagen");
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -126,86 +128,15 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </SCRIPT>
 </BODY>
 </HTML>
-<?
-//________________________________________________________________________________________________________
-//
-//	Descripción:
-//		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
-//		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El código html de la tabla
-//________________________________________________________________________________________________________
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuración
-	global $conKeys; // Contador de claves de configuración
-	global $TbMsg;
-	global $_SESSION;
-	$colums=8;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[24].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[31].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[27].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[22].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[9].'&nbsp;</TH>';
-	echo '</TR>';
+<?php
 
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
-	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
-		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
-			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				$swcc=$tbKeys[$k]["clonable"];
-				echo '<TR>'.chr(13);
-				if($swcc){
-					$icp=$cc."_".$tbKeys[$k]["numpar"]; // Identificador de la configuración-partición
-					echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-					echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-					echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-					echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-					echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
-					echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-					echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
-
-					//Clonación
-					$metodos="UNICAST=UNICAST-CACHE".chr(13);
-					$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
-					$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-					$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
-					$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
-
-					$TBmetodos["UNICAST-CACHE"]=1;
-					$TBmetodos["UNICAST-DIRECT"]=2;
-					$TBmetodos["MULTICAST-CACHE"]=3;
-					$TBmetodos["MULTICAST-DIRECT"]=4;
-					$TBmetodos["TORRENT-CACHE"]=5;
-					$idxc=$_SESSION["protclonacion"];
-					if ($idxc == "UNICAST") {
-						$idxc = "UNICAST-DIRECT";
-					}
-					echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
-				}
-				echo '</TR>'.chr(13);
-			}
-		}
-	}	
-	echo '<TR height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-}
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
+	global $IMAGENES_MONOLITICAS;
+
 	$SelectHtml="";
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
 				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio"; 
@@ -214,7 +145,8 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 	else
 		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;		
 		
-	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y estar creada	
+	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y
+	$cmd->texto.=" 	AND imagenes.tipo=".$IMAGENES_MONOLITICAS;
     
 	$idordenador1 = explode(",",$idordenadores);
 	$idordenador=$idordenador1[0];
@@ -274,94 +206,6 @@ function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$particion){
 }
 
 
-function mcast_syntax($cmd,$ambito,$idambito)
-{
-//if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if ($ambito == 4) 
-{
-$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
-		WHERE aulas.idaula=' . $idambito ;
-}
-
-if ($ambito == 8) 
-{
-$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
-		JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula
-		WHERE gruposordenadores.idgrupo=' . $idambito ;
-}
-
-if ($ambito == 16)
-{
-$cmd->texto='SELECT pormul, ipmul, modomul, velmul, puestos FROM aulas
-		JOIN ordenadores ON ordenadores.idaula=aulas.idaula
-		WHERE ordenadores.idordenador=' . $idambito ;
-}
-
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	if ($rs->Abrir()){
-		$rs->Primero(); 
-		$mcastsyntax = $rs->campos["pormul"] . ':';
-
-		$rs->Siguiente();
-		switch ($rs->campos["modomul"]) 
-		{
-			case 1:
-				$mcastsyntax.="half-duplex:";
-				break;
-			default:
-				$mcastsyntax.="full-duplex:";
-				break;
-		} 			
-		$rs->Siguiente();
-		$mcastsyntax.=$rs->campos["ipmul"] . ':';
-		
-		$rs->Siguiente();
-		$mcastsyntax.=$rs->campos["velmul"] .'M:';
-
-		$rs->Siguiente();
-		$mcastsyntax.=$rs->campos["puestos"] . ':';
-
-	$rs->Cerrar();
-	}
-	$mcastsyntax.="60";
-
-	return($mcastsyntax);	
-}
-
-
-function torrent_syntax($cmd,$ambito,$idambito)
-{
-if ($ambito == 4) 
-{
-	$cmd->texto='SELECT modp2p, timep2p FROM aulas
-			WHERE aulas.idaula=' . $idambito ;
-}
-if ($ambito == 8) 
-{
-	$cmd->texto='SELECT modp2p, timep2p FROM aulas
-			JOIN gruposordenadores ON aulas.idaula=gruposordenadores.idaula
-			WHERE gruposordenadores.idgrupo=' . $idambito ;
-}
-if ($ambito == 16)
-{
-	$cmd->texto='SELECT modp2p, timep2p FROM aulas
-			JOIN ordenadores ON ordenadores.idaula=aulas.idaula
-			WHERE ordenadores.idordenador=' . $idambito ;
-}
-
-$rs=new Recordset; 
-$rs->Comando=&$cmd; 
-if ($rs->Abrir()){
-	$rs->Primero(); 
-	$torrentsyntax=$rs->campos["modp2p"] . ':';
-	$rs->Siguiente();
-	$torrentsyntax.=$rs->campos["timep2p"];
-	$rs->Siguiente();
-	$rs->Cerrar();
-}
-return($torrentsyntax);   
-}
 
 ?>
 

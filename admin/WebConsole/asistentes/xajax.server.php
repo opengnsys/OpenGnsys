@@ -1,9 +1,9 @@
-<?php 
+<?php
 //importando nuestras las referencias XAJAX
 require ("xajax.common.php");
 
 
-//funciÃ³n que lista las Particiones segun la IP elegida
+//funcion que lista las Particiones segun la IP elegida
 function ListarOrigenMaster($ip){ 
 
 	include_once("../includes/ctrlacc.php");
@@ -24,25 +24,24 @@ function ListarOrigenMaster($ip){
 	 $rs=new Recordset; 
 	 
 	//Primera consulta: Particiones del MASTER potencialmente clonables.
-    $cmd->texto='SELECT ordenadores_particiones.numpar as PART,nombresos.nombreso as OS 
+    $cmd->texto='SELECT ordenadores_particiones.numdisk as DISK,ordenadores_particiones.numpar as PART,nombresos.nombreso as OS 
 	FROM ordenadores_particiones INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 	INNER JOIN nombresos ON ordenadores_particiones.idnombreso=nombresos.idnombreso 	
 	INNER JOIN ordenadores ON ordenadores_particiones.idordenador=ordenadores.idordenador 
 	WHERE ordenadores.ip="' .$ip . '"   
 	AND tipospar.clonable>0  
 	AND ordenadores_particiones.idnombreso>0
-	ORDER BY ordenadores_particiones.numpar';
-		
+	ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar';
 	$rs->Comando=&$cmd; 
-    	
-  	if ($rs->Abrir()){
+
+	if ($rs->Abrir()){
 		$cantRegistros=$rs->numeroderegistros;
 		if($cantRegistros>0){
 			 $rs->Primero(); 
 			while (!$rs->EOF){
-				$SelectHtml.='<OPTION value=" 1 '.$rs->campos["PART"].'"';				
+				$SelectHtml.='<OPTION value=" '.$rs->campos["DISK"].' '.$rs->campos["PART"].'"';				
 				$SelectHtml.='>';
-				$SelectHtml.='PART: '. $rs->campos["OS"].'</OPTION>';
+				$SelectHtml.='DISK '.$rs->campos["DISK"].',PART '.$rs->campos["PART"].': '. $rs->campos["OS"].'</OPTION>';
 				$rs->Siguiente();
 			}
 		}
@@ -52,12 +51,13 @@ function ListarOrigenMaster($ip){
 		}
 		$rs->Cerrar();
 	}
-	
 	//Segunda consulta: Imagenes del MASTER registradas como si fuese un repo.
-	$cmd->texto='SELECT *,repositorios.ip as iprepositorio FROM  imagenes
-INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
-where repositorios.ip="' .$ip .'"';
-	
+
+#	$cmd->texto='SELECT *,repositorios.ip as iprepositorio FROM  imagenes
+#INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
+#where repositorios.ip="' .$ip .'"';
+
+	$cmd->texto='select cache  from ordenadores_particiones where codpar = 202 and  idordenador = (SELECT idordenador from ordenadores where ip="' .$ip . '")';
 	$rs->Comando=&$cmd;
 	
 	if ($rs->Abrir()){
@@ -65,9 +65,15 @@ where repositorios.ip="' .$ip .'"';
 		if($cantRegistros>0){
 			$rs->Primero(); 
 			while (!$rs->EOF){
-				$SelectHtml.='<OPTION value=" CACHE /'.$rs->campos["nombreca"].'"';				
-				$SelectHtml.='>';
-				$SelectHtml.='IMG-CACHE: ' . $rs->campos["nombreca"].'</OPTION>';
+				$files = explode(",", $rs->campos["cache"]);
+				foreach ($files as $file) {
+					if ( preg_match ( "/img$/", $file ) )  {					
+					$imgname = rtrim($file, ".img");
+					$SelectHtml.='<OPTION value=" CACHE /'.ltrim($imgname).'"';				
+					$SelectHtml.='>';
+					$SelectHtml.='IMG-CACHE: ' . ltrim($imgname).'</OPTION>';
+					}
+				}
 				$rs->Siguiente();
 			}
 		}
@@ -83,7 +89,6 @@ where repositorios.ip="' .$ip .'"';
 INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
 where repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.ip="' .$ip .'")';
    
-	
 	$rs->Comando=&$cmd;
 	
 	if ($rs->Abrir()){
@@ -105,16 +110,14 @@ where repositorios.idrepositorio=(select idrepositorio from ordenadores where or
 	}
 	
 	$SelectHtml.= '</SELECT>';
-	 
  
 	 //asignando el contenido de la varabiale $SelectHTML al div que esta en la paquina inicial
 	 $objResponse->assign("divListado","innerHTML",$SelectHtml);
-	
-	
+
 	 return $objResponse; //retornamos la respuesta AJAX
 }
 	
-$xajax->processRequest(); //procesando cualquier peticiÃ³n AJAX
+$xajax->processRequest(); //procesando cualquier peticion AJAX
 
 
 

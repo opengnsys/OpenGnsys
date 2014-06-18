@@ -422,7 +422,10 @@ class Comando{
 			$this->ultimoerror=4;
 			return(false);
 		}
-		if (stristr($this->texto,"select")){
+		
+		$sqlstr=trim($this->texto);
+		
+		if (strtoupper(substr($sqlstr,0,6))=="SELECT"){
 			$this->Recordset->Inicializar();
 			$this->Recordset->filas=$this->resul;
 			$this->Recordset->numerodecampos=mysql_num_fields($this->Recordset->filas);

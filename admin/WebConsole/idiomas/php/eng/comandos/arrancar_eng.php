@@ -12,5 +12,9 @@
 	$TbMsg[4]='Computers';
 	$TbMsg[5]='Power-On computers';
 	$TbMsg[6]='Environment';
+        $TbMsg[7]='Data to submit';
+        $TbMsg[8]='Broadcast';
+        $TbMsg[9]='Unicast';
+        $TbMsg[10]='Boot method';
 
 ?>

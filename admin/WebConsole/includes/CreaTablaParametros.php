@@ -20,6 +20,7 @@ function CreaTablaParametros($cmd,$tabla_parametros,$cont_parametros){
 	$rs->Primero(); 
 	$cont=0;
 	while (!$rs->EOF){
+echo "<br>".$rs->campos["nemonico"];
 		$auxtabla_parametros="";
 		$auxtabla_parametros["nemonico"]=$rs->campos["nemonico"];
 		$auxtabla_parametros["descripcion"]=$rs->campos["descripcion"];

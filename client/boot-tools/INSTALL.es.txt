@@ -4,8 +4,8 @@ OpenGnSys Client boot-tools   INSTALL.es.txt
 
 Advertencia previa:
 -----------------------------
-- No usar este instalador en un sistema OpenGnNys en producción.
-- Se puede ejecutar este script desde un sistema Ubuntu 10.04, 11.04
+- No usar este instalador en un sistema OpenGnSys en producción.
+- Se puede ejecutar este script desde un sistema Ubuntu 10.04 o superior.
 - Mas información http://www.opengnsys.es/wiki/ClienteInitrdDSGenerarloV1.0.2
 
 
@@ -23,12 +23,24 @@ mv /opt/opengnsys/tftpboot/ogclient /opt/opengnsys/tftpboot/ogclient-old;
 
 #1. Descargar del Subversion las herramientas del cliente
 apt-get install subversion wget
-svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
-svn checkout http://www.opengnsys.es/svn/branches/version2/  /tmp/opengnsys_installer/opengnsys2;
+svn checkout http://www.opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys/client/;
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 #2. Ejecutar el instalador: 
 /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh;
+
+Notas para ejecución del instalador en Ubuntu 12.10:
+- Configuración openssh-client:
+  - *** ssh_config (Y/I/N/O/D/Z) [default=N] ?   [intro]
+- Mapa de caracteres:
+  - Pantalla "Configuring console-data": elegir "Select keymap from full list"
+  - Keymap: pc / qwerty / Spanish / Standard / Standard
+- Clave publica del servidor
+ - verwrite (y/n)?   [intro]
+- Mapa de caracteres (repetición):
+  - Pantalla "Configuring console-data":
+  - Select keymap from full list
+  - pc / qwerty / Spanish / Standard / Standard,  UTF-8,  Combined - Latin; Slavic Cyrillic; Greek,  Fixed,  16
 
 
      
@@ -47,3 +59,4 @@ NOTA:
  boottollsfuncions.lib  ->  btogSetfsBase
  bootsoftwareinstall ->
  packages ->sw.testing
+

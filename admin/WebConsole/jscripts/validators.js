@@ -17,8 +17,15 @@
  */
 
 
+// Validar expresión regular.
 function validate_expr(value, epx) {
 	var expr = new RegExp(epx);
+	return (value.search(expr) == 0);
+}
+
+// Validar expresión ignorando diferencias entre mayúsculas y minúsculas.
+function validate_expr_nocase(value, epx) {
+	var expr = new RegExp(epx, "i");
 	return (value.search(expr) == 0);
 }
 
@@ -42,13 +49,37 @@ function validate_alphanum_notnull(value) {
 	return validate_number(value) && validate_notnull(value);
 }
 
-
+// Validar dirección IPv4.
 function validate_ipadress(value) {
-	return validate_expr(value, "^\\d+\\.\\d+\.\\d+\\.\\d+$");
+	var octet = '(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])';
+	var regex = '^((?:' + octet + '\\.){3}' + octet + ')?$';
+	return validate_expr(value, regex);
 }
 
 function validate_ipadress_notnull(value) {
 	return validate_ipadress(value) && validate_notnull(value);
+}
+
+// Validar direccion MAC
+function validate_macaddress(value) {
+	var regex = '^([0-9a-fA-F]){12}$'
+	return validate_expr(value, regex);
+}
+
+function validate_macaddress_notnull(value) {
+	return validate_macaddress(value) && validate_notnull(value);
+}
+
+// Validar URL.
+function validate_url(value) {
+	var octet = '(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])';
+	var regex = '^((ht|f)tps?:\/\/(([a-z0-9]+([\.\-a-z0-9]+)?\.[a-z]{2,5})|((' + octet + '\\.){3}' + octet + '))(:[0-9]{2,5})?(\/.*)?)?$';
+	return validate_expr_nocase(value, regex);
+
+}
+
+function validate_url_notnull(value) {
+	return validate_url(value) && validate_notnull(value);
 }
 
 function validate_nameimagefile(value) {
@@ -61,3 +92,4 @@ function validation_highlight(field) {
 	field.style.border = "1px solid red";
 	field.style.background = "#fee";
 }
+

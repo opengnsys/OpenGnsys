@@ -371,6 +371,7 @@ function filtrado()
 {
 	var ipes="";
 	for(j=1;j<=cid;j++){
+
 		var objTB=document.getElementById("tbo-"+j);
 		if(objTB){ 
 			var imagenes = objTB.getElementsByTagName('img');

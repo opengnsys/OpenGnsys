@@ -1,26 +1,26 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: particionaryformatear_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: particionaryformatear_cat.php (Comandos)
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Particionar y Formatear';
-	$TbMsg[6]='Ámbito';
+	$TbMsg[0]='Centres';
+	$TbMsg[1]='Grup d\'aules';
+	$TbMsg[2]='Aules';
+	$TbMsg[3]='Grup d\'ordinadors';
+	$TbMsg[4]='Ordinadors';
+	$TbMsg[5]='Particionar i Formatejar';
+	$TbMsg[6]='Àmbit';
 	$TbMsg[7]='';
 	$TbMsg[8]='Par';
-	$TbMsg[9]='Tipo';
-	$TbMsg[10]='Nombre S.O.';
-	$TbMsg[11]='Tamaño';
-	$TbMsg[12]='Operación';
-	$TbMsg[13]='Sin action';
-	$TbMsg[14]='Formatear';
+	$TbMsg[9]='Tipus';
+	$TbMsg[10]='Nom S.O.';
+	$TbMsg[11]='Grandària';
+	$TbMsg[12]='Operació';
+	$TbMsg[13]='Sense action';
+	$TbMsg[14]='Formatejar';
 	$TbMsg[15]='Ocultar';
 	$TbMsg[16]='Mostrar';
-	$TbMsg[17]='¡¡ Espacio libre !!';
+	$TbMsg[17]='¡¡ Espai liure !!';
 ?>

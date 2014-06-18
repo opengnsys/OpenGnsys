@@ -2,17 +2,26 @@
 # Scirpt de ejemplo para apagar un ordenador
 # (puede usarse como base para el programa de apagado usado por OpenGNSys Admin).
 
-PROG="$(basename $0)"
 
+# Desmontar los sistemas de archivos y la caché local.
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
     ogUnmountAll $i 2>/dev/null
 done
 echo "[50] Desmontar cache local."
-ogUnmountCache
+ogUnmountCache 2>/dev/null
 echo "[70] Apagando el equipo."
-ethtool -s $DEVICE wol g
-(sleep 5 && busyboxOLD poweroff) &
+# Estado correcto de Wake-On-Lan antes de apagar.
+ethtool -s $DEVICE wol g 2>/dev/null
+# Detectar Busybox.
+BUSYBOX=$(which busyboxOLD)
+BUSYBOX=${BUSYBOX:-"busybox"}
 
+# Retardo para dar lugar al registro en cola de acciones.
+sleep 5
+# Parar Browser para evitar "cuelgues".
+pkill browser
+# Apagar.
+$BUSYBOX poweroff
 

@@ -21,6 +21,9 @@
 #@version 1.0.4 - Detector de distribución y compatibilidad con CentOS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2012/05/04
+#@version 1.0.5 - Actualizar BD en la misma versión, compatibilidad con Fedora (systemd) y configuración de Rsync.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2014/04/03
 #*/
 
 
@@ -46,7 +49,7 @@ if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
 elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
 	source $INSTALL_TARGET/etc/ogAdmAgent.cfg
 fi
-OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base datos
+OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base de datos
 OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
 OPENGNSYS_DBPASSWORD=${OPENGNSYS_DBPASSWORD:-"$PASSWORD"}	# Clave del usuario
 if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASSWORD" ]; then
@@ -68,7 +71,9 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
 
-LOG_FILE=/tmp/opengnsys_update.log
+# Registro de incidencias.
+OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log 
+LOG_FILE=/tmp/$(basename $OGLOGFILE) 
 
 
 
@@ -81,7 +86,7 @@ LOG_FILE=/tmp/opengnsys_update.log
 # - OSDISTRIB - distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
-# - APACHECFGDIR, APACHESERV, DHCPSERV - configuración y servicios
+# - APACHECFGDIR, APACHESERV, DHCPSERV, INETDCFGDIR - configuración y servicios
 function autoConfigure()
 {
 local i
@@ -92,19 +97,38 @@ OSDISTRIB=$(lsb_release -is 2>/dev/null)
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps)
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
+		if which service &>/dev/null; then
+			STARTSERVICE="eval service \$service restart"
+			STOPSERVICE="eval service \$service stop"
+		else
+			STARTSERVICE="eval /etc/init.d/\$service restart"
+			STOPSERVICE="eval /etc/init.d/\$service stop"
+		fi
+		ENABLESERVICE="eval update-rc.d \$service defaults"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		INETDCFGDIR=/etc/xinetd.d
 		;;
         Fedora|CentOS)
-		DEPENDENCIES=
+		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
+		if which systemctl &>/dev/null; then
+			STARTSERVICE="eval systemctl start \$service.service"
+			STOPSERVICE="eval systemctl stop \$service.service"
+			ENABLESERVICE="eval systemctl enable \$service.service"
+		else
+			STARTSERVICE="eval service \$service start"
+			STOPSERVICE="eval service \$service stop"
+			ENABLESERVICE="eval chkconfig \$service on"
+		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
+		INETDCFGDIR=/etc/xinetd.d
 		;;
 	*)	# Otras distribuciones.
 		;;
@@ -231,6 +255,7 @@ function importSqlFile()
         local database="$3"
         local sqlfile="$4"
         local tmpfile=$(mktemp)
+        local mycnf=/tmp/.my.cnf.$$
         local status
 
         if [ ! -r $sqlfile ]; then
@@ -242,9 +267,18 @@ function importSqlFile()
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
             -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
-        mysql -u$dbuser -p"$dbpassword" --default-character-set=utf8 "$database" < $tmpfile
+	# Componer fichero con credenciales de conexión.  
+	touch $mycnf
+	chmod 600 $mycnf
+	cat << EOT > $mycnf
+[client]
+user=$dbuser
+password=$dbpassword
+EOT
+	# Ejecutar actualización y borrar fichero de credenciales.
+	mysql --defaults-extra-file=$mycnf --default-character-set=utf8 -D "$database" < $tmpfile
 	status=$?
-	rm -f $tmpfile
+	rm -f $mycnf $tmpfile
 	if [ $status -ne 0 ]; then
                 errorAndLog "${FUNCNAME}(): error importing $sqlfile in database $database"
                 return 1
@@ -352,7 +386,7 @@ function updateClientFiles()
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
@@ -385,24 +419,76 @@ function apacheConfiguration ()
 	APACHE_RUN_GROUP=${APACHE_RUN_GROUP:-"$APACHEGROUP"}
 }
 
+# Configurar servicio Rsync.
+function rsyncConfigure()
+{
+	local service 
+
+	# Configurar acceso a Rsync.
+	if [ ! -f /etc/rsyncd.conf ]; then
+		echoAndLog "${FUNCNAME}(): Configuring Rsync service."
+		NEWFILES="$NEWFILES /etc/rsyncd.conf"
+		sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENTUSER/g" \
+		    $WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > /etc/rsyncd.conf
+		# Habilitar Rsync.
+		if [ -f /etc/default/rsync ]; then
+			perl -pi -e 's/RSYNC_ENABLE=.*/RSYNC_ENABLE=inetd/' /etc/default/rsync
+		fi
+		if [ -f $INETDCFGDIR/rsync ]; then
+			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/rsync
+		else
+			cat << EOT > $INETDCFGDIR/rsync
+service rsync
+{
+	disable = no
+	socket_type = stream
+	wait = no
+	user = root
+	server = $(which rsync)
+	server_args = --daemon
+	log_on_failure += USERID
+	flags = IPv6
+}
+EOT
+		fi
+		# Activar e iniciar Rsync.
+		service="rsync"  $ENABLESERVICE
+		service="xinetd"
+		$ENABLESERVICE; $STARTSERVICE
+	fi
+}
+
 # Copiar ficheros del OpenGnSys Web Console.
 function updateWebFiles()
 {
-        local ERRCODE
+	local ERRCODE COMPATDIR f
+
 	echoAndLog "${FUNCNAME}(): Updating web files..."
-        backupFile $INSTALL_TARGET/www/controlacceso.php
-        mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
+
+	# Copiar los ficheros nuevos conservando el archivo de configuración de acceso.
+	backupFile $INSTALL_TARGET/www/controlacceso.php
+	mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
-        ERRCODE=$?
-        mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
+	ERRCODE=$?
+	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	if [ $ERRCODE != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating web files."
 		exit 1
 	fi
-        restoreFile $INSTALL_TARGET/www/controlacceso.php
+	restoreFile $INSTALL_TARGET/www/controlacceso.php
+
+	# Compatibilidad con dispositivos móviles.
+	COMPATDIR="$INSTALL_TARGET/www/principal"
+	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
+		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
+	done
+	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
+
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
 
@@ -410,7 +496,7 @@ function updateWebFiles()
 function updateInterfaceAdm()
 { 
 	local errcode=0 
-         
+
 	# Crear carpeta y copiar Interface 
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder" 
 	mv $INSTALL_TARGET/client/interfaceAdm $INSTALL_TARGET/client/Interface
@@ -483,11 +569,18 @@ function createDirs()
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
 	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
+	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
 	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
 	fi
+
+	# Mover el fichero de registro al directorio de logs. 
+	echoAndLog "${FUNCNAME}(): moving update log file" 
+	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE 
+	chmod 600 $LOG_FILE
 
 	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0
@@ -499,12 +592,16 @@ function updateServerFiles()
 	# No copiar ficheros del antiguo cliente Initrd
 	local SOURCES=(	repoman/bin \
 			server/bin \
+			admin/Sources/Services/ogAdmServerAux \
+			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
 			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
+			sbin/ogAdmServerAux \
+			sbin/ogAdmRepoAux \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
 			lib/install_ticket_wolunicast.sh \
@@ -549,12 +646,34 @@ function updateServerFiles()
 	[ ! -f /etc/cron.d/opengnsys ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
+	[ ! -f /etc/cron.d/imagedelete ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
 
 ####################################################################
 ### Funciones de compilación de código fuente de servicios
 ####################################################################
+
+# Mueve el fichero del nuevo servicio si es distinto al del directorio destino.
+function moveNewService()
+{
+	local service 
+
+	# Recibe 2 parámetros: fichero origen y directorio destino.
+	[ $# == 2 ] || return 1
+	[ -f  $1 -a -d $2 ] || return 1
+
+	# Comparar los ficheros.
+	if ! diff -q $1 $2/$(basename $1) &>/dev/null; then
+		# Parar los servicios si fuese necesario.
+		[ -z "$NEWSERVICES" ] && service="opengnsys" $STOPSERVICE
+		# Nuevo servicio.
+		NEWSERVICES="$NEWSERVICES $(basename $1)"
+		# Mover el nuevo fichero de servicio
+		mv $1 $2
+	fi
+}
+
 
 # Recompilar y actualiza los serivicios y clientes.
 function compileServices()
@@ -564,7 +683,7 @@ function compileServices()
 	# Compilar OpenGnSys Server
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
-	make && mv ogAdmServer $INSTALL_TARGET/sbin
+	make && moveNewService ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
 		hayErrores=1
@@ -573,7 +692,7 @@ function compileServices()
 	# Compilar OpenGnSys Repository Manager
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && mv ogAdmRepo $INSTALL_TARGET/sbin
+	make && moveNewService ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
 		hayErrores=1
@@ -582,7 +701,7 @@ function compileServices()
 	# Compilar OpenGnSys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && mv ogAdmAgent $INSTALL_TARGET/sbin
+	make && moveNewService ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
 		hayErrores=1
@@ -612,13 +731,16 @@ function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	#local FILENAME=ogLive-raring-3.8.0-22-generic-r3836.iso 	# 1.0.5-rc3
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
 	local TARGETLENGTH
 	local TMPDIR=/tmp/${FILENAME%.iso}
 	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
+	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	local SAMBAPASS
+	local KERNELVERSION
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
@@ -635,7 +757,7 @@ function updateClient()
 		if [ -f $OGINITRD ]; then
 			SAMBAPASS=$(gzip -dc $OGINITRD | \
 				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
-				    grep "^[ 	]*OPTIONS=" | \
+				    grep "^[ 	].*OPTIONS=" | \
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 		fi
 		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
@@ -661,9 +783,36 @@ function updateClient()
 		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
 		cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 		
+		# Obtiene versión del Kernel del cliente (con 2 decimales).
+		KERNELVERSION=$(file -bkr $OGVMLINUZ 2>/dev/null | \
+				awk '/Linux/ { for (i=1; i<=NF; i++)
+						   if ($i~/version/) {
+						      v=$(i+1);
+						      printf ("%d",v);
+						      sub (/[0-9]*\./,"",v);
+						      printf (".%02d",v)
+					     } }')
+		# Actaulizar la base de datos adaptada al Kernel del cliente.
+		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
+		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
+			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
+			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
+		fi
+
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
-		echoAndLog "${FUNCNAME}(): Client is already updated"
+		# Si no existe, crear el fichero de claves de Rsync.
+		if [ ! -f /etc/rsyncd.secrets ]; then
+			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			SAMBAPASS=$(gzip -dc $OGINITRD | \
+				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+				    grep "^[ 	].*OPTIONS=" | \
+				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
+					$INSTALL_TARGET/bin/setsmbpass
+		else
+			echoAndLog "${FUNCNAME}(): Client is already updated"
+		fi
 	fi
 }
 
@@ -672,7 +821,7 @@ function updateSummary()
 {
 	# Actualizar fichero de versión y revisión.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Revision:/ {print "r"$2}')
+	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
 
 	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
@@ -681,8 +830,19 @@ function updateSummary()
 	echoAndLog "OpenGnSys Update Summary"
 	echo       "========================"
 	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echoAndLog "Update log file:                  $LOG_FILE"
 	if [ -n "$NEWFILES" ]; then
 		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
+	fi
+	if [ -n "$NEWSERVICES" ]; then
+		echoAndLog "New compiled services:            $(echo $NEWSERVICES)"
+		# Indicar si se debe reiniciar servicios manualmente o usando el Cron.
+		[ -f /etc/default/opengnsys ] && source /etc/default/opengnsys
+		if [ "$RUN_CRONJOB" == "no" ]; then
+			echoAndLog "        WARNING: you must restart OpenGnSys services manually."
+		else
+			echoAndLog "        New OpenGnSys services will be restarted by the cronjob."
+		fi
 	fi
 	echo
 }
@@ -723,7 +883,7 @@ fi
 autoConfigure
 
 # Instalar dependencias.
-installDependencies $DEPENDENCIES
+installDependencies ${DEPENDENCIES[*]}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error: you may install all needed dependencies."
 	exit 1
@@ -750,9 +910,13 @@ fi
 # Si existe fichero de actualización de la base de datos; aplicar cambios.
 INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
 REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+if [ "$INSTVERSION" == "$REPOVERSION" ]; then
+	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION.sql"
+else
+	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
+fi
 if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-	echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
+	echoAndLog "Updating tables from file: $(basename $OPENGNSYS_DBUPDATEFILE)"
 	importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
 else
 	echoAndLog "Database unchanged."
@@ -764,6 +928,9 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnSys Server files"
 	exit 1
 fi
+
+# Configurar Rsync.
+rsyncConfigure
 
 # Actualizar ficheros del cliente
 updateClientFiles

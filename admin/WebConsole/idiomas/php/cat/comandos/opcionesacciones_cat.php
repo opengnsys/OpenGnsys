@@ -1,21 +1,21 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: opcionesacciones_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: opcionesacciones_cat.php (Comandos)
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsgAux=array();
-	$TbMsgAux[0]='Opciones de Ejecución';
-	$TbMsgAux[1]='Ejecutar inmediatamente';
-	$TbMsgAux[2]='Incluirlo en Cola de Acciones';
-	$TbMsgAux[3]='No incluirlo en Cola de Acciones';
-	$TbMsgAux[4]='Programar comando';
-	$TbMsgAux[5]='Guardar como procedimiento';
-	$TbMsgAux[6]='Guardar como nuevo procedimiento';
-	$TbMsgAux[7]='Incluir en un procedimiento existente';
-	$TbMsgAux[8]='Orden de ejecución';
-	$TbMsgAux[9]='Guardar como tarea';
-	$TbMsgAux[10]='Guardar como una tarea nueva' ;
-	$TbMsgAux[11]='Incluir en una tarea existente' ;
-	$TbMsgAux[12]='Orden de ejecución';
+	$TbMsgAux[0]='Opcions d\'Execució';
+	$TbMsgAux[1]='Executar inmediatament';
+	$TbMsgAux[2]='Incluir-ho en Cola d\'Accions';
+	$TbMsgAux[3]='No incluir-ho en Cola d\'Accions';
+	$TbMsgAux[4]='Programar comanda';
+	$TbMsgAux[5]='Guardar como a procediment';
+	$TbMsgAux[6]='Guardar como a nou procediment';
+	$TbMsgAux[7]='Incluir-ho en un procediment existent';
+	$TbMsgAux[8]='Ordre d\'execució';
+	$TbMsgAux[9]='Guardar como a tasca';
+	$TbMsgAux[10]='Guardar como a tasca nova' ;
+	$TbMsgAux[11]='Incluir-ho en una tasca existent' ;
+	$TbMsgAux[12]='Ordre d\'execució';
 ?>

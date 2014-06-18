@@ -1,10 +1,10 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: inventariosoftware__esp.php (Comandos)
+//	Fichero de idiomas php: inventariosoftware_esp.php (Comandos)
 //	Idioma: Español
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='Centros';
 	$TbMsg[1]='Grupo de aulas';
 	$TbMsg[2]='Aulas';

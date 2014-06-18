@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -37,11 +37,30 @@ if (!$cmd)
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
 	include_once("./includes/FiltradoAmbito.php");
+?>
+	<P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN></p>
+	</BR>
+	<TABLE id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+		<TR>
+			<TH align=center>&nbsp;&nbsp;</Th>
+			<TH align=center>&nbsp;<?php echo $TbMsg[10] ?>&nbsp;</TH>
+		</TR>
+		<TR>
+			<TD align=center><input type="radio" checked id="broadcast" name="metodo" value="1"></TD>
+			<TD align=center>&nbsp;<?php echo $TbMsg[8] ?>&nbsp;</TD>
+		</TR>
+		<TR>
+			<TD align=center><input type="radio" id="unicast" name="metodo" value="2"></TD>	
+			<TD align=center>&nbsp;<?php echo $TbMsg[9] ?>&nbsp;</TD>
+			
+		</TR>
+	</TABLE>
+<?php
 	//________________________________________________________________________________________________________
 	//
 	include_once("./includes/formularioacciones.php");

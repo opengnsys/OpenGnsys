@@ -2,6 +2,115 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.5
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#142	Ampliar el soporte al mayor número de sistemas de ficheros posible
+#295	Función ogSetPartitionId: partición errónea o desconocida
+#397	Separación completa de objetos partición y sistema de archivos (tarea)
+#484	Arranque dual (tarea)
+#548	Ampliar la detección de sistemas operativos
+#550	Error al restaurar en equipos recién particionados o recién incluidos en OpenGnSys
+#555	Longitud máxima de nombres Netbios
+#571	NTAutoLogon: muestra la clave del usuario de autologon
+#578	Problema con la instalación del cliente de Windows
+#581	El comando chntpw se cuelga cuando el registro de Windows está corrompido
+#588	Grub para GNU/Linux de 32 y 64 bits incluye configurador del fichero cfg
+#589	Función ogConfigureFstab en Boot.lib
+#590	Función ogSetLinuxName en Boot.lib
+#591	Función ogCleanLinuxDevices en Boot.lib
+#592	Función ogBoot sobre un sistema GNU/Linux depende del valor default de grub.cfg
+#593	Engine: optimizar inicio de sesión en Windows
+#598	Eliminar imagen de caché no funciona si caché desmontada
+#600	Eliminar el límite de tamaño de la caché
+#602	Adaptar funciones para soportar los sistemas de ficheros del Kernel 3.7
+#605	builtToOrder para discos SCSI con controlador lsi_sas
+#624	Reboot con valor por defecto de tiempo de sleep configurable.
+#628	Problema postconfiguración Windows dos veces seguidas
+#634	Problema si cliente de OpenGnSys ya se encuentra instalado en Windows
+#636	Recupearar log en tiempo real para comados de restauración
+#637	Función ogRaiseError sin parámetros devuelve mensaje erróneo y revisión de control de errores
+#640	Evitar información repetida en ficheros de logs
+#644	Continuar comunicación en torrent
+
+Tickets resueltos en módulo OpenGnSys Client:
+#245	Teclado internacional en el cliente (mejora)
+#263	Consola Web: Particionar y formatear
+#457	Seguridad: ogclient en modo usuario permite abrir una consola bash (no se resolverá)
+#461	Actualizar Grub4DOS (no se resolverá)
+#463	ogLive no espera el link para configurar la red y da error
+#547	ogLive basado en ubuntu 12.04 no detecta ficheros de configuración de DNS
+#568	Menú por defecto para los clientes incluye acceso a sistemas operativos
+#570	boot-tools: error en la generación del ogLive basado en ubuntu 12.10
+#573	Crear cliente ogLive basado en Ubuntu 12.10 con Kernel 3.7 (tarea)
+#579	El cliente no inicia cuando se conecta un dispositivo USB
+#563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
+#587	buildToOrder: activación controladores de disco para Windows 7
+#595	Internacionalización mensajes del cliente
+#604	Agente de sistema operativo Windows bloquea conexión a Internet
+#612	Log en tiempo real no muestra salida de Unicast
+#613	Script reboot con parámetro de tiempo
+#635	Opción para deshabilitar el apagado automático de clientes (mejora)
+#639	Cliente OpenGnSys para Linux permite ejecutar script
+#641	Crear Código de error específico para script updateCache
+
+Tickets resueltos en módulo OpenGnSys Server:
+#534	Netboot con ficheros dinámicos
+#535	Script torrent-creator con imágenes mayores a 80 GB entra en bucle y no finaliza
+#567	Los comandos se ejecutan 2 veces si se incluyen en la cola de acciones
+#575	Archivo de configuración Rsync para imagenes sincronizadas
+#584	Script setclientmode trunca el fichero PXE
+#586	Mejorar seguridad en scripts para no mostrar los parámetros de ejecución de mysql
+#597	Servicio ogAdmServer deja conexiones MySQL abiertas en la funcion AutoexecCliente
+#607	Script setclientmode: Identificacion de la plantilla por nombre en consola
+#621	Servicio ogAdmServer consume toda la CPU en ciertas circunstancias
+#638	Script de servidor para listar el software instalado en una imagen
+
+Tickets resueltos en módulo OpenGnSys Repository Server:
+#583	Script deleteimage no admite correctamente parámetro de borrado de copia de seguridad de la imagen
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#149	Controlar tamaño de caché en la consola
+#265	Consola Web: Actualización información al terminar los comandos (duplicado de #577)
+#416	Clonar partición sólo datos
+#524	Eliminar imagen en caché del cliente
+#533	Scritps de interfaceAdm no deben incluir lógica de proceso
+#551	Consola web compatible con PHP 5.4 (tarea)
+#552	Permitir crear caché en cualquier disco
+#566	Asistente de gestión Master muestra todas las imágenes de su caché para enviarlas
+#585	Incluir en la administración web las opciones DNS y proxy para el ogLive
+#594	Reactivar el comando Formatear y Particionar
+#596	Gestión automática de fichero PXE al administrar clientes
+#599	Consola Web: opción de ejecución por defecto de los comandos
+#601	Mostrar configuraciones de más de un disco en la consola web
+#606	Fichero constantes.php: error panel de navegación y asistente particiones remotas
+#608	Consola Web: mostrar mensaje cuando equipo no tenga la configuración del disco en la BD
+#609	Fallo al incorporar ordenadores
+#610	Validación nombre canónico de image
+#614	Compatibilidad múltiples dispositivos (mejora)
+#617	Botones barra menú (duplicado de #614)
+#619	Consola web asistente particionado: error si se incluye en la cola de acciones
+#642	Mejoras en comandos de eliminación de imágenes
+#643	Validacion formulario propiedades del ordenador
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#562	Log de instalación ubicarlo en directorio log del server
+#569	Aplicar actualizaciones de la base de datos en la misma versión de OpenGnSys
+#576	Varias cuestiones relacionadas con la sincronización de imágenes
+#582	Nebtoot basado en ficheros (ticket #534) requiere proceso para actualización de ficheros y de la base de datos
+#622	Script de instalacion interactivo
+#627	Corrección errores SQL
+
+Tickets genéricos resueltos:
+#453	Autenticación con LDAP u otro servicio (tarea)
+#455	Comunicacion SSH entre un Servidor central y repositorios (opcional)
+#564	Eliminar imagen de repositorio (tarea)
+#565	Imágenes diferenciales (tarea)
+#537	Revisión proceso de creación y restauración de imágenes: interfazAdm -> scripts -> engine (mejora)
+#577	Enviar al servidor la configuración de particiones cada vez que un cliente e ejecuta un comando
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.4a (versión de mantenimiento)
 ----------------------------------------------
 
@@ -39,6 +148,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #530	Función ogReduceFs sobre windows 7 no borra fichero hiberfil.sys
 #538	Función ogTypeToId: error en parámetro
 #540	Función ogCreateCache no detecta tipo de tabla de particiones
+#542	ogLive cliente torrent -leecher ó peer- tiempo en modo seeder
 #543	Particionado -incluido initCache- sobre disco duro sin formatear no funciona
 
 Tickets resueltos en módulo OpenGnSys Client:
@@ -113,6 +223,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #460	Cliente ogLive 11.10 (tarea)
 #466	Comando iniciar sobre sistema Linux bloqueado por Browswer
 #468	Sistema de archivos de la caché en Ext4
+#476	Revisar y depurar el proceso de arranque del cliente
 #477	Mejorar la internacionalización del cliente (inglés, en especial)
 #482	Script de inicio mountrepo.sh no reconoce variable "ogprotocol"
 
@@ -291,6 +402,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #336	Regenerar el cliente ogclient-1.0-lucid-32bit.tar.gz
 #360	Importar herramientas de generación del cliente desde la rama ogClient (mejora)
 #368	Generar nuevo cliente como boot-tools
+#374	Script fileslink da error al intentar crear enlace con las Qt y crear directorios
 
 Tickets resueltos en módulo OpenGnSys Server:
 #340	Menú PXE de arranque con tiempo de espera

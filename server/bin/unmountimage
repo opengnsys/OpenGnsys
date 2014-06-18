@@ -1,0 +1,47 @@
+#!/bin/bash
+#/**
+#        unmountimage
+#@brief  Desmonta imagen sincronizable
+#@param 1 imagen
+#@param 2 extension [ img|diff ] opcional, por defecto img
+#@return  
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@version 1.0 - Desmontar imagen sincronizable
+#@author  Irina Gomez
+#@date   2013-05-23
+#*/ ##
+BASEDIR=/opt/opengnsys
+REPODIR="$BASEDIR/images"
+REPOLOG=$BASEDIR/log/ogAdmRepo.log
+source $BASEDIR/client/etc/lang.$LANG.conf
+
+PROG="$(basename $0)"
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    echo -e " $PROG: $MSG_HELP_ogUnmountImage \n" \
+            "$MSG_FORMAT: $PROG nombre_image [ img|diff ] \n" \
+            "base -> $PROG Windows7 \n" \
+	    "diff -> $PROG Ubuntu12 diff"
+   exit 0
+fi
+
+[ $# -lt 1 ] && echo -e "$PROG: Error: $MSG_ERR_FORMAT \n     $MSG_FORMAT: $PROG image [ img | diff ]" && exit 1
+
+if [ "$USER" != "root" ]; then
+        echo "$PROG: Error: solo ejecutable por root" >&2
+        exit 1
+fi
+
+# Comprobamos que imagen la imagen esta montada
+MOUNTDIR="$REPODIR/mount/$1"
+if [ "$2" == "diff" ]; then
+	IMGEXT="diff"
+	MOUNTDIR="$MOUNTDIR.diff"
+else
+	IMGEXT="img" 
+fi
+# Si la imaen no está montada me salgo
+df |grep "$MOUNTDIR$"  2>&1 >/dev/null || exit 0
+
+echo -ne UMOUNT_IMAGE "$1" $IMGEXT | /opt/opengnsys/sbin/ogAdmRepoAux
+echo "Los resultado se registran en $REPOLOG. "

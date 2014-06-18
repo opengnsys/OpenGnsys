@@ -4,67 +4,93 @@
 #@brief    Librería o clase System
 #@class    System
 #@brief    Funciones básicas del sistema.
-#@version  1.0.4
+#@version  1.0.5
 #@warning  License: GNU GPLv3+
 #*/
 
 
 #/**
-#         ogEcho [str_loglevel] "str_message..."
+#         ogEcho [str_logtype ...] [str_loglevel] "str_message" ...
 #@brief   Muestra mensajes en consola y lo registra en fichero de incidencias.
+#@param   str_logtype  tipo de registro de incidencias.
 #@param   str_loglevel nivel de registro de incidencias.
 #@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@warning Si no se indica nivel de registro, solo muestra mensaje en pantalla.
+#@note    logfile = { log, command, session }; usa "log" si se indica nivel de registro.
+#@note    loglevel = { help, info, warning, error }
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
 #@version 0.9 - Primera versión para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-07-23
+#@version 1.0.5 - Elegir fichero de log.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-23
 #*/
 function ogEcho () {
 
 # Variables locales
-local LOGLEVEL DATETIME
+local CONT=1 LOGS LOGLEVEL DATETIME
+
+# Selección de ficheros de rgistro de incidencias.
+while [ $CONT ]; do
+    case "${1,,}" in
+        log)     LOGS="$LOGS $OGLOGFILE";    shift ;;
+        command) LOGS="$LOGS $OGLOGCOMMAND"; shift ;;
+        session) LOGS="$LOGS $OGLOGSESSION"; shift ;;
+        *)       CONT= ;;
+    esac
+done
 
 # Selección del nivel de registro (opcional).
-case "$1" in
+case "${1,,}" in
      help)    shift ;;
      info)    LOGLEVEL="$1"; shift ;;
      warning) LOGLEVEL="$1"; shift ;;
      error)   LOGLEVEL="$1"; shift ;;
      *)       ;;
 esac
-DATETIME=$(date +"%F %T")
 
 if [ -n "$LOGLEVEL" ]; then
-    logger -s -t "OpenGnSys $LOGLEVEL" -f $OGLOGFILE "$DATETIME $*"
-    logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGCOMMAND "$DATETIME $*"
-    logger -t "OpenGnSys $LOGLEVEL" -f $OGLOGSESSION "$DATETIME $*"
+    DATETIME=$(date +"%F %T")
+    logger -s -t "OpenGnSys $LOGLEVEL" "$DATETIME $*" 2>&1 | tee -a $OGLOGFILE $LOGS
 else
-    echo "$*"
+    echo "$*" | tee -a $LOGS
 fi
 }
 
 
 #/**
-#         ogRaiseError int_errcode ["str_errmessage" ...]
+#         ogRaiseError [str_logtype ...] int_errcode ["str_errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.
+#@param   str_logtype    tipo de registro de incidencias.
 #@param   int_errcode    código de error.
 #@param   str_errmessage mensajes complementarios de error.
-#@return  str_message - Mensaje de error.
+#@return  str_message - Mensaje de error, incluyendo las funciones relacionadas.
 #@warning No definidas
 #@note    Mensajes internacionales del fichero de idiomas.
 #@version 0.9 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-21
+#@version 1.0.5 - Muestra en el mensaje todas las funciones relacionadas (separadas por <-).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-03-17
 #*/ 
 function ogRaiseError () {
 
 # Variables locales
-local MSG CODE
+local CONT=1 LOGS MSG CODE FUNCS
+
+# Selección de rgistros de incidencias.
+while [ $CONT ]; do
+    case "${1,,}" in
+        log|command|session)  LOGS="$LOGS $1"; shift ;;
+        *)                    CONT= ;;
+    esac
+done
 
 # Obtener código y mensaje de error.
-CODE=$1
+CODE="$1"
 case "$CODE" in
      $OG_ERR_FORMAT)     MSG="$MSG_ERR_FORMAT \"$2\"" ;;
      $OG_ERR_NOTFOUND)   MSG="$MSG_ERR_NOTFOUND \"$2\"" ;;
@@ -83,6 +109,7 @@ case "$CODE" in
      $OG_ERR_REDUCEFS)   MSG="$MSG_ERR_REDUCEFS \"$2\"" ;;
      $OG_ERR_EXTENDFS)   MSG="$MSG_ERR_EXTENDFS \"$2\"" ;;
      $OG_ERR_IMGSIZEPARTITION)   MSG="$MSG_ERR_IMGSIZEPARTITION \"$2\"" ;;   
+     $OG_ERR_UPDATECACHE)       MSG="$MSG_ERR_UPDATECACHE \"$2\"" ;;
      $OG_ERR_UCASTSYNTAXT)   MSG="$MSG_ERR_UCASTSYNTAXT \"$2\"" ;;
      $OG_ERR_UCASTSENDPARTITION)   MSG="$MSG_ERR_UCASTSENDPARTITION \"$2\"" ;;    
      $OG_ERR_UCASTSENDFILE)   MSG="$MSG_ERR_UCASTSENDFILE \"$2\"" ;;  
@@ -94,11 +121,20 @@ case "$CODE" in
      $OG_ERR_MCASTSENDPARTITION)   MSG="$MSG_ERR_MCASTSENDPARTITION \"$2\"" ;;
      $OG_ERR_MCASTRECEIVERPARTITION)   MSG="$MSG_ERR_MCASTRECEIVERPARTITION \"$2\"" ;; 
      $OG_ERR_PROTOCOLJOINMASTER)   MSG="$MSG_ERR_PROTOCOLJOINMASTER \"$2\"" ;;
+     $OG_ERR_DONTMOUNT_IMAGE)	MSG="$MSG_ERR_DONTMOUNT_IMAGE \"$2\"" ;;
+     $OG_ERR_DONTUNMOUNT_IMAGE)   MSG="$MSG_ERR_DONTUNMOUNT_IMAGE \"$2\"" ;;
+     $OG_ERR_DONTSYNC_IMAGE)	MSG="$MSG_ERR_DONTSYNC_IMAGE \"$2\"" ;;
+     $OG_ERR_NOTDIFFERENT)	MSG="$MSG_ERR_NOTDIFFERENT \"$2\"" ;;
+     $OG_ERR_SYNCHRONIZING)	MSG="$MSG_ERR_SYNCHRONIZING \"$2\"" ;;
      *)                  MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 
+# Obtener lista de funciones afectadas, incluyendo el script que las llama.
+FUNCS="${FUNCNAME[@]:1}"
+FUNCS="${FUNCS/main/$(basename $0 2>/dev/null)}"
+
 # Mostrar mensaje de error y salir con el código indicado.
-ogEcho error "${FUNCNAME[1]}: $MSG" >&2
+ogEcho $LOGS error "${FUNCS// /<-}: $MSG" >&2
 return $CODE
 }
 
@@ -115,8 +151,8 @@ return $CODE
 function ogGetCaller () {
 
 # Obtener el nombre del programa o del script que ha llamado al proceso actual.
-basename $(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
-                                else print $13;}')
+basename "$(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
+                                 else { sub(/^-/,"",$13); print $13; } }')"
 }
 
 

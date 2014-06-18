@@ -11,22 +11,22 @@
 // ________________________________________________________________________________________________________
 #define LONSTD 1024	// Longitud de memoria estandar
 #define LONINT 16	// Longitud de memoria estandar para un número entero
-#define LONFIL 256	// Longitud de memoria estandar para nombres de archivo completos (incluido path)
+#define LONFIL 1024	// Longitud de memoria estandar para nombres de archivo completos (incluido path)
 #define LONIP 16	// Longitud de memoria estandar para cadenas que contiene una dirección IP
 #define LONMAC 16	// Longitud de memoria estandar para cadenas que contiene una dirección MAC
-#define LONSQL 4096	// Longitud de memoria estandar para una sentencia SQL
-#define LONPRM 512	// Longitud estandar de los parámetros del fichero de configuración del servicio
-#define LONSCP 2024	// Longitud estandar de los parámetros de las tramas
-#define LONFUN 64	// Longitud estandar de los nombres de las funciones que procesan las tramas
-#define LONSUC 512	// Longitud de los mensajes de sucesos
-#define LONBLK 512	// Longitud de los paquetes de tramas leidos cada vez
-#define MAXPRM 10	// Máximo número de parámeros del fichero de configuración del servicio
+#define LONSQL 8192	// Longitud de memoria estandar para una sentencia SQL
+#define LONPRM 4098	// Longitud estandar de los parámetros del fichero de configuración del servicio
+#define LONSCP 4098	// Longitud estandar de los parámetros de las tramas
+#define LONFUN 512	// Longitud estandar de los nombres de las funciones que procesan las tramas
+#define LONSUC 4098	// Longitud de los mensajes de sucesos
+#define LONBLK 8192	// Longitud de los paquetes de tramas leidos cada vez
+#define MAXPRM 20	// Máximo número de parámeros del fichero de configuración del servicio
 #define MAXPAR 128	// Maximo numero de particiones manejadas por el sistema, ahora con GPT es 128
-#define MAXLONURL 512 // Longitud máxima de una dirección url con parámetros
+#define MAXLONURL 1024 // Longitud máxima de una dirección url con parámetros
 
 #define LONHEXPRM 5 // Longitud del campo que contiene el tamaño de la cadena de parámetros
 #define LONGITUD_CABECERATRAMA 16	// Longitud de la cabecera de las tramas
-#define LONGITUD_PARAMETROS 1024	// Longitud estandar de la información de la trama (parámetros)
+#define LONGITUD_PARAMETROS 8192	// Longitud estandar de la información de la trama (parámetros)
 #define MAXCMD_PARAMETROS  200  // Máximo número de parámetros de una trama
 
 #define MAXIMOS_CLIENTES	4000	// Máximo número de conexiones con ordenadores clientes
@@ -90,14 +90,14 @@
 
 #define ANNOREF 2009 // Año de referencia base
 
-#define LONGITUD_SCRIPTSALIDA 512	// Longitud máxima de la información devuelta por una función de interface
+#define LONGITUD_SCRIPTSALIDA 131072	// Longitud máxima de la información devuelta por una función de interface
 #define MAXARGS 16	// Número máximo de argumentos enviados a un scripts
 #define MAXCNX 5	// Máximos intentos de conexión al servidor de Administración
 
 #define PUERTO_WAKEUP	9 // Puerto wake up
 
 #define MAXHARDWARE 128 //	 Máximos elementos hardware a detectar
-#define MAXSOFTWARE 2048 //	 Máximos elementos software a detectar
+#define MAXSOFTWARE 8096 //	 Máximos elementos software a detectar
 // ________________________________________________________________________________________________________
 // Tipos definidos
 // ________________________________________________________________________________________________________
@@ -129,7 +129,7 @@ typedef struct{		// Estructura de las tramas
 	char arroba;	// Caracter arroba siempre
 	char identificador[14];	// Identificador de la trama, siempre JMMLCAMDJ_MCDJ
 	char tipo;	// Tipo de mensaje
-	int lonprm; // Longitud en hexadecimal de los parámetros
+	long lonprm;	// Longitud en hexadecimal de los parámetros
 	char *parametros; // Parámetros de la trama
 }TRAMA;
 // ________________________________________________________________________________________________________
@@ -228,7 +228,10 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"090-Error en el fichero de configuración del programa. No se ha definido el parámetro URLMSG",\
 		"091-Ha habido algún problema al enviar un mensaje de tipo petición al Servidor",\
 		"092-Error en el fichero de configuración del programa. No se ha definido el parámetro IPLOCAL",\
-		"093-No se puede caragar la libraria Windows para trabajar con sockets",\
+		"093-No se puede cargar la librería Windows para trabajar con sockets",\
+		"094-Ha habido algún problerma al procesar la actualización después de crear una imagen",\
+		"095-Ha habido algún problerma al procesar la actualización después de restaurar una imagen",\
+		"096-Ha habido algún problerma al procesar la actualización después de crear un software incremental",\
 
 };
 // ________________________________________________________________________________________________________
@@ -307,4 +310,5 @@ BOOLEAN escribeArchivo(char *,char*);
 BOOLEAN sendArchivo(SOCKET *,char *);
 BOOLEAN recArchivo(SOCKET *,char *);
 SOCKET TCPConnect(char *,char*);
+int tomaPuerto(SOCKET);
 

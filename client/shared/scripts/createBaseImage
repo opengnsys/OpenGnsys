@@ -1,0 +1,174 @@
+#!/bin/bash
+
+#/**
+#         createBaseImage
+#@brief   Script de ejemplo para crear una imagen de un sistema de archivos.
+#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#@param 1 disco 
+#@param 2 particion 
+#@param 3 REPO|CACHE
+#@param 4 imagen
+#@return  
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
+#@exception OG_ERR_LOCKED     # 4 Imagen o particion bloqueada
+#@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
+#@exception OG_ERR_NOTWRITE   # 14 error de escritura
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
+#@exception OG_ERR_DONTMOUNT_IMAGE # 70 Error al montar una imagen sincronizada
+#@note  No necesario permiso se escritura por samba en repo.
+#@todo: que hacer, si el tamaño de la cache es sufciente, pero no tiene espacio libre
+#@version 1.0 - creación imagen con btrfs
+#@author  
+#@date   2012-12-04
+#*/ ##
+
+trap "onexit $1 $2 $3 \"$4\"" 1 2 3 6 9 14 15 EXIT
+
+# Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
+function onexit() {
+    local exit_status=$?
+    if [ $exit_status -ne 4 ]; then
+	ogUnlockImage "$3" "/$4.$IMGEXT" 
+	ogUnlock $1 $2
+    fi
+    exit $exit_status
+}
+
+TIME1=$SECONDS
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Factor de calculo de Time out al crear imagen: valor por defecto en engine.cfg 
+CREATESPEED=${CREATESPEED:-"100000*4"}
+
+# Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
+KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
+[ $KERNELVERSION \< 3.07 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
+
+# % de compresion para estimacion tamaño imagen IMGFS="EXT4"
+ZSYNC=${ZSYNC:-"120"}
+
+# Si IMGFS="BTRFS" la compresion es mayor.
+[ $IMGFS == "BTRFS" ] && let ZSYNC=$ZSYNC-30
+
+PROG="$(basename $0)"
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp  "$PROG: $MSG_HELP_createBaseImage" \
+	    "$PROG ndisco nparticion REPO|CACHE base_image" \
+            "$PROG 1 1 REPO Windows7"
+    exit 0
+fi
+
+[ $# -ne 4 ] && exit $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen" ; echo $?)
+
+# Limpiamos fichero de log
+echo  " " > $OGLOGCOMMAND
+[ "$(ogGetCaller)" == "RestaurarImagenBasica" ] || echo  -n ""> $OGLOGSESSION
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Valores por defecto en etc/engine.cfg
+IMGEXT="img"
+REPOIP=$(ogGetRepoIp)
+
+
+# Comprobamos si la imagen o la particion estan bloqueada:
+ogIsImageLocked "$3" "$4.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$3 $4.$IMGEXT"; echo $?)
+ogIsLocked "$1" "$2" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$1 $2"; echo $?)
+
+# Si el repositorio es CACHE comprobamos que exista
+if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
+	! ogFindCache >/dev/null && exit $(ogRaiseError session $OG_ERR_NOTCACHE "CACHE "; echo $?)
+fi
+
+# Obtener información de los parámetros de entrada.
+PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || exit $(ogRaiseError session $OG_ERR_PARTITION "$1 $2" ; echo $?)
+# Comprobar consistencia del sistema de archivos.
+echo " " > $OGLOGCOMMAND
+SIZEFS=$(ogGetFsSize  $1 $2)
+ogEcho log session "[20] $MSG_HELP_ogCheckFs  $PART $SIZEFS (KB) "
+ogUnmount $1 $2
+ogCheckFs $1 $2 &> $OGLOGCOMMAND || exit $(ogRaiseError session $OG_ERR_PARTITION "ogCheckFs $1 $2"; echo $?)
+
+# Comprobamos que la particion se puede montar
+ORIG=$(ogMount $1 $2) || exit $(ogRaiseError session $OG_ERR_PARTITION "$1 $2" ; echo $?)
+
+# Borramos ficheros de paginacion y configuracion
+case "$(ogGetFsType $1 $2)" in 
+    EXT[234])
+	ogCleanLinuxDevices $1 $2
+	rm -rf $ORIG/tmp/*
+	;;
+    NTFS)
+	[ $(ogGetPath $1 $2 pagefile.sys) ] && ogDeleteFile $1 $2 pagefile.sys
+	[ $(ogGetPath $1 $2 hiberfil.sys) ] && ogDeleteFile $1 $2 hiberfil.sys	
+	[ $(ogGetPath $1 $2 swapfile.sys) ] && ogDeleteFile $1 $2 swapfile.sys 
+	;;
+esac
+
+#Comprobar espacio que requerira la imagen para ser almacenada
+SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
+#Aplicar factor de compresion
+let SIZEREQUIRED=$SIZEDATA*$ZSYNC/100
+# El tamaño mínimo del sistema de ficheros btrfs es 250M, ponemos 300
+[ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
+#Comprobar espacio libre en el contenedor.
+[ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
+[ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
+ogEcho log session "      $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE"
+[ $SIZEREQUIRED -gt $SIZEFREE ] && exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
+IMGDIR="$(ogGetParentPath "$3" "/$4")"
+IMGFILE=${IMGDIR[$3]}/$(basename "/$4").$IMGEXT
+
+# Crear la imagen.
+echo " " > $OGLOGCOMMAND
+TIME2=$SECONDS
+
+ogEcho log session "[40] $MSG_HELP_ogCreateImage $1 $2 $3 $4 "
+# Si existe el fichero de la imagen se hace copia de seguridad y se redimensiona, si  no existe se crea.
+ogEcho log session "[50] $MSG_HELP_ogCreateFileImage."
+ogLockImage "$3"  "/$4.$IMGEXT"
+ogCreateFileImage $3 "$4" $IMGEXT $SIZEREQUIRED
+
+# Creamos la lista del contenido y lo situamos en la particion a copiar.
+ogEcho log session "[60] $MSG_HELP_ogCreateInfoImage" 
+ogCreateInfoImage $1 $2 $IMGEXT
+
+TIMEAUX3=$[SECONDS-TIME2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
+
+# Esperamos que el servidor termine de crear y montar la imagen
+ogWaitSyncImage "$3" "$4" $IMGEXT "mounted" $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
+
+# Sincronizamos los datos de la particion con la imagen.
+ogEcho log session "[70] $MSG_HELP_ogSyncCreate." 
+ogSyncCreate $1 $2 $3 "$4"  $IMGEXT 
+RETVAL=$?
+[ $RETVAL == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
+
+TIMEAUX5=$[SECONDS-TIMEAUX3]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX5/60]m $[TIMEAUX5%60]s"
+
+# Reducimos la imagen: solo para kernel <= 3.7, imagenes con FS ext4. (Desmonta y desbloquea la imagen)
+ogEcho log session "[80] $MSG_HELP_ogReduceImage: $3 /$4.$IMGEXT"
+ogReduceImage $3 "$4" $IMGEXT
+# Esperamos que el servidor termine de reducir la imagen
+ogWaitSyncImage "$3" "$4" $IMGEXT "reduced" $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
+
+echo  " " > $OGLOGCOMMAND
+# Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
+ogEcho log session "[95] $MSG_HELP_ogCheckSyncImage"
+ogCheckSyncImage $3 "$4" "img" || exit $(ogRaiseError session $OG_ERR_IMAGE "$3 $4 img" ; echo $?)
+
+#resumen de la operacion
+IMGSIZE=$(ls -l --block-size=1024 "$IMGFILE" | cut -f5 -d" ")
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
+ogEcho log session "      FileSystem $PART with $SIZEDATA KB data created onto file-image as $4 and used $IMGSIZE KB acros DFS rsync "
+
+# Si ha habido problema al sincronizar nos salimos con error 
+[ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING

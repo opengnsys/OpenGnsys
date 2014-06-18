@@ -58,11 +58,6 @@ $ ogIsNewerFile CACHE prueba/fichero_prueba CACHE fichero_prueba2; echo $?
 $ ogIsNewerFile CACHE fichero_prueba CACHE prueba/fichero_prueba; echo $?
 1
 
-$ ogNewPath CACHE prueba2
-/opt/opengnsys/cache//opt/opengnsys/images/prueba2
-$ ls -d $OGCAC$OGIMG/prueba2
-/opt/opengnsys/cache/opt/opengnsys/images/prueba2
-
 $ ogDeleteTree CACHE prueba
 $ ls -d $OGCAC$OGIMG/prueba 
 ls: cannot access /opt/opengnsys/cache/opt/opengnsys/images/prueba: No such file or directory

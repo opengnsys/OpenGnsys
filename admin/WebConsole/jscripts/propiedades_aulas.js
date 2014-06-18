@@ -93,26 +93,36 @@ function comprobar_datos(){
 		return true;
 	}
 
+/* HORA DE RESERVA TEMPORALMENTE DESHABILITADA.
 	if (parseInt(document.fdatos.horaresevini.value)>parseInt(document.fdatos.horaresevfin.value)) {
 		alert(TbMsg[3]);
 		validation_highlight (document.fdatos.horaresevini);
 		validation_highlight (document.fdatos.horaresevfin);
 		return(false);
 	}
+*/
 
 	var form = document.fdatos;
+	// Si se activa la validación, comprobar que se incluyen los datos adecuados.
+	if (form.validacion.options[form.validacion.selectedIndex].value == 1 && (form.paginalogin.value == '' || form.paginavalidacion.value == '')) {
+		alert(TbMsg[14]);
+		validation_highlight (document.fdatos.paginalogin);
+		validation_highlight (document.fdatos.paginavalidacion);
+		return(false);
+	}
+	// Validación general de datos del formulario.
 	return validate (form.nombreaula, validate_notnull, 0) &&
 	       validate (form.puestos, validate_number_notnull, 1) &&
 	       validate (form.router, validate_ipadress_notnull, 4) &&
-		   validate (form.netmask, validate_ipadress_notnull, 5) && 
+	       validate (form.netmask, validate_ipadress_notnull, 5) && 
+	       validate (form.dns, validate_ipadress, 12) && 
+	       validate (form.proxy, validate_url, 13) && 
 	       validate (form.modp2p, validate_notnull, 6) &&
-		   validate (form.timep2p, validate_number_notnull, 7) &&
-		   validate (form.modomul, validate_notnull, 8) &&
-		   validate (form.ipmul, validate_ipadress_notnull, 9) &&
-		   validate (form.pormul, validate_notnull, 10) &&
+	       validate (form.timep2p, validate_number_notnull, 7) &&
+	       validate (form.modomul, validate_notnull, 8) &&
+	       validate (form.ipmul, validate_ipadress_notnull, 9) &&
+	       validate (form.pormul, validate_notnull, 10) &&
 	       validate (form.velmul, validate_number_notnull, 11);
-
-	return(true);
 }
 
 //________________________________________________________________________________________________________

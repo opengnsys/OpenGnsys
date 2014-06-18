@@ -1,11 +1,13 @@
 #sw.other
 install screen 
 install schroot 
-#install grub 
+#install grub
+install xmlstarlet 
+install efibootmgr 
 ##############
 #install discover 
 #install laptop-detect 
-#install os-prober  
+install os-prober  
 #install casper 
 #install lupin-casper
 #install xinit 
@@ -52,7 +54,6 @@ install schroot
 #install policykit-1-gnome 
 #install policykit-desktop-privileges 
 #install baobab 
-#install gparted 
 #install lshw-gtk 
 #install testdisk 
 #install usb-creator-gtk 

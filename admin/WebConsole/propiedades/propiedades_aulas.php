@@ -1,4 +1,4 @@
-<? 
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -22,7 +22,34 @@ $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
 $idaula=0; 
+$nombreaula="";
 $grupoid=0;
+$ordenadores=0;
+$ubicacion="";
+$cagnon="";
+$pizarra="";
+$puestos=0;
+$horaresevini="";
+$horaresevfin="";
+$comentarios="";
+$router="";
+$netmask="";
+$modp2p="peer";
+$timep2p="";
+$modomul=2;
+$ipmul="";
+$pormulmetodos="";
+$pormul=9000;
+$velmul="";
+$dns="";
+$proxy="";
+$idmenu="";
+$idrepositorio="";
+$idprocedimiento="";
+$idperfilhard="";
+$validacion="";
+$paginalogin="";
+$paginavalidacion="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"]; 
@@ -50,8 +77,8 @@ else
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_aulas.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_aulas_'.$idioma.'.js"></SCRIPT>'?>
-		<script language=javascript> 
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_aulas_'.$idioma.'.js"></SCRIPT>'?>
+	<script language=javascript> 
 function abrir_ventana(URL){ 
    window.open('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640') 
 } 
@@ -69,8 +96,6 @@ function abrir_ventana(URL){
 	<INPUT type=hidden name=gidprocedimiento value="<? echo $gidprocedimiento?>">
 	<INPUT type=hidden name=gidrepositorio value="<? echo $gidrepositorio?>">
 	<INPUT type=hidden name=gidperfilhard value="<? echo $gidperfilhard?>">
-	<INPUT type=hidden name=gcache value="<? echo $gcache?>">
-	
 	
 	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
@@ -78,73 +103,69 @@ function abrir_ventana(URL){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
 			<th align="center"><?php echo $TbMsg[5]?></th>
-			<?php
-				if ($opcion==$op_eliminacion){
+			<?php	if ($opcion==$op_eliminacion){
 					echo '<td>'. $nombreaula.'</td>';
-					echo '<td colspan="2" valign="top" align=c"enter" rowspan="2">
+					echo '<td rowspan="5" colspan="2" valign="top" align=c"enter">
 							<img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" />
 							<br />'.$TbMsg[21].': '. $ordenadores.'</td>';
 			}
 			else{
 				echo '<td><input class="formulariodatos" name=nombreaula style="width:215" type=text value="'. $nombreaula.'" /></td>';
-				echo'<td colspan="2" valign="top" align="left" rowspan="2"><img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" /><br />'.$TbMsg[21].': '. $ordenadores.'<br />(150X110)-(jpg - gif) ---- '.$TbMsg[5091].'<br /><input name="archivo" type="file" id="archivo" size="16" /></td>';
+				echo'<td rowspan="5" colspan="2" valign="top" align="left"><img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" /><br />'.$TbMsg[21].': '. $ordenadores.'<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'<br /><input name="archivo" type="file" id="archivo" size="16" /></td>';
 			}
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
-					echo '<TD>'.$ubicacion.'&nbsp; </TD>';
+		<tr>
+			<th align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td>'.$ubicacion.'&nbsp; </td>';
 				else
-					echo '<TD><TEXTAREA   class="formulariodatos" name=ubicacion rows=3 cols=42>'.$ubicacion.'</TEXTAREA></TD>';
+					echo '<td><textarea   class="formulariodatos" name=ubicacion rows=3 cols=42>'.$ubicacion.'</textarea></td>';
 			?>
-		</TR>	
+		</tr>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
-			if ($opcion==$op_eliminacion){
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cagnon type=checkbox  onclick="desabilita(this)" ';
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[7]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion){
+					echo '<td><input  class="formulariodatos" name=cagnon type=checkbox  onclick="desabilita(this)" ';
 					if ($cagnon) echo ' checked ';
-					echo '></TD>';
+					echo '></td>';
 			}
 			else{
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cagnon type=checkbox value="1" ';
+					echo '<td><input  class="formulariodatos" name=cagnon type=checkbox value="1" ';
 					if ($cagnon) echo ' checked ';
-					echo '></TD>';
+					echo '></td>';
 			}
 			?>
-			</TR>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-			<?
-			if ($opcion==$op_eliminacion){
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=pizarra type=checkbox  onclick="desabilita(this)" ';
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[8]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion){
+					echo '<td><input  class="formulariodatos" name=pizarra type=checkbox  onclick="desabilita(this)" ';
 					if ($pizarra) echo ' checked ';
-					echo '></TD>';
-			}
-			else{
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=pizarra type=checkbox value="1"  ';
+					echo '></td>';
+				} else {
+					echo '<td><input  class="formulariodatos" name=pizarra type=checkbox value="1"  ';
 					if ($pizarra) echo ' checked ';
-					echo '></TD>';
-			}
+					echo '></td>';
+				}
 			?>
-		</TR	>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[9]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.$puestos.'</TD>';
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td>'.$puestos.'</td>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=puestos style="width:30" type=text value='.$puestos.'></TD>';
+					echo '<td><input  class="formulariodatos" name=puestos style="width:30" type=text value='.$puestos.'></td>';
 			?>
-		</TR>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!--  HORARIO DE SERVICIO TEMPORALMENTE DESHABILITADO.
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[13]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$TbMsg[14].$horaresevini.'&nbsp;&nbsp;&nbsp&nbsp;'.$TbMsg[15].$horaresevfin.'</TD>';
@@ -152,9 +173,10 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3>'.$TbMsg[14].'&nbsp<INPUT  class="formulariodatos" onclick="vertabla_horas(this)"  name=horaresevini style="width:30" type=text value='.$horaresevini.'>&nbsp;&nbsp;&nbsp&nbsp;'.$TbMsg[15].'&nbsp<INPUT  class="formulariodatos" onclick="vertabla_horas(this)" name=horaresevfin style="width:30" type=text value='.$horaresevfin.'></TD>';
 			?>
 		</TR>
+-->
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD  colspan=3>../images/fotos/'.$urlfoto.'</TD>';
@@ -181,118 +203,129 @@ function abrir_ventana(URL){
 					<?
 					}
 					?>
-		</TR>	
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$comentarios.'</TD>';
 				else
 					echo '<TD colspan=3><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=65>'.$comentarios.'</TEXTAREA></TD>';
 			?>
-		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-<!----ADV  -------------------------------------router-------------------------------------------------------------------------------------------------------------------------------------------->
+		</TR>
+<!---- ADV ---------------------------router------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[28]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[28]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$router.'</TD>';
 				else
 					echo '<TD colspan=3><INPUT  class="formulariodatos" name=router style="width:100" type=text value='.$router.'></TD>';
 			?>
-		</TR>				
-<!-----ADV -----------------------------netmask--------------------------------------------------------------------------------------------------------------------------------------------------->
+		</TR>
+<!---- ADV --------------------------netmask------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[29]?>&nbsp;</TD>
+			<TH align=center&nbsp;><?echo $TbMsg[29]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$netmask.'</TD>';
 				else
 					echo '<TD colspan=3><INPUT  class="formulariodatos" name=netmask style="width:100" type=text value='.$netmask.'></TD>';
 			?>
-		</TR>				
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-
-<!-----ADV --------------------------p2pmodo------------------------------------------------------------------------------------------------------------------------------------------------------>
+		</TR>
+<!---- Ramón ------------------------dns------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_DNSIP'] ?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$dns.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="dns" style="width:100" type="text" maxlength="15" value="'.$dns.'" /></td>';
+			?>
+		</tr>
+<!---- Ramón ------------------------proxy------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_PROXYURL'] ?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$proxy.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="proxy" style="width:200" type="text" maxlength="30" value="'.$proxy.'" /></td>';
+			?>
+		</tr>
+<!---- ADV --------------------------p2pmodo------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[26]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[26]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$modp2p.'</TD>';
-				else
+				else {
 					echo '<TD colspan=3>';
 					$p2pmetodos="peer=peer".chr(13);
 					$p2pmetodos.="leecher=leecher".chr(13);
 					$p2pmetodos.="seeder=seeder";
 					echo HTMLCTESELECT($p2pmetodos,"modp2p","estilodesple","",$modp2p,100).'</TD>';
+				}
 			?>
-		</TR>				
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 
 <!----------------------------p2p tiempo semillero--------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[27]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[27]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$timep2p.'</TD>';
 				else
 					echo '<TD colspan=3><INPUT  class="formulariodatos" name=timep2p style="width:100" type=text value='.$timep2p.'></TD>';
 			?>
-		</TR>				
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-
-					
-
-
-
-
-	<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[22]?>&nbsp;</TD>
+		<TR>
+			<TH align=center>&nbsp;<?echo $TbMsg[22]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion){
 					$TBMetodos[0]="";
 					$TBMetodos[1]="Half-Duplex";
 					$TBMetodos[2]="Full-Duplex";
 					echo '<TD colspan=3>'.$TBMetodos[$modomul].'</TD>';
-				}
-				else
+				} else {
 					echo '<TD colspan=3>';
 					$metodos="0=".chr(13);
 					$metodos.="1=Half-Duplex".chr(13);
 					$metodos.="2=Full-Duplex";
 					echo HTMLCTESELECT($metodos,"modomul","estilodesple","",$modomul,100).'</TD>';
+				}
 			?>
-		</TR>		
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[23]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[23]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$ipmul.'</TD>';
 				else
 					echo '<TD colspan=3><INPUT  class="formulariodatos" name=ipmul style="width:100" type=text value='.$ipmul.'></TD>';
 			?>
-		</TR>		
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[24]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[24]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$pormul.'</TD>';
-				else
+				else {
 					echo '<td colspan="3">';
 					for ($i=9000; $i<9050; $i+=2) {
 						$pormulmetodos.="$i=$i".chr(13);
 					}
 					$pormulmetodos.="9050=9050";
 					echo HTMLCTESELECT($pormulmetodos,"pormul","estilodesple","",$pormul,100).'</td>';
+				}
 			?>
-		</TR>				
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[25]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[25]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$velmul.'</TD>';
@@ -306,7 +339,7 @@ function abrir_ventana(URL){
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion').'&nbsp;</TD>';
@@ -316,7 +349,7 @@ function abrir_ventana(URL){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'&nbsp;</TD>';
@@ -326,7 +359,7 @@ function abrir_ventana(URL){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[20]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[20]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'procedimientos',$idprocedimiento,'idprocedimiento','descripcion').'&nbsp;</TD>';
@@ -336,7 +369,7 @@ function abrir_ventana(URL){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TH>
 			<?
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion').'&nbsp;</TD>';
@@ -344,28 +377,48 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion',330).'</TD>';
 			?>
 		</TR>		
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[19]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.$cache.'</TD>';
-				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=cache style="width:100" type=text  readonly value=0></TD>';
+<!--------------------------------------------------------------UHU comprobar si se requiere validacion -------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[30]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.(($validacion == 1)?"Si":"No").'</td>';
+				else {
+					echo '<td colspan="3">';
+					$validaciones="0=No".chr(13);
+					$validaciones.="1=Si";
+					echo HTMLCTESELECT($validaciones,"validacion","estilodesple","",$validacion,100).'</td>';
+				}
 			?>
-		</TR>
+		</tr>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[31]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$paginalogin.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="paginalogin" style="width:200" type="text" value="'.$paginalogin.'"></td>';
+			?>
+		</tr>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[32]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$paginavalidacion.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="paginavalidacion" style="width:200" type="text" value="'.$paginavalidacion.'"></td>';
+			?>
+		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
 	</TABLE>
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un aula
 //		Parametros: 
@@ -387,19 +440,15 @@ function TomaPropiedades($cmd,$ida)
 	global $horaresevfin;
 	global $grupoid;
 
-	
-	
 	global $idmenu;
 	global $idprocedimiento;
 	global $idrepositorio;
 	global $idperfilhard;
-	global $cache;
 	
 	global $gidmenu;
 	global $gidprocedimiento;
 	global $gidrepositorio;
 	global $gidperfilhard;
-	global $gcache;
 ###################### ADV	
 	global $router;
 	global $netmask;
@@ -410,6 +459,14 @@ function TomaPropiedades($cmd,$ida)
 	global $ipmul;
 	global $pormul;
 	global $velmul;
+###################### Ramón
+	global $dns;
+	global $proxy;
+###################### UHU
+        global $validacion;
+        global $paginalogin;
+        global $paginavalidacion;
+###################### UHU
 	
 	$idaula=0; 
 	$nombreaula="";
@@ -426,46 +483,40 @@ function TomaPropiedades($cmd,$ida)
 ## ADV #########################################
 	$router=0;
 	$netmask=0;
-    $modp2p=0;
+	$modp2p=0;
 	$timep2p=0;
-### ADV	 ########################################
+### ADV ########################################
 	$modomul=0;
 	$ipmul=0;
 	$pormul=0;
 	$velmul=0;
-	
+### UHU ########################################
+        $validacion="";
+
 	$idmenu=0;
 	$idprocedimiento=0;
 	$idrepositorio=0;
 	$idperfilhard=0;
-	$cache=0;
 
 	$gidmenu=0;
 	$gidprocedimiento=0;
 	$gidrepositorio=0;
 	$gidperfilhard=0;
-	$gcache=0;
-	
-
 	
 	$rs=new Recordset; 
-	$cmd->texto="SELECT count( * ) AS numordenadores, aulas.* , 
-				group_concat(DISTINCT cast( ordenadores.idmenu AS char( 11 ) )  
+	$cmd->texto="SELECT	aulas.*, COUNT(ordenadores.idordenador) AS numordenadores,
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idmenu AS char( 11 ) )  
 				ORDER BY ordenadores.idmenu SEPARATOR ',' ) AS idmenus,
-				group_concat(DISTINCT cast( ordenadores.idrepositorio AS char( 11 ) )  
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idrepositorio AS char( 11 ) )  
 				ORDER BY ordenadores.idrepositorio SEPARATOR ',' ) AS idrepositorios,
-				group_concat(DISTINCT cast( ordenadores.idperfilhard AS char( 11 ) )  
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idperfilhard AS char( 11 ) )  
 				ORDER BY ordenadores.idperfilhard SEPARATOR ',' ) AS idperfileshard,
-				group_concat(DISTINCT cast( ordenadores.cache AS char( 11 ) )  
-				ORDER BY ordenadores.cache SEPARATOR ',' ) AS caches,
-				group_concat(DISTINCT cast( ordenadores.idproautoexec AS char( 11 ) )  
-				ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos			
-				FROM aulas
-				LEFT OUTER JOIN ordenadores ON ordenadores.idaula = aulas.idaula
-				WHERE aulas.idaula =".$ida." 
-				GROUP BY aulas.idaula";
-				
-	//	echo $cmd->texto;
+				GROUP_CONCAT(DISTINCT CAST( ordenadores.idproautoexec AS char( 11 ) )  
+				ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos
+			FROM aulas
+			LEFT OUTER JOIN ordenadores ON ordenadores.idaula = aulas.idaula
+			WHERE aulas.idaula =".$ida." 
+			GROUP BY aulas.idaula";
 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
@@ -491,7 +542,14 @@ function TomaPropiedades($cmd,$ida)
 		$netmask=$rs->campos["netmask"];
 		$modp2p=$rs->campos["modp2p"];
 		$timep2p=$rs->campos["timep2p"];
-###################### ADV
+#################### Ramón
+		$dns=$rs->campos["dns"];
+		$proxy=$rs->campos["proxy"];
+#################### UHU
+		$validacion=$rs->campos["validacion"];
+		$paginalogin=$rs->campos["paginalogin"];
+		$paginavalidacion=$rs->campos["paginavalidacion"];
+###################### UHU
 
 		$ordenadores=$rs->campos["numordenadores"];
 		$idmenu=$rs->campos["idmenus"];
@@ -500,8 +558,6 @@ function TomaPropiedades($cmd,$ida)
 		if(count(split(",",$idrepositorio))>1) $idrepositorio=0;		
 		$idperfilhard=$rs->campos["idperfileshard"];		
 		if(count(split(",",$idperfilhard))>1) $idperfilhard=0;		
-		$cache=$rs->campos["caches"];		
-		if(count(split(",",$cache))>1) $cache=0;	
 		$idmenu=$rs->campos["idmenus"];
 		if(count(split(",",$idmenu))>1) $idmenu=0;		
 		$idprocedimiento=$rs->campos["idprocedimientos"];
@@ -511,12 +567,11 @@ function TomaPropiedades($cmd,$ida)
 		$gidprocedimiento=$idprocedimiento;
 		$gidrepositorio=$idrepositorio;
 		$gidperfilhard=$idperfilhard;
-		$gcache=$cache;	
-	
+
 		$rs->Cerrar();
-		
 		return(true);
 	}
 	return(false);
 }
 ?>
+

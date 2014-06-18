@@ -1,10 +1,10 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: sondeo_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: sondeo_cat.php 
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='';
-	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al consultar el estado de los ordenadore';
+	$TbMsg[1]='ATENCIÓ: Ha ocorregut algun problema al consultar l\'estat del ordinadors';
 ?>

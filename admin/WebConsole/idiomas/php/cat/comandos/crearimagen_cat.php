@@ -1,24 +1,24 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: crearperfilsoftware_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: crearperfilsoftware_cat.php (Comandos)
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Creación de Imagen';
-	$TbMsg[1]='Características del ordenador';
-	$TbMsg[2]='Nombre';
-	$TbMsg[3]='Dirección IP';
-	$TbMsg[4]='Dirección MAC';
+	$TbMsg[0]='Creació d\'Imatge';
+	$TbMsg[1]='Característiques de l\'ordinador';
+	$TbMsg[2]='Nom';
+	$TbMsg[3]='Direcció IP';
+	$TbMsg[4]='Direcció MAC';
 	$TbMsg[5]='Perfil Hardware';
-	$TbMsg[6]='Datos a suministrar';
-	$TbMsg[7]='Se necesita capturar Perfil Software';
+	$TbMsg[6]='Dades a subministrar';
+	$TbMsg[7]='Es necessita capturar Perfil Software';
 	$TbMsg[8]='Par';
-	$TbMsg[9]='Nombre S.O.';
-	$TbMsg[10]='Imagen a crear ';
-	$TbMsg[11]='Repositorio de destino';
-	$TbMsg[12]='Desconocido';
-	$TbMsg[13]='Tipo';
-	$TbMsg[14]='Ámbito';
-	$TbMsg[15]='Ordenadores';	
+	$TbMsg[9]='Nom S.O.';
+	$TbMsg[10]='Imatge a crear ';
+	$TbMsg[11]='Repositori de destí';
+	$TbMsg[12]='Desconegut';
+	$TbMsg[13]='Tipus';
+	$TbMsg[14]='Àmbit';
+	$TbMsg[15]='Ordinadors';	
 ?>

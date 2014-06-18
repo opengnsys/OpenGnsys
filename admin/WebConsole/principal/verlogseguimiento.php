@@ -45,12 +45,12 @@ else
 
 
 <HTML>
-<TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
 <HEAD>
+<TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
 <?
 echo "<meta http-equiv='Refresh' content='2;URL=http://".$ip."/cgi-bin/httpd-log.sh'";
 ?>
-
+<meta charset="utf-8">
 
 </HEAD>
 

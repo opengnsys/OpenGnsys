@@ -1,0 +1,9 @@
+##NO-TOCAR-ESTA-LINEA MBR
+timeout 1
+title  MBR
+keeppxe
+chainloader (hd0)+1
+rootnoverify (hd0) 
+boot
+
+

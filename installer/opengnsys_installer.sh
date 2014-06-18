@@ -6,35 +6,83 @@
 #####################################################################
 
 
-
-####  AVISO: Editar configuración de acceso por defecto.
-####  WARNING: Edit default access configuration.
-MYSQL_ROOT_PASSWORD="passwordroot"	# Clave root de MySQL
-OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
-OPENGNSYS_DB_PASSWD="passusuog"		# Clave de acceso a la base de datos
-OPENGNSYS_CLIENT_PASSWD="og"		# Clave de acceso del cliente
-
-
-####  AVISO: NO EDITAR.
-####  WARNING: DO NOT EDIT. 
-OPENGNSYS_DATABASE="ogAdmBD"		# Nombre de la base datos
-OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario del cliente para acceso remoto
-
-
+####  AVISO: Puede editar configuración de acceso por defecto.
+####  WARNING: Edit default access configuration if you wish.
+DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
+DEFAULT_OPENGNSYS_DB_USER="usuog"		    # Usuario por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
 
 # Sólo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
-# Solo se deben aceptar números y letras en la clave de acceso del cliente.
-if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then
-	echo "ERROR: client password must be alphanumeric, edit installer variables."
-	exit 1
-fi
+
+echo -e "\\nOpenGnSys Installation"
+echo "=============================="
+
+# Clave root de MySQL
+while : ; do
+	echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): ";
+	read MYSQL_ROOT_PASSWORD
+	if [ -n "${MYSQL_ROOT_PASSWORD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $MYSQL_ROOT_PASSWORD ]; then # Si esta vacio ponemos el valor por defecto
+			MYSQL_ROOT_PASSWORD=$DEFAULT_MYSQL_ROOT_PASSWORD
+		fi
+		break
+	fi
+done
+
+# Usuario de acceso a la base de datos
+while : ; do
+	echo -n -e "\\nEnter username for OpenGnSys console (${DEFAULT_OPENGNSYS_DB_USER}): "
+	read OPENGNSYS_DB_USER
+	if [ -n "${OPENGNSYS_DB_USER//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $OPENGNSYS_DB_USER ]; then # Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_DB_USER=$DEFAULT_OPENGNSYS_DB_USER
+		fi
+		break
+	fi
+done
+
+# Clave de acceso a la base de datos
+while : ; do
+	echo -n -e "\\nEnter password for OpenGnSys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
+	read OPENGNSYS_DB_PASSWD
+	if [ -n "${OPENGNSYS_DB_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $OPENGNSYS_DB_PASSWD ]; then # Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_DB_PASSWD=$DEFAULT_OPENGNSYS_DB_PASSWD
+		fi
+		break
+	fi
+done
+
+# Clave de acceso del cliente
+while : ; do
+	echo -n -e "\\nEnter root password for OpenGnSys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
+	read OPENGNSYS_CLIENT_PASSWD
+	if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+		echo -e "\\aERROR: Must be alphanumeric, try again..."
+	else
+		if [ -z $OPENGNSYS_CLIENT_PASSWD ]; then # Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_CLIENT_PASSWD=$DEFAULT_OPENGNSYS_CLIENT_PASSWD
+		fi
+		break
+	fi
+done
+
+echo -e "\\n=============================="
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
+PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="www.opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
@@ -46,11 +94,19 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
 
+# Directorio destino de OpenGnSys.
 INSTALL_TARGET=/opt/opengnsys
-LOG_FILE=/tmp/opengnsys_installation.log
 
-# Base de datos
-OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
+# Registro de incidencias.
+OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log
+LOG_FILE=/tmp/$(basename $OGLOGFILE)
+
+# Usuario del cliente para acceso remoto.
+OPENGNSYS_CLIENT_USER="opengnsys"
+
+# Nombre de la base datos y fichero SQL para su creación.
+OPENGNSYS_DATABASE="ogAdmBD"
+OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 
 
 #####################################################################
@@ -59,7 +115,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 
 # Generar variables de configuración del instalador
 # Variables globales:
-# - OSDISTRIB, OSCODENAME - datos de la distribución Linux
+# - OSDISTRIB - tipo de distribución GNU/Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
@@ -69,21 +125,27 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/ogAdmBD.sql
 # - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
 # - INETDSERV - servicio Inetd
-# - IPTABLESSERV - servicio IPTables
+# - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
-# - MYSQLSERV - servicio MySQL
+# - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso
+# - MARIADBSERV - servicio MariaDB (sustituto de MySQL en algunas distribuciones)
+# - RSYNCSERV, RSYNCCFGDIR - servicio y configuración de Rsync
 # - SAMBASERV, SAMBACFGDIR - servicio y configuración de Samba
 # - TFTPSERV, TFTPCFGDIR, SYSLINUXDIR - servicio y configuración de TFTP/PXE
 function autoConfigure()
 {
-# Detectar sistema operativo del servidor (debe soportar LSB).
-OSDISTRIB=$(lsb_release -is 2>/dev/null)
-OSCODENAME=$(lsb_release -cs 2>/dev/null)
+# Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
+if [ -f /etc/os-release ]; then
+	source /etc/os-release
+	OSDISTRIB="$NAME"
+else
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+fi
 
-# Configuración según la distribución de Linux.
+# Configuración según la distribución GNU/Linux.
 case "$OSDISTRIB" in
 	Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( subversion apache2 php5 libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux openbsd-inetd update-inetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba unzip netpipes debootstrap schroot squashfs-tools )
+		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -108,24 +170,38 @@ case "$OSDISTRIB" in
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
 		DHCPSERV=isc-dhcp-server
 		DHCPCFGDIR=/etc/dhcp
-		INETDSERV=openbsd-inetd
+		INETDSERV=xinetd
+		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysql
+		MARIADBSERV=mariadb
+		RSYNCSERV=rsync
+		RSYNCCFGDIR=/etc
 		SAMBASERV=smbd
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/lib/syslinux
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba unzip debootstrap schroot squashfs-tools )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba rsync unzip debootstrap schroot squashfs-tools python-crypto )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
-				   'pushd /tmp; wget http://download2.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -s btlaunchmany.py /usr/bin/btlaunchmany; ln -s bttrack.py /usr/bin/bttrack; popd' )
-		UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
+		if [ "$OSDISTRIB" == "CentOS" ]; then
+			UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
+		fi
 		INSTALLPKG="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
-		STARTSERVICE="eval service \$service start"
-		STOPSERVICE="eval service \$service stop"
-		ENABLESERVICE="eval chkconfig \$service on"
-		DISABLESERVICE="eval chkconfig \$service off"
+		SYSTEMD=$(which systemctl 2>/dev/null)
+		if [ -n "$SYSTEMD" ]; then
+			STARTSERVICE="eval systemctl start \$service.service"
+			STOPSERVICE="eval systemctl stop \$service.service"
+			ENABLESERVICE="eval systemctl enable \$service.service"
+			DISABLESERVICE="eval systemctl disable \$service.service"
+		else
+			STARTSERVICE="eval service \$service start"
+			STOPSERVICE="eval service \$service stop"
+			ENABLESERVICE="eval chkconfig \$service on"
+			DISABLESERVICE="eval chkconfig \$service off"
+		fi
 		APACHESERV=httpd
 		APACHECFGDIR=/etc/httpd/conf.d
 		APACHEOGSITE=opengnsys.conf
@@ -133,9 +209,17 @@ case "$OSDISTRIB" in
 		APACHEGROUP="apache"
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
+		if firewall-cmd --state &>/dev/null; then
+			FIREWALLSERV=firewalld
+		else
+			FIREWALLSERV=iptables
+		fi
 		INETDSERV=xinetd
-		IPTABLESSERV=iptables
+		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysqld
+		MARIADBSERV=mariadb
+		RSYNCSERV=rsync
+		RSYNCCFGDIR=/etc
 		SAMBASERV=smb
 		SAMBACFGDIR=/etc/samba
 		SYSLINUXDIR=/usr/share/syslinux
@@ -147,14 +231,27 @@ case "$OSDISTRIB" in
 	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
 		exit 1 ;;
 esac
+
+# Fichero de credenciales de acceso a MySQL.
+TMPMYCNF=/tmp/.my.cnf.$$
 }
+
 
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-[ -e /etc/init.d/$SAMBASERV ] || SAMBASERV=samba	# Debian 6
-[ -e $TFTPCFGDIR ] || TFTPCFGDIR=/srv/tftp		# Debian 6
-[ -f /selinux/enforce ] && echo 0 > /selinux/enforce	# SELinux permisivo
+local f
+
+# Configuraciones específicas para Samba y TFTP en Debian 6.
+[ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba
+[ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp
+
+# Configuraciones específicas para SELinux permisivo en distintas versiones.
+[ -f /selinux/enforce ] && echo 0 > /selinux/enforce
+for f in /etc/sysconfig/selinux /etc/selinux/config; do
+	[ -f $f ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $f
+done
+selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
 }
 
 
@@ -181,8 +278,12 @@ case "$OSDISTRIB" in
 		fi
 		;;
 	CentOS)	# Postconfiguación personalizada para CentOS.
-		# Incluir repositorio de paquetes EPEL.
-		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release )
+		# Incluir repositorio de paquetes EPEL y paquetes específicos.
+		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release procps )
+		;;
+	Fedora)	# Postconfiguación personalizada para Fedora. 
+		# Incluir paquetes específicos.
+		DEPENDENCIES=( ${DEPENDENCIES[@]} libstdc++-static.i686 btrfs-progs procps-ng )
 		;;
 esac
 }
@@ -433,9 +534,20 @@ function mysqlTestConnection()
 		exit 1
 	fi
 
-	local root_password="${1}"
+	local root_password="$1"
 	echoAndLog "${FUNCNAME}(): checking connection to mysql..."
-	echo "" | mysql -uroot -p"${root_password}"
+	# Componer fichero con credenciales de conexión a MySQL.
+ 	touch $TMPMYCNF
+ 	chmod 600 $TMPMYCNF
+ 	cat << EOT > $TMPMYCNF
+[client]
+user=root
+password=$root_password
+EOT
+	# Borrar el fichero temporal si termina el proceso de instalación.
+	trap "rm -f $TMPMYCNF" 0 1 2 3 6 9 15
+ 	# Comprobar conexión a MySQL.
+ 	echo "" | mysql --defaults-extra-file=$TMPMYCNF
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): connection to mysql failed, check root password and if daemon is running!"
 		return 1
@@ -448,15 +560,14 @@ function mysqlTestConnection()
 # comprueba si la base de datos existe
 function mysqlDbExists()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
+	local database="$1"
 	echoAndLog "${FUNCNAME}(): checking if $database exists..."
-	echo "show databases" | mysql -uroot -p"${root_password}" | grep "^${database}$"
+	echo "show databases" | mysql --defaults-extra-file=$TMPMYCNF | grep "^${database}$"
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}():database $database doesn't exists"
 		return 1
@@ -468,15 +579,14 @@ function mysqlDbExists()
 
 function mysqlCheckDbIsEmpty()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
+	local database="$1"
 	echoAndLog "${FUNCNAME}(): checking if $database is empty..."
-	num_tablas=`echo "show tables" | mysql -uroot -p"${root_password}" "${database}" | wc -l`
+	num_tablas=`echo "show tables" | mysql --defaults-extra-file=$TMPMYCNF "${database}" | wc -l`
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error executing query, check database and root password"
 		exit 1
@@ -495,14 +605,13 @@ function mysqlCheckDbIsEmpty()
 
 function mysqlImportSqlFileToDb()
 {
-	if [ $# -ne 3 ]; then
+	if [ $# -ne 2 ]; then
 		errorAndLog "${FNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="$1"
-	local database="$2"
-	local sqlfile="$3"
+	local database="$1"
+	local sqlfile="$2"
 	local tmpfile=$(mktemp)
 	local i=0
 	local dev=""
@@ -524,7 +633,7 @@ function mysqlImportSqlFileToDb()
 		fi
 		let i++
 	done
-	mysql -uroot -p"${root_password}" --default-character-set=utf8 "${database}" < $tmpfile
+	mysql --defaults-extra-file=$TMPMYCNF --default-character-set=utf8 "${database}" < $tmpfile
 	status=$?
 	rm -f $tmpfile
 	if [ $status -ne 0 ]; then
@@ -538,16 +647,15 @@ function mysqlImportSqlFileToDb()
 # Crea la base de datos
 function mysqlCreateDb()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local database=$2
+	local database="$1"
 
 	echoAndLog "${FUNCNAME}(): creating database..."
-	mysqladmin -u root --password="${root_password}" create $database
+	mysqladmin --defaults-extra-file=$TMPMYCNF create $database
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating database $database"
 		return 1
@@ -559,16 +667,15 @@ function mysqlCreateDb()
 
 function mysqlCheckUserExists()
 {
-	if [ $# -ne 2 ]; then
+	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password="${1}"
-	local userdb=$2
+	local userdb="$1"
 
 	echoAndLog "${FUNCNAME}(): checking if $userdb exists..."
-	echo "select user from user where user='${userdb}'\\G" |mysql -uroot -p"${root_password}" mysql | grep user
+	echo "select user from user where user='${userdb}'\\G" |mysql --defaults-extra-file=$TMPMYCNF mysql | grep user
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): user doesn't exists"
 		return 1
@@ -582,15 +689,14 @@ function mysqlCheckUserExists()
 # Crea un usuario administrativo para la base de datos
 function mysqlCreateAdminUserToDb()
 {
-	if [ $# -ne 4 ]; then
+	if [ $# -ne 3 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
 	fi
 
-	local root_password=$1
-	local database=$2
-	local userdb=$3
-	local passdb=$4
+	local database="$1"
+	local userdb="$2"
+	local passdb="$3"
 
 	echoAndLog "${FUNCNAME}(): creating admin user ${userdb} to database ${database}"
 
@@ -599,7 +705,7 @@ GRANT USAGE ON *.* TO '${userdb}'@'localhost' IDENTIFIED BY '${passdb}' ;
 GRANT ALL PRIVILEGES ON ${database}.* TO '${userdb}'@'localhost' WITH GRANT OPTION ;
 FLUSH PRIVILEGES ;
 EOF
-	mysql -u root --password=${root_password} < $WORKDIR/create_${database}.sql
+	mysql --defaults-extra-file=$TMPMYCNF < $WORKDIR/create_${database}.sql
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating user in mysql"
 		rm -f $WORKDIR/create_${database}.sql
@@ -644,15 +750,22 @@ function svnExportCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	echoAndLog "${FUNCNAME}(): Disabling IPTables."
-	if [ -n "$IPTABLESSERV" ]; then
-		service=$IPTABLESSERV
+	echoAndLog "${FUNCNAME}(): Disabling Firewall: $FIREWALLSERV."
+	if [ -n "$FIREWALLSERV" ]; then
+		service=$FIREWALLSERV
 		$STOPSERVICE; $DISABLESERVICE
 	fi
 
 	echoAndLog "${FUNCNAME}(): Checking OpenGnSys server conectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
-	wget --spider -q $OPENGNSYS_SERVER
+	if which wget &>/dev/null; then
+		wget --spider -q $OPENGNSYS_SERVER
+	elif which curl &>/dev/null; then
+		curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
+	else
+		echoAndLog "${FUNCNAME}(): Cannot execute \"wget\" nor \"curl\"."
+		return 1
+	fi
 }
 
 # Obtener los parámetros de red de la interfaz por defecto.
@@ -681,7 +794,9 @@ function getNetworkSettings()
 	for dev in ${DEVICE[*]}; do
 		SERVERIP[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
 		if [ -n "${SERVERIP[i]}" ]; then
-			NETMASK[i]=$(LANG=C ifconfig $dev | awk '/Mask/ {sub(/.*:/,"",$4); print $4}')
+			NETMASK[i]=$(LANG=C ifconfig $dev | \
+						awk '/Mask/ {sub(/.*:/,"",$4); print $4}
+						     /netmask/ {print $4}')
 			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
 			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
 			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
@@ -717,8 +832,12 @@ function tftpConfigure()
 	echoAndLog "${FUNCNAME}(): Configuring TFTP service."
 	# Habilitar TFTP y reiniciar Inetd.
 	if [ -n "$TFTPSERV" ]; then
-		service=$TFTPSERV
-		$ENABLESERVICE
+		if [ -f $INETDCFGDIR/$TFTPSERV ]; then
+			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/$TFTPSERV
+		else
+			service=$TFTPSERV
+			$ENABLESERVICE
+		fi
 	fi
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
@@ -886,6 +1005,57 @@ function smbConfigure()
 
 
 ########################################################################
+## Configuracion servicio Rsync
+########################################################################
+
+# Configurar servicio Rsync.
+function rsyncConfigure()
+{
+	echoAndLog "${FUNCNAME}(): Configuring Rsync service."
+
+	backupFile $RSYNCCFGDIR/rsyncd.conf
+
+	# Configurar acceso a Rsync.
+	sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENT_USER/g" \
+		$WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > $RSYNCCFGDIR/rsyncd.conf
+	sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENT_USER/g" \
+	    -e "s/CLIENTPASSWORD/$OPENGNSYS_CLIENT_PASSWD/g" \
+		$WORKDIR/opengnsys/repoman/etc/rsyncd.secrets.tmpl > $RSYNCCFGDIR/rsyncd.secrets
+	chown root.root $RSYNCCFGDIR/rsyncd.secrets
+	chmod 600 $RSYNCCFGDIR/rsyncd.secrets
+
+	# Habilitar Rsync y reiniciar Inetd.
+	if [ -n "$RSYNCSERV" ]; then
+		if [ -f /etc/default/rsync ]; then
+			perl -pi -e 's/RSYNC_ENABLE=.*/RSYNC_ENABLE=inetd/' /etc/default/rsync
+		fi
+		if [ -f $INETDCFGDIR/rsync ]; then
+			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/rsync
+		else
+			cat << EOT > $INETDCFGDIR/rsync
+service rsync
+{
+	disable = no
+	socket_type = stream
+	wait = no
+	user = root
+	server = $(which rsync)
+	server_args = --daemon
+	log_on_failure += USERID
+	flags = IPv6
+}
+EOT
+		fi
+		service=$RSYNCSERV $ENABLESERVICE
+		service=$INETDSERV $STARTSERVICE
+	fi
+
+	echoAndLog "${FUNCNAME}(): Added Rsync configuration."
+	return 0
+}
+
+	
+########################################################################
 ## Configuracion servicio DHCP
 ########################################################################
 
@@ -931,8 +1101,11 @@ function dhcpConfigure()
 # Copiar ficheros del OpenGnSys Web Console.
 function installWebFiles()
 {
+	local COMPATDIR f
+
 	echoAndLog "${FUNCNAME}(): Installing web files..."
-	cp -a $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para doxigen
+	# Copiar ficheros.
+	cp -a $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para Doxygen.
 	if [ $? != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
@@ -940,8 +1113,16 @@ function installWebFiles()
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	# Descomprimir XAJAX.
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	# Compatibilidad con dispositivos móviles.
+	COMPATDIR="$INSTALL_TARGET/www/principal"
+	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
+		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
+	done
+	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 
@@ -953,8 +1134,8 @@ function installWebConsoleApacheConf()
 		exit 1
 	fi
 
-	local path_opengnsys_base=$1
-	local path_apache2_confd=$2
+	local path_opengnsys_base="$1"
+	local path_apache2_confd="$2"
 	local CONSOLEDIR=${path_opengnsys_base}/www
 
 	if [ ! -d $path_apache2_confd ]; then
@@ -972,10 +1153,15 @@ function installWebConsoleApacheConf()
 	$APACHEMAKECERT
 
 	# Genera configuración de consola web a partir del fichero plantilla.
-	sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
-                $WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_opengnsys_base/etc/apache.conf
-
-	ln -fs $path_opengnsys_base/etc/apache.conf $path_apache2_confd/$APACHESITESDIR/$APACHEOGSITE
+	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
+		# Configuración para versiones anteriores de Apache.
+		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
+	else
+		# Configuración específica a partir de Apache 2.4
+		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+	fi
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
@@ -1058,6 +1244,11 @@ function createDirs()
 		return 1
 	fi
 
+	# Mover el fichero de registro de instalación al directorio de logs.
+	echoAndLog "${FUNCNAME}(): moving installation log file"
+	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE
+	chmod 600 $LOG_FILE
+
 	echoAndLog "${FUNCNAME}(): directory paths created"
 	return 0
 }
@@ -1075,6 +1266,8 @@ function copyServerFiles ()
 	local SOURCES=( server/tftpboot \
 			server/bin \
 			repoman/bin \
+			admin/Sources/Services/ogAdmServerAux
+			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
 			installer/install_ticket_wolunicast.sh \
@@ -1082,6 +1275,8 @@ function copyServerFiles ()
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
+			sbin \
+			sbin \
 			lib \
 			lib \
 			lib \
@@ -1199,7 +1394,7 @@ function copyClientFiles()
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
-	cp -a $WORKDIR/opengnsys/client/engine/*.lib $INSTALL_TARGET/client/lib/engine/bin
+	cp -a $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		errstatus=1
@@ -1215,11 +1410,12 @@ function copyClientFiles()
 }
 
 
-# Crear cliente OpenGnSys 1.0.2
+# Crear cliente OpenGnSys 1.0.2 y posteriores.
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	#local FILENAME=ogLive-raring-3.8.0-22-generic-r3836.iso	# 1.0.5-rc3
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
@@ -1269,13 +1465,13 @@ function openGnsysConfigure()
 	local CONSOLEURL
 
 	echoAndLog "${FUNCNAME}(): Copying init files."
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
-	cp -p $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepoAux $INSTALL_TARGET/sbin
+	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
+	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 
 	echoAndLog "${FUNCNAME}(): Creating logrotate configuration file."
 	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
@@ -1345,17 +1541,19 @@ function installationSummary()
 	echo       "=============================="
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
+	echoAndLog "Installation log file:            $LOG_FILE"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
-	echoAndLog "Web Console admin user:           $OPENGNSYS_DB_USER"
-	echoAndLog "Web Console admin password:       $OPENGNSYS_DB_PASSWD"
+	echoAndLog "Web Console access data:          specified in installer script"
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
-	echoAndLog "Change IPTables and SELinux system configuration, if needed."
+	echoAndLog "Firewall service has been disabled and SELinux mode set to"
+	echoAndLog "   permissive during OpenGnSys installation. Please check"
+	echoAndLog "   $FIREWALLSERV and SELinux configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Optional: Log-in as Web Console admin user."
@@ -1450,17 +1648,20 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Configurando tftp
+# Configuración de TFTP.
 tftpConfigure
 
-# Configuración Samba
+# Configuración de Samba.
 smbConfigure
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while configuring Samba server!"
 	exit 1
 fi
 
-# Configuración ejemplo DHCP
+# Configuración de Rsync.
+rsyncConfigure
+
+# Configuración ejemplo DHCP.
 dhcpConfigure
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying your dhcp server files!"
@@ -1474,25 +1675,34 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Instalar Base de datos de OpenGnSys Admin.
+# Instalar base de datos de OpenGnSys Admin.
 isInArray notinstalled "mysql-server"
 if [ $? -eq 0 ]; then
+	# Habilitar gestor de base de datos (MySQL, si falla, MariaDB).
 	service=$MYSQLSERV
-	$ENABLESERVICE; $STARTSERVICE
-	mysqlSetRootPassword ${MYSQL_ROOT_PASSWORD}
+	$ENABLESERVICE
+	if [ $? != 0 ]; then
+		service=$MARIADBSERV
+		$ENABLESERVICE
+	fi
+	# Activar gestor de base de datos.
+	$STARTSERVICE
+	# Asignar clave del usuario "root".
+	mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
 else
+	# Si ya está instalado el gestor de bases de datos, obtener clave de "root", 
 	mysqlGetRootPassword
 fi
 
-mysqlTestConnection ${MYSQL_ROOT_PASSWORD}
+mysqlTestConnection "${MYSQL_ROOT_PASSWORD}"
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while connection to mysql"
 	exit 1
 fi
-mysqlDbExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
+mysqlDbExists ${OPENGNSYS_DATABASE}
 if [ $? -ne 0 ]; then
 	echoAndLog "Creating Web Console database"
-	mysqlCreateDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
+	mysqlCreateDb ${OPENGNSYS_DATABASE}
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while creating Web Console database"
 		exit 1
@@ -1501,10 +1711,10 @@ else
 	echoAndLog "Web Console database exists, ommiting creation"
 fi
 
-mysqlCheckUserExists ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DB_USER}
+mysqlCheckUserExists ${OPENGNSYS_DB_USER}
 if [ $? -ne 0 ]; then
 	echoAndLog "Creating user in database"
-	mysqlCreateAdminUserToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} ${OPENGNSYS_DB_USER} "${OPENGNSYS_DB_PASSWD}"
+	mysqlCreateAdminUserToDb ${OPENGNSYS_DATABASE} ${OPENGNSYS_DB_USER} "${OPENGNSYS_DB_PASSWD}"
 	if [ $? -ne 0 ]; then
 		errorAndLog "Error while creating database user"
 		exit 1
@@ -1512,11 +1722,11 @@ if [ $? -ne 0 ]; then
 
 fi
 
-mysqlCheckDbIsEmpty ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE}
+mysqlCheckDbIsEmpty ${OPENGNSYS_DATABASE}
 if [ $? -eq 0 ]; then
 	echoAndLog "Creating tables..."
 	if [ -f $WORKDIR/$OPENGNSYS_DB_CREATION_FILE ]; then
-		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_CREATION_FILE
+		mysqlImportSqlFileToDb ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_CREATION_FILE
 	else
 		errorAndLog "Unable to locate $WORKDIR/$OPENGNSYS_DB_CREATION_FILE!!"
 		exit 1
@@ -1528,11 +1738,13 @@ else
 	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
  	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
- 		mysqlImportSqlFileToDb ${MYSQL_ROOT_PASSWORD} ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
+ 		mysqlImportSqlFileToDb ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
  	else
  		echoAndLog "Database unchanged."
  	fi
 fi
+# Eliminar fichero temporal con credenciales de acceso a MySQL.
+rm -f $TMPMYCNF
 
 # copiando paqinas web
 installWebFiles
@@ -1547,7 +1759,6 @@ if [ $? -ne 0 ]; then
 fi
 
 popd
-
 
 # Crear la estructura de los accesos al servidor desde el cliente (shared)
 copyClientFiles

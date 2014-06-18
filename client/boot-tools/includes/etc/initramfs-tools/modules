@@ -8,7 +8,18 @@
 #
 # raid1
 # sd_mod
+
+# video Kernel 3.2 video.
 vga16b
 vesafb
 fbcon
 
+# video Kernel 3.7 video.
+#uvesafb
+
+#generales
+usbcore
+uhci_hcd
+ehci_hcd
+usbhid
+mac-hid

@@ -17,17 +17,14 @@ O bien, descargar el instalador desde la última reversión del repositorio:
 Opcionalmente, puede descargarse la imagen del cliente; si no se realiza este paso, el instalador la descargará automáticamente.
 	wget http://www.opengnsys.es/downloads/ogLive-versioncliente.iso
 
-2. Configuración básica.
-
-Como medida de seguridad, debe modificarse los usuarios y claves por defecto de acceso al sistema. Para ello, editar el fichero de instalación opengnsys_installer.sh y modificar los valores de las variables de configuración:
-
-    MYSQL_ROOT_PASSWORD - clave del usuario root de MySQL.
-    OPENGNSYS_DB_USER - usuario de acceso y super-administrador de OpenGnSys.
-    OPENGNSYS_DB_PASSWD - clave del usuario.
-    OPENGNSYS_CLIENT_PASSWD - clave de acceso del cliente a servicios remotos. 
-
-3. Ejecutar el instalador como root:
+2. Ejecutar el instalador como root:
         sudo bash opengnsys_installer.sh 
+
+Dicho script solicitará por teclado la siguiente información para configurar el acceso al servicio (si no se indica un parámetro, toma el valor por defecto):
+    * Clave del usuario root de MySQL.
+    * Usuario de acceso a la consola web y super-administrador de OpenGnSys.
+    * Clave del usuario de acceso a la consola web.
+    * Clave de acceso del cliente a servicios remotos. 
 
 
 Actaulización de ficheros

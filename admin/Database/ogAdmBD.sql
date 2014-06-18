@@ -107,14 +107,17 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `ipmul` varchar(16) NOT NULL,
   `pormul` int(11) NOT NULL,
   `velmul` smallint(6) NOT NULL DEFAULT '70',
-  `router` VARCHAR( 30 ),
-  `netmask` VARCHAR( 30 ),
-  `dns` VARCHAR (30),
+  `router` varchar( 30 ),
+  `netmask` varchar( 30 ),
+  `dns` varchar (30),
+  `proxy` varchar (30),
   `modp2p` enum('seeder','peer','leecher') DEFAULT 'peer',
-  `timep2p` INT(11) NOT NULL DEFAULT '60',
+  `timep2p` int(11) NOT NULL DEFAULT '60',
+  `validacion` tinyint(1) DEFAULT '0',
+  `paginalogin` varchar(100),
+  `paginavalidacion` varchar(100),
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
 
 
 --
@@ -182,13 +185,13 @@ CREATE TABLE IF NOT EXISTS `centros` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
-	--
-	-- Volcar la base de datos para la tabla `centros`
-	--
-	INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
-	 (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
-	 
-	
+--
+-- Volcar la base de datos para la tabla `centros`
+--
+INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
+ (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
+
+
 -- --------------------------------------------------------
 
 --
@@ -207,24 +210,30 @@ CREATE TABLE IF NOT EXISTS `comandos` (
   `parametros` varchar(250) DEFAULT NULL,
   `comentarios` text,
   `activo` tinyint(1) NOT NULL,
+  `submenu` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`idcomando`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
 
 --
 -- Volcar la base de datos para la tabla `comandos`
 --
 
-INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`) VALUES
-(1, 'Arrancar', '../comandos/Arrancar.php', '../comandos/gestores/gestor_Comandos.php', 'Arrancar', '', 31, '', 'nfn;iph;mac', '', 1),
-(2, 'Apagar', '../comandos/Apagar.php', '../comandos/gestores/gestor_Comandos.php', 'Apagar', '', 31, '', 'nfn;iph;mac', '', 1),
-(3, 'Restaurar Imagen', '../comandos/RestaurarImagen.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagen', '', 28, 'dsk;par;idi;nci;ipr;ptc', 'nfn;iph;mac;dsk;par;idi;nci;ipr;ifs;ptc', '', 1),
-(4, 'Crear Imagen', '../comandos/CrearImagen.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagen', '', 16, 'dsk;par;idi;nci;ipr;cpt', 'nfn;iph;mac;dsk;par;idi;nci;ipr;cpt;', '', 1),
-(5, 'Reiniciar', '../comandos/Reiniciar.php', '../comandos/gestores/gestor_Comandos.php', 'Reiniciar', '', 31, '', 'nfn;iph;mac;', '', 1),
-(6, 'Inventario Hardware', '../comandos/InventarioHardware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioHardware', '', 16, '', 'nfn;iph;mac;', '', 1),
-(7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'par', 'nfn;iph;mac;par', '', 1),
-(8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1),
-(9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1),
-(10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 0);
+INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, `aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`, `submenu`) VALUES
+(1, 'Arrancar', '../comandos/Arrancar.php', '../comandos/gestores/gestor_Comandos.php', 'Arrancar', '', 31, '', 'nfn;iph;mac', '', 1, ''),
+(2, 'Apagar', '../comandos/Apagar.php', '../comandos/gestores/gestor_Comandos.php', 'Apagar', '', 31, '', 'nfn;iph;mac', '', 1, ''),
+(3, 'Restaurar Imagen', '../comandos/RestaurarImagen.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagen', '', 28, 'dsk;par;idi;nci;ipr;ptc', 'nfn;iph;mac;dsk;par;idi;nci;ipr;ifs;ptc', '', 1, ''),
+(4, 'Crear Imagen', '../comandos/CrearImagen.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagen', '', 16, 'dsk;par;idi;nci;ipr;cpt', 'nfn;iph;mac;dsk;par;idi;nci;ipr;cpt;', '', 1, ''),
+(5, 'Reiniciar', '../comandos/Reiniciar.php', '../comandos/gestores/gestor_Comandos.php', 'Reiniciar', '', 31, '', 'nfn;iph;mac;', '', 1, ''),
+(6, 'Inventario Hardware', '../comandos/InventarioHardware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioHardware', '', 16, '', 'nfn;iph;mac;', '', 1, ''),
+(7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'par', 'nfn;iph;mac;par', '', 1, ''),
+(8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
+(9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1, ''),
+(10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 1, ''),
+(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
+(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
+(13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
+(14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
+(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion');
 
 
 
@@ -413,8 +422,12 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
   `idrepositorio` int(11) NOT NULL,
-  `numpar` smallint(6) NOT NULL,
+  `numdisk` smallint NOT NULL DEFAULT 1,
+  `numpar` smallint NOT NULL,
   `codpar` int(8) NOT NULL,
+  `tipo` tinyint NULL,
+  `imagenid` int NOT NULL DEFAULT '0',
+  `ruta` varchar(250) NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -440,7 +453,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `grupoid` int(11) NOT NULL DEFAULT '0',
   `htmlmenupub` varchar(250) DEFAULT NULL,
   `htmlmenupri` varchar(250) DEFAULT NULL,
-  `resolucion` SMALLINT(4) DEFAULT NULL,
+  `resolucion` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`idmenu`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -476,11 +489,14 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `cache` int(11) DEFAULT NULL,
   `router` varchar(16) NOT NULL,
   `mascara` varchar(16) NOT NULL,
-  `idproautoexec` int(11) NOT NULL,
-  `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '1',
+  `idproautoexec` int(11) NOT NULL DEFAULT 0,
+  `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '00unknown',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
-  `netdriver` VARCHAR( 30 ) NOT NULL DEFAULT 'generic',
-  `fotoord` VARCHAR( 250 ) NOT NULL,
+  `netdriver` varchar( 30 ) NOT NULL DEFAULT 'generic',
+  `fotoord` varchar( 250 ) NOT NULL DEFAULT 'fotoordenador.gif',
+  `validacion` tinyint(1) DEFAULT '0',
+  `paginalogin` varchar(100),
+  `paginavalidacion` varchar(100),
   PRIMARY KEY (`idordenador`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -494,8 +510,8 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 
 CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idordenador` int(11) NOT NULL,
-  `numdisk` tinyint(4) NOT NULL,
-  `numpar` tinyint(4) NOT NULL,
+  `numdisk` smallint NOT NULL,
+  `numpar` smallint NOT NULL,
   `codpar` int(8) NOT NULL,
   `tamano` int(11) NOT NULL,
   `idsistemafichero` smallint(11) NOT NULL,
@@ -521,8 +537,9 @@ CREATE TABLE IF NOT EXISTS `parametros` (
   `nomliteral` varchar(64) NOT NULL,
   `tipopa` tinyint(1) DEFAULT '0',
   `visual` tinyint(4) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`idparametro`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=31 ;
+  PRIMARY KEY (`idparametro`),
+  KEY (`nemonico`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=33 ;
 
 --
 -- Volcar la base de datos para la tabla `parametros`
@@ -541,7 +558,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (9, 'ifh', 'Perfil Hardware', 'idperfilhard', 'perfileshard', 'descripcion', 1, 1),
 (10, 'ifs', 'Perfil Software', 'idperfilsoft', 'perfilessoft', 'descripcion', 1, 1),
 (11, 'idi', 'Imagen', 'idimagen', 'imagenes', 'descripcion', 1, 1),
-(12, 'nci', 'Nombre canonico', '', '', '', 0, 1),
+(12, 'nci', 'Nombre canónico', '', '', '', 0, 1),
 (13, 'scp', 'Código a ejecutar en formato script', '', '', '', 0, 0),
 (14, 'npc', 'Nombre del cliente', '', '', '', NULL, 0),
 (15, 'che', 'Tamaño de la cache del cliente', '', '', '', NULL, 0),
@@ -549,20 +566,29 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (17, 'res', 'Respuesta del comando: Puede tomar los valores 1 o 2 en el caso de que la respuesta sea correcta o que haya un error al ejecutarse.', '', '', '', 0, 0),
 (19, 'ipr', 'Repositorio', 'ip', 'repositorios', 'nombrerepositorio', 1, 1),
 (20, 'cpt', 'Tipo partición', 'codpar', 'tipospar', 'tipopar', 1, 1),
-(21, 'sfi', 'Sistema de fichero', 'idsistemafichero', 'sistemasficheros', 'nemonico', 1, 0),
-(22, 'tam', 'Tamaño', '', '', '', 0, 0),
+(21, 'sfi', 'Sistema de fichero', 'nemonico', 'sistemasficheros', 'nemonico', 1, 0),
+(22, 'tam', 'Tamaño', '', '', '', 0, 1),
 (23, 'ope', 'Operación', ';', '', 'Sin operación;Formatear;Ocultar;Mostrar', 3, 1),
 (24, 'nfl', 'Nombre del fichero que se envía o se recibe', '', '', '', 0, 0),
 (25, 'hrd', 'Nombre del archivo de inventario hardware enviado por la red', '', '', '', 0, 0),
 (26, 'sft', 'Nombre del archivo de inventario software enviado por la red', '', '', '', 0, 0),
 (27, 'tpc', 'Tipo de cliente', '', '', '', 0, 0),
 (28, 'scp', 'Código script', '', '', '', 4, 1),
-(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1);
+(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1),
+(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1), 
+(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1), 
+(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1), 
+(34, 'cpc', 'Copiar también en cache', '', '', '', 5, 1), 
+(35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1), 
+(36, 'rti', 'Ruta de origen', '', '', '', 0, 1), 
+(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
+(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1); 
 
 -- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `perfileshard`
+
 --
 
 CREATE TABLE IF NOT EXISTS `perfileshard` (
@@ -736,8 +762,29 @@ CREATE TABLE IF NOT EXISTS `sistemasficheros` (
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
   `codpar` int(8) NOT NULL,
-  PRIMARY KEY (`idsistemafichero`)
+  PRIMARY KEY (`idsistemafichero`),
+  UNIQUE KEY (`descripcion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `codpar`) VALUES
+ (1, 'EMPTY', 'EMPTY', 0),
+ (2, 'CACHE', 'CACHE', 0),
+ (3, 'BTRFS', 'BTRFS', 0),
+ (4, 'EXT2', 'EXT2', 0),
+ (5, 'EXT3', 'EXT3', 0),
+ (6, 'EXT4', 'EXT4', 0),
+ (7, 'FAT12', 'FAT12', 0),
+ (8, 'FAT16', 'FAT16', 0),
+ (9, 'FAT32', 'FAT32', 0),
+ (10, 'HFS', 'HFS', 0),
+ (11, 'HFSPLUS', 'HFSPLUS', 0),
+ (12, 'JFS', 'JFS', 0),
+ (13, 'NTFS', 'NTFS', 0),
+ (14, 'REISERFS', 'REISERFS', 0),
+ (15, 'REISER4', 'REISER4', 0),
+ (16, 'UFS', 'UFS', 0),
+ (17, 'XFS', 'XFS', 0),
+ (18, 'EXFAT', 'EXFAT', 0);
+
 
 -- --------------------------------------------------------
 
@@ -915,7 +962,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('CA',16,10), 'CACHE', 0),
 (CONV('DA',16,10), 'DATA', 1),
 (CONV('EE',16,10), 'GPT', 0),
-(CONV('EF',16,10), 'EFI', 0),
+(CONV('EF',16,10), 'EFI', 1),
 (CONV('FB',16,10), 'VMFS', 1),
 (CONV('FD',16,10), 'LINUX-RAID', 1),
 (CONV('0700',16,10), 'WINDOWS', 1),
@@ -931,6 +978,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('A501',16,10), 'FREEBSD-BOOT', 1),
 (CONV('A502',16,10), 'FREEBSD-SWAP', 0),
 (CONV('A503',16,10), 'FREEBSD', 1),
+(CONV('AB00',16,10), 'HFS-BOOT', 1),
 (CONV('AF00',16,10), 'HFS', 1),
 (CONV('AF01',16,10), 'HFS-RAID', 1),
 (CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
@@ -941,7 +989,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('BF04',16,10), 'SOLARIS', 1),
 (CONV('BF05',16,10), 'SOLARIS', 1),
 (CONV('CA00',16,10), 'CACHE', 0),
-(CONV('EF00',16,10), 'EFI', 0),
+(CONV('EF00',16,10), 'EFI', 1),
 (CONV('EF01',16,10), 'MBR', 0),
 (CONV('EF02',16,10), 'BIOS-BOOT', 0),
 (CONV('FD00',16,10), 'LINUX-RAID', 1),
@@ -1008,59 +1056,4 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`) VALUES
 (1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1);
 
-
-CREATE TABLE IF NOT EXISTS `itemboot` (
-  `label` varchar(50) collate utf8_spanish_ci NOT NULL,
-  `kernel` varchar(100) collate utf8_spanish_ci NOT NULL,
-  `append` varchar(500) collate utf8_spanish_ci NOT NULL,
-  PRIMARY KEY  (`label`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
-
-
-INSERT INTO `itemboot` (`label`, `kernel`, `append`) VALUES
-('1', 'KERNEL syslinux/chain.c32', 'APPEND hd0'),
-('1_localboot', 'LOCALBOOT 0', ' '),
-('11', 'KERNEL syslinux/chain.c32', 'APPEND hd0 1'),
-('12', 'KERNEL syslinux/chain.c32', 'APPEND hd0 2'),
-('ogClientUser', 'KERNEL ogclient/ogvmlinuz', 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false'),
-('ogClientAdmin', 'KERNEL ogclient/ogvmlinuz', 'APPEND initrd=ogclient/oginitrd.img ro boot=oginit vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true'),
-('ogInitrdUser', 'KERNEL linux', 'APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=user '),
-('ogInitrdAdmin', 'KERNEL linux', 'APPEND initrd=initrd.gz ip=dhcp ro vga=788 irqpoll acpi=on boot=admin ');
-
-
-
-
-CREATE TABLE IF NOT EXISTS `menuboot` (
-  `label` varchar(50) collate utf8_spanish_ci NOT NULL,
-  `prompt` int(11) NOT NULL,
-  `timeout` int(30) default NULL,
-  `description` varchar(50) collate utf8_spanish_ci NOT NULL,
-  PRIMARY KEY  (`label`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
-
-
-INSERT INTO `menuboot` (`label`, `prompt`, `timeout`, `description`) VALUES
-('1', 0, 10, 'mbr 1hd'),
-('11', 0, 10, '1hd 1particion'),
-('12', 0, 10, '1hd 2particion'),
-('pxe', 0, 10, 'og client - user'),
-('pxeADMIN', 0, 10, 'OgClient - admin');
-
-
-CREATE TABLE IF NOT EXISTS `menuboot_itemboot` (
-  `labelmenu` varchar(100) NOT NULL,
-  `labelitem` varchar(100) NOT NULL,
-  `default` tinyint(10) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-
-INSERT INTO `menuboot_itemboot` (`labelmenu`, `labelitem`, `default`) VALUES
-('0', '0', 0),
-('11', '11', 0),
-('12', '12', 0),
-('1', '1', 0),
-('pxe', 'ogClientUser', 0),
-('pxeADMIN', 'ogClientAdmin', 0);
 

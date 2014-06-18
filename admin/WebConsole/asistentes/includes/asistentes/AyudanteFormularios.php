@@ -74,11 +74,12 @@ if ($ambito == 16)
 $cmd->texto='SELECT aulas.modp2p,aulas.timep2p FROM  aulas JOIN ordenadores ON ordenadores.idaula=aulas.idaula where ordenadores.idordenador=' . $idambito ;
 }
 
+	$SelectHtml="";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-if ($rs->Abrir()){
+	if ($rs->Abrir()){
 		$rs->Primero(); 
-        $SelectHtml.= $TbMsg["WDI26"] . ' :<input type="text" size="10" name="modp2p" value="'.$rs->campos["modp2p"] . '" /> <br />';
+		$SelectHtml.= $TbMsg["WDI26"] . ' :<input type="text" size="10" name="modp2p" value="'.$rs->campos["modp2p"] . '" /> <br />';
 		$rs->Siguiente();
 		$SelectHtml.= $TbMsg["WDI30"] . ' :<input type="text" size="10"  maxlength="15" name="timep2p" value="'.$rs->campos["timep2p"] . '" /> <br />';
 		$rs->Siguiente();
@@ -186,9 +187,9 @@ $subconsultarepo='SELECT idrepositorio FROM  ordenadores where idordenador=' . $
 	
 	
 	$SelectHtml="";
+	// 1.0.5  imagenes.tipo =1 para que solo muestre las monoloticas.
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
-				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio AND repositorios.idrepositorio=(" . $subconsultarepo . ")"; 
-	
+				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio AND repositorios.idrepositorio=(" . $subconsultarepo . ") WHERE imagenes.tipo=1"; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	
@@ -342,6 +343,7 @@ $SelectHtml.='<OPTION value="CHROMEOS"> ChromeOS </OPTION>';
 $SelectHtml.='<OPTION value="CHROMEOS-KRN"> ChromeOS Kernel </OPTION>';
 $SelectHtml.='<OPTION value="CHROMEOS-RESERV"> ChromeOS Reserved </OPTION>';
 $SelectHtml.='<OPTION value="HFS"> MacOS HFS </OPTION>';
+$SelectHtml.='<OPTION value="HFS-BOOT"> MacOS HFS Boot </OPTION>';
 $SelectHtml.='<OPTION value="HFS-RAID"> MacOS HFS RAID </OPTION>';
 $SelectHtml.='<OPTION value="FREEBSD"> FreeBSD </OPTION>';
 $SelectHtml.='<OPTION value="FREEBSD-DISK"> FreeBSD Disk </OPTION>';
@@ -377,7 +379,8 @@ function htmlForm_sizepart($cmd,$numpar)
 	return($SelectHtml);	
 }
 
-function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
+
+function pintaParticionesAsistenteDeployImage($cmd,$configuraciones,$idordenadores,$cc)
 {
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración

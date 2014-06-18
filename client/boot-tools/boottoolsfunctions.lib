@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot-Tools
 #@class   Boot-Tools
 #@brief   Funciones para generar un sistema operativo cliente para opengnsys
-#@version 0.9
+#@version 1.0.5
 #@warning License: GNU GPLv3+
 #*/
 
@@ -29,11 +29,7 @@ export BTROOTFSIMGLABEL=ogClient
 
 export LOG_FILE=/tmp/boot-tools_installation.log
 
-NAMEISOCLIENT=`cat /tmp/opengnsys_info_rootfs`
-NAMEHOSTCLIENT=`cat /tmp/opengnsys_chroot`
-
-export NAMEISOCLIENT
-export NAMEHOSTCLIENT
+export VERSIONBOOTTOOLS="ogLive"
 }
 
 
@@ -44,32 +40,79 @@ export NAMEHOSTCLIENT
 #@version 1.0 - Compatibilidad OpengGnsys X.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/08/03
+#@version 1.0.5 - Fichero general de configuración, Kernel 3.7 para Ubuntu 12.10.
+#@author  Ramón Gómez, ETSII Univ. Sevilla
+#@date    2013/02/06
 function btogGetOsInfo ()
 {
-		case $1 in
-		lenny|LENNY)
-			export OSDISTRIB=debian
-			export OSCODENAME=lenny
-			export OSRELEASE="2.6.28-11-generic"
-			export OSARCH=i386
-			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
+OGCLIENTCFG=/tmp/ogclient.cfg
+case "${1,,}" in
+	precise)	# ogLive 1.0.4-rc2 basado en Ubuntu 12.04 LTS.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="precise"
+		OSRELEASE="3.2.0-23-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-		lucid|LUCID)
-			export OSDISTRIB=ubuntu
-			export OSCODENAME=lucid
-			export OSRELEASE="2.6.32-21-generic-pae"
-			export OSARCH=i386
-			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/ "
+	quantal)	# ogLive 1.0.5-rc2 basado en Ubuntu 12.10 con Kernel descargado.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="quantal"
+		OSRELEASE="3.7.6-030706-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-		host | HOST | *)
-			export OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-			export OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
-			export OSRELEASE=$(uname -a | awk '{print $3}')
-			uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
-			export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+	raring) 	# ogLive 1.0.5-rc3 basado en Ubuntu 13.04.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="raring"
+		OSRELEASE="3.8.0-22-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	esac
-		echo $OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP
+	wheezy) 	# ogLive basado en Debian 7.3.
+		OSDISTRIB="debian"
+		OSCODENAME="wheezy"
+		OSRELEASE="3.2.0-4-i386"
+		OSARCH="i386"
+		OSHTTP="http://ftp.es.debian.org/debian/"
+		;;
+	trusty) 	# ogLive 1.0.5-rc4 basado en Ubuntu 14.04.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="trusty"
+		OSRELEASE="3.13.0-24-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	host | *)	# ogLive basado en la distribución del servidor.
+		OSDISTRIB=$(lsb_release -is)
+		OSCODENAME=$(lsb_release -cs)
+		OSRELEASE=$(uname -a | awk '{print $3}')
+		#uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
+		OSARCH="i386"
+		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+esac
+SVNURL="http://opengnsys.es/svn/trunk/client"
+VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
+NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
+NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
+export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
+export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
+### El fichero de configuración debe sustituir a estos 3 ficheros (borrar las 3 líneas siguientes).
+echo "$VERSIONSVN" > /tmp/versionsvn.txt
+echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
+echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
+# Generar fichero de configuración.
+cat << EOT > $OGCLIENTCFG
+TYPECLIENT="$1"
+OSDISTRIB="$OSDISTRIB"
+OSCODENAME="$OSCODENAME"
+OSRELEASE="$OSRELEASE"
+OSARCH="$OSARCH"
+OSHTTP="$OSHTTP"
+VERSIONSVN="$VERSIONSVN"
+NAMEISOCLIENT="$NAMEISOCLIENT"
+NAMEHOSTCLIENT="$NAMEHOSTCLIENT"
+EOT
 }
 
 # btogSetFsVirtual: Crea y formatea el fichero - disco duro virtual
@@ -92,7 +135,7 @@ echoAndLog "$FUNCNAME(): Creación y formateo del disco virtual $BTVIRTUALDISKSI
 
 #Desmontamos el dispositivo virtual
 mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT 
-mount | grep $BTROOTFSMNTT && umount $BTROOTFSMNT 
+mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT 
 
 #echo "$FUNCNAME(): Creando el directorio donde se montará el disco virtual $BTROOTFSMNT"
 mkdir -p $BTROOTFSMNT
@@ -137,7 +180,7 @@ fi
 
 PARTLOOP=$(losetup -f)
 #echo "$FUNCNAME(): Formateando la particion principal $PARTLOOP"
-losetup -o 32256 $PARTLOOP $BTROOTFSIMG && mkfs.ext3 -b 4096 -L $BTROOTFSIMGLABEL $PARTLOOP
+losetup -o 32256 $PARTLOOP $BTROOTFSIMG && mkfs.ext4 -b 4096 -L $BTROOTFSIMGLABEL $PARTLOOP
 if [ $? -ne 0 ]
 then 
 	errorAndLog "$FUNCNAME(): Formateando la particion principal del disco virtual: ERROR" 
@@ -168,7 +211,7 @@ function btogSetFsBase ()
 {
 
 # Dependencias
-[ -z "$OSCODENAME" ] && btogGetOsInfo
+[ -z "$OSCODENAME" ] && btogGetOsInfo $TYPECLIENT
 
 echoAndLog "$FUNCNAME:  Iniciando la generación del sistema de archivos "
 	
@@ -176,12 +219,12 @@ echoAndLog "$FUNCNAME:  Iniciando la generación del sistema de archivos "
 mount | grep $BTROOTFSMNT || mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256
 mount | grep $BTROOTFSMNT && echoAndLog "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 OK   " || errorAndLog  "$FUNCNAME:  mount $BTROOTFSIMG $BTROOTFSMNT -o loop,offset=32256 : FAILURE  "
 
-debootstrap  --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
+debootstrap --arch=$OSARCH --components=main,universe ${OSCODENAME} ${BTROOTFSMNT} ${OSHTTP} 
 #debootstrap --arch=$OSARCH ${OSCODENAME} ${BTROOTFSMNT} http://archive.ubuntu.com/ubuntu/
 
 
 if [ $? -ne 0 ]; then
-	errorAndLog "$FUNCNAME:  debootstrap --include=linux-image-${OSRELEASE},linux-headers-${OSRELEASE} --arch=$OSARCH --components=main,universe $OSCODENAME $BTROOTFSMNT $OSHTTP : ha fallado!"
+	errorAndLog "$FUNCNAME:  debootstrap --arch=$OSARCH --components=main,universe $OSCODENAME $BTROOTFSMNT $OSHTTP : ha fallado!"
 	mount | grep $BTROOTFSMNT && umount $BTROOTFSMNT
 	return 3
 else
@@ -213,7 +256,7 @@ cat << EOF > /etc/schroot/schroot.conf
 [IMGogclient]
 type=loopback
 file=/var/lib/tftpboot/ogclient/ogclient.img
-description=ogclient ubuntu luc IMGi
+description=ogclient Ubuntu image
 #priority=1
 users=root
 groups=root
@@ -257,7 +300,7 @@ function btogFsInitrd ()
 {
 #DEPENDENCIAS
 [ -z "$BTROOTFSIMG" ] && btogGetVar
-[ -z "$OSCODENAME" ] && btogGetOsInfo
+[ -z "$OSCODENAME" ] && btogGetOsInfo $TYPECLIENT
 
 cd /
 schroot -c IMGogclient -- /usr/bin/boot-tools/boottoolsInitrdGenerate.sh
@@ -292,7 +335,7 @@ function btogFsSqfs ()
 {
 #Dependencias.
 [ -z "$BTROOTFSIMG" ] && btogGetVar
-[ -z "$OSCODENAME" ] && btogGetOsInfo
+[ -z "$OSCODENAME" ] && btogGetOsInfo $TYPECLIENT
 
 echoAndLog "$FUNCNAME: Iniciando la creación del sistema de archivos en sqfs "
 # si ya existe un sqfs lo renombramos

@@ -11,7 +11,7 @@
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
-PXEDIR=$OPENGNSYS/tftpboot/pxelinux.cfg
+MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
 if [ $# -ne 1 ]; then
@@ -26,27 +26,23 @@ fi
 
 # Obtener datos de acceso a la Base de datos.
 source $SERVERCONF
-# Comprobar si se recibe nombre de aula o de equipo.
-IDAULA=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-		"SELECT idaula FROM aulas WHERE nombreaula='$1';")
-
-if [ -n "$IDAULA" ]; then
-	# Aula encontrada
-	PCNAME=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT nombreordenador FROM ordenadores WHERE idaula='$IDAULA';")
-else
-	# Buscar ordenador
-	PCNAME=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT nombreordenador FROM ordenadores WHERE nombreordenador='$1';")
-fi
-if [ -z "$PCNAME" ]; then
-	echo "$PROG: No existe ningún aula o equipo con el nombre \"$1\""
-	exit 1
-fi
-
-for PC in $PCNAME; do
-	PXE=$(mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" -N -e \
-        	"SELECT arranque FROM ordenadores WHERE nombreordenador='$PC';")
-	echo "Equipo $PC asociado a arranque tipo \"$PXE\""
-done
+# Sustituir caracteres ' por \' para evitar inyección SQL.
+RESOURCE="${1//\'/\'}"
+# Componer fichero con credenciales de conexión.
+touch $MYCNF
+chmod 600 $MYCNF
+cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+# Borrar el fichero temporal si termina el proceso.
+trap "rm -f $MYCNF" 0 1 2 3 6 9 15
+# Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
+mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
+		"SELECT nombreordenador, arranque FROM ordenadores
+		   JOIN aulas USING (idaula)
+		  WHERE aulas.nombreaula='$RESOURCE'
+		     OR nombreordenador='$RESOURCE';" | \
+	awk '{ printf ("Equipo %s asociado a arranque tipo \"%s\"\n", $1, $2); }'
 

@@ -1,8 +1,11 @@
 #!/bin/bash
+OGLOGSESSION=${OGLOGSESSION:-"/tmp/session.log"}
 echo "Content-type: text/html"
 echo ""
-echo "<html><head> <meta http-equiv='Refresh' content='5,URL=./LogSession.sh'> <title>Bash as CGI"
-echo "</title>"
+echo "<html><head>"
+echo "   <meta charset='utf-8'>"
+echo "   <meta http-equiv='Refresh' content='5,URL=./LogSession.sh'>"
+echo "   <title>Bash as CGI</title>"
 
 echo "<style type='text/css'>"
 echo "<!--"
@@ -17,15 +20,11 @@ echo "} "
 echo "-->"
 echo "</style>"
 
-
-
 echo "</head><body>"
 
 echo "<TEXTAREA NAME='contenido' ROWS='115' COLS='175'  >"
-echo "$(cat /tmp/session.log | uniq )"
+uniq $OGLOGSESSION
 echo "</TEXTAREA>"
-
-
 
 echo "</body></html>"
 

@@ -4,7 +4,7 @@
 //	Php language file: configuraciones_eng.php 
 //	Language: English
 //_________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]='Configurations';
 $TbMsg[1]='Scope';
 $TbMsg[2]="Labs";
@@ -52,10 +52,10 @@ $TbMsg[38]='Less free disk space (KB)';
 $TbMsg[39]='Customize';
 $TbMsg[40]='Size unchanged';
 $TbMsg[41]='Generate OG Instruction';
-$TbMsg["CONFIG_PARTTABLE"='Partition table';
+$TbMsg["CONFIG_PARTTABLE"]='Partition table';
 
 $TbMsg[42]='Variable';
-$TbMsg[43]='No configuration: client does not connect to server.';
+$TbMsg["CONFIG_NOCONFIG"]='No configuration: client does not connect to server.';
 $TbMsg[44]='Hardware equipment without profile';
 $TbMsg[45]='Add Profile to obtain data';
 $TbMsg[495]='Content cache';

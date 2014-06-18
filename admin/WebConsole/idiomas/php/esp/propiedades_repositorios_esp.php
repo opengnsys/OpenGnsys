@@ -16,4 +16,10 @@ $TbMsg[7]="Comentarios";
 $TbMsg[8]="Puerto"; 
 $TbMsg[9]="Directorio Base"; 
 $TbMsg[10]="Directorio PXE"; 
+$TbMsg[11]="Espacio TOTAL"; 
+$TbMsg[12]="Espacio Ocupado"; 
+$TbMsg[13]="Espacio Libre"; 
+$TbMsg[14]="% Ocupado"; 
+$TbMsg[15]='Limitaciones de esta versi&oacute;n';
+$TbMsg[16]='Informaci&oacute;n de espacio solo disponible si Repositorio y Servidor Web est&aacute;n alojados en el mismo servidor';
 ?>

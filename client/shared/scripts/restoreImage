@@ -1,85 +1,69 @@
 #!/bin/bash
-# Scirpt de ejemplo para restaurar una imagen.
+# Script de ejemplo para restaurar una imagen.
 # (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones protocolo]"
     exit $?
 fi
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+# Valores por defecto: #IMGPROG="partclone" ; #IMGCOMP="lzop" ; #IMGEXT="img" #IMGREDUCE="TRUE"
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+[ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION; 
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
 # Procesar parámetros de entrada
-IMGTYPE="img"
-IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
-PROTO=${5:-"UNICAST"}
-if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
-    IMGDIR=$(ogGetParentPath "$1" "$2")
-    # Si no existe el directorio de la imagen, crearlo.
-    if [ -z "$IMGDIR" ]; then
-        echo "[5] Creando directorio de imagen \"$1, ${2%/*}\"."
-        ogMakeDir "$1" "${2%/*}" || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
-    fi
-    IMGDIR=$(ogGetParentPath "$1" "$2") || ogRaiseError $OG_ERR_NOTFOUND "$1, ${2%/*}" || exit $?
-    # Procesar protocolos de transferencia.
-    case "$PROTO" in
-        UNICAST|unicast)
-            # Copiar fichero del repositorio al caché local.
-            #IMGTYPE=$(ogGetImageType "repo" "$2")
-            IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
-            if [ -z "$IMGFILE" ] || [ $(ogIsNewerFile "repo" "$2.$IMGTYPE" "$IMGFILE") ]; then
-                echo "[10] Copiando imagen \"$2\" del repositorio a caché local"
-                ogCopyFile "repo" "$2.$IMGTYPE" "$IMGDIR"
-            fi
-            # Comprobar si existe el fichero en caché y no en el repositorio.
-            if [ -z "$IMGFILE" ]; then
-                #IMGTYPE=$(ogGetImageType "cache" "$2")
-                IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
-                if [ -z "$IMGFILE" ]; then
-                    ogRaiseError $OG_ERR_NOTFOUND "cache, $2.$IMGTYPE"
-                    exit $?
-                fi
-            fi
-            ;;
-        MULTICAST|multicast)
-            if [ -z "$IMGFILE" ]; then
-            	echo "[10] Copiando imagen multicast \"$2\" del repositorio a caché local"
-				#IMGTYPE=$(ogGetImageType "repo" "$2")
-            	PORTBASE=`echo $6 | cut -f1 -d:`
-      		echo "ogMcastReceiverFile SOURCE:$PORTBASE TARGET:CACHE $2.$IMGTYPE" 
-      		ogMcastReceiverFile "$PORTBASE" "CACHE" "$2.$IMGTYPE" || exit $?
-      		IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")
-            fi
-            ;;
-        TORRENT|torrent)
-		echo "[9] copiando el fichero torrent Unicast \"$2\" del repositorio a caché local"
-		#IMGTYPE=$(ogGetImageType "repo" "$2")
-            	ogCopyFile "repo" "$2.$IMGTYPE.torrent" "$IMGDIR" || exit $?
-   		echo "[10] descargando imagen torrent($6) \"$2\" del repositorio a caché local"
-     		ogTorrentStart "CACHE" "$2.$IMGTYPE.torrent" "peer:60" || exit $?        		
-     		IMGFILE=$(ogGetPath "cache" "$2.$IMGTYPE")            
-            ;;
-        *)  # Protocolo desconocido.
-            ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT opciones ]"
-            exit $?
-    esac
+REPO="${1^^}"
+IMGNAME="$2"
+DISK="$3"
+PART="$4"
+PROTO="${5^^}"
+PROTO=${PROTO:-"UNICAST"}
+PROTOOPT="$6"
+IMGTYPE="${IMGTYPE:-"img"}"
+# Comprobar que existe la imagen del origen.
+IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
+IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
+if [ "$IMGFILE" == "" -o "$IMGDIR" == "" ]; then
+        ogRaiseError session $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
+        exit $?
 fi
-if [ -z "$IMGFILE" ]; then
-    ogRaiseError $OG_ERR_NOTFOUND "$1, $2"
-    exit $?
-fi
-PART=$(ogDiskToDev "$3" "$4") || exit $?
 
-# Restaurar la imagen.
-echo "[40] Restaurar imagen en $PART"
-ogRestoreImage "$@" || exit $?
-# Restaurar tamaño.
-echo "[80] Extender sistema de archivos."
-ogExtendFs $3 $4
-# Llamar al script de post-configuración del sistema operativo.
-echo "[90] Post-configuracion de aranque del sistema."
-configureOs $3 $4
+# Procesar protocolos de transferencia.
+case "$PROTO" in
+    UNICAST|UNICAST-DIRECT)
+        # Restaurar la imagen.
+        ogEcho log session "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST"
+        ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" 2>&1 | tee -a $OGLOGCOMMAND
+        RETVAL=${PIPESTATUS[0]}
+        ;;
+    MULTICAST|MULTICAST-DIRECT)
+        PORT=$(echo $PROTOOPT | cut -f1 -d":")
+        TOOL=$(ogGetImageProgram REPO $IMGNAME)
+        COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
+        #TODO comprobar parametros anteriores
+        ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
+        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
+        ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS" 2>&1 | tee -a $OGLOGCOMMAND
+        RETVAL=${PIPESTATUS[0]}
+        ;;
+    *)  # Protocolo desconocido.
+        ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 
+        exit $?
+esac
 
 TIME=$[SECONDS-TIME1]
-echo "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+
+# Código de salida del comando prinicpal de restauración.
+exit $RETVAL
 

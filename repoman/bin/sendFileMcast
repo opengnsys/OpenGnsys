@@ -57,5 +57,5 @@ CERROR="8x8/128"
 # Envío de fichero por Multicast.
 # Se desabilita el uso de mbuffer: eesta versión del upd-sender no la admite.
 #which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
-$OGBIN/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 1 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
+$OGBIN/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
 

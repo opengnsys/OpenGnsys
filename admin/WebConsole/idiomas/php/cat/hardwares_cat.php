@@ -1,7 +1,7 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fitxer d'idiomes php: hardwares_esp.php 
+//	Fitxer d'idiomes php: hardwares_cat.php 
 //	Idioma: Català
 //________________________________________________________________________________________________________
 	$TbMsg=array();
@@ -17,7 +17,7 @@
 	$TbMsg[9]='"Eliminar component"';
 	$TbMsg[10]='"Nou grup de perfils"';
 	$TbMsg[11]='"Definir nou perfil"';
-	$TbMsg[12]='"Col.locar perfil"';
+	$TbMsg[12]='"Col·locar perfil"';
 	$TbMsg[13]='"Eliminar grup de perfils"';
 	$TbMsg[14]='"Gestió Components"';
 	$TbMsg[15]='"Informació Perfil"';

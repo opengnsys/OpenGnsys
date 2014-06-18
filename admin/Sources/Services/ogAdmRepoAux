@@ -1,5 +1,7 @@
 #!/bin/bash
 PARM=`cat`
+#PARM=$@
+
 
 #TODO:  ticket 379
 #buscar parametro de identificador de operacion.
@@ -9,6 +11,7 @@ PARM=`cat`
 #Si esta seteada (en progreso) salir.
 
 
+TIME=$SECONDS
 
 BASEDIR=/opt/opengnsys
 PATH=$PATH:$BASEDIR/bin
@@ -16,18 +19,52 @@ REPONAME=ogAdmRepo
 REPOLOG=$BASEDIR/log/$REPONAME.log
 MCASTLOGBASE=$BASEDIR/log/mcastlog
 MCASTLOG=$MCASTLOGBASE/ogAdmRepoMcast.`date +%Y%m%d-%H%M%S`
+REPODIR="$BASEDIR/images/"
+
+# Para las sincronizadas 
+# BACKUP: Define si se realiza copia de seguridad al crear una imagen (true|false).
+eval $(grep BACKUP $BASEDIR/client/etc/engine.cfg)
+# FS segun kernel. ext4 para < 3.7, para >= BTRFS
+KERNEL=$(file -bkr /opt/opengnsys/tftpboot/ogclient/ogvmlinuz |awk '/Linux/ {for(i=1;i<=NF;i++) if($i~/version/) {v=$(i+1);printf("%d",v);sub(/[0-9]*\./,"",v);printf(".%02d",v)}}')
+[ $KERNEL \< 3.07 ] && IMGFS="EXT4" || IMGFS="BTRFS"
+
 
 # Añade registro de incidencias.
 function echolog () {
-	date +"%Y%m%d-%H%M%S $*" >> $REPOLOG
+	if [ "$1" == "-o" ]; then
+		shift
+		date +"%Y%m%d-%H%M%S $*"|tee -a $REPOLOG
+	else
+		date +"%Y%m%d-%H%M%S $*" >> $REPOLOG
+	fi
+}
+
+function mountImage () {
+	#@param 1 image_file
+	#@param 2 mount_dir
+	#@param 3 openciones mount
+ 	[ "$3" != "" ] && OPTMOUNT=" -o $3 "	
+	# Si está montado nada que hacer
+	df |grep "$2$"  2>&1 >/dev/null  && return 0
+	if [ $IMGFS == "EXT4" ]; then
+		echolog "mount $OPTMOUNT -t ext4 $1 $2"
+		mount $OPTMOUNT -t ext4 $1 $2
+	else
+		echolog "mount $OPTMOUNT -o compress=lzo  $1 $2"
+		mount $OPTMOUNT -o compress=lzo  "$1" "$2"
+	fi
+	return $?
 }
 
 mkdir -p $MCASTLOGBASE
+
 
 PARM1=$(echo $PARM | cut -f1 -d" ")
 PARM2=$(echo $PARM | cut -f2 -d" ")
 PARM3=$(echo $PARM | cut -f3 -d" ")
 PARM4=$(echo $PARM | cut -f4 -d" ")
+
+# Determinamos el tipo de sistema de fichero de las imagenes segun el kernel que tenga
 
 
 case "$PARM1" in
@@ -41,15 +78,211 @@ case "$PARM1" in
 		sendFileMcast $FILE $MCASTOPT &>> $MCASTLOG
 		case $? in
 			1)  echolog "Parametros insuficientes"
-			    return 1 ;;
+			    exit 1 ;;
 			2)  echolog "Fichero no accesible"
-			    return 2 ;;
+			    exit 2 ;;
 			3)  echolog "Sesion multicast no valida"
-			    return 3 ;;
+			    exit 3 ;;
 		esac
+	;;
+	CREATE_IMAGE)
+		# Creamos/Redimensionamos el fichero de imagen y lo montamos para que se pueda escribir sobre el
+		#1 CREATE_IMAGE
+		#2 nombre imagen
+		#3 tipo de imagen [ img | diff ]
+		#4 tamaño imagen 
+		LOOPDEVICE=$(losetup -f)
+		DIRMOUNT="$REPODIR/mount/$PARM2"
+		if [ "$PARM3" == "img" ] ; then
+			IMGEXT="img" 
+		else
+			IMGEXT="img.diff"
+			DIRMOUNT="$DIRMOUNT.diff"
+		fi
+		IMGFILE="$REPODIR/$PARM2.$IMGEXT"
+		IMGDIR="$(dirname $IMGFILE)"
+		[ -d  $IMGDIR ] || mkdir -p $IMGDIR
+		mkdir -p "$DIRMOUNT"
+
+		LOCKFILE="$IMGFILE.lock"
+
+		SIZEREQUIRED="$PARM4"
+
+		# Si existe la imagen hacemos copia de seguridad y la redimesionamos 
+		if [ -f "$IMGFILE" ]; then
+		    echolog "La imagen $IMGFILE ya existe."
+		    # TODO modificar ogGetImageSize
+		    IMGSIZE=$(ls -l --block-size=1024 $IMGFILE| cut -f5 -d" ")
+
+		    if [ "$BACKUP" == "true" -o "$BACKUP" == "TRUE"  -o $IMGSIZE -lt $SIZEREQUIRED ]; then
+		        # Si la imagen esta montada la desmonto
+			if [ -r "$DIRMOUNT/ogimg.info" ]; then
+                                echolog "umount $DIRMOUNT"
+                                umount "$DIRMOUNT"
+                                [ $? -ne 0 ] && echolog "Error: No podemos desmontar la imagen para hacer copia de seguridad o redimensionar" && exit 1
+                        fi
+		    fi
+
+		    # Copia de seguridad de la imagen 
+		    if [ "$BACKUP" == "true" -o "$BACKUP" == "TRUE" ]; then
+		    	echolog "Copia de seguridad de la imagen anterior"
+		    	echolog "cp  $IMGFILE $IMGFILE.ant" 
+		    	cp  "$IMGFILE" "$IMGFILE.ant" 
+		    	echolog mv -f "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
+		    	mv -f "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
+		    fi
+
+		    # Redimensionamos la imagen al tamaño necesario
+		    if [ $IMGSIZE -lt $SIZEREQUIRED ];then
+		        echolog "Redimensionamos la imagen $IMGFILE al tamaño necesario: $SIZEREQUIRED"
+		        echolog "truncate --size=\">$SIZEREQUIRED\"k $IMGFILE" 
+		        truncate --size=">$SIZEREQUIRED"k $IMGFILE 2>&1 > $REPOLOG
+			# Montamos la imagen, si da error nos salimos
+			if [ $IMGFS == "EXT4" ]; then
+			   losetup $LOOPDEVICE "$IMGFILE"
+			   echolog "resize2fs -f $LOOPDEVICE"
+			   resize2fs -f $LOOPDEVICE &> $REPOLOG
+			else
+		    	   mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT"
+			   echolog "btrfs filesystem resize max $DIRMOUNT"
+			   btrfs filesystem resize max "$DIRMOUNT"  2>&1 > $REPOLOG
+			fi
+		    fi
+
+
+		# Si no existe la imagen creamos el fichero.	
+		else
+		    echolog "Creamos la imagen $IMGFILE al tamaño necesario: $SIZEREQUIRED"
+		    echolog dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED 
+		    dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED
+		    #Formateamos imagen
+		    echo losetup $LOOPDEVICE "$IMGFILE"
+		    losetup $LOOPDEVICE "$IMGFILE"
+		    if [ $IMGFS == "EXT4" ] ; then
+			echolog "      mkfs.ext4 -i 4096  -b 4096 -L ${PARM2##*\/} $LOOPDEVICE"
+			mkfs.ext4 -i 4096  -b 4096 -L ${PARM2##*\/} $LOOPDEVICE
+		    else
+			echolog mkfs.btrfs  -L ${PARM2##*\/} $LOOPDEVICE 
+		    	mkfs.btrfs  -L ${PARM2##*\/} $LOOPDEVICE #&> $OGLOGCOMMAND
+		    fi
+		fi
+		# Montamos la imagen.
+		mountImage "$IMGFILE" "$DIRMOUNT" 
+		RETVAL=$?
+		if [ $RETVAL -ne 0 ]; then
+			rmdir "$DIRMOUNT"
+			echolog -o "Error al crear/redimensionar la imagen" 
+			exit $RETVAL
+		fi
+
+		#touch "$DIRMOUNT/ogimg.info"
+		echo "mounted"> "$LOCKFILE"
+		TIME2=$[SECONDS-TIME]
+		echolog "Fin creación/redimension de la  imagen: $[TIME2/60]m $[TIME2%60]s"
+		# Si existe dispositivo loop lo borramos.
+ 		[ $LOOPDEVICE ] && losetup -a| grep $LOOPDEVICE &> /dev/null  &&  losetup -d $LOOPDEVICE
+		# TODO: comprobar que no se quede el losetup bloqueado.
+
+	;;
+	MOUNT_IMAGE)
+		# Montamos el fichero imagen para que se pueda 
+		#1 MOUNT_IMAGE
+		#2 nombre imagen
+		#3 tipo de imagen [ img | diff ]
+		DIRMOUNT="$REPODIR""mount/$PARM2"
+		if [ "$PARM3" == "img" ] ; then
+			IMGEXT="img" 
+		else
+			IMGEXT="img.diff"
+			DIRMOUNT="$DIRMOUNT.diff"
+		fi
+		IMGFILE="$REPODIR/$PARM2.$IMGEXT"
+		LOCKFILE="$IMGFILE.lock"
+		echolog "Montamos la imagen $IMGFILE "
+		mkdir -p "$DIRMOUNT"
+		mountImage "$IMGFILE" "$DIRMOUNT"  ro || (echolog "Error al montar la imagen"; exit 1)
+	;;
+	UMOUNT_IMAGE)
+                # Desmontamos el fichero imagen.
+		# Si el directorio esta ocupado no se desmontará
+                #1 UMOUNT_IMAGE
+                #2 nombre imagen
+                #3 tipo de imagen [ img | diff ]
+		IMGTYPE="$PARM3"
+		DIRMOUNT="$REPODIR/mount/$PARM2"
+		if [ "$IMGTYPE" == "img" ]; then
+			IMGEXT="img"
+		else
+			DIRMOUNT="$DIRMOUNT.$IMGTYPE"
+			IMGEXT="img.diff"
+		fi
+		LOCKFILE="$REPODIR/$PARM2.$IMGEXT.lock"
+		echolog "Desmontamos la imagen $PARM2 $PARM3 "
+		umount $DIRMOUNT
+		rmdir $DIRMOUNT
+		[ -f $LOCKFILE ] && sed -i s/mounted//g $LOCKFILE
+
+	;;
+	REDUCE_IMAGE)
+		# Reduce el archivo de la imagen a tamaño datos + 500M
+		#1 REDUCE_IMAGE
+		#2 Nombre Imagen
+		#3 Tipo de imagen [ img |diff ]
+		DIRMOUNT="${REPODIR}mount/${PARM2}"
+		if [ "$PARM3" == "img" ] ; then
+			IMGEXT="img" 
+		else
+			IMGEXT="img.diff"
+			DIRMOUNT="$DIRMOUNT.diff"
+		fi
+                IMGFILE="$REPODIR$PARM2.$IMGEXT"
+		LOCKFILE="$IMGFILE.lock"
+		[ ! -f $IMGFILE ] && echolog "Imagen $IMGFILE no existe" && exit 1 
+
+		# Solo funciona si la imagen es ext4, si no nos salimos sin error
+		file $IMGFILE |grep -i -e " ext4 filesystem " 2>&1 > /dev/null || exit 0
+
+		[ -d $DIRMOUNT ] || mkdir $DIRMOUNT
+		mountImage "$IMGFILE" "$DIRMOUNT" || (echolog "Error al montar la imagen $IMGFILE"; exit 1)
+		
+        	# Si el espacio libre menor que 500Mb desmontamos la imagen y nos salimos
+		AVAILABLE=$(df -k|grep $DIRMOUNT|awk '{print $4}')
+        	if [ $AVAILABLE -lt 200000 ]; then
+        	     echolog "reducir imagen REPO $PARM2 $IMGEXT. tamaño minimo, nada que hacer"
+		     umount $DIRMOUNT 
+		     rmdir $DIRMOUNT
+		     exit 0
+		fi
+
+		# Calculamos la diferencia entre el tamaño interno y externo
+		EXTSIZE=$(ls -l --block-size=1024 $IMGFILE | cut -f5 -d" ")
+		INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
+		let EDGESIZE=$EXTSIZE-$INTSIZE
+
+        	echolog "reducir imagen REPO $PARM2 $IMGEXT, tamaño final: $ENDSIZE"
+		umount $DIRMOUNT
+		LOOPDEVICE=$(losetup -f)
+           	losetup $LOOPDEVICE "$IMGFILE"
+
+		# Redimensiono sistema de ficheros
+           	echolog "resize2fs -fpM $LOOPDEVICE "
+           	resize2fs -fpM $LOOPDEVICE # 2>&1 > $REPOLOG
+		mountImage "$IMGFILE" "$DIRMOUNT" 
+		# Calculamos el tamaño final del archivo
+		INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
+		let EXTSIZE=$INTSIZE+$EDGESIZE
+		umount $DIRMOUNT  || (echolog "Error al desmontar la imagen $IMGFILE"; exit 1)
+		# Si existe dispositivo loop lo borramos.
+		[ $LOOPDEVICE ] && losetup -a| grep $LOOPDEVICE &> /dev/null  &&  losetup -d $LOOPDEVICE
+		# Corto el archivo al tamaño del sistema de ficheros
+		echo "truncate --size=\"$EXTSIZE\"k $IMGFILE"
+		echolog "truncate --size=\"$EXTSIZE\"k $IMGFILE"
+        	truncate --size="$EXTSIZE"k $IMGFILE
+		rmdir $DIRMOUNT
+		echo "reduced" >$LOCKFILE
+
 	;;
 	default)
 	    echolog "Solicitud con parametros  \"$PARM\"  no realizada, no registrada o con errores"
 	;;
 esac
-

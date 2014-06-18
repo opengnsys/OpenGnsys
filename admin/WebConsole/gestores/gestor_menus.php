@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -15,6 +15,7 @@ include_once("../clases/ArbolVistaXML.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 include_once("../includes/opciones.php");
+include_once("../includes/tftputils.php");
 include_once("./relaciones/menus_eliminacion.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
@@ -132,6 +133,7 @@ function Gestiona(){
 	global	$htmlmenupri;
 	global	$resolucion;
 	global	$idurlimg;
+	global	$idioma;
 
 	global	$op_alta;
 	global	$op_modificacion;
@@ -154,7 +156,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@htmlmenupub",$htmlmenupub,0);
 	$cmd->CreaParametro("@htmlmenupri",$htmlmenupri,0);
-	$cmd->CreaParametro("@resolucion",$resolucion,1);
+	$cmd->CreaParametro("@resolucion",$resolucion,0);
 	$cmd->CreaParametro("@idurlimg",$idurlimg,1);
 
 	switch($opcion){
@@ -176,8 +178,10 @@ function Gestiona(){
 		case $op_modificacion:
 			$cmd->texto="UPDATE menus SET descripcion=@descripcion,titulo=@titulo,coorx=@coorx,coory=@coory,modalidad=@modalidad,scoorx=@scoorx,scoory=@scoory,smodalidad=@smodalidad,
 						comentarios=@comentarios,htmlmenupub=@htmlmenupub ,htmlmenupri=@htmlmenupri,resolucion=@resolucion,idurlimg=@idurlimg
-						WHERE idmenu=@idmenu";
+					WHERE idmenu=@idmenu";
 			$resul=$cmd->Ejecutar();
+			// Actualizar ficheros PXE de todos los ordenadores afectados.
+			updateBootMode ($cmd, "idmenu", $idmenu, $idioma);
 			break;
 		case $op_eliminacion :
 			$resul=EliminaMenus($cmd,$idmenu,"idmenu");

@@ -8,8 +8,11 @@ if [ $# -ne 2 ]; then
     exit $?
 fi
 
-echo "[0] Inicio del proceso de arranque."
+# Comprobar errores.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
+ogMount $1 $2 || exit $?
+
+echo "[0] Inicio del proceso de arranque."
 NAME="$(ogGetHostname)"
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $1 $2)
@@ -22,26 +25,24 @@ if [ "$OSTYPE" == "Windows" ]; then
 fi
 
 echo "[10] Desmontar todos los sistemas de archivos."
-sync
+sync 
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
-    ogUnmountAll $i 2>/dev/null
+    ogUnmountAll $i &>/dev/null
 done
 case "$OSTYPE" in
     Windows)
         echo "[30] Mostrar y activar particion de Windows $PART."
         [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
-        ogSetPartitionActive $1 $2
-        echo "[50] Asignar nombre Windows \"$NAME\" y usuario por defecto."
-        ogSetWindowsName $1 $2 "$NAME"
         ;;
     Linux)
         echo "[30] Asignar nombre Linux \"$NAME\"."
         ETC=$(ogGetPath $1 $2 /etc)
         [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
         if [ -f "$ETC/fstab" ]; then
+            # Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
             echo "[50] Actaualizar fstab con particion raiz \"$PART\"."
-            awk -v P="$PART " '{ if ($2=="/") {sub(/^.*$/, P, $1)}
-                                 print } ' $ETC/fstab >/tmp/fstab
+            awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
+                                 print }' $ETC/fstab >/tmp/fstab
             mv /tmp/fstab $ETC/fstab
         fi
         ;;

@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon.
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -23,9 +23,13 @@ function HTMLCTESELECT($parametros,$nombreid,$clase,$defaultlit,$valorselec,$anc
 	if (!empty($defaultlit)) $SelectHtml.= '<option value="0">'.$defaultlit.'</option>';
 	for($i=0;$i<sizeof($opciones);$i++){
 		$item=split("=",$opciones[$i]);
-		$SelectHtml.= '<option value="'.$item[0].'"';
-		if($valorselec==$item[0]) $SelectHtml.=" selected ";
-		$SelectHtml.= '>'.$item[1].'</option>';
+		// Comprobar formato de línea: "nombre=valor".
+		if (! empty ($item[1])) {
+			$SelectHtml.= '<option value="'.$item[0].'"';
+			if($valorselec==$item[0])
+				$SelectHtml.=" selected ";
+			$SelectHtml.= '>'.$item[1].'</option>';
+		}
 	}
 	$SelectHtml.= '</select>';
 	return($SelectHtml);

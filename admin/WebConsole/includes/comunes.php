@@ -182,7 +182,11 @@
 							break;
 						case 4: // El valor lo toma directamente pero está codificado con urlencode
 							$tbParametrosValor[$nemonico]["valor"]='<PRE>'.urldecode($valor).'</PRE>';
-							
+							break;
+						case 5: // El valor es 0 ó 1 y se muestra NO o SI
+							$tbSN[0]="No";
+							$tbSN[1]="Si";
+							$tbParametrosValor[$nemonico]["valor"]=$tbSN[$valor];
 					}
 				}
 			}	
@@ -240,8 +244,8 @@
 		for($i=$len-1;$i>=0;$i--){
 			$cadenafinal=substr($cadena,$i,1).$cadenafinal;
 			if($m%3==0 && $i>0){
-				$cadenafinal=".".$cadenafinal;
-				$m=0;
+					$cadenafinal=".".$cadenafinal;
+					$m=0;
 			}
 			$m++;
 		}
@@ -251,7 +255,7 @@
 		Devuelve la url de la imagen y la descripción de un ámbito 
 		Parametros: 
 			- ambito: Identificador del ambito
-			- urlimg: Por referencia. Es donde se devuelve la url de la imagen
+			- urlimg: Por referencia. Es donde se devuelve la url de la imagen	
 			- textambito: Por referencia. Es donde se devuelve la descripción
 			
 		Devuelve:
@@ -296,7 +300,7 @@
 	
 		Devuelve la descripción de un ambito 
 		Parametros: 
-			- cmd: Objeto comando (Operativo)
+			-	cmd: Objeto comando (Operativo)
 			- ambito: tipo de ambito
 			- idambito: Identificador del ambito
 			- textambito: Por referencia. Es donde se devuelve la descripción
@@ -305,7 +309,7 @@
 			- Los dos parámetros pasados por referencia
 	________________________________________________________________________*/
 	
-	function tomaDescriAmbito($cmd,$ambito,$idambito,&$textambito)
+	function tomaDescriAmbito($cmd,$ambito,$idambito,$textambito)
 	{
 		global $AMBITO_CENTROS;
 		global $AMBITO_GRUPOSAULAS;
@@ -313,29 +317,29 @@
 		global $AMBITO_GRUPOSORDENADORES;
 		global $AMBITO_ORDENADORES;
 
-		switch($ambito){
-			case $AMBITO_CENTROS :
-				$textambito=TomaDato($cmd,0,'centros',$idambito,'idcentro','nombrecentro');
-				break;
-			case $AMBITO_GRUPOSAULAS :
-				$textambito=TomaDato($cmd,0,'grupos',$idambito,'idgrupo','nombregrupo');
-				break;
-			case $AMBITO_AULAS :
-				$textambito=TomaDato($cmd,0,'aulas',$idambito,'idaula','nombreaula');
-				break;
-			case $AMBITO_GRUPOSORDENADORES :
-				$textambito=TomaDato($cmd,0,'gruposordenadores',$idambito,'idgrupo','nombregrupoordenador');
-				break;
-			case $AMBITO_ORDENADORES :
-				$textambito=TomaDato($cmd,0,'ordenadores',$idambito,'idordenador','nombreordenador');
-				break;
-			default: 	
-				$textambito;					
-		}
+			switch($ambito){
+				case $AMBITO_CENTROS :
+					$textambito=TomaDato($cmd,0,'centros',$idambito,'idcentro','nombrecentro');
+					break;
+				case $AMBITO_GRUPOSAULAS :
+					$textambito=TomaDato($cmd,0,'grupos',$idambito,'idgrupo','nombregrupo');
+					break;
+				case $AMBITO_AULAS :
+					$textambito=TomaDato($cmd,0,'aulas',$idambito,'idaula','nombreaula');
+					break;
+				case $AMBITO_GRUPOSORDENADORES :
+					$textambito=TomaDato($cmd,0,'gruposordenadores',$idambito,'idgrupo','nombregrupoordenador');
+					break;
+				case $AMBITO_ORDENADORES :
+					$textambito=TomaDato($cmd,0,'ordenadores',$idambito,'idordenador','nombreordenador');
+					break;
+				default: 	
+					$textambito;					
+			}
 	}
 	/*______________________________________________________________________
 	
-		Devuelve el código HTML de una etiqueta "select" para un ámbito concreto
+		Devuelve el código html de una etiqueta SELECT para un ámbito concreto
 		Parametros: 
 			- cmd: Objeto comando (Operativo)
 			- ambito: tipo de ambito
@@ -376,4 +380,3 @@
 		}
 		return($selecHtml);	
 	}
-

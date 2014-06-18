@@ -14,11 +14,13 @@
 		var particion;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
-				particion=ochecks[i].value
+				diskPart=ochecks[i].value.split(";");
 			}
 		}
 		var RC="@";
-		var disco=1; // Siempre disco 1
+		// UHU - Ahora se puede hacer de cualquier disco
+		var disco = diskPart[0];
+		var particion = diskPart[1];
 		document.fdatosejecucion.atributos.value="dsk="+disco+RC+"par="+particion+RC;
 		document.fdatosejecucion.submit();
 	}
@@ -34,7 +36,8 @@
 		var ochecks=tb_conf.getElementsByTagName('INPUT')
 		var op=0
 		for(var i=0;i<ochecks.length;i++){
-			if(ochecks[i].checked)		op++;
+			if(ochecks[i].checked)
+				op++;
 		}
 		if(op==0){
 			   alert(TbMsg[1])

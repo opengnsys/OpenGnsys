@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -60,9 +60,12 @@ $funcion="nfn=".$funcion.chr(13); // Nombre de la función que procesa el comand
 $aplicacion=""; // Ámbito de aplicación (cadena de ipes separadas por ";" y de identificadores de ordenadores por ","
 $acciones=""; // Cadena de identificadores de acciones separadas por ";" para seguimiento
 
+
+
 $atributos=str_replace('@',chr(13),$atributos); // Reemplaza caracters
 $atributos=str_replace('#',chr(10),$atributos); 
 $atributos=str_replace('$',chr(9),$atributos);
+
 
 //__________________________________________________________________
 ?>
@@ -72,7 +75,7 @@ $atributos=str_replace('$',chr(9),$atributos);
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/comunescomandos.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<?
+<?php
 
 /* Recopila identificadore ,ipes y macs para envío de comandos */
 $cadenaid="";
@@ -117,6 +120,7 @@ if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
 	$cmd->ParamSetValor("@restrambito",$filtro);
 }
 $resul=true;
+
 /*--------------------------------------------------------------------------------------------------------------------
 	Switch de ejecución inmediata y de seguimiento
 --------------------------------------------------------------------------------------------------------------------*/
@@ -142,7 +146,6 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$cmd->ParamSetValor("@idcentro",$idcentro);
 		$auxID=split(",",$cadenaid);
 		$auxIP=split(";",$cadenaip);
-		$vez=0;
 		for ($i=0;$i<sizeof($auxID);$i++){
 			$cmd->ParamSetValor("@idordenador",$auxID[$i]);
 			$cmd->ParamSetValor("@ip",$auxIP[$i]);
@@ -152,12 +155,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idcentro)";
 			$resul=$cmd->Ejecutar();
 			//echo "<br>".$cmd->texto;
-			if(empty($vez)){
-				$idaccion=$cmd->Autonumerico();
-				$acciones=chr(13)."ids=".$idaccion.chr(13); // Para seguimiento
-			}
-			$vez++;
 		}
+		$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	}
 	if (!$resul){
 		echo '<SCRIPT language="javascript">';
@@ -171,7 +170,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
 				$parametros.=$acciones;
-				//echo $parametros;
+				//die($parametros);
 				$resul=$shidra->envia_comando($parametros);
 				if($resul)
 					$trama=$shidra->recibe_respuesta();
@@ -225,11 +224,13 @@ if($sw_mkprocedimiento=='on' || $sw_mktarea=='on'){
 		$cmd->ParamSetValor("@ordprocedimiento",$ordprocedimiento);
 		$parametros=$funcion.$atributos;
 		$cmd->ParamSetValor("@parametros",$parametros);
-		$cmd->texto="INSERT INTO procedimientos_acciones(idprocedimiento,orden,idcomando,parametros) VALUES (@idprocedimiento,@ordprocedimiento,@idcomando,@parametros)";
+		$cmd->texto="INSERT INTO procedimientos_acciones(idprocedimiento,orden,idcomando,parametros) 
+				    VALUES (@idprocedimiento,@ordprocedimiento,@idcomando,@parametros)";
 		$resul=$cmd->Ejecutar();
 		if($sw_mktarea=='on' && $idprocedimiento!=$idprocedimientotarea){ // Si es tarea se graba para su procedimiento independiente aunque los parametros sean los mismos
 			$cmd->ParamSetValor("@idprocedimiento",$idprocedimientotarea);		
-			$cmd->texto="INSERT INTO procedimientos_acciones(idprocedimiento,orden,idcomando,parametros) VALUES (@idprocedimiento,@ordprocedimiento,@idcomando,@parametros)";
+			$cmd->texto="INSERT INTO procedimientos_acciones(idprocedimiento,orden,idcomando,parametros) 
+					    VALUES (@idprocedimiento,@ordprocedimiento,@idcomando,@parametros)";
 			$resul=$cmd->Ejecutar();
 		}
 	}
@@ -295,3 +296,4 @@ if ($resul){
 ?>
 </BODY>
 </HTML>	
+

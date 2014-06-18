@@ -1,16 +1,16 @@
 <?
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: reiniciar_esp.php (Comandos)
-//	Idioma: Español 
+//	Fichero de idiomas php: reiniciar_cat.php (Comandos)
+//	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenadores';
-	$TbMsg[5]='Reiniciar ordenadores';
-	$TbMsg[6]='Ámbito';
+	$TbMsg[0]='Centres';
+	$TbMsg[1]='Grupo d\'aules';
+	$TbMsg[2]='Aules';
+	$TbMsg[3]='Grup d\'ordinadors';
+	$TbMsg[4]='Ordinadors';
+	$TbMsg[5]='Reiniciar ordinadors';
+	$TbMsg[6]='Àmbit';
 
 ?>

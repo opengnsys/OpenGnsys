@@ -31,7 +31,7 @@
 	</TR>
 	<TR>
 		<TD>&nbsp; </TD>
-		<TD><INPUT  checked  name=sw_seguimiento type=radio value=0></TD><TD><? echo $TbMsgAux[3] ?>&nbsp;</TD>
+		<TD><INPUT checked name=sw_seguimiento type=radio value=0></TD><TD><? echo $TbMsgAux[3] ?>&nbsp;</TD>
 	</TR>
 	<!-------------------------------------------------------------------------------------------------------------------------------->
 		 <TR HEIGHT=5><TD colspan=4><HR></TD></TR>

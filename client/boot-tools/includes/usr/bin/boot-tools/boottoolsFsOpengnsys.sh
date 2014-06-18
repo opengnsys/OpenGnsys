@@ -3,40 +3,42 @@
 
 #svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
 #svn checkout http://www.opengnsys.es/svn/branches/version2/  /tmp/opengnsys_installer/opengnsys2
-find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
-
-apt-get -y --force-yes install  subversion
+#find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
+#apt-get -y --force-yes install  subversion
 #export SVNURL="http://opengnsys.es/svn/branches/version1.0/client/"
 #VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Revision:/ {print "r"$2}')
-VERSIONSVN=$(cat /tmp/versionsvn.txt)
-VERSIONBOOTTOOLS=ogLive
+
+#VERSIONSVN=$(cat /tmp/versionsvn.txt)
+VERSIONBOOTTOOLS="ogLive"
 
 NAMEISOCLIENTFILE="/tmp/opengnsys_info_rootfs" 
 NAMEHOSTCLIENTFILE="/tmp/opengnsys_chroot"
-	
+
 SVNCLIENTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 SVNCLIENTSTRUCTURE=/tmp/opengnsys_installer/opengnsys/client/shared
 SVNCLIENTENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
-SVNOG2=/tmp/opengnsys_installer/opengnsys2
  
 OGCLIENTMOUNT=""
 
+OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
+[ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
+OSDISTRIB=${OSDISTRIB:-$(lsb_release -is)}
+OSCODENAME=${OSCODENAME:-$(lsb_release -cs)}
+OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
+if [ -z "$OSARCH" ]; then
+	uname -a | grep x86_64 > /dev/null  &&  OSARCH="amd64" || OSARCH="i386"
+fi
+OSHTTP=${OSHTTP:-"http://es.archive.ubuntu.com/ubuntu/"}
 
-OSDISTRIB=$(lsb_release -i | awk -F: '{sub(/\t/,""); print $2}') 2>/dev/null
-OSCODENAME=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $NF}')
-OSRELEASE=$(uname -a | awk '{print $3}')
-uname -a | grep x86_64 > /dev/null  &&  export OSARCH=amd64 || export OSARCH=i386
-OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
-
-echo $OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP	
+echo "$OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP"
 
 
 LERROR=TRUE
 
 echo "$FUNCNAME: Iniciando la personalización con datos del SVN "
 
-# parseamos del apt.source
-sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.ubuntu > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
+# parseamos el apt.source de la distribución
+sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.$OSDISTRIB > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Parsing apt.sources : ERROR"
@@ -49,10 +51,10 @@ fi
 chmod -R 775 ${SVNCLIENTDIR}/includes/usr/bin/*
 
 # los copiamos
-cp -prv ${SVNCLIENTDIR}/includes/* /
+cp -av ${SVNCLIENTDIR}/includes/* ${OGCLIENTMOUNT}/
 mkdir -p ${OGCLIENTMOUNT}/opt/opengnsys/
-cp -prv ${SVNCLIENTSTRUCTURE}/* ${OGCLIENTMOUNT}/opt/opengnsys/
-cp -prv ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
+cp -av ${SVNCLIENTSTRUCTURE}/* ${OGCLIENTMOUNT}/opt/opengnsys/
+cp -av ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
 
 if [ $? -ne 0 ]
 then 
@@ -60,63 +62,34 @@ then
 	exit 1
 fi
 
-# copiamos algunas cosas del nfsexport
 
-#### Tipos de letra para el Browser.
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/lib/fonts
-#### Crear enlaces para compatibilidad con las distintas versiones del Browser.
-mkdir -p $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/
-mkdir -p $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/
-mkdir -p $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/Trolltech/QtEmbedded-4.5.1/lib/fonts 
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.2/lib/fonts 
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/QtEmbedded-4.6.3/lib/fonts
-if [ $? -ne 0 ]
-then 
-	echo "$FUNCNAME(): Linking Browser fonts : ERROR"
-	exit 1
-fi
+# Si no existe, copiar pci.ids.
+[ -f $OGCLIENTMOUNT/etc/pci.ids ] || cp -va ${SVNCLIENTSTRUCTURE}/lib/pci.ids $OGCLIENTMOUNT/etc
 
-#########################################################
-cp -pr ${SVNCLIENTSTRUCTURE}/lib/pci.ids $OGCLIENTMOUNT/etc
-if [ $? -ne 0 ]
-then 
-	echo "$FUNCNAME(): Copying pci.ids : ERROR"
-	exit 1
-fi
-####### Browsser
-cp ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
-if [ $? -ne 0 ]
-then 
+# Dependencias Qt para el Browser.
+mkdir -p $OGCLIENTMOUNT/usr/local/{etc,lib,plugins}
+cp -av ${SVNCLIENTSTRUCTURE}/lib/qtlib/* $OGCLIENTMOUNT/usr/local/lib
+cp -av ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/lib
+cp -av ${SVNCLIENTSTRUCTURE}/lib/qtplugins/* $OGCLIENTMOUNT/usr/local/plugins
+cp -av ${SVNCLIENTSTRUCTURE}/etc/*.qmap $OGCLIENTMOUNT/usr/local/etc
+
+# Browser.
+cp -av ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
+if [ $? -ne 0 ]; then 
 	echo "$FUNCNAME(): Copying Browser : ERROR"
 	exit 1
 fi
 
+# ogAdmClient.
+cp -av ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient $OGCLIENTMOUNT/bin
+if [ $? -ne 0 ]; then 
+	echo "$FUNCNAME(): Copying ogAdmClient: ERROR"
+	exit 1
+fi
 
-#Compatiblidad con og2
-cp ${SVNCLIENTSTRUCTURE}/bin/browser2 $OGCLIENTMOUNT/bin
-
-cp -prv ${SVNOG2}/ogr/ogr $OGCLIENTMOUNT/opt/opengnsys/bin/
-
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.7/libogr.py
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/usr/lib/python2.6/libogr.py
-cp -prv ${SVNOG2}/ogr/libogr.py $OGCLIENTMOUNT/opt/opengnsys/lib/python
-
-
-echo "mkdir -p /opt/opengnsys/lib/engine/"
-mkdir -p /opt/opengnsys/engine/
-echo "cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/" 
-cp -prv ${SVNOG2}/engine/2.0/* $OGCLIENTMOUNT/opt/opengnsys/engine/
-
-
-cp -prv ${SVNOG2}/job_executer $OGCLIENTMOUNT/opt/opengnsys/bin/
-
-
-cp ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient  $OGCLIENTMOUNT/bin
-
-
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN} > $NAMEISOCLIENTFILE
-echo ${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN} > $NAMEHOSTCLIENTFILE
+# El fichero de configuración debe sustituir a los 2 ficheros (borrar las 2 líneas).
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN}" > /$NAMEISOCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN}" > $NAMEHOSTCLIENTFILE
 
 
 history -c

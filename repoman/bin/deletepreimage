@@ -1,0 +1,62 @@
+#!/bin/bash
+# Eliminar las imagenees del repositiro seg�raca de la consola web .img
+#Version 0.3   Ejecuci�n desde cron cada minuto.
+#echo "* * * * *   root   /opt/opengnsys/bin/image-delete" > /etc/cron.d/imagedelete
+
+# Comprobar si el proceso ya est� en ejecuci�n.on.
+PROG=$(basename $0)
+[ "$(pgrep "$PROG")" != "$$" ] && exit
+
+# Variables.
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+PATH=$PATH:$OPENGNSYS/bin
+OGIMG="$OPENGNSYS/images"
+REPOCFG="$OPENGNSYS/etc/ogAdmRepo.cfg"
+LOGFILE="$OPENGNSYS/log/$PROG.log"
+
+# Error si no est� bien configurado el repositorio de im�genes.nes.
+[ -d $OGIMG -a -f $REPOCFG ] || exit 1
+
+# Procesar ficheros de im�genes.s.
+trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
+
+#TODO en LOCAL: si existe algun fichero *.delete lo movemos al repositorio
+ls /opt/opengnsys/www/tmp/*.delete &>/dev/null || exit
+#[ -f /opt/opengnsys/www/tmp/*.delete ] && 
+mv /opt/opengnsys/www/tmp/*.* /opt/opengnsys/images/
+
+#TODO: iniciar blucle siempre y cuando haya algun delete
+ls /opt/opengnsys/images/*.delete &>/dev/null || exit
+
+for IMG in `ls /opt/opengnsys/images/*.delete`; do
+	## Obtenemos el nombre de la imagen
+        DELETEIMAGE=$(echo $IMG | awk -F"." '{print $1}' | awk -F"/opt/opengnsys/images/" '{print $2}')
+
+        # Borramos marca .delete para que el proximo cron no trabaje sobre este conjunto.
+        [ -f  $IMG ] &&  rm $IMG
+
+	## Comprobamos si es un Directorio .delete
+	DELETEdir=$(echo $IMG | awk -F"." '{print $2}')	## .delete
+	DELETEant=$(echo $IMG | awk -F"." '{print $3}')	## .ant
+	DELETEdiff=$(echo $IMG | awk -F"." '{print $3}')	## .diff
+	## Si NO es ninguno es un img
+
+        ## se llama al escript de borrado de imagen.
+	## Si es un Directorio Borramos
+	if [[ $DELETEdir == "delete" ]]; then
+		/opt/opengnsys/bin/deleteimage -d $DELETEIMAGE
+
+		# Si es un Imagen Backup Borramos
+		elif [[ $DELETEant == "ant" ]]; then
+			DELETEIMAGE=$DELETEIMAGE".ant"
+			/opt/opengnsys/bin/deleteimage $DELETEIMAGE
+
+			# Si es un Imagen diff Borramos
+			elif [[ $DELETEdiff == "diff" ]]; then
+				/opt/opengnsys/bin/deleteimage $DELETEIMAGE
+
+				# Si no es una de las anteriores lo que queda es img
+				else
+					/opt/opengnsys/bin/deleteimage $DELETEIMAGE
+	fi
+done

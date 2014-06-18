@@ -1,0 +1,55 @@
+#!/bin/bash
+# checkperms: Comprueba que los permisos de los ficheros sean correctos.
+# Nota: Las siguientes variables de entorno pueden usarse para retocar los
+#	valores por defecto:
+#	- OPENGNSYS_USER - usuario de OpenGnSys.
+#	- OPENGNSYS_DIR  - directorio de instalación.
+#	- APACHE_USER    - usuario de Apache.
+#	- APACHE_GROUP   - grupo de Apache.
+# Uso:	checkperms
+#	variable1=valor1 ... checkperms
+# Autor: Ramon Gomez - Univ. Sevilla, noviembre 2010
+# Fecha: 2012/07/13
+
+
+# Variables.
+OPENGNSYS_USER=${OPENGNSYS_USER:-"opengnsys"}	# Usuario del cliente para acceso remoto
+OPENGNSYS_DIR=${OPENGNSYS_DIR:-/opt/opengnsys}	# Directorio de instalación de OpenGnSys
+APACHE_USER=${APACHE_USER:-"www-data"}		# Usuario de ejecución de Apache
+APACHE_GROUP=${APACHE_GROUP:-"www-data"}	# Grupo de ejecución de Apache
+PROG=$(basename $0)
+
+# Control de errores.
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Error: solo ejecutable por root" >&2
+	exit 1
+fi
+if [ "$OPENGNSYS_USER" == "root" -o -z "$(getent passwd "$OPENGNSYS_USER" 2>/dev/null)" ]; then
+	echo "$PROG: Error: el usuario de OpenGnSys debe existir y no ser root (OPENGNSYS_USER=\"$OPENGNSYS_USER\")" >&2
+	exit 1
+fi
+if [ ! -d "$OPENGNSYS_DIR" ]; then
+	echo "$PROG: Error: sin acceso al directorio de OpenGnSys (OPENGNSYS_DIR=\"$OPENGNSYS_DIR\")". >&2
+	exit 1
+fi
+if [ -z "$(getent passwd "$APACHE_USER" 2>/dev/null)" -o -z "$(getent group "$APACHE_GROUP" 2>/dev/null)" ]; then
+	echo "$PROG: Error: no se detectan el usuario o el grupo de Apache (APACHE_USER=\"$APACHE_USER\", APACHE_GROUP=\"$APACHE_GROUP\")" >&2
+	exit 1
+fi
+
+chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/{log/clients,images}
+chmod -R 775 $OPENGNSYS_DIR/{log/clients,images}
+find $OPENGNSYS_DIR/client/{interfaceAdm,scripts} ! -name "*.txt" -exec chmod +x {} \;
+chown $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
+chmod 700 $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
+chown root:root $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
+chmod 600 $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
+chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/controlacceso*.php
+chmod 600 $OPENGNSYS_DIR/www/controlacceso*.php
+chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/images/{fotos,iconos}
+chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/api
+chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/tftpboot/{menu.lst,pxelinux.cfg}
+chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/tftpboot/ogclient
+find -L $OPENGNSYS_DIR/tftpboot -type d -exec chmod 755 {} \;
+find -L $OPENGNSYS_DIR/tftpboot -type f -exec chmod 644 {} \;
+

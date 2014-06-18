@@ -5,7 +5,7 @@
 //	Idioma: Ingés 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Generation of  incremental software';
+	$TbMsg[0]='Generation of  incremental software  <br> (experimental)';
 	$TbMsg[1]='Computer features';
 	$TbMsg[2]='Name';
 	$TbMsg[3]='IP Address';
@@ -15,5 +15,5 @@
 	$TbMsg[7]='';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Profile name';
-	$TbMsg[10]='Availables incremetnal software ';
+	$TbMsg[10]='Availables incremental software ';
 ?>
