@@ -1,100 +1,94 @@
+Installing OpenGnsys Server v 1.0.5
+=======================================
 
-OpenGnSys Server Installation v. 1.0.3
-======================================
+Before installation
+-------------------
 
+OpenGnsys Server 1.0.5 is meant to be installed under Ubuntu Server 12.04 LTS or newer, though it has also been tested under operating systems based on Fedora 20
 
-Notes
------
+Network connection is needed in order to download the required packages, the source code and the preconfigured client.
 
-It is assumed OpenGnSys Server will be installed in a GNU/Linux distro, Ubuntu 10.04 Server LTS or later, Linux Mint 12 or later, Debian 6 or later.
+Minimum storage requirements:
+- 100 MB in /tmp (for the installation process)
+- 450 MB in /var/lib/tftpboot (or /srv in Debian systems)
+- 500 MB in the installation folder (/opt/opengnsys) in addition to the space required for logging (100 MB if ogLive client is already downloaded).
+- Enough disk space for the image repository in /opt/opengnsys/images (it is recommended to mount it on an independent file system)
 
+Installation
+------------
 
-Installation Methods
---------------------
+To install OpenGnSys run opengnsys_installer.sh after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh.
 
-There are three basic ways OpenGnSys installation:
-
-    Installation script. Which uses Subversion to download the application.
-    Starting from a tar.gz This application is now complete.
-    Installation step by step manual. It is obvious the installation script and install each component. 
-
-
-1. Download the Installation Script
-
-OpenGnSys installation is done by running the installation script opengnsys_installer.sh, which can be downloaded directly from http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh
-
-1.1. Download the script.  Examples with various tools:
-
-        Download with wget.
-           wget http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh
-        Download with curl.
-           curl http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh > opengnsys_installer.sh
-        Download with a web browser. Click on the link http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh and save the file as opengnsys_installer.sh 
-
-1.2. Or, installation from tar.gz.
-
-    If we do not have access to Subversion, we will have to download the package tgz from the web.  Access to http://www.opengnsys.es/browser/tags and load it on a server temporary directory.
-
-    Descompress the file:
-	tar xvzf opengnsys-version.tar.gz
-
-    Change to the installer directory:
+Unpacking example:
+	tar xvzf opengnsys-1.0.5.tar.gz
 	cd opengnsys/installer
 
+Download examples:
 
-2. Basic Configuration
+    * Download with wget.
+	wget http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh -O opengnsys_installer.sh
 
-        For security reasons, it is very important modify defaults users and passwords to access to the system. For this, edit the installation file opengnsys_installer.sh and change the values of configuration variables:
-            MYSQL_ROOT_PASSWORD - MySQL root user password.
-            OPENGNSYS_DB_USER - OpenGnSys access user and OpenGnSys super-user.
-            OPENGNSYS_DB_PASSWD - User password.
-            OPENGNSYS_CLIENT_PASSWD - Password for client access to remote services. 
-
-
-3. Installation process.
-
-The installation script must be run as root:
-
-           sudo bash opengnsys_installer.sh
+    * Download with curl.
+	curl http://www.opengnsys.es/svn/trunk/installer/opengnsys_installer.sh > opengnsys_installer.sh
 
 
-4. Check the configuration files. 
-
-Init Configuration
-        /opt/opengnsys/etc/ogAdmServer.cfg - OpenGnSys Server config file
-        /opt/opengnsys/etc/ogAdmRepo.cfg - OpenGnSys Repository config file
-        /opt/opengnsys/etc/ogAdmAgent.cfg - OpenGnSys Agent config file
-        /opt/opengnsys/client/etc/ogAdmClient.cfg - OpenGnSys Client config file
-        /opt/opengnsys/www/controlacceso.php - OpenGnSys Web Admin Console config file 
-
-Configure DHCP server, insert clients data and restart the service.
-
-Access as Administrador in Web Admin Console.
-        Use the user and password set in the installer to access to database (variables OPENGNSYS_DB_USER and OPENGNSYS_DB_PASSWD).
-        Check the default organizaed configuration and default user. 
-    Access as user in Web Admin Console.
-        Use the user and password configured as administrador in the Organizational Unit.
-        Check the server IP in section "Servidores->Servidor OpenGnSys (Default)".
-        If you change the configuration, you must to restart the server: sudo /etc/init.d/opengnsys restart 
+You must be root to run the installation script:
+	sudo bash opengnsys_installer.sh
 
 
-Updating OpenGnSys
-------------------
+The following information will be requested in order to configure the access to the service (a default value will be introduced if no parameter is indicated):
+    * MySQL root password
+    * Web console user and OpenGnSys Super Administrator
+    * Web console user's password
+    * Client's password for accessing remote services
 
-Run opengnsys_update.sh script as "root" to update all OpenGnSys components from the Subversion repository:
+The following processes will be carried out:
+    * Gathering of the basic network parameters.
+    * Checking the installed packages.
+    * Downloading and installing dependencies.
+    * Creating OpenGnSys basic folder sctructure.
+    * Download the code repository to a temporal folder (/tmp/opengnsys_installer). In upcoming releases this process will not be necessary.
+    * Compiling and installing OpenGnSys services.
+    * Basic configuration of OpenGnSys network services (DHCP, PXE and Samba) using the existing configuration templates.
+    * Copying additional server management files.
+    * Creating the database and configuring OpenGnSys administration console web server.
+    * Copying web administration console pages.
+    * Copying the OpenGnSys client folder structure.
+    * Downloading OpenGnSys client initial image.
+    * Basic configuration of OpenGnSys services using network parameters.
 
-	sudo bash /opt/opengnsys/lib/opengnsys_update.sh
+Once the installation is finished you can start working with the system:
+    * Configuring DHCP.
+    * Adding information in the administration console.
+    * Customizing administration scripts.
+    * Creating start menus for the clients.
 
-Follow the instructions.
 
 
-Uninstalling OpenGnSys
-----------------------
+Updating / upgrading
+--------------------
 
-Run opengnsys_uninstall.sh script as "root" to uninstall all OpenGnSys components:
+There is a system self-upgrading script with the following features:
+    * Network connection is needed to obtain the latest updates / upgrades.
+    * If the script updates itself, then it must be run once again.
+    * Services depending on the operating system will not be updated.
+    * Configuration files will not be modified.
 
-	sudo bash /opt/opengnsys/lib/opengnsys_uninstall.sh
+You must be root to run this script:
+    sudo /opt/opengnsys/lib/opengnsys_update.sh
+ 
 
-Follow the instructions.
 
+Uninstall
+---------
+
+There is also an uninstall script for the OpenGnSys components:
+    * OpenGnSys files and data base will be deleted. 
+    * Packages belonging to the operating system and their configuration files will be preserved.
+    * The image folder and its content will not be deleted.
+
+
+
+You must be root to run this script:
+    sudo /opt/opengnsys/lib/opengnsys_uninstall.sh
 
