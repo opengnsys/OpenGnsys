@@ -109,6 +109,7 @@ Tickets genéricos resueltos:
 #565	Imágenes diferenciales (tarea)
 #537	Revisión proceso de creación y restauración de imágenes: interfazAdm -> scripts -> engine (mejora)
 #577	Enviar al servidor la configuración de particiones cada vez que un cliente e ejecuta un comando
+#616	Integración de OpenGnSys 1.0.5 en rama principal
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.4a (versión de mantenimiento)
