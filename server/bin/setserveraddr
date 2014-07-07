@@ -49,7 +49,7 @@ if [ -n "$SERVERIP" ]; then
 	for f in /etc/{dhcp,hcp3}/dhcpd.conf; do
 		if [ -f $f ]; then
 			# Cambiar el parámetro "next-server" de DHCP.
-			sed "s/next-server.*/next-server $SERVERIP/" $f >$tmpfile
+			sed "s/next-server.*/next-server $SERVERIP;/" $f >$tmpfile
 			file="${f/./-$1.}"
 			# Copiar el fichero y enlazarlo si hay cambios.
 			if ! diff -q $tmpfile $file &>/dev/null; then
