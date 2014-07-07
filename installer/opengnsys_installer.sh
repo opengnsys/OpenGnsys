@@ -314,6 +314,14 @@ function errorAndLog()
 	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
+# Escribe a fichero y muestra mensaje de aviso
+function warningAndLog()
+{
+	local DATETIME=`getDateTime`
+	echo "ERROR: $1"
+	echo "$DATETIME;$SSH_CLIENT;Warning: $1" >> $LOG_FILE
+}
+
 # Comprueba si el elemento pasado en $2 está en el array $1
 function isInArray()
 {
@@ -459,7 +467,7 @@ function backupFile()
 	local dateymd=`date +%Y%m%d`
 
 	if [ ! -f "$file" ]; then
-		errorAndLog "${FUNCNAME}(): file $file doesn't exists"
+		warningAndLog "${FUNCNAME}(): file $file doesn't exists"
 		return 1
 	fi
 
@@ -1270,14 +1278,12 @@ function copyServerFiles ()
 			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
-			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
 			sbin \
 			sbin \
-			lib \
 			lib \
 			lib \
 			doc )
@@ -1299,7 +1305,7 @@ function copyServerFiles ()
 			echoAndLog "Copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -a "${SOURCES[$i]}"/* "${path_opengnsys_base}/${TARGETS[$i]}"
         else
-			echoAndLog "Warning: Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			warningAndLog "Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 		fi
 	done
 	popd
