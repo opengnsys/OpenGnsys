@@ -2,6 +2,13 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.6
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Server:
+#648	Script de servidor para comparar datos de red
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.5
 ---------------------------------------------
 
