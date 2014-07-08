@@ -137,14 +137,16 @@ function autoConfigure()
 # Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
 if [ -f /etc/os-release ]; then
 	source /etc/os-release
-	OSDISTRIB="$NAME"
+	OSDISTRIB="$ID"
 else
 	OSDISTRIB=$(lsb_release -is 2>/dev/null)
 fi
+# Convertir a minúsculas para evitar errores.
+OSDISTRIB="${OSDISTRIB,,}"
 
-# Configuración según la distribución GNU/Linux.
+# Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
-	Ubuntu|Debian|LinuxMint)
+	ubuntu|debian|linuxmint)
 		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
@@ -181,11 +183,11 @@ case "$OSDISTRIB" in
 		SYSLINUXDIR=/usr/lib/syslinux
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
-	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan )
+	fedora|centos)
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
 				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		if [ "$OSDISTRIB" == "CentOS" ]; then
+		if [ "$OSDISTRIB" == "centos" ]; then
 			UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
 		fi
 		INSTALLPKG="yum install -y"
@@ -266,7 +268,7 @@ local DHCPVERSION
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
-	Ubuntu|LinuxMint)	# Postconfiguación personalizada para Ubuntu.
+	ubuntu|linuxmint)	# Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
 		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
@@ -277,11 +279,11 @@ case "$OSDISTRIB" in
 			DHCPCFGDIR=/etc/dhcp3
 		fi
 		;;
-	CentOS)	# Postconfiguación personalizada para CentOS.
+	centos)	# Postconfiguación personalizada para CentOS.
 		# Incluir repositorio de paquetes EPEL y paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release procps )
 		;;
-	Fedora)	# Postconfiguación personalizada para Fedora. 
+	fedora)	# Postconfiguación personalizada para Fedora. 
 		# Incluir paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} libstdc++-static.i686 btrfs-progs procps-ng )
 		;;
@@ -806,8 +808,8 @@ function getNetworkSettings()
 						awk '/Mask/ {sub(/.*:/,"",$4); print $4}
 						     /netmask/ {print $4}')
 			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
-			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
+			NETIP[i]=$(ip route | awk -v d="$dev" '{ if ($3==d) {sub (/\/.*/,""); print $1} }')
+			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1~/default/ { if ($5==d) print $3 }')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
@@ -876,7 +878,7 @@ function testPxe ()
 {
 	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
 	pushd /tmp
-	tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	tftp -v 127.0.0.1 -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
 	popd
 }
 
