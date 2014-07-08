@@ -17,14 +17,11 @@ OBJS := sources/ogAdmClient.o
 all: $(PROYECTO)
 
 $(PROYECTO): $(OBJS)
-	g++ $(OPCS) $(DIRS) $(LIBS) $(OBJS) -o $(PROYECTO)
+	gcc $(OPCS) $(DIRS) $(LIBS) $(OBJS) -o $(PROYECTO)
 #	strip $(PROYECTO)	# Optimizacion
 
 clean:
-	rm $(PROYECTO) $(OBJS)
-
-sources/%.o: sources/%.cpp
-	g++ $(OPCS) -c -o"$@" "$<"
+	rm -f $(PROYECTO) $(OBJS)
 
 sources/%.o: sources/%.c
 	gcc $(OPCS) -I ../../Includes -c -o"$@" "$<"
