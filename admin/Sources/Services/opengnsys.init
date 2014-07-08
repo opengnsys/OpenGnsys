@@ -82,12 +82,13 @@ fi
 config() {
     if [ -f /etc/os-release ]; then
 	source /etc/os-release
-	OSDISTRIB="$NAME"
+	OSDISTRIB="$ID"
     else
 	OSDISTRIB=$(lsb_release -is 2>/dev/null)
     fi
+    OSDISTRIB="${OSDISTRIB,,}"
     case "$OSDISTRIB" in
-        Ubuntu|Debian|LinuxMint)
+        ubuntu|debian|linuxmint)
             INITFUNCTIONS=/lib/lsb/init-functions
             DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
             EXTRAOPTS="--"
@@ -101,7 +102,7 @@ config() {
             SEEDERSTART="start-stop-daemon --make-pidfile --pidfile $BTSEEDERPID --start --quiet --background --exec"
             SEEDERSTOP="start-stop-daemon --stop --quiet --oknodo --pidfile $BTSEEDERPID"
             ;;
-        CentOS|Fedora)
+        centos|fedora)
             INITFUNCTIONS=/etc/init.d/functions
             DAEMONSTART="daemon"
             ENDOPTS="&"
