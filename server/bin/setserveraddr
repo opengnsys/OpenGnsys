@@ -52,7 +52,7 @@ if [ -n "$SERVERIP" ]; then
 			sed "s/next-server.*/next-server $SERVERIP;/" $f >$tmpfile
 			file="${f/./-$1.}"
 			# Copiar el fichero y enlazarlo si hay cambios.
-			if ! diff -q $tmpfile $file &>/dev/null; then
+			if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
 				mv $tmpfile $file
 				chmod 644 $file
 				ln -f $file $f
