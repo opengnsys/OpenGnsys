@@ -1525,6 +1525,13 @@ function openGnsysConfigure()
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
+
+	# Revisar permisos generales.
+	if [ -x $INSTALL_TARGET/bin/checkperms ]; then
+		echoAndLog "${FUNCNAME}(): Checking permissions."
+		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENT_USER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
+	fi
+
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	service="opengnsys"
 	$ENABLESERVICE; $STARTSERVICE
