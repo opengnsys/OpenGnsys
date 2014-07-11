@@ -46,7 +46,7 @@ mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 
 # Obtener datos de red.
 NET=$(ip -o addr show up | awk -v ip="^$ServidorAdm/" '{if ($3=="inet" && $4 ~ ip) print $4}')
-arp-scan $NET 2>/dev/null | awk '/^[0-2]/ {gsub(/:/,"");print $1,toupper($2)}' > $TMPSCAN
+arp-scan $NET 2>/dev/null | awk '/^[0-2]*\./ {gsub(/:/,"");print $1,toupper($2)}' > $TMPSCAN
 
 # Comparar los ficheros y mostrar las diferencias de direcciones MAC.
 (while read -e IP MAC; do
