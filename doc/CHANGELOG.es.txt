@@ -6,7 +6,10 @@ Lista de cambios incluidos en OpenGnSys 1.0.6
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Server:
-#648	Script de servidor para comparar datos de red
+#646	Script de servidor para comparar datos de red
+
+Tickets resueltos en módulo OpenGnSys Installer:
+#650	Posible error de actualización de la BD desde versiones que necesitan modificar IP del servidor
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.5
