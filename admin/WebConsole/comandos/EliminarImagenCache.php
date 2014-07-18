@@ -385,8 +385,8 @@ switch($ambito){
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-                                        //$sin_duplicados=array_unique($nombreimagenes);
-                                        $sin_duplicados=$nombreimagenes;
+                                        $sin_duplicados=array_unique($nombreimagenes);
+                                        //$sin_duplicados=$nombreimagenes;
                                         $contar=1;
 					if (empty($sin_duplicados)) {
                                                 // Equipo sin configuracion en base de datos.
