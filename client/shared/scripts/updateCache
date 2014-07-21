@@ -262,7 +262,7 @@ case "$PROTOCOLO" in
 		ogMountImage CACHE  "${IMGNAME#\/}" $IMGTYPE || exit $?
 		ogMountImage REPO  "${IMGNAME#\/}" $IMGTYPE 
 		# Esperamos que se monte la imagen en el servidor
-		ogWaitMountImage  REPO  "$IMGNAME" $IMGTYPE || exit $?
+		ogWaitSyncImage  REPO  "$IMGNAME" $IMGTYPE || exit $?
 		ogEcho log session "      rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/ $DIRLOCAL"
 		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT/" "$DIRLOCAL" 2>>$OGLOGCOMMAND  | egrep "^sent|^sending|^total|%" >>   $OGLOGCOMMAND
 		# RETVAL="1" -> OK  RETVAL="2" -> error  # valores igual que ogUpdateCacheIsNecesary
