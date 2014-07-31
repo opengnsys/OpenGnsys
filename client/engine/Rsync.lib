@@ -710,10 +710,10 @@ fi
 IMGDIR="$(ogGetParentPath "$1" "/$2")"
 IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
 
-# Solo es posible para imagenes EXT4. Si no es EXT4 salimos sin error
-file "$IMGFILE" | grep -i " ext4 filesystem " 2>&1 > /dev/null || return 0
 
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+    # Para imagenes EXT4 reduzco, para BTRFS solo desmonto.
+    if file "$IMGFILE" | grep -i " ext4 filesystem " 2>&1 > /dev/null; then
         # Al montar se comprueba la existencia de la imagen
         DIRMOUNT="$(ogMountImage $1 "$2" ${IMGEXT#*\.})"
         AVAILABLE=$(df -k|grep "$DIRMOUNT$"|awk '{print $4}')
@@ -748,10 +748,13 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Corto el archivo al tamaño del sistema de ficheros.
         echo "      truncate --size=\"$EXTSIZE\"k $IMGFILE  "
         truncate --size="$EXTSIZE"k "$IMGFILE"
-
+    else
 	# Desmonto  la imagen
-	echo "reduced" > "$IMGFILE.lock"
-	rmdir "$DIRMOUNT"
+	umount "$DIRMOUNT"
+    fi
+
+    echo "reduced" > "$IMGFILE.lock"
+    rmdir "$DIRMOUNT"
 
 else
 	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)

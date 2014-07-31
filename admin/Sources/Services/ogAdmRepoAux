@@ -239,45 +239,48 @@ case "$PARM1" in
 		LOCKFILE="$IMGFILE.lock"
 		[ ! -f $IMGFILE ] && echolog "Imagen $IMGFILE no existe" && exit 1 
 
-		# Solo funciona si la imagen es ext4, si no nos salimos sin error
-		file $IMGFILE |grep -i -e " ext4 filesystem " 2>&1 > /dev/null || exit 0
+		# Para imagenes EXT4 reduzco, para BTRFS solo desmonto.
+		if file $IMGFILE |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
 
-		[ -d $DIRMOUNT ] || mkdir $DIRMOUNT
-		mountImage "$IMGFILE" "$DIRMOUNT" || (echolog "Error al montar la imagen $IMGFILE"; exit 1)
+		    [ -d $DIRMOUNT ] || mkdir $DIRMOUNT
+		    mountImage "$IMGFILE" "$DIRMOUNT" || (echolog "Error al montar la imagen $IMGFILE"; exit 1)
 		
-        	# Si el espacio libre menor que 500Mb desmontamos la imagen y nos salimos
-		AVAILABLE=$(df -k|grep $DIRMOUNT|awk '{print $4}')
-        	if [ $AVAILABLE -lt 200000 ]; then
+        	    # Si el espacio libre menor que 200Mb desmontamos la imagen y nos salimos
+		        AVAILABLE=$(df -k|grep $DIRMOUNT|awk '{print $4}')
+        	    if [ $AVAILABLE -lt 200000 ]; then
         	     echolog "reducir imagen REPO $PARM2 $IMGEXT. tamaño minimo, nada que hacer"
 		     umount $DIRMOUNT 
 		     rmdir $DIRMOUNT
 		     exit 0
+		    fi
+
+		    # Calculamos la diferencia entre el tamaño interno y externo
+		    EXTSIZE=$(ls -l --block-size=1024 $IMGFILE | cut -f5 -d" ")
+		    INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
+		    let EDGESIZE=$EXTSIZE-$INTSIZE
+
+        	    echolog "reducir imagen REPO $PARM2 $IMGEXT, tamaño final: $ENDSIZE"
+		    umount $DIRMOUNT
+		    LOOPDEVICE=$(losetup -f)
+           	    losetup $LOOPDEVICE "$IMGFILE"
+
+		    # Redimensiono sistema de ficheros
+           	    echolog "resize2fs -fpM $LOOPDEVICE "
+           	    resize2fs -fpM $LOOPDEVICE # 2>&1 > $REPOLOG
+		    mountImage "$IMGFILE" "$DIRMOUNT" 
+		    # Calculamos el tamaño final del archivo
+		    INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
+		    let EXTSIZE=$INTSIZE+$EDGESIZE
+		    umount $DIRMOUNT  || (echolog "Error al desmontar la imagen $IMGFILE"; exit 1)
+		    # Si existe dispositivo loop lo borramos.
+		    [ $LOOPDEVICE ] && losetup -a| grep $LOOPDEVICE &> /dev/null  &&  losetup -d $LOOPDEVICE
+		    # Corto el archivo al tamaño del sistema de ficheros
+		    echo "truncate --size=\"$EXTSIZE\"k $IMGFILE"
+		    echolog "truncate --size=\"$EXTSIZE\"k $IMGFILE"
+        	    truncate --size="$EXTSIZE"k $IMGFILE
+		else
+		    umount $DIRMOUNT  || (echolog "Error al desmontar la imagen $IMGFILE"; exit 1)
 		fi
-
-		# Calculamos la diferencia entre el tamaño interno y externo
-		EXTSIZE=$(ls -l --block-size=1024 $IMGFILE | cut -f5 -d" ")
-		INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
-		let EDGESIZE=$EXTSIZE-$INTSIZE
-
-        	echolog "reducir imagen REPO $PARM2 $IMGEXT, tamaño final: $ENDSIZE"
-		umount $DIRMOUNT
-		LOOPDEVICE=$(losetup -f)
-           	losetup $LOOPDEVICE "$IMGFILE"
-
-		# Redimensiono sistema de ficheros
-           	echolog "resize2fs -fpM $LOOPDEVICE "
-           	resize2fs -fpM $LOOPDEVICE # 2>&1 > $REPOLOG
-		mountImage "$IMGFILE" "$DIRMOUNT" 
-		# Calculamos el tamaño final del archivo
-		INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
-		let EXTSIZE=$INTSIZE+$EDGESIZE
-		umount $DIRMOUNT  || (echolog "Error al desmontar la imagen $IMGFILE"; exit 1)
-		# Si existe dispositivo loop lo borramos.
-		[ $LOOPDEVICE ] && losetup -a| grep $LOOPDEVICE &> /dev/null  &&  losetup -d $LOOPDEVICE
-		# Corto el archivo al tamaño del sistema de ficheros
-		echo "truncate --size=\"$EXTSIZE\"k $IMGFILE"
-		echolog "truncate --size=\"$EXTSIZE\"k $IMGFILE"
-        	truncate --size="$EXTSIZE"k $IMGFILE
 		rmdir $DIRMOUNT
 		echo "reduced" >$LOCKFILE
 
