@@ -108,8 +108,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 						
 						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-	
+
 						if ($filesys == "CACHE") {
+						$idordenadores=split(",",$idordenadores);$idordenadores=$idordenadores[0];
 							$rs=new Recordset; 
 							$cmd->texto="SELECT cache FROM ordenadores_particiones WHERE idordenador=".$idordenadores." AND numdisk=".$tbKeys[$k]["numdisk"]." AND numpar=".$tbKeys[$k]["numpar"];
 							$rs->Comando=&$cmd; 
@@ -134,7 +135,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 									// Esto para numerarla
 									if(substr($ima[$x],-4)==".img" || substr($ima[$x],-5)==".diff" || substr($ima[$x],-4)=="") {
 										echo '<br />('.$info.') &nbsp;'.$numero++.'.-'.$ima[$x];
-									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x])) {
+									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x]) || ereg(".full.sum",$ima[$x])) {
 										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
 										}else{
 											echo '<br /><font color=blue>('.$info.') </font>'.$numero++.'.-<font color=blue>'.$ima[$x]."</font>";

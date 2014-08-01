@@ -103,18 +103,18 @@ switch($ambito){
                         $cuentarepos=$idx; // Guarda contador
                         $rs->Cerrar();
 					if ($cuentarepos==1){
-					$cmd->texto="SELECT repositorios.ip
-					FROM repositorios
-					INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
-					AND ordenadores.grupoid='$idambito'
-					GROUP BY ip";
-					$rs=new Recordset;
-					$rs->Comando=&$cmd; 
-					if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
-					$rs->Primero();
-					$iprepositorioord=$rs->campos["ip"];
-					if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
-					$rs->Cerrar();
+						$cmd->texto="SELECT repositorios.ip
+						FROM repositorios
+						INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
+						AND ordenadores.grupoid='$idambito'
+						GROUP BY ip";
+						$rs=new Recordset;
+						$rs->Comando=&$cmd; 
+						if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+						$rs->Primero();
+						$iprepositorioord=$rs->campos["ip"];
+						if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
+						$rs->Cerrar();
 										}//#agp 
                         break;
 
@@ -129,8 +129,8 @@ switch($ambito){
                         $rs->Comando=&$cmd; 
                         if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
                         $rs->Primero();
-			    $iprepositorioord=$rs->campos["ip"];
-			    if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
+						$iprepositorioord=$rs->campos["ip"];
+						if ( $iprepositorioord == $ipservidor ){$cuentarepos=1;}else{$cuentarepos=2;}
                         $rs->Cerrar();//#agp 
                         break;
         }
@@ -142,7 +142,7 @@ switch($ambito){
 <?php 
     // Mensaje aviso limitacion version si hay dos repositorios
     if ($cuentarepos >1){ ?>
-         <TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
+         <TABLE  id="tabla" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
        		<TH align=center >&nbsp;
 		<? if ($ambito==16){
@@ -349,100 +349,96 @@ switch($ambito){
 
         while (!$rs->EOF){
 
-                                $cache=$rs->campos["cache"];
-                                $idordenador=$rs->campos["idordenador"];
-                                $ima=split(",",$cache);
-                                
-                                for ($x=0;$x<count($ima); $x++)
-                                {
-                                    if(ereg(".img",$ima[$x])  ) //si contiene .img son ficheros de imagen
-                                        {
-                                                if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x])  )//Si el nombre contiene .img.sum o img.torrent
-                                                  {}else{$esdir[]="f";
-								if (ereg(".img.diff",$ima[$x]))
-									{
-									$ima[$x] = str_replace(".img.diff", "", $ima[$x]); //quitar todos los .img
-									$ima[$x]=trim($ima[$x]);
-									$nombreimagenes[]=$ima[$x];
-									}else{
-										$ima[$x] = str_replace(".img", "", $ima[$x]); //quitar todos los .img
-										$ima[$x]=trim($ima[$x]);
-										$nombreimagenes[]=$ima[$x];
-										
+							$cache=$rs->campos["cache"];
+							$idordenador=$rs->campos["idordenador"];
+							$ima=split(",",$cache);
+							for ($x=0;$x<count($ima); $x++)
+							{
+								if(ereg(".img",$ima[$x])  ) //si contiene .img son ficheros de imagen
+								{
+									if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x]) || ereg(".img.full.sum",$ima[$x]) )//Si el nombre contiene .img.sum o img.torrent o img.full.sum
+									{}else{$esdir[]="f";
+										if (ereg(".img.diff",$ima[$x]))
+										{
+											$ima[$x] = str_replace(".img.diff", "", $ima[$x]); //quitar todos los .img
+											$ima[$x]=trim($ima[$x]);
+											$nombreimagenes[]="f-".$ima[$x];
+										}else{
+											$ima[$x] = str_replace(".img", "", $ima[$x]); //quitar todos los .img
+											$ima[$x]=trim($ima[$x]);
+											$nombreimagenes[]="f-".$ima[$x];
+											}
+											}
+								}elseif (ereg(".MB",$ima[$x])){
+									}else{	// Es un directorio
+											$ima[$x]=trim($ima[$x]);
+											$nombreimagenes[]="d-".$ima[$x];
+											$esdir[]="d";
 										}
-                                                        }
-                                         }elseif (ereg("MB",$ima[$x]))
-							{}else{	// Es un directorio
-								$ima[$x]=trim($ima[$x]);
-								$nombreimagenes[]=$ima[$x];
-								$esdir[]="d";
-								}
-                                 }
+							}
         
-                                 $rs->Siguiente();
+		$rs->Siguiente();
                         }
-                        $rs->Cerrar();
+		$rs->Cerrar();
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		$sin_duplicados=array_unique($nombreimagenes);
+
+		if (empty($sin_duplicados)) {
+			// Equipo sin configuracion en base de datos.
+			$inicioTabla='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+			$inicioTabla.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
+		}else{
+			// Equipo con configuracion en BD
+			// Incluimos primera linea de la tabla.
+			$inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
+			$inicioTabla.='         <TR>'.chr(13);
+			$inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>'.chr(13);
+			$inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[19].'&nbsp;</TH>'.chr(13);
+			$inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>'.chr(13);
+			$inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>'.chr(13);
+			if ($cuentarepos==1)
+				$inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[13].'&nbsp;</TH>'.chr(13);
+			}
+
+		echo $inicioTabla;
+		$numdir=0;
+		$contar=1;
+		foreach($sin_duplicados as $value){ //imprimimos $sin_duplicados
 		
-                                        $sin_duplicados=array_unique($nombreimagenes);
-                                        //$sin_duplicados=$nombreimagenes;
-                                        $contar=1;
-					if (empty($sin_duplicados)) {
-                                                // Equipo sin configuracion en base de datos.
-                                                $inicioTabla='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
-                                                $inicioTabla.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
-					}else{
-                                                // Equipo con configuracion en BD
-                                                // Incluimos primera linea de la tabla.
-                                                $inicioTabla='<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'.chr(13);
-                                                $inicioTabla.='         <TR>'.chr(13);
-                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[11].'&nbsp;</TH>'.chr(13);
-                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[19].'&nbsp;</TH>'.chr(13);
-                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[12].'&nbsp;</TH>'.chr(13);
-                                                $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>'.chr(13);
-                                                if ($cuentarepos==1)
-                                                        $inicioTabla.='         <TH align=center>&nbsp;'.$TbMsg[13].'&nbsp;</TH>'.chr(13);
-
-
-
-                                        }
-
-					echo $inicioTabla;
-					$numdir=0;
-					     
-                                        foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
-                                        {
-						if (empty($value)){
-                                                // Equipo sin imagenes en la cache.
-                                                $inicioTabla='<table id="tabla_conf" width="25%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
-                                                $inicioTabla.='<tr><th align="center" >NO '.$TbMsg["7"].'</th><tr>'.chr(13);
-							echo $inicioTabla;
-						}else{
-							$nombrefichero=$value.'.img';
-							$tamanofich=exec("du -h /opt/opengnsys/images/$nombrefichero");
-							if ($tamanofich==""){$tamanofich=$TbMsg[14];}
-							$tamanofich=split("/",$tamanofich);     
-							$todo=".*";
-							if ($esdir[$numdir] == "d"){
-								$ruta[]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;
-							}else{
-								$ruta[]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;
-							}
-							echo '<TR>'.chr(13);
-							echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
-							if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;D&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
-							echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta[$numdir].'></TD>'.chr(13);
-							if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
-							if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
-							echo '</TR>'.chr(13);
-							$contar++;$numdir++;
-							}
-						}
-						echo "</table>".chr(13);
+			// Eliminino las f- y d-
+			$value=split("-",$value);
+			$value=$value[1];
+			
+			if (empty($value) && $ambito == $AMBITO_ORDENADORES){
+				// Equipo sin imagenes en la cache.
+				$inicioTabla='<table id="tabla_conf" width="25%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+				$inicioTabla.='<tr><th align="center" >NO '.$TbMsg["7"].'</th><tr>'.chr(13);
+				echo $inicioTabla;
+			}elseif (empty($value)){ $numdir++;
+				}else{
+					$nombrefichero=$value.'.img';
+					$tamanofich=exec("du -h /opt/opengnsys/images/$nombrefichero");
+					if ($tamanofich==""){$tamanofich=$TbMsg[14];}
+					$tamanofich=split("/",$tamanofich);     
+					$todo=".*";
+					if ($esdir[$numdir] == "d"){$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;}else{$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;}
+					echo '<TR>'.chr(13);
+					echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;D&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
+					echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta[$numdir].'></TD>'.chr(13);
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
+					if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
+					echo '</TR>'.chr(13);
+					$contar++;$numdir++;
+					}
+		}
+		echo "</table>".chr(13);
 							
 
-                        return($tablaHtml);
+return($tablaHtml);
 }
 
 ?>
+
