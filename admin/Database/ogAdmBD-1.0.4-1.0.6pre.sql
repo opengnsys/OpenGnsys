@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.4 - 1.0.5
+# OpenGnSys 1.0.4 - 1.0.6
 #use ogAdmBD
 
 # Mejorar el rendimiento en acceso a la cola de acciones.
@@ -142,4 +142,7 @@ UPDATE ordenadores_particiones
 	SET codpar = 0
 	WHERE codpar = numpar AND tamano = 0;
 
+# Correccion en eliminar imagen de cache de cliente (ticket #658).
+ALTER TABLE ordenadores_particiones
+	MODIFY cache TEXT NOT NULL;
 

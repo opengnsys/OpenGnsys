@@ -518,7 +518,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idnombreso` smallint(11) NOT NULL,
   `idimagen` int(11) NOT NULL,
   `idperfilsoft` int(11) NOT NULL,
-  `cache` varchar(500) NOT NULL,
+  `cache` text NOT NULL,
   UNIQUE KEY `idordenadornumdisknumpar` (`idordenador`,`numdisk`,`numpar`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 

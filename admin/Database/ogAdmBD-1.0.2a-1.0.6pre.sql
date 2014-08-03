@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.2a - 1.0.5
+# OpenGnSys 1.0.2a - 1.0.6
 #use ogAdmBD
 
 UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
@@ -190,4 +190,8 @@ ALTER TABLE ordenadores
 	ALTER idproautoexec SET DEFAULT 0;
 UPDATE ordenadores
 	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
+
+# Correccion en eliminar imagen de cache de cliente (ticket #658).
+ALTER TABLE ordenadores_particiones
+	MODIFY cache TEXT NOT NULL;
 
