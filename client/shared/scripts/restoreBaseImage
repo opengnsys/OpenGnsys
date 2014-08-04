@@ -65,13 +65,13 @@ ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError session $OG_ERR_DONTSYN
 
 IMGEXT="img"
 # Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
+ogIsImageLocked "REPO" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
 ogIsLocked "$3" "$4" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$3 $4"; echo $?)
 
 # Detectamos el sistema de ficheros de la imagen
 # TODO ogGetImageInfo
-DIRMOUNT=$(ogMountImage "$1" "$2")
-ogWaitSyncImage "$1" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+DIRMOUNT=$(ogMountImage "REPO" "$2")
+ogWaitSyncImage "REPO" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
 IMGFSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)
 
 # Comprobamos si el sistema de ficheros se puede montar
@@ -139,7 +139,8 @@ ogRestoreInfoImage $3 $4  2>&1 | tee -a $OGLOGCOMMAND
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
    if which configureOsCustom &>/dev/null; then
 	ogEcho log session "[90] configureOsCustom"
-	configureOsCustom "$3" "$4"
+	# CDC: enviamos todos los parametros.
+	configureOsCustom "$1" "$2" "$3" "$4"
    else
 	ogEcho log session "[90] $MSG_HELP_configureOs" 
 	configureOs $3 $4 
