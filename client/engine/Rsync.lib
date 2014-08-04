@@ -64,8 +64,8 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                    ogEcho log session  "      $MSG_SYNC_RESIZE" 
                    echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" 
                    truncate --size=">$SIZEREQUIRED"k "$IMGFILE" &> $OGLOGCOMMAND
-		   # FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
-		   if [ $KERNELVERSION \< 3.07 ]; then
+		   # FS de la imagen segun el contenido del archivo .img
+		   if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
                 	losetup $LOOPDEVICE "$IMGFILE"
 			echo "      resize2fs -f $LOOPDEVICE"
 			resize2fs -f $LOOPDEVICE &> $OGLOGCOMMAND
@@ -528,9 +528,9 @@ else
 		|| return $(ogRaiseError $OG_ERR_NOTFOUND "$1 $2.$IMGEXT"; echo $?)
         mkdir -p "/tmp/$DIRMOUNT"
 	
-   	# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
-	KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-	if [ $KERNELVERSION \< 3.07 ]; then
+
+	# FS de la imagen segun el contenido del archivo .img
+	if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
 	    mount -t ext4 -o loop "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
 	else
 	    mount -o compress=lzo  "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
@@ -844,10 +844,9 @@ fi
 [ "$ISMOUNT" == TRUE ] && ogEcho session warning "$MSG_SYNC_NOCHECK" && return 0
 
 DIRMOUNT="/tmp/ogCheckImage$$"
-mkdir "$DIRMOUNT"
-# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
-KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-if [ $KERNELVERSION \< 3.07 ]; then
+mkdir "$DIRMOUNT" 
+# FS de la imagen segun el contenido del archivo .img
+if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
 	mount -t ext4 -o loop "$IMGFILE" "$DIRMOUNT" 2>&1 | tee -a $OGLOGCOMMAND
 	RETVAL=${PIPESTATUS[0]}
 else

@@ -46,7 +46,8 @@ function mountImage () {
  	[ "$3" != "" ] && OPTMOUNT=" -o $3 "	
 	# Si está montado nada que hacer
 	df |grep "$2$"  2>&1 >/dev/null  && return 0
-	if [ $IMGFS == "EXT4" ]; then
+	# FS de la imagen segun el contenido del archivo .img
+	if file "$1" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
 		echolog "mount $OPTMOUNT -t ext4 $1 $2"
 		mount $OPTMOUNT -t ext4 $1 $2
 	else
@@ -137,8 +138,8 @@ case "$PARM1" in
 		        echolog "Redimensionamos la imagen $IMGFILE al tamaño necesario: $SIZEREQUIRED"
 		        echolog "truncate --size=\">$SIZEREQUIRED\"k $IMGFILE" 
 		        truncate --size=">$SIZEREQUIRED"k $IMGFILE 2>&1 > $REPOLOG
-			# Montamos la imagen, si da error nos salimos
-			if [ $IMGFS == "EXT4" ]; then
+			# FS de la imagen segun el contenido del archivo .img
+			if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
 			   losetup $LOOPDEVICE "$IMGFILE"
 			   echolog "resize2fs -f $LOOPDEVICE"
 			   resize2fs -f $LOOPDEVICE &> $REPOLOG
