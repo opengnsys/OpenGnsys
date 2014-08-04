@@ -137,8 +137,13 @@ ogRestoreInfoImage $3 $4  2>&1 | tee -a $OGLOGCOMMAND
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
+   if which configureOsCustom &>/dev/null; then
+	ogEcho log session "[90] configureOsCustom"
+	configureOsCustom "$3" "$4"
+   else
 	ogEcho log session "[90] $MSG_HELP_configureOs" 
 	configureOs $3 $4 
+   fi
 fi
 
 TIME=$[SECONDS-TIME1]

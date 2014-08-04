@@ -124,9 +124,13 @@ ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage"
 ogRestoreInfoImage  "$4" "$5" 2>&1 | tee -a $OGLOGCOMMAND
 
 # Llamar al script de post-configuración del sistema operativo.
-ogEcho log session "[90] $MSG_HELP_configureOs." 
-configureOs $4 $5 
-
+if which configureOsCustom &>/dev/null; then
+        ogEcho log session "[90] configureOsCustom"
+        configureOsCustom "$4" "$5"
+else
+	ogEcho log session "[90] $MSG_HELP_configureOs." 
+	configureOs $4 $5 
+fi
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s"
 
