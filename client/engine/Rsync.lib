@@ -82,8 +82,14 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 dd if=/dev/zero of="$IMGFILE" bs=1024 count=$SIZEREQUIRED 2>&1 | tee -a $OGLOGCOMMAND
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
-		# FS de la imagen segun la version del kernel: < 3.7 ext4, si >=  btrfs 
+		# FS de la imagen segun la configuracion y la version del kernel: < 3.7 ext4, si >=  btrfs 
 		if [ $KERNELVERSION \< 3.07 ]; then
+			IMGFS == "EXT4" 
+		else 
+			[ "$IMGFS" == "" ] && IMGFS="BTRFS"
+		fi
+
+		if [ "$IMGFS" == "EXT4" ]; then
 		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
 		   mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE 2>&1 |tee -a $OGLOGCOMMAND
 		else
