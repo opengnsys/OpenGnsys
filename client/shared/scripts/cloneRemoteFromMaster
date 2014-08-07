@@ -281,8 +281,14 @@ case $MASTERIP in
  						ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR || exit $(ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " l230 "; echo $?)
  					;;
  				esac						
-			ogEcho log session "[90] llamando a configureOS $DISKTARGET $PARTTARGET"
-			configureOs $DISKTARGET $PARTTARGET			
+			if which configureOsCustom &>/dev/null; then
+				ogEcho log session "[90] configureOsCustom $DISKTARGET $PARTTARGET"
+				configureOsCustom $DISKTARGET $PARTTARGET
+			else
+				ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE $DISKTARGET $PARTTARGET"
+				configureOs $DISKTARGET $PARTTARGET			
+			fi
+
 		else
 		    # Si el tamaño de los datos recibidos es más grande que la particion destino
 			ogRaiseError $OG_ERR_IMGSIZEPARTITION "ERROR tamanio particion= $SIZEPARTTARGET  menor que la imagen= $SIZEIMAGE"; exit $?
