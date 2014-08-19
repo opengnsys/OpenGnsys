@@ -5,11 +5,20 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 Lista de cambios incluidos en OpenGnSys 1.0.6
 ---------------------------------------------
 
+Tickets resueltos en módulo OpenGnSys Client:
+#656	Script updateCache: erratas en imágenes sincronizadas
+#657	Sincronizadas tipo archivo: adaptación a ogclient 1.0.5
+
 Tickets resueltos en módulo OpenGnSys Server:
 #646	Script de servidor para comparar datos de red
+#648	Comprobar y determinar permisos en /opt/opengnsys/images
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #650	Posible error de actualización de la BD desde versiones que necesitan modificar IP del servidor
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#654	Eliminar imagen de caché duplica algunas imágenes.
+#658	Correccion en eliminar imagen de caché de cliente
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.5
