@@ -4,7 +4,7 @@
 #@brief    Librería o clase Net
 #@class    Net
 #@brief    Funciones básicas de red.
-#@version  1.0.2
+#@version  1.0.6
 #@warning  License: GNU GPLv3+
 #*/
 
@@ -187,20 +187,27 @@ fi
 #@note   Comprobacion segun protocolo de conexion al Repo
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011-02-24
+#@version 1.0.6 - Obtener datos del punto de montaje, evitando fallo si $ogprotocol está vacía.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-08-27
 #*/ ##
 function ogGetRepoIp ()
 {
+# Variables locales.
+local SOURCE FSTYPE
+
+# Mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  192.168.0.2"
     return
 fi
-# Obtener direcciones IP, segun el protocolo de montaje
-if [ -n "$OGIMG" ]; then
-    case "$ogprotocol" in
-        nfs)  mount | grep " on $OGIMG " | cut -f1 -d: ;;
-        smb)  mount | grep " on $OGIMG " | cut -f3 -d/ ;;
-    esac
-fi
+
+# Obtener direcciones IP, según el tipo de montaje.
+eval $(findmnt -P -o SOURCE,FSTYPE $OGIMG)
+case "$FSTYPE" in
+    nfs)   echo "$SOURCE" | cut -f1 -d: ;;
+    cifs)  echo "$SOURCE" | cut -f3 -d/ ;;
+esac
 }
 
 
@@ -215,20 +222,27 @@ fi
 #@note   Comprobacion segun protocolo de conexion al Repo
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011-02-24
+#@version 1.0.6 - Obtener datos del punto de montaje, evitando fallo si $ogprotocol está vacía.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-08-27
 #*/ ##
 function ogGetServerIp ()
 {
+# Variables locales.
+local SOURCE FSTYPE
+
+# Mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  192.168.0.2"
     return
 fi
-# Obtener direcciones IP.
-if [ -n "$OPENGNSYS" ]; then
-    case "$ogprotocol" in
-        nfs)  mount | grep " on $OPENGNSYS " | cut -f1 -d: ;;
-        smb)  mount | grep " on $OPENGNSYS " | cut -f3 -d/ ;;
-    esac
-fi
+
+# Obtener direcciones IP, según el tipo de montaje.
+eval $(findmnt -P -o SOURCE,FSTYPE $OPENGNSYS)
+case "$FSTYPE" in
+    nfs)   echo "$SOURCE" | cut -f1 -d: ;;
+    cifs)  echo "$SOURCE" | cut -f3 -d/ ;;
+esac
 }
 
 
