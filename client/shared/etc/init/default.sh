@@ -22,7 +22,7 @@ fi
 # Arranque de OpenGnSys Client daemon (socket).
 if [ -x "$OPENGNSYS/bin/ogAdmClient" ]; then
     echo "${MSG_LAUNCHCLIENT:-.}"
-    [ $ogactiveadmin == "true" ] && boot="admin"
+    [ "$ogactiveadmin" == "true" ] && boot="admin"
     # Indicar fichero de teclado de Qt para el idioma especificado (tipo "es.qmap").
     [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
     # Ejecutar servicio cliente.

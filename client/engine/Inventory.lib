@@ -4,7 +4,7 @@
 #@brief   Librería o clase Inventory
 #@class   Inventory
 #@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
-#@version 1.0.5
+#@version 1.0.6
 #@warning License: GNU GPLv3+
 #*/
 
@@ -48,6 +48,9 @@ fi
 #@version 1.0.5 - Incluir tipos GrubLoader, Hurd y WinLoader, leer por defecto fichero /etc/os-release.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-10-07
+#@version 1.0.6 - Detectar GrubLoader al final.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-08-27
 #*/ ##
 function ogGetOsVersion ()
 {
@@ -87,16 +90,6 @@ fi
 [ -z "$VERSION" ] && VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
 # Comprobar Linux de 64 bits.
 [ -n "$VERSION" ] && [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
-# Para cargador GRUB, comprobar fichero de configuración.
-if [ -z "$VERSION" ]; then
-    TYPE="GrubLoader"
-    for FILE in $MNTDIR/{,boot/}grub/menu.lst; do
-        [ -r $FILE ] && VERSION="GRUB Loader"
-    done
-    for FILE in $MNTDIR/{,boot/}{grub{,2},EFI/*}/grub.cfg; do
-        [ -r $FILE ] && VERSION="GRUB2 Loader"
-    done
-fi
 # Para Android, leer fichero de propiedades.
 if [ -z "$VERSION" ]; then
     TYPE="Android"
@@ -163,6 +156,16 @@ if [ -z "$VERSION" ]; then
     TYPE="Solaris"
     FILE="$MNTDIR/etc/release"
     [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+fi
+# Para cargador GRUB, comprobar fichero de configuración.
+if [ -z "$VERSION" ]; then
+    TYPE="GrubLoader"
+    for FILE in $MNTDIR/{,boot/}grub/menu.lst; do
+        [ -r $FILE ] && VERSION="GRUB Loader"
+    done
+    for FILE in $MNTDIR/{,boot/}{grub{,2},EFI/*}/grub.cfg; do
+        [ -r $FILE ] && VERSION="GRUB2 Loader"
+    done
 fi
 
 # Mostrar resultado y salir sin errores.

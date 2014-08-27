@@ -12,7 +12,7 @@ OGIMG=${OGIMG:-/opt/opengnsys/images}
 ROOTREPO=${ROOTREPO:-"$ROOTSERVER"}
 
 # TODO Revisar proceso de arranque para no montar 2 veces el repositorio.
-if [ $ogactiveadmin == "true" ]; then 
+if [ "$ogactiveadmin" == "true" ]; then 
 	export boot=admin	# ATENCIÓN: siempre en modo "admin".
 	umount $OGIMG 2>/dev/null
 
