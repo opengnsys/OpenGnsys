@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot
 #@class   Boot
 #@brief   Funciones para arranque y post-configuración de sistemas de archivos.
-#@version 1.0.5
+#@version 1.0.6
 #@warning License: GNU GPLv3+
 #*/
 
@@ -29,6 +29,9 @@
 #@version 1.0.4 - Soporta modo de arranque Windows (parámetro de inicio "winboot").
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-12
+#@version 1.0.6 - Selección a partir de tipo de sistema operativo (en vez de S.F.).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-08-28
 #*/ ##
 function ogBoot ()
 {
@@ -46,24 +49,24 @@ fi
 
 # Detectar tipo de sistema de archivos y montarlo.
 PART=$(ogDiskToDev $1 $2) || return $?
-TYPE=$(ogGetFsType $1 $2) || return $?
+TYPE=$(ogGetOsType $1 $2) || return $?
 # Error si no puede montar sistema de archivos.
 MNTDIR=$(ogMount $1 $2) || return $?
 
 case "$TYPE" in
-    EXT[234]|REISERFS|REISER4|JFS|XFS)
+    Linux|Android)
         # Obtiene los parámetros de arranque para Linux.
         PARAMS=$(ogLinuxBootParameters $1 $2) || return $?
         read -e KERNEL INITRD APPEND <<<"$PARAMS"
         # Si no hay kernel, no hay sistema operativo.
-        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS || return $?
+        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2" || return $?
         # Arrancar de partición distinta a la original.
         [ -e "$MNTDIR/etc" ] && APPEND=$(echo $APPEND | awk -v P="$PART " '{sub (/root=[-+=_/a-zA-Z0-9]* /,"root="P);print}')
         # Configurar kernel Linux con los parámetros leídos de su GRUB.
         kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
         kexec -e &
         ;;
-    NTFS|HNTFS|FAT32|HFAT32)
+    Windows)
         # Compruebar si hay un cargador de Windows.
         for f in io.sys ntldr bootmgr; do
             FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
@@ -89,7 +92,17 @@ case "$TYPE" in
             reboot
         fi
         ;;
-    *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
+    MacOS)
+        # Modo de arranque por reinicio.
+        # Nota: el cliente tiene que tener configurado correctamente Grub.
+        touch ${MNTDIR}/boot.mac &>/dev/null
+        reboot
+        ;;
+    GrubLoader)
+        # Reiniciar.
+        reboot
+        ;;
+    *)  ogRaiseError $OG_NOTOS "$1 $2 ${TYPE:+($TYPE)}"
         return $?
         ;;
 esac
