@@ -110,18 +110,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 
 						if ($filesys == "CACHE") {
-						$idordenadores=split(",",$idordenadores);$idordenadores=$idordenadores[0];
-							$rs=new Recordset; 
-							$cmd->texto="SELECT cache FROM ordenadores_particiones WHERE idordenador IN (".$idordenadores.") AND numdisk=".$tbKeys[$k]["numdisk"]." AND numpar=".$tbKeys[$k]["numpar"];
-							$rs->Comando=&$cmd; 
-							if (!$rs->Abrir()) return(false); // Error al abrir recordset
-							$rs->Primero(); 
-							if (!$rs->EOF){
-								$campocache=$rs->campos["cache"];
-							}
-							$rs->Cerrar();
 							echo '<td align="leght">&nbsp;';
-							$campocache = eregi_replace("[\n|\r|\n\r]", '', $campocache);
+							$campocache = eregi_replace("[\n|\r|\n\r]", '', tomaCache($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]));
 							$ima=split(",",$campocache);
 							$numero=1;
 							for ($x=0;$x<count($ima); $x++) {
