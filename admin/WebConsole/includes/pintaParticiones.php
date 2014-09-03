@@ -112,7 +112,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						if ($filesys == "CACHE") {
 						$idordenadores=split(",",$idordenadores);$idordenadores=$idordenadores[0];
 							$rs=new Recordset; 
-							$cmd->texto="SELECT cache FROM ordenadores_particiones WHERE idordenador=".$idordenadores." AND numdisk=".$tbKeys[$k]["numdisk"]." AND numpar=".$tbKeys[$k]["numpar"];
+							$cmd->texto="SELECT cache FROM ordenadores_particiones WHERE idordenador IN (".$idordenadores.") AND numdisk=".$tbKeys[$k]["numdisk"]." AND numpar=".$tbKeys[$k]["numpar"];
 							$rs->Comando=&$cmd; 
 							if (!$rs->Abrir()) return(false); // Error al abrir recordset
 							$rs->Primero(); 
