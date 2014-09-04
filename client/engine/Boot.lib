@@ -59,20 +59,20 @@ case "$TYPE" in
         PARAMS=$(ogLinuxBootParameters $1 $2) || return $?
         read -e KERNEL INITRD APPEND <<<"$PARAMS"
         # Si no hay kernel, no hay sistema operativo.
-        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2" || return $?
+        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 $TYPE" || return $?
         # Arrancar de partición distinta a la original.
         [ -e "$MNTDIR/etc" ] && APPEND=$(echo $APPEND | awk -v P="$PART " '{sub (/root=[-+=_/a-zA-Z0-9]* /,"root="P);print}')
         # Configurar kernel Linux con los parámetros leídos de su GRUB.
         kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
         kexec -e &
         ;;
-    Windows)
+    Windows|WinLoader)
         # Compruebar si hay un cargador de Windows.
         for f in io.sys ntldr bootmgr; do
             FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
             [ -n "$FILE" ] && LOADER="$f"
         done
-        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS || return $?
+        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 $TYPE" || return $?
         if [ "$winboot" == "kexec" ]; then
             # Modo de arranque en caliente (con kexec).
             cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
@@ -102,7 +102,7 @@ case "$TYPE" in
         # Reiniciar.
         reboot
         ;;
-    *)  ogRaiseError $OG_NOTOS "$1 $2 ${TYPE:+($TYPE)}"
+    *)  ogRaiseError $OG_ERR_NOTOS "$1 $2 ${TYPE:+($TYPE)}"
         return $?
         ;;
 esac
