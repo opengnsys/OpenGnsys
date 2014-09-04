@@ -29,6 +29,26 @@ fi
 
 
 #/**
+#         ogGetOsType int_ndisk int_npartition
+#@brief   Devuelve el tipo del sistema operativo instalado.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@return  OSType - Tipo de sistema operativo.
+#@see     ogGetOsVersion
+#*/ ##
+function ogGetOsType ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+           "$FUNCNAME 1 2  =>  Linux"
+    return
+fi
+ogGetOsVersion "$@" | cut -sf1 -d:
+}
+
+
+#/**
 #         ogGetOsVersion int_ndisk int_nfilesys
 #@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
@@ -126,19 +146,22 @@ fi
 # Para MacOS: detectar kernel y completar con fichero plist de información del sistema.
 if [ -z "$VERSION" ]; then
     TYPE="MacOS"
-    # Kernel de Mac OS.
+    # Kernel de Mac OS (no debe ser fichero de texto).
     FILE="$MNTDIR/mach_kernel"
-    [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS"
-    [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
-    # Datos de configuración de versión de Mac OS.
-    FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
-    [ -r $FILE ] && VERSION=$(awk -F"[<>]" '
-                                  /ProductName/ {getline;s=$3}
-                                  /ProductVersion/ {getline;v=$3}
-                                  END {print s,v}' $FILE)
-    # Datos de recuperación de Mac OS.
-    FILE="$MNTDIR/com.apple.recovery.boot"
-    [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
+    if [ -z "$(file -b $FILE | grep 'text')" ]; then
+        # Obtener tipo de kernel.
+        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS"
+        [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
+        # Datos de configuración de versión de Mac OS.
+        FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
+        [ -r $FILE ] && VERSION=$(awk -F"[<>]" '
+                                      /ProductName/ {getline;s=$3}
+                                      /ProductVersion/ {getline;v=$3}
+                                      END {print s,v}' $FILE)
+        # Datos de recuperación de Mac OS.
+        FILE="$MNTDIR/com.apple.recovery.boot"
+        [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
+    fi
 fi
 # Para FreeBSD: obtener datos del Kernel.
 ### TODO Revisar solución.
@@ -171,27 +194,6 @@ fi
 # Mostrar resultado y salir sin errores.
 [ -n "$VERSION" ] && echo "$TYPE:$VERSION $IS64BIT"
 return 0
-}
-
-
-#/**
-#         ogGetOsType int_ndisk int_npartition
-#@brief   Devuelve el tipo del sistema operativo instalado.
-#@param   int_ndisk      nº de orden del disco
-#@param   int_npartition nº de orden de la partición
-#@return  OSType - Tipo de sistema operativo.
-#@note    OSType = { Android, BSD, Linux, MacOS, Windows }
-#@see     ogGetOsVersion
-#*/ ##
-function ogGetOsType ()
-{
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-           "$FUNCNAME 1 2  =>  Linux"
-    return
-fi
-ogGetOsVersion "$@" | cut -sf1 -d:
 }
 
 
