@@ -4,7 +4,7 @@
 #@brief   Librería o clase FileSystem
 #@class   FileSystem
 #@brief   Funciones para gestión de sistemas de archivos.
-#@version 1.0.5
+#@version 1.0.6
 #@warning License: GNU GPLv3+
 #*/
 
@@ -428,6 +428,9 @@ esac
 #@version 0.9 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-15
+#@version 1.0.6 - Usar comando findmnt.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-09-04
 #*/ ##
 function ogGetMountPoint ()
 {
@@ -444,7 +447,8 @@ fi
 # Obtener partición.
 PART="$(ogDiskToDev $1 $2)" || return $?
 
-mount | awk -v P=$PART '{if ($1==P) {print $3}}'
+# Devolver punto de montaje.
+findmnt -n -o TARGET $PART
 }
 
 
