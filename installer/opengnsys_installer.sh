@@ -808,8 +808,8 @@ function getNetworkSettings()
 						awk '/Mask/ {sub(/.*:/,"",$4); print $4}
 						     /netmask/ {print $4}')
 			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(ip route | awk -v d="$dev" '{ if ($3==d) {sub (/\/.*/,""); print $1} }')
-			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1~/default/ { if ($5==d) print $3 }')
+			NETIP[i]=$(ip route | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
+			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1=="default" && $5==d {print $3}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
