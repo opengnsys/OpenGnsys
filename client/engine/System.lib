@@ -107,6 +107,56 @@ $COMMAND $REDIREC | tee -a $FILES
 
 
 #/**
+#         ogGetCaller
+#@brief   Devuelve nombre del programa o script ejecutor (padre).
+#@param   No.
+#@return  str_name - Nombre del programa ejecutor.
+#@version 0.10 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-01-17
+#*/
+function ogGetCaller () {
+
+# Obtener el nombre del programa o del script que ha llamado al proceso actual.
+basename "$(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
+                                 else { sub(/^-/,"",$13); print $13; } }')"
+}
+
+
+#/**
+#         ogHelp ["str_function" ["str_format" ["str_example" ... ]]]
+#@brief   Muestra mensaje de ayuda para una función determinda.
+#@param   str_function Nombre de la función.
+#@param   str_format   Formato de ejecución de la función.
+#@param   str_example  Ejemplo de ejecución de la función.
+#@return  str_help - Salida de ayuda.
+#@note    Si no se indican parámetros, la función se toma de la variable \c $FUNCNAME
+#@note    La descripción de la función se toma de la variable compuesta por \c MSG_FUNC_$función incluida en el fichero de idiomas.
+#@note    Pueden especificarse varios mensajes con ejemplos.
+#@version 0.9 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-07-27
+#*/
+function ogHelp () {
+
+# Variables locales.
+local FUNC MSG
+
+# Mostrar función, descripción y formato.
+FUNC="${1:-${FUNCNAME[${#FUNCNAME[*]}-1]}}"
+MSG="MSG_HELP_$FUNC"
+ogEcho help "$MSG_FUNCTION $FUNC: ${!MSG}"
+[ -n "$2" ] && ogEcho help "    $MSG_FORMAT: $2"
+# Mostrar ejemplos (si existen).
+shift 2
+while [ $# -gt 0 ]; do
+    ogEcho help "    $MSG_EXAMPLE: $1"
+    shift
+done
+}
+
+
+#/**
 #         ogRaiseError [str_logtype ...] int_errcode ["str_errmessage" ...]
 #@brief   Devuelve el mensaje y el código de error correspondiente.
 #@param   str_logtype    tipo de registro de incidencias.
@@ -186,23 +236,6 @@ return $CODE
 
 
 #/**
-#         ogGetCaller
-#@brief   Devuelve nombre del programa o script ejecutor (padre).
-#@param   No.
-#@return  str_name - Nombre del programa ejecutor.
-#@version 0.10 - Primera versión para OpenGnSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011-01-17
-#*/
-function ogGetCaller () {
-
-# Obtener el nombre del programa o del script que ha llamado al proceso actual.
-basename "$(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
-                                 else { sub(/^-/,"",$13); print $13; } }')"
-}
-
-
-#/**
 #         ogIsRepoLocked
 #@brief   Comprueba si el repositorio está siendo usado (tiene ficheros abiertos).
 #@param   No.
@@ -226,40 +259,6 @@ local f FILES
 # punto de montaje del repositorio de imágenes.
 FILES=$(for f in /proc/[0-9]*/fd/*; do readlink -f "$f"; done | grep "^$OGIMG")   # */ (comentario Doxygen)
 test -n "$FILES"
-}
-
-
-
-#/**
-#         ogHelp ["str_function" ["str_format" ["str_example" ... ]]]
-#@brief   Muestra mensaje de ayuda para una función determinda.
-#@param   str_function Nombre de la función.
-#@param   str_format   Formato de ejecución de la función.
-#@param   str_example  Ejemplo de ejecución de la función.
-#@return  str_help - Salida de ayuda.
-#@note    Si no se indican parámetros, la función se toma de la variable \c $FUNCNAME
-#@note    La descripción de la función se toma de la variable compuesta por \c MSG_FUNC_$función incluida en el fichero de idiomas.
-#@note    Pueden especificarse varios mensajes con ejemplos.
-#@version 0.9 - Primera versión para OpenGnSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-07-27
-#*/
-function ogHelp () {
-
-# Variables locales.
-local FUNC MSG
-
-# Mostrar función, descripción y formato.
-FUNC="${1:-${FUNCNAME[${#FUNCNAME[*]}-1]}}"
-MSG="MSG_HELP_$FUNC"
-ogEcho help "$MSG_FUNCTION $FUNC: ${!MSG}"
-[ -n "$2" ] && ogEcho help "    $MSG_FORMAT: $2"
-# Mostrar ejemplos (si existen).
-shift 2
-while [ $# -gt 0 ]; do
-    ogEcho help "    $MSG_EXAMPLE: $1"
-    shift
-done
 }
 
 
