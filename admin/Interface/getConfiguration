@@ -17,6 +17,7 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
     case "$ptt" in
         MSDOS)  ptt=1 ;; 
         GPT)    ptt=2 ;; 
+        LVM)    ptt=3 ;; 
         *)      ptt=0 ;; 
     esac
     # Información de disco (partición 0)
@@ -31,8 +32,8 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
 	tam=$(ogGetPartitionSize $dsk $par 2>/dev/null)
 	tam=${tam:-"0"}
 	# Sistema operativo instalado 
-	case "$cod" in
-		""|82|8200|A502|BF02|EE)
+	case "$fsi" in
+		""|EMPTY|CACHE|LINUX-SWAP|LINUX-LVM)
 			soi="" ;;
 		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
 			# Sistema de archivos para datos (sistema operativo "DATA")

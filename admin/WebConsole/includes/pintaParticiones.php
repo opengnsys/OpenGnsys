@@ -85,6 +85,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 								 break;
 							case 2:  $disktable[$tbKeys[$k]["numdisk"]] = "GPT";
 								 break;
+							case 3:  $disktable[$tbKeys[$k]["numdisk"]] = "LVM";
+								 break;
 							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
 						}
 					}
@@ -92,11 +94,16 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<tr height="16">'.chr(13);
                                 	        echo'<td align="center">&nbsp;</td>'.chr(13);
 						echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-						if (is_numeric ($tbKeys[$k]["tipopar"])) {
-							echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
+						if ($disktable[$tbKeys[$k]["numdisk"]] == "LVM") {
+							echo '<td></td>'.chr(13);
 						}
 						else {
-							echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+							if (is_numeric ($tbKeys[$k]["tipopar"])) {
+								echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
+							}
+							else {
+								echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+							}
 						}
 						$filesys=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]);
 						echo'<td align="center">&nbsp;'.$filesys.'&nbsp;</td>'.chr(13);
