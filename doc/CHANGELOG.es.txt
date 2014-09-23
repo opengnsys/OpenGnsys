@@ -5,6 +5,10 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 Lista de cambios incluidos en OpenGnSys 1.0.6
 ---------------------------------------------
 
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#51	Detectar y tratar metadispositivos
+#660	El arranque de sistema operativo debe depender de su tipo y no del sistema de ficheros
+
 Tickets resueltos en módulo OpenGnSys Client:
 #656	Script updateCache: erratas en imágenes sincronizadas
 #657	Sincronizadas tipo archivo: adaptación a ogclient 1.0.5
@@ -12,6 +16,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 Tickets resueltos en módulo OpenGnSys Server:
 #646	Script de servidor para comparar datos de red
 #648	Comprobar y determinar permisos en /opt/opengnsys/images
+#664	Script listclientmode: Identificacion de la plantilla por nombre en consola
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #650	Posible error de actualización de la BD desde versiones que necesitan modificar IP del servidor
@@ -19,6 +24,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #654	Eliminar imagen de caché duplica algunas imágenes.
 #658	Correccion en eliminar imagen de caché de cliente
+#661	Error al mostrar configuración de varios equipos con caché
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.5
@@ -246,6 +252,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 #476	Revisar y depurar el proceso de arranque del cliente
 #477	Mejorar la internacionalización del cliente (inglés, en especial)
 #482	Script de inicio mountrepo.sh no reconoce variable "ogprotocol"
+#523	ogClient: actualizar ogClient compara en directorio incorrecto
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #376	Menú para el Browser en equipos sin menú asignados con valores por defecto (se solucionará en #411)
