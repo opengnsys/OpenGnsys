@@ -40,7 +40,7 @@
 
 PROG="$(basename $0)"
 if [ $# -lt 4 ]; then
-    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST|UNICAST-CACHE|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST-DIRECT|UNICAST|UNICAST-CACHE|MULTICAST-DIRECT|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
     exit $?
 fi
 
