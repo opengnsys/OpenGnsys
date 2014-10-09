@@ -612,6 +612,8 @@ done
 if [ -n "${DEVICE}" ]; then	
 	export DEVICE
 	export DEVICECFG="/run/net-${DEVICE}.conf"
+	# En algunos casos, el fichero de configuración está en /tmp.
+	[ ! -f $DEVICECFG -a -f ${DEVICECFG/run/tmp} ] && mv ${DEVICECFG/run/tmp} $DEVICECFG
 	source $DEVICECFG
 	echo "DEVICE=$DEVICE" >> $CFGINITRD
 	echo "DEVICECFG=$DEVICECFG" >> $CFGINITRD

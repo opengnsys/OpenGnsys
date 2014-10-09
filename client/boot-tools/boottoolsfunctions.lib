@@ -51,6 +51,7 @@ case "${1,,}" in
 		OSDISTRIB="ubuntu"
 		OSCODENAME="precise"
 		OSRELEASE="3.2.0-23-generic"
+		#OSRELEASE="3.11.0-26-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;

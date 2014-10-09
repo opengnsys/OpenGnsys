@@ -2,7 +2,6 @@
 install squashfs-tools
 install unionfs-fuse
 install drbl-ntfsprogs 
-#install ntfsprogs 
 install ntfs-3g 
 install dosfstools 
 install fatresize
@@ -22,9 +21,10 @@ install hfsprogs
 install hfsutils
 install nilfs-tools
 install ufsutils
-#install ubuntu-zfs
+install vmfs-tools
 install zfs-fuse
-install android-tools-adb
-install android-tools-fastboot
-install android-tools-fsutils
-install f2fs-tools
+# Solo en ogLive basado en Ubuntu 14.04
+#install android-tools-adb
+#install android-tools-fastboot
+#install android-tools-fsutils
+#install f2fs-tools
