@@ -574,7 +574,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (26, 'sft', 'Nombre del archivo de inventario software enviado por la red', '', '', '', 0, 0),
 (27, 'tpc', 'Tipo de cliente', '', '', '', 0, 0),
 (28, 'scp', 'Código script', '', '', '', 4, 1),
-(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1),
+(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 0, 1),
 (31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1), 
 (32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1), 
 (33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1), 

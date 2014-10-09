@@ -146,3 +146,8 @@ UPDATE ordenadores_particiones
 ALTER TABLE ordenadores_particiones
 	MODIFY cache TEXT NOT NULL;
 
+# Mostrar protocolo de clonación en la cola de acciones (ticket #672)
+UPDATE parametros
+	SET tipopa = 0
+	WHERE idparametro = 30;
+

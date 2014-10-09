@@ -4,7 +4,8 @@
 
 UPDATE entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
 
-UPDATE parametros SET tipopa = '1' WHERE idparametro = 30;
+# Mostrar protocolo de clonación en la cola de acciones (ticket #672)
+UPDATE parametros SET tipopa = 0 WHERE idparametro = 30;
 
 UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
 UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
