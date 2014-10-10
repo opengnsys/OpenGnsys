@@ -97,12 +97,16 @@ done
 [ -n "$COMMAND" ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Componer lista de ficheros de registro.
-[ $ISCOMMAND ] && (FILES="$OGLOGCOMMAND"; > $FILES; REDIREC="2&>1")
+if [ $ISCOMMAND ]; then
+    FILES="$OGLOGCOMMAND"
+    > $FILES
+    REDIREC="2>&1"
+fi
 [ $ISLOG ] && FILES="$FILES $OGLOGFILE"
 [ $ISSESSION ] && FILES="$FILES $OGLOGSESSION"
 
 # Ejecutar comando.
-$COMMAND $REDIREC | tee -a $FILES
+eval $COMMAND $REDIREC | tee -a $FILES
 }
 
 
