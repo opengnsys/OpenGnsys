@@ -112,21 +112,21 @@ ogUnmountAll $dis &>/dev/null
 
 # Elimina la tabla de particiones
 ogDeletePartitionTable $dis  
-ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
+ogExecAndLog session log ogUpdatePartitionTable $dis
 
 # Crea tabla de particiones MSDOS (NOTA: adaptar para tablas GPT).
 ogCreatePartitionTable $dis MSDOS 
 
 # Cuestión caché
 if [ "$che" == "1" ]; then
-	initCache $tch >/dev/null | tee -a $OGLOGSESSION $OGLOGFILE
+	ogExecAndLog session log initCache $tch
 fi
 
 # Definir particionado.
-ogCreatePartitions $dis ${TBP[@]}  | tee -a $OGLOGSESSION $OGLOGFILE
-ogUpdatePartitionTable $dis | tee -a $OGLOGSESSION $OGLOGFILE	
+ogExecAndLog session log ogCreatePartitions $dis ${TBP[@]}
+ogExecAndLog session log ogUpdatePartitionTable $dis
 
-RETVAL=$?	
+RETVAL=$?
 if [ $RETVAL -ne 0 ]; then
 	kill $COPROC_PID
 	exit $RETVAL
@@ -136,7 +136,7 @@ fi
 for ((par=1; par<=$maxp; par++)); do
 	sfi="${TBF[par]}"
 	if [ "$sfi" != "EMPTY" ]; then
-		ogFormatFs $dis $par $sfi | tee -a $OGLOGSESSION $OGLOGFILE
+		ogExecAndLog session log ogFormatFs $dis $par $sfi
 		RETVAL=$?
 		if [ $RETVAL -ne 0 ]; then
 			kill $COPROC_PID

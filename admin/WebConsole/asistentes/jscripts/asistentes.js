@@ -21,10 +21,8 @@ switch (form.idmetodo.value)
 //form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " 1 " + form.PartOrigen.value + "  " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " 1 " + form.PartOrigen.value + " " + form.tool.value + " " + form.compresor.value;
 command="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
 form.codigo.value="\
-ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + comand + "\"\n " +
-command + " | tee -a $OGLOGCOMMAND \n ";
-//cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value + " | tee -a $OGLOGCOMMAND \n";
-//form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
+ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + comand + "\"\n \
+ogExecAndLog command " + command + " \n ";
 }
 
 function codeDeployImage(form){
@@ -142,9 +140,9 @@ ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
 sizecache=`ogGetCacheSize` \n \
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
+ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "+n_disk+" $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";		
+initCache "+n_disk+" $sizecache  &>/dev/null \n ";		
 			} else {
 				if (form.size4.value == "CUSTOM") { 
 					cacheSize = form.size4custom.value; 
@@ -156,7 +154,7 @@ ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache " + n_disk + " " + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";	
+initCache " + n_disk + " " + cacheSize + " &>/dev/null";	
 			} 
 		} else {
 			cacheCode="\
@@ -207,15 +205,15 @@ ogUnmountCache \n \
 ogUnmountAll "+n_disk+" 2>/dev/null\n  \
 " + cacheCode + " \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
-ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION \n \
+ogExecAndLog command session ogListPartitions "+n_disk+" \n \
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
-ogCreatePartitions "+n_disk+" " + partCode + " | tee -a $OGLOGCOMMAND \n \
+ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
 ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
 ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n \
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
 reboot \n";
 }
 
@@ -242,9 +240,9 @@ ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
 sizecache=`ogGetCacheSize` \n \
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+"  \n \
-ogUpdatePartitionTable "+n_disk+" | tee -a $OGLOGCOMMAND \n \
+ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "+ n_disk +" $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
+initCache "+ n_disk +" $sizecache &>/dev/null \n ";
 				} else {
 					if (form.sizeGPT4.value == "CUSTOM") {
 						cacheSize = form.sizeGPT4custom.value;
@@ -256,7 +254,7 @@ ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "  + n_disk +" "+ cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND";
+initCache "  + n_disk +" "+ cacheSize + " &>/dev/null";
 				}
 			} else{
 				var partType=eval("form.partGPT"+nPart);
@@ -294,15 +292,15 @@ ogUnmountCache \n \
 ogUnmountAll "+n_disk+" \n  \
 " + cacheCode + " \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
-ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION \n \
+ogExecAndLog command session ogListPartitions "+n_disk+" \n \
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions " + partCode + "\"\n \
-ogCreatePartitions "+n_disk+" " + partCode + " | tee -a $OGLOGCOMMAND \n \
+ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
 ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
 ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogListPartitions "+n_disk+" | tee -a $OGLOGCOMMAND $OGLOGSESSION $OGLOGFILE \n \
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
 reboot \n";
 }
 

@@ -132,14 +132,14 @@ ogUnmountImage "$1" "$2" "$IMGEXT"
 # Restableciendo acl
 ogUnlock $3 $4
 ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage" 
-ogRestoreInfoImage $3 $4  2>&1 | tee -a $OGLOGCOMMAND
+ogExecAndLog command ogRestoreInfoImage $3 $4
 
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
    if which configureOsCustom &>/dev/null; then
 	ogEcho log session "[90] configureOsCustom"
-	# CDC: enviamos todos los parametros.
+	# Enviamos todos los parametros.
 	configureOsCustom "$1" "$2" "$3" "$4"
    else
 	ogEcho log session "[90] $MSG_HELP_configureOs" 

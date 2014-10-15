@@ -53,7 +53,7 @@ case "$PROTO" in
         #TODO comprobar parametros anteriores
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
         ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
-        ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS" 2>&1 | tee -a $OGLOGCOMMAND
+        ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
         RETVAL=${PIPESTATUS[0]}
         ;;
     *)  # Protocolo desconocido.

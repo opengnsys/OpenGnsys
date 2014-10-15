@@ -173,7 +173,7 @@ case "$PROTOCOLO" in
 		ogEcho log session "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
 		# tiempos 
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
-		ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR" 2>&1 | tee -a   $OGLOGCOMMAND
+		ogExecAndLog command ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
 		#TODO: comprobar que el tracker definido en el fichero es correcto.
     		#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
@@ -181,11 +181,11 @@ case "$PROTOCOLO" in
 		ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4"
 		sleep $P2PWAIT
 		ogEcho log session "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4"
-		ogTorrentStart CACHE "$2.torrent" $4 2>&1 | tee -a   $OGLOGCOMMAND
+		ogExecAndLog command ogTorrentStart CACHE "$2.torrent" $4
 		RESUMEUPDATECACHE=$(grep -m 1 -B1 "Download" $OGLOGCOMMAND) 
 		RESUMEUPDATECACHEbf=$(grep -m 1 "Download" $OGLOGCOMMAND) 
 		if [ "$RESUMEUPDATECACHEbf" == "Download complete." ]; then
-			rm $IMGDIR$2".torrent.bf" 2>&1 | tee -a   $OGLOGCOMMAND
+			rm -f $IMGDIR$2".torrent.bf"
 		fi
 	;;
 	MULTICAST)
@@ -198,7 +198,7 @@ case "$PROTOCOLO" in
 		#FIN TODO
 		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 		then 
-	   		ogMcastReceiverFile $PORT CACHE "$2" 2>&1  | tee -a   $OGLOGCOMMAND
+			ogExecAndLog command ogMcastReceiverFile $PORT CACHE "$2"
 
 		else
 		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
@@ -208,7 +208,7 @@ case "$PROTOCOLO" in
 	   		sleep 10
 	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 	   		then 
-	   			ogMcastReceiverFile $PORT CACHE "$2" 2>&1  | tee -a   $OGLOGCOMMAND
+	   			ogExecAndLog command ogMcastReceiverFile $PORT CACHE "$2"
 			else
 				ogEcho log session "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
 	   			exit $OG_ERR_UPDATECACHE
@@ -221,7 +221,7 @@ case "$PROTOCOLO" in
 	;;
 	UNICAST)
 		#ogEcho log session "unicast"
-		ogCopyFile $REPOSITORIO "$2" "$IMGDIR" 2>&1  | tee -a   $OGLOGCOMMAND
+		ogExecAndLog command ogCopyFile $REPOSITORIO "$2" "$IMGDIR"
 		sleep 5
 		RESUMEUPDATECACHE=$(grep -m 1  "100%" $OGLOGCOMMAND.tmp)
 	;;

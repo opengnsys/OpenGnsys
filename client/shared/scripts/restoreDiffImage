@@ -121,7 +121,7 @@ ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[T
 
 # creando enlaces y restableciendo ACL (en windows)
 ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage"
-ogRestoreInfoImage  "$4" "$5" 2>&1 | tee -a $OGLOGCOMMAND
+ogExecAndLog command ogRestoreInfoImage "$4" "$5"
 
 # Llamar al script de post-configuración del sistema operativo.
 if which configureOsCustom &>/dev/null; then
