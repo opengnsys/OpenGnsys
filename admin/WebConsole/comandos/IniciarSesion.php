@@ -15,6 +15,7 @@ include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
+include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/pintaTablaConfiguraciones.php");
 include_once("../idiomas/php/".$idioma."/comandos/iniciarsesion_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
@@ -49,7 +50,7 @@ if (!$cmd)
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
 	</BR>
 <form  align=center name="fdatos"> 
-	<?php echo tablaConfiguracionesIniciarSesion($cmd,$idambito); ?>
+	<?php tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito); ?>
 </form>
 <?php
 	//________________________________________________________________________________________________________

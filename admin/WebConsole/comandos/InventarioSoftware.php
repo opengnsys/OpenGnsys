@@ -67,7 +67,7 @@ switch($ambito){
 	<P align=center>
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
 	</p>
-		<?php echo tablaConfiguracionesIniciarSesion($cmd,$idambito); ?>
+		<?php echo tablaConfiguracionesInventarioSoftware($cmd,$idambito); ?>
 
 	</BR>
 <?
