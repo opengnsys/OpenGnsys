@@ -115,7 +115,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 
 # Generar variables de configuración del instalador
 # Variables globales:
-# - OSDISTRIB - tipo de distribución GNU/Linux
+# - OSDISTRIB, OSVERSION - tipo y versión de la distribución GNU/Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
@@ -138,11 +138,14 @@ function autoConfigure()
 if [ -f /etc/os-release ]; then
 	source /etc/os-release
 	OSDISTRIB="$ID"
+	OSVERSION="$VERSION_ID"
 else
 	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+	OSVERSION=$(lsb_release -rs 2>/dev/null)
 fi
-# Convertir a minúsculas para evitar errores.
+# Convertir distribución a minúsculas y obtener solo el 1er número de versión.
 OSDISTRIB="${OSDISTRIB,,}"
+OSVERSION="${OSVERSION%%.*}"
 
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
@@ -282,10 +285,14 @@ case "$OSDISTRIB" in
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Incluir repositorio de paquetes EPEL y paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release procps )
+		# Sustituir MySQL por MariaDB a partir de CentOS 7.
+		[ $OSVERSION -ge 7 ] && DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
 		;;
 	fedora)	# Postconfiguación personalizada para Fedora. 
 		# Incluir paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} libstdc++-static.i686 btrfs-progs procps-ng )
+		# Sustituir MySQL por MariaDB a partir de Fedora 20.
+		[ $OSVERSION -ge 20 ] && DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
 		;;
 esac
 }
@@ -1691,7 +1698,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Instalar base de datos de OpenGnSys Admin.
-isInArray notinstalled "mysql-server"
+isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
 if [ $? -eq 0 ]; then
 	# Habilitar gestor de base de datos (MySQL, si falla, MariaDB).
 	service=$MYSQLSERV
