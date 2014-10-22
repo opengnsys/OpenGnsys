@@ -195,6 +195,14 @@ function errorAndLog()
 	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
+# Escribe a fichero y muestra mensaje de aviso
+function warningAndLog()
+{
+	local DATETIME=`getDateTime`
+	echo "Warning: $1"
+	echo "$DATETIME;$SSH_CLIENT;Warning: $1" >> $LOG_FILE
+}
+
 
 #####################################################################
 ####### Funciones de copia de seguridad y restauración de ficheros
@@ -213,7 +221,7 @@ function backupFile()
 	local fecha=`date +%Y%m%d`
 
 	if [ ! -f $fichero ]; then
-		errorAndLog "${FUNCNAME}(): file $fichero doesn't exists"
+		warningAndLog "${FUNCNAME}(): file $fichero doesn't exists"
 		return 1
 	fi
 

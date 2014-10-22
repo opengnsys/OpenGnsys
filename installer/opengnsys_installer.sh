@@ -327,7 +327,7 @@ function errorAndLog()
 function warningAndLog()
 {
 	local DATETIME=`getDateTime`
-	echo "ERROR: $1"
+	echo "Warning: $1"
 	echo "$DATETIME;$SSH_CLIENT;Warning: $1" >> $LOG_FILE
 }
 
