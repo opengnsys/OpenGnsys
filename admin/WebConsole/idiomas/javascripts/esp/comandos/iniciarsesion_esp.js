@@ -6,3 +6,4 @@
 TbMsg=new Array;
 TbMsg[0]="";
 TbMsg[1]="Debe elegir al menos una partición";
+TbMsg["FILTER"]="Debe seleccionar al menos un ordenador que tenga la configuración elegida.";

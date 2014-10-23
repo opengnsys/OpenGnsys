@@ -3,6 +3,10 @@ include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
 
 /*________________________________________________________________________________________________________
 	Crea la tabla de configuraciones y perfiles a crear
+// Version 0.1 - En ambito distinto a ordenador muestra los equipos agrupados en configuraciones iguales.
+// Fecha: 2014-10-23
+// Autora: Irina Gomez, ETSII Universidad de Sevilla
+
 ________________________________________________________________________________________________________*/
 function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
         // TODO despues de las pruebas: idnombreso <> 5
@@ -85,7 +89,7 @@ function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
         while (!$rs->EOF){
                 $cc++;
                 echo '<tr><td colspan="'.$columns.'" style="background-color: #ffffff;">';
-                echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc);
+                echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc,'ipordenador');
                 echo "</td></tr>";
                 $configuraciones=explode("@",$rs->campos["configuraciones"]);
                 echo $cabeceraTabla;
@@ -101,7 +105,7 @@ function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
                         }
                         $tablaHtml.='<tr><td><input name="particion" idcfg="'.$cc.'" id="'.$cc.'_'.$datos[0].'_'.$datos[1].'" value="'.$datos[0].';'.$datos[1].'" type="radio"></td>'.chr(13);
                         $tablaHtml.='<td align="center">&nbsp;'.$datos[1].'&nbsp;</td>'.chr(13);
-                        $tablaHtml.='<td>&nbsp;'.$datos[2].'&nbsp;'.$sistOperativo[$datos[2]].'</td></tr>'.chr(13);
+                        $tablaHtml.='<td>&nbsp;'.$sistOperativo[$datos[2]].'</td></tr>'.chr(13);
 
                 }
                 echo $tablaHtml;
