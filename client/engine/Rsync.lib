@@ -1,4 +1,21 @@
 #!/bin/bash
+
+#/**
+# rsync
+#@brief Función para utilizar la versión de rsync situada en $OPENGNSYS/bin en vez de la del sistema operativo.
+#@param los mismos que el comando rsync del sistema operativo.
+#@return  instrucción para ser ejecutada.
+#*/
+function rsync ()
+{
+local RSYNC
+[ -x $OPENGNSYS/bin/rsync ] && RSYNC=$OPENGNSYS/bin/rsync
+RSYNC=${RSYNC:-$(which rsync)}
+
+$RSYNC "$@"
+}
+
+
 #/**
 # ogCreateFileImage  [ REPO | CACHE ] image_name extension size
 #@brief   Crear el archivo 
