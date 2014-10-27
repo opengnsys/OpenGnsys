@@ -98,6 +98,48 @@ return $ERRCODE
 
 
 #/**
+#         ogCleanFs int_ndisk int_nfilesys
+#@brief   Elemina los archivos que no son necesarios en el sistema de archivos.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Partición desconocida o no accesible.
+#@note	  Antes incluido en la funcion ogReduceFs
+#@return  (nada)
+#@date    2014-10-27
+#*/ ##
+function ogCleanFs {
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_nfilesys" || return $?
+
+case "$(ogGetFsType $1 $2)" in
+    EXT[234])
+	# Borramos los ficheros de dispositivos y los temporales.
+        ogCleanLinuxDevices $1 $2
+	rm -rf $ORIG/tmp/*
+        ;;
+    NTFS)
+	# Borrar ficheros de hibernación y paginación de Windows.
+	ogGetPath $1 $2 pagefile.sys &>/dev/null && ogDeleteFile $1 $2 pagefile.sys
+	ogGetPath $1 $2 hiberfil.sys &>/dev/null && ogDeleteFile $1 $2 hiberfil.sys
+	ogGetPath $1 $2 swapfile.sys &>/dev/null && ogDeleteFile $1 $2 swapfile.sys
+        ;;
+esac
+
+}
+
+
+
+#/**
 #         ogExtendFs int_ndisk int_nfilesys
 #@brief   Extiende un sistema de archivos al tamaño de su partición.
 #@param   int_ndisk      nº de orden del disco
@@ -789,10 +831,6 @@ case "$(ogGetFsType $1 $2)" in
     JFS)    ;;          # No se reduce (por el momento).
     XFS)    ;;          # No se reduce (por el momento).
     NTFS)
-        # Borrar ficheros de hibernación y paginación de Windows.
-        ogDeleteFile $1 $2 hiberfil.sys 2>/dev/null
-        ogDeleteFile $1 $2 pagefile.sys 2>/dev/null
-        ogDeleteFile $1 $2 swapfile.sys 2>/dev/null
         ogUnmount $1 $2 2>/dev/null
         ## NTFS: Obtiene tamaño mínimo en MB.
         #SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print int($8*1.1)}')
