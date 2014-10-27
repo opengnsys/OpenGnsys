@@ -125,7 +125,7 @@ case "$(ogGetFsType $1 $2)" in
     EXT[234])
 	# Borramos los ficheros de dispositivos y los temporales.
         ogCleanLinuxDevices $1 $2
-	rm -rf $ORIG/tmp/*
+	rm -rf $(ogMount $1 $2)/tmp/*
         ;;
     NTFS)
 	# Borrar ficheros de hibernación y paginación de Windows.
