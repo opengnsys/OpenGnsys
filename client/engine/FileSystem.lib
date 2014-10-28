@@ -102,15 +102,16 @@ return $ERRCODE
 #@brief   Elemina los archivos que no son necesarios en el sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_nfilesys   nº de orden del sistema de archivos
+#@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Partición desconocida o no accesible.
-#@note	  Antes incluido en la funcion ogReduceFs
-#@return  (nada)
+#@note    Antes incluido en la funcion ogReduceFs
+#@author  Irina Gomez. Universidad de Sevilla.
 #@date    2014-10-27
 #*/ ##
-function ogCleanFs {
-
+function ogCleanFs ()
+{
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
@@ -123,20 +124,19 @@ fi
 
 case "$(ogGetFsType $1 $2)" in
     EXT[234])
-	# Borramos los ficheros de dispositivos y los temporales.
+        # Borramos los ficheros de dispositivos y los temporales.
         ogCleanLinuxDevices $1 $2
-	rm -rf $(ogMount $1 $2)/tmp/*
+        rm -rf $(ogMount $1 $2)/tmp/*
         ;;
     NTFS)
-	# Borrar ficheros de hibernación y paginación de Windows.
-	ogGetPath $1 $2 pagefile.sys &>/dev/null && ogDeleteFile $1 $2 pagefile.sys
-	ogGetPath $1 $2 hiberfil.sys &>/dev/null && ogDeleteFile $1 $2 hiberfil.sys
-	ogGetPath $1 $2 swapfile.sys &>/dev/null && ogDeleteFile $1 $2 swapfile.sys
+       # Borrar ficheros de hibernación y paginación de Windows.
+       ogGetPath $1 $2 pagefile.sys &>/dev/null && ogDeleteFile $1 $2 pagefile.sys
+       ogGetPath $1 $2 hiberfil.sys &>/dev/null && ogDeleteFile $1 $2 hiberfil.sys
+       ogGetPath $1 $2 swapfile.sys &>/dev/null && ogDeleteFile $1 $2 swapfile.sys
         ;;
 esac
 
 }
-
 
 
 #/**
@@ -785,11 +785,14 @@ echo $MNTDIR
 #@version 1.0 -  Deteccion automatica del tamaño minimo adecuado
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2011-02-24
+#@version 1.0.6 - Integrar código de antigua función "ogReduceFsCheck".
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-10-28
 #*/ ##
 function ogReduceFs ()
 {
 # Variables locales
-local PART BLKS SIZE
+local PART BLKS SIZE MAXSIZE EXTRASIZE=0 RETVAL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -815,6 +818,7 @@ case "$(ogGetFsType $1 $2)" in
         #resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         resize2fs -fpM $PART  &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         ;;
+
     BTRFS)
         MNTDIR=$(ogMount $1 $2)
         # Calcular tamaño ocupado + 10%.
@@ -822,92 +826,53 @@ case "$(ogGetFsType $1 $2)" in
         btrfs filesystem resize ${SIZE}k $MNTDIR
         ;;
     REISERFS|REISER4)
-        MNTDIR=$(ogMount $1 $2)
         # Calcular tamaño ocupado + 10%.
+        MNTDIR=$(ogMount $1 $2)
         SIZE=$[ $(df -k $MNTDIR | awk '{getline;print $3}') * 110 / 100 ]
         ogUnmount $1 $2 2>/dev/null
         resize_reiserfs -s${SIZE}K $PART
         ;;
+
     JFS)    ;;          # No se reduce (por el momento).
     XFS)    ;;          # No se reduce (por el momento).
+
     NTFS)
-        ogUnmount $1 $2 2>/dev/null
-        ## NTFS: Obtiene tamaño mínimo en MB.
-        #SIZE=$(ntfsresize -fi $PART | awk '/resize at/ {print int($8*1.1)}')
-        #ntfsresize -fns "${SIZE}M" $PART >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-        #ntfsresize -fs "${SIZE}M" $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
-        SIZE=$(ogReduceFsCheck $1 $2)
-        [ "$SIZE" == 0 ] && return 1	
-        ntfsresize -fs "${SIZE}M" $PART <<<"y"  || ogRaiseError $OG_ERR_PARTITION "error reduciendo $1,$2" || return $?
+        # Calcular tamaño ocupado + 10%.
+        ogUnmount $1 $2 &>/dev/null
+        read -e MAXSIZE SIZE <<<$(ntfsresize -fi $PART | \
+                                  awk '/device size/ {d=$4}
+                                       /resize at/ {r=int($5*1.1/1024+1)*1024}
+                                       END { print d,r}')
+        # Error si no puede obtenerse el tamaño máximo del volumen.
+        [ -n "$MAXSIZE" ] || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+        # Simular la redimensión y comprobar si es necesario ampliarala.
+        RETVAL=1
+        while [ $RETVAL != 0 -a $[ SIZE+=EXTRASIZE ] -lt $MAXSIZE ]; do
+            # Obtener espacio de relocalización y devolver código de salida
+            # (ntfsresize devuelve 0 si no necesita relocalizar).
+            EXTRASIZE=$(ntfsresize -fns $SIZE $PART 2>/dev/null | \
+                        awk '/Needed relocations/ {print int($4*1.1/1024+1)*1024}'
+                        exit ${PIPESTATUS[0]})
+            RETVAL=$?
+        done
+        # Redimensionar solo si hace falta.
+        if [ $SIZE -lt $MAXSIZE ]; then
+            ntfsresize -fs $SIZE $PART <<<"y" >/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+        fi
         ;;
+
     EXFAT)  ;;          # No se reduce (por el momento).
     FAT32|FAT16)  ;;    # No se reduce (probar "fatresize").
     HFS|HFSPLUS)  ;;    # No se reduce (por el momento).
     UFS)    ;;          # No se reduce (por el momento).
+
     *)  ogRaiseError $OG_ERR_PARTITION "$1,$2"
         return $? ;;
 esac
+
+# Devuelve tamaño del sistema de ficheros.
 ogGetFsSize $1 $2
 }
-
-
-function ogReduceFsCheck ()
-{
-#IMPORTANTE: retorna el valor en MB que podrá reducir el FS de una particion ntfs
-#valor devuelto 0, y codigo error 1. No se puede reducir, probar a reiniciar windows y chkdsk
-
-
-local  PART RC MODE SIZE SIZEDATA 
-[ $# == 2 ] && MODE=STAGE1
-[ $# == 3 ] && MODE=STAGE2
-[ -z $MODE ] && return
-
-PART="$(ogDiskToDev $1 $2)" || return $?
-ogUnmount $1 $2 &>/dev/null
-
-
-case $MODE in
-	STAGE1)
-	#	echo "primera etapa $*"
-		# Mostramos el error
-		#ntfsresize -fi $PART &>/dev/null
-		ntfsresize -fi $PART | grep -A 10 -e ERROR >&2
-		RC=`echo $?`
-	#	echo "RC es" $RC
-		# if [ "$RC" -eq "1" ] # con error la salida del grep es 0
-		if [ "$RC" -eq "0" ]
-		then 
-			echo "0" 
-     			return 1	
-		fi  
-		SIZEDATA=$(ntfsresize -fi $PART | awk '/resize at/ {print $8+1000}')
-	#	echo "salida" $?
-	#	echo $SIZEDATA
-		ogReduceFsCheck $1 $2 $SIZEDATA 
-		return 0
-       ;;
-	STAGE2)
-	#	echo "segunda etapa $*"
-		SIZEDATA=$3
-        	ntfsresize -fns "${SIZEDATA}M" $PART &>/tmp/ntfsresize.txt
-		RC=$?
-		if [ "$RC" == "0" ]
-		then  
-			SIZE=$SIZEDATA	
-			echo $SIZE	
-		else
-			SIZEEXTRA=$(cat /tmp/ntfsresize.txt | awk '/Needed relocations :/ {print $0}' | awk -F"(" '{print $2}' | awk '{print $1+500}')
-			SIZE=$(expr $SIZEDATA + $SIZEEXTRA)
-			ogReduceFsCheck $1 $2 $SIZE 
-			return 0 
-		fi
-	;;
-	*)
-	return
-	;;
-esac
-}
-
 
 
 #/**
