@@ -22,7 +22,7 @@ install hfsutils
 install nilfs-tools
 install ufsutils
 install vmfs-tools
-install zfs-fuse
+install ubuntu-zfs
 # Solo en ogLive basado en Ubuntu 14.04
 #install android-tools-adb
 #install android-tools-fastboot
