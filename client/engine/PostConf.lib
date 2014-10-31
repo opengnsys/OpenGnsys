@@ -8,6 +8,50 @@
 #@warning License: GNU GPLv3+
 #*/
 
+
+#/**
+#         ogCleanOs int_ndisk int_nfilesys
+#@brief   Elimina los archivos que no son necesarios en el sistema operativo.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Partición desconocida o no accesible.
+#@note    Antes incluido en la funcion ogReduceFs
+#@author  Irina Gomez. Universidad de Sevilla.
+#@return  (nada)
+#@date    2014-10-27
+#*/ ##
+function ogCleanOs {
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_nfilesys" || return $?
+
+case "$(ogGetOsType $1 $2)" in
+    Linux)
+        # Borramos los ficheros de dispositivos y los temporales.
+        ogCleanLinuxDevices $1 $2
+        rm -rf $(ogMount $1 $2)/tmp/*
+        ;;
+    Windows)
+        # Borrar ficheros de hibernación y paginación de Windows.
+        ogGetPath $1 $2 pagefile.sys &>/dev/null && ogDeleteFile $1 $2 pagefile.sys
+        ogGetPath $1 $2 hiberfil.sys &>/dev/null && ogDeleteFile $1 $2 hiberfil.sys
+        ogGetPath $1 $2 swapfile.sys &>/dev/null && ogDeleteFile $1 $2 swapfile.sys
+        ;;
+esac
+
+}
+
+
+
 #/**
 #         ogInstallMiniSetup int_ndisk int_npartition str_filename [str_admuser str_admpassword bool_autologin [str_autouser str_autopassword] ]
 #@brief   Metafunción para instalar archivo que se ejecutará en el arranque de Windows.
