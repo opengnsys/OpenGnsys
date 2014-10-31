@@ -8,8 +8,13 @@ Lista de cambios incluidos en OpenGnSys 1.0.6
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #51	Detectar y tratar metadispositivos
 #660	El arranque de sistema operativo debe depender de su tipo y no del sistema de ficheros
+#611	Crear función para mostrar y registrar la ejecución de un comando
+#645	Configuración de sistemas GNU/Linux instalados sobre EFI
+#671	ogFormat sobre NTFS no reconoce tipo de partición NTFS (no se resolverá)
+#675	Bucle infinito al reducir sistema de archivos NTFS menor de 1 GB
 
 Tickets resueltos en módulo OpenGnSys Client:
+#649	El arranque gráfico del ogLive depende del hardware (no se resolverá)
 #656	Script updateCache: erratas en imágenes sincronizadas
 #657	Sincronizadas tipo archivo: adaptación a ogclient 1.0.5
 
@@ -17,14 +22,23 @@ Tickets resueltos en módulo OpenGnSys Server:
 #646	Script de servidor para comparar datos de red
 #648	Comprobar y determinar permisos en /opt/opengnsys/images
 #664	Script listclientmode: Identificacion de la plantilla por nombre en consola
+#672	La cola de acciones no muestra el protocolo usado en una restauración (heredado de #473)
+
+Tickets resueltos en módulo OpenGnSys Repository Server:
+#674	Corregir erratas en script deleteimage (heredado de #564)
 
 Tickets resueltos en módulo OpenGnSys Installer:
+#647	Compatibilidad de instalación en CentOS 7
 #650	Posible error de actualización de la BD desde versiones que necesitan modificar IP del servidor
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #654	Eliminar imagen de caché duplica algunas imágenes.
 #658	Correccion en eliminar imagen de caché de cliente
 #661	Error al mostrar configuración de varios equipos con caché
+#665	Comando Iniciar Sesión toma datos incorrectos para aulas
+#667	Resolución de los menús en la configuración PXE (no se resolverá)
+
+Tickets genéricos resueltos:
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.5
