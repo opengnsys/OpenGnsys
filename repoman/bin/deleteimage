@@ -11,7 +11,7 @@
 #@version 1.0.5 - Eliminar imagen incremental.
 #@date    2013-07-17
 #@author  Alberto García, Univ. Málaga
-#@version 1.0.6 - Simplificar ejecución.
+#@version 1.0.6 - Detección automática del tipo de imagen.
 #@date    2014-10-29
 #@author  Ramón Gómez, ETSII Univ. Sevilla
 
