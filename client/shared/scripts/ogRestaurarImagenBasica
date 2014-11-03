@@ -186,7 +186,14 @@
 	fi	
 
 	echo "Ejecutando configure OS" | tee -a $OGLOGSESSION $OGLOGFILE	
-	configureOs	$DISCO $NPART
+	if which configureOsCustom &>/dev/null; then
+		ogEcho log session "[90] configureOsCustom"
+		configureOsCustom "$DISCO" "$NPART"
+	else
+		ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE "
+		configureOs "$DISCO" "$NPART"
+	fi
+
 
   echo "!!! Finaliza correctamente !!! restauracion imagen basica $NOMBREIMG desde cache local" | tee -a $OGLOGSESSION $OGLOGFILE
 #___________________________________________________________________
