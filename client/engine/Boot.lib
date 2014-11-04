@@ -1105,7 +1105,7 @@ function ogGrubHidePartitions {
                 # Muestro solo la particion de la entrada actual.
                 [ $LINE2 -eq $LINE ] && HIDDEN="-" || HIDDEN="+"
 
-                TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2} hidden$HIDDEN \n$TEXT"
+                TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2) hidden$HIDDEN \n$TEXT"
         done
 	
         sed -i "${LINE}a\ $TEXT" $GRUBGFC
