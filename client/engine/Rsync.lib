@@ -100,7 +100,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la configuracion y la version del kernel: < 3.7 ext4, si >=  btrfs 
-		[ $KERNELVERSION \< 3.07 ] && IMGFS == "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+		[ $KERNELVERSION \< 3.07 ] && IMGFS = "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
 
 		if [ "$IMGFS" == "EXT4" ]; then
 		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
@@ -195,7 +195,7 @@ SIZEDATA=${SIZEDATA:-"SIZEDATA"}
 
 # Incluimos información de la imagen. Segun el kernel sera ext4 o btrfs.
 KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-[ $KERNELVERSION \< 3.07 ] && IMGFS == "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+[ $KERNELVERSION \< 3.07 ] && IMGFS = "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
 echo "#$IMGFS:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
 
 if [ "$IMGTYPE" == "img" ]; then
