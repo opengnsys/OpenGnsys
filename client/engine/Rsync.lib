@@ -100,11 +100,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la configuracion y la version del kernel: < 3.7 ext4, si >=  btrfs 
-		if [ $KERNELVERSION \< 3.07 ]; then
-			IMGFS == "EXT4" 
-		else 
-			[ "$IMGFS" == "" ] && IMGFS="BTRFS"
-		fi
+		[ $KERNELVERSION \< 3.07 ] && IMGFS == "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
 
 		if [ "$IMGFS" == "EXT4" ]; then
 		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
@@ -117,7 +113,6 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 	# Monto la imagen 
 	ogMountImage $1 "$2" $3 &>/dev/null
 	[ $? -eq 0 ] || return $( ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?)
-	#touch "$DIRMOUNT/ogimg.info"
 	echo "mounted"> $IMGFILE.lock
 
 	# Si existe dispositivo de loop lo borro.
@@ -200,11 +195,8 @@ SIZEDATA=${SIZEDATA:-"SIZEDATA"}
 
 # Incluimos información de la imagen. Segun el kernel sera ext4 o btrfs.
 KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-if [ $KERNELVERSION \< 3.07 ]; then
-	echo "#EXT4:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
-else
-	echo "#BTRFS:LZO:$FSTYPE:$SIZEDATA" > $IMGINFO
-fi
+[ $KERNELVERSION \< 3.07 ] && IMGFS == "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+echo "#$IMGFS:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
 
 if [ "$IMGTYPE" == "img" ]; then
 	# Imagen Basica

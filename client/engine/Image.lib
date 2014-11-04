@@ -412,7 +412,7 @@ if [ "_${4^^}_" == "_SYNC_" -o "_${4^^}_" == "_DIFF_" ]; then
 	[ $KERNELVERSION \< 3.07 ] &&  IMGFS="EXT4" || IMGFS=${IMGFS:-"BTRFS"}
 	FACTORSYNC=${FACTORSYNC:-"120"}
 	# Si IMGFS="BTRFS" la compresion es mayor.
-	[ $IMGFS == "BTRFS" ] && let FACTORSYNC=$FACTORSYNC
+	[ $IMGFS == "BTRFS" ] && let FACTORSYNC=$FACTORSYNC-20
 
 	let SIZEREQUIRED=$SIZEDATA*$FACTORSYNC/100
 	# El tamaño mínimo del sistema de ficheros btrfs es 250M, ponemos 300
