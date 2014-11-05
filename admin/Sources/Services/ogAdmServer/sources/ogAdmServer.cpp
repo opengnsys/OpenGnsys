@@ -2313,7 +2313,7 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	Database db;
 	Table tbl;
 	BOOLEAN res;
-	char *iph, *ido, *idi, *par, *ifs;
+	char *iph, *ido, *idi, *dsk, *par, *ifs;
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
@@ -2335,10 +2335,11 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	// Acciones posteriores
 	idi = copiaParametro("idi",ptrTrama); // Toma identificador de la imagen
+	dsk = copiaParametro("dsk",ptrTrama); // Número de disco
 	par = copiaParametro("par",ptrTrama); // Número de partición
 	ifs = copiaParametro("ifs",ptrTrama); // Identificador del perfil software contenido
 	
-	res=actualizaRestauracionImagen(db, tbl, idi, par, ido, ifs);
+	res=actualizaRestauracionImagen(db, tbl, idi, dsk, par, ido, ifs);
 	
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
@@ -2396,6 +2397,7 @@ BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- db: Objeto base de datos (ya operativo)
 //		- tbl: Objeto tabla
 //		- idi: Identificador de la imagen
+//		- dsk: Disco de donde se restauró
 //		- par: Partición de donde se restauró
 //		- ido: Identificador del cliente donde se restauró
 //		- ifs: Identificador del perfil software contenido	en la imagen
@@ -2404,14 +2406,15 @@ BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
-	char* par, char* ido, char* ifs) {
+	char* dsk, char* par, char* ido, char* ifs) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaRestauracionImagen()";
 
 	/* Actualizar los datos de la imagen */
-	sprintf(sqlstr,
-			"UPDATE ordenadores_particiones SET idimagen=%s,idperfilsoft=%s"
-				" WHERE idordenador=%s AND numpar=%s", idi, ifs, ido, par);
+	snprintf(sqlstr, LONSQL,
+			"UPDATE ordenadores_particiones"
+			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW()"
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);

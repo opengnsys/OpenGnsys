@@ -108,7 +108,7 @@ BOOLEAN RestaurarSoftIncremental(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_RestaurarImagenBasica(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *,TRAMA *);
-BOOLEAN actualizaRestauracionImagen(Database,Table,char*,char*,char*,char*);
+BOOLEAN actualizaRestauracionImagen(Database,Table,char*,char*,char*,char*,char*);
 BOOLEAN Configurar(SOCKET *,TRAMA* );
 BOOLEAN RESPUESTA_Configurar(SOCKET *,TRAMA* );
 BOOLEAN actualizaConfigurar(Database , Table , char* );

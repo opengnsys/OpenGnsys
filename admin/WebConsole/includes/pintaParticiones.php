@@ -142,7 +142,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							echo '&nbsp;</td>'.chr(13);
 
 						} else {
-							echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
+							echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].'&nbsp;</td>'.chr(13);
 						}
 					
 						echo'</tr>'.chr(13);

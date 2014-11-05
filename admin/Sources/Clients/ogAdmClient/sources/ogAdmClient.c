@@ -1487,6 +1487,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagen");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
@@ -1567,6 +1568,7 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
@@ -1660,6 +1662,7 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarSoftIncremental");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idf); // Identificador de la imagen incremental (Forzada a idi)
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 
