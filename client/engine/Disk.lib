@@ -1167,12 +1167,15 @@ ID="${3^^}"
 PTTYPE=$(ogGetPartitionTableType $1)
 case "$PTTYPE" in
     GPT)    sgdisk -t$2:$ID $DISK 2>/dev/null ;;
-    MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK &>/dev/null ;;
+    MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK | grep Syncing &>/dev/null ;;
     *)      ogRaiseError $OG_ERR_OUTOFLIMIT "$1,$PTTYPE"
             return $? ;;
 esac
-if [ $? == 0 ]; then
+
+# MSDOS) Correcto si fdisk sin error o con error pero realiza Syncing
+if [ "${PIPESTATUS[1]}" == "0" -o $? -eq 0 ]; then
     partprobe $DISK 2>/dev/null
+    return 0
 else
     ogRaiseError $OG_ERR_PARTITION "$1,$2,$3"
     return $?
