@@ -390,9 +390,10 @@ function getNetworkSettings()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Actualizar cliente OpenGnSys
+# Actualizar cliente OpenGnSys.
 function updateClientFiles()
 {
+	# Actualizar ficheros del cliente.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
@@ -400,7 +401,14 @@ function updateClientFiles()
 		exit 1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	
+	# Hacer coincidir las versiones de Rsync entre servidor y cliente.
+	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
+		[ -e $WORKDIR/opengnsys/client/bin/rsync-3.1.0 ] && mv -f $WORKDIR/opengnsys/client/bin/rsync-3.1.0 $WORKDIR/opengnsys/client/bin/rsync
+	else
+		[ -e $WORKDIR/opengnsys/client/bin/rsync ] && mv -f $WORKDIR/opengnsys/client/bin/rsync $WORKDIR/opengnsys/client/bin/rsync-3.1.0
+	fi
+
+	# Actualizar librerías del motor de clonación.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then

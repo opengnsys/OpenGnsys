@@ -1280,6 +1280,7 @@ function copyServerFiles ()
 
 	local path_opengnsys_base="$1"
 
+	# Lista de ficheros y directorios origen y de directorios destino.
 	local SOURCES=( server/tftpboot \
 			server/bin \
 			repoman/bin \
@@ -1302,6 +1303,7 @@ function copyServerFiles ()
 		exit 1
 	fi
 
+	# Copiar ficheros.
 	echoAndLog "${FUNCNAME}(): copying files to server directories"
 
 	pushd $WORKDIR/opengnsys
@@ -1317,6 +1319,13 @@ function copyServerFiles ()
 			warningAndLog "Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 		fi
 	done
+
+	# Si servidor tiene instalado Rsync > 3.0.9, renombrar el ejecutable
+	# compilado para el cliente.
+	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
+		[ -e client/bin/rsync-3.1.0 ] && mv -f client/bin/rsync-3.1.0 client/bin/rsync
+	fi
+
 	popd
 }
 
