@@ -100,7 +100,7 @@ BOOLEAN CrearSoftIncremental(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_CrearImagen(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_CrearImagenBasica(SOCKET *,TRAMA *);
 BOOLEAN RESPUESTA_CrearSoftIncremental(SOCKET *,TRAMA *);
-BOOLEAN actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*);
+BOOLEAN actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*,char*);
 BOOLEAN actualizaCreacionSoftIncremental(Database,Table,char*,char*);
 BOOLEAN RestaurarImagen(SOCKET *,TRAMA *);
 BOOLEAN RestaurarImagenBasica(SOCKET *,TRAMA *);

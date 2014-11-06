@@ -1948,11 +1948,12 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	// Acciones posteriores
 	idi = copiaParametro("idi",ptrTrama);
+	dsk = copiaParametro("dsk",ptrTrama);
 	par = copiaParametro("par",ptrTrama);
 	cpt = copiaParametro("cpt",ptrTrama);
 	ipr = copiaParametro("ipr",ptrTrama);
 
-	res=actualizaCreacionImagen(db, tbl, idi, par, cpt, ipr, ido);
+	res=actualizaCreacionImagen(db, tbl, idi, dsk, par, cpt, ipr, ido);
 
 	liberaMemoria(idi);
 	liberaMemoria(par);
@@ -1977,6 +1978,7 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- db: Objeto base de datos (ya operativo)
 //		- tbl: Objeto tabla
 //		- idi: Identificador de la imagen
+//		- dsk: Disco de donde se creó
 //		- par: Partición de donde se creó
 //		- cpt: Código de partición
 //		- ipr: Ip del repositorio
@@ -1985,14 +1987,15 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
-	char* cpt, char* ipr, char *ido) {
+BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
+	char* par, char* cpt, char* ipr, char *ido) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaCreacionImagen()";
 	int idr,ifs;
 
 	/* Toma identificador del repositorio correspondiente al ordenador modelo */
-	sprintf(sqlstr, "SELECT repositorios.idrepositorio"
+	snprintf(sqlstr, LONSQL,
+			"SELECT repositorios.idrepositorio"
 			"  FROM repositorios"
 			"  LEFT JOIN ordenadores USING (idrepositorio)"
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
@@ -2010,7 +2013,10 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 	}
 
 	/* Toma identificador del perfilsoftware */
-	sprintf(sqlstr,"SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s", ido,par);
+	snprintf(sqlstr, LONSQL,
+			"SELECT idperfilsoft"
+			"  FROM ordenadores_particiones"
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
@@ -2025,9 +2031,10 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 	}
 
 	/* Actualizar los datos de la imagen */
-	sprintf(sqlstr,
-			"UPDATE imagenes SET numpar=%s,codpar=%s,idperfilsoft=%d,idrepositorio='%d'"
-				" WHERE idimagen=%s", par, cpt, ifs, idr, idi);
+	snprintf(sqlstr, LONSQL,
+			"UPDATE imagenes"
+			"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s, idperfilsoft=%d, idrepositorio=%d, fechacreacion=NOW()"
+			" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
