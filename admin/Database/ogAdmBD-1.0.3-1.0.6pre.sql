@@ -5,15 +5,14 @@
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
 
-# Soportar particiones GPT y añadir información de caché.
+# Soportar particiones GPT, añadir información de caché y fecha de despliegue.
 ALTER TABLE ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
 	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idordenador,
-	ADD cache varchar(500),
+	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
+	ADD cache TEXT NOT NULL;
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
-ALTER TABLE imagenes
-	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio;
 
 # Nuevos tipos de particiones y particiones GPT.
 ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
@@ -61,11 +60,33 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
+# Añadir proxy para aulas.
+ALTER TABLE aulas
+       ADD proxy VARCHAR(30) AFTER dns;
+
+# Valores por defecto para incorporar ordenadores (ticket #609).
+ALTER TABLE ordenadores
+	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
+	ALTER idproautoexec SET DEFAULT 0;
+UPDATE ordenadores
+	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
+
+# Corregir errata en particiones vacías con número de partición asignado al código de partición.
+UPDATE ordenadores_particiones
+	SET codpar = 0
+	WHERE codpar = numpar AND tamano = 0;
+
 # Añadir foto de ordenador.
 ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
 # Actualizar localización de foto de aula (eliminar el camino).
 UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
+
+# Internacionalización correcta de los asistentes.
+UPDATE asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir validación del cliente.
 ALTER TABLE aulas
@@ -94,10 +115,14 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
-# Parámetros para los comandos nuevos.
+# Actualizar y definir parámetros para los comandos nuevos.
 ALTER TABLE parametros
 	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+	(12, 'nci', 'Nombre canónico', '', '', '', 0, 1),
+	(21, 'sfi', 'Sistema de fichero', 'nemonico', 'sistemasficheros', 'nemonico', 1, 0),
+	(22, 'tam', 'Tamaño', '', '', '', 0, 1),
+	(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 0, 1),
 	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
 	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
 	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),
@@ -107,11 +132,15 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
 	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
 
-# Imágenes incrementales.
+# Imágenes incrementales, soporte para varios discos y fecha de creación
+# (tickets #565, #601 y #677).
 ALTER TABLE imagenes
-	ADD tipo TINYINT NULL,
-	ADD imagenid INT NOT NULL DEFAULT '0',
-	ADD ruta VARCHAR(250) NULL;
+	ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
+	ADD numdisk SMALLINT NOT NULL DEFAULT 1 AFTER idordenador,
+	ADD tipo SMALLINT NULL,
+	ADD imagenid INT NOT NULL DEFAULT 0,
+	ADD ruta VARCHAR(250) NULL,
+	ADD fechacreacion DATETIME NULL;
 UPDATE imagenes SET tipo=1;
 
 # Cambio de tipo de grupo.
@@ -168,13 +197,6 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('XFS', 'XFS')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
-# Nuevas particiones marcadas como clonables.
-INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
-	(CONV('EF',16,10), 'EFI', 1),
-	(CONV('AB00',16,10), 'HFS-BOOT', 1),
-	(CONV('EF00',16,10), 'EFI', 1)
-	ON DUPLICATE KEY UPDATE
-		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas
@@ -197,9 +219,4 @@ UPDATE ordenadores_particiones
 ALTER TABLE ordenadores_particiones
 	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
 	MODIFY cache TEXT NOT NULL;
-
-# Mostrar protocolo de clonación en la cola de acciones (ticket #672).
-UPDATE parametros
-	SET tipopa = 0
-	WHERE idparametro = 30;
 

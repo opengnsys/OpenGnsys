@@ -43,10 +43,14 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
 
-# Parámetros para los comandos nuevos.
+# Actualizar y definir parámetros para los comandos nuevos.
 ALTER TABLE parametros
 	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+	(12, 'nci', 'Nombre canónico', '', '', '', 0, 1),
+	(21, 'sfi', 'Sistema de fichero', 'nemonico', 'sistemasficheros', 'nemonico', 1, 0),
+	(22, 'tam', 'Tamaño', '', '', '', 0, 1),
+	(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 0, 1),
 	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
 	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
 	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),
@@ -56,12 +60,15 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
 	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
 
-# Imágenes incrementales y completar soporte para varios discos.
+# Imágenes incrementales, soporte para varios discos y fecha de creación
+# (tickets #565, #601 y #677).
 ALTER TABLE imagenes
-	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio,
-	ADD tipo TINYINT NULL,
+	ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
+	ADD numdisk SMALLINT NOT NULL DEFAULT 1 AFTER idordenador,
+	ADD tipo SMALLINT NULL,
 	ADD imagenid INT NOT NULL DEFAULT '0',
-	ADD ruta VARCHAR(250) NULL;
+	ADD ruta VARCHAR(250) NULL,
+	ADD fechacreacion DATETIME NULL;
 UPDATE imagenes SET tipo=1;
 
 # Cambio de tipo de grupo.
@@ -147,9 +154,4 @@ UPDATE ordenadores_particiones
 ALTER TABLE ordenadores_particiones
 	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
 	MODIFY cache TEXT NOT NULL;
-
-# Mostrar protocolo de clonación en la cola de acciones (ticket #672).
-UPDATE parametros
-	SET tipopa = 0
-	WHERE idparametro = 30;
 

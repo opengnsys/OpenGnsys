@@ -422,12 +422,14 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
   `idrepositorio` int(11) NOT NULL,
+  `idordenador` int(11) NOT NULL,
   `numdisk` smallint NOT NULL DEFAULT 1,
   `numpar` smallint NOT NULL,
   `codpar` int(8) NOT NULL,
   `tipo` tinyint NULL,
-  `imagenid` int NOT NULL DEFAULT '0',
+  `imagenid` int NOT NULL DEFAULT 0,
   `ruta` varchar(250) NULL,
+  `fechacreacion` datetime NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

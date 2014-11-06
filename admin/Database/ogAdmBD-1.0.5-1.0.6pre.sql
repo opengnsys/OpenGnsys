@@ -2,8 +2,13 @@
 # OpenGnSys 1.0.5 - 1.0.6
 #use ogAdmBD
 
-# Incluir fecha de despliegue/restauración (ticket #677) y
-# correcion en eliminar imagen de cache de cliente (ticket #658)
+# Incluir ordenador modelo y fecha de creación de imagen (ticket #677).
+ALTER TABLE imagenes
+	ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
+	ADD fechacreacion DATETIME NULL;
+
+# Incluir fecha de despliegue/restauración de imagen (ticket #677) y
+# correcion en eliminar imagen de cache de cliente (ticket #658).
 ALTER TABLE ordenadores_particiones
 	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
 	MODIFY cache TEXT NOT NULL;

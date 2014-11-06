@@ -7,7 +7,15 @@ DROP PROCEDURE IF EXISTS addcols;
 # Procedimiento para actualización condicional de tablas.
 delimiter '//'
 CREATE PROCEDURE addcols() BEGIN
-	# Incluir fecha de despliegue/restauración (ticket #677).
+	# Incluir ordenador modelo y fecha de creación de imagen (ticket #677).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='fechacreacion' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE imagenes
+			ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
+			ADD fechacreacion DATETIME NULL;
+	END IF;
+	# Incluir fecha de despliegue/restauración de imagen (ticket #677).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='fechadespliegue' AND TABLE_NAME='ordenadores_particiones' AND TABLE_SCHEMA=DATABASE())
 	THEN
