@@ -1227,7 +1227,7 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagen");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
-	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",par); // Número de disco
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición de donde se creó
 	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o código de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojó
@@ -1313,7 +1313,7 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagenBasica");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
-	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",par); // Número de disco
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición de donde se creó
 	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o código de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojó
@@ -1414,7 +1414,7 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearSoftIncremental");
 	lon+=sprintf(ptrTrama->parametros+lon,"idf=%s\r",idf); // Identificador de la imagen incremental
-	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",par); // Número de disco
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	

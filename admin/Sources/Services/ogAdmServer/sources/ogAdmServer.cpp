@@ -1924,7 +1924,7 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	char *iph, *par, *cpt, *ipr, *ido;
+	char *iph, *dsk, *par, *cpt, *ipr, *ido;
 	char *idi;
 	BOOLEAN res;
 	char modulo[] = "RESPUESTA_CrearImagen()";
