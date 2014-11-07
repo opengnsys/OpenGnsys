@@ -67,11 +67,14 @@ if ( $opcion == 1 && $datospost == 1)
 	if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 	if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
 	if (isset($_POST["identificador"])) $idimagen=$_POST["identificador"];
+	if (isset($_POST["modelo"])) $numpar=$_POST["modelo"]; 
+	if (isset($_POST["numdisk"])) $numpar=$_POST["numdisk"]; 
 	if (isset($_POST["numpar"])) $numpar=$_POST["numpar"]; 
 	if (isset($_POST["codpar"])) $codpar=$_POST["codpar"]; 
 	if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
 	if (isset($_POST["imagenid"])) $imagenid=$_POST["imagenid"]; 
 	if (isset($_POST["tipoimg"])) $tipoimg=$_POST["tipoimg"]; 
+	if (isset($_POST["fechacreacion"])) $tipoimg=$_POST["fechacreacion"]; 
 	if (isset($_POST["litamb"])) $litamb=$_POST["litamb"]; 
 	
 
@@ -103,7 +106,7 @@ if ( $opcion == 1 && $datospost == 1)
 	<INPUT type="hidden" name="tipoimg" value="<?=$tipoimg?>">
 	<INPUT type="hidden" name="litamb" value="<?=$litamb?>">
 	<INPUT type="hidden" name="datospost" value="1">
-	<?
+	<?php
 		switch($tipoimg){
 		case $IMAGENES_MONOLITICAS:
 			$lit=$TbMsg[4];
@@ -153,18 +156,7 @@ if ( $opcion == 1 && $datospost == 1)
 			?>
 		</TR>	
 	<?}?>
-	<!-------------------------------------------------------------------------------------->
-	<?if($tipoimg!=$IMAGENES_INCREMENTALES){?>
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
-					echo '<TD>'.$numpar.'
-					&nbsp;<INPUT type="hidden" name="numpar" value="'.$numpar.'"></TD>';
-				else
-					echo '<TD><INPUT  class="formulariodatos" name=numpar style="width:30" type=text value="'.$numpar.'"></TH>';
-			?>
-		</TR>
+	<?php if($tipoimg!=$IMAGENES_INCREMENTALES){?>
 	<!-------------------------------------------------------------------------------------->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
@@ -207,6 +199,25 @@ if ( $opcion == 1 && $datospost == 1)
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TH>';
 			?>
 		</TR>
+		<!-- Equipo modelo (aula) -->
+		<tr>
+			<th align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</th>
+			<td>&nbsp;<?php echo $modelo ?>
+			    &nbsp;<input type="hidden" name="modelo" value="<?php echo $modelo ?>">
+		</tr>
+		<!-- Disco y partición -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[8]?>&nbsp;</th>
+			<td>&nbsp;<?php if (! empty ($modelo)) echo "$numdisk, $numpar" ?>
+			    &nbsp;<input type="hidden" name="numdisk" value="<?php echo $numdisk ?>">
+			    &nbsp;<input type="hidden" name="numpar" value="<?php echo $numpar ?>"></td>
+		</tr>
+		<!-- Fecha de creación -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[20]?>&nbsp;</th>
+			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion" ?>
+			    &nbsp;<input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
+		</tr>
 		<!-------------------------------------------------------------------------------------->
 
 		<TR>
@@ -264,21 +275,26 @@ function TomaPropiedades($cmd,$idmagen){
 	global $descripcion;
 	global $comentarios;
 	global $idperfilsoft;
+	global $modelo;
+	global $numdisk;
 	global $numpar;
 	global $codpar;
 	global $tipopar;
 	global $nombrerepositorio;
 	global $idrepositorio;
-	global $perfilsoft;		
-	global $imagenid;		
+	global $perfilsoft;
+	global $imagenid;
+	global $fechacreacion;
 	
 	$rs=new Recordset; 
-	$cmd->texto="SELECT imagenes.*,tipospar.tipopar,repositorios.nombrerepositorio,perfilessoft.descripcion as perfilsoft
-					FROM imagenes
-					LEFT OUTER JOIN tipospar ON tipospar.codpar=imagenes.codpar
-					LEFT OUTER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
-					LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=imagenes.idperfilsoft
-					 WHERE imagenes.idimagen=".$idmagen;
+	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, perfilessoft.descripcion AS perfilsoft, CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo
+			FROM imagenes
+			LEFT OUTER JOIN tipospar ON tipospar.codpar=imagenes.codpar
+			LEFT OUTER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
+			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=imagenes.idperfilsoft
+			LEFT OUTER JOIN ordenadores ON ordenadores.idordenador=imagenes.idordenador
+			JOIN aulas ON ordenadores.idaula=aulas.idaula
+			WHERE imagenes.idimagen=".$idmagen;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(0); // Error al abrir recordset
 	$rs->Primero(); 
@@ -288,6 +304,8 @@ function TomaPropiedades($cmd,$idmagen){
 		$descripcion=$rs->campos["descripcion"];		
 		$idperfilsoft=$rs->campos["idperfilsoft"];
 		$comentarios=$rs->campos["comentarios"];
+		$modelo=$rs->campos["modelo"];
+		$numdisk=$rs->campos["numdisk"];
 		$numpar=$rs->campos["numpar"];
 		$tipopar=$rs->campos["tipopar"];
 		$codpar=$rs->campos["codpar"];
@@ -295,6 +313,7 @@ function TomaPropiedades($cmd,$idmagen){
 		$nombrerepositorio=$rs->campos["nombrerepositorio"];
 		$perfilsoft=$rs->campos["perfilsoft"];
 		$imagenid=$rs->campos["imagenid"];
+		$fechacreacion=$rs->campos["fechacreacion"];
 		$rs->Cerrar();
 		return(true);
 	}

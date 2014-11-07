@@ -13,7 +13,7 @@ $TbMsg[4]="Gestión Imágenes Monolíticas";
 $TbMsg[5]="Descripción";
 $TbMsg[6]="Perfil Software";
 $TbMsg[7]="Comentarios";
-$TbMsg[8]="Partición";
+$TbMsg[8]="Disco, Partición";
 $TbMsg[9]="Tipo partición";
 $TbMsg[10]="Repositorio";
 $TbMsg[11]="Nombre";
@@ -25,4 +25,6 @@ $TbMsg[15]="ATENCIÓN.- Una imagen que tiene perfil software indica que en algú
 $TbMsg[16]="Ruta Origen";
 $TbMsg[17]='"Nombre canónico fichero-imagen existe : Introduzca otro nombre"';
 $TbMsg[18]="Introduzca otro Nombre";
+$TbMsg[19]="Equipo modelo";
+$TbMsg[20]="Fecha de creación";
 ?>

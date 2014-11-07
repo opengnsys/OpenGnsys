@@ -835,10 +835,11 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					" tamano=%s,"
 					" idsistemafichero=%d,"
 					" idnombreso=%d,"
-					" idimagen=%d,"
-					" idperfilsoft=%d"
+					" idimagen=0,"
+					" idperfilsoft=0,"
+					" fechadespliegue=NULL"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
-					cpt, tam, idsfi, idsoi, 0, 0, ido, disk, par);
+					cpt, tam, idsfi, idsoi, ido, disk, par);
 				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 					errorLog(modulo, 21, FALSE);
 					db.GetErrorErrStr(msglog);
