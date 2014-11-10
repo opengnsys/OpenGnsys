@@ -293,7 +293,7 @@ function TomaPropiedades($cmd,$idmagen){
 			LEFT OUTER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=imagenes.idperfilsoft
 			LEFT OUTER JOIN ordenadores ON ordenadores.idordenador=imagenes.idordenador
-			JOIN aulas ON ordenadores.idaula=aulas.idaula
+			LEFT OUTER JOIN aulas ON ordenadores.idaula=aulas.idaula
 			WHERE imagenes.idimagen=".$idmagen;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(0); // Error al abrir recordset
