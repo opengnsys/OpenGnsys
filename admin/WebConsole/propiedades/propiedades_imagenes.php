@@ -26,8 +26,8 @@ $idimagen=0;
 $nombreca="";
 $ruta="";
 $descripcion="";
-$modelo=""
-$numdisk=0
+$modelo="";
+$numdisk=0;
 $numpar=0;
 $codpar=0;
 $idperfilsoft=0;
@@ -37,6 +37,7 @@ $grupoid=0;
 $litamb="";
 $tipoimg=0;
 $idrepositorio=0;
+$fechacreacion="";
 $imagenid=0;
 if (isset($_POST["validnombreca"])) {$opcion=$_POST["validnombreca"];}else{$validnombreca="";} // Recoge parametros
 if (isset($_POST["datospost"])) {$datospost=$_POST["datospost"];}else{$datospost=0;} // Recoge parametros
@@ -76,7 +77,7 @@ if ( $opcion == 1 && $datospost == 1)
 	if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
 	if (isset($_POST["imagenid"])) $imagenid=$_POST["imagenid"]; 
 	if (isset($_POST["tipoimg"])) $tipoimg=$_POST["tipoimg"]; 
-	if (isset($_POST["fechacreacion"])) $tipoimg=$_POST["fechacreacion"]; 
+	if (isset($_POST["fechacreacion"])) $fechacreacion=$_POST["fechacreacion"]; 
 	if (isset($_POST["litamb"])) $litamb=$_POST["litamb"]; 
 	
 
