@@ -96,7 +96,7 @@ echo " " > $OGLOGCOMMAND
 ogCleanOs $1 $2
 
 #Comprobar espacio que requerira la imagen para ser almacenada
-read SIZEDATA SIZEREQUIRED ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3" ; echo $?)
+read SIZEDATA SIZEREQUIRED ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3")
 
 ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED"
 [ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
