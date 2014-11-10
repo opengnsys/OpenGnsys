@@ -20,7 +20,6 @@ ALTER TABLE ordenadores_particiones
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 
 # Nuevos tipos de particiones y particiones GPT.
-ALTER TABLE imagenes MODIFY codpar int(8) NOT NULL;
 ALTER TABLE sistemasficheros MODIFY codpar int(8) NOT NULL;
 ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
@@ -118,11 +117,15 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 # Imágenes incrementales, soporte para varios discos y fecha de creación
 # (tickets #565, #601 y #677).
 ALTER TABLE imagenes
-	ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
-	ADD numdisk SMALLINT NOT NULL DEFAULT 1 AFTER idordenador,
+	MODIFY idrepositorio INT(11) NOT NULL DEFAULT 0,
+	MODIFY numpar SMALLINT NOT NULL DEFAULT 0,
+	MODIFY codpar INT(8) NOT NULL DEFAULT 0,
+	ADD idordenador INT(11) NOT NULL DEFAULT 0 AFTER idrepositorio,
+	ADD numdisk SMALLINT NOT NULL DEFAULT 0 AFTER idordenador,
 	ADD tipo SMALLINT NULL,
+	ADD imagenid INT NOT NULL DEFAULT 0,
 	ADD ruta VARCHAR(250) NULL,
-	ADD fechacreacion DATETIME NULL;
+	ADD fechacreacion DATETIME DEFAULT NULL;
 UPDATE imagenes SET tipo=1;
 
 # Cambio de tipo de grupo.

@@ -421,15 +421,15 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `idcentro` int(11) DEFAULT NULL,
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idrepositorio` int(11) NOT NULL,
-  `idordenador` int(11) NOT NULL,
-  `numdisk` smallint NOT NULL DEFAULT 1,
-  `numpar` smallint NOT NULL,
-  `codpar` int(8) NOT NULL,
+  `idrepositorio` int(11) NOT NULL DEFAULT 0,
+  `idordenador` int(11) NOT NULL DEFAULT 0,
+  `numdisk` smallint NOT NULL DEFAULT 0,
+  `numpar` smallint NOT NULL DEFAULT 0,
+  `codpar` int(8) NOT NULL DEFAULT 0,
   `tipo` tinyint NULL,
   `imagenid` int NOT NULL DEFAULT 0,
   `ruta` varchar(250) NULL,
-  `fechacreacion` datetime NULL,
+  `fechacreacion` datetime DEFAULT NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

@@ -2,10 +2,15 @@
 # OpenGnSys 1.0.5 - 1.0.6
 #use ogAdmBD
 
-# Incluir ordenador modelo y fecha de creación de imagen (ticket #677).
+# Incluir ordenador modelo y fecha de creación de imagen y
+# establecer valores por defecto (ticket #677).
 ALTER TABLE imagenes
-	ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
-	ADD fechacreacion DATETIME NULL;
+	MODIFY idrepositorio INT(11) NOT NULL DEFAULT 0,
+	MODIFY numdisk SMALLINT NOT NULL DEFAULT 0,
+	MODIFY numpar SMALLINT NOT NULL DEFAULT 0,
+	MODIFY codpar INT(8) NOT NULL DEFAULT 0,
+	ADD idordenador INT(11) NOT NULL DEFAULT 0 AFTER idrepositorio,
+	ADD fechacreacion DATETIME DEFAULT NULL;
 
 # Incluir fecha de despliegue/restauración de imagen (ticket #677) y
 # correcion en eliminar imagen de cache de cliente (ticket #658).

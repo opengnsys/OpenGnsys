@@ -7,13 +7,25 @@ DROP PROCEDURE IF EXISTS addcols;
 # Procedimiento para actualización condicional de tablas.
 delimiter '//'
 CREATE PROCEDURE addcols() BEGIN
-	# Incluir ordenador modelo y fecha de creación de imagen (ticket #677).
+	# Incluir ordenador modelo y fecha de creación de imagen y
+	# establecer valores por defecto (ticket #677).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='fechacreacion' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
 	THEN
 		ALTER TABLE imagenes
-			ADD idordenador INT(11) NOT NULL AFTER idrepositorio,
-			ADD fechacreacion DATETIME NULL;
+			MODIFY idrepositorio INT(11) NOT NULL DEFAULT 0,
+			MODIFY numdisk SMALLINT NOT NULL DEFAULT 0,
+			MODIFY numpar SMALLINT NOT NULL DEFAULT 0,
+			MODIFY codpar INT(8) NOT NULL DEFAULT 0,
+			ADD idordenador INT(11) NOT NULL DEFAULT 0 AFTER idrepositorio,
+			ADD fechacreacion DATETIME DEFAULT NULL;
+	else
+		ALTER TABLE imagenes
+			MODIFY idrepositorio INT(11) NOT NULL DEFAULT 0,
+			MODIFY idordenador INT(11) NOT NULL DEFAULT 0,
+			MODIFY numdisk SMALLINT NOT NULL DEFAULT 0,
+			MODIFY numpar SMALLINT NOT NULL DEFAULT 0,
+			MODIFY codpar INT(8) NOT NULL DEFAULT 0;
 	END IF;
 	# Incluir fecha de despliegue/restauración de imagen (ticket #677).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
