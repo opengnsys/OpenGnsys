@@ -100,15 +100,19 @@ function tomaPropiedades($cmd,$ido){
 }
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
-	UHU - 2013/05/17 - Ahora las imagenes pueden ser en cualquier disco
+//	UHU - 2013/05/17 - Ahora las imagenes pueden ser en cualquier disco
+//	Version 0.1: La consulta SQL se limita a IMAGENES_MONOLITICAS.
+//		US ETSII - Irina Gomez - 2014-11-11
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,$masterip)
 {
+	global $IMAGENES_MONOLITICAS;
 	$SelectHtml="";
-	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.idperfilsoft, repositorios.nombrerepositorio
-				FROM  imagenes INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
-				WHERE imagenes.idrepositorio=".$idrepositorio ." OR repositorios.ip='" .$masterip ."'";
-	//echo $cmd->texto;
+	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,
+			imagenes.idperfilsoft, repositorios.nombrerepositorio
+			FROM  imagenes INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
+			WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
+			AND imagenes.idrepositorio=".$idrepositorio ." OR repositorios.ip='" .$masterip ."'";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$disk."_".$particion.'" style="WIDTH: 300">';
@@ -127,33 +131,6 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
-
-function HTMLSELECT_imagenesORIGINAL($cmd,$idrepositorio,$idperfilsoft,$particion,$masterip)
-{
-	$SelectHtml="";
-	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.idperfilsoft 
-				FROM  imagenes INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
-				WHERE imagenes.idrepositorio=".$idrepositorio ." OR repositorios.ip='" .$masterip ."'";
-	//echo $cmd->texto;
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$particion.'" style="WIDTH: 300">';
-	$SelectHtml.= '    <OPTION value="0"></OPTION>';
-	if ($rs->Abrir()){
-		$rs->Primero(); 
-		while (!$rs->EOF){
-			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["nombreca"].'"';
-			if($idperfilsoft==$rs->campos["idperfilsoft"]) $SelectHtml.=" selected ";
-			$SelectHtml.='>';
-			$SelectHtml.= $rs->campos["descripcion"].'</OPTION>';
-			$rs->Siguiente();
-		}
-		$rs->Cerrar();
-	}
-	$SelectHtml.= '</SELECT>';
-	return($SelectHtml);
-}
-
 
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los repositorios
