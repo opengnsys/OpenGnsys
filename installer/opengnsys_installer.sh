@@ -285,8 +285,13 @@ case "$OSDISTRIB" in
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Incluir repositorio de paquetes EPEL y paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release procps )
-		# Sustituir MySQL por MariaDB a partir de CentOS 7.
-		[ $OSVERSION -ge 7 ] && DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
+		# Cambios a aplicar a partir de CentOS 7.
+		if [ $OSVERSION -ge 7 ]; then
+			# Sustituir MySQL por MariaDB.
+			DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
+			# Instalar arp-scan de CentOS 6 (no disponible en CentOS 7).
+			DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
+		fi
 		;;
 	fedora)	# Postconfiguación personalizada para Fedora. 
 		# Incluir paquetes específicos.

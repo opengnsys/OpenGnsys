@@ -93,13 +93,16 @@ local i
 
 # Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
 if [ -f /etc/os-release ]; then
-        source /etc/os-release
-        OSDISTRIB="$ID"
+	source /etc/os-release
+	OSDISTRIB="$ID"
+	OSVERSION="$VERSION_ID"
 else
-        OSDISTRIB=$(lsb_release -is 2>/dev/null)
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+	OSVERSION=$(lsb_release -rs 2>/dev/null)
 fi
-# Convertir a minúsculas para evitar errores.
+# Convertir distribución a minúsculas y obtener solo el 1er número de versión.
 OSDISTRIB="${OSDISTRIB,,}"
+OSVERSION="${OSVERSION%%.*}"
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
@@ -122,6 +125,8 @@ case "$OSDISTRIB" in
 		;;
         fedora|centos)
 		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng arp-scan )
+		# En CentOS 7 instalar arp-scan de CentOS 6.
+		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		if which systemctl &>/dev/null; then
