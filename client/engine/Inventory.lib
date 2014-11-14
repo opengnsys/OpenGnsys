@@ -264,6 +264,9 @@ lshw | awk 'BEGIN {type="mod";}
 #@version 1.0.5 - Aproximación para inventario de software de Mac OS.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-10-08
+#@version 1.0.6 - Proceso depende del tipo de SO y sporte para FreeBSD.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-11-13
 #*/ ##
 function ogListSoftware ()
 {
@@ -279,11 +282,11 @@ fi
 [ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Obtener tipo de sistema de archivos y montarlo.
-TYPE=$(ogGetFsType $1 $2) || return $?
 MNTDIR=$(ogMount $1 $2) || return $?
+TYPE=$(ogGetOsType $1 $2) || return $?
 
 case "$TYPE" in
-    EXT[234]|REISERFS|REISER4)          # Software de GNU/Linux.
+    Linux)          # Software de GNU/Linux.
         # Procesar paquetes dpkg.
         DPKGDIR="${MNTDIR}/var/lib/dpkg"
         if [ -r $DPKGDIR ]; then
@@ -297,7 +300,7 @@ case "$TYPE" in
                                  vers=$2}
                      /Status:/  {if ($2!="install") pack=vers=""}
                      END        {if (pack!="") print pack,vers}
-                    ' $MNTDIR/var/lib/dpkg/status | sort | uniq
+                    ' $DPKGDIR/status | sort | uniq
             else
                 # FIXME Sólo 32 bits
                 chroot "$MNTDIR" /usr/bin/dpkg -l | \
@@ -309,14 +312,17 @@ case "$TYPE" in
         # Procesar paquetes RPM.
         RPMDIR="${MNTDIR}/var/lib/rpm"
         if [ -r $RPMDIR ]; then
-            # Correccion inconsistencia de version de base de datos.
-            #    rm -f ${RPMDIR}/__db.*
-            #    rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" | \
-            # FIXME Sólo 32 bits
-            chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
-                   awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | \
-                   sort | uniq
-           	#    rm -f ${RPMDIR}/__db.*
+            # Listar si está instalado el paquete "rpm" en el cliente.
+            if which rpm &>/dev/null; then
+                rm -f ${RPMDIR}/__db.*
+                rpm --dbpath $RPMDIR -qa --qf "%{NAME} %{VERSION}\n" 2>/dev/null | \
+                    awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | sort | uniq
+                rm -f ${RPMDIR}/__db.*
+            else
+                # FIXME Sólo 32 bits
+                chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
+                    awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | sort | uniq
+            fi
         fi
         # Procesar paquetes pacman.
         PACMANDIR="${MNTDIR}/var/lib/pacman/local"
@@ -325,7 +331,7 @@ case "$TYPE" in
             ls -A $PACMANDIR
         fi
         ;;
-    NTFS|HNTFS|FAT32|HFAT32)            # Software de Windows.
+    Windows)        # Software de Windows.
         # Claves de registro para programas instalados: formato "{clave}".
         KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
         KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
@@ -345,17 +351,22 @@ case "$TYPE" in
             fi
         done) | sort | uniq
         ;;
-    HFS|HFSPLUS)                        # Software de Mac OS.
+    MacOS)          # Software de Mac OS.
         # Listar directorios de aplicaciones (falta buscar versiones en ficheros .plist).
         find "${MNTDIR}/Applications" -type d -name "*.app" -prune -print | \
                 while read k; do
                     echo "$(basename "$k" .app)"
                 done | sort
         ;;
+    BSD)            # Software de FreeBSD.
+        sqlite3 $MNTDIR/var/db/pkg/local.sqlite <<<"SELECT name FROM pkg_search;" 2>/dev/null | \
+                sed 's/\(.*\)-\(.*\)/\1 \2/g' | sort
+        ;;
     *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
         return $? ;;
 esac
 }
+
 
 #/**  @function ogInfoCache: @brief muestra la informacion de la CACHE.
 #@param  sin parametros

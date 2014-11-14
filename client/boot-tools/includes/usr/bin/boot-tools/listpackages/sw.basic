@@ -16,3 +16,5 @@ install python
 install php5-cli
 install dmidecode 
 install realpath
+install rpm
+install sqlite3
