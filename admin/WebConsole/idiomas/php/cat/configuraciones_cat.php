@@ -58,7 +58,7 @@ $TbMsg[42]='Variable';
 $TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
 $TbMsg[44]='Equip sense Perfil de Hardware';
 $TbMsg[45]='Afegeixi Perfil per obtenir dades';
-$TbMsg[495]='Contingut Caché';
+$TbMsg[495]='Data/Caché';
 $TbMsg[4951]='Caché lliure';
 ?>
 

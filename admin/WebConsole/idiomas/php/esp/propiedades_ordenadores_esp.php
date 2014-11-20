@@ -28,7 +28,7 @@ $TbMsg[17]="Pagina validación";
 $TbMsg[509]="Foto ordenador";
 $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
-$TbMsg[495]="Contenido cach&eacute;";
+$TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
 ?>
 

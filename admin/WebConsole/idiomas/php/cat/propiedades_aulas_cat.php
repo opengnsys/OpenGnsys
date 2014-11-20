@@ -40,7 +40,7 @@ $TbMsg[30]="Validació";
 $TbMsg[31]="Pàgina login";
 $TbMsg[32]="Pàgina validació";
 // UHU
-$TbMsg[495]="Contingut cache";
+$TbMsg[495]="Data/Caché";
 $TbMsg[509]="Foto ordinador";
 $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";

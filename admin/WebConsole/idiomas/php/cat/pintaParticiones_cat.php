@@ -21,7 +21,7 @@ $TbMsg["DISK"]='Disco';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 
 $TbMsg["VARIABLE"]='Variable';
-$TbMsg["CACHE_CONTENT"]='Contenido cach&eacute;';
+$TbMsg["CACHE_CONTENT"]='Data/Caché';
 $TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
 
 $TbMsg["SAMESYSTEM_IMAGE"]='Imagen (Mismo sistema)';

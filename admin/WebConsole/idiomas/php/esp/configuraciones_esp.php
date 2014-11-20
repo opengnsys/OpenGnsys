@@ -58,7 +58,7 @@ $TbMsg[42]='Variable';
 $TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
 $TbMsg[44]='Equipo sin perfil de hardware';
 $TbMsg[45]='Agregue perfil para obtener datos';
-$TbMsg[495]='Contenido cach&eacute;';
+$TbMsg[495]='Fecha/Cach&eacute;';
 $TbMsg[4951]='Cach&eacute; libre';
 ?>
 
