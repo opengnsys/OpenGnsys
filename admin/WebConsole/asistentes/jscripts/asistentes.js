@@ -9,6 +9,7 @@
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
+var command ;
 switch (form.idmetodo.value)
 {
 	case "MULTICAST":
@@ -21,7 +22,7 @@ switch (form.idmetodo.value)
 //form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " 1 " + form.PartOrigen.value + "  " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " 1 " + form.PartOrigen.value + " " + form.tool.value + " " + form.compresor.value;
 command="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
 form.codigo.value="\
-ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + comand + "\"\n \
+ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \
 ogExecAndLog command " + command + " \n ";
 }
 
