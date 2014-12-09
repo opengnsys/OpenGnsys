@@ -166,7 +166,7 @@ if ( $opcion == 1 && $datospost == 1)
 			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
 			<?php
 				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
-					echo '<td>'.$tipopar.' ('.$codpar.')
+					echo '<td>'.$tipopar.' ('.dechex($codpar).')
 					&nbsp;<input type="hidden" name="codpar" value="'.$codpar.'"></td>';
 				else
 					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar',"CONCAT(CASE WHEN codpar BETWEEN 1 AND 255 THEN '1-MSDOS' WHEN codpar BETWEEN 256 AND 65535 THEN '2-GPT' ELSE codpar END,': ',tipopar,' (',HEX(codpar),')')",170,"","","clonable=1").'</td>';

@@ -24,8 +24,8 @@ $TbMsg["VARIABLE"]='Variable';
 $TbMsg["CACHE_CONTENT"]='Data/Caché';
 $TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
 
-$TbMsg["SAMESYSTEM_IMAGE"]='Imagen (Mismo sistema)';
-$TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (Distinto sistema)';
+$TbMsg["SAMESYSTEM_IMAGE"]='Imagen (mismo tipo partici&oacute;n)';
+$TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (distinto tipo partici&oacute;n)';
 $TbMsg["RESTORE_METHOD"]='M&eacute;todo';
 
 $TbMsg["SO_NAME"]='Nombre S.O.';
