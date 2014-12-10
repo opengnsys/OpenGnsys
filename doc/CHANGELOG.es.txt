@@ -14,6 +14,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #675	Bucle infinito al reducir sistema de archivos NTFS menor de 1 GB
 
 Tickets resueltos en módulo OpenGnSys Client:
+#136	Splash de arranque con Plymouth (no se resolverá)
 #649	El arranque gráfico del ogLive depende del hardware (no se resolverá)
 #656	Script updateCache: erratas en imágenes sincronizadas
 #657	Sincronizadas tipo archivo: adaptación a ogclient 1.0.5
@@ -33,12 +34,16 @@ Tickets resueltos en módulo OpenGnSys Installer:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #654	Eliminar imagen de caché duplica algunas imágenes.
+#655	Gestión Arranque Avanzado: opción eliminar no muestra plantillas (no válido)
 #658	Correccion en eliminar imagen de caché de cliente
 #661	Error al mostrar configuración de varios equipos con caché
 #665	Comando Iniciar Sesión toma datos incorrectos para aulas
-#667	Resolución de los menús en la configuración PXE (no se resolverá)
+#666	Asistente de particiones remotas no genera la instrucción a ejecutar
+#667	Resolución de los menús en la configuración PXE (no válido)
 
 Tickets genéricos resueltos:
+#670	Las copias en trunk y tags no mantienen los cambios del svn realizados en branches (informativo)
+#677	Incluir datos de creación y despliegue de imagen
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.5

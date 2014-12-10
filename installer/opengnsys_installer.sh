@@ -599,6 +599,7 @@ function mysqlDbExists()
 	fi
 }
 
+# Comprueba si la base de datos está vacía.
 function mysqlCheckDbIsEmpty()
 {
 	if [ $# -ne 1 ]; then
@@ -624,7 +625,14 @@ function mysqlCheckDbIsEmpty()
 
 }
 
-
+# Importa un fichero SQL en la base de datos.
+# Parámetros:
+# - 1: nombre de la BD.
+# - 2: fichero a importar.
+# Nota: el fichero SQL puede contener las siguientes palabras reservadas:
+# - SERVERIP: se sustituye por la dirección IP del servidor.
+# - DBUSER: se sustituye por usuario de conexión a la BD definido en este script.
+# - DBPASSWD: se sustituye por la clave de conexión a la BD definida en este script.
 function mysqlImportSqlFileToDb()
 {
 	if [ $# -ne 2 ]; then
@@ -686,7 +694,7 @@ function mysqlCreateDb()
 	return 0
 }
 
-
+# Comprueba si ya está definido el usuario de acceso a la BD.
 function mysqlCheckUserExists()
 {
 	if [ $# -ne 1 ]; then
@@ -744,6 +752,7 @@ EOF
 ####### Funciones para el manejo de Subversion
 #####################################################################
 
+# Obtiene el código fuente del proyecto desde el servidor SVN.
 function svnExportCode()
 {
 	if [ $# -ne 1 ]; then
@@ -886,6 +895,7 @@ EOF
 	testPxe
 }
 
+# Comprueba que haya conexión al servicio TFTP/PXE.
 function testPxe ()
 {
 	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
