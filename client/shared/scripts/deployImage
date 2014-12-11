@@ -170,7 +170,7 @@ ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3
 
 if which configureOsCustom &>/dev/null; then
     ogEcho log session "[90] configureOsCustom"
-    configureOsCustom "$DISK" "$PART"
+    configureOsCustom "$DISK" "$PART" "$REPO" "$IMGNAME"
 else
     ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE "
     configureOs "$DISK" "$PART"
