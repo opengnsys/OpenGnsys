@@ -188,7 +188,7 @@
 	echo "Ejecutando configure OS" | tee -a $OGLOGSESSION $OGLOGFILE	
 	if which configureOsCustom &>/dev/null; then
 		ogEcho log session "[90] configureOsCustom"
-		configureOsCustom "$DISCO" "$NPART"
+		configureOsCustom "$DISCO" "$NPART" "$IPREPOSITORIO" "$NOMBREIMG"
 	else
 		ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE "
 		configureOs "$DISCO" "$NPART"

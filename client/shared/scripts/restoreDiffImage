@@ -126,7 +126,7 @@ ogExecAndLog command ogRestoreInfoImage "$4" "$5"
 # Llamar al script de post-configuración del sistema operativo.
 if which configureOsCustom &>/dev/null; then
         ogEcho log session "[90] configureOsCustom"
-        configureOsCustom "$4" "$5"
+        configureOsCustom "$4" "$5" "$1" "$2"
 else
 	ogEcho log session "[90] $MSG_HELP_configureOs." 
 	configureOs $4 $5 

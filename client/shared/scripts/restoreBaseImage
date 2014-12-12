@@ -139,8 +139,7 @@ ogExecAndLog command ogRestoreInfoImage $3 $4
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
    if which configureOsCustom &>/dev/null; then
 	ogEcho log session "[90] configureOsCustom"
-	# Enviamos todos los parametros.
-	configureOsCustom "$1" "$2" "$3" "$4"
+	configureOsCustom "$3" "$4" "$1" "$2"
    else
 	ogEcho log session "[90] $MSG_HELP_configureOs" 
 	configureOs $3 $4 

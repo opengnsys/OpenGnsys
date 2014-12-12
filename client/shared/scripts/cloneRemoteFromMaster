@@ -283,7 +283,9 @@ case $MASTERIP in
  				esac						
 			if which configureOsCustom &>/dev/null; then
 				ogEcho log session "[90] configureOsCustom $DISKTARGET $PARTTARGET"
-				configureOsCustom $DISKTARGET $PARTTARGET
+				# Si $2 = num_disk las varibles REPO IMGNAME estan vacias
+				! [[  $2 =~ ^[0-9]+$ ]] && REPO="$2" && IMGNAME="$3"
+				configureOsCustom $DISKTARGET $PARTTARGET $REPO $IMGNAME
 			else
 				ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE $DISKTARGET $PARTTARGET"
 				configureOs $DISKTARGET $PARTTARGET			
