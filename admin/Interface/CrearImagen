@@ -51,14 +51,6 @@ if [ "$CALLER" != "ogAdmClient" ]; then
 	exit $?
 fi
 
-# Si el origen(pariticion) esta bloqueada salir.
-
-#if ogIsLocked $1 $2; then
-#	ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION, $1 $2"
-#	exit $?
-#fi
-
-
 # Valor por defecto para el repositorio.
 REPO=${4:-"REPO"}
 [ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
@@ -73,24 +65,16 @@ then
 	[ $RETVAL -gt 0 ] && exit $RETVAL 	
 fi
 
-
-
-if [ -f createImage$ogengine ]; then
-	createImage$ogengine "$1" "$2" "$REPO" /"$3" &>> $OGLOGCOMMAND
+# Si existe, ejecuta script personalizado "createImageCustom"; si no, llama al genérico "createImage".
+if which createImageCustom &>/dev/null; then
+	createImageCustom "$1" "$2" "$REPO" /"$3" &>> $OGLOGCOMMAND
 else
 	createImage "$1" "$2" "$REPO" /"$3" &>> $OGLOGCOMMAND
 fi
 RETVAL=$?
 
+# Cambiar acceso a modo usuario, si es necesario.
 [ "$REPO" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
-
-#if [ $RETVAL == 0 ]
-#then
-#rm $OGLOGFILE
-#	touch $OGLOGFILE
-#else
-#	echo $RETVAL &>> $OGLOGFILE
-#fi
 
 # Registro de fin de ejecución
 ogEcho log session "$MSG_INTERFACE_END $RETVAL"

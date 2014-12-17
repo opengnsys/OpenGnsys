@@ -1,0 +1,24 @@
+#!/bin/bash
+#/**
+#         createImageCustom
+#@brief   Plantilla para scirpt de creación personalizada de imagen
+#@param   $1 disco 
+#@param   $2 particion 
+#@param   $3 Repositorio: CACHE, REPO o dirección IP
+#@param   $4 Nombre canónico de la imagen sin extensión
+#@warning Renombrar este fichero como "createImageCustom".
+
+
+# Control de parámetros.
+[ $# -eq 4 ] || exit
+
+# Parámetros.
+DISK="$1"
+PART="$2"
+REPO="${3^^}"			# En mayúsculas.
+IMGNAME="$4"
+
+
+# Añadir aquí el código de creación personalizada.
+
+
