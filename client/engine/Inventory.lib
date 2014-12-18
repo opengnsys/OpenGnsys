@@ -352,10 +352,14 @@ case "$TYPE" in
         done) | sort | uniq
         ;;
     MacOS)          # Software de Mac OS.
-        # Listar directorios de aplicaciones (falta buscar versiones en ficheros .plist).
+        # Listar directorios de aplicaciones e intentar obtener la versión del fichero .plist (tanto original como descomprimido).
         find "${MNTDIR}/Applications" -type d -name "*.app" -prune -print | \
                 while read k; do
-                    echo "$(basename "$k" .app)"
+                    FILE="$k/Contents/version.plist"
+                    [ -s "$FILE" ] || FILE="$k/Contents/version.plist.uncompress"
+                    [ -s "$FILE" ] && VERSION=$(awk -F"[<>]" '/ShortVersionString/ {getline;v=$3}
+                                                              END {print v}' "$FILE")
+                    echo "$(basename "$k" .app) $VERSION"
                 done | sort
         ;;
     BSD)            # Software de FreeBSD.
