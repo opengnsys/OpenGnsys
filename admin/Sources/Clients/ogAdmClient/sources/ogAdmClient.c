@@ -452,15 +452,13 @@ BOOLEAN cuestionCache(char* tam)
 // ________________________________________________________________________________________________________
 int cargaPaginaWeb(char *url)
 {
+	pid_t pidbrowser; // Identificador del proceso que se crea para mostrar una página web con el browser
 	int resul=0;
 	char* argumentos[4];
 	char modulo[] = "cargaPaginaWeb()";
 
-	if(pidbash>0)
-		kill(pidbash,SIGQUIT); // Destruye el proceso hijo del proceso bash si existiera una conmutación
-
-	if(pidbrowser>0)
-		kill(pidbrowser,SIGQUIT); // Destruye el proceso hijo anterior y se queda sólo el actual
+	// Destruye los procesos del Browser y lanza uno nuevo.
+	system("pkill -9 browser");
 
 	sprintf(interface,"/opt/opengnsys/bin/browser");
 	sprintf(parametros,"browser -qws %s",url);

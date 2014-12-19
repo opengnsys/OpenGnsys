@@ -41,8 +41,6 @@ int herror;
 
 BOOLEAN CMDPTES; // Para bucle de comandos pendientes
 
-pid_t  pidbrowser; // Identificador del proceso que se crea para mostrar una página web con el browser
-pid_t  pidbash; // Identificador del proceso que se crea cuando se conmuta el browser
 
 char urlmenu[MAXLONURL]; // Url de la pagina de menu para el browser
 char urlmsg[MAXLONURL]; // Url de la página de mensajed para el browser
