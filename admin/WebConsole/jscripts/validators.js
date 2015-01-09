@@ -60,10 +60,10 @@ function validate_ipadress_notnull(value) {
 	return validate_ipadress(value) && validate_notnull(value);
 }
 
-// Validar direccion MAC
+// Validar direccion MAC (sin contar caracteres ":").
 function validate_macaddress(value) {
 	var regex = '^([0-9a-fA-F]){12}$'
-	return validate_expr(value, regex);
+	return validate_expr(value.replace(/:/g,''), regex);
 }
 
 function validate_macaddress_notnull(value) {
