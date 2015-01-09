@@ -900,7 +900,8 @@ function testPxe ()
 {
 	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
 	pushd /tmp
-	tftp -v 127.0.0.1 -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	tftp -v 127.0.0.1 -c get pxelinux.cfg/default /tmp/pxelinux.cfg && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	rm -f /tmp/pxelinux.cfg
 	popd
 }
 
