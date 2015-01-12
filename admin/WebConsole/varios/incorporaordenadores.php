@@ -58,9 +58,11 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 <table align="center" class="tabla_datos" border="0" cellpadding="0" cellspacing="1">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<tr> 
-	    <th>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</th>
-		<td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
+	    <th>&nbsp;<?php echo $TbMsg["MSG_DHCPCODE"]?>&nbsp;<br>
+		&nbsp;<?php echo $TbMsg["MSG_DHCPHOST"]?>&nbsp;</th>
+	    <td><textarea class="cajatexto" name="contenido" cols="70" rows="18"></textarea></td></tr>
 	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th></tr>
+	<tr><th colspan="2">&nbsp;<?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th></tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 </table>
  </FORM>
