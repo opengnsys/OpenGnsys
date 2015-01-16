@@ -3,17 +3,13 @@
 #
 # PARAMETROS RECIBIDOS DESDE EL CLIENTE:
 # $1 disco
-# $2 par=N�mero de particion
-# $3 Nombre can�nico de la imagen
-# $4 Direcci�n IP del repositorio
+# $2 par=Número de particion
+# $3 Nombre canónico de la imagen
+# $4 Dirección IP del repositorio
 # $5 Protocolo  UNICAST  MULTICAST  TORRENT
 # $6 Opciones del protocolo
 #_______________________________________________________________________________________________________________________________
 
-# Si existe, ejecuta script personalizado "deployImageCustom"; si no, llama al genérico "deployImage".
-if which deployImageCustom &>/dev/null; then
-    deployImageCustom "$4" "$3" "$1" "$2" "$5" "$6" "$7" "$8" || exit $?
-else
-    deployImage "$4" "$3" "$1" "$2" "$5" "$6" "$7" "$8" || exit $?
-fi
+# Llamar al script de despliegue "deployImage".
+deployImage "$4" "$3" "$1" "$2" "$5" "$6" "$7" "$8" || exit $?
 
