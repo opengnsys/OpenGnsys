@@ -156,13 +156,14 @@ function ejecucionTarea($idtarea)
 //________________________________________________________________________________________________________
 function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 {		
-	global $cmd;	
-			 
-	$cmd->texto="SELECT idcomando,procedimientoid,parametros
-							 FROM procedimientos_acciones
-							 WHERE idprocedimiento=".$idprocedimiento." 
-							 ORDER BY orden";	
-	//echo $cmd->texto;						 			
+	global $cmd;
+	global $sesion;
+
+	$cmd->texto="SELECT   idcomando,procedimientoid,parametros
+			 FROM procedimientos_acciones
+			WHERE idprocedimiento=".$idprocedimiento." 
+			ORDER BY orden";	
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
@@ -176,6 +177,13 @@ function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 		else{
 			$parametros=$rs->campos["parametros"];
 			$idcomando=$rs->campos["idcomando"];
+			// Ticket 681: bucle infinito en procedimiento compuesto (J.M. Alonso).
+			do{
+				$nwsesion=time();       
+			}while($sesion==$nwsesion);
+			$sesion=$nwsesion;
+			$cmd->ParamSetValor("@sesion",$sesion);
+			// Fin ticket 681.
 			if(!insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambito)) 
 				return(false);	
 		}
