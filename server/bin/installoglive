@@ -40,6 +40,7 @@ if [ -f $OGINITRD ]; then
 fi
 
 # Hacer copia de seguridad del ogLive actual.
+rm -fr $OPENGNSYS/tftpboot/ogclient.old
 mv -f $OPENGNSYS/tftpboot/ogclient $OPENGNSYS/tftpboot/ogclient.old
 
 # Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
