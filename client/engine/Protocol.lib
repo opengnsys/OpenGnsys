@@ -983,18 +983,23 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 #@brief   Comprueba que el fichero que se desea almacenar en la cache del cliente, no esta. 
 #@param   1 str_REPO
 #@param   2 str_Relative_path_file_OGIMG_with_/ 
-#@return    0 si es necesario actualizar el fichero.
-#@return    1 si la imagen ya esta en la cache, por lo tanto no es necesario actualizar el fichero
+#@param   3 md5 to check: use full to check download image torrent 
+#@return    0 (true)si es necesario actualizar el fichero.
+#@return    1 (false) si la imagen ya esta en la cache, por lo tanto no es necesario actualizar el fichero
+#@return   >1 (false) error de sintaxis (TODO)
 #@note
 #@todo:      Proceso en el caso de que el fichero tenga el mismo nombre, pero su contenido sea distinto.
 #@todo:      Se dejan mensajes mientras se confirma su funcionamiento.
 #@version 0.1 - Integracion para OpenGNSys.
 #@author        Antonio J. Doblas Viso. Universidad de Malaga
 #@date
+#@version 1.5 - gestiona ficheros hash full.sum (TORRENT) y .sum (MULTICAST)
+#@author        Antonio J. Doblas Viso. Universidad de Malaga
+#@date
 #*/ ##
 function ogUpdateCacheIsNecesary ()
 {
-
+#echo "admite full check con 3param TORRENT"
 # Variables locales.
 local ERROR SOURCE CACHE FILESOURCE MD5SOURCE FILETARGET MD5TARGET
 ERROR=0
@@ -1011,7 +1016,12 @@ fi
 #Control de la cache
 ogFindCache || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 
-[ $# == "2" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+
+#TODO:  return 0->true, 1->false; si error, aunque sintaxis devuelve > 1
+
+#Control de parametros:  ahora admite tres.
+[ $# > "3" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
@@ -1022,6 +1032,7 @@ then
     # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
     ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
     ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
     echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
     return 0 
 fi
@@ -1035,21 +1046,52 @@ then
 fi
 
 ## En este punto la imagen en el repo y en la cache se llaman igual, 
-#echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
-if [ -f $FILESOURCE.sum ]
-then
-    MD5SOURCE=$(cat $FILESOURCE.sum)
-else
-    MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
-fi
-[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
-MD5TARGET=$(cat $FILETARGET.sum)
+#echo "paso 4. recuperamos o calculamos los md5 de los ficheros segun PROTOCOLO"
+case "$3" in 
+	full|FULL|torrent|TORRENT)
+		#Buscamos MD5 en el REPO SOURCE
+		if [ -f $FILESOURCE.full.sum ]
+		then
+        		MD5SOURCE=$(cat $FILESOURCE.full.sum)
+		else
+        		MD5SOURCE=$(ogCalculateFullChecksum $FILESOURCE)
+		fi
+		# Generamos el MD5 (full) en la CACHE
+		[ ! -f $FILETARGET.full.sum ] && ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+		MD5TARGET=$(cat $FILETARGET.full.sum)
+		# Generamos el MD5 (little) en la CACHE para posteriores usos del protocolo MULTICAST
+		[ ! -f $FILETARGET.sum ] &&  ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+	;;
+	*)
+		#Buscamos MD5 en el REPO SOURCE
+		if [ -f $FILESOURCE.sum ]
+		then
+        		MD5SOURCE=$(cat $FILESOURCE.sum)
+		else
+        		MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
+		fi
+		# Generamos el MD5 (little) en la CACHE
+		[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+		MD5TARGET=$(cat $FILETARGET.sum)
+    	#Generamos o copiamos MD5 (full) en la CAHCHE para posteriores usos con Torrent
+    	if [ ! -f $FILETARGET.full.sum -a $FILETARGE.sum ]
+		then
+			if [ ! -f $FILESOURCE.full.sum ]
+			then
+				#.full.sum en REPO realizamos COPIA
+				cp $FILESOURCE.full.sum $FILETARGET.full.sum
+			else
+				# .full.sum no en REPO LO GENERAMOS
+				ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+			fi
+		fi			
+esac
 
 #echo "Paso 5. comparamos los md5"
 #TODO: que hacer cuando los md5 son distintos. Por defecto borrar.
 if [ "$MD5SOURCE" == "$MD5TARGET" ]
-then
-    echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
+then	
+	echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
     return 1
 else
     echo "TRUE=0, Si es necesario actualizar. paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
