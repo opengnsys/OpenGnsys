@@ -319,9 +319,13 @@ case "$TYPE" in
                     awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | sort | uniq
                 rm -f ${RPMDIR}/__db.*
             else
-                # FIXME Sólo 32 bits
-                chroot $MNTDIR /bin/rpm -qa --qf "%{NAME} %{VERSION}\n" | \
-                    awk '$1!~/-devel$/ {sub(/-.*$/,"",$2); print $0}' | sort | uniq
+                # Obtener el nombre de cada paquete en la BD de RPM.
+                python <<<"
+import re;
+import bsddb;
+db=bsddb.hashopen('$RPMDIR/Name','r');
+for k in db.keys():
+    print re.sub('-debel$','',k);" | sort | uniq
             fi
         fi
         # Procesar paquetes pacman.
