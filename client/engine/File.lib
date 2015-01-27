@@ -80,6 +80,39 @@ test "$(cat "$SOURCE.sum" 2>/dev/null)" == "$(cat "$TARGET.sum" 2>/dev/null)"
 
 
 #/**
+#         ogCalculateFullChecksum [ str_repo | int_ndisk int_npart ] path_filepath
+#@brief   Devuelve la suma COMPLETA de comprobación (checksum) de un fichero.
+#@param   path_filepath     camino del fichero (independiente de mayúsculas)
+#@param   str_repo          repositorio de ficheros
+#@param   int_ndisk         nº de orden del disco
+#@param   int_npartition    nº de orden de la partición
+#@return  hex_checksum      Checksum del fichero
+#@version 1.0.5 - Primera versión para OpenGnSys.
+#@author  Antonio Doblas Viso, EVLT Universidad de Málaga
+#@date    2014-07-09
+#*/ ##
+function ogCalculateFullChecksum ()
+{
+# Variables locales.
+local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "$FUNCNAME REPO ubuntu.img  ==>  ef899299caf8b517ce36f1157a93d8bf"
+    return
+fi
+
+# Comprobar que existe el fichero y devolver sus datos.
+FILE=$(ogGetPath "$@")
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+#ADV
+md5sum "$FILE" -b 2>&1 | cut -f1 -d" "
+# tail -c1M "$FILE" | md5sum -b 2>&1 | cut -f1 -d" "
+}
+
+
+
+
+#/**
 #         ogCopyFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
 #@brief   Metafunción para copiar un fichero de sistema OpenGnSys a un directorio.
 #@see     ogGetPath
