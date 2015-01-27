@@ -136,10 +136,9 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 			LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
 			WHERE ordenadores.idordenador=".$idordenador."
-			  AND tipospar.clonable=1
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
-				
+
 	$rs->Comando=&$cmd; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
