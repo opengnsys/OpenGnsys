@@ -89,6 +89,7 @@ if [ -f "$IMGFILE" ]; then
     mv "$IMGFILE" "$IMGFILE.ant"
     mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
     mv "$IMGFILE.sum" "$IMGFILE.sum.ant" 2>/dev/null
+    mv "$IMGFILE.full.sum" "$IMGFILE.full.sum.ant" 2>/dev/null
 fi
 
 echo " " > $OGLOGCOMMAND
