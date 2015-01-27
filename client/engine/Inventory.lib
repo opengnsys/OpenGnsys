@@ -325,7 +325,7 @@ import re;
 import bsddb;
 db=bsddb.hashopen('$RPMDIR/Name','r');
 for k in db.keys():
-    print re.sub('-debel$','',k);" | sort | uniq
+    print re.sub('-devel$','',k);" | sort | uniq
             fi
         fi
         # Procesar paquetes pacman.
