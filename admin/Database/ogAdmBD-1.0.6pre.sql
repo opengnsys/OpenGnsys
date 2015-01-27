@@ -45,3 +45,11 @@ UPDATE parametros
 	SET tipopa = 0
 	WHERE idparametro = 30;
 
+# Mostrar disco en comandos Inventario de software e Iniciar sesión.
+UPDATE comandos
+	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;mac;dsk;par'
+	WHERE idcomando = 7;
+UPDATE comandos
+	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
+	WHERE idcomando = 9;
+
