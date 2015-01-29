@@ -56,7 +56,14 @@ MNTDIR=$(ogMount $1 $2) || return $?
 case "$TYPE" in
     Linux|Android)
         # Obtiene los parámetros de arranque para Linux.
-        PARAMS=$(ogLinuxBootParameters $1 $2) || return $?
+        PARAMS=$(ogLinuxBootParameters $1 $2)
+        # Si no existe, buscar sistema de archivo /boot en /etc/fstab.
+        if [ -z "$PARAMS" -a -e $MNTDIR/etc/fstab ]; then
+            # Localizar S.F. /boot en /etc/fstab del S.F. actual.
+            PART=$(ogDevToDisk $(awk '$2=="/boot" {print $1}' $MNTDIR/etc/fstab))
+            # Buscar los datos de arranque.
+            PARAMS=$(ogLinuxBootParameters $PART) || exit $?
+        fi
         read -e KERNEL INITRD APPEND <<<"$PARAMS"
         # Si no hay kernel, no hay sistema operativo.
         [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
