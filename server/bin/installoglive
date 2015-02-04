@@ -6,6 +6,13 @@
 # Fecha: 2015-01-26
 
 
+# Control de acceso.
+PROG=$(basename $0)
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Need to be root." >&2
+	exit 1
+fi
+
 # Constantes.
 DOWNLOADURL="http://opengnsys.es/downloads"
 OPENGNSYS=/opt/opengnsys
