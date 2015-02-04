@@ -577,7 +577,7 @@ function createDirs()
 			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
 		done
 	fi
-	mkdir -p ${INSTALL_TARGET}/tftpboot/{pxelinux.cfg,menu.lst}
+	mkdir -p ${INSTALL_TARGET}/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -597,10 +597,10 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
 	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
 	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
@@ -804,7 +804,7 @@ function updateClient()
 		find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
 		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
-		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 		
 		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
 		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot

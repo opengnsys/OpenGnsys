@@ -873,23 +873,9 @@ function tftpConfigure()
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
 
-	# preparacion contenedor tftpboot
+	# Copiar ficheros de Syslinux.
 	cp -a $SYSLINUXDIR $TFTPCFGDIR/syslinux
-	cp -a $SYSLINUXDIR/pxelinux.0 $TFTPCFGDIR
-	# prepamos el directorio de la configuracion de pxe
-	mkdir -p $TFTPCFGDIR/pxelinux.cfg
-	cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
-DEFAULT syslinux/vesamenu.c32 
-MENU TITLE Aplicacion GNSYS 
- 
-LABEL 1 
-MENU LABEL 1 
-KERNEL syslinux/chain.c32 
-APPEND hd0 
- 
-PROMPT 0 
-TIMEOUT 10 
-EOF
+
 	# comprobamos el servicio tftp
 	sleep 1
 	testPxe
@@ -899,108 +885,9 @@ EOF
 function testPxe ()
 {
 	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
-	pushd /tmp
-	tftp -v 127.0.0.1 -c get pxelinux.cfg/default /tmp/pxelinux.cfg && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
-	rm -f /tmp/pxelinux.cfg
-	popd
-}
-
-
-########################################################################
-## Configuracion servicio NFS
-########################################################################
-
-# Configurar servicio NFS.
-# ADVERTENCIA: usa variables globales NETIP y NETMASK!
-function nfsConfigure()
-{
-	echoAndLog "${FUNCNAME}(): Config nfs server."
-	backupFile /etc/exports
-
-	nfsAddExport $INSTALL_TARGET/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding NFS client config"
-		return 1
-	fi
-
-	nfsAddExport $INSTALL_TARGET/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding NFS images config"
-		return 1
-	fi
-
-	nfsAddExport $INSTALL_TARGET/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding logging client config"
-		return 1
-	fi
-
-	nfsAddExport $INSTALL_TARGET/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the PXE ogclient"
-		return 1
-	fi
-
-	/etc/init.d/nfs-kernel-server restart
-	exportfs -va
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configure exports"
-		return 1
-	fi
-
-	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
-	return 0
-}
-
-
-# Añadir entrada en fichero de configuración del servidor NFS.
-# Ejemplos:
-#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
-#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
-#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
-function nfsAddExport()
-{
-	if [ $# -lt 2 ]; then
-		errorAndLog "${FUNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
-	if [ ! -f /etc/exports ]; then
-		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
-		return 1
-	fi
-
-	local export="$1"
-	local contador=0
-	local cadenaexport
-
-	grep "^$export" /etc/exports > /dev/null
-	if [ $? -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
-		return 0
-	fi
-
-	cadenaexport="${export}"
-	for parametro in $*; do
-		if [ $contador -gt 0 ]; then
-			host=`echo $parametro | awk -F: '{print $1}'`
-			options=`echo $parametro | awk -F: '{print $2}'`
-			if [ "${host}" == "" ]; then
-				errorAndLog "${FUNCNAME}(): host can't be empty"
-				return 1
-			fi
-			cadenaexport="${cadenaexport}\t${host}"
-
-			if [ "${options}" != "" ]; then
-				cadenaexport="${cadenaexport}(${options})"
-			fi
-		fi
-		let contador=contador+1
-	done
-
-	echo -en "$cadenaexport\n" >> /etc/exports
-
-	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
-	return 0
+	echo "test" >$TFTPCFGDIR/testpxe
+	tftp -v 127.0.0.1 -c get testpxe /tmp/testpxe && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	rm -f $TFTPCFGDIR/testpxe /tmp/testpxe
 }
 
 
@@ -1249,7 +1136,6 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/images
 	mkdir -p $TFTPCFGDIR
 	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
-	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
@@ -1487,7 +1373,7 @@ function clientCreate()
 	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
 	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 
 	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
 	cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
