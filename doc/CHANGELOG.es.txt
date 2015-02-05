@@ -2,30 +2,47 @@ LISTA DE CAMBIOS	CHANGELOG.es.ext
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.1.0
+
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.6
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
-#51	Detectar y tratar metadispositivos
+#51	Detectar y tratar metadispositivos (mejora)
 #660	El arranque de sistema operativo debe depender de su tipo y no del sistema de ficheros
 #611	Crear función para mostrar y registrar la ejecución de un comando
+#626	Mejorar la integridad en el protocolo torrent
 #645	Configuración de sistemas GNU/Linux instalados sobre EFI
+#651	Incluir en la interfaz de crear imagen una condición para que llame a script personalizado
+#652	Incluir script personalizado para restoreImage (mejora)
+#668	Comando restaurar torrent-cache si encuentra trozo de imagen monolítica previa se queda compartiendo la imagen sin proceder a la restauración
 #671	ogFormat sobre NTFS no reconoce tipo de partición NTFS (no se resolverá)
 #675	Bucle infinito al reducir sistema de archivos NTFS menor de 1 GB
+#685	Arrancar sistema GNU/Linux con sistema de archivos /boot separado del raíz (mejora)
 
 Tickets resueltos en módulo OpenGnSys Client:
 #136	Splash de arranque con Plymouth (no se resolverá)
+#377	Documentar como modificar el tiempo de las cookies para los menús personalizados desde la web de clientes (no se resolverá)
+#615    Cliente oglive 1.0.5 basado en Ubuntu 12.04.2 LTS (duplicado de #603)
 #649	El arranque gráfico del ogLive depende del hardware (no se resolverá)
+#653	Decidir el número de parámetros del script configureOsCustom
 #656	Script updateCache: erratas en imágenes sincronizadas
 #657	Sincronizadas tipo archivo: adaptación a ogclient 1.0.5
+#659	Rsync: Incompatibilidad versión 3.0.9 instalada en los clientes y la versión 3.1.0 del servidor
+#669	Comando reboot no permite comunicar con la cola de acciones
 
 Tickets resueltos en módulo OpenGnSys Server:
 #646	Script de servidor para comparar datos de red
 #648	Comprobar y determinar permisos en /opt/opengnsys/images
 #664	Script listclientmode: Identificacion de la plantilla por nombre en consola
 #672	La cola de acciones no muestra el protocolo usado en una restauración (heredado de #473)
+#682	Script de servidor para instalar cliente ogLive (mejora)
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
+#536	Desactivar la descarga no autenticada de ficheros torrent desde el servicio web del tracker
+#532	Gestión básica de imágenes en el repositorio (heredado de #270)
 #674	Corregir erratas en script deleteimage (heredado de #564)
 
 Tickets resueltos en módulo OpenGnSys Installer:
@@ -33,17 +50,21 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #650	Posible error de actualización de la BD desde versiones que necesitan modificar IP del servidor
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#512	Asistente particionado: comprobar que las particiones no sobrepasan disco (mejora)
 #654	Eliminar imagen de caché duplica algunas imágenes.
 #655	Gestión Arranque Avanzado: opción eliminar no muestra plantillas (no válido)
 #658	Correccion en eliminar imagen de caché de cliente
 #661	Error al mostrar configuración de varios equipos con caché
 #665	Comando Iniciar Sesión toma datos incorrectos para aulas
-#666	Asistente de particiones remotas no genera la instrucción a ejecutar
+#666	Asistente de particiones remotas no genera la instrucción a ejecutar (tarea)
 #667	Resolución de los menús en la configuración PXE (no válido)
+#680	Opcion status de ordenador sobre objeto aulas es incorrecto cuando existe también objetos tipo "grupo de ordenadores" (no válido)
+#683	Consola web: comandos Iniciar sesión e Inventario software solo reconocen un disco
 
 Tickets genéricos resueltos:
+#541	Gestión plataformas Mac (tarea)
 #670	Las copias en trunk y tags no mantienen los cambios del svn realizados en branches (informativo)
-#677	Incluir datos de creación y despliegue de imagen
+#677	Incluir datos de creación y despliegue de imagen (mejora)
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.5
@@ -460,6 +481,7 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 #384	Se ha portado una versión antigua del script sendFileMcast
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#125	Consola web: No se puede crear imagen desde algunos ordenadores
 #126	Integración de consola Web con bittorent (mejora)
 #138	Configurar parámetros de red en cliente
 #143	Integración con la consola web de los nuevos sistema de ficheros
