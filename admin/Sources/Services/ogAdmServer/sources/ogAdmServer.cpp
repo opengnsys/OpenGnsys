@@ -835,10 +835,11 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					" tamano=%s,"
 					" idsistemafichero=%d,"
 					" idnombreso=%d,"
-					" idimagen=%d,"
-					" idperfilsoft=%d"
+					" idimagen=0,"
+					" idperfilsoft=0,"
+					" fechadespliegue=NULL"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
-					cpt, tam, idsfi, idsoi, 0, 0, ido, disk, par);
+					cpt, tam, idsfi, idsoi, ido, disk, par);
 				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 					errorLog(modulo, 21, FALSE);
 					db.GetErrorErrStr(msglog);
@@ -1924,7 +1925,7 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	char *iph, *par, *cpt, *ipr, *ido;
+	char *iph, *dsk, *par, *cpt, *ipr, *ido;
 	char *idi;
 	BOOLEAN res;
 	char modulo[] = "RESPUESTA_CrearImagen()";
@@ -1948,11 +1949,12 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	// Acciones posteriores
 	idi = copiaParametro("idi",ptrTrama);
+	dsk = copiaParametro("dsk",ptrTrama);
 	par = copiaParametro("par",ptrTrama);
 	cpt = copiaParametro("cpt",ptrTrama);
 	ipr = copiaParametro("ipr",ptrTrama);
 
-	res=actualizaCreacionImagen(db, tbl, idi, par, cpt, ipr, ido);
+	res=actualizaCreacionImagen(db, tbl, idi, dsk, par, cpt, ipr, ido);
 
 	liberaMemoria(idi);
 	liberaMemoria(par);
@@ -1977,6 +1979,7 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- db: Objeto base de datos (ya operativo)
 //		- tbl: Objeto tabla
 //		- idi: Identificador de la imagen
+//		- dsk: Disco de donde se creó
 //		- par: Partición de donde se creó
 //		- cpt: Código de partición
 //		- ipr: Ip del repositorio
@@ -1985,14 +1988,15 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
-	char* cpt, char* ipr, char *ido) {
+BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
+	char* par, char* cpt, char* ipr, char *ido) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaCreacionImagen()";
 	int idr,ifs;
 
 	/* Toma identificador del repositorio correspondiente al ordenador modelo */
-	sprintf(sqlstr, "SELECT repositorios.idrepositorio"
+	snprintf(sqlstr, LONSQL,
+			"SELECT repositorios.idrepositorio"
 			"  FROM repositorios"
 			"  LEFT JOIN ordenadores USING (idrepositorio)"
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
@@ -2010,7 +2014,10 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 	}
 
 	/* Toma identificador del perfilsoftware */
-	sprintf(sqlstr,"SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s", ido,par);
+	snprintf(sqlstr, LONSQL,
+			"SELECT idperfilsoft"
+			"  FROM ordenadores_particiones"
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		errorLog(modulo, 21, FALSE);
@@ -2025,9 +2032,10 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* par,
 	}
 
 	/* Actualizar los datos de la imagen */
-	sprintf(sqlstr,
-			"UPDATE imagenes SET numpar=%s,codpar=%s,idperfilsoft=%d,idrepositorio='%d'"
-				" WHERE idimagen=%s", par, cpt, ifs, idr, idi);
+	snprintf(sqlstr, LONSQL,
+			"UPDATE imagenes"
+			"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s, idperfilsoft=%d, idrepositorio=%d, fechacreacion=NOW()"
+			" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
@@ -2313,7 +2321,7 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	Database db;
 	Table tbl;
 	BOOLEAN res;
-	char *iph, *ido, *idi, *par, *ifs;
+	char *iph, *ido, *idi, *dsk, *par, *ifs;
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
@@ -2335,10 +2343,11 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	// Acciones posteriores
 	idi = copiaParametro("idi",ptrTrama); // Toma identificador de la imagen
+	dsk = copiaParametro("dsk",ptrTrama); // Número de disco
 	par = copiaParametro("par",ptrTrama); // Número de partición
 	ifs = copiaParametro("ifs",ptrTrama); // Identificador del perfil software contenido
 	
-	res=actualizaRestauracionImagen(db, tbl, idi, par, ido, ifs);
+	res=actualizaRestauracionImagen(db, tbl, idi, dsk, par, ido, ifs);
 	
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
@@ -2396,6 +2405,7 @@ BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- db: Objeto base de datos (ya operativo)
 //		- tbl: Objeto tabla
 //		- idi: Identificador de la imagen
+//		- dsk: Disco de donde se restauró
 //		- par: Partición de donde se restauró
 //		- ido: Identificador del cliente donde se restauró
 //		- ifs: Identificador del perfil software contenido	en la imagen
@@ -2404,14 +2414,15 @@ BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
-	char* par, char* ido, char* ifs) {
+	char* dsk, char* par, char* ido, char* ifs) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaRestauracionImagen()";
 
 	/* Actualizar los datos de la imagen */
-	sprintf(sqlstr,
-			"UPDATE ordenadores_particiones SET idimagen=%s,idperfilsoft=%s"
-				" WHERE idordenador=%s AND numpar=%s", idi, ifs, ido, par);
+	snprintf(sqlstr, LONSQL,
+			"UPDATE ordenadores_particiones"
+			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW()"
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
@@ -3452,7 +3463,7 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				errorInfo(modulo, msglog);
 				return (FALSE);
 			}
-			
+
 			//mar = copiaParametro("mar",ptrTrama); // Toma modo de arranque si el comando es Arrancar
 
 			// Se manda por broadcast y por unicast
