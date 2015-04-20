@@ -21,8 +21,6 @@ $idrepositorio=0;
 $nombrerepositorio="";
 $ip="";
 $puertorepo="2002";
-$pathrepod="/opt/opengnsys/admin";
-$pathpxe="/opt/opengnsys/tftpboot/pxelinux.cfg";
 $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
@@ -137,26 +135,6 @@ else{
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$pathrepod.'</TD>';
-			else	
-				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathrepod type=text style="width:330" value="'.$pathrepod.'"></TD>';
-			?>
-		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$pathpxe.'</TD>';
-			else	
-				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathpxe type=text style="width:330" value="'.$pathpxe.'"></TD>';
-			?>
-		</TR>		
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
 			<?
 			if ($opcion==$op_eliminacion)
@@ -218,8 +196,6 @@ function TomaPropiedades($cmd,$id){
 	global $ip;
 	global $comentarios;
 	global $puertorepo;
-	global $pathrepod;
-	global $pathpxe;
 	global $ordenadores;
 
 
@@ -240,8 +216,6 @@ function TomaPropiedades($cmd,$id){
 		$ip=$rs->campos["ip"];
 		$comentarios=$rs->campos["comentarios"];
 		$puertorepo=$rs->campos["puertorepo"];
-		$pathrepod=$rs->campos["pathrepod"];
-		$pathpxe=$rs->campos["pathpxe"];
 //		$ordenadores=$rs->campos["numordenadores"];
 	}
 	$rs->Cerrar();

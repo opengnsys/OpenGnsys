@@ -101,6 +101,7 @@ function Confirmar(cc)
 //	Confirma un bloque de configuración de particiones
 //	Parametros:
 //		cc: Identificador de la configuración (bloque de particiones)
+//	Version 1.1: 2015-02-25. Irina Gomez ETSII US. Se envian datos de cuarta particion.
 //________________________________________________________________________________________________________
  
 function comprobarDatos(cc)	
@@ -213,12 +214,13 @@ function comprobarDatos(cc)
 	}
 
 	for(var i=1;i<=maxpar;i++){
-		if(i!=4){
+		// Version 1.1: Se envian datos cuarta particion.
+		//if(i!=4){
 			if(tbparam[i]!=undefined)
 				atributos+=tbparam[i];
 			else
 				atributos+="par="+i+TB+"cpt=EMPTY"+TB+"sfi=EMPTY"+TB+"tam=0"+TB+"ope=0"+SL;
-		}
+		//}
 	}
 
 	// Completa con EMPTY si las particiones son menores a 4 y no hay cache

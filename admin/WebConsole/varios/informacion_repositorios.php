@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -41,13 +41,13 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 </HEAD>
 <BODY>
 	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/repositorios.gif"><BR><BR>
+	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/repositorio.gif"><BR><BR>
 	<IMG src="../images/iconos/repositorio.gif"><SPAN class=presentaciones>&nbsp;&nbsp;
 	<U><?echo $TbMsg[2]?></U>:<? echo $descripcionrepositorio?></SPAN></P>
 	<?echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones?>
 </BODY>
 </HTML>
-<?
+<?php
 /**************************************************************************************************************************************************
 	Devuelve una cadena con formato XML de toda la información de los repositorios
 	Parametros: 
@@ -145,7 +145,6 @@ function SubarbolXML_ImagenesDisponibles($cmd,$idrepositorio)
 	global $TbMsg;
 	
 	$cadenaXML="";
-	$gidimagen=0;
 
 	$cmd->texto="SELECT DISTINCT imagenes.* FROM imagenes
 								WHERE imagenes.idrepositorio=".$idrepositorio." 
@@ -161,21 +160,13 @@ function SubarbolXML_ImagenesDisponibles($cmd,$idrepositorio)
 		$cadenaXML.='>';
 	}
 	while (!$rs->EOF){
-		if ($gidimagen!=$rs->campos["idperfilsoft"]){
-			if ($gidimagen){
-				$cadenaXML.='</IMAGENES>';
-			}
-			$gidimagen=$rs->campos["idperfilsoft"];
-			$cadenaXML.='<IMAGENES';
-			// Atributos
-			$cadenaXML.=' imagenodo="../images/iconos/imagenes.gif"';
-			$cadenaXML.=' infonodo="'.$rs->campos["descripcion"].'"';
-			$cadenaXML.='>';
-		}
+		$cadenaXML.='<IMAGENES';
+		$cadenaXML.=' imagenodo="../images/iconos/imagenes.gif"';
+		$cadenaXML.=' infonodo="'.$rs->campos["descripcion"].' ('.$TbMsg["IMGTYPE".$rs->campos["tipo"]].')"';
+		$cadenaXML.='</IMAGENES>';
 		$rs->Siguiente();
 	}
-	if ($gidimagen){
-		$cadenaXML.='</IMAGENES>';
+	if ($rs->numeroderegistros>0) {
 		$cadenaXML.='</DISPONIBLESIMAGENES>';
 	}
 	$rs->Cerrar();

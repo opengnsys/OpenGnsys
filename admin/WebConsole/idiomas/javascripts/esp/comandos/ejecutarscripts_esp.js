@@ -6,3 +6,4 @@
 TbMsg=new Array;
 TbMsg[0]="";
 TbMsg[1]="El script debe tener alguna linea de código";
+TbMsg[4]="\t!!!!!     ATENCIÓN     !!!!! \nHa seleccionado UNICAST en varios ordenadores,\nLa transferencia puede demorarse en el tiempo";

@@ -1,13 +1,74 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.4 - 1.0.6
+# OpenGnSys 1.0.2 - 1.1.0
 #use ogAdmBD
 
-# Mejorar el rendimiento en acceso a la cola de acciones.
-ALTER TABLE acciones
-	ADD KEY (idordenador),
-	ADD KEY (idprocedimiento),
-	ADD KEY (idtarea),
-	ADD KEY (idprogramacion);
+UPDATE entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
+
+# Mostrar protocolo de clonación en la cola de acciones (ticket #672)
+UPDATE parametros SET tipopa = 0 WHERE idparametro = 30;
+
+UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
+UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
+
+# Añadir tipo de arranque Windows al perfil hardware.
+ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
+
+# Soportar particiones GPT y añadir información de caché.
+ALTER TABLE ordenadores_particiones
+	MODIFY codpar int(8) NOT NULL,
+	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idordenador,
+	ADD cache varchar(500),
+	DROP INDEX idordenadornumpar,
+	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
+
+# Nuevos tipos de particiones y particiones GPT.
+ALTER TABLE sistemasficheros MODIFY codpar int(8) NOT NULL;
+ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
+INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
+	(6, 'FAT16', 1),
+	(CONV('A5',16,10), 'FREEBSD', 1),
+	(CONV('A6',16,10), 'OPENBSD', 1),
+	(CONV('AF',16,10), 'HFS', 1),
+	(CONV('BE',16,10), 'SOLARIS-BOOT', 1),
+	(CONV('DA',16,10), 'DATA', 1),
+	(CONV('EE',16,10), 'GPT', 0),
+	(CONV('EF',16,10), 'EFI', 1),
+	(CONV('FB',16,10), 'VMFS', 1),
+	(CONV('0700',16,10), 'WINDOWS', 1),
+	(CONV('0C01',16,10), 'WIN-RESERV', 1),
+	(CONV('7F00',16,10), 'CHROMEOS-KRN', 1),
+	(CONV('7F01',16,10), 'CHROMEOS', 1),
+	(CONV('7F02',16,10), 'CHROMEOS-RESERV', 1),
+	(CONV('8200',16,10), 'LINUX-SWAP', 0),
+	(CONV('8300',16,10), 'LINUX', 1),
+	(CONV('8301',16,10), 'LINUX-RESERV', 1),
+	(CONV('8E00',16,10), 'LINUX-LVM', 1),
+	(CONV('A500',16,10), 'FREEBSD-DISK', 0),
+	(CONV('A501',16,10), 'FREEBSD-BOOT', 1),
+	(CONV('A502',16,10), 'FREEBSD-SWAP', 0),
+	(CONV('A503',16,10), 'FREEBSD', 1),
+	(CONV('AB00',16,10), 'HFS-BOOT', 1),
+	(CONV('AF00',16,10), 'HFS', 1),
+	(CONV('AF01',16,10), 'HFS-RAID', 1),
+	(CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
+	(CONV('BF00',16,10), 'SOLARIS', 1),
+	(CONV('BF01',16,10), 'SOLARIS', 1),
+	(CONV('BF02',16,10), 'SOLARIS-SWAP', 0),
+	(CONV('BF03',16,10), 'SOLARIS-DISK', 1),
+	(CONV('BF04',16,10), 'SOLARIS', 1),
+	(CONV('BF05',16,10), 'SOLARIS', 1),
+	(CONV('CA00',16,10), 'CACHE', 0),
+	(CONV('EF00',16,10), 'EFI', 1),
+	(CONV('EF01',16,10), 'MBR', 0),
+	(CONV('EF02',16,10), 'BIOS-BOOT', 0),
+	(CONV('FD00',16,10), 'LINUX-RAID', 1),
+	(CONV('FFFF',16,10), 'UNKNOWN', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
+
+ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
+
+UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
 
 # Internacionalización correcta de los asistentes.
 UPDATE asistentes
@@ -42,8 +103,7 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
-
-# Actualizar y definir parámetros para los comandos nuevos.
+# Parámetros para los comandos nuevos.
 ALTER TABLE parametros
 	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
@@ -79,11 +139,11 @@ UPDATE grupos SET tipo=70 WHERE tipo=50;
 
 # Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
-     MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-#UPDATE menus SET resolucion = CASE resolucion 
-#                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+	MODIFY resolucion VARCHAR(50) DEFAULT NULL;
+#UPDATE menus SET resolucion = CASE resolucion
+#				   WHEN '355' THEN 'uvesafb:1152x864-16'
 #				   WHEN '788' THEN 'uvesafb:800x600-16'
-#        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+#				   WHEN '789' THEN 'uvesafb:800x600-24'
 #				   WHEN '791' THEN 'uvesafb:1024x768-16'
 #				   WHEN '792' THEN 'uvesafb:1024x768-24'
 #				   WHEN '794' THEN 'uvesafb:1280x1024-16'
@@ -111,6 +171,7 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('EMPTY', 'EMPTY'),
 	('CACHE', 'CACHE'),
 	('BTRFS', 'BTRFS'),
+	('EXFAT', 'EXFAT'),
 	('EXT2', 'EXT2'),
 	('EXT3', 'EXT3'),
 	('EXT4', 'EXT4'),
@@ -124,8 +185,7 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('REISERFS', 'REISERFS'),
 	('REISER4', 'REISER4'),
 	('UFS', 'UFS'),
-	('XFS', 'XFS'),
-	('EXFAT', 'EXFAT')
+	('XFS', 'XFS')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
 # Nuevas particiones marcadas como clonables.
@@ -147,11 +207,6 @@ ALTER TABLE ordenadores
 UPDATE ordenadores
 	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
 
-# Corregir errata en particiones vacías con número de partición asignado al código de partición.
-UPDATE ordenadores_particiones 
-	SET codpar = 0
-	WHERE codpar = numpar AND tamano = 0;
-
 # Incluir fecha de despliegue/restauración (ticket #677) y
 # correcion en eliminar imagen de cache de cliente (ticket #658)
 ALTER TABLE ordenadores_particiones
@@ -165,4 +220,15 @@ UPDATE comandos
 UPDATE comandos
 	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
 	WHERE idcomando = 9;
+
+# Eliminar campos que ya no se usan (ticket #705).
+ALTER TABLE repositorios
+	DROP pathrepoconf,
+	DROP pathrepod,
+	DROP pathpxe;
+ALTER TABLE menus
+	DROP coorx,
+	DROP coory,
+	DROP scoorx,
+	DROP scoory;
 

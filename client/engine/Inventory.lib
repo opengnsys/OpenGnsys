@@ -68,7 +68,7 @@ ogGetOsVersion "$@" | cut -sf1 -d:
 #@version 1.0.5 - Incluir tipos GrubLoader, Hurd y WinLoader, leer por defecto fichero /etc/os-release.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-10-07
-#@version 1.0.6 - Detectar GrubLoader al final.
+#@version 1.0.6 - Detectar GrubLoader al final y sistemas basados en EFI.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-08-27
 #*/ ##
@@ -133,12 +133,11 @@ fi
 if [ -z "$VERSION" ]; then
     TYPE="WinLoader"
     FILE="$(ogGetPath $MNTDIR/boot/bcd)"
+    [ -z "$FILE" ] && FILE="$(ogGetPath $MNTDIR/EFI/Microsoft/boot/bcd)"
     if [ -n "$FILE" ]; then
-        for DISTRIB in "Windows 8" "Windows 7" "Windows Vista" \
-                       "Windwos Server 2008" "Windwos Server 2008 R2" \
-                       "Windwos Recovery Environment"; do
+        for DISTRIB in "Windows Recovery" "Windows Boot"; do
             if grep -qs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
-               VERSION="$DISTRIB loader"
+                VERSION="$DISTRIB loader"
             fi
         done
     fi

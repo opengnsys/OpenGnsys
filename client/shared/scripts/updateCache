@@ -75,7 +75,6 @@ else
 	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
 	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE "REPO $2"; echo $?)
 	IMGSYNC=FALSE
-	#TODO: ogUpdateCacheIsNecesary debe borrar la imagen que tenga igual nombre pero distinto sum-
 	ogUpdateCacheIsNecesary "$1" "$2" "$PROTOCOLO"
 	RETVAL=$?
 fi
@@ -115,7 +114,7 @@ else
 	SIZEREQUIRED=$FILESIZE
 fi
 
-#ERROR CACHESIZE 16
+#ERROR CACHESIZE 16 (tamanyo de la CACHE insuficiente)
 if [ "$SIZEREQUIRED" -ge "$CACHESIZE" ]  
 then
 	ogEcho log session "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > CACHE = $CACHESIZE"
@@ -123,14 +122,16 @@ then
 	exit $?
 fi
 
-ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO"
-#ERROR CACHESIZE 16
+
+#ERROR CACHESIZE 16 (Espacio libre en CACHE insuficiente)
 if [ "$SIZEREQUIRED" -ge "$CACHESIZEFREE" ]  
 then
-	# ogEcho log session "[ ] No hay espacio sufiente en la CACHE, detectar que hacer con engine.cfg"
+    ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_IFNOTCACHEDO: ACTIONCACHEFULL=$ACTIONCACHEFULL"
 	case "$ACTIONCACHEFULL" in 
 	NONE)
-		NEXTOPERATION=UNICAST
+		ogEcho log session "$MSG_WARNING: $MSG_ERR_CACHESIZE:  $2 = $SIZEREQUIRED > FREE SPACE CACHE = $CACHESIZEFREE"
+		ogRaiseError session $OG_ERR_CACHESIZE "CACHE FULL, NO SPACE FREE"
+		exit $?
 	;;
 	FORMAT)
 	    ogEcho log session  "[51] $MSG_HELP_ogFormatCache "

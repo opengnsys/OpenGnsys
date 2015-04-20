@@ -25,6 +25,29 @@ if [ "$ogactiveadmin" == "true" ]; then
 			PASS=${PASS:-"og"}
 			mount.cifs //${ROOTREPO}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=$PASS
 			;;
+		local)	# TODO: hacer funcion dentro de este script que monte smb
+			# Comprobamos que estatus sea online.
+			if [ "$ogstatus" == "offline" -o "$SERVER" == "" ]; then
+			   # Si estatus es offline buscamos un dispositivo con etiqueta repo
+			   # y si no existe montamos la cache como repo (si existe).
+			   TYPE=$(blkid | grep REPO | awk -F"TYPE=" '{print $2}' | tr -d \")
+			   if [ "$TYPE" == "" ]; then
+				[ -d $OGCAC/$OGIMG ] && mount --bind  $OGCAC/$OGIMG $OGIMG
+			   else
+		           	mount -t $TYPE LABEL=REPO $OGIMG &>/dev/null
+			   fi
+			else
+                           # Comprobamos que existe un servicio de samba.
+                           smbclient -L $SERVER -N &>/dev/null
+                           if [ $? -eq 0 ]; then
+			   	PASS=$(grep "^[         ]*\(export \)\?OPTIONS=" /scripts/ogfunctions 2>&1 | \
+			   	   sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+			   	PASS=${PASS:-"og"}
+			   	mount.cifs //${ROOTREPO}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=$PASS
+			   fi
+			   # TODO: buscar condicion para NFS
+			fi
+			;;
 	esac
 fi
 

@@ -1,11 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 3.2.2.1deb1
--- http://www.phpmyadmin.net
---
--- Servidor: localhost
--- Tiempo de generación: 20-09-2010 a las 22:43:50
--- Versión del servidor: 5.1.37
--- Versión de PHP: 5.2.10-2ubuntu6.4
+-- Fichero de instalación de la base de datos.
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -445,11 +438,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `idurlimg` int(11) NOT NULL DEFAULT '0',
   `titulo` varchar(250) DEFAULT NULL,
-  `coorx` int(11) DEFAULT NULL,
-  `coory` int(11) DEFAULT NULL,
   `modalidad` tinyint(4) DEFAULT NULL,
-  `scoorx` int(11) DEFAULT NULL,
-  `scoory` int(11) DEFAULT NULL,
   `smodalidad` tinyint(4) DEFAULT NULL,
   `comentarios` text,
   `grupoid` int(11) NOT NULL DEFAULT '0',
@@ -740,9 +729,6 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
   `nombrerepositorio` varchar(250) NOT NULL,
   `ip` varchar(15) NOT NULL DEFAULT '',
   `passguor` varchar(50) NOT NULL DEFAULT '',
-  `pathrepoconf` varchar(250) NOT NULL,
-  `pathrepod` varchar(250) NOT NULL,
-  `pathpxe` varchar(250) NOT NULL,
   `idcentro` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
@@ -750,8 +736,8 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`pathrepoconf`,`pathrepod`,`pathpxe`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
- (1,'Repositorio (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
+INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
+ (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002);
 
 
 -- --------------------------------------------------------

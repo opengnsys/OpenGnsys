@@ -102,8 +102,9 @@ TIME2=$SECONDS
 ogEcho log session "[40] $MSG_HELP_ogCreateImage $1 $2 $3 $4 "
 
 # Si existe el fichero de la imagen se hace copia de seguridad y se redimensiona, si  no existe se crea.
+# Bloqueo la imagen. Si esta en modo lectura dara error y nos salimos
 ogEcho log session "[50] $MSG_HELP_ogCreateFileImage."
-ogLockImage "$3"  "/$4.$IMGEXT"
+ogLockImage "$3"  "/$4.$IMGEXT" || exit $? 
 ogCreateFileImage $3 "$4" $IMGEXT $SIZEREQUIRED
 
 # Creamos la lista del contenido y lo situamos en la particion a copiar.

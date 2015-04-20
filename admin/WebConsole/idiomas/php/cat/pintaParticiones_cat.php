@@ -23,6 +23,7 @@ $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 $TbMsg["VARIABLE"]='Variable';
 $TbMsg["CACHE_CONTENT"]='Data/Caché';
 $TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
+$TbMsg["CACHE_COMPLETE"]='CACHE COMPLETA';
 
 $TbMsg["SAMESYSTEM_IMAGE"]='Imagen (mismo tipo partici&oacute;n)';
 $TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (distinto tipo partici&oacute;n)';

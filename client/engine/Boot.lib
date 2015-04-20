@@ -990,11 +990,12 @@ rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
 }
 
 #/**
-# ogGrubAddOgclient num_disk num_part [ timeout ]
+# ogGrubAddOgclient num_disk num_part [ timeout ] [ offline ]
 #@brief   Crea entrada de menu grub para ogclient, tomando como paramentros del kernel los actuales del cliente.
 #@param 1 Numero de disco
 #@param 2 Numero de particion
-#@param 3 timeout: Segundos de espera para iniciar el sistema operativo por defecto.
+#@param 3 timeout  Segundos de espera para iniciar el sistema operativo por defecto (opcional)
+#@param 4 offline  configura el modo offline [offline|online] (opcional)
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND No existe kernel o initrd  en cache.
@@ -1003,18 +1004,19 @@ rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
 #*/
 
 ogGrubAddOgclient () {
-    local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL NUMLINE MENUENTRY
+    local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition time_out" \
-                "$FUNCNAME 1 6 15"
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [ time_out ] [ offline|online ] " \
+                "$FUNCNAME 1 1" \
+                "$FUNCNAME 1 6 15 offline"
         return
     fi
 
     # Error si no se reciben 2 parámetros.
     [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part [ timeout ]"; echo $?)
-    TIMEOUT="$3"
+    [[ "$3" =~ ^[0-9]*$ ]] && TIMEOUT="$3"
 
     # Error si no existe el kernel y el initrd en la cache.
     # Falta crear nuevo codigo de error.
@@ -1038,6 +1040,12 @@ ogGrubAddOgclient () {
     let NUMDISK=$NUMDISK-1
     # kernel y sus opciones. Pasamos a modo usuario
     KERNEL="/boot/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=true/ogactiveadmin=false/g /proc/cmdline)"
+
+    # Configuracion offline si existe parametro
+    echo "$@" |grep offline &>/dev/null && STATUS=offline
+    echo "$@" |grep online  &>/dev/null && STATUS=online
+    [ -z "$STATUS" ] || KERNEL="$(echo $KERNEL | sed  s/"ogprotocol=[a-z]* "/"ogprotocol=local "/g ) ogstatus=$STATUS"
+
     # Numero de línea de la primera entrada del grub.
     NUMLINE=$(grep -n -m 1 "^menuentry" $GRUBGFC|cut -d: -f1)
     # Texto de la entrada de opengnsys

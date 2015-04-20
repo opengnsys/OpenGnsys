@@ -9,7 +9,7 @@ source /tmp/net-$DEVICE.conf
 FILEINFOHTML=$OGLOG/`ogGetIpAddress`.info.html
 FILEINFOCACHE=$OGLOG/`ogGetIpAddress`.cache.txt
 ogMountCache 2>/dev/null
-CACHECONTENIDO=`ls -m $OGCAC/$OGIMG 2>/dev/null`
+CACHECONTENIDO="ls -m $OGCAC/$OGIMG 2>/dev/null"
 
 SPEED=$(LANG=C ethtool $DEVICE 2>/dev/null | awk '$1~/Speed/ {print $2}')
 case "${SPEED,,}" in
@@ -23,8 +23,13 @@ case "${DUPLEX,,}" in
 	full)		;;
 	*)		DUPLEX="<font color=\"red\">$DUPLEX</font>"
 esac
+
 CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
-expr $CACHESIZEFREE / 1024 > $FILEINFOCACHE 2>/dev/null && echo '.MB,' >> $FILEINFOCACHE
+if [ $CACHESIZEFREE == 0 ]; then
+	echo '0.MB,' > $FILEINFOCACHE
+else
+	expr $CACHESIZEFREE / 1024 > $FILEINFOCACHE 2>/dev/null && echo '.MB,' >> $FILEINFOCACHE
+fi
 
 # Crear menú por defecto.
 cat > $FILEINFOHTML << EOT
@@ -72,7 +77,5 @@ cat >> $FILEINFOHTML << EOT
 EOT
 
 # Crear contenido de la caché.
-cat >> $FILEINFOCACHE << EOT
-$CACHECONTENIDO
-EOT
+eval $CACHECONTENIDO >> $FILEINFOCACHE
 

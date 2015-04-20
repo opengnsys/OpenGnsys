@@ -2,7 +2,6 @@
 #/**
 #@file    opengnsys_update.sh
 #@brief   Script actualización de OpenGnSys
-#@warning No se actualiza BD, ni ficheros de configuración.
 #@version 0.9 - basado en opengnsys_installer.sh
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2010/01/27
@@ -24,6 +23,9 @@
 #@version 1.0.5 - Actualizar BD en la misma versión, compatibilidad con Fedora (systemd) y configuración de Rsync.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2014/04/03
+#@version 1.0.6 - Redefinir URLs de ficheros de configuración usando HTTPS.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2015/03/12
 #*/
 
 
@@ -66,7 +68,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
 	USESVN=1
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
+SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -507,6 +509,13 @@ function updateWebFiles()
 	fi
 	restoreFile $INSTALL_TARGET/www/controlacceso.php
 
+	# Cambiar acceso a protocolo HTTPS.
+	if grep -q "http://" $INSTALL_TARGET/www/controlacceso.php 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating web access file"
+		perl -pi -e 's!http://!https://!g' $INSTALL_TARGET/www/controlacceso.php
+		NEWFILES="$NEWFILES $INSTALL_TARGET/www/controlacceso.php"
+	fi
+
 	# Compatibilidad con dispositivos móviles.
 	COMPATDIR="$INSTALL_TARGET/www/principal"
 	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
@@ -663,10 +672,10 @@ function updateServerFiles()
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
 	fi
-	if grep -q "UrlMsg=.*msgbrowser.php" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
+	if egrep -q "(UrlMsg=.*msgbrowser.php)|(UrlMenu=http://)" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new client config file"
 		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g; s!UrlMenu=http://!UrlMenu=https://!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
@@ -757,7 +766,7 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.4-rc4
 	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso 	# 1.0.6-rc1
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME

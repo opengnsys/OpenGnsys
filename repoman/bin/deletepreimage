@@ -44,7 +44,7 @@ for IMG in `ls /opt/opengnsys/images/*.delete`; do
         ## se llama al escript de borrado de imagen.
 	## Si es un Directorio Borramos
 	if [[ $DELETEdir == "delete" ]]; then
-		/opt/opengnsys/bin/deleteimage -d $DELETEIMAGE
+		/opt/opengnsys/bin/deleteimage $DELETEIMAGE
 
 		# Si es un Imagen Backup Borramos
 		elif [[ $DELETEant == "ant" ]]; then

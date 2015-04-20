@@ -1,12 +1,12 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0 y 1.0.1 - 1.0.6
+# OpenGnSys 1.0.2a - 1.1.0
 #use ogAdmBD
-
-# Mostrar protocolo de clonación en la cola de acciones (ticket #672)
-UPDATE parametros SET tipopa = 0, visual = 1 WHERE idparametro = 30;
 
 UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
 UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
+
+# Habilita el comando Particionar y formatear
+UPDATE comandos SET activo = '1' WHERE comandos.idcomando = 10;
 
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
@@ -64,10 +64,8 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
-# Imágenes incrementales.
 ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
-# Cambio de tipo de grupo.
 UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
 
 # Añadir validación del cliente.
@@ -133,11 +131,11 @@ UPDATE grupos SET tipo=70 WHERE tipo=50;
 
 # Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
-     MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-#UPDATE menus SET resolucion = CASE resolucion 
-#                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+	MODIFY resolucion VARCHAR(50) DEFAULT NULL;
+#UPDATE menus SET resolucion = CASE resolucion
+#				   WHEN '355' THEN 'uvesafb:1152x864-16'
 #				   WHEN '788' THEN 'uvesafb:800x600-16'
-#        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+#				   WHEN '789' THEN 'uvesafb:800x600-24'
 #				   WHEN '791' THEN 'uvesafb:1024x768-16'
 #				   WHEN '792' THEN 'uvesafb:1024x768-24'
 #				   WHEN '794' THEN 'uvesafb:1280x1024-16'
@@ -205,7 +203,7 @@ ALTER TABLE ordenadores
 	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
 	ALTER idproautoexec SET DEFAULT 0;
 UPDATE ordenadores
-        SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
+	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
 
 # Incluir fecha de despliegue/restauración (ticket #677) y
 # correcion en eliminar imagen de cache de cliente (ticket #658)
@@ -220,4 +218,15 @@ UPDATE comandos
 UPDATE comandos
 	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
 	WHERE idcomando = 9;
+
+# Eliminar campos que ya no se usan (ticket #705).
+ALTER TABLE repositorios
+	DROP pathrepoconf,
+	DROP pathrepod,
+	DROP pathpxe;
+ALTER TABLE menus
+	DROP coorx,
+	DROP coory,
+	DROP scoorx,
+	DROP scoory;
 

@@ -100,7 +100,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la configuracion y la version del kernel: < 3.7 ext4, si >=  btrfs 
-		[ $KERNELVERSION \< 3.07 ] && IMGFS = "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+		[ $KERNELVERSION \< 3.07 ] && IMGFS="EXT4" || IMGFS=${IMGFS:-"BTRFS"}
 
 		if [ "$IMGFS" == "EXT4" ]; then
 		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
@@ -195,7 +195,7 @@ SIZEDATA=${SIZEDATA:-"SIZEDATA"}
 
 # Incluimos información de la imagen. Segun el kernel sera ext4 o btrfs.
 KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-[ $KERNELVERSION \< 3.07 ] && IMGFS = "EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+[ $KERNELVERSION \< 3.07 ] && IMGFS="EXT4" || IMGFS=${IMGFS:-"BTRFS"}
 echo "#$IMGFS:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
 
 if [ "$IMGTYPE" == "img" ]; then
@@ -241,14 +241,14 @@ fi
 
 #/**
 #  ogAclFilter
-#@brief Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial
+#@brief Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial (falla: no se usa)
 #@param No.
 #@return  (nada)
 #*/
 function ogAclFilter () {
 local  IMGACL IMGINFO FILES ACLTMP
 
-# Ayuda o menos de 5 parametros y la imagen no es basica
+# Ayuda 
 if [ "$*" == "help" ]; then
 	ogHelp "$MSG_HELP_ogAclFilter" \
 		"$FUNCNAME [ no parameters ]  "
@@ -267,14 +267,12 @@ ACLFILES="/tmp/aclfiles$$"
 echo "" > $ACLTMP
 grep -n  -e "File" -e "Directory" $IMGACL > $ACLFILES
 
-# Al fichero le quitamos las líneas sobrantes: comentarios y lineas vacias.
-sed -e s/"^#.*$"//g $IMGINFO > $FILES
-sed -i '/^$/d'  $FILES
+# Al listado de ficheros le quitamos las líneas sobrantes: comentarios y lineas vacias.
+sed -e s/"^#.*$"//g -e '/^$/d' $IMGINFO > $FILES
 
 
 # Recorremos el listado y extraemos la acl correspondiente al fichero o directorio.
 while read LINE; do
-    #read END INI <<< "$(grep -n  -e "File" -e "Directory" $IMGACL| grep -A 1 "$LINE"| awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
     read END INI <<< "$(grep -A 1 "$LINE" $ACLFILES | awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
     let NUM=$END-$INI-1
     # Si algún archivo no se encuentra, el error lo mandamos a /dev/null
@@ -316,12 +314,16 @@ DEST=$(ogMount $1 $2) || return $?
 
 IMGACL="ogimg.acl"
 IMGLN="ogimg.ln"
+IMGINFO="ogimg.info"
+
+# Copiamos informacion de la imagen a /tmp (para basicas)
+[ -r $DEST/$IMGACL ] && cp $DEST/ogimg.* /tmp
 
 #Creamos o modificamos los enlaces.
 # La imagen diferencial tiene ogimg.ln 
 # para la completa lo generamos con los enlaces que contengan  /mnt/
-[ -r "$DEST/$IMGLN" ] || grep -e "->" -e "=>" "$DEST/ogimg.info"|grep "/mnt/" > "$DEST/$IMGLN"
-if [ $(wc -l "$DEST/$IMGLN"|cut -f1 -d" ") -ne 0 ]; then
+[ -r "/tmp/$IMGLN" ] || grep -e "->" -e "=>" "/tmp/$IMGINFO"|grep "/mnt/" > "/tmp/$IMGLN"
+if [ $(wc -l "/tmp/$IMGLN"|cut -f1 -d" ") -ne 0 ]; then
    while read LINEA
    do
         ORIGLN="${LINEA#*> }"
@@ -342,15 +344,26 @@ if [ $(wc -l "$DEST/$IMGLN"|cut -f1 -d" ") -ne 0 ]; then
 	rm -f "$(basename "$DESTLN")"
    	ln $OPTLN "$ORIGLN" "$(basename "$DESTLN")"
    	echo -n "."
-   done < "$DEST/$IMGLN"  2>/dev/null
+   done < "/tmp/$IMGLN"  2>/dev/null
    echo ""
 
 fi
+cd /
+}
+#/**
+#  ogRestoreAclImage
+#@brief Restaurar las ACL. La informacion esta ya copiada al directorio /tmp
+#@param 1 num_disk
+#@param 2 num_part
+#*/
+function ogRestoreAclImage () {
+local PART IMGACL
+PART=$(ogDiskToDev "$1" "$2") || return $?
+IMGACL="ogimg.acl"
 
 # Restauramos acl
-if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f "$DEST/$IMGACL" ] ; then
+if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f "/tmp/$IMGACL" ] ; then
 	cd /
-        cp "$DEST/$IMGACL" /tmp
         ogUnmount "$1" "$2"
         echo "ntfs-3g.secaudit -se $PART /tmp/$IMGACL"
         ntfs-3g.secaudit -se $PART /tmp/$IMGACL
@@ -457,6 +470,7 @@ DESTRSYNC=$(ogGetMountPoint $4 $5)
 
 # Borramos ficheros de informacion de restauraciones antiguas
 rm -rf $DESTRSYNC/ogimg.*
+rm -rf /tmp/ogimg.*
 
 # Origen y destino de la sincronizacion y en REPO opciones rsync
 if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
@@ -482,23 +496,25 @@ ogEcho log session "      $MSG_SYNC_RESTORE"
 if [ "$3" == "diff" ]; then
 	# Lista de archivos a copiar:
 	IMGINFO="ogimg.info"
-	FILESFROM=" --files-from=$DESTRSYNC/$IMGINFO"
+	FILESFROM=" --files-from=/tmp/$IMGINFO"
 
-        echo "      rsync -aHAX$OPTRSYNC --progress  $ORIG/ogimg* $DESTRSYNC" 
-        rsync -aHAX$OPTRSYNC $PASSWORD --progress  "$ORIG"/ogimg* $DESTRSYNC 
+        echo "      rsync -aHAX$OPTRSYNC --progress  $ORIG/ogimg* /tmp"
+        rsync -aHAX$OPTRSYNC $PASSWORD --progress  "$ORIG"/ogimg* /tmp
         # Borramos linea de información de la imagen, sino busca un fichero con ese nombre
-        sed -i   '/^\#/d' $DESTRSYNC/$IMGINFO
+        sed -i   '/^\#/d' /tmp/$IMGINFO
 
 	cd $DESTRSYNC
 	# Diferencial: Borramos archivos sobrantes.
 	ogEcho log session "      $MSG_SYNC_DELETE"  
-	cat "$DESTRSYNC/ogimg.rm" 2>/dev/null | xargs rm -rf
+	sed -e s/^/\"/g -e s/$/\"/g "/tmp/ogimg.rm" 2>/dev/null | xargs rm -rf
 
 fi
 
 echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC"
 rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>$OGLOGCOMMAND | egrep "^deleting|^sent|^sending|^total|%"  |tee -a $OGLOGCOMMAND
-return ${PIPESTATUS[0]}
+RETVAL=${PIPESTATUS[0]}
+cd /
+return $RETVAL
 
 }
 
@@ -684,7 +700,7 @@ echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"  | tee -a $OGLOGSESSION $
 let TIMEOUT=$SIZE/$CREATESPEED
 [ $TIMEOUT -lt 60 ] && TIMEOUT=60
 until $(grep -i $STATE $LOCKFILE &>/dev/null) ; do
-	[ $STATE = "mounted" -a -f "$DIRMOUNT/ogimg.info" ] && ogEcho session "" && return 0
+	[ $STATE = "mounted" -a -f "$DIRMOUNT/ogimg.info" ] && ogEcho log session "" && return 0
         TIMEAUX=$[SECONDS-TIME]
         [  "$TIMEAUX" -lt "$TIMEOUT" ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
         echo -n "#"  | tee -a $OGLOGSESSION $OGLOGFILE
@@ -856,7 +872,7 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 else
 	[ -f "$OGIMG/mount/$2${IMGEXT#img}/ogimg.info" ] && ISMOUNT=TRUE
 fi
-[ "$ISMOUNT" == TRUE ] && ogEcho session warning "$MSG_SYNC_NOCHECK" && return 0
+[ "$ISMOUNT" == TRUE ] && ogEcho log session warning "$MSG_SYNC_NOCHECK" && return 0
 
 DIRMOUNT="/tmp/ogCheckImage$$"
 mkdir "$DIRMOUNT" 

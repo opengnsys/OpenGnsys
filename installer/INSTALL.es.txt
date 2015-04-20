@@ -1,4 +1,4 @@
-Instalación y Actualización de OpenGnSys 1.0.3
+Instalación y Actualización de OpenGnSys 1.1.0
 ==============================================
 
 
@@ -12,7 +12,7 @@ Descargar una versión completa y desccomprimir el fichero "opengnsys-version.ta
         cd opengnsys/installer
 
 O bien, descargar el instalador desde la última reversión del repositorio:
-        svn export http://www.opengnsys.es/svn/branches/version1.0/installer/opengnsys_installer.sh
+        svn export http://www.opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh
 
 Opcionalmente, puede descargarse la imagen del cliente; si no se realiza este paso, el instalador la descargará automáticamente.
 	wget http://www.opengnsys.es/downloads/ogLive-versioncliente.iso

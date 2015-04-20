@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.5 - 1.0.6
+# OpenGnSys 1.0.5 - 1.1.0
 #use ogAdmBD
 
 # Incluir ordenador modelo y fecha de creación de imagen y
@@ -30,4 +30,15 @@ UPDATE comandos
 UPDATE comandos
 	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
 	WHERE idcomando = 9;
+
+# Eliminar campos que ya no se usan (ticket #705).
+ALTER TABLE repositorios
+	DROP pathrepoconf,
+	DROP pathrepod,
+	DROP pathpxe;
+ALTER TABLE menus
+	DROP coorx,
+	DROP coory,
+	DROP scoorx,
+	DROP scoory;
 

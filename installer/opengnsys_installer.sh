@@ -89,7 +89,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
 	USESVN=1
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.0/"
+SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -1222,12 +1222,6 @@ function copyServerFiles ()
 		fi
 	done
 
-	# Si servidor tiene instalado Rsync > 3.0.9, renombrar el ejecutable
-	# compilado para el cliente.
-	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
-		[ -e client/bin/rsync-3.1.0 ] && mv -f client/bin/rsync-3.1.0 client/bin/rsync
-	fi
-
 	popd
 }
 
@@ -1326,6 +1320,12 @@ function copyClientFiles()
 		errstatus=1
 	fi
 	
+	# Si el servidor tiene instalado Rsync > 3.0.9, renombrar el ejecutable
+	# compilado para el cliente.
+	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
+		[ -e $INSTALL_TARGET/client/bin/rsync-3.1.0 ] && mv -f $INSTALL_TARGET/client/bin/rsync-3.1.0 $INSTALL_TARGET/client/bin/rsync
+	fi
+
 	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
@@ -1340,7 +1340,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.4-rc4
 	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso	# 1.0.6-rc1
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
@@ -1418,7 +1418,7 @@ function openGnsysConfigure()
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent/ogAdmAgent.cfg > $INSTALL_TARGET/etc/ogAdmAgent-$dev.cfg
-			CONSOLEURL="http://${SERVERIP[i]}/opengnsys"
+			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
@@ -1429,7 +1429,7 @@ function openGnsysConfigure()
 			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
-				OPENGNSYS_CONSOLEURL="${CONSOLEURL/http:/https:}"
+				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
 			fi
 		fi
 		let i++

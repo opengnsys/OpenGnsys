@@ -53,13 +53,13 @@ fi
 IMGPATH="$OGIMG/$1.$IMGEXT"
 if [ -f $IMGPATH ]; then
     echo "Borrando fichero $PATHDIR"
-    rm -f $IMGPATH && rm -f $IMGPATH.{sum,torrent}
+    rm -f $IMGPATH && rm -f $IMGPATH.{sum,full.sum,torrent}
 else
     # Eliminar ficheros de imagen sincronizada diferencial. 
     IMGPATH="$OGIMG/$1.$IMGEXT.$DIFFEXT"
     if [ -f $IMGPATH ]; then
         echo "Borrando fichero $PATHDIR"
-        rm -f $IMGPATH && rm -f $IMGPATH.{sum,torrent}
+        rm -f $IMGPATH && rm -f $IMGPATH.{sum,full.sum,torrent}
     else
         # Eliminar directorio de imagen sincronizada. 
         IMGPATH="$OGIMG/$1"
@@ -75,12 +75,13 @@ if [ -n "$RECOVERBACKUP" ]; then
     [ -e $IMGPATH.$BAKEXT ] && echo "Recuperando copia $IMGPATH.$BAKEXT"
     mv -f $IMGPATH.$BAKEXT $IMGPATH && \
             (mv -f $IMGPATH.sum.$BAKEXT $IMGPATH.sum 2>/dev/null
+	     mv -f $IMGPATH.full.sum.$BAKEXT $IMGPATH.full.sum 2>/dev/null
              mv -f $IMGPATH.torrent.$BAKEXT $IMGPATH.torrent 2>/dev/null)
 fi
 
 # Borrar copia de seguridad de la imagen.
 if [ -n "$DELETEBACKUP" ]; then
     [ -e $IMGPATH ] && echo "Eliminando copia $IMGPATH.$BAKEXT"
-    rm -f $IMGPATH.$BAKEXT && rm -f $IMGPATH.{sum,torrent}.$BAKEXT
+    rm -f $IMGPATH.$BAKEXT && rm -f $IMGPATH.{sum,full.sum,torrent}.$BAKEXT
 fi
 

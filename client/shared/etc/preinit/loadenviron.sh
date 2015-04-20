@@ -119,6 +119,7 @@ export OG_ERR_NOGPT=22		# El disco indicado no contiene una particion GPT
 
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
 export OG_ERR_UPDATECACHE=31	# Error al realizar el comando updateCache
+export OG_ERR_DONTFORMAT=32	# Error al formatear
 export OG_ERR_GENERIC=40 	# Error imprevisto no definido
 export OG_ERR_UCASTSYNTAXT=50   # Error en la generación de sintaxis de transferenica UNICAST
 export OG_ERR_UCASTSENDPARTITION=51  # Error en envío UNICAST de partición
@@ -137,3 +138,4 @@ export OG_ERR_DONTSYNC_IMAGE=71 # Imagen no sincronizable (es monolitica)
 export OG_ERR_DONTUNMOUNT_IMAGE=72 # Error al desmontar la imagen
 export OG_ERR_NOTDIFFERENT=73	# No se detectan diferencias entre la imagen basica y la particion.
 export OG_ERR_SYNCHRONIZING=74  # Error al sincronizar, puede afectar la creacion/restauracion de la imagen
+

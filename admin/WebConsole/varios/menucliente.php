@@ -50,7 +50,15 @@ else{
 	$gestor = fopen($nombre_archivo, 'r');
 	$contenidofichero = fread($gestor, filesize($nombre_archivo));
 	fclose($gestor);
-	if (! empty ($contenidofichero)) {
+	if (empty ($contenidofichero)) {
+		// Sin caché local.
+		$cmd->texto="UPDATE ordenadores_particiones
+				SET cache=''
+				WHERE idordenador=(SELECT idordenador
+						     FROM ordenadores
+						    WHERE ip='".$iph."')";
+	} else {
+		// Actualizar datos de caché local.
 		$cmd->texto="UPDATE ordenadores_particiones
 				SET cache='".$contenidofichero."'
 				WHERE idordenador=(SELECT idordenador
@@ -59,8 +67,8 @@ else{
 				  AND idsistemafichero=(SELECT idsistemafichero
 							  FROM sistemasficheros
 							 WHERE descripcion='CACHE')";
-		$resul=$cmd->Ejecutar();
 	}
+	$resul=$cmd->Ejecutar();
 	//agp
 	//________________________________________________________________________________________________________
 	$rsmenu=RecuperaMenu($cmd,$iph);	// Recupera un recordset con los datos del m en
@@ -69,7 +77,7 @@ else{
 			case $ITEMS_PUBLICOS:
 				if(!empty($rsmenu->campos["htmlmenupub"])){
 					$urlHtml=$rsmenu->campos["htmlmenupub"];
-					if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
+					//if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
 					Header('Location: '.$urlHtml); // Url del menu personalizado
 				}
 				else{
@@ -82,7 +90,7 @@ else{
 				if(!empty($rsmenu->campos["htmlmenupri"])){
 					$urlHtml=$rsmenu->campos["htmlmenupri"];
 					
-					if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
+					//if(strtoupper(substr($urlHtml,0,7))!="HTTP://") $urlHtml="http://".$urlHtml;
 					Header('Location: '.$urlHtml); // Url del menu personalizado
 				}
 				else{

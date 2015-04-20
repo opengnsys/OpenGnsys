@@ -227,7 +227,7 @@ esac
 function ogFormatFs ()
 {
 # Variables locales
-local PART ID TYPE LABEL PROG PARAMS LABELPARAM ERRCODE
+local PART TYPE LABEL PROG PARAMS LABELPARAM ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -244,7 +244,7 @@ fi
 PART="$(ogDiskToDev $1 $2)" || return $?
 # Error si la partición está montada o bloqueada.
 if ogIsMounted $1 $2; then
-    ogRaiseError $OG_ERR_PARTITION "$1 $2"       # Indicar nuevo error
+    ogRaiseError $OG_ERR_DONTFORMAT "$MSG_MOUNT: $1 $2"
     return $?
 fi
 if ogIsLocked $1 $2; then
@@ -384,7 +384,7 @@ echo ${SIZE%.0*}
 function ogGetFsType ()
 {
 # Variables locales.
-local PART ID TYPE
+local PART TYPE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
@@ -396,16 +396,13 @@ fi
 
 # Detectar tipo de sistema de archivo (independientemente del tipo de partición).
 PART=$(ogDiskToDev "$1" "$2") || return $?
-TYPE=$(blkid -o export $PART | awk -F= '$1~/^TYPE/ { print toupper($2) }')
+TYPE=$(blkid -o export $PART | awk -F= '$1=="TYPE" { print toupper($2) }')
 
 # Componer valores correctos.
 case "$TYPE" in
     EXT4)      # Comprobar si es caché o Ext4.
-               if [ "$1 $2" == "$(ogFindCache)" ]; then
-                   ogIsFormated $1 $2 2>/dev/null && TYPE="CACHE"
-               fi
-               ;;
-    VFAT)      TYPE="$(blkid -po export $PART | awk -F= '$1~/^VERSION$/ { print toupper($2) }')" ;;
+               [ "$1 $2" == "$(ogFindCache)" ] && TYPE="CACHE" ;;
+    VFAT)      TYPE="$(blkid -po export $PART | awk -F= '$1=="VERSION" { print toupper($2) }')" ;;
     SWAP)      TYPE="LINUX-SWAP" ;;
     LVM*)      TYPE="LINUX-LVM" ;;
     *RAID*)    TYPE="LINUX-RAID" ;;

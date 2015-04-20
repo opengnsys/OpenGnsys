@@ -25,10 +25,6 @@ include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");
 include_once("./includes/HTMLSELECT.php");
 
-// Valores por defecto.
-$herror=0;
-$idcentro="";
-
 // Control de errores.
 if (isset($_GET["herror"])) $herror=$_GET["herror"]; 
 if (isset($_POST["herror"])) $herror=$_POST["herror"]; 
@@ -39,10 +35,28 @@ if (!empty ($parmidi) and file_exists ("idiomas/php/$parmidi/acceso_$parmidi.php
 }
 include ("idiomas/php/$idi/acceso_$idi.php");
 
+$busidcentro="";
 $cmd=CreaComando($cnx); // Crea objeto comando 
 if (!$cmd)
    	die($TbMsg["ACCESS_ERROR"]);
 
+        $rs=new Recordset;
+//      $cmd->texto="SELECT * FROM  centros WHERE idcentro='$idc'";
+        $cmd->texto="SELECT * FROM  centros ";
+        $rs->Comando=&$cmd;
+        if (!$rs->Abrir()) return(false); // Error al abrir recordset
+        $rs->Primero();
+        if (!$rs->EOF){
+        $busidcentro=$rs->campos["identidad"];
+        }$rs->Cerrar();	
+	
+// Valores por defecto.
+$herror=0;
+if (empty($busidcentro)){
+	$idcentro="";
+}else{
+	$idcentro=$busidcentro;
+}
 ?>
 <html>
 <head>

@@ -137,6 +137,7 @@ ogExecAndLog command ogRestoreInfoImage $3 $4
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
+   ogExecAndLog command ogRestoreAclImage  $3 $4
    if which configureOsCustom &>/dev/null; then
 	ogEcho log session "[90] configureOsCustom"
 	configureOsCustom "$3" "$4" "$1" "$2"
@@ -145,6 +146,8 @@ if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
 	configureOs $3 $4 
    fi
 fi
+TIMEAUX3=$[SECONDS-TIMEAUX2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s" 
 
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" 

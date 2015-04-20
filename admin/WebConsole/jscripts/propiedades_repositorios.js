@@ -95,16 +95,6 @@ function comprobar_datos(){
 		document.fdatos.puertorepo.focus();
 		return(false);
 	}
-	if (document.fdatos.pathrepod.value=="") {
-		alert(TbMsg[4]);
-		document.fdatos.pathrepod.focus();
-		return(false);
-	}
-	if (document.fdatos.pathpxe.value=="") {
-		alert(TbMsg[5]);
-		document.fdatos.pathpxe.focus();
-		return(false);
-	}
 	
 	return(true);
 }

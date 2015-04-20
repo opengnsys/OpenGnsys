@@ -140,7 +140,7 @@ function consola_remota(ambito){
 function ver_log(ambito){
 	var nombre_ordenador=currentNodo.toma_infonodo();
 	var whref="../principal/verlog.php?nombreordenador="+nombre_ordenador;
-	window.open(whref,"","width=400,height=100,scrollbars=YES,resizable=YES")
+	window.open(whref,"","width=1024,height=870,scrollbars=YES,resizable=YES")
 }
 
 //________________________________________________________________________________________________________
@@ -152,7 +152,7 @@ function ver_log(ambito){
 function ver_log_seguimiento(ambito){
 	var nombre_ordenador=currentNodo.toma_infonodo();
 	var whref="../principal/verlogseguimiento.php?nombreordenador="+nombre_ordenador;
-	window.open(whref,"","width=400,height=100,scrollbars=YES,resizable=YES")
+	window.open(whref,"","width=1024,height=870,scrollbars=YES,resizable=YES")
 }
 
 //________________________________________________________________________________________________________
@@ -231,7 +231,7 @@ function confirmarcomando(ambito,idcomando,descricomando,pagina,gestor,funcion){
 	reset_contextual(-1,-1); // Oculta menu contextual
 	document.fcomandos.idcomando.value=idcomando; // Identificador del comandos
 	document.fcomandos.descricomando.value=descricomando; // Descripción del comandos	
-	document.fcomandos.ambito.value=ambito; // Ámbito de aplicación
+	document.fcomandos.ambito.value=ambito; // �?mbito de aplicación
 	document.fcomandos.idambito.value=currentNodo.toma_identificador(); // Identificador del ámbito
 	document.fcomandos.nombreambito.value=currentNodo.toma_infonodo() ; // Nombre del ámbito
 	document.fcomandos.action=pagina; // Página interactiva del comando

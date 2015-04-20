@@ -1,22 +1,27 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.3 - 1.0.6
+# OpenGnSys 1.0 y 1.0.1 - 1.1.0
 #use ogAdmBD
+
+# Mostrar protocolo de clonación en la cola de acciones (ticket #672)
+UPDATE parametros SET tipopa = 0, visual = 1 WHERE idparametro = 30;
+
+UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
+UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
 
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
 
-# Soportar particiones GPT, añadir información de caché y fecha de despliegue.
+# Soportar particiones GPT y añadir información de caché.
 ALTER TABLE ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
 	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idordenador,
-	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
-	ADD cache TEXT NOT NULL;
+	ADD cache varchar(500),
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 
 # Nuevos tipos de particiones y particiones GPT.
-ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
 ALTER TABLE sistemasficheros MODIFY codpar int(8) NOT NULL;
+ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
 	(CONV('A5',16,10), 'FREEBSD', 1),
@@ -59,33 +64,11 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
-# Añadir proxy para aulas.
-ALTER TABLE aulas
-       ADD proxy VARCHAR(30) AFTER dns;
-
-# Valores por defecto para incorporar ordenadores (ticket #609).
-ALTER TABLE ordenadores
-	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
-	ALTER idproautoexec SET DEFAULT 0;
-UPDATE ordenadores
-	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
-
-# Corregir errata en particiones vacías con número de partición asignado al código de partición.
-UPDATE ordenadores_particiones
-	SET codpar = 0
-	WHERE codpar = numpar AND tamano = 0;
-
-# Añadir foto de ordenador.
+# Imágenes incrementales.
 ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
-# Actualizar localización de foto de aula (eliminar el camino).
+# Cambio de tipo de grupo.
 UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
-
-# Internacionalización correcta de los asistentes.
-UPDATE asistentes
-	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
-UPDATE asistentes
-	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir validación del cliente.
 ALTER TABLE aulas
@@ -114,7 +97,7 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
-# Actualizar y definir parámetros para los comandos nuevos.
+# Parámetros para los comandos nuevos.
 ALTER TABLE parametros
 	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
@@ -199,6 +182,19 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('XFS', 'XFS')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+# Nuevas particiones marcadas como clonables.
+INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
+	(CONV('EF',16,10), 'EFI', 1),
+	(CONV('AB00',16,10), 'HFS-BOOT', 1),
+	(CONV('EF00',16,10), 'EFI', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
+
+# Internacionalización correcta de los asistentes.
+UPDATE asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas
@@ -209,12 +205,7 @@ ALTER TABLE ordenadores
 	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
 	ALTER idproautoexec SET DEFAULT 0;
 UPDATE ordenadores
-	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
-
-# Corregir errata en particiones vacías con número de partición asignado al código de partición.
-UPDATE ordenadores_particiones
-	SET codpar = 0
-	WHERE codpar = numpar AND tamano = 0;
+        SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
 
 # Incluir fecha de despliegue/restauración (ticket #677) y
 # correcion en eliminar imagen de cache de cliente (ticket #658)
@@ -229,4 +220,15 @@ UPDATE comandos
 UPDATE comandos
 	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
 	WHERE idcomando = 9;
+
+# Eliminar campos que ya no se usan (ticket #705).
+ALTER TABLE repositorios
+	DROP pathrepoconf,
+	DROP pathrepod,
+	DROP pathpxe;
+ALTER TABLE menus
+	DROP coorx,
+	DROP coory,
+	DROP scoorx,
+	DROP scoory;
 

@@ -69,15 +69,19 @@ case "$OSTYPE" in
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
         #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
-        # Instalar cliente para Windows (no activar en sistema en produccion ver ticket 604).
-        ogInstallMiniSetup $1 $2 postconf.cmd
-        ogInstallWindowsClient $1 $2 postconf.cmd
+        # Instalar cliente para Windows si se indica en la variable INSTALLOSCLIENT.
+	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        	ogInstallMiniSetup $1 $2 postconf.cmd
+        	ogInstallWindowsClient $1 $2 postconf.cmd
+	fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
         ## Install and Configure Grub based on OS installed and Grub 1st stage location.
         ogGrubInstallPartition $1 $2
-        # Instalar cliente para Linux. 
-        ogInstallLinuxClient $1 $2
+        # Instalar cliente para GNU/Linux si se indica en la variable INSTALLOSCLIENT.
+	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        	ogInstallLinuxClient $1 $2
+	fi
         ;;
     MacOS)      # Postconfiguración de Mac OS X.
         # Fichero indicador de activación de postconfiguración.

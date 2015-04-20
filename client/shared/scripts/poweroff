@@ -21,7 +21,7 @@ BUSYBOX=${BUSYBOX:-"busybox"}
 # Retardo para dar lugar al registro en cola de acciones.
 sleep 5
 # Parar Browser para evitar "cuelgues".
-pkill browser
+[ "$ogstatus" == "offline" ] || pkill browser
 # Apagar.
 $BUSYBOX poweroff
 

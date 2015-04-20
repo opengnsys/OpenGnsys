@@ -123,7 +123,11 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							$numero=1;
 							for ($x=0;$x<count($ima); $x++) {
 								if(substr($ima[$x],-3)==".MB") {
-									echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
+									if ( $ima[$x] == "0.MB" ){
+										echo '<font color=red><strong>'.$TbMsg["CACHE_COMPLETE"].': '.$ima[$x].'</strong></font>';
+									}else{
+										echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
+									}
 								}elseif (! empty($ima[1])){
 									// $dir=is_dir('$ima');echo $dir;
 									// if ($ima == "directorio"){$dir="si";}

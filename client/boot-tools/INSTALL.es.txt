@@ -23,7 +23,7 @@ mv /opt/opengnsys/tftpboot/ogclient /opt/opengnsys/tftpboot/ogclient-old;
 
 #1. Descargar del Subversion las herramientas del cliente
 apt-get install subversion wget
-svn checkout http://www.opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys/client/;
+svn checkout http://www.opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys/client/;
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 #2. Ejecutar el instalador: 

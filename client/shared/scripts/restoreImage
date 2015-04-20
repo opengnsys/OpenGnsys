@@ -54,7 +54,7 @@ case "$PROTO" in
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
         ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
         ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
-        RETVAL=${PIPESTATUS[0]}
+        RETVAL=$?
         ;;
     *)  # Protocolo desconocido.
         ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 

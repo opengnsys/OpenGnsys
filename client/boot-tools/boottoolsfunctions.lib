@@ -92,7 +92,7 @@ case "${1,,}" in
 		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
 esac
-SVNURL="http://opengnsys.es/svn/branches/version1.0/client"
+SVNURL="http://opengnsys.es/svn/branches/version1.1/client"
 VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
 NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
 NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"

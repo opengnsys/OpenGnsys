@@ -26,17 +26,39 @@ ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \
 ogExecAndLog command " + command + " \n ";
 }
 
+// disableDirect(form): En Deploy de imagenes si se elige updateCache se impide elegir multicast-direct o unicast-direct
+function disableDirect(form){
+	// MULTICAST-DIRECT
+	form.idmetodo.options[2].disabled=true;
+	// UNICAST-DIRECT
+	form.idmetodo.options[4].disabled=true;
+}
+// enableDirect(form): En Deploy de imagenes si se elige deployCache se permite elegir multicast-direct o unicast-direct
+function enableDirect(form){
+	// MULTICAST-DIRECT
+	form.idmetodo.options[2].disabled=false;
+	// UNICAST-DIRECT
+	form.idmetodo.options[4].disabled=false;
+}
+
+
 function codeDeployImage(form){
 switch (form.idmetodo.value)
 {
 	case "MULTICAST":
  		protocol="MULTICAST " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " ";
 		break;
+	case "MULTICAST-DIRECT":
+ 		protocol="MULTICAST-DIRECT " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " ";
+		break;
 	case "TORRENT":
 		protocol=" TORRENT " +  form.modp2p.value + ":" + form.timep2p.value;
 		break;
 	case "UNICAST":
 		protocol=" UNICAST";
+		break;
+	case "UNICAST-DIRECT":
+		protocol=" UNICAST-DIRECT";
 		break;
 }
 //form.codigo.value="deployImage REPO /";
@@ -202,8 +224,8 @@ partCode += " EMPTY:0";
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions \"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
-ogUnmountCache \n \
 ogUnmountAll "+n_disk+" 2>/dev/null\n  \
+ogUnmountCache \n \
 " + cacheCode + " \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogExecAndLog command session ogListPartitions "+n_disk+" \n \
@@ -289,8 +311,8 @@ partCode += " EMPTY:0";
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
-ogUnmountCache \n \
 ogUnmountAll "+n_disk+" \n  \
+ogUnmountCache \n \
 " + cacheCode + " \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogExecAndLog command session ogListPartitions "+n_disk+" \n \

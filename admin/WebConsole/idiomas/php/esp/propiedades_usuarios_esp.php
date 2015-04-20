@@ -19,4 +19,8 @@ $TbMsg[10]="Idioma ";
 $TbMsg[11]="SuperAdministrador ";
 $TbMsg[12]="Administrador";
 $TbMsg[13]="Operador";
+$TbMsg[14]="Para realizar cambios en este usuario<br>";
+$TbMsg[15]="creado en el proceso de instalación,<br><br>";
+$TbMsg[16]="pulse aquí<br>";
+$TbMsg[17]="http://opengnsys.es/wiki/ModificarUsuarios";
 ?>

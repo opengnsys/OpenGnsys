@@ -25,11 +25,7 @@ $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 $idmenu=0; 
 $descripcion="";
 $titulo="";
-$coorx=0;
-$coory=0;
 $modalidad=0;
-$scoorx=0;
-$scoory=0;
 $smodalidad=0;
 $comentarios="";
 $grupoid=0;
@@ -160,23 +156,12 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TD align=center colspan=6>&nbsp;<b><?echo $TbMsg[8]?></b>&nbsp;</TD>
+			<TD align=center colspan=2>&nbsp;<b><?echo $TbMsg[8]?></b>&nbsp;</TD>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp; <?echo $TbMsg[9]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
-				echo '<TD style="width:50">'.$coorx.'</TD>';
-				else
-					echo '<TD><INPUT  class="formulariodatos" name=coorx style="width:50" type=text value="'.$coorx.'"></TD>';?>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
-					echo '<TD style="width:50">'.$coorx.'</TD>';
-				else
-					echo '<TD><INPUT  class="formulariodatos" name=coory style="width:50" type=text value="'.$coory.'"></TD>';?>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TH>
-			<?
-				if ($opcion==$op_eliminacion){
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
+			<?php	if ($opcion==$op_eliminacion){
 					$tbmodalidad[1]=$TbMsg[13];
 					$tbmodalidad[2]=$TbMsg[14];
 					echo '<TD style="width:100">'.$tbmodalidad[$modalidad].'</TD>';
@@ -206,19 +191,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
-				echo '<TD style="width:50">'.$scoorx.'</TD>';
-			else
-				echo '<TD><INPUT  class="formulariodatos" name=scoorx style="width:50" type=text value="'.$scoorx.'"></TD>';?>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion)
-						echo '<TD style="width:50">'.$scoorx.'</TD>';
-					else
-						echo '<TD><INPUT  class="formulariodatos" name=scoory style="width:50" type=text value="'.$scoory.'"></TD>';?>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TH>
-				<?
-					if ($opcion==$op_eliminacion){
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
+				<?php	if ($opcion==$op_eliminacion){
 						$tbmodalidad[1]=$TbMsg[13];
 						$tbmodalidad[2]=$TbMsg[14];
 						echo '<TD style="width:100">'.$tbmodalidad[$smodalidad].'</TD>';
@@ -234,15 +208,21 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>
 		<TR>
-			<TH align=center>&nbsp; <?echo $TbMsg[16]?>&nbsp;</TH>
+			<TH align=center>&nbsp; <?echo $TbMsg[15]?>&nbsp;</TH>
 			<?if ($opcion==$op_eliminacion)
 					echo '<TD colspan=5">'.$htmlmenupri.'</TD>';
 				else
 					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupri style="width:350" type=text value="'.$htmlmenupri.'"></TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+	<br>
+	<table align="center" border="0" cellpadding="1" cellspacing="1" class="tabla_datos">
+		<?php	if ($opcion!=$op_eliminacion)
+				echo '<tr><th align="center">&nbsp;'.$TbMsg["WARN_NOTESOFMENU"].'&nbsp;</th></th>';
+		?>
+	</table>
 </FORM>
 </DIV>
 <?php
@@ -262,11 +242,7 @@ include_once("../includes/opcionesbotonesop.php");
 function TomaPropiedades($cmd,$id){
 	global	$descripcion;
 	global  $titulo;
-	global  $coorx;
-	global  $coory;
 	global  $modalidad;
-	global  $scoorx;
-	global  $scoory;
 	global  $smodalidad;
 	global	$comentarios;
 	global	$htmlmenupub;
@@ -282,11 +258,7 @@ function TomaPropiedades($cmd,$id){
 	if (!$rs->EOF){
 		$descripcion=$rs->campos["descripcion"];
 		$titulo=$rs->campos["titulo"];
-		$coorx=$rs->campos["coorx"];
-		$coory=$rs->campos["coory"];
 		$modalidad=$rs->campos["modalidad"];
-		$scoorx=$rs->campos["scoorx"];
-		$scoory=$rs->campos["scoory"];
 		$smodalidad=$rs->campos["smodalidad"];
 		$comentarios=$rs->campos["comentarios"];
 		$htmlmenupub=$rs->campos["htmlmenupub"];

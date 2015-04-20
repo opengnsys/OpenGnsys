@@ -14,6 +14,8 @@
 #@exception OG_ERR_LOCKED    4 partición bloqueada por otra operación.
 #@exception OG_ERR_IMAGE    5 error al restaurar la imagen del sistema.
 #@exception OG_ERR_IMGSIZEPARTITION  30 Tamaño de la particion es menor al tamaño de la imagen.
+#@exception OG_ERR_NOTCACHE     No existe cache -15-
+#@exception OG_ERR_CACHESIZE   Tamaño de la paticion menor al archivo a descargar -16-
 #@version 1.0.1 - Separación en protocolos de transferencia y postconfiguracion
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2011-05-11
@@ -26,15 +28,16 @@
 #@version 1.0.5 - Renominación del script como "deployImage".
 #@author  Antonio J. Doblas Viso y Ramón M. Gómez.
 #@date    2013-12-04
+#@version 1.0.6 - Se añade la gestión de errores de la CACHE cuando en el engine.cfg se define RESTOREPROTOCOLNOCACHE=NONE.
+#@author  Antonio J. Doblas Viso.
+#@date    2015-02-23
 #**/
 
 
 #Descripcion:
-# La interfaz detecta:
-#    Si Repositorio es el global (REPO) realiza un deploy.
-#    Si Repositorio es local (CACHE) realiza un restoreImage CACHE
-# El deploy, si detecta que el cliente no tiene una cache con espacio suficiente 
-#  -- reazlia un ogRestore REPO
+# Si Repositorio es el global (REPO) realiza un deploy.
+# Si Repositorio es local (CACHE) realiza un restoreImage CACHE
+# El deploy, si detecta que el cliente no tiene una CACHE o no tiene espacio suficiente consulta el engine.cfg  RESTOREPROTOCOLNOCACHE
 
 
 
@@ -111,17 +114,35 @@ case "$REPO" in
                         NEXTOPERATION=CACHE
                     ;;
                     15|16)
+                        # no se permite usar la cache (no existe(15) o no espacio sufiente (16). Se consulta engine.cfg para RESTOREPROTOCOLNOCACHE [ multicast   unicast  none ]
                         ogEcho log session "[50] $MSG_ERR_NOTCACHE ;  $MSG_ERR_CACHESIZE "
-                        ogEcho log session "[50] $MSG_SCRIPTS_CHECK_ENGINE "
-                        if [ "$RESTOREPROTOCOLNOCACHE" == "MULTICAST" ]; then
-                            case "$PROTO" in
-                                MULTICAST)  NEXTOPERATION=MULTICAST ;;
-                                TORRENT)    NEXTOPERATION=UNICAST ;;
-                                UNICAST)    NEXTOPERATION=UNICAST ;;
-                            esac
-                        else
-                            NEXTOPERATION=UNICAST
-                        fi
+                        ogEcho log session "[50] $MSG_SCRIPTS_CHECK_ENGINE:  RESTOREPROTOCOLNOTCACHE=$RESTOREPROTOCOLNOTCACHE "
+                        case "$RESTOREPROTOCOLNOTCACHE" in
+                            MULTICAST)
+                                case "$PROTO" in
+                                    MULTICAST)  NEXTOPERATION=MULTICAST ;;
+                                    TORRENT)    NEXTOPERATION=UNICAST ;;
+                                    UNICAST)    NEXTOPERATION=UNICAST ;;
+                                esac
+                          	;;
+                          	UNICAST)
+                            	NEXTOPERATION=UNICAST
+                          	;;
+                          	NONE)
+                            	case $RETVAL in
+                                	15)
+                                    	ogEcho log session "[100] $MSG_ERR_NOTCACHE"
+                                        ogRaiseError session $OG_ERR_NOTCACHE "NOT CACHE"
+                                        exit $?
+                                    ;;
+                                    16)
+                                    	ogEcho log session "[100]  $MSG_ERR_CACHESIZE "
+                                    	ogRaiseError session $OG_ERR_CACHESIZE "CACHE FULL"
+                                        exit $?
+                                    ;;
+                                esac # del segundo RETAVAL
+                          	;;
+                        esac # del RESTOREPROTOCOLNOTCACHE
                     ;;
                 esac
             ;;

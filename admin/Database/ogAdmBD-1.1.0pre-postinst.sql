@@ -1,5 +1,5 @@
 ### Procedimiento para actualización de la base de datos.
-# Postinstalación de OpenGnSys 1.0.5
+# Postinstalación de OpenGnSys 1.1.0
 #use ogAdmBD
 
 # Nota: retocar el fichero para sustituir KERNELVERSION por la versión del 

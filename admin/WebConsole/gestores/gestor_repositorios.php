@@ -23,9 +23,6 @@ $idrepositorio=0;
 $nombrerepositorio="";
 $ip="";
 $passguor="";
-$pathrepoconf="";
-$pathrepod="";
-$pathpxe="";
 
 $grupoid=0;
 $puertorepo="";
@@ -40,9 +37,6 @@ if (isset($_POST["identificador"])) $idrepositorio=$_POST["identificador"];
 if (isset($_POST["nombrerepositorio"])) $nombrerepositorio=$_POST["nombrerepositorio"]; 
 if (isset($_POST["ip"])) $ip=$_POST["ip"]; 
 if (isset($_POST["passguor"])) $passguor=$_POST["passguor"]; 
-if (isset($_POST["pathrepoconf"])) $pathrepoconf=$_POST["pathrepoconf"];
-if (isset($_POST["pathrepod"])) $pathrepod=$_POST["pathrepod"]; 
-if (isset($_POST["pathpxe"])) $pathpxe=$_POST["pathpxe"]; 
 if (isset($_POST["puertorepo"])) $puertorepo=$_POST["puertorepo"];
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"];
 
@@ -114,9 +108,6 @@ function Gestiona(){
 	global	$nombrerepositorio;
 	global	$ip;
 	global	$passguor;
-	global	$pathrepoconf;
-	global	$pathrepod;
-	global	$pathpxe;
 	global  $puertorepo;
 	global	$comentarios;
 	
@@ -134,15 +125,12 @@ function Gestiona(){
 	$cmd->CreaParametro("@nombrerepositorio",$nombrerepositorio,0);
 	$cmd->CreaParametro("@ip",$ip,0);
 	$cmd->CreaParametro("@passguor",$passguor,0);
-	$cmd->CreaParametro("@pathrepoconf",$pathrepoconf,0);
-	$cmd->CreaParametro("@pathrepod",$pathrepod,0);
-	$cmd->CreaParametro("@pathpxe",$pathpxe,0);
 	$cmd->CreaParametro("@puertorepo",$puertorepo,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO repositorios(idcentro,grupoid,nombrerepositorio,ip,passguor,pathrepoconf,pathrepod,pathpxe,puertorepo,comentarios) VALUES (@idcentro,@grupoid,@nombrerepositorio,@ip,@passguor,@pathrepoconf,@pathrepod,@pathpxe,@puertorepo,@comentarios)";
+			$cmd->texto="INSERT INTO repositorios(idcentro,grupoid,nombrerepositorio,ip,passguor,puertorepo,comentarios) VALUES (@idcentro,@grupoid,@nombrerepositorio,@ip,@passguor,@puertorepo,@comentarios)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la p�gina que llam� �sta
 				$idrepositorio=$cmd->Autonumerico();
@@ -154,7 +142,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,pathrepoconf=@pathrepoconf,pathrepod=@pathrepod,pathpxe=@pathpxe,puertorepo=@puertorepo,comentarios=@comentarios WHERE idrepositorio=@idrepositorio";
+			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,puertorepo=@puertorepo,comentarios=@comentarios WHERE idrepositorio=@idrepositorio";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
