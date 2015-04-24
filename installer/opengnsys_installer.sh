@@ -1340,8 +1340,8 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.4-rc4
-	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso	# 1.0.6-rc1
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.6-kernel3.2
+	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso	# 1.0.6-kernel3.11
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
@@ -1464,9 +1464,13 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
-	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
-	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	[ -f $VERSIONFILE ] || echo "OpenGnSys Server" >$VERSIONFILE
+	# Incluir datos de revisión, si se está instaladno desde el repositorio
+	# de código o si no está incluida en el fichero de versión.
+	if [ $USESVN -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
+		local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
+		perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	fi
 
 	# Mostrar información.
 	echo
