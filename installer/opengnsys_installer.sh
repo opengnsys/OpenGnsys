@@ -189,7 +189,7 @@ case "$OSDISTRIB" in
 	fedora|centos)
 		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
-				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
+				   'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		if [ "$OSDISTRIB" == "centos" ]; then
 			UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
 		fi
@@ -867,7 +867,7 @@ function tftpConfigure()
 			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/$TFTPSERV
 		else
 			service=$TFTPSERV
-			$ENABLESERVICE
+			$ENABLESERVICE; $STARTSERVICE
 		fi
 	fi
 	service=$INETDSERV
@@ -1393,6 +1393,11 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
+	# Deshabilitar servicios de BitTorrent si no están instalados.
+	if [ ! -e /usr/bin/bttrack ]; then
+		sed -ie 's/RUN_BTTRACKER="yes"/RUN_BTTRACKER="no"/; s/RUN_BTSEEDER="yes"/RUN_BTSEEDER="no"/' \
+			/etc/default/opengnsys
+	fi
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -1485,6 +1490,9 @@ function installationSummary()
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console access data:          specified in installer script"
+	if grep -q "^RUN_BTTRACK.*no" /etc/default/opengnsys; then
+		echoAndLog "BitTorrent service is disabled."
+	fi
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="

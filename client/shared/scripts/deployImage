@@ -160,23 +160,27 @@ esac
 
 TIME3=$SECONDS
 
+# Obtener parámetros de restauración. 
 case "$NEXTOPERATION" in
     CACHE)
-        ogEcho log session "[55] $MSG_HELP_ogRestoreImage : restoreImage CACHE $IMGNAME $DISK $PART UNICAST"
-        restoreImage CACHE "$IMGNAME" "$DISK" "$PART"
-        RETVAL=$?
-    ;;
+        PARAMS="CACHE $IMGNAME $DISK $PART" ;;
     UNICAST)
-        ogEcho log session "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART UNICAST"
-        restoreImage REPO "$IMGNAME" "$DISK" "$PART"
-        RETVAL=$?
-    ;;
+        PARAMS="REPO $IMGNAME $DISK $PART" ;;
     MULTICAST)
-        ogEcho log session "[55] $MSG_HELP_ogRestoreImage : restoreImage REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT"
-        restoreImage REPO "$IMGNAME" "$DISK" "$PART" $PROTO $PROTOOPT 
-        RETVAL=$?
-    ;;
+        PARAMS="REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" ;;
 esac
+
+# Si existe, ejecuta script personalizado "restoreImageCustom"; si no, llama al genérico "restoreImage".
+if which restoreImageCustom &>/dev/null; then
+    ogEcho log session "[55] $MSG_HELP_ogRestoreImage: restoreImageCustom $PARAMS"
+    restoreImageCustom $PARAMS
+else
+    ogEcho log session "[55] $MSG_HELP_ogRestoreImage: restoreImage $PARAMS"
+    restoreImage $PARAMS
+fi
+RETVAL=$?
+
+# Mostrar resultados.
 RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
 ogEcho log session "   [ ]      $RESUMERESTOREIMAGE "
 # Si la transferencia ha dado error me salgo.
@@ -189,6 +193,7 @@ fi
 TIME3=$[SECONDS-TIME3]
 ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s"
 
+# Si existe, ejecuta script personalizado de postconfiguración "configureOsCustom"; si no, llama al genérico "configureOs".
 if which configureOsCustom &>/dev/null; then
     ogEcho log session "[90] configureOsCustom"
     configureOsCustom "$DISK" "$PART" "$REPO" "$IMGNAME"

@@ -157,8 +157,9 @@ case "$PARM1" in
 		# Si no existe la imagen creamos el fichero.	
 		else
 		    echolog "Creamos la imagen $IMGFILE al tamaño necesario: $SIZEREQUIRED"
-		    echolog dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED 
-		    dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED
+		    touch "$IMGFILE"
+		    echolog "truncate --size=\">$SIZEREQUIRED\"k $IMGFILE"
+		    truncate --size=">$SIZEREQUIRED"k $IMGFILE 2>&1 > $REPOLOG
 		    #Formateamos imagen
 		    echo losetup $LOOPDEVICE "$IMGFILE"
 		    losetup $LOOPDEVICE "$IMGFILE"
