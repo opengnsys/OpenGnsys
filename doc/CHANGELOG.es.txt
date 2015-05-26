@@ -82,6 +82,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #704	Ampliar tamaño de ventana log de seguimiento (mejora)
 #705	Eliminar campos de formularios que han dejado de utilizarse
 #707	Eliminar del repositorio imagen de tipo directorio
+#710	Fallo al intentar cambiar cualquier campo de usuario administrador normal
 
 Tickets genéricos resueltos:
 #541	Gestión plataformas Mac (tarea)

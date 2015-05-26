@@ -4,7 +4,7 @@
 //	Idioma: Español 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="Debe introducir un nombre para este aula";
+TbMsg[0]="El nombre del aula debe contener caracteres alfanuméricos";
 TbMsg[1]="Debe introducir un número de puestos para este aula";
 TbMsg[2]="ATENCIÓN.- Esta aula contiene grupos de ordenadores u ordenadores. Si los elimina, eliminará también éstos. ¿ Está seguro ?";
 TbMsg[3]="La hora de comienzo del intervalo de reservas debe ser menor que la hora final";
@@ -19,4 +19,8 @@ TbMsg[11]="La velocidad de multicast no es válida, sólo números";
 TbMsg[12]="La dirección IP del servidor DNS no es válida";
 TbMsg[13]="La URL del servidor Proxy no es válida";
 TbMsg[14]="Deben introducirse datos de validación: página de login y página de validación";
+TbMsg[15]="La URL de la página de login no es válida";
+TbMsg[16]="La URL de la página de validación no es válida";
+TbMsg[17]="La ubicación sólo puede contener caracteres alfanuméricos"
+TbMsg[18]="Los comentarios sólo pueden contener caracteres alfanuméricos"
 

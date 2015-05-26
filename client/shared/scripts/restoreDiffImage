@@ -122,7 +122,7 @@ ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[T
 # creando enlaces y restableciendo ACL (en windows)
 ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage"
 ogExecAndLog command ogRestoreInfoImage "$4" "$5"
-ogExecAndLog command gRestoreAclImage  "$4" "$5"
+ogExecAndLog command ogRestoreAclImage  "$4" "$5"
 TIMEAUX3=$[SECONDS-TIMEAUX2]
 ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
 

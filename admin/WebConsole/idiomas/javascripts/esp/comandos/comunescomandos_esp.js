@@ -3,7 +3,7 @@
 //	Fichero de idiomas javascripts: comunescomandos_esp.js (Común a todos los comandos)
 //	Idioma: Español 
 //________________________________________________________________________________________________________
-CTbMsg=new Array;
+var CTbMsg=new Array;
 CTbMsg[0]="ATENCIÓN.- Acción cancelada, puede volver en cualquier momento a esta pantalla para ejecutar este Comando";
 CTbMsg[1]="ATENCIÓN: Ha ocurrido un error al intentar enviar este Comando";
 CTbMsg[2]="El comando se ha enviado correctamente";
@@ -20,4 +20,5 @@ CTbMsg[11]="ATENCIÓN.- Debe especificar el nombre del nuevo procedimiento que s
 CTbMsg[12]="ATENCIÓN.- Debe elegir el procedimiento al que se añadirá este comando";
 CTbMsg[13]="ATENCIÓN.- Debe elegir un modo de inclusión en tarea ejecutable, de este comando";
 CTbMsg[14]="ATENCIÓN.- Debe especificar el nombre de la nueva tarea ejecutable que se creará y a la que se añadirá este comando";
-CTbMsg[15]="ATENCIÓN.- Debe elegir la tarea a la que se añadirá este comando  ";
+CTbMsg[15]="ATENCIÓN.- Debe elegir la tarea a la que se añadirá este comando";
+CTbMsg[16]="AVISO: si el código incluye reinicio o apagado, puede provocar que el cliente no inicie correctamente";

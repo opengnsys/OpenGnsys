@@ -94,6 +94,14 @@ function	clic_mktarea(o){
 		document.fdatosejecucion.nombretarea.value="";
 		document.fdatosejecucion.sw_tarea[1].checked=false;
 		document.fdatosejecucion.idtarea.selectedIndex=0;
+	}else{
+		// Avisar si el código incluye reinicio o apagado.
+		if (typeof document.fdatos.codigo !== undefined) {
+			if (document.fdatos.codigo.value.match(/(poweroff|reboot)/)) {
+				// AVISO: si el código incluye reinicio o apagado, puede provocar que el cliente no inicie correctamente.
+				alert(CTbMsg[16]);
+			}
+		}
 	}
 }
 function	clic_nwtarea(o){
@@ -121,6 +129,14 @@ function	clic_mkprocedimiento(o){
 		document.fdatosejecucion.nombreprocedimiento.value="";
 		document.fdatosejecucion.sw_procedimiento[1].checked=false;
 		document.fdatosejecucion.idprocedimiento.selectedIndex=0;
+	}else{
+		// Avisar si el código incluye reinicio o apagado.
+		if (typeof document.fdatos.codigo !== undefined) {
+			if (document.fdatos.codigo.value.match(/(poweroff|reboot)/)) {
+				// AVISO: si el código incluye reinicio o apagado, puede provocar que el cliente no inicie correctamente.
+				alert(CTbMsg[16]);
+			}
+		}
 	}
 }
 function	clic_nwprocedimiento(o){

@@ -413,7 +413,7 @@ function calculateFreeDisk(form) {
 		
 	var freeDisk=document.getElementById("freedisk");
 	freeDisk.value=diskSize;
-	for (npart=1; npart<=4; npart++) {
+	for (var npart=1; npart<=4; npart++) {
 		var partCheck=eval("form.check"+npart);
 		var partSize=eval("form.size"+npart);
 		var partSizeCustom=eval("form.size"+npart+"custom");

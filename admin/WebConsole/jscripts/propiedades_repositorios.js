@@ -80,21 +80,18 @@ function confirmar(op){
 //	Comprobar_datos 
 //___________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.nombrerepositorio.value=="") {
-		alert(TbMsg[0]);
-		document.fdatos.nombrerepositorio.focus();
-		return(false);
+	function validate (field, validator, msgi) {
+		if (!validator (field.value)) {
+			alert(TbMsg[msgi]);
+			validation_highlight (field);
+			return false;
+		}
+		return true;
 	}
-	if (document.fdatos.ip.value=="") {
-		alert(TbMsg[1]);
-		document.fdatos.ip.focus();
-		return(false);
-	}
-	if (document.fdatos.puertorepo.value=="") {
-		alert(TbMsg[3]);
-		document.fdatos.puertorepo.focus();
-		return(false);
-	}
-	
-	return(true);
+	// Validación general de datos del formulario.
+	return validate (fdatos.nombrerepositorio, validate_text_notnull, 0 ) &&
+	       validate (fdatos.ip, validate_ipadress_notnull, 1 ) &&
+	       validate (fdatos.puertorepo, validate_number_notnull, 3 ) &&
+	       validate (fdatos.comentarios, validate_text, 4 );
+
 }

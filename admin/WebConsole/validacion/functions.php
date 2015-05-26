@@ -142,6 +142,7 @@ function GeneraMenu($rs,$tipo,$iph){
 	$codeHTML.='<BR><BR>';
 	$codeHTML.='<P align=center>';
 
+	if (empty($url)) $url="";
 	switch($tipo){
 		case $ITEMS_PUBLICOS:
 			$url.='acceso_operador.php';

@@ -24,6 +24,7 @@ if(!isset($_SESSION["validated"]) || $_SESSION["validated"] != true)
         include("../validacion/access_controller.php");
 }
 else{
+        include_once("../validacion/functions.php");
 
 //___________________________________________________________________________________________________
 	//________________________________________________________________________________________________________
@@ -47,9 +48,7 @@ else{
 	//________________________________________________________________________________________________________
 	//agp
 	$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";
-	$gestor = fopen($nombre_archivo, 'r');
-	$contenidofichero = fread($gestor, filesize($nombre_archivo));
-	fclose($gestor);
+	$contenidofichero = file_get_contents($nombre_archivo);
 	if (empty ($contenidofichero)) {
 		// Sin caché local.
 		$cmd->texto="UPDATE ordenadores_particiones

@@ -77,12 +77,7 @@ switch($idtipousuario){
 	<INPUT type=hidden name=idusuario value=<?=$idusuario?>>
 	<INPUT type=hidden name=idtipousuario value=<?=$idtipousuario?>>
 	<INPUT type=hidden name=idambito value=<?=$idambito?>>
-	<?
-		if ($opcion==$op_modificacion && $idtipousuario!=$SUPERADMINISTRADOR){
-			echo '<INPUT type=hidden name=usuario value='.$usuario.'>';
-			echo '<INPUT type=hidden name=pasguor value='.$pasguor.'>';
-		}
-	?>
+
 	<P align=center class=cabeceras><?echo $TbMsg[4]." (".$litusu.")"?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>

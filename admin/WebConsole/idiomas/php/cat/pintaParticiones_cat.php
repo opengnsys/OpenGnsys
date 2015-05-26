@@ -48,5 +48,6 @@ $TbMsg["TITLE_E"]='Opción de rsync: Se compara el destino con el origen y se bo
 $TbMsg["TITLE_C"]='Opción de rsync: Comprime los archivos de datos que se envían a la máquina de destino, lo que reduce la cantidad de datos que se transmiten. ';
 $TbMsg["SEND"]='Protocolo';
 
+$TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
 ?>
 

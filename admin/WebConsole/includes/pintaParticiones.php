@@ -331,11 +331,13 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 			}
 		}
 	}
-	if ($aviso) {			// Mostrar aviso: solo disco 1 con tabla MSDOS.
+	// Marcar fin de zona de datos de la tabla.
+	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	// Mostrar aviso: solo disco 1 con tabla MSDOS.
+	if ($aviso) {
 		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
 	}
-	/* Botones de añadir y confirmar */
-	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	// Botones de añadir y confirmar.
 	echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
 	echo '	<A href="#add" style="text-decoration:none">
 						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
@@ -439,7 +441,9 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 			}
 		}
 	}	
+
 	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	echo '<tr><th colspan="14">'.$TbMsg["WARN_PROTOCOL"].'</th></tr>';
 }
 /**
  * Las funcion pintaParticionesRestaurarImagenSincronizacion1 sustituye a las funciones 
