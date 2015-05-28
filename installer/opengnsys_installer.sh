@@ -1395,7 +1395,7 @@ function openGnsysConfigure()
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	# Deshabilitar servicios de BitTorrent si no están instalados.
 	if [ ! -e /usr/bin/bttrack ]; then
-		sed -ie 's/RUN_BTTRACKER="yes"/RUN_BTTRACKER="no"/; s/RUN_BTSEEDER="yes"/RUN_BTSEEDER="no"/' \
+		sed -i 's/RUN_BTTRACKER="yes"/RUN_BTTRACKER="no"/; s/RUN_BTSEEDER="yes"/RUN_BTSEEDER="no"/' \
 			/etc/default/opengnsys
 	fi
 	echoAndLog "${FUNCNAME}(): Creating cron files."
