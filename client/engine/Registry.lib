@@ -94,12 +94,12 @@ fi
 [ $# == 3 -o $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
-case "$4" in
-    string|STRING|"")  TYPE=1 ;;
-    binary|BINARY)     TYPE=3 ;;
-    dword|DWORD)       TYPE=4 ;;
-    *)                 ogRaiseError $OG_ERR_OUTOFLIMIT "$4"
-                       return $? ;;
+case "${4^^}" in
+    STRING|"")  TYPE=1 ;;
+    BINARY)     TYPE=3 ;;
+    DWORD)      TYPE=4 ;;
+    *)          ogRaiseError $OG_ERR_OUTOFLIMIT "$4"
+                return $? ;;
 esac
 
 # Devolver el dato del valor de registro.
@@ -222,7 +222,7 @@ local FILE FILENT FILEXP
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive" \
            "$FUNCNAME /mnt/sda1 SOFTWARE  => /mnt/sda1/WINDOWS/System32/config/SOFTWARE"
     return
 fi
@@ -388,7 +388,7 @@ local FILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename str_data"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename str_data" \
            "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1' 1"
     return
 fi

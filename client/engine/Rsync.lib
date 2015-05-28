@@ -95,8 +95,9 @@ if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
 		   fi
                 fi
         else
-                echo "      dd if=/dev/zero of=$IMGFILE bs=1024 count=$SIZEREQUIRED"
-                dd if=/dev/zero of="$IMGFILE" bs=1024 count=$SIZEREQUIRED 2>&1 | tee -a $OGLOGCOMMAND
+                touch "$IMGFILE"
+                echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" 
+                truncate --size=">$SIZEREQUIRED"k "$IMGFILE" &> $OGLOGCOMMAND
                 #Formateamos imagen
                 losetup $LOOPDEVICE $IMGFILE
 		# FS de la imagen segun la configuracion y la version del kernel: < 3.7 ext4, si >=  btrfs 
@@ -135,8 +136,9 @@ function ogCreateInfoImage () {
 #@param 3 Repositorio  [ REPO | CACHE ] (opcional en las completas)
 #@param 4 Nombre Imagen Basica (opcional en las completas)
 #@param 5 Tipo imagen [ img | diff ]
+#@version 1.0.6 rsync opcion W (whole) para que sea más rápido
 #*/
-local  IMGTYPE IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD OPTRSYNC USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL KERNELVERSION
+local  IMGTYPE IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL KERNELVERSION
 # Ayuda o menos de 5 parametros y la imagen no es basica
 if [ "$*" == "help" -o   $# -lt 5 -a "$3" != "img"  ]; then
 	ogHelp "$FUNCNAME" : "$MSG_HELP_ogCreateInfoImage" \
@@ -200,15 +202,15 @@ echo "#$IMGFS:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
 
 if [ "$IMGTYPE" == "img" ]; then
 	# Imagen Basica
-	echo "      rsync -aHAXvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" 
-	rsync -aHAXvn --delete $ORIG/ $DIREMPTY>> $IMGINFO
+	echo "      rsync -aHAXWvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" 
+	rsync -aHAXWvn --delete $ORIG/ $DIREMPTY>> $IMGINFO
 	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGINFO
 	sed -i  '/^\.\//d' $IMGINFO
 
 else
 	# Imagen Diferencial
-	echo "      rsync -aHAXvn$OPTRSYNC  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" 
-	rsync -aHAXvn$OPTRSYNC $PASSWORD  --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
+	echo "      rsync -aHAXWvn  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" 
+	rsync -aHAXWvn $PASSWORD  --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
 	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGLIST
 	sed -i  '/^\.\//d' $IMGLIST
 

@@ -36,7 +36,7 @@ for IMG in *.{img,pgz,diff}; do
 	SUMFILE="$IMG.sum"
 	#MD5 completo de todo el fichero imagen
 	SUMFULLFILE="$IMG.full.sum"
-	if [ -f "$TORRENT" ]; then
+	if [ -f "$TORRENT" -a -f "$SUMFULLFILE" ]; then
 		FILESIZE="$(ls -l $IMG | awk '{print $5}')"
 		read -e TORRFILE TORRSIZE <<<"$(ctorrent -x $TORRENT 2>/dev/null | awk '$1~/<1>/ {print $2,$3}')"
 		[ "$(basename $IMG)" = "$TORRFILE" -a "[$FILESIZE]" = "$TORRSIZE" ] && continue

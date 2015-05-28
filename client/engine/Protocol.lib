@@ -993,7 +993,7 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 #@version 0.1 - Integracion para OpenGNSys.
 #@author        Antonio J. Doblas Viso. Universidad de Malaga
 #@date
-#@version 1.5 - gestiona ficheros hash full.sum (TORRENT) y .sum (MULTICAST)
+#@version 1.6 - gestiona ficheros hash full.sum (TORRENT) y .sum (MULTICAST)
 #@author        Antonio J. Doblas Viso. Universidad de Malaga
 #@date
 #*/ ##
@@ -1006,18 +1006,18 @@ ERROR=0
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME $FUNCNAME [ str_repo] [ [Relative_path_image] " \
-           "$FUNCNAME REPO /PS1_PH1.img" \
-	   "$FUNCNAME REPO /ogclient.sqfs"
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo  relative_path_image [protocol|FULL]" \
+           "$FUNCNAME REPO /PS1_PH1.img UNICAST" \
+           "$FUNCNAME REPO /ogclient.sqfs FULL"
 	   
     return
 fi
 
 #Control de la cache
-ogFindCache || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
+ogFindCache &>/dev/null || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 
 #Control de parametros:  ahora admite tres.
-[ $# > "3" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+[ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_repo relative_path_image [protocol|FULL]"; echo $?)
 
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
@@ -1044,8 +1044,8 @@ fi
 
 ## En este punto la imagen en el repo y en la cache se llaman igual, 
 #echo "paso 4. Obtener los md5 del fichero imagen en la cacha segun PROTOCOLO  $3"
-case "$3" in 
-	full|FULL|torrent|TORRENT)
+case "${3^^}" in 
+	FULL|TORRENT)
 		#Buscamos MD5 en el REPO SOURCE
 		if [ -f $FILESOURCE.full.sum ]
 		then
@@ -1070,18 +1070,20 @@ case "$3" in
 		# Generamos el MD5 (little) en la CACHE
 		[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
 		MD5TARGET=$(cat $FILETARGET.sum)
-    	#Generamos o copiamos MD5 (full) en la CAHCHE para posteriores usos con Torrent
-    	if [ ! -f $FILETARGET.full.sum -a $FILETARGE.sum ]
-		then
-			if [ ! -f $FILESOURCE.full.sum ]
-			then
-				#.full.sum en REPO realizamos COPIA
-				cp $FILESOURCE.full.sum $FILETARGET.full.sum
-			else
-				# .full.sum no en REPO LO GENERAMOS
-				ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
-			fi
-		fi			
+        #Generamos o copiamos MD5 (full) en la CACHE para posteriores usos con Torrent
+        # Si no existe el full.sum y si existe el .sum es porque el upateCACHE multicast o unicast ha sido correcto.
+        if [ ! -f $FILETARGET.full.sum -a $FILETARGET.sum ]
+        then
+            if [ -f $FILESOURCE.full.sum ]
+            then
+                #Existe el .full.sum en REPO realizamos COPIA
+                cp $FILESOURCE.full.sum $FILETARGET.full.sum
+            else
+                #No existe .full.sum no en REPO LO GENERAMOS en la cache: situacion dificil que ocurra
+                ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+            fi
+        fi		
+		
 esac
 
 #echo "Paso 5. comparar los md5"
