@@ -21,14 +21,14 @@ MYCNF=/tmp/.my.cnf.$$
 # Control básico de errores.
 if [ $# -ne 2 ]; then
 	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG template [pc_name|group_name]"
+	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA]"
 	exit 1
 fi
 if [ ! -r $SERVERCONF ]; then
 	echo "$PROG: Sin acceso a fichero de configuración"
 	exit 2
 fi
-TEMPLATE=$(grep "^#.* $1 *$" $PXEDIR/templates/*|cut -d: -f1)
+TEMPLATE=$(grep -l "^#.* $1 *$" $PXEDIR/templates/*)
 if [ -z "$TEMPLATE" ]; then
 	echo "No existe archivo platilla: $1"
 	exit

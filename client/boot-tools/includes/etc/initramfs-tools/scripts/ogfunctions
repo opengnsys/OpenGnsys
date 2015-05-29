@@ -74,6 +74,8 @@ ogExportVarEnvironment ()
 {
 	export CFGINITRD="/tmp/initrd.cfg"	
 	OGPROTOCOL="${ogprotocol:-smb}"
+	# OPTIONS Para samba y local (a nfs no le afecta)
+	export OPTIONS=" -o user=opengnsys,pass=og"
 	case "$OGPROTOCOL" in
 		nfs|NFS)			
 			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
@@ -82,14 +84,17 @@ ogExportVarEnvironment ()
 			export SRCOGIMAGES="/opt/opengnsys/images" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
 		;;
 		smb|SMB|cifs|CIFS|samba|SAMBA)
-			export OPTIONS=" -o user=opengnsys,pass=og"
 			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
 			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
 			export SRCOGIMAGES="ogimages" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
 		;;
 		local|LOCAL)
+			# Ponemos variables SRC compatibles con smb y nfs.
 			export SRCOGLIVE="local"
+			export SRCOGSHARE="client" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+			export SRCOGLOG="log" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD
+			export SRCOGIMAGES="images" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
 		;;
 	esac
 	#punto de acceso al boot-tools live
@@ -214,8 +219,39 @@ ogPostConfigureFS()
 	#enlace si iniciamos desde ogprotocolo=local { cdrom, usb, cache } .
 	# monta el raiz del dispositivo local en /opt/og2fs/tftpboot  - acceso al fichero .sqfs
 	# y monta el sistema root sqfs en /opt/og2fs/2ndfs
-	[ "$LOCALMEDIA" == "CACHE" ] && ln -s $DSTOGLIVE /opt/opengnsys/cache
-	[ "$ogprotocol" == "local" ] &&  ln -s ${OGLIVEROOTFS}/opt/opengnsys/* /opt/opengnsys/
+	#[ "$LOCALMEDIA" == "CACHE" ] && ln -s $DSTOGLIVE /opt/opengnsys/cache
+	#[ "$ogprotocol" == "local" ] &&  ln -s ${OGLIVEROOTFS}/opt/opengnsys/* /opt/opengnsys/
+	if [ "$ogprotocol" == "local" ]; then
+	   # Creamos los subdirectorios de /opt/opengnsys/
+	   [ "$ogstatus" == "offline" ] && ln -s ${OGLIVEROOTFS}/opt/opengnsys/* /opt/opengnsys/
+	   # Montamos CACHE
+	   # Si existe particion identificada como CACHE se monta.
+	   DEVICECACHE=$(blkid -L "CACHE")
+	   if [ "$DEVICECACHE" != "" ]; then
+		# Se monta diferente segun el dispositivo de cache igual o no al de ogclient.
+		DEVICEOGLIVE=$(df |grep $DSTOGLIVE|awk '{print $1}')
+		if [[ "$DEVICECACHE" == "*$DEVICEOGLIVE*" ]];then
+		   mount --bind $DSTOGLIVE /opt/opengnsys/cache
+		else
+		   mount $DEVICECACHE /opt/opengnsys/cache
+		fi
+		if [ "$ogstatus" == "offline" ]; then
+		   [ -d /opt/opengnsys/cache/log ] || mkdir /opt/opengnsys/cache/log
+		   mount --bind /opt/opengnsys/cache/log /opt/opengnsys/log
+		fi
+	   fi
+	   # Montamos REPO
+	   if [ "$ogstatus" == "offline" ]; then
+		# Si estatus distinto de online buscamos un dispositivo con etiqueta repo
+		# y si no existe montamos la cache como repo (si existe).
+		TYPE=$(blkid | grep REPO | awk -F"TYPE=" '{print $2}' | tr -d \")
+		if [ "$TYPE" == "" ]; then
+		   [ -d "/opt/opengnsys/cache$DSTOGIMAGES" ] && mount --bind  /opt/opengnsys/cache$DSTOGIMAGES $DSTOGIMAGES
+		else
+		   mount -t $TYPE LABEL=REPO $DSTOGIMAGES &>/dev/null
+		fi
+	   fi
+	fi
 
 	#Montamos un directorio temporal para el apt-get
 	mount tmpfs /var/cache/apt/archives -t tmpfs -o size=15M
@@ -361,6 +397,17 @@ ogConnect ()
 		smb)
 			mount.cifs //${SERVER}/${SRC} ${DST} ${OPTIONS}${READONLY}		
 		;;
+		local)
+		   # Comprobamos que estatus sea online y que la variable del server no esta vacia.
+		   if [ "$ogstatus" != "offline" -a "$SERVER" != "" -a "$SRC" != "" ]; then
+			# Comprobamos que existe un servicio de samba.
+			smbclient -L $SERVER -N &>/dev/null
+			if [ $? -eq 0 ]; then
+			   mount.cifs //${SERVER}/og${SRC} ${DST} ${OPTIONS}${READONLY}
+			fi
+			# TODO: buscar condicion para NFS
+		   fi
+		;;
 	esac
 }
 
@@ -387,11 +434,11 @@ ogConnectOgLive ()
 		then
 			# Si local es particion CACHE es identificada como CACHE
 			mount LABEL=CACHE $DSTOGLIVE
-			export LOCALMEDIA=CACHE
+			#export LOCALMEDIA=CACHE
 		fi
 	else
-# Si ogprotocol es remoto.    TODO en smb rw y en nfs ro??
-	ogConnect $OGSERVERLIVE $OGPROTOCOL $SRCOGLIVE $DSTOGLIVE 		
+		# Si ogprotocol es remoto.    TODO en smb rw y en nfs ro??
+		ogConnect $OGSERVERLIVE $OGPROTOCOL $SRCOGLIVE $DSTOGLIVE 		
 	fi		
 # Si el montaje ha sido correcto, tanto en local como en remoto. Procedemos con la union
 	ogMergeLive
@@ -612,6 +659,8 @@ done
 if [ -n "${DEVICE}" ]; then	
 	export DEVICE
 	export DEVICECFG="/run/net-${DEVICE}.conf"
+	# En algunos casos, el fichero de configuración está en /tmp.
+	[ ! -f $DEVICECFG -a -f ${DEVICECFG/run/tmp} ] && mv ${DEVICECFG/run/tmp} $DEVICECFG
 	source $DEVICECFG
 	echo "DEVICE=$DEVICE" >> $CFGINITRD
 	echo "DEVICECFG=$DEVICECFG" >> $CFGINITRD

@@ -65,13 +65,13 @@ ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError session $OG_ERR_DONTSYN
 
 IMGEXT="img"
 # Comprobamos si la imagen o la particion estan bloqueada:
-ogIsImageLocked "$1" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
+ogIsImageLocked "REPO" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
 ogIsLocked "$3" "$4" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$3 $4"; echo $?)
 
 # Detectamos el sistema de ficheros de la imagen
 # TODO ogGetImageInfo
-DIRMOUNT=$(ogMountImage "$1" "$2")
-ogWaitSyncImage "$1" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+DIRMOUNT=$(ogMountImage "REPO" "$2")
+ogWaitSyncImage "REPO" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
 IMGFSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)
 
 # Comprobamos si el sistema de ficheros se puede montar
@@ -132,14 +132,22 @@ ogUnmountImage "$1" "$2" "$IMGEXT"
 # Restableciendo acl
 ogUnlock $3 $4
 ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage" 
-ogRestoreInfoImage $3 $4  2>&1 | tee -a $OGLOGCOMMAND
+ogExecAndLog command ogRestoreInfoImage $3 $4
 
 # Llamar al script de post-configuración del sistema operativo.
 # Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
 if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
+   ogExecAndLog command ogRestoreAclImage  $3 $4
+   if which configureOsCustom &>/dev/null; then
+	ogEcho log session "[90] configureOsCustom"
+	configureOsCustom "$3" "$4" "$1" "$2"
+   else
 	ogEcho log session "[90] $MSG_HELP_configureOs" 
 	configureOs $3 $4 
+   fi
 fi
+TIMEAUX3=$[SECONDS-TIMEAUX2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s" 
 
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" 

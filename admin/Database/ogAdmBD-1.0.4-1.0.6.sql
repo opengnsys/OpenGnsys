@@ -1,84 +1,34 @@
-### Procedimiento para actualización de la base de datos.
-# OpenGnSys 1.0.5
+### Fichero de actualización de la base de datos.
+# OpenGnSys 1.0.4 - 1.0.6
 #use ogAdmBD
 
-# Eliminar procedimiento para evitar errores de ejecución.
-DROP PROCEDURE IF EXISTS addcols;
-# Procedimiento para actualización condicional de tablas.
-delimiter '//'
-CREATE PROCEDURE addcols() BEGIN
-	# Añadir validación del cliente.
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='aulas' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE aulas
-			ADD validacion TINYINT(1) DEFAULT 0,
-			ADD paginalogin VARCHAR(100),
-			ADD paginavalidacion VARCHAR(100);
-	END IF;
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='validacion' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE ordenadores
-			ADD validacion TINYINT(1) DEFAULT 0,
-			ADD paginalogin VARCHAR(100),
-			ADD paginavalidacion VARCHAR(100);
-	END IF;
-	# Submenú para comandos.
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='submenu' AND TABLE_NAME='comandos' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE comandos
-			ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
-	END IF;
-	# Añadir índice para mnemónicos de parámetros.
-	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
-			WHERE COLUMN_NAME='nemonico' AND TABLE_NAME='parametros' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE parametros
-			ADD KEY (nemonico);
-	END IF;
-	# Añadir imágenes diferenciales.
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='tipo' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE imagenes
-			ADD tipo TINYINT NOT NULL DEFAULT 1,
-			ADD imagenid INT NOT NULL DEFAULT 0,
-			ADD ruta VARCHAR(250) NULL;
-		UPDATE grupos SET tipo=70 WHERE tipo=50;
-	END IF;
-	# Soporte completo para varios discos.
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='numdisk' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE imagenes
-			ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio;
-		ALTER TABLE ordenadores_particiones
-			MODIFY numdisk smallint NOT NULL,
-			MODIFY numpar smallint NOT NULL;
-	END IF;
-	# Comando Particionar y formatear.
-	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
-			WHERE INDEX_NAME='descripcion' AND TABLE_NAME='sistemasficheros' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE sistemasficheros
-			ADD UNIQUE INDEX descripcion (descripcion);
-	END IF;
-	# Añadir proxy para aulas.
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='proxy' AND TABLE_NAME='aulas' AND TABLE_SCHEMA=DATABASE())
-	THEN
-		ALTER TABLE aulas
-			ADD proxy VARCHAR(30) AFTER dns;
-	END IF;
-END//
-# Ejecutar actualización condicional.
-delimiter ';'
-CALL addcols();
-DROP PROCEDURE addcols;
+# Mejorar el rendimiento en acceso a la cola de acciones.
+ALTER TABLE acciones
+	ADD KEY (idordenador),
+	ADD KEY (idprocedimiento),
+	ADD KEY (idtarea),
+	ADD KEY (idprogramacion);
+
+# Internacionalización correcta de los asistentes.
+UPDATE asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
+
+# Añadir validación del cliente.
+ALTER TABLE aulas
+	ADD validacion TINYINT(1) DEFAULT 0,
+	ADD paginalogin VARCHAR(100),
+	ADD paginavalidacion VARCHAR(100);
+
+ALTER TABLE ordenadores
+	ADD validacion TINYINT(1) DEFAULT 0,
+	ADD paginalogin VARCHAR(100),
+	ADD paginavalidacion VARCHAR(100);
 
 # Nuevos comandos.
+ALTER TABLE comandos
+	ADD submenu VARCHAR(50) NOT NULL DEFAULT '';
 INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
 	(11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
 	(12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
@@ -92,8 +42,15 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
-# Parámetros para los comandos nuevos.
+
+# Actualizar y definir parámetros para los comandos nuevos.
+ALTER TABLE parametros
+	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+	(12, 'nci', 'Nombre canónico', '', '', '', 0, 1),
+	(21, 'sfi', 'Sistema de fichero', 'nemonico', 'sistemasficheros', 'nemonico', 1, 0),
+	(22, 'tam', 'Tamaño', '', '', '', 0, 1),
+	(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 0, 1),
 	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
 	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
 	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),
@@ -101,29 +58,41 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1),
 	(36, 'rti', 'Ruta de origen', '', '', '', 0, 1),
 	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
-	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1)
-	ON DUPLICATE KEY UPDATE
-		nemonico=VALUES(nemonico), descripcion=VALUES(descripcion),
-		nomidentificador=VALUES(nomidentificador), nomtabla=VALUES(nomtabla),
-		nomliteral=VALUES(nomliteral), tipopa=VALUES(tipopa), visual=VALUES(visual);
+	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
+
+# Imágenes incrementales, soporte para varios discos y fecha de creación
+# (tickets #565, #601 y #677).
+ALTER TABLE imagenes
+	MODIFY idrepositorio INT(11) NOT NULL DEFAULT 0,
+	MODIFY numpar SMALLINT NOT NULL DEFAULT 0,
+	MODIFY codpar INT(8) NOT NULL DEFAULT 0,
+	ADD idordenador INT(11) NOT NULL DEFAULT 0 AFTER idrepositorio,
+	ADD numdisk SMALLINT NOT NULL DEFAULT 0 AFTER idordenador,
+	ADD tipo SMALLINT NULL,
+	ADD imagenid INT NOT NULL DEFAULT 0,
+	ADD ruta VARCHAR(250) NULL,
+	ADD fechacreacion DATETIME DEFAULT NULL;
+UPDATE imagenes SET tipo=1;
+
+# Cambio de tipo de grupo.
+UPDATE grupos SET tipo=70 WHERE tipo=50;
 
 # Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
      MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-#UPDATE menus
-#	SET resolucion = CASE resolucion 
-#                		WHEN '355' THEN 'uvesafb:1152x864-16'
-#				WHEN '788' THEN 'uvesafb:800x600-16'
-#				WHEN '789' THEN 'uvesafb:800x600-24'
-#				WHEN '791' THEN 'uvesafb:1024x768-16'
-#				WHEN '792' THEN 'uvesafb:1024x768-24'
-#				WHEN '794' THEN 'uvesafb:1280x1024-16'
-#				WHEN '795' THEN 'uvesafb:1280x1024-24'
-#				WHEN '798' THEN 'uvesafb:1600x1200-16'
-#				WHEN '799' THEN 'uvesafb:1600x1200-24'
-#				WHEN NULL or '0' THEN 'uvesafb:800x600-16'
-#				ELSE resolucion
-#			 END;
+#UPDATE menus SET resolucion = CASE resolucion 
+#                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+#				   WHEN '788' THEN 'uvesafb:800x600-16'
+#        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+#				   WHEN '791' THEN 'uvesafb:1024x768-16'
+#				   WHEN '792' THEN 'uvesafb:1024x768-24'
+#				   WHEN '794' THEN 'uvesafb:1280x1024-16'
+#				   WHEN '795' THEN 'uvesafb:1280x1024-24'
+#				   WHEN '798' THEN 'uvesafb:1600x1200-16'
+#				   WHEN '799' THEN 'uvesafb:1600x1200-24'
+#				   WHEN NULL  THEN 'uvesafb:800x600-16'
+#				   ELSE resolucion
+#			       END;
 
 # Cambios para NetBoot con ficheros dinámicos (tickets #534 #582).
 DROP TABLE IF EXISTS menuboot;
@@ -134,8 +103,10 @@ ALTER TABLE ordenadores
 UPDATE ordenadores SET arranque = '01' WHERE arranque = '1';
 UPDATE ordenadores SET arranque = '19pxeadmin' WHERE arranque = 'pxeADMIN';
 
-# Habilitar el comando Particionar y formatear.
+# Habilita el comando Particionar y formatear.
 UPDATE comandos SET activo = '1' WHERE idcomando = 10;
+ALTER TABLE sistemasficheros
+	ADD UNIQUE INDEX descripcion (descripcion);
 INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('EMPTY', 'EMPTY'),
 	('CACHE', 'CACHE'),
@@ -157,6 +128,7 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('EXFAT', 'EXFAT')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+# Nuevas particiones marcadas como clonables.
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('EF',16,10), 'EFI', 1),
 	(CONV('AB00',16,10), 'HFS-BOOT', 1),
@@ -164,8 +136,44 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
+# Añadir proxy para aulas.
+ALTER TABLE aulas
+       ADD proxy VARCHAR(30) AFTER dns;
+
 # Valores por defecto para incorporar ordenadores (ticket #609).
 ALTER TABLE ordenadores
 	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
 	ALTER idproautoexec SET DEFAULT 0;
+UPDATE ordenadores
+	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
+
+# Corregir errata en particiones vacías con número de partición asignado al código de partición.
+UPDATE ordenadores_particiones 
+	SET codpar = 0
+	WHERE codpar = numpar AND tamano = 0;
+
+# Incluir fecha de despliegue/restauración (ticket #677) y
+# correcion en eliminar imagen de cache de cliente (ticket #658)
+ALTER TABLE ordenadores_particiones
+	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
+	MODIFY cache TEXT NOT NULL;
+
+# Mostrar disco en comandos Inventario de software e Iniciar sesión.
+UPDATE comandos
+	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;mac;dsk;par'
+	WHERE idcomando = 7;
+UPDATE comandos
+	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
+	WHERE idcomando = 9;
+
+# Eliminar campos que ya no se usan (ticket #705).
+ALTER TABLE repositorios
+	DROP pathrepoconf,
+	DROP pathrepod,
+	DROP pathpxe;
+ALTER TABLE menus
+	DROP coorx,
+	DROP coory,
+	DROP scoorx,
+	DROP scoory;
 

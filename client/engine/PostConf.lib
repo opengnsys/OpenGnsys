@@ -8,6 +8,50 @@
 #@warning License: GNU GPLv3+
 #*/
 
+
+#/**
+#         ogCleanOs int_ndisk int_nfilesys
+#@brief   Elimina los archivos que no son necesarios en el sistema operativo.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Partición desconocida o no accesible.
+#@note    Antes incluido en la funcion ogReduceFs
+#@author  Irina Gomez. Universidad de Sevilla.
+#@return  (nada)
+#@date    2014-10-27
+#*/ ##
+function ogCleanOs {
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_nfilesys" || return $?
+
+case "$(ogGetOsType $1 $2)" in
+    Linux)
+        # Borramos los ficheros de dispositivos y los temporales.
+        ogCleanLinuxDevices $1 $2
+        rm -rf $(ogMount $1 $2)/tmp/*
+        ;;
+    Windows)
+        # Borrar ficheros de hibernación y paginación de Windows.
+        ogGetPath $1 $2 pagefile.sys &>/dev/null && ogDeleteFile $1 $2 pagefile.sys
+        ogGetPath $1 $2 hiberfil.sys &>/dev/null && ogDeleteFile $1 $2 hiberfil.sys
+        ogGetPath $1 $2 swapfile.sys &>/dev/null && ogDeleteFile $1 $2 swapfile.sys
+        ;;
+esac
+
+}
+
+
+
 #/**
 #         ogInstallMiniSetup int_ndisk int_npartition str_filename [str_admuser str_admpassword bool_autologin [str_autouser str_autopassword] ]
 #@brief   Metafunción para instalar archivo que se ejecutará en el arranque de Windows.
@@ -255,6 +299,110 @@ Set objComputer = GetObject("winmgmts:{impersonationLevel=Impersonate}!\\\" & _
 ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, strPassword, _
     strDomain & "\" & strUser, NULL, JOIN_DOMAIN + ACCT_CREATE)
 EOF
+}
+
+
+### PRUEBAS.
+
+#/**
+#         ogInstallLaunchDaemon int_ndisk int_nfilesys str_filename
+#@brief   Instala archivo que se ejecutará en el arranque de Mac OS.
+#@param   int_ndisk         nº de orden del disco
+#@param   int_nfilesys      nº de orden del sistema de archivos
+#@param   str_filename      nombre del script
+#return   (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o directorio no encontrado.
+#@npte    Crea ficheros de configuración /Library/LaunchDaemon/es.opengnsys.Script.plist.
+#@version 1.0.6 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-10-06
+#*/ ##
+function ogInstallLaunchDaemon ()
+{
+# Variables locales.
+local LAUNCHDIR SCRIPTDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_scriptname" \
+           "$FUNCNAME 1 2 postconf"
+    return
+fi
+
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Comprobar directorios.
+LAUNCHDIR=$(ogGetPath $1 $2 /Library/LaunchDaemons)
+[ -n "$LAUNCHDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 /Library/LaunchDaemons" || return $?
+SCRIPTDIR=$(ogGetPath $1 $2 /usr/share)
+[ -n "$SCRIPTDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 /usr/share" || return $?
+
+# Crear fichero de configuración del servicio de arranque.
+cat << EOT $LAUNCHDIR/es.opengnsys.$3.plist
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+        <dict>
+                <key>Label</key>
+                <string>es.opengnsys.$3</string>
+                <key>ProgramArguments</key>
+                <array>
+                        <string>$SCRIPTDIR/$3.sh</string>
+                </array>
+                <key>RunAtLoad</key>
+                <true/>
+                <key>StandardOutPath</key>
+                <string>/var/log/$3.log</string>
+                <key>StandardErrorPath</key>
+                <string>/var/log/$3.err</string>
+                <true/>
+        </dict>
+</plist>
+EOT
+
+# Crear un fichero de script vacío.
+rm -f $SCRIPTDIR/$3.sh
+touch $SCRIPTDIR/$3.sh
+chmod +x $SCRIPTDIR/$3.sh
+}
+
+
+### PRUEBAS.
+
+#/**
+#         ogAddToLaunchDaemon int_ndisk int_nfilesys str_filename str_commands
+#@brief   Añade comandos al script creado por ogInstalLaunchDaemon.
+#@param   int_ndisk         nº de orden del disco
+#@param   int_nfilesys      nº de orden del sistema de archivos
+#@param   str_filename      nombre del script (siempre se guardará en /usr/share para que sea visible por el sistema
+#@param   str_commands      comando o comandos que se añadiran al fichero
+#return   (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o directorio no encontrado.
+#@version 1.0.6 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-10-06
+#*/ ##
+function ogAddToLaunchDaemon ()
+{
+# Variables locales.
+local SCRIPTFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_scriptname" \
+           "$FUNCNAME 1 2 postconf \"diskutil enableJournal disk0s2\""
+    return
+fi
+
+# Error si no se reciben 4 parámetros.
+[ $# == 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Comprobar que existe el fichero de comandos.
+SCRIPTFILE=$(ogGetPath $1 $2 "/usr/share/$3.sh")
+[ -n "$SCRIPTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 /usr/share/$3" || return $?
+
+# Concatenamos el comando en el fichero de comandos
+cat >> "$SCRIPTFILE" << EOT
+$4
+EOT
 }
 
 

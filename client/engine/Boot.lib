@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot
 #@class   Boot
 #@brief   Funciones para arranque y post-configuración de sistemas de archivos.
-#@version 1.0.5
+#@version 1.0.6
 #@warning License: GNU GPLv3+
 #*/
 
@@ -29,6 +29,9 @@
 #@version 1.0.4 - Soporta modo de arranque Windows (parámetro de inicio "winboot").
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-12
+#@version 1.0.6 - Selección a partir de tipo de sistema operativo (en vez de S.F.).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-08-28
 #*/ ##
 function ogBoot ()
 {
@@ -46,30 +49,37 @@ fi
 
 # Detectar tipo de sistema de archivos y montarlo.
 PART=$(ogDiskToDev $1 $2) || return $?
-TYPE=$(ogGetFsType $1 $2) || return $?
+TYPE=$(ogGetOsType $1 $2) || return $?
 # Error si no puede montar sistema de archivos.
 MNTDIR=$(ogMount $1 $2) || return $?
 
 case "$TYPE" in
-    EXT[234]|REISERFS|REISER4|JFS|XFS)
+    Linux|Android)
         # Obtiene los parámetros de arranque para Linux.
-        PARAMS=$(ogLinuxBootParameters $1 $2) || return $?
+        PARAMS=$(ogLinuxBootParameters $1 $2)
+        # Si no existe, buscar sistema de archivo /boot en /etc/fstab.
+        if [ -z "$PARAMS" -a -e $MNTDIR/etc/fstab ]; then
+            # Localizar S.F. /boot en /etc/fstab del S.F. actual.
+            PART=$(ogDevToDisk $(awk '$2=="/boot" {print $1}' $MNTDIR/etc/fstab))
+            # Buscar los datos de arranque.
+            PARAMS=$(ogLinuxBootParameters $PART) || exit $?
+        fi
         read -e KERNEL INITRD APPEND <<<"$PARAMS"
         # Si no hay kernel, no hay sistema operativo.
-        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS || return $?
+        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
         # Arrancar de partición distinta a la original.
         [ -e "$MNTDIR/etc" ] && APPEND=$(echo $APPEND | awk -v P="$PART " '{sub (/root=[-+=_/a-zA-Z0-9]* /,"root="P);print}')
         # Configurar kernel Linux con los parámetros leídos de su GRUB.
         kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
         kexec -e &
         ;;
-    NTFS|HNTFS|FAT32|HFAT32)
+    Windows|WinLoader)
         # Compruebar si hay un cargador de Windows.
         for f in io.sys ntldr bootmgr; do
             FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
             [ -n "$FILE" ] && LOADER="$f"
         done
-        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS || return $?
+        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
         if [ "$winboot" == "kexec" ]; then
             # Modo de arranque en caliente (con kexec).
             cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
@@ -89,7 +99,17 @@ case "$TYPE" in
             reboot
         fi
         ;;
-    *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
+    MacOS)
+        # Modo de arranque por reinicio.
+        # Nota: el cliente tiene que tener configurado correctamente Grub.
+        touch ${MNTDIR}/boot.mac &>/dev/null
+        reboot
+        ;;
+    GrubLoader)
+        # Reiniciar.
+        reboot
+        ;;
+    *)  ogRaiseError $OG_ERR_NOTOS "$1 $2 ${TYPE:+($TYPE)}"
         return $?
         ;;
 esac
@@ -150,11 +170,14 @@ ogGetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerN
 #@version 1.0.5 - Mejoras en tratamiento de GRUB2.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-05-14
+#@version 1.0.6 - Detectar instalaciones sobre EFI.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-09-15
 #*/ ##
 function ogLinuxBootParameters ()
 {
 # Variables locales.
-local MNTDIR CONFDIR CONFFILE
+local MNTDIR CONFDIR CONFFILE f
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -169,13 +192,12 @@ fi
 MNTDIR=$(ogMount $1 $2) || return $?
 
 # Fichero de configuración de GRUB.
-CONFDIR=$MNTDIR                               # Partición de arranque /boot.
-[ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Partición raíz con directorio boot.
-CONFFILE="$CONFDIR/grubPARTITION/boot/grub/grub.cfg"
-[ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/menu.lst"
-[ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub/grub.cfg"
-[ ! -e $CONFFILE ] && CONFFILE="$CONFDIR/grub2/grub.cfg"
-[ -e $CONFFILE ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
+CONFDIR=$MNTDIR                               # Sistema de archivos de arranque (/boot).
+[ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Sist. archivos raíz con directorio boot.
+for f in $MNTDIR/{,grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg,grub.cfg.backup.og}; do
+    [ -r $f ] && CONFFILE=$f
+done
+[ -n "$CONFFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
 
 # Toma del fichero de configuracion los valores del kernel, initrd
 #       y parámetros de arranque usando las cláusulas por defecto
@@ -184,15 +206,16 @@ CONFFILE="$CONFDIR/grubPARTITION/boot/grub/grub.cfg"
 # /* (comentario Doxygen)
 awk 'BEGIN {cont=-1;}
      $1~/^default$/     {sub(/=/," "); def=$2;}
-     $1~/^set$/ && $2~/^default$/ {gsub(/[="]/," "); def=$3;
+     $1~/^set$/ && $2~/^default/ { gsub(/[="]/," "); def=$3;
                                    if (def ~ /saved_entry/) def=0;
-                                  }
+                                 }
      $1~/^(title|menuentry)$/ {cont++}
-     $1~/^(kernel|linux)$/ {if (def==cont) {
-                               kern=$2;
-                               sub($1,"");sub($1,"");sub(/^[ \t]*/,"");app=$0}  # /* (comentario Doxygen)
-                           }
-     $1~/^initrd$/      {if (def==cont) init=$2}
+     $1~/^(kernel|linux(efi)?)$/ { if (def==cont) {
+                                       kern=$2;
+                                       sub($1,""); sub($1,""); sub(/^[ \t]*/,""); app=$0
+                                   } # /* (comentario Doxygen)
+                                 }
+     $1~/^initrd(efi)?$/ {if (def==cont) init=$2}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}
     ' $CONFFILE
 # */ (comentario Doxygen)
@@ -964,5 +987,201 @@ MNTDIR=$(ogMount $1 $2) || return $?
 
 # Eliminar fichero de configuración de udev para dispositivos fijos de red.
 rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
+}
+
+#/**
+# ogGrubAddOgclient num_disk num_part [ timeout ] [ offline ]
+#@brief   Crea entrada de menu grub para ogclient, tomando como paramentros del kernel los actuales del cliente.
+#@param 1 Numero de disco
+#@param 2 Numero de particion
+#@param 3 timeout  Segundos de espera para iniciar el sistema operativo por defecto (opcional)
+#@param 4 offline  configura el modo offline [offline|online] (opcional)
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND No existe kernel o initrd  en cache.
+#@exception OG_ERR_NOTFOUND No existe archivo de configuracion del grub.
+# /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#*/
+
+ogGrubAddOgclient () {
+    local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [ time_out ] [ offline|online ] " \
+                "$FUNCNAME 1 1" \
+                "$FUNCNAME 1 6 15 offline"
+        return
+    fi
+
+    # Error si no se reciben 2 parámetros.
+    [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part [ timeout ]"; echo $?)
+    [[ "$3" =~ ^[0-9]*$ ]] && TIMEOUT="$3"
+
+    # Error si no existe el kernel y el initrd en la cache.
+    # Falta crear nuevo codigo de error.
+    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo ?)
+
+    # Archivo de configuracion del grub
+    DIRMOUNT=$(ogMount $1 $2)
+    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+
+    # Error si no existe archivo del grub
+    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
+
+    # Si existe la entrada de opengnsys nos salimos.
+    grep "menuentry Opengnsys" $GRUBGFC &>/dev/null && return 0
+
+    # Tipo de tabla de particiones
+    PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
+
+    # Localizacion de la cache
+    read NUMDISK NUMPART <<< $(ogFindCache)
+    let NUMDISK=$NUMDISK-1
+    # kernel y sus opciones. Pasamos a modo usuario
+    KERNEL="/boot/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=true/ogactiveadmin=false/g /proc/cmdline)"
+
+    # Configuracion offline si existe parametro
+    echo "$@" |grep offline &>/dev/null && STATUS=offline
+    echo "$@" |grep online  &>/dev/null && STATUS=online
+    [ -z "$STATUS" ] || KERNEL="$(echo $KERNEL | sed  s/"ogprotocol=[a-z]* "/"ogprotocol=local "/g ) ogstatus=$STATUS"
+
+    # Numero de línea de la primera entrada del grub.
+    NUMLINE=$(grep -n -m 1 "^menuentry" $GRUBGFC|cut -d: -f1)
+    # Texto de la entrada de opengnsys
+MENUENTRY="menuentry "Opengnsys"  --class gnu-linux --class gnu --class os { \n \
+\tinsmod part_$PARTTABLETYPE \n \
+\tinsmod ext2 \n \
+\tset root='(hd${NUMDISK},$PARTTABLETYPE${NUMPART})' \n \
+\tlinux $KERNEL \n \
+\tinitrd /boot/oginitrd.img \n \
+}"
+
+
+    # Insertamos la entrada de opengnsys antes de la primera entrada existente.
+    sed -i "${NUMLINE}i\ $MENUENTRY" $GRUBGFC
+
+    # Ponemos que la entrada por defecto sea la primera.
+    sed -i s/"set.*default.*$"/"set default=\"0\""/g $GRUBGFC
+
+    # Si me dan valor para timeout lo cambio en el grub.
+    [ $TIMEOUT ] &&  sed -i s/timeout=.*$/timeout=$TIMEOUT/g $GRUBGFC
+}
+
+
+#/**
+# ogGrubHidePartitions num_disk num_part
+#@brief Configura el grub para que oculte las particiones de windows que no se esten iniciando.
+#@param 1 Numero de disco
+#@param 2 Numero de particion
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception No existe archivo de configuracion del grub.
+#@ /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#*/
+function ogGrubHidePartitions {
+    local DIRMOUNT GRUBGFC PARTTABLETYPE WINENTRY ENTRY TEXT ENTRY2 LINE2 PART2 HIDDEN
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+                "$FUNCNAME 1 6"
+        return
+    fi
+
+    # Error si no se reciben 2 parámetros.
+    [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
+
+    # Archivo de configuracion del grub
+    DIRMOUNT=$(ogMount $1 $2)
+    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+
+    # Error si no existe archivo del grub
+    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
+
+    # Si solo hay una entrada de Windows me salgo
+    [ $(grep -n "menuentry.*Windows" $GRUBGFC |wc -l) -eq 1 ] && return 0
+
+    # Elimino llamadas a parttool, se han incluido en otras ejecuciones de esta funcion.
+    sed -i '/parttool/d' $GRUBGFC
+
+    PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
+
+    # Entradas de Windows: numero de linea y particion. De mayor a menor.
+    WINENTRY=$(awk '/menuentry.*Windows/ { gsub(/\/dev\/sda/,""); gsub(/\)\"/, "");  print NR":"$6} ' $GRUBGFC | sed '1!G;h;$!d' )
+    # Modifico todas las entradas de Windows.
+    for ENTRY in $WINENTRY; do
+        LINE=${ENTRY%:*}
+        # En cada entrada, oculto o muestro cada particion.
+        TEXT=""
+        for ENTRY2 in $WINENTRY; do
+                LINE2=${ENTRY2%:*}
+                PART2=${ENTRY2#*:}
+                # Muestro solo la particion de la entrada actual.
+                [ $LINE2 -eq $LINE ] && HIDDEN="-" || HIDDEN="+"
+
+                TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2) hidden$HIDDEN \n$TEXT"
+        done
+	
+        sed -i "${LINE}a\ $TEXT" $GRUBGFC
+    done
+
+    # Activamos la particion que se inicia en todas las entradas de windows.
+    sed -i "/chainloader/i\\\tparttool \$\{root\} boot+"  $GRUBGFC
+
+}
+
+#/**
+# ogGrubDeleteEntry num_disk num_part num_part_delete
+#@brief Borra en el grub las entradas para el inicio en una particion.
+#@param 1 Numero de disco donde esta el grub
+#@param 2 Numero de particion donde esta el grub
+#@parm 3 Numero de la particion de la que borramos las entradas
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception No existe archivo de configuracion del grub.
+#@ /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#*/
+
+
+function ogGrubDeleteEntry {
+    local DIRMOUNT GRUBGFC MENUENTRY DELETEENTRY ENDENTRY ENTRY
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
+                "$FUNCNAME 1 6 2"
+        return
+    fi
+
+    # Error si no se reciben 3 parámetros.
+    [ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
+
+    # Archivo de configuracion del grub
+    DIRMOUNT=$(ogMount $1 $2)
+    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+
+    # Error si no existe archivo del grub)
+    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC"; echo $?)
+
+    # Numero de linea de cada entrada, de mayor a menor.
+    MENUENTRY="$(grep -n -e menuentry.*/dev/sda $GRUBGFC| cut -d: -f1 | sed '1!G;h;$!d' )"
+
+    # Entradas que hay que borrar.
+    DELETEENTRY=$(grep -n menuentry.*/dev/sda$3 $GRUBGFC| cut -d: -f1)
+
+    # Recorremos el fichero del final hacia el principio.
+    ENDENTRY="$(wc -l $GRUBGFC|cut  -d" " -f1)"
+    for ENTRY in $MENUENTRY; do
+        # Comprobamos si hay que borrar la entrada.
+        if  ogCheckStringInGroup $ENTRY "$DELETEENTRY" ; then
+            let ENDENTRY=$ENDENTRY-1
+            sed -i -e $ENTRY,${ENDENTRY}d  $GRUBGFC
+        fi
+
+        # Guardamos el número de línea de la entrada, que sera el final de la siguiente.
+        ENDENTRY=$ENTRY
+    done
+
 }
 

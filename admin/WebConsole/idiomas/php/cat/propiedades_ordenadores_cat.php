@@ -23,7 +23,7 @@ $TbMsg[14]="Driver de Xarxa";
 $TbMsg[509]="Foto ordinador";
 $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
-$TbMsg[495]="Contingut caché";
+$TbMsg[495]="Data/Caché";
 $TbMsg[4951]="Caché lliure";
 ?>
 

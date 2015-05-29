@@ -20,13 +20,20 @@ if [ -x $OPENGNSYS/job_executer/init.d/job_executer ]; then
 fi
 
 # Arranque de OpenGnSys Client daemon (socket).
-if [ -x "$OPENGNSYS/bin/ogAdmClient" ]; then
-    echo "${MSG_LAUNCHCLIENT:-.}"
-    [ $ogactiveadmin == "true" ] && boot="admin"
-    # Indicar fichero de teclado de Qt para el idioma especificado (tipo "es.qmap").
-    [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
+echo "${MSG_LAUNCHCLIENT:-.}"
+[ "$ogactiveadmin" == "true" ] && boot="admin"
+# Indicar fichero de teclado de Qt para el idioma especificado (tipo "es.qmap").
+[ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
+
+if [ -x "$OPENGNSYS/bin/ogAdmClient" -a "$ogstatus" != "offline"  ]; then
     # Ejecutar servicio cliente.
     $OPENGNSYS/bin/ogAdmClient -f $OPENGNSYS/etc/ogAdmClient.cfg -l $OGLOGFILE -d $LOGLEVEL
+else
+    for FILE in index $OGGROUP $(ogGetIpAddress)
+    do
+	[ -f $OGCAC/menus/$FILE.html ] && OGMENU="$OGCAC/menus/$FILE.html"
+    done
+    $OPENGNSYS/bin/browser -qws $OGMENU
 fi
 
 # Si fallo en cliente y modo "admin", cargar shell; si no, salir.

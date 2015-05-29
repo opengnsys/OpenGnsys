@@ -4,12 +4,12 @@
 //	Idioma: Ingés 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="WARNING.- There are not partitions table modified, therefore no command will be registered";
-TbMsg[1]="WARNING.- There are partitions with the same number, you must select another or remove it  clicking in the last column";
-TbMsg[2]="WARNING.- The size of the partition must be greater than zero";
-TbMsg[3]="WARNING.- The partition must be correlative and there would not have spaces between partitions";
-TbMsg[4]="WARNING.- This partition is empty, therefore you can't to perform any operation";
-TbMsg[5]="WARNING.-  This partition must be just formatted because the operating system has changed or has changed the size of some partition";
-TbMsg[6]="WARNING.-  There is not coherent to hide this partition because it is not a Windows partition";
-TbMsg[7]="WARNING.-  There is not coherent to show this partition because it is not a Windows partition";
-TbMsg[8]="You can't add more partitions";
+TbMsg[0]="WARNING.- There are partitions with the same number, you must select another or remove it  clicking in the last column";
+TbMsg[1]="WARNING.- The number of the partition must be greater than zero";
+TbMsg[2]="El tipo de partición no se ha especificado";
+TbMsg[3]="WARNING.- The size of the partition must be greater than zero";
+TbMsg[4]="ATENCION: Se va a eliminar esta partición ¿ Esta seguro ?";
+TbMsg[5]="Debe especificar el tipo de sistema de ficheros si desea formatear la particion";
+TbMsg[6]="La CACHE solo puede definirse en la particion 4";
+TbMsg[7]="El número maximo de particiones es 4";
+

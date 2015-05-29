@@ -7,6 +7,9 @@
 // Nombre del fichero: IniciarSesion.php
 // Descripción : 
 //		Implementación� del comando "Iniciar Sesión"
+// Version 0.1 - En ambito distinto a ordenador muestra los equipos agrupados en configuraciones iguales.
+// 	Fecha: 2014-10-23
+//	 Autora: Irina Gomez, ETSII Universidad de Sevilla
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -15,6 +18,8 @@ include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
+include_once("../includes/RecopilaIpesMacs.php");
+include_once("../includes/ConfiguracionesParticiones.php");
 include_once("../includes/pintaTablaConfiguraciones.php");
 include_once("../idiomas/php/".$idioma."/comandos/iniciarsesion_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
@@ -33,9 +38,11 @@ if (!$cmd)
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/IniciarSesion.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
+<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
+<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
+<SCRIPT language="javascript" src="../jscripts/arrays.js"></SCRIPT>
 <?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/iniciarsesion_'.$idioma.'.js"></SCRIPT>'?>
 <?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 </HEAD>
 <BODY>
 <?php
@@ -44,13 +51,24 @@ if (!$cmd)
 	//
 	include_once("./includes/FiltradoAmbito.php");
 	//________________________________________________________________________________________________________
-?>
+        if($ambito!=$AMBITO_ORDENADORES){
+                $cadenaid="";
+                $cadenaip="";
+                $cadenamac="";
+                RecopilaIpesMacs($cmd,$ambito,$idambito);
+	
+        ?>
 	<P align=center>
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
 	</BR>
-<form  align=center name="fdatos"> 
-	<?php echo tablaConfiguracionesIniciarSesion($cmd,$idambito); ?>
+<form  align=center name="fdatos" method="POST"> 
+	<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
+	<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">
+	<INPUT type="hidden" name="cadenaid" value="<? echo $cadenaid?>">
 </form>
+	<?php } // fin if $ambito!=$AMBITO_ORDENADORES
+
+		tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito); ?>
 <?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");

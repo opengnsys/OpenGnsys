@@ -1,0 +1,75 @@
+#!/bin/bash
+# installoglive - descarga e instala cliente ogLive.
+# Nota:	El usuario debe elegir el número del ogLive que desea instalar.
+# Uso:	installoglive
+# Autor: Ramón M. Gómez - ETSII Univ. Sevilla
+# Fecha: 2015-01-26
+
+
+# Control de acceso.
+PROG=$(basename $0)
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Need to be root." >&2
+	exit 1
+fi
+
+# Constantes.
+DOWNLOADURL="http://opengnsys.es/downloads"
+OPENGNSYS=/opt/opengnsys
+OGINITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
+OGVMLINUZ=$OPENGNSYS/tftpboot/ogclient/ogvmlinuz
+
+# Listar todos los ficheros ogLive que pueden ser descargados.
+OGLIVE=( $(wget $DOWNLOADURL -O - 2>/dev/null|grep ogLive.*iso) )
+NISOS=${#OGLIVE[@]}
+echo "Descargas disponibles (+- = instalado):"
+for i in $(seq 1 $NISOS); do
+	[ -e $OPENGNSYS/lib/${OGLIVE[i-1]} ] && OGLIVE[i-1]="+-${OGLIVE[i-1]}"
+done
+select opt in ${OGLIVE[@]}; do
+	[ -n "$opt" ] && OGLIVEFILE=${opt/+-/} && break
+done
+
+# Tamaño del fichero a descargar.
+SOURCELENGTH=$(LANG=C wget --spider $DOWNLOADURL/$OGLIVEFILE 2>&1 | awk '/Length:/ {print $2}')
+[ -n "$SOURCELENGTH" ] || exit
+
+# Descarga de ogLive.
+TARGETFILE=$OPENGNSYS/lib/$OGLIVEFILE
+wget $DOWNLOADURL/$OGLIVEFILE -O $TARGETFILE || exit
+
+# Obtener la clave actual de acceso a Samba para restaurarla tras la descarga.
+if [ -f $OGINITRD ]; then
+	SAMBAPASS=$(gzip -dc $OGINITRD | \
+	cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+			grep "^[ 	].*OPTIONS=" | \
+			sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+fi
+
+# Hacer copia de seguridad del ogLive actual.
+rm -fr $OPENGNSYS/tftpboot/ogclient.old
+mv -f $OPENGNSYS/tftpboot/ogclient $OPENGNSYS/tftpboot/ogclient.old
+
+# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
+TMPDIR=/tmp/${OGLIVEFILE%.iso}
+mkdir -p $TMPDIR
+mount -o loop,ro $TARGETFILE $TMPDIR
+cp -va $TMPDIR/ogclient $OPENGNSYS/tftpboot/ogclient
+umount $TMPDIR
+rmdir $TMPDIR
+
+# Recuperar la clave de acceso a Samba o solicitar una nueva clave.
+if [ -n "$SAMBAPASS" ]; then
+	echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | $OPENGNSYS/bin/setsmbpass
+else
+	$OPENGNSYS/bin/setsmbpass
+fi
+
+# Establecer los permisos.
+find -L $OPENGNSYS/tftpboot/ogclient -type d -exec chmod 755 {} \;
+find -L $OPENGNSYS/tftpboot/ogclient -type f -exec chmod 644 {} \;
+chown -R :opengnsys $OPENGNSYS/tftpboot/ogclient
+
+# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
+cp -av $OPENGNSYS/tftpboot/ogclient/{ogvmlinuz,oginitrd.img}* $OPENGNSYS/tftpboot
+

@@ -983,77 +983,118 @@ ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.tor
 #@brief   Comprueba que el fichero que se desea almacenar en la cache del cliente, no esta. 
 #@param   1 str_REPO
 #@param   2 str_Relative_path_file_OGIMG_with_/ 
-#@return    0 si es necesario actualizar el fichero.
-#@return    1 si la imagen ya esta en la cache, por lo tanto no es necesario actualizar el fichero
+#@param   3 md5 to check: use full to check download image torrent 
+#@return    0 (true) cache sin imagen, SI es necesario actualizar el fichero.
+#@return    1 (false) imagen en la cache, NO es necesario actualizar el fichero
+#@return   >1 (false) error de sintaxis (TODO)
 #@note
 #@todo:      Proceso en el caso de que el fichero tenga el mismo nombre, pero su contenido sea distinto.
 #@todo:      Se dejan mensajes mientras se confirma su funcionamiento.
 #@version 0.1 - Integracion para OpenGNSys.
 #@author        Antonio J. Doblas Viso. Universidad de Malaga
 #@date
+#@version 1.6 - gestiona ficheros hash full.sum (TORRENT) y .sum (MULTICAST)
+#@author        Antonio J. Doblas Viso. Universidad de Malaga
+#@date
 #*/ ##
 function ogUpdateCacheIsNecesary ()
 {
-
+#echo "admite full check con 3param TORRENT"
 # Variables locales.
 local ERROR SOURCE CACHE FILESOURCE MD5SOURCE FILETARGET MD5TARGET
 ERROR=0
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME $FUNCNAME [ str_repo] [ [Relative_path_image] " \
-           "$FUNCNAME REPO /PS1_PH1.img" \
-	   "$FUNCNAME REPO /ogclient.sqfs"
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo  relative_path_image [protocol|FULL]" \
+           "$FUNCNAME REPO /PS1_PH1.img UNICAST" \
+           "$FUNCNAME REPO /ogclient.sqfs FULL"
 	   
     return
 fi
 
 #Control de la cache
-ogFindCache || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
+ogFindCache &>/dev/null || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 
-[ $# == "2" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+#Control de parametros:  ahora admite tres.
+[ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_repo relative_path_image [protocol|FULL]"; echo $?)
+
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
-#echo "paso 1. si no existe la imagen, confirmamos que es necesaria la actualizacion de la cache."
+#echo "paso 1. si no existe la imagen, confirmar que es necesario actualizar la cache."
 FILETARGET=`ogGetPath CACHE $2`
 if [ -z $FILETARGET ]
 then
     # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
-    ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
-    ogDeleteFile CACHE "/$2.sum" &> /dev/null
-    echo "TRUE=0, es necesario actualizar. Paso 1, la cache no contiene esa imagen "
+    ogGetPath CACHE "/$2.torrent.bf" && ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+    ogGetPath CACHE "/$2.sum" && ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    ogGetPath CACHE "/$2.full.sum" && ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
+    echo "TRUE(0), es necesario actualizar. Paso 1, la cache no contiene esa imagen "
     return 0 
 fi
 
 #echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
 if ogGetPath $FILETARGET.torrent.bf  > /dev/null
 then
-    #TODO: comprobar los md5 para asegurarnos que la imagen es la misma.
-    echo "TRUE=0, es necesario actualizar. Paso 2, la imagen esta en un estado de descarga torrent interrumpido"
+    #TODO: comprobar los md5 del fichero .torrent para asegurarnos que la imagen a descarga es la misma.
+    echo "TRUE(0), es necesario actualizar. Paso 2, la imagen esta en un estado de descarga torrent interrumpido"
     return 0
 fi
 
 ## En este punto la imagen en el repo y en la cache se llaman igual, 
-#echo "paso 4. recuperamos o calculamos los md5 de los ficheros"
-if [ -f $FILESOURCE.sum ]
-then
-    MD5SOURCE=$(cat $FILESOURCE.sum)
-else
-    MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
-fi
-[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
-MD5TARGET=$(cat $FILETARGET.sum)
+#echo "paso 4. Obtener los md5 del fichero imagen en la cacha segun PROTOCOLO  $3"
+case "${3^^}" in 
+	FULL|TORRENT)
+		#Buscamos MD5 en el REPO SOURCE
+		if [ -f $FILESOURCE.full.sum ]
+		then
+        		MD5SOURCE=$(cat $FILESOURCE.full.sum)
+		else
+        		MD5SOURCE=$(ogCalculateFullChecksum $FILESOURCE)
+		fi
+		# Generamos el MD5 (full) en la CACHE
+		[ ! -f $FILETARGET.full.sum ] && ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+		MD5TARGET=$(cat $FILETARGET.full.sum)
+		# Generamos el MD5 (little) en la CACHE para posteriores usos del protocolo MULTICAST
+		[ ! -f $FILETARGET.sum ] &&  ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+	;;
+	*)
+		#Buscamos MD5 en el REPO SOURCE
+		if [ -f $FILESOURCE.sum ]
+		then
+        		MD5SOURCE=$(cat $FILESOURCE.sum)
+		else
+        		MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
+		fi
+		# Generamos el MD5 (little) en la CACHE
+		[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+		MD5TARGET=$(cat $FILETARGET.sum)
+        #Generamos o copiamos MD5 (full) en la CACHE para posteriores usos con Torrent
+        # Si no existe el full.sum y si existe el .sum es porque el upateCACHE multicast o unicast ha sido correcto.
+        if [ ! -f $FILETARGET.full.sum -a $FILETARGET.sum ]
+        then
+            if [ -f $FILESOURCE.full.sum ]
+            then
+                #Existe el .full.sum en REPO realizamos COPIA
+                cp $FILESOURCE.full.sum $FILETARGET.full.sum
+            else
+                #No existe .full.sum no en REPO LO GENERAMOS en la cache: situacion dificil que ocurra
+                ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+            fi
+        fi		
+		
+esac
 
-#echo "Paso 5. comparamos los md5"
-#TODO: que hacer cuando los md5 son distintos. Por defecto borrar.
+#echo "Paso 5. comparar los md5"
 if [ "$MD5SOURCE" == "$MD5TARGET" ]
-then
-    echo "FALSE=1, No es neceario actualizar. Paso5.A la imagen esta en cache"
+then	
+	echo "FALSE (1), No es neceario actualizar. Paso5.A la imagen esta en cache"
     return 1
 else
-    echo "TRUE=0, Si es necesario actualizar. paso 5.b la imagen en cache es distinta,  borramos la imagen anterior y devolvemos 0 para confirmar la actualizacion"
-    rm -f $FILETARGET $FILETARGET.sum $FILETARGET.torrent
+    echo "imagen en cache distinta,  borramos la imagen anterior"
+    rm -f $FILETARGET $FILETARGET.sum $FILETARGET.torrent $FILETARGET.full.sum
+    echo "TRUE (0), Si es necesario actualizar."
     return 0
 fi
 }

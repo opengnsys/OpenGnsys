@@ -452,15 +452,13 @@ BOOLEAN cuestionCache(char* tam)
 // ________________________________________________________________________________________________________
 int cargaPaginaWeb(char *url)
 {
+	pid_t pidbrowser; // Identificador del proceso que se crea para mostrar una página web con el browser
 	int resul=0;
 	char* argumentos[4];
 	char modulo[] = "cargaPaginaWeb()";
 
-	if(pidbash>0)
-		kill(pidbash,SIGQUIT); // Destruye el proceso hijo del proceso bash si existiera una conmutación
-
-	if(pidbrowser>0)
-		kill(pidbrowser,SIGQUIT); // Destruye el proceso hijo anterior y se queda sólo el actual
+	// Destruye los procesos del Browser y lanza uno nuevo.
+	system("pkill -9 browser");
 
 	sprintf(interface,"/opt/opengnsys/bin/browser");
 	sprintf(parametros,"browser -qws %s",url);
@@ -1227,6 +1225,7 @@ BOOLEAN CrearImagen(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagen");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición de donde se creó
 	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o código de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojó
@@ -1312,6 +1311,7 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearImagenBasica");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición de donde se creó
 	lon+=sprintf(ptrTrama->parametros+lon,"cpt=%s\r",cpt); // Tipo o código de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ipr=%s\r",ipr); // Ip del repositorio donde se alojó
@@ -1412,6 +1412,7 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_CrearSoftIncremental");
 	lon+=sprintf(ptrTrama->parametros+lon,"idf=%s\r",idf); // Identificador de la imagen incremental
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
@@ -1487,6 +1488,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagen");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
@@ -1567,6 +1569,7 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idi); // Identificador de la imagen
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 	respuestaEjecucionComando(ptrTrama,herror,ids);
@@ -1660,6 +1663,7 @@ BOOLEAN RestaurarSoftIncremental(TRAMA* ptrTrama)
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarSoftIncremental");
 	lon+=sprintf(ptrTrama->parametros+lon,"idi=%s\r",idf); // Identificador de la imagen incremental (Forzada a idi)
+	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
 

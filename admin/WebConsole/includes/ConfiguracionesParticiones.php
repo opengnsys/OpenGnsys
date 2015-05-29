@@ -99,6 +99,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				imagenes.descripcion AS imagen,
 				imagenes.nombreca AS nombreca,
 				imagenes.idrepositorio AS repositorio,
+				ordenadores_particiones.fechadespliegue,
 				ordenadores_particiones.idperfilsoft,
 				perfilessoft.descripcion AS perfilsoft
 
@@ -151,6 +152,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$tbKeys[$idx]["imagen"]=$rs->campos["imagen"];
 		$tbKeys[$idx]["nombreca"]=$rs->campos["nombreca"];
 		$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
+		$tbKeys[$idx]["fechadespliegue"]=$rs->campos["fechadespliegue"];
 		$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
 		$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
 		//$tbKeys[$idx]["cache"]=$rs->campos["cache"];
@@ -291,17 +293,23 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 //		$idordenadores: Cadena con los identificadores de los ordenadores separados por ","
 //		$maxcontor: Número máximo de ordenadores por fila
 //		$cc: Identificador del bloque de configuración
+//		$tipoid: define si el "value" de la tabla es una cadena de ip o de id de los equipos.
+//			 Valores ipordenador o idordenador (por defecto id).
+//	Versión 0.1 - Se incluye parametro tipoid.
+//		Fecha 2014-10-23
+//		Autora: Irina Gomez, ETSII Universidad de Sevilla
 //________________________________________________________________________________________________________
-function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
+function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc,$tipoid='idordenador')
 {
 	$tablaHtml="";
+	$ipordenadores="";
 	$contor=0;
 	$maxcontor=10; // Número máximo de prodenadores por fila
 	$cmd->texto=" SELECT idordenador,nombreordenador,ip FROM ordenadores WHERE idordenador IN (".$idordenadores.") ORDER BY nombreordenador";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(""); // Error al abrir recordset
-	$tablaHtml.='<table align="left" border="0" id="tbOrd_'.$cc.'" value="'.$idordenadores.'"><tr>';
+	// Cada ordenador es una celda de la tabla.
 	while (!$rs->EOF){
 		$contor++;
 		$tablaHtml.= '<td align="center" style="BACKGROUND-COLOR: #FFFFFF;">
@@ -311,10 +319,22 @@ function pintaOrdenadores($cmd,$idordenadores,$maxcontor,$cc)
 			$contor=0;
 			$tablaHtml.='</tr><tr>';
 		}
+		$ipordenadores.=$rs->campos["ip"].',';
 		$rs->Siguiente();
 	}
 	$tablaHtml.='</tr>';
 	$tablaHtml.= '</table>';
+
+	//Quitamos coma final en ipordenadores
+	$ipordenadores = trim($ipordenadores, ',');
+
+	// Inicio tabla: el identificador de los ordenadores puede ser las ips o las ids.
+	if ($tipoid == 'ipordenador') 
+		$inicioTablaHtml='<table align="left" border="0" id="tbOrd_'.$cc.'" value="'.$ipordenadores.'"><tr>';
+	else
+		$inicioTablaHtml='<table align="left" border="0" id="tbOrd_'.$cc.'" value="'.$idordenadores.'"><tr>';
+		
+	$tablaHtml=$inicioTablaHtml.$tablaHtml;
 	return($tablaHtml);
 }
 /*________________________________________________________________________________________________________

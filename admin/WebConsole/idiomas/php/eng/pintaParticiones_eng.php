@@ -23,9 +23,10 @@ $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 $TbMsg["VARIABLE"]='Variable';
 $TbMsg["CACHE_CONTENT"]='Contenido cach&eacute;';
 $TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
+$TbMsg["CACHE_COMPLETE"]='FULL CACHE';
 
-$TbMsg["SAMESYSTEM_IMAGE"]='Imagen (Mismo sistema)';
-$TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (Distinto sistema)';
+$TbMsg["SAMESYSTEM_IMAGE"]='Imagen (mismo tipo partici&oacute;n)';
+$TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (distinto tipo partici&oacute;n)';
 $TbMsg["RESTORE_METHOD"]='M&eacute;todo';
 
 $TbMsg["SO_NAME"]='Nombre S.O.';
@@ -47,5 +48,6 @@ $TbMsg["TITLE_E"]="Rsync option: delete extraneous files from  the  receiving si
 $TbMsg["TITLE_C"]='Rsync option: compresses the file data as it  is  sent to  the  destination  machine,  which reduces the amount of data being transmitted.';
 $TbMsg["SEND"]='Protocol';
 
+$TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
 ?>
 

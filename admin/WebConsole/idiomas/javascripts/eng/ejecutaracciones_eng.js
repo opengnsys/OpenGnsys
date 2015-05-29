@@ -1,7 +1,7 @@
 ﻿//____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: ejecutarprocedimientos_esp.js 
-//	Idioma: Español 
+//	Fichero de idiomas javascript: ejecutaracciones_eng.js 
+//	Idioma: Ingles
 //____________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="ATENCIÓN.- El Procedimiento será ejecutado aplicándolo a este ámbito. ¿ Está seguro ?";

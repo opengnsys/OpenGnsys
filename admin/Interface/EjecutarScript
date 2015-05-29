@@ -31,7 +31,8 @@ if [ $RETVAL == 0 ]
 then
 	ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
 else
-	ogEcho log session "ERROR: operacion no realizada"
+	ogRaiseError log session $RETVAL
+	ogEcho log session error "Operacion no realizada"
 fi
 
 

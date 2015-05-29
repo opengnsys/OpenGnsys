@@ -48,7 +48,7 @@ if (!$cmd)
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
-	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
+	<SCRIPT language="javascript" src="../comandos/jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>

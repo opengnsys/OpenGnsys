@@ -1,15 +1,15 @@
 #!/bin/bash
 #/**
-#         restoreiDiffSquash
+#         restoreDiffImage
 #@brief Script de ejemplo para restaurar una imagen diferencial.
 #@brief (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
 #@param 1 REPO|CACHE
 #@param 2 imagen basica
-#@param 2 imagen diferencial
-#@param 3 disco 
-#@param 4 particion 
-#@param 5 protocolo 
-#@param 6 opciones protocolo
+#@param 3 imagen diferencial
+#@param 4 disco 
+#@param 5 particion 
+#@param 6 protocolo 
+#@param 7 opciones protocolo
 #@return 
 #@exception OG_ERR_FORMAT   # 1 formato incorrecto.
 #@exception OG_ERR_NOTFOUND # 2 Fichero o dispositivo no encontrado
@@ -121,15 +121,21 @@ ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[T
 
 # creando enlaces y restableciendo ACL (en windows)
 ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage"
-ogRestoreInfoImage  "$4" "$5" 2>&1 | tee -a $OGLOGCOMMAND
+ogExecAndLog command ogRestoreInfoImage "$4" "$5"
+ogExecAndLog command ogRestoreAclImage  "$4" "$5"
+TIMEAUX3=$[SECONDS-TIMEAUX2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
 
 # Llamar al script de post-configuración del sistema operativo.
-ogEcho log session "[90] $MSG_HELP_configureOs." 
-configureOs $4 $5 
-
+if which configureOsCustom &>/dev/null; then
+        ogEcho log session "[90] configureOsCustom"
+        configureOsCustom "$4" "$5" "$1" "$2"
+else
+	ogEcho log session "[90] $MSG_HELP_configureOs." 
+	configureOs $4 $5 
+fi
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s"
 
 # Si ha habido problema al sincronizar nos salimos con error 
 [ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING
-

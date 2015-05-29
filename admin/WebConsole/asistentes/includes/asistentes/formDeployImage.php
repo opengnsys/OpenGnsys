@@ -12,8 +12,8 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 
 ?>
 <? echo $TbMsg["WDI13"] ?> <br>
-		<input type="radio" name="modo" value="deployImage" checked ><? echo $TbMsg["WDI14"] ?> <br>
-		<input type="radio" name="modo" value="updateCache" > <? echo $TbMsg["WDI15"] ?> <br> 
+		<input type="radio" name="modo" value="deployImage" onClick="enableDirect(this.form)" checked ><? echo $TbMsg["WDI14"] ?> <br>
+		<input type="radio" name="modo" value="updateCache" onClick="disableDirect(this.form)" > <? echo $TbMsg["WDI15"] ?> <br> 
 	
 <tr> <td> <? echo $TbMsg["WDI16"] ?>  </td> <td> <? echo $TbMsg["WDI17"] ?> </td> <td>  <? echo $TbMsg["WDI18"] ?> </td> <td>  <? echo $TbMsg["WDI19"] ?> </td></tr>
 
@@ -43,11 +43,12 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	    <? echo $TbMsg["WDI23"] ?>
 	
 		<br />
-		<select name="idmetodo" id="idmetodo" style="WIDTH:220";">
-		<!--	<option value="UNICAST"> UNICAST </option> -->
+		<select name="idmetodo" id="idmetodo" style="WIDTH:220;">
 			<option value="TORRENT"> TORRENT </option>
 			<option value="MULTICAST"> MULTICAST </option>
+			<option value="MULTICAST-DIRECT"> MULTICAST-DIRECT </option>
 			<option value="UNICAST"> UNICAST </option>
+			<option value="UNICAST-DIRECT"> UNICAST-DIRECT </option>
 		</select>
 		<br />
 	</td>

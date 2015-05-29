@@ -23,6 +23,9 @@
 #@version 1.0.4 - Inyecta el cliente para gestión del sistema operativo.
 #@author Ramon Gomez, ETSII Universidad de Sevilla
 #@date   2012-04-11
+#@version 1.0.5 - Postconfiguración para Mac OS X.
+#@author Ramon Gomez, ETSII Universidad de Sevilla
+#@date   2013-10-11
 
 # Carga el configurador del engine y los parámetros de red.
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
@@ -32,20 +35,29 @@
 PARTSIZE=$(ogGetPartitionSize $1 $2) || exit $?
 FSSIZE=$(ogGetFsSize $1 $2)
 if [ $FSSIZE -lt $PARTSIZE ]; then
-	echo "Extender sistema de archivos."
-	ogExtendFs $1 $2
+    echo "Extender sistema de archivos."
+    ogExtendFs $1 $2
 fi
 
 # Si no existe partición activa, activar este sistema.
 FLAGACTIVE=$(ogGetPartitionActive $1)
 [ -z $FLAGACTIVE ] && ogSetPartitionActive $1 $2
 
+# Si el sistema de archivos es de solo lectura, no hacer la post-configuración.
+MNTDIR=$(ogMount $1 $2)
+if ! ogIsWritable $1 $2; then
+    echo "AVISO: sistema de archivos de solo lectura, no se ejecuta postconfiguración."
+    exit
+fi
+
+# Nombre del cliente.
+HOST="$(ogGetHostname)"
+
 # Post-configuración personalizada para cada tipo de sistema operativo.
 OSTYPE="$(ogGetOsType $1 $2)"
 case "$OSTYPE" in 
-    Windows)
+    Windows)    # Postconfiguración de Windows.
         # Cambiar nombre en sistemas Windows.
-        HOST=$(ogGetHostname)
         HOST=${HOST:-"pc"}
         ogSetWindowsName $1 $2 "$HOST"
         # Descomentar la siguiente línea para cambiar usuario de inicio.
@@ -57,15 +69,99 @@ case "$OSTYPE" in
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
         #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
-        # Instalar cliente para Windows (no activar en sistema en produccion ver ticket 604).
-	ogInstallMiniSetup $1 $2 postconf.cmd
-	ogInstallWindowsClient $1 $2 postconf.cmd
+        # Instalar cliente para Windows si se indica en la variable INSTALLOSCLIENT.
+	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        	ogInstallMiniSetup $1 $2 postconf.cmd
+        	ogInstallWindowsClient $1 $2 postconf.cmd
+	fi
         ;;
-    Linux)
+    Linux)      # Postconfiguración de GNU/Linux.
         ## Install and Configure Grub based on OS installed and Grub 1st stage location.
         ogGrubInstallPartition $1 $2
-        # Instalar cliente para Linux. 
-        ogInstallLinuxClient $1 $2
+        # Instalar cliente para GNU/Linux si se indica en la variable INSTALLOSCLIENT.
+	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        	ogInstallLinuxClient $1 $2
+	fi
+        ;;
+    MacOS)      # Postconfiguración de Mac OS X.
+        # Fichero indicador de activación de postconfiguración.
+        touch $MNTDIR/osxpostconf
+
+        # Crear fichero de configuración del servicio de arranque.
+        cat << EOT >$MNTDIR/Library/LaunchDaemons/es.opengnsys.postconfd.plist
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>Label</key>
+		<string>es.opengnsys.postconfd.sh</string>
+		<key>ProgramArguments</key>
+		<array>
+			<string>/var/root/postconfd.sh</string>
+		</array>
+		<key>RunAtLoad</key>
+		<true/>
+		<key>StandardOutPath</key>
+		<string>/var/log/postconfd.log</string>
+		<key>StandardErrorPath</key>
+		<string>/var/log/postconfd.err</string>
+		<key>Debug</key>
+		<true/>
+	</dict>
+</plist>
+EOT
+
+        # Programa de inicio que será ejecutado en el arranque de Mac OS X.
+        cat << EOT >$MNTDIR/var/root/postconfd.sh
+#!/bin/bash
+# postconfd - ejecución de scripts de inicio.
+
+# Ejecutar postconfiguración si existe el fichero indicador.
+if [ -e /osxpostconf ]; then
+	### NOTA: descomentar las opciones deseadas.
+	# Activar Journaling en HFS+ (no usar si el cliente continua en OpenGnsys).
+	#diskutil enableJournal disk$[$1-1]s$2
+	# Pedir usuario y clave en pantalla de conexión.
+	#defaults write /Library/Preferences/com.apple.loginwindow SHOWFULLNAME -bool yes
+	# No mostrar botón de cambio rápido de usuario.
+	#defaults write /Library/Preferences/.GlobalPreferences MultipleSessionEnabled -bool NO
+	# Bloquear escritorio, fondo, dock, etc del usuario "usuario".
+	#chflags uchange /Users/usuario/Library/Preferences/com.apple.desktop.plist
+	#chflags uchange /Users/usuario/Library/Preferences/com.apple.dock.plist
+	#chflags uchange /Users/usuario/Desktop
+	# Añadir usuario "usuario" a la lista de desarrolladores de Xcode.
+	#DevToolsSecurity --enable
+	#dscl . -append /Groups/_developer GroupMembership usuario
+	# Bajar volumen (valor entre 0 y 7).
+	#osascript -e 'set volume 1'
+	# Tomar nombre del equipo.
+	HOST="$HOST"
+	if [ -z "\$HOST" ]; then
+		# Si no hay nombre asociado, activar la red para obtener datos del DHCP.
+		source /etc/rc.common
+		CheckForNetwork
+		while [ "\$NETWORKUP" != "-YES-" ]; do
+			sleep 5
+			NETWORKUP=
+			CheckForNetwork
+		done
+		# Componer nombre del equipo a partir de datos del DHCP.
+		IP=\$(ifconfig en0 inet | awk '{if (\$1=="inet") print \$2}')
+		HOST="mac-\$(echo \${IP//./-} | cut -f3-4 -d-)"
+	fi
+	# Asignar nombre del equipo.
+	scutil --set ComputerName "\$HOST"
+	scutil --set LocalHostName "\$HOST"
+	scutil --set HostName "\$HOST"
+	hostname "\$HOST"
+	# Descromprimir ficheros de versión para obtener inventario de aplicaciones.
+	find /Applications -type d -name "*.app" -prune -exec \
+	     ditto --nopreserveHFSCompression "{}/Contents/version.plist" "{}/Contents/version.plist.uncompress"
+	# Borrar fichero indicador de psotconfiguración
+	rm -f /osxpostconf
+fi
+EOT
+        # Dar permiso de ejecución.
+        chmod 700 $MNTDIR/var/root/postconfd.sh
         ;;
 esac
 

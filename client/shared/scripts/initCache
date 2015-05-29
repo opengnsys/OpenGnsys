@@ -50,7 +50,7 @@ else
     PART=${FINDCACHE#* }
 
     # Si la CACHE actual esta definida en otro disco, se elimina
-    if [ "$NDISK" != "$CACHEDISK" ]
+    if [ -n "$CACHEDISK" -a "$NDISK" != "$CACHEDISK" ]
     then
 	echo "[10] Detectada cache en otro disco, eliminarla"
 	ogUnmountCache 2>/dev/null

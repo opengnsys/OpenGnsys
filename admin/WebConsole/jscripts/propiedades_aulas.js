@@ -110,9 +110,17 @@ function comprobar_datos(){
 		validation_highlight (document.fdatos.paginavalidacion);
 		return(false);
 	}
+	// Validacion paginas de autenticacion, se usan variables auxiliares
+	var prefix = 'https://' + form.router.value + '/opengnsys/validacion/';
+	var plogin = document.createElement("INPUT");
+	var pvalidacion =  document.createElement("INPUT");
+	plogin.value = prefix + form.paginalogin.value;
+	pvalidacion.value = prefix + form.paginavalidacion.value;
 	// Validación general de datos del formulario.
-	return validate (form.nombreaula, validate_notnull, 0) &&
+	return validate (form.nombreaula, validate_text_notnull, 0) &&
 	       validate (form.puestos, validate_number_notnull, 1) &&
+	       validate (form.ubicacion, validate_text, 17) &&
+	       validate (form.comentarios, validate_text, 18) &&
 	       validate (form.router, validate_ipadress_notnull, 4) &&
 	       validate (form.netmask, validate_ipadress_notnull, 5) && 
 	       validate (form.dns, validate_ipadress, 12) && 
@@ -122,7 +130,10 @@ function comprobar_datos(){
 	       validate (form.modomul, validate_notnull, 8) &&
 	       validate (form.ipmul, validate_ipadress_notnull, 9) &&
 	       validate (form.pormul, validate_notnull, 10) &&
-	       validate (form.velmul, validate_number_notnull, 11);
+	       validate (form.velmul, validate_number_notnull, 11)  &&
+	       validate (plogin, validate_url, 15) &&
+	       validate (pvalidacion, validate_url, 16);
+		
 }
 
 //________________________________________________________________________________________________________

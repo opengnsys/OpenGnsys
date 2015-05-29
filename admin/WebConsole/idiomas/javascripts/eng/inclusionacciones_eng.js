@@ -1,7 +1,7 @@
 ﻿//________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: accionmenu_esp.js 
-//	Idioma: Español 
+//	Fichero de idiomas javascript: inclusionacciones_eng.js 
+//	Idioma: Ingles
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";

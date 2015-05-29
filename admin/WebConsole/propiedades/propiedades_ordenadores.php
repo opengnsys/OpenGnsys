@@ -263,6 +263,11 @@ function abrir_ventana(URL){
 		<tr>
 			<th colspan="4" align="center">&nbsp;<sup>*</sup> <?php echo $TbMsg["WARN_NAMELENGTH"]?>&nbsp;</th>
 		</tr>
+<?php   }
+	if ($opcion==$op_alta) { ?>
+		<tr>
+			<th colspan="4" align="center">&nbsp;<?php echo $TbMsg["WARN_NETBOOT"]?>&nbsp;</th>
+		</tr>
 <?php	} ?>
 	</table>
 </form>

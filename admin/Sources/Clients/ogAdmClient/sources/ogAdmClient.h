@@ -41,8 +41,6 @@ int herror;
 
 BOOLEAN CMDPTES; // Para bucle de comandos pendientes
 
-pid_t  pidbrowser; // Identificador del proceso que se crea para mostrar una página web con el browser
-pid_t  pidbash; // Identificador del proceso que se crea cuando se conmuta el browser
 
 char urlmenu[MAXLONURL]; // Url de la pagina de menu para el browser
 char urlmsg[MAXLONURL]; // Url de la página de mensajed para el browser
@@ -88,7 +86,7 @@ char* tbErroresScripts[]={"Se han generado errores desconocidos. No se puede con
 		"029-Error no definido",\
 		"030-Error al restaurar imagen - Imagen mas grande que particion",\
 		"031-Error al realizar el comando updateCache",\
-		"032-Error no definido",\
+		"032-Error al formatear",\
 		"033-Error no definido",\
 		"034-Error no definido",\
 		"035-Error no definido",\

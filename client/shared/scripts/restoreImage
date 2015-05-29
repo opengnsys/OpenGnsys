@@ -43,8 +43,8 @@ case "$PROTO" in
     UNICAST|UNICAST-DIRECT)
         # Restaurar la imagen.
         ogEcho log session "[40] ogRestoreImage $REPO $IMGNAME $DISK $PART UNICAST"
-        ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART" 2>&1 | tee -a $OGLOGCOMMAND
-        RETVAL=${PIPESTATUS[0]}
+        ogExecAndLog command ogRestoreImage "$REPO" "$IMGNAME" "$DISK" "$PART"
+        RETVAL=$?
         ;;
     MULTICAST|MULTICAST-DIRECT)
         PORT=$(echo $PROTOOPT | cut -f1 -d":")
@@ -53,8 +53,8 @@ case "$PROTO" in
         #TODO comprobar parametros anteriores
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
         ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
-        ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS" 2>&1 | tee -a $OGLOGCOMMAND
-        RETVAL=${PIPESTATUS[0]}
+        ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
+        RETVAL=$?
         ;;
     *)  # Protocolo desconocido.
         ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST opciones ]" 

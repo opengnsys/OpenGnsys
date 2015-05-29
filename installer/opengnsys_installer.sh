@@ -115,7 +115,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 
 # Generar variables de configuración del instalador
 # Variables globales:
-# - OSDISTRIB - tipo de distribución GNU/Linux
+# - OSDISTRIB, OSVERSION - tipo y versión de la distribución GNU/Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
@@ -137,15 +137,20 @@ function autoConfigure()
 # Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
 if [ -f /etc/os-release ]; then
 	source /etc/os-release
-	OSDISTRIB="$NAME"
+	OSDISTRIB="$ID"
+	OSVERSION="$VERSION_ID"
 else
 	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+	OSVERSION=$(lsb_release -rs 2>/dev/null)
 fi
+# Convertir distribución a minúsculas y obtener solo el 1er número de versión.
+OSDISTRIB="${OSDISTRIB,,}"
+OSVERSION="${OSVERSION%%.*}"
 
-# Configuración según la distribución GNU/Linux.
+# Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
-	Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps )
+	ubuntu|debian|linuxmint)
+		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -181,11 +186,11 @@ case "$OSDISTRIB" in
 		SYSLINUXDIR=/usr/lib/syslinux
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
-	Fedora|CentOS)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba rsync unzip debootstrap schroot squashfs-tools python-crypto )
+	fedora|centos)
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp syslinux xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
-				   'pushd /tmp; wget http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz; tar xvzf BitTornado-0.3.18.tar.gz; cd BitTornado-CVS; python setup.py install; ln -fs btlaunchmany.py /usr/bin/btlaunchmany; ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		if [ "$OSDISTRIB" == "CentOS" ]; then
+				   'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
+		if [ "$OSDISTRIB" == "centos" ]; then
 			UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
 		fi
 		INSTALLPKG="yum install -y"
@@ -266,7 +271,7 @@ local DHCPVERSION
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
-	Ubuntu|LinuxMint)	# Postconfiguación personalizada para Ubuntu.
+	ubuntu|linuxmint)	# Postconfiguación personalizada para Ubuntu.
 		# Configuración para DHCP v3.
 		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
@@ -277,13 +282,22 @@ case "$OSDISTRIB" in
 			DHCPCFGDIR=/etc/dhcp3
 		fi
 		;;
-	CentOS)	# Postconfiguación personalizada para CentOS.
+	centos)	# Postconfiguación personalizada para CentOS.
 		# Incluir repositorio de paquetes EPEL y paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release procps )
+		# Cambios a aplicar a partir de CentOS 7.
+		if [ $OSVERSION -ge 7 ]; then
+			# Sustituir MySQL por MariaDB.
+			DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
+			# Instalar arp-scan de CentOS 6 (no disponible en CentOS 7).
+			DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
+		fi
 		;;
-	Fedora)	# Postconfiguación personalizada para Fedora. 
+	fedora)	# Postconfiguación personalizada para Fedora. 
 		# Incluir paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} libstdc++-static.i686 btrfs-progs procps-ng )
+		# Sustituir MySQL por MariaDB a partir de Fedora 20.
+		[ $OSVERSION -ge 20 ] && DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
 		;;
 esac
 }
@@ -312,6 +326,14 @@ function errorAndLog()
 	local DATETIME=`getDateTime`
 	echo "ERROR: $1"
 	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
+}
+
+# Escribe a fichero y muestra mensaje de aviso
+function warningAndLog()
+{
+	local DATETIME=`getDateTime`
+	echo "Warning: $1"
+	echo "$DATETIME;$SSH_CLIENT;Warning: $1" >> $LOG_FILE
 }
 
 # Comprueba si el elemento pasado en $2 está en el array $1
@@ -459,7 +481,7 @@ function backupFile()
 	local dateymd=`date +%Y%m%d`
 
 	if [ ! -f "$file" ]; then
-		errorAndLog "${FUNCNAME}(): file $file doesn't exists"
+		warningAndLog "${FUNCNAME}(): file $file doesn't exists"
 		return 1
 	fi
 
@@ -577,6 +599,7 @@ function mysqlDbExists()
 	fi
 }
 
+# Comprueba si la base de datos está vacía.
 function mysqlCheckDbIsEmpty()
 {
 	if [ $# -ne 1 ]; then
@@ -602,7 +625,14 @@ function mysqlCheckDbIsEmpty()
 
 }
 
-
+# Importa un fichero SQL en la base de datos.
+# Parámetros:
+# - 1: nombre de la BD.
+# - 2: fichero a importar.
+# Nota: el fichero SQL puede contener las siguientes palabras reservadas:
+# - SERVERIP: se sustituye por la dirección IP del servidor.
+# - DBUSER: se sustituye por usuario de conexión a la BD definido en este script.
+# - DBPASSWD: se sustituye por la clave de conexión a la BD definida en este script.
 function mysqlImportSqlFileToDb()
 {
 	if [ $# -ne 2 ]; then
@@ -664,7 +694,7 @@ function mysqlCreateDb()
 	return 0
 }
 
-
+# Comprueba si ya está definido el usuario de acceso a la BD.
 function mysqlCheckUserExists()
 {
 	if [ $# -ne 1 ]; then
@@ -722,6 +752,7 @@ EOF
 ####### Funciones para el manejo de Subversion
 #####################################################################
 
+# Obtiene el código fuente del proyecto desde el servidor SVN.
 function svnExportCode()
 {
 	if [ $# -ne 1 ]; then
@@ -798,8 +829,8 @@ function getNetworkSettings()
 						awk '/Mask/ {sub(/.*:/,"",$4); print $4}
 						     /netmask/ {print $4}')
 			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(netstat -nr | awk -v d="$dev" '$1!~/0\.0\.0\.0/&&$8==d {if (n=="") n=$1} END {print n}')
-			ROUTERIP[i]=$(netstat -nr | awk -v d="$dev" '$1~/0\.0\.0\.0/&&$8==d {print $2}')
+			NETIP[i]=$(ip route | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
+			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1=="default" && $5==d {print $3}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
@@ -836,138 +867,27 @@ function tftpConfigure()
 			perl -pi -e 's/disable.*/disable = no/' $INETDCFGDIR/$TFTPSERV
 		else
 			service=$TFTPSERV
-			$ENABLESERVICE
+			$ENABLESERVICE; $STARTSERVICE
 		fi
 	fi
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
 
-	# preparacion contenedor tftpboot
+	# Copiar ficheros de Syslinux.
 	cp -a $SYSLINUXDIR $TFTPCFGDIR/syslinux
-	cp -a $SYSLINUXDIR/pxelinux.0 $TFTPCFGDIR
-	# prepamos el directorio de la configuracion de pxe
-	mkdir -p $TFTPCFGDIR/pxelinux.cfg
-	cat > $TFTPCFGDIR/pxelinux.cfg/default <<EOF
-DEFAULT syslinux/vesamenu.c32 
-MENU TITLE Aplicacion GNSYS 
- 
-LABEL 1 
-MENU LABEL 1 
-KERNEL syslinux/chain.c32 
-APPEND hd0 
- 
-PROMPT 0 
-TIMEOUT 10 
-EOF
+
 	# comprobamos el servicio tftp
 	sleep 1
 	testPxe
 }
 
+# Comprueba que haya conexión al servicio TFTP/PXE.
 function testPxe ()
 {
 	echoAndLog "${FUNCNAME}(): Checking TFTP service... please wait."
-	pushd /tmp
-	tftp -v localhost -c get pxelinux.0 /tmp/pxelinux.0 && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
-	popd
-}
-
-
-########################################################################
-## Configuracion servicio NFS
-########################################################################
-
-# Configurar servicio NFS.
-# ADVERTENCIA: usa variables globales NETIP y NETMASK!
-function nfsConfigure()
-{
-	echoAndLog "${FUNCNAME}(): Config nfs server."
-	backupFile /etc/exports
-
-	nfsAddExport $INSTALL_TARGET/client ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding NFS client config"
-		return 1
-	fi
-
-	nfsAddExport $INSTALL_TARGET/images ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync,crossmnt
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding NFS images config"
-		return 1
-	fi
-
-	nfsAddExport $INSTALL_TARGET/log/clients ${NETIP}/${NETMASK}:rw,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding logging client config"
-		return 1
-	fi
-
-	nfsAddExport $INSTALL_TARGET/tftpboot ${NETIP}/${NETMASK}:ro,no_subtree_check,no_root_squash,sync
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while adding second filesystem for the PXE ogclient"
-		return 1
-	fi
-
-	/etc/init.d/nfs-kernel-server restart
-	exportfs -va
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while configure exports"
-		return 1
-	fi
-
-	echoAndLog "${FUNCNAME}(): Added NFS configuration to file \"/etc/exports\"."
-	return 0
-}
-
-
-# Añadir entrada en fichero de configuración del servidor NFS.
-# Ejemplos:
-#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0:ro,no_subtree_check,no_root_squash,sync
-#nfsAddExport /opt/opengnsys 192.168.0.0/255.255.255.0
-#nfsAddExport /opt/opengnsys 80.20.2.1:ro 192.123.32.2:rw
-function nfsAddExport()
-{
-	if [ $# -lt 2 ]; then
-		errorAndLog "${FUNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
-	if [ ! -f /etc/exports ]; then
-		errorAndLog "${FUNCNAME}(): /etc/exports don't exists"
-		return 1
-	fi
-
-	local export="$1"
-	local contador=0
-	local cadenaexport
-
-	grep "^$export" /etc/exports > /dev/null
-	if [ $? -eq 0 ]; then
-		echoAndLog "${FUNCNAME}(): $export exists in /etc/exports, omiting"
-		return 0
-	fi
-
-	cadenaexport="${export}"
-	for parametro in $*; do
-		if [ $contador -gt 0 ]; then
-			host=`echo $parametro | awk -F: '{print $1}'`
-			options=`echo $parametro | awk -F: '{print $2}'`
-			if [ "${host}" == "" ]; then
-				errorAndLog "${FUNCNAME}(): host can't be empty"
-				return 1
-			fi
-			cadenaexport="${cadenaexport}\t${host}"
-
-			if [ "${options}" != "" ]; then
-				cadenaexport="${cadenaexport}(${options})"
-			fi
-		fi
-		let contador=contador+1
-	done
-
-	echo -en "$cadenaexport\n" >> /etc/exports
-
-	echoAndLog "${FUNCNAME}(): add $export to /etc/exports"
-	return 0
+	echo "test" >$TFTPCFGDIR/testpxe
+	tftp -v 127.0.0.1 -c get testpxe /tmp/testpxe && echoAndLog "TFTP service is OK." || errorAndLog "TFTP service is down."
+	rm -f $TFTPCFGDIR/testpxe /tmp/testpxe
 }
 
 
@@ -1216,7 +1136,6 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/images
 	mkdir -p $TFTPCFGDIR
 	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
-	mkdir -p $path_opengnsys_base/tftpboot/pxelinux.cfg
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
@@ -1263,6 +1182,7 @@ function copyServerFiles ()
 
 	local path_opengnsys_base="$1"
 
+	# Lista de ficheros y directorios origen y de directorios destino.
 	local SOURCES=( server/tftpboot \
 			server/bin \
 			repoman/bin \
@@ -1270,14 +1190,12 @@ function copyServerFiles ()
 			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
-			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
 			sbin \
 			sbin \
-			lib \
 			lib \
 			lib \
 			doc )
@@ -1287,6 +1205,7 @@ function copyServerFiles ()
 		exit 1
 	fi
 
+	# Copiar ficheros.
 	echoAndLog "${FUNCNAME}(): copying files to server directories"
 
 	pushd $WORKDIR/opengnsys
@@ -1299,9 +1218,10 @@ function copyServerFiles ()
 			echoAndLog "Copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -a "${SOURCES[$i]}"/* "${path_opengnsys_base}/${TARGETS[$i]}"
         else
-			echoAndLog "Warning: Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
+			warningAndLog "Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 		fi
 	done
+
 	popd
 }
 
@@ -1400,6 +1320,12 @@ function copyClientFiles()
 		errstatus=1
 	fi
 	
+	# Si el servidor tiene instalado Rsync > 3.0.9, renombrar el ejecutable
+	# compilado para el cliente.
+	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
+		[ -e $INSTALL_TARGET/client/bin/rsync-3.1.0 ] && mv -f $INSTALL_TARGET/client/bin/rsync-3.1.0 $INSTALL_TARGET/client/bin/rsync
+	fi
+
 	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
@@ -1414,8 +1340,8 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
-	#local FILENAME=ogLive-raring-3.8.0-22-generic-r3836.iso	# 1.0.5-rc3
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.6-kernel3.2
+	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso	# 1.0.6-kernel3.11
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
@@ -1447,7 +1373,7 @@ function clientCreate()
 	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
 	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 
 	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
 	cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
@@ -1467,6 +1393,11 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
+	# Deshabilitar servicios de BitTorrent si no están instalados.
+	if [ ! -e /usr/bin/bttrack ]; then
+		sed -i 's/RUN_BTTRACKER="yes"/RUN_BTTRACKER="no"/; s/RUN_BTSEEDER="yes"/RUN_BTSEEDER="no"/' \
+			/etc/default/opengnsys
+	fi
 	echoAndLog "${FUNCNAME}(): Creating cron files."
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -1492,7 +1423,7 @@ function openGnsysConfigure()
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent/ogAdmAgent.cfg > $INSTALL_TARGET/etc/ogAdmAgent-$dev.cfg
-			CONSOLEURL="http://${SERVERIP[i]}/opengnsys"
+			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
@@ -1503,7 +1434,7 @@ function openGnsysConfigure()
 			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
-				OPENGNSYS_CONSOLEURL="${CONSOLEURL/http:/https:}"
+				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
 			fi
 		fi
 		let i++
@@ -1517,6 +1448,13 @@ function openGnsysConfigure()
 	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
+
+	# Revisar permisos generales.
+	if [ -x $INSTALL_TARGET/bin/checkperms ]; then
+		echoAndLog "${FUNCNAME}(): Checking permissions."
+		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENT_USER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
+	fi
+
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	service="opengnsys"
 	$ENABLESERVICE; $STARTSERVICE
@@ -1531,9 +1469,13 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
-	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
-	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	[ -f $VERSIONFILE ] || echo "OpenGnSys Server" >$VERSIONFILE
+	# Incluir datos de revisión, si se está instaladno desde el repositorio
+	# de código o si no está incluida en el fichero de versión.
+	if [ $USESVN -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
+		local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
+		perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	fi
 
 	# Mostrar información.
 	echo
@@ -1548,12 +1490,15 @@ function installationSummary()
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console access data:          specified in installer script"
+	if grep -q "^RUN_BTTRACK.*no" /etc/default/opengnsys; then
+		echoAndLog "BitTorrent service is disabled."
+	fi
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
 	echoAndLog "Firewall service has been disabled and SELinux mode set to"
 	echoAndLog "   permissive during OpenGnSys installation. Please check"
-	echoAndLog "   $FIREWALLSERV and SELinux configuration, if needed."
+	echoAndLog "   ${FIREWALLSERV:-firewall} and SELinux configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Optional: Log-in as Web Console admin user."
@@ -1676,7 +1621,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Instalar base de datos de OpenGnSys Admin.
-isInArray notinstalled "mysql-server"
+isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
 if [ $? -eq 0 ]; then
 	# Habilitar gestor de base de datos (MySQL, si falla, MariaDB).
 	service=$MYSQLSERV

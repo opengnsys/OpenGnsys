@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idioms php: propiedades_menus_cat.php 
@@ -13,14 +13,13 @@ $TbMsg[4]="Gestió Menus";
 $TbMsg[5]="Nom del Menú";
 $TbMsg[6]="Títol";
 $TbMsg[7]="Comentaris";
-$TbMsg[8]="Ítems públics del Menú";
+$TbMsg[8]="Items de Menú Público";
 $TbMsg[9]="Coordenada x";
 $TbMsg[10]="Coordenada y";
-$TbMsg[11]="Modalitat";
-$TbMsg[12]="Ítems privats del Menú";
+$TbMsg[11]="Columnas menú automático";
 $TbMsg[13]="Menú simple";
 $TbMsg[14]="Menú doble";
-$TbMsg[15]="Html menú públic";
-$TbMsg[16]="Html menú privat";
+$TbMsg[15]="URL menú personalizado";
 $TbMsg[17]="Resolució de pantalla";
+$TbMsg[18]="Imagen de fondo";
 ?>

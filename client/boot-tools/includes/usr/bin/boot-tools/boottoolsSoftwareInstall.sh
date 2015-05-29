@@ -48,7 +48,8 @@ if [ "$OSRELEASE" == "3.7.6-030706-generic" ]; then
 	rm -fr /tmp/kernel
 else
 	# Instalar Kernel del repositorio de paquetes.
-	apt-get -y --force-yes install linux-image-${OSRELEASE} linux-image-extra-${OSRELEASE} linux-headers-${OSRELEASE}
+	apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE}
+	apt-get -y --force-yes install linux-image-extra-${OSRELEASE} 2>/dev/null
 fi
 
 

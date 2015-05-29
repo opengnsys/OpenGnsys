@@ -75,8 +75,20 @@ $atributos=str_replace('$',chr(9),$atributos);
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/comunescomandos.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<? echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
 <?php
+//##################################################################
+if ( ereg("ptc=UNICAST", $atributos) & $ambito!=16) { ?>
+	<SCRIPT language="javascript">
+	if (confirm(TbMsg[4]) == false) {
+		alert(CTbMsg[0]);
+		location.href="../../nada.php"
+	}
+	</SCRIPT>
+<?php } ?>
 
+<?php
+//##################################################################
 /* Recopila identificadore ,ipes y macs para envío de comandos */
 $cadenaid="";
 $cadenaip="";

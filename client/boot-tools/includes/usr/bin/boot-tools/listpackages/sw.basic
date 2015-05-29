@@ -13,6 +13,8 @@ install gawk
 install subversion
 install python-openssl 
 install python 
+install php5-cli
 install dmidecode 
-#install hwinfo
 install realpath
+install rpm
+install sqlite3

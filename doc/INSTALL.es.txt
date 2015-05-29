@@ -1,16 +1,16 @@
-Instalación de OpenGnSys Server v 1.0.5
+Instalación de OpenGnSys Server v 1.0.6
 =======================================
 
 Notas iniciales
 ---------------
 
-Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 12.04 LTS (también ha sido probado en sistemas basados en Fedora 20).
+Se presupone que el servidor de OpenGnSys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 12.04 LTS (también ha sido probado en sistemas basados en Fedora 20 y CentOS 6.5).
 
 El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el código del proyecto y el cliente preconfigurado.
 
 Requisitos mínimos de almacenamiento:
 - 100 MB en el directorio /tmp (solo durante la instalación)
-- 450 MB en el directorio /var/lib/tftpboot (o /srv en sistemas Debian)
+- 500 MB en el directorio /var/lib/tftpboot (o /srv en sistemas Debian)
 - 500 MB en el directorio de instalación /opt/opengnsys sin contar el espacio para logs (100 MB si el cliente ogLive está previamente descargado).
 - Estimar la capacidad necesaria para el repositorio de imágenes en /opt/opengnsys/images (es recomendable que este directorio se monte sobre un sistema de archivos independiente).
 

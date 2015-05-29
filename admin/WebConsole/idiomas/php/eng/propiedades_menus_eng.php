@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_menus_eng.php 
@@ -13,16 +13,14 @@ $TbMsg[4]="Menus Management";
 $TbMsg[5]="Menu name";
 $TbMsg[6]="Title";
 $TbMsg[7]="Comments";
-$TbMsg[8]="Public Items Menu";
+$TbMsg[8]="Public Menu Items";
 $TbMsg[9]="Coordinate x";
 $TbMsg[10]="Coordinate y";
-$TbMsg[11]="Modality";
-$TbMsg[12]="Private Items Menu";
+$TbMsg[11]="Columnas menú automático";
+$TbMsg[12]="Private Menu Items";
 $TbMsg[13]="Simple menu";
 $TbMsg[14]="Double menu";
-$TbMsg[15]="Html public menu";
-$TbMsg[16]="Html private menu";
+$TbMsg[15]="URL menú personalizado";
 $TbMsg[17]="Screen resolution";
 $TbMsg[18]="Background image";
 ?>
-

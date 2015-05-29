@@ -23,11 +23,7 @@ $opcion=0; // Inicializa parametros
 $idmenu=0; 
 $descripcion="";
 $titulo="";
-$coorx=0;
-$coory=0;
 $modalidad=0;
-$scoorx=0;
-$scoory=0;
 $smodalidad=0;
 $comentarios="";
 $grupoid=0; 
@@ -42,12 +38,8 @@ if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"];
 if (isset($_POST["identificador"])) $idmenu=$_POST["identificador"];
 if (isset($_POST["descripcion"])) $descripcion=$_POST["descripcion"]; 
 if (isset($_POST["titulo"])) $titulo=$_POST["titulo"]; 
-if (isset($_POST["coorx"])) $coorx=$_POST["coorx"]; 
-if (isset($_POST["coory"])) $coory=$_POST["coory"]; 
-if (isset($_POST["modalidad"])) $modalidad=$_POST["modalidad"]; 
 
-if (isset($_POST["scoorx"])) $scoorx=$_POST["scoorx"]; 
-if (isset($_POST["scoory"])) $scoory=$_POST["scoory"]; 
+if (isset($_POST["modalidad"])) $modalidad=$_POST["modalidad"]; 
 if (isset($_POST["smodalidad"])) $smodalidad=$_POST["smodalidad"]; 
 
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
@@ -120,13 +112,9 @@ function Gestiona(){
 	global	$idcentro;
 	global	$idmenu;
 	global	$descripcion;
-	global   $titulo;
-	global   $coorx;
-	global   $coory;
-	global   $modalidad;
-	global   $scoorx;
-	global   $scoory;
-	global   $smodalidad;
+	global	$titulo;
+	global	$modalidad;
+	global	$smodalidad;
 	global	$comentarios;
 	global	$grupoid;
 	global	$htmlmenupub;
@@ -146,11 +134,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@descripcion",$descripcion,0);
 	$cmd->CreaParametro("@titulo",$titulo,0);
-	$cmd->CreaParametro("@coorx",$coorx,1);
-	$cmd->CreaParametro("@coory",$coory,1);
 	$cmd->CreaParametro("@modalidad",$modalidad,1);
-	$cmd->CreaParametro("@scoorx",$scoorx,1);
-	$cmd->CreaParametro("@scoory",$scoory,1);
 	$cmd->CreaParametro("@smodalidad",$smodalidad,1);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
@@ -161,9 +145,9 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO menus (descripcion,titulo,coorx,coory,modalidad,scoorx,scoory,smodalidad,
+			$cmd->texto="INSERT INTO menus (descripcion,titulo,modalidad,smodalidad,
 						comentarios,idcentro,grupoid,htmlmenupub,htmlmenupri,resolucion,idurlimg) 
-						VALUES (@descripcion,@titulo,@coorx,@coory,@modalidad,@scoorx,@scoory,@smodalidad,
+						VALUES (@descripcion,@titulo,@modalidad,@smodalidad,
 						@comentarios,@idcentro,@grupoid,@htmlmenupub,@htmlmenupri,@resolucion,@idurlimg)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -176,7 +160,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE menus SET descripcion=@descripcion,titulo=@titulo,coorx=@coorx,coory=@coory,modalidad=@modalidad,scoorx=@scoorx,scoory=@scoory,smodalidad=@smodalidad,
+			$cmd->texto="UPDATE menus SET descripcion=@descripcion,titulo=@titulo,modalidad=@modalidad,smodalidad=@smodalidad,
 						comentarios=@comentarios,htmlmenupub=@htmlmenupub ,htmlmenupri=@htmlmenupri,resolucion=@resolucion,idurlimg=@idurlimg
 					WHERE idmenu=@idmenu";
 			$resul=$cmd->Ejecutar();

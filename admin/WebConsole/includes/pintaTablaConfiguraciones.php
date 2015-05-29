@@ -3,8 +3,122 @@ include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
 
 /*________________________________________________________________________________________________________
 	Crea la tabla de configuraciones y perfiles a crear
+// Version 0.1 - En ambito distinto a ordenador muestra los equipos agrupados en configuraciones iguales.
+// Fecha: 2014-10-23
+// Autora: Irina Gomez, ETSII Universidad de Sevilla
+
 ________________________________________________________________________________________________________*/
-function tablaConfiguracionesIniciarSesion($cmd,$idordenador){
+function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
+        // TODO despues de las pruebas: idnombreso <> 5
+        global $TbMsg;
+        global $idcentro;
+
+        global $AMBITO_AULAS;
+        global $AMBITO_GRUPOSORDENADORES;
+        global $AMBITO_ORDENADORES;
+        global $msk_nombreSO;
+        // array: identificadores y nombres sistemas operativos en BD;
+        $sistOperativo= SistemaOperativoBD($cmd);
+	// Identificador del "sistema operativo" DATA.
+	$sistData= array_search ('DATA', $sistOperativo);
+
+        $tablaHtml='';
+        // Incluimos primera linea de la tabla para todos los equipos.
+        $inicioTabla='<table id="tabla_conf" class="tabla_datos" border="0" cellpadding="1" cellspacing="1" align="center">'.chr(13);
+	// Cabecera información sistemas operativos.
+        $cabeceraTabla='<tr>'.chr(13);
+        $cabeceraTabla.='<th align="center">&nbsp;&nbsp;</th>'.chr(13);
+        $cabeceraTabla.='<th align="center">&nbsp;Partición&nbsp;</th>'.chr(13);
+        $cabeceraTabla.='<th align="center">&nbsp;Nombre del S.O.&nbsp;</th>'.chr(13);
+        $cabeceraTabla.='</tr>'.chr(13);
+	// Mensaje si no existen datos en la base de datos.
+        $tablaSinConfiguracion='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
+        $tablaSinConfiguracion.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13).'</table>'.chr(13);
+
+	// CONSULTA BD: grupo de equipos con iguales sistemas operativos: idordenadores,configuracion
+        $cmd->texto="";
+        // agrupamos equipos con igual conf de disco.
+        $cmd->texto="select GROUP_CONCAT(pcconf.idordenador SEPARATOR ',') AS idordenadores, pcconf.configuraciones  FROM  (";
+
+        // partconf agrupa la configuracion de todas las part: idordenador | configuracionTodasPart
+        $cmd->texto.=" select partconf.idordenador , GROUP_CONCAT(partconf.configuracion  ORDER BY partconf.configuracion ASC SEPARATOR '@'  ) AS configuraciones FROM (";
+
+        // particion conf: idordenador, numdisk, configuracion (numdisk;numpar;idnombreso)
+        $cmd->texto.="SELECT ordenadores_particiones.idordenador,ordenadores_particiones.numdisk, CONCAT_WS(';',ordenadores_particiones.numdisk, ordenadores_particiones.numpar, ordenadores_particiones.idnombreso) AS configuracion FROM ordenadores_particiones ";
+
+        switch($ambito){
+                case $AMBITO_AULAS :
+                        $cmd->texto.=" INNER JOIN ordenadores ON ordenadores_particiones.idordenador=ordenadores.idordenador
+                                INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
+                                WHERE aulas.idaula =".$idambito;
+                        break;
+                case $AMBITO_GRUPOSORDENADORES :
+                        $cmd->texto.=" INNER JOIN ordenadores ON ordenadores_particiones.idordenador=ordenadores.idordenador
+                                INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
+                                WHERE gruposordenadores.idgrupo =".$idambito;
+                        break;
+                case $AMBITO_ORDENADORES :
+                        $cmd->texto.=" WHERE ordenadores_particiones.idordenador =".$idambito;
+                        break;
+        }
+
+        $cmd->texto.=" AND ordenadores_particiones.idnombreso <> 0 ";
+	// Si existen particiones de datos no las mostramos.
+	if ($sistData != '') 
+        	$cmd->texto.=" AND ordenadores_particiones.idnombreso <> ".$sistData; 
+	
+	$cmd->texto.=" ORDER BY ordenadores_particiones.idordenador, idordenador,ordenadores_particiones.numdisk, ordenadores_particiones.numpar";
+        // fin consulta basica -> partcion conf
+        $cmd->texto.=") AS partconf GROUP BY partconf.idordenador";
+        // fin consulta  partconf.
+        $cmd->texto.=" ) AS pcconf GROUP BY pcconf.configuraciones " ;
+
+	// Muestro datos de la consulta en tabla.
+        $rs=new Recordset;
+        $rs->Comando=&$cmd;
+        if (!$rs->Abrir())
+                return($tablaHtml); // Error al abrir recordset
+        $rs->Primero();
+        $columns = 3;
+        $cc=0;
+        echo $inicioTabla;
+	// Si no hay datos pinto mensaje informativo.
+	if($rs->EOF)
+		echo $tablaSinConfiguracion;
+	// Para cada grupo de pc con iguales Sist. Operativo pinto una tabla.
+        while (!$rs->EOF){
+                $cc++;
+                echo '<tr><td colspan="'.$columns.'" style="background-color: #ffffff;">';
+                echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc,'ipordenador');
+                echo "</td></tr>";
+                $configuraciones=explode("@",$rs->campos["configuraciones"]);
+                echo $cabeceraTabla;
+                // Una fila para cada particion.
+                $actualDisk = 0;
+                $tablaHtml='';
+                foreach ( $configuraciones as $particiones) {
+                        $datos= explode (';', $particiones);
+                        // Si es inicio de disco
+                        if($actualDisk != $datos[0]){
+                                $actualDisk = $datos[0];
+                                $tablaHtml.='<tr><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td><tr>'.chr(13);
+                        }
+                        $tablaHtml.='<tr><td><input name="particion" idcfg="'.$cc.'" id="'.$cc.'_'.$datos[0].'_'.$datos[1].'" value="'.$datos[0].';'.$datos[1].'" type="radio"></td>'.chr(13);
+                        $tablaHtml.='<td align="center">&nbsp;'.$datos[1].'&nbsp;</td>'.chr(13);
+                        $tablaHtml.='<td>&nbsp;'.$sistOperativo[$datos[2]].'</td></tr>'.chr(13);
+
+                }
+                echo $tablaHtml;
+
+
+                $rs->Siguiente();
+        }
+        $rs->Cerrar();
+        echo "</table>".chr(13);
+
+}
+
+function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 	global $TbMsg;
 	global $idcentro;
 	$tablaHtml="";
@@ -22,10 +136,9 @@ function tablaConfiguracionesIniciarSesion($cmd,$idordenador){
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 			LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
 			WHERE ordenadores.idordenador=".$idordenador."
-			  AND tipospar.clonable=1
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
-				
+
 	$rs->Comando=&$cmd; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -335,4 +448,23 @@ function tablaConfiguracionesCrearSoftIncremental($idordenador)
 }
 <<<<<<< .mine
 /**/
+
+
+// Devuelve un Array nombres de los sistemas operativos en BD con sus identificadores.
+function SistemaOperativoBD ($cmd) {
+        $idSistOperativo = array(); // Array nombres de los sistemas operativos
+
+        $cmd->texto="select idnombreso, nombreso from nombresos";
+        $rs=new Recordset;
+        $rs->Comando=&$cmd;
+        if (!$rs->Abrir()) return; // Error al abrir recordset
+        $rs->Primero();
+        while (!$rs->EOF){
+                $idSistOperativo[ $rs->campos["idnombreso"] ] = $rs->campos["nombreso"];
+                $rs->Siguiente();
+        }
+
+        return $idSistOperativo;
+
+}
 

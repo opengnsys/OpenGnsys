@@ -77,40 +77,35 @@ switch($idtipousuario){
 	<INPUT type=hidden name=idusuario value=<?=$idusuario?>>
 	<INPUT type=hidden name=idtipousuario value=<?=$idtipousuario?>>
 	<INPUT type=hidden name=idambito value=<?=$idambito?>>
-	<?
-		if ($opcion==$op_modificacion && $idtipousuario!=$SUPERADMINISTRADOR){
-			echo '<INPUT type=hidden name=usuario value='.$usuario.'>';
-			echo '<INPUT type=hidden name=pasguor value='.$pasguor.'>';
-		}
-	?>
+
 	<P align=center class=cabeceras><?echo $TbMsg[4]." (".$litusu.")"?><BR>
 	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-<!-------------------------------------------------------------------------------------------------------------------------------------------------->
+<!------------------------------------------------	NOMBRE USUARIO	-------------------------------------------------------------------------------------------------->
 			<TR>
 				<TH>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idtipousuario!=$SUPERADMINISTRADOR)){?>
-					<TD><?echo $usuario?>&nbsp&nbsp;<IMG src="<? echo $urlimg ?>"></TD>
+				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
+					<TD><INPUT type=hidden class=cajatexto name="usuario"  style="width:100" value="<? echo $usuario?>"></INPUT><?echo $usuario?>&nbsp&nbsp;<IMG src="<? echo $urlimg ?>"></TD>
 				<?}else{?>
 					<TD><INPUT type=text class=cajatexto name="usuario"  style="width:100" value="<? echo $usuario?>">
 					<IMG src="<? echo $urlimg ?>">
 
 				<?}?>
 			</TR>
-<!-------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------	PASSWORD	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
 				<TH>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idtipousuario!=$SUPERADMINISTRADOR)){?>
-					<TD><?echo $pasguor?></TD>
+				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
+					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>"></INPUT><?echo $pasguor?></TD>
 				<?}else{?>
 					<TD><INPUT type=text class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>">
 				<?}?>
 			</TR>
-<!-------------------------------------------------------------------------------------------------------------------------------------------------->
+<!---------------------------------------------------	NOMBRE COMPLETO	----------------------------------------------------------------------------------------------->
 			<TR>
 				<TH>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion){?>
-					<TD><?echo $nombre?></TD>
+				<?if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idusuario==1)){?>
+					<TD><INPUT type=hidden class=cajatexto name="nombre"  style="width:250" value="<? echo $nombre?>"></INPUT><?echo $nombre?></TD>
 				<?}else{?>
 					<TD><INPUT type=text class=cajatexto name="nombre"  style="width:250" value="<? echo $nombre?>">
 				<?}?>
@@ -138,10 +133,29 @@ switch($idtipousuario){
 	</TABLE>
 </FORM>
 </DIV>
+
+<?php
+if ($idusuario==1){
+///*
+
+       echo '<TABLE  id=tabla_conf align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>';
+		  echo '<TR>';
+               echo '</TR>';
+		  echo '<div onclick=window.open("http://opengnsys.es/wiki/ModificarUsuarios")><TR>';
+       	echo	'<TH align=center >&nbsp;'.$TbMsg[14].$TbMsg[15].$TbMsg[16].$TbMsg[17].'<a color=white href='.$TbMsg[17].' target=blank></a></br>'.$nombreambito.$TbMsg[23].'</br>'.$TbMsg[24].'&nbsp;</TH>';
+               echo '</TR></div>';
+       echo '</TABLE>';
+
+//*/
+}
+?>
 <?
+if ($opcion==$op_eliminacion && $idusuario==1)
+{}else{
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
+}
 ?>
 </BODY>
 </HTML>

@@ -9,4 +9,6 @@ TbMsg[1]="El número de la partición debe ser mayor de 0";
 TbMsg[2]="El tipo de partición no se ha especificado";
 TbMsg[3]="El tamaño de la partición debe ser mayor que cero";
 TbMsg[4]="ATENCIÓN: Se va a eliminar esta partición ¿ Está seguro ?";
-TbMsg[5]="Debe especificar el tipo de fichero si desea formatear la partición";
+TbMsg[5]="Debe especificar el tipo de sistema de ficheros si desea formatear la partición";
+TbMsg[6]="La CACHE sólo puede definirse en la partición 4";
+TbMsg[7]="El número máximo de particiones es 4";

@@ -51,6 +51,7 @@ case "${1,,}" in
 		OSDISTRIB="ubuntu"
 		OSCODENAME="precise"
 		OSRELEASE="3.2.0-23-generic"
+		#OSRELEASE="3.11.0-26-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
@@ -365,8 +366,18 @@ function btogIsoGenerator {
 btogGetVar
 #Preparamos los gestores de arranque
 mkdir -p /tmp/iso/isolinux
-cp -prv /usr/lib/syslinux/* /tmp/iso/isolinux/
-cp -prv /usr/share/gpxe/* /tmp/iso/isolinux/
+cp -av /usr/lib/syslinux/* /tmp/iso/isolinux/
+cp -av /usr/share/gpxe/* /tmp/iso/isolinux/
+
+# Si existe isolinux/gpxe.iso, montarlo para extraer isolinux.bin.
+if [ -f /tmp/iso/isolinux/gpxe.iso ]; then
+    mkdir -p /tmp/iso/isolinux/mount
+    mount -o loop /tmp/iso/isolinux/gpxe.iso /tmp/iso/isolinux/mount
+    cp -va /tmp/iso/isolinux/mount/* /tmp/iso/isolinux
+    umount /tmp/iso/isolinux/mount
+    rmdir /tmp/iso/isolinux/mount
+    rm -f /tmp/iso/isolinux/gpxe.iso
+fi
 
 cat << FIN > /tmp/iso/isolinux/isolinux.cfg
 DEFAULT menu.c32

@@ -46,7 +46,7 @@ function validate_number_notnull(value) {
 }
 
 function validate_alphanum_notnull(value) {
-	return validate_number(value) && validate_notnull(value);
+	return validate_alphanum(value) && validate_notnull(value);
 }
 
 // Validar dirección IPv4.
@@ -60,10 +60,10 @@ function validate_ipadress_notnull(value) {
 	return validate_ipadress(value) && validate_notnull(value);
 }
 
-// Validar direccion MAC
+// Validar direccion MAC (sin contar caracteres ":").
 function validate_macaddress(value) {
 	var regex = '^([0-9a-fA-F]){12}$'
-	return validate_expr(value, regex);
+	return validate_expr(value.replace(/:/g,''), regex);
 }
 
 function validate_macaddress_notnull(value) {
@@ -86,6 +86,14 @@ function validate_nameimagefile(value) {
 	return validate_expr(value, "^[0-9a-zA-Z]*$");
 }
 
+// Validar texto: alfanumerico más espacios, subrayado y guiones.
+function validate_text(value) {
+	return ! validate_expr(value, /.*['"%&<=>*$+?|\/]/);
+}
+
+function validate_text_notnull(value) {
+	return validate_text(value) && validate_notnull(value);
+}
 
 function validation_highlight(field) {
 	field.focus();

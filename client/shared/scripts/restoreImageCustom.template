@@ -1,0 +1,34 @@
+#!/bin/bash
+#/**
+#         restoreImageCustom
+#@brief   Plantilla para scirpt de rastauración personalizada de imagen.
+#@param   $1 nº de disco 
+#@param   $2 nº de partición 
+#@param   $3 Repositorio: CACHE, REPO o dirección IP
+#@param   $4 Nombre canónico de la imagen sin extensión
+#@warning Renombrar este fichero como "restoreImageCustom" para sustituir al script estándar "restoreImage".
+#**/
+
+
+# Control de parámetros.
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: createImageCustom int_ndisc int_npart str_repo str_imgname" || exit $?
+
+# Toma de parámetros.
+DISK="$1"		# Nº de disco.
+PART="$2"		# Nº de partición.
+REPO="${3^^}"		# Repositorio (en mayúsculas).
+IMGNAME="$4"		# Nombre canónico de imagen (sin extensión).
+
+
+# Paso 0: Añadir código para realizar control de errores de los parámetros de entrada (recomendado).
+
+
+# Paso 1: Añadir aquí el código para el proceso previo antes de la restauración de la imagen en los equipos (opcional).
+
+
+# Paso 2: Sustituir, si se desea, la llamada al proceso estándar de restauración de imagen por código personalizado.
+restoreImage "$@"
+
+
+# Aviso: editar la plantilla "configureOsCustom" para añadir el código personalizado para el proceso de postconfiguración de los clientes (no incluir aquí dicho código).
+

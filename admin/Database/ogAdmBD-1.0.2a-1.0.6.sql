@@ -1,13 +1,12 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.2 - 1.0.5
+# OpenGnSys 1.0.2a - 1.0.6
 #use ogAdmBD
-
-UPDATE entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
-
-UPDATE parametros SET tipopa = '1' WHERE idparametro = 30;
 
 UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
 UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
+
+# Habilita el comando Particionar y formatear
+UPDATE comandos SET activo = '1' WHERE comandos.idcomando = 10;
 
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
@@ -19,11 +18,8 @@ ALTER TABLE ordenadores_particiones
 	ADD cache varchar(500),
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
-ALTER TABLE imagenes
-	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idrepositorio;
 
 # Nuevos tipos de particiones y particiones GPT.
-ALTER TABLE imagenes MODIFY codpar int(8) NOT NULL;
 ALTER TABLE sistemasficheros MODIFY codpar int(8) NOT NULL;
 ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
@@ -103,6 +99,10 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 ALTER TABLE parametros
 	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+	(12, 'nci', 'Nombre canónico', '', '', '', 0, 1),
+	(21, 'sfi', 'Sistema de fichero', 'nemonico', 'sistemasficheros', 'nemonico', 1, 0),
+	(22, 'tam', 'Tamaño', '', '', '', 0, 1),
+	(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 0, 1),
 	(31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1),
 	(32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1),
 	(33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1),
@@ -112,11 +112,18 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
 	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
 
-# Imágenes incrementales.
+# Imágenes incrementales, soporte para varios discos y fecha de creación
+# (tickets #565, #601 y #677).
 ALTER TABLE imagenes
-	ADD tipo TINYINT NULL,
-	ADD imagenid INT NOT NULL DEFAULT '0',
-	ADD ruta VARCHAR(250) NULL;
+	MODIFY idrepositorio INT(11) NOT NULL DEFAULT 0,
+	MODIFY numpar SMALLINT NOT NULL DEFAULT 0,
+	MODIFY codpar INT(8) NOT NULL DEFAULT 0,
+	ADD idordenador INT(11) NOT NULL DEFAULT 0 AFTER idrepositorio,
+	ADD numdisk SMALLINT NOT NULL DEFAULT 0 AFTER idordenador,
+	ADD tipo SMALLINT NULL,
+	ADD imagenid INT NOT NULL DEFAULT 0,
+	ADD ruta VARCHAR(250) NULL,
+	ADD fechacreacion DATETIME DEFAULT NULL;
 UPDATE imagenes SET tipo=1;
 
 # Cambio de tipo de grupo.
@@ -181,6 +188,12 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
+# Internacionalización correcta de los asistentes.
+UPDATE asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
+
 # Añadir proxy para aulas.
 ALTER TABLE aulas
        ADD proxy VARCHAR(30) AFTER dns;
@@ -191,4 +204,29 @@ ALTER TABLE ordenadores
 	ALTER idproautoexec SET DEFAULT 0;
 UPDATE ordenadores
 	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
+
+# Incluir fecha de despliegue/restauración (ticket #677) y
+# correcion en eliminar imagen de cache de cliente (ticket #658)
+ALTER TABLE ordenadores_particiones
+	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
+	MODIFY cache TEXT NOT NULL;
+
+# Mostrar disco en comandos Inventario de software e Iniciar sesión.
+UPDATE comandos
+	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;mac;dsk;par'
+	WHERE idcomando = 7;
+UPDATE comandos
+	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
+	WHERE idcomando = 9;
+
+# Eliminar campos que ya no se usan (ticket #705).
+ALTER TABLE repositorios
+	DROP pathrepoconf,
+	DROP pathrepod,
+	DROP pathpxe;
+ALTER TABLE menus
+	DROP coorx,
+	DROP coory,
+	DROP scoorx,
+	DROP scoory;
 

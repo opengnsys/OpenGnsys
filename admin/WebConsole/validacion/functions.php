@@ -55,8 +55,8 @@ function TomaPropiedades($cmd){
 //___________________________________________________________________________________________________
 function RecuperaMenu($cmd,$iph){
 	$rs=new Recordset; 
-	$cmd->texto="SELECT menus.idcentro,menus.resolucion,menus.titulo,menus.idurlimg,menus.coorx,menus.coory,
-			menus.modalidad,menus.scoorx,menus.scoory,menus.smodalidad,menus.htmlmenupub,menus.htmlmenupri,
+	$cmd->texto="SELECT menus.idcentro,menus.resolucion,menus.titulo,menus.idurlimg,
+			menus.modalidad,menus.smodalidad,menus.htmlmenupub,menus.htmlmenupri,
 			acciones_menus.tipoaccion,acciones_menus.idaccionmenu,acciones_menus.idtipoaccion,
 			acciones_menus.tipoitem,acciones_menus.descripitem,iconos.urlicono
 			FROM ordenadores
@@ -81,13 +81,8 @@ function GeneraMenu($rs,$tipo,$iph){
 	global $UrlPaginaIconos;
 
 	$titulo=$rs->campos["titulo"]; 
-	$coorx=$rs->campos["coorx"]; 
-	$coory=$rs->campos["coory"]; 
 	$modalidad=$rs->campos["modalidad"]; 
-	$scoorx=$rs->campos["scoorx"]; 
-	$scoory=$rs->campos["scoory"]; 
 	$smodalidad=$rs->campos["smodalidad"]; 
-	$scoory=$rs->campos["scoory"]; 
 	$resolucion=$rs->campos["resolucion"]; 
 	$htmlmenupub=$rs->campos["htmlmenupub"]; 
 	$htmlmenupri=$rs->campos["htmlmenupri"]; 
@@ -98,8 +93,7 @@ function GeneraMenu($rs,$tipo,$iph){
 		$mod=$modalidad;
 	$codeHTML="";
 
-	//	Genera HTML de la p�ina en funci� de las propiedades del Men del clioente
-	//$codeHTML.='<DIV style="POSITION:absolute;TOP:'.$coory."px;LEFT:".$coorx.'px">';
+	//	Genera HTML de la página en función de las propiedades del menú del cliente.
 	$codeHTML.='<P align=center>';
 	$codeHTML.='<SPAN style="COLOR: #999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE: 20px;"><U>'.$titulo.'</U></SPAN>';
 	$codeHTML.='</BR>';
@@ -148,6 +142,7 @@ function GeneraMenu($rs,$tipo,$iph){
 	$codeHTML.='<BR><BR>';
 	$codeHTML.='<P align=center>';
 
+	if (empty($url)) $url="";
 	switch($tipo){
 		case $ITEMS_PUBLICOS:
 			$url.='acceso_operador.php';

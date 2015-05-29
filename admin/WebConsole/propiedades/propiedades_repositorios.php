@@ -21,8 +21,6 @@ $idrepositorio=0;
 $nombrerepositorio="";
 $ip="";
 $puertorepo="2002";
-$pathrepod="/opt/opengnsys/admin";
-$pathpxe="/opt/opengnsys/tftpboot/pxelinux.cfg";
 $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
@@ -87,6 +85,7 @@ else{
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
+	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_repositorios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
@@ -135,26 +134,6 @@ else{
 				echo'<TD><INPUT  class="formulariodatos" name=puertorepo type=text style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$pathrepod.'</TD>';
-			else	
-				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathrepod type=text style="width:330" value="'.$pathrepod.'"></TD>';
-			?>
-		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$pathpxe.'</TD>';
-			else	
-				echo'<TD colspan=2><INPUT  class="formulariodatos" name=pathpxe type=text style="width:330" value="'.$pathpxe.'"></TD>';
-			?>
-		</TR>		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
@@ -218,8 +197,6 @@ function TomaPropiedades($cmd,$id){
 	global $ip;
 	global $comentarios;
 	global $puertorepo;
-	global $pathrepod;
-	global $pathpxe;
 	global $ordenadores;
 
 
@@ -240,8 +217,6 @@ function TomaPropiedades($cmd,$id){
 		$ip=$rs->campos["ip"];
 		$comentarios=$rs->campos["comentarios"];
 		$puertorepo=$rs->campos["puertorepo"];
-		$pathrepod=$rs->campos["pathrepod"];
-		$pathpxe=$rs->campos["pathpxe"];
 //		$ordenadores=$rs->campos["numordenadores"];
 	}
 	$rs->Cerrar();

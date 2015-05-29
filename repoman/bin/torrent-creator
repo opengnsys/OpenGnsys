@@ -32,9 +32,11 @@ for IMG in *.{img,pgz,diff}; do
 		continue
 	fi
 	# Comprobar si ya existe el fichero Torrent para esa imagen.
-	TORRENT="$IMG.torrent"
+	TORRENT="$IMG.torrent"	
 	SUMFILE="$IMG.sum"
-	if [ -f "$TORRENT" ]; then
+	#MD5 completo de todo el fichero imagen
+	SUMFULLFILE="$IMG.full.sum"
+	if [ -f "$TORRENT" -a -f "$SUMFULLFILE" ]; then
 		FILESIZE="$(ls -l $IMG | awk '{print $5}')"
 		read -e TORRFILE TORRSIZE <<<"$(ctorrent -x $TORRENT 2>/dev/null | awk '$1~/<1>/ {print $2,$3}')"
 		[ "$(basename $IMG)" = "$TORRFILE" -a "[$FILESIZE]" = "$TORRSIZE" ] && continue
@@ -43,10 +45,14 @@ for IMG in *.{img,pgz,diff}; do
 	echo "`date` : Inicio creación de fichero $TORRENT" >> $LOGFILE
 	touch "$LOCKFILE"
 	trap "rm -f $LOCKFILE" 1 2 3 6 9
-	rm -f "$TORRENT" "$SUMFILE"
+	rm -f "$TORRENT" "$SUMFILE"	
+	# datasum de los ultimos megas del fichero para transferencias unicast y multicast
 	DATASUM=$(tail -c1M "$IMG" | md5sum -b | cut -f1 -d" ")
 	echo $DATASUM > "$SUMFILE"
-	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATASUM -l 4194304 2>/dev/null
+	# Datasum completo para transferencias torrent
+	DATAFULLSUM=$(md5sum -b "$IMG"| cut -f1 -d" ")
+	echo $DATAFULLSUM > "$SUMFULLFILE"
+	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATAFULLSUM -l 4194304 2>/dev/null
 	rm -f "$LOCKFILE"
 	if [ -f "$TORRENT"  ]; then
 		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE

@@ -43,16 +43,6 @@ function onexit() {
 #Carga el configurador del engine desde el fichero engine.cfg
 [ -z $OGENGINECONFIGURATE ] &&  source /opt/opengnsys/etc/engine.cfg
 
-# Factor de calculo de Time out al crear imagen: valor por defecto en engine.cfg 
-CREATESPEED=${CREATESPEED:-"100000*4"}
-# Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
-KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
-[ $KERNELVERSION \< 3.07 ] &&  IMGFS="EXT4" || IMGFS="BTRFS"
-# % de compresion para estimacion tamaño imagen IMGFS="EXT4"
-ZSYNC=${ZSYNC:-"120"}
-# Si IMGFS="BTRFS" la compresion es mayor.
-[ $IMGFS == "BTRFS" ] && let ZSYNC=$ZSYNC-30
-
 TIME1=$SECONDS
 
 PROG="$(basename $0)"
@@ -105,8 +95,9 @@ ORIG=$(ogMount $1 $2) ||   exit $(ogRaiseError session $OG_ERR_PARTITION "$1 $2"
 DIFFDIR="$(ogGetParentPath "$3" "/$5")"
 DIFFFILE="$DIFFDIR/$5.$DIFFEXT"
 
-ogLockImage "$3"  "/$4.$IMGEXT"
-ogLockImage "$3"  "/$5.$DIFFEXT"
+# Bloqueo las imagenes -> Si no hay acceso de escritura dara error y nos saldremos.
+ogLockImage "$3"  "/$4.$IMGEXT" || exit $?
+ogLockImage "$3"  "/$5.$DIFFEXT" || exit $? 
 
 # Comprobar consistencia del sistema de archivos.
 echo " " > $OGLOGCOMMAND
@@ -116,18 +107,7 @@ ogUnmount $1 $2
 ogCheckFs $1 $2 >$OGLOGCOMMAND || exit $(ogRaiseError session $OG_ERR_PARTITION "ogCheckFs $1 $2" ; echo $?)
 
 # Borramos ficheros de paginacion y configuracion
-FSTYPE=$(ogGetFsType $1 $2)
-case "$FSTYPE" in
-    EXT[234])
-        ogCleanLinuxDevices $1 $2
-	rm -rf $ORIG/tmp/*
-        ;;
-    NTFS)
-	[ $(ogGetPath $1 $2 pagefile.sys) ] && ogDeleteFile $1 $2 pagefile.sys
-	[ $(ogGetPath $1 $2 hiberfil.sys) ] && ogDeleteFile $1 $2 hiberfil.sys
-	[ $(ogGetPath $1 $2 swapfile.sys) ] && ogDeleteFile $1 $2 swapfile.sys
-        ;;
-esac
+ogCleanOs $1 $2
 
 # Crear la imagen.
 echo " " > $OGLOGCOMMAND
@@ -142,36 +122,23 @@ ogMountImage $3 "$4" $IMGEXT >/dev/null
 ogWaitSyncImage $3 "$4" $IMGEXT "mounted" || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
 
 # Creamos la informacion de la imagen.
-ogEcho log session "[50] $MSG_HELP_ogCreateInfoImage "
+ogEcho log session "[45] $MSG_HELP_ogCreateInfoImage "
 ogCreateInfoImage $1 $2 $3 "$4" "${DIFFTYPE}"
 [ $? -eq $OG_ERR_NOTDIFFERENT ] &&  exit $(ogRaiseError session $OG_ERR_NOTDIFFERENT; echo $?)
+
+#Comprobar espacio que requerira la imagen para ser almacenada
+read SIZEDATA SIZEREQUIRED ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3" DIFF)
+
+ogEcho log session "[50] $PROG: $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED"
+[ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
 
 #Calculamos el tamaño de la imagen:
 ogMount $1 $2 >/dev/null
 ogLock $1 $2
-ogEcho log session  "     $MSG_SCRIPTS_CREATE_SIZE"
-cd $ORIG
-SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
-let SIZEREQUIRED=$SIZEDATA*$ZSYNC/100
-# Tamaño minimo fichero imagen 300000
-[ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
-
-# Comprueba que quepa en el repositorio
-[ "$3" == "CACHE" -o "$3" == "cache" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`) && ogMountCache >/dev/null
-[ "$3" == "REPO"  -o "$3" == "repo"  ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
-ogEcho log session  "      $SIZEREQUIRED $SIZEFREE"
-[ $SIZEREQUIRED -gt $SIZEFREE ] && exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
 
 TIMEAUX3=$[SECONDS-TIME2]
 ogEcho log session "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
 
-# Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial
-if [ "$FSTYPE" == "NTFS" ]; then
-	ogEcho log session "[55] $MSG_HELP_ogAclFilter "
-	ogAclFilter
-	TIMEAUX4=$[SECONDS-TIMEAUX3]
-	ogEcho log session "      $MSG_SCRIPTS_TASK_END $MSG_SCRIPTS_TIME_PARTIAL: $[TIMEAUX4/60]m $[TIMEAUX4%60]s"
-fi
 TIMEAUX5=$[SECONDS-TIMEAUX3]
 
 # Configuro la informacion del tamaño de los datos en /tmp/ogimg.info
@@ -202,7 +169,6 @@ ogWaitSyncImage "$3" "$5" $DIFFTYPE "reduced" $SIZEREQUIRED || exit $(ogRaiseErr
 echo " " > $OGLOGCOMMAND
 # Comprobamos que la imagen esta bien
 ogEcho log session "[95] $MSG_HELP_ogCheckSyncImage"
-sleep 10
 ogCheckSyncImage $3 "$5" diff ||  exit $(ogRaiseError session $OG_ERR_IMAGE "$3 $5 diff"; echo $?)
 
 #resumen de la operacion

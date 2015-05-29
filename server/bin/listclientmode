@@ -11,6 +11,7 @@
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+TMPLDIR=$OPENGNSYS/tftpboot/menu.lst/templates
 MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
@@ -44,5 +45,7 @@ mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 		   JOIN aulas USING (idaula)
 		  WHERE aulas.nombreaula='$RESOURCE'
 		     OR nombreordenador='$RESOURCE';" | \
-	awk '{ printf ("Equipo %s asociado a arranque tipo \"%s\"\n", $1, $2); }'
+	while read PC TMPL; do
+		echo "Equipo $PC asociado a arranque tipo \"$(head -1 $TMPLDIR/$TMPL |cut -f2 -d" ")\" (fichero $TMPL)"
+	done
 

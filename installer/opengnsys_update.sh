@@ -2,7 +2,6 @@
 #/**
 #@file    opengnsys_update.sh
 #@brief   Script actualización de OpenGnSys
-#@warning No se actualiza BD, ni ficheros de configuración.
 #@version 0.9 - basado en opengnsys_installer.sh
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2010/01/27
@@ -24,6 +23,9 @@
 #@version 1.0.5 - Actualizar BD en la misma versión, compatibilidad con Fedora (systemd) y configuración de Rsync.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2014/04/03
+#@version 1.0.6 - Redefinir URLs de ficheros de configuración usando HTTPS.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2015/03/12
 #*/
 
 
@@ -91,13 +93,23 @@ function autoConfigure()
 {
 local i
 
-# Detectar sistema operativo del servidor (debe soportar LSB).
-OSDISTRIB=$(lsb_release -is 2>/dev/null)
+# Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
+if [ -f /etc/os-release ]; then
+	source /etc/os-release
+	OSDISTRIB="$ID"
+	OSVERSION="$VERSION_ID"
+else
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+	OSVERSION=$(lsb_release -rs 2>/dev/null)
+fi
+# Convertir distribución a minúsculas y obtener solo el 1er número de versión.
+OSDISTRIB="${OSDISTRIB,,}"
+OSVERSION="${OSVERSION%%.*}"
 
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
-        Ubuntu|Debian|LinuxMint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps)
+        ubuntu|debian|linuxmint)
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
@@ -113,8 +125,10 @@ case "$OSDISTRIB" in
 		APACHEGROUP="www-data"
 		INETDCFGDIR=/etc/xinetd.d
 		;;
-        Fedora|CentOS)
-		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng )
+        fedora|centos)
+		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng arp-scan )
+		# En CentOS 7 instalar arp-scan de CentOS 6.
+		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
 		INSTALLPKGS="yum install -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		if which systemctl &>/dev/null; then
@@ -188,6 +202,14 @@ function errorAndLog()
 	echo "$DATETIME;$SSH_CLIENT;ERROR: $1" >> $LOG_FILE
 }
 
+# Escribe a fichero y muestra mensaje de aviso
+function warningAndLog()
+{
+	local DATETIME=`getDateTime`
+	echo "Warning: $1"
+	echo "$DATETIME;$SSH_CLIENT;Warning: $1" >> $LOG_FILE
+}
+
 
 #####################################################################
 ####### Funciones de copia de seguridad y restauración de ficheros
@@ -206,7 +228,7 @@ function backupFile()
 	local fecha=`date +%Y%m%d`
 
 	if [ ! -f $fichero ]; then
-		errorAndLog "${FUNCNAME}(): file $fichero doesn't exists"
+		warningAndLog "${FUNCNAME}(): file $fichero doesn't exists"
 		return 1
 	fi
 
@@ -363,6 +385,7 @@ function getNetworkSettings()
 	local dev
 
 	echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	SERVERIP="$ServidorAdm"
 	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
 	for dev in $DEVICES; do
 		[ -z "$SERVERIP" ] && SERVERIP=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
@@ -374,9 +397,10 @@ function getNetworkSettings()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Actualizar cliente OpenGnSys
+# Actualizar cliente OpenGnSys.
 function updateClientFiles()
 {
+	# Actualizar ficheros del cliente.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
@@ -384,7 +408,14 @@ function updateClientFiles()
 		exit 1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	
+	# Hacer coincidir las versiones de Rsync entre servidor y cliente.
+	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
+		[ -e $WORKDIR/opengnsys/client/bin/rsync-3.1.0 ] && mv -f $WORKDIR/opengnsys/client/bin/rsync-3.1.0 $WORKDIR/opengnsys/client/bin/rsync
+	else
+		[ -e $WORKDIR/opengnsys/client/bin/rsync ] && mv -f $WORKDIR/opengnsys/client/bin/rsync $WORKDIR/opengnsys/client/bin/rsync-3.1.0
+	fi
+
+	# Actualizar librerías del motor de clonación.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
@@ -478,6 +509,13 @@ function updateWebFiles()
 	fi
 	restoreFile $INSTALL_TARGET/www/controlacceso.php
 
+	# Cambiar acceso a protocolo HTTPS.
+	if grep -q "http://" $INSTALL_TARGET/www/controlacceso.php 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating web access file"
+		perl -pi -e 's!http://!https://!g' $INSTALL_TARGET/www/controlacceso.php
+		NEWFILES="$NEWFILES $INSTALL_TARGET/www/controlacceso.php"
+	fi
+
 	# Compatibilidad con dispositivos móviles.
 	COMPATDIR="$INSTALL_TARGET/www/principal"
 	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
@@ -548,7 +586,7 @@ function createDirs()
 			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
 		done
 	fi
-	mkdir -p ${INSTALL_TARGET}/tftpboot/{pxelinux.cfg,menu.lst}
+	mkdir -p ${INSTALL_TARGET}/tftpboot/menu.lst
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -568,10 +606,10 @@ function createDirs()
 
 	# Establecer los permisos básicos.
 	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
 	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
 	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/pxelinux.cfg,tftpboot/menu.lst}
+	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while setting permissions"
 		return 1
@@ -596,7 +634,6 @@ function updateServerFiles()
 			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
-			installer/install_ticket_wolunicast.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
@@ -604,7 +641,6 @@ function updateServerFiles()
 			sbin/ogAdmRepoAux \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
-			lib/install_ticket_wolunicast.sh \
 			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
@@ -636,10 +672,10 @@ function updateServerFiles()
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
 	fi
-	if grep -q "UrlMsg=.*msgbrowser.php" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
+	if egrep -q "(UrlMsg=.*msgbrowser.php)|(UrlMenu=http://)" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new client config file"
 		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g; s!UrlMenu=http://!UrlMenu=https://!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
 	echoAndLog "${FUNCNAME}(): updating cron files"
@@ -730,8 +766,8 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r3257.iso	# 1.0.4-rc2
-	#local FILENAME=ogLive-raring-3.8.0-22-generic-r3836.iso 	# 1.0.5-rc3
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.6-kernel3.2
+	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso 	# 1.0.6-kernel3.11
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
@@ -777,7 +813,7 @@ function updateClient()
 		find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
 		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
 		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
-		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/{menu.lst,pxelinux.cfg}
+		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 		
 		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
 		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
@@ -813,6 +849,22 @@ function updateClient()
 		else
 			echoAndLog "${FUNCNAME}(): Client is already updated"
 		fi
+	fi
+}
+
+# Comprobar permisos y ficheros.
+function checkFiles()
+{
+	# Comprobar permisos adecuados.
+	if [ -x	$INSTALL_TARGET/bin/checkperms ]; then
+		echoAndLog "${FUNCNAME}(): Checking permissions." 
+		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENTUSER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
+	fi
+
+	# Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
+	if [ -f /tmp/dstate ]; then
+		echoAndLog "${FUNCNAME}(): Delete unused files." 
+		rm -f /tmp/dstate
 	fi
 }
 
@@ -956,10 +1008,8 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
-if [ -f /tmp/dstate ]; then
-	rm -f /tmp/dstate
-fi
+# Comprobar permisos y ficheros.
+checkFiles
 
 # Mostrar resumen de actualización.
 updateSummary

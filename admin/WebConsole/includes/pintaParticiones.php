@@ -85,6 +85,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 								 break;
 							case 2:  $disktable[$tbKeys[$k]["numdisk"]] = "GPT";
 								 break;
+							case 3:  $disktable[$tbKeys[$k]["numdisk"]] = "LVM";
+								 break;
 							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
 						}
 					}
@@ -92,11 +94,16 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<tr height="16">'.chr(13);
                                 	        echo'<td align="center">&nbsp;</td>'.chr(13);
 						echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-						if (is_numeric ($tbKeys[$k]["tipopar"])) {
-							echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
+						if ($disktable[$tbKeys[$k]["numdisk"]] == "LVM") {
+							echo '<td></td>'.chr(13);
 						}
 						else {
-							echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+							if (is_numeric ($tbKeys[$k]["tipopar"])) {
+								echo '<td align="center"><em>'.sprintf("%02X",$tbKeys[$k]["tipopar"]).'</em></td>'.chr(13);
+							}
+							else {
+								echo '<td align="center">'.$tbKeys[$k]["tipopar"].'</td>'.chr(13);
+							}
 						}
 						$filesys=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]);
 						echo'<td align="center">&nbsp;'.$filesys.'&nbsp;</td>'.chr(13);
@@ -108,24 +115,19 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 						
 						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-	
+
 						if ($filesys == "CACHE") {
-							$rs=new Recordset; 
-							$cmd->texto="SELECT cache FROM ordenadores_particiones WHERE idordenador=".$idordenadores." AND numdisk=".$tbKeys[$k]["numdisk"]." AND numpar=".$tbKeys[$k]["numpar"];
-							$rs->Comando=&$cmd; 
-							if (!$rs->Abrir()) return(false); // Error al abrir recordset
-							$rs->Primero(); 
-							if (!$rs->EOF){
-								$campocache=$rs->campos["cache"];
-							}
-							$rs->Cerrar();
 							echo '<td align="leght">&nbsp;';
-							$campocache = eregi_replace("[\n|\r|\n\r]", '', $campocache);
+							$campocache = eregi_replace("[\n|\r|\n\r]", '', tomaCache($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]));
 							$ima=split(",",$campocache);
 							$numero=1;
 							for ($x=0;$x<count($ima); $x++) {
 								if(substr($ima[$x],-3)==".MB") {
-									echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
+									if ( $ima[$x] == "0.MB" ){
+										echo '<font color=red><strong>'.$TbMsg["CACHE_COMPLETE"].': '.$ima[$x].'</strong></font>';
+									}else{
+										echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
+									}
 								}elseif (! empty($ima[1])){
 									// $dir=is_dir('$ima');echo $dir;
 									// if ($ima == "directorio"){$dir="si";}
@@ -134,7 +136,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 									// Esto para numerarla
 									if(substr($ima[$x],-4)==".img" || substr($ima[$x],-5)==".diff" || substr($ima[$x],-4)=="") {
 										echo '<br />('.$info.') &nbsp;'.$numero++.'.-'.$ima[$x];
-									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x])) {
+									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x]) || ereg(".full.sum",$ima[$x])) {
 										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
 										}else{
 											echo '<br /><font color=blue>('.$info.') </font>'.$numero++.'.-<font color=blue>'.$ima[$x]."</font>";
@@ -144,7 +146,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							echo '&nbsp;</td>'.chr(13);
 
 						} else {
-							echo'<td align="center">&nbsp;&nbsp;</td>'.chr(13);
+							echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].'&nbsp;</td>'.chr(13);
 						}
 					
 						echo'</tr>'.chr(13);
@@ -329,11 +331,13 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 			}
 		}
 	}
-	if ($aviso) {			// Mostrar aviso: solo disco 1 con tabla MSDOS.
+	// Marcar fin de zona de datos de la tabla.
+	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	// Mostrar aviso: solo disco 1 con tabla MSDOS.
+	if ($aviso) {
 		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
 	}
-	/* Botones de añadir y confirmar */
-	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	// Botones de añadir y confirmar.
 	echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
 	echo '	<A href="#add" style="text-decoration:none">
 						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
@@ -437,7 +441,9 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 			}
 		}
 	}	
+
 	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	echo '<tr><th colspan="14">'.$TbMsg["WARN_PROTOCOL"].'</th></tr>';
 }
 /**
  * Las funcion pintaParticionesRestaurarImagenSincronizacion1 sustituye a las funciones 

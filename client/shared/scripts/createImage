@@ -53,7 +53,7 @@ TIME1=$SECONDS
 # Valores por defecto en etc/engine.cfg
 #IMGPROG="partclone"
 #IMGCOMP="lzop"
-#IMGEXT="img"
+IMGEXT=${IMGEXT:-"img"}
 #IMGREDUCE="TRUE"
 
 # Clear temporary file used as log track by httpdlog
@@ -63,7 +63,7 @@ echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.t
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
 # Si el repositorio es CACHE comprobamos que exista
-if [ "$3" == "CACHE" -o "$3" == "cache" ]; then 
+if [ "${3^^}" == "CACHE" ]; then 
     ! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
 fi
 
@@ -89,32 +89,18 @@ if [ -f "$IMGFILE" ]; then
     mv "$IMGFILE" "$IMGFILE.ant"
     mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
     mv "$IMGFILE.sum" "$IMGFILE.sum.ant" 2>/dev/null
+    mv "$IMGFILE.full.sum" "$IMGFILE.full.sum.ant" 2>/dev/null
 fi
+
+echo " " > $OGLOGCOMMAND
+# Borramos ficheros de paginacion y configuracion
+ogCleanOs $1 $2
 
 #Comprobar espacio que requerira la imagen para ser almacenada
-echo " " > $OGLOGCOMMAND
-if ogMount $1 $2 &>/dev/null
-then
-    SIZEDATA=$(df -k | grep $PART | awk '{print $3}')
-    #Aplicar factor de compresion
-    FACTORGZIP=55/100
-    FACTORLZOP=65/100
-    let SIZEREQUIRED=$SIZEDATA*$FACTORLZOP
-    #Comprobar espacio libre en el contenedor.
-    [ "$3" == "CACHE" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
-    [ "$3" == "REPO" ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
-else
-    ogRaiseError $OG_ERR_PARTITION "$1 $2"
-    exit $?
-fi
+read SIZEDATA SIZEREQUIRED ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3")
 
-ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED $SIZEFREE"
-[ "$SIZEREQUIRED" -gt "$SIZEFREE" ] && exit $(ogRaiseError $OG_ERR_CACHESIZE "$3" || echo $?)
-
-# Ejecuta script personalizado de preconfiguración del sistema operativo modelo. 
-if which createImageCustomPre &>/dev/null; then
-    createImageCustomPre "$1" "$2" "$3" "$4"
-fi
+ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED"
+[ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
 
 # Comprobar consistencia del sistema de archivos.
 echo " " > $OGLOGCOMMAND
@@ -154,16 +140,11 @@ ogEcho log session "      $MSG_HELP_ogExtendFs  $NEWSIZEFS ->  $SIZEFS = $SIZEFS
 #TODO que hacer si error al extender sistemade archivos
 
 #resumen de la operacion
-IMGSIZE=$(ls -s `ogGetPath $3 /$4.img`| cut -f1 -d" ")
-IMGOS=$(ogGetImageInfo `ogGetPath $3 /$4.img`)
+IMGSIZE=$(ls -s `ogGetPath $3 /$4.$IMGEXT`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $3 /$4.$IMGEXT`)
 
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 ogEcho log session "      FileSystem $PART with $NEWSIZEFS KB data created onto file-image as $4 and used $IMGSIZE KB across DFS $ogprotocol"
 ogEcho log session "      Image-file $4 metada: $IMGOS"
-
-# Ejecuta scripts personalizado de postconfiguracion del sistema operativo modelo. 
-if which createImageCustomPost &>/dev/null; then
-    createImageCustomPost "$1" "$2" "$3" "$4"
-fi
 

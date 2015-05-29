@@ -54,6 +54,9 @@
 #@version 1.0.3 - Habilita el uso de la variable OGWINREDUCE=TRUE|TRUE para reducir el sistema de archivos a enviar
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2011/12/22
+#@version 1.0.6 - Uso de la funcion ogExecuteAndLog
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2012/02/12 
 #*/ ##
 
 #test 1. cliente sin particiones.    Detectado  TODO: crear estrucutras de particiones
@@ -63,25 +66,35 @@
 #test 5. master sin origen particion.
 #test 6. master sin origen fichero.
 
-#Carga del configurador del engine
-[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
-
+TIME1=$SECONDS
+PROG="$(basename $0)"
 
 trap "pkill faucet; exit 1" 0 1 2 3 6 9 14 15
 
-TIME1=$SECONDS
-PROG="$(basename $0)"
+#AYUDA
 if [ $# -lt 1 -o "$1" == "help" ]; then
-	echo "cloneRemoteFromMaster ipmaster disk init [MULTICAST|UNICAST] session disk part tool comp"
-	exit 1
+        echo "cloneRemoteFromMaster ipmaster disk init [MULTICAST|UNICAST] session disk part tool comp"
+        exit 1
 fi
 
-if [  $# -lt 6  ]; then
-    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ipMaster SOURCE_disco SOURCE_particion [MULTICAT|UNICAST] SESSION TARGER_disck TARGET_partition" 
+#ERROR
+if [ $# -lt 6 ]; then
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ipMaster SOURCE_disco SOURCE_particion [MULTICAST|UNICAST] SESSION TARGET_disk TARGET_partition"
     exit $?
 fi
 
-# Obtener información de los parámetros de entrada.
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+# Valores por defecto: #IMGPROG="partclone" ; #IMGCOMP="lzop" ; #IMGEXT="img" #IMGREDUCE="TRUE"
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Procesar parámetros de entrada
 HOSTIP=`ogGetIpAddress`
 if [ -z "$HOSTIP" ] 
 then
@@ -115,7 +128,7 @@ pkill faucet
 # Preparando Instrucción según sea Master o Client
 case $MASTERIP in
 	$HOSTIP)
-		echo "[1] Equipo Master preparando el origen de los datos a enviar"
+		ogEcho log session  "[1] Equipo Master preparando el origen de los datos a enviar"
 		ogGetPath $2 $3.img &>/dev/null; RC=$?; 
 		ogDiskToDev $2 $3 &>/dev/null; RETVAL=$?; 
 
@@ -168,15 +181,13 @@ case $MASTERIP in
 				fi
 				case "${PROTOCOL^^}" in
 					MULTICAST)
- 						ogEcho log session "[29] Transferencia Multicast"
-						ogEcho log "ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR"
- 						ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR || RETVAL=$?
+ 						ogEcho log session "[29] Transferencia Multicast: ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR "
+						ogExecAndLog session "ogMcastSendPartition" "$DISKSOURCE" "$PARTSOURCE" "$SESSIONMCASTSERVER" "$TOOLCLONE" "$COMPRESOR" || RETVAL=$?
  					;;
  					UNICAST)
  						sleep 60
- 						ogEcho log session "[29] Transferencia Unicast"
- 						ogEcho log "ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
- 						ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR || RETVAL=$?
+ 						ogEcho log session "[29] Transferencia Unicast: ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
+ 						ogExecAndLog session "ogUcastSendPartition" "$DISKSOURCE" "$PARTSOURCE" "$SESSIONUCASTSERVER" "$TOOLCLONE" "$COMPRESOR" || RETVAL=$?
  					;;
  				esac
  				
@@ -264,8 +275,8 @@ case $MASTERIP in
 		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $4}')
 		ogEcho log "$INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE"
 		ogMount $DISKTARGET $PARTTARGET || ogFormat $DISKTARGET $PARTTARGET
-		SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | grep Disk | awk -F" " '{print $3}' | tr -d kB);
-
+		#SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | grep Disk | awk -F" " '{print $3}' | tr -d kB);
+		SIZEPARTTARGET=$(ogGetPartitionSize $DISKTARGET $PARTTARGET )
 		ogEcho log session  "[28] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"
 		# comprobamos que el tamaño de a imagen es menor que la del cliente.
 		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
@@ -274,15 +285,23 @@ case $MASTERIP in
 				case "${PROTOCOL^^}" in
 					MULTICAST)
 						ogEcho log session  "ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR"
-						ogMcastReceiverPartition "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR"  || exit $(ogRaiseError $OG_ERR_MCASTRECEIVERPARTITION " l251 "; echo $?)
+						ogExecAndLog command "ogMcastReceiverPartition" "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR"  || exit $(ogRaiseError $OG_ERR_MCASTRECEIVERPARTITION " l251 "; echo $?)
 		 			;;
  					UNICAST)
  						ogEcho log session "ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR"
- 						ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR || exit $(ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " l230 "; echo $?)
+ 						ogExecAndLog command "ogUcastReceiverPartition" "$DISKTARGET" "$PARTTARGET" "$SESSIONUCASTCLIENT" "$TOOLCLONE" "$COMPRESOR" || exit $(ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " l230 "; echo $?)
  					;;
  				esac						
-			ogEcho log session "[90] llamando a configureOS $DISKTARGET $PARTTARGET"
-			configureOs $DISKTARGET $PARTTARGET			
+			if which configureOsCustom &>/dev/null; then
+				ogEcho log session "[90] configureOsCustom $DISKTARGET $PARTTARGET"
+				# Si $2 = num_disk las varibles REPO IMGNAME estan vacias
+				! [[  $2 =~ ^[0-9]+$ ]] && REPO="$2" && IMGNAME="$3"
+				configureOsCustom $DISKTARGET $PARTTARGET $REPO $IMGNAME
+			else
+				ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE $DISKTARGET $PARTTARGET"
+				configureOs $DISKTARGET $PARTTARGET			
+			fi
+
 		else
 		    # Si el tamaño de los datos recibidos es más grande que la particion destino
 			ogRaiseError $OG_ERR_IMGSIZEPARTITION "ERROR tamanio particion= $SIZEPARTTARGET  menor que la imagen= $SIZEIMAGE"; exit $?

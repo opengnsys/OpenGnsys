@@ -21,11 +21,12 @@ $TbMsg["DISK"]='Disco';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 
 $TbMsg["VARIABLE"]='Variable';
-$TbMsg["CACHE_CONTENT"]='Contenido cach&eacute;';
+$TbMsg["CACHE_CONTENT"]='Data/Caché';
 $TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
+$TbMsg["CACHE_COMPLETE"]='CACHE COMPLETA';
 
-$TbMsg["SAMESYSTEM_IMAGE"]='Imagen (Mismo sistema)';
-$TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (Distinto sistema)';
+$TbMsg["SAMESYSTEM_IMAGE"]='Imagen (mismo tipo partici&oacute;n)';
+$TbMsg["DIFFERENTSYSTEM_IMAGE"]='Imagen (distinto tipo partici&oacute;n)';
 $TbMsg["RESTORE_METHOD"]='M&eacute;todo';
 
 $TbMsg["SO_NAME"]='Nombre S.O.';
@@ -47,5 +48,6 @@ $TbMsg["TITLE_E"]='Opción de rsync: Se compara el destino con el origen y se bo
 $TbMsg["TITLE_C"]='Opción de rsync: Comprime los archivos de datos que se envían a la máquina de destino, lo que reduce la cantidad de datos que se transmiten. ';
 $TbMsg["SEND"]='Protocolo';
 
+$TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
 ?>
 

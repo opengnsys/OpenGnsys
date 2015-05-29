@@ -49,10 +49,10 @@ if [ -n "$SERVERIP" ]; then
 	for f in /etc/{dhcp,hcp3}/dhcpd.conf; do
 		if [ -f $f ]; then
 			# Cambiar el parámetro "next-server" de DHCP.
-			sed "s/next-server.*/next-server $SERVERIP/" $f >$tmpfile
+			sed "s/next-server.*/next-server $SERVERIP;/" $f >$tmpfile
 			file="${f/./-$1.}"
 			# Copiar el fichero y enlazarlo si hay cambios.
-			if ! diff -q $tmpfile $file &>/dev/null; then
+			if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
 				mv $tmpfile $file
 				chmod 644 $file
 				ln -f $file $f
@@ -66,7 +66,7 @@ if [ -n "$SERVERIP" ]; then
 			[ -x $f ] && $f restart
 		done
 	else
-		echo "Don't change the DHCP configuration."
+		echo "DHCP configuration has not changed."
 	fi
 
 	# Guardar la IP anterior del repositorio.
@@ -90,10 +90,10 @@ if [ -n "$SERVERIP" ]; then
 		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
 		    -e '/localhost/!s,http://[^/]*/\(.*\),http://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$1.}"
-		# Copiar el fichero y enlazarlo si hay cambios.
-		if ! diff -q $tmpfile $file &>/dev/null; then
-			mv $tmpfile $file
-			chmod 644 $file
+		# Si se usa otro interfaz o cambian los datos de red; ...
+		if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
+			# Copiar el fichero y enlazarlo.
+			cp $tmpfile $file
 			ln -f $file $f
 			CHANGE=1
 		fi
@@ -134,11 +134,14 @@ Log-in as Web Console organization user.
 EOT
 	else
 		# Mensaje indicando que no se han cambiado datos.
-		echo "Don't change the default interface: $1"
+		echo "Default interface has not changed: $1"
 	fi
 else
 	# Error: interfaz de red no encontrado.
 	echo "$PROG: Network device not found. Format: $PROG interface" >&2
 	exit 1
 fi
+
+# Eliminar ficheros temporales.
+rm -f $tmpfile $MYCNF
 

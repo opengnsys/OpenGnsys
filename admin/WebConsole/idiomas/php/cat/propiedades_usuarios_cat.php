@@ -16,4 +16,12 @@ $TbMsg[7]="Nom complet";
 $TbMsg[8]="E-mail";
 $TbMsg[9]="Unitat organitzativa";
 $TbMsg[10]="Idioma";
+$TbMsg[11]="SuperAdministrador ";
+$TbMsg[12]="Administrador";
+$TbMsg[13]="Operador";
+$TbMsg[14]="Per realitzar canvis en aquest usuari<br>";
+$TbMsg[15]="creat en el procés d'instal·lació,<br><br>";
+$TbMsg[16]="
+premi aquí<br>";
+$TbMsg[17]="http://opengnsys.es/wiki/ModificarUsuarios";
 ?>

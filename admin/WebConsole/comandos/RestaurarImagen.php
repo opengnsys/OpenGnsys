@@ -132,6 +132,8 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los perfiles softwares
+// Version 0.1: En consulta SQL se quita imagenes.numpar>0. las imágenes recien creadas tienen numpar=0.
+//      US ETSII - Irina Gomez - 2014-11-11
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
@@ -145,8 +147,8 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 	else
 		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;		
 		
-	$cmd->texto.=" AND imagenes.numpar>0 AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y
-	$cmd->texto.=" 	AND imagenes.tipo=".$IMAGENES_MONOLITICAS;
+	$cmd->texto.=" AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y
+	$cmd->texto.=" AND imagenes.tipo=".$IMAGENES_MONOLITICAS;
     
 	$idordenador1 = explode(",",$idordenadores);
 	$idordenador=$idordenador1[0];
@@ -154,10 +156,6 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 		$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .") OR repositorios.ip=(select ip from ordenadores where ordenadores.idordenador=". $idordenador .")";
     else 
     	$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .")";
-    
-
-
-	//echo $cmd->texto;
 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 

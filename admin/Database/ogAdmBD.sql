@@ -1,11 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 3.2.2.1deb1
--- http://www.phpmyadmin.net
---
--- Servidor: localhost
--- Tiempo de generación: 20-09-2010 a las 22:43:50
--- Versión del servidor: 5.1.37
--- Versión de PHP: 5.2.10-2ubuntu6.4
+-- Fichero de instalación de la base de datos.
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -225,9 +218,9 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 (4, 'Crear Imagen', '../comandos/CrearImagen.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagen', '', 16, 'dsk;par;idi;nci;ipr;cpt', 'nfn;iph;mac;dsk;par;idi;nci;ipr;cpt;', '', 1, ''),
 (5, 'Reiniciar', '../comandos/Reiniciar.php', '../comandos/gestores/gestor_Comandos.php', 'Reiniciar', '', 31, '', 'nfn;iph;mac;', '', 1, ''),
 (6, 'Inventario Hardware', '../comandos/InventarioHardware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioHardware', '', 16, '', 'nfn;iph;mac;', '', 1, ''),
-(7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'par', 'nfn;iph;mac;par', '', 1, ''),
+(7, 'Inventario Software', '../comandos/InventarioSoftware.php', '../comandos/gestores/gestor_Comandos.php', 'InventarioSoftware', '', 16, 'dsk;par', 'nfn;iph;mac;dsk;par', '', 1, ''),
 (8, 'Ejecutar Script', '../comandos/EjecutarScripts.php', '../comandos/gestores/gestor_Comandos.php', 'EjecutarScript', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
-(9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'par', 'nfn;iph;par', '', 1, ''),
+(9, 'Iniciar Sesion', '../comandos/IniciarSesion.php', '../comandos/gestores/gestor_Comandos.php', 'IniciarSesion', '', 31, 'dsk;par', 'nfn;iph;dsk;par', '', 1, ''),
 (10, 'Particionar y Formatear', '../comandos/Configurar.php', '../comandos/gestores/gestor_Comandos.php', 'Configurar', '', 28, 'dsk;cfg;', 'nfn;iph;mac;dsk;cfg;par;cpt;sfi;tam;ope', '', 1, ''),
 (11, 'Eliminar Imagen Cache', '../comandos/EliminarImagenCache.php', '../comandos/gestores/gestor_Comandos.php', 'EliminarImagenCache', '', 31, 'iph;tis;dcr;scp', 'nfn;iph;tis;dcr;scp', '', 1, ''),
 (12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
@@ -421,13 +414,15 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `idcentro` int(11) DEFAULT NULL,
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idrepositorio` int(11) NOT NULL,
-  `numdisk` smallint NOT NULL DEFAULT 1,
-  `numpar` smallint NOT NULL,
-  `codpar` int(8) NOT NULL,
+  `idrepositorio` int(11) NOT NULL DEFAULT 0,
+  `idordenador` int(11) NOT NULL DEFAULT 0,
+  `numdisk` smallint NOT NULL DEFAULT 0,
+  `numpar` smallint NOT NULL DEFAULT 0,
+  `codpar` int(8) NOT NULL DEFAULT 0,
   `tipo` tinyint NULL,
-  `imagenid` int NOT NULL DEFAULT '0',
+  `imagenid` int NOT NULL DEFAULT 0,
   `ruta` varchar(250) NULL,
+  `fechacreacion` datetime DEFAULT NULL,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -443,11 +438,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `idurlimg` int(11) NOT NULL DEFAULT '0',
   `titulo` varchar(250) DEFAULT NULL,
-  `coorx` int(11) DEFAULT NULL,
-  `coory` int(11) DEFAULT NULL,
   `modalidad` tinyint(4) DEFAULT NULL,
-  `scoorx` int(11) DEFAULT NULL,
-  `scoory` int(11) DEFAULT NULL,
   `smodalidad` tinyint(4) DEFAULT NULL,
   `comentarios` text,
   `grupoid` int(11) NOT NULL DEFAULT '0',
@@ -518,7 +509,8 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idnombreso` smallint(11) NOT NULL,
   `idimagen` int(11) NOT NULL,
   `idperfilsoft` int(11) NOT NULL,
-  `cache` varchar(500) NOT NULL,
+  `fechadespliegue` datetime NULL,
+  `cache` text NOT NULL,
   UNIQUE KEY `idordenadornumdisknumpar` (`idordenador`,`numdisk`,`numpar`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
@@ -574,7 +566,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (26, 'sft', 'Nombre del archivo de inventario software enviado por la red', '', '', '', 0, 0),
 (27, 'tpc', 'Tipo de cliente', '', '', '', 0, 0),
 (28, 'scp', 'Código script', '', '', '', 4, 1),
-(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 1, 1),
+(30, 'ptc', 'Protocolo de clonación', ';', '', ';Unicast;Multicast;Torrent', 0, 1),
 (31, 'idf', 'Imagen Incremental', 'idimagen', 'imagenes', 'descripcion', 1, 1), 
 (32, 'ncf', 'Nombre canónico de la Imagen Incremental', '', '', '', 0, 1), 
 (33, 'bpi', 'Borrar imagen o partición previamente', '', '', '', 5, 1), 
@@ -737,9 +729,6 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
   `nombrerepositorio` varchar(250) NOT NULL,
   `ip` varchar(15) NOT NULL DEFAULT '',
   `passguor` varchar(50) NOT NULL DEFAULT '',
-  `pathrepoconf` varchar(250) NOT NULL,
-  `pathrepod` varchar(250) NOT NULL,
-  `pathpxe` varchar(250) NOT NULL,
   `idcentro` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
@@ -747,8 +736,8 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`pathrepoconf`,`pathrepod`,`pathpxe`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
- (1,'Repositorio (Default)','SERVERIP','','','/opt/opengnsys/admin','/opt/opengnsys/tftpboot/pxelinux.cfg',1,0,'',2002);
+INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
+ (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002);
 
 
 -- --------------------------------------------------------

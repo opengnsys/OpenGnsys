@@ -74,10 +74,18 @@ function confirmar(op){
 //	Comprobar_datos 
 //___________________________________________________________________________________________________________
 function comprobar_datos(){
+	var url=[document.fdatos.htmlmenupub.value,document.fdatos.htmlmenupri.value];
+	var expreg=new RegExp("^http://|^https://");
 	if (document.fdatos.descripcion.value=="") {
 		alert(TbMsg[0]);
 		document.fdatos.descripcion.focus();
 		return(false);
+	}
+	for (i = 0; i < url.length; i++) {
+		if (url[i]!=""  && ! expreg.test(url[i])) {
+			alert(TbMsg[2]);	
+			return(false);
+		}
 	}
 	return(true);
 }
