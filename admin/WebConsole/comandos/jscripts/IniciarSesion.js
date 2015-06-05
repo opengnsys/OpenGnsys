@@ -46,7 +46,7 @@ function confirmar(){
 					}
 				}
 				else {
-					ipfiltro=iptabla.replace(",", ";");
+					ipfiltro=iptabla.replace(/,/g, ";");
 				}
 				document.fdatosejecucion.filtro.value=ipfiltro;
 				document.fdatosejecucion.atributos.value=atributos;
