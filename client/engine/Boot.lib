@@ -29,9 +29,9 @@
 #@version 1.0.4 - Soporta modo de arranque Windows (parámetro de inicio "winboot").
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-12
-#@version 1.0.6 - Selección a partir de tipo de sistema operativo (en vez de S.F.).
+#@version 1.0.6 - Selección a partir de tipo de sistema operativo (en vez de S.F.) y arrancar Linux con /boot separado.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2014-08-28
+#@date    2015-06-05
 #*/ ##
 function ogBoot ()
 {
@@ -61,6 +61,8 @@ case "$TYPE" in
         if [ -z "$PARAMS" -a -e $MNTDIR/etc/fstab ]; then
             # Localizar S.F. /boot en /etc/fstab del S.F. actual.
             PART=$(ogDevToDisk $(awk '$2=="/boot" {print $1}' $MNTDIR/etc/fstab))
+            # Montar S.F. de /boot.
+            MNTDIR=$(ogMount $PART) || return $?
             # Buscar los datos de arranque.
             PARAMS=$(ogLinuxBootParameters $PART) || exit $?
         fi
@@ -210,12 +212,12 @@ awk 'BEGIN {cont=-1;}
                                    if (def ~ /saved_entry/) def=0;
                                  }
      $1~/^(title|menuentry)$/ {cont++}
-     $1~/^(kernel|linux(efi)?)$/ { if (def==cont) {
+     $1~/^(kernel|linux(16|efi)?)$/ { if (def==cont) {
                                        kern=$2;
                                        sub($1,""); sub($1,""); sub(/^[ \t]*/,""); app=$0
-                                   } # /* (comentario Doxygen)
-                                 }
-     $1~/^initrd(efi)?$/ {if (def==cont) init=$2}
+                                      } # /* (comentario Doxygen)
+                                    }
+     $1~/^initrd(16|efi)?$/ {if (def==cont) init=$2}
      END {if (kern!="") printf("%s %s %s", kern,init,app)}
     ' $CONFFILE
 # */ (comentario Doxygen)
