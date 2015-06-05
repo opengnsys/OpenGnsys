@@ -1455,6 +1455,12 @@ function openGnsysConfigure()
 		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENT_USER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
 	fi
 
+	# Evitar inicio de duplicado en Ubuntu 14.04 (Upstart y SysV Init).
+	if [ -f /etc/init/${MYSQLSERV}.conf ]; then
+		service=$MYSQLSERV
+		$DISABLESERVICE
+	fi
+
 	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
 	service="opengnsys"
 	$ENABLESERVICE; $STARTSERVICE
