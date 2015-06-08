@@ -4,7 +4,7 @@
 #@brief   Librería o clase Inventory
 #@class   Inventory
 #@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
-#@version 1.0.6
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -197,15 +197,37 @@ return 0
 
 
 #/**
+#         ogGetSerialNumber
+#@brief   Obtiene el nº de serie del cliente.
+#@version 1.1.0 - Primeras versión con OpenGnsys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-08
+function ogGetSerialNumber ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+
+# Obtener nº de serie (ignorar los no especificados)
+dmidecode -s system-serial-number | egrep -vi "(not specified|filled by o.e.m.)"
+}
+
+
+#/**
 #         ogListHardwareInfo
 #@brief   Lista el inventario de hardware de la máquina cliente.
 #@return  TipoDispositivo:Modelo    (por determinar)
 #@warning Se ignoran los parámetros de entrada.
-#@note    TipoDispositivo = { ata, bio, boa, cdr, cpu, dis, fir, mem, mod, mul, net, ser, vga }
-#@note    Requisitos: lshw, awk
+#@note    TipoDispositivo = { bio, boa, bus, cha, cdr, cpu, dis, fir, mem, mod, mul, net, sto, usb, vga }
+#@note    Requisitos: dmidecode, lshw, awk
 #@version 0.1 - Primeras pruebas con OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-28
+#@version 1.1.0 - Incluir nuevos componentes al inventario.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-04-23
 #*/ ##
 function ogListHardwareInfo ()
 {
@@ -217,32 +239,39 @@ fi
 
 # Recopilación de disposibivos procesando la salida de \c lshw
 ogEcho info "$MSG_HARDWAREINVENTORY}"
+echo "cha=$(dmidecode -s chassis-type)"
 lshw | awk 'BEGIN {type="mod";}
-	/product:/ {sub(/ *product: */,"");  prod=$0;}
-	/vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
-	/version:/ {sub(/ *version: */,"v.");vers=$0;}
-	/size:/    {sub(/ *size: */,"");     size=$0;}
-	/\*-/	   {if (type=="mem")
-                    print type"="size;
-                else
-                    if (type!="" && prod!="")
-                        print type"="vend,prod,size,vers;
-                type=prod=vend=vers=size="";}
-	/-core/    {type="boa";}
-	/-firmware/ {type="bio";}
-	/-cpu/     {type="cpu";}
-	/-memory/  {type="mem";}
-	/-ide/     {type="ide";}
-	/-disk/    {type="dis";}
-	/-cdrom/   {type="cdr";}
-	/-display/ {type="vga";}
-	/-network/ {type="net";}
-	/-multimedia/ {type="mul";}
-	/-usb/     {type="usb";}
-	/-firewire/ {type="fir";}
-	/-serial/  {type="bus";}
-	END 	   {if (type!="" && prod!="")
-                    print type"="vend,prod,size,vers;}
+       /product:/ {sub(/ *product: */,"");  prod=$0;}
+       /vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
+       /version:/ {sub(/ *version: */,"v.");vers=$0;}
+       /size:/    {size=$2;}
+       /clock:/   {clock=$2;}
+       /slot:/    {sub(/ *slot: */,"");     slot=$0;}
+       /\*-/      {if (type=="mem"){
+                     if (size!="")
+                       print type"="vend,prod,size,clock" ("slot")";
+                   }else{
+                     if (type!="" && prod!=""){
+                       if (prod=="v."vers)
+                         vers="";
+                       print type"="vend,prod,size,vers;} }
+                   type=prod=vend=vers=size=clock=slot="";}
+       $1~/-core/    {type="boa";}
+       $1~/-firmware/ {type="bio";}
+       $1~/-cpu/     {type="cpu";}
+       $1~/-bank/    {type="mem";}
+       $1~/-ide/     {type="ide";}
+       $1~/-storage/ {type="sto";}
+       $1~/-disk/    {type="dis";}
+       $1~/-cdrom/   {type="cdr";}
+       $1~/-display/ {type="vga";}
+       $1~/-network/ {type="net";}
+       $1~/-multimedia/ {type="mul";}
+       $1~/-usb/     {type="usb";}
+       $1~/-firewire/ {type="fir";}
+       $1~/-serial/  {type="bus";}
+       END           {if (type!="" && prod!="")
+                        print type"="vend,prod,size,vers;}
       '
 # */ (comentario para Doxygen)
 }
@@ -289,24 +318,15 @@ case "$TYPE" in
         # Procesar paquetes dpkg.
         DPKGDIR="${MNTDIR}/var/lib/dpkg"
         if [ -r $DPKGDIR ]; then
-        #    dpkg --admindir=$DPKGDIR -l | \
             # Proceso de fichero en sistemas de 64 bits.
-            if [ -e $MNTDIR/lib64 ]; then
-                awk '/Package:/ {if (pack!="") print pack,vers;
-                                 sub(/-dev$/,"",$2);
-                                 pack=$2}
-                     /Version:/ {sub(/^.*:/,"",$2); sub(/-.*$/,"",$2);
-                                 vers=$2}
-                     /Status:/  {if ($2!="install") pack=vers=""}
-                     END        {if (pack!="") print pack,vers}
-                    ' $DPKGDIR/status | sort | uniq
-            else
-                # FIXME Sólo 32 bits
-                chroot "$MNTDIR" /usr/bin/dpkg -l | \
-                    awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
-                                  sub(/-.*$/,"",$3); print $2,$3}
-                        ' | sort | uniq
-            fi
+            awk '/Package:/ {if (pack!="") print pack,vers;
+                             sub(/-dev$/,"",$2);
+                             pack=$2}
+                 /Version:/ {sub(/^.*:/,"",$2); sub(/-.*$/,"",$2);
+                             vers=$2}
+                 /Status:/  {if ($2!="install") pack=vers=""}
+                 END        {if (pack!="") print pack,vers}
+                ' $DPKGDIR/status | sort | uniq
         fi
         # Procesar paquetes RPM.
         RPMDIR="${MNTDIR}/var/lib/rpm"
