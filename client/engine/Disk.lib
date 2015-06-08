@@ -4,7 +4,7 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 1.0.6
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -430,14 +430,17 @@ return $OG_ERR_NOTFOUND
 #@version 1.0.5 - Comprobación correcta de parámetros para soportar valores > 9.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2013-05-07
-#@version 1.0.6 - Soporta RAID hardware y Multipath.
+#@version 1.0.6 - Soportar RAID hardware y Multipath.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2014-09-23
+#@version 1.1.0 - Soportar pool de volúmenes ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2014-11-14
 #*/ ##
 function ogDiskToDev ()
 {
 # Variables locales
-local ALLDISKS MPATH VOLGROUPS DISK PART i
+local ALLDISKS MPATH VOLGROUPS ZFSVOLS DISK PART ZPOOL i
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -465,6 +468,10 @@ if MPATH=$(multipath -l -v 1 2>/dev/null | awk '{printf "/dev/mapper/%s ",$1}'; 
     ALLDISKS="$ALLDISKS $MPATH"
 fi
 
+# Detectar volúmenes ZFS.
+ZFSVOLS=$(blkid | awk -F: '/zfs/ {print $1}')
+ALLDISKS="$ALLDISKS $ZFSVOLS"
+
 # Mostrar salidas segun el número de parametros.
 case $# in
     0)  # Muestra todos los discos, separados por espacios.
@@ -490,15 +497,26 @@ case $# in
             PART="${DISK}p$2"
             if [ "$(stat -L -c "%A" "$PART" 2>/dev/null | cut -c1)" == "b" ]; then
                 echo "$PART"
-            elif [ -n "$VOLGROUPS" ]; then
-                # Comprobar si volumen lógico.      /* (comentario Doxygen)
-                PART=$(lvscan -a 2>/dev/null | \
-                       awk -F\' -v n=$2 "\$2~/^${DISK//\//\\/}\// {if (NR==n) print \$2}")
-                [ -e "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
-                #                                   (comentario Doxygen) */
-                echo "$PART"
             else
-                ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+                PART=""
+                # Comprobar si volumen lógico.          /* (comentario Doxygen)
+                if ogCheckStringInGroup "$DISK" "$VOLGROUPS"; then
+                    PART=$(lvscan -a 2>/dev/null | \
+                           awk -F\' -v n=$2 "\$2~/^${DISK//\//\\/}\// {if (NR==n) print \$2}")
+                    [ -e "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+                    #                                   (comentario Doxygen) */
+                fi
+                # Comprobar si volumen ZFS que puede ser montado.
+                if ogCheckStringInGroup "$DISK" "$ZFSVOLS"; then
+                    zpool import -f -R /mnt -N -a 2>/dev/null
+                    ZPOOL=$(blkid -s LABEL -o value $DISK)
+                    PART=$(zfs list -Hp -o name,canmount,mountpoint -r $ZPOOL | \
+                           awk -v n=$2 '$2=="on" && $3!="none" {c++; if (c==n) print $1}')
+                fi
+                # Salir si no se encuentra dispositivo.
+                [ -n "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+                # Devolver camino al dispositivo.
+                echo "$PART"
             fi
         fi
         ;;
@@ -680,10 +698,16 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #@note    Requisitos: sfdisk
 #@version 0.9 - Primera versión compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/03/25
+#@date    2009-03-25
 #@version 1.0.2 - Detectar partición vacía.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011/12/23
+#@date    2011-12-23
+#@version 1.0.6 - Soportar LVM.
+#@author  Universidad de Huelva
+#@date    2014-09-04
+#@version 1.1.0 - Soportar pool de volúmenes ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2014-11-14
 #*/ ##
 function ogGetPartitionId ()
 {
@@ -707,6 +731,8 @@ case "$(ogGetPartitionTableType $1)" in
             [ "$ID" == "8301" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
+    LVM)    ID=10000 ;;
+    ZPOOL)  ID=10010 ;;
 esac
 echo $ID
 }
@@ -750,7 +776,8 @@ case "$(ogGetPartitionId $1 $2)" in
           sfdisk -l $DISK 2>/dev/null | \
                     awk -v p=$PART '{if ($1==p) {sub (/[^0-9]+/,"",$5); print $5} }'
           ;;
-    *)    sfdisk -s $PART
+    *)    # Devolver tamaño de partición o del sistema de archivos (para ZFS).
+          sfdisk -s $PART 2>/dev/null || ogGetFsSize $1 $2
           ;;
 esac
 }
@@ -769,13 +796,16 @@ esac
 #@date    Date: 27/10/2008
 #@version 1.0 - Uso de sfdisk Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
+#@date    2009-07-24
 #@version 1.0.4 - Uso de /proc/partitions para detectar el numero de particiones
 #@author  Universidad de Huelva
-#@date    2012/03/28
+#@date    2012-03-28
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
-#@date    2014/09/04
+#@date    2014-09-04
+#@version 1.1.0 - Soportar ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2014-11-14
 #*/ ##
 function ogGetPartitionsNumber ()
 {
@@ -796,6 +826,11 @@ case "$(ogGetPartitionTableType $1)" in
     GPT)    grep -c "${DISK#/dev/}." /proc/partitions ;;
     MSDOS)  sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK" ;;
     LVM)    lvs --noheadings $DISK 2>/dev/null | wc -l ;;
+    ZPOOL)  zpool import -f -R /mnt -N -a 2>/dev/null
+            zfs list -Hp -o name,canmount,mountpoint -r $(blkid -s LABEL -o value $DISK) | \
+                    awk '$2=="on" && $3!="none" {c++}
+                         END {print c}'
+            ;;
 esac
 }
 
@@ -813,7 +848,10 @@ esac
 #@date    2012/03/01
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
-#@date    2014/09/04
+#@date    2014-09-04
+#@version 1.1.0 - Soportar ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2014-11-14
 #*/ ##
 function ogGetPartitionTableType ()
 {
@@ -834,7 +872,10 @@ DISK=$(ogDiskToDev $1) || return $?
 
 # Comprobar tabla de particiones.
 [ -b $DISK ] && TYPE=$(parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}')
+# Comprobar si es volumen lógico.
 [ -d $DISK ] && vgs $DISK &>/dev/null && TYPE="LVM"
+# Comprobar si es pool de ZFS.
+[ -z "$TYPE" ] && [ -n "$(blkid -s TYPE $DISK | grep zfs)" ] && TYPE="ZPOOL"
 
 # Mostrar salida.
 [ -n "$TYPE" ] && echo "$TYPE"
