@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
+  `inremotepc` tinyint DEFAULT 0,
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -1049,6 +1050,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `email` varchar(200) DEFAULT NULL,
   `ididioma` int(11) DEFAULT NULL,
   `idtipousuario` tinyint(4) DEFAULT NULL,
+  `apikey` varchar(32) NOT NULL,
   PRIMARY KEY (`idusuario`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -1057,6 +1059,6 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 --
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`) VALUES
-(1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1);
+(1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
 
 

@@ -126,10 +126,13 @@ function Gestiona(){
 	$cmd->CreaParametro("@idambito",$idambito,1);
 	$cmd->CreaParametro("@ididioma",$ididioma,1);
 	$cmd->CreaParametro("@idtipousuario",$idtipousuario,1);
+	// Generar clave de acceso a la API REST.
+	$apikey=md5(uniqid(rand(), true));
+	$cmd->CreaParametro("@apikey",$apikey,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,ididioma,idtipousuario ) VALUES (@usuario,@pasguor,@nombre,@email,@ididioma,@idtipousuario);";
+			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,ididioma,idtipousuario,apikey) VALUES (@usuario,@pasguor,@nombre,@email,@ididioma,@idtipousuario,@apikey);";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idusuario=$cmd->Autonumerico();

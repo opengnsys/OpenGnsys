@@ -170,6 +170,7 @@ case "$OSDISTRIB" in
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
 		APACHESSLMOD="a2enmod ssl"
+		APACHEREWRITEMOD="a2enmod rewrite"
 		APACHEENABLESSL="a2ensite default-ssl"
 		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
@@ -646,6 +647,8 @@ function mysqlImportSqlFileToDb()
 	local i=0
 	local dev=""
 	local status
+	# Clave aleatoria para acceso a la API REST.
+	local OPENGNSYS_APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
 	if [ ! -f $sqlfile ]; then
 		errorAndLog "${FUNCNAME}(): Unable to locate $sqlfile!!"
@@ -659,6 +662,7 @@ function mysqlImportSqlFileToDb()
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+			    -e "s/APIKEY/$OPENGNSYS_APIKEY/g" \
 				$sqlfile > $tmpfile
 		fi
 		let i++
@@ -1022,6 +1026,8 @@ function dhcpConfigure()
 function installWebFiles()
 {
 	local COMPATDIR f
+	local XAJAXFILE="xajax_0.5_standard.zip"
+	local SLIMFILE="slim-2.6.1.zip"
 
 	echoAndLog "${FUNCNAME}(): Installing web files..."
 	# Copiar ficheros.
@@ -1031,8 +1037,11 @@ function installWebFiles()
 		exit 1
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	# Descomprimir XAJAX.
-	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+
+	# Descomprimir librerías XAJAX y SLIM.
+	unzip -o $WORKDIR/opengnsys/admin/$XAJAXFILE -d $INSTALL_TARGET/www/xajax
+	unzip -o $WORKDIR/opengnsys/admin/$SLIMFILE -d $INSTALL_TARGET/www/rest
+
 	# Compatibilidad con dispositivos móviles.
 	COMPATDIR="$INSTALL_TARGET/www/principal"
 	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
@@ -1071,6 +1080,8 @@ function installWebConsoleApacheConf()
 	$APACHESSLMOD
 	$APACHEENABLESSL
 	$APACHEMAKECERT
+	# Activar módulo Rewrite.
+	$APACHEREWRITEMOD
 
 	# Genera configuración de consola web a partir del fichero plantilla.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
