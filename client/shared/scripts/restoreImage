@@ -1,6 +1,20 @@
 #!/bin/bash
-# Script de ejemplo para restaurar una imagen.
-# (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
+#/**
+#@file    restoreImage
+#@brief   Script de ejemplo para restaurar una imagen.
+#@param   $1 Repositorio (CACHE, REPO o dirección IP)
+#@param   $2 Nombre canónico de la imagen (sin extensión)
+#@param   $3 Número de disco
+#@param   $4 Número de particion
+#@param   $5 Protocolo (UNICAST, UNICAST-DIRECT, MULTICAST o MULTICAST-DIRECT)
+#@param   $6 Opciones del protocolo
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 cambio de repositorio: repositorio no encontrado
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-16
+#**/
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -30,6 +44,17 @@ PROTO="${5^^}"
 PROTO=${PROTO:-"UNICAST"}
 PROTOOPT="$6"
 IMGTYPE="${IMGTYPE:-"img"}"
+
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO 
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        REPO="REPO"
+fi
+
 # Comprobar que existe la imagen del origen.
 IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
 IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")

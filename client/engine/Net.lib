@@ -10,6 +10,50 @@
 
 
 #/**
+# ogChangeRepo  IPREPO [ OgUnit ]
+#@brief   Cambia el repositorio para el recurso remoto images.
+#@param 1 Ip Repositorio 
+#@param 2 Abreviatura Unidad Organizativa
+#@return  Cambio recurso remoto en OGIMG.
+#@version 1.1 - Primera versión para OpenGnSys.
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-16
+#*/
+function ogChangeRepo {
+local SRCIMG 
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME IPREPO [ OgUnit ]" \
+           "$FUNCNAME 10.1.120.3" \
+           "$FUNCNAME 10.1.120.3 cdc"
+    return
+fi
+
+
+if [ $# -lt 1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME IPREPO [ OgUnit ]"
+    return $?
+fi
+
+REPO="${1^^}"
+# Si REPO tomamos el valor por defecto.
+[ "$REPO" == "REPO" ] && REPO=$ogrepo
+
+source /scripts/functions
+source /scripts/ogfunctions
+# Si $1 y $2 son el repositorio y la OU actual me salgo
+[ "$REPO" == "$(ogGetRepoIp)" ] && [ "$2" == "$ogunit" -o "$2" == "" ]  && return 0
+umount $OGIMG
+[ "$2" == "" ] && SRCIMG="ogimages" || SRCIMG="ogimages/$2"
+eval $(grep "OPTIONS=" /scripts/ogfunctions)
+[ "$ogactiveadmin" == "true" ] && RW=",rw" || RW=",ro" 
+echo "$MSG_HELP_ogChangeRepo $REPO"
+ogConnect $REPO $ogprotocol $SRCIMG $OGIMG $RW
+
+}
+
+
+#/**
 #         ogGetGroupDir [ str_repo ]
 #@brief   Devuelve el cmaino del directorio para el grupo del cliente.
 #@param   str_repo     repositorio de imágenes (opcional)

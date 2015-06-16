@@ -27,7 +27,9 @@
 #@date    2013-02-20
 #@version 1.0.5 - uso de md5 full para las transferencias torrent, en la llamada => ogUpdateCacheIsNecesary 
 #@date    2014-07-09
-
+#@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-16
 #*/ ##
 
 PROG="$(basename $0)"
@@ -47,6 +49,13 @@ echo " " > $OGLOGCOMMAND
 REPOSITORIO="${1^^}"
 PROTOCOLO="${3^^}"
 OPTPROTOCOLO="$4"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPOSITORIO
+if [ $? == 0 -o $REPOSITORIO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPOSITORIO || exit $(ogRaiseError $OG_ERR_NOTFOUND $REPOSITORIO; echo $?)
+        REPOSITORIO="REPO"
+fi
 REPOIP=$(ogGetRepoIp)
 ogEcho log session  $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 
@@ -75,7 +84,7 @@ else
 	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
 	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE "REPO $2"; echo $?)
 	IMGSYNC=FALSE
-	ogUpdateCacheIsNecesary "$1" "$2" "$PROTOCOLO"
+	ogUpdateCacheIsNecesary "$REPOSITORIO" "$2" "$PROTOCOLO"
 	RETVAL=$?
 fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
@@ -174,7 +183,7 @@ TIME1=$SECONDS
 
 case "$PROTOCOLO" in
 	TORRENT)
-		ogEcho log session "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
+		ogEcho log session "ogCopyFile $REPOSITORIO $2.torrent absolute $OGCAC/$OGIMG"
 		# tiempos 
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
 		ogExecAndLog command ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
@@ -273,7 +282,8 @@ case "$PROTOCOLO" in
 		[ ${PIPESTATUS[0]} -eq 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes
 		ogUnmountImage CACHE  "$IMGNAME" $IMGTYPE
-		ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
+	 	ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
+		ogUnlockImage CACHE "$2"
 	   fi
 	;;
 esac
