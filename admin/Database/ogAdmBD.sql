@@ -506,6 +506,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `numpar` smallint NOT NULL,
   `codpar` int(8) NOT NULL,
   `tamano` int(11) NOT NULL,
+  `uso` tinyint NOT NULL DEFAULT 0,
   `idsistemafichero` smallint(11) NOT NULL,
   `idnombreso` smallint(11) NOT NULL,
   `idimagen` int(11) NOT NULL,
@@ -1050,7 +1051,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `email` varchar(200) DEFAULT NULL,
   `ididioma` int(11) DEFAULT NULL,
   `idtipousuario` tinyint(4) DEFAULT NULL,
-  `apikey` varchar(32) NOT NULL,
+  `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idusuario`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
