@@ -300,3 +300,14 @@ else
 fi
 } 
 
+
+
+#### PRUEBA
+function ogIsVirtualMachine() {
+case "$(dmidecode -s system-product-name)" in
+    KVM|VirtualBox)
+        return 1 ;;
+    *)  return 0 ;;
+esac
+}
+
