@@ -7,6 +7,10 @@
 // Nombre del fichero: RestaurarImagenOrdenador.php
 // Descripción : 
 //		Implementación del comando "RestaurarImagen" (Ordenadores)
+// version 1.1: cliente con varios repositorios
+//	HTMLSELECT_imagenes: Imagenes de todos los repositorios de la UO - Cambia parametro idordenadores por idambito
+// autor: Irina Gomez, Universidad de Sevilla
+// fecha 2015-06-17
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -114,6 +118,8 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 		</FORM>	
 <?php
 	}
+
+
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false,"pintaParticionesRestaurarImagen");
 	//________________________________________________________________________________________________________
@@ -135,12 +141,12 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 // Version 0.1: En consulta SQL se quita imagenes.numpar>0. las imágenes recien creadas tienen numpar=0.
 //      US ETSII - Irina Gomez - 2014-11-11
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
+function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idambito,$ambito)
 {
 	global $IMAGENES_MONOLITICAS;
 
 	$SelectHtml="";
-	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
+	$cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM imagenes
 				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio"; 
 	if($sw) // Imágenes con el mismo tipo de partición 
 		$cmd->texto.=	"	WHERE imagenes.codpar=".$codpar;								
@@ -150,12 +156,22 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 	$cmd->texto.=" AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y
 	$cmd->texto.=" AND imagenes.tipo=".$IMAGENES_MONOLITICAS;
     
-	$idordenador1 = explode(",",$idordenadores);
-	$idordenador=$idordenador1[0];
-	if ($ambito == 16)
-		$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .") OR repositorios.ip=(select ip from ordenadores where ordenadores.idordenador=". $idordenador .")";
-    else 
-    	$cmd->texto.=" AND repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.idordenador=" .$idordenador .")";
+	// 1.1 Imagenes de todos los repositorios de la UO.
+	switch ($ambito) {
+	    case 16:
+		// ambito ordenador
+		$selectrepo='select repositorios.idrepositorio from repositorios INNER JOIN aulas INNER JOIN ordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=ordenadores.idaula AND idordenador='.$idambito;
+		break;	  
+	    case 8:
+		// ambito grupo ordenadores
+		$selectrepo='select idrepositorio  from repositorios INNER JOIN aulas INNER JOIN gruposordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=gruposordenadores.idaula AND idgrupo='.$idambito;
+		break;	  
+	    case 4:
+		// ambito aulas
+		$selectrepo='select idrepositorio from repositorios INNER JOIN aulas where repositorios.idcentro=aulas.idcentro AND idaula='.$idambito;
+		break;	  
+	}
+	$cmd->texto.=" AND repositorios.idrepositorio IN (".$selectrepo.")";
 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
@@ -169,7 +185,8 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["iprepositorio"]."_".$rs->campos["idperfilsoft"].'"';
 			if($idimagen==$rs->campos["idimagen"]) $SelectHtml.=" selected ";
 			$SelectHtml.='>';
-			$SelectHtml.= $rs->campos["descripcion"].'</OPTION>';
+			$SelectHtml.= $rs->campos["descripcion"].' ('.$rs->campos["nombrerepo"].') </OPTION>';
+
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();

@@ -6,6 +6,9 @@
 // Nombre del fichero: asistentes.js
 // DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero AsistentesEjecutarScripts.php (Comandos)
+// version 1.1: cliente con varios repositorios - Imagenes de todos los repositorios de la UO.
+// autor: Irina Gomez, Universidad de Sevilla
+// fecha 2015-06-17
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
@@ -66,7 +69,7 @@ if (form.modo[0].checked)
 {
 	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
 	var diskPart = form.idparticion.value.split(";");
-	command="deployImage REPO /" + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
+	command="deployImage " + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
 command + " \n";
