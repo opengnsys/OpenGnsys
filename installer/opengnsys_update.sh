@@ -26,6 +26,9 @@
 #@version 1.0.6 - Redefinir URLs de ficheros de configuración usando HTTPS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2015/03/12
+#@version 1.1.0 - Instalación de API REST.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2015/06/18
 #*/
 
 
@@ -429,16 +432,32 @@ function updateClientFiles()
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
-	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2).
+	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2) y
+	#    activar módulo Rewrite (solo actualizaciones desde 1.0.x a 1.1.x).
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
 		mv $APACHECFGDIR/sites-available/opengnsys.conf $APACHECFGDIR/sites-available/opengnsys
 		a2ensite default-ssl
 		a2enmod ssl
+		a2enmod rewrite
 		a2dissite opengnsys.conf
 		a2ensite opengnsys
-		$APACHESERV restart
 	fi
+
+	# Actualizar configuración para acceso a API REST
+	#    (solo actualizaciones de 1.0.x a 1.1.x).
+	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf ]; do
+		if [ -e $config ] && ! grep -q "/rest" $config; then 
+			cat << EOT >> $config
+<Directory $INSTALL_TARGET/www/rest>
+        AllowOverride All
+</Directory>
+EOT
+		fi
+	done
+
+	# Reiniciar Apache.
+	$APACHESERV restart
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
@@ -503,6 +522,7 @@ function updateWebFiles()
 	ERRCODE=$?
 	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	unzip -o $WORKDIR/opengnsys/admin/slim-2.6.1.zip -d $INSTALL_TARGET/www/rest
 	if [ $ERRCODE != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating web files."
 		exit 1
@@ -777,6 +797,7 @@ function updateClient()
 	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	local SAMBAPASS
 	local KERNELVERSION
+	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
@@ -831,7 +852,7 @@ function updateClient()
 		# Actaulizar la base de datos adaptada al Kernel del cliente.
 		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
 		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
+			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g; s/APIKEY/$APIKEY/g" $OPENGNSYS_DBUPDATEFILE
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
 		fi
 
