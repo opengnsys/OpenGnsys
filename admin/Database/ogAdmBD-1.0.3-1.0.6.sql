@@ -129,7 +129,12 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1),
 	(36, 'rti', 'Ruta de origen', '', '', '', 0, 1),
 	(37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
-	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1);
+	(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1)
+	ON DUPLICATE KEY UPDATE
+		idparametro=VALUES(idparametro), nemonico=VALUES(nemonico),
+		descripcion=VALUES(descripcion), nomidentificador=VALUES(nomidentificador),
+		nomtabla=VALUES(nomtabla), nomliteral=VALUES(nomliteral),
+		tipopa=VALUES(tipopa), visual=VALUES(visual);
 
 # Imágenes incrementales, soporte para varios discos y fecha de creación
 # (tickets #565, #601 y #677).
