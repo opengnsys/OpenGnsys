@@ -17,7 +17,7 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('AF02',16,10), 'HFS-RAID', 1),
 	(CONV('FB00',16,10), 'VMFS', 1),
 	(CONV('FB01',16,10), 'VMFS-RESERV', 1),
-	(CONV('FB02',16,10), 'VMFS-KRN', 1);
+	(CONV('FB02',16,10), 'VMFS-KRN', 1)
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
