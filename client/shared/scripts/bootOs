@@ -3,8 +3,8 @@
 # (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
 
 PROG="$(basename $0)"
-if [ $# -ne 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion"
+if [ $# -lt 2 -o $# gt 3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nfilesys [kernelparams]"
     exit $?
 fi
 
@@ -50,5 +50,5 @@ esac
 echo "[70] Desmontar cache local."
 ogUnmountCache
 echo "[90] Arrancar sistema operativo."
-ogBoot $1 $2
+ogBoot "$@"
 
