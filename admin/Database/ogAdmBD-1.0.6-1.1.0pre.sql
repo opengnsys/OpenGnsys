@@ -23,14 +23,14 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 
 # Añadir campo para incluir aulas en proyecto Remote PC (ticket #708).
 ALTER TABLE aulas
-	ADD inremotepc TINYINT DEFAULT 0:
+	ADD inremotepc TINYINT DEFAULT 0;
 # Añadir campo para clave de acceso a la API REST (ticket #708).
 ALTER TABLE usuarios
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 
 # Añadir campo para porcentaje de uso de sistema de ficheros (ticket #711)
 ALTER TABLE ordenadores_particiones
-	ADD uso TINYINT NOT NULL DEFAULT 0,
+	ADD uso TINYINT NOT NULL DEFAULT 0;
 
 # Nuevos componentes hardware (ticket #713)
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico, pci) VALUES
