@@ -239,7 +239,8 @@ fi
 
 # Recopilación de disposibivos procesando la salida de \c lshw
 ogEcho info "$MSG_HARDWAREINVENTORY}"
-echo "cha=$(dmidecode -s chassis-type)"
+echo "cha=$(dmidecode -s chassis-type)" | grep -v "Other"
+[ -e /sys/firmware/efi ] && echo "boo=UEFI" || echo "boo=BIOS"
 lshw | awk 'BEGIN {type="mod";}
        /product:/ {sub(/ *product: */,"");  prod=$0;}
        /vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
