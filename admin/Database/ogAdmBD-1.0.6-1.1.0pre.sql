@@ -32,3 +32,9 @@ ALTER TABLE usuarios
 ALTER TABLE ordenadores_particiones
 	ADD uso TINYINT NOT NULL DEFAULT 0,
 
+# Nuevos componentes hardware (ticket #713)
+INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico, pci) VALUES
+	(17, 'Chasis del Sistema', '', 'cha', 0),
+	(18, 'Controladores de almacenamiento', '', 'sto', 0),
+	(19, 'Tipo de proceso de arranque', '', 'boo', 0);
+

@@ -862,7 +862,10 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 (13, 'Controladores IDE', '../images/iconos/ide.gif', 'ide', 0),
 (14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir', 0),
 (15, 'Controladores USB', '../images/iconos/usb.gif', 'usb', 0),
-(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus', 0);
+(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus', 0),
+(17, 'Chasis del Sistema', '', 'cha', 0),
+(18, 'Controladores de almacenamiento', '', 'sto', 0),
+(19, 'Tipo de proceso de arranque', '', 'boo', 0);
 
 -- --------------------------------------------------------
 
