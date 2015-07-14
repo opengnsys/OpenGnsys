@@ -21,7 +21,7 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
         *)      ptt=0 ;; 
     esac
     # Información de disco (partición 0)
-    cfg="$cfg$dsk:0:$ptt:::$(ogGetDiskSize $dsk);"
+    cfg="$cfg$dsk:0:$ptt:::$(ogGetDiskSize $dsk):0;"
     for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
 	cod=$(ogGetPartitionId $dsk $par 2>/dev/null)
@@ -34,13 +34,15 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
 	# Sistema operativo instalado 
 	case "$fsi" in
 		""|EMPTY|CACHE|LINUX-SWAP|LINUX-LVM)
-			soi="" ;;
+			soi=""; uso=0 ;;
 		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
 			# Sistema de archivos para datos (sistema operativo "DATA")
 			[ -z "$soi" -a "$fsi" != "EMPTY" -a "$fsi" != "CACHE" ] && soi="DATA"
+			uso=$(df $(ogDiskToDev $dsk $par) | awk '{getline; printf "%d",$5}')
+			uso=${uso:0}
 			;;
    	esac
-	cfg="$cfg$dsk:$par:$cod:$fsi:$soi:$tam;"
+	cfg="$cfg$dsk:$par:$cod:$fsi:$soi:$tam:$uso;"
     done
 done
 
@@ -58,8 +60,8 @@ generateMenuDefault &>/dev/null
 awk '{  n=split($0,sep,";");
 	for (i=1; i<n; i++){
 	    split (sep[i],dua,":");
-	    printf ("disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\n",
-		    dua[1],dua[2],dua[3],dua[4],dua[5],dua[6]);
+	    printf ("disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
+		    dua[1],dua[2],dua[3],dua[4],dua[5],dua[6],dua[7]);
 	    }
      }' $cfgfile
 

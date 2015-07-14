@@ -732,14 +732,14 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
-	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
+	char *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros que definen una partición
 	char modulo[] = "actualizaConfiguracion()";
 
 	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
 		c = splitCadena(ptrCfg, ptrPar[i], '\t');
-		disk = par = cpt = sfi = soi = tam = NULL;
+		disk = par = cpt = sfi = soi = tam = uso = NULL;
 		splitCadena(ptrDual, ptrCfg[0], '=');
 		disk = ptrDual[1]; // Número de disco
 
@@ -774,10 +774,14 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		splitCadena(ptrDual, ptrCfg[5], '=');
 		tam = ptrDual[1]; // Tamaño de la partición
 
+		splitCadena(ptrDual, ptrCfg[6], '=');
+		uso = ptrDual[1]; // Porcentaje de uso del S.F.
+
 		lon += sprintf(tbPar + lon, "(%s, %s),", disk, par);
 
-		sprintf(sqlstr, "SELECT numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso"
-				"  FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
+		sprintf(sqlstr, "SELECT numdisk, numpar, codpar, tamano, uso, idsistemafichero, idnombreso"
+				"  FROM ordenadores_particiones"
+				" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 				ido, disk, par);
 
 
@@ -788,9 +792,9 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			return (FALSE);
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
-			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
-					" VALUES(%d,%s,%s,0x%s,%s,%d,%d,0)",
-					ido, disk, par, cpt, tam, idsfi, idsoi);
+			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,uso,idsistemafichero,idnombreso,idimagen)"
+					" VALUES(%d,%s,%s,0x%s,%s,%s,%d,%d,0)",
+					ido, disk, par, cpt, tam, uso, idsfi, idsoi);
 
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
@@ -812,19 +816,26 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					return (FALSE);
 				}
 				if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
-					if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
+					if (!tbl.Get("uso", dato)) { // Toma dato
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 						errorInfo(modulo, msglog);
 						return (FALSE);
 					}
-					if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
-						if (!tbl.Get("idnombreso", dato)) { // Toma dato
+					if (atoi(uso) == dato) {// Parámetro uso igual al almacenado
+						if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
 							tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 							errorInfo(modulo, msglog);
 							return (FALSE);
 						}
-						if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
-							swu = FALSE; // Todos los parámetros de la partición son iguales, no se actualiza
+						if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
+							if (!tbl.Get("idnombreso", dato)) { // Toma dato
+								tbl.GetErrorErrStr(msglog); // Error al acceder al registro
+								errorInfo(modulo, msglog);
+								return (FALSE);
+							}
+							if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
+								swu = FALSE; // Todos los parámetros de la partición son iguales, no se actualiza
+							}
 						}
 					}
 				}
@@ -833,13 +844,14 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
 					" codpar=0x%s,"
 					" tamano=%s,"
+					" uso=%s,"
 					" idsistemafichero=%d,"
 					" idnombreso=%d,"
 					" idimagen=0,"
 					" idperfilsoft=0,"
 					" fechadespliegue=NULL"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
-					cpt, tam, idsfi, idsoi, ido, disk, par);
+					cpt, tam, uso, idsfi, idsoi, ido, disk, par);
 				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 					errorLog(modulo, 21, FALSE);
 					db.GetErrorErrStr(msglog);

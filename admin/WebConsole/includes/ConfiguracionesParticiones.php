@@ -92,6 +92,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				IFNULL (tipospar.tipopar, ordenadores_particiones.codpar) AS tipopar,
 				tipospar.clonable,
 				ordenadores_particiones.tamano,
+				ordenadores_particiones.uso,
 				sistemasficheros.descripcion AS sistemafichero,
 				ordenadores_particiones.idnombreso,
 				nombresos.nombreso,
@@ -145,6 +146,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$tbKeys[$idx]["tipopar"]=$rs->campos["tipopar"];
 		$tbKeys[$idx]["clonable"]=$rs->campos["clonable"];
 		$tbKeys[$idx]["tamano"]=$rs->campos["tamano"];
+		$tbKeys[$idx]["uso"]=$rs->campos["uso"];
 		$tbKeys[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
 		$tbKeys[$idx]["idnombreso"]=$rs->campos["idnombreso"];
 		$tbKeys[$idx]["nombreso"]=$rs->campos["nombreso"];
