@@ -28,13 +28,15 @@ ALTER TABLE aulas
 ALTER TABLE usuarios
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 
-# Añadir campo para porcentaje de uso de sistema de ficheros (ticket #711)
+# Añadir porcentaje de uso de sistema de ficheros (ticket #711)
 ALTER TABLE ordenadores_particiones
 	ADD uso TINYINT NOT NULL DEFAULT 0;
 
-# Nuevos componentes hardware (ticket #713)
+# Nuevos componentes hardware y nº de serie (ticket #713)
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico, pci) VALUES
 	(17, 'Chasis del Sistema', '', 'cha', 0),
 	(18, 'Controladores de almacenamiento', '', 'sto', 0),
 	(19, 'Tipo de proceso de arranque', '', 'boo', 0);
+ALTER TABLE ordenadores
+	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
 
