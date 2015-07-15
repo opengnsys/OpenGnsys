@@ -840,7 +840,6 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) NOT NULL DEFAULT '',
   `nemonico` char(3) NOT NULL,
-  `pci` tinyint(1) NOT NULL,
   PRIMARY KEY (`idtipohardware`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
 
@@ -849,24 +848,24 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
 --
 
 INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES
-(1, 'Placas', '../images/iconos/placabase.gif', 'boa', 0),
-(2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
-(3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 0),
-(4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
-(5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
-(7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga', 0),
-(8, 'Discos', '../images/iconos/discoduro.gif', 'dis', 0),
-(9, 'Dispositivos de sonido', '../images/iconos/audio.gif', 'aud', 0),
-(10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
-(11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio', 0),
-(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/dvdcd.gif', 'cdr', 0),
-(13, 'Controladores IDE', '../images/iconos/ide.gif', 'ide', 0),
-(14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir', 0),
-(15, 'Controladores USB', '../images/iconos/usb.gif', 'usb', 0),
-(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus', 0),
-(17, 'Chasis del Sistema', '', 'cha', 0),
-(18, 'Controladores de almacenamiento', '', 'sto', 0),
-(19, 'Tipo de proceso de arranque', '', 'boo', 0);
+(1, 'Placas', '../images/iconos/placabase.gif', 'boa'),
+(2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul'),
+(3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net'),
+(4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu'),
+(5, 'Memorias', '../images/iconos/confihard.gif', 'mem'),
+(7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga'),
+(8, 'Discos', '../images/iconos/discoduro.gif', 'dis'),
+(9, 'Dispositivos de sonido', '../images/iconos/audio.gif', 'aud'),
+(10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod'),
+(11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio'),
+(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/dvdcd.gif', 'cdr'),
+(13, 'Controladores IDE', '../images/iconos/ide.gif', 'ide'),
+(14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir'),
+(15, 'Controladores USB', '../images/iconos/usb.gif', 'usb'),
+(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus'),
+(17, 'Chasis del Sistema', '', 'cha'),
+(18, 'Controladores de almacenamiento', '', 'sto'),
+(19, 'Tipo de proceso de arranque', '', 'boo');
 
 -- --------------------------------------------------------
 

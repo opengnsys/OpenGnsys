@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -30,26 +30,32 @@ if (!$cmd)
 <SCRIPT language="javascript" src="../jscripts/perfilcomponente_hard.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/perfilcomponente_hard_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/perfilcomponente_hard_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 
-	<INPUT type=hidden value="<? echo $idcentro?>" id=idcentro>	 
-	<INPUT type=hidden value="<? echo $idperfilhard?>" id=idperfilhard>	 
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confihard.gif"></P>
+	<INPUT type=hidden value="<?php echo $idcentro?>" id=idcentro>	 
+	<INPUT type=hidden value="<?php echo $idperfilhard?>" id=idperfilhard>	 
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confihard.gif"></P>
 	<BR>
 	<DIV align=center id="Layer_componentes">
-		<SPAN align=center class=presentaciones><B><U><?echo $TbMsg[2]?></U>:&nbsp;<? echo $descripcionperfil?></B></SPAN></P>
+		<SPAN align=center class=presentaciones><B><U><?php echo $TbMsg[2]?></U>:&nbsp;<?php echo $descripcionperfil?></B></SPAN></P>
 		<TABLE width="100%" class="tabla_listados" cellspacing=1 cellpadding=0 >
 			 <TR>
 				<TH>&nbsp</TH>
 				<TH>T</TH>
-				<TH><?echo $TbMsg[3]?></TH>
+				<TH><?php echo $TbMsg[3]?></TH>
 			</TR>
-		<?
+		<?php
 			$rs=new Recordset; 
-			$cmd->texto='SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.descripcion as hdescripcion,tipohardwares.urlimg,tipohardwares.pci FROM hardwares INNER JOIN perfileshard_hardwares ON hardwares.idhardware=perfileshard_hardwares.idhardware INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware WHERE perfileshard_hardwares.idperfilhard='.$idperfilhard.' ORDER BY tipohardwares.idtipohardware,hardwares.descripcion';
+			$cmd->texto='SELECT hardwares.idhardware, hardwares.descripcion,'.
+				    '       tipohardwares.descripcion AS hdescripcion, tipohardwares.urlimg'.
+				    '  FROM hardwares'.
+				    ' INNER JOIN perfileshard_hardwares ON hardwares.idhardware=perfileshard_hardwares.idhardware'.
+				    ' INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware'.
+				    ' WHERE perfileshard_hardwares.idperfilhard='.$idperfilhard.
+				    ' ORDER BY tipohardwares.idtipohardware, hardwares.descripcion';
 			$rs->Comando=&$cmd; 
 
 			if ($rs->Abrir()){ 
@@ -68,7 +74,12 @@ if (!$cmd)
 				}
 			}
 			$rs->Cerrar();
-			$cmd->texto='SELECT hardwares.idhardware,hardwares.descripcion,tipohardwares.descripcion as hdescripcion,tipohardwares.urlimg,tipohardwares.pci  FROM hardwares  INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware '.$strex.' AND hardwares.idcentro='.$idcentro.'  ORDER BY tipohardwares.idtipohardware,hardwares.descripcion';
+			$cmd->texto='SELECT hardwares.idhardware, hardwares.descripcion,'.
+				    '       tipohardwares.descripcion AS hdescripcion, tipohardwares.urlimg,'.
+				    '  FROM hardwares'.
+				    ' INNER JOIN tipohardwares ON hardwares.idtipohardware=tipohardwares.idtipohardware '.
+				    $strex.' AND hardwares.idcentro='.$idcentro.
+				    ' ORDER BY tipohardwares.idtipohardware, hardwares.descripcion';
 			$rs->Comando=&$cmd; 
 			if ($rs->Abrir()){
 				$rs->Primero();
@@ -88,7 +99,7 @@ if (!$cmd)
 	</DIV>		
 	<DIV id="Layer_nota" align=center >
 		<BR>
-		<SPAN align=center class=notas><I><?echo $TbMsg[4]?></I></SPAN>
+		<SPAN align=center class=notas><I><?php echo $TbMsg[4]?></I></SPAN>
 	</DIV>
 </FORM>
 </BODY>

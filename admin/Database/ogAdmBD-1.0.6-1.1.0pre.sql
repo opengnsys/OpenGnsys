@@ -32,11 +32,13 @@ ALTER TABLE usuarios
 ALTER TABLE ordenadores_particiones
 	ADD uso TINYINT NOT NULL DEFAULT 0;
 
-# Nuevos componentes hardware y nº de serie (ticket #713)
-INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico, pci) VALUES
-	(17, 'Chasis del Sistema', '', 'cha', 0),
-	(18, 'Controladores de almacenamiento', '', 'sto', 0),
-	(19, 'Tipo de proceso de arranque', '', 'boo', 0);
+# Eliminar campo sin uso, nuevos componentes hardware y nº de serie (ticket #713)
+ALTER TABLE tipohardwares
+	DROP pci;
+INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
+	(17, 'Chasis del Sistema', '', 'cha'),
+	(18, 'Controladores de almacenamiento', '', 'sto'),
+	(19, 'Tipo de proceso de arranque', '', 'boo');
 ALTER TABLE ordenadores
 	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
 
