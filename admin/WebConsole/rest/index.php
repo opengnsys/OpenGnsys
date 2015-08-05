@@ -37,7 +37,7 @@ $app = new \Slim\Slim(array(
 $app->setName('opengnsys');
 
 // Global variables.
-$userid = NULL;			// Usuer id. with access to REST API.
+$userid = NULL;			// User id. with access to REST API.
 
 
 // Auxiliar functions.
@@ -50,11 +50,11 @@ $userid = NULL;			// Usuer id. with access to REST API.
  */
 function jsonResponse($status, $response) {
 	$app = \Slim\Slim::getInstance();
-	// Código HTTP.
+	// HTTP status code.
 	$app->status($status);
-	// Cabecera con tipo de contenido.
+	// Content-type HTTP header.
 	$app->contentType('application/json');
-	// Respuesta JSON.
+	// JSON response.
 	echo json_encode($response);
 }
 
@@ -97,7 +97,7 @@ function validateApiKey() {
 			jsonResponse(500, $response);
 		}
 	} else {
-		# Error: falta clave de la API.
+		// Error: missing API key.
                	$response['error'] = true;
                	$response['message'] = 'Missing API key';
 		jsonResponse(400, $response);
@@ -546,8 +546,9 @@ EOD;
 			} else {
 				$tmp['partition'] = $rs->campos["numpar"];
 				$tmp['parttype'] = $rs->campos["tipopar"];
-				$tmp['size'] = $rs->campos["tamano"];
 				$tmp['filesystem'] = $rs->campos["nemonico"];
+				$tmp['size'] = $rs->campos["tamano"];
+				$tmp['usage'] = $rs->campos["uso"];
 				if ($rs->campos["nombreso"] != null) {
 					$tmp['os'] = $rs->campos["nombreso"];
 					$tmp['idimage'] = $rs->campos["idimagen"];
