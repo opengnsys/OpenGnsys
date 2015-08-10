@@ -20,6 +20,8 @@ $TbMsg["FILESYSTEM_SHORT"]='S.F.';
 $TbMsg["DISK"]='Disco';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
 
+$TbMsg["USAGE"]='Uso';
+
 $TbMsg["VARIABLE"]='Variable';
 $TbMsg["CACHE_CONTENT"]='Fecha/Cach&eacute;';
 $TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
