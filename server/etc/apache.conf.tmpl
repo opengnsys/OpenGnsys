@@ -1,4 +1,4 @@
-# OpenGnSys Web Console template configuration for Apache.
+# OpenGnsys Web Admin Console template configuration for Apache.
 
 Alias /opengnsys CONSOLEDIR
 
@@ -10,6 +10,11 @@ php_value short_open_tag on
 	Options -Indexes +FollowSymLinks
 	DirectoryIndex index.php
 </Directory>
+
+# RESTful configuration.
 <Directory CONSOLEDIR/rest>
-	AllowOverride All
+	RewriteEngine On
+	RewriteBase /opengnsys/rest/
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^ index.php [QSA,L]
 </Directory>
