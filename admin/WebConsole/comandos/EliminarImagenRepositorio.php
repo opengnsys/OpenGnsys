@@ -406,7 +406,6 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ####################################################################################
 		// ########## Si el nombre imagen existe en la Unidad Organizativa ####################
 		// ####################################################################################
-		//echo $value." - ".$idcentro."</br>";
 
 		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' ";//AND idcentro='$idcentro'";
 		$rs=new Recordset; 
@@ -416,13 +415,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		if (!$rs->EOF){
 		$nombrecacentro=$rs->campos["nombreca"];
 		$nombrecaidcentro=$rs->campos["idcentro"];
-						}
-		if ($nombrecacentro != $value){$nombrecaidcentro=0;}
+		}
+		if (empty($nombrecacentro) or $nombrecacentro != $value){$nombrecaidcentro=0;}
 		$rs->Cerrar();
 
 		if($nombrecaidcentro == $idcentro || $nombrecaidcentro==0)
 			{	//Comienzo de Condicion si es nombrecaidcentro
-			//echo "Value   -  ".$value."/   -  Id Centro - ".$idc." /Nombrecacentro -  ".$nombrecacentro." /Base ID Centro ".$nombrecaidcentro."</br>";
 		
 		// ####################################################################################
 		// ####################################################################################
@@ -734,6 +732,5 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 </BODY>
 </HTML>
 
-<?php }
+<?php } ?>
 
- ?>
