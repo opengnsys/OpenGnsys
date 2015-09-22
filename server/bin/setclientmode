@@ -101,6 +101,8 @@ for MAC in $ETHERNET; do
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
 		sed -e "s/vga=[0-9]*//g; s/INFOHOST/$DATOS/g" $TEMPLATE >$PXEFILE
+		# Ponemos como propietario al usuario apache para que se pueda cambiar desde la consola
+                chown www-data:www-data $PXEFILE
 		# Actualizar en la BD el modo de arranque asociada el cliente.
 		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
 			"UPDATE ordenadores SET arranque='$(basename $TEMPLATE)' WHERE mac='$MAC';"
