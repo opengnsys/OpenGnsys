@@ -103,7 +103,7 @@ for MAC in $ETHERNET; do
 		sed -e "s/vga=[0-9]*//g; s/INFOHOST/$DATOS/g" $TEMPLATE >$PXEFILE
 		# Actualizar en la BD el modo de arranque asociada el cliente.
 		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-			"UPDATE ordenadores SET arranque='$BOOTMODE' WHERE mac='$MAC';"
+			"UPDATE ordenadores SET arranque='$(basename $TEMPLATE)' WHERE mac='$MAC';"
 	fi
 	let NPC=NPC+1
 done
