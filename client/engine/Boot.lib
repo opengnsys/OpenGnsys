@@ -1027,7 +1027,7 @@ ogGrubAddOgclient () {
 
     # Error si no existe el kernel y el initrd en la cache.
     # Falta crear nuevo codigo de error.
-    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo ?)
+    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo $?)
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
