@@ -1,15 +1,15 @@
 #!/bin/bash
 
 #####################################################################
-####### Script instalador OpenGnSys
-####### autor: Luis Guillén <lguillen@unizar.es>
+####### Script instalador OpenGnsys
+####### Autor: Luis Guillén <lguillen@unizar.es>
 #####################################################################
 
 
 ####  AVISO: Puede editar configuración de acceso por defecto.
 ####  WARNING: Edit default access configuration if you wish.
 DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
-DEFAULT_OPENGNSYS_DB_USER="usuog"		    # Usuario por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
 DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
 DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
 
@@ -19,7 +19,7 @@ if [ "$(whoami)" != 'root' ]; then
         exit 1
 fi
 
-echo -e "\\nOpenGnSys Installation"
+echo -e "\\nOpenGnsys Installation"
 echo "=============================="
 
 # Clave root de MySQL
@@ -38,7 +38,7 @@ done
 
 # Usuario de acceso a la base de datos
 while : ; do
-	echo -n -e "\\nEnter username for OpenGnSys console (${DEFAULT_OPENGNSYS_DB_USER}): "
+	echo -n -e "\\nEnter username for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_USER}): "
 	read OPENGNSYS_DB_USER
 	if [ -n "${OPENGNSYS_DB_USER//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
@@ -52,7 +52,7 @@ done
 
 # Clave de acceso a la base de datos
 while : ; do
-	echo -n -e "\\nEnter password for OpenGnSys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
+	echo -n -e "\\nEnter password for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
 	read OPENGNSYS_DB_PASSWD
 	if [ -n "${OPENGNSYS_DB_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
@@ -66,7 +66,7 @@ done
 
 # Clave de acceso del cliente
 while : ; do
-	echo -n -e "\\nEnter root password for OpenGnSys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
+	echo -n -e "\\nEnter root password for OpenGnsys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
 	read OPENGNSYS_CLIENT_PASSWD
 	if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
@@ -94,7 +94,7 @@ SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
 
-# Directorio destino de OpenGnSys.
+# Directorio destino de OpenGnsys.
 INSTALL_TARGET=/opt/opengnsys
 
 # Registro de incidencias.
@@ -123,7 +123,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - STOPSERVICE, DISABLESERVICE - parar y deshabilitar un servicio
 # - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
 # - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
-# - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnSys
+# - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnsys
 # - INETDSERV - servicio Inetd
 # - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
@@ -213,6 +213,7 @@ case "$OSDISTRIB" in
 		APACHEOGSITE=opengnsys.conf
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
+		APACHEREWRITEMOD="sed -i '/rewrite/s/^#//' $APACHECFGDIR/../*.conf"
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
 		if firewall-cmd --state &>/dev/null; then
@@ -234,7 +235,7 @@ case "$OSDISTRIB" in
 		;;
 	"") 	echo "ERROR: Unknown Linux distribution, please install \"lsb_release\" command."
 		exit 1 ;;
-	*) 	echo "ERROR: Distribution not supported by OpenGnSys."
+	*) 	echo "ERROR: Distribution not supported by OpenGnsys."
 		exit 1 ;;
 esac
 
@@ -770,7 +771,7 @@ function svnExportCode()
 
 	svn export --force "$url" opengnsys
 	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error getting OpenGnSys code from $url"
+		errorAndLog "${FUNCNAME}(): error getting OpenGnsys code from $url"
 		return 1
 	fi
 	echoAndLog "${FUNCNAME}(): subversion code downloaded"
@@ -791,7 +792,7 @@ function checkNetworkConnection()
 		$STOPSERVICE; $DISABLESERVICE
 	fi
 
-	echoAndLog "${FUNCNAME}(): Checking OpenGnSys server conectivity."
+	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server conectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
 	if which wget &>/dev/null; then
 		wget --spider -q $OPENGNSYS_SERVER
@@ -896,7 +897,7 @@ function testPxe ()
 
 
 ########################################################################
-## Configuracion servicio Samba
+## Configuración servicio Samba
 ########################################################################
 
 # Configurar servicios Samba.
@@ -906,11 +907,11 @@ function smbConfigure()
 
 	backupFile $SAMBACFGDIR/smb.conf
 	
-	# Copiar plantailla de recursos para OpenGnSys
+	# Copiar plantailla de recursos para OpenGnsys
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
 	# Configurar y recargar Samba"
-	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnSys Samba Server/" $SAMBACFGDIR/smb.conf
+	perl -pi -e "s/WORKGROUP/OPENGNSYS/; s/server string \=.*/server string \= OpenGnsys Samba Server/" $SAMBACFGDIR/smb.conf
 	if ! grep -q "smb-og" $SAMBACFGDIR/smb.conf; then
 		echo "include = $SAMBACFGDIR/smb-og.conf" >> $SAMBACFGDIR/smb.conf
 	fi
@@ -929,7 +930,7 @@ function smbConfigure()
 
 
 ########################################################################
-## Configuracion servicio Rsync
+## Configuración servicio Rsync
 ########################################################################
 
 # Configurar servicio Rsync.
@@ -980,7 +981,7 @@ EOT
 
 	
 ########################################################################
-## Configuracion servicio DHCP
+## Configuración servicio DHCP
 ########################################################################
 
 # Configurar servicios DHCP.
@@ -1022,7 +1023,7 @@ function dhcpConfigure()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Copiar ficheros del OpenGnSys Web Console.
+# Copiar ficheros del OpenGnsys Web Console.
 function installWebFiles()
 {
 	local COMPATDIR f
@@ -1157,10 +1158,10 @@ function createDirs()
 	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then 
 		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENT_USER\" is already created"
 	else
-		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
+		echoAndLog "${FUNCNAME}(): creating OpenGnsys user"
 		useradd $OPENGNSYS_CLIENT_USER 2>/dev/null
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
+			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
 			return 1
 		fi
 	fi
@@ -1240,44 +1241,44 @@ function copyServerFiles ()
 ### Funciones de compilación de código fuente de servicios
 ####################################################################
 
-# Compilar los servicios de OpenGnSys
+# Compilar los servicios de OpenGnsys
 function servicesCompilation ()
 {
 	local hayErrores=0
 
-	# Compilar OpenGnSys Server
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Server"
+	# Compilar OpenGnsys Server
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
 	make && mv ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnSys Repository Manager
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Repository Manager"
+	# Compilar OpenGnsys Repository Manager
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
 	make && mv ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnSys Agent
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Agent"
+	# Compilar OpenGnsys Agent
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
 	make && mv ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Agent"
 		hayErrores=1
 	fi
 	popd	
-	# Compilar OpenGnSys Client
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnSys Admin Client"
+	# Compilar OpenGnsys Client
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
 	make && mv ogAdmClient ../../../../client/shared/bin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Client"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Client"
 		hayErrores=1
 	fi
 	popd
@@ -1315,7 +1316,7 @@ function copyClientFiles()
 {
 	local errstatus=0
 
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Client files."
+	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Client files."
 	cp -a $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
@@ -1323,7 +1324,7 @@ function copyClientFiles()
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
-	echoAndLog "${FUNCNAME}(): Copying OpenGnSys Cloning Engine files."
+	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
 	cp -a $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
@@ -1347,7 +1348,7 @@ function copyClientFiles()
 }
 
 
-# Crear cliente OpenGnSys 1.0.2 y posteriores.
+# Crear cliente OpenGnsys.
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
@@ -1394,7 +1395,7 @@ function clientCreate()
 }
 
 
-# Configuración básica de servicios de OpenGnSys
+# Configuración básica de servicios de OpenGnsys
 function openGnsysConfigure()
 {
 	local i=0
@@ -1419,7 +1420,7 @@ function openGnsysConfigure()
 	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsys
 
-	echoAndLog "${FUNCNAME}(): Creating OpenGnSys config files."
+	echoAndLog "${FUNCNAME}(): Creating OpenGnsys config files."
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[i]}" ]; then
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
@@ -1472,7 +1473,7 @@ function openGnsysConfigure()
 		$DISABLESERVICE
 	fi
 
-	echoAndLog "${FUNCNAME}(): Starting OpenGnSys services."
+	echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."
 	service="opengnsys"
 	$ENABLESERVICE; $STARTSERVICE
 }
@@ -1486,7 +1487,7 @@ function installationSummary()
 {
 	# Crear fichero de versión y revisión, si no existe.
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	[ -f $VERSIONFILE ] || echo "OpenGnSys Server" >$VERSIONFILE
+	[ -f $VERSIONFILE ] || echo "OpenGnsys Server" >$VERSIONFILE
 	# Incluir datos de revisión, si se está instaladno desde el repositorio
 	# de código o si no está incluida en el fichero de versión.
 	if [ $USESVN -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
@@ -1496,7 +1497,7 @@ function installationSummary()
 
 	# Mostrar información.
 	echo
-	echoAndLog "OpenGnSys Installation Summary"
+	echoAndLog "OpenGnsys Installation Summary"
 	echo       "=============================="
 	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
@@ -1514,24 +1515,24 @@ function installationSummary()
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
 	echoAndLog "Firewall service has been disabled and SELinux mode set to"
-	echoAndLog "   permissive during OpenGnSys installation. Please check"
+	echoAndLog "   permissive during OpenGnsys installation. Please check"
 	echoAndLog "   ${FIREWALLSERV:-firewall} and SELinux configuration, if needed."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
 	echoAndLog "Optional: Log-in as Web Console admin user."
 	echoAndLog " - Review default Organization data and assign access to users."
 	echoAndLog "Log-in as Web Console organization user."
-	echoAndLog " - Insert OpenGnSys data (labs, computers, menus, etc)."
+	echoAndLog " - Insert OpenGnsys data (labs, computers, menus, etc)."
 echo
 }
 
 
 
 #####################################################################
-####### Proceso de instalación de OpenGnSys
+####### Proceso de instalación de OpenGnsys
 #####################################################################
 
-echoAndLog "OpenGnSys installation begins at $(date)"
+echoAndLog "OpenGnsys installation begins at $(date)"
 pushd $WORKDIR
 
 # Detectar datos iniciales de auto-configuración del instalador.
@@ -1552,7 +1553,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Detener servicios de OpenGnSys, si están activos previamente.
+# Detener servicios de OpenGnsys, si están activos previamente.
 [ -f /etc/init.d/opengnsys ] && /etc/init.d/opengnsys stop
 
 # Actualizar repositorios
@@ -1578,7 +1579,7 @@ fi
 # Detectar datos de auto-configuración después de instalar paquetes.
 autoConfigurePost
 
-# Arbol de directorios de OpenGnSys.
+# Arbol de directorios de OpenGnsys.
 createDirs ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while creating directory paths!"
@@ -1596,7 +1597,7 @@ else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
-# Compilar código fuente de los servicios de OpenGnSys.
+# Compilar código fuente de los servicios de OpenGnsys.
 servicesCompilation
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while compiling OpenGnsys services"
@@ -1630,14 +1631,14 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Copiar ficheros de servicios OpenGnSys Server.
+# Copiar ficheros de servicios OpenGnsys Server.
 copyServerFiles ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
 fi
 
-# Instalar base de datos de OpenGnSys Admin.
+# Instalar base de datos de OpenGnsys Admin.
 isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
 if [ $? -eq 0 ]; then
 	# Habilitar gestor de base de datos (MySQL, si falla, MariaDB).
@@ -1708,15 +1709,15 @@ fi
 # Eliminar fichero temporal con credenciales de acceso a MySQL.
 rm -f $TMPMYCNF
 
-# copiando paqinas web
+# Copiando páqinas web.
 installWebFiles
 # Generar páqinas web de documentación de la API
 makeDoxygenFiles
 
-# creando configuracion de apache2
+# Creando configuración de Apache.
 installWebConsoleApacheConf $INSTALL_TARGET $APACHECFGDIR
 if [ $? -ne 0 ]; then
-	errorAndLog "Error configuring Apache for OpenGnSys Admin"
+	errorAndLog "Error configuring Apache for OpenGnsys Admin"
 	exit 1
 fi
 
@@ -1728,20 +1729,20 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
 
-# Crear la estructura del cliente de OpenGnSys
+# Crear la estructura del cliente de OpenGnsys.
 clientCreate
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client"
 	exit 1
 fi
 
-# Configuración de servicios de OpenGnSys
+# Configuración de servicios de OpenGnsys
 openGnsysConfigure
 
 # Mostrar sumario de la instalación e instrucciones de post-instalación.
 installationSummary
 
 #rm -rf $WORKDIR
-echoAndLog "OpenGnSys installation finished at $(date)"
+echoAndLog "OpenGnsys installation finished at $(date)"
 exit 0
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #/**
 #@file    opengnsys_update.sh
-#@brief   Script actualización de OpenGnSys
+#@brief   Script actualización de OpenGnsys
 #@version 0.9 - basado en opengnsys_installer.sh
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2010/01/27
@@ -43,9 +43,9 @@ if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
-# Error si OpenGnSys no está instalado (no existe el directorio del proyecto)
+# Error si OpenGnsys no está instalado (no existe el directorio del proyecto)
 if [ ! -d $INSTALL_TARGET ]; then
-        echo "ERROR: OpenGnSys is not installed, cannot update!!"
+        echo "ERROR: OpenGnsys is not installed, cannot update!!"
         exit 1
 fi
 # Cargar configuración de acceso a la base de datos.
@@ -400,11 +400,11 @@ function getNetworkSettings()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Actualizar cliente OpenGnSys.
+# Actualizar cliente OpenGnsys.
 function updateClientFiles()
 {
 	# Actualizar ficheros del cliente.
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
+	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Client files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
@@ -419,7 +419,7 @@ function updateClientFiles()
 	fi
 
 	# Actualizar librerías del motor de clonación.
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
+	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Cloning Engine files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
@@ -435,13 +435,16 @@ function apacheConfiguration ()
 	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2) y
 	#    activar módulo Rewrite (solo actualizaciones desde 1.0.x a 1.1.x).
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
-		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
+		echoAndLog "${FUNCNAME}(): Configuring Apache modules."
 		mv $APACHECFGDIR/sites-available/opengnsys.conf $APACHECFGDIR/sites-available/opengnsys
 		a2ensite default-ssl
 		a2enmod ssl
 		a2enmod rewrite
 		a2dissite opengnsys.conf
 		a2ensite opengnsys
+	elif [ -e $APACHECFGDIR/conf.modules.d ]; then
+		echoAndLog "${FUNCNAME}(): Configuring Apache modules."
+		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
 
 	# Actualizar configuración para acceso a API REST
@@ -450,7 +453,10 @@ function apacheConfiguration ()
 		if [ -e $config ] && ! grep -q "/rest" $config; then 
 			cat << EOT >> $config
 <Directory $INSTALL_TARGET/www/rest>
-        AllowOverride All
+	RewriteEngine On
+	RewriteBase /opengnsys/rest/
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^ index.php [QSA,L]
 </Directory>
 EOT
 		fi
@@ -508,7 +514,7 @@ EOT
 	fi
 }
 
-# Copiar ficheros del OpenGnSys Web Console.
+# Copiar ficheros del OpenGnsys Web Console.
 function updateWebFiles()
 {
 	local ERRCODE COMPATDIR f
@@ -616,10 +622,10 @@ function createDirs()
 	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
 		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\" is already created"
 	else
-		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
+		echoAndLog "${FUNCNAME}(): creating OpenGnsys user"
 		useradd $OPENGNSYS_CLIENTUSER 2>/dev/null
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
+			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
 			return 1
 		fi
 	fi
@@ -736,40 +742,40 @@ function compileServices()
 {
 	local hayErrores=0
 
-	# Compilar OpenGnSys Server
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Admin Server"
+	# Compilar OpenGnsys Server
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
 	make && moveNewService ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnSys Repository Manager
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Repository Manager"
+	# Compilar OpenGnsys Repository Manager
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
 	make && moveNewService ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnSys Agent
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Agent"
+	# Compilar OpenGnsys Agent
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
 	make && moveNewService ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Agent"
 		hayErrores=1
 	fi
 	popd
 
-	# Compilar OpenGnSys Client
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Client"
+	# Compilar OpenGnsys Client
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
 	make && mv ogAdmClient $INSTALL_TARGET/client/bin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Client"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Client"
 		hayErrores=1
 	fi
 	popd
@@ -779,10 +785,10 @@ function compileServices()
 
 
 ####################################################################
-### Funciones instalacion cliente OpenGnSys
+### Funciones instalacion cliente OpenGnsys
 ####################################################################
 
-# Actualizar cliente OpenGnSys
+# Actualizar cliente OpenGnsys
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
@@ -807,7 +813,7 @@ function updateClient()
 		echoAndLog "${FUNCNAME}(): Loading Client"
 		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
 		if [ ! -s $TARGETFILE ]; then
-			errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
+			errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
 			return 1
 		fi
 		# Obtener la clave actual de acceso a Samba para restaurarla.
@@ -896,11 +902,11 @@ function updateSummary()
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
 	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
 
-	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
+	[ -f $VERSIONFILE ] || echo "OpenGnsys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
 	echo
-	echoAndLog "OpenGnSys Update Summary"
+	echoAndLog "OpenGnsys Update Summary"
 	echo       "========================"
 	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
 	echoAndLog "Update log file:                  $LOG_FILE"
@@ -912,9 +918,9 @@ function updateSummary()
 		# Indicar si se debe reiniciar servicios manualmente o usando el Cron.
 		[ -f /etc/default/opengnsys ] && source /etc/default/opengnsys
 		if [ "$RUN_CRONJOB" == "no" ]; then
-			echoAndLog "        WARNING: you must restart OpenGnSys services manually."
+			echoAndLog "        WARNING: you must restart OpenGnsys services manually."
 		else
-			echoAndLog "        New OpenGnSys services will be restarted by the cronjob."
+			echoAndLog "        New OpenGnsys services will be restarted by the cronjob."
 		fi
 	fi
 	echo
@@ -923,11 +929,11 @@ function updateSummary()
 
 
 #####################################################################
-####### Proceso de actualización de OpenGnSys
+####### Proceso de actualización de OpenGnsys
 #####################################################################
 
 
-echoAndLog "OpenGnSys update begins at $(date)"
+echoAndLog "OpenGnsys update begins at $(date)"
 
 pushd $WORKDIR
 
@@ -946,7 +952,7 @@ getNetworkSettings
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
 	checkAutoUpdate
 	if [ $? -ne 0 ]; then
-		echoAndLog "OpenGnSys updater has been overwritten."
+		echoAndLog "OpenGnsys updater has been overwritten."
 		echoAndLog "Please, re-execute this script."
 		exit
 	fi
@@ -962,7 +968,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Arbol de directorios de OpenGnSys.
+# Arbol de directorios de OpenGnsys.
 createDirs ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while creating directory paths!"
@@ -998,7 +1004,7 @@ fi
 # Actualizar ficheros complementarios del servidor
 updateServerFiles
 if [ $? -ne 0 ]; then
-	errorAndLog "Error updating OpenGnSys Server files"
+	errorAndLog "Error updating OpenGnsys Server files"
 	exit 1
 fi
 
@@ -1013,7 +1019,7 @@ updateInterfaceAdm
 apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
-	errorAndLog "Error updating OpenGnSys Web Admin files"
+	errorAndLog "Error updating OpenGnsys Web Admin files"
 	exit 1
 fi
 # Generar páginas Doxygen para instalar en el web
@@ -1036,7 +1042,7 @@ checkFiles
 updateSummary
 
 #rm -rf $WORKDIR
-echoAndLog "OpenGnSys update finished at $(date)"
+echoAndLog "OpenGnsys update finished at $(date)"
 
 popd
 
