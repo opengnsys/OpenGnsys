@@ -4,7 +4,7 @@
 #@brief   Librería o clase Registry
 #@class   Boot
 #@brief   Funciones para gestión del registro de Windows.
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -380,16 +380,21 @@ EOT
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-24
+#@version 1.1.0 - Soportar tipos BINARY (parejas hexadecimales separadas por espacio).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-09-28
 #*/ ##
 function ogSetRegistryValue ()
 {
 # Variables locales.
-local FILE
+local FILE i n tmpfile
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename str_data" \
-           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1' 1"
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Key\SubKey\StringValue' \"Abcde Fghij\"" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Key\SubKey\DwordValue' 1" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Key\SubKey\BinaryValue' \"04 08 0C 10\""
     return
 fi
 # Error si no se reciben 4 parámetros.
@@ -397,13 +402,44 @@ fi
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
-# Cambiar el dato del valor de registro.
-chntpw "$FILE" << EOT &> /dev/null
+# Fichero temporal para componer la entrada al comando "chntpw".
+tmpfile=/tmp/chntpw$$
+trap "rm -f $tmpfile" 1 2 3 9 15
+
+# Comprobar tipo de datos del valor del registro.
+cat << EOT >$tmpfile
+ls ${3%\\*}
+q
+EOT
+if [ -n "$(chntpw "$FILE" < $tmpfile 2> /dev/null | grep "BINARY.*<${3##*\\}>")" ]; then
+    # Procesar tipo binario (incluir nº de bytes y líneas de 16 parejas hexadecimales).
+    [[ "$4 " =~ ^([0-9A-Z]{2} )*$ ]] || ogRaiseError $OG_ERR_FORMAT "$4" || return $?
+    let n=${#4}+1
+    cat << EOT >$tmpfile
+cd ${3%\\*}
+ed ${3##*\\}
+$[n/3]
+EOT
+    # Formato de líneas hexadecimales:   :OFFSET  XX YY ZZ ... (hasta 16 parejas).
+    for (( i=0; i<n; i+=48 )); do
+        printf ":%05x  %s\n" $[i/3] "${4:$i:48}" >> $tmpfile
+    done
+    echo -e "s\nq\ny" >> $tmpfile
+else
+    # Cambiar el dato del valor de registro para cadenas y bytes.
+    cat << EOT >$tmpfile
 cd ${3%\\*}
 ed ${3##*\\}
 $4
 q
 y
 EOT
+
+fi
+
+# Aplicar cambios.
+chntpw "$FILE" < $tmpfile &> /dev/null
+rm -f $tmpfile
 }
+
 
