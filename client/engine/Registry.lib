@@ -255,6 +255,9 @@ echo "$FILE"
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
+#@version 1.1.0 - Soportar tipos BINARY (parejas hexadecimales separadas por espacio).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-09-28
 #*/ ##
 function ogGetRegistryValue ()
 {
@@ -274,7 +277,12 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
-chntpw "$FILE" << EOT 2> /dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2> /dev/null | awk '^/> Value/ {if (index($0, "REG_BINARY") > 0)
+                                                          {data=""}
+                                                      else
+                                                          {getline; data=$0;} }
+                                          /^:[0-9A-F]+ / {data=data""substr($0, 9, 48);}
+                                          END {print data;}'
 cd ${3%\\*}
 cat ${3##*\\}
 q
@@ -413,7 +421,7 @@ q
 EOT
 if [ -n "$(chntpw "$FILE" < $tmpfile 2> /dev/null | grep "BINARY.*<${3##*\\}>")" ]; then
     # Procesar tipo binario (incluir nº de bytes y líneas de 16 parejas hexadecimales).
-    [[ "$4 " =~ ^([0-9A-Z]{2} )*$ ]] || ogRaiseError $OG_ERR_FORMAT "$4" || return $?
+    [[ "$4 " =~ ^([0-9A-F]{2} )*$ ]] || ogRaiseError $OG_ERR_FORMAT "\"$4\"" || return $?
     let n=${#4}+1
     cat << EOT >$tmpfile
 cd ${3%\\*}
