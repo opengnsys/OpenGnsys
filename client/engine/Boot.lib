@@ -201,7 +201,7 @@ MNTDIR=$(ogMount $1 $2) || return $?
 # Fichero de configuración de GRUB.
 CONFDIR=$MNTDIR                               # Sistema de archivos de arranque (/boot).
 [ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Sist. archivos raíz con directorio boot.
-for f in $MNTDIR/{,grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg,grub.cfg.backup.og}; do
+for f in $MNTDIR/{,{,boot/}grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg.backupu.og,grub.cfg}
     [ -r $f ] && CONFFILE=$f
 done
 [ -n "$CONFFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
@@ -1010,7 +1010,7 @@ rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
 # /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
 #*/
 
-ogGrubAddOgclient () {
+function ogGrubAddOgclient () {
     local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
 
     # Si se solicita, mostrar ayuda.
@@ -1036,8 +1036,8 @@ ogGrubAddOgclient () {
     # Error si no existe archivo del grub
     [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
 
-    # Si existe la entrada de opengnsys nos salimos.
-    grep "menuentry Opengnsys" $GRUBGFC &>/dev/null && return 0
+    # Si existe la entrada de opengnsys, se borra
+    grep -q "menuentry Opengnsys" $GRUBGFC && sed -ie "/menuentry Opengnsys/,+6d" $GRUBGFC
 
     # Tipo de tabla de particiones
     PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
@@ -1046,7 +1046,7 @@ ogGrubAddOgclient () {
     read NUMDISK NUMPART <<< $(ogFindCache)
     let NUMDISK=$NUMDISK-1
     # kernel y sus opciones. Pasamos a modo usuario
-    KERNEL="/boot/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=true/ogactiveadmin=false/g /proc/cmdline)"
+    KERNEL="/boot/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=[a-z]*//g /proc/cmdline)"
 
     # Configuracion offline si existe parametro
     echo "$@" |grep offline &>/dev/null && STATUS=offline
