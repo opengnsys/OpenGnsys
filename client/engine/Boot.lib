@@ -201,7 +201,7 @@ MNTDIR=$(ogMount $1 $2) || return $?
 # Fichero de configuración de GRUB.
 CONFDIR=$MNTDIR                               # Sistema de archivos de arranque (/boot).
 [ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Sist. archivos raíz con directorio boot.
-for f in $MNTDIR/{,{,boot/}grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg.backupu.og,grub.cfg}
+for f in $MNTDIR/{,{,boot/}grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg.backupu.og,grub.cfg}; do
     [ -r $f ] && CONFFILE=$f
 done
 [ -n "$CONFFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
@@ -1010,7 +1010,7 @@ rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
 # /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
 #*/
 
-function ogGrubAddOgclient () {
+ogGrubAddOgclient () {
     local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
 
     # Si se solicita, mostrar ayuda.
