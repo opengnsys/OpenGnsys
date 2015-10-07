@@ -16,7 +16,7 @@ include_once("../controlacceso.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
 // Connection class.
-include_once("../includes/constantes.php");
+@include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../clases/SockHidra.php");
 		
@@ -597,7 +597,7 @@ EOD;
 		$reqframe = "nfn=Sondeo\r".
 			    "ido=$clientid\r".
 			    "iph=$clientip\r";
-		$result = sendCommand($serverip, $serverport, $reqframe, &$values);
+		$result = sendCommand($serverip, $serverport, $reqframe, $values);
 
 		// Connect to fetch client's status.
 		// Asuming client is off by default.
@@ -610,7 +610,7 @@ EOD;
 			$reqframe = "nfn=respuestaSondeo\r".
 				    "ido=$clientid\r".
 				    "iph=$clientip\r";
-			$result = sendCommand($serverip, $serverport, $reqframe, &$values);
+			$result = sendCommand($serverip, $serverport, $reqframe, $values);
 			// Wait until next checking (0.1 ms).
 			usleep(100000);
 		}
@@ -894,14 +894,14 @@ EOD;
 		$reqframe = "nfn=Sondeo\r".
 			    "ido=".implode(',', $clientid)."\r".
 			    "iph=".implode(';', $clientip)."\r";
-		sendCommand($serverip, $serverport, $reqframe, &$values);
+		sendCommand($serverip, $serverport, $reqframe, $values);
 		 // Wait to get response.
 		sleep(3);
 		// Connect to check status.
 		$reqframe = "nfn=respuestaSondeo\r".
 			    "ido=".implode(',', $clientid)."\r".
 			    "iph=".implode(';', $clientip)."\r";
-		sendCommand($serverip, $serverport, $reqframe, &$values);
+		sendCommand($serverip, $serverport, $reqframe, $values);
 		// Check status type.
 		if (isset($values["tso"])) {
 			preg_match_all('/[A-Z]{3}/', $values["tso"], $stat);
@@ -931,7 +931,7 @@ EOD;
 			    "mac=".implode(';', $clientmac)."\r".
 			    "mar=1\r";
 echo "req=".str_replace("\r"," ",$reqframe).".\n";
-		sendCommand($serverip, $serverport, $reqframe, &$values);
+		sendCommand($serverip, $serverport, $reqframe, $values);
 		if ($values["res"]) {
 print_r($values);
 			$tmp = array();
@@ -942,7 +942,7 @@ print_r($values);
 					    "dsk=".$clientdisk[$i]."\r".
 					    "par=".$clientpart[$i]."\r";
 echo "i=$i: req=".str_replace("\r"," ",$reqframe).".\n";
-				sendCommand($serverip, $serverport, $reqframe, &$values);
+				sendCommand($serverip, $serverport, $reqframe, $values);
 				if ($values["res"]) {
 
 					// AVISO: incluir comando Iniciar sesión en cola de acciones.
