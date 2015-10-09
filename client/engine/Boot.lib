@@ -201,7 +201,7 @@ MNTDIR=$(ogMount $1 $2) || return $?
 # Fichero de configuración de GRUB.
 CONFDIR=$MNTDIR                               # Sistema de archivos de arranque (/boot).
 [ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Sist. archivos raíz con directorio boot.
-for f in $MNTDIR/{,{,boot/}grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg.backup.og,grub.cfg}; do
+for f in $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg}; do
     [ -r $f ] && CONFFILE=$f
 done
 [ -n "$CONFFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
