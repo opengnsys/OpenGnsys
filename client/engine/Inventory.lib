@@ -49,6 +49,48 @@ ogGetOsVersion "$@" | cut -sf1 -d:
 
 
 #/**
+#         ogGetOsUuid int_ndisk int_nfilesys
+#@brief   Devuelve el UUID del sistema operativo instalado en un sistema de archivos.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden de la partición
+#@return  str_uuid -     UUID del sistema operativo.
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
+#@version 1.1.0 - Primera versión para OpenGnsys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-09-09
+#*/ ##
+function ogGetOsUuid ()
+{
+# Variables locales.
+local MNTDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 2  =>  540e47c6-8e78-4178-aa46-042e4803fb16"
+    return
+fi
+# Error si no se reciben 2 parametros.
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Montar la particion, si no lo estaba previamente.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Obtener UUID según el tipo de sistema operativo.
+case "$(ogGetOsType $1 $2)" in
+    Linux)
+        # Leer el UUID del sistema de ficheros raíz o el fichero de identificador.
+        findmnt -no UUID $MNTDIR 2>/dev/null || cat $MNTDIR/etc/machine-id 2>/dev/null
+        ;;
+    Windows)
+        # Leer identificador en clave de registro.
+        ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Cryptography\MachineGuid' 2>/dev/null
+        ;;
+esac
+}
+
+
+#/**
 #         ogGetOsVersion int_ndisk int_nfilesys
 #@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
