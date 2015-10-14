@@ -202,41 +202,48 @@ EOT
 
 
 #/**
-#         ogGetHivePath path_mountpoint str_hive
+#         ogGetHivePath path_mountpoint [str_hive|str_user]
 #@brief   Función básica que devuelve el camino del fichero con una sección del registro.
 #@param   path_mountpoint  directorio donde está montado el sistema Windows
 #@param   str_hive         sección del registro
 #@return  str_path - camino del fichero de registro
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
-#@note    hive = { DEFAULT, SAM, SECURITY, SOFTWARE, SYSTEM, COMPONENTS }
+#@note    hive = { DEFAULT, SAM, SECURITY, SOFTWARE, SYSTEM, COMPONENTS, NombreDeUsuario }
 #@warning El sistema de archivos de Windows debe estar montada previamente.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-18
+#@version 1.1.0 - Soportar registro de un usuario local.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-10-14
 #*/ ##
 function ogGetHivePath ()
 {
 # Variables locales.
-local FILE FILENT FILEXP
+local FILE HIVE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive" \
-           "$FUNCNAME /mnt/sda1 SOFTWARE  => /mnt/sda1/WINDOWS/System32/config/SOFTWARE"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint [str_hive|str_user]" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE  =>  /mnt/sda1/WINDOWS/System32/config/SOFTWARE" \
+           "$FUNCNAME /mnt/sda1 user1  =>  /mnt/sda1/Users/user1/NTUSER.DAT"
     return
 fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Camino del fichero de registro en NT/2000 o en XP y posteriores.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f "$FILENT" ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f "$FILEXP" ] && FILE="$FILEXP"
-[ -f "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+# Camino del fichero de registro de usuario o de sistema (de menor a mayor prioridad).
+for FILE in $(ogGetPath "/$1/Documents and Settings/$2/NTUSER.DAT") \
+            $(ogGetPath "/$1/Users/$2/NTUSER.DAT") \
+            $(ogGetPath "/$1/winnt/system32/config/$2") \
+            $(ogGetPath "/$1/windows/system32/config/$2"); do
+    [ -f "$FILE" ] && HIVE="$FILE"
+done
+# Error si no se encuentra el fichero de registro.
+[ -f "$HIVE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
 
-echo "$FILE"
+echo "$HIVE"
 }
 
 
@@ -277,10 +284,10 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
-chntpw "$FILE" << EOT 2> /dev/null | awk '^/> Value/ {if (index($0, "REG_BINARY") > 0)
-                                                          {data=""}
-                                                      else
-                                                          {getline; data=$0;} }
+chntpw "$FILE" << EOT 2> /dev/null | awk '/> Value/ {if (index($0, "REG_BINARY") > 0)
+                                                         {data=""}
+                                                     else
+                                                         {getline; data=$0;} }
                                           /^:[0-9A-F]+ / {data=data""substr($0, 9, 48);}
                                           END {print data;}'
 cd ${3%\\*}
