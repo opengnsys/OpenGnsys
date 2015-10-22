@@ -4,6 +4,11 @@ install schroot
 #install grub
 install xmlstarlet 
 install efibootmgr 
+############# Requisitos para el cliente 1.1.0 en pruebas compatible con Remote-PC
+install libxss1
+install python-prctl
+install python-six
+install python-requests
 ##############
 #install discover 
 #install laptop-detect 
@@ -59,17 +64,6 @@ install os-prober
 #install usb-creator-gtk 
 #install wodim 
 #install curlftpfs 
-#install nmap 
-#install cifs-utils 
 #install libnotify-bin 
 #install cryptsetup 
-#install reiserfsprogs 
-#install dosfstools 
-#install ntfsprogs 
-#install ntfs-3g 
-#install hfsutils
-#install reiser4progs 
-#install jfsutils 
-#install smbclient 
-#install wget 
 #install system-config-lvm
