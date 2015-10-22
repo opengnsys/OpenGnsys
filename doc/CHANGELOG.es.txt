@@ -3,9 +3,18 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
-Lista de cambios incluidos en OpenGnSys 1.1.0
+Lista de cambios incluidos en OpenGnsys 1.1.0
 ---------------------------------------------
 
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
+
+Tickets resueltos en módulo OpenGnsys Server:
+#719	setclientmode: desaparece equipo de NetBoot Avanzado
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#711	Mostrar porcentaje de uso de cada sistema de archivos
+#721	Consola Restaurar Imagen: falla el filtro de equipos
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.6
@@ -13,6 +22,7 @@ Lista de cambios incluidos en OpenGnSys 1.0.6
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #51	Detectar y tratar metadispositivos (mejora)
+#57	Incluir dpkg y rpm en cliente Initrd (mejora)
 #660	El arranque de sistema operativo debe depender de su tipo y no del sistema de ficheros
 #611	Crear función para mostrar y registrar la ejecución de un comando
 #626	Mejorar la integridad en el protocolo torrent
