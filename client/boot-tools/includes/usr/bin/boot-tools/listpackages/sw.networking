@@ -7,7 +7,7 @@ install trickle
 install lighttpd 
 install ethtool 
 install ssmping 
-install mii-diag
+#install mii-diag	# No existe en Ubuntu 15.04
 install tcpdump 
 install nmap
 install arping 

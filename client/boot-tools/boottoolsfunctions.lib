@@ -69,6 +69,13 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	vivid) 	# ogLive 1.1.0-rc1 basado en Ubuntu 15.04.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="vivid"
+		OSRELEASE="3.19.0-31-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
 	wheezy) 	# ogLive basado en Debian 7.3.
 		OSDISTRIB="debian"
 		OSCODENAME="wheezy"

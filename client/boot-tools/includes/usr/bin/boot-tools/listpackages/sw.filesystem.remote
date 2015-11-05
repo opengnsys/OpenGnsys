@@ -1,5 +1,5 @@
 #sw.filesystem.remote
-install nfs-common 
+#install nfs-common	# Provoca error de instalación en Ubuntu 15.04
 install sshfs 
 install cifs-utils
 install smbclient 

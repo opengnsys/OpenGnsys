@@ -20,11 +20,12 @@ install hfsplus
 install hfsprogs
 install hfsutils
 install nilfs-tools
-install ufsutils
 install vmfs-tools
 install ubuntu-zfs
-# Solo en ogLive basado en Ubuntu 14.04
-#install android-tools-adb
-#install android-tools-fastboot
-#install android-tools-fsutils
-#install f2fs-tools
+# Solo en ogLive anterior a Ubuntu 14.04
+#install ufsutils
+# Solo en ogLive basado en Ubuntu 14.04 o posterior
+install android-tools-adb
+install android-tools-fastboot
+install android-tools-fsutils
+install f2fs-tools

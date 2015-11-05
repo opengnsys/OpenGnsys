@@ -1,5 +1,7 @@
 install build-essential 
-install libattr* 
+#install libattr*		# Satura el tamaño del archivo en Ubuntu 15.04
+install libattr1
+install libattr1-dev
 install attr 
 install make 
 install m4 
