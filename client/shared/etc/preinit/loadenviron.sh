@@ -89,6 +89,10 @@ if [ -d $OPENGNSYS ]; then
     export OGLOGFILE="$OGLOG/$(ogGetIpAddress).log"
 fi
 
+# Sincronización horaria con servidor NTP.
+export TZ=${TZ:-"Europe/Madrid"}	# Zona horaria por defecto: UTC+1.
+[ -n "$ogntp" -a "$status" != "offline" ] && ntpdate $ogntp
+
 # Compatibilidad para usar proxy en clientes ogLive.
 [ -z "$http_proxy" -a -n "$ogproxy" ] && export http_proxy="$ogproxy" 
 
