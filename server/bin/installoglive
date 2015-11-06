@@ -1,9 +1,13 @@
 #!/bin/bash
-# installoglive - descarga e instala cliente ogLive.
-# Nota:	El usuario debe elegir el número del ogLive que desea instalar.
-# Uso:	installoglive
-# Autor: Ramón M. Gómez - ETSII Univ. Sevilla
-# Fecha: 2015-01-26
+# installoglive - instala cliente ogLive.
+# Nota:	Si no se especifica fichero local, el usuario debe elegir
+#	el número del ogLive que desea descargar e instalar.
+# Uso:	installoglive [fichero]
+# Autor:   Ramón M. Gómez - ETSII Univ. Sevilla
+# Fecha:   2015-01-26
+# Versión: 1.1 - Posibilidad para instalar fichero ogLive local.
+# Autor:   Ramón M. Gómez - ETSII Univ. Sevilla
+# Fecha:   2016-11-06
 
 
 # Control de acceso.
@@ -19,24 +23,39 @@ OPENGNSYS=/opt/opengnsys
 OGINITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
 OGVMLINUZ=$OPENGNSYS/tftpboot/ogclient/ogvmlinuz
 
-# Listar todos los ficheros ogLive que pueden ser descargados.
-OGLIVE=( $(wget $DOWNLOADURL -O - 2>/dev/null|grep ogLive.*iso) )
-NISOS=${#OGLIVE[@]}
-echo "Descargas disponibles (+- = instalado):"
-for i in $(seq 1 $NISOS); do
-	[ -e $OPENGNSYS/lib/${OGLIVE[i-1]} ] && OGLIVE[i-1]="+-${OGLIVE[i-1]}"
-done
-select opt in ${OGLIVE[@]}; do
-	[ -n "$opt" ] && OGLIVEFILE=${opt/+-/} && break
-done
+if [ -n "$1" ]; then
+	# Si se recibe un parámetro, utilizar fichero ogLive local.
+	TARGETFILE="$1"
+else
+	# Sin parámetros, listar todos los ficheros ogLive descargables.
+	OGLIVE=( $(wget $DOWNLOADURL -O - 2>/dev/null|grep ogLive.*iso) )
+	NISOS=${#OGLIVE[@]}
+	echo "Descargas disponibles (+- = instalado):"
+	for i in $(seq 1 $NISOS); do
+		[ -e $OPENGNSYS/lib/${OGLIVE[i-1]} ] && OGLIVE[i-1]="+-${OGLIVE[i-1]}"
+	done
+	select opt in ${OGLIVE[@]}; do
+		[ -n "$opt" ] && OGLIVEFILE=${opt/+-/} && break
+	done
 
-# Tamaño del fichero a descargar.
-SOURCELENGTH=$(LANG=C wget --spider $DOWNLOADURL/$OGLIVEFILE 2>&1 | awk '/Length:/ {print $2}')
-[ -n "$SOURCELENGTH" ] || exit
+	# Tamaño del fichero a descargar.
+	SOURCELENGTH=$(LANG=C wget --spider $DOWNLOADURL/$OGLIVEFILE 2>&1 | awk '/Length:/ {print $2}')
+	[ -n "$SOURCELENGTH" ] || exit
 
-# Descarga de ogLive.
-TARGETFILE=$OPENGNSYS/lib/$OGLIVEFILE
-wget $DOWNLOADURL/$OGLIVEFILE -O $TARGETFILE || exit
+	# Descarga de ogLive.
+	TARGETFILE=$OPENGNSYS/lib/$OGLIVEFILE
+	wget $DOWNLOADURL/$OGLIVEFILE -O $TARGETFILE || exit
+fi
+
+# Error si no existe el fichero ogLive o no es una imagen ISO.
+if [ ! -f $TARGETFILE ]; then
+	echo "$PROG: File not found." >&2
+	exit 2
+fi
+if [ -z "$(file -b $TARGETFILE | grep "ISO.*ogClient")" ]; then
+	echo "$PROG: File is not an OpenGnsys Client ISO image." >&2
+	exit 2
+fi
 
 # Obtener la clave actual de acceso a Samba para restaurarla tras la descarga.
 if [ -f $OGINITRD ]; then
