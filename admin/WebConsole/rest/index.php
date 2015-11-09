@@ -299,7 +299,7 @@ $app->get('/ous/:ouid', 'validateApiKey',
 );
 
 // Listar aulas de una OU.
-$app->get('/ous/:ouid/rooms', 'validateApiKey',
+$app->get('/ous/:ouid/labs', 'validateApiKey',
     function($ouid) {
 	global $cmd;
 
@@ -320,13 +320,13 @@ EOD;
 	if (checkParameter($rs->campos["idcentro"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response['error'] = false;
 		$response['ouid'] = $ouid;
-		$response['rooms'] = array();
+		$response['labs'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
-			$tmp['roomid'] = $rs->campos["idaula"];
-			$tmp['roomname'] = $rs->campos["nombreaula"];
+			$tmp['labid'] = $rs->campos["idaula"];
+			$tmp['labname'] = $rs->campos["nombreaula"];
 			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-			array_push($response['rooms'], $tmp);
+			array_push($response['labs'], $tmp);
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -336,14 +336,14 @@ EOD;
 );
 
 // Obtener datos de un aula.
-// Alternativa: $app->get('/room/:roomid', 'validateApiKey',
-//                  function($roomid) {
-$app->get('/ous/:ouid/rooms/:roomid', 'validateApiKey',
-    function($ouid, $roomid) {
+// Alternativa: $app->get('/lab/:labid', 'validateApiKey',
+//                  function($labid) {
+$app->get('/ous/:ouid/labs/:labid', 'validateApiKey',
+    function($ouid, $labid) {
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	$roomid = htmlspecialchars($roomid);
+	$labid = htmlspecialchars($labid);
 	$cmd->texto = <<<EOD
 SELECT COUNT(idordenador) AS defclients, aulas.*, adm.idadministradorcentro
   FROM aulas
@@ -351,7 +351,7 @@ SELECT COUNT(idordenador) AS defclients, aulas.*, adm.idadministradorcentro
  RIGHT JOIN usuarios USING(idusuario)
   LEFT JOIN ordenadores USING(idaula)
  WHERE idcentro='$ouid'
-   AND idaula='$roomid';
+   AND idaula='$labid';
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
@@ -359,8 +359,8 @@ EOD;
 	$rs->Primero();
 	if (checkParameter($rs->campos["idaula"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response['error'] = false;
-		$response['roomid'] = $rs->campos["idaula"];
-		$response['roomname'] = $rs->campos["nombreaula"];
+		$response['labid'] = $rs->campos["idaula"];
+		$response['labname'] = $rs->campos["nombreaula"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
 		$response['maxclients'] = $rs->campos["puestos"];
@@ -369,6 +369,7 @@ EOD;
 		$response['board'] = $rs->campos["pizarra"]==0 ? false: true;
 		$response['routerip'] = $rs->campos["router"];
 		$response['netmask'] = $rs->campos["netmask"];
+		$response['ntp'] = $rs->campos["ntp"];
 		$response['dns'] = $rs->campos["dns"];
 		$response['proxyurl'] = $rs->campos["proxy"];
 		switch ($rs->campos["modomul"]) {
@@ -388,15 +389,15 @@ EOD;
 );
 
 // Listar clientes de un aula.
-$app->get('/ous/:ouid/rooms/:roomid/clients', 'validateApiKey',
-    function($ouid, $roomid) {
+$app->get('/ous/:ouid/labs/:labid/clients', 'validateApiKey',
+    function($ouid, $labid) {
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	$roomid = htmlspecialchars($roomid);
+	$labid = htmlspecialchars($labid);
 	// Listar los clientes del aula si el usuario de la apikey es admin de su UO.
 	// Consulta temporal,
-	$cmd->texto = "SELECT * FROM ordenadores WHERE idaula=$roomid;";
+	$cmd->texto = "SELECT * FROM ordenadores WHERE idaula=$labid;";
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Recordset open error.
@@ -404,7 +405,7 @@ $app->get('/ous/:ouid/rooms/:roomid/clients', 'validateApiKey',
 	if (checkParameter($rs->campos["idaula"])) {
 		$response['error'] = false;
 		$response['ouid'] = $ouid;
-		$response['roomid'] = $roomid;
+		$response['labid'] = $labid;
 		$response['clients'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
@@ -420,19 +421,19 @@ $app->get('/ous/:ouid/rooms/:roomid/clients', 'validateApiKey',
 );
 
 // Obtener datos de un cliente.
-$app->get('/ous/:ouid/rooms/:roomid/clients/:clntid', 'validateApiKey',
-    function($ouid, $roomid, $clntid) {
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
+    function($ouid, $labid, $clntid) {
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	$roomid = htmlspecialchars($roomid);
+	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
 	$cmd->texto = "SELECT * FROM ordenadores WHERE idordenador='$clntid';";
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
-//	if ($roomid != $rs->campos["idaula"]) ...
+//	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"])) {
 		$response['error'] = false;
 		$response['clientid'] = $rs->campos["idordenador"];
@@ -455,12 +456,12 @@ $app->get('/ous/:ouid/rooms/:roomid/clients/:clntid', 'validateApiKey',
 );
 
 // Obtener la configuración de hardware de un cliente.
-$app->get('/ous/:ouid/rooms/:roomid/clients/:clntid/hardware', 'validateApiKey',
-    function($ouid, $roomid, $clntid) {
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/hardware', 'validateApiKey',
+    function($ouid, $labid, $clntid) {
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	$roomid = htmlspecialchars($roomid);
+	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
 	$cmd->texto = <<<EOD
 SELECT ordenadores.idordenador, ordenadores.nombreordenador,
@@ -477,7 +478,7 @@ EOD;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 //	if ($ouid != $rs->campos["idcentro"]) ...
-//	if ($roomid != $rs->campos["idaula"]) ...
+//	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"])) {
 		$response['error'] = false;
 		$response['clientid'] = $rs->campos["idordenador"];
@@ -497,12 +498,12 @@ EOD;
 );
 
 // Obtener datos de configuración de discos del cliente.
-$app->get('/ous/:ouid/rooms/:roomid/clients/:clntid/diskcfg', 'validateApiKey',
-    function($ouid, $roomid, $clntid) {
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/diskcfg', 'validateApiKey',
+    function($ouid, $labid, $clntid) {
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	$roomid = htmlspecialchars($roomid);
+	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
 	$cmd->texto = <<<EOD
 SELECT ordenadores.idordenador AS clientid, ordenadores.nombreordenador,
@@ -521,7 +522,7 @@ EOD;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
-//	if ($roomid != $rs->campos["idaula"]) ...
+//	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["clientid"])) {
 		$response['error'] = false;
 		$response['clientid'] = $rs->campos["clientid"];
@@ -566,15 +567,15 @@ EOD;
 );
 
 // Obtener estado de ejecución del cliente.
-$app->get('/ous/:ouid/rooms/:roomid/clients/:clntid/status', 'validateApiKey',
-    function($ouid, $roomid, $clntid) {
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/status', 'validateApiKey',
+    function($ouid, $labid, $clntid) {
 	global $cmd;
 	global $LONCABECERA;
 	global $LONHEXPRM;
 
 	// Pparameters.
 	$ouid = htmlspecialchars($ouid);
-	$roomid = htmlspecialchars($roomid);
+	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
 
 	// Database query.
@@ -702,7 +703,7 @@ $app->get('/ous/:ouid/repos/:repoid', 'validateApiKey',
 	if (checkParameter($rs->campos["idrepositorio"])) {
 		$response['error'] = false;
 		$response['repoid'] = $rs->campos["idrepositorio"];
-		$response['roomname'] = $rs->campos["nombrerepositorio"];
+		$response['reponame'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['ipaddress'] = $rs->campos["ip"];
 		$response['port'] = $rs->campos["puertorepo"];
@@ -734,6 +735,7 @@ $app->get('/ous/:ouid/images', 'validateApiKey',
 			$tmp = array();
 			$tmp['imageid'] = $rs->campos["idimagen"];
 			$tmp['imagename'] = $rs->campos["nombreca"];
+			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
 			array_push($response['images'], $tmp);
 			$rs->Siguiente();
 		}
@@ -761,6 +763,7 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 		$response['imagename'] = $rs->campos["nombreca"];
 		$response['description'] = $rs->campos["descripcion"];
 		$response['comments'] = $rs->campos["comentarios"];
+		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
 		$response['repoid'] = $rs->campos["idrepositorio"];
 		switch ($rs->campos["tipo"]) {
 			case 1:  $response['type'] = "monolithic"; break;
@@ -852,6 +855,7 @@ SELECT s.ipserveradm, s.portserveradm,
  WHERE centros.idcentro='$ouid'
    AND aulas.inremotepc=1
    AND imagenes.idimagen='$imageid'
+   AND imagenes.inremotepc=1
  ORDER BY RAND();
 EOD;
 	$rs=new Recordset;
