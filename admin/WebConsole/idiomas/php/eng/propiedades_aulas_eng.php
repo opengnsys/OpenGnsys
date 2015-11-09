@@ -45,6 +45,8 @@ $TbMsg[509]="Computer Photo";
 $TbMsg[5091]="Insert Photo";
 $TbMsg[5092]="View Images";
 // Ramón
+$TbMsg['PROP_NTPIP']="NTP Server IP <em>(optional)</em>";
+$TbMsg['PROP_DEFTIMEZONE']="default time zone";
 $TbMsg['PROP_DNSIP']="DNS Server IP <em>(optional)</em>";
 $TbMsg['PROP_PROXYURL']="Proxy Server URL <em>(optional)</em>";
 ?>

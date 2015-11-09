@@ -41,6 +41,7 @@ $ipmul="";
 $pormulmetodos="";
 $pormul=9000;
 $velmul="";
+$ntp="";
 $dns="";
 $proxy="";
 $idmenu="";
@@ -234,6 +235,19 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3><INPUT  class="formulariodatos" name=netmask style="width:100" type=text value='.$netmask.'></TD>';
 			?>
 		</TR>
+<!---- Ramón ------------------------ntp------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_NTPIP'] ?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion)
+					echo '<td colspan="3">'.$ntp.'</td>';
+				else
+					echo '<td colspan="3"><input class="formulariodatos" name="ntp" style="width:100" type="text" maxlength="15" value="'.$ntp.'" /> ';
+					if (exec("timedatectl status | awk -F'[:()]' '/Time.*zone/ {print $2}'", $out, $err)) {
+						echo '<em>('.$TbMsg['PROP_DEFTIMEZONE'].': '.$out[0].')</em>;
+					}
+					echo "</td>";
+			?>
+		</tr>
 <!---- Ramón ------------------------dns------------------------------------------------->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg['PROP_DNSIP'] ?>&nbsp;</th>
@@ -460,6 +474,7 @@ function TomaPropiedades($cmd,$ida)
 	global $pormul;
 	global $velmul;
 ###################### Ramón
+	global $ntp;
 	global $dns;
 	global $proxy;
 ###################### UHU
@@ -543,6 +558,7 @@ function TomaPropiedades($cmd,$ida)
 		$modp2p=$rs->campos["modp2p"];
 		$timep2p=$rs->campos["timep2p"];
 #################### Ramón
+		$ntp=$rs->campos["ntp"];
 		$dns=$rs->campos["dns"];
 		$proxy=$rs->campos["proxy"];
 #################### UHU

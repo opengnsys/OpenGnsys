@@ -47,6 +47,7 @@ $netmask=0;
 $modp2p=0;
 $timep2p=0;
 ############ Ramón
+$ntp="";
 $dns="";
 $proxy="";
 ############ UHU
@@ -93,6 +94,7 @@ if (isset($_POST["netmask"])) $netmask=$_POST["netmask"];
 if (isset($_POST["modp2p"])) $modp2p=$_POST["modp2p"]; 
 if (isset($_POST["timep2p"])) $timep2p=$_POST["timep2p"]; 
 ################# Ramón
+if (isset($_POST["ntp"])) $ntp=$_POST["ntp"]; 
 if (isset($_POST["dns"])) $dns=$_POST["dns"]; 
 if (isset($_POST["proxy"])) $proxy=$_POST["proxy"]; 
 ################# UHU
@@ -202,6 +204,7 @@ function Gestiona(){
 	global  $modp2p;
 	global  $timep2p;
 ########################## Ramón
+	global $ntp;
 	global $dns;
 	global $proxy;
 	global $idioma;
@@ -234,6 +237,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idproautoexec",$idproautoexec,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
+	$cmd->CreaParametro("@ntp",$ntp,0);
 	$cmd->CreaParametro("@dns",$dns,0);
 	$cmd->CreaParametro("@proxy",$proxy,0);
 	$cmd->CreaParametro("@modomul",$modomul,1);
@@ -258,12 +262,12 @@ function Gestiona(){
 						(idcentro, grupoid, nombreaula, urlfoto, cagnon,
 						 pizarra, ubicacion, comentarios, puestos,
 						 horaresevini, horaresevfin, router, netmask,
-						 dns, proxy, modomul, ipmul, pormul, velmul,
+						 ntp, dns, proxy, modomul, ipmul, pormul, velmul,
 						 modp2p, timep2p, validacion, paginalogin, paginavalidacion) 
 					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @cagnon,
 						 @pizarra, @ubicacion, @comentarios, @puestos,
 						 @horaresevini, @horaresevfin, @router, @netmask,
-						 @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
+						 @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
 						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -281,7 +285,7 @@ function Gestiona(){
 					    pizarra=@pizarra, ubicacion=@ubicacion,
 					    comentarios=@comentarios, puestos=@puestos,
 					    horaresevini=@horaresevini, horaresevfin=@horaresevfin,
-					    router=@router,netmask=@netmask, dns=@dns, proxy=@proxy,
+					    router=@router,netmask=@netmask, ntp=@ntp, dns=@dns, proxy=@proxy,
 					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
 					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
 					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion

@@ -23,3 +23,4 @@ TbMsg[15]="La URL de la pagina de login no es valida";
 TbMsg[16]="La URL de la pagina de validación no es valida";
 TbMsg[17]="La ubicacion solo puede contener caracteres alfanumericos"
 TbMsg[18]="Los comentarios solo pueden contener caracteres alfanumericos"
+TbMsg[19]="NTP server IP address is not valid";
