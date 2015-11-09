@@ -9,6 +9,9 @@ Lista de cambios incluidos en OpenGnsys 1.1.0
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
 
+Tickets resueltos en módulo OpenGnsys Client:
+#725	Sincronización horaria de clientes con servidor NTP
+
 Tickets resueltos en módulo OpenGnsys Server:
 #719	setclientmode: desaparece equipo de NetBoot Avanzado
 
@@ -42,7 +45,8 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 
 Tickets resueltos en módulo OpenGnSys Client:
 #136	Splash de arranque con Plymouth (no se resolverá)
-#615    Cliente oglive 1.0.5 basado en Ubuntu 12.04.2 LTS (duplicado de #603)
+#603	Cliente ogLive 1.0.6 basado en Ubuntu 12.04 LTS con Kernel 3.11
+#615	Cliente ogLive 1.0.5 basado en Ubuntu 12.04.2 LTS (duplicado de #603)
 #649	El arranque gráfico del ogLive depende del hardware (no se resolverá)
 #653	Decidir el número de parámetros del script configureOsCustom
 #656	Script updateCache: erratas en imágenes sincronizadas
