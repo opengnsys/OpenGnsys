@@ -14,6 +14,13 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE aulas
 			ADD inremotepc TINYINT DEFAULT 0;
 	END IF;
+	# Añadir campo para incluir imágenes en proyecto Remote PC (ticket #708).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='inremotepc' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE imagenes
+			ADD inremotepc TINYINT DEFAULT 0;
+	END IF;
 	# Añadir campo para clave de acceso a la API REST (ticket #708).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='apikey' AND TABLE_NAME='usuarios' AND TABLE_SCHEMA=DATABASE())
@@ -41,6 +48,13 @@ CREATE PROCEDURE addcols() BEGIN
 	THEN
 		ALTER TABLE tipohardwares
 			DROP pci;
+	END IF;
+	# Añadir servidor de sincronización horaria NTP (ticket #725).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='ntp' AND TABLE_NAME='aulas' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE aulas
+			ADD ntp VARCHAR(30) AFTER proxy;
 	END IF;
 END//
 # Ejecutar actualización condicional.

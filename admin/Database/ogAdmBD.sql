@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `netmask` varchar( 30 ),
   `dns` varchar (30),
   `proxy` varchar (30),
+  `ntp` varchar (30),
   `modp2p` enum('seeder','peer','leecher') DEFAULT 'peer',
   `timep2p` int(11) NOT NULL DEFAULT '60',
   `validacion` tinyint(1) DEFAULT '0',
@@ -424,6 +425,7 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
   `imagenid` int NOT NULL DEFAULT 0,
   `ruta` varchar(250) NULL,
   `fechacreacion` datetime DEFAULT NULL,
+  `inremotepc` tinyint DEFAULT 0,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

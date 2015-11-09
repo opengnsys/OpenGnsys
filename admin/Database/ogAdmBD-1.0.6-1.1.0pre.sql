@@ -21,8 +21,12 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
-# Añadir campo para incluir aulas en proyecto Remote PC (ticket #708).
+# Añadir campos para aulas: servidor NTP e inclusión en proyecto Remote PC (tickets #725 y #708).
 ALTER TABLE aulas
+	ADD ntp VARCHAR(30) AFTER proxy,
+	ADD inremotepc TINYINT DEFAULT 0;
+# Añadir campo para incluir imágenes en proyecto Remote PC (ticket #708).
+ALTER TABLE imagenes
 	ADD inremotepc TINYINT DEFAULT 0;
 # Añadir campo para clave de acceso a la API REST (ticket #708).
 ALTER TABLE usuarios
@@ -41,4 +45,5 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 	(19, 'Tipo de proceso de arranque', '', 'boo');
 ALTER TABLE ordenadores
 	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
+
 
