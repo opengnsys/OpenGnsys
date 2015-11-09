@@ -70,7 +70,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$cmd->texto="SELECT ordenadores.nombreordenador AS hostname, ordenadores.ip AS ip,
 			    ordenadores.mac AS mac, ordenadores.netiface AS netiface,
 			    aulas.netmask AS netmask, aulas.router AS router,
-			    aulas.dns AS dns, aulas.proxy AS proxy,
+			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
 			    aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
 			    (SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
 			    menus.resolucion AS vga, perfileshard.winboot AS winboot
@@ -91,6 +91,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$netiface=$rs->campos["netiface"];
 	$netmask=$rs->campos["netmask"];
 	$router=$rs->campos["router"];
+	$ntp=$rs->campos["ntp"];
 	$dns=$rs->campos["dns"];
 	$proxy=$rs->campos["proxy"];
 	$group=cleanString($rs->campos["grupo"]);
@@ -123,6 +124,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 		  " oglog=$server" .
 		  " ogshare=$server";
 	// Añadir parámetros opcionales.
+	if (! empty ($ntp))	{ $infohost.=" ogntp=$ntp"; }
 	if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
 	if (! empty ($proxy))	{ $infohost.=" ogproxy=$proxy"; }
 	if (! empty ($winboot))	{ $infohost.=" winboot=$winboot"; }
