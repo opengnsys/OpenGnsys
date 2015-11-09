@@ -55,6 +55,13 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	wheezy) 	# ogLive basado en Debian 7.3.
+		OSDISTRIB="debian"
+		OSCODENAME="wheezy"
+		OSRELEASE="3.2.0-4-i386"
+		OSARCH="i386"
+		OSHTTP="http://ftp.es.debian.org/debian/"
+		;;
 	quantal)	# ogLive 1.0.5-rc2 basado en Ubuntu 12.10 con Kernel descargado.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="quantal"
@@ -69,24 +76,24 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	vivid) 	# ogLive 1.1.0-rc1 basado en Ubuntu 15.04.
+	trusty) 	# ogLive 1.0.5-rc4 basado en Ubuntu 14.04.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="trusty"
+		OSRELEASE="3.13.0-24-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	vivid) 	        # ogLive 1.1.0-rc1 basado en Ubuntu 15.04.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="vivid"
 		OSRELEASE="3.19.0-31-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	wheezy) 	# ogLive basado en Debian 7.3.
-		OSDISTRIB="debian"
-		OSCODENAME="wheezy"
-		OSRELEASE="3.2.0-4-i386"
-		OSARCH="i386"
-		OSHTTP="http://ftp.es.debian.org/debian/"
-		;;
-	trusty) 	# ogLive 1.0.5-rc4 basado en Ubuntu 14.04.
+	wily) 	        # ogLive 1.1.0-rc1 basado en Ubuntu 15.10.
 		OSDISTRIB="ubuntu"
-		OSCODENAME="trusty"
-		OSRELEASE="3.13.0-24-generic"
+		OSCODENAME="wily"
+		OSRELEASE="4.2.0-16-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
