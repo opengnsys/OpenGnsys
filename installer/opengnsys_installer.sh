@@ -1461,6 +1461,14 @@ function openGnsysConfigure()
 	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
 	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 
+	# Configuración del motor de clonación.
+	# - Zona horaria del servidor.
+	TZ=$(timedatectl status|awk -F"[:()]" '/Time.*zone/ {print $2}')
+	cat << EOT >> $INSTALL_TARGET/client/etc/engine.cfg
+# OpenGnsys Server timezone.
+TZ="${TZ// /}"
+EOT
+
 	# Revisar permisos generales.
 	if [ -x $INSTALL_TARGET/bin/checkperms ]; then
 		echoAndLog "${FUNCNAME}(): Checking permissions."

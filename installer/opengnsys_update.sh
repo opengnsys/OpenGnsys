@@ -26,9 +26,9 @@
 #@version 1.0.6 - Redefinir URLs de ficheros de configuración usando HTTPS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2015/03/12
-#@version 1.1.0 - Instalación de API REST.
+#@version 1.1.0 - Instalación de API REST y configuración de zona horaria.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
-#@date    2015/06/18
+#@date    2015/11/09
 #*/
 
 
@@ -425,7 +425,15 @@ function updateClientFiles()
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
 	fi
-	
+	# Actualizar fichero de configuración del motor de clonación.
+	if ! grep -q "^TZ" $INSTALL_TARGET/client/etc/engine.cfg; then
+		TZ=$(timedatectl status | awk -F"[:()]" '/Time.*zone/ {print $2}')
+		cat << EOT >> $INSTALL_TARGET/client/etc/engine.cfg
+# OpenGnsys Server timezone.
+TZ="${TZ// /}"
+EOT
+	fi
+
 	echoAndLog "${FUNCNAME}(): client files update success."
 }
 
@@ -704,6 +712,7 @@ function updateServerFiles()
 		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g; s!UrlMenu=http://!UrlMenu=https://!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
+
 	echoAndLog "${FUNCNAME}(): updating cron files"
 	[ ! -f /etc/cron.d/opengnsys ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -911,7 +920,7 @@ function updateSummary()
 	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
 	echoAndLog "Update log file:                  $LOG_FILE"
 	if [ -n "$NEWFILES" ]; then
-		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
+		echoAndLog "Check new config files:           $(echo $NEWFILES)"
 	fi
 	if [ -n "$NEWSERVICES" ]; then
 		echoAndLog "New compiled services:            $(echo $NEWSERVICES)"
