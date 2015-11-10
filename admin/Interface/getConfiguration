@@ -40,7 +40,7 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
 			# Sistema de archivos para datos (sistema operativo "DATA")
 			[ -z "$soi" -a "$fsi" != "EMPTY" -a "$fsi" != "CACHE" ] && soi="DATA"
 			# Obtener porcentaje de uso.
-			uso=$(df $(ogMountPoint $dsk $par) | awk '{getline; printf "%d",$5}')
+			uso=$(df $(ogGetMountPoint $dsk $par) | awk '{getline; printf "%d",$5}')
 			uso=${uso:0}
 			;;
    	esac
