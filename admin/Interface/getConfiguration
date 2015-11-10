@@ -18,6 +18,7 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
         MSDOS)  ptt=1 ;; 
         GPT)    ptt=2 ;; 
         LVM)    ptt=3 ;; 
+        ZPOOL)  ptt=4 ;; 
         *)      ptt=0 ;; 
     esac
     # Información de disco (partición 0)
@@ -38,7 +39,8 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
 		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
 			# Sistema de archivos para datos (sistema operativo "DATA")
 			[ -z "$soi" -a "$fsi" != "EMPTY" -a "$fsi" != "CACHE" ] && soi="DATA"
-			uso=$(df $(ogDiskToDev $dsk $par) | awk '{getline; printf "%d",$5}')
+			# Obtener porcentaje de uso.
+			uso=$(df $(ogMountPoint $dsk $par) | awk '{getline; printf "%d",$5}')
 			uso=${uso:0}
 			;;
    	esac

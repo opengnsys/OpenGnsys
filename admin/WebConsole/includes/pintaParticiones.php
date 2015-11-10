@@ -87,6 +87,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 								 break;
 							case 3:  $disktable[$tbKeys[$k]["numdisk"]] = "LVM";
 								 break;
+							case 4:  $disktable[$tbKeys[$k]["numdisk"]] = "ZPOOL";
+								 break;
 							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
 						}
 					}
@@ -94,7 +96,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<tr height="16">'.chr(13);
                                 	        echo'<td align="center">&nbsp;</td>'.chr(13);
 						echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-						if ($disktable[$tbKeys[$k]["numdisk"]] == "LVM") {
+						if ($disktable[$tbKeys[$k]["numdisk"]] == "LVM" or $disktable[$tbKeys[$k]["numdisk"]] == "ZPOOL") {
 							echo '<td></td>'.chr(13);
 						}
 						else {
