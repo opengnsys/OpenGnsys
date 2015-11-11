@@ -3,6 +3,11 @@
 # (puede usarse como base para el programa de apagado usado por OpenGNSys Admin).
 
 
+# Registrar ejecución manual de script. 
+case "$(ogGetCaller)" in
+    browser|bash)  ogEcho log info "Script: $0" ;;
+esac
+
 # No registrar errores.
 export DEBUG="no"
 
@@ -10,10 +15,10 @@ export DEBUG="no"
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
-    ogUnmountAll $i 2>/dev/null
+    ogUnmountAll $i &>/dev/null
 done
 echo "[50] Desmontar cache local."
-ogUnmountCache 2>/dev/null
+ogUnmountCache &>/dev/null
 
 # Volver a registrar errores.
 unset DEBUG
