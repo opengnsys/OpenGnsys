@@ -801,8 +801,7 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.4-rc4
-	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso 	# 1.0.6-rc1
+	local FILENAME=ogLive-vivid-3.19.0-31-generic-r4717.iso		# 1.1.0-rc1
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH

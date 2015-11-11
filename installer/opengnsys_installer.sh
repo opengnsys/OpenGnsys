@@ -1352,8 +1352,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.6-kernel3.2
-	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso	# 1.0.6-kernel3.11
+	local FILENAME=ogLive-vivid-3.19.0-31-generic-r4717.iso		# 1.1.0-rc1
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
  
@@ -1366,7 +1365,7 @@ function clientCreate()
 		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
 	fi
 	if [ ! -s $TARGETFILE ]; then
-		errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
+		errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
 		return 1
 	fi
 	# Montar imagen, copiar cliente ogclient y desmontar.
