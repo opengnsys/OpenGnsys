@@ -7,6 +7,9 @@
 #_______________________________________________________________________________________________________________________________
 
 
+# No registrar los errores.
+export DEBUG="no"
+
 cfg=""
 disks=$(ogDiskToDev | wc -w)
 for ((dsk=1; dsk<=$disks; dsk++)); do
@@ -66,4 +69,7 @@ awk '{  n=split($0,sep,";");
 		    dua[1],dua[2],dua[3],dua[4],dua[5],dua[6],dua[7]);
 	    }
      }' $cfgfile
+
+# Volver a registrar los errores.
+unset DEBUG
 

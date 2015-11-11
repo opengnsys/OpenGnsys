@@ -4,7 +4,7 @@
 #@brief    Librería o clase System
 #@class    System
 #@brief    Funciones básicas del sistema.
-#@version  1.0.6
+#@version  1.1.0
 #@warning  License: GNU GPLv3+
 #*/
 
@@ -17,6 +17,7 @@
 #@param   str_message  mensaje (puede recibir más de 1 parámetro.
 #@return  Mensaje mostrado.
 #@warning Si no se indica nivel de registro, solo muestra mensaje en pantalla.
+#@warning Si DEBUG="no", no se registran mensajes de error.
 #@note    logfile = { log, command, session }; usa "log" si se indica nivel de registro.
 #@note    loglevel = { help, info, warning, error }
 #@note    El nivel de ayuda \c (help) no se registra en el fichero de incidencias.
@@ -26,6 +27,9 @@
 #@version 1.0.5 - Elegir fichero de log.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-03-17
+#@version 1.1.0 - Posibilidad de no registrar mensajes en ficheros.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-11-10
 #*/
 function ogEcho () {
 
@@ -53,7 +57,9 @@ esac
 
 if [ -n "$LOGLEVEL" ]; then
     DATETIME=$(date +"%F %T")
-    logger -s -t "OpenGnSys $LOGLEVEL" "$DATETIME $*" 2>&1 | tee -a $OGLOGFILE $LOGS
+    # Registrar mensajes en fichero de log si la depuración no está desactivada.
+    [ "${DEBUG,,}" != "no" ] && LOGS="$OGLOGFILE $LOGS"
+    logger -s -t "OpenGnsys $LOGLEVEL" "$DATETIME $*" 2>&1 | tee -a $LOGS
 else
     echo "$*" | tee -a $LOGS
 fi
