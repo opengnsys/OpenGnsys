@@ -183,6 +183,8 @@ ND="$1"
 DISK=$(ogDiskToDev "$ND") || return $?
 # Se calcula el ultimo sector del disco (total de sectores usables)
 SECTORS=$(ogGetLastSector $1)
+# Se recalcula el nº de sectores del disco si existe partición de caché.
+CACHEPART=$(ogFindCache 2>/dev/null)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 # Si el disco es GPT empieza en el sector 2048  por defecto, pero podria cambiarse
