@@ -1084,10 +1084,12 @@ MENUENTRY="menuentry "Opengnsys"  --class gnu-linux --class gnu --class os { \n 
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception No existe archivo de configuracion del grub.
-#@ /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#@version 1.1 Se comprueban las particiones de Windows con blkid (y no con grub.cfg)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-11-17
 #*/
 function ogGrubHidePartitions {
-    local DIRMOUNT GRUBGFC PARTTABLETYPE WINENTRY ENTRY TEXT ENTRY2 LINE2 PART2 HIDDEN
+    local DIRMOUNT GRUBGFC PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
@@ -1106,8 +1108,8 @@ function ogGrubHidePartitions {
     # Error si no existe archivo del grub
     [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
 
-    # Si solo hay una entrada de Windows me salgo
-    [ $(grep -n "menuentry.*Windows" $GRUBGFC |wc -l) -eq 1 ] && return 0
+    # Si solo hay una particion de Windows me salgo
+    [ $(blkid | grep 'ntfs' |wc -l) -eq 1 ] && return 0
 
     # Elimino llamadas a parttool, se han incluido en otras ejecuciones de esta funcion.
     sed -i '/parttool/d' $GRUBGFC
@@ -1116,16 +1118,17 @@ function ogGrubHidePartitions {
 
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
     WINENTRY=$(awk '/menuentry.*Windows/ { gsub(/\/dev\/sda/,""); gsub(/\)\"/, "");  print NR":"$6} ' $GRUBGFC | sed '1!G;h;$!d' )
+    # Particiones de Windows, pueden no estar en el grub.
+    WINPART=$(blkid|awk '/ntfs/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
     # Modifico todas las entradas de Windows.
     for ENTRY in $WINENTRY; do
         LINE=${ENTRY%:*}
+	PART=${ENTRY#*:}
         # En cada entrada, oculto o muestro cada particion.
         TEXT=""
-        for ENTRY2 in $WINENTRY; do
-                LINE2=${ENTRY2%:*}
-                PART2=${ENTRY2#*:}
+        for PART2 in $WINPART; do
                 # Muestro solo la particion de la entrada actual.
-                [ $LINE2 -eq $LINE ] && HIDDEN="-" || HIDDEN="+"
+                [ $PART2 -eq $PART ] && HIDDEN="-" || HIDDEN="+"
 
                 TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2) hidden$HIDDEN \n$TEXT"
         done
