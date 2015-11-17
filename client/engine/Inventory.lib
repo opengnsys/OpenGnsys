@@ -210,7 +210,7 @@ if [ -z "$VERSION" ]; then
     TYPE="BSD"
     FILE="$MNTDIR/boot/kernel/kernel"
     if [ -r $FILE ]; then
-        VERSION="$(strings $FILE|awk '/@.*RELEASE/ {gsub(/@\(#\),""); print $1,$2}')"
+        VERSION="$(strings $FILE|awk '/@.*RELEASE/ {sub(/@\(#\)/,""); print $1,$2}')"
         [ -n "$(file -b $FILE | grep 'x86-64')" ] && IS64BIT="$MSG_64BIT"
     fi
 fi
