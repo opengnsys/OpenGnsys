@@ -1109,7 +1109,7 @@ function ogGrubHidePartitions {
     [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
 
     # Si solo hay una particion de Windows me salgo
-    [ $(blkid | grep 'ntfs' |wc -l) -eq 1 ] && return 0
+    [ $(fdisk -l $(ogDiskToDev $1) | grep 'NTFS' |wc -l) -eq 1 ] && return 0
 
     # Elimino llamadas a parttool, se han incluido en otras ejecuciones de esta funcion.
     sed -i '/parttool/d' $GRUBGFC
@@ -1119,7 +1119,7 @@ function ogGrubHidePartitions {
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
     WINENTRY=$(awk '/menuentry.*Windows/ { gsub(/\/dev\/sda/,""); gsub(/\)\"/, "");  print NR":"$6} ' $GRUBGFC | sed '1!G;h;$!d' )
     # Particiones de Windows, pueden no estar en el grub.
-    WINPART=$(blkid|awk '/ntfs/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
+    WINPART=$(fdisk -l $(ogDiskToDev $1)|awk '/NTFS/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
     # Modifico todas las entradas de Windows.
     for ENTRY in $WINENTRY; do
         LINE=${ENTRY%:*}
