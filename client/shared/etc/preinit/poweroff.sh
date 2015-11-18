@@ -14,12 +14,17 @@
 if [ -n "$OPENGNSYS" ]; then
     echo "${MSG_POWEROFFCONF:-.}"
 
+    # Sincronización horaria con servidor NTP.
+    [ -n "$ogntp" -a "$status" != "offline" ] && ntpdate $ogntp
+
     # Crear fichero de configuración por defecto (30 min. de espera).
     POWEROFFCONF=/etc/poweroff.conf
     cat << FIN > $POWEROFFCONF
 POWEROFFSLEEP=30
 POWEROFFTIME=
 FIN
+    # Incluir zona horaria en el fichero de configuración.
+    awk 'BEGIN {RS=" "} /^TZ=/ {print}' /proc/cmdline >> $POWEROFFCONF
 
     # Lanzar el proceso "cron".
     cron -l
