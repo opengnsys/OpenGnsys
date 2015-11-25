@@ -28,11 +28,9 @@
 			var despleimagen=document.getElementById("despleimagen_"+parcod[0]+"_"+parcod[1]);
 			var imgcan=despleimagen.value.split("_");
 			atributos+="idi="+imgcan[0]+RC; // Identificador de la imagen
-			atributos+="nci="+imgcan[1]+RC;	// Nonbre canónico		
+			atributos+="nci="+imgcan[1]+RC;	// Nombre canónico		
+			atributos+="ipr="+imgcan[2]+RC; // Ip repositorio
 		
-			var desplerepositorios=document.getElementById("desplerepositorios_"+parcod[0]+"_"+parcod[1]);
-			var idx=desplerepositorios.selectedIndex;
-			atributos+="ipr="+desplerepositorios.options[idx].value+RC;
 			break;		
 		}
 	}

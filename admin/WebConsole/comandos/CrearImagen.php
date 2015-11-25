@@ -33,8 +33,8 @@ if (!$resul){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/CrearImagen.js"></SCRIPT>
@@ -108,11 +108,15 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 {
 	global $IMAGENES_MONOLITICAS;
 	$SelectHtml="";
-	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,
-			imagenes.idperfilsoft, repositorios.nombrerepositorio
-			FROM  imagenes INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
-			WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
-			AND imagenes.idrepositorio=".$idrepositorio ." OR repositorios.ip='" .$masterip ."'";
+	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,
+		imagenes.idperfilsoft, repositorios.nombrerepositorio, repositorios.ip
+		FROM  imagenes INNER JOIN repositorios  ON imagenes.idrepositorio = repositorios.idrepositorio 
+		INNER JOIN aulas ON aulas.idcentro = repositorios.idcentro 
+		INNER JOIN ordenadores  ON  ordenadores.idaula = aulas.idaula
+		WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
+		AND ordenadores.ip='".$masterip."' OR repositorios.ip='" .$masterip ."'
+		ORDER BY imagenes.descripcion";
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$disk."_".$particion.'" style="WIDTH: 300">';
@@ -120,7 +124,7 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["nombreca"].'"';
+			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["ip"].'"';
 			if($idperfilsoft==$rs->campos["idperfilsoft"]) $SelectHtml.=" selected ";
 			$SelectHtml.='>';
 			$SelectHtml.= $rs->campos["descripcion"]. ' -- '. $rs->campos['nombrerepositorio']  . '</OPTION>';
@@ -131,31 +135,4 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
-
-/*________________________________________________________________________________________________________
-	Crea la etiqueta html <SELECT> de los repositorios
-	UHU - 2013/05/17 - Ahora las imagenes pueden ser en cualquier disco
-________________________________________________________________________________________________________*/
-function HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$disk,$particion,$masterip){
-	$SelectHtml="";
-	$rs=new Recordset; 
-	$cmd->texto='SELECT idrepositorio, nombrerepositorio, ip FROM repositorios WHERE idrepositorio="'.$idrepositorio .'" OR ip="'.$masterip.'"';
-	$rs->Comando=&$cmd; 
-
-	if (!$rs->Abrir()) return($SelectHtml); // Error al abrir recordset
-	$SelectHtml.= '<SELECT class="formulariodatos" id="desplerepositorios_'.$disk."_".$particion.'" style="WIDTH: 250">';
-	$rs->Primero(); 
-	while (!$rs->EOF){
-		$SelectHtml.='<OPTION value="'.$rs->campos["ip"].'"';
-		if($rs->campos["idrepositorio"]==$idrepositorio) $SelectHtml.=" selected ";
-		$SelectHtml.='>';
-		$SelectHtml.= $rs->campos["nombrerepositorio"];
-		$SelectHtml.='</OPTION>';
-		$rs->Siguiente();
-	}
-	$SelectHtml.= '</SELECT>';
-	$rs->Cerrar();
-	return($SelectHtml);
-}
-
 ?>

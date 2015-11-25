@@ -53,9 +53,14 @@ fi
 
 # Valor por defecto para el repositorio.
 REPO=${4:-"REPO"}
-[ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
-[ "$REPO" == "CACHE" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        REPO="REPO"
+fi
 
 # Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
 if [ "$REPO" == "REPO" -a "$boot" != "admin"  ] 
@@ -65,11 +70,12 @@ then
 	[ $RETVAL -gt 0 ] && exit $RETVAL 	
 fi
 
+ogEcho	createImage "$1" "$2" "$4" /"$3" 
 # Si existe, ejecuta script personalizado "createImageCustom"; si no, llama al genérico "createImage".
 if which createImageCustom &>/dev/null; then
-	createImageCustom "$1" "$2" "$REPO" /"$3" &>> $OGLOGCOMMAND
+	createImageCustom "$1" "$2" "$4" /"$3" &>> $OGLOGCOMMAND
 else
-	createImage "$1" "$2" "$REPO" /"$3" &>> $OGLOGCOMMAND
+	createImage "$1" "$2" "$4" /"$3" &>> $OGLOGCOMMAND
 fi
 RETVAL=$?
 
