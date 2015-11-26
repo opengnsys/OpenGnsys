@@ -849,7 +849,7 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
 -- Volcar la base de datos para la tabla `tipohardwares`
 --
 
-INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES
+INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`) VALUES
 (1, 'Placas', '../images/iconos/placabase.gif', 'boa'),
 (2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul'),
 (3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net'),
@@ -1064,7 +1064,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 -- Volcar la base de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`) VALUES
+INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`, `apikey`) VALUES
 (1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
 
 
