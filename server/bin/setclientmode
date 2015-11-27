@@ -1,13 +1,20 @@
 #!/bin/bash
-# setclientmode: Configura el archivo de arranque de PXE para los clientes,
-#	ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla. 
-# Nota: El archivo PXE por defecto "default" se deja en modo de ejecución "user" 
-#	y se eliminan los enlaces para equipos con la plantilla por defecto.
-# Uso:	clienmode NombrePlatilla { NombrePC | NombreAula }
-# Autores: Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
+
+#/**
+# 	  setclientmode NombrePlatilla { NombrePC | NombreAula } Modo_trabajo
+#@file	  setclientmode
+#@brief   Configura el archivo de arranque de PXE para los clientes, ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla. 
+#@warning El archivo PXE por defecto "default" se deja en modo de ejecución "user" y se eliminan los enlaces para equipos con la plantilla por defecto.
+#@note    Modo_trabajo = { 0, 1 }
+#@version 1.0 - Versión inicial.
+#@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
-#@author Irina Gomez - Univ. Sevilla
-#@date 2013-05-31
+#@author  Irina Gomez - Univ. Sevilla
+#@date    2013-05-31
+#@version 1.0.2 - Cambio en la funcionalidad del script: el cambio del archivo de arranque PXE puede hacerse de manera temporal (codigo 0) modificando solo el fichero de arranque PXE durante 60 sg. y sin tocar la base de datos o permanente (codigo 1), actualizando tanto el fichero PXE como la base de datos.
+#@author  Juan Carlos Garcia - Univ. Zaragoza
+#@date    2015-11-17
+#*/ ##
 
 
 # Variables.
@@ -19,9 +26,9 @@ LOGFILE=$OPENGNSYS/log/opengnsys.log
 MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
-if [ $# -ne 2 ]; then
+if [ $# -ne 3 ]; then
 	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA]"
+	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO"
 	exit 1
 fi
 if [ ! -r $SERVERCONF ]; then
@@ -32,6 +39,12 @@ TEMPLATE=$(grep -l "^#.* $1 *$" $PXEDIR/templates/*)
 if [ -z "$TEMPLATE" ]; then
 	echo "No existe archivo platilla: $1"
 	exit
+fi
+
+if [ $3 != "0" ] && [ $3 != "1" ]; then
+	echo "$PROG: Error de ejecución"
+	echo "el modo debe ser 0 o 1 (temporal o permanente)"
+	exit 1
 fi
 
 # Obtener datos de acceso a la Base de datos.
@@ -61,13 +74,14 @@ if [ -z "$ETHERNET" ]; then
 fi
 
 # Copiar fichero de configuración y actualizar base de datos.
-date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\"" | tee -a $LOGFILE
+date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\" en modo \"$3\"" | tee -a $LOGFILE
 NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
-	# Si existe anteriormente el fichero PXE, lo borra
-	PXEFILE=$PXEDIR/01-${MAC:0:2}-${MAC:2:2}-${MAC:4:2}-${MAC:6:2}-${MAC:8:2}-${MAC:10:2}
-	[ -e $PXEFILE ] && rm $PXEFILE
+	MACFILE=$(echo $MAC | tr [a-z] [A-Z])
+	PXEFILE=$PXEDIR/01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
+	# Renombra el fichero PXE original
+	[ -e $PXEFILE ] && mv $PXEFILE $PXEFILE.netboot
 	if [ "$1" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
@@ -83,6 +97,7 @@ for MAC in $ETHERNET; do
 				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
 				' ogshare=', @serverip,
 				' winboot=', IFNULL (perfileshard.winboot, 'reboot'),
+				IF (aulas.ntp IS NULL, '', CONCAT (' ogntp=', aulas.ntp)),
 				IF (aulas.dns IS NULL, '', CONCAT (' ogdns=', aulas.dns)),
 				IF (aulas.proxy IS NULL, '', CONCAT (' ogproxy=', aulas.proxy)),
 				CASE
@@ -103,10 +118,20 @@ for MAC in $ETHERNET; do
 		sed -e "s/vga=[0-9]*//g; s/INFOHOST/$DATOS/g" $TEMPLATE >$PXEFILE
 		# Ponemos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
 		PERMS=$(ps axho user,group,comm|awk '!/root/ && /httpd|apache/ {u=$1; g=$2} END {if (g) printf "%s:%s",u,g}')
-		[ -n "$PEMS" ] && chown $PERMS $PXEFILE
-		# Actualizar en la BD el modo de arranque asociada el cliente.
-		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-			"UPDATE ordenadores SET arranque='$(basename $TEMPLATE)' WHERE mac='$MAC';"
+		[ -n "$PERMS" ] && chown $PERMS $PXEFILE
+		# Si el modo de trabajo es temporal (0) mete un retardo, restaura el fichero PXE a su estado original y no toca la base de datos
+		if [ "$3" == "0" ]; then
+			sleep 60
+			rm $PXEFILE	
+			[ -e $PXEFILE.netboot ] && mv $PXEFILE.netboot $PXEFILE
+		fi
+
+		# Si el modo de trabajo es permanente (1)  borra el fichero PXE.netboot si existe y graba los datos en la base de datos
+		if [ "$3" == "1" ]; then
+			[ -e $PXEFILE.netboot ] && rm $PXEFILE.netboot
+			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+				"UPDATE ordenadores SET arranque='$(basename $TEMPLATE)' WHERE mac='$MAC';"
+		fi
 	fi
 	let NPC=NPC+1
 done
