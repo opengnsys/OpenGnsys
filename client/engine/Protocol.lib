@@ -331,6 +331,9 @@ fi
 #@version 1.0 - 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
+#@version 2.0 - cambios en udp-receiver para permitir multicast entre subredes
+#@author  Juan Carlos Garcia, Universidad de Zaragoza
+#@date    2015/11/17
 #*/ ##
 #         
 
@@ -425,7 +428,52 @@ which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' "
 
 # Generamos la instrucción base de multicast -Envio,Recepcion-
 SYNTAXSERVER="udp-sender $MBUFFER --nokbd --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
-SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
+#SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
+
+
+# Deteccion automatica de la subred del cliente para anadir la  IP del repositorio a la orden udp-receiver en el caso de encontrarse en distinta subred del repo
+REPOIP="$(ogGetRepoIp)"
+CLIENTIP=$(ip -o address show up | awk '$2!~/lo/ {if ($3~/inet$/) {printf ("%s ", $4)}}')
+MASCARA=`echo $CLIENTIP | cut -f2 -d/`
+CLIENTIP=`echo $CLIENTIP | cut -f1 -d/`
+RIPBT=""
+IPBT=""
+for (( i = 1 ; i < 5 ; i++ ))
+do
+	RIP=`echo $REPOIP | cut -f$i -d.`
+	RIP=`echo "$[$RIP + 256]"`
+	RIPB=""
+	while [ $RIP -gt 0 ]
+	do
+		let COCIENTE=$RIP/2
+		let RESTO=$RIP%2
+		RIPB=$RESTO$RIPB
+		RIP=$COCIENTE
+	done
+	RIPB=`echo "$RIPB" | cut -c2-`
+	RIPBT=$RIPBT$RIPB
+	IP=`echo $CLIENTIP | cut -f$i -d.`
+	IP=`echo "$[$IP + 256]"`
+	IPB=""
+	while [ $IP -gt 0 ]
+	do
+		let COCIENTE=$IP/2
+		let RESTO=$IP%2
+		IPB=$RESTO$IPB
+		IP=$COCIENTE
+	done
+	IPB=`echo "$IPB" | cut -c2-`
+	IPBT=$IPBT$IPB
+done
+REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
+CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
+if [ $REPOSUBRED == $CLIENTSUBRED ]; then
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE"
+else
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP"
+fi
+
+
 
 
 case "$1" in
