@@ -8,8 +8,11 @@ Lista de cambios incluidos en OpenGnsys 1.1.0
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
+#676	Soportar sistema de ficheros ZFS
+#727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
 
 Tickets resueltos en módulo OpenGnsys Client:
+#625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
 #725	Sincronización horaria de clientes con servidor NTP
 
 Tickets resueltos en módulo OpenGnsys Server:
@@ -334,6 +337,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #376	Menú para el Browser en equipos sin menú asignados con valores por defecto (se solucionará en #411)
+#403	Incompatibilidad con Internet Explorer
 #454	Buscador de equipos para la interfaz de administración web (mejora)
 #475	Consola web comando->restaurar habilitar restauración directa (sin cache) por Multicast y Unicast (mejora)
 #483	Completar la internacionalización de la consola web (los 3 idiomas iniciales)
