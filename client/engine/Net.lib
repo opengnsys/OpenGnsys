@@ -39,16 +39,26 @@ REPO="${1^^}"
 # Si REPO tomamos el valor por defecto.
 [ "$REPO" == "REPO" ] && REPO=$ogrepo
 
+OLDREPO=$(ogGetRepoIp)
+# Si $1 y $2 son el repositorio y la OU actual me salgo
+[ "$REPO" == "$OLDREPO" ] && [ "$2" == "$ogunit" ]  && return 0
+
 source /scripts/functions
 source /scripts/ogfunctions
-# Si $1 y $2 son el repositorio y la OU actual me salgo
-[ "$REPO" == "$(ogGetRepoIp)" ] && [ "$2" == "$ogunit" -o "$2" == "" ]  && return 0
 umount $OGIMG
 [ "$2" == "" ] && SRCIMG="ogimages" || SRCIMG="ogimages/$2"
 eval $(grep "OPTIONS=" /scripts/ogfunctions)
 [ "$ogactiveadmin" == "true" ] && RW=",rw" || RW=",ro" 
-echo "$MSG_HELP_ogChangeRepo $REPO"
+
+ogEcho session log "$MSG_HELP_ogChangeRepo $REPO"
 ogConnect $REPO $ogprotocol $SRCIMG $OGIMG $RW
+
+# Si da error volvemos a montar el inicial
+if [ $? -ne 0 ]; then
+    ogConnect $OLDREPO $ogprotocol $SRCIMG $OGIMG $RW
+    ogRaiseError session $OG_ERR_REPO "$REPO" 
+    return $?
+fi
 
 }
 

@@ -207,6 +207,7 @@ case "$CODE" in
      $OG_ERR_LOCKED)     MSG="$MSG_ERR_LOCKED \"$2\"" ;;
      $OG_ERR_CACHE)      MSG="$MSG_ERR_CACHE \"$2\"" ;;
      $OG_ERR_NOGPT)      MSG="$MSG_ERR_NOGPT \"$2\"" ;;
+     $OG_ERR_REPO)	 MSG="$MSG_ERR_REPO \"$2\"" ;;
      $OG_ERR_FILESYS)    MSG="$MSG_ERR_FILESYS \"$2\"" ;;
      $OG_ERR_IMAGE)      MSG="$MSG_ERR_IMAGE \"$2\"" ;;
      $OG_ERR_NOTOS)      MSG="$MSG_ERR_NOTOS \"$2\"" ;;
