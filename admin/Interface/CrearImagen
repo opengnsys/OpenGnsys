@@ -57,8 +57,10 @@ REPO=${4:-"REPO"}
 # Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
 ogCheckIpAddress $REPO
 if [ $? == 0 -o $REPO == "REPO" ] ; then
+	# Unidad organizativa
+	[ "$ogunit" != "" ] && OGUNIT="$ogunit"
         # Si falla el cambio -> salimos con error repositorio no valido
-        ogChangeRepo $REPO || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        ogChangeRepo $REPO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
         REPO="REPO"
 fi
 

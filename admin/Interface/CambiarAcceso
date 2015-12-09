@@ -41,12 +41,14 @@ esac
 
 # Desmontar repositorio y volver a montarlo con el modo adecuado.
 umount $OGIMG
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 ogEcho info "$PROG: Montar repositorio $REPO por $PROTO en modo $1"
 case "$PROTO" in
-	nfs)	mount -t nfs $REPOIP:$OGIMG $OGIMG -o $MODE ;;
+	nfs)	mount -t nfs $REPOIP:$OGIMG$OGUNIT $OGIMG -o $MODE ;;
 	smb)	PASS=$(grep "^[	 ]*\(export \)\?OPTIONS=" /scripts/ogfunctions 2>&1 | \
 			sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 		PASS=${PASS:-"og"}
-		mount.cifs //$REPOIP/ogimages $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=$PASS
+		mount.cifs //$REPOIP/ogimages$OGUNIT $OGIMG -o $MODE,serverino,acl,username=opengnsys,password=$PASS
 esac
 
