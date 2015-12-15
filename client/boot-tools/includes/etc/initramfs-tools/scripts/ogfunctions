@@ -74,6 +74,7 @@ ogExportVarEnvironment ()
 {
 	export CFGINITRD="/tmp/initrd.cfg"	
 	OGPROTOCOL="${ogprotocol:-smb}"
+	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 	# OPTIONS Para samba y local (a nfs no le afecta)
 	export OPTIONS=" -o user=opengnsys,pass=og"
 	case "$OGPROTOCOL" in
@@ -81,13 +82,13 @@ ogExportVarEnvironment ()
 			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
 			export SRCOGSHARE="/opt/opengnsys/client" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="/opt/opengnsys/log/clients" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
-			export SRCOGIMAGES="/opt/opengnsys/images" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
+			export SRCOGIMAGES="/opt/opengnsys/images$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
 		;;
 		smb|SMB|cifs|CIFS|samba|SAMBA)
 			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
 			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
-			export SRCOGIMAGES="ogimages" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
+			export SRCOGIMAGES="ogimages$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
 		;;
 		local|LOCAL)
 			# Ponemos variables SRC compatibles con smb y nfs.
