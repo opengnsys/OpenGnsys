@@ -45,13 +45,16 @@ PROTO=${PROTO:-"UNICAST"}
 PROTOOPT="$6"
 IMGTYPE="${IMGTYPE:-"img"}"
 
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="$ogunit/"
+
 # Si es una ip y es igual a la del equipo restaura desde cache
 [ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
 # Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
 ogCheckIpAddress $REPO 
 if [ $? == 0 -o $REPO == "REPO" ] ; then
         # Si falla el cambio -> salimos con error repositorio no valido
-        ogChangeRepo $REPO || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        ogChangeRepo $REPO ${OGUNIT%/} || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO $OGUNIT'; echo $?)
         REPO="REPO"
 fi
 
@@ -77,7 +80,7 @@ case "$PROTO" in
         COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
         #TODO comprobar parametros anteriores
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
-        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
+        ogMcastRequest "$OGUNIT$IMGNAME.img" "$PROTOOPT" 
         ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
         RETVAL=$?
         ;;

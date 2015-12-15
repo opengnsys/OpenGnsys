@@ -49,11 +49,14 @@ echo " " > $OGLOGCOMMAND
 REPOSITORIO="${1^^}"
 PROTOCOLO="${3^^}"
 OPTPROTOCOLO="$4"
+# Unidad organizativa.
+[ "$ogunit" != "" ] && OGUNIT="$ogunit/"
+
 # Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
 ogCheckIpAddress $REPOSITORIO
 if [ $? == 0 -o $REPOSITORIO == "REPO" ] ; then
         # Si falla el cambio -> salimos con error repositorio no valido
-        ogChangeRepo $REPOSITORIO || exit $(ogRaiseError $OG_ERR_NOTFOUND $REPOSITORIO; echo $?)
+        ogChangeRepo $REPOSITORIO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND $REPOSITORIO; echo $?)
         REPOSITORIO="REPO"
 fi
 REPOIP=$(ogGetRepoIp)
@@ -215,15 +218,15 @@ case "$PROTOCOLO" in
 
 		else
 		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
-	   		ogEcho log session "$MSG_SCRIPTS_TASK_START :  hose $REPOIP 2009 --out sh -c \"echo -ne START_MULTICAST $2 $OPTPROTOCOLO\""
-	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+	   		ogEcho log session "$MSG_SCRIPTS_TASK_START :  hose $REPOIP 2009 --out sh -c \"echo -ne START_MULTICAST $OGUNIT$2 $OPTPROTOCOLO\""
+	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $OGUNIT$2 $OPTPROTOCOLO"
 	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
 	   		sleep 10
 	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
 	   		then 
 	   			ogExecAndLog command ogMcastReceiverFile $PORT CACHE "$2"
 			else
-				ogEcho log session "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
+				ogEcho log session "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $OGUNIT$2 $OPTPROTOCOLO"
 	   			exit $OG_ERR_UPDATECACHE
 	   		fi
 		fi
@@ -251,8 +254,8 @@ case "$PROTOCOLO" in
 	   if [ -d $REPOFILE ]; then
 		# Si es sincronizada tipo directorio.
 		[ -d "$OGCAC$OGIMG/$2" ] || mkdir "$OGCAC$OGIMG/$2"
-		ogEcho log session "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2"
-		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>> $OGLOGCOMMAND  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
+		ogEcho log session "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$OGUNIT$2/ $OGCAC$OGIMG/$2"
+		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$OGUNIT$2/" "$OGCAC$OGIMG/$2" 2>> $OGLOGCOMMAND  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
            else
 		# Si es sincronizada tipo archivo.
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"

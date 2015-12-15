@@ -50,7 +50,7 @@ umount $OGIMG
 eval $(grep "OPTIONS=" /scripts/ogfunctions)
 [ "$ogactiveadmin" == "true" ] && RW=",rw" || RW=",ro" 
 
-ogEcho session log "$MSG_HELP_ogChangeRepo $REPO"
+ogEcho session log "$MSG_HELP_ogChangeRepo $REPO ${2%/}"
 ogConnect $REPO $ogprotocol $SRCIMG $OGIMG $RW
 
 # Si da error volvemos a montar el inicial
