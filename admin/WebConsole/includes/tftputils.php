@@ -51,9 +51,12 @@ function clientKernelVersion () {
  * @param    {String}  bootopt   Plantilla de arranque PXE.
  * @param    {Number}  hostid    Id. del ordenador.
  * @param    {String}  lang      Idioma de arranque.
- * @versión  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
- * @authors  Ramón Gómez - ETSII Universidad de Sevilla
+ * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
+ * @author  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-25
+ * @version  1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678).
+ * @author   Irina Gómez - ETSII Universidad de Sevilla
+ * @date     2015-12-16
  */
 function createBootMode ($cmd, $bootopt, $hostid, $lang) {	
 
@@ -73,9 +76,12 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
 			    aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
 			    (SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
-			    menus.resolucion AS vga, perfileshard.winboot AS winboot
+			    menus.resolucion AS vga, perfileshard.winboot AS winboot,
+			    centros.directorio, entidades.ogunit
 			FROM ordenadores 
 			JOIN aulas USING (idaula)
+			JOIN centros USING (idcentro)
+			JOIN entidades USING (identidad)
 			JOIN repositorios USING (idrepositorio)
 			LEFT JOIN menus USING (idmenu)
 			LEFT JOIN perfileshard USING (idperfilhard)
@@ -99,6 +105,12 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$server=$rs->campos["ipserveradm"];
 	$vga=$rs->campos["vga"];
 	$winboot=$rs->campos["winboot"];
+	$ogunit=$rs->campos["ogunit"];
+	if ($ogunit == 0 or $rs->campos["directorio"] == null) {
+		$directorio="" ;
+	} else {
+		$directorio=$rs->campos["directorio"];
+	}
 
 	$rs->Cerrar();
 
@@ -137,6 +149,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			$infohost.=" video=$vga";
 		}
 	}
+	if (! empty ($directorio)) { $infohost.=" ogunit=$directorio"; }
 	
 	// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
 	$pxedir="/opt/opengnsys/tftpboot/menu.lst";

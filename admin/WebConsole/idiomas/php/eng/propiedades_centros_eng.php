@@ -12,4 +12,6 @@ $TbMsg[3]="Remove";
 $TbMsg[4]="Organizing Unit Management";
 $TbMsg[5]="Name of Unit";
 $TbMsg[6]="Coments";
+$TbMsg['DIR']="Directorio";
+$TbMsg['MSG_OGUNIT']="Si se elige separar por unidades organizativas, el directorio <b>/opt/opengnsys/images</b><br> debe contener un subdirectorio llamado como el directorio indicado.";
 ?>

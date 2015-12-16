@@ -7,6 +7,12 @@
 // Nombre del fichero: propiedades_entidades.php
 // Descripción : 
 //		 Presenta el formulario de captura de datos de una entidad para insertar,modificar y eliminar
+/**
+ * @file    propiedades_entidades.php	
+ * @version 1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678)
+ * @author  Irina Gómez - ETSII Universidad de Sevilla
+ * @date     2015-12-16
+ */
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
@@ -24,6 +30,7 @@ $nombreentidad="";
 $iduniversidad=0;
 $grupoid=0;
 $comentarios="";
+$ogunit=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros 
 if (isset($_GET["identidad"])) $identidad=$_GET["identidad"]; 
@@ -43,12 +50,13 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_entidades.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
+	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_entidades_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
@@ -79,6 +87,15 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+               <?  if ($opcion!=$op_eliminacion) {
+			($ogunit == 1) ? $checked = "checked" : $checked = "";
+echo "                  <TR>\n".
+     "                          <TH align=center>&nbsp;".$TbMsg['OGUNIT']."&nbsp;</TD>\n".
+     "                         <TD><input class='formulariodatos' name='ogunit' value='1' type='checkbox' $checked></TD>\n".
+     "                  </TR>\n";
+              }
+               ?>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
 </DIV>
@@ -99,6 +116,7 @@ include_once("../includes/opcionesbotonesop.php");
 function TomaPropiedades($cmd,$id){
 	global $nombreentidad;
 	global $comentarios;
+	global $ogunit;
 	
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM entidades WHERE identidad=".$id;
@@ -108,6 +126,7 @@ function TomaPropiedades($cmd,$id){
 	if (!$rs->EOF){
 			$nombreentidad=$rs->campos["nombreentidad"];
 			$comentarios=$rs->campos["comentarios"];
+			$ogunit=$rs->campos["ogunit"];
 		$rs->Cerrar();
 		return(true);
 	}

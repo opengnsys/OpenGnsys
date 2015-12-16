@@ -74,10 +74,16 @@ function confirmar(op){
 //	Comprobar_datos 
 //________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.nombrecentro==""){
-         alert(TbMsg[0])
-		document.forms.fdatos.nombrecentro.focus()
-		return(false)
-	}
-	return(true);
+        function validate (field, validator, msgi) {
+                if (!validator (field.value)) {
+                        alert(TbMsg[msgi]);
+                        validation_highlight (field);
+                        return false;
+                }
+                return true;
+        }
+
+	return validate (fdatos.nombrecentro, validate_text_notnull,0) &&
+	       validate (fdatos.comentarios, validate_text, 1) &&
+	       validate (fdatos.directorio, validate_text, 2)
 }

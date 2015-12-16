@@ -12,5 +12,5 @@ $TbMsg[3]="Eliminar";
 $TbMsg[4]="Gestión Entidades";
 $TbMsg[5]="Nombre de la Entidad";
 $TbMsg[6]="Comentarios";
+$TbMsg['OGUNIT']="Separar unidades organizativas";
 ?>
-  

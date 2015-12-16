@@ -7,6 +7,12 @@
 // Nombre del fichero: propiedades_centros.php
 // Descripción : 
 //		 Presenta el formulario de captura de datos de un centro para insertar,modificar y eliminar
+/**
+ * @file    propiedades_centros.php   
+ * @version 1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678)
+ * @author  Irina Gómez - ETSII Universidad de Sevilla
+ * @date     2015-12-16
+ */
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
@@ -24,6 +30,7 @@ $nombrecentro="";
 $identidad=0;
 $grupoid=0;
 $comentarios="";
+$directorio="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros 
 if (isset($_GET["idcentro"])) $idcentro=$_GET["idcentro"]; 
@@ -42,13 +49,15 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_centros.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
+	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_centros_'.$idioma.'.js"></SCRIPT>'?>
+
 </HEAD>
 <BODY>
 <FORM  name="fdatos" action="../gestores/gestor_centros.php" method="post"> 
@@ -69,7 +78,7 @@ if  ($opcion!=$op_alta){
 			</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
 			<?if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
@@ -77,9 +86,20 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+               <?  if ($opcion!=$op_eliminacion) {
+echo "			<TR>\n".
+     "				<TH align=center>&nbsp;".$TbMsg['DIR']."&nbsp;</TH>\n".
+     "				<TD><INPUT type=text class=cajatexto  name='directorio'  style='width:15em' value='".$directorio."'></TD>\n".
+     "			</TR>\n".
+     "			<TR>\n".
+     "                          <TH colspan='4' align='center'>&nbsp;<sup>*</sup>".$TbMsg['MSG_OGUNIT']."</TH>".
+     "			</TR>\n";
+		}
+		?>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
-</DIV>
 <?
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
@@ -97,6 +117,7 @@ include_once("../includes/opcionesbotonesop.php");
 function TomaPropiedades($cmd,$id){
 	global $nombrecentro;
 	global $comentarios;
+        global $directorio;
 	
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * FROM centros WHERE idcentro=".$id;
@@ -106,6 +127,7 @@ function TomaPropiedades($cmd,$id){
 	if (!$rs->EOF){
 			$nombrecentro=$rs->campos["nombrecentro"];
 			$comentarios=$rs->campos["comentarios"];
+			$directorio=$rs->campos["directorio"];
 		$rs->Cerrar();
 		return(true);
 	}
