@@ -176,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
   `nombrecentro` varchar(100) NOT NULL DEFAULT '',
   `identidad` int(11) DEFAULT NULL,
   `comentarios` text,
+  `directorio` varchar(50) DEFAULT '',
   PRIMARY KEY (`idcentro`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -244,6 +245,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
   `comentarios` text,
   `iduniversidad` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
+  `ogunit` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`identidad`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
