@@ -7,7 +7,10 @@
 # Fecha:   2015-01-26
 # Versión: 1.1 - Posibilidad para instalar fichero ogLive local.
 # Autor:   Ramón M. Gómez - ETSII Univ. Sevilla
-# Fecha:   2016-11-06
+# Fecha:   2015-11-06
+# Versión: 1.1.0a - Adaptar la versión de Rsync de cliente y servidor.
+# Autor:   Ramón M. Gómez - ETSII Univ. Sevilla
+# Fecha:   2015-12-16
 
 
 # Control de acceso.
@@ -20,12 +23,15 @@ fi
 # Constantes.
 DOWNLOADURL="http://opengnsys.es/downloads"
 OPENGNSYS=/opt/opengnsys
-OGINITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
-OGVMLINUZ=$OPENGNSYS/tftpboot/ogclient/ogvmlinuz
+OGCLIENTDIR=/opt/opengnsys/tftpboot/ogclient
+OGINITRD=$OGCLIENTDIR/oginitrd.img
+OGVMLINUZ=$OGCLIENTDIR/ogvmlinuz
+OGSQFS=$OGCLIENTDIR/ogclient.sqfs
 
 if [ -n "$1" ]; then
 	# Si se recibe un parámetro, utilizar fichero ogLive local.
 	TARGETFILE="$1"
+	OGLIVEFILE=$(basename $TARGETFILE)
 else
 	# Sin parámetros, listar todos los ficheros ogLive descargables.
 	OGLIVE=( $(wget $DOWNLOADURL -O - 2>/dev/null|grep ogLive.*iso) )
@@ -66,16 +72,16 @@ if [ -f $OGINITRD ]; then
 fi
 
 # Hacer copia de seguridad del ogLive actual.
-rm -fr $OPENGNSYS/tftpboot/ogclient.old
-mv -f $OPENGNSYS/tftpboot/ogclient $OPENGNSYS/tftpboot/ogclient.old
+rm -fr ${OGCLIENTDIR}.old
+mv -f $OGCLIENTDIR ${OGCLIENTDIR}.old
 
 # Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
 TMPDIR=/tmp/${OGLIVEFILE%.iso}
 mkdir -p $TMPDIR
 mount -o loop,ro $TARGETFILE $TMPDIR
-cp -va $TMPDIR/ogclient $OPENGNSYS/tftpboot/ogclient
+cp -va $TMPDIR/ogclient $OGCLIENTDIR
+#rsync -irlt $TMPDIR/ogclient $OPENGNSYS/tftpboot
 umount $TMPDIR
-rmdir $TMPDIR
 
 # Recuperar la clave de acceso a Samba o solicitar una nueva clave.
 if [ -n "$SAMBAPASS" ]; then
@@ -85,10 +91,25 @@ else
 fi
 
 # Establecer los permisos.
-find -L $OPENGNSYS/tftpboot/ogclient -type d -exec chmod 755 {} \;
-find -L $OPENGNSYS/tftpboot/ogclient -type f -exec chmod 644 {} \;
-chown -R :opengnsys $OPENGNSYS/tftpboot/ogclient
+find -L $OGCLIENTDIR -type d -exec chmod 755 {} \;
+find -L $OGCLIENTDIR -type f -exec chmod 644 {} \;
+chown -R :opengnsys $OGCLIENTDIR
 
 # Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-cp -av $OPENGNSYS/tftpboot/ogclient/{ogvmlinuz,oginitrd.img}* $OPENGNSYS/tftpboot
+cp -av $OGCLIENTDIR/{ogvmlinuz,oginitrd.img}* $OPENGNSYS/tftpboot
+
+# Montar SquashFS para comprobar versión de Rsync.
+mount -o loop,ro $OGCLIENTDIR/ogclient.sqfs $TMPDIR
+# Si versión Rsync de servidor > cliente, enlazar a fichero compilado.
+RSYNCSERV=$(rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+RSYNCCLNT=$(chroot $TMPDIR /usr/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then
+	[ -e $OPENGNSYS/client/bin/rsync-$RSYNCSERV ] && mv -f $OPENGNSYS/client/bin/rsync-$RSYNCSERV $OPENGNSYS/client/bin/rsync
+else
+	# Si no, renombrar fichero compilado con nº de protocolo.
+	[ -e $OPENGNSYS/client/bin/rsync ] && mv -f $OPENGNSYS/client/bin/rsync $OPENGNSYS/client/bin/rsync-$($OPENGNSYS/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+fi
+# Desmontar SquashFS.
+umount $TMPDIR
+rmdir $TMPDIR
 
