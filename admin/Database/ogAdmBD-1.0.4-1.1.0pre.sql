@@ -182,3 +182,9 @@ ALTER TABLE menus
 	DROP scoorx,
 	DROP scoory;
 
+# Directorios en repo para distintas UO (ticket #678).
+ALTER TABLE entidades
+	ADD ogunit TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE centros
+	ADD directorio VARCHAR(50) DEFAULT '';
+
