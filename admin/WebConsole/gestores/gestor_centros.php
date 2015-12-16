@@ -35,6 +35,7 @@ if (isset($_POST["idcentro"])) $idcentro=$_POST["idcentro"];
 if (isset($_POST["identificador"])) $idcentro=$_POST["identificador"];
 if (isset($_POST["nombrecentro"])) $nombrecentro=$_POST["nombrecentro"];
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"];
+if (isset($_POST["directorio"])) $directorio=$_POST["directorio"];
 
 
 $tablanodo=""; // Arbol para nodos insertados
@@ -101,6 +102,7 @@ function Gestiona(){
 	global $idcentro;
 	global $nombrecentro;
 	global $comentarios;
+	global $directorio;
 	global $identidad;
 
 	global	$op_alta;
@@ -113,10 +115,11 @@ function Gestiona(){
 	$cmd->CreaParametro("@idcentro",$idcentro,1);
 	$cmd->CreaParametro("@nombrecentro",$nombrecentro,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
+	$cmd->CreaParametro("@directorio",$directorio,0);
 	
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO centros(nombrecentro,comentarios,identidad) VALUES (@nombrecentro,@comentarios,@identidad)";
+			$cmd->texto="INSERT INTO centros(nombrecentro,comentarios,directorio,identidad) VALUES (@nombrecentro,@comentarios,@directorio,@identidad)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idcentro=$cmd->Autonumerico();
@@ -128,7 +131,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE centros SET nombrecentro=@nombrecentro,comentarios=@comentarios WHERE idcentro=@idcentro";
+			$cmd->texto="UPDATE centros SET nombrecentro=@nombrecentro,comentarios=@comentarios,directorio=@directorio WHERE idcentro=@idcentro";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
