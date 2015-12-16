@@ -1332,12 +1332,6 @@ function copyClientFiles()
 		errstatus=1
 	fi
 	
-	# Si el servidor tiene instalado Rsync > 3.0.9, renombrar el ejecutable
-	# compilado para el cliente.
-	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
-		[ -e $INSTALL_TARGET/client/bin/rsync-3.1.0 ] && mv -f $INSTALL_TARGET/client/bin/rsync-3.1.0 $INSTALL_TARGET/client/bin/rsync
-	fi
-
 	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
@@ -1354,7 +1348,6 @@ function clientCreate()
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	local FILENAME=ogLive-vivid-3.19.0-31-generic-r4717.iso		# 1.1.0-rc1
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
-	local TMPDIR=/tmp/${FILENAME%.iso}
  
 	# Descargar cliente, si es necesario.
 	if [ -s $PROGRAMDIR/$FILENAME ]; then
@@ -1368,27 +1361,13 @@ function clientCreate()
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
 		return 1
 	fi
+
 	# Montar imagen, copiar cliente ogclient y desmontar.
 	echoAndLog "${FUNCNAME}(): Copying Client files"
-	mkdir -p $TMPDIR
-	mount -o loop,ro $TARGETFILE $TMPDIR
-	cp -av $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
-	umount $TMPDIR
-	rmdir $TMPDIR
-	# Asignar la clave cliente para acceso a Samba.
-	echoAndLog "${FUNCNAME}(): Set client access key"
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | \
-			$INSTALL_TARGET/bin/setsmbpass
-
-	# Establecer los permisos.
-	find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
-	find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
-	chown -R :$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/tftpboot/ogclient
+			$INSTALL_TARGET/bin/installoglive $TARGETFILE
+	# Adaptar permisos.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
-
-	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-	cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
-	cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }

@@ -411,12 +411,6 @@ function updateClientFiles()
 		exit 1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	# Hacer coincidir las versiones de Rsync entre servidor y cliente.
-	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
-		[ -e $WORKDIR/opengnsys/client/bin/rsync-3.1.0 ] && mv -f $WORKDIR/opengnsys/client/bin/rsync-3.1.0 $WORKDIR/opengnsys/client/bin/rsync
-	else
-		[ -e $WORKDIR/opengnsys/client/bin/rsync ] && mv -f $WORKDIR/opengnsys/client/bin/rsync $WORKDIR/opengnsys/client/bin/rsync-3.1.0
-	fi
 
 	# Actualizar librerías del motor de clonación.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Cloning Engine files."
@@ -806,7 +800,6 @@ function updateClient()
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
 	local TARGETLENGTH
-	local TMPDIR=/tmp/${FILENAME%.iso}
 	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
 	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	local SAMBAPASS
@@ -824,35 +817,9 @@ function updateClient()
 			errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
 			return 1
 		fi
-		# Obtener la clave actual de acceso a Samba para restaurarla.
-		if [ -f $OGINITRD ]; then
-			SAMBAPASS=$(gzip -dc $OGINITRD | \
-				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
-				    grep "^[ 	].*OPTIONS=" | \
-				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
-		fi
-		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
+		# Actaulizar la imagen ISO del ogclient.
 		echoAndLog "${FUNCNAME}(): Updatting ogclient files"
-		mkdir -p $TMPDIR
-		mount -o loop,ro $TARGETFILE $TMPDIR
-		rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
-		umount $TMPDIR
-		rmdir $TMPDIR
-		# Recuperar la clave de acceso a Samba.
-		if [ -n "$SAMBAPASS" ]; then
-			echoAndLog "${FUNCNAME}(): Restoring client access key"
-			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
-					$INSTALL_TARGET/bin/setsmbpass
-		fi
-		# Establecer los permisos.
-		find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
-		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
-		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
-		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
-		
-		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
-		cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+		$INSTALL_TARGET/bin/installoglive
 		
 		# Obtiene versión del Kernel del cliente (con 2 decimales).
 		KERNELVERSION=$(file -bkr $OGVMLINUZ 2>/dev/null | \
