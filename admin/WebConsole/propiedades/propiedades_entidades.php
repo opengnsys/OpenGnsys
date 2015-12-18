@@ -91,7 +91,7 @@ if  ($opcion!=$op_alta){
 			($ogunit == 1) ? $checked = "checked" : $checked = "";
 echo "                  <TR>\n".
      "                          <TH align=center>&nbsp;".$TbMsg['OGUNIT']."&nbsp;</TD>\n".
-     "                         <TD><input class='formulariodatos' name='ogunit' value='1' type='checkbox' $checked></TD>\n".
+     "                         <TD><input class='formulariodatos' name='ogunit' value='1' type='checkbox' $checked onchange='mensaje_ogunit()'> </TD>\n".
      "                  </TR>\n";
               }
                ?>
