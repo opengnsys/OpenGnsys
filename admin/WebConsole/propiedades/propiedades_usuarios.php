@@ -25,6 +25,7 @@ $usuario="";
 $pasguor="";
 $nombre="";
 $email="";
+$apikey="";
 $identificador=0;
 $idambito=0;
 $ididioma=0;
@@ -130,6 +131,20 @@ switch($idtipousuario){
 			</TR>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+                        <?if ($opcion!=$op_eliminacion){?>
+                        <TR>
+                                <TH>&nbsp;<?echo $TbMsg['APIKEY']?>&nbsp;</TH>
+				<?// Opcion nuevo usuario
+				if ($opcion == 1) {?>
+					<TD><? echo $TbMsg['NEWAPIKEY']?></TD>
+				<?} else { ?>
+					<TD><? echo $apikey?></TD>
+				<?}?>
+                        </TR>
+                        <?}?>
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
 	</TABLE>
 </FORM>
 </DIV>
@@ -138,13 +153,12 @@ switch($idtipousuario){
 if ($idusuario==1){
 ///*
 
-       echo '<TABLE  id=tabla_conf align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>';
-		  echo '<TR>';
-               echo '</TR>';
-		  echo '<div onclick=window.open("http://opengnsys.es/wiki/ModificarUsuarios")><TR>';
-       	echo	'<TH align=center >&nbsp;'.$TbMsg[14].$TbMsg[15].$TbMsg[16].$TbMsg[17].'<a color=white href='.$TbMsg[17].' target=blank></a></br>'.$nombreambito.$TbMsg[23].'</br>'.$TbMsg[24].'&nbsp;</TH>';
-               echo '</TR></div>';
-       echo '</TABLE>';
+       echo '<table id="tabla_conf" align="center" border="0" cellPadding="5" cellspacing="1" class="tabla_datos">';
+		echo '<tr>';
+		echo '<th align="center">&nbsp;'.$TbMsg[14].$TbMsg[15].'<a style="color:white" href="'.$TbMsg[17].'" target="_blank">'.$TbMsg[16].'</a>&nbsp;</th>';
+		echo '</tr>';
+       echo '</table>';
+       echo '<p>';
 
 //*/
 }
@@ -171,7 +185,7 @@ function TomaPropiedades($cmd,$id){
 	global $pasguor;
 	global $nombre;
 	global $email;
-	global $idambito;
+        global $apikey;
 	global $ididioma;
 	global $idtipousuario;
 	
@@ -185,7 +199,7 @@ function TomaPropiedades($cmd,$id){
 			$pasguor=$rs->campos["pasguor"];
 			$nombre=$rs->campos["nombre"];
 			$email=$rs->campos["email"];
-			$idambito=$rs->campos["idambito"];
+			$apikey=$rs->campos["apikey"];
 			$ididioma=$rs->campos["ididioma"];
 			$idtipousuario=$rs->campos["idtipousuario"];
 		$rs->Cerrar();

@@ -1,4 +1,4 @@
-<? 
+<?php
 // *********************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -120,6 +120,7 @@ function SubarbolXML_universidades($cmd){
 //________________________________________________________________________________________________________
 function SubarbolXML_usuarios($cmd){
 	global $TbMsg;
+	global $LITAMBITO_USUARIOS;
 	global $cadenaXML;
 
 		$cadenaXML.='<USUARIOS';

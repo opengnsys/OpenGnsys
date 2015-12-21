@@ -23,4 +23,6 @@ $TbMsg[14]="To make changes to this user<br>";
 $TbMsg[15]="created in the installation,<br><br>";
 $TbMsg[16]="click here<br>";
 $TbMsg[17]="http://opengnsys.es/wiki/ModificarUsuarios";
+$TbMsg['APIKEY']="API key";
+$TbMsg['NEWAPIKEY']="La API key se generará automáticamente al insertar el usuario.";
 ?>
