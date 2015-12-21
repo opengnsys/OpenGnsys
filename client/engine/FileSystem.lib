@@ -711,8 +711,12 @@ if [ -z "$MNTDIR" ]; then
         fi
         # Montar sistema de archivos.
         mount $PART $MNTDIR &>/dev/null || \
-                   mount $PART $MNTDIR -o force,remove_hiberfile &>/dev/null || \
-                   ogRaiseError $OG_ERR_PARTITION "$1, $2" || return $?
+                   mount $PART $MNTDIR -o force,remove_hiberfile &>/dev/null
+        case $? in
+            0)  ;;
+            14) ogRaiseError $OG_ERR_PARTITION "$1, $2 ($MSG_HIBERNATED)"; return $? ;;
+            *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"; return $? ;;
+        esac
     else
         # Montar sistema de archivos ZFS (un ZPOOL no comienza por "/").
         zfs mount $PART 2>/dev/null
