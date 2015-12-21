@@ -90,7 +90,7 @@ if  ($opcion!=$op_alta){
                <?  if ($opcion!=$op_eliminacion) {
 echo "			<TR>\n".
      "				<TH align=center>&nbsp;".$TbMsg['DIR']."&nbsp;</TH>\n".
-     "				<TD><INPUT type=text class=cajatexto  name='directorio'  style='width:15em' value='".$directorio."'></TD>\n".
+     "				<TD><INPUT type=text class=cajatexto  name='directorio' maxlength='50' style='width:30em' value='".$directorio."'></TD>\n".
      "			</TR>\n".
      "			<TR>\n".
      "                          <TH colspan='4' align='center'>&nbsp;<sup>*</sup>".$TbMsg['MSG_OGUNIT']."</TH>".
