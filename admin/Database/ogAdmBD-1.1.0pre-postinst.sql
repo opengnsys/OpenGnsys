@@ -41,6 +41,6 @@ UPDATE menus
 
 # Crear clave de acceso a la API REST para el usuario principal (ticket #708).
 UPDATE usuarios
-	SET apikey='APIKEY'
-	WHERE idusuario=1 AND apikey!='';
+	SET apikey = 'APIKEY'
+	WHERE idusuario = 1 AND apikey = '';
 
