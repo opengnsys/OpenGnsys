@@ -2,7 +2,7 @@
 //________________________________________________________
 //
 //	Fichero de idiomas php: tiposhardwares_esp.php 
-//	Idioma: Español
+//	Idioma: Català
 //________________________________________________________
 if (empty ($TbMsg)) $TbMsg=Array();
 $TbMsg["HARDWARE_aud"]="Dispositivos de sonido";

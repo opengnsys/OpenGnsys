@@ -17,6 +17,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 
 Tickets resueltos en módulo OpenGnsys Server:
 #719	setclientmode: desaparece equipo de NetBoot Avanzado
+#729	Instalar en cliente la misma versión de Rsync que la del servidor
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #711	Mostrar porcentaje de uso de cada sistema de archivos
