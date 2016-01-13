@@ -39,8 +39,3 @@ UPDATE menus
 			 END
 			 WHERE KERNELVERSION >= 3.07;
 
-# Crear clave de acceso a la API REST para el usuario principal (ticket #708).
-UPDATE usuarios
-	SET apikey = 'APIKEY'
-	WHERE idusuario = 1 AND apikey = '';
-

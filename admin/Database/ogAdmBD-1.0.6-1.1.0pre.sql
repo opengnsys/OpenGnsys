@@ -31,6 +31,10 @@ ALTER TABLE imagenes
 # Añadir campo para clave de acceso a la API REST (ticket #708).
 ALTER TABLE usuarios
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
+# Preparar generación de clave de acceso a la API REST para el usuario principal (ticket #708).
+UPDATE usuarios
+	SET apikey = 'APIKEY'
+	WHERE idusuario = 1 AND apikey = '';
 
 # Añadir porcentaje de uso de sistema de ficheros (ticket #711)
 ALTER TABLE ordenadores_particiones

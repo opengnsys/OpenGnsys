@@ -282,6 +282,7 @@ function importSqlFile()
         local tmpfile=$(mktemp)
         local mycnf=/tmp/.my.cnf.$$
         local status
+	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -291,7 +292,8 @@ function importSqlFile()
         echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
+            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+            -e "s/APIKEY/$APIKEY/g" $sqlfile > $tmpfile
 	# Componer fichero con credenciales de conexión.  
 	touch $mycnf
 	chmod 600 $mycnf
@@ -804,7 +806,6 @@ function updateClient()
 	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	local SAMBAPASS
 	local KERNELVERSION
-	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
@@ -833,7 +834,7 @@ function updateClient()
 		# Actaulizar la base de datos adaptada al Kernel del cliente.
 		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
 		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g; s/APIKEY/$APIKEY/g" $OPENGNSYS_DBUPDATEFILE
+			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
 		fi
 
