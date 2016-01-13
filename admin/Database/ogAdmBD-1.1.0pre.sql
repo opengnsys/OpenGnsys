@@ -59,11 +59,13 @@ CREATE PROCEDURE addcols() BEGIN
 	# Directorios en repo para distintas UO (ticket #678).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='ogunit' AND TABLE_NAME='entidades' AND TABLE_SCHEMA=DATABASE())
+	THEN
 		ALTER TABLE entidades
 			ADD ogunit TINYINT(1) NOT NULL DEFAULT 0;
 	END IF;
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='directorio' AND TABLE_NAME='centros' AND TABLE_SCHEMA=DATABASE())
+	THEN
 		ALTER TABLE centros
 			ADD directorio VARCHAR(50) DEFAULT '';
 	END IF;
