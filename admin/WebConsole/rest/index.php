@@ -2,6 +2,7 @@
 /**
  * @file    index.php
  * @brief   OpenGnsys REST API manager.
+ * @warning All input and output messages are formatted in JSON.
  * @note    Some ideas are based on article "How to create REST API for Android app using PHP, Slim and MySQL" by Ravi Tamada, thanx.
  * @license GNU GPLv3+
  * @author  Ramón M. Gómez, ETSII Univ. Sevilla
@@ -143,7 +144,7 @@ function checkAdmin($adminid) {
 
 
 /**
- * @brief    Send a command to OpenGnsys Server and get request.
+ * @brief    Send a command to OpenGnsys ogAdmServer and get request.
  * @param    string serverip    Server IP address.
  * @param    string serverport  Server port.
  * @param    string reqframe    Request frame (field's separator is "\r").
@@ -179,7 +180,7 @@ function sendCommand($serverip, $serverport, $reqframe, &$values) {
 	}
 }
 
-// Define JSON routes.
+// Define REST routes.
 
 /**
  * @brief    user login.
@@ -195,11 +196,22 @@ $app->post('/login',
 	global $cmd;
 	global $userid;
 
-	// Reading POST parameters.
-	$user = htmlspecialchars($app->request()->post('username'));
-	$pass = htmlspecialchars($app->request()->post('password'));
 	$response = array();
- 
+
+	// Reading JSON parameters.
+	try {
+		$input = json_decode($app->request()->getBody());
+		$user = htmlspecialchars($input->username);
+		$pass = htmlspecialchars($input->password);
+	} catch (Exception $e) {
+		// Message error.
+		$response["error"] = true;
+		$response["message"] = $e->getMessage();
+		jsonResponse(400, $response);
+		$app->stop();
+	}
+
+	// Check parameters. 
 	if (! empty($user) and ! empty($pass)) {
 		// Database query.
 		$cmd->texto = "SELECT idusuario, apikey
