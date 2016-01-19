@@ -459,6 +459,9 @@ rm -f $FILE
 #@version 1.0.5 - Soporte para Windows 8 y Windows 8.1.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-01-28
+#@version 1.1.0 - Soporte para Windows 10.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-01-19
 #*/ ##
 
 function ogWindowsBootParameters ()
@@ -485,7 +488,10 @@ FILE=/tmp/temp$$
 
 VERSION=$(ogGetOsVersion $1 $2)
 
-if echo "$VERSION" | grep "Windows 8.1"
+if echo "$VERSION" | grep "Windows 10"
+then
+	WINVER="Windows 10"
+elif echo "$VERSION" | grep "Windows 8.1"
 then
 	WINVER="Windows 8.1"
 elif echo "$VERSION" | grep "Windows 8"
