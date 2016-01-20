@@ -714,7 +714,7 @@ if [ -z "$MNTDIR" ]; then
                    mount $PART $MNTDIR -o force,remove_hiberfile &>/dev/null || \
                    mount $PART $MNTDIR -o ro &>/dev/null && \
                    ogEcho warning "$FUNCNAME: $MSG_MOUNTREADONLY: \"$1, $2\"" || \
-                   ogRaiseError $OG_ERR_PARTITION "$1, $2"; return $? ;;
+                   ogRaiseError $OG_ERR_PARTITION "$1, $2" || return $?
     else
         # Montar sistema de archivos ZFS (un ZPOOL no comienza por "/").
         zfs mount $PART 2>/dev/null
