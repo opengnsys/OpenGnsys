@@ -560,6 +560,37 @@ test -n "$(ogGetMountPoint $1 $2)"
 
 
 #/**
+#         ogIsReadonly int_ndisk int_nfilesys
+#@brief   Comprueba si un sistema de archivos está montado solo de lectura.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@return  Código de salida: 0 - montado solo de lectura, 1 - con escritura o no montado.
+#@version 1.1.0 - Primera versión para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-01-20
+#/**
+function ogIsReadonly ()
+{
+# Variables locales
+local PART
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "if $FUNCNAME 1 1; then ... ; fi"
+    return
+fi
+# Falso, en caso de error.
+[ $# == 2 ] || return 1
+
+# Obtener partición.
+PART="$(ogDiskToDev $1 $2)" || return 1
+
+test -n "$(findmnt -n -o OPTIONS $PART | awk 'BEGIN {RS=","} /^ro$/ {print}')"
+}
+
+
+#/**
 #         ogIsWritable int_ndisk int_nfilesys
 #@brief   Comprueba si un sistema de archivos está montado de lectura y escritura.
 #@param   int_ndisk      nº de orden del disco
@@ -703,18 +734,23 @@ if [ -z "$MNTDIR" ]; then
     if [[ "$PART" =~ ^/ ]]; then
         # Crear punto de montaje o enlace simbólico para caché local.
         MNTDIR=${PART/dev/mnt}
+        DEBUG="no"
         if [ "$(ogFindCache)" == "$1 $2" -a -n "$OGCAC" ]; then
             mkdir -p $OGCAC
             ln -fs $OGCAC $MNTDIR
         else
             mkdir -p $MNTDIR
         fi
+        unset DEBUG
         # Montar sistema de archivos.
         mount $PART $MNTDIR &>/dev/null || \
                    mount $PART $MNTDIR -o force,remove_hiberfile &>/dev/null || \
-                   mount $PART $MNTDIR -o ro &>/dev/null && \
-                   ogEcho warning "$FUNCNAME: $MSG_MOUNTREADONLY: \"$1, $2\"" || \
+                   mount $PART $MNTDIR -o ro &>/dev/null || \
                    ogRaiseError $OG_ERR_PARTITION "$1, $2" || return $?
+        # Aviso de montaje de solo lectura.
+        if ogIsReadonly $1 $2; then
+            ogEcho warning "$FUNCNAME: $MSG_MOUNTREADONLY: \"$1, $2\""
+        fi
     else
         # Montar sistema de archivos ZFS (un ZPOOL no comienza por "/").
         zfs mount $PART 2>/dev/null
