@@ -477,11 +477,14 @@ findmnt -n -o TARGET $PART
 #@version 1.0.5 - Dejar de usar "parted".
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-09-04
+#@version 1.1.0 - Comprobar sin montar el sistema de ficheros.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-01-21
 #*/ ##
 function ogIsFormated ()
 {
 # Variables locales
-local DISK
+local PART
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "if $FUNCNAME 1 1; then ... ; fi"
@@ -489,8 +492,16 @@ if [ "$*" == "help" ]; then
 fi
 # Falso, en caso de error.
 [ $# == 2 ] || return 1
+PART="$(ogDiskToDev $1 $2 2>/dev/null)" || return 1
 
-test -n "$(ogMount "$1" "$2" 2>/dev/null)"
+# Revisar tipo de sistema de ficheros.
+if [[ "$PART" =~ ^/ ]]; then
+    # Sistemas de ficheros genéricos.
+    test -n "$(blkid -s TYPE $PART | egrep -vi "swap|_member")"
+else
+    # ZFS.
+    test "$(zfs list -Hp -o canmount $PART 2>/dev/null)" = "on"
+fi
 }
 
 
@@ -521,9 +532,7 @@ if [ "$*" == "help" ]; then
 fi
 # Falso, en caso de error.
 [ $# == 2 ] || return 1
-
-# Obtener partición.
-PART="$(ogDiskToDev $1 $2)" || return 1
+PART="$(ogDiskToDev $1 $2 2>/dev/null)" || return 1
 
 # Comprobar existencia del fichero de bloqueo.
 LOCKFILE="/var/lock/lock${PART//\//-}"
@@ -582,9 +591,7 @@ if [ "$*" == "help" ]; then
 fi
 # Falso, en caso de error.
 [ $# == 2 ] || return 1
-
-# Obtener partición.
-PART="$(ogDiskToDev $1 $2)" || return 1
+PART="$(ogDiskToDev $1 $2 2>/dev/null)" || return 1
 
 test -n "$(findmnt -n -o OPTIONS $PART | awk 'BEGIN {RS=","} /^ro$/ {print}')"
 }
@@ -613,9 +620,7 @@ if [ "$*" == "help" ]; then
 fi
 # Falso, en caso de error.
 [ $# == 2 ] || return 1
-
-# Obtener partición.
-PART="$(ogDiskToDev $1 $2)" || return 1
+PART="$(ogDiskToDev $1 $2 2>/dev/null)" || return 1
 
 test -n "$(findmnt -n -o OPTIONS $PART | awk 'BEGIN {RS=","} /^rw$/ {print}')"
 }
