@@ -259,10 +259,10 @@ TYPE="${3:-$(ogGetFsType $1 $2)}"
 
 # Elegir tipo de formato.
 case "$TYPE" in
-    EXT2)         PROG="mkfs.ext2" ;;
-    EXT3)         PROG="mkfs.ext3" ;;
-    EXT4)         PROG="mkfs.ext4" ;;
-    BTRFS)        PROG="mkfs.btrfs" ;;
+    EXT2)         PROG="mkfs.ext2"; PARAMS="-F" ;;
+    EXT3)         PROG="mkfs.ext3"; PARAMS="-F" ;;
+    EXT4)         PROG="mkfs.ext4"; PARAMS="-F" ;;
+    BTRFS)        PROG="mkfs.btrfs"; PARAMS="-f" ;;
     REISERFS)     PROG="mkfs.reiserfs"; PARAMS="-f"; LABELPARAM="-l" ;;
     REISER4)      PROG="mkfs.reiser4"; PARAMS="-fy" ;;
     XFS)          PROG="mkfs.xfs"; PARAMS="-f" ;;
