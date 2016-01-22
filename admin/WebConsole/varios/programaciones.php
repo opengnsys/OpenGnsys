@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -119,7 +119,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 							<TR>
 								<TD valign=top>
 									<? 	$annodesde=date("Y");
-										echo $mialmanaque->Annos(($annodesde-4),($annodesde+4)); // Años?>
+										echo $mialmanaque->Annos(($annodesde-3),($annodesde+3)); // Años?>
 								</TD>
 								<TD width=10>&nbsp;</TD>
 								<TD  valign=top>
