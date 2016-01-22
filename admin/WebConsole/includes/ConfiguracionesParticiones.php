@@ -65,7 +65,8 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_perfil;	
 	global $msk_cache;
 				
-	$cmd->texto="SELECT CONCAT_WS( ';',ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ";
+	$cmd->texto="SELECT CONCAT_WS(';', LPAD(ordenadores_particiones.numdisk, 3, 0),
+				LPAD(ordenadores_particiones.numpar, 3, 0), ";
 
 	if($sws & $msk_tamano)						
 		$cmd->texto.="	ordenadores_particiones.tamano,";
@@ -210,8 +211,8 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 					GROUP_CONCAT(CAST( temp1.configuracion AS CHAR(250) )  ORDER BY temp1.configuracion SEPARATOR '@' ) AS configuraciones
 					FROM (SELECT ordenadores_particiones.idordenador,ordenadores_particiones.numdisk,
 						ordenadores_particiones.numpar,
-						concat_WS( ';', ordenadores_particiones.numdisk,
-						ordenadores_particiones.numpar, ";
+						CONCAT_WS(';', LPAD(ordenadores_particiones.numdisk, 3, 0),
+						LPAD(ordenadores_particiones.numpar, 3, 0), ";
 
 	if($sws & $msk_tamano)
 		$cmd->texto.="	ordenadores_particiones.tamano,";

@@ -65,8 +65,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	         echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 
 
 		
@@ -225,8 +226,9 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	         
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -404,8 +406,9 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -506,8 +509,9 @@ function pintaParticionesRestaurarSoftIncremental($cmd,$configuraciones,$idorden
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -582,8 +586,9 @@ function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenado
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
