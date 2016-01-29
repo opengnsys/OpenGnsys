@@ -112,7 +112,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         ubuntu|debian|linuxmint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan )
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan realpath )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
