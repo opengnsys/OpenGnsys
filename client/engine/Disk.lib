@@ -254,11 +254,14 @@ sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
 #@return  (por determinar)
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
-#@note    tabletype: { MSDOS, GPT }
-#@note    Requisitos: sfdisk, sgdisk
+#@note    tabletype: { MSDOS, GPT }, MSDOS por defecto
+#@note    Requisitos: fdisk, gdisk, parted
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/03/06
+#@version 1.1.0 - Adaptar creación de nueva tabla MSDOS.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016/01/29
 #*/ ##
 function ogCreatePartitionTable ()
 {
@@ -310,7 +313,8 @@ case "$CREATE" in
         if [ "$PTTYPE" == "GPT" ]; then
             sgdisk -Z $DISK
         fi
-        fdisk $DISK <<< "w"
+        # Crear y borrar una partición para que la tabla se genere bien.
+        echo -e "o\nn\np\n\n\n\nd\n\nw" | fdisk $DISK
         partprobe $DISK 2>/dev/null
         ;;
 esac
