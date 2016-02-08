@@ -1346,7 +1346,7 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-vivid-3.19.0-31-generic-r4717.iso		# 1.1.0-rc1
+	local FILENAME=ogLive-vivid-3.19.0-49-generic-r4795.iso 	# 1.1.0-rc2
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
  
 	# Descargar cliente, si es necesario.
