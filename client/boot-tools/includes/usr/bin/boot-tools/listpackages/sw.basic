@@ -18,3 +18,4 @@ install dmidecode
 install realpath
 install rpm
 install sqlite3
+install os-prober
