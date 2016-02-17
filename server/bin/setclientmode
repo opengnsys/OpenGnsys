@@ -120,8 +120,9 @@ for MAC in $ETHERNET; do
 				LEFT JOIN perfileshard USING (idperfilhard)
 				LEFT JOIN menus USING (idmenu)
 				WHERE ordenadores.mac='$MAC';")
-		# Quitar tabuladores y sustituir caracteres quitando acentos y tildes.
+		# Quitar tabuladores, sustituir acentos y dejar resolución por defecto.
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
+		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
 		sed -e "s/vga=[0-9]*//g; s#INFOHOST#$DATOS#g" $TEMPLATE >$PXEFILE
 		# Ponemos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
