@@ -144,6 +144,7 @@ function checkAdmin($adminid) {
 
 
 /**
+ * @#fn       sendCommand($serverip, $serverport, $reqframe, &$values)
  * @brief    Send a command to OpenGnsys ogAdmServer and get request.
  * @param    string serverip    Server IP address.
  * @param    string serverport  Server port.
@@ -184,8 +185,7 @@ function sendCommand($serverip, $serverport, $reqframe, &$values) {
 
 /**
  * @brief    user login.
- * URL: /login
- * Método: POST
+ * @note     Route: /login, Method: POST
  * @param    string username   User name.
  * @param    string password   User password.
  * @return   string            JSON response with user id. and API key.
@@ -255,11 +255,10 @@ $app->post('/login',
 );
 
 /**
- * Listar todas las Unidades Organizativas definidas.
- * URL: /ous
- * Método: GET
- * Parámetros: no
- * Devuelve: array JSON con ouid y ouname de las Unidades Organizativas definidas.
+ * @brief    List all defined Organizational Units
+ * @note     Route: /ous, Method: GET
+ * @param    no
+ * @return   JSON array with ouid, ouname for every defined OU
  */
 $app->get('/ous', 'validateApiKey', function() {
 	global $cmd;
@@ -284,10 +283,10 @@ $app->get('/ous', 'validateApiKey', function() {
 );
 
 /**
- * Obtener datos de una Unidad Organizativa.
- * URL: /ous/id (id. de la UO)
- * Método: GET
- * Devuelve: ouid, ouname y description
+ * @brief    Get Organizational Unit data
+ * @note     Route: /ous/id, Method: GET
+ * @param    id      OU id.
+ * @return   JSON string with ouid, ouname and description
  */
 $app->get('/ous/:ouid', 'validateApiKey',
     function($ouid) {
@@ -460,7 +459,7 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 		//$response['hardprofid'] = $rs->campos["idperfilhard"];
 		//$response['menuid'] = $rs->campos["idmenu"];
 		//$response['validation'] = $rs->campos["arranque"]==0 ? false: true;
-		$response['boottype'] = $rs->campos["arranque"];
+		//$response['boottype'] = $rs->campos["arranque"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
@@ -585,7 +584,7 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/status', 'validateApiKey',
 	global $LONCABECERA;
 	global $LONHEXPRM;
 
-	// Pparameters.
+	// Parameters.
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
@@ -840,7 +839,7 @@ EOD;
     }
 );
 
-// Arrancar N ordenadores con una imagen instalada.
+// Arrancar un ordenador con una imagen instalada, elegido al azar.
 $app->get('/ous/:id1/images/:id2/boot', 'validateApiKey',
     function($ouid, $imageid) {
 	global $cmd;
