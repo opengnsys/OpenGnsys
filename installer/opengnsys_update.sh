@@ -899,6 +899,7 @@ function updateSummary()
 			echoAndLog "        New OpenGnsys services will be restarted by the cronjob."
 		fi
 	fi
+	echoAndLog "Warning: You must to clear web browser cache before loading OpenGnSys page."
 	echo
 }
 
