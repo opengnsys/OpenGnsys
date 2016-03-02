@@ -1,14 +1,11 @@
 #!/bin/bash
-#         deleteimage [ -b | -r ] [ dir_ogunit ] str_image
+#         deleteimage [ -b | -r ] [ str_image | str_dir/str_image ]
 #@file    deleteimage
 #@brief   Borra del repositorio los ficheros de una imagen.
 #@param   -b           Elimina también la copia de seguridad de la imagen (opcional).
 #@param   -r           Recupera la copia de seguridad de la imagen (opcional).
-#@param   str_dir_ogunit  Nombre del subdirectorio de la unidad organizativa (opcional).
-#@param   str_image    Nombre canónico de la imagen, sin extensión.
+#@param   str_image    Nombre canónico de la imagen, sin extensión. Permite directorio.
 #@exception 1 Error de formato
-#@exception 2 Solo ejecutable por root
-#@exception 3 No existe subdirectorio de la unidad organizativa
 #@version 1.0 - Versión inicial.
 #@date    2012-10-14
 #@author  Ramón Gómez, ETSII Univ. Sevilla
@@ -18,9 +15,6 @@
 #@version 1.0.6 - Detección automática del tipo de imagen.
 #@date    2014-10-29
 #@author  Ramón Gómez, ETSII Univ. Sevilla
-#@version 1.1 - Separación subdirectorios unidades organizativas.
-#@date    2016-01-03
-#@author  Irina Gómez, ETSII Univ. Sevilla
 
 
 PROG=$(basename $0)
@@ -34,13 +28,11 @@ DIFFEXT="diff"
 if [ "$*" == "help" ]; then
     cat << EOT
 $PROG: Borra los ficheros de una imagen del repositorio.
-Formato: $PROG [ -b | -r ] [ str_dir_ogunit ] str_image
+Formato: $PROG [ -b | -r ] [ str_image | str_dir/str_image ]
          -b  Elimina también la copia de seguridad de la imagen.
          -r  Recupera la copia de seguridad de la imagen.
-         dir_ogunit subdirectorio unidad organizativa
-
 Ejemplo: $PROG imagen1
-         $PROG -r dir_ogunit2 imagen2
+         $PROG -r dir2/imagen2
 EOT
     exit 0
 fi
@@ -54,25 +46,10 @@ while getopts br OPTION; do
     shift $((OPTIND-1))
 done
 [ -n "$DELETEBACKUP" ] && [ -n "$RECOVERBACKUP" ] && ERR=1
-if [ $# -lt 1 -o -n "$ERR" ]; then
-    echo "$PROG Error: Formato: $PROG [ -b | -r ] [ str_dir_ogunit ] str_image" 
+if [ $# != 1 -o -n "$ERR" ]; then
+    echo "$PROG Error: Formato: $PROG [ -b | -r ] [ str_image | str_dir/str_image ]"
     exit 1
 fi
-
-if [ "$USER" != "root" ]; then
-    echo "$PROG: Error: solo ejecutable por root" >&2
-    exit 2
-fi
-
-if [ "$2" ]; then
-    if [ -d "$OGIMG/$1"  ]; then
-        OGIMG="$OGIMG/$1"
-    else
-        echo "$PROG Error: No existe el subdirectorio de la unidad organizativa $OGIMG/$1"
-        exit 3
-    fi
-    shift
-fi    
 
 # Eliminar ficheros de imagen monolítica o sincronizada básica.
 IMGPATH="$OGIMG/$1.$IMGEXT"

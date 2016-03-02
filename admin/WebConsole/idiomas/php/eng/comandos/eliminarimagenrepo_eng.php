@@ -38,4 +38,5 @@
 	$TbMsg[30]='Organizational Unit';
 	$TbMsg[31]='Archive';
 	$TbMsg[32]='Directory';
+	$TbMsg[33]='AVISO: La imagen está situada en un directorio que no corresponde a la unidad organizativa.'
 ?>

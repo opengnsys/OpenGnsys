@@ -20,7 +20,7 @@ if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion;} // Recoge
 //$opcion=$_POST["opcion"]; // Recoge parametros
 if (isset($_POST["idrepositorio"])) {$idrepositorio=$_POST["idrepositorio"];}else{$idrepositorio;}
 //$idrepositorio=$_POST["idrepositorio"]; 
-if (isset($_POST["grupoid"])) {$grupoid=$_POST["grupoid"];}else{$grupoid;}
+if (isset($_POST["grupoid"])) {$grupoid=$_POST["grupoid"];}else{$grupoid='';}
 //$grupoid=$_POST["grupoid"]; 
 $idcentro=$_SESSION["widcentro"];
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
@@ -86,19 +86,38 @@ if (!$rs->Abrir()) return(true); // Error al abrir recordset
 	}
 	$rs->Cerrar();
 
+// Compruebo si se separan directorio de unidades organizativas
+$cmd->texto="SELECT ogunit FROM entidades INNER JOIN centros USING(identidad) where idcentro=$idcentro";
+$rs=new Recordset;
+$rs->Comando=&$cmd;
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+$rs->Primero();
+if (!$rs->EOF)
+{
+        $separarogunit=$rs->campos["ogunit"]; // 1 -> si, 0 -> no
+}
+$rs->Cerrar();
+
+// Directorios de las imágenes, si separo por unidades organizativas leo la BD
+$dircentros= array();
+$dircentros[0]='/'; 	// Incluimos /opt/opengnsys/images
+if ($separarogunit == 1 ) {
+	$cmd->texto="SELECT idcentro, directorio FROM centros ORDER BY idcentro";
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero();
+	while (!$rs->EOF)
+	{
+		$dircentros[$rs->campos["idcentro"]]="/".$rs->campos["directorio"];
+		$rs->Siguiente();
+	}
+}
+
 if ($iprepositorio == $ipservidor)
 {
 
-$cmd->texto="SELECT * FROM repositorios WHERE ip='$iprepositorio'";
-$rs=new Recordset;
-$rs->Comando=&$cmd; 
-if (!$rs->Abrir()) return(true); // Error al abrir recordset
-	$rs->Primero(); 
-	if (!$rs->EOF)
-	{
-		$idrepodefault=$rs->campos["idrepositorio"];
-	}
-	$rs->Cerrar();
+
 //#########################################################################
 
 $repolocal="si";
@@ -106,19 +125,24 @@ $repolocal="si";
 	// LEYENDO EL DIRECTORIO local en el server
 	// /opt/opengnsys/images/
 	//#########################################################################
-	$dirtemplates="/opt/opengnsys/images/";
-	$directorio=dir($dirtemplates);
 	$imarepo= array();//pila de nombres
-	//bucle para llenar las pilas :P
-	while ($archivo = $directorio->read())
-	{
+	foreach ( array_unique($dircentros) as $subdir) {
+	   $dirtemplates="/opt/opengnsys/images/$subdir";
+	   $directorio=dir($dirtemplates);
+	   // quitamos la barra inicial
+	   $subdir = ($subdir == "/") ? '' : substr($subdir,1).':';
+	   //bucle para llenar las pilas :P
+	   while ($archivo = $directorio->read())
+	   {
 		//no mostrar ni "." ni ".." ni "pxe"
 		if(($archivo!=".")&&($archivo!="..")&&($archivo!="mount")&&($archivo!="lost+found"))
 		{
-		array_push($imarepo, $archivo);
+		array_push($imarepo, $subdir.$archivo);
 		}
+	   }
+	   $directorio->close();
 	}
-	$directorio->close();
+
 	sort($imarepo); // Ordenamos el Array
 
 	if (isset($_POST["contar"])) {$cuantos=$_POST["contar"];}else{$cuantos=0;$contar;}
@@ -133,6 +157,7 @@ $repolocal="si";
 		$nombre=trim($nombre);
 		$chekmarcadif=$_POST["marcadif".$i];
 		$tipoimg=$_POST["tipoimg".$i];
+		$idcentroimg=$_POST["idcentroimg".$i];
 
 		if ($checkbox == "si" && $chekmarcadif == 1)
 		{
@@ -169,19 +194,15 @@ $repolocal="si";
 		if ($checkboxobjeto == "si")
 		{
 	//#########################################################################
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$nombre' AND idcentro='$idcentro'";
+		// Si la imagen tiene directorio lo elimino
+		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='".preg_replace('/^\w*:/','',$nombre)."' AND idcentro='$idcentroimg'";
 		$rs=new Recordset; 
 		$rs->Comando=&$cmd; 
 		if (!$rs->Abrir()) return(0); // Error al abrir recordset
 		$rs->Primero(); 
 		if (!$rs->EOF){
-		$idimagen=$rs->campos["idimagen"];
-		$nombrecanonico=$rs->campos["nombreca"];
-		$centroimagen=$rs->campos["idcentro"];
-		$idimagen=$rs->campos["idimagen"];
-		//$cmd->texto="DELETE FROM imagenes WHERE idimagen='$idimagen'";
-		//$resul=$cmd->Ejecutar();
-				}
+			$idimagen=$rs->campos["idimagen"];
+		}
 		$rs->Cerrar();
 
 		EliminaImagenes($cmd,$idimagen,"idimagen");// EliminaciÃƒÂ³n en cascada
@@ -221,7 +242,7 @@ $repolocal="no";
 ?>
 
 <HTML>
-<TITLE>AdministraciÃƒÂ³n web de aulas</TITLE>
+<TITLE>Administración web de aulas</TITLE>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
@@ -314,7 +335,9 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[13] ?>&nbsp;</TH>
 			<TH align=center>&nbsp;<? echo $TbMsg[26] ?>&nbsp;</TH>
-			<?php if ($modov == 1){ ?><TH align=center>&nbsp;<? echo $TbMsg[30] ?>&nbsp;</TH><?php } ?>
+			<?php if ($modov == 1){ // Vista Repositorio Completo ?>
+			<TH align=center>&nbsp;<? echo $TbMsg[30] ?>&nbsp;</TH>
+			<?php } ?>
 
 
 		</TR>
@@ -352,7 +375,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 				   		}
 			}else{
 				// Compruebo si es un directorio
-				$buscodir="/opt/opengnsys/images/".$imarepo[$x];
+				$buscodir="/opt/opengnsys/images/".str_replace(":","/",$imarepo[$x]);
 				$buscopengnsys=$buscodir."/.marcimg";
 				if(is_dir($buscodir)  && file_exists($buscopengnsys)){
 						$imarepo[$x]=trim($imarepo[$x]);
@@ -373,16 +396,24 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	$contar=1;
 	foreach($sin_duplicados as $value) //imprimimos $sin_duplicados
 	{ //Llave Forach
+		// Guardo los valores del directorio y el nombre imagen
+		// Si no se separan los directorios queda igual
+		$arrayname=explode(':', $value);
+		if (sizeof( $arrayname) == 1){
+			$imgdir="";
+			$imgname=$arrayname[0];
+		} else {
+			$imgdir=$arrayname[0];
+			$imgname=$arrayname[1];
+		}	
 
 
 		//Buscamos tamano de fichero
-		//Buscamos .torrent y .sum con lock
-		$gensum=$value.".img.sum.lock";
-		$gentor=$value.".img.lock";
+		//Buscamos si existe fichero de bloqueo
+		$gentor=str_replace(":","/",$value).".img.lock";
 		if(ereg(".diff",$value))$gendif=$value.".img.diff";
 		// ########### Buscando si existe fichero imagen #####################
-		$buscando="find /opt/opengnsys/images/ -maxdepth 1 -name ".$gentor." -print";
-		$generando="Generando .torrent";
+		$buscando="ls /opt/opengnsys/images/$gentor";
 		$bustor=exec($buscando);
 		if(ereg(".diff",$value)) 
 			{
@@ -400,48 +431,48 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 				$nombrefichero=$value.'.img';$marcadif=0;
 			}
 
-
-		if ($modov != 1){
-
-		// ####################################################################################
-		// ########## Si el nombre imagen existe en la Unidad Organizativa ####################
-		// ####################################################################################
-
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' ";//AND idcentro='$idcentro'";
-		$rs=new Recordset; 
-		$rs->Comando=&$cmd; 
-		if (!$rs->Abrir()) return(0); // Error al abrir recordset
-		$rs->Primero(); 
-		if (!$rs->EOF){
-		$nombrecacentro=$rs->campos["nombreca"];
-		$nombrecaidcentro=$rs->campos["idcentro"];
-		}
-		if (empty($nombrecacentro) or $nombrecacentro != $value){$nombrecaidcentro=0;}
-		$rs->Cerrar();
-
-		if($nombrecaidcentro == $idcentro || $nombrecaidcentro==0)
-			{	//Comienzo de Condicion si es nombrecaidcentro
-		
-		// ####################################################################################
 		// ####################################################################################
 		// ########## Buscando si existe objeto imagen ########################################
-		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
-		if(ereg(".diff",$value)){ $valuediff=$value; $value = str_replace(".diff", "", $value);} //quitar todos los .diff y continuamos
 		// ####################################################################################
+		$encontradoobjetoimagen='';
+		// Version anterior tomaba nombrecentro donde $nombrecaidcentro=$idrepodefault
+		$nombrecaidcentro=0; // No afecta a vista unidad organizativa  
+		$nombrecentro='';	//  No afecta a vista unidad organizativa
+		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
+		if(ereg(".diff",$imgname)){ $imgname = str_replace(".diff", "", $imgname);} 
 
-		$encontradoobjetoimagen="";
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' AND idcentro='$idcentro'";
+		$cmd->texto="SELECT idcentro, nombrecentro, nombreca FROM imagenes LEFT JOIN centros USING(idcentro) WHERE nombreca='$imgname' ";
 		$rs=new Recordset; 
 		$rs->Comando=&$cmd; 
 		if (!$rs->Abrir()) return(0); // Error al abrir recordset
 		$rs->Primero(); 
 		if (!$rs->EOF){
-		$encontradoobjetoimagen=$rs->campos["nombreca"];
-					}
-		if($encontradoobjetoimagen == $value){$encontradoobjetoimagen;}else{$encontradoobjetoimagen="";}
+		$encontradoobjetoimagen=(is_null($rs->campos["nombreca"]))? '': $rs->campos["nombreca"];
+		$nombrecaidcentro=(is_null($rs->campos["idcentro"]))? 0 :$rs->campos["idcentro"];
+		$nombrecentro=(is_null($rs->campos["nombrecentro"]))? '' : $rs->campos["nombrecentro"];
+		}
 		$rs->Cerrar();
-		// ####################################################################################		
 
+		// Sobre: si devuelve una imagen tiene que coincidir
+		if($encontradoobjetoimagen == $imgname) {
+			$encontradoobjetoimagen=$value;
+		}
+
+		if ($modov != 1){  //VISTA UNIDAD ORGANIZATIVA
+		   // Si la imagen no es del centro no la muestro
+		   if ($nombrecaidcentro != $idcentro &&  $nombrecaidcentro != 0) {
+			$contandotipo++;
+			continue; 
+		   }
+		   // si ogunit con dir separados -> si la imagen no es del dir del centro no la muestro
+		   if ($separarogunit == 1 and  ! ereg($dircentros[$idcentro], "/".$value)) {
+			$contandotipo++;
+			continue; 
+		   };
+
+		}
+
+		// ####################################################################################		
 		// ########################## VARIABLES FICHERO DELETE ################################
 		$nombredirectorio="/opt/opengnsys/images/".$value;
 		// ####################################################################################	
@@ -453,6 +484,9 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			$ficherodelete="../tmp/".$nombrefichero.".delete";
 			}
 		// ########################## VARIABLES FICHERO DELETE ################################
+		$nombredirectorio=str_replace(":","/",$nombredirectorio);
+		$nombrefichero=str_replace(":","/",$nombrefichero);
+
 		// ####################################################################################	
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
@@ -510,16 +544,28 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="tipoimg'.$contar.'"  value='.$tipo[$contandotipo].'></TD>'.chr(13);;
+		echo '<input type="hidden" name="idcentroimg'.$contar.'"  value='.$nombrecaidcentro.'></TD>'.chr(13);;
+
+		// ########## Aviso si directorio distinto al del centro - en vista repositorio ##########
+		$aviso='';
+		if ($separarogunit == 1) {
+ 		    if ( $nombrecaidcentro != 0 and  "/".$imgdir != $dircentros[$nombrecaidcentro]){
+ 			$aviso="<font color=red> * </font>";
+			$textoaviso="<tr>\n	<th colspan='7' align='center'>".
+				"&nbsp;<sup>*</sup> $TbMsg[33] &nbsp;</th>\n".
+				"</tr>\n";
+ 		    }
+		}
 
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
 		{
-			echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center><font color=blue>&nbsp;'.$value.' '.$aviso.'&nbsp;</TD>'.chr(13);
 		}
 		else
 		{
 
-			echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center>&nbsp;'.$value.' '.$aviso.'&nbsp;</TD>'.chr(13);
 		}
 
 		// ########## Tamaño de Imagen ########################################################
@@ -538,174 +584,23 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			}else{
 				echo '<TD align=center><font color=red>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
 		}
-		// #####################################################################################
-		echo '</TR>'.chr(13);
-		$contar++;
-		$contandotipo++;
+		// VISTA REPOSITORIO COMPLETO
+		if ($modov == 1){
+                // #####################################################################################
+                // ########## Unidad Organizativa ######################################################
 
-						}else{$contandotipo++;}//Fin de Condicion si es nombrecaidcentro
+                        echo '<TD align=center >'.$nombrecentro.'</TD>'.chr(13);
 
-			}
-
-		else{
-
-
-		$nombrecaidcentro=$idrepodefault;
-		//echo $value." - ".$idcentro."</br>";
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value' ";
-		$rs=new Recordset; 
-		$rs->Comando=&$cmd; 
-		if (!$rs->Abrir()) return(0); // Error al abrir recordset
-		$rs->Primero(); 
-		if (!$rs->EOF){
-		$nombrecacentro=$rs->campos["nombreca"];
-		$nombrecaidcentro=$rs->campos["idcentro"];
-						}
-		$rs->Cerrar();
-
-		$cmd->texto="SELECT * FROM centros WHERE idcentro='$nombrecaidcentro' ";
-		$rs=new Recordset; 
-		$rs->Comando=&$cmd; 
-		if (!$rs->Abrir()) return(0); // Error al abrir recordset
-		$rs->Primero(); 
-		if (!$rs->EOF){
-		$nombrecentro=$rs->campos["nombrecentro"];
-				}
-		$rs->Cerrar();
-
-	
-		// ####################################################################################
-		// ####################################################################################
-		// ########## Buscando si existe objeto imagen ########################################
-		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
-		if(ereg(".diff",$value)){ $valuediff=$value; $value = str_replace(".diff", "", $value);} //quitar todos los .diff y continuamos
-		// ####################################################################################
-
-		$encontradoobjetoimagen="";
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$value'";// AND idcentro='$idcentro'";
-		$rs=new Recordset; 
-		$rs->Comando=&$cmd; 
-		if (!$rs->Abrir()) return(0); // Error al abrir recordset
-		$rs->Primero(); 
-		if (!$rs->EOF){
-		$encontradoobjetoimagen=$rs->campos["nombreca"];
-					}
-		if($encontradoobjetoimagen == $value){$encontradoobjetoimagen;}else{$encontradoobjetoimagen="";}
-		$rs->Cerrar();
-		// ####################################################################################		
-
-		// ########################## VARIABLES FICHERO DELETE ################################
-		$nombredirectorio="/opt/opengnsys/images/".$value;
-		// ####################################################################################	
-		if ($tipo[$contandotipo] == "D")
-		{
-			$nombrefichero=str_replace(".img", "", $nombrefichero);
-			$ficherodelete="../tmp/".$nombrefichero.".delete";
-		}else{
-			$ficherodelete="../tmp/".$nombrefichero.".delete";
-			}
-		// ########################## VARIABLES FICHERO DELETE ################################
-
-		// ####################################################################################	
-		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
-		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
-			{
-			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
-			}
-		elseif (ereg(".ant",$nombrefichero))
-			{
-				$nombreficheroant=str_replace(".ant", "", $nombrefichero); //quitar todos los .ant y continuamos
-
-				$nombreficheroant=$nombreficheroant.".ant";
-				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombreficheroant");
-				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
-			}else{
-				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
-				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
-			}
-		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
-												
-		$todo=".delete";
-		$ruta='touch%20/opt/opengnsys/images/'.$value.$todo;//////////////////////////////////////echo $value;//
-
-		echo '<TR>'.chr(13);
-
-		// ########## Nº ######################################################################
-		echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
-
-		// ########## Marcar ##################################################################
-		if ($bustor<>"") 
-			{
-			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
-			}
-			elseif (file_exists($ficherodelete))
-				{
-					echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[15].'</strong></TD>'.chr(13);}
-				else
-				{
-					echo '<TD align=center ><input type="checkbox" name="checkbox'.$contar.'"  value="si"></TD>'.chr(13);
-				}
-
-		// ########## Tipo ####################################################################
-		if ($tipo[$contandotipo]=="D")
-		{
-			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
+                // #####################################################################################
 		}
-		elseif ($tipo[$contandotipo]=="B")
-		{
-			echo '<TD align=center><font color=red>&nbsp;'.$tipo[$contandotipo].'&nbsp;</TD>'.chr(13);
-			}else{
-			echo '<TD align=center >'.$tipo[$contandotipo].'</TD>'.chr(13);
-		}
-
-		echo '<input type="hidden" name="nombre'.$contar.'" value='.$value.'></TD>'.chr(13);;
-		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
-		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
-		echo '<input type="hidden" name="tipoimg'.$contar.'"  value='.$tipo[$contandotipo].'></TD>'.chr(13);;
-
-		// ########## Nombre de Imagen ########################################################
-		if ($tipo[$contandotipo]=="D")
-		{
-			echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
-		}
-		else
-		{
-			echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);
-		}
-
-		// ########## Tamaño de Imagen ########################################################
-		if (is_dir ($nombredirectorio) && $tipo[$contandotipo] == "D")
-		{echo '<TD align=center>&nbsp;'.$tamanofich.'</TD>'.chr(13);}
-		else{echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
-
-		// ########## Objeto Imagen ###########################################################
-		if($encontradoobjetoimagen<>"")
-		{
-			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
-		}
-		elseif (ereg(".ant",$nombrefichero))
-			{
-				echo '<TD align=center><font color=red>&nbsp;------</strong></TD>'.chr(13);
-			}else{
-				echo '<TD align=center><font color=red>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
-		}
-		// #####################################################################################
-		// ########## Unidad Organizativa ######################################################
-
-			echo '<TD align=center >'.$nombrecentro.'</TD>'.chr(13);
 
 		// #####################################################################################
 		echo '</TR>'.chr(13);
 		$contar++;
 		$contandotipo++;
-
-//						}else{$contandotipo++;}//Fin de Condicion si es nombrecaidcentro
-
-			}
-
-
 
 	} //Fin Llave Forach
+	if (isset ($textoaviso)) echo $textoaviso;
 
 	?>
 
