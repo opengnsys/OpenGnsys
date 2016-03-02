@@ -9,6 +9,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.0
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
 #676	Soportar sistema de ficheros ZFS
+#678	Unidades organizativas con directorio de imágenes separado.
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
 
 Tickets resueltos en módulo OpenGnsys Client:
@@ -16,12 +17,35 @@ Tickets resueltos en módulo OpenGnsys Client:
 #725	Sincronización horaria de clientes con servidor NTP
 
 Tickets resueltos en módulo OpenGnsys Server:
-#719	setclientmode: desaparece equipo de NetBoot Avanzado
 #729	Instalar en cliente la misma versión de Rsync que la del servidor
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #711	Mostrar porcentaje de uso de cada sistema de archivos
+#732	Ampliar el calendario de programación de acciones más allá de 2015
+
+Tickets genéricos resueltos:
+#679	Varios repositorios para un mismo cliente.
+
+
+Lista de cambios incluidos en OpenGnSys 1.0.6a (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#696	Función ogUnmountAll monta la caché
+#728	Solucionar problemas de clonado y postconfiguración de Windows 10
+#733	No se genera tabla de partición en discos vacíos
+
+Tickets resueltos en módulo OpenGnSys Client:
+#717	Indicar manualmente parámetros de arranque de un S.O.
+
+Tickets resueltos en módulo OpenGnSys Server:
+#719	setclientmode: desaparece equipo de netBootAvanzado
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #721	Consola Restaurar Imagen: falla el filtro de equipos
+
+Tickets genéricos resueltos:
+#734	Liberar versión de mantenimiento OpenGnSys 1.0.6a en rama principal
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.6
