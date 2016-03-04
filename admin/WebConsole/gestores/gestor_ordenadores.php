@@ -7,6 +7,9 @@
 // Nombre del fichero: gestor_ordenadores.php
 // Descripción :
 //		Gestiona el mantenimiento de la tabla de ordenadores
+// Versión 1.1.0: Al insertar ordenador se comprueba que no existen duplicados nombre, ip y mac
+// Autor: Irina Gómez  - ETSII, Universidad de Sevilla
+// Fecha: 2016-03-04
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -17,6 +20,8 @@ include_once("../includes/constantes.php");
 include_once("./relaciones/ordenadores_eliminacion.php");
 include_once("../includes/tftputils.php");
 include_once("../includes/opciones.php");
+include_once("../idiomas/php/".$idioma."/gestor_ordenadores_".$idioma.".php");
+
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
 
@@ -41,6 +46,8 @@ $paginalogin="";
 $paginavalidacion="";
 ### Ramón
 $arranque="";
+### Irina
+$datosduplicados="";
 
 //##agp
 if (isset($_FILES['archivo'])) {
@@ -118,8 +125,13 @@ if($opcion!=$op_movida){
 			break;
 	}
 if ($resul){
-	if ($opcion==$op_alta )
+	if ($opcion==$op_alta ) {
+	    if ( $datosduplicados != '') {
+		echo $literal."(0,'".$TbMsg["DUPLICADO"].$datosduplicados." ',".$idordenador.",o.innerHTML);".chr(13);
+	    } else {  
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ',".$idordenador.",o.innerHTML);".chr(13);
+	    }
+	}
 	else
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ','".$nombreordenador."');".chr(13);
 }
@@ -180,6 +192,9 @@ function Gestiona(){
 	global $op_movida;
 	global $tablanodo;
 
+####################### Irina
+	global $datosduplicados;
+
 	
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idaula",$idaula,1);
@@ -203,13 +218,39 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			//Insertar fotoord con Values @fotoordenador
-			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
-			idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
-			@idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
+                        // Comprueba que no existan duplicados
+                        $ipduplicada='no';
+                        $nombreduplicado='no';
+                        $macduplicada='no';
+                        $cmd->texto="SELECT nombreordenador,ip,mac FROM  ordenadores
+                                WHERE nombreordenador=@nombreordenador OR ip=@ip OR mac=@mac";
+                        $rs=new Recordset;
+                        $rs->Comando=&$cmd;
+                        if (!$rs->Abrir()) return(0); // Error al abrir recordset
+                        $rs->Primero();
+                        while (!$rs->EOF){
+                           if ( $nombreordenador == $rs->campos["nombreordenador"]) $nombreduplicado='si';
+                           if ( $ip == $rs->campos["ip"]) $ipduplicada='si';
+                           if ( $mac == $rs->campos["mac"]) $macduplicada='si';
+                           $rs->Siguiente();
+                        }
+                        $rs->Cerrar();
+                        if ( $ipduplicada == 'si' ) $datosduplicados ="ip: $ip,";
+                        if ( $nombreduplicado == 'si' ) $datosduplicados .=" nombre: $nombreordenador, ";
+                        if ( $macduplicada == 'si' ) $datosduplicados .=" mac: $mac";
+                        // quitamos última coma
+                        $datosduplicados = trim($datosduplicados, ',');
 
+                        // Si no hay datos duplicados insertamos el ordenador;
+                        if ( $datosduplicados == "" ) {
+			     // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
+			     createBootMode ($cmd, "", $idordenador, $idioma); 
+			     //Insertar fotoord con Values @fotoordenador
+			     $cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
+			     idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
+			     @idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
+                        }
 			$resul=$cmd->Ejecutar();
-			//echo $cmd->texto;
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idordenador=$cmd->Autonumerico();
 				$arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
@@ -218,8 +259,6 @@ function Gestiona(){
 				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
 				$tablanodo=$arbol->CreaArbolVistaXML();
 			}
-			// Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
-			createBootMode ($cmd, "", $idordenador, $idioma);
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
