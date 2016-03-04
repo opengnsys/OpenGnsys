@@ -55,10 +55,21 @@
 					        alert(TbMsg["FILTER"]);
 					        return(false);
 					}
+					numequipos=arrayfiltro.length;
 				}
 				else {
 					ipfiltro=iptabla.replace(/,/g, ";");
+					numequipos=iptabla.split(",").length;
 				}
+
+				// Mensaje de aviso si protocolo UNICAST y más de un ordenador
+				if ( ( protoclonacion.value=="UNICAST" || protoclonacion.value=="UNICAST-DIRECT") && numequipos > 1 ) {
+					if (confirm(TbMsg["UNICAST"]) != true) {
+						cancelar();
+						return(false);
+					}
+				}
+
 				document.fdatosejecucion.filtro.value=ipfiltro;
 				document.fdatosejecucion.submit();	
 			}
@@ -67,7 +78,7 @@
  }
 //________________________________________________________________________________________________________
   function cancelar(){
-	alert(TbMsg[0]);
+	alert(CTbMsg[0]);
 	location.href="../nada.php"
   }
 //________________________________________________________________________________________________________

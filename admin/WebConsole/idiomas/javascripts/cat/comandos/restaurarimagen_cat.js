@@ -1,6 +1,6 @@
 ﻿//________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: configurar_esp.js 
+//	Fichero de idiomas javascripts: restaurarimagen_cat.js
 //	Idioma: Español 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
@@ -12,3 +12,4 @@ TbMsg[4]="Debe elegir al menos una imagen para la partición"
 TbMsg[5]="Debe elegir al menos un path de imagen para la partición ";
 TbMsg[6]="Debe elegir la imagen de uno sólo de los desplegables";
 TbMsg["FILTER"]="Debe seleccionar al menos un ordenador que tenga la configuración elegida.";
+TbMsg["UNICAST"]="\t!!!!!     ATENCIÓN     !!!!! \nHa seleccionado UNICAST en varios ordenadores,\nLa transferencia puede demorarse en el tiempo";
