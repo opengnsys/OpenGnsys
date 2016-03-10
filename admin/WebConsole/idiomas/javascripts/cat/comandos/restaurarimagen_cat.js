@@ -10,4 +10,5 @@ TbMsg[2]="ATENCIÓN:  Ha selecccionado una imagen de Sistema Operativo distinto 
 TbMsg[3]="¿ Está seguro ?"
 TbMsg[4]="Debe elegir al menos una imagen para la partición"
 TbMsg[5]="Debe elegir al menos un path de imagen para la partición ";
-TbMsg[6]="Debe elegir la imagen de uno sólo de los desplegables"
+TbMsg[6]="Debe elegir la imagen de uno sólo de los desplegables";
+TbMsg["FILTER"]="Debe seleccionar al menos un ordenador que tenga la configuración elegida.";

@@ -44,7 +44,7 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 function ogCreatePartitions ()
 {
 # Variables locales.
-local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART CACHESIZE IOSIZE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -72,7 +72,20 @@ CACHEPART=$(ogFindCache 2>/dev/null)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 # Sector de inicio (la partición 1 empieza en el sector 63).
-START=63
+##########   agp  ###########
+iodisco=$(ogDiskToDev $1)
+IOSIZE=$(fdisk -l $iodisco | grep I/O | cut -d ":" -f2 | cut -d "/" -f1 | cut -d " " -f2)
+if [[ $IOSIZE = 4096 ]]; then
+	START=4096
+else
+	START=63
+fi
+##########   agp  ###########
+
+
+
+
+
 PART=1
 
 # Fichero temporal de entrada para "sfdisk"
@@ -257,6 +270,9 @@ sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/03/06
+#@version 1.0.6a - Adaptar creación de nueva tabla MSDOS.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016/01/29
 #*/ ##
 function ogCreatePartitionTable ()
 {
@@ -308,7 +324,8 @@ case "$CREATE" in
         if [ "$PTTYPE" == "GPT" ]; then
             sgdisk -Z $DISK
         fi
-        fdisk $DISK <<< "w"
+        # Crear y borrar una partición para que la tabla se genere bien. 
+        echo -e "o\nn\np\n\n\n\nd\n\nw" | fdisk $DISK
         partprobe $DISK 2>/dev/null
         ;;
 esac
@@ -592,7 +609,7 @@ echo $TYPE
 function ogGetLastSector ()
 {
 # Variables locales
-local DISK PART PTTYPE LASTSECTOR SECTORS CYLS
+local DISK PART PTTYPE LASTSECTOR SECTORS CYLS IOSIZE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npart]" \
@@ -626,7 +643,14 @@ case "$PTTYPE" in
         if [ $# == 1 ]; then
             SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
             CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-            LASTSECTOR=$[SECTORS/CYLS*CYLS-1]
+	    ##########   agp  ###########
+	    IOSIZE=$(fdisk -l $DISK | grep I/O | cut -d ":" -f2 | cut -d "/" -f1 | cut -d " " -f2)
+	    if [[ $IOSIZE = 4096 ]]; then
+		LASTSECTOR=$[SECTORS-512]
+	    else
+		LASTSECTOR=$[SECTORS/CYLS*CYLS-1]
+	    fi
+	    ##########   agp  ###########
         else
             LASTSECTOR=$(sfdisk -uS -l $DISK 2>/dev/null | \
                          awk -v P="$PART" '{if ($1==P) {if ($2=="*") print $4; else print $3} }')

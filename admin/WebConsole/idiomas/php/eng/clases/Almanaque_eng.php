@@ -72,14 +72,14 @@ class Almanaque{
 		$this->semanas[5]=array ("5ª",0x10);
 		$this->semanas[6]=array ("Last",0x20);
 
-		$this->numero_annos[1]=array ("2004",0x01); // tamaño 1 bytes
-		$this->numero_annos[2]=array ("2005",0x02); 
-		$this->numero_annos[3]=array ("2006",0x04); 
-		$this->numero_annos[4]=array ("2007",0x08); 
-		$this->numero_annos[5]=array ("2008",0x10); 
-		$this->numero_annos[6]=array ("2009",0x20); 
-		$this->numero_annos[7]=array ("2010",0x40); 
-		$this->numero_annos[8]=array ("2011",0x80); 
+		$this->numero_annos[1]=array ("2010",0x01); // tamaño 1 bytes
+		$this->numero_annos[2]=array ("2011",0x02); 
+		$this->numero_annos[3]=array ("2012",0x04); 
+		$this->numero_annos[4]=array ("2013",0x08); 
+		$this->numero_annos[5]=array ("2014",0x10); 
+		$this->numero_annos[6]=array ("2015",0x20); 
+		$this->numero_annos[7]=array ("2016",0x40); 
+		$this->numero_annos[8]=array ("2017",0x80); 
 
 		$this->numero_dias[1]=0x00000001; // tamaño 4 bytes
 		$this->numero_dias[2]=0x00000002; 
@@ -211,7 +211,7 @@ class Almanaque{
 		$HTML_calendario='<TABLE id="tabla_annos" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
 		$HTML_calendario.='<TH style="cursor:hand" onclick="TH_'.$this->onclick.'">Years</TH></TR>'.chr(13); // Literal años
-		for ($i=1;$i<7;$i++){
+		for ($i=1;$i<9;$i++){
 			$HTML_calendario.='<TR><TD id="'.$this->numero_annos[$i][0].'" value="'.$this->numero_annos[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_annos[$i][0].'</TD></TR>'.chr(13);
 		}
 		$HTML_calendario.='</TABLE>'.chr(13);

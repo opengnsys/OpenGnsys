@@ -37,22 +37,30 @@
 				atributos+="ipr="+imgcanrepo[2]+RC;	// Ip del repositorio donde está alojada	
 				atributos+="ifs="+imgcanrepo[3]+RC;	// Identificador del perfil soft contenido en la imagen				
 				atributos+="ptc="+protoclonacion.value+RC; // Identificador del protocolo de clonación				
+				document.fdatosejecucion.atributos.value=atributos;
 				
 				var cc=ochecks[i].getAttribute('idcfg'); // Toma identificador del bloque de configuración
-
-				if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){	
-					var tbOrd=document.getElementById("tbOrd_"+cc);			
-					var idordenadores=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores
-					var cadenaid=document.fdatos.cadenaid.value; // Cadena de identificadores de todos los ordenadores del ámbito
-					if(idordenadores!=cadenaid){ 
-						document.fdatosejecucion.ambito.value=0; // Ambito de aplicación restringido
-						document.fdatosejecucion.idambito.value=idordenadores;
-					}
-				}					
-				document.fdatosejecucion.atributos.value=atributos;
+				var tbOrd=document.getElementById("tbOrd_"+cc);
+				var iptabla=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores 
 				filtrado();
+				var ipfiltro=document.fdatosejecucion.filtro.value; 
+
+				// Elimino los ordenadores del filtro que no estén en la tabla
+				if (ipfiltro!=''){ 
+					var arraytabla = iptabla.split(",");
+					var arrayfiltro =ipfiltro.split(";");
+					arrayfiltro = array_interset (arrayfiltro.sort(), arraytabla.sort()); 
+					ipfiltro = arrayfiltro.join(";"); 
+					if (ipfiltro ==''){ 
+						alert(TbMsg["FILTER"]); 
+						return(false); 
+					}
+				} else {
+					ipfiltro=iptabla.replace(/,/g, ";"); 
+				}
+				document.fdatosejecucion.filtro.value=ipfiltro; 
+
 				document.fdatosejecucion.submit();	
-				break;		
 			}
 		}
 	}
@@ -96,4 +104,3 @@
 		}
 		return(comprobar_datosejecucion())
 }
-
