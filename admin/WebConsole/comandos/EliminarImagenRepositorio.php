@@ -133,6 +133,7 @@ $repolocal="si";
 		$nombre=trim($nombre);
 		$chekmarcadif=$_POST["marcadif".$i];
 		$tipoimg=$_POST["tipoimg".$i];
+		$idcentroimg=$_POST["idcentroimg".$i];
 
 		if ($checkbox == "si" && $chekmarcadif == 1)
 		{
@@ -169,7 +170,7 @@ $repolocal="si";
 		if ($checkboxobjeto == "si")
 		{
 	//#########################################################################
-		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$nombre' AND idcentro='$idcentro'";
+		$cmd->texto="SELECT * FROM imagenes WHERE nombreca='$nombre' AND idcentro='$idcentroimg'";
 		$rs=new Recordset; 
 		$rs->Comando=&$cmd; 
 		if (!$rs->Abrir()) return(0); // Error al abrir recordset
@@ -664,6 +665,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		echo '<input type="hidden" name="contar" value='.$contar.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="marcadif'.$contar.'" value='.$marcadif.'></TD>'.chr(13);;
 		echo '<input type="hidden" name="tipoimg'.$contar.'"  value='.$tipo[$contandotipo].'></TD>'.chr(13);;
+		echo '<input type="hidden" name="idcentroimg'.$contar.'"  value='.$nombrecaidcentro.'></TD>'.chr(13);;
 
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")

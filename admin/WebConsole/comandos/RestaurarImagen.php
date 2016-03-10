@@ -63,6 +63,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
+<SCRIPT language="javascript" src="../jscripts/arrays.js"></SCRIPT> 
 <?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 <?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarimagen_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
@@ -115,7 +116,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <?php
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
-	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false,"pintaParticionesRestaurarImagen");
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false,"pintaParticionesRestaurarImagen","ipordenador");
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________

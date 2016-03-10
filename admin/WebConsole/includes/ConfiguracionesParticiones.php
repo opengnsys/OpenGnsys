@@ -179,7 +179,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				configuración de los ordenadores o la pantalla de los comandos "Configurar" o "RestaurarImagen" 
 				para permitir introducir los	datos necesarios.		
 ________________________________________________________________________________________________________*/
-function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaParticionesFunction="pintaParticiones")
+function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaParticionesFunction="pintaParticiones",$tipoid="idordenador")
 {
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
@@ -270,7 +270,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 		$cc++;
 		//Muestra ordenadores
 		echo '<tr><td colspan="'.$colums.'" style="background-color: #ffffff;">';
-		echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc);
+		echo pintaOrdenadores($cmd,$rs->campos["idordenadores"],10,$cc,$tipoid);
 		echo '</td></tr>';
 		//Muestra particiones y configuración
 		$configuraciones[$cc-1] = $rs->campos["configuraciones"];

@@ -35,7 +35,7 @@
 function ogCreateCache ()
 {
 # Variables locales.
-local FINDCACHE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
+local FINDCACHE NDSK SIZECACHE IOSIZE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partsize" "$FUNCNAME 1 10000000"
@@ -65,7 +65,15 @@ PART=4
 DISK=$(ogDiskToDev $NDSK) || return $?
 END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
 SIZE=$[$SIZECACHE*2]                            # Tamaño en sectores de 512 B.
-START=$[END-SIZE+1]
+###### agp ############
+IOSIZE=$(fdisk -l $DISK | grep I/O | cut -d ":" -f2 | cut -d "/" -f1 | cut -d " " -f2)
+if [[  $IOSIZE = 4096 ]]; then
+	END=$[$END-8192]
+	START=$[END-SIZE-8192]
+else
+	START=$[END-SIZE+1]
+fi
+###### agp ############
 ENDPREVPART=$[$(ogGetLastSector $NDSK $[PART-1] 2>/dev/null)]
 # Error si tamaño no está entre límites permitidos o si se solapa con la partición anterior.
 MINSIZE=25000                   # Error de formateo si tamaño < 50 MB.

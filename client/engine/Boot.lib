@@ -480,7 +480,10 @@ FILE=/tmp/temp$$
 
 VERSION=$(ogGetOsVersion $1 $2)
 
-if echo "$VERSION" | grep "Windows 8.1"
+if echo "$VERSION" | grep "Windows 10"
+then
+       WINVER="Windows 10"
+elif echo "$VERSION" | grep "Windows 8.1"
 then
 	WINVER="Windows 8.1"
 elif echo "$VERSION" | grep "Windows 8"
@@ -1022,7 +1025,7 @@ ogGrubAddOgclient () {
 
     # Error si no existe el kernel y el initrd en la cache.
     # Falta crear nuevo codigo de error.
-    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo ?)
+    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo $?)
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)

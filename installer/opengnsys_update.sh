@@ -884,7 +884,7 @@ function updateSummary()
 	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
 	echoAndLog "Update log file:                  $LOG_FILE"
 	if [ -n "$NEWFILES" ]; then
-		echoAndLog "Check the new config files:       $(echo $NEWFILES)"
+		echoAndLog "Check new config files:           $(echo $NEWFILES)"
 	fi
 	if [ -n "$NEWSERVICES" ]; then
 		echoAndLog "New compiled services:            $(echo $NEWSERVICES)"
@@ -896,6 +896,7 @@ function updateSummary()
 			echoAndLog "        New OpenGnSys services will be restarted by the cronjob."
 		fi
 	fi
+	echoAndLog "Warning: You must to clear web browser cache before loading OpenGnSys page."
 	echo
 }
 

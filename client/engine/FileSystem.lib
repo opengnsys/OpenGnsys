@@ -468,7 +468,7 @@ findmnt -n -o TARGET $PART
 function ogIsFormated ()
 {
 # Variables locales
-local DISK
+local PART
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
            "if $FUNCNAME 1 1; then ... ; fi"
@@ -476,8 +476,9 @@ if [ "$*" == "help" ]; then
 fi
 # Falso, en caso de error.
 [ $# == 2 ] || return 1
+PART="$(ogDiskToDev $1 $2 2>/dev/null)" || return 1 
 
-test -n "$(ogMount "$1" "$2" 2>/dev/null)"
+test -n "$(blkid -s TYPE $PART | egrep -vi "swap|_member")"
 }
 
 

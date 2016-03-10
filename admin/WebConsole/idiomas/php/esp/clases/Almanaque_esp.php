@@ -179,7 +179,7 @@ class Almanaque{
 		$HTML_calendario='<TABLE id="tabla_annos" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
 		$HTML_calendario.='<TH style="cursor:pointer" onclick="TH_'.$this->onclick.'">Años</TH></TR>'.chr(13); // Literal años
-		for ($i=1;$i<7;$i++){
+		for ($i=1;$i<9;$i++){
 			$HTML_calendario.='<TR><TD align="center" id="'.$this->numero_annos[$i][0].'" 
 			value="'.$this->numero_annos[$i][1].'" style="cursor:pointer" 
 			onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" 

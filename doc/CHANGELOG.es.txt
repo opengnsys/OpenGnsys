@@ -2,6 +2,26 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.6a (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#696	Función ogUnmountAll monta la caché
+#728	Solucionar problemas de clonado y postconfiguración de Windows 10
+#733	No se genera tabla de partición en discos vacíos
+#735	Discos duros con sectores de 4096 bytes
+
+Tickets resueltos en módulo OpenGnSys Server:
+#719	setclientmode: desaparece equipo de netBootAvanzado
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#721	Consola Restaurar Imagen: falla el filtro de equipos
+#732	Ampliar el calendario de programación de acciones más allá de 2015 (parcial)
+
+Tickets genéricos resueltos:
+#734	Liberar versión de mantenimiento OpenGnSys 1.0.6a en rama principal
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.6
 ---------------------------------------------
 
