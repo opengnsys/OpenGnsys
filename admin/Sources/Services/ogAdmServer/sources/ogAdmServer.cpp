@@ -816,26 +816,19 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					return (FALSE);
 				}
 				if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
-					if (!tbl.Get("uso", dato)) { // Toma dato
+					if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 						errorInfo(modulo, msglog);
 						return (FALSE);
 					}
-					if (atoi(uso) == dato) {// Parámetro uso igual al almacenado
-						if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
+					if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
+						if (!tbl.Get("idnombreso", dato)) { // Toma dato
 							tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 							errorInfo(modulo, msglog);
 							return (FALSE);
 						}
-						if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
-							if (!tbl.Get("idnombreso", dato)) { // Toma dato
-								tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-								errorInfo(modulo, msglog);
-								return (FALSE);
-							}
-							if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
-								swu = FALSE; // Todos los parámetros de la partición son iguales, no se actualiza
-							}
+						if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
+							swu = FALSE; // Todos los parámetros de la partición son iguales, no se actualiza
 						}
 					}
 				}
@@ -852,12 +845,17 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					" fechadespliegue=NULL"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 					cpt, tam, uso, idsfi, idsoi, ido, disk, par);
-				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-					errorLog(modulo, 21, FALSE);
-					db.GetErrorErrStr(msglog);
-					errorInfo(modulo, msglog);
-					return (FALSE);
-				}
+			} else {  // Actualizar porcentaje de uso.
+				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
+					" uso=%s"
+					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
+					uso, ido, disk, par);
+			}
+			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+				errorLog(modulo, 21, FALSE);
+				db.GetErrorErrStr(msglog);
+				errorInfo(modulo, msglog);
+				return (FALSE);
 			}
 		}
 	}
