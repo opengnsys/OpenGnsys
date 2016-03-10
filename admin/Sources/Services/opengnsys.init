@@ -159,9 +159,10 @@ arranca_demonios() {
      sleep 5 # Damos tiempo a que ogAdmServer este funcionando
   fi
   if [ $RUN_OGADMREPO = "yes" ]; then
-     $ACTIONMSG "Iniciando demonio: $REPONAME"
-     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS $ENDOPTS
-     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+     # No iniciar ogAdmRepo
+     #$ACTIONMSG "Iniciando demonio: $REPONAME"
+     #$DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS $ENDOPTS
+     #[ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
      faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG

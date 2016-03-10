@@ -21,6 +21,8 @@ Tickets resueltos en módulo OpenGnsys Server:
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #711	Mostrar porcentaje de uso de cada sistema de archivos
+#712	Formulario añadir nuevo ordenador no verifica la existencia previa del equipo
+#720	Fallo en alerta de Unicast al restaurar imagen
 #732	Ampliar el calendario de programación de acciones más allá de 2015
 
 Tickets genéricos resueltos:
@@ -34,6 +36,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #696	Función ogUnmountAll monta la caché
 #728	Solucionar problemas de clonado y postconfiguración de Windows 10
 #733	No se genera tabla de partición en discos vacíos
+#735	Discos duros con sectores de 4096 bytes
 
 Tickets resueltos en módulo OpenGnSys Client:
 #717	Indicar manualmente parámetros de arranque de un S.O.
