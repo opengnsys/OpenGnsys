@@ -27,12 +27,8 @@ mkdir -p /opt/opengnsys/images
 echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
 mount -a
 wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash
-cp /etc/dhcp/dhcpd-eth1.conf /etc/dhcp/dhcpd-eth1-orig.conf	# temporal
 echo y | sudo /opt/opengnsys/bin/setserveraddr eth1
 echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
-sed -e 's/routers /routers #{NETPREFIX}1/' /etc/dhcp/dhcpd-eth1-orig.conf >/etc/dhcp/dhcpd.conf	# temporal
-sed -i -e 's#://[^/]*/#://#{NETPREFIX}10/#g' /opt/opengnsys/www/controlacceso.php	# temporal
-sed -i -e 's#://[^/]*/#://#{NETPREFIX}10/#g' /opt/opengnsys/client/etc/ogAdmClient.cfg	# temporal
 sed -i '/^}/d' /etc/dhcp/dhcpd.conf
 echo "
     host virt1 { hardware ethernet #{MACPREFIX}01; fixed-address #{NETPREFIX}101; }

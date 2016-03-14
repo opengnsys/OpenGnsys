@@ -10,6 +10,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
 #676	Soportar sistema de ficheros ZFS
 #678	Unidades organizativas con directorio de imágenes separado.
+#722	Multicast entre subredes
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
 
 Tickets resueltos en módulo OpenGnsys Client:
@@ -17,6 +18,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #725	Sincronización horaria de clientes con servidor NTP
 
 Tickets resueltos en módulo OpenGnsys Server:
+#723	Cambio temporal de fichero de arranque PXE
 #729	Instalar en cliente la misma versión de Rsync que la del servidor
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
