@@ -49,8 +49,9 @@ if [ -n "$SERVERIP" ]; then
 	for f in /etc/{dhcp,hcp3}/dhcpd.conf; do
 		if [ -f $f ]; then
 			# Cambiar el parámetro "next-server" de DHCP.
-			sed "s/next-server.*/next-server $SERVERIP;/" $f >$tmpfile
 			file="${f/./-$1.}"
+			sed -e "s/next-server.*/next-server $SERVERIP;/" \
+			    -e "s/option routers ;/option routers ${SERVERIP%.*}.1;/" $file >$tmpfile
 			# Copiar el fichero y enlazarlo si hay cambios.
 			if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
 				mv $tmpfile $file
@@ -88,7 +89,7 @@ if [ -n "$SERVERIP" ]; then
 		# - servidor o IP en URLs excepto si contienen "localhost".
 		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
 		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
-		    -e '/localhost/!s,http://[^/]*/\(.*\),http://'$SERVERIP'/\1,' $f >$tmpfile
+		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$1.}"
 		# Si se usa otro interfaz o cambian los datos de red; ...
 		if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
