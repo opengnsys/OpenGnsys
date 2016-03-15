@@ -33,12 +33,12 @@ Ejecutar el entorno virtual.
    - NETPREFIX: prefijo para las direcciones IP de la red virtual.
    - MACPREFIX: prefijo para las direcciones MAC de los clientes.
    - LOCALWEBPORT: puerto local para acceder al web de administración del servidor.
- - Opcional: para una configuración automática de un aula con sus 2 clientes, descomentar las líneas del fichero Vagrantfile de los comandos "mysql" y "setclientmode".
+ - Opcional: para una definición automática del aula virtual con sus 2 clientes, descomentar las líneas del fichero Vagrantfile de los comandos "mysql" y "setclientmode".
 
  - Iniciar la MV del servidor:
 	vagrant up
  - Iniciar las MV de los clientes (tras iniciar el servidor):
-	vagrant up /virt1*/
+	vagrant up /virt*/
 
 Nota: los procesos de inicio pueden tardar varios minutos en la primera ejecución, porque descargan y configuran las máquinas virtuales.
 Nota: antes de iniciar las MV de los clientes, debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos (o revisar que los datos son correctos).
