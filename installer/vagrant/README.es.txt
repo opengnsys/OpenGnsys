@@ -6,7 +6,7 @@ Preparar entorno virtual de desarrollo para OpenGnsys
 Ficheros de configuración disponibles:
 
  - Vagrantfile-trunk-vbox  Vagrantfile para OpenGnsys oficial con proveedor VirtualBox.
- - Vagrantfile-1.1-vbox    Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
+ - Vagrantfile-devel-vbox  Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
 
 
 Requisitos previos.
@@ -27,25 +27,27 @@ Ejecutar el entorno virtual.
  - Crear un directorio de trabajo.
  - Copiar el fichero Vagrantfile correspondiente en dicho directorio como Vagrantfile.
  - Opcional: editar las variables de configuración del fichero Vagrantfile para el entorno personal.
+   - LANGUAGE: idioma (se aceptan es_ES, ca_ES y en_GB).
    - REPODISK, REPOSIZE: fichero y tamaño (en GB) del disco duro virtual para el repositorio de imágenes.
    - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes.
    - NETPREFIX: prefijo para las direcciones IP de la red virtual.
    - MACPREFIX: prefijo para las direcciones MAC de los clientes.
    - LOCALWEBPORT: puerto local para acceder al web de administración del servidor.
+ - Opcional: para una configuración automática de un aula con sus 2 clientes, descomentar las líneas del fichero Vagrantfile de los comandos "mysql" y "setclientmode".
 
  - Iniciar la MV del servidor:
-	vagrant up opengnsys
+	vagrant up
  - Iniciar las MV de los clientes (tras iniciar el servidor):
-	vagrant up virt1
-	vagrant up virt2
+	vagrant up /virt1*/
 
 Nota: los procesos de inicio pueden tardar varios minutos en la primera ejecución, porque descargan y configuran las máquinas virtuales.
-Nota: antes de iniciar las MV de los clientes, debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos.
+Nota: antes de iniciar las MV de los clientes, debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos (o revisar que los datos son correctos).
 
 
 Descripción de las MV.
 
  - Máquina virtual opengnsys.
+   - Debe estar iniciada en primer lugar y activa para gestionar los clientes.
    - Usuario de acceso SSH: vagrant, clave: vagrant.
    - La interfaz 2 de VirtualBox está definida en la red privada para las MV del entorno.
    - Instalación de OpenGnsys Server con datos por defecto.

@@ -4,7 +4,8 @@ VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
 ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
 # Language.
-ENV['LC_ALL'] = "es_ES.UTF-8"
+LANGUAGE = "es_ES"
+ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
 
 # Repository virtual disk: file and size (GB).
 REPODISK = "repo.vdi"
@@ -39,13 +40,19 @@ echo "
     host virt2 { hardware ethernet #{MACPREFIX}02; fixed-address #{NETPREFIX}102; }
 }" >> /etc/dhcp/dhcpd.conf
 service isc-dhcp-server restart
-locale-gen --lang es_ES
+export LANG="#{LANGUAGE}.UTF-8"
+echo "LANG=\"$LANG\"" > /etc/default/locale
+locale-gen --lang #{LANGUAGE}
+# Unmcomment next lines for automatic data insertion.
+#mysql -u usuog -ppassusuog -D ogAdmBD -e "INSERT INTO aulas (idaula, nombreaula, idcentro, urlfoto, grupoid, comentarios, puestos, modomul, ipmul, pormul, velmul, router, netmask, dns, proxy, modp2p, timep2p) VALUES  (1, 'Aula virtual', 1, 'aula.jpg', 0, 'Aula virtual generada automáticamente en despligue Vagrant.', 5, 2, '239.194.50.101', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', 'peer', 30); INSERT INTO ordenadores (idordenador, nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES  (1, 'virt1', '#{NETPREFIX}101', REPLACE('#{MACPREFIX}01',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'), (2, 'virt2', '#{NETPREFIX}102', REPLACE('#{MACPREFIX}02',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif');" 
+#/opt/opengnsys/bin/setclientmode ogAdmin virt1 1
+#/opt/opengnsys/bin/setclientmode ogClient virt2 1
 EOT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # OpenGnsys Server VM definition.
-  config.vm.define "opengnsys" do |og|
+  config.vm.define "opengnsys", primary: true do |og|
     # Specific VirtualBox configuration.
     og.vm.provider "virtualbox" do |vb|
       # VM name, memory and CPUs.
@@ -69,12 +76,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: 8443
     og.vm.network "private_network", ip: "#{NETPREFIX}10", virtualbox__intnet: true
+    # Disable synced folder.
+    og.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
     og.vm.provision "shell", inline: OGSERVERSCRIPT
   end
 
   # Client 1 VM definition.
-  config.vm.define "virt1" do |v1|
+  config.vm.define "virt1", autostart: false do |v1|
     v1.vm.box = "ubuntu/trusty64"
     v1.vm.hostname = "virt1"
     v1.vm.network "private_network", mac: "#{MACPREFIX}01".tr(":",""), type: "dhcp", virtualbox__intnet: true
@@ -84,10 +93,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.cpus = 1
       vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
     end
+    v1.vm.synced_folder ".", "/vagrant", disabled: true
+    v1.vm.provision "shell", inline: "echo 'After now, use VirtualBox GUI to shutdown this VM, disable its network interface 1 and work whit it.'"
   end
 
   # Client 2 VM definition.
-  config.vm.define "virt2" do |v2|
+  config.vm.define "virt2", autostart: false do |v2|
     v2.vm.box = "clink15/pxe"
     v2.ssh.insert_key = false
     v2.vm.boot_timeout = 5
