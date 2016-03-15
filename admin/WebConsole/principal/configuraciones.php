@@ -201,7 +201,7 @@ function datosAulas($cmd,$idaula)
 			<?
 					echo '<TD>'.$puestos.'</TD>';
 			?>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
 			<?
 					echo '<TD>'.$comentarios.'</TD>';
 			?>
