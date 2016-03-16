@@ -21,21 +21,24 @@ LOCALWEBPORT = 8443
 
 # OpenGnsys Server provisioning script: prepare repo disk, install OpenGnsys, change default interface, configure DHCP server.
 OGSERVERSCRIPT = <<EOT
+# Mount repository disk.
 test -n "$(blkid /dev/sdb1 | grep ext4)" && exit
 echo -e "o\nn\np\n\n\n\nw" | fdisk /dev/sdb
 mkfs -t ext4 /dev/sdb1
 mkdir -p /opt/opengnsys/images
 echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
 mount -a
+# Install OpenGnsys and change server address.
 wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash
 echo y | sudo /opt/opengnsys/bin/setserveraddr eth1
-echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
+# Insert DHCP data.
 sed -i '/^}/d' /etc/dhcp/dhcpd.conf
 echo "
     host virt1 { hardware ethernet #{MACPREFIX}01; fixed-address #{NETPREFIX}101; }
     host virt2 { hardware ethernet #{MACPREFIX}02; fixed-address #{NETPREFIX}102; }
 }" >> /etc/dhcp/dhcpd.conf
 service isc-dhcp-server restart
+# Set language.
 export LANG="#{LANGUAGE}.UTF-8"
 echo "LANG=\"$LANG\"" > /etc/default/locale
 locale-gen --lang #{LANGUAGE}
@@ -43,6 +46,20 @@ locale-gen --lang #{LANGUAGE}
 #mysql -u usuog -ppassusuog -D ogAdmBD -e "INSERT INTO aulas (idaula, nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  (1, 'Aula virtual', 1, 'aula.jpg', 0, 'Despligue virtual con Vagrant.', 5, 2, '239.194.50.101', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (idordenador, nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES  (1, 'virt1', '#{NETPREFIX}101', REPLACE('#{MACPREFIX}01',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'), (2, 'virt2', '#{NETPREFIX}102', REPLACE('#{MACPREFIX}02',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif');" 
 #/opt/opengnsys/bin/setclientmode ogAdmin virt1 1
 #/opt/opengnsys/bin/setclientmode ogClient virt2 1
+echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
+EOT
+
+# Client 1 OS provisioning script.
+MODELSCRIPT = <<EOT
+# Uncomment next lines to install and configure OGAgent.
+#apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
+#wget -q http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/client/shared/lib/ogagent/ogagent_1.0.0_all.deb	# temporal
+#dpkg -i ogagent_1.0.0_all.deb
+#sed -i "0,/remote=/s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+echo "After now, use VirtualBox GUI to disable network interface 1 and work with this VM."
+# Shutdown VM.
+sleep 2
+poweroff &
 EOT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -90,7 +107,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
     end
     v1.vm.synced_folder ".", "/vagrant", disabled: true
-    v1.vm.provision "shell", inline: "echo 'After now, use VirtualBox GUI to shutdown this VM, disable its network interface 1 and work whit it.'"
+    v1.vm.provision "shell", inline: MODELSCRIPT
   end
 
   # Client 2 VM definition.
