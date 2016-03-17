@@ -1002,7 +1002,10 @@ EOD;
 //   }
 //);
 
-// Ejecutar REST con Slim.
+// Include OGAgent push routes.
+include("ogagent.php");
+
+// Execute REST using Slim.
 $app->run();
 
 ?>

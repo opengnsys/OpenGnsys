@@ -557,8 +557,8 @@ function updateWebFiles()
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
 	# Fichero de logs del agente OGAgent.
-	touch $INSTALL_TARGET/log/clients/ogagent.log
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/clients/ogagent.log
+	touch $INSTALL_TARGET/log/ogagent.log
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/ogagent.log
 
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
