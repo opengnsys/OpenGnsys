@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -232,7 +232,7 @@ function RecorreOrdenadores($cmd){
 		$idordenador=$rs->campos["idordenador"];
 		$Midordenador[$k]=$rs->campos["idordenador"];
 		$Mnombreordenador[$k]=$rs->campos["nombreordenador"];
-		$MimgOrdenador[$k]="ordenador_OFF.gif";
+		$MimgOrdenador[$k]="ordenador_OFF.png";
 		$Mip[$k]=$rs->campos["ip"];
 		$Mmac[$k]=$rs->campos["mac"];
 		$cadenaip.=$rs->campos["ip"].";";
@@ -299,8 +299,8 @@ function pintaordenadores(){
 <p>
 <table style="border: #d4d0c8 1px solid; background: #eeeeee" align=center>
   <tr align="center">';
-	foreach ( Array ("OPG", "BSY", "WXP", "LNX", "OFF") as $status) {
-		echo '    <td><img src="../images/ordenador_'.$status.'.gif" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$TbMsg["STATUS_$status"].'</font></td>';
+	foreach ( Array ("OPG", "BSY", "WIN", "LNX", "OFF") as $status) {
+		echo '    <td><img src="../images/ordenador_'.$status.'.png" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$TbMsg["STATUS_$status"].'</font></td>';
 	}
 	echo '  </tr>';
 	echo '</table>';

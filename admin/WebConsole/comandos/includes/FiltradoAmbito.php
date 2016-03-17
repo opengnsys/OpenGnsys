@@ -193,7 +193,7 @@ function RecorriendoOrdenadores($cmd)
 		$ip=$rs->campos["ip"];
 		$cadenaip.=$ip.";";
 		$htmlCode.='<TABLE  cellspacing=1 cellpadding=0>';
-		$htmlCode.='	<TR><TD align="center"><img sondeo="ordenador_OFF.gif" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.gif"></TD></TR>';
+		$htmlCode.='	<TR><TD align="center"><img sondeo="ordenador_OFF.png" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.png"></TD></TR>';
 		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:9px;	COLOR: #4f4f4f;">'.$nombreordenador.'</SPAN></TD></TR>';			
 		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:8px;	COLOR: #4f4f4f;">'.$ip.'</SPAN></TD></TR>';			
 		$htmlCode.='	<TR><TD align="center"><INPUT id="chk-'.$ip.'" type="checkbox" checked></TD></TR>';	
@@ -276,45 +276,31 @@ function soIMG(so)
 {
 	var MimgOrdenador="";
 	switch(so){
-				case 'INI':
-								MimgOrdenador="ordenador_INI.gif";  // Cliente ocupado
-								break;
-				case 'BSY':
-								MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
-								break;
-				case 'OPG':
-								MimgOrdenador="ordenador_OPG.gif";  // Cliente Rembo
-								break;
-				case 'WS2': 
-								MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
-								break;
-				case 'W2K':
-								MimgOrdenador="ordenador_W2K.gif"; // Windows 2000
-								break;
-				case 'WXP':
-								MimgOrdenador="ordenador_WXP.gif"; // Windows XP
-								break;
-				case 'WNT':
-								MimgOrdenador="ordenador_WNT.gif"; // Windows NT
-								break;
-				case 'W95':
-								MimgOrdenador="ordenador_W95.gif"; // Windows 95
-								break;
-				case 'W98':
-								MimgOrdenador="ordenador_W98.gif"; // Windows 98
-								break;
-				case 'WML':
-								MimgOrdenador="ordenador_WML.gif"; // Windows Millenium
-								break;
-				case 'WIN':
-								MimgOrdenador="ordenador_WXP.gif"; // Windows
-								break;								
-				case 'LNX':
-								MimgOrdenador="ordenador_LNX.gif"; // Linux
-								break;
-				default:
-								MimgOrdenador="ordenador_OFF.gif"; // Apagado
-								break;
+		case 'INI':
+			MimgOrdenador="ordenador_INI.png";  // Cliente iniciando
+			break;
+		case 'BSY':
+			MimgOrdenador="ordenador_BSY.png";  // Cliente ocupado
+			break;
+		case 'OPG':
+			MimgOrdenador="ordenador_OPG.png";  // Cliente OpenGnsys
+			break;
+		case 'WIN':
+		case 'WXP':
+			MimgOrdenador="ordenador_WIN.png";  // Windows
+			break;
+		case 'WINS':
+			MimgOrdenador="ordenador_WINS.png"; // Sesión Windows
+			break;
+		case 'LNX':
+			MimgOrdenador="ordenador_LNX.png";  // Linux
+			break;
+		case 'LNXS':
+			MimgOrdenador="ordenador_LNXS.png"; // Sesión Linux
+			break;
+		default:
+			MimgOrdenador="ordenador_OFF.png";	// Apagado
+			break;
 	}
 	return(MimgOrdenador);
 }

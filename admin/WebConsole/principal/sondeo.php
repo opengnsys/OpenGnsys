@@ -9,6 +9,7 @@
 //		Consulta el estado de los ordenadores
 // *************************************************************************************************************************************************
 	include_once("../includes/ctrlacc.php");
+	include_once("../includes/restfunctions.php");
 	include_once("../clases/SockHidra.php");
 	include_once("../clases/AdoPhp.php");
 	include_once("../includes/constantes.php");
@@ -42,6 +43,8 @@
 	$cadenamac="";
 	RecopilaIpesMacs($cmd,$ambito,$idambito); // Ámbito de aplicación
 	$aplicacion="ido=".$cadenaid.chr(13)."iph=".$cadenaip.chr(13);
+	// Reset status.
+	echo "cadenaip";
 	//________________________________________________________________________________________________________
 	// Envio al servidor de la petición
 	//________________________________________________________________________________________________________
@@ -65,6 +68,26 @@
 		if (isset ($ValorParametros["tso"])) {
 			$trama_notificacion=$ValorParametros["tso"];
 			echo $trama_notificacion; // Devuelve respuesta
+		}
+	}
+
+	// Send REST requests to new OGAgent clients.
+	$urls = array();
+	// Compose array of REST URLs.
+	foreach (explode (';', $cadenaip) as $ip) {
+		$urls[$ip] = "https://$ip:8000/opengnsys/status";
+	}
+	// Launch concurrent requests.
+	$responses = multiRequest($urls, array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
+	// Process responses array (IP as array index).
+	foreach ($responses as $ip => $data) {
+		if (isset($data)) {
+			$status = json_decode($data);
+			// If user session is oppened, then append "S" to client status.
+			if (isset($status->status) and isset($status->loggedin)) {
+				// Output format: IP1/Status1;...
+				echo "$ip/".$status->status.($status->loggedin?"S;":";");
+			}
 		}
 	}
 ?>
