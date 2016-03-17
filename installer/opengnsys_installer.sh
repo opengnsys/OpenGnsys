@@ -150,7 +150,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath )
+		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa syslinux xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php5-curl )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -1052,6 +1052,9 @@ function installWebFiles()
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+	# Fichero de logs del agente OGAgent.
+	touch $INSTALL_TARGET/log/clients/ogagent.log
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/clients/ogagent.log
 
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }

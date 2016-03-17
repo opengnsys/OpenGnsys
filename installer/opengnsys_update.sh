@@ -112,7 +112,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         ubuntu|debian|linuxmint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan realpath )
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan realpath php5-curl )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
@@ -556,6 +556,9 @@ function updateWebFiles()
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+	# Fichero de logs del agente OGAgent.
+	touch $INSTALL_TARGET/log/clients/ogagent.log
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/clients/ogagent.log
 
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
