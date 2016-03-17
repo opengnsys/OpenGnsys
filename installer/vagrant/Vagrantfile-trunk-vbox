@@ -30,7 +30,7 @@ mkdir -p /opt/opengnsys/images
 echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
 mount -a
 # Install OpenGnsys and change server address.
-wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash
+wget -q http://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh -O - | bash
 echo y | sudo /opt/opengnsys/bin/setserveraddr eth1
 # Insert DHCP data.
 for ((i=#{NCLIENTS}; i>0; i--)); do
