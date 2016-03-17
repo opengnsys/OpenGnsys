@@ -24,14 +24,15 @@ function multiRequest($data, $options = array()) {
     $curly[$id] = curl_init();
  
     $url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
-    curl_setopt($curly[$id], CURLOPT_URL,            $url);
-    curl_setopt($curly[$id], CURLOPT_HEADER,         0);
+    curl_setopt($curly[$id], CURLOPT_URL, $url);
+    curl_setopt($curly[$id], CURLOPT_HEADER, 0);
     curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curly[$id], CURLOPT_TIMEOUT, 1000);
  
     // post?
     if (is_array($d)) {
       if (!empty($d['post'])) {
-        curl_setopt($curly[$id], CURLOPT_POST,       1);
+        curl_setopt($curly[$id], CURLOPT_POST, 1);
         curl_setopt($curly[$id], CURLOPT_POSTFIELDS, $d['post']);
       }
     }

@@ -44,7 +44,7 @@
 	RecopilaIpesMacs($cmd,$ambito,$idambito); // Ámbito de aplicación
 	$aplicacion="ido=".$cadenaid.chr(13)."iph=".$cadenaip.chr(13);
 	// Reset status.
-	echo "cadenaip";
+	echo "$cadenaip;";
 	//________________________________________________________________________________________________________
 	// Envio al servidor de la petición
 	//________________________________________________________________________________________________________
