@@ -17,9 +17,9 @@ Requisitos previos.
 
 El entorno de trabajo.
 
- - opengnsys: MV para servidor OpenGnsys basada en Ubuntu 14.04 y 2º disco para repositorio.
- - virt1: MV cliente modelo con Ubuntu 14.04 instalado.
- - virt2: MV cliente para clonar con disco vacío.
+ - ogAdministrator: MV para servidor OpenGnsys basada en Ubuntu 14.04 y 2º disco para repositorio.
+ - ogClient01: MV cliente modelo con Ubuntu 14.04 instalado.
+ - ogClient02 - ogclient0N: MV clientes para restaurar con disco vacío.
 
 
 Ejecutar el entorno virtual.
@@ -28,6 +28,7 @@ Ejecutar el entorno virtual.
  - Copiar el fichero Vagrantfile correspondiente en dicho directorio como Vagrantfile.
  - Opcional: editar las variables de configuración del fichero Vagrantfile para el entorno personal.
    - LANGUAGE: idioma (se aceptan es_ES, ca_ES y en_GB).
+   - NCLIENTS: nº de clientes a generar (de 2 a 9).
    - REPODISK, REPOSIZE: fichero y tamaño (en GB) del disco duro virtual para el repositorio de imágenes.
    - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes.
    - NETPREFIX: prefijo para las direcciones IP de la red virtual.
@@ -38,10 +39,15 @@ Ejecutar el entorno virtual.
  - Iniciar la MV del servidor:
 	vagrant up
  - Iniciar las MV de los clientes (tras iniciar el servidor):
-	vagrant up /virt*/
+   - Cliente modelo:
+	vagrant up ogClient01
+   - Clientes vacíos para restaurar:
+	vagrant up ogClient0X      (siendo X de 2 al nº máximo definido)
 
-Nota: los procesos de inicio pueden tardar varios minutos en la primera ejecución, porque descargan y configuran las máquinas virtuales.
-Nota: antes de iniciar las MV de los clientes, debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos (o revisar que los datos son correctos).
+Notas:
+ - Los procesos de inicio pueden tardar varios minutos en la primera ejecución, porque descargan y configuran las máquinas virtuales.
+ - Antes de iniciar las MV de los clientes, debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos (o revisar que los datos son correctos).
+ - Ignorar los errores de conexión de Vagrant con los clientes vacíos.
 
 
 Descripción de las MV.
@@ -55,9 +61,9 @@ Descripción de las MV.
 	https://localhost:8443/opengnsys/
    - Configurar el DHCP usando las direcciones MAC de los clientes según lo indicado en la definición de la interfaz 2 de cada MV en Virtual Box.
 
- - Máquinas virtuales para cliente modelo y cliente para clonar.
+ - Máquinas virtuales para cliente modelo y clientes para clonar.
    - La interfaz 2 de cada MV VirtualBox está definida en la red privada del entorno.
    - Ignorar los posibles errores de conexión de Vagrant.
-   - Usar VirtualBox para deshabilitar la interfaz 1 de las MV cliente.
+   - Usar VirtualBox para deshabilitar la interfaz 1 de la MV del cliente modelo.
    - Una vez desplegadas las MV deberán ser controladas directamente con VirtaulBox.
 

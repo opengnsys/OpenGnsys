@@ -3,19 +3,20 @@
 VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
 ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
-# Language.
+# Language (accepted values: es_ES, ca_ES, en_GB).
 LANGUAGE = "es_ES"
 ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
-
+# Number of OpenGnsys clients (accepted values: from 2 to 9).
+NCLIENTS = 4
 # Repository virtual disk: file and size (GB).
-REPODISK = "repo.vdi"
+REPODISK = "ogRepo.vdi"
 REPOSIZE = 50
 # Amount of memory for server and clients (MB)
 SERVERMEM = 1024
 CLIENTMEM = 512
 # Clients MAC address prefix.
 MACPREFIX = "08:00:27:0E:65:"
-NETPREFIX = "192.168.50."
+NETPREFIX = "192.168.2."
 # Local port to access OpenGnsys Server.
 LOCALWEBPORT = 8443
 
@@ -32,32 +33,38 @@ mount -a
 wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash
 echo y | sudo /opt/opengnsys/bin/setserveraddr eth1
 # Insert DHCP data.
-sed -i '/^}/d' /etc/dhcp/dhcpd.conf
-echo "
-    host virt1 { hardware ethernet #{MACPREFIX}01; fixed-address #{NETPREFIX}101; }
-    host virt2 { hardware ethernet #{MACPREFIX}02; fixed-address #{NETPREFIX}102; }
-}" >> /etc/dhcp/dhcpd.conf
+for ((i=#{NCLIENTS}; i>0; i--)); do
+    sed -i "/^}$/ i host ogClient0${i} { hardware ethernet #{MACPREFIX}0${i}; fixed-address #{NETPREFIX}1${i}; }" /etc/dhcp/dhcpd.conf
+done
 service isc-dhcp-server restart
 # Set language.
 export LANG="#{LANGUAGE}.UTF-8"
 echo "LANG=\"$LANG\"" > /etc/default/locale
 locale-gen --lang #{LANGUAGE}
 # Unmcomment next lines for automatic data insertion.
-#mysql -u usuog -ppassusuog -D ogAdmBD -e "INSERT INTO aulas (idaula, nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  (1, 'Aula virtual', 1, 'aula.jpg', 0, 'Despligue virtual con Vagrant.', 5, 2, '239.194.50.101', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (idordenador, nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES  (1, 'virt1', '#{NETPREFIX}101', REPLACE('#{MACPREFIX}01',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'), (2, 'virt2', '#{NETPREFIX}102', REPLACE('#{MACPREFIX}02',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif');" 
-#/opt/opengnsys/bin/setclientmode ogAdmin virt1 1
-#/opt/opengnsys/bin/setclientmode ogClient virt2 1
+#SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
+#for ((i=1; i<=#{NCLIENTS}; i++)); do
+#    SQL="$SQL ('ogClient0$i', '#{NETPREFIX}1$i', REPLACE('#{MACPREFIX}0$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
+#done
+#mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
+#/opt/opengnsys/bin/setclientmode ogAdmin ogClient01 1
+#for ((i=2; i<=#{NCLIENTS}; i++)); do
+#    /opt/opengnsys/bin/setclientmode ogClient ogClient0$i 1
+#done
 echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
 EOT
 
 # Client 1 OS provisioning script.
 MODELSCRIPT = <<EOT
-# Uncomment next lines to install and configure OGAgent.
+# Uncomment next lines to install and configure OGAgent for Ubuntu.
 #apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
 #wget -q http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/client/shared/lib/ogagent/ogagent_1.0.0_all.deb	# temporal
 #dpkg -i ogagent_1.0.0_all.deb
-#sed -i "0,/remote=/s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+#sed -i "0,/remote=/ s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+# Remove network configuration added by Vagrant.
+sed -i "/VAGRANT/,$ d" /etc/network/interfaces
 echo "After now, use VirtualBox GUI to disable network interface 1 and work with this VM."
-# Shutdown VM.
+# Leave VM halted.
 sleep 2
 poweroff &
 EOT
@@ -65,11 +72,11 @@ EOT
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # OpenGnsys Server VM definition.
-  config.vm.define "opengnsys", primary: true do |og|
+  config.vm.define "ogAdministrator", primary: true do |og|
     # Specific VirtualBox configuration.
     og.vm.provider "virtualbox" do |vb|
       # VM name, memory and CPUs.
-      vb.name = "opengnsys"
+      vb.name = "ogAdministrator"
       vb.memory = SERVERMEM
       vb.cpus = 1
       # Get VM disk path
@@ -85,7 +92,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     # VM base and host name.
     og.vm.box = "ubuntu/trusty64"
-    og.vm.hostname = "opengnsys"
+    og.vm.hostname = "ogAdministrator"
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: 8443
     og.vm.network "private_network", ip: "#{NETPREFIX}10", virtualbox__intnet: true
@@ -96,12 +103,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # Client 1 VM definition.
-  config.vm.define "virt1", autostart: false do |v1|
+  config.vm.define "ogClient01", autostart: false do |v1|
     v1.vm.box = "ubuntu/trusty64"
-    v1.vm.hostname = "virt1"
+    v1.vm.hostname = "ogClient01"
     v1.vm.network "private_network", mac: "#{MACPREFIX}01".tr(":",""), type: "dhcp", virtualbox__intnet: true
     v1.vm.provider "virtualbox" do |vb|
-      vb.name = "virt1"
+      vb.name = "ogClient01"
       vb.memory = CLIENTMEM
       vb.cpus = 1
       vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
@@ -110,18 +117,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v1.vm.provision "shell", inline: MODELSCRIPT
   end
 
-  # Client 2 VM definition.
-  config.vm.define "virt2", autostart: false do |v2|
-    v2.vm.box = "clink15/pxe"
-    v2.ssh.insert_key = false
-    v2.vm.boot_timeout = 5
-    v2.vm.network "private_network", mac: "#{MACPREFIX}02".tr(":",""), type: "dhcp", virtualbox__intnet: true
-    v2.vm.provider "virtualbox" do |vb|
-      vb.name = "virt2"
-      vb.memory = CLIENTMEM
-      vb.cpus = 1
-      vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
-      vb.customize ["modifyvm", :id, "--nic1", "none"]
+  # Clonable clients definition.
+  (2..NCLIENTS).each do |i|
+    config.vm.define "ogClient0#{i}", autostart: false do |cl|
+      cl.vm.box = "clink15/pxe"
+      cl.ssh.insert_key = false
+      cl.vm.boot_timeout = 5
+      cl.vm.network "private_network", mac: "#{MACPREFIX}".tr(":","") + "%02d" % "#{i}", type: "dhcp", virtualbox__intnet: true
+      cl.vm.provider "virtualbox" do |vb|
+        vb.name = "ogClient0#{i}"
+        vb.memory = CLIENTMEM
+        vb.cpus = 1
+        vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
+        vb.customize ["modifyvm", :id, "--nic1", "none"]
+      end
     end
   end
 
