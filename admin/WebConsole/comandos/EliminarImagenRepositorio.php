@@ -560,12 +560,12 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
 		{
-			echo '<TD align=center><font color=blue>&nbsp;'.$value.' '.$aviso.'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center><font color=blue>&nbsp;'.str_replace(":"," / ",$value).' '.$aviso.'&nbsp;</TD>'.chr(13);
 		}
 		else
 		{
 
-			echo '<TD align=center>&nbsp;'.$value.' '.$aviso.'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center>&nbsp;'.str_replace(":"," / ",$value).' '.$aviso.'&nbsp;</TD>'.chr(13);
 		}
 
 		// ########## Tamaño de Imagen ########################################################
