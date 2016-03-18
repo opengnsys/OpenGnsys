@@ -295,13 +295,17 @@ function pintaordenadores(){
 		}
 	}
 	echo '</TABLE>';
-	echo '
-<p>
-<table style="border: #d4d0c8 1px solid; background: #eeeeee" align=center>
-  <tr align="center">';
-	foreach ( Array ("OPG", "BSY", "WIN", "LNX", "OFF") as $status) {
+	echo '<p>';
+	echo '<table style="border: #d4d0c8 1px solid; background: #eeeeee" align="center">';
+	echo '  <tr align="center" valign="top">';
+	foreach (Array ("OPG", "WIN", "LNX", "OFF") as $status) {
 		echo '    <td><img src="../images/ordenador_'.$status.'.png" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$TbMsg["STATUS_$status"].'</font></td>';
 	}
+	echo '  <tr align="center" valign="top">';
+	foreach (Array ("BSY", "WINS", "LNXS") as $status) {
+		echo '    <td><img src="../images/ordenador_'.$status.'.png" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.str_replace(" ", "<br>", $TbMsg["STATUS_$status"]).'</font></td>';
+	}
+	echo '  </tr>';
 	echo '  </tr>';
 	echo '</table>';
 	if ($nombreaula!="")

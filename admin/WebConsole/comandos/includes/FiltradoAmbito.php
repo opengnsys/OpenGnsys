@@ -173,12 +173,20 @@ function RecorriendoOrdenadores($cmd)
 
 <TD align="center">'.$TbMsg["STATUS_OPG"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,3,'.$cid.')"></TD>
+</TR>
 
-<TD align="center">'.$TbMsg["STATUS_WXP"].'</TD>
+<TR>
+<TD align="center">'.$TbMsg["STATUS_WIN"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,4,'.$cid.')"></TD>
 
-<TD align="center">'.$TbMsg["STATUS_LNX"].'</TD>
+<TD align="center">'.$TbMsg["STATUS_WINS"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,5,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_LNX"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,6,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_LNXS"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,7,'.$cid.')"></TD>
 
 </TR>
 </TABLE>';
@@ -321,27 +329,37 @@ function selector(oSLCT,op,id)
 
 				switch(parseInt(op)){
 					case 1: // Apagados						
-						if(estado=="ordenador_OFF.gif")
+						if(estado=="ordenador_OFF.png")
 							oCHK.checked=sw;
 						break;	
 						
 					case 2: // Ocupados
-						if(estado=="ordenador_BSY.gif")
+						if(estado=="ordenador_BSY.png")
 							oCHK.checked=sw;
 						break;
 						
 					case 3: // Opengnsys
-						if(estado=="ordenador_OPG.gif")
+						if(estado=="ordenador_OPG.png")
 							oCHK.checked=sw;
 						break;
 						
 					case 4: // Windows
-						if(estado=="ordenador_WXP.gif")
+						if(estado=="ordenador_WIN.png")
+							oCHK.checked=sw;
+						break;
+						
+					case 5: // Windows
+						if(estado=="ordenador_WINS.png")
 							oCHK.checked=sw;
 						break;
 						
 					case 5: // Linux
-						if(estado=="ordenador_LNX.gif")
+						if(estado=="ordenador_LNX.png")
+							oCHK.checked=sw;
+						break;
+
+					case 7: // Linux
+						if(estado=="ordenador_LNXS.png")
 							oCHK.checked=sw;
 						break;
 
