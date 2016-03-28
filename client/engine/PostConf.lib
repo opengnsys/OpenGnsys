@@ -4,7 +4,7 @@
 #@brief   Librería o clase PostConf
 #@class   PostConf
 #@brief   Funciones para la postconfiguración de sistemas operativos.
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -481,11 +481,22 @@ ogUnlock $1 $2
 
 #/*
 #         ogInstallUbuntuAgent int_ndisk int_filesys
+#@brief   Instala el nuevo agente OGAent para sistemas operativos Ubuntu/Debian.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_filesys  nº de orden del sistema de archivos
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
+#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@version 1.1.0 - Primera adaptación para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-03-29
 #*/ ##
 function ogInstallUbuntuAgent ()
 {
 # Variables locales.
-local MNTDIR CLIENTFILE i TMPDIR ETCDIR RCLOCAL
+local MNTDIR AGENTFILE i VARDIR ETCDIR RCLOCAL
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
@@ -499,12 +510,12 @@ fi
 MNTDIR=$(ogMount $1 $2) || return $?
 
 # Comprobar si existe el cliente y los directorios y ficheros destino.
-CLIENTFILE=$(ogGetPath $OGLIB/ogagent/ogagent*.deb)
-[ -n "$CLIENTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.deb" || return $?
-TMPDIR=$MNTDIR/tmp
-[ -d $TMPDIR ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 tmp" || return $?
+AGENTFILE=$(ogGetPath $OGLIB/ogagent/ogagent*.deb)
+[ -n "$AGENTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.deb" || return $?
+VARDIR=$MNTDIR/var
+[ -d $VARDIR ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 var" || return $?
 for i in /usr/local/etc /etc; do
-    [ -d $MNTDIR/$i ] && ETCDIR=$i
+    [ -d $MNTDIR/$i ] && ETCDIR=$MNTDIR/$i
 done
 [ -n "$ETCDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 etc" || return $?
 for i in $ETCDIR/rc.local $ETCDIR/rc.d/rc.local; do
@@ -515,16 +526,20 @@ done
 ogLock $1 $2
 trap "ogUnlock $1 $2" 1 2 3 6 9
 # Copiar agente y crear script de instalación en primer arranque.
-cp -a $CLIENTFILE $TMPDIR
-cat > $TMPDIR/install-ogagent.sh << EOT
+cp -a $AGENTFILE $VARDIR/cache/apt/archives
+cat > $VARDIR/tmp/install-ogagent.sh << EOT
 #!/bin/bash
 #apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-dpkg -i ogagent_1.0.0_all.deb
-sed -i "0,/remote=/ s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
-rm -f $0
+dpkg -i /var/cache/apt/archives/$(basename $AGENTFILE)
+dpkg --configure -a
+sed -i "0,/remote=/ s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+service ogagent start
+rm -f \$0
 EOT
-chmod +x $TMPDIR/install-ogagent.sh
-grep -q "install-ogagent.sh" $RCLOCAL || sed -i "$ i [ -x /tmp/install-ogagent.sh ] && /tmp/install-ogagent.sh" $RCLOCAL
+chmod +x $VARDIR/tmp/install-ogagent.sh
+grep -q "install-ogagent.sh" $RCLOCAL || sed -i "$ i [ -x /var/tmp/install-ogagent.sh ] && /var/tmp/install-ogagent.sh" $RCLOCAL
+# Quitar uso exclusivo.
+ogUnlock $1 $2
 }
 
 
