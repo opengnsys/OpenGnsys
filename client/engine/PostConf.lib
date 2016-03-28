@@ -479,6 +479,55 @@ ogUnlock $1 $2
 }
 
 
+#/*
+#         ogInstallUbuntuAgent int_ndisk int_filesys
+#*/ ##
+function ogInstallUbuntuAgent ()
+{
+# Variables locales.
+local MNTDIR CLIENTFILE i TMPDIR ETCDIR RCLOCAL
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Comprobar si existe el cliente y los directorios y ficheros destino.
+CLIENTFILE=$(ogGetPath $OGLIB/ogagent/ogagent*.deb)
+[ -n "$CLIENTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.deb" || return $?
+TMPDIR=$MNTDIR/tmp
+[ -d $TMPDIR ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 tmp" || return $?
+for i in /usr/local/etc /etc; do
+    [ -d $MNTDIR/$i ] && ETCDIR=$i
+done
+[ -n "$ETCDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 etc" || return $?
+for i in $ETCDIR/rc.local $ETCDIR/rc.d/rc.local; do
+    [ -f $i ] && RCLOCAL=$i
+done
+[ -n "$RCLOCAL" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 rc.local" || return $?
+# Realizar la instalación en modo uso exclusivo.
+ogLock $1 $2
+trap "ogUnlock $1 $2" 1 2 3 6 9
+# Copiar agente y crear script de instalación en primer arranque.
+cp -a $CLIENTFILE $TMPDIR
+cat > $TMPDIR/install-ogagent.sh << EOT
+#!/bin/bash
+#apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
+dpkg -i ogagent_1.0.0_all.deb
+sed -i "0,/remote=/ s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+rm -f $0
+EOT
+chmod +x $TMPDIR/install-ogagent.sh
+grep -q "install-ogagent.sh" $RCLOCAL || sed -i "$ i [ -x /tmp/install-ogagent.sh ] && /tmp/install-ogagent.sh" $RCLOCAL
+}
+
+
 #/**
 #         ogInstallWindowsClient int_ndisk int_filesys
 #@brief   Instala el cliente OpenGnSys para sistemas operativos Windows.
