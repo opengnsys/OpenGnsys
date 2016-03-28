@@ -38,7 +38,7 @@ LERROR=TRUE
 echo "$FUNCNAME: Iniciando la personalización con datos del SVN "
 
 # parseamos el apt.source de la distribución
-sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.$OSDISTRIB > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
+sed -e "s/OSCODENAME/${OSCODENAME,,}/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.$OSDISTRIB > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
 if [ $? -ne 0 ]
 then 
 	echo "$FUNCNAME(): Parsing apt.sources : ERROR"
