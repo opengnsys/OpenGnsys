@@ -1,0 +1,50 @@
+# Vagrantfile to install OpenGnsys boot-tools .1 virtual environment using VirtualBox provider.
+
+VAGRANTFILE_API_VERSION = "2"
+# VM provider: Oracle VM VirtualBox.
+ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
+# Language.
+LANGUAGE = "es_ES"
+ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
+# Amount of memory VM.
+VMMEM = 1024
+# OpenGnsys boot-tools environment provisioning script.
+SCRIPT = <<EOT
+# Set language.
+export LANG="#{LANGUAGE}.UTF-8"
+echo "LANG=\"$LANG\"" > /etc/default/locale
+locale-gen --lang #{LANGUAGE}
+# Install dependencies.
+apt-get update -y
+apt-get install -y subversion
+# Prepare environment.
+mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys
+ln -fs /var/lib/tftpboot /opt/opengnsys
+svn export http://opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys/client
+echo "Connect to this VM, launch boot-tools generation script and follow instructions:"
+echo "    sudo /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh"
+EOT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # OpenGnsys boot-tools environment VM definition.
+  config.vm.define "ogBootTools" do |bt|
+    # Specific VirtualBox configuration.
+    bt.vm.provider "virtualbox" do |vb|
+      # VM name, memory and CPUs.
+      vb.name = "ogBootTools"
+      vb.memory = VMMEM
+      vb.cpus = 1
+      vb.gui = true
+    end
+    # VM base and host name.
+    bt.vm.box = "ubuntu/wily32"
+    bt.vm.hostname = "ogBootTools"
+    # Disable synced folder.
+    bt.vm.synced_folder ".", "/vagrant", disabled: true
+    # Launch provisioning script.
+    bt.vm.provision "shell", inline: SCRIPT
+  end
+
+end
+
