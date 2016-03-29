@@ -13,6 +13,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 
 Tickets resueltos en módulo OpenGnSys Server:
 #719	setclientmode: desaparece equipo de netBootAvanzado
+#741	Problema "PXE unload fails: 1"
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #721	Consola Restaurar Imagen: falla el filtro de equipos
