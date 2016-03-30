@@ -4,7 +4,7 @@
 //	Php language file: propiedades_ordenadores_eng.php 
 //	Language: English
 //_________________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
 $TbMsg[2]="Modify";
@@ -25,5 +25,6 @@ $TbMsg[5091]="Insert Photo";
 $TbMsg[5092]="View Images";
 $TbMsg[495]="Content Cache";
 $TbMsg[4951]="Cache Free";
+$TbMsg['DOWNLOADS']="Available downloads";
 ?>
 

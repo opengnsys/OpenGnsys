@@ -4,7 +4,7 @@
 //	Fichero de idiomas php: propiedades_ordenadores_esp.php 
 //	Idioma: Español 
 //______________________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="Sin Opci&oacute;n";
 $TbMsg[1]="Insertar";
 $TbMsg[2]="Modificar";
@@ -30,5 +30,7 @@ $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
+// Otros mensajes.
+$TbMsg['DOWNLOADS']="Descargas disponibles";
 ?>
 

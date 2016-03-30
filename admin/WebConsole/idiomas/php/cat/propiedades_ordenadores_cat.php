@@ -4,7 +4,7 @@
 //	Fitxer d'idiomes php: propiedades_ordenadores_cat.php 
 //	Idioma: Català
 //____________________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="Sense Opció";
 $TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
@@ -25,5 +25,6 @@ $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
 $TbMsg[495]="Data/Caché";
 $TbMsg[4951]="Caché lliure";
+$TbMsg['DOWNLOADS']="descàrregues disponibles";
 ?>
 
