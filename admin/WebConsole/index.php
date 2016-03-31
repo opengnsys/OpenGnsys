@@ -9,6 +9,7 @@
 // Autor: Ramón Gómez - ETSII, Universidad de Sevilla
 // Fecha: 2012-02-07
 // *****************************************************************************
+session_start();
 if(isset($_SESSION)){ 	// Si existe algua sesión ...
 	session_unset(); // Elimina variables
 	session_destroy(); // Destruye sesión
