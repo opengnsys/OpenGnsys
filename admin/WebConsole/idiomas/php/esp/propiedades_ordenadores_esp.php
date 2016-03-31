@@ -30,7 +30,5 @@ $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
-// Otros mensajes.
-$TbMsg['DOWNLOADS']="Descargas disponibles";
 ?>
 

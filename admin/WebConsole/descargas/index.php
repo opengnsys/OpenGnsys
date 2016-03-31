@@ -1,11 +1,15 @@
 <?php
+// Warning: Don't left any character outside PHP code.
+//
+// Choose a file on this directory to download via Apache.
+
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
-include_once("../idiomas/php/".$idioma."/propiedades_ordenadores_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/descargas_".$idioma.".php");
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-        header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 
 // Security tip: change to local directory.
 $oldpwd=getcwd();
@@ -52,5 +56,5 @@ function sendFile($file) {
 	}
 }
 
+// Warning: Don't left any character outside PHP code.
 ?>
-

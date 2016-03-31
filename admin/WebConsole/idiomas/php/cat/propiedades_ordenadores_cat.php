@@ -25,6 +25,5 @@ $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
 $TbMsg[495]="Data/Caché";
 $TbMsg[4951]="Caché lliure";
-$TbMsg['DOWNLOADS']="descàrregues disponibles";
 ?>
 
