@@ -3,10 +3,10 @@ OGAgent: agentes OpenGnsys para sistemas operativos
 ---------------------------------------------------
 
 
-Instalar el paquete correspondiente al sistema operativo de los equipos cliente:
+Ficheros disponibles para descarga de agente OGAgent:
 
- - ogagent_Version_all.deb      OGAgent para sistemas Ubuntu y /Debian
- - ogagent-Version.noarch.rpm   OGAgent para sistemas Red Hat y Fedora
+ - ogagent_Version_all.deb      OGAgent para sistemas Ubuntu, Debian y derivados
+ - ogagent-Version.noarch.rpm   OGAgent para sistemas Red Hat, Fedora y derivados
  - ogagent-opensuse-Version.noarch.rpm   OGAgent para sistemas SuSE y OpenSuSE
  - OGAgentSetup-Version.exe     OGAgent para sistemas Windows
 
@@ -14,9 +14,9 @@ Instalar el paquete correspondiente al sistema operativo de los equipos cliente:
 Instalación manual de los agentes.
 
  - Ubuntu, Debian y derivados:
-   - Instalar dependencias:
+   - Instalar dependencias (NOTA: revisar dependencias para Ubuntu 12.04):
 	sudo apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-   - Instalar agente:
+   - Descargar e instalar el agente:
 	sudo dpkg -i ogagent_Version_all.deb
    - Configurar el agente:
 	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
@@ -24,12 +24,24 @@ Instalación manual de los agentes.
 	sudo service ogagent start
 
  - Red Hat, Fedora y derivados (como root):
-	(en preparación)
+   - Descargar e instalar el agente:
+	yum install ogagent-Version.noarch.rpm
+   - Configurar el agente:
+	sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+   - Puede ser necesario corregir permisos antes de iniciar el servicio:
+	chmod +x /etc/init.d/ogagent
+   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
+	service ogagent start
 
  - OpenSuSE:
 	(en preparación)
 
- - Windows:
-	(en preparación)
+ - Windows (como usuario administrador):
+   - Descargar e instalar el agente ejecutando:
+	OGAgentSetup-Version.exe
+   - Seguir las instrucciones del instalador.
+   - Editar el fichero de configuación "C:\Program Files\OGAgent\cfg\ogagent.cfg" (o C:\Archivos de programa\OGAgent\cfg\ogagent.cfg) y modificar el valor de la cláusula "remote" de la sección [OGAgent] inclyendo la dirección IP del servidor OpenGnsys.
+   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
+	NET START OGAgent
 
 
