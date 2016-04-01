@@ -8,6 +8,7 @@ Ficheros de configuración disponibles:
  - Vagrantfile-trunk-vbox  Vagrantfile para OpenGnsys oficial con proveedor VirtualBox.
  - Vagrantfile-devel-vbox  Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
  - Vagrantfile-boottools-vbox  Vagrantfile para preparar el entorno de generación del cliente ogLive (recomendado solo para desarrolladores experimentados).
+ - Vagrantfile-ogagent-vbox    Vagrantfile para preparar el entorno de desarrollo del agente OGAgent (recomendado solo para miembros del grupo de desarrollo).
 
 
 Requisitos previos.
@@ -16,14 +17,14 @@ Requisitos previos.
  - Instalar la última versión oficial de Vagrant (no usar la incluida en Ubuntu 14.04).
 
 
-El entorno de trabajo.
+El entorno de trabajo de OpenGnsys
 
  - ogAdministrator: MV para servidor OpenGnsys basada en Ubuntu 14.04 y 2º disco para repositorio.
  - ogClient01: MV cliente modelo con Ubuntu 14.04 instalado.
  - ogClient02 - ogclient0N: MV clientes para restaurar con disco vacío.
 
 
-Ejecutar el entorno virtual.
+Ejecutar el entorno virtual (Vagrantfile-trunk y Vagrantfile-devel).
 
  - Crear un directorio de trabajo.
  - Copiar el fichero Vagrantfile correspondiente en dicho directorio como Vagrantfile.
@@ -53,7 +54,7 @@ Notas:
 
 Descripción de las MV.
 
- - Máquina virtual opengnsys.
+ - Máquina virtual para servidor OpenGnsys.
    - Debe estar iniciada en primer lugar y activa para gestionar los clientes.
    - Usuario de acceso SSH: vagrant, clave: vagrant.
    - La interfaz 2 de VirtualBox está definida en la red privada para las MV del entorno.
@@ -67,4 +68,5 @@ Descripción de las MV.
    - Ignorar los posibles errores de conexión de Vagrant.
    - Usar VirtualBox para deshabilitar la interfaz 1 de la MV del cliente modelo.
    - Una vez desplegadas las MV deberán ser controladas directamente con VirtaulBox.
+
 
