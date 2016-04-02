@@ -14,12 +14,12 @@ SCRIPT = <<EOT
 # Set language.
 export LANG="#{LANGUAGE}.UTF-8"
 echo "LANG=\"$LANG\"" > /etc/default/locale
-echo "LANG=\"$LANG\"" > /etc/environment
+echo "LANG=\"$LANG\"" >> /etc/environment
 echo "LANGUAGE=\"$LANG\"" >> /etc/environment
 echo "LC_ALL=\"$LANG\"" >> /etc/environment
 echo "LC_CTYPE=\"$LANG\"" >> /etc/environment
 locale-gen --lang #{LANGUAGE}
-sed -i 's/XKBLAYOUT=.*/XKBLAYOUT="${LANG%_*}"/' /etc/default/keyboard
+sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 # Update repositories.
 add-apt-repository -y ppa:webupd8team/java
 add-apt-repository -y ppa:ubuntu-wine
@@ -41,6 +41,7 @@ wget -q http://ftp.fau.de/eclipse/technology/epp/downloads/release/mars/2/eclips
 tar -C /opt -xvzf /tmp/eclipse-php-mars-2-linux-gtk-x86_64.tar.gz
 # Add Eclipse icon to the desktop.
 mkdir -p /home/vagrant/Escritorio
+mkdir -p /home/vagrant/Escritorio
 echo "#!/usr/bin/env xdg-open" > /home/vagrant/Escritorio/eclipse.desktop
 echo "[Desktop Entry]" >> /home/vagrant/Escritorio/eclipse.desktop
 echo "Name=Eclipse" >> /home/vagrant/Escritorio/eclipse.desktop
@@ -48,6 +49,7 @@ echo "Type=Application" >> /home/vagrant/Escritorio/eclipse.desktop
 echo "Exec=/opt/eclipse/eclipse" >> /home/vagrant/Escritorio/eclipse.desktop
 echo "Icon=/opt/eclipse/icon.xpm" >> /home/vagrant/Escritorio/eclipse.desktop
 echo "Terminal=false" >> /home/vagrant/Escritorio/eclipse.desktop
+chown -R vagrant.vagrant /home/vagrant/Escritorio
 # Download OGAgent environment installer.
 svn export http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/installer/ogagent-devel-installer.sh /home/vagrant
 # Instructions.
