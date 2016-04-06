@@ -29,6 +29,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.
+#739	Estandarizar entornos virtuales de desarrollo con Vagrant
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.6a (versión de mantenimiento)

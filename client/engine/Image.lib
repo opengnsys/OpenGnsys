@@ -4,9 +4,89 @@
 #@brief   Librería o clase Image
 #@class   Image
 #@brief   Funciones para creación, restauración y clonación de imágenes de sistemas.
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
+
+
+#/**
+#         ogCreateDiskImage int_ndisk str_repo path_image [str_tools] [str_compressionlevel]
+#@brief   Crea una imagen (copia de seguridad) de un disco completo.
+#@param   int_ndisk      nº de orden del disco
+#@param   str_repo       repositorio de imágenes (remoto o caché local)
+#@param   path_image     camino de la imagen (sin extensión)
+#@return  (nada, por determinar)
+#@note    repo = { REPO, CACHE }
+#@note    Esta primera versión crea imágenes con dd comprimidas con gzip.
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#@exception OG_ERR_LOCKED    particion bloqueada por otra operación.
+#@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
+#@warning En pruebas iniciales
+#@todo    Gestión de bloqueos de disco
+#@todo    Comprobar si debe desmontarse la caché local
+#@todo    Comprobar que no se crea la imagen en el propio disco
+#@version 1.1.0 -  Primera versión para OpenGnsys con herramientas prefijadas.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2016/04/06
+#*/ ##
+function ogCreateDiskImage ()
+{
+# Variables locales
+local DISK PROGRAM IMGDIR IMGFILE IMGTYPE ERRCODE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+           "$FUNCNAME 1 REPO /disk1"
+    return
+fi
+# Error si no se reciben entre 3 y 5 parámetros.
+[ $# -ge 3 -a $# -le 5 ] || ogRaiseError $OG_ERR_FORMAT "$*" || return $?
+
+# Comprobar que no está bloqueada ni la partición, ni la imagen.
+DISK="$(ogDiskToDev $1)" || return $?
+### Pendiente: comprobar bloqueo de disco
+#if ogIsLocked $1; then
+#    ogRaiseError $OG_ERR_LOCKED "$MSG_LOCKED $1"
+#    return $?
+#fi
+
+IMGTYPE="dsk"			# Extensión genérica de imágenes de disco.
+IMGDIR=$(ogGetParentPath "$2" "$3")
+[ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$2 $(dirname $3)" || return $?
+
+IMGFILE="$IMGDIR/$(basename "$3").$IMGTYPE"
+if ogIsImageLocked "$IMGFILE"; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $3, $4"
+    return $?
+fi
+# Generar la instruccion a ejecutar antes de aplicar los bloqueos.
+PROGRAM="dd if=$DISK conv=sync,noerror bs=1M | pv | gzip -c > \"$IMGFILE\""
+# Desmontar todos los sistemas de archivos del disco, bloquear partición e imagen.
+ogUnmountAll $1 2>/dev/null
+### Pendiente: bloquear disco
+#ogLock $1 || return $?
+ogLockImage "$2" "$3.$IMGTYPE" || return $?
+
+# Crear Imagen.
+### Pendiente: desbloquear disco
+#trap "ogUnlock $1; ogUnlockImage "$3" "$4.$IMGTYPE"; rm -f $IMGFILE" 1 2 3 6 9
+trap "ogUnlockImage "$3" "$4.$IMGTYPE"; rm -f $IMGFILE" 1 2 3 6 9
+eval $PROGRAM
+
+# Controlar salida de error y desbloquear partición.
+ERRCODE=$?
+if [ $ERRCODE != 0 ]; then
+    ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
+    rm -f "$IMGFILE"
+fi
+# Desbloquear partición e imagen.
+### Pendiente: desbloquear disco
+#ogUnlock $1
+ogUnlockImage "$2" "$3.$IMGTYPE"
+return $ERRCODE
+}
 
 
 
@@ -83,8 +163,7 @@ case "$TOOL" in
         which $PARAM1 &>/dev/null || PARAM1="partclone.dd"
         PARAM1="$PARAM1 -d0 -F -c -s $PART"
         ;;
-esac
-# Comprobar que existe mbuffer.
+esac # Comprobar que existe mbuffer.
 which mbuffer &>/dev/null && PARAM2="| mbuffer -q -m 40M " || PARAM2=" "
 
 # Nivel de compresion.
@@ -217,7 +296,6 @@ fi
 #@exception OG_ERR_PARTITION partición no accesible o no soportada.
 #@exception OG_ERR_LOCKED    particion bloqueada por otra operación.
 #@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
-#@warning En pruebas iniciales
 #@todo    Comprobaciones, control de errores, definir parámetros, etc.
 #@version 0.1 -  Integracion para Opengnsys  -  HIDRA:CrearImagen{EXT3, NTFS}.sh;  EAC: CreateImageFromPartition () en Deploy.lib
 #@author  Ramon Gomez, ETSII Universidad de Sevilla 
@@ -248,7 +326,7 @@ fi
 # Comprobar que no está bloqueada ni la partición, ni la imagen.
 PART="$(ogDiskToDev $1 $2)" || return $?
 if ogIsLocked $1 $2; then
-    ogRaiseError $OG_ERR_LOCKED "$MSG_PARTITION $1, $2"
+    ogRaiseError $OG_ERR_LOCKED "$MSG_LOCKED $1, $2"
     return $?
 fi
 
@@ -498,6 +576,77 @@ fi
 IMGDIR=$(ogGetParentPath $@) || return $?
 # Crear fichero de bloqueo.
 touch $IMGDIR/$(basename "${!#}").lock 2>/dev/null || ogRaiseError $OG_ERR_NOTWRITE "$*" || return $?
+}
+
+
+#/**
+#         ogRestoreDiskImage str_repo path_image int_npartition
+#@brief   Restaura (recupera) una imagen de un disco completo.
+#@param   str_repo       repositorio de imágenes o caché local
+#@param   path_image     camino de la imagen
+#@param   int_ndisk      nº de orden del disco
+#@return  (por determinar)
+#@warning Primera versión en pruebas
+#@todo    Gestionar bloqueos de disco
+#@todo    Comprobar que no se intenta restaurar de la caché sobre el mismo disco
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero de imagen o partición no detectados.
+#@exception OG_ERR_LOCKED    partición bloqueada por otra operación.
+#@exception OG_ERR_IMAGE     error al restaurar la imagen del sistema.
+#@exception OG_ERR_IMGSIZEPARTITION  Tamaño de la particion es menor al tamaño de la imagen.
+#@version 1.1.0 - Primera versión para OpenGnsys.
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2016/04/06
+#*/ ##
+function ogRestoreDiskImage ()
+{
+# Variables locales
+local DISK DISKSIZE IMGFILE IMGTYPE IMGSIZE PROGRAM ERRCODE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
+           "$FUNCNAME REPO /aula1/winxp 1"
+    return
+fi
+# Error si no se reciben 4 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Procesar parámetros.
+DISK="$(ogDiskToDev $3)" || return $(ogRaiseError $OG_ERR_NOTFOUND " $3 $4"; echo $?)
+IMGTYPE="dsk"
+IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE") 
+[ -r "$IMGFILE" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $3 $4"; echo $?)
+
+# comprobamos consistencia de la imagen
+#ogGetImageInfo $IMGFILE >/dev/null  || return $(ogRaiseError $OG_ERR_IMAGE " $1 $2"; echo $?)
+# Error si la imagen no cabe en la particion.
+#IMGSIZE=$(ogGetImageSize "$1" "$2") || return $(ogRaiseError $OG_ERR_IMAGE " $1 $2"; echo $?)
+#DISKSIZE=$(ogGetDiskSize $3)
+#if [ $IMGSIZE -gt $DISKSIZE ]; then
+#    ogRaiseError $OG_ERR_IMGSIZEPARTITION "$DISKSIZE < $IMGSIZE"
+#    return $?
+#fi
+# Comprobar el bloqueo de la imagen y de la partición.
+if ogIsImageLocked "$IMGFILE"; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $1, $2.$IMGTYPE"
+    return $?
+
+# Solicitamos la generación de la instruccion a ejecutar
+PROGRAM="gunzip -c \"$IMGFILE\" | dd of=$DISK conv=sync,noerror bs=64K"
+
+# Bloquear el disco
+#ogLock $3 || return $?
+#trap "ogUnlock $3" 1 2 3 6 9
+
+# Ejecutar restauración según el tipo de imagen.
+eval $PROGRAM
+
+ERRCODE=$?
+if [ $ERRCODE != 0 ]; then
+    ogRaiseError $OG_ERR_IMAGE "$IMGFILE, $3, $4"
+fi
+#ogUnlock $3 $4
+return $ERRCODE
 }
 
 
