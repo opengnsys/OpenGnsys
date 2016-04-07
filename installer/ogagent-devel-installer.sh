@@ -15,6 +15,7 @@ PROGDIR=$PWD/ogagent
 SVNURL=http://opengnsys.es/svn/branches/version1.1/admin/Sources/Clients/ogagent
 
 # Show prerequisites needed to build the environment.
+mkdir -p $PROGDIR || exit 1
 cat << EOT
 
 OGAgent devoloping environment installation
@@ -33,7 +34,6 @@ EOT
 read
 
 # Importing OGAgent source code.
-mkdir -p $PROGDIR || exit 1
 svn export --force $SVNURL $PROGDIR || exit 1
 
 # Update PyQt components.
