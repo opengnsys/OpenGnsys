@@ -62,7 +62,7 @@ if ogIsImageLocked "$IMGFILE"; then
     return $?
 fi
 # Generar la instruccion a ejecutar antes de aplicar los bloqueos.
-PROGRAM="dd if=$DISK conv=sync,noerror bs=1M | pv | gzip -c > \"$IMGFILE\""
+PROGRAM=$(ogCreateImageSyntax $DISK $IMGFILE dd gzip)
 # Desmontar todos los sistemas de archivos del disco, bloquear partición e imagen.
 ogUnmountAll $1 2>/dev/null
 ### Pendiente: bloquear disco
@@ -109,7 +109,7 @@ return $ERRCODE
 #*/ ##
 function ogCreateImageSyntax()
 {
-local FS TOOL LEVEL PART IMGFILE BUFFER PARAM1 PARAM2 PARAM3
+local FS TOOL LEVEL DEV IMGFILE BUFFER PARAM1 PARAM2 PARAM3
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -122,10 +122,10 @@ fi
 [ $# -ge 2 -a $# -le 4 ] || ogRaiseError $OG_ERR_FORMAT "$*" || return $?
 
 # Asignación de parámetros.
-PART="$1"
+DEV="$1"
 IMGFILE="$2"
 case "$#" in
-    2)  # Sintaxis por defecto OG PART IMGFILE
+    2)  # Sintaxis por defecto OG DEV IMGFILE
         TOOL="partclone"
         LEVEL="gzip"
         ;;
@@ -137,14 +137,13 @@ esac
 
 case "$TOOL" in
     ntfsclone)
-        PARAM1="ntfsclone --force --save-image -O - $PART"
+        PARAM1="ntfsclone --force --save-image -O - $DEV"
         ;;
     partimage|default)
-        PARAM1="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $PART stdout"
+        PARAM1="partimage -M -f3 -o -d -B gui=no -c -z0 --volume=0 save $DEV stdout"
         ;;
     partclone)
-        FS="$(ogGetFsType $(ogDevToDisk $PART 2>/dev/null) 2>/dev/null)"
-        umount $PART 2>/dev/null
+        FS="$(ogGetFsType $(ogDevToDisk $DEV 2>/dev/null) 2>/dev/null)"
         case "$FS" in
             EXT[234]) PARAM1="partclone.extfs" ;;
             BTRFS)    PARAM1="partclone.btrfs" ;;
@@ -161,9 +160,13 @@ case "$TOOL" in
         esac
         # Por compatibilidad, si no existe el ejecutable usar por defecto "parclone.dd".
         which $PARAM1 &>/dev/null || PARAM1="partclone.dd"
-        PARAM1="$PARAM1 -d0 -F -c -s $PART"
+        PARAM1="$PARAM1 -d0 -F -c -s $DEV"
         ;;
-esac # Comprobar que existe mbuffer.
+    dd)
+        PARAM1="pv $DEV | dd conv=sync,noerror bs=1M"
+        ;;
+esac
+# Comprobar que existe mbuffer.
 which mbuffer &>/dev/null && PARAM2="| mbuffer -q -m 40M " || PARAM2=" "
 
 # Nivel de compresion.
@@ -266,6 +269,9 @@ if [ "$#" -eq 4 ]; then
 		"partclone" | "PARTCLONE")
 		    # -C para que no compruebe tamaños
 			TOOL="| partclone.restore -d0 -C -I -o $PART"
+		;;
+                dd)
+                        TOOL="| pv | dd conv=sync,noerror bs=1M of=$PART"
 		;;
 		*)
     		ogRaiseError $OG_ERR_NOTFOUND "Tools imaging no valid $TOOL" || return $?
@@ -630,9 +636,9 @@ IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 if ogIsImageLocked "$IMGFILE"; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $1, $2.$IMGTYPE"
     return $?
-
+fi
 # Solicitamos la generación de la instruccion a ejecutar
-PROGRAM="gunzip -c \"$IMGFILE\" | dd of=$DISK conv=sync,noerror bs=64K"
+PROGRAM=$(ogRestoreImageSyntax $IMGFILE $DISK)
 
 # Bloquear el disco
 #ogLock $3 || return $?
@@ -935,7 +941,13 @@ then
 		FS=$(echo $PARTIMAGEINFO | awk '{gsub(/ /,"\n"); print $17;}' | awk '{sub(/\.\.+/," "); print toupper($2)}') 
 		SIZE=$( echo $PARTIMAGEINFO | awk '{gsub(/ /,"\n"); print $36;}' | awk '{sub(/\.\.+/," "); printf "%d\n",$2*1024*1024;}')
 		IMGDETECT="TRUE"
-	fi	
+	fi
+	if file $FILEHEAD 2> /dev/null | grep -q "boot sector"; then
+		TOOLS="dd"
+                FS=
+                SIZE=
+		IMGDETECT="TRUE"
+	fi
 fi
 #comprobamos valores #Chequeamos los valores devueltos.
 if [ -z "$TOOLS" -o -z "$COMPRESSOR" -o "$IMGDETECT" == "FALSE" ]
