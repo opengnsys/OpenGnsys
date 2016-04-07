@@ -9,6 +9,7 @@
 //		Gestor de todos los comandos
 // *************************************************************************************************************************************************
 include_once("../../includes/ctrlacc.php");
+include_once("../../includes/restfunctions.php");
 include_once("../../clases/AdoPhp.php");
 include_once("../../clases/SockHidra.php");
 include_once("../../includes/constantes.php");
@@ -155,7 +156,6 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						VALUES (@idordenador,@tipoaccion,@idtipoaccion,@descriaccion,@ip,
 						@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idcentro)";
 			$resul=$cmd->Ejecutar();
-			//echo "<br>".$cmd->texto;
 		}
 		$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	}
@@ -183,7 +183,61 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					}
 				$shidra->desconectar();
 			}
-			if (!$resul){
+			// Guardamos resultado de ogAgent original
+			$resulhidra = $resul;
+
+	                // Comprobamos si el comando es soportado por el nuevo ogAgent
+			$numip=0;
+			$ogAgentNuevo = false;
+			switch ($idcomando) {
+				case 2:
+ 					// Apagar
+					$urlcomando = 'poweroff';
+					$ogAgentNuevo = true;
+					break;
+				case 5:
+					// Reiniciar
+					$urlcomando = 'reboot';
+					$ogAgentNuevo = true;
+					break;
+			}
+
+	                // Se envía acción al nuevo ogAgent
+			if ( $ogAgentNuevo ) {
+				// Send REST requests to new OGAgent clients.
+				$urls = array();
+				$ipsuccess = '';
+				// Compose array of REST URLs.
+				foreach (explode (';', $cadenaip) as $ip) {
+					$urls[$ip] = "https://$ip:8000/opengnsys/$urlcomando";
+				}
+				// Launch concurrent requests.
+				$responses = multiRequest($urls, array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
+				// Process responses array (IP as array index).
+				foreach ($responses as $ip => $data) {
+					if (isset($data)) {
+						$status = json_decode($data);
+						if (!isset($status->error)) {
+							$ipsuccess .= "'".$ip."',";
+							$numip++;
+						}
+					}
+				}
+				// quitamos último carácter ','
+				$ipsuccess=substr($ipsuccess, 0, -1);
+
+				// Actualizamos la cola de acciones con los que no dan error
+				if ( $numip >> 0 ) {
+					$fin= date ("Y-m-d H:i:s");
+					$cmd->texto="UPDATE acciones SET resultado='1', estado='3', ".
+						" descrinotificacion='', fechahorafin='".$fin."' ".
+						" WHERE ip IN  ($ipsuccess) AND idcomando='$idcomando' ".
+						" ORDER BY idaccion DESC LIMIT $numip";
+					$resul=$cmd->Ejecutar();
+				}
+			}
+			// Mostramos mensaje con resultado
+			if (!$resulhidra && $numip == 0){
 				echo '<SCRIPT language="javascript">';
 				echo 'resultado_comando(1);'.chr(13);
 				echo '</SCRIPT>';
