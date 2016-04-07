@@ -51,7 +51,7 @@ echo "Icon=/opt/eclipse/icon.xpm" >> /home/vagrant/Escritorio/eclipse.desktop
 echo "Terminal=false" >> /home/vagrant/Escritorio/eclipse.desktop
 chown -R vagrant.vagrant /home/vagrant/Escritorio
 # Download OGAgent environment installer.
-svn export http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/installer/ogagent-devel-installer.sh /home/vagrant
+svn export http://opengnsys.es/svn/branches/version1.1/installer/ogagent-devel-installer.sh /home/vagrant
 # Instructions.
 echo "Manual operations:"
 echo "- Launch desktop: startxfce4 &"

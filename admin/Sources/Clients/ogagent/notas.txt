@@ -1,0 +1,11 @@
+* ¿Como sabemos la direccion del servidor?
+* Seguridad. Como hacer el agente seguro (registro con OpenGnsys). Mensajes bidireccionales
+* Mensajes. (Moderm)
+   - Definir mensajes de cliente --> servidor
+   - Definir mensajes servidor --> cliente
+* Logotipo OpenGnsys
+* Licencia BSD (relicenciamiento basado en OpenUDS)
+* Clientes Windows y Linux inicialmente, parte usuarios?
+* "Modern" vs "Legacy" agents
+* Particularidades
+* ¿Posibles extensiones para "consola" og?

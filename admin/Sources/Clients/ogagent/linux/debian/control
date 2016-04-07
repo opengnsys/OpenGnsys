@@ -1,0 +1,15 @@
+Source: ogagent
+Section: admin
+Priority: optional
+Maintainer: Adolfo Gómez García <agomez@virtualcable.es>
+Build-Depends: debhelper (>= 7), po-debconf
+Standards-Version: 3.9.2
+Homepage: http://www.opengnsys.es
+
+Package: ogagent
+Section: admin
+Priority: optional
+Architecture: all
+Depends: policykit-1(>=0.100), python-requests (>=0.8.2), python-qt4 (>=4.9), python-six(>=1.1), python-prctl(>=1.1.1), python (>=2.7), libxss1, ${misc:Depends}
+Description: Agent for OpenGnSys
+ This package provides the required components to allow this machine to work on an environment managed by OpenGnSys.

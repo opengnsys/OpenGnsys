@@ -1,0 +1,96 @@
+#!/bin/bash
+#/**
+#@file     ogagent-devel-installer.sh
+#@brief    Script to download and prepare the environmnt to compile OGAgent packages.
+#@warning  Some operations need "root" privileges.
+#@note     This script will make a "ogagent" directory with 1.5 GiB approx.
+#@version  1.0 - Initial version for OpenGnsys 1.1.0.
+#@author   Ramón M. Gómez, ETSII Universidad de Sevilla
+#@date     2016-04-07
+#*/ ##
+
+
+# Variables.
+PROGDIR=$PWD/ogagent
+SVNURL=http://opengnsys.es/svn/branches/version1.1/admin/Sources/Clients/ogagent
+
+# Show prerequisites needed to build the environment.
+cat << EOT
+
+OGAgent devoloping environment installation
+
+Prerequisites:
+- Install packages, if needed:
+  - Wine for 32-bit with Winetricks
+  - Python 2.7 with pyqt4-dev-tools
+  - realpath
+  - dpkg-dev
+  - rpmbuild
+- Open a web browser and download Microsoft Visual C++ 2010 Redistributable Package (x86) from: http://www.microsoft.com/en-us/download/details.aspx?id=5555
+- Copy or move "vcredist_x86.exe" file to $PROGDIR directory.
+Press [Enter] key when ready to continue.
+EOT
+read
+
+# Importing OGAgent source code.
+mkdir -p $PROGDIR || exit 1
+svn export --force $SVNURL $PROGDIR || exit 1
+
+# Update PyQt components.
+pushd ogagent/src >/dev/null
+./update.sh
+popd >/dev/null
+
+# Showing instructions to configure Wine.
+cat << EOT
+
+Manual actions:
+- After all downloads, install Gecko for Wine, if needed.
+- Press [Esc] key or "Cancel" button on Winetricks screen.
+- Accept default settings for all other components
+- Uncheck all options on "Completing NSIS Setup" screen.
+Press [Enter] key to init downloads. 
+
+EOT
+read
+
+# Downloading and configuring Wine prerequisites.
+pushd ogagent/windows >/dev/null
+./py2exe-wine-linux.sh
+cp -a build.bat ogagent.nsi ..
+ln -s ../../.. wine/drive_c/ogagent
+popd >/dev/null
+
+# Build OGAgent for GNU/Linux.
+pushd $PROGDIR/linux >/dev/null
+sudo ./build-packages.sh
+popd >/dev/null
+
+# Build OGAgent for Windows. 
+pushd $PROGDIR/windows >/dev/null
+./build-windows.sh
+popd >/dev/null
+
+# Showing instructions to rebuild OGAgent packages.
+cat << EOT
+
+How to rebuild OGAgent packages
+-------------------------------
+OGAgent project source code is available in $PROGDIR/src directory.
+
+- Commands to update PyQt graphical components for OGAgnet:
+    cd $PROGDIR/src
+    ./update.sh
+
+- Commands to rebuild GNU/Linux packages:
+    cd $PROGDIR/linux
+    sudo ./build-packages.sh
+
+- Commands to rebuild Windows installer:
+    cd $PROGDIR/windows
+    ./build-windows.sh
+
+OGAgent packages will be created into $PROGDIR directory.
+
+EOT
+
