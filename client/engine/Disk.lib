@@ -1132,6 +1132,41 @@ echo $PARTS | cut -sf5- -d" "
 
 
 #/**
+#         ogLockDisk int_ndisk
+#@brief   Genera un fichero de bloqueo para un disco en uso exlusivo.
+#@param   int_ndisk      nº de orden del disco
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    El fichero de bloqueo se localiza en \c /var/lock/disk, siendo \c disk el dispositivo del disco, sustituyendo el carácter "/" por "-".
+#@version 1.1.0 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-07
+#*/ ##
+function ogLockDisk ()
+{
+# Variables locales
+local DISK LOCKFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener partición.
+DISK="$(ogDiskToDev $1)" || return $?
+
+# Crear archivo de bloqueo exclusivo.
+LOCKFILE="/var/lock/lock${DISK//\//-}"
+touch $LOCKFILE
+}
+
+
+#/**
 #         ogSetPartitionActive int_ndisk int_npartition
 #@brief   Establece cual es la partición activa de un disco.
 #@param   int_ndisk      nº de orden del disco
@@ -1458,6 +1493,41 @@ case "$TYPE" in
 esac
 # Cambiar tipo de partición.
 ogSetPartitionType $1 $2 $NEWTYPE
+}
+
+
+#/**
+#         ogUnlockDisk int_ndisk
+#@brief   Elimina el fichero de bloqueo para un disco.
+#@param   int_ndisk      nº de orden del disco
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    El fichero de bloqueo se localiza en \c /var/lock/disk, siendo \c disk el dispositivo del disco, sustituyendo el carácter "/" por "-".
+#@version 1.1.0 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-08
+#*/ ##
+function ogUnlockDisk ()
+{
+# Variables locales
+local DISK LOCKFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener partición.
+DISK="$(ogDiskToDev $1)" || return $?
+
+# Borrar archivo de bloqueo exclusivo.
+LOCKFILE="/var/lock/lock${DISK//\//-}"
+rm -f $LOCKFILE
 }
 
 
