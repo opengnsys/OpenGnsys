@@ -80,9 +80,8 @@ case "$TOOL" in
         # Por compatibilidad, si no existe el ejecutable usar por defecto "parclone.dd".
         which $PARAM1 &>/dev/null || PARAM1="partclone.dd"
         PARAM1="$PARAM1 -d0 -F -c -s $DEV"
-        ;;
-    dd)
-        PARAM1="pv $DEV | dd conv=sync,noerror bs=1M"
+        # El programa partclone.dd no tiene opción "-c".
+        [[ "PARAM1" =~ ^partclone.dd ]] && PARAM1="${PARAM1/ -c / }"
         ;;
 esac
 # Comprobar que existe mbuffer.
@@ -117,8 +116,7 @@ esac
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
 #@date    2010/02/08
 #*/ ##
-
-ogRestoreImageSyntax ()
+function ogRestoreImageSyntax ()
 {
 local TOOL COMPRESSOR LEVEL PART IMGFILE FILEHEAD INFOIMG
 
@@ -189,7 +187,7 @@ if [ "$#" -eq 4 ]; then
 		    # -C para que no compruebe tamaños
 			TOOL="| partclone.restore -d0 -C -I -o $PART"
 		;;
-                dd)
+                partclone.dd)
                         TOOL="| pv | dd conv=sync,noerror bs=1M of=$PART"
 		;;
 		*)
@@ -257,7 +255,7 @@ if ogIsImageLocked "$IMGFILE"; then
     return $?
 fi
 # Generar la instruccion a ejecutar antes de aplicar los bloqueos.
-PROGRAM=$(ogCreateImageSyntax $DISK $IMGFILE dd gzip)
+PROGRAM=$(ogCreateImageSyntax $DISK $IMGFILE)
 # Desmontar todos los sistemas de archivos del disco, bloquear partición e imagen.
 ogUnmountAll $1 2>/dev/null
 ### Pendiente: bloquear disco
