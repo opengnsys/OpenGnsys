@@ -81,7 +81,7 @@ case "$TOOL" in
         which $PARAM1 &>/dev/null || PARAM1="partclone.dd"
         PARAM1="$PARAM1 -d0 -F -c -s $DEV"
         # El programa partclone.dd no tiene opción "-c".
-        [[ "PARAM1" =~ ^partclone.dd ]] && PARAM1="${PARAM1/ -c / }"
+        [[ "$PARAM1" =~ ^partclone.dd ]] && PARAM1="${PARAM1/ -c / }"
         ;;
 esac
 # Comprobar que existe mbuffer.
@@ -240,7 +240,7 @@ fi
 
 # Comprobar que no está bloqueada ni la partición, ni la imagen.
 DISK="$(ogDiskToDev $1)" || return $?
-if ogDiskIsLocked $1; then
+if ogIsDiskLocked $1; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_LOCKED $1"
     return $?
 fi
@@ -937,7 +937,7 @@ then
 		IMGDETECT="TRUE"
 	fi
 	if file $FILEHEAD 2> /dev/null | grep -q "boot sector"; then
-		TOOLS="dd"
+		TOOLS="partclone.dd"
                 FS=
                 SIZE=
 		IMGDETECT="TRUE"
