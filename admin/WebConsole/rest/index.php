@@ -144,8 +144,8 @@ function checkAdmin($adminid) {
 
 
 /**
- * @#fn       sendCommand($serverip, $serverport, $reqframe, &$values)
- * @brief    Send a command to OpenGnsys ogAdmServer and get request.
+ * @#fn      sendCommand($serverip, $serverport, $reqframe, &$values)
+ * @brief    Send a command to an OpenGnsys ogAdmServer and get request.
  * @param    string serverip    Server IP address.
  * @param    string serverport  Server port.
  * @param    string reqframe    Request frame (field's separator is "\r").
@@ -451,8 +451,8 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 		$response['clientname'] = $rs->campos["nombreordenador"];
 		$response['netiface'] = $rs->campos["netiface"];
 		$response['netdriver'] = $rs->campos["netdriver"];
-		$response['macaddress'] = $rs->campos["mac"];
-		$response['ipaddress'] = $rs->campos["ip"];
+		$response['mac'] = $rs->campos["mac"];
+		$response['ip'] = $rs->campos["ip"];
 		$response['netmask'] = $rs->campos["mascara"];
 		$response['routerip'] = $rs->campos["router"];
 		$response['repoid'] = $rs->campos["idrepositorio"];
@@ -563,8 +563,10 @@ EOD;
 				$tmp['usage'] = $rs->campos["uso"];
 				if ($rs->campos["nombreso"] != null) {
 					$tmp['os'] = $rs->campos["nombreso"];
-					$tmp['idimage'] = $rs->campos["idimagen"];
+					$tmp['imageid'] = $rs->campos["idimagen"];
 					$tmp['deploydate'] = $rs->campos["fechadespliegue"];
+					// Comprobar si la imagen está actualizada.
+					//$tmp['updated'] = indica si la imagen está actualizada
 				}
 				//$tmp['cachedata'] = $rs->campos["cache"];
 			}
@@ -600,6 +602,10 @@ EOD;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	if (checkParameter($rs->campos["idordenador"])) {
+		//
+		// Probar primero el estado de OGAgent y luego de ogAdmClient
+		//
+
 		$serverip = $rs->campos["ipserveradm"];
 		$serverport = $rs->campos["portserveradm"];
 		$clientid = $rs->campos["idordenador"];
@@ -717,7 +723,7 @@ $app->get('/ous/:ouid/repos/:repoid', 'validateApiKey',
 		$response['reponame'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['ipaddress'] = $rs->campos["ip"];
-		$response['port'] = $rs->campos["puertorepo"];
+		//$response['port'] = $rs->campos["puertorepo"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
@@ -790,6 +796,7 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 			$response['disk'] = $rs->campos["numdisk"];
 			$response['partition'] = $rs->campos["numpar"];
 			$response['creationdate'] = $rs->campos["fechacreacion"];
+			//$response['imagerelease'] = revisión de la aimagen
 		}
 		jsonResponse(200, $response);
 	}
