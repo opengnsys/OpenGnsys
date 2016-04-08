@@ -1049,6 +1049,36 @@ echo "$TYPE"
 }
 
 
+#         ogIsDiskLocked int_ndisk
+#@brief   Comprueba si un disco está bloqueado por una operación de uso exclusivo.
+#@param   int_ndisk      nº de orden del disco
+#@return  Código de salida: 0 - bloqueado, 1 - sin bloquear o error.
+#@note    Los ficheros de bloqueo se localizan en \c /var/lock/dev, siendo \c dev el dispositivo de la partición o de su disco, sustituyendo el carácter "/" por "-".
+#@version 1.1.0 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-08
+#*/ ##
+function ogIsDiskLocked ()
+{
+# Variables locales
+local DISK LOCKFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "if $FUNCNAME 1; then ... ; fi"
+    return
+fi
+# Falso, en caso de error.
+[ $# == 1 ] || return 1
+DISK="$(ogDiskToDev $1 2>/dev/null)" || return 1
+
+# Comprobar existencia de fichero de bloqueo para el disco.
+LOCKFILE="/var/lock/lock${DISK//\//-}"
+test -f $LOCKFILE
+}
+
+
 #/**
 #         ogListPartitions int_ndisk
 #@brief   Lista las particiones definidas en un disco.
