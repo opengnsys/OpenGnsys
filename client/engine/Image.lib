@@ -244,21 +244,25 @@ if ogIsDiskLocked $1; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_LOCKED $1"
     return $?
 fi
-
 IMGTYPE="dsk"			# Extensión genérica de imágenes de disco.
 IMGDIR=$(ogGetParentPath "$2" "$3")
 [ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$2 $(dirname $3)" || return $?
-
 IMGFILE="$IMGDIR/$(basename "$3").$IMGTYPE"
 if ogIsImageLocked "$IMGFILE"; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $3, $4"
     return $?
 fi
+
+# No guardar imagen en el propio disco (disco no incluido en el camino del repositorio).
+if [[ $(ogGetPath "$2" /) =~ ^$DISK ]]; then
+    ogRaiseError $OG_ERR_IMAGE "$2 = $DISK"
+    return $?
+fi
+
 # Generar la instruccion a ejecutar antes de aplicar los bloqueos.
 PROGRAM=$(ogCreateImageSyntax $DISK $IMGFILE)
-# Desmontar todos los sistemas de archivos del disco, bloquear partición e imagen.
+# Desmontar todos los sistemas de archivos del disco, bloquear disco e imagen.
 ogUnmountAll $1 2>/dev/null
-### Pendiente: bloquear disco
 ogLockDisk $1 || return $?
 ogLockImage "$2" "$3.$IMGTYPE" || return $?
 
@@ -272,7 +276,7 @@ if [ $ERRCODE != 0 ]; then
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
     rm -f "$IMGFILE"
 fi
-# Desbloquear partición e imagen.
+# Desbloquear disco e imagen.
 ogUnlockDisk $1
 ogUnlockImage "$2" "$3.$IMGTYPE"
 return $ERRCODE
