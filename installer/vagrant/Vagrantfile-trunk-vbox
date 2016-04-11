@@ -40,7 +40,9 @@ service isc-dhcp-server restart
 # Set language.
 export LANG="#{LANGUAGE}.UTF-8"
 echo "LANG=\"$LANG\"" > /etc/default/locale
+echo "LANG=\"$LANG\"" >> /etc/environment
 locale-gen --lang #{LANGUAGE}
+dpkg-reconfigure -fnoninteractive console-setup
 # Unmcomment next lines for automatic data insertion.
 #SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
 #for ((i=1; i<=#{NCLIENTS}; i++)); do

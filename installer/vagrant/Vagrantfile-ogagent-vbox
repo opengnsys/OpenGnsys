@@ -20,6 +20,7 @@ echo "LC_ALL=\"$LANG\"" >> /etc/environment
 echo "LC_CTYPE=\"$LANG\"" >> /etc/environment
 locale-gen --lang #{LANGUAGE}
 sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
+dpkg-reconfigure -fnoninteractive console-setup
 # Update repositories.
 add-apt-repository -y ppa:webupd8team/java
 add-apt-repository -y ppa:ubuntu-wine
@@ -27,7 +28,8 @@ dpkg --add-architecture i386
 apt-get update
 apt-get -y upgrade
 # Install main dependencies.
-apt-get install -y aspell-${LANG%_*} debhelper dpkg-dev pyqt4-dev-tools realpath rpm subversion winbind wine1.8-i386
+echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
+apt-get install -y aspell-${LANG%_*} debhelper dpkg-dev pyqt4-dev-tools realpath rpm subversion winbind wine1.8-i386 wine-gecko2.40:i386 wine-mono4.5.6
 # Install desktop (XFCE) and GUI utils.
 apt-get install -y xfce4 gnome-icon-theme-full tango-icon-theme firefox virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
 echo "allowed_users=anybody" > /etc/X11/Xwrapper.config
