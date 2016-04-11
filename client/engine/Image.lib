@@ -631,6 +631,10 @@ if ogIsImageLocked "$IMGFILE"; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $1, $2.$IMGTYPE"
     return $?
 fi
+if ogIsDiskLocked $3; then
+    ogRaiseError $OG_ERR_LOCKED "$MSG_DISK $3"
+    return $?
+fi
 # Solicitamos la generación de la instruccion a ejecutar
 PROGRAM=$(ogRestoreImageSyntax $IMGFILE $DISK)
 
