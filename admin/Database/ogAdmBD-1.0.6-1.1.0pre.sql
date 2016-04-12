@@ -25,8 +25,9 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 ALTER TABLE aulas
 	ADD ntp VARCHAR(30) AFTER proxy,
 	ADD inremotepc TINYINT DEFAULT 0;
-# Añadir campo para incluir imágenes en proyecto Remote PC (ticket #708).
+# Añadir campos para nº de revisión de imágenes y su inclusión en proyecto Remote PC (tickets #737 y #708).
 ALTER TABLE imagenes
+	ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER nombreca,
 	ADD inremotepc TINYINT DEFAULT 0;
 # Añadir campo para clave de acceso a la API REST (ticket #708).
 ALTER TABLE usuarios
@@ -36,8 +37,9 @@ UPDATE usuarios
 	SET apikey = 'APIKEY'
 	WHERE idusuario = 1 AND apikey = '';
 
-# Añadir porcentaje de uso de sistema de ficheros (ticket #711)
+# Añadir nº de revisión de imagen restaurada y porcentaje de uso de sistema de ficheros (tickets #737 y #711)
 ALTER TABLE ordenadores_particiones
+	ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER idimagen,
 	ADD uso TINYINT NOT NULL DEFAULT 0;
 
 # Eliminar campo sin uso, nuevos componentes hardware y nº de serie (ticket #713)

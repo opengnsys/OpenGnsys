@@ -413,6 +413,7 @@ INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 CREATE TABLE IF NOT EXISTS `imagenes` (
   `idimagen` int(11) NOT NULL AUTO_INCREMENT,
   `nombreca` varchar(50) NOT NULL,
+  `revision` smallint UNSIGNED NOT NULL DEFAULT 0,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `idperfilsoft` int(11) DEFAULT NULL,
   `idcentro` int(11) DEFAULT NULL,
@@ -515,6 +516,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `idsistemafichero` smallint(11) NOT NULL,
   `idnombreso` smallint(11) NOT NULL,
   `idimagen` int(11) NOT NULL,
+  `revision` smallint UNSIGNED NOT NULL DEFAULT 0,
   `idperfilsoft` int(11) NOT NULL,
   `fechadespliegue` datetime NULL,
   `cache` text NOT NULL,

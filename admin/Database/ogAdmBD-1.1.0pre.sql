@@ -69,6 +69,19 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE centros
 			ADD directorio VARCHAR(50) DEFAULT '';
 	END IF;
+	# Nº de revisión de imagen (ticket #737).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='revision' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE imagenes
+			ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER nombreca;
+	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='revision' AND TABLE_NAME='ordenadores_particiones' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE ordenadores_particiones 
+			ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER idimagen;
+	END IF;
 END//
 # Ejecutar actualización condicional.
 delimiter ';'

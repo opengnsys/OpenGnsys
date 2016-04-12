@@ -2044,7 +2044,9 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
 			"UPDATE imagenes"
-			"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s, idperfilsoft=%d, idrepositorio=%d, fechacreacion=NOW()"
+			"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s,"
+			"       idperfilsoft=%d, idrepositorio=%d,"
+			"       fechacreacion=NOW(), revision=revision+1"
 			" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
@@ -2431,8 +2433,9 @@ BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
 			"UPDATE ordenadores_particiones"
-			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW()"
-			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, ido, dsk, par);
+			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW(),"
+			"       revision=(SELECT revision FROM imagenes WHERE idimagen=%s)" 
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
