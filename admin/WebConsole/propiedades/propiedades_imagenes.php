@@ -39,6 +39,7 @@ $litamb="";
 $tipoimg=0;
 $idrepositorio=0;
 $fechacreacion="";
+$revision=0;
 $imagenid=0;
 if (isset($_POST["validnombreca"])) {$opcion=$_POST["validnombreca"];}else{$validnombreca="";} // Recoge parametros
 if (isset($_POST["datospost"])) {$datospost=$_POST["datospost"];}else{$datospost=0;} // Recoge parametros
@@ -219,7 +220,7 @@ if ( $opcion == 1 && $datospost == 1)
 		<!-- Fecha de creación -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[20]?>&nbsp;</th>
-			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion" ?>
+			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(rev. $revision)" : "") ?>
 			    &nbsp;<input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
 		</tr>
 		<!-------------------------------------------------------------------------------------->
@@ -289,6 +290,7 @@ function TomaPropiedades($cmd,$idmagen){
 	global $perfilsoft;
 	global $imagenid;
 	global $fechacreacion;
+	global $revision;
 	
 	$rs=new Recordset; 
 	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, perfilessoft.descripcion AS perfilsoft, CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo
@@ -318,6 +320,7 @@ function TomaPropiedades($cmd,$idmagen){
 		$perfilsoft=$rs->campos["perfilsoft"];
 		$imagenid=$rs->campos["imagenid"];
 		$fechacreacion=$rs->campos["fechacreacion"];
+		$revision=$rs->campos["revision"];
 		$rs->Cerrar();
 		return(true);
 	}

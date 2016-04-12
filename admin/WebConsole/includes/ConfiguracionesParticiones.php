@@ -99,6 +99,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				nombresos.nombreso,
 				imagenes.idimagen, 
 				imagenes.descripcion AS imagen,
+				IF (imagenes.revision > ordenadores_particiones.revision, '(*)', '') AS imgnueva,
 				imagenes.nombreca AS nombreca,
 				imagenes.idrepositorio AS repositorio,
 				ordenadores_particiones.fechadespliegue,
@@ -156,6 +157,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$tbKeys[$idx]["nombreca"]=$rs->campos["nombreca"];
 		$tbKeys[$idx]["repositorio"]=$rs->campos["repositorio"];
 		$tbKeys[$idx]["fechadespliegue"]=$rs->campos["fechadespliegue"];
+		$tbKeys[$idx]["imgnueva"]=$rs->campos["imgnueva"];
 		$tbKeys[$idx]["idperfilsoft"]=$rs->campos["idperfilsoft"];
 		$tbKeys[$idx]["perfilsoft"]=$rs->campos["perfilsoft"];
 		//$tbKeys[$idx]["cache"]=$rs->campos["cache"];
