@@ -21,7 +21,7 @@ install hfsprogs
 install hfsutils
 install nilfs-tools
 install vmfs-tools
-install ubuntu-zfs
+install zfsutils
 # Solo en ogLive anterior a Ubuntu 14.04
 #install ufsutils
 # Solo en ogLive basado en Ubuntu 14.04 o posterior
