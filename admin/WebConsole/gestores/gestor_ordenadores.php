@@ -229,15 +229,12 @@ function Gestiona(){
                         if (!$rs->Abrir()) return(0); // Error al abrir recordset
                         $rs->Primero();
                         while (!$rs->EOF){
-                           if ( $nombreordenador == $rs->campos["nombreordenador"]) $nombreduplicado='si';
-                           if ( $ip == $rs->campos["ip"]) $ipduplicada='si';
-                           if ( $mac == $rs->campos["mac"]) $macduplicada='si';
+                           if ( $nombreordenador == $rs->campos["nombreordenador"]) $datosduplicados ="nombre: $nombreordenador,";
+                           if ( $ip == $rs->campos["ip"]) $datosduplicados .=" ip: $ip,";
+                           if ( $mac == $rs->campos["mac"]) $datosduplicados .=" mac: $mac,";
                            $rs->Siguiente();
                         }
                         $rs->Cerrar();
-                        if ( $ipduplicada == 'si' ) $datosduplicados ="ip: $ip,";
-                        if ( $nombreduplicado == 'si' ) $datosduplicados .=" nombre: $nombreordenador, ";
-                        if ( $macduplicada == 'si' ) $datosduplicados .=" mac: $mac";
                         // quitamos última coma
                         $datosduplicados = trim($datosduplicados, ',');
 
