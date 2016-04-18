@@ -2,9 +2,9 @@
 #/**
 #@file    security-config
 #@brief   OpenGnsys Server security configuration.
-#@version 1.1 - Initial version.
-#@author  Ramón J. Gómez, ETSII Univ. Sevilla
-#@date    2016-03-01
+#@version 1.1.0 - Initial version.
+#@author  Ramón M. Gómez, ETSII Univ. Sevilla
+#@date    2016-04-18
 #*/ ##
 
 
@@ -17,8 +17,23 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
+# UFW configuration.
+if which ufw 2>/dev/null; then
+	# Adding active services.
+	ufw allow "Apache Secure"
+	ufw allow OpenSSH
+	ufw allow Samba
+	ufw allow mysql
+	ufw allow rsync
+	ufw allow tftp
+	ufw allow 67,68/udp		# DHCP
+	ufw allow 2002,2008/tcp		# OpenGnsys services
+	ufw allow 9000:9051/udp		# Multicast
+	ufw allow 6881:6999/udp		# BitTorrent
+	# Applying configuration.
+	ufw enable
 # FirewallD configuration.
-if which firewall-cmd 2>/dev/null; then
+elif which firewall-cmd 2>/dev/null; then
 	# Defining OpenGnsys services.
 	python -c "
 import firewall.core.io.service as ios
@@ -45,12 +60,12 @@ ios.service_writer(s, '/etc/firewalld/services')
 	firewall-cmd --permanent --add-service=tftp
 	# Adding Multicast ports.
 	firewall-cmd --permanent --add-port=9000-9051/udp
-	# Adding Torent ports?
-	#firewall-cmd --permanent --add-port=6881-6999/udp
+	# Adding BitTorent ports.
+	firewall-cmd --permanent --add-port=6881-6999/udp
 	# Applying configuration.
 	firewall-cmd --reload
 else
-	echo "$PROG: Warning: FirewallD won't be configured (firewalld is not installed)."
+	echo "$PROG: Warning: Firewall won't be configured (neither ufw or firewalld are installed)."
 fi
 
 # SELinux configuration.
