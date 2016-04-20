@@ -91,7 +91,7 @@ while read -e mod vers; do
 	echo -n "Intalando módulo $mod v$vers"
 	dkms install -m $mod -v $vers &>/dev/null
 	RETVAL=$?
-	if [ $RETVAL == 0 ]
+	if [ $RETVAL == 0 ]; then
 		echo " : OK - Módulo instalado correctamente (codigo interno de dkms $RETVAL)"
 	else
 		echo " : Error módulo $mod (codigo interno de dkms $RETVAL) "
