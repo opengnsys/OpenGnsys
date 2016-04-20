@@ -2,20 +2,51 @@
 #@file    ogfunctions.lib
 #@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnSys.
 #@class   client
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/ ##
 
 
 #/**
-#        ogExportKernelParameters
+#         ogGetNetworkDevice
+#@brief   Devuelve el nombre de dispositivo de red correpondiente al índice indicado.
+#@param   int_devindex   índice de dispositivo de red.
+#@return  str_devname    nombre de dispositivo de red.
+#@note    Índice 0 debe corresponder a interfaz "lo" y a partir de 1 para las reales.
+#@version 1.1.0 - Primera versión de la función.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2016/04/20
+#*/ ##
+ogGetNetworkDevice ()
+{
+# Mantener retrocompatibilidad con interfaces antiguas tipo eth.
+case "$1" in
+	eth0)	ind=1 ;;
+	eth1)	ind=2 ;;
+	eth2)	ind=3 ;;
+	*)	ind="$1" ;;
+esac
+# Buscar el dispositivo del índice.
+dev=""
+for f in /sys/class/net/*/uevent; do
+	source $f
+	let aux=$IFINDEX-1
+	[ "$ind" = "$INTERFACE" -o "$ind" = $aux ] && dev="$INTERFACE"
+done
+[ -n "$dev" ] && echo "$dev"
+}
+
+
+#/**
+#         ogExportKernelParameters
 #@brief   Exporta los parametros pasados al kernel
-#@param   
-#@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@version 0.7 - 
-#@author Antonio J. Doblas. Universidad de Malaga.
+#@version 0.7 - Primera versión de la función.
+#@author  Antonio J. Doblas. Universidad de Malaga.
 #@date    2010/05/24
+#@version 1.1.0 - Sustituir índice de interfaz de red por su dispositivo.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2016/04/20
 #*/ ##
 ogExportKernelParameters ()
 {
@@ -24,6 +55,14 @@ ogExportKernelParameters ()
 	do
 		echo $i | grep "=" > /dev/null && export $i
 	done
+	# Sustituir índice de interfaz de red por su dispositivo.
+	DEVIND=$(echo "$ip" | cut -f6 -d:)
+	if [ -n "$DEVIND" ]; then
+		PRE=$(echo "$ip" | cut -f1-5 -d:)
+		POST=$(echo "$ip" | cut -f7- -d:)
+		DEVICE=$(ogGetNetworkDevice $DEVIND)
+		[ -n "$DEVICE" ] && export ip="$PRE:$DEVICE:${POST:-none}"
+	fi
 	return 0
 }
 
@@ -343,7 +382,7 @@ ogUpdateInitrd ()
 	CACHEINITRD=`cat /tmp/cache/boot/oginitrd.img.sum`
 	
 	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
-	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
+	echo "MD5 on  CACHE: $CACHEVMLINUZ $CACHEINITRD"
 	
 	cd /tmp/cache/boot
 	
@@ -472,7 +511,8 @@ then
 		mount $DSTOGLIVE/ogclient/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
 	fi
 # Realizamos la union entre el ogliveram(initrd) y el ogliverootfs(ogclient.sqfs)	
-	for i in etc var lib bin sbin usr root boot; do
+# Nota: el orden es muy importante para evitar errores de montaje.
+	for i in bin sbin etc var lib usr root boot; do
 		ogUnionLiveDir $i
 	done
 	cat /tmp/mtab.preunion > /etc/mtab
@@ -581,16 +621,17 @@ else
 			;;
 		""|on|any)
 			# Bring up device
-			DEVICE=eth0
+			DEVICE=1
 			;;
 		dhcp|bootp|rarp|both)
-			DEVICE=eth0
+			DEVICE=1
 			;;
 		*)
 			DEVICE=`echo $IP | cut -f6 -d:`
 			;;
 	esac
 fi
+DEVICE=$(ogGetNetworkDevice $DEVICE)
 if [ -z "${DEVICE}" ]; then
 	echo "variable DEVICE con valor $DEVICE no encontrada, llamamos de nuevo a ogconfigure_networking"
 	ogConfigureNetworking
