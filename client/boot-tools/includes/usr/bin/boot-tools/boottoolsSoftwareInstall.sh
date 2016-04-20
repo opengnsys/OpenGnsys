@@ -79,12 +79,26 @@ do
 			echo " : OK - Paquete instalado correctamente (codigo interno de apt-get $RETVAL)"
 		else
 			echo " : Error Paquete $package del grupo $group (codigo interno de apt-get $RETVAL) "
-			echo "Pulse pause para continuar"
+			echo "Pulse [Intro] para continuar"
 			read
 		fi
 	done	
 done
 
+# Instalar módulos que algunos paquetes puedan tener pendientes de compilar.
+echo "Instalando módulos adicionales con DKMS"
+while read -e mod vers; do
+	echo -n "Intalando módulo $mod v$vers"
+	dkms install -m $mod -v $vers &>/dev/null
+	RETVAL=$?
+	if [ $RETVAL == 0 ]
+		echo " : OK - Módulo instalado correctamente (codigo interno de dkms $RETVAL)"
+	else
+		echo " : Error módulo $mod (codigo interno de dkms $RETVAL) "
+		echo "Pulse [Intro] para continuar"
+		read
+	fi
+done < <(dkms status 2>/dev/null | awk -F, '$3~/added/ {print $1,$2}')
 
 #Activamos el hook del oginitrd.img 
 mv /etc/initramfs-tools/oghooks /etc/initramfs-tools/hooks/
