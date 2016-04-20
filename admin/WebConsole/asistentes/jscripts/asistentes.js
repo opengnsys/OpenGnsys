@@ -239,8 +239,7 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
-reboot \n";
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
 }
 
 
@@ -326,8 +325,7 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
-reboot \n";
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
 }
 
 
