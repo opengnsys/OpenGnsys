@@ -759,11 +759,14 @@ echo $ID
 #@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
+#@version 1.1.0 - Sustituir "sfdisk" por "partx".
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016/04/21
 #*/ ##
 function ogGetPartitionSize ()
 {
 # Variables locales.
-local DISK PART
+local PART
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -774,18 +777,10 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Obtener el tamaño de la partición.
-DISK="$(ogDiskToDev $1)" || return $?
+# Devolver tamaño de partición o del sistema de archivos (para ZFS).
 PART="$(ogDiskToDev $1 $2)" || return $?
-case "$(ogGetPartitionId $1 $2)" in
-    5|f)  # Procesar detección de tamaño de partición Extendida.
-          sfdisk -l $DISK 2>/dev/null | \
-                    awk -v p=$PART '{if ($1==p) {sub (/[^0-9]+/,"",$5); print $5} }'
-          ;;
-    *)    # Devolver tamaño de partición o del sistema de archivos (para ZFS).
-          sfdisk -s $PART 2>/dev/null || ogGetFsSize $1 $2
-          ;;
-esac
+partx -gbo SIZE $PART 2>/dev/null | awk '{print $1/1024}'
+[ ${PIPESTATUS[0]} -ne 0 ] && ogGetFsSize $1 $2
 }
 
 
