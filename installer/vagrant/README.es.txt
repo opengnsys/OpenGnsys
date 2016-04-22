@@ -8,6 +8,7 @@ Ficheros de configuración disponibles:
  - Vagrantfile-trunk-vbox  Vagrantfile para OpenGnsys oficial con proveedor VirtualBox.
  - Vagrantfile-devel-vbox  Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
  - Vagrantfile-boottools-vbox  Vagrantfile para preparar el entorno de generación del cliente ogLive (recomendado solo para desarrolladores experimentados).
+ - Vagrantfile-browser-vbox    Vagrantfile para preparar el entorno de desarrollo del Browser del cliente (recomendado solo para miembros del grupo de desarrollo).
  - Vagrantfile-ogagent-vbox    Vagrantfile para preparar el entorno de desarrollo del agente OGAgent (recomendado solo para miembros del grupo de desarrollo).
 
 
