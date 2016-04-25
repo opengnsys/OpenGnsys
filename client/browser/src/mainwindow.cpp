@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QNetworkReply>
 #include <QSslError>
+#include <libintl.h>
 
 #include "qtermwidget.h"
 #include "digitalclock.h"
@@ -287,7 +288,7 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
     }
     else
     {
-        print(tr(gettext("El proceso ha fallado inesperadamente. Salida: )"+code));
+        print(tr(gettext("El proceso ha fallado inesperadamente. Salida: ")+code));
     }
     finishProgressBar();
 }
