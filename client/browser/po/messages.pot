@@ -1,0 +1,107 @@
+# OpenGnsys Client Browser messeages file.
+# Copyright (C) 2016
+# This file is distributed under the same license as the browser package.
+# Ramón M. Gómez <ramongomez@us.es>, 2016.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenGnsys Client Browser 1.1.0\n"
+"Report-Msgid-Bugs-To: http://opengnsys.es\n"
+"POT-Creation-Date: 2016-04-25 14:30+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: branches/version1.1/client/browser/src/main.cpp:17
+#, c-format
+msgid "Uso: %s -qws http://sitioweb.com/\n"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:54
+msgid "&Nueva Terminal"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:132
+msgid "El fichero de log no ha podido ser abierto: "
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:162
+msgid "Hay otro proceso en ejecución. Por favor espere."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:177
+#: branches/version1.1/client/browser/src/mainwindow.cpp:216
+msgid "AVISO"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:179
+msgid ""
+"La siguiente acci&oacute;n puede modificar datos o tardar varios minutos. El "
+"equipo no podr&aacute; ser utilizado durante su ejecuci&oacute;n."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:180
+msgid "Ejecutar"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:181
+msgid "Cancelar"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:199
+#, c-format
+msgid "%p% Cargando"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:218
+msgid "La p&aacute;gina no se puede cargar."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:220
+msgid "Recargar"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:221
+msgid "Abortar"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:252
+msgid "Lanzado satisfactoriamente."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:286
+msgid "Proceso acabado correctamente. Valor de retorno: "
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:290
+msgid "El proceso ha fallado inesperadamente. Salida: )"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:301
+msgid "Imposible lanzar el proceso."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:304
+msgid "Error de escritura en el proceso."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:307
+msgid "Error de lectura del proceso."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:315
+msgid "Error desconocido."
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:432
+msgid "Listo"
+msgstr ""
+
+#: branches/version1.1/client/browser/src/mainwindow.cpp:445
+msgid "Lanzando el comando: "
+msgstr ""

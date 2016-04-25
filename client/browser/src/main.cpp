@@ -2,12 +2,19 @@
 #include <stdio.h>
 #include "mainwindow.h"
 #include <Qt/qtextcodec.h>
+// Internacionalización con GNU Gettext.
+#include <libintl.h>
 
 int main(int argc, char *argv[])
 {
+    // Preparar internacionalización.
+    setlocale (LC_ALL, "");
+    bindtextdomain ("browser", "/opt/opengnsys/lib/locale");
+    textdomain ("browser");
+
     if(argc<=1)
     {
-        printf("Usage: %s http://siteweb.com/\n",argv[0]);
+        printf(gettext("Uso: %s -qws http://sitioweb.com/\n"),argv[0]);
         return -1;
     }
     // Codificación UTF-8.
