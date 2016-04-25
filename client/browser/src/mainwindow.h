@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QNetworkReply>
 #include <QSslError>
+#include "digitalclock.h"
 
 class QWebView;
 class QTextEdit;
@@ -71,6 +72,7 @@ class MainWindow : public QMainWindow
         QWebView *m_web;
         QTextEdit *m_output;
         QProgressBar *m_progressBar;
+        DigitalClock *m_clock;
         QTabWidget *m_tabs;
         QLineEdit *m_webBar;
 

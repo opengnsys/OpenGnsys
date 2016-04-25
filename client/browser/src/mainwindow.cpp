@@ -18,6 +18,7 @@
 #include <QSslError>
 
 #include "qtermwidget.h"
+#include "digitalclock.h"
 
 #define BUFFERSIZE 2048
 #define REGEXP_STRING "^\\[(\\d+)\\]"
@@ -32,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Graphic
     showFullScreen();
 
-    setWindowTitle(tr("OpenGnSys Browser"));
+    setWindowTitle(tr("OpenGnsys Browser"));
 
     setCentralWidget(m_web);
 
@@ -88,6 +89,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_progressBar=new QProgressBar(this);
     m_progressBar->setMinimum(0);
     m_progressBar->setMaximum(100);
+    m_clock=new DigitalClock(this);
 
     m_web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
@@ -411,12 +413,15 @@ void MainWindow::captureOutputForStatusBar(QString output)
   }
 }
 
+// Iniciar barra de progreso con reloj digital
 void MainWindow::startProgressBar()
 {
     QStatusBar* st=statusBar();
     st->clearMessage();
-    st->addWidget(m_progressBar,100);
+    st->addWidget(m_progressBar,90);
+    st->addWidget(m_clock,10);
     m_progressBar->show();
+    m_clock->show();
     m_web->setEnabled(false);
 }
 
