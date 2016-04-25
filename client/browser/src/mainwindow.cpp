@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
     dock->setWidget(m_tabs);
 
     // Y el dock al mainwindow
-    if(m_env.contains("boot") && m_env["boot"] == "admin")
+    if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
       addDockWidget(Qt::BottomDockWidgetArea,dock);
 
     // Top Dock
@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
     dock->setWidget(m_webBar);
 
     // dock al mainwindow
-    if(m_env.contains("boot") && m_env["boot"] == "admin")
+    if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
       addDockWidget(Qt::TopDockWidgetArea,dock);
 
     // Status bar

@@ -3,7 +3,7 @@
 
 #define COMMAND "command:"
 #define COMMAND_WITH_CONFIRMATION "commandwithconfirmation:"
-#define ENVIRONMENT "OGLOGFILE,boot"
+#define ENVIRONMENT "OGLOGFILE,ogactiveadmin"
 //#define ENVIRONMENT "OGIP,OGSERVER,OGLOG"
 
 #include <QWidget>
