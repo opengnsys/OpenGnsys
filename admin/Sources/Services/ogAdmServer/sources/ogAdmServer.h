@@ -117,7 +117,7 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *,TRAMA *);
 BOOLEAN actualizaHardware(Database, Table,char* ,char*,char*,char*);
 BOOLEAN cuestionPerfilHardware(Database,Table,char*,char*,int,char*,char*,int *,int);
 BOOLEAN actualizaSoftware(Database , Table , char* , char* , char*,char*,char*);
-BOOLEAN cuestionPerfilSoftware(Database, Table, char*, char*,int,char*,char*,char*,int *,int);
+BOOLEAN cuestionPerfilSoftware(Database, Table, char*, char*,int,int,char*,char*,char*,int *,int);
 
 BOOLEAN enviaArchivo(SOCKET *, TRAMA *);
 BOOLEAN recibeArchivo(SOCKET *, TRAMA *);

@@ -3083,10 +3083,12 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
+//
+//	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 // ________________________________________________________________________________________________________
 BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, char* npc, char* idc) 
 {
-	int i, j, lon, aux, idperfilsoft;
+	int i, j, lon, aux, idperfilsoft, idnombreso;
 	bool retval;
 	char *wsft;
 	int tbidsoftware[MAXSOFTWARE];
@@ -3134,6 +3136,12 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 		lon = MAXSOFTWARE; // Limita el número de componentes software
 
 	for (i = 0; i < lon; i++) {
+		// Primera línea es el sistema operativo: se obtiene identificador
+		if (i == 0) {
+			idnombreso = checkDato(db, tbl, rTrim(tbSoftware[i]), "nombresos", "nombreso", "idnombreso");
+			continue;
+		}
+
 		sprintf(sqlstr,
 				"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",
 				rTrim(tbSoftware[i]));
@@ -3202,7 +3210,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 		aux += sprintf(idsoftwares + aux, ",%d", tbidsoftware[i]);
 
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
-	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idsoftwares,
+	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
 		errorLog(modulo, 83, FALSE);
 		errorInfo(modulo, msglog);
@@ -3223,6 +3231,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 //		- tbl: Objeto tabla
 //		- idcentro: Identificador del centro en la tabla
 //		- ido: Identificador del ordenador del cliente en la tabla
+//		- idnombreso: Identificador del sistema operativo
 //		- idsoftwares: Cadena con los identificadores de componentes software separados por comas
 //		- npc: Nombre del ordenador del cliente
 //		- particion: Número de la partición
@@ -3231,9 +3240,11 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
-//________________________________________________________________________________________________________/
+//
+//	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
+//_________________________________________________________________________________________________________
 BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
-		int idperfilsoftware, char *idsoftwares, char *npc, char *par,
+		int idperfilsoftware, int idnombreso, char *idsoftwares, char *npc, char *par,
 		int *tbidsoftware, int lon) {
 	char *sqlstr, msglog[LONSTD];
 	int i, nwidperfilsoft;
@@ -3261,8 +3272,8 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		return (false);
 	}
 	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
-		sprintf(sqlstr, "INSERT perfilessoft  (descripcion,idcentro,grupoid)"
-				" VALUES('Perfil Software (%s, Part:%s) ',%s,0)", npc, par, idc);
+		sprintf(sqlstr, "INSERT perfilessoft  (descripcion, idcentro, grupoid, idnombreso)"
+				" VALUES('Perfil Software (%s, Part:%s) ',%s,0,%i)", npc, par, idc,idnombreso);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);

@@ -335,9 +335,12 @@ lshw | awk 'BEGIN {type="mod";}
 #@version 1.0.5 - Aproximación para inventario de software de Mac OS.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-10-08
-#@version 1.0.6 - Proceso depende del tipo de SO y sporte para FreeBSD.
+#@version 1.0.6 - Proceso depende del tipo de SO y soporte para FreeBSD.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-11-13
+#@version 1.1.0 - Se muestra el sistema operativo en la primera línea de la salida
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-26
 #*/ ##
 function ogListSoftware ()
 {
@@ -355,6 +358,9 @@ fi
 # Obtener tipo de sistema de archivos y montarlo.
 MNTDIR=$(ogMount $1 $2) || return $?
 TYPE=$(ogGetOsType $1 $2) || return $?
+
+# Sistema Operativo en la primera línea de la salida
+ogGetOsVersion $1 $2 | awk -F ':'  '{print $2}'
 
 case "$TYPE" in
     Linux)          # Software de GNU/Linux.
