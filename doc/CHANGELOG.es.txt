@@ -12,10 +12,12 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #678	Unidades organizativas con directorio de imágenes separado.
 #722	Multicast entre subredes
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
+#744	Gestionar bloqueos de disco
 
 Tickets resueltos en módulo OpenGnsys Client:
 #625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
 #725	Sincronización horaria de clientes con servidor NTP
+#746	Reloj en barra de estado del Browser del cliente
 
 Tickets resueltos en módulo OpenGnsys Server:
 #723	Cambio temporal de fichero de arranque PXE
