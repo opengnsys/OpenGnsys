@@ -82,6 +82,14 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE ordenadores_particiones 
 			ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER idimagen;
 	END IF;
+	# Incluir campo sistema operativo en el perfil de software (tickets #738 #713)
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='idnombreso' AND TABLE_NAME='perfilessoft'  AND TABLE_SCHEMA=DATABASE())
+	THEN 
+		ALTER TABLE perfilessoft
+			ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
+	END IF;
+
 END//
 # Ejecutar actualización condicional.
 delimiter ';'
@@ -115,8 +123,9 @@ UPDATE usuarios
 # Nuevos componentes hardware (ticket #713)
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 	(17, 'Chasis del Sistema', '', 'cha'),
-	(18, 'Controladores de almacenamiento', '', 'sto'),
-	(19, 'Tipo de proceso de arranque', '', 'boo')
+	(18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
+	(19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), urlimg=VALUES(urlimg), nemonico=VALUES(nemonico);
+
 

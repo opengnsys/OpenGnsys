@@ -47,8 +47,8 @@ ALTER TABLE tipohardwares
 	DROP pci;
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 	(17, 'Chasis del Sistema', '', 'cha'),
-	(18, 'Controladores de almacenamiento', '', 'sto'),
-	(19, 'Tipo de proceso de arranque', '', 'boo');
+	(18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
+	(19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 ALTER TABLE ordenadores
 	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
 
@@ -58,3 +58,6 @@ ALTER TABLE entidades
 ALTER TABLE centros
 	ADD directorio VARCHAR(50) DEFAULT '';
 
+# Incluir campo ID sistema operativo en el perfil de software (tickets #738 #713)
+ALTER TABLE perfilessoft
+	ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;

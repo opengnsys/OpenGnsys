@@ -42,9 +42,23 @@ ALTER TABLE menus
 	DROP scoorx,
 	DROP scoory;
 
+# Eliminar campo sin uso, nuevos componentes hardware y nº de serie (ticket #713)
+ALTER TABLE tipohardwares
+        DROP pci;
+INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
+        (17, 'Chasis del Sistema', '', 'cha'),
+        (18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
+        (19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
+ALTER TABLE ordenadores
+        ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
+
+
 # Directorios en repo para distintas UO (ticket #678).
 ALTER TABLE entidades
 	ADD ogunit TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE centros
 	ADD directorio VARCHAR(50) DEFAULT '';
 
+# Incluir campo ID sistema operativo en el perfil de software (tickets #738 #713)
+ALTER TABLE perfilessoft
+        ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
