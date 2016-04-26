@@ -770,8 +770,9 @@ function compileServices()
 	fi
 	popd
 	# Actualizar o insertar clave de acceso REST en el fichero de configuración del repositorio.
-	grep -q '^ApiToken=' || echo "ApiToken=$REPOKEY" >> $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" >> $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	grep -q '^ApiToken=' $INSTALL_TARGET/etc/ogAdmRepo.cfg && \
+		sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg || \
+		sed -i "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	# Compilar OpenGnsys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
