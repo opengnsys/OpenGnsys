@@ -283,7 +283,7 @@ function importSqlFile()
         local mycnf=/tmp/.my.cnf.$$
         local status
 	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-	local REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -769,6 +769,9 @@ function compileServices()
 		hayErrores=1
 	fi
 	popd
+	# Actualizar o insertar clave de acceso REST en el fichero de configuración del repositorio.
+	grep -q '^ApiToken=' || echo "ApiToken=$REPOKEY" >> $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" >> $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	# Compilar OpenGnsys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent

@@ -650,7 +650,7 @@ function mysqlImportSqlFileToDb()
 	local status
 	# Claves aleatorias para acceso a las APIs REST.
 	local OPENGNSYS_APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-	local OPENGNSYS_REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+	OPENGNSYS_REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
 	if [ ! -f $sqlfile ]; then
 		errorAndLog "${FUNCNAME}(): Unable to locate $sqlfile!!"
@@ -1412,6 +1412,7 @@ function openGnsysConfigure()
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
+			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo/ogAdmRepo.cfg > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
