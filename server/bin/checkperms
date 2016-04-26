@@ -42,10 +42,10 @@ chmod -R 775 $OPENGNSYS_DIR/{log/clients,images}
 find $OPENGNSYS_DIR/client/{interfaceAdm,scripts} ! -name "*.txt" -exec chmod +x {} \;
 chown $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
 chmod 700 $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
-chown root:root $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}*.cfg
-chmod 600 $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}*.cfg
-chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/controlacceso*.php
-chmod 600 $OPENGNSYS_DIR/www/controlacceso*.php
+chown root:root $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
+chmod 600 $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
+chown root:$APACHE_GROUP $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
+chmod 640 $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/images/{fotos,iconos}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/api
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/tftpboot/menu.lst
