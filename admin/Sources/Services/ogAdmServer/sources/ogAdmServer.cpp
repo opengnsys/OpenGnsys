@@ -2434,8 +2434,9 @@ BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 	snprintf(sqlstr, LONSQL,
 			"UPDATE ordenadores_particiones"
 			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW(),"
-			"       revision=(SELECT revision FROM imagenes WHERE idimagen=%s)" 
-			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ido, dsk, par);
+			"       revision=(SELECT revision FROM imagenes WHERE idimagen=%s)," 
+			"       idnombreso=(SELECT idnombreso FROM perfilessoft WHERE idperfilsoft=%s)" 
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
