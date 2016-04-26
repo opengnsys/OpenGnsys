@@ -1,7 +1,7 @@
 <?php
 /**
- * @file    index.php
- * @brief   OpenGnsys REST API manager.
+ * @file    repository.php
+ * @brief   OpenGnsys Repository REST API manager.
  * @warning All input and output messages are formatted in JSON.
  * @note    Some ideas are based on article "How to create REST API for Android app using PHP, Slim and MySQL" by Ravi Tamada, thanx.
  * @license GNU GPLv3+
