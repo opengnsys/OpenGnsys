@@ -1009,6 +1009,9 @@ EOD;
 //   }
 //);
 
+// Include repository routes.
+include("repository.php");
+
 // Include OGAgent push routes.
 include("ogagent.php");
 

@@ -224,11 +224,12 @@ UPDATE comandos
 	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
 	WHERE idcomando = 9;
 
-# Eliminar campos que ya no se usan (ticket #705).
+# Eliminar campos que ya no se usan y añadir clave de acceso a la API REST del repositorio (tickets #705 y #743).
 ALTER TABLE repositorios
 	DROP pathrepoconf,
 	DROP pathrepod,
-	DROP pathpxe;
+	DROP pathpxe,
+	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 ALTER TABLE menus
 	DROP coorx,
 	DROP coory,

@@ -89,7 +89,13 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE perfilessoft
 			ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
 	END IF;
-
+	# Añadir campo para clave de acceso a la API REST del repositorio (ticket #743).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='apikey' AND TABLE_NAME='repositorios' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE repositorios
+			ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
+	END IF;
 END//
 # Ejecutar actualización condicional.
 delimiter ';'

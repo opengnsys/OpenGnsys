@@ -61,3 +61,8 @@ ALTER TABLE centros
 # Incluir campo ID sistema operativo en el perfil de software (tickets #738 #713)
 ALTER TABLE perfilessoft
 	ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
+
+# Añadir campo para clave de acceso a la API REST del repositorio (ticket #743).
+ALTER TABLE repositorios
+	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
+

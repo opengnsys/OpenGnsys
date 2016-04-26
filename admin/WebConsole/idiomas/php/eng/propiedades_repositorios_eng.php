@@ -22,4 +22,5 @@ $TbMsg[13]="Space Free";
 $TbMsg[14]="% Taken";
 $TbMsg[15]='Limitations of this version';
 $TbMsg[16]='Space information is allowed only if Repository and Web Server are hosted on the same server';
+$TbMsg[17]='Api Token';
 ?>

@@ -742,6 +742,7 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
   `puertorepo` int(11) NOT NULL,
+  `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

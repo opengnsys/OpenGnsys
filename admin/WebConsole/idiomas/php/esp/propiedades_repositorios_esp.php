@@ -22,4 +22,5 @@ $TbMsg[13]="Espacio Libre";
 $TbMsg[14]="% Ocupado"; 
 $TbMsg[15]='Limitaciones de esta versi&oacute;n';
 $TbMsg[16]='Informaci&oacute;n de espacio solo disponible si Repositorio y Servidor Web est&aacute;n alojados en el mismo servidor';
+$TbMsg[17]='Api Token';
 ?>
