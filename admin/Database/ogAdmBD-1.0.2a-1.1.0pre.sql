@@ -255,3 +255,11 @@ ALTER TABLE centros
 # Campo ID sistema operativo en el perfil de software (tickets #738 #713)
 ALTER TABLE perfilessoft
         ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
+# Preparar generación de claves de acceso a la API REST para el usuario principal y a la del repositorio principal (tickets #708 y #743).
+UPDATE usuarios
+	SET apikey = 'APIKEY'
+	WHERE idusuario = 1 AND apikey = '';
+UPDATE repositorios
+	SET apikey = 'REPOKEY'
+	WHERE idrepositorio = 1 AND apikey = '';
+

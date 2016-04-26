@@ -747,7 +747,7 @@ CREATE TABLE IF NOT EXISTS `repositorios` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
- (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002);
+ (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002,'REPOKEY');
 
 
 -- --------------------------------------------------------

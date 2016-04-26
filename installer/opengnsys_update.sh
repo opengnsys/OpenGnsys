@@ -283,6 +283,7 @@ function importSqlFile()
         local mycnf=/tmp/.my.cnf.$$
         local status
 	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+	local REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -293,7 +294,7 @@ function importSqlFile()
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
             -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-            -e "s/APIKEY/$APIKEY/g" $sqlfile > $tmpfile
+            -e "s/APIKEY/$APIKEY/g" -e "s/REPOKEY/$REPOKEY/g" $sqlfile > $tmpfile
 	# Componer fichero con credenciales de conexión.  
 	touch $mycnf
 	chmod 600 $mycnf

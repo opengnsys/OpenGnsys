@@ -62,7 +62,10 @@ ALTER TABLE centros
 ALTER TABLE perfilessoft
 	ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
 
-# Añadir campo para clave de acceso a la API REST del repositorio (ticket #743).
+# Añadir campo y generar clave de acceso a la API REST del repositorio (ticket #743).
 ALTER TABLE repositorios
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
+UPDATE repositorios
+	SET apikey = 'REPOKEY'
+	WHERE idrepositorio = 1 AND apikey = '';
 

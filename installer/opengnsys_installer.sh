@@ -648,8 +648,9 @@ function mysqlImportSqlFileToDb()
 	local i=0
 	local dev=""
 	local status
-	# Clave aleatoria para acceso a la API REST.
+	# Claves aleatorias para acceso a las APIs REST.
 	local OPENGNSYS_APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+	local OPENGNSYS_REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
 	if [ ! -f $sqlfile ]; then
 		errorAndLog "${FUNCNAME}(): Unable to locate $sqlfile!!"
@@ -664,6 +665,7 @@ function mysqlImportSqlFileToDb()
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/APIKEY/$OPENGNSYS_APIKEY/g" \
+			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$sqlfile > $tmpfile
 		fi
 		let i++

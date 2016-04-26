@@ -121,10 +121,13 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
-# Preparar generación de clave de acceso a la API REST para el usuario principal (ticket #708).
+# Preparar generación de claves de acceso a la API REST para el usuario principal y a la del repositorio principal (tickets #708 y #743).
 UPDATE usuarios
 	SET apikey = 'APIKEY'
 	WHERE idusuario = 1 AND apikey = '';
+UPDATE repositorios
+	SET apikey = 'REPOKEY'
+	WHERE idrepositorio = 1 AND apikey = '';
 
 # Nuevos componentes hardware (ticket #713)
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
