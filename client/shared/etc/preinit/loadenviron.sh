@@ -16,6 +16,7 @@
 
 # Idioma por defecto.
 export LANG="${LANG:-es_ES}"
+locale-gen $LANG
 
 # Directorios del projecto OpenGnSys.
 export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys}"
