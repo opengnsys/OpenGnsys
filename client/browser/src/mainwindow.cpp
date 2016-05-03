@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_tabs->setCornerWidget(button);
     m_tabs->setFocusPolicy(Qt::NoFocus);
 
-    m_tabs->addTab(m_output,tr("Salida"));
+    m_tabs->addTab(m_output,tr(gettext("Salida")));
     slotCreateTerminal();
 
     // Las pestanyas al dock
