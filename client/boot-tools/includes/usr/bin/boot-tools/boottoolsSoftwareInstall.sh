@@ -44,23 +44,25 @@ if [ "$OSRELEASE" == "3.7.6-030706-generic" ]; then
 	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.6-raring/linux-headers-3.7.6-030706-generic_3.7.6-030706.201302040006_$OSARCH.deb
 	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.6-raring/linux-headers-3.7.6-030706_3.7.6-030706.201302040006_all.deb
 	dpkg -i *.deb
+	apt-get -y --force-yes install dkms
 	popd
 	rm -fr /tmp/kernel
 else
 	# Instalar Kernel del repositorio de paquetes.
-	apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE}
+	apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE} dkms
 	apt-get -y --force-yes install linux-image-extra-${OSRELEASE} 2>/dev/null
 fi
 
-
-#Eliminamos cualquier busybox previo:  antes del busybox
-#apt-get -y --force-yes remove busybox
-#apt-get -y --force-yes remove busybox-static
-
-#estos paquetes ofrecen interaccion.
-# si es actualización, ya existe el fichero /etc/ssh/ssh_config
-apt-get -y install sshfs 
-apt-get -y install console-data
+# Valores para paquetes interactivos.
+cat << EOT | debconf-set-selections --
+console-setup console-setup/charmap47 select UTF-8
+console-setup console-setup/codeset47 select . Combined - Latin; Slavic Cyrillic; Greek
+console-setup console-setup/fontface47 select TerminusBold
+console-setup console-setup/fontsize-fb47 select 8x16
+davfs2 davfs2/suid_file boolean false
+kexec-tools kexec-tools/load_kexec boolean true
+EOT
+apt-get -y install sshfs console-data kexec-tools davfs2
 
 #comenzamos con la instalación de los paquetes a instalar.
 for group in `find /usr/bin/boot-tools/listpackages/ -name sw.*`

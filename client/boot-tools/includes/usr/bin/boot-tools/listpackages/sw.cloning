@@ -2,7 +2,6 @@
 install drbl-partimage 
 install fsarchiver 
 install pv 
-install kexec-tools 
 install pxe-kexec
 install mbuffer
 install parted 
