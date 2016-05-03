@@ -1,6 +1,6 @@
 #!/bin/bash
 #@file    boottoolsgenerator.sh
-#@brief   Script generación del sistema opertativo cliente OpenGnSys
+#@brief   Script generación del sistema opertativo cliente OpenGnsys
 #@warning 
 #@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
@@ -11,7 +11,7 @@
 #*/
 
  #mkdir -p /tmp/opengnsys_installer/opengnsys
- #svn export http://opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys
+ #svn export http://opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys
 
 
 #Variables
@@ -42,7 +42,7 @@ source $PROGRAMDIR/boottoolsfunctions.lib
 echo "FASE 1 - Asignación de variables"
 #obtenemos las variables necesarias y la información del host.
 btogGetVar
-echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
+echoAndLog "OpenGnsys CLIENT installation begins at $(date)"
 btogGetOsInfo $TYPECLIENT
 ##########################################################################
 echo "FASE 2 - Instalación de software adicional."
@@ -68,9 +68,11 @@ fi
 echo "FASE 4 - Configurar acceso schroot al Segundo Sistema de archivos (img)"
 cat /etc/schroot/schroot.conf | grep $BTROOTFSIMG || btogSetFsAccess
 ###########################################################################
-echo "FASE 5 - Incorporando ficheros OpenGnSys el sistema raiz rootfs "
+echo "FASE 5 - Incorporando ficheros OpenGnsys al sistema raíz rootfs "
 cp -a ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp
 chmod +x /tmp/boot-tools/*.sh
+# Incluir revisión.
+sed -i "1 s/$/ $VERSIONSVN/" ${BTSVNBOOTTOOLS}/includes/etc/initramfs-tools/scripts/VERSION.txt
 # En Ubuntu 13.04+ es necesario matar proceso de "udev" antes de desmontar.
 umount $BTROOTFSMNT 2>/dev/null || (kill -9 $(lsof -t $BTROOTFSMNT); umount $BTROOTFSMNT 2>/dev/null)
 schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh 
@@ -112,5 +114,5 @@ echo "Fase 8.3 Generar la ISO"
 btogIsoGenerator
 ######################################################################3
 ########################################################################
-echoAndLog "OpenGnSys installation finished at $(date)"
+echoAndLog "OpenGnsys installation finished at $(date)"
 

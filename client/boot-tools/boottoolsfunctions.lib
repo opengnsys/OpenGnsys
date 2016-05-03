@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot-Tools
 #@class   Boot-Tools
 #@brief   Funciones para generar un sistema operativo cliente para opengnsys
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -93,7 +93,7 @@ case "${1,,}" in
 	wily) 	        # ogLive 1.1.0-rc1 basado en Ubuntu 15.10.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="wily"
-		OSRELEASE="4.2.0-16-generic"
+		OSRELEASE="4.2.0-35-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
@@ -113,7 +113,6 @@ NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
 export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
 ### El fichero de configuración debe sustituir a estos 3 ficheros (borrar las 3 líneas siguientes).
-echo "$VERSIONSVN" > /tmp/versionsvn.txt
 echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
 echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
 # Generar fichero de configuración.

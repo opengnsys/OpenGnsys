@@ -1,6 +1,6 @@
 #/**
 #@file    ogfunctions.lib
-#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnSys.
+#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnsys.
 #@class   client
 #@version 1.1.0
 #@warning License: GNU GPLv3+
