@@ -70,12 +70,15 @@ case "$TOOL" in
             REISER4)  PARAM1="partclone.reiser4" ;;
             JFS)      PARAM1="partclone.jfs" ;;
             XFS)      PARAM1="partclone.xfs" ;;
+            F2FS)     PARAM1="partclone.f2fs" ;;
+            NILFS2)   PARAM1="partclone.nilfs2" ;;
             NTFS)     PARAM1="partclone.ntfs" ;;
             EXFAT)    PARAM1="partclone.exfat" ;;
             FAT16|FAT32) PARAM1="partclone.fat" ;;
             HFS|HFSPLUS) PARAM1="partclone.hfsp" ;;
             UFS)      PARAM1="partclone.ufs" ;;
-            *)        PARAM1="partclone.dd" ;;
+            VMFS)     PARAM1="partclone.vmfs" ;;
+            *)        PARAM1="partclone.imager" ;;
         esac
         # Por compatibilidad, si no existe el ejecutable usar por defecto "parclone.dd".
         which $PARAM1 &>/dev/null || PARAM1="partclone.dd"
