@@ -292,10 +292,6 @@ ogPostConfigureFS()
 		fi
 	   fi
 	fi
-
-	#Montamos un directorio temporal para el apt-get
-	mount tmpfs /var/cache/apt/archives -t tmpfs -o size=15M
-	mkdir -p /var/cache/apt/archives/partial
 }
 
 
@@ -365,9 +361,11 @@ ogUpdateInitrd ()
 {
 	cd /tmp
 	mkdir /tmp/cache
-	TYPE=$(blkid | grep CACHE | awk -F"TYPE=" '{print $2}' | tr -d \")
+	TYPE=$(blkid -po export $(blkid -L CACHE) 2>/dev/null | awk -F= '$1=="TYPE" { print $2}')
+	# Salir si no se detecta caché.
+	[ -z "$TYPE" ] && return
 	mount -t $TYPE LABEL=CACHE /tmp/cache || return
-	mkdir /tmp/cache/boot
+	mkdir -p /tmp/cache/boot
 	
 	
 	# comparamos los del server
