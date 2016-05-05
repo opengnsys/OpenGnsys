@@ -467,7 +467,7 @@ rm -f $FILE
 function ogWindowsBootParameters ()
 {
 # Variables locales.
-local PART DISK FILE VERSION WINVER MOUNT
+local PART DISK FILE WINVER MOUNT
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -486,31 +486,16 @@ let DISK=$1-1
 PART=$2	
 FILE=/tmp/temp$$
 
-VERSION=$(ogGetOsVersion $1 $2)
+# Obtener versión de Windows.
+WINVER=$(ogGetOsVersion $1 $2 | awk -F"[: ]" '$2=="Windows" {if ($3=="Server" || $3=="Recovery") print $2,$3,$4; else print $2,$3;}')
+[ -z "$WINVER" ] && return $(ogRaiseError $OG_ERR_NOTOS "Windows"; echo $?)
 
-if echo "$VERSION" | grep "Windows 10"
-then
-	WINVER="Windows 10"
-elif echo "$VERSION" | grep "Windows 8.1"
-then
-	WINVER="Windows 8.1"
-elif echo "$VERSION" | grep "Windows 8"
-then
-	WINVER="Windows 8"
-elif echo "$VERSION" | grep "Windows 7"
-then
-	WINVER="Windows 7"
-elif echo "$VERSION" | grep "Windows Seven"
-then 
-	WINVER="Windows Vista"
-elif echo "$VERSION" | grep "XP"
-then
-	MOUNT=$(ogMount $1 $2)
-	[ -f ${MOUNT}/boot.ini ] || return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
-	cat ${MOUNT}/boot.ini | sed s/partition\([0-9]\)/partition\($PART\)/g | sed s/rdisk\([0-9]\)/rdisk\($DISK\)/g > ${MOUNT}/tmp.boot.ini; mv ${MOUNT}/tmp.boot.ini ${MOUNT}/boot.ini
-	return 0
-else
-	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+# Acciones para Windows XP.
+if [[ "$WINVER" =~ "XP" ]]; then
+    MOUNT=$(ogMount $1 $2)
+    [ -f ${MOUNT}/boot.ini ] || return $(ogRaiseError $OG_ERR_NOTFOUND "boot.ini"; echo $?)
+    cat ${MOUNT}/boot.ini | sed s/partition\([0-9]\)/partition\($PART\)/g | sed s/rdisk\([0-9]\)/rdisk\($DISK\)/g > ${MOUNT}/tmp.boot.ini; mv ${MOUNT}/tmp.boot.ini ${MOUNT}/boot.ini
+    return 0
 fi
 
 ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
