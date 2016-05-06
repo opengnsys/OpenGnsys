@@ -487,7 +487,7 @@ PART=$2
 FILE=/tmp/temp$$
 
 # Obtener versión de Windows.
-WINVER=$(ogGetOsVersion $1 $2 | awk -F"[: ]" '$2=="Windows" {if ($3=="Server" || $3=="Recovery") print $2,$3,$4; else print $2,$3;}')
+WINVER=$(ogGetOsVersion $1 $2 | awk -F"[: ]" '$1=="Windows" {if ($3=="Server") print $2,$3,$4; else print $2,$3;}')
 [ -z "$WINVER" ] && return $(ogRaiseError $OG_ERR_NOTOS "Windows"; echo $?)
 
 # Acciones para Windows XP.

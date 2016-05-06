@@ -178,7 +178,7 @@ if [ -z "$VERSION" ]; then
     [ -z "$FILE" ] && FILE="$(ogGetPath $MNTDIR/EFI/Microsoft/boot/bcd)"
     if [ -n "$FILE" ]; then
         for DISTRIB in "Windows Recovery" "Windows Boot"; do
-            if grep -qs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
+            if grep -aqs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
                 VERSION="$DISTRIB loader"
             fi
         done
