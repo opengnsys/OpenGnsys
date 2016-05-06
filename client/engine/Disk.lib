@@ -781,6 +781,7 @@ fi
 PART="$(ogDiskToDev $1 $2)" || return $?
 partx -gbo SIZE $PART 2>/dev/null | awk '{print int($1/1024)}'
 [ ${PIPESTATUS[0]} -ne 0 ] && ogGetFsSize $1 $2
+return 0
 }
 
 
