@@ -852,7 +852,7 @@ esac
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
 #@date    2014-09-04
-#@version 1.1.0 - Soportar ZFS.
+#@version 1.1.0 - Mejorar rendimiento y soportar ZFS.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2014-11-14
 #*/ ##
@@ -874,7 +874,7 @@ fi
 DISK=$(ogDiskToDev $1) || return $?
 
 # Comprobar tabla de particiones.
-[ -b $DISK ] && TYPE=$(parted -sm $DISK print 2>/dev/null | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}')
+[ -b $DISK ] && TYPE=$(blkid -s PTTYPE -o value $DISK | awk '{ if($1=="dos") print "MSDOS"; else print toupper($1)}')
 # Comprobar si es volumen lógico.
 [ -d $DISK ] && vgs $DISK &>/dev/null && TYPE="LVM"
 # Comprobar si es pool de ZFS.
