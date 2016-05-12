@@ -10,6 +10,7 @@
 # No registrar los errores.
 export DEBUG="no"
 
+ser=$(ogGetSerialNumber)
 cfg=""
 disks=$(ogDiskToDev | wc -w)
 for ((dsk=1; dsk<=$disks; dsk++)); do
@@ -56,7 +57,7 @@ done
 
 # Guardar salida en fichero temporal.
 cfgfile=/tmp/getconfig
-echo $cfg > $cfgfile
+echo "${ser:+$ser;}$cfg" > $cfgfile
 
 # Crear el menú por defecto a partir del fichero generado (no dar ninguna salida).
 generateMenuDefault &>/dev/null
@@ -64,9 +65,12 @@ generateMenuDefault &>/dev/null
 # Componer salida formateada.
 awk '{  n=split($0,sep,";");
 	for (i=1; i<n; i++){
-	    split (sep[i],dua,":");
-	    printf ("disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
-		    dua[1],dua[2],dua[3],dua[4],dua[5],dua[6],dua[7]);
+	    c=split (sep[i],dua,":");
+	    if (i==1 && c==1)
+		printf ("ser=%s\n", dua[1]);
+	    else
+		printf ("disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
+		        dua[1],dua[2],dua[3],dua[4],dua[5],dua[6],dua[7]);
 	    }
      }' $cfgfile
 

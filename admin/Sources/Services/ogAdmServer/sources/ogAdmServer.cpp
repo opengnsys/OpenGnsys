@@ -732,14 +732,35 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
-	char *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros que definen una partición
+	char *ser, *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros de configuración.
 	char modulo[] = "actualizaConfiguracion()";
 
 	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
 		c = splitCadena(ptrCfg, ptrPar[i], '\t');
+
+		// Si la 1ª línea solo incluye el número de serie del equipo; actualizar BD.
+		if (i == 0 && c == 1) {
+			splitCadena(ptrDual, ptrCfg[0], '=');
+			ser = ptrDual[1];
+			if (strlen(ser) > 0) {
+				// Solo actualizar si número de serie no existía.
+				sprintf(sqlstr, "UPDATE ordenadores SET numserie='%s'"
+						" WHERE idordenador=%d AND numserie=''",
+						ser, ido);
+				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
+					db.GetErrorErrStr(msglog);
+					errorInfo(modulo, msglog);
+					return (FALSE);
+				}
+			}
+			continue;
+		}
+
+		// Distribución de particionado.
 		disk = par = cpt = sfi = soi = tam = uso = NULL;
+
 		splitCadena(ptrDual, ptrCfg[0], '=');
 		disk = ptrDual[1]; // Número de disco
 
@@ -750,7 +771,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		if(k==2){
 			cpt = ptrDual[1]; // Código de partición
 		}else{
-			cpt = "0";
+			cpt = (char*)"0";
 		}
 
 		k=splitCadena(ptrDual, ptrCfg[3], '=');
@@ -2568,7 +2589,6 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 	Database db;
 	Table tbl;
 	char *iph, *ido,*cfg;
-	int res;
 
 	char modulo[] = "RESPUESTA_EjecutarScript()";
 
@@ -2592,7 +2612,7 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
 	
 	if(cfg){
-		res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
 		liberaMemoria(cfg);	
 	}
 
@@ -3434,7 +3454,7 @@ BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
-	char *idp,*mar,iph[LONIP],mac[LONMAC];
+	char *idp,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
 	int idx,idcomando;
@@ -3489,24 +3509,19 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				return (FALSE);
 			}
 
-			//mar = copiaParametro("mar",ptrTrama); // Toma modo de arranque si el comando es Arrancar
-
 			// Se manda por broadcast y por unicast
-			if (!Levanta(iph,mac,"1")) {
+			if (!Levanta(iph, mac, (char*)"1")) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
-				liberaMemoria(mar);
 				return (FALSE);
 			}
 
-			if (!Levanta(iph,mac,"2")) {
+			if (!Levanta(iph, mac, (char*)"2")) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
-				liberaMemoria(mar);
 				return (FALSE);
 			}
 
-			liberaMemoria(mar);
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente

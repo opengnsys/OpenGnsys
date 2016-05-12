@@ -253,7 +253,7 @@ if [ "$*" == "help" ]; then
 fi
 
 # Obtener nº de serie (ignorar los no especificados)
-dmidecode -s system-serial-number | egrep -vi "(not specified|filled by o.e.m.)"
+dmidecode -s system-serial-number | egrep -vi "( +|not specified|filled by o.e.m.)"
 }
 
 
