@@ -72,3 +72,6 @@ UPDATE repositorios
 	SET apikey = 'REPOKEY'
 	WHERE idrepositorio = 1 AND apikey = '';
 
+# Número de puestos del aula permite valores hasta 32768 (ticket #747)
+ALTER TABLE  aulas
+     MODIFY puestos smallint  DEFAULT NULL;

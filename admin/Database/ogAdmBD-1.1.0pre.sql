@@ -137,4 +137,6 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), urlimg=VALUES(urlimg), nemonico=VALUES(nemonico);
 
-
+# Número de puestos del aula permite valores hasta 32768 (ticket #747)
+ALTER TABLE  aulas
+     MODIFY puestos smallint  DEFAULT NULL;

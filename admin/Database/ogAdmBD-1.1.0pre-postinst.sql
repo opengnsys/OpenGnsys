@@ -39,3 +39,6 @@ UPDATE menus
 			 END
 			 WHERE KERNELVERSION >= 3.07;
 
+# Número de puestos del aula permite valores hasta 32768 (ticket #747)
+ALTER TABLE  aulas
+     MODIFY puestos smallint  DEFAULT NULL;
