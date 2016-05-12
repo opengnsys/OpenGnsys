@@ -12,6 +12,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #678	Unidades organizativas con directorio de imágenes separado.
 #722	Multicast entre subredes
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
+#731	Soporte para cualquier versión de Windows
 #740	Clonar disco completo en modo "raw"
 #744	Gestionar bloqueos de disco
 
@@ -30,6 +31,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #712	Formulario añadir nuevo ordenador no verifica la existencia previa del equipo
 #720	Fallo en alerta de Unicast al restaurar imagen
 #732	Ampliar el calendario de programación de acciones más allá de 2015
+#747	Uso incorrecto del número de puestos de las propiedades del aula
 
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.

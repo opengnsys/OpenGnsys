@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `grupoid` int(11) DEFAULT NULL,
   `ubicacion` varchar(255) DEFAULT NULL,
   `comentarios` text,
-  `puestos` tinyint(4) DEFAULT NULL,
+  `puestos` smallint DEFAULT NULL,
   `horaresevini` tinyint(4) DEFAULT NULL,
   `horaresevfin` tinyint(4) DEFAULT NULL,
   `modomul` tinyint(4) NOT NULL,
