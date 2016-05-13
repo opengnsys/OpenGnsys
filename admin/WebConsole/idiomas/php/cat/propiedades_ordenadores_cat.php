@@ -25,5 +25,7 @@ $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
 $TbMsg[495]="Data/Caché";
 $TbMsg[4951]="Caché lliure";
+$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 ?>
 

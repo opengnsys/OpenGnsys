@@ -24,6 +24,7 @@ $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
 $idordenador=0; 
 $nombreordenador="";
+$numserie="";
 $ip="";
 $mac="";
 $idperfilhard=0;
@@ -97,7 +98,7 @@ function abrir_ventana(URL){
 				$fotomenu=$fotoordenador;
 				$dirfotos="../images/fotos";
 			?>
-			<td colspan="2" valign="top" align="left" rowspan="3">
+			<td colspan="2" valign="top" align="left" rowspan="4">
 			<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
 			<?php	if ($opcion!=$op_eliminacion) {
 				echo '<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'><br />';
@@ -124,6 +125,20 @@ function abrir_ventana(URL){
 					echo '<td><input class="formulariodatos" name=mac  type=text value="'. $mac.'"></td>';
 			?>
 		</tr>	
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg["PROP_SERIALNO"]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td>'.(isset($numserie)?$numserie:$TbMsg["WARN_NOTDETECTED"]).'</td>';
+				} else {
+					echo '<td><input class="formulariodatos" name="numserie" type="text" value="'.$numserie.'">';
+					if (empty($numserie)) {
+						echo $TbMsg["WARN_NOTDETECTED"];
+					}
+					echo "</td>\n";
+				}
+			?>
+		</tr>
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<th align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</th>
@@ -305,6 +320,7 @@ if ($opcion!=$op_alta) {
 function TomaPropiedades($cmd,$id){
 	global $idordenador; 
 	global $nombreordenador;
+	global $numserie;
 	global $ip;
 	global $mac;
 	global $fotoordenador;
@@ -328,6 +344,7 @@ function TomaPropiedades($cmd,$id){
 	$rs->Primero(); 
 	if (!$rs->EOF){
 		$nombreordenador=$rs->campos["nombreordenador"];
+		$numserie=$rs->campos["numserie"];
 		$ip=$rs->campos["ip"];
 		$mac=$rs->campos["mac"];
 		$idperfilhard=$rs->campos["idperfilhard"];

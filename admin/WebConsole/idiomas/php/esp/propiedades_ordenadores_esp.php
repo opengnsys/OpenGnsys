@@ -30,5 +30,7 @@ $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
+$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 ?>
 
