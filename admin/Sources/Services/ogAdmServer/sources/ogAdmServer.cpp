@@ -747,7 +747,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			if (strlen(ser) > 0) {
 				// Solo actualizar si número de serie no existía.
 				sprintf(sqlstr, "UPDATE ordenadores SET numserie='%s'"
-						" WHERE idordenador=%d AND numserie=''",
+						" WHERE idordenador=%d AND numserie IS NULL",
 						ser, ido);
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog);
