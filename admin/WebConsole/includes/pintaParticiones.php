@@ -183,7 +183,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
                         echo'</tr>'.chr(13);
 		}
 	}
-	if (isset($aviso) {
+	if (isset($aviso)) {
 		echo '<tr><th colspan="'.$columns.'">&nbsp;* '.$aviso.'&nbsp;</th></tr>'."\n";
 	}
 	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
