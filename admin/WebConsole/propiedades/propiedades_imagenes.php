@@ -220,7 +220,7 @@ if ( $opcion == 1 && $datospost == 1)
 		<!-- Fecha de creación -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[20]?>&nbsp;</th>
-			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(rev. $revision)" : "") ?>
+			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(r$revision)" : "") ?>
 			    &nbsp;<input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
 		</tr>
 		<!-------------------------------------------------------------------------------------->

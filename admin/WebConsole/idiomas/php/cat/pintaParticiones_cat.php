@@ -49,7 +49,8 @@ $TbMsg["TITLE_W"]='Opción de rsync: El algoritmo incremental rsync no se usa y 
 $TbMsg["TITLE_E"]='Opción de rsync: Se compara el destino con el origen y se borran los ficheros que no existen en el primero.';
 $TbMsg["TITLE_C"]='Opción de rsync: Comprime los archivos de datos que se envían a la máquina de destino, lo que reduce la cantidad de datos que se transmiten. ';
 $TbMsg["SEND"]='Protocolo';
-
+// AVISOS.
 $TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
+$TbMsg["WARN_DIFFIMAGE"]='Hay una nueva versi&oacute; de la imagen (se muestra la diferencia de revisiones).';
 ?>
 

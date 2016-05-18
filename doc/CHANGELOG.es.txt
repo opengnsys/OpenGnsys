@@ -19,6 +19,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 Tickets resueltos en módulo OpenGnsys Client:
 #244	Internacionalización de los mensajes del Browser (mejora)
 #625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
+#724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10
 #725	Sincronización horaria de clientes con servidor NTP
 #746	Reloj en barra de estado del Browser del cliente
 
@@ -29,8 +30,10 @@ Tickets resueltos en módulo OpenGnsys Server:
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #711	Mostrar porcentaje de uso de cada sistema de archivos
 #712	Formulario añadir nuevo ordenador no verifica la existencia previa del equipo
+#713	Mejorar el inventario de hardware y obtener número de serie
 #720	Fallo en alerta de Unicast al restaurar imagen
 #732	Ampliar el calendario de programación de acciones más allá de 2015
+#737	Incluir número de revisión de creación de imágenes
 #747	Uso incorrecto del número de puestos de las propiedades del aula
 
 Tickets genéricos resueltos:

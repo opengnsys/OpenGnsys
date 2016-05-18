@@ -63,7 +63,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	echo '</tr>';
 
 	// Recorremos todas las configuraciones encontradas para cada disco
-	
+	$aviso="";
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
 		echo'<tr height="16">'.chr(13);
@@ -152,7 +152,12 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							echo '&nbsp;</td>'.chr(13);
 
 						} else {
-							echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].' '.$tbKeys[$k]["imgnueva"].'&nbsp;</td>'.chr(13);
+							if ($tbKeys[$k]["difimagen"] > 0 ) {
+								echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].' (* '.$tbKeys[$k]["difimagen"].')&nbsp;</td>'.chr(13);
+								$aviso=$TbMsg["WARN_DIFFIMAGE"];
+							} else {
+								echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].'&nbsp;</td>'.chr(13);
+							}
 						}
 					
 						echo'</tr>'.chr(13);
@@ -177,6 +182,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 			echo'<td></td>'.chr(13);
                         echo'</tr>'.chr(13);
 		}
+	}
+	if (isset($aviso) {
+		echo '<tr><th colspan="'.$columns.'">&nbsp;* '.$aviso.'&nbsp;</th></tr>'."\n";
 	}
 	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
 }

@@ -49,7 +49,8 @@ $TbMsg["TITLE_W"]='Rsync option:  delta-transfer algorithm is not used and the w
 $TbMsg["TITLE_E"]="Rsync option: delete extraneous files from  the  receiving side  (ones  that  aren't on the sending side).";
 $TbMsg["TITLE_C"]='Rsync option: compresses the file data as it  is  sent to  the  destination  machine,  which reduces the amount of data being transmitted.';
 $TbMsg["SEND"]='Protocol';
-
+// WARNINGS.
 $TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
+$TbMsg["WARN_DIFFIMAGE"]='There is a new image version (showing revision difference).';
 ?>
 
