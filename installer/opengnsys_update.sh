@@ -828,7 +828,7 @@ function updateClient()
 		fi
 		# Actaulizar la imagen ISO del ogclient.
 		echoAndLog "${FUNCNAME}(): Updatting ogclient files"
-		$INSTALL_TARGET/bin/installoglive
+		$INSTALL_TARGET/bin/installoglive $TARGETFILE
 		
 		# Obtiene versión del Kernel del cliente (con 2 decimales).
 		KERNELVERSION=$(file -bkr $OGVMLINUZ 2>/dev/null | \
