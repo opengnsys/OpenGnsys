@@ -227,13 +227,13 @@ $app->get('/ous', 'validateApiKey', function() {
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$response['ous'] = array();
+	$response = array();
 	$rs->Primero();
 	while (!$rs->EOF) {
 		$tmp = array();
 		$tmp['id'] = $rs->campos["idcentro"];
 		$tmp['name'] = $rs->campos["nombrecentro"];
-		array_push($response['ous'], $tmp);
+		array_push($response, $tmp);
 		$rs->Siguiente();
 	}
 	$rs->Cerrar(); 
@@ -287,14 +287,14 @@ EOD;
 	// Comprobar que exista la UO y que el usuario sea su administrador.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idcentro"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
-		$response['ouid'] = $ouid;
-		$response['labs'] = array();
+		$response = array();
 		while (!$rs->EOF) {
 			$tmp = array();
 			$tmp['id'] = $rs->campos["idaula"];
 			$tmp['name'] = $rs->campos["nombreaula"];
 			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-			array_push($response['labs'], $tmp);
+			$tmp['ou']['id'] = $ouid;
+			array_push($response, $tmp);
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -373,12 +373,14 @@ $app->get('/ous/:ouid/labs/:labid/clients', 'validateApiKey',
 	if (checkParameter($rs->campos["idaula"])) {
 		$response['ouid'] = $ouid;
 		$response['labid'] = $labid;
-		$response['clients'] = array();
+		$response = array();
 		while (!$rs->EOF) {
 			$tmp = array();
 			$tmp['id'] = $rs->campos["idordenador"];
 			$tmp['name'] = $rs->campos["nombreordenador"];
-			array_push($response['clients'], $tmp);
+			$tmp['ou']['id'] = $ouid;
+			$tmp['lab']['id'] = $labid;
+			array_push($response, $tmp);
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -411,9 +413,9 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 		$response['ip'] = $rs->campos["ip"];
 		$response['netmask'] = $rs->campos["mascara"];
 		$response['routerip'] = $rs->campos["router"];
-		$response['repoid'] = $rs->campos["idrepositorio"];
-		//$response['hardprofid'] = $rs->campos["idperfilhard"];
-		//$response['menuid'] = $rs->campos["idmenu"];
+		$response['repo']['id'] = $rs->campos["idrepositorio"];
+		//$response['hardprofile']['id'] = $rs->campos["idperfilhard"];
+		//$response['menu']['id'] = $rs->campos["idmenu"];
 		//$response['validation'] = $rs->campos["arranque"]==0 ? false: true;
 		//$response['boottype'] = $rs->campos["arranque"];
 		jsonResponse(200, $response);
@@ -640,13 +642,13 @@ $app->get('/ous/:ouid/repos', 'validateApiKey',
 	$rs->Primero();
 	// Comprobar que exista la UO.
 	if (checkParameter($rs->campos["idcentro"])) {
-		$response['ouid'] = $ouid;
-		$response['repos'] = array();
+		$response = array();
 		while (!$rs->EOF) {
 			$tmp = array();
 			$tmp['id'] = $rs->campos["idrepositorio"];
 			$tmp['name'] = $rs->campos["nombrerepositorio"];
-			array_push($response['repos'], $tmp);
+			$tmp['ou']['id'] = $ouid;
+			array_push($response, $tmp);
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -672,7 +674,7 @@ $app->get('/ous/:ouid/repos/:repoid', 'validateApiKey',
 		$response['id'] = $rs->campos["idrepositorio"];
 		$response['name'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
-		$response['ipaddress'] = $rs->campos["ip"];
+		$response['ip'] = $rs->campos["ip"];
 		//$response['port'] = $rs->campos["puertorepo"];
 		jsonResponse(200, $response);
 	}
@@ -695,14 +697,14 @@ $app->get('/ous/:ouid/images', 'validateApiKey',
 	// Comprobar que exista la UO.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idcentro"])) {
-		$response['ouid'] = $ouid;
-		$response['images'] = array();
+		$response = array();
 		while (!$rs->EOF) {
 			$tmp = array();
 			$tmp['id'] = $rs->campos["idimagen"];
 			$tmp['name'] = $rs->campos["nombreca"];
 			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-			array_push($response['images'], $tmp);
+			$tmp['ou']['id'] = $ouid;
+			array_push($response, $tmp);
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -958,5 +960,5 @@ EOD;
 //   }
 //);
 
-?>
+
 
