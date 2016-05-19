@@ -258,8 +258,8 @@ $app->get('/ous/:ouid', 'validateApiKey',
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	if (checkParameter($rs->campos["nombrecentro"])) {
-		$response['ouid'] = $ouid;
-		$response['ouname'] = $rs->campos["nombrecentro"];
+		$response['id'] = $ouid;
+		$response['name'] = $rs->campos["nombrecentro"];
 		$response['description'] = $rs->campos["comentarios"];
 		jsonResponse(200, $response);
 	}
@@ -291,8 +291,8 @@ EOD;
 		$response['labs'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
-			$tmp['labid'] = $rs->campos["idaula"];
-			$tmp['labname'] = $rs->campos["nombreaula"];
+			$tmp['id'] = $rs->campos["idaula"];
+			$tmp['name'] = $rs->campos["nombreaula"];
 			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
 			array_push($response['labs'], $tmp);
 			$rs->Siguiente();
@@ -326,11 +326,12 @@ EOD;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	if (checkParameter($rs->campos["idaula"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
-		$response['labid'] = $rs->campos["idaula"];
-		$response['labname'] = $rs->campos["nombreaula"];
+		$response['id'] = $rs->campos["idaula"];
+		$response['name'] = $rs->campos["nombreaula"];
+		$response['location'] = $rs->campos["ubicacion"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-		$response['maxclients'] = $rs->campos["puestos"];
+		$response['capacity'] = $rs->campos["puestos"];
 		$response['defclients'] = $rs->campos["defclients"];
 		$response['projector'] = $rs->campos["cagnon"]==0 ? false: true;
 		$response['board'] = $rs->campos["pizarra"]==0 ? false: true;
@@ -375,8 +376,8 @@ $app->get('/ous/:ouid/labs/:labid/clients', 'validateApiKey',
 		$response['clients'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
-			$tmp['clientid'] = $rs->campos["idordenador"];
-			$tmp['clientname'] = $rs->campos["nombreordenador"];
+			$tmp['id'] = $rs->campos["idordenador"];
+			$tmp['name'] = $rs->campos["nombreordenador"];
 			array_push($response['clients'], $tmp);
 			$rs->Siguiente();
 		}
@@ -401,8 +402,9 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 	$rs->Primero();
 //	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"])) {
-		$response['clientid'] = $rs->campos["idordenador"];
-		$response['clientname'] = $rs->campos["nombreordenador"];
+		$response['id'] = $rs->campos["idordenador"];
+		$response['name'] = $rs->campos["nombreordenador"];
+		$response['serialno'] = $rs->campos["numserie"];
 		$response['netiface'] = $rs->campos["netiface"];
 		$response['netdriver'] = $rs->campos["netdriver"];
 		$response['mac'] = $rs->campos["mac"];
@@ -445,8 +447,8 @@ EOD;
 //	if ($ouid != $rs->campos["idcentro"]) ...
 //	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"])) {
-		$response['clientid'] = $rs->campos["idordenador"];
-		$response['clientname'] = $rs->campos["nombreordenador"];
+		$response['id'] = $rs->campos["idordenador"];
+		$response['name'] = $rs->campos["nombreordenador"];
 		$response['hardware'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
@@ -488,8 +490,8 @@ EOD;
 	$rs->Primero();
 //	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["clientid"])) {
-		$response['clientid'] = $rs->campos["clientid"];
-		$response['clientname'] = $rs->campos["nombreordenador"];
+		$response['id'] = $rs->campos["clientid"];
+		$response['name'] = $rs->campos["nombreordenador"];
 		$response['diskcfg'] = array();
 		while (!$rs->EOF) {
 			if ($rs->campos["numdisk"] == 0) {
@@ -518,7 +520,7 @@ EOD;
 					$tmp['imageid'] = $rs->campos["idimagen"];
 					$tmp['deploydate'] = $rs->campos["fechadespliegue"];
 					// Comprobar si la imagen está actualizada.
-					//$tmp['updated'] = indica si la imagen está actualizada
+					$tmp['updated'] = ($rs->campos["difimagen"]>0 ? "false" : "true");
 				}
 				//$tmp['cachedata'] = $rs->campos["cache"];
 			}
@@ -590,7 +592,7 @@ EOD;
 			// Check status type.
 			if (checkParameter($values["tso"])) {
 				// Compose JSON response.
-				$response['clientid'] = $clientid;
+				$response['id'] = $clientid;
 				$response['ip'] = $clientip;
 				$stat = array();
 				preg_match('/\/[A-Z]*;/', $values["tso"], $stat);
@@ -642,8 +644,8 @@ $app->get('/ous/:ouid/repos', 'validateApiKey',
 		$response['repos'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
-			$tmp['repoid'] = $rs->campos["idrepositorio"];
-			$tmp['reponame'] = $rs->campos["nombrerepositorio"];
+			$tmp['id'] = $rs->campos["idrepositorio"];
+			$tmp['name'] = $rs->campos["nombrerepositorio"];
 			array_push($response['repos'], $tmp);
 			$rs->Siguiente();
 		}
@@ -667,8 +669,8 @@ $app->get('/ous/:ouid/repos/:repoid', 'validateApiKey',
 	$rs->Primero();
 	// Comprobar que exista el repositorio.
 	if (checkParameter($rs->campos["idrepositorio"])) {
-		$response['repoid'] = $rs->campos["idrepositorio"];
-		$response['reponame'] = $rs->campos["nombrerepositorio"];
+		$response['id'] = $rs->campos["idrepositorio"];
+		$response['name'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['ipaddress'] = $rs->campos["ip"];
 		//$response['port'] = $rs->campos["puertorepo"];
@@ -697,8 +699,8 @@ $app->get('/ous/:ouid/images', 'validateApiKey',
 		$response['images'] = array();
 		while (!$rs->EOF) {
 			$tmp = array();
-			$tmp['imageid'] = $rs->campos["idimagen"];
-			$tmp['imagename'] = $rs->campos["nombreca"];
+			$tmp['id'] = $rs->campos["idimagen"];
+			$tmp['name'] = $rs->campos["nombreca"];
 			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
 			array_push($response['images'], $tmp);
 			$rs->Siguiente();
@@ -722,8 +724,8 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 	$rs->Primero();
 	// Comprobar que exista el repositorio.
 	if (checkParameter($rs->campos["idimagen"])) {
-		$response['imageid'] = $rs->campos["idimagen"];
-		$response['imagename'] = $rs->campos["nombreca"];
+		$response['id'] = $rs->campos["idimagen"];
+		$response['name'] = $rs->campos["nombreca"];
 		$response['description'] = $rs->campos["descripcion"];
 		$response['comments'] = $rs->campos["comentarios"];
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
@@ -742,7 +744,7 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 			$response['disk'] = $rs->campos["numdisk"];
 			$response['partition'] = $rs->campos["numpar"];
 			$response['creationdate'] = $rs->campos["fechacreacion"];
-			//$response['imagerelease'] = revisión de la aimagen
+			$response['release'] = $rs->campos["revision"];
 		}
 		jsonResponse(200, $response);
 	}
@@ -758,9 +760,10 @@ $app->get('/ous/:ouid/images/:imgid/software', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	$imgid = htmlspecialchars($imgid);
 	$cmd->texto = <<<EOD
-SELECT imagenes.idimagen, imagenes.nombreca, softwares.descripcion
+SELECT imagenes.idimagen, imagenes.nombreca, nombresos.nombreso, softwares.descripcion
   FROM perfilessoft
  RIGHT JOIN imagenes USING(idperfilsoft)
+  LEFT JOIN nombresos USING(idnombreso)
   LEFT JOIN perfilessoft_softwares USING(idperfilsoft)
   LEFT JOIN softwares USING(idsoftware)
  WHERE imagenes.idimagen='$imgid'
@@ -772,8 +775,10 @@ EOD;
 	$rs->Primero();
 	// Comprobar que exista el repositorio.
 	if (checkParameter($rs->campos["idimagen"])) {
-		$response['imageid'] = $rs->campos["idimagen"];
-		$response['imagename'] = $rs->campos["nombreca"];
+		$response['id'] = $rs->campos["idimagen"];
+		$response['name'] = $rs->campos["nombreca"];
+		$response['os'] = $rs->campos["nombreso"];
+		//$response['ostype'] = Tipo de SO (agrupar en array con nombre SO).
 		$response['software'] = array();
 		while (!$rs->EOF) {
 			if ($rs->campos["descripcion"] == null) {
@@ -933,7 +938,7 @@ INSERT INTO acciones
 EOD;
 					$result = $cmd->Ejecutar();
 					if ($result) {
-						$tmp['clientid'] = $clientid[$i];
+						$tmp['id'] = $clientid[$i];
 						$tmp['ip'] = $clientip[$i];
 						$tmp['mac'] = $clientmac[$i];
 						array_push($response['sendto'], $tmp);
@@ -952,15 +957,6 @@ EOD;
 //
 //   }
 //);
-
-// Include repository routes.
-include("repository.php");
-
-// Include OGAgent push routes.
-include("ogagent.php");
-
-// Execute REST using Slim.
-$app->run();
 
 ?>
 
