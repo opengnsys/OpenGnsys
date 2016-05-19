@@ -7,7 +7,7 @@
  * @license GNU GPLv3+
  * @author  Ramón M. Gómez, ETSII Univ. Sevilla
  * @version 1.1
- * @date    2015-04-16
+ * @date    2016-05-19
  */
 
 
@@ -218,7 +218,7 @@ $app->post('/login',
  * @brief    List all defined Organizational Units
  * @note     Route: /ous, Method: GET
  * @param    no
- * @return   JSON array with ouid, ouname for every defined OU
+ * @return   JSON array with id. and name for every defined OU
  */
 $app->get('/ous', 'validateApiKey', function() {
 	global $cmd;
@@ -231,8 +231,8 @@ $app->get('/ous', 'validateApiKey', function() {
 	$rs->Primero();
 	while (!$rs->EOF) {
 		$tmp = array();
-		$tmp['ouid'] = $rs->campos["idcentro"];
-		$tmp['ouname'] = $rs->campos["nombrecentro"];
+		$tmp['id'] = $rs->campos["idcentro"];
+		$tmp['name'] = $rs->campos["nombrecentro"];
 		array_push($response['ous'], $tmp);
 		$rs->Siguiente();
 	}
@@ -245,7 +245,7 @@ $app->get('/ous', 'validateApiKey', function() {
  * @brief    Get Organizational Unit data
  * @note     Route: /ous/id, Method: GET
  * @param    id      OU id.
- * @return   JSON string with ouid, ouname and description
+ * @return   JSON string with OU's parameters
  */
 $app->get('/ous/:ouid', 'validateApiKey',
     function($ouid) {

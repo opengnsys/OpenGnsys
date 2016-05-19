@@ -7,7 +7,7 @@
  * @license GNU GPLv3+
  * @author  Ramón M. Gómez, ETSII Univ. Sevilla
  * @version 1.1
- * @date    2015-04-16
+ * @date    2016-05-19
  */
 
 // Inclussion files.
