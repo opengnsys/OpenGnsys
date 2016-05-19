@@ -22,11 +22,9 @@ $app->post('/ogagent/started',
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent started: ip=$ip, mac=$mac.\n", FILE_APPEND);
 		// Response. 
-		$response["error"] = false;
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
-		$response["error"] = true;
 		$response["message"] = $e->getMessage();
 		jsonResponse(400, $response);
 	}
@@ -46,11 +44,9 @@ $app->post('/ogagent/stopped',
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent stopped: ip=$ip, mac=$mac.\n", FILE_APPEND);
 		// Response. 
-		$response["error"] = false;
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
-		$response["error"] = true;
 		$response["message"] = $e->getMessage();
 		jsonResponse(400, $response);
 	}
@@ -70,11 +66,9 @@ $app->post('/ogagent/loggedin',
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user.\n", FILE_APPEND);
 		// Response. 
-		$response["error"] = false;
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
-		$response["error"] = true;
 		$response["message"] = $e->getMessage();
 		jsonResponse(400, $response);
 	}
@@ -94,11 +88,9 @@ $app->post('/ogagent/loggedout',
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged out: ip=$ip, user=$user.\n", FILE_APPEND);
 		// Response. 
-		$response["error"] = false;
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
-		$response["error"] = true;
 		$response["message"] = $e->getMessage();
 		jsonResponse(400, $response);
 	}

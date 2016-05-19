@@ -41,20 +41,17 @@ function validateRepositoryApiKey() {
 			}
 			if (!$found){
 				// Credentials error.
-		                $response['error'] = true;
                 		$response['message'] = 'Login failed. Incorrect credentials';
 				jsonResponse(401, $response);
 				$app->stop();
 			}
 		} else {
 			// Access error.
-			$response['error'] = true;
 			$response['message'] = "An error occurred, please try again";
 			jsonResponse(500, $response);
 		}
 	} else {
 		// Error: missing API key.
-       		$response['error'] = true;
        		$response['message'] = 'Missing Repository API key';
 		jsonResponse(400, $response);
 		$app = \Slim\Slim::getInstance();
@@ -122,7 +119,6 @@ $app->get('/repository/images', 'validateRepositoryApiKey',
 		    jsonResponse(200, $response);
 		}else{
 			// Print error message.
-			$response['error'] = true;
 			$response['message'] = 'Images directory not found';
 			jsonResponse(404, $response);
 		}
@@ -144,7 +140,6 @@ $app->post('/repository/poweron', 'validateRepositoryApiKey',
 		$data = $app->request()->post();
 		if(empty($data["macs"])){
 			// Print error message.
-			$response['error'] = true;
 			$response['message'] = 'Required param macs not found';
 			jsonResponse(400, $response);
 		}
@@ -163,7 +158,6 @@ $app->post('/repository/poweron', 'validateRepositoryApiKey',
 			}
 			else{
 				// Print error message.
-				$response['error'] = true;
 				$response['message'] = 'Wakeonlan command not found in this repository';
 				jsonResponse(404, $response);
 			}

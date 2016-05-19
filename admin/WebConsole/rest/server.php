@@ -55,7 +55,6 @@ function validateApiKey() {
 				$userid = $rs->campos["idusuario"];
 			} else {
                 		// Credentials error.
-                		$response['error'] = true;
                 		$response['message'] = 'Login failed. Incorrect credentials';
 				jsonResponse(401, $response);
 				$app->stop();
@@ -63,14 +62,12 @@ function validateApiKey() {
 			$rs->Cerrar();
 		} else {
 			// Access error.
-			$response['error'] = true;
 			$response['message'] = "An error occurred, please try again";
 			jsonResponse(500, $response);
 		}
 	} else {
 		// Error: missing API key.
-               	$response['error'] = true;
-               	$response['message'] = 'Missing API key';
+		$response['message'] = 'Missing API key';
 		jsonResponse(400, $response);
 		$app->stop();
 	}
@@ -86,7 +83,6 @@ function checkParameter($param) {
 		return true;
 	} else {
 		// Print error message.
-		$response['error'] = true;
 		$response['message'] = 'Parameter not found';
 		jsonResponse(400, $response);
 		return false;
@@ -105,7 +101,6 @@ function checkAdmin($adminid) {
 		return true;
 	} else {
 		// Print error message.
-		$response['error'] = true;
 		$response['message'] = 'Cannot access this resource';
 		jsonResponse(401, $response);
 		return false;
@@ -174,8 +169,7 @@ $app->post('/login',
 		$user = htmlspecialchars($input->username);
 		$pass = htmlspecialchars($input->password);
 	} catch (Exception $e) {
-		// Message error.
-		$response["error"] = true;
+		// Error message.
 		$response["message"] = $e->getMessage();
 		jsonResponse(400, $response);
 		$app->stop();
@@ -195,13 +189,11 @@ $app->post('/login',
 				// JSON response.
 				$userid=$rs->campos["idusuario"];
 				$apikey=$rs->campos["apikey"];
-				$response["error"] = false;
 				$response['userid'] = $userid;
 				$response['apikey'] = $apikey;
 				jsonResponse(200, $response);
 			} else {
                 		// Credentials error.
-                		$response['error'] = true;
                 		$response['message'] = 'Login failed. Incorrect credentials';
 				jsonResponse(401, $response);
 				$app->stop();
@@ -209,14 +201,12 @@ $app->post('/login',
 			$rs->Cerrar();
 		} else {
 			// Access error.
-			$response['error'] = true;
 			$response['message'] = "An error occurred. Please try again";
 			jsonResponse(500, $response);
 			$app->stop();
 		}
 	} else {
 		# Error: missing some input parameter.
-              	$response['error'] = true;
 		$response['message'] = 'Missing username or password';
 		jsonResponse(400, $response);
 		$app->stop();
@@ -237,7 +227,6 @@ $app->get('/ous', 'validateApiKey', function() {
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$response['error'] = false;
 	$response['ous'] = array();
 	$rs->Primero();
 	while (!$rs->EOF) {
@@ -269,7 +258,6 @@ $app->get('/ous/:ouid', 'validateApiKey',
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	if (checkParameter($rs->campos["nombrecentro"])) {
-		$response['error'] = false;
 		$response['ouid'] = $ouid;
 		$response['ouname'] = $rs->campos["nombrecentro"];
 		$response['description'] = $rs->campos["comentarios"];
@@ -299,7 +287,6 @@ EOD;
 	// Comprobar que exista la UO y que el usuario sea su administrador.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idcentro"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
-		$response['error'] = false;
 		$response['ouid'] = $ouid;
 		$response['labs'] = array();
 		while (!$rs->EOF) {
@@ -339,7 +326,6 @@ EOD;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	if (checkParameter($rs->campos["idaula"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
-		$response['error'] = false;
 		$response['labid'] = $rs->campos["idaula"];
 		$response['labname'] = $rs->campos["nombreaula"];
 		$response['description'] = $rs->campos["comentarios"];
@@ -384,7 +370,6 @@ $app->get('/ous/:ouid/labs/:labid/clients', 'validateApiKey',
 	if (!$rs->Abrir()) return(false);	// Recordset open error.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idaula"])) {
-		$response['error'] = false;
 		$response['ouid'] = $ouid;
 		$response['labid'] = $labid;
 		$response['clients'] = array();
@@ -416,7 +401,6 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 	$rs->Primero();
 //	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"])) {
-		$response['error'] = false;
 		$response['clientid'] = $rs->campos["idordenador"];
 		$response['clientname'] = $rs->campos["nombreordenador"];
 		$response['netiface'] = $rs->campos["netiface"];
@@ -461,7 +445,6 @@ EOD;
 //	if ($ouid != $rs->campos["idcentro"]) ...
 //	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"])) {
-		$response['error'] = false;
 		$response['clientid'] = $rs->campos["idordenador"];
 		$response['clientname'] = $rs->campos["nombreordenador"];
 		$response['hardware'] = array();
@@ -505,7 +488,6 @@ EOD;
 	$rs->Primero();
 //	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["clientid"])) {
-		$response['error'] = false;
 		$response['clientid'] = $rs->campos["clientid"];
 		$response['clientname'] = $rs->campos["nombreordenador"];
 		$response['diskcfg'] = array();
@@ -608,7 +590,6 @@ EOD;
 			// Check status type.
 			if (checkParameter($values["tso"])) {
 				// Compose JSON response.
-				$response['error'] = false;
 				$response['clientid'] = $clientid;
 				$response['ip'] = $clientip;
 				$stat = array();
@@ -633,7 +614,6 @@ EOD;
 			}
 		} else {
 			// Access error.
-			$response['error'] = true;
 			$response['message'] = "Cannot access to OpenGnsys server";
 			jsonResponse(500, $response);
 		}
@@ -658,7 +638,6 @@ $app->get('/ous/:ouid/repos', 'validateApiKey',
 	$rs->Primero();
 	// Comprobar que exista la UO.
 	if (checkParameter($rs->campos["idcentro"])) {
-		$response['error'] = false;
 		$response['ouid'] = $ouid;
 		$response['repos'] = array();
 		while (!$rs->EOF) {
@@ -688,7 +667,6 @@ $app->get('/ous/:ouid/repos/:repoid', 'validateApiKey',
 	$rs->Primero();
 	// Comprobar que exista el repositorio.
 	if (checkParameter($rs->campos["idrepositorio"])) {
-		$response['error'] = false;
 		$response['repoid'] = $rs->campos["idrepositorio"];
 		$response['reponame'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
@@ -715,7 +693,6 @@ $app->get('/ous/:ouid/images', 'validateApiKey',
 	// Comprobar que exista la UO.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idcentro"])) {
-		$response['error'] = false;
 		$response['ouid'] = $ouid;
 		$response['images'] = array();
 		while (!$rs->EOF) {
@@ -745,7 +722,6 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 	$rs->Primero();
 	// Comprobar que exista el repositorio.
 	if (checkParameter($rs->campos["idimagen"])) {
-		$response['error'] = false;
 		$response['imageid'] = $rs->campos["idimagen"];
 		$response['imagename'] = $rs->campos["nombreca"];
 		$response['description'] = $rs->campos["descripcion"];
@@ -796,7 +772,6 @@ EOD;
 	$rs->Primero();
 	// Comprobar que exista el repositorio.
 	if (checkParameter($rs->campos["idimagen"])) {
-		$response['error'] = false;
 		$response['imageid'] = $rs->campos["idimagen"];
 		$response['imagename'] = $rs->campos["nombreca"];
 		$response['software'] = array();
@@ -852,7 +827,6 @@ EOD;
 	$rs->Primero();
 	if (checkParameter($rs->campos["ipserveradm"])) {
 
-		$response['error'] = false;
 		$response['imageid'] = $imageid;
 		$response['sendto'] = array();
 
