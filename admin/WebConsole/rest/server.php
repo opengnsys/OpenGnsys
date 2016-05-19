@@ -10,36 +10,6 @@
  * @date    2015-04-16
  */
 
-// Inclussion files.
-
-// Server access data.
-include_once("../controlacceso.php");
-include_once("../clases/AdoPhp.php");
-include_once("../includes/CreaComando.php");
-// Connection class.
-@include_once("../includes/constantes.php");
-include_once("../includes/comunes.php");
-include_once("../clases/SockHidra.php");
-		
-// Slim framework.
-include_once("Slim/Slim.php");
-\Slim\Slim::registerAutoloader();
-
-// Server access control.
-$cmd = CreaComando($cnx);
-if (!$cmd)
-	die("Access Error");
-
-// Install Slim application (development mode).
-//$app = new \Slim\Slim(array('mode' => 'production', 'debug' => false));
-$app = new \Slim\Slim(array(
-		'mode' => 'development',
-		'debug' => true));
-$app->setName('opengnsys');
-
-// Global variables.
-$userid = NULL;			// User id. with access to REST API.
-
 
 // Auxiliar functions.
 
