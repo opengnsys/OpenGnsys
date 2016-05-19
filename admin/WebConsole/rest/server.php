@@ -220,7 +220,7 @@ $app->post('/login',
  * @param    no
  * @return   JSON array with id. and name for every defined OU
  */
-$app->get('/ous', 'validateApiKey', function() {
+$app->get('/ous', function() {
 	global $cmd;
 
 	$cmd->texto = "SELECT * FROM centros";
