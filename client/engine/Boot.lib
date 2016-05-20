@@ -10,7 +10,7 @@
 
 
 #/**
-#         ogBoot int_ndisk int_nfilesys [str_krnlparams]
+#         ogBoot int_ndisk int_nfilesys [str_kernel str_initrd str_krnlparams]
 #@brief   Inicia el proceso de arranque de un sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
 #@param   int_nfilesys   nº de orden del sistema de archivos
@@ -45,8 +45,8 @@ local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND FILE LOADER f
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys [str_kernelparams" \
-           "$FUNCNAME 1 1" "$FUNCNAME 1 2 \"root=/dev/sda2 ro\""
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys [str_kernel str_initrd str_kernelparams]" \
+           "$FUNCNAME 1 1" "$FUNCNAME 1 2 \"/boot/vmlinuz /boot/initrd.img root=/dev/sda2 ro\""
     return
 fi
 # Error si no se reciben 2 o 3 parámetros.

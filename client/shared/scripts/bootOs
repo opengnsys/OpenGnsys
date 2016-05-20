@@ -4,7 +4,7 @@
 
 PROG="$(basename $0)"
 if [ $# -lt 2 -o $# -gt 3 ]; then
-    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nfilesys [kernelparams]"
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nfilesys [str_kernel str_initrd str_kernelparams]"
     exit $?
 fi
 
