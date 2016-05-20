@@ -611,12 +611,14 @@ echo $TYPE
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/06/03
+#@version 1.1.0 - Usar "hdparm" y "partx" en vez de "sfdisk".
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2016-05-20
 #*/ ##
-
 function ogGetLastSector ()
 {
 # Variables locales
-local DISK PART PTTYPE LASTSECTOR SECTORS CYLS
+local DISK PART LASTSECTOR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npart]" \
@@ -624,38 +626,20 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1  =>  102400062"
     return
 fi
-# Error si no se reciben 1 o 2 parámetros.
-case $# in 
-    1)  DISK=$(ogDiskToDev $1) || return $?
-        ;;
-    2)  DISK=$(ogDiskToDev $1) || return $?
-        PART=$(ogDiskToDev $1 $2) || return $?
-        ;;
-    *)  ogRaiseError $OG_ERR_FORMAT
-        return $? ;;
-esac
 
-# Hay que comprobar si el disco es GPT
-PTTYPE=$(ogGetPartitionTableType $1)
-PTTYPE=${PTTYPE:-"MSDOS"}               # Por defecto para discos vacíos.
-case "$PTTYPE" in 
-    GPT)
-        if [ $# == 1 ]; then
-            LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
-        else
-            LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
-        fi
+# Obtener último sector.
+case $# in 
+    1)  # Para un disco.
+        DISK=$(ogDiskToDev $1) || return $?
+        LASTSECTOR=$(hdparm -N $DISK | awk -F"[=/]" '/=/ {print $2}')
         ;;
-    MSDOS)
-        if [ $# == 1 ]; then
-            SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
-            CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-            LASTSECTOR=$[SECTORS/CYLS*CYLS-1]
-        else
-            LASTSECTOR=$(sfdisk -uS -l $DISK 2>/dev/null | \
-                         awk -v P="$PART" '{if ($1==P) {if ($2=="*") print $4; else print $3} }')
-        fi
+    2)  # Para una partición.
+        PART=$(ogDiskToDev $1 $2) || return $?
+        LASTSECTOR=$(partx -gso END $PART)
         ;;
+    *)  # Error si se reciben más parámetros.
+        ogRaiseError $OG_ERR_FORMAT
+        return $? ;;
 esac
 echo $LASTSECTOR
 }
@@ -718,7 +702,7 @@ LANG=C parted -sm $DISK print 2>/dev/null | awk -F: '$7~/boot/ {print $1}'
 function ogGetPartitionId ()
 {
 # Variables locales.
-local DISK PART ID
+local DISK ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -729,9 +713,8 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Detectar id. de tipo de partición y codificar al mnemónico.
+# Detectar y mostrar el id. de tipo de partición.
 DISK=$(ogDiskToDev $1) || return $?
-PART=$(ogDiskToDev $1 $2) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
             [ "$ID" == "8301" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
