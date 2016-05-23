@@ -623,6 +623,7 @@ CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
 
 CREATE TABLE IF NOT EXISTS `perfilessoft` (
   `idperfilsoft` int(11) NOT NULL AUTO_INCREMENT,
+  `idnombreso` smallint(5) unsigned DEFAULT NULL,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
