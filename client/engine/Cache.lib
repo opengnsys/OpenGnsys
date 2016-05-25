@@ -4,7 +4,7 @@
 #@brief   Librería o clase Cache
 #@class   Cache
 #@brief   Funciones para gestión de la caché local de disco.
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -110,13 +110,16 @@ esac
 #@brief   Elimina la partición de caché local.
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT   formato incorrecto.
-#@note    Requisitos: sfdisk, parted, awk, sed
+#@note    Requisitos: fdisk, sgdisk, partprobe
 #@version 0.91 - Definición de caché local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/03/11
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/13
+#@version 1.1.0 - Sustituir "sfdisk" por "fdisk" para discos MSDOS.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016/05/25
 #*/ ##
 function ogDeleteCache ()
 {
@@ -142,10 +145,9 @@ case "$(ogGetPartitionTableType $1)" in
         ;;
     MSDOS)
         # Si la tabla de particiones no es valida, volver a generarla.
-        [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
-        # Eliminar (poner a 0) la partición de caché.
-        sfdisk -f $DISK -N$NPART <<<"0,0,0" 2>/dev/null && partprobe
-        ;;
+        parted -s $DISK print &>/dev/null || fdisk $DISK <<< "w"
+        # Eliminar la partición de caché.
+        echo -e "d\n$NPART\nw" | fdisk $DISK 2>/dev/null && partprobe
 esac
 # Borrar etiqueta de la caché.
 rm -f /dev/disk/by-label/CACHE
