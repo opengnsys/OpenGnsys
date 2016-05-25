@@ -11,8 +11,9 @@
 
 #/**
 #         ogCreateCache [int_ndisk] int_partsize
-#@brief   Define la caché local en la partición 4 del disco 1
+#@brief   Define la caché local, por defecto en partición 4 del disco 1.
 #@param   int_ndisk  numero de disco donde crear la cache, si no se indica es el 1 por defecto
+#@param   int_npart      número de partición (opcional, 4 por defecto)
 #@param   int_partsize   tamaño de la partición (en KB)
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT   formato incorrecto.
@@ -31,6 +32,9 @@
 #@version 1.0.5 - Posibilidad de crear la cache en cualquier disco duro
 #@author  Universidad de Huelva
 #@date    2012/09/18
+#@version 1.1.0 - Posibilidad de crear la caché en cualquier partición.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016/05/25
 #*/ ##
 function ogCreateCache ()
 {
@@ -38,7 +42,8 @@ function ogCreateCache ()
 local FINDCACHE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_partsize" "$FUNCNAME 1 10000000"
+    ogHelp "$FUNCNAME" "$FUNCNAME [int_ndisk [int_npart]] int_partsize" \
+           "$FUNCNAME 10000000" "$FUNCNAME 1 10000000" "$FUNCNAME 1 4 10000000"
     return
 fi
 # Si se recibe un parametro, sera el tamano de la cache
@@ -46,21 +51,28 @@ case $# in
     1)  # Error, si no es un entero positivo
         [[ $1 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
         NDSK=1
+        PART=4
         SIZECACHE=$1
         ;;
     2)  # Error, si no son enteros positivos
         [[ $1 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
         [[ $2 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$2" || return $?
         NDSK=$1
+        PART=4
         SIZECACHE=$2
+        ;;
+    3)  # Error, si no son enteros positivos
+        [[ $1 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$1" || return $?
+        [[ $2 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$2" || return $?
+        [[ $3 =~ ^[1-9][0-9]*$ ]] || ogRaiseError $OG_ERR_FORMAT "$3" || return $?
+        NDSK=$1
+        PART=$2
+        SIZECACHE=$3
         ;;
     *)  ogRaiseError $OG_ERR_FORMAT
         return $?
         ;;
 esac
-
-# De momento la cache sigue siendo siempre la cuarta particion
-PART=4
 
 DISK=$(ogDiskToDev $NDSK) || return $?
 END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
@@ -87,7 +99,7 @@ fi
 case "$(ogGetPartitionTableType $NDSK)" in
     GPT)
         # Si la tabla de particiones no es valida, volver a generarla.
-        [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
+        [ ! $(sgdisk -p $DISK &>/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
         # Si existe la cache se borra previamente
         [ -n "$(ogFindCache)" ] && ogDeleteCache
         # Capturamos el codigo de particion GPT para cache
@@ -96,7 +108,7 @@ case "$(ogGetPartitionTableType $NDSK)" in
         ;;
     MSDOS)
         # Si la tabla de particiones no es valida, volver a generarla.
-        [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
+        parted -s $DISK print &>/dev/null || fdisk $DISK <<< "w"
         # Definir particiones y notificar al kernel.
         ID=$(ogTypeToId CACHE MSDOS)
         sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,$ID" 2>/dev/null && partprobe
@@ -148,6 +160,7 @@ case "$(ogGetPartitionTableType $1)" in
         parted -s $DISK print &>/dev/null || fdisk $DISK <<< "w"
         # Eliminar la partición de caché.
         echo -e "d\n$NPART\nw" | fdisk $DISK 2>/dev/null && partprobe
+        ;;
 esac
 # Borrar etiqueta de la caché.
 rm -f /dev/disk/by-label/CACHE
