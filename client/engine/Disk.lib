@@ -439,14 +439,14 @@ return $OG_ERR_NOTFOUND
 #@version 1.0.6 - Soportar RAID hardware y Multipath.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2014-09-23
-#@version 1.1.0 - Soportar pool de volúmenes ZFS.
+#@version 1.1.0 - Usar caché de datos y soportar pool de volúmenes ZFS.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
-#@date    2014-11-14
+#@date    2016-05-27
 #*/ ##
 function ogDiskToDev ()
 {
 # Variables locales
-local ALLDISKS MPATH VOLGROUPS ZFSVOLS DISK PART ZPOOL i
+local CACHEFILE ALLDISKS MPATH VOLGROUPS ZFSVOLS DISK PART ZPOOL i
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -457,6 +457,22 @@ if [ "$*" == "help" ]; then
     return
 fi
 
+# Borrar fichero de caché de configuración si hay cambios en las particiones.
+CACHEFILE=/var/cache/disks.cfg
+if ! diff -q <(cat /proc/partitions) /tmp/.partitions 2>/dev/null; then 
+    # Guardar copia de las particiones definidas para comprobar cambios.
+    cp -a /proc/partitions /tmp/.partitions
+    rm -f $CACHEFILE
+fi
+
+# Si existe una correspondencia con disco/dispositivo en el caché; mostrarlo y salir.
+PART=$(awk -F: -v d="$*" '{if ($1==d) {print $2}}' $CONFFILE 2>/dev/null)
+if [ -n "$PART" ]; then
+    echo "$PART"
+    return
+fi
+
+# Continuar para detectar nuevos dispositivos.
 # Listar dispositivos de discos duros.
 ALLDISKS=$(lsblk -n | awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
 
@@ -488,6 +504,8 @@ case $# in
         DISK=$(echo "$ALLDISKS" | awk -v n=$1 '{print $n}')
         # Error si el fichero no existe.
         [ -e "$DISK" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
+        # Actualizar caché de configuración y mostrar dispositivo.
+        echo "$*:$DISK" >> $CACHEFILE
         echo "$DISK"
         ;;
     2)  # Error si los 2 parámetros no son números positivos.
@@ -497,11 +515,15 @@ case $# in
         PART="$DISK$2"
         # Comprobar si es partición.
         if [ -b "$PART" ]; then
+            # Actualizar caché de configuración y mostrar dispositivo.
+            echo "$*:$PART" >> $CACHEFILE
             echo "$PART"
         else
             # Comprobar si RAID o Multipath (tener en cuenta enlace simbólico).
             PART="${DISK}p$2"
             if [ "$(stat -L -c "%A" "$PART" 2>/dev/null | cut -c1)" == "b" ]; then
+                # Actualizar caché de configuración y mostrar dispositivo.
+                echo "$*:$PART" >> $CACHEFILE
                 echo "$PART"
             else
                 PART=""
@@ -522,6 +544,8 @@ case $# in
                 # Salir si no se encuentra dispositivo.
                 [ -n "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
                 # Devolver camino al dispositivo.
+                # Actualizar caché de configuración y mostrar dispositivo.
+                echo "$*:$PART" >> $CACHEFILE
                 echo "$PART"
             fi
         fi
