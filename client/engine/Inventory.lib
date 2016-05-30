@@ -279,7 +279,7 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Recopilación de disposibivos procesando la salida de \c lshw
+# Recopilación de dispositivos procesando la salida de \c lshw
 ogEcho info "$MSG_HARDWAREINVENTORY}"
 echo "cha=$(dmidecode -s chassis-type)" | grep -v "Other"
 [ -e /sys/firmware/efi ] && echo "boo=UEFI" || echo "boo=BIOS"
@@ -298,11 +298,15 @@ lshw | awk 'BEGIN {type="mod";}
                        if (prod=="v."vers)
                          vers="";
                        print type"="vend,prod,size,vers;} }
+                   if (type=="totalmem") {
+                        totalmemory="mem="size;
+                   }
                    type=prod=vend=vers=size=clock=slot="";}
        $1~/-core/    {type="boa";}
        $1~/-firmware/ {type="bio";}
        $1~/-cpu/     {type="cpu";}
        $1~/-bank/    {type="mem";}
+       $1~/-memory/  {type="totalmem";}
        $1~/-ide/     {type="ide";}
        $1~/-storage/ {type="sto";}
        $1~/-disk/    {type="dis";}
@@ -314,7 +318,9 @@ lshw | awk 'BEGIN {type="mod";}
        $1~/-firewire/ {type="fir";}
        $1~/-serial/  {type="bus";}
        END           {if (type!="" && prod!="")
-                        print type"="vend,prod,size,vers;}
+                        print type"="vend,prod,size,vers;
+                      if ( length(numbank) == 0 && length(totalmemory) >=4 )
+                        print totalmemory; }
       '
 # */ (comentario para Doxygen)
 }

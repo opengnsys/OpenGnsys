@@ -872,8 +872,8 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 (15, 'Controladores USB', '../images/iconos/usb.gif', 'usb'),
 (16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus'),
 (17, 'Chasis del Sistema', '', 'cha'),
-(18, 'Controladores de almacenamiento', '', 'sto'),
-(19, 'Tipo de proceso de arranque', '', 'boo');
+(18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
+(19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 
 -- --------------------------------------------------------
 
