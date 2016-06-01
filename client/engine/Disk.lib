@@ -459,14 +459,14 @@ fi
 
 # Borrar fichero de caché de configuración si hay cambios en las particiones.
 CACHEFILE=/var/cache/disks.cfg
-if ! diff -q <(cat /proc/partitions) /tmp/.partitions 2>/dev/null; then 
+if ! diff -q <(cat /proc/partitions) /tmp/.partitions &>/dev/null; then 
     # Guardar copia de las particiones definidas para comprobar cambios.
     cp -a /proc/partitions /tmp/.partitions
     rm -f $CACHEFILE
 fi
 
 # Si existe una correspondencia con disco/dispositivo en el caché; mostrarlo y salir.
-PART=$(awk -F: -v d="$*" '{if ($1==d) {print $2}}' $CONFFILE 2>/dev/null)
+PART=$(awk -F: -v d="$*" '{if ($1==d) {print $2}}' $CACHEFILE 2>/dev/null)
 if [ -n "$PART" ]; then
     echo "$PART"
     return
