@@ -852,7 +852,7 @@ esac
 #@return  str_tabletype - Tipo de tabla de paritiones
 #@warning Salidas de errores no determinada
 #@note    tabletype = { MSDOS, GPT }
-#@note    Requisitos: parted
+#@note    Requisitos: blkid, parted, vgs
 #@version 1.0.4 - Primera versión para OpenGnSys
 #@author  Universidad de Huelva
 #@date    2012/03/01
@@ -881,7 +881,10 @@ fi
 DISK=$(ogDiskToDev $1) || return $?
 
 # Comprobar tabla de particiones.
-[ -b $DISK ] && TYPE=$(blkid -s PTTYPE -o value $DISK | awk '{ if($1=="dos") print "MSDOS"; else print toupper($1)}')
+if [ -b $DISK ]; then
+    TYPE=$(parted -sm $DISK print 2>/dev/null | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}')
+    [ -z "$TYPE" ] && TYPE=$(parted -sm $DISK print 2>/dev/null | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}') 
+fi
 # Comprobar si es volumen lógico.
 [ -d $DISK ] && vgs $DISK &>/dev/null && TYPE="LVM"
 # Comprobar si es pool de ZFS.
