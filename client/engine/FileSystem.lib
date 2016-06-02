@@ -60,7 +60,7 @@ case "$TYPE" in
     REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
     REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
     JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
-    XFS)          PROG="fsck.xfs" ;;
+    XFS)          PROG="xfs_repair" ;;
     F2FS)         PROG="fsck.f2fs" ;;
     NTFS)         PROG="ntfsfix" ;;
     EXFAT)        PROG="fsck.exfat" ;;
@@ -148,7 +148,9 @@ case "$TYPE" in
                 ;;
     REISERFS|REISER4)
                 PROG="resize_reiserfs"; PARAMS="-f" ;;
+    F2FS)       ;;            # No se reduce (por el momento).
     JFS)        ;;            # No se reduce (por el momento).
+    NILFS2)     ;;            # No se reduce (probar "nilfs-resize").
     XFS)        ;;            # No se reduce (por el momento).
     NTFS)       PROG="ntfsresize"; PARAMS="<<<\"y\" -f" ;;
     EXFAT)      ;;            # No se reduce (por el momento).
@@ -271,7 +273,7 @@ case "$TYPE" in
     EXT4)         PROG="mkfs.ext4"; PARAMS="-F" ;;
     BTRFS)        PROG="mkfs.btrfs"; PARAMS="-f" ;;
     REISERFS)     PROG="mkfs.reiserfs"; PARAMS="-f"; LABELPARAM="-l" ;;
-    REISER4)      PROG="mkfs.reiser4"; PARAMS="-fy" ;;
+    REISER4)      PROG="mkfs.reiser4"; PARAMS="-f <<<\"y\"" ;;
     XFS)          PROG="mkfs.xfs"; PARAMS="-f" ;;
     JFS)          PROG="mkfs.jfs"; PARAMS="<<<\"y\"" ;;
     F2FS)         PROG="mkfs.f2fs"; LABELPARAM="-l" ;;
@@ -864,9 +866,9 @@ case "$(ogGetFsType $1 $2)" in
 
     BTRFS)
         MNTDIR=$(ogMount $1 $2)
-        # Calcular tamaño ocupado + 10%.
-        SIZE=$[ $(df -k $MNTDIR | awk '{getline;print $3}') * 110 / 100 ]
-        btrfs filesystem resize ${SIZE}k $MNTDIR
+        # Calcular tamaño ocupado + 10%, redondeado + 1 (incluyendo letra de unidad).
+        SIZE=$(btrfs filesystem show $MNTDIR | awk -v P=$PART '{ if ($8==P) printf ("%d%s", $6*1.1+1, substr($6,match($6,/[A-Z]/),1)) }')
+        btrfs filesystem resize ${SIZE} $MNTDIR 2>/dev/null
         ;;
     REISERFS|REISER4)
         # Calcular tamaño ocupado + 10%.
@@ -876,7 +878,9 @@ case "$(ogGetFsType $1 $2)" in
         resize_reiserfs -s${SIZE}K $PART <<<"y"
         ;;
 
+    F2FS)   ;;          # No se reduce (por el momento).
     JFS)    ;;          # No se reduce (por el momento).
+    NILFS2) ;;          # No se reduce (probar "nilfs-resize").
     XFS)    ;;          # No se reduce (por el momento).
 
     NTFS)
