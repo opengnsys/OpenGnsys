@@ -22,9 +22,6 @@ else
     echo "[5] No se ha introducido un retardo, $TIME segundos para reiniciar"
 fi
 
-# No registrar errores.
-export DEBUG="no"
-
 # Desmontar los sistemas de archivos y la caché local.
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
@@ -33,9 +30,6 @@ for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
 done
 echo "[50] Desmontar cache local."
 ogUnmountCache &>/dev/null
-
-# Volver a registrar errores.
-unset DEBUG
 
 echo "[90] Reiniciar el equipo."
 # Estado correcto de Wake-On-Lan antes de reiniciar.

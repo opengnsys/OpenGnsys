@@ -243,8 +243,10 @@ esac
 FUNCS="${FUNCNAME[@]:1}"
 FUNCS="${FUNCS/main/$(basename $0 2>/dev/null)}"
 
-# Mostrar mensaje de error y salir con el código indicado.
-ogEcho $LOGS error "${FUNCS// /<-}: $MSG" >&2
+# Mostrar mensaje de error si es función depurable y salir con el código indicado.
+if [ $CODE == $OG_ERR_FORMAT ] || ogCheckStringInGroup "$FUNCS" "$NODEBUGFUNCTIONS" || ! ogCheckStringInGroup "${FUNCS%% *}" "$NODEBUGFUNCTIONS"; then
+    ogEcho $LOGS error "${FUNCS// /<-}: $MSG" >&2
+fi
 return $CODE
 }
 
