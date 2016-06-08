@@ -42,15 +42,15 @@ s.short = 'OpenGnsys Server'
 s.name = 'ogAdmServer'
 s.ports = [('2008', 'tcp')]
 ios.service_writer(s, '/etc/firewalld/services')
-//s.short = 'OpenGnsys Repository'
-//s.name = 'ogAdmRepo'
-//s.ports = [('2002', 'tcp')]
-//ios.service_writer(s, '/etc/firewalld/services')"
+s.short = 'OpenGnsys Repository'
+s.name = 'ogAdmRepo'
+s.ports = [('2002', 'tcp')]
+ios.service_writer(s, '/etc/firewalld/services')"
 	# Adding active services.
 	firewall-cmd --permanent --add-service=dhcp
 	firewall-cmd --permanent --add-service=https
 	firewall-cmd --permanent --add-service=mysql --zone internal
-	#firewall-cmd --permanent --add-service=ogAdmRepo
+	firewall-cmd --permanent --add-service=ogAdmRepo
 	firewall-cmd --permanent --add-service=ogAdmServer
 	# Ubuntu 14.04 does not define "rsyncd" service.
 	firewall-cmd --permanent --add-service=rsyncd || \
