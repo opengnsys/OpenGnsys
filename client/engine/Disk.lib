@@ -655,7 +655,7 @@ fi
 case $# in 
     1)  # Para un disco.
         DISK=$(ogDiskToDev $1) || return $?
-        LASTSECTOR=$(hdparm -N $DISK | awk -F"[=/]" '/=/ {print $2}')
+        LASTSECTOR=$[$(hdparm -N $DISK | awk -F"[=/]" '/=/ {print $2}') - 1]
         ;;
     2)  # Para una partición.
         PART=$(ogDiskToDev $1 $2) || return $?
