@@ -15,6 +15,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #731	Soporte para cualquier versión de Windows
 #740	Clonar disco completo en modo "raw"
 #744	Gestionar bloqueos de disco
+#748	Mejorar rendimiento usando fichero de configuración de discos (mejora)
 
 Tickets resueltos en módulo OpenGnsys Client:
 #244	Internacionalización de los mensajes del Browser (mejora)
@@ -26,6 +27,9 @@ Tickets resueltos en módulo OpenGnsys Client:
 Tickets resueltos en módulo OpenGnsys Server:
 #723	Cambio temporal de fichero de arranque PXE
 #729	Instalar en cliente la misma versión de Rsync que la del servidor
+
+Tickets resueltos en módulo OpenGnsys Repository Server:
+#379	Usar identificador de operación para el ogAdmRepoAux
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #711	Mostrar porcentaje de uso de cada sistema de archivos
