@@ -52,7 +52,6 @@ if [ -n "${SIZE//[-0-9]/}" ] || [ $SIZE -lt -1 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $EXECFORMAT"
     exit $?
 fi
-	exit
 # Si tamaño=0, no hacer nada.
 if [ $SIZE -eq 0 ]; then
     echo "No modificar la caché local."
@@ -65,7 +64,7 @@ if [ $SIZE -eq -1 ]; then
     ogDeleteCache
 else
     # Si la caché actual está definida en otro disco y partición, se elimina.
-    if [ "$NDISK $NPART" = "$(ogFindCache)" ]; then
+    if [ "$NDISK $NPART" != "$(ogFindCache)" ]; then
 	echo "[10] Detectada otra caché, eliminarla"
 	ogUnmountCache 2>/dev/null
 	ogDeleteCache

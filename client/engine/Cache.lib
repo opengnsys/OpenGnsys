@@ -149,7 +149,7 @@ DISK=$(ogDiskToDev $NDISK)
 
 # Desmontar todos los sistemas de archivos del disco.
 ogUnmountAll $NDISK 2>/dev/null
-case "$(ogGetPartitionTableType $1)" in
+case "$(ogGetPartitionTableType $NDISK)" in
     GPT)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
