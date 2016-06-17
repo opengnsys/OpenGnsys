@@ -116,6 +116,7 @@ function codeParticionado(form){
 function codeParticionadoMSDOS (form) {
 	var partCode="";
 	var logicalCode="";
+	var sizecacheCode="";
 	var cacheCode;
 	var cacheSize;
 	var extended=false;
@@ -161,14 +162,15 @@ function codeParticionadoMSDOS (form) {
 	if(form.part4.value == "CACHE"){
 		if (form.check4.checked) {
 			if (form.size4.value == "0") {
-				cacheCode="\
+				sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n \
+sizecache=`ogGetCacheSize` \n ";
+				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "+n_disk+" $sizecache  &>/dev/null \n ";		
+initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";		
 			} else {
 				if (form.size4.value == "CUSTOM") { 
 					cacheSize = form.size4custom.value; 
@@ -180,7 +182,7 @@ ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache " + n_disk + " " + cacheSize + " &>/dev/null";	
+initCache " + n_disk + " " + cacheSize + " NOMOUNT &>/dev/null";	
 			} 
 		} else {
 			cacheCode="\
@@ -224,6 +226,7 @@ partCode += " EMPTY:0";
 	}
 
 	form.codigo.value="\
+" + sizecacheCode + " \n \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions \"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
@@ -246,6 +249,7 @@ ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
 function codeParticionadoGPT (form) {
         var partCode="";
         var logicalCode="";
+	var sizecacheCode="";
         var cacheCode="";
         var cacheSize;
         var extended=false;
@@ -260,14 +264,15 @@ function codeParticionadoGPT (form) {
 			// Solo tratamos la particion 4 como cache, si se selecciono este tipo
 			if(nPart == 4 && form.partGPT4.value == "CACHE") {
 				if (form.sizeGPT4.value == "0") {
-					cacheCode="\
+                                        sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n \
+sizecache=`ogGetCacheSize` \n ";
+					cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+"  \n \
 ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "+ n_disk +" $sizecache &>/dev/null \n ";
+initCache "+ n_disk +" $sizecache NOMOUNT &>/dev/null \n ";
 				} else {
 					if (form.sizeGPT4.value == "CUSTOM") {
 						cacheSize = form.sizeGPT4custom.value;
@@ -279,7 +284,7 @@ ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "  + n_disk +" "+ cacheSize + " &>/dev/null";
+initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null";
 				}
 			} else{
 				var partType=eval("form.partGPT"+nPart);
@@ -310,6 +315,7 @@ partCode += " EMPTY:0";
                 }
         }
 	form.codigo.value="\
+" + sizecacheCode + " \n \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
