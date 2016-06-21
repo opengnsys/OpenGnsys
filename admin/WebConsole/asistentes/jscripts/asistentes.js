@@ -9,6 +9,9 @@
 // version 1.1: cliente con varios repositorios - Imagenes de todos los repositorios de la UO.
 // autor: Irina Gomez, Universidad de Sevilla
 // fecha 2015-06-17
+// version 1.1: showPartitionForm: Se incluye aviso para particiones GTP.
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-06-21
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
@@ -340,8 +343,19 @@ function showPartitionForm (tipo_table_part) {
 	if(tipo_table_part == "MSDOS"){
 		// De los dos tipos, se oculta el otro
 		document.getElementById("formGPT").style.display="none";
+		document.getElementById("warngpt").style.display="none";
 	} else{
 		document.getElementById("formMSDOS").style.display="none";
+		// Para GPT obliga que primera partición sea EFI
+		document.getElementById("checkGPT1").checked=true;
+		document.getElementById("checkGPT1").disabled=true;
+		document.getElementById("partGPT1").value="CUSTOM";
+		document.getElementById("partGPT1custom").value="EFI";
+		document.getElementById("sizeGPT1").value="CUSTOM";
+		document.getElementById("sizeGPT1").disabled=false;
+		document.getElementById("sizeGPT1custom").value="512000";
+		document.getElementById("sizeGPT1custom").disabled=false;
+		document.getElementById("warngpt").style.display="table-row";
 	}
 }
 

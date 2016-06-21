@@ -13,7 +13,7 @@ for ($p=1; $p<4; $p++) {
     echo '
 <tr id="trPartition'.$p.'">
 <td>
-<input type="checkbox" name="checkGPT'.$p.'" value="checkGPT'.$p.'" onclick="clickPartitionCheckbox(this.form, '.$p.',true);" /> '.$TbMsg[20].' '.$p.'</td>
+<input type="checkbox" id="checkGPT'.$p.'" name="checkGPT'.$p.'" value="checkGPT'.$p.'" onclick="clickPartitionCheckbox(this.form, '.$p.',true);" /> '.$TbMsg[20].' '.$p.'</td>
 <td>
 <select name="partGPT'.$p.'" id="partGPT'.$p.'" style="width:220" disabled="true" onclick="
 	//if (this.form.part'.$p.'.options[this.form.part'.$p.'.selectedIndex].value == \'CUSTOM\') {
@@ -37,7 +37,7 @@ for ($p=1; $p<4; $p++) {
 <option value="CUSTOM"> '.$TbMsg[39].'</option>
 </select>
 <br />
-<input type="text" style="width:100" name="sizeGPT'.$p.'custom" value="0" disabled="true" onchange="calculateFreeDisk(this.form);" />
+<input type="text" style="width:100" id="sizeGPT'.$p.'custom" name="sizeGPT'.$p.'custom" value="0" disabled="true" onchange="calculateFreeDisk(this.form);" />
 </td>
 </tr>
     ';
