@@ -142,7 +142,7 @@ ogCreatePartitionTable $ND
 # Definir particiones y notificar al kernel.
 sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe $DISK
 rm -f $tmpsfdisk
-[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
+[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null || return 0
 }
 
 
