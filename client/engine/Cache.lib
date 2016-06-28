@@ -39,7 +39,7 @@
 function ogCreateCache ()
 {
 # Variables locales.
-local FINDCACHE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID
+local FINDCACHE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID TMPFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [int_ndisk [int_npart]] int_partsize" \
@@ -74,6 +74,7 @@ case $# in
         ;;
 esac
 
+TMPFILE=/tmp/sfdisk$$
 DISK=$(ogDiskToDev $NDSK) || return $?
 END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
 SIZE=$[$SIZECACHE*2]                            # Tamaño en sectores de 512 B.
@@ -111,7 +112,13 @@ case "$(ogGetPartitionTableType $NDSK)" in
         parted -s $DISK print &>/dev/null || fdisk $DISK <<< "w"
         # Definir particiones y notificar al kernel.
         ID=$(ogTypeToId CACHE MSDOS)
-        sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,$ID" 2>/dev/null && partprobe
+        # Salvamos la configuración de las particiones e incluimos la cache.
+        trap "rm -f $TMPFILE" 1 2 3 9 15
+        sfdisk --dump $DISK | grep -v $DISK$PART > $TMPFILE
+        echo  "$DISK$PART : start= $START, size= $SIZE, type=$ID" >> $TMPFILE
+        # Guardamos nueva configuración en el disco.
+        sfdisk --no-reread  $DISK < $TMPFILE && partprobe
+        rm -f $TMPFILE
         ;;
 esac
 }

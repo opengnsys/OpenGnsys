@@ -64,7 +64,7 @@ if [ $SIZE -eq -1 ]; then
     ogDeleteCache
 else
     # Si la caché actual está definida en otro disco y partición, se elimina.
-    if [ "$NDISK $NPART" != "$(ogFindCache)" ]; then
+    if [ -n "$(ogFindCache)" -a "$NDISK $NPART" != "$(ogFindCache)" ]; then
 	echo "[10] Detectada otra caché, eliminarla"
 	ogUnmountCache 2>/dev/null
 	ogDeleteCache
