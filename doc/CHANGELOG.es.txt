@@ -30,15 +30,18 @@ Tickets resueltos en módulo OpenGnsys Server:
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux
+#701	torrent-creator falla si el fichero de imagen a procesar no es válido
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #711	Mostrar porcentaje de uso de cada sistema de archivos
 #712	Formulario añadir nuevo ordenador no verifica la existencia previa del equipo
 #713	Mejorar el inventario de hardware y obtener número de serie
+#714	Comando Particionar y Formatear no se ejecuta en ámbito superior a un ordenador
 #720	Fallo en alerta de Unicast al restaurar imagen
 #732	Ampliar el calendario de programación de acciones más allá de 2015
 #737	Incluir número de revisión de creación de imágenes
 #747	Uso incorrecto del número de puestos de las propiedades del aula
+#751	Asistente de particionado: particiones GPT
 
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.
