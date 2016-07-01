@@ -20,17 +20,21 @@ localectl set-x11-keymap ${LANG%_*}
 # Update repositories.
 dnf install -y http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 # Install main dependencies.
-dnf install -y debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono
+dnf install -y kernel-devel-$(uname -r) debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract
 # Install desktop (XFCE) and GUI utils.
-dnf install -y @xfce-desktop-environment firefox eclipse-pydev eclipse-nls-${LANG%_*} VirtualBox-guest kmod-VirtualBox akmod-VirtualBox akmods
+dnf install -y @xfce-desktop-environment firefox VirtualBox-guest kmod-VirtualBox akmod-VirtualBox akmods
 ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target 
 sed -i '$d' /usr/lib/udev/rules.d/60-vboxguest.rules
 akmods && systemctl restart systemd-modules-load.service
+# Install Eclipse IDE for Python (it needs some disk space).
+dnf install -y eclipse-pydev eclipse-nls-${LANG%_*}
+# Comment out next line if you prefer to install ATOM editor.
+#wget -q https://atom.io/download/rpm -O /tmp/atom.rpm && dnf install -y /tmp/atom.rpm && rm -f /tmp/atom.rpm
 # Download OGAgent environment installer.
 svn export http://opengnsys.es/svn/branches/version1.1/installer/ogagent-devel-installer.sh /home/vagrant
 # Instructions.
 echo "Manual operations:"
-echo "- Launch desktop: startxfce4 &"
+echo "- Reboot VM or launch desktop: startxfce4 &"
 echo "- Enlarge VM window."
 echo "- To prepare OGAgent environment, execute: ./ogagent-devel-installer.sh"
 echo "- Before modify OGAgent code, configure Eclipse:"
@@ -53,8 +57,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # VM base and host name.
     ag.vm.box = "fedora/23-cloud-base"
     ag.vm.hostname = "ogAgent"
-    # Disable synced folder.
-    ag.vm.synced_folder ".", "/vagrant", disabled: true
+    # Comment out if you want to disable synced folder.
+    #ag.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
     ag.vm.provision "shell", inline: SCRIPT
   end
