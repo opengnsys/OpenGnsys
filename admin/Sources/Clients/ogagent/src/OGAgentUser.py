@@ -39,6 +39,7 @@ import time
 import signal
 import json
 import six
+import atexit
 
 from opengnsys import ipc
 from opengnsys import utils
@@ -54,11 +55,15 @@ from opengnsys.loader import loadModules
 
 trayIcon = None
 
-
-def sigTerm(sigNo, stackFrame):
+def sigAtExit():
+    #logger.debug("Exec sigAtExit")
     if trayIcon:
         trayIcon.quit()
 
+#def sigTerm(sigNo, stackFrame):
+#    logger.debug("Exec sigTerm")
+#    if trayIcon:
+#        trayIcon.quit()
 
 # About dialog
 class OGAAboutDialog(QtGui.QDialog):
@@ -161,17 +166,16 @@ class MessagesProcessor(QtCore.QThread):
 class OGASystemTray(QtGui.QSystemTrayIcon):
     def __init__(self, app_, parent=None):
         self.app = app_
-
         self.config = readConfig(client=True)
 
-        # Get opengnsys section as dict        
+        # Get opengnsys section as dict
         cfg = dict(self.config.items('opengnsys'))
-    
+
         # Set up log level
         logger.setLevel(cfg.get('log', 'INFO'))
-        
+
         self.ipcport = int(cfg.get('ipc_port', IPC_PORT))
-        
+
         # style = app.style()
         # icon = QtGui.QIcon(style.standardPixmap(QtGui.QStyle.SP_ComputerIcon))
         icon = QtGui.QIcon(':/images/img/oga.png')
@@ -182,10 +186,10 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
         exitAction.triggered.connect(self.about)
         self.setContextMenu(self.menu)
         self.ipc = MessagesProcessor(self.ipcport)
-        
+
         if self.ipc.isAlive() is False:
             raise Exception('No connection to service, exiting.')
-        
+
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.timerFnc)
 
@@ -203,13 +207,13 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
         self.timer.start(1000)  # Launch idle checking every 1 seconds
 
         self.ipc.start()
-        
+
     def initialize(self):
         # Load modules and activate them
         # Also, sends "login" event to service
         self.modules = loadModules(self, client=True)
         logger.debug('Modules: {}'.format(list(v.name for v in self.modules)))
-        
+
         # Send init to all modules
         validMods = []
         for mod in self.modules:
@@ -220,7 +224,7 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
             except Exception as e:
                 logger.exception()
                 logger.error("Activation of {} failed: {}".format(mod.name, utils.exceptionToMessage(e)))
-        
+
         self.modules[:] = validMods  # copy instead of assignment
 
         # If this is running, it's because he have logged in, inform service of this fact
@@ -257,12 +261,12 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
                     return
                 except Exception as e:
                     logger.error('Got exception {} processing generic message on {}'.format(e, v.name))
-                    
+
         logger.error('Module {} not found, messsage {} not sent'.format(module, message))
 
     def executeScript(self, script):
         logger.debug('Executing script')
-        script = six.text_type(script.toUtf8()).decode('base64') 
+        script = six.text_type(script.toUtf8()).decode('base64')
         th = ScriptExecutorThread(script)
         th.start()
 
@@ -273,7 +277,7 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
     def about(self):
         self.aboutDlg.exec_()
 
-    def quit(self):
+    def cleanup(self):
         logger.debug('Quit invoked')
         if self.stopped is False:
             self.stopped = True
@@ -282,7 +286,7 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
             except Exception:
                 logger.exception()
                 logger.error('Got exception deinitializing modules')
-                
+
             try:
                 # If we close Client, send Logoff to Broker
                 self.ipc.sendLogout(operations.getCurrentUser())
@@ -292,13 +296,22 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
                 # May we have lost connection with server, simply exit in that case
                 pass
 
-        try:
-            # operations.logoff()  # Uncomment this after testing to logoff user
-            pass
-        except Exception:
-            pass
+            try:
+                # operations.logoff()  # Uncomment this after testing to logoff user
+                pass
+            except Exception:
+                pass
 
-        self.app.quit()
+    def quit(self):
+        #logger.debug("Exec quit {}".format(self.stopped))
+        if self.stopped is False:
+            self.cleanup()
+            self.app.quit()
+
+    def closeEvent(self,event):
+        logger.debug("Exec closeEvent")
+        event.accept()
+        self.quit()
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
@@ -325,10 +338,12 @@ if __name__ == '__main__':
         trayIcon.quit()
         sys.exit(1)
 
+    app.aboutToQuit.connect(trayIcon.cleanup)
     trayIcon.show()
 
     # Catch kill and logout user :)
-    signal.signal(signal.SIGTERM, sigTerm)
+    #signal.signal(signal.SIGTERM, sigTerm)
+    atexit.register(sigAtExit)
 
     res = app.exec_()
 
