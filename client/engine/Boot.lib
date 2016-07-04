@@ -272,8 +272,10 @@ NAME="$3"
 # Modificar datos de los valores de registro.
 ogSetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\HostName' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\Hostname' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV HostName' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\NV Hostname' "$NAME" 2>/dev/null
 }
 
