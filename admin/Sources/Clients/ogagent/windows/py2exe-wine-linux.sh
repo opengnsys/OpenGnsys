@@ -57,7 +57,9 @@ setup_pip() {
 
 install_packages() {
     echo "Installing required packages"    
-    wine c:\\Python27\\python -m pip install requests pycrypto six
+    wine c:\\Python27\\python -m pip install requests
+    wine c:\\Python27\\python -m pip install pycrypto
+    wine c:\\Python27\\python -m pip install six
     # Copy nsis required NSIS_Simple_Firewall_Plugin_1
     echo "Copying simple firewall plugin for nsis installer"
     unzip -o downloads/NSIS_Simple_Firewall_Plugin_1.20.zip SimpleFC.dll -d $WINEPREFIX/drive_c/Program\ Files/NSIS/Plugins/x86-ansi/
