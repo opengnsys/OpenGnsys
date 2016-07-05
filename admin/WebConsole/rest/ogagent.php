@@ -24,7 +24,7 @@ $app->post('/ogagent/started',
 		    //...
 		} else {
 		    // Insecure agent exception.
-		    throw new Exception("Insecure agent: ip=$ip, mac=$mac");
+		    throw new Exception("Insecure OGAgent started: ip=$ip, mac=$mac");
 		}
 		// May check that client is included in the server database?
 		// Default processing: log activity.
@@ -35,7 +35,7 @@ $app->post('/ogagent/started',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -58,7 +58,7 @@ $app->post('/ogagent/stopped',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -74,7 +74,8 @@ $app->post('/ogagent/loggedin',
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
 		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
-		if (isset($input->osversion))  $osVersion = str_replace(",", "", htmlspecialchars($input->osVersion));
+		//if (isset($input->osversion))  $osVersion = htmlspecialchars(implode(",", $input->osversion));
+		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
 		// May check that client is included in the server database?
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user, os=$osType:$osVersion.\n", FILE_APPEND);
@@ -84,7 +85,7 @@ $app->post('/ogagent/loggedin',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -100,17 +101,17 @@ $app->post('/ogagent/loggedout',
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
 		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
-		if (isset($input->osversion))  $osVersion = str_replace(",", "", htmlspecialchars($input->osVersion));
+		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
 		// May check that client is included in the server database?
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user, os=$osType:$osVersion.\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged out: ip=$ip, user=$user, os=$osType:$osVersion.\n", FILE_APPEND);
 		// Response. 
 		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
