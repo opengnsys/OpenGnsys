@@ -22,10 +22,12 @@ $app->post('/ogagent/started',
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent started: ip=$ip, mac=$mac.\n", FILE_APPEND);
 		// Response. 
+		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -44,10 +46,12 @@ $app->post('/ogagent/stopped',
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent stopped: ip=$ip, mac=$mac.\n", FILE_APPEND);
 		// Response. 
+		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -56,20 +60,24 @@ $app->post('/ogagent/stopped',
 // OGAgent notifies that an user logs in.
 $app->post('/ogagent/loggedin',
     function() use ($app) {
-
+	$osType = $osVersion = "";
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
+		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
+		if (isset($input->osversion))  $osVersion = str_replace(",", "", htmlspecialchars($input->osVersion));
 		// May check that client is included in the server database?
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user.\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user, os=$osType:$osVersion.\n", FILE_APPEND);
 		// Response. 
+		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -78,20 +86,24 @@ $app->post('/ogagent/loggedin',
 // OGAgent notifies that an user logs out.
 $app->post('/ogagent/loggedout',
     function() use ($app) {
-
+	$osType = $osVersion = "";
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
+		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
+		if (isset($input->osversion))  $osVersion = str_replace(",", "", htmlspecialchars($input->osVersion));
 		// May check that client is included in the server database?
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged out: ip=$ip, user=$user.\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user, os=$osType:$osVersion.\n", FILE_APPEND);
 		// Response. 
+		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }

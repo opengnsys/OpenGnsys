@@ -36,5 +36,9 @@ from __future__ import unicode_literals
 import sys
 if sys.platform == 'win32':
     from .windows.operations import *  # @UnusedWildImport
+    osType = 'Windows'
+    osVersion = getWindowsVersion()
 else:
     from .linux.operations import *  # @UnusedWildImport
+    osType = 'Linux'
+    osVersion = getLinuxVersion()

@@ -110,12 +110,12 @@ class OpenGnSysWorker(ServerWorker):
     def onLogin(self, user):
         logger.debug('Received login for {}'.format(user))
         self.loggedin = True
-        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, "user": user})
+        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})
         
     def onLogout(self, user):
         logger.debug('Received logout for {}'.format(user))
         self.loggedin = False
-        self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, "user": user})
+        self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})
 
     def process_ogclient(self, path, getParams, postParams):
         '''
