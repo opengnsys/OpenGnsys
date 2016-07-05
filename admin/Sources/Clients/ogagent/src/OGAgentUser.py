@@ -56,7 +56,6 @@ from opengnsys.loader import loadModules
 trayIcon = None
 
 def sigAtExit():
-    #logger.debug("Exec sigAtExit")
     if trayIcon:
         trayIcon.quit()
 
@@ -290,11 +289,12 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
             try:
                 # If we close Client, send Logoff to Broker
                 self.ipc.sendLogout(operations.getCurrentUser())
+                time.sleep(1)
                 self.timer.stop()
                 self.ipc.stop()
             except Exception:
-                # May we have lost connection with server, simply exit in that case
-                pass
+                # May we have lost connection with server, simply log and exit in that case
+                logger.exception("Got an exception processing quit")
 
             try:
                 # operations.logoff()  # Uncomment this after testing to logoff user
