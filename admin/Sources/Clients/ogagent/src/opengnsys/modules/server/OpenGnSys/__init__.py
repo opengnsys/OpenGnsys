@@ -43,6 +43,8 @@ import thread
 import os
 import platform
 import time
+import random
+import string
 
 # Error handler decorator.
 def catchBackgroundError(fnc):
@@ -57,11 +59,14 @@ def catchBackgroundError(fnc):
 class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
     interface = None  # Binded interface for OpenGnsys
-    loggedin = False  #
+    loggedin = False  # User session flag
     locked = {}
+    random = None     # Random string for secure connections
+    length = 32       # Random string length
     
     def onActivation(self):
         self.cmd = None
+        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
         
         self.REST = REST(self.service.config.get('opengnsys', 'remote'))
@@ -73,7 +78,7 @@ class OpenGnSysWorker(ServerWorker):
         #self.REST.sendMessage('initialize/{}/{}'.format(self.interface.mac, self.interface.ip))
         
         # Send an POST message
-        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip})
+        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random})
         
     def onDeactivation(self):
         #self.REST.sendMessage('deinitialize/{}/{}'.format(self.interface.mac, self.interface.ip))
@@ -87,12 +92,16 @@ class OpenGnSysWorker(ServerWorker):
     #   self.sendClientMessage('doit', {'param1': 'test', 'param2': 'test2'})
     #   return 'Processed message for {}, {}, {}'.format(path, getParams, postParams)
     
-    def process_script(self, path, getParams, postParams):
+    def process_script(self, path, getParams, postParams, server):
         '''
         Processes an script execution (script is encoded in base64)
         '''
         logger.debug('Processing script request')
         script = postParams.get('script')
+        secret = getParams.get('secret')
+        if secret != self.random:
+            logger.error('Unauthorized operation.')
+            raise Exception('Unauthorized operation')
         if postParams.get('client', 'false') == 'false':
             thr = ScriptExecutorThread(script=script.decode('base64'))
             thr.start()
@@ -110,14 +119,14 @@ class OpenGnSysWorker(ServerWorker):
     def onLogin(self, user):
         logger.debug('Received login for {}'.format(user))
         self.loggedin = True
-        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})
-        
+        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})        
+
     def onLogout(self, user):
         logger.debug('Received logout for {}'.format(user))
         self.loggedin = False
-        self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})
+        self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})        
 
-    def process_ogclient(self, path, getParams, postParams):
+    def process_ogclient(self, path, getParams, postParams, server):
         '''
         This method can be overriden to provide your own message proccessor, or better you can
         implement a method that is called exactly as "process_" + path[0] (module name has been removed from path array) and this default processMessage will invoke it
@@ -144,7 +153,7 @@ class OpenGnSysWorker(ServerWorker):
         return operation(path[1:], getParams, postParams)
        
     ###### EN PRUEBAS ###### 
-    def process_status(self, path, getParams, postParams):
+    def process_status(self, path, getParams, postParams, server):
         '''
         Returns client status.
         '''
@@ -167,7 +176,7 @@ class OpenGnSysWorker(ServerWorker):
             res['status'] = 'OSX'
         return res
     
-    def process_reboot(self, path, getParams, postParams):
+    def process_reboot(self, path, getParams, postParams, server):
         '''
         Launches a system reboot operation.
         '''
@@ -177,7 +186,7 @@ class OpenGnSysWorker(ServerWorker):
         threading.Thread(target=rebt).start()
         return {'op': 'launched'}
 
-    def process_poweroff(self, path, getParams, postParams):
+    def process_poweroff(self, path, getParams, postParams, server):
         '''
         Launches a system power off operation.
         '''
@@ -188,7 +197,7 @@ class OpenGnSysWorker(ServerWorker):
         threading.Thread(target=pwoff).start()
         return {'op': 'launched'}
 
-    def process_logoff(self, path, getParams, postParams):
+    def process_logoff(self, path, getParams, postParams, server):
         '''
         Closes user session.
         '''

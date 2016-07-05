@@ -12,12 +12,20 @@ define('LOG_FILE', '/opt/opengnsys/log/ogagent.log');
 // OGAgent notifies that its service is started on client.
 $app->post('/ogagent/started',
     function() use ($app) {
-
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$mac = htmlspecialchars($input->mac);
+		// Client secret key for secure communications.
+		if (isset($input->secret)) {
+		    $secret = htmlspecialchars($input->secret);
+		    // Store secret key in DB.
+		    //...
+		} else {
+		    // Insecure agent exception.
+		    throw new Exception("Insecure agent: ip=$ip, mac=$mac");
+		}
 		// May check that client is included in the server database?
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent started: ip=$ip, mac=$mac.\n", FILE_APPEND);
@@ -36,7 +44,6 @@ $app->post('/ogagent/started',
 // OGAgent notifies that its service is stopped on client.
 $app->post('/ogagent/stopped',
     function() use ($app) {
-
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());

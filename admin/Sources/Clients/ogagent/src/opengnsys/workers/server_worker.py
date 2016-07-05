@@ -63,7 +63,7 @@ class ServerWorker(object):
         '''
         self.onDeactivation()
         
-    def process(self, getParams, postParams):
+    def process(self, getParams, postParams, server):
         '''
         This method is invoked on a message received with an empty path (that means a message with only the module name, like in "http://example.com/Sample"
         Override it if you expect messages with that pattern
@@ -72,7 +72,7 @@ class ServerWorker(object):
         '''
         raise NotImplementedError('Generic message processor is not supported')
         
-    def processServerMessage(self, path, getParams, postParams):
+    def processServerMessage(self, path, getParams, postParams, server):
         '''
         This method can be overriden to provide your own message proccessor, or better you can
         implement a method that is called exactly as "process_" + path[0] (module name has been removed from path array) and this default processMessage will invoke it
@@ -93,13 +93,13 @@ class ServerWorker(object):
             raise Exception('system is busy')
         
         if len(path) == 0:
-            return self.process(getParams, postParams)
+            return self.process(getParams, postParams, server)
         try:
             operation = getattr(self, 'process_' + path[0])
         except Exception:
             raise Exception('Message processor for "{}" not found'.format(path[0]))
         
-        return operation(path[1:], getParams, postParams)
+        return operation(path[1:], getParams, postParams, server)
         
         
     def processClientMessage(self, message, data):

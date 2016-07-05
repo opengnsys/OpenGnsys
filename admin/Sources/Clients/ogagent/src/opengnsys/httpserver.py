@@ -90,7 +90,7 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
         Locates witch module will process the message based on path (first folder on url path)
         '''
         try:
-            data = module.processServerMessage(path, getParams, postParams)
+            data = module.processServerMessage(path, getParams, postParams, self)
             self.sendJsonResponse(data)
         except Exception as e:
             logger.exception()
