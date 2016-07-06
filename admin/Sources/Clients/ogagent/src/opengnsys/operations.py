@@ -34,11 +34,12 @@
 from __future__ import unicode_literals
 
 import sys
+# Importing platform operations and getting operating system data.
 if sys.platform == 'win32':
     from .windows.operations import *  # @UnusedWildImport
     osType = 'Windows'
-    osVersion = getWindowsVersion()
+    osVersion = '.'.join(map(str,getWindowsVersion()[:3]))+' '+getWindowsVersion()[4]
 else:
     from .linux.operations import *  # @UnusedWildImport
     osType = 'Linux'
-    osVersion = getLinuxVersion()
+    osVersion = getLinuxVersion().replace(',','')
