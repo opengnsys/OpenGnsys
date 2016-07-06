@@ -80,7 +80,7 @@ $app->post('/ogagent/loggedin',
 		$user = htmlspecialchars($input->user);
 		// May check that client is included in the server database?
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged out: ip=$ip, user=$user.\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user.\n", FILE_APPEND);
 		// Response. 
 		$response = "";
 		jsonResponse(200, $response);
