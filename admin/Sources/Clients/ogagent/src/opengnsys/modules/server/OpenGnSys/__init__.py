@@ -65,25 +65,29 @@ class OpenGnSysWorker(ServerWorker):
     length = 32       # Random string length
     
     def onActivation(self):
+        '''
+        Sends OGAgent activation notification to OpenGnsys server
+        '''
         self.cmd = None
-        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
-        
         self.REST = REST(self.service.config.get('opengnsys', 'remote'))
-        
         # Get network interfaces
         self.interface = list(operations.getNetworkInfo())[0]  # Get first network interface
+        # Generate random secret to send on activation
+        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         
         # Send an initialize message
         #self.REST.sendMessage('initialize/{}/{}'.format(self.interface.mac, self.interface.ip))
-        
         # Send an POST message
-        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random})
+        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random, 'ostype': operations.osType, 'osversion': operations.osVersion})
         
     def onDeactivation(self):
+        '''
+        Sends OGAgent stopping notification to OpenGnsys server
+        '''
         #self.REST.sendMessage('deinitialize/{}/{}'.format(self.interface.mac, self.interface.ip))
         logger.debug('onDeactivation')
-        self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip})
+        self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip, 'ostype': operations.osType, 'osversion': operations.osVersion})
     
     # Processes message "doit" (sample)    
     #def process_doit(self, path, getParams, postParams):
@@ -94,37 +98,44 @@ class OpenGnSysWorker(ServerWorker):
     
     def process_script(self, path, getParams, postParams, server):
         '''
-        Processes an script execution (script is encoded in base64)
+        Processes an script execution (script should be encoded in base64)
         '''
         logger.debug('Processing script request')
-        script = postParams.get('script')
+        # Checking received secret
         secret = getParams.get('secret')
         if secret != self.random:
             logger.error('Unauthorized operation.')
             raise Exception('Unauthorized operation')
+        # Executing script
+        script = postParams.get('script')
         if postParams.get('client', 'false') == 'false':
             thr = ScriptExecutorThread(script=script.decode('base64'))
             thr.start()
         else:
             self.sendScriptMessage(script)
-            
-        return 'ok'
+        return {'op': 'launched'}
     
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
     
-    def process_client_doit(self, params):
-        self.REST.sendMessage('doit_done', params)
+    #def process_client_doit(self, params):
+    #    self.REST.sendMessage('doit_done', params)
     
     def onLogin(self, user):
+        '''
+        Sends session login notification to OpenGnsys server
+        '''
         logger.debug('Received login for {}'.format(user))
         self.loggedin = True
         self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})        
 
     def onLogout(self, user):
+        '''
+        Sends session logout notification to OpenGnsys server
+        '''
         logger.debug('Received logout for {}'.format(user))
         self.loggedin = False
-        self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})        
+        self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user})
 
     def process_ogclient(self, path, getParams, postParams, server):
         '''
@@ -152,7 +163,6 @@ class OpenGnSysWorker(ServerWorker):
         
         return operation(path[1:], getParams, postParams)
        
-    ###### EN PRUEBAS ###### 
     def process_status(self, path, getParams, postParams, server):
         '''
         Returns client status.
@@ -181,6 +191,12 @@ class OpenGnSysWorker(ServerWorker):
         Launches a system reboot operation.
         '''
         logger.debug('Received reboot operation')
+        # Check received secret
+        secret = getParams.get('secret')
+        if secret != self.random:
+            logger.error('Unauthorized operation.')
+            raise Exception('Unauthorized operation')
+        # Rebooting thread
         def rebt():
             operations.reboot()
         threading.Thread(target=rebt).start()
@@ -191,6 +207,12 @@ class OpenGnSysWorker(ServerWorker):
         Launches a system power off operation.
         '''
         logger.debug('Received poweroff operation')
+        # Checking received secret
+        secret = getParams.get('secret')
+        if secret != self.random:
+            logger.error('Unauthorized operation.')
+            raise Exception('Unauthorized operation')
+        # Powering off thread
         def pwoff():
             time.sleep(2)
             operations.poweroff()
@@ -202,6 +224,12 @@ class OpenGnSysWorker(ServerWorker):
         Closes user session.
         '''
         logger.debug('Received logoff operation')
+        # Checking received secret
+        secret = getParams.get('secret')
+        if secret != self.random:
+            logger.error('Unauthorized operation.')
+            raise Exception('Unauthorized operation')
+        # Sending log off message to OGAgent client
         self.sendClientMessage('logoff', {})
         return 'Logoff operation was sended to client'
 
