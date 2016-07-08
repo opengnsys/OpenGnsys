@@ -495,6 +495,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
+  `agentkey` varchar(32),
   PRIMARY KEY (`idordenador`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

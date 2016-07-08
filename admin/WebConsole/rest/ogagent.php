@@ -12,7 +12,8 @@ define('LOG_FILE', '/opt/opengnsys/log/ogagent.log');
 // OGAgent notifies that its service is started on client.
 $app->post('/ogagent/started',
     function() use ($app) {
-	$osType = $osVersion = "";
+	global $cmd;
+	$osType = $osVersion = "none";
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
@@ -22,14 +23,19 @@ $app->post('/ogagent/started',
 		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
 		// Client secret key for secure communications.
 		if (isset($input->secret)) {
-		    $secret = htmlspecialchars($input->secret);
 		    // Store secret key in DB.
-		    //...
+		    $secret = htmlspecialchars($input->secret);
+		    $cmd->texto = "UPDATE ordenadores
+				      SET agentkey='$secret'
+				    WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac',':',''))";
+		    if ($cmd->Ejecutar() !== true) {
+			// DB access error.
+			throw new Exception("Cannot store secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
+		    }
 		} else {
 		    // Insecure agent exception.
 		    throw new Exception("Insecure OGAgent started: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		}
-		// May check that client is included in the server database?
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent started: ip=$ip, mac=$mac, os=$osType:$osVersion.\n", FILE_APPEND);
 		// Response. 
@@ -47,7 +53,7 @@ $app->post('/ogagent/started',
 // OGAgent notifies that its service is stopped on client.
 $app->post('/ogagent/stopped',
     function() use ($app) {
-	$osType = $osVersion = "";
+	$osType = $osVersion = "none";
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
