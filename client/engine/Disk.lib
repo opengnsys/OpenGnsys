@@ -40,6 +40,9 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 #@version 1.0.4 - Llamada a función específica para tablas GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/30
+#@version 1.1.1 - El inicio de la primera partición logica es el de la extendida más 4x512
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2016/07/11
 #*/ ##
 function ogCreatePartitions ()
 {
@@ -102,8 +105,9 @@ while [ $# -gt 0 ]; do
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
         [ $PART -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-        EXTSTART=$START
-        EXTSIZE=$SIZE
+	# El inicio de la primera partición logica es el de la extendida más 4x512
+        let EXTSTART=$START+2048
+        let EXTSIZE=$SIZE-2048
     fi
     # Incluir particiones lógicas dentro de la partición extendida.
     if [ $PART = 5 ]; then

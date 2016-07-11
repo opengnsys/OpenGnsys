@@ -65,7 +65,7 @@ fi
 
 #/**
 #         ogGetGroupDir [ str_repo ]
-#@brief   Devuelve el cmaino del directorio para el grupo del cliente.
+#@brief   Devuelve el camino del directorio para el grupo del cliente.
 #@param   str_repo     repositorio de imágenes (opcional)
 #@return  path_dir  -  Camino al directorio del grupo.
 #@note    repo = { REPO, CACHE }     REPO por defecto
@@ -95,6 +95,8 @@ if [ -n "$GROUP" ]; then
     DIR=$(ogGetPath "$REPO" "/groups/$GROUP" 2>/dev/null)
     [ -d "$DIR" ] && echo "$DIR"
 fi
+# Para que no haya error al fallar la condición anterior
+return 0
 }
 
 
