@@ -42,6 +42,13 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE ordenadores
 			ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
 	END IF;
+	# Añadir campo para clave de acceso a la API REST de OGAgent (ticket #718).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='agentkey' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE ordenadores
+			ADD agentkey VARCHAR(32) DEFAULT NULL;
+	END IF;
 	# Eliminar campos no usado en inventario de hardware (ticket #713).
 	IF EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='pci' AND TABLE_NAME='tipohardwares' AND TABLE_SCHEMA=DATABASE())
