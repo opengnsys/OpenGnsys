@@ -305,6 +305,46 @@ EOF
 ### PRUEBAS.
 
 #/**
+#         ogConfigureOgAgent int_ndisk int_filesys
+#@brief   Modifica el fichero de configuración del nuevo agente OGAent para sistemas operativos.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_filesys  nº de orden del sistema de archivos
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@version 1.1.0 - Primera adaptación para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-07-15
+#*/ ##
+function ogConfigureOgAgent ()
+{
+# Variables locales.
+local MNTDIR AGENTDIR CFGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Comprobar si existe el fichero de configuración de OGAgent.
+for AGENTDIR in usr/share/OGAgent "Program Files/OGAgent" "Program Files (x86)/OGAgent"; do
+    CFGFILE=$(ogGetPath $MNTDIR/$AGENTDIR/cfg/ogagent.cfg)
+    [ -n "$CFGFILE" ] && break
+done
+[ -n "$CFGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND ".../OGAgent/cfg/ogagent.cfg" || return $?
+# Parchear dirección del servidor OpenGnsys en el fichero de configuración de OGAgent.
+sed -i "0,/remote=/ s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys/rest/," $CFGFILE
+}
+
+
+#/**
 #         ogInstallLaunchDaemon int_ndisk int_nfilesys str_filename
 #@brief   Instala archivo que se ejecutará en el arranque de Mac OS.
 #@param   int_ndisk         nº de orden del disco
@@ -475,70 +515,6 @@ awk -v sbin=$SBINDIR -v etc=$ETCDIR \
                     print; }
         }' /tmp/rclocal > $MNTDIR/$RCLOCAL
 rm /tmp/rclocal
-ogUnlock $1 $2
-}
-
-
-#/*
-#         ogInstallUbuntuAgent int_ndisk int_filesys
-#@brief   Instala el nuevo agente OGAent para sistemas operativos Ubuntu/Debian.
-#@param   int_ndisk    nº de orden del disco
-#@param   int_filesys  nº de orden del sistema de archivos
-#@return  (nada)
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
-#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
-#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
-#@version 1.1.0 - Primera adaptación para OpenGnsys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2016-03-29
-#*/ ##
-function ogInstallUbuntuAgent ()
-{
-# Variables locales.
-local MNTDIR AGENTFILE i VARDIR ETCDIR RCLOCAL
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
-           "$FUNCNAME 1 1"
-    return
-fi
-
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-# Obtener sistema de archvios.
-MNTDIR=$(ogMount $1 $2) || return $?
-
-# Comprobar si existe el cliente y los directorios y ficheros destino.
-AGENTFILE=$(ogGetPath $OGLIB/ogagent/ogagent*.deb)
-[ -n "$AGENTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.deb" || return $?
-VARDIR=$MNTDIR/var
-[ -d $VARDIR ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 var" || return $?
-for i in /usr/local/etc /etc; do
-    [ -d $MNTDIR/$i ] && ETCDIR=$MNTDIR/$i
-done
-[ -n "$ETCDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 etc" || return $?
-for i in $ETCDIR/rc.local $ETCDIR/rc.d/rc.local; do
-    [ -f $i ] && RCLOCAL=$i
-done
-[ -n "$RCLOCAL" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 rc.local" || return $?
-# Realizar la instalación en modo uso exclusivo.
-ogLock $1 $2
-trap "ogUnlock $1 $2" 1 2 3 6 9
-# Copiar agente y crear script de instalación en primer arranque.
-cp -a $AGENTFILE $VARDIR/cache/apt/archives
-cat > $VARDIR/tmp/install-ogagent.sh << EOT
-#!/bin/bash
-#apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-dpkg -i /var/cache/apt/archives/$(basename $AGENTFILE)
-dpkg --configure -a
-sed -i "0,/remote=/ s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
-service ogagent start
-rm -f \$0
-EOT
-chmod +x $VARDIR/tmp/install-ogagent.sh
-grep -q "install-ogagent.sh" $RCLOCAL || sed -i "$ i [ -x /var/tmp/install-ogagent.sh ] && /var/tmp/install-ogagent.sh" $RCLOCAL
-# Quitar uso exclusivo.
 ogUnlock $1 $2
 }
 
