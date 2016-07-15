@@ -238,7 +238,7 @@ ALTER TABLE menus
 	DROP scoorx,
 	DROP scoory;
 
-# Eliminar campo sin uso, nuevos componentes hardware y nº de serie (ticket #713)
+# Actualizar componentes hardware y añadir nº de serie y clave de acceso a API REST de OGAgent (tickets #713 y #718)
 ALTER TABLE tipohardwares
         DROP pci;
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
@@ -246,7 +246,8 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
         (18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
         (19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 ALTER TABLE ordenadores
-        ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador;
+	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador,
+	ADD agentkey VARCHAR(32) DEFAULT NULL;
 
 # Directorios en repo para distintas UO (ticket #678).
 ALTER TABLE entidades
