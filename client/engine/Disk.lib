@@ -47,7 +47,7 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 function ogCreatePartitions ()
 {
 # Variables locales.
-local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART IODISCO IOSIZE CACHESIZE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -74,8 +74,15 @@ SECTORS=$(ogGetLastSector $1)
 CACHEPART=$(ogFindCache 2>/dev/null)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
+
 # Sector de inicio (la partición 1 empieza en el sector 63).
-START=63
+IODISCO=$(ogDiskToDev $1)
+IOSIZE=$(fdisk -l $IODISCO | awk '/I\/O/ {print $4}')
+if [ "$IOSIZE" == "4096" ]; then
+    START=4096
+else
+    START=63
+fi
 PART=1
 
 # Fichero temporal de entrada para "sfdisk"
