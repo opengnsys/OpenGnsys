@@ -447,6 +447,48 @@ EOT
 
 
 #/**
+#         ogConfigureOsAgent int_ndisk int_filesys
+#@brief   Configura el agente OpenGnsys para sistemas operativos.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_filesys  nº de orden del sistema de archivos
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@version 1.1.0 - Primera versión para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-08-16
+#*/ ##
+function ogConfigureOsAgent ()
+{
+# Variables locales.
+local MNTDIR CFGFILE i
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Buscar fichero de configuración de OGAgent.
+for i in usr/share "Program Files" "Program Files (x86)"; do
+    CFGFILE=$(ogGetPath "$MNTDIR/$i/OGAgent/cfg/ogagent.cfg")
+    [ -n "$CFGFILE" ] && break
+done
+# Error si no se encuentra el archivo de configuración.
+[ -n "$CFGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.cfg" || return $?
+
+# Parchear fichero de configuración de OGAgent con IP del servidor OpenGnsys.
+sed -i -e "0,/^remote=/ s,^\(remote=https://\)\([^/]*\)\(.*\)$,\1$(ogGetServerIp)\3," $CFGFILE
+}
+
+
+#/**
 #         ogInstallLinuxClient int_ndisk int_filesys
 #@brief   Instala el cliente OpenGnSys para sistemas operativos GNU/Linux.
 #@param   int_ndisk    nº de orden del disco
