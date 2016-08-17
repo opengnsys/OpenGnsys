@@ -97,6 +97,13 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	xenial) 	# ogLive 1.1.0-rc4 basado en Ubuntu 16.04.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="xenial"
+		OSRELEASE="4.4.0-34-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
 	host | *)	# ogLive basado en la distribución del servidor.
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
@@ -380,16 +387,22 @@ btogGetVar
 #Preparamos los gestores de arranque
 mkdir -p /tmp/iso/isolinux
 cp -av /usr/lib/syslinux/* /tmp/iso/isolinux/
-cp -av /usr/share/gpxe/* /tmp/iso/isolinux/
+if [ -d /usr/share/gpxe ]; then
+    cp -av /usr/share/gpxe/* /tmp/iso/isolinux
+    PXE=gpxe
+elif [ -d /usr/lib/ipxe ]; then
+    cp -av /usr/lib/ipxe/* /tmp/iso/isolinux
+    PXE=ipxe
+fi
 
-# Si existe isolinux/gpxe.iso, montarlo para extraer isolinux.bin.
-if [ -f /tmp/iso/isolinux/gpxe.iso ]; then
+# Si existe el fichero ISO, montarlo para extraer isolinux.bin.
+if [ -f /tmp/iso/isolinux/$PXE.iso ]; then
     mkdir -p /tmp/iso/isolinux/mount
-    mount -o loop /tmp/iso/isolinux/gpxe.iso /tmp/iso/isolinux/mount
+    mount -o loop /tmp/iso/isolinux/$PXE.iso /tmp/iso/isolinux/mount
     cp -va /tmp/iso/isolinux/mount/* /tmp/iso/isolinux
     umount /tmp/iso/isolinux/mount
     rmdir /tmp/iso/isolinux/mount
-    rm -f /tmp/iso/isolinux/gpxe.iso
+    rm -f /tmp/iso/isolinux/$PXE.iso
 fi
 
 cat << FIN > /tmp/iso/isolinux/isolinux.cfg
@@ -427,22 +440,22 @@ append -
 
 label 5
 MENU LABEL Network boot via gPXE lkrn
-KERNEL gpxe.lkrn
+KERNEL $PXE.lkrn
 
 label 6
 MENU LABEL Network boot via gPXE usb
-KERNEL gpxe.usb
+KERNEL $PXE.usb
 
 label 7
 MENU LABEL Network boot via gPXE  pxe
-KERNEL gpxe.pxe
+KERNEL $PXE.pxe
 
 label 8
 MENU LABEL Network boot via gPXE  iso
-KERNEL gpxe.iso
+KERNEL $PXE.iso
 
 label 9
-MENU LABEL gpxe
+MENU LABEL pxe
 KERNEL /clonezilla/live/vmlinuz1
 APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
 FIN

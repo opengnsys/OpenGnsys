@@ -46,8 +46,11 @@ echoAndLog "OpenGnsys CLIENT installation begins at $(date)"
 btogGetOsInfo $TYPECLIENT
 ##########################################################################
 echo "FASE 2 - Instalación de software adicional."
-cat /etc/apt/sources.list | grep "http://free.nchc.org.tw/drbl-core" || echo "deb http://free.nchc.org.tw/drbl-core drbl stable " >> /etc/apt/sources.list
-apt-get update; apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage gpxe qemu lsof
+grep "http://free.nchc.org.tw/drbl-core" /etc/apt/sources.list || echo "deb http://free.nchc.org.tw/drbl-core drbl stable" >> /etc/apt/sources.list
+apt-get update
+[ -n "$(apt-cache search gpxe)" ] && PXEPKG="gpxe"
+[ -n "$(apt-cache search ipxe)" ] && PXEPKG="ipxe"
+apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage $PXEPKG qemu lsof
 ###################################################################3
 echo "FASE 3 - Creación del Sistema raiz RootFS (Segundo Sistema archivos (img)) "
 echo "Fase 3.1 Generar y formatear el disco virtual. Generar el dispositivo loop."

@@ -21,6 +21,7 @@ dpkg-reconfigure -fnoninteractive console-setup
 apt-get update -y
 apt-get install -y subversion
 # Prepare environment.
+groupadd opengnsys
 mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys
 ln -fs /var/lib/tftpboot /opt/opengnsys
 svn export http://opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys/client
@@ -38,13 +39,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.name = "ogBootTools"
       vb.memory = VMMEM
       vb.cpus = 1
-      vb.gui = true
     end
     # VM base and host name.
     bt.vm.box = "ubuntu/wily32"
     bt.vm.hostname = "ogBootTools"
-    # Disable synced folder.
-    bt.vm.synced_folder ".", "/vagrant", disabled: true
+    # Comment out to disable synced folder.
+    #bt.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
     bt.vm.provision "shell", inline: SCRIPT
   end

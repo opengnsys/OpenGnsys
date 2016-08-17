@@ -1,5 +1,5 @@
 #sw.cloning
-install drbl-partimage 
+#install drbl-partimage		# Eliminado
 install fsarchiver 
 install pv 
 install pxe-kexec

@@ -510,7 +510,7 @@ then
 	fi
 # Realizamos la union entre el ogliveram(initrd) y el ogliverootfs(ogclient.sqfs)	
 # Nota: el orden es muy importante para evitar errores de montaje.
-	for i in bin sbin etc var lib usr root boot; do
+	for i in bin sbin lib etc var usr root boot; do
 		ogUnionLiveDir $i
 	done
 	cat /tmp/mtab.preunion > /etc/mtab
