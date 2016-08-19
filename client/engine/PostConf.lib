@@ -484,7 +484,7 @@ done
 [ -n "$CFGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.cfg" || return $?
 
 # Parchear fichero de configuración de OGAgent con IP del servidor OpenGnsys.
-sed -i -e "0,/^remote=/ s,^\(remote=https://\)\([^/]*\)\(.*\)$,\1$(ogGetServerIp)\3," $CFGFILE
+sed -i -e "0,/^remote=/ s,^\(remote=https://\)\([^/]*\)\(.*\)$,\1$(ogGetServerIp)\3," "$CFGFILE"
 }
 
 
