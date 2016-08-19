@@ -15,6 +15,7 @@ echo "${MSG_LOADMODULES:-.}"
 
 # Módulo del ratón.
 modprobe psmouse 2>/dev/null
+modprobe usbmouse 2>/dev/null
 
 # Cargar módulos específicos del kernel del cliente.
 for m in $OGLIB/modules/$(uname -r)/*.ko; do
