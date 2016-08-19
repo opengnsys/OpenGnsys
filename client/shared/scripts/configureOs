@@ -74,22 +74,20 @@ case "$OSTYPE" in
         ogWindowsRegisterPartition $1 $2 C $1 $2
         #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
         # Instalar nuevo agente de sistema operativo o el antiguo cliente para Windows.
-	if [ "${INSTALLOSAGENT^^}" == "TRUE" ]; then
-        	ogConfigureOsAgent $1 $2
-	elif [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
-        	ogInstallMiniSetup $1 $2 postconf.cmd
-        	ogInstallWindowsClient $1 $2 postconf.cmd
-	fi
+        ogConfigureOsAgent $1 $2
+        if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+            ogInstallMiniSetup $1 $2 postconf.cmd
+            ogInstallWindowsClient $1 $2 postconf.cmd
+        fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
         ## Install and Configure Grub based on OS installed and Grub 1st stage location.
         ogGrubInstallPartition $1 $2
         # Instalar nuevo agente de sistema operativo o el antiguo cliente para GNU/Linux.
-	if [ "${INSTALLOSAGENT^^}" == "TRUE" ]; then
-        	ogConfigureOsAgent $1 $2
-	elif [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
-        	ogInstallLinuxClient $1 $2
-	fi
+        ogConfigureOsAgent $1 $2
+        if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+            ogInstallLinuxClient $1 $2
+        fi
         ;;
     MacOS)      # Postconfiguración de Mac OS X.
         # Fichero indicador de activación de postconfiguración.
