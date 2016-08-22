@@ -562,7 +562,7 @@ ogUnlock $1 $2
 
 
 #/**
-#         ogInstallWindowsClient int_ndisk int_filesys
+#         ogInstallWindowsClient int_ndisk int_filesys str_filename
 #@brief   Instala el cliente OpenGnSys para sistemas operativos Windows.
 #@param   int_ndisk         nº de orden del disco
 #@param   int_npartition    nº de orden de la partición
@@ -583,10 +583,10 @@ ogUnlock $1 $2
 function ogInstallWindowsClient ()
 {
 # Variables locales.
-local MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
+local MNTDIR CLIENTFILE i DIR WINDIR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_filename" \
     return
 fi
 
@@ -607,5 +607,80 @@ done
 cp -a $CLIENTFILE "$WINDIR"
 ogAddCmd $1 $2 $3 "ogAdmWinClient -remove"
 ogAddCmd $1 $2 $3 "ogAdmWinClient -install -s $(ogGetServerIp) -p 2008 -i $(ogGetIpAddress)"
+}
+
+
+
+#/**
+#         ogUninstallLinuxClient int_ndisk int_filesys
+#@brief   Desinstala el cliente OpenGnSys para sistemas operativos GNU/Linux.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_filesys  nº de orden del sistema de archivos
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@version 1.1.0 - Primera adaptación para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-08-22
+#*/ ##
+function ogUninstallLinuxClient ()
+{
+# Variables locales.
+local MNTDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
+           "$FUNCNAME 1 1"
+    return
+fi
+
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Borrar ficheros y quitar llamada al cliente durante el proceso de inicio.
+rm -f $MNTDIR/{usr/sbin,sbin,usr/local/sbin}/ogAdmLnxClient
+rm -f $MNTDIR/{etc,usr/local/etc}/ogAdmLnxClient.cfg
+sed -i -e '/ogAdmLnxClient/ d' $MNTDIR/{etc,usr/local/etc}/{rc.local,rc.d/rc.local} 2>/dev/null
+}
+
+
+#/**
+#         ogUninstallWindowsClient int_ndisk int_filesys str_filename
+#@brief   Desinstala el cliente OpenGnSys para sistemas operativos Windows.
+#@param   int_ndisk         nº de orden del disco
+#@param   int_npartition    nº de orden de la partición
+#@param   str_filename      nombre del fichero cmd donde deberemos introducir el comando de ejecutar el script vbs
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
+#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@version 1.1.0 - Primera adaptación para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-08-22
+#*/ ##
+
+function ogUninstallWindowsClient ()
+{
+# Variables locales.
+local MNTDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_filename" \
+    return
+fi
+
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Obtener sistema de archvios.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Crear órdenes para desinstalar servicio y borrar ejecutable del cliente.
+if [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient)" -o -n "$(ogGetPath $MNTDIR/winnt/ogAdmWinClient)" ]; then
+    ogAddCmd $1 $2 $3 'ogAdmWinClient -remove'
+    ogAddCmd $1 $2 $3 'DEL C:\Windows\ogAdmWinClient.exe C:\Winnt\ogAdmWinClient.exe'
+fi
 }
 
