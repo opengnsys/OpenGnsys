@@ -88,13 +88,19 @@ MODE="$(echo $video|cut -f2 -d:)"
 case "$DRIVER" in
 	# Cambiar resolución para driver "uvesafb".
 	uvesafb)
-		grep ":$(echo $MODE|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1 || MODE="640x480-16"
-		echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
-		echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
-	;;
+		# Mantener resolución por defecto si solo hay una opción disponible.
+		if [ $(awk 'END {print NR}' /sys/class/graphics/fb0/modes) -eq 1 ]; then
+			echo "Default screen mode: $(awk -F"[:-]" '{print $2}' /sys/class/graphics/fb0/modes),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
+		else
+			# Cambiar resolución según valor del parámetro "video".
+			grep ":$(echo $MODE|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1 || MODE="640x480-16"
+			echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
+			echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
+		fi
+		;;
 	# Resolución por defecto para el resto de casos.
 	*)	echo "Unknown video driver, using default mode."
-	;;
+		;;
 esac
 }
 
