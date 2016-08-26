@@ -82,26 +82,28 @@ ogChangeVideoResolution ()
 {
 # Variables locales.
 local DRIVER MODE
-# Obtener driver y resolución.
-DRIVER="$(echo $video|cut -f1 -d:)"
-MODE="$(echo $video|cut -f2 -d:)"
-case "$DRIVER" in
-	# Cambiar resolución para driver "uvesafb".
-	uvesafb)
-		# Mantener resolución por defecto si solo hay una opción disponible.
-		if [ $(awk 'END {print NR}' /sys/class/graphics/fb0/modes) -eq 1 ]; then
-			echo "Default screen mode: $(awk -F"[:-]" '{print $2}' /sys/class/graphics/fb0/modes),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
-		else
+# Mostrar resolución y driver por defecto si solo hay una opción disponible.
+if [ $(grep -c "" /sys/class/graphics/fb0/modes) -eq 1 ]; then
+	echo "Default screen mode: $(cat /sys/class/graphics/fb0/modes),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp$(lsmod|awk '$1=="video" && $3>0 {printf " (%s)",$4}')."
+else
+	# Obtener driver y resolución.
+	DRIVER="$(echo $video|cut -f1 -d:)"
+	MODE="$(echo $video|cut -f2 -d:)"
+	case "$DRIVER" in
+		# Cambiar resolución para driver "uvesafb".
+		uvesafb)
+			# Obtener modo por defecto si parámetro "video=uvesafb:D".
+			[ "$MODE" == "D" ] && MODE=$(awk -F: '$1=="D" {print $2; nextfile}' /sys/class/graphics/fb0/modes)
 			# Cambiar resolución según valor del parámetro "video".
-			grep ":$(echo $MODE|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1 || MODE="640x480-16"
+			grep ":$(echo ${MODE/p/}|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1
 			echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
 			echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
-		fi
-		;;
-	# Resolución por defecto para el resto de casos.
-	*)	echo "Unknown video driver, using default mode."
-		;;
-esac
+			;;
+		# Resolución por defecto para el resto de casos.
+		*)	echo "Unknown video driver, using default mode."
+			;;
+	esac
+fi
 }
 
 

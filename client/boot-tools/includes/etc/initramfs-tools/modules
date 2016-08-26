@@ -22,4 +22,5 @@ usbcore
 uhci_hcd
 ehci_hcd
 usbhid
+usbmouse
 mac-hid
