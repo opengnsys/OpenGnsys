@@ -5,7 +5,7 @@
 # Nota: retocar el fichero para sustituir KERNELVERSION por la versión del 
 #       Kernel del cliente ogLive con el formato V.RR (V=versión, RR=revisión).
 
-# Cambiar parámetro de resolución de pantalla para Kernel anteriores a 3.7 o posteriores a 4.3.
+# Cambiar parámetro de resolución de pantalla para Kernel anteriores a 3.7.
 UPDATE menus
 	SET resolucion = CASE resolucion 
 				WHEN 'uvesafb:1152x864-16' THEN '355'
@@ -24,9 +24,9 @@ UPDATE menus
 				WHEN NULL or '0' THEN '788'
 				ELSE resolucion
 			 END
-			 WHERE KERNELVERSION < 3.07 OR KERNELVERSION >= 4.04;
+			 WHERE KERNELVERSION < 3.07;
 
-# Cambiar parámetro de resolución de pantalla para Kernel entre 3.7 y 4.3.
+# Cambiar parámetro de resolución de pantalla para Kernel 3.7 o superior.
 UPDATE menus
 	SET resolucion = CASE resolucion 
 				WHEN '355' THEN 'uvesafb:1152x864-16'
@@ -45,5 +45,5 @@ UPDATE menus
 				WHEN NULL or '0' THEN 'uvesafb:800x600-16'
 				ELSE resolucion
 			 END
-			 WHERE KERNELVERSION >= 3.07 OR KERNELVERSION < 4.04;;
+			 WHERE KERNELVERSION >= 3.07;
 
