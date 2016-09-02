@@ -350,6 +350,7 @@ EOD;
 		$response['mcastspeed'] = $rs->campos["velmul"];
 		$response['p2pmode'] = $rs->campos["modp2p"];
 		$response['p2ptime'] = $rs->campos["timep2p"];
+		$response['image'] = $rs->campos["urlfoto"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
@@ -365,12 +366,20 @@ $app->get('/ous/:ouid/labs/:labid/clients', 'validateApiKey',
 	$labid = htmlspecialchars($labid);
 	// Listar los clientes del aula si el usuario de la apikey es admin de su UO.
 	// Consulta temporal,
-	$cmd->texto = "SELECT * FROM ordenadores WHERE idaula=$labid;";
+	$cmd->texto = <<<EOD
+SELECT ordenadores.*, adm.idadministradorcentro
+  FROM ordenadores
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ RIGHT JOIN usuarios USING(idusuario)
+ WHERE idcentro='$ouid'
+   AND idaula='$labid';
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Recordset open error.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idaula"])) {
+	if (checkParameter($rs->campos["idaula"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response['ouid'] = $ouid;
 		$response['labid'] = $labid;
 		$response = array();
@@ -397,13 +406,22 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
-	$cmd->texto = "SELECT * FROM ordenadores WHERE idordenador='$clntid';";
+	$cmd->texto = <<<EOD
+SELECT ordenadores.*, adm.idadministradorcentro
+  FROM ordenadores
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ RIGHT JOIN usuarios USING(idusuario)
+ WHERE idcentro='$ouid'
+   AND idaula='$labid'
+   AND idordenador='$clntid';
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 //	if ($labid != $rs->campos["idaula"]) ...
-	if (checkParameter($rs->campos["idordenador"])) {
+	if (checkParameter($rs->campos["idordenador"]) and checkParameter($rs->campos["idaula"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response['id'] = $rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['serialno'] = $rs->campos["numserie"];
@@ -416,8 +434,9 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 		$response['repo']['id'] = $rs->campos["idrepositorio"];
 		//$response['hardprofile']['id'] = $rs->campos["idperfilhard"];
 		//$response['menu']['id'] = $rs->campos["idmenu"];
-		//$response['validation'] = $rs->campos["arranque"]==0 ? false: true;
-		//$response['boottype'] = $rs->campos["arranque"];
+		$response['validation'] = $rs->campos["validacion"]==0 ? false: true;
+		$response['boottype'] = $rs->campos["arranque"];
+		$response['image'] = $rs->campos["fotoord"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
