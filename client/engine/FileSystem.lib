@@ -730,9 +730,9 @@ esac
 #@version 1.0.5 - Independiente del tipo de sistema de ficheros.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-09-04
-#@version 1.1.0 - Montar sistema de archivos ZFS.
+#@version 1.1.0 - Montar sistema de archivos ZFS y NTFS hibernado.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2014-11-14
+#@date    2016-09-19
 #*/ ##
 function ogMountFs ()
 {
@@ -774,9 +774,19 @@ if [ -z "$MNTDIR" ]; then
         unset DEBUG
         # Montar sistema de archivos.
         mount $PART $MNTDIR &>/dev/null || \
-                   mount $PART $MNTDIR -o force,remove_hiberfile &>/dev/null || \
-                   mount $PART $MNTDIR -o ro &>/dev/null || \
-                   ogRaiseError $OG_ERR_PARTITION "$1, $2" || return $?
+                    mount $PART $MNTDIR -o force,remove_hiberfile &>/dev/null
+        case $? in
+            0)  # Correcto.
+                ;;
+            14) # Intentar limpiar hibernación NTFS y montar.
+                ntfsfix -d $PART &>/dev/null && mount $PART $MNTDIR &>/dev/null || \
+                        ogRaiseError $OG_ERR_PARTITION "$1, $2" || return $?
+                ;;
+            *)  # Probar montaje de solo lectura.
+                mount $PART $MNTDIR -o ro &>/dev/null || \
+                        ogRaiseError $OG_ERR_PARTITION "$1, $2" || return $?
+                ;;
+        esac
         # Aviso de montaje de solo lectura.
         if ogIsReadonly $1 $2; then
             ogEcho warning "$FUNCNAME: $MSG_MOUNTREADONLY: \"$1, $2\""
