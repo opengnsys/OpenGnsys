@@ -285,14 +285,17 @@ case "$OSDISTRIB" in
 		fi
 		# Configuración para PHP 5 en Ubuntu 16.x+.
 		if [ -z "$(apt-cache pkgnames php5)" ]; then
-			INSTALLEXTRADEPS=( 'apt-get update' 
-					   'apt-get -y install --force-yes software-properties-common'
-					   'add-apt-repository -y ppa:ondrej/php' )
-			PHP5VERSION=$(apt-cache pkgnames php5 | sort | head -1)
-			DEPENDENCIES=( ${DEPENDENCIES[@]//php5/$PHP5VERSION} )
+			if [ -z "$(apt-cache pkgnames software-properties-common)" ]; then
+				apt-get update
+				apt-get -y install --force-yes software-properties-common
+			fi
+			add-apt-repository -y ppa:ondrej/php
+			apt-get update
 		fi
+		PHP5VERSION=$(apt-cache pkgnames php5 | sort | head -1)
+		DEPENDENCIES=( ${DEPENDENCIES[@]//php5/$PHP5VERSION} )
 		# Dependencias correctas para libmysqlclient.
-		[ -z "$(apt-cache pkgnames libmysqlclient15/libmysqlclient)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
+		[ -z "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Incluir repositorio de paquetes EPEL y paquetes específicos.
