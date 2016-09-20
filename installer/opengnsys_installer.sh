@@ -266,7 +266,7 @@ selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
 # dependiendo de la versión instalada.
 function updatePackageList()
 {
-local DHCPVERSION
+local DHCPVERSION PHP5VERSION
 
 # Si es necesario, actualizar la lista de paquetes disponibles.
 [ -n "$UPDATEPKGLIST" ] && eval $UPDATEPKGLIST
@@ -283,6 +283,16 @@ case "$OSDISTRIB" in
 			DHCPSERV=dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
+		# Configuración para PHP 5 en Ubuntu 16.x+.
+		if [ -z "$(apt-cache pkgnames php5)" ]; then
+			INSTALLEXTRADEPS=( 'apt-get update' 
+					   'apt-get -y install --force-yes software-properties-common'
+					   'add-apt-repository -y ppa:ondrej/php' )
+			PHP5VERSION=$(apt-cache pkgnames php5 | sort | head -1)
+			DEPENDENCIES=( ${DEPENDENCIES[@]//php5/$PHP5VERSION} )
+		fi
+		# Dependencias correctas para libmysqlclient.
+		[ -z "$(apt-cache pkgnames libmysqlclient15/libmysqlclient)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Incluir repositorio de paquetes EPEL y paquetes específicos.
@@ -1351,7 +1361,8 @@ function copyClientFiles()
 function clientCreate()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
+	#local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
+	local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso 	# 1.1.0-rc4
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
  
 	# Descargar cliente, si es necesario.
