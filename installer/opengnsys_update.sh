@@ -805,7 +805,8 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
+	#local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
+	local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso		# 1.1.0-rc4
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local SOURCELENGTH
