@@ -49,6 +49,13 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE ordenadores
 			ADD agentkey VARCHAR(32) DEFAULT NULL;
 	END IF;
+	# Añadir índice para mostrar correctamente el formulario de estado.
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='idaulaip' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE ordenadores
+			ADD KEY idaulaip (idaula ASC, ip ASC);
+	END IF;
 	# Eliminar campos no usado en inventario de hardware (ticket #713).
 	IF EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='pci' AND TABLE_NAME='tipohardwares' AND TABLE_SCHEMA=DATABASE())

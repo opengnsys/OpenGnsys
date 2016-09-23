@@ -247,7 +247,8 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
         (19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 ALTER TABLE ordenadores
 	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador,
-	ADD agentkey VARCHAR(32) DEFAULT NULL;
+	ADD agentkey VARCHAR(32) DEFAULT NULL,
+	ADD KEY idaulaip (idaula ASC, ip ASC);
 
 # Directorios en repo para distintas UO (ticket #678).
 ALTER TABLE entidades
