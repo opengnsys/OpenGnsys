@@ -416,11 +416,6 @@ function updateClientFiles()
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
 		exit 1
 	fi
-	if diff -q ${ENGINECFG}{,-LAST} 2>/dev/null; then
-		NEWFILES="$NEWFILES $ENGINECFG"
-	else
-		rm -f ${ENGINECFG}-LAST
-	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
 	# Actualizar librerías del motor de clonación.
@@ -431,12 +426,17 @@ function updateClientFiles()
 		exit 1
 	fi
 	# Actualizar fichero de configuración del motor de clonación.
-	if ! grep -q "^TZ" $INSTALL_TARGET/client/etc/engine.cfg; then
+	if ! grep -q "^TZ" $ENGINECFG; then
 		TZ=$(timedatectl status | awk -F"[:()]" '/Time.*zone/ {print $2}')
-		cat << EOT >> $INSTALL_TARGET/client/etc/engine.cfg
+		cat << EOT >> $ENGINECFG
 # OpenGnsys Server timezone.
 TZ="${TZ// /}"
 EOT
+	fi
+	if diff -q ${ENGINECFG}{,-LAST} 2>/dev/null; then
+		NEWFILES="$NEWFILES $ENGINECFG"
+	else
+		rm -f ${ENGINECFG}-LAST
 	fi
 
 	echoAndLog "${FUNCNAME}(): client files update success."
