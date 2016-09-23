@@ -406,12 +406,20 @@ function getNetworkSettings()
 # Actualizar cliente OpenGnsys.
 function updateClientFiles()
 {
+	local ENGINECFG=$INSTALL_TARGET/client/etc/engine.cfg
+
 	# Actualizar ficheros del cliente.
+	backupFile $ENGINECFG
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Client files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
 		exit 1
+	fi
+	if diff -q ${ENGINECFG}{,-LAST} 2>/dev/null; then
+		NEWFILES="$NEWFILES $ENGINECFG"
+	else
+		rm -f ${ENGINECFG}-LAST
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
