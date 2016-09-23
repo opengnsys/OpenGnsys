@@ -433,7 +433,7 @@ function updateClientFiles()
 TZ="${TZ// /}"
 EOT
 	fi
-	if diff -q ${ENGINECFG}{,-LAST} 2>/dev/null; then
+	if ! diff -q ${ENGINECFG}{,-LAST} &>/dev/null; then
 		NEWFILES="$NEWFILES $ENGINECFG"
 	else
 		rm -f ${ENGINECFG}-LAST
