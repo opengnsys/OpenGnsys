@@ -2,6 +2,7 @@
 #/**
 #@file    security-config
 #@brief   OpenGnsys Server security configuration.
+#@note    Security configuration tipsx for UFW, FirewallD and SELinux.
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez, ETSII Univ. Sevilla
 #@date    2016-04-18
