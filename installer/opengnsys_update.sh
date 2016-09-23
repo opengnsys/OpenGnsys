@@ -672,6 +672,7 @@ function updateServerFiles()
 	# No copiar ficheros del antiguo cliente Initrd
 	local SOURCES=(	repoman/bin \
 			server/bin \
+			server/lib \
 			admin/Sources/Services/ogAdmServerAux \
 			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
@@ -679,6 +680,7 @@ function updateServerFiles()
 			doc )
 	local TARGETS=(	bin \
 			bin \
+			lib \
 			sbin/ogAdmServerAux \
 			sbin/ogAdmRepoAux \
 			tftpboot \

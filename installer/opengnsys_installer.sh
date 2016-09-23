@@ -1213,6 +1213,7 @@ function copyServerFiles ()
 	local SOURCES=( server/tftpboot \
 			server/bin \
 			repoman/bin \
+			server/lib \
 			admin/Sources/Services/ogAdmServerAux
 			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
@@ -1221,6 +1222,7 @@ function copyServerFiles ()
 	local TARGETS=( tftpboot \
 			bin \
 			bin \
+			lib \
 			sbin \
 			sbin \
 			lib \
