@@ -1,0 +1,489 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: "1.1.0"
+  title: OpenGnsys Server REST API
+  description: |
+    Information about OpenGnsys Server REST API functions.
+  license:
+    name: Creative Commons 4.0 International
+    url: http://creativecommons.org/licenses/by/4.0/
+basePath: /rest
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  apikey:
+    type: apiKey
+    name: Authorization
+    in: header
+# Paths description.
+paths:
+  /login:
+    post:
+      description: Check user login and returns his/her API key.
+      parameters:
+        - in: body
+          name: authdata
+          description: JSON authentication data
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            type: object
+            properties:
+              userid:
+                type: integer
+              apikey:
+                type: string
+        "400":
+          description: Missing parameters
+        "500":
+          description: Authentication error
+      tags:
+        - user
+  /ous:
+    get:
+      description: Gets all `OU` objects.
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+      tags:
+        - ou
+  /ous/{ouid}:
+    get:
+      description: Get an `OU` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: Organization Unit identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              description:
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - ou
+  /ous/{ouid}/labs:
+    get:
+      description: Get all `lab` objects defined in an `OU`.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                inremotepc:
+                  type: boolean
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+      security:
+        - apikey: []
+      tags:
+        - lab
+  /ous/{ouid}/labs/{labid}:
+    get:
+      description: Get a `lab` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: laboratory identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: laboratory identificator
+                type: integer
+              name:
+                description: laboratory name
+                type: string
+              location:
+                description: laboratory location 
+                type: string
+              description:
+                description: laboratory description
+                type: string
+              inremotepc:
+                description: check if this lab will be included in Remote PC Project
+                type: boolean
+              capacity:
+                description: maximum number of people in the lab
+                type: integer
+              defclients:
+                description: number of defined clients in the lab
+                type: integer
+              projector:
+                description: check if this lab has a projector
+                type: boolean
+              board:
+                description: check if this lab has an electronic board
+                type: boolean
+              routerip:
+                description: lab router IP address
+                type: string
+              netmask:
+                description: network mask to use in the lab
+                type: string
+              ntp:
+                description: NTP server IP address
+                type: string
+              dns:
+                description: DNS server IP address
+                type: string
+              proxyurl:
+                description: Proxy server URL
+                type: string
+              mcastmode:
+                description: Multicast protocol mode ("full-duplex", "half-duplex").
+                type: string
+              mcastip:
+                description: Multicast IP address
+                type: string
+              mcastport:
+                description: Multicast port
+                type: integer
+              mcastspeed:
+                description: Multicast speed (in Mbps)
+                type: integer
+              p2pmode:
+                description: Bittorrent connection type ("peer", "leecher". "seeder").
+                type: string
+              p2ptime:
+                description: Bittorrent connection extra time (in s.)
+                type: integer
+              image:
+                description: Lab's picture file
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - lab
+  /ous/{ouid}/labs/{labid}/clients:
+    get:
+      description: Get all `client` objects defined in an `lab`.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                lab:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+      security:
+        - apikey: []
+      tags:
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}:
+    get:
+      description: Get a `client` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+              name:
+                description: client name
+                type: string
+              serialno:
+                description: client serial number
+                type: string
+              netiface:
+                description: main network interface
+                type: string
+              netdriver:
+                description: client MAC address (kernel module)
+                type: string
+              mac:
+                description: client MAC address
+                type: string
+              ip:
+                description: client IP address
+                type: string
+              netmask:
+                description: subnet mask address
+                type: string
+              routerip:
+                description: network router IP address
+                type: string
+              repo:
+                description: repository identification
+                type: object
+                properties:
+                  id:
+                    type: integer
+              validation:
+                description: boot validation flag
+                type: boolean
+              boottype:
+                description: boot template type
+                type: string
+              image:
+                description: client's picture file
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware:
+    get:
+      description: Get the hardware definition of a `client` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+              name:
+                description: client name
+                type: string
+              hardware:
+                description: hardware components
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      description: hardware component type
+                      type: string
+                    description:
+                      description: hardware component description
+                      type: string
+      tags:
+        - client
+  #/ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg:
+  #  get:
+  #    description: Get disks configuration of a `client`
+  #    parameters:
+  #    ....
+  #    tags:
+  #      - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/status:
+    get:
+      description: Get execution status of a `client`
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+              ip:
+                description: client IP address
+                type: string
+              status:
+                description: execution status
+                type: string
+      tags:
+        - client
+  /ous/{ouid}/repos:
+    get:
+      description: Get all `repo` objects defined in an `OU`.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+      security:
+        - apikey: []
+      tags:
+        - repo
+  /ous/{ouid}/repos/{repoid}:
+    get:
+      description: Get a `repo` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: repoid
+          in: path
+          description: repository identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: repository id
+                type: integer
+              name:
+                description: repository name
+                type: string
+              description:
+                description: repository description
+                type: string
+              ip:
+                description: repository IP address
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - repo
+  #/ous/{ouid}/images:
+  #/ous/{ouid}/images/{imageid}:
+  #/ous/{ouid}/images/{imageid}/software:
+  #/ous/{ouid}/images/{imageid}/boot:

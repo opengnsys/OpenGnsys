@@ -6,8 +6,8 @@
  * @note    Some ideas are based on article "How to create REST API for Android app using PHP, Slim and MySQL" by Ravi Tamada, thanx.
  * @license GNU GPLv3+
  * @author  Ramón M. Gómez, ETSII Univ. Sevilla
- * @version 1.1
- * @date    2016-05-19
+ * @version 1.1.0 - Primera versión para OpenGnsys
+ * @date    2016-09-19
  */
 
 
@@ -109,7 +109,7 @@ function checkAdmin($adminid) {
 
 
 /**
- * @#fn      sendCommand($serverip, $serverport, $reqframe, &$values)
+ * @fn       sendCommand($serverip, $serverport, $reqframe, &$values)
  * @brief    Send a command to an OpenGnsys ogAdmServer and get request.
  * @param    string serverip    Server IP address.
  * @param    string serverport  Server port.
@@ -267,7 +267,12 @@ $app->get('/ous/:ouid', 'validateApiKey',
     }
 );
 
-// Listar aulas de una OU.
+/**
+ * @brief    List all labs defined in an OU
+ * @note     Route: /ous/id/labs, Method: GET
+ * @param    id      OU id.
+ * @return   JSON string with all UO's labs parameters
+ */
 $app->get('/ous/:ouid/labs', 'validateApiKey',
     function($ouid) {
 	global $cmd;
@@ -303,9 +308,13 @@ EOD;
     }
 );
 
-// Obtener datos de un aula.
-// Alternativa: $app->get('/lab/:labid', 'validateApiKey',
-//                  function($labid) {
+/**
+ * @brief    Get lab data
+ * @note     Route: /ous/id1/labs/id2, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     lab id.
+ * @return   JSON string with lab parameters
+ */
 $app->get('/ous/:ouid/labs/:labid', 'validateApiKey',
     function($ouid, $labid) {
 	global $cmd;
@@ -365,7 +374,6 @@ $app->get('/ous/:ouid/labs/:labid/clients', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	// Listar los clientes del aula si el usuario de la apikey es admin de su UO.
-	// Consulta temporal,
 	$cmd->texto = <<<EOD
 SELECT ordenadores.*, adm.idadministradorcentro
   FROM ordenadores
@@ -406,6 +414,7 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
+	// Obtener datos del cliente del aula si el usuario de la apikey es admin de su UO.
 	$cmd->texto = <<<EOD
 SELECT ordenadores.*, adm.idadministradorcentro
   FROM ordenadores
@@ -420,7 +429,6 @@ EOD;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
-//	if ($labid != $rs->campos["idaula"]) ...
 	if (checkParameter($rs->campos["idordenador"]) and checkParameter($rs->campos["idaula"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response['id'] = $rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];

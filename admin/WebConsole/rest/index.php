@@ -54,6 +54,16 @@ if ($config['RUN_OGADMREPO'] === "yes") {
     include("repository.php");
 }
 
+// Showing API information page.
+app->get('/',
+    function() {
+        if (is_readable(__DIR__."/opengnsys-api.html"))
+            include("opengnsys-api.html");
+        else
+            echo "<strong>Cannot access OpenGnsys REST API information page.</strong>\n";
+    }
+);
+
 
 // Execute REST using Slim.
 $app->run();
