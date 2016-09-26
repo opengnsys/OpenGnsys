@@ -14,13 +14,13 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 CREATE TABLE IF NOT EXISTS `acciones` (
   `idaccion` int(11) NOT NULL AUTO_INCREMENT,
-  `tipoaccion` smallint(6) NOT NULL,
-  `idtipoaccion` int(11) NOT NULL,
-  `descriaccion` varchar(250) NOT NULL,
-  `idordenador` int(11) NOT NULL,
-  `ip` varchar(50) NOT NULL,
-  `sesion` int(11) NOT NULL,
-  `idcomando` int(11) NOT NULL,
+  `tipoaccion` smallint(6) NOT NULL DEFAULT '0',
+  `idtipoaccion` int(11) NOT NULL DEFAULT '0', 
+  `descriaccion` varchar(250) NOT NULL DEFAULT '',
+  `idordenador` int(11) NOT NULL DEFAULT '0',
+  `ip` varchar(50) NOT NULL DEFAULT '',
+  `sesion` int(11) NOT NULL DEFAULT '0',
+  `idcomando` int(11) NOT NULL DEFAULT '0',
   `parametros` text,
   `fechahorareg` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `fechahorafin` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -96,9 +96,9 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `puestos` smallint DEFAULT NULL,
   `horaresevini` tinyint(4) DEFAULT NULL,
   `horaresevfin` tinyint(4) DEFAULT NULL,
-  `modomul` tinyint(4) NOT NULL,
-  `ipmul` varchar(16) NOT NULL,
-  `pormul` int(11) NOT NULL,
+  `modomul` tinyint(4) NOT NULL DEFAULT '0',
+  `ipmul` varchar(16) NOT NULL DEFAULT '',
+  `pormul` int(11) NOT NULL DEFAULT '0',
   `velmul` smallint(6) NOT NULL DEFAULT '70',
   `router` varchar( 30 ),
   `netmask` varchar( 30 ),
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
-  `inremotepc` tinyint DEFAULT 0,
+  `inremotepc` tinyint DEFAULT '0',
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -122,15 +122,15 @@ CREATE TABLE IF NOT EXISTS `aulas` (
 CREATE TABLE IF NOT EXISTS `asistentes` (
   `idcomando` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
-  `pagina` varchar(256) NOT NULL,
-  `gestor` varchar(256) NOT NULL,
-  `funcion` varchar(64) NOT NULL,
+  `pagina` varchar(256) NOT NULL DEFAULT '',
+  `gestor` varchar(256) NOT NULL DEFAULT '',
+  `funcion` varchar(64) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
   `aplicambito` tinyint(4) DEFAULT NULL,
   `visuparametros` varchar(250) DEFAULT NULL,
   `parametros` varchar(250) DEFAULT NULL,
   `comentarios` text,
-  `activo` tinyint(1) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY ( `idcomando` , `descripcion` ) 
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
 
@@ -197,15 +197,15 @@ INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALU
 CREATE TABLE IF NOT EXISTS `comandos` (
   `idcomando` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
-  `pagina` varchar(256) NOT NULL,
-  `gestor` varchar(256) NOT NULL,
-  `funcion` varchar(64) NOT NULL,
+  `pagina` varchar(256) NOT NULL DEFAULT '',
+  `gestor` varchar(256) NOT NULL DEFAULT '',
+  `funcion` varchar(64) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
   `aplicambito` tinyint(4) DEFAULT NULL,
   `visuparametros` varchar(250) DEFAULT NULL,
   `parametros` varchar(250) DEFAULT NULL,
   `comentarios` text,
-  `activo` tinyint(1) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '0',
   `submenu` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`idcomando`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
   `comentarios` text,
   `iduniversidad` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
-  `ogunit` tinyint(1) NOT NULL DEFAULT 0,
+  `ogunit` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`identidad`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -264,9 +264,9 @@ INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `idunivers
 
 CREATE TABLE IF NOT EXISTS `entornos` (
   `identorno` int(11) NOT NULL AUTO_INCREMENT,
-  `ipserveradm` varchar(50) NOT NULL,
-  `portserveradm` int(20) NOT NULL,
-  `protoclonacion` varchar(50) NOT NULL,
+  `ipserveradm` varchar(50) NOT NULL DEFAULT '',
+  `portserveradm` int(20) NOT NULL DEFAULT 2008,
+  `protoclonacion` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`identorno`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -412,23 +412,23 @@ INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 
 CREATE TABLE IF NOT EXISTS `imagenes` (
   `idimagen` int(11) NOT NULL AUTO_INCREMENT,
-  `nombreca` varchar(50) NOT NULL,
-  `revision` smallint UNSIGNED NOT NULL DEFAULT 0,
+  `nombreca` varchar(50) NOT NULL DEFAULT '',
+  `revision` smallint UNSIGNED NOT NULL DEFAULT '0',
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `idperfilsoft` int(11) DEFAULT NULL,
   `idcentro` int(11) DEFAULT NULL,
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idrepositorio` int(11) NOT NULL DEFAULT 0,
-  `idordenador` int(11) NOT NULL DEFAULT 0,
-  `numdisk` smallint NOT NULL DEFAULT 0,
-  `numpar` smallint NOT NULL DEFAULT 0,
-  `codpar` int(8) NOT NULL DEFAULT 0,
+  `idrepositorio` int(11) NOT NULL DEFAULT '0',
+  `idordenador` int(11) NOT NULL DEFAULT '0',
+  `numdisk` smallint NOT NULL DEFAULT '0',
+  `numpar` smallint NOT NULL DEFAULT '0',
+  `codpar` int(8) NOT NULL DEFAULT '0',
   `tipo` tinyint NULL,
-  `imagenid` int NOT NULL DEFAULT 0,
+  `imagenid` int NOT NULL DEFAULT '0',
   `ruta` varchar(250) NULL,
   `fechacreacion` datetime DEFAULT NULL,
-  `inremotepc` tinyint DEFAULT 0,
+  `inremotepc` tinyint DEFAULT '0',
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -462,7 +462,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
 
 CREATE TABLE IF NOT EXISTS `nombresos` (
   `idnombreso` smallint(11) NOT NULL AUTO_INCREMENT,
-  `nombreso` varchar(250) NOT NULL,
+  `nombreso` varchar(250) NOT NULL DEFAULT '',
   `idtiposo` int(11) DEFAULT '0',
   PRIMARY KEY (`idnombreso`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -477,7 +477,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `idordenador` int(11) NOT NULL AUTO_INCREMENT,
   `nombreordenador` varchar(100) DEFAULT NULL,
   `numserie` varchar(25) DEFAULT NULL,
-  `ip` varchar(16) NOT NULL,
+  `ip` varchar(16) NOT NULL DEFAULT '',
   `mac` varchar(12) DEFAULT NULL,
   `idaula` int(11) DEFAULT NULL,
   `idperfilhard` int(11) DEFAULT NULL,
@@ -485,9 +485,9 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `grupoid` int(11) DEFAULT NULL,
   `idmenu` int(11) DEFAULT NULL,
   `cache` int(11) DEFAULT NULL,
-  `router` varchar(16) NOT NULL,
-  `mascara` varchar(16) NOT NULL,
-  `idproautoexec` int(11) NOT NULL DEFAULT 0,
+  `router` varchar(16) NOT NULL DEFAULT '',
+  `mascara` varchar(16) NOT NULL DEFAULT '',
+  `idproautoexec` int(11) NOT NULL DEFAULT '0',
   `arranque` varchar(30) NOT NULL DEFAULT '00unknown',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
   `netdriver` varchar(30) NOT NULL DEFAULT 'generic',
@@ -509,17 +509,17 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 --
 
 CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
-  `idordenador` int(11) NOT NULL,
-  `numdisk` smallint NOT NULL,
-  `numpar` smallint NOT NULL,
-  `codpar` int(8) NOT NULL,
-  `tamano` int(11) NOT NULL,
-  `uso` tinyint NOT NULL DEFAULT 0,
-  `idsistemafichero` smallint(11) NOT NULL,
-  `idnombreso` smallint(11) NOT NULL,
-  `idimagen` int(11) NOT NULL,
-  `revision` smallint UNSIGNED NOT NULL DEFAULT 0,
-  `idperfilsoft` int(11) NOT NULL,
+  `idordenador` int(11) NOT NULL DEFAULT '0',
+  `numdisk` smallint NOT NULL DEFAULT '0',
+  `numpar` smallint NOT NULL DEFAULT '0',
+  `codpar` int(8) NOT NULL DEFAULT '0',
+  `tamano` int(11) NOT NULL DEFAULT '0',
+  `uso` tinyint NOT NULL DEFAULT '0',
+  `idsistemafichero` smallint(11) NOT NULL DEFAULT '0',
+  `idnombreso` smallint(11) NOT NULL DEFAULT '0',
+  `idimagen` int(11) NOT NULL DEFAULT '0',
+  `revision` smallint UNSIGNED NOT NULL DEFAULT '0',
+  `idperfilsoft` int(11) NOT NULL DEFAULT '0',
   `fechadespliegue` datetime NULL,
   `cache` text NOT NULL,
   UNIQUE KEY `idordenadornumdisknumpar` (`idordenador`,`numdisk`,`numpar`)
@@ -533,11 +533,11 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
 
 CREATE TABLE IF NOT EXISTS `parametros` (
   `idparametro` int(11) NOT NULL AUTO_INCREMENT,
-  `nemonico` char(3) NOT NULL,
+  `nemonico` char(3) NOT NULL DEFAULT '',
   `descripcion` text NOT NULL,
-  `nomidentificador` varchar(64) NOT NULL,
-  `nomtabla` varchar(64) NOT NULL,
-  `nomliteral` varchar(64) NOT NULL,
+  `nomidentificador` varchar(64) NOT NULL DEFAULT '',
+  `nomtabla` varchar(64) NOT NULL DEFAULT '',
+  `nomliteral` varchar(64) NOT NULL DEFAULT '',
   `tipopa` tinyint(1) DEFAULT '0',
   `visual` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idparametro`),
@@ -599,7 +599,7 @@ CREATE TABLE IF NOT EXISTS `perfileshard` (
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idcentro` int(11) NOT NULL,
+  `idcentro` int(11) NOT NULL DEFAULT '0',
   `winboot` enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot',
   PRIMARY KEY (`idperfilhard`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -629,7 +629,7 @@ CREATE TABLE IF NOT EXISTS `perfilessoft` (
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idcentro` int(11) NOT NULL,
+  `idcentro` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idperfilsoft`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -652,7 +652,7 @@ CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
 
 CREATE TABLE IF NOT EXISTS `plataformas` (
   `idplataforma` int(11) NOT NULL AUTO_INCREMENT,
-  `plataforma` varchar(250) NOT NULL,
+  `plataforma` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idplataforma`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=18 ;
 
@@ -695,7 +695,7 @@ CREATE TABLE IF NOT EXISTS `procedimientos_acciones` (
   `orden` smallint(4) DEFAULT NULL,
   `idcomando` int(11) NOT NULL DEFAULT '0',
   `parametros` text,
-  `procedimientoid` int(11) NOT NULL,
+  `procedimientoid` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idprocedimientoaccion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -726,7 +726,7 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
   `ampmfin` tinyint(1) DEFAULT NULL,
   `minutosfin` tinyint(4) DEFAULT NULL,
   `suspendida` tinyint(1) DEFAULT NULL,
-  `sesion` int(11) NOT NULL,
+  `sesion` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idprogramacion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -738,13 +738,13 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
 
 CREATE TABLE IF NOT EXISTS `repositorios` (
   `idrepositorio` int(11) NOT NULL AUTO_INCREMENT,
-  `nombrerepositorio` varchar(250) NOT NULL,
+  `nombrerepositorio` varchar(250) NOT NULL DEFAULT '',
   `ip` varchar(15) NOT NULL DEFAULT '',
   `passguor` varchar(50) NOT NULL DEFAULT '',
   `idcentro` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
-  `puertorepo` int(11) NOT NULL,
+  `puertorepo` int(11) NOT NULL DEFAULT '0',
   `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -763,7 +763,7 @@ CREATE TABLE IF NOT EXISTS `sistemasficheros` (
   `idsistemafichero` smallint(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
-  `codpar` int(8) NOT NULL,
+  `codpar` int(8) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idsistemafichero`),
   UNIQUE KEY (`descripcion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -849,7 +849,7 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
   `idtipohardware` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) NOT NULL DEFAULT '',
-  `nemonico` char(3) NOT NULL,
+  `nemonico` char(3) NOT NULL DEFAULT '',
   PRIMARY KEY (`idtipohardware`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
 
@@ -907,8 +907,8 @@ INSERT INTO `tiposoftwares` (`idtiposoftware`, `descripcion`, `urlimg`) VALUES
 
 CREATE TABLE IF NOT EXISTS `tiposos` (
   `idtiposo` int(11) NOT NULL AUTO_INCREMENT,
-  `tiposo` varchar(250) NOT NULL,
-  `idplataforma` int(11) NOT NULL,
+  `tiposo` varchar(250) NOT NULL DEFAULT '',
+  `idplataforma` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idtiposo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
 
@@ -935,8 +935,8 @@ INSERT INTO `tiposos` (`idtiposo`, `tiposo`, `idplataforma`) VALUES
 
 CREATE TABLE IF NOT EXISTS `tipospar` (
   `codpar` int(8) NOT NULL,
-  `tipopar` varchar(250) NOT NULL,
-  `clonable` tinyint(4) NOT NULL,
+  `tipopar` varchar(250) NOT NULL DEFAULT '',
+  `clonable` tinyint(4) NOT NULL DEFAULT '0',
   UNIQUE KEY `codpar` (`codpar`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
