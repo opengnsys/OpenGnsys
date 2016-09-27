@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>OpenGnsys Server REST API</title>
+    <title>OpenGnsys REST API</title>
     <style type="text/css">
       body { 
 	font-family: Trebuchet MS, sans-serif;
@@ -179,12 +179,12 @@ font-style: italic;
     </style>
   </head>
   <body>
-  <h1>OpenGnsys Server REST API</h1>
-    <div class="app-desc">Information about OpenGnsys Server REST API functions. </div>
-    <div class="app-desc">More information: <a href="https://helloreverb.com">https://helloreverb.com</a></div>
-    <div class="app-desc">Contact Info: <a href="hello@helloreverb.com">hello@helloreverb.com</a></div>
+  <h1>OpenGnsys REST API</h1>
+    <div class="app-desc">Information about the OpenGnsys REST API functions (including Server and Repository Manager). </div>
+    <div class="app-desc">More information: <a href="http://opengnsys.es/">http://opengnsys.es/</a></div>
+    <div class="app-desc">Contact Info: <a href="opengnsys-devel@listas.unizar.es">opengnsys-devel@listas.unizar.es</a></div>
     <div class="app-desc">Version: 1.1.0</div>
-    <div class="app-desc">BasePath:/rest</div>
+    <div class="app-desc">BasePath:/opengnsys/rest</div>
     <div class="license-info">Creative Commons 4.0 International</div>
     <div class="license-url">http://creativecommons.org/licenses/by/4.0/</div>
   <h2>Access</h2>
@@ -202,10 +202,25 @@ font-style: italic;
   <li><a href="#ousOuidLabsLabidClientsClientidHardwareGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></a></li>
   <li><a href="#ousOuidLabsLabidClientsClientidStatusGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></a></li>
   <li><a href="#ousOuidLabsLabidClientsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients</code></a></li>
+  <li><a href="#ousOuidImagesGet"><code><span class="http-method">get</span> /ous/{ouid}/images</code></a></li>
+  <li><a href="#ousOuidImagesImageidGet"><code><span class="http-method">get</span> /ous/{ouid}/images/{imageid}</code></a></li>
   <li><a href="#ousOuidLabsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs</code></a></li>
   <li><a href="#ousOuidLabsLabidGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}</code></a></li>
   <li><a href="#ousGet"><code><span class="http-method">get</span> /ous</code></a></li>
   <li><a href="#ousOuidGet"><code><span class="http-method">get</span> /ous/{ouid}</code></a></li>
+  <li><a href="#ousOuidReposGet"><code><span class="http-method">get</span> /ous/{ouid}/repos</code></a></li>
+  <li><a href="#ousOuidReposRepoidGet"><code><span class="http-method">get</span> /ous/{ouid}/repos/{repoid}</code></a></li>
+  <li><a href="#loginPost"><code><span class="http-method">post</span> /login</code></a></li>
+  <li><a href="#ousGet"><code><span class="http-method">get</span> /ous</code></a></li>
+  <li><a href="#ousOuidGet"><code><span class="http-method">get</span> /ous/{ouid}</code></a></li>
+  <li><a href="#ousOuidImagesGet"><code><span class="http-method">get</span> /ous/{ouid}/images</code></a></li>
+  <li><a href="#ousOuidImagesImageidGet"><code><span class="http-method">get</span> /ous/{ouid}/images/{imageid}</code></a></li>
+  <li><a href="#ousOuidLabsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs</code></a></li>
+  <li><a href="#ousOuidLabsLabidClientsClientidGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}</code></a></li>
+  <li><a href="#ousOuidLabsLabidClientsClientidHardwareGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></a></li>
+  <li><a href="#ousOuidLabsLabidClientsClientidStatusGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></a></li>
+  <li><a href="#ousOuidLabsLabidClientsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients</code></a></li>
+  <li><a href="#ousOuidLabsLabidGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}</code></a></li>
   <li><a href="#ousOuidReposGet"><code><span class="http-method">get</span> /ous/{ouid}/repos</code></a></li>
   <li><a href="#ousOuidReposRepoidGet"><code><span class="http-method">get</span> /ous/{ouid}/repos/{repoid}</code></a></li>
   <li><a href="#loginPost"><code><span class="http-method">post</span> /login</code></a></li>
@@ -241,7 +256,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_6">inline_response_200_6</a>
+      <a href="#inline_response_200_7">inline_response_200_7</a>
       
     </div>
 
@@ -255,7 +270,7 @@ font-style: italic;
   "boottype" : "aeiou",
   "ip" : "aeiou",
   "repo" : {
-    "id" : ""
+    "id" : 123
   },
   "netdriver" : "aeiou",
   "netiface" : "aeiou",
@@ -263,68 +278,8 @@ font-style: italic;
   "serialno" : "aeiou",
   "netmask" : "aeiou",
   "name" : "aeiou",
-  "id" : "",
+  "id" : 123,
   "validation" : true
-}</code></pre>
-
-    <h3 class="field-label">Produces</h3>
-    This API call produces the following media types according to the <span class="header">Accept</span> request header;
-    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
-    <ul>
-      <li><code>application/json</code></li>
-    </ul>
-
-    <h3 class="field-label">Responses</h3>
-    <h4 class="field-label">200</h4>
-    Successful response
-        <a href="#inline_response_200_6">inline_response_200_6</a>
-  </div> <!-- method -->
-  <hr/>
-  <div class="method"><a name="ousOuidLabsLabidClientsClientidHardwareGet"/>
-    <div class="method-path">
-    <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></pre></div>
-    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidHardwareGet</span>)</div>
-    <div class="method-notes">Get the hardware definition of a &#x60;client&#x60; object.</div>
-
-    <h3 class="field-label">Path parameters</h3>
-    <div class="field-items">
-      <div class="param">ouid (required)</div>
-
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
-
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
-
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
-    </div>  <!-- field-items -->
-
-    <h3 class="field-label">Consumes</h3>
-    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
-    <ul>
-      <li><code>application/json</code></li>
-    </ul>
-
-
-
-
-
-    <h3 class="field-label">Return type</h3>
-    <div class="return-type">
-      <a href="#inline_response_200_7">inline_response_200_7</a>
-      
-    </div>
-
-    <!--Todo: process Response Object and its headers, schema, examples -->
-
-    <h3 class="field-label">Example data</h3>
-    <div class="example-data-content-type">Content-Type: application/json</div>
-    <pre class="example"><code>{
-  "name" : "aeiou",
-  "id" : "",
-  "hardware" : [ {
-    "description" : "aeiou",
-    "type" : "aeiou"
-  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -340,12 +295,12 @@ font-style: italic;
         <a href="#inline_response_200_7">inline_response_200_7</a>
   </div> <!-- method -->
   <hr/>
-  <div class="method"><a name="ousOuidLabsLabidClientsClientidStatusGet"/>
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidHardwareGet"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
-    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></pre></div>
-    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidStatusGet</span>)</div>
-    <div class="method-notes">Get execution status of a &#x60;client&#x60;</div>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidHardwareGet</span>)</div>
+    <div class="method-notes">Get the hardware definition of a &#x60;client&#x60; object.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -379,9 +334,12 @@ font-style: italic;
     <h3 class="field-label">Example data</h3>
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
-  "ip" : "aeiou",
-  "id" : "",
-  "status" : "aeiou"
+  "name" : "aeiou",
+  "id" : 123,
+  "hardware" : [ {
+    "description" : "aeiou",
+    "type" : "aeiou"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -395,6 +353,63 @@ font-style: italic;
     <h4 class="field-label">200</h4>
     Successful response
         <a href="#inline_response_200_8">inline_response_200_8</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidStatusGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidStatusGet</span>)</div>
+    <div class="method-notes">Get execution status of a &#x60;client&#x60;</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_9">inline_response_200_9</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "ip" : "aeiou",
+  "id" : 123,
+  "status" : "aeiou"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_9">inline_response_200_9</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsGet"/>
@@ -425,7 +440,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_5">inline_response_200_5</a>]
+      array[<a href="#inline_response_200_6">inline_response_200_6</a>]
       
     </div>
 
@@ -435,10 +450,10 @@ font-style: italic;
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
   "ou" : {
-    "id" : ""
+    "id" : 123
   },
   "name" : "aeiou",
-  "id" : "",
+  "id" : 123,
   "lab" : ""
 } ]</code></pre>
 
@@ -453,6 +468,131 @@ font-style: italic;
     <h4 class="field-label">200</h4>
     Successful response
         
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidImagesGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/images</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidImagesGet</span>)</div>
+    <div class="method-notes">Get all &#x60;image&#x60; objects defined in an &#x60;OU&#x60;.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#inline_response_200_3">inline_response_200_3</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "ou" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "id" : 123,
+  "inremotepc" : true
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidImagesImageidGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/images/{imageid}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidImagesImageidGet</span>)</div>
+    <div class="method-notes">Get an &#x60;image&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">imageid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; image definition identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_4">inline_response_200_4</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "path" : "aeiou",
+  "creationdate" : "2000-01-23T04:56:07.000+00:00",
+  "release" : "aeiou",
+  "repo" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "description" : "aeiou",
+  "client" : {
+    "disk" : 123,
+    "partition" : 123,
+    "id" : 123
+  },
+  "id" : 123,
+  "inremotepc" : true,
+  "type" : "aeiou",
+  "baseimg" : "aeiou"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_4">inline_response_200_4</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsGet"/>
@@ -491,10 +631,10 @@ font-style: italic;
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
   "ou" : {
-    "id" : ""
+    "id" : 123
   },
   "name" : "aeiou",
-  "id" : "",
+  "id" : 123,
   "inremotepc" : true
 } ]</code></pre>
 
@@ -539,7 +679,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_4">inline_response_200_4</a>
+      <a href="#inline_response_200_5">inline_response_200_5</a>
       
     </div>
 
@@ -550,24 +690,24 @@ font-style: italic;
     <pre class="example"><code>{
   "image" : "aeiou",
   "routerip" : "aeiou",
-  "mcastport" : "",
+  "mcastport" : 123,
   "proxyurl" : "aeiou",
   "dns" : "aeiou",
   "mcastmode" : "aeiou",
   "description" : "aeiou",
   "inremotepc" : true,
   "ntp" : "aeiou",
-  "mcastspeed" : "",
-  "capacity" : "",
-  "defclients" : "",
+  "mcastspeed" : 123,
+  "capacity" : 123,
+  "defclients" : 123,
   "mcastip" : "aeiou",
   "projector" : true,
   "netmask" : "aeiou",
-  "p2ptime" : "",
+  "p2ptime" : 123,
   "name" : "aeiou",
   "p2pmode" : "aeiou",
   "location" : "aeiou",
-  "id" : "",
+  "id" : 123,
   "board" : true
 }</code></pre>
 
@@ -581,7 +721,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_4">inline_response_200_4</a>
+        <a href="#inline_response_200_5">inline_response_200_5</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousGet"/>
@@ -614,7 +754,7 @@ font-style: italic;
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
   "name" : "aeiou",
-  "id" : ""
+  "id" : 123
 } ]</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -709,7 +849,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_9">inline_response_200_9</a>]
+      array[<a href="#inline_response_200_10">inline_response_200_10</a>]
       
     </div>
 
@@ -719,10 +859,10 @@ font-style: italic;
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>[ {
   "ou" : {
-    "id" : ""
+    "id" : 123
   },
   "name" : "aeiou",
-  "id" : ""
+  "id" : 123
 } ]</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -766,7 +906,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_10">inline_response_200_10</a>
+      <a href="#inline_response_200_11">inline_response_200_11</a>
       
     </div>
 
@@ -778,7 +918,7 @@ font-style: italic;
   "ip" : "aeiou",
   "name" : "aeiou",
   "description" : "aeiou",
-  "id" : ""
+  "id" : 123
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -791,7 +931,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_10">inline_response_200_10</a>
+        <a href="#inline_response_200_11">inline_response_200_11</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="loginPost"/>
@@ -830,7 +970,773 @@ font-style: italic;
     <div class="example-data-content-type">Content-Type: application/json</div>
     <pre class="example"><code>{
   "apikey" : "aeiou",
-  "userid" : ""
+  "userid" : 123
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful login
+        <a href="#inline_response_200">inline_response_200</a>
+    <h4 class="field-label">400</h4>
+    Missing parameters
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Authentication error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousGet</span>)</div>
+    <div class="method-notes">Gets all &#x60;OU&#x60; objects.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#inline_response_200_1">inline_response_200_1</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "name" : "aeiou",
+  "id" : 123
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidGet</span>)</div>
+    <div class="method-notes">Get an &#x60;OU&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Organization Unit identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_2">inline_response_200_2</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "name" : "aeiou",
+  "description" : "aeiou",
+  "id" : ""
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_2">inline_response_200_2</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidImagesGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/images</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidImagesGet</span>)</div>
+    <div class="method-notes">Get all &#x60;image&#x60; objects defined in an &#x60;OU&#x60;.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#inline_response_200_3">inline_response_200_3</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "ou" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "id" : 123,
+  "inremotepc" : true
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidImagesImageidGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/images/{imageid}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidImagesImageidGet</span>)</div>
+    <div class="method-notes">Get an &#x60;image&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">imageid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; image definition identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_4">inline_response_200_4</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "path" : "aeiou",
+  "creationdate" : "2000-01-23T04:56:07.000+00:00",
+  "release" : "aeiou",
+  "repo" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "description" : "aeiou",
+  "client" : {
+    "disk" : 123,
+    "partition" : 123,
+    "id" : 123
+  },
+  "id" : 123,
+  "inremotepc" : true,
+  "type" : "aeiou",
+  "baseimg" : "aeiou"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_4">inline_response_200_4</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsGet</span>)</div>
+    <div class="method-notes">Get all &#x60;lab&#x60; objects defined in an &#x60;OU&#x60;.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#inline_response_200_3">inline_response_200_3</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "ou" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "id" : 123,
+  "inremotepc" : true
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidGet</span>)</div>
+    <div class="method-notes">Get a &#x60;client&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_7">inline_response_200_7</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "image" : "aeiou",
+  "routerip" : "aeiou",
+  "boottype" : "aeiou",
+  "ip" : "aeiou",
+  "repo" : {
+    "id" : 123
+  },
+  "netdriver" : "aeiou",
+  "netiface" : "aeiou",
+  "mac" : "aeiou",
+  "serialno" : "aeiou",
+  "netmask" : "aeiou",
+  "name" : "aeiou",
+  "id" : 123,
+  "validation" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_7">inline_response_200_7</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidHardwareGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidHardwareGet</span>)</div>
+    <div class="method-notes">Get the hardware definition of a &#x60;client&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_8">inline_response_200_8</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "name" : "aeiou",
+  "id" : 123,
+  "hardware" : [ {
+    "description" : "aeiou",
+    "type" : "aeiou"
+  } ]
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_8">inline_response_200_8</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidStatusGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidStatusGet</span>)</div>
+    <div class="method-notes">Get execution status of a &#x60;client&#x60;</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_9">inline_response_200_9</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "ip" : "aeiou",
+  "id" : 123,
+  "status" : "aeiou"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_9">inline_response_200_9</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidClientsGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsGet</span>)</div>
+    <div class="method-notes">Get all &#x60;client&#x60; objects defined in an &#x60;lab&#x60;.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#inline_response_200_6">inline_response_200_6</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "ou" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "id" : 123,
+  "lab" : ""
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidGet</span>)</div>
+    <div class="method-notes">Get a &#x60;lab&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; laboratory identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_5">inline_response_200_5</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "image" : "aeiou",
+  "routerip" : "aeiou",
+  "mcastport" : 123,
+  "proxyurl" : "aeiou",
+  "dns" : "aeiou",
+  "mcastmode" : "aeiou",
+  "description" : "aeiou",
+  "inremotepc" : true,
+  "ntp" : "aeiou",
+  "mcastspeed" : 123,
+  "capacity" : 123,
+  "defclients" : 123,
+  "mcastip" : "aeiou",
+  "projector" : true,
+  "netmask" : "aeiou",
+  "p2ptime" : 123,
+  "name" : "aeiou",
+  "p2pmode" : "aeiou",
+  "location" : "aeiou",
+  "id" : 123,
+  "board" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_5">inline_response_200_5</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidReposGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/repos</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidReposGet</span>)</div>
+    <div class="method-notes">Get all &#x60;repo&#x60; objects defined in an &#x60;OU&#x60;.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#inline_response_200_10">inline_response_200_10</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "ou" : {
+    "id" : 123
+  },
+  "name" : "aeiou",
+  "id" : 123
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidReposRepoidGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/repos/{repoid}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidReposRepoidGet</span>)</div>
+    <div class="method-notes">Get a &#x60;repo&#x60; object.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">repoid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; repository identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_11">inline_response_200_11</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "ip" : "aeiou",
+  "name" : "aeiou",
+  "description" : "aeiou",
+  "id" : 123
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_11">inline_response_200_11</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="loginPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /login</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">loginPost</span>)</div>
+    <div class="method-notes">Check user login and returns his/her API key.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">authdata (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; JSON authentication data </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200">inline_response_200</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "apikey" : "aeiou",
+  "userid" : 123
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -863,44 +1769,54 @@ font-style: italic;
     <li><a href="#inline_response_200"><code>inline_response_200</code></a></li>
     <li><a href="#inline_response_200_1"><code>inline_response_200_1</code></a></li>
     <li><a href="#inline_response_200_10"><code>inline_response_200_10</code></a></li>
+    <li><a href="#inline_response_200_11"><code>inline_response_200_11</code></a></li>
     <li><a href="#inline_response_200_2"><code>inline_response_200_2</code></a></li>
     <li><a href="#inline_response_200_3"><code>inline_response_200_3</code></a></li>
     <li><a href="#inline_response_200_4"><code>inline_response_200_4</code></a></li>
+    <li><a href="#inline_response_200_4_client"><code>inline_response_200_4_client</code></a></li>
+    <li><a href="#inline_response_200_4_repo"><code>inline_response_200_4_repo</code></a></li>
     <li><a href="#inline_response_200_5"><code>inline_response_200_5</code></a></li>
     <li><a href="#inline_response_200_6"><code>inline_response_200_6</code></a></li>
-    <li><a href="#inline_response_200_6_repo"><code>inline_response_200_6_repo</code></a></li>
     <li><a href="#inline_response_200_7"><code>inline_response_200_7</code></a></li>
-    <li><a href="#inline_response_200_7_hardware"><code>inline_response_200_7_hardware</code></a></li>
     <li><a href="#inline_response_200_8"><code>inline_response_200_8</code></a></li>
+    <li><a href="#inline_response_200_8_hardware"><code>inline_response_200_8_hardware</code></a></li>
     <li><a href="#inline_response_200_9"><code>inline_response_200_9</code></a></li>
-    <li><a href="#ousouidlabs_ou"><code>ousouidlabs_ou</code></a></li>
+    <li><a href="#ousouidimages_ou"><code>ousouidimages_ou</code></a></li>
   </ol>
 
   <div class="model">
     <h3 class="field-label"><a name="authdata">authdata</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  format: password</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200">inline_response_200</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">userid (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+      <div class="param">userid (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
 <div class="param">apikey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_1">inline_response_200_1</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_10">inline_response_200_10</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> repository id </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidimages_ou">ousouidimages_ou</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_11">inline_response_200_11</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> repository id format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> repository name </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> repository description </div>
 <div class="param">ip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> repository IP address </div>
@@ -917,22 +1833,52 @@ font-style: italic;
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_3">inline_response_200_3</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
-<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidlabs_ou">ousouidlabs_ou</a></span>  </div>
+<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidimages_ou">ousouidimages_ou</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_4">inline_response_200_4</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> laboratory identificator </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> image id format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image name </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image description </div>
+<div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> usable in Remote PC Project flag </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image type (&#x60;&#x60;monolithic&#x60;&#x60;, &#x60;&#x60;basic&#x60;&#x60;, &#x60;&#x60;incremental&#x60;&#x60;) </div>
+<div class="param">baseimg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> base image for an incremental image (if &#x60;&#x60;type&#x60;&#x60; is &#x60;&#x60;incremental&#x60;&#x60;) </div>
+<div class="param">path (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image path (if &#x60;&#x60;type&#x60;&#x60; is &#x60;&#x60;incremental&#x60;&#x60;) </div>
+<div class="param">repo (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_4_repo">inline_response_200_4_repo</a></span>  </div>
+<div class="param">client (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_4_client">inline_response_200_4_client</a></span>  </div>
+<div class="param">creationdate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> image creation date format: date-time</div>
+<div class="param">release (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image creation release </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_4_client">inline_response_200_4_client</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> model client&#39;s id. format: int32</div>
+<div class="param">disk (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> model client&#39;s id. format: int32</div>
+<div class="param">partition (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> model client&#39;s id. format: int32</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_4_repo">inline_response_200_4_repo</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_5">inline_response_200_5</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> laboratory identificator format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory name </div>
 <div class="param">location (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory location </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory description </div>
 <div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> check if this lab will be included in Remote PC Project </div>
-<div class="param">capacity (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> maximum number of people in the lab </div>
-<div class="param">defclients (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> number of defined clients in the lab </div>
+<div class="param">capacity (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> maximum number of people in the lab format: int32</div>
+<div class="param">defclients (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> number of defined clients in the lab format: int32</div>
 <div class="param">projector (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> check if this lab has a projector </div>
 <div class="param">board (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> check if this lab has an electronic board </div>
 <div class="param">routerip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> lab router IP address </div>
@@ -940,28 +1886,28 @@ font-style: italic;
 <div class="param">ntp (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> NTP server IP address </div>
 <div class="param">dns (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> DNS server IP address </div>
 <div class="param">proxyurl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Proxy server URL </div>
-<div class="param">mcastmode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Multicast protocol mode (\&quot;full-duplex\&quot;, \&quot;half-duplex\&quot;). </div>
+<div class="param">mcastmode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Multicast protocol mode (&#x60;&#x60;full-duplex&#x60;&#x60;, &#x60;&#x60;half-duplex&#x60;&#x60;). </div>
 <div class="param">mcastip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Multicast IP address </div>
-<div class="param">mcastport (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Multicast port </div>
-<div class="param">mcastspeed (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Multicast speed (in Mbps) </div>
+<div class="param">mcastport (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Multicast port format: int32</div>
+<div class="param">mcastspeed (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Multicast speed (in Mbps) format: int32</div>
 <div class="param">p2pmode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Bittorrent connection type (\&quot;peer\&quot;, \&quot;leecher\&quot;. \&quot;seeder\&quot;). </div>
-<div class="param">p2ptime (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Bittorrent connection extra time (in s.) </div>
+<div class="param">p2ptime (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Bittorrent connection extra time (in s.) format: int32</div>
 <div class="param">image (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Lab&#39;s picture file </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_5">inline_response_200_5</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidlabs_ou">ousouidlabs_ou</a></span>  </div>
-<div class="param">lab (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidlabs_ou">ousouidlabs_ou</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_6">inline_response_200_6</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidimages_ou">ousouidimages_ou</a></span>  </div>
+<div class="param">lab (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidimages_ou">ousouidimages_ou</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_7">inline_response_200_7</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client name </div>
 <div class="param">serialno (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client serial number </div>
 <div class="param">netiface (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> main network interface </div>
@@ -970,53 +1916,39 @@ font-style: italic;
 <div class="param">ip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client IP address </div>
 <div class="param">netmask (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> subnet mask address </div>
 <div class="param">routerip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> network router IP address </div>
-<div class="param">repo (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_6_repo">inline_response_200_6_repo</a></span>  </div>
+<div class="param">repo (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_4_repo">inline_response_200_4_repo</a></span>  </div>
 <div class="param">validation (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> boot validation flag </div>
 <div class="param">boottype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> boot template type </div>
 <div class="param">image (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client&#39;s picture file </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_6_repo">inline_response_200_6_repo</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="inline_response_200_8">inline_response_200_8</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_7">inline_response_200_7</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client name </div>
-<div class="param">hardware (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_7_hardware">array[inline_response_200_7_hardware]</a></span> hardware components </div>
+<div class="param">hardware (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_8_hardware">array[inline_response_200_8_hardware]</a></span> hardware components </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_7_hardware">inline_response_200_7_hardware</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="inline_response_200_8_hardware">inline_response_200_8_hardware</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> hardware component type </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> hardware component description </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_8">inline_response_200_8</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="inline_response_200_9">inline_response_200_9</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
 <div class="param">ip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client IP address </div>
 <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> execution status </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_9">inline_response_200_9</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="ousouidimages_ou">ousouidimages_ou</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidlabs_ou">ousouidlabs_ou</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3 class="field-label"><a name="ousouidlabs_ou">ousouidlabs_ou</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
     </div>  <!-- field-items -->
   </div>
   </body>

@@ -758,7 +758,7 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 		$response['description'] = $rs->campos["descripcion"];
 		$response['comments'] = $rs->campos["comentarios"];
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-		$response['repoid'] = $rs->campos["idrepositorio"];
+		$response['repo']['id'] = $rs->campos["idrepositorio"];
 		switch ($rs->campos["tipo"]) {
 			case 1:  $response['type'] = "monolithic"; break;
 			case 2:  $response['type'] = "base"; break;
@@ -769,9 +769,9 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 			default: $response['type'] = $rs->campos["tipo"];
 		}
 		if ($rs->campos["idordenador"] != 0) {
-			$response['clientid'] = $rs->campos["idordenador"];
-			$response['disk'] = $rs->campos["numdisk"];
-			$response['partition'] = $rs->campos["numpar"];
+			$response['client']['id'] = $rs->campos["idordenador"];
+			$response['client']['disk'] = $rs->campos["numdisk"];
+			$response['client']['partition'] = $rs->campos["numpar"];
 			$response['creationdate'] = $rs->campos["fechacreacion"];
 			$response['release'] = $rs->campos["revision"];
 		}

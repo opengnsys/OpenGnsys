@@ -6,13 +6,18 @@ swagger: '2.0'
 # This is your document metadata
 info:
   version: "1.1.0"
-  title: OpenGnsys Server REST API
+  title: OpenGnsys REST API
   description: |
-    Information about OpenGnsys Server REST API functions.
+    Information about the OpenGnsys REST API functions (including Server and
+    Repository Manager).
+  contact:
+    name: OpenGnsys Project
+    url: http://opengnsys.es/
+    email: opengnsys-devel@listas.unizar.es
   license:
     name: Creative Commons 4.0 International
     url: http://creativecommons.org/licenses/by/4.0/
-basePath: /rest
+basePath: /opengnsys/rest
 schemes:
   - https
 consumes:
@@ -41,6 +46,7 @@ paths:
                 type: string
               password:
                 type: string
+                format: password
       responses:
         "200":
           description: Successful login
@@ -49,6 +55,7 @@ paths:
             properties:
               userid:
                 type: integer
+                format: int32
               apikey:
                 type: string
         "400":
@@ -56,6 +63,7 @@ paths:
         "500":
           description: Authentication error
       tags:
+        - server
         - user
   /ous:
     get:
@@ -70,9 +78,11 @@ paths:
               properties:
                 id:
                   type: integer
+                  format: int32
                 name:
                   type: string
       tags:
+        - server
         - ou
   /ous/{ouid}:
     get:
@@ -98,6 +108,7 @@ paths:
       security:
         - apikey: []
       tags:
+        - server
         - ou
   /ous/{ouid}/labs:
     get:
@@ -118,6 +129,7 @@ paths:
               properties:
                 id:
                   type: integer
+                  format: int32
                 name:
                   type: string
                 inremotepc:
@@ -127,9 +139,11 @@ paths:
                   properties:
                     id:
                       type: integer
+                      format: int32
       security:
         - apikey: []
       tags:
+        - server
         - lab
   /ous/{ouid}/labs/{labid}:
     get:
@@ -154,6 +168,7 @@ paths:
               id:
                 description: laboratory identificator
                 type: integer
+                format: int32
               name:
                 description: laboratory name
                 type: string
@@ -169,9 +184,11 @@ paths:
               capacity:
                 description: maximum number of people in the lab
                 type: integer
+                format: int32
               defclients:
                 description: number of defined clients in the lab
                 type: integer
+                format: int32
               projector:
                 description: check if this lab has a projector
                 type: boolean
@@ -194,7 +211,7 @@ paths:
                 description: Proxy server URL
                 type: string
               mcastmode:
-                description: Multicast protocol mode ("full-duplex", "half-duplex").
+                description: Multicast protocol mode (``full-duplex``, ``half-duplex``).
                 type: string
               mcastip:
                 description: Multicast IP address
@@ -202,21 +219,25 @@ paths:
               mcastport:
                 description: Multicast port
                 type: integer
+                format: int32
               mcastspeed:
                 description: Multicast speed (in Mbps)
                 type: integer
+                format: int32
               p2pmode:
                 description: Bittorrent connection type ("peer", "leecher". "seeder").
                 type: string
               p2ptime:
                 description: Bittorrent connection extra time (in s.)
                 type: integer
+                format: int32
               image:
                 description: Lab's picture file
                 type: string
       security:
         - apikey: []
       tags:
+        - server
         - lab
   /ous/{ouid}/labs/{labid}/clients:
     get:
@@ -242,6 +263,7 @@ paths:
               properties:
                 id:
                   type: integer
+                  format: int32
                 name:
                   type: string
                 ou:
@@ -249,14 +271,17 @@ paths:
                   properties:
                     id:
                       type: integer
+                      format: int32
                 lab:
                   type: object
                   properties:
                     id:
                       type: integer
+                      format: int32
       security:
         - apikey: []
       tags:
+        - server
         - client
   /ous/{ouid}/labs/{labid}/clients/{clientid}:
     get:
@@ -286,6 +311,7 @@ paths:
               id:
                 description: client id
                 type: integer
+                format: int32
               name:
                 description: client name
                 type: string
@@ -316,6 +342,7 @@ paths:
                 properties:
                   id:
                     type: integer
+                    format: int32
               validation:
                 description: boot validation flag
                 type: boolean
@@ -328,6 +355,7 @@ paths:
       security:
         - apikey: []
       tags:
+        - server
         - client
   /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware:
     get:
@@ -357,6 +385,7 @@ paths:
               id:
                 description: client id
                 type: integer
+                format: int32
               name:
                 description: client name
                 type: string
@@ -373,6 +402,7 @@ paths:
                       description: hardware component description
                       type: string
       tags:
+        - server
         - client
   #/ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg:
   #  get:
@@ -380,6 +410,7 @@ paths:
   #    parameters:
   #    ....
   #    tags:
+  #      - server
   #      - client
   /ous/{ouid}/labs/{labid}/clients/{clientid}/status:
     get:
@@ -409,6 +440,7 @@ paths:
               id:
                 description: client id
                 type: integer
+                format: int32
               ip:
                 description: client IP address
                 type: string
@@ -416,6 +448,7 @@ paths:
                 description: execution status
                 type: string
       tags:
+        - server
         - client
   /ous/{ouid}/repos:
     get:
@@ -436,6 +469,7 @@ paths:
               properties:
                 id:
                   type: integer
+                  format: int32
                 name:
                   type: string
                 ou:
@@ -443,9 +477,11 @@ paths:
                   properties:
                     id:
                       type: integer
+                      format: int32
       security:
         - apikey: []
       tags:
+        - server
         - repo
   /ous/{ouid}/repos/{repoid}:
     get:
@@ -470,6 +506,7 @@ paths:
               id:
                 description: repository id
                 type: integer
+                format: int32
               name:
                 description: repository name
                 type: string
@@ -482,8 +519,125 @@ paths:
       security:
         - apikey: []
       tags:
+        - server
         - repo
-  #/ous/{ouid}/images:
-  #/ous/{ouid}/images/{imageid}:
+  /ous/{ouid}/images:
+    get:
+      description: Get all `image` objects defined in an `OU`.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                name:
+                  type: string
+                inremotepc:
+                  type: boolean
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int32
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
+  /ous/{ouid}/images/{imageid}:
+    get:
+      description: Get an `image` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: imageid
+          in: path
+          description: image definition identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: image id
+                type: integer
+                format: int32
+              name:
+                description: image name
+                type: string
+              description:
+                description: image description
+                type: string
+              inremotepc:
+                description: usable in Remote PC Project flag
+                type: boolean
+              type:
+                description: image type (``monolithic``, ``basic``, ``incremental``)
+                type: string
+              baseimg:
+                description: base image for an incremental image (if ``type`` is ``incremental``)
+                type: string
+              path:
+                description: image path (if ``type`` is ``incremental``)
+                type: string
+              repo:
+                description: repository identification
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int32
+              client:
+                description: model client's data
+                type: object
+                properties:
+                  id:
+                    description: model client's id.
+                    type: integer
+                    format: int32
+                  disk:
+                    description: model client's id.
+                    type: integer
+                    format: int32
+                  partition:
+                    description: model client's id.
+                    type: integer
+                    format: int32
+              creationdate:
+                description: image creation date
+                type: string
+                format: date-time
+              release:
+                description: image creation release
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
   #/ous/{ouid}/images/{imageid}/software:
   #/ous/{ouid}/images/{imageid}/boot:
+  #/repository/images
+  #/repository/poweron
+  #/ogagent/started
+  #/ogagent/stopped
+  #/ogagent/loggedin
+  #/ogagent/loggedout
