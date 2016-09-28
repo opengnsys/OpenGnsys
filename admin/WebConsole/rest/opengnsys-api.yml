@@ -6,7 +6,7 @@ swagger: '2.0'
 # This is your document metadata
 info:
   version: "1.1.0"
-  title: OpenGnsys REST API
+  title: OpenGnsys REST API definition
   description: |
     Information about the OpenGnsys REST API functions (including Server and
     Repository Manager).
@@ -55,8 +55,10 @@ paths:
             properties:
               userid:
                 type: integer
+                description: user identificator
                 format: int32
               apikey:
+                description: API key to include in ``Authorization`` header
                 type: string
         "400":
           description: Missing parameters
@@ -78,9 +80,12 @@ paths:
               properties:
                 id:
                   type: integer
+                  description: Organization Unit identificator
                   format: int32
+                  minimum: 1
                 name:
                   type: string
+                  description: Organization Unit name
       tags:
         - server
         - ou
@@ -101,10 +106,13 @@ paths:
             properties:
               id:
                 type: integer
+                description: OU identificator
               name:
                 type: string
+                description: OU name
               description:
                 type: string
+                description: OU description
       security:
         - apikey: []
       tags:
@@ -129,16 +137,20 @@ paths:
               properties:
                 id:
                   type: integer
+                  description: laboratory identificator
                   format: int32
                 name:
                   type: string
+                  description: laboratory name
                 inremotepc:
                   type: boolean
+                  description: laboratory usable in Remote PC Project flag
                 ou:
                   type: object
                   properties:
                     id:
                       type: integer
+                      description: OU identificator
                       format: int32
       security:
         - apikey: []
@@ -179,7 +191,7 @@ paths:
                 description: laboratory description
                 type: string
               inremotepc:
-                description: check if this lab will be included in Remote PC Project
+                description: check if this lab can be included in Remote PC Project
                 type: boolean
               capacity:
                 description: maximum number of people in the lab
@@ -211,8 +223,10 @@ paths:
                 description: Proxy server URL
                 type: string
               mcastmode:
-                description: Multicast protocol mode (``full-duplex``, ``half-duplex``).
+                description: Multicast protocol mode (full-duplex, half-duplex).
                 type: string
+                enum: [ "full-duplex", "half-duplex" ]
+                default: "full-duplex"
               mcastip:
                 description: Multicast IP address
                 type: string
@@ -404,14 +418,94 @@ paths:
       tags:
         - server
         - client
-  #/ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg:
-  #  get:
-  #    description: Get disks configuration of a `client`
-  #    parameters:
-  #    ....
-  #    tags:
-  #      - server
-  #      - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg:
+    get:
+      description: Get disks configuration of a `client`
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+                format: int32
+              name:
+                description: client name
+                type: string
+              diskcfg:
+                description: |
+                  array of disk configuration data, including general disk information and
+                  partition/filesystem information (if not specified in paratmeter
+                  description, it is only valid in partition configuration).
+                type: array
+                items:
+                  type: object
+                  properties:
+                    disk:
+                      description: disk number (only for disks configurations)
+                      type: integer
+                      format: int32
+                    parttable:
+                      description: partition table type (only for disks configurations)
+                      type: string
+                      enum: [ "MSDOS", "GPT", "LVM", "ZVOL" ]
+                    partition:
+                      description: partition number
+                      type: integer
+                      format: int32
+                      minimum: 1
+                    parttype:
+                      description: partition type
+                      type: string
+                    size:
+                      description: disk size (used in both, disk and partition configuration)
+                      type: integer
+                      format: int64
+                    filesystem:
+                      description: filesystem type
+                      type: string
+                    usage:
+                      description: data usage percentage in a formated filesystem
+                      type: integer
+                      format: int32
+                    os:
+                      description: installed operating system
+                      type: string
+                    image:
+                      description: restaured image data (if needed)
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int32
+                        deploydate:
+                          description: image restauration/deploying date
+                          type: string
+                          format: date-time
+                        updated:
+                          description: flag to check if the restaured image is updated
+                          type: boolean
+      tags:
+        - server
+        - client
   /ous/{ouid}/labs/{labid}/clients/{clientid}/status:
     get:
       description: Get execution status of a `client`
@@ -447,6 +541,10 @@ paths:
               status:
                 description: execution status
                 type: string
+                enum: [ "nodata", "off", "ogclient", "busy", "linux", "windows", "unknown" ]
+#              usersession:
+#                description: flag to check if an user has session oppened
+#                type: boolean
       tags:
         - server
         - client
@@ -587,7 +685,7 @@ paths:
                 description: image description
                 type: string
               inremotepc:
-                description: usable in Remote PC Project flag
+                description: image usable in Remote PC Project flag
                 type: boolean
               type:
                 description: image type (``monolithic``, ``basic``, ``incremental``)
@@ -614,11 +712,11 @@ paths:
                     type: integer
                     format: int32
                   disk:
-                    description: model client's id.
+                    description: source disk number
                     type: integer
                     format: int32
                   partition:
-                    description: model client's id.
+                    description: source partition number
                     type: integer
                     format: int32
               creationdate:
@@ -633,7 +731,45 @@ paths:
       tags:
         - server
         - image
-  #/ous/{ouid}/images/{imageid}/software:
+  /ous/{ouid}/images/{imageid}/software:
+    get:
+      description: Get software inventory store into an `image`
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: imageid
+          in: path
+          description: image definition identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: image id
+                type: integer
+                format: int32
+              name:
+                description: image name
+                type: string
+              os:
+                description: installed operating system
+                type: string
+              software:
+                description: array of installed applications
+                type: array
+                items:
+                  type: object
+                  properties:
+                    application:
+                      description: application name and version
+                      type: string
   #/ous/{ouid}/images/{imageid}/boot:
   #/repository/images
   #/repository/poweron

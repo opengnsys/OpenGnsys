@@ -546,10 +546,12 @@ EOD;
 				$tmp['usage'] = $rs->campos["uso"];
 				if ($rs->campos["nombreso"] != null) {
 					$tmp['os'] = $rs->campos["nombreso"];
-					$tmp['imageid'] = $rs->campos["idimagen"];
-					$tmp['deploydate'] = $rs->campos["fechadespliegue"];
-					// Comprobar si la imagen está actualizada.
-					$tmp['updated'] = ($rs->campos["difimagen"]>0 ? "false" : "true");
+					if ($rs->campos["idimagen"] > 0) {
+						$tmp['image']['id'] = $rs->campos["idimagen"];
+						$tmp['image']['deploydate'] = $rs->campos["fechadespliegue"];
+						// Comprobar si la imagen está actualizada.
+						$tmp['image']['updated'] = ($rs->campos["difimagen"]>0 ? "false" : "true");
+					}
 				}
 				//$tmp['cachedata'] = $rs->campos["cache"];
 			}

@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>OpenGnsys REST API</title>
+    <title>OpenGnsys REST API definition</title>
     <style type="text/css">
       body { 
 	font-family: Trebuchet MS, sans-serif;
@@ -179,7 +179,7 @@ font-style: italic;
     </style>
   </head>
   <body>
-  <h1>OpenGnsys REST API</h1>
+  <h1>OpenGnsys REST API definition</h1>
     <div class="app-desc">Information about the OpenGnsys REST API functions (including Server and Repository Manager). </div>
     <div class="app-desc">More information: <a href="http://opengnsys.es/">http://opengnsys.es/</a></div>
     <div class="app-desc">Contact Info: <a href="opengnsys-devel@listas.unizar.es">opengnsys-devel@listas.unizar.es</a></div>
@@ -198,24 +198,13 @@ font-style: italic;
   <h2>Table of Contents </h2>
   <div class="method-summary"></div>
   <ol>
-  <li><a href="#ousOuidLabsLabidClientsClientidGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}</code></a></li>
-  <li><a href="#ousOuidLabsLabidClientsClientidHardwareGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></a></li>
-  <li><a href="#ousOuidLabsLabidClientsClientidStatusGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></a></li>
-  <li><a href="#ousOuidLabsLabidClientsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients</code></a></li>
-  <li><a href="#ousOuidImagesGet"><code><span class="http-method">get</span> /ous/{ouid}/images</code></a></li>
-  <li><a href="#ousOuidImagesImageidGet"><code><span class="http-method">get</span> /ous/{ouid}/images/{imageid}</code></a></li>
-  <li><a href="#ousOuidLabsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs</code></a></li>
-  <li><a href="#ousOuidLabsLabidGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}</code></a></li>
-  <li><a href="#ousGet"><code><span class="http-method">get</span> /ous</code></a></li>
-  <li><a href="#ousOuidGet"><code><span class="http-method">get</span> /ous/{ouid}</code></a></li>
-  <li><a href="#ousOuidReposGet"><code><span class="http-method">get</span> /ous/{ouid}/repos</code></a></li>
-  <li><a href="#ousOuidReposRepoidGet"><code><span class="http-method">get</span> /ous/{ouid}/repos/{repoid}</code></a></li>
-  <li><a href="#loginPost"><code><span class="http-method">post</span> /login</code></a></li>
   <li><a href="#ousGet"><code><span class="http-method">get</span> /ous</code></a></li>
   <li><a href="#ousOuidGet"><code><span class="http-method">get</span> /ous/{ouid}</code></a></li>
   <li><a href="#ousOuidImagesGet"><code><span class="http-method">get</span> /ous/{ouid}/images</code></a></li>
   <li><a href="#ousOuidImagesImageidGet"><code><span class="http-method">get</span> /ous/{ouid}/images/{imageid}</code></a></li>
+  <li><a href="#ousOuidImagesImageidSoftwareGet"><code><span class="http-method">get</span> /ous/{ouid}/images/{imageid}/software</code></a></li>
   <li><a href="#ousOuidLabsGet"><code><span class="http-method">get</span> /ous/{ouid}/labs</code></a></li>
+  <li><a href="#ousOuidLabsLabidClientsClientidDiskcfgGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg</code></a></li>
   <li><a href="#ousOuidLabsLabidClientsClientidGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}</code></a></li>
   <li><a href="#ousOuidLabsLabidClientsClientidHardwareGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware</code></a></li>
   <li><a href="#ousOuidLabsLabidClientsClientidStatusGet"><code><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/status</code></a></li>
@@ -226,6 +215,77 @@ font-style: italic;
   <li><a href="#loginPost"><code><span class="http-method">post</span> /login</code></a></li>
   </ol>
 
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidDiskcfgGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidDiskcfgGet</span>)</div>
+    <div class="method-notes">Get disks configuration of a &#x60;client&#x60;</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_10">inline_response_200_10</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "diskcfg" : [ {
+    "parttable" : "aeiou",
+    "image" : {
+      "deploydate" : "2000-01-23T04:56:07.000+00:00",
+      "id" : 123,
+      "updated" : true
+    },
+    "disk" : 123,
+    "partition" : 123,
+    "size" : 123456789,
+    "os" : "aeiou",
+    "usage" : 123,
+    "parttype" : "aeiou",
+    "filesystem" : "aeiou"
+  } ],
+  "name" : "aeiou",
+  "id" : 123
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_10">inline_response_200_10</a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsClientidGet"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -256,7 +316,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_7">inline_response_200_7</a>
+      <a href="#inline_response_200_9">inline_response_200_9</a>
       
     </div>
 
@@ -292,7 +352,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_7">inline_response_200_7</a>
+        <a href="#inline_response_200_9">inline_response_200_9</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsClientidHardwareGet"/>
@@ -325,7 +385,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_8">inline_response_200_8</a>
+      <a href="#inline_response_200_11">inline_response_200_11</a>
       
     </div>
 
@@ -352,7 +412,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_8">inline_response_200_8</a>
+        <a href="#inline_response_200_11">inline_response_200_11</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsClientidStatusGet"/>
@@ -385,7 +445,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_9">inline_response_200_9</a>
+      <a href="#inline_response_200_12">inline_response_200_12</a>
       
     </div>
 
@@ -409,7 +469,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_9">inline_response_200_9</a>
+        <a href="#inline_response_200_12">inline_response_200_12</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsGet"/>
@@ -440,7 +500,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_6">inline_response_200_6</a>]
+      array[<a href="#inline_response_200_8">inline_response_200_8</a>]
       
     </div>
 
@@ -468,6 +528,64 @@ font-style: italic;
     <h4 class="field-label">200</h4>
     Successful response
         
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidImagesImageidSoftwareGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/images/{imageid}/software</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidImagesImageidSoftwareGet</span>)</div>
+    <div class="method-notes">Get software inventory store into an &#x60;image&#x60;</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">imageid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; image definition identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_5">inline_response_200_5</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "os" : "aeiou",
+  "software" : [ {
+    "application" : "aeiou"
+  } ],
+  "name" : "aeiou",
+  "id" : 123
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_5">inline_response_200_5</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidImagesGet"/>
@@ -621,7 +739,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_3">inline_response_200_3</a>]
+      array[<a href="#inline_response_200_6">inline_response_200_6</a>]
       
     </div>
 
@@ -679,7 +797,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_5">inline_response_200_5</a>
+      <a href="#inline_response_200_7">inline_response_200_7</a>
       
     </div>
 
@@ -721,7 +839,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_5">inline_response_200_5</a>
+        <a href="#inline_response_200_7">inline_response_200_7</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousGet"/>
@@ -849,7 +967,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_10">inline_response_200_10</a>]
+      array[<a href="#inline_response_200_13">inline_response_200_13</a>]
       
     </div>
 
@@ -906,7 +1024,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_11">inline_response_200_11</a>
+      <a href="#inline_response_200_14">inline_response_200_14</a>
       
     </div>
 
@@ -931,7 +1049,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_11">inline_response_200_11</a>
+        <a href="#inline_response_200_14">inline_response_200_14</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="loginPost"/>
@@ -1242,7 +1360,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_3">inline_response_200_3</a>]
+      array[<a href="#inline_response_200_6">inline_response_200_6</a>]
       
     </div>
 
@@ -1270,6 +1388,77 @@ font-style: italic;
     <h4 class="field-label">200</h4>
     Successful response
         
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="ousOuidLabsLabidClientsClientidDiskcfgGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">ousOuidLabsLabidClientsClientidDiskcfgGet</span>)</div>
+    <div class="method-notes">Get disks configuration of a &#x60;client&#x60;</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ouid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; OU identificator </div><div class="param">labid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Lab identificator </div><div class="param">clientid (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Client identificator </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#inline_response_200_10">inline_response_200_10</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "diskcfg" : [ {
+    "parttable" : "aeiou",
+    "image" : {
+      "deploydate" : "2000-01-23T04:56:07.000+00:00",
+      "id" : 123,
+      "updated" : true
+    },
+    "disk" : 123,
+    "partition" : 123,
+    "size" : 123456789,
+    "os" : "aeiou",
+    "usage" : 123,
+    "parttype" : "aeiou",
+    "filesystem" : "aeiou"
+  } ],
+  "name" : "aeiou",
+  "id" : 123
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#inline_response_200_10">inline_response_200_10</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsClientidGet"/>
@@ -1302,7 +1491,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_7">inline_response_200_7</a>
+      <a href="#inline_response_200_9">inline_response_200_9</a>
       
     </div>
 
@@ -1338,7 +1527,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_7">inline_response_200_7</a>
+        <a href="#inline_response_200_9">inline_response_200_9</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsClientidHardwareGet"/>
@@ -1371,7 +1560,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_8">inline_response_200_8</a>
+      <a href="#inline_response_200_11">inline_response_200_11</a>
       
     </div>
 
@@ -1398,7 +1587,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_8">inline_response_200_8</a>
+        <a href="#inline_response_200_11">inline_response_200_11</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsClientidStatusGet"/>
@@ -1431,7 +1620,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_9">inline_response_200_9</a>
+      <a href="#inline_response_200_12">inline_response_200_12</a>
       
     </div>
 
@@ -1455,7 +1644,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_9">inline_response_200_9</a>
+        <a href="#inline_response_200_12">inline_response_200_12</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidLabsLabidClientsGet"/>
@@ -1486,7 +1675,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_6">inline_response_200_6</a>]
+      array[<a href="#inline_response_200_8">inline_response_200_8</a>]
       
     </div>
 
@@ -1544,7 +1733,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_5">inline_response_200_5</a>
+      <a href="#inline_response_200_7">inline_response_200_7</a>
       
     </div>
 
@@ -1586,7 +1775,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_5">inline_response_200_5</a>
+        <a href="#inline_response_200_7">inline_response_200_7</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="ousOuidReposGet"/>
@@ -1615,7 +1804,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      array[<a href="#inline_response_200_10">inline_response_200_10</a>]
+      array[<a href="#inline_response_200_13">inline_response_200_13</a>]
       
     </div>
 
@@ -1672,7 +1861,7 @@ font-style: italic;
 
     <h3 class="field-label">Return type</h3>
     <div class="return-type">
-      <a href="#inline_response_200_11">inline_response_200_11</a>
+      <a href="#inline_response_200_14">inline_response_200_14</a>
       
     </div>
 
@@ -1697,7 +1886,7 @@ font-style: italic;
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
     Successful response
-        <a href="#inline_response_200_11">inline_response_200_11</a>
+        <a href="#inline_response_200_14">inline_response_200_14</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="loginPost"/>
@@ -1769,19 +1958,26 @@ font-style: italic;
     <li><a href="#inline_response_200"><code>inline_response_200</code></a></li>
     <li><a href="#inline_response_200_1"><code>inline_response_200_1</code></a></li>
     <li><a href="#inline_response_200_10"><code>inline_response_200_10</code></a></li>
+    <li><a href="#inline_response_200_10_diskcfg"><code>inline_response_200_10_diskcfg</code></a></li>
+    <li><a href="#inline_response_200_10_image"><code>inline_response_200_10_image</code></a></li>
     <li><a href="#inline_response_200_11"><code>inline_response_200_11</code></a></li>
+    <li><a href="#inline_response_200_11_hardware"><code>inline_response_200_11_hardware</code></a></li>
+    <li><a href="#inline_response_200_12"><code>inline_response_200_12</code></a></li>
+    <li><a href="#inline_response_200_13"><code>inline_response_200_13</code></a></li>
+    <li><a href="#inline_response_200_14"><code>inline_response_200_14</code></a></li>
     <li><a href="#inline_response_200_2"><code>inline_response_200_2</code></a></li>
     <li><a href="#inline_response_200_3"><code>inline_response_200_3</code></a></li>
     <li><a href="#inline_response_200_4"><code>inline_response_200_4</code></a></li>
     <li><a href="#inline_response_200_4_client"><code>inline_response_200_4_client</code></a></li>
     <li><a href="#inline_response_200_4_repo"><code>inline_response_200_4_repo</code></a></li>
     <li><a href="#inline_response_200_5"><code>inline_response_200_5</code></a></li>
+    <li><a href="#inline_response_200_5_software"><code>inline_response_200_5_software</code></a></li>
     <li><a href="#inline_response_200_6"><code>inline_response_200_6</code></a></li>
     <li><a href="#inline_response_200_7"><code>inline_response_200_7</code></a></li>
     <li><a href="#inline_response_200_8"><code>inline_response_200_8</code></a></li>
-    <li><a href="#inline_response_200_8_hardware"><code>inline_response_200_8_hardware</code></a></li>
     <li><a href="#inline_response_200_9"><code>inline_response_200_9</code></a></li>
     <li><a href="#ousouidimages_ou"><code>ousouidimages_ou</code></a></li>
+    <li><a href="#ousouidlabs_ou"><code>ousouidlabs_ou</code></a></li>
   </ol>
 
   <div class="model">
@@ -1794,19 +1990,76 @@ font-style: italic;
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200">inline_response_200</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">userid (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
-<div class="param">apikey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">userid (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> user identificator format: int32</div>
+<div class="param">apikey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> API key to include in &#x60;&#x60;Authorization&#x60;&#x60; header </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_1">inline_response_200_1</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Organization Unit identificator format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Organization Unit name </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_10">inline_response_200_10</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client name </div>
+<div class="param">diskcfg (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_10_diskcfg">array[inline_response_200_10_diskcfg]</a></span> array of disk configuration data, including general disk information and partition/filesystem information (if not specified in paratmeter description, it is only valid in partition configuration).  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_10_diskcfg">inline_response_200_10_diskcfg</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">disk (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> disk number (only for disks configurations) format: int32</div>
+<div class="param">parttable (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> partition table type (only for disks configurations) </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">MSDOS</div><div class="param-enum">GPT</div><div class="param-enum">LVM</div><div class="param-enum">ZVOL</div>
+<div class="param">partition (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> partition number format: int32</div>
+<div class="param">parttype (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> partition type </div>
+<div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span> disk size (used in both, disk and partition configuration) format: int64</div>
+<div class="param">filesystem (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> filesystem type </div>
+<div class="param">usage (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> data usage percentage in a formated filesystem format: int32</div>
+<div class="param">os (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> installed operating system </div>
+<div class="param">image (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_10_image">inline_response_200_10_image</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_10_image">inline_response_200_10_image</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+<div class="param">deploydate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> image restauration/deploying date format: date-time</div>
+<div class="param">updated (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> flag to check if the restaured image is updated </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_11">inline_response_200_11</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client name </div>
+<div class="param">hardware (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_11_hardware">array[inline_response_200_11_hardware]</a></span> hardware components </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_11_hardware">inline_response_200_11_hardware</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> hardware component type </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> hardware component description </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_12">inline_response_200_12</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
+<div class="param">ip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client IP address </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> execution status </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">nodata</div><div class="param-enum">off</div><div class="param-enum">ogclient</div><div class="param-enum">busy</div><div class="param-enum">linux</div><div class="param-enum">windows</div><div class="param-enum">unknown</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_13">inline_response_200_13</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
@@ -1814,7 +2067,7 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_11">inline_response_200_11</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="inline_response_200_14">inline_response_200_14</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> repository id format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> repository name </div>
@@ -1825,9 +2078,9 @@ font-style: italic;
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_2">inline_response_200_2</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> OU identificator </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> OU name </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> OU description </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1845,7 +2098,7 @@ font-style: italic;
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> image id format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image name </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image description </div>
-<div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> usable in Remote PC Project flag </div>
+<div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> image usable in Remote PC Project flag </div>
 <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image type (&#x60;&#x60;monolithic&#x60;&#x60;, &#x60;&#x60;basic&#x60;&#x60;, &#x60;&#x60;incremental&#x60;&#x60;) </div>
 <div class="param">baseimg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> base image for an incremental image (if &#x60;&#x60;type&#x60;&#x60; is &#x60;&#x60;incremental&#x60;&#x60;) </div>
 <div class="param">path (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image path (if &#x60;&#x60;type&#x60;&#x60; is &#x60;&#x60;incremental&#x60;&#x60;) </div>
@@ -1859,8 +2112,8 @@ font-style: italic;
     <h3 class="field-label"><a name="inline_response_200_4_client">inline_response_200_4_client</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> model client&#39;s id. format: int32</div>
-<div class="param">disk (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> model client&#39;s id. format: int32</div>
-<div class="param">partition (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> model client&#39;s id. format: int32</div>
+<div class="param">disk (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> source disk number format: int32</div>
+<div class="param">partition (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> source partition number format: int32</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1872,11 +2125,35 @@ font-style: italic;
   <div class="model">
     <h3 class="field-label"><a name="inline_response_200_5">inline_response_200_5</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> image id format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> image name </div>
+<div class="param">os (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> installed operating system </div>
+<div class="param">software (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_5_software">array[inline_response_200_5_software]</a></span> array of installed applications </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_5_software">inline_response_200_5_software</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">application (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> application name and version </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_6">inline_response_200_6</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> laboratory identificator format: int32</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory name </div>
+<div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> laboratory usable in Remote PC Project flag </div>
+<div class="param">ou (optional)</div><div class="param-desc"><span class="param-type"><a href="#ousouidlabs_ou">ousouidlabs_ou</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="inline_response_200_7">inline_response_200_7</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> laboratory identificator format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory name </div>
 <div class="param">location (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory location </div>
 <div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> laboratory description </div>
-<div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> check if this lab will be included in Remote PC Project </div>
+<div class="param">inremotepc (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> check if this lab can be included in Remote PC Project </div>
 <div class="param">capacity (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> maximum number of people in the lab format: int32</div>
 <div class="param">defclients (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> number of defined clients in the lab format: int32</div>
 <div class="param">projector (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> check if this lab has a projector </div>
@@ -1886,7 +2163,9 @@ font-style: italic;
 <div class="param">ntp (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> NTP server IP address </div>
 <div class="param">dns (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> DNS server IP address </div>
 <div class="param">proxyurl (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Proxy server URL </div>
-<div class="param">mcastmode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Multicast protocol mode (&#x60;&#x60;full-duplex&#x60;&#x60;, &#x60;&#x60;half-duplex&#x60;&#x60;). </div>
+<div class="param">mcastmode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Multicast protocol mode (full-duplex, half-duplex). </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">full-duplex</div><div class="param-enum">half-duplex</div>
 <div class="param">mcastip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Multicast IP address </div>
 <div class="param">mcastport (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Multicast port format: int32</div>
 <div class="param">mcastspeed (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Multicast speed (in Mbps) format: int32</div>
@@ -1896,7 +2175,7 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_6">inline_response_200_6</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="inline_response_200_8">inline_response_200_8</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
@@ -1905,7 +2184,7 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_7">inline_response_200_7</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3 class="field-label"><a name="inline_response_200_9">inline_response_200_9</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client name </div>
@@ -1923,32 +2202,15 @@ font-style: italic;
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_8">inline_response_200_8</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
-<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client name </div>
-<div class="param">hardware (optional)</div><div class="param-desc"><span class="param-type"><a href="#inline_response_200_8_hardware">array[inline_response_200_8_hardware]</a></span> hardware components </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_8_hardware">inline_response_200_8_hardware</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class="field-items">
-      <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> hardware component type </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> hardware component description </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3 class="field-label"><a name="inline_response_200_9">inline_response_200_9</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class="field-items">
-      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> client id format: int32</div>
-<div class="param">ip (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> client IP address </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> execution status </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3 class="field-label"><a name="ousouidimages_ou">ousouidimages_ou</a> <a class="up" href="#__Models">Up</a></h3>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3 class="field-label"><a name="ousouidlabs_ou">ousouidlabs_ou</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> OU identificator format: int32</div>
     </div>  <!-- field-items -->
   </div>
   </body>
