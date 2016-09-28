@@ -587,10 +587,7 @@ EOD;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	if (checkParameter($rs->campos["idordenador"])) {
-		//
-		// Probar primero el estado de OGAgent y luego de ogAdmClient
-		//
-
+		// First, try to connect to ogAdmCleint service.
 		$serverip = $rs->campos["ipserveradm"];
 		$serverport = $rs->campos["portserveradm"];
 		$clientid = $rs->campos["idordenador"];
@@ -628,8 +625,24 @@ EOD;
 				$stat = array();
 				preg_match('/\/[A-Z]*;/', $values["tso"], $stat);
 				// Check if data exists.
-				if (empty($stat[0])) {
-					$response['status'] = "nodata";
+				if (empty($stat[0]) or preg_match('/OFF/',$stat[0])) {
+					// If no data, check OGAgent API connection.
+					$url = "https://$clientip:8000/opengnsys/status";
+					$result = multiRequest(Array($url), array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
+					if (empty($result[0])) {
+						// Client is off.
+						$response['status'] = "off";
+					} else {
+						// Get status data.
+						$data = json_decode($result[0]);
+						if (isset($data->status)) {
+							$response['status'] = $data->status;
+							$response['loggedin'] = $data->loggedin;
+						} else {
+							// Unknown status.
+							$response['status'] = "unknown";
+						}
+					}
 				} else {
 					// Status mapping.
 					$status = array('OFF'=>"off",

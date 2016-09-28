@@ -542,9 +542,9 @@ paths:
                 description: execution status
                 type: string
                 enum: [ "nodata", "off", "ogclient", "busy", "linux", "windows", "unknown" ]
-#              usersession:
-#                description: flag to check if an user has session oppened
-#                type: boolean
+              loggedin:
+                description: flag to check if an user is logged in
+                type: boolean
       tags:
         - server
         - client
