@@ -56,7 +56,7 @@ if ($config['RUN_OGADMREPO'] === "yes") {
 }
 
 // Showing API information page using Swagger-UI.
-app->get('/',
+$app->get('/',
     function() use ($app) {
         $app->response->redirect('swagger-ui/index.html?url=../../opengnsys-api.yml');
     }
