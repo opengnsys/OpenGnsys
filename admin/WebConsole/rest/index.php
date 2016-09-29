@@ -55,13 +55,10 @@ if ($config['RUN_OGADMREPO'] === "yes") {
     include("repository.php");
 }
 
-// Showing API information page.
+// Showing API information page using Swagger-UI.
 app->get('/',
-    function() {
-        if (is_readable(__DIR__."/opengnsys-api.html"))
-            include("opengnsys-api.html");
-        else
-            echo "<strong>Cannot access OpenGnsys REST API information page.</strong>\n";
+    function() use ($app) {
+        $app->response->redirect('swagger-ui/index.html?url=../../opengnsys-api.yml');
     }
 );
 

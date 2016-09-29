@@ -765,6 +765,11 @@ paths:
                     application:
                       description: application name and version
                       type: string
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
   #/ous/{ouid}/images/{imageid}/boot:
   #/repository/images
   #/repository/poweron
