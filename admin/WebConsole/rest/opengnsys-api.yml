@@ -1,9 +1,5 @@
-# Example YAML to get you started quickly.
-# Be aware that YAML has indentation based scoping.
-# Code completion support is available so start typing for available options.
 swagger: '2.0'
 
-# This is your document metadata
 info:
   version: "1.1.0"
   title: OpenGnsys REST API definition
@@ -13,7 +9,6 @@ info:
   contact:
     name: OpenGnsys Project
     url: http://opengnsys.es/
-    email: opengnsys-devel@listas.unizar.es
   license:
     name: Creative Commons 4.0 International
     url: http://creativecommons.org/licenses/by/4.0/
@@ -773,7 +768,106 @@ paths:
   #/ous/{ouid}/images/{imageid}/boot:
   #/repository/images
   #/repository/poweron
-  #/ogagent/started
-  #/ogagent/stopped
-  #/ogagent/loggedin
-  #/ogagent/loggedout
+  /ogagent/started:
+    post:
+      description: Process push notification when OGAgent is started
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              mac:
+                type: string
+              ostype:
+                type: string
+              osversion:
+                type: string
+              secret:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+  /ogagent/stopped:
+    post:
+      description: Process push notification when OGAgent is stopped
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              mac:
+                type: string
+              ostype:
+                type: string
+              osversion:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+  /ogagent/loggedin:
+    post:
+      description: Process push notification when an user logged in
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              user:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+  /ogagent/loggedout:
+    post:
+      description: Process push notification when an user is logged in
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              user:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+
