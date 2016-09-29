@@ -503,7 +503,8 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/diskcfg', 'validateApiKey',
 	$cmd->texto = <<<EOD
 SELECT ordenadores.idordenador AS clientid, ordenadores.nombreordenador,
        ordenadores_particiones.*, tipospar.tipopar,
-       sistemasficheros.nemonico, nombresos.nombreso, imagenes.nombreca
+       sistemasficheros.nemonico, nombresos.nombreso, imagenes.nombreca,
+       (imagenes.revision - ordenadores_particiones.revision) AS difimagen
   FROM ordenadores_particiones
  RIGHT JOIN ordenadores USING(idordenador)
   LEFT JOIN tipospar USING(codpar)
@@ -571,6 +572,13 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/status', 'validateApiKey',
 	global $LONCABECERA;
 	global $LONHEXPRM;
 
+	// Status mapping.
+	$status = array('OFF'=>"off",
+			'INI'=>"initializing",
+			'OPG'=>"ogclient",
+			'BSY'=>"busy",
+			'LNX'=>"linux",
+			'WIN'=>"windows");
 	// Parameters.
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
@@ -625,36 +633,26 @@ EOD;
 				$stat = array();
 				preg_match('/\/[A-Z]*;/', $values["tso"], $stat);
 				// Check if data exists.
-				if (empty($stat[0]) or preg_match('/OFF/',$stat[0])) {
+				if (empty($stat[0]) or preg_match('/OFF/', $stat[0])) {
 					// If no data, check OGAgent API connection.
 					$url = "https://$clientip:8000/opengnsys/status";
 					$result = multiRequest(Array($url), array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
 					if (empty($result[0])) {
 						// Client is off.
-						$response['status'] = "off";
+						$response['status'] = $status['OFF'];
 					} else {
-						// Get status data.
+						// Get status and session data.
 						$data = json_decode($result[0]);
-						if (isset($data->status)) {
-							$response['status'] = $data->status;
+						if (isset($status[$data->status])) {
+							$response['status'] = $status[$data->status];
 							$response['loggedin'] = $data->loggedin;
-						} else {
-							// Unknown status.
-							$response['status'] = "unknown";
 						}
 					}
 				} else {
-					// Status mapping.
-					$status = array('OFF'=>"off",
-							'INI'=>"initializing",
-							'OPG'=>"ogclient",
-							'BSY'=>"busy",
-							'LNX'=>"linux",
-							'WIN'=>"windows");
 					$response['status'] = $status[substr($stat[0], 1, 3)];
-					if (empty($response['status'])) {
-						$response['status'] = "unknown";
-					}
+				}
+				if (empty($response['status'])) {
+					$response['status'] = "unknown";
 				}
 				jsonResponse(200, $response);
 			}
