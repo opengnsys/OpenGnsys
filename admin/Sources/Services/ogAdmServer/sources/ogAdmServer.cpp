@@ -2023,7 +2023,7 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 	char* par, char* cpt, char* ipr, char *ido) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaCreacionImagen()";
-	int idr,ifs;
+	int idr,ifs,rev;
 
 	/* Toma identificador del repositorio correspondiente al ordenador modelo */
 	snprintf(sqlstr, LONSQL,
@@ -2064,12 +2064,41 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
-			"UPDATE imagenes"
-			"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s,"
-			"       idperfilsoft=%d, idrepositorio=%d,"
-			"       fechacreacion=NOW(), revision=revision+1"
-			" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
+		"UPDATE imagenes"
+		"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s,"
+		"       idperfilsoft=%d, idrepositorio=%d,"
+		"       fechacreacion=NOW(), revision=revision+1"
+		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
+	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	/* Toma revisión de la imagen */
+	snprintf(sqlstr, LONSQL,
+		"SELECT revision"
+		"  FROM imagenes"
+		" WHERE idimagen=%s",  idi);
+
+	if (!db.Execute(sqlstr, tbl)) { // Error al leer
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	if (!tbl.Get("revision", rev)) { // Toma dato
+		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	/* Actualizar los datos en el cliente */
+	snprintf(sqlstr, LONSQL,
+		"UPDATE ordenadores_particiones"
+		"   SET idimagen=%s, revision=%d, fechadespliegue=NOW()"
+		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
+		idi, rev, ido, dsk, par);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
