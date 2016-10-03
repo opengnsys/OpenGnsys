@@ -18,7 +18,7 @@ if (isset($_POST['file'])) {
 	// Send file.
 	sendFile ($_POST['file']);
 } else {
-	// Show files list.
+	// Show list of files.
 	echo '<!DOCTYPE html>'."\n";
 	echo '<html><head>'."\n";
 	echo '  <link rel="stylesheet" type="text/css" href="../estilos.css" />'."\n";
@@ -27,15 +27,24 @@ if (isset($_POST['file'])) {
 	echo '<form action="'.$_SERVER['PHP_SELF'].'" method="post">'."\n";
 	echo '  <table>'."\n";
 	echo '    <tr><th>'.$TbMsg['DOWNLOADS'].':</th></tr>'."\n";
-	echo '    <tr><td><select name="file">'."\n";
 	$filelist = glob("*");
+	$data = "";
 	foreach ($filelist as $f) {
-		// Skip this file.
-		if ($f == basename(__FILE__))  continue;
-		echo '      <option value="'.$f.'">'.$f.'</option>'."\n";
+		// Get only readable files, except this one.
+		if ($f !== basename(__FILE__) and is_file($f) and is_readable($f)) {
+			$data .= '      <option value="'.$f.'">'.$f.'</option>'."\n";
+		}
 	}
-	echo '      </select>'."\n";
-	echo '      <input type="submit" value="" style="width:20px; background:url(../images/boton_confirmar.gif);"></td></tr>'."\n";
+	if (empty($data)) {
+		// Show warning message if there is no files to download.
+		echo '    <tr><td>'.$TbMsg['NOFILES'].'</td></tr>'."\n";
+	} else {
+		// Show available files.
+		echo '    <tr><td><select name="file">'."\n";
+		echo $data;
+		echo '      </select>'."\n";
+		echo '      <input type="submit" value="" style="width:20px; background:url(../images/boton_confirmar.gif);"></td></tr>'."\n";
+	}
 	echo '</table>'."\n";
 	echo '</form>'."\n";
 	echo '</body></html>'."\n";

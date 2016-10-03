@@ -6,6 +6,7 @@
 //______________________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg['DOWNLOADS']="Available downloads";
+$TbMsg['NOFILES']="No files available";
 
-// Warning: Don't left any character outside PHP code.
+// Warning: Do not leave characters out of PHP code.
 ?>

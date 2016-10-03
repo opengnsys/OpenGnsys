@@ -7,6 +7,7 @@
 //______________________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg['DOWNLOADS']="Descargas disponibles";
+$TbMsg['NOFILES']="No hay ficheros disponibles";
 
 // Aviso: no dejar ningún carácter fuera del código PHP.
 ?>
