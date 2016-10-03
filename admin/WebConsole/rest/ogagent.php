@@ -2,14 +2,22 @@
 
 // OpenGnsys REST routes for OGAgent communications.
 // Author: Ramón M. Gómez
-// Date:   2015-09-04
-// Warning: authentication/authorisation not included.
+// Date:   2016-10-03
 
 
 // OGAgent sessions log file.
 define('LOG_FILE', '/opt/opengnsys/log/ogagent.log');
 
-// OGAgent notifies that its service is started on client.
+/**
+ * @brief    OGAgent notifies that its service is started on a client.
+ * @note     Route: /ogagent/started, Method: POST
+ * @param    string ip         IP address
+ * @param    string mac        MAC (Ethernet) address
+ * @param    string ostype     OS type (Linux, Windows)
+ * @param    string osversion  OS name and version
+ * @param    string secret     random secret key to access client's REST API
+ * @return   Null string if OK, else error message.
+ */
 $app->post('/ogagent/started',
     function() use ($app) {
 	global $cmd;
@@ -21,16 +29,24 @@ $app->post('/ogagent/started',
 		$mac = htmlspecialchars($input->mac);
 		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
 		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
+		// Check sender IP address consistency (same as parameter value).
+		if ($ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		}
 		// Client secret key for secure communications.
 		if (isset($input->secret)) {
+		    // Check if secret key is valid (32 alphanumeric characters).
+		    if (! ctype_alnum($input->secret) or strlen($input->secret) !== 32) {
+			throw new Exception("Bad secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
+		    }
 		    // Store secret key in DB.
-		    $secret = htmlspecialchars($input->secret);
 		    $cmd->texto = "UPDATE ordenadores
 				      SET agentkey='$secret'
-				    WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac',':',''))";
-		    if ($cmd->Ejecutar() !== true) {
-			// DB access error.
-			throw new Exception("Cannot store secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
+				    WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac',':',''))
+				    LIMIT 1";
+		    if ($cmd->Ejecutar() !== true or mysql_affected_rows() !== 1) {
+			// DB access error or not updated.
+			throw new Exception("Cannot store new secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		    }
 		} else {
 		    // Insecure agent exception.
@@ -44,7 +60,7 @@ $app->post('/ogagent/started',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -61,7 +77,11 @@ $app->post('/ogagent/stopped',
 		$mac = htmlspecialchars($input->mac);
 		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
 		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
-		// May check that client is included in the server database?
+		// Check sender IP address consistency (same as parameter value).
+		if ($ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		}
+		// May check if client is included in the server database?
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent stopped: ip=$ip, mac=$mac, os=$osType:$osVersion.\n", FILE_APPEND);
 		// Response. 
@@ -70,7 +90,7 @@ $app->post('/ogagent/stopped',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -84,7 +104,11 @@ $app->post('/ogagent/loggedin',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
-		// May check that client is included in the server database?
+		// Check sender IP address consistency (same as parameter value).
+		if ($ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		}
+		// May check if client is included in the server database?
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user.\n", FILE_APPEND);
 		// Response. 
@@ -93,7 +117,7 @@ $app->post('/ogagent/loggedin',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
@@ -107,7 +131,11 @@ $app->post('/ogagent/loggedout',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
-		// May check that client is included in the server database?
+		// Check sender IP address consistency (same as parameter value).
+		if ($ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		}
+		// May check if client is included in the server database?
 		// Default processing: log activity.
 		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged out: ip=$ip, user=$user.\n", FILE_APPEND);
 		// Response. 
@@ -116,7 +144,7 @@ $app->post('/ogagent/loggedout',
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".__FUNCTION__.": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
 		jsonResponse(400, $response);
 	}
     }
