@@ -13,6 +13,7 @@ VMCPUS = 4
 SCRIPT = <<EOT
 # Set language.
 export LANG="#{LANGUAGE}.UTF-8"
+dnf install -y glibc-locale-source glibc-langpack-${LANG%_*}
 localedef -v -c -i ${LANG%.*} -f UTF-8 $LANG 2>/dev/null
 localectl set-locale LANG=$LANG
 localectl set-keymap ${LANG%_*}
@@ -20,16 +21,16 @@ localectl set-x11-keymap ${LANG%_*}
 # Update repositories.
 dnf install -y http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 # Install main dependencies.
-dnf install -y kernel-devel-$(uname -r) debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract
+dnf install -y debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract
 # Install desktop (XFCE) and GUI utils.
 dnf install -y @xfce-desktop-environment firefox VirtualBox-guest kmod-VirtualBox akmod-VirtualBox akmods
-ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target 
+systemctl set-default graphical.target
 sed -i '$d' /usr/lib/udev/rules.d/60-vboxguest.rules
 akmods && systemctl restart systemd-modules-load.service
-# Install Eclipse IDE for Python (it needs some disk space).
-dnf install -y eclipse-pydev eclipse-nls-${LANG%_*}
-# Comment out next line if you prefer to install ATOM editor.
-#wget -q https://atom.io/download/rpm -O /tmp/atom.rpm && dnf install -y /tmp/atom.rpm && rm -f /tmp/atom.rpm
+# Install ATOM editor by default (less disk space).
+wget -q https://atom.io/download/rpm -O /tmp/atom.rpm && dnf install -y /tmp/atom.rpm && rm -f /tmp/atom.rpm
+# Comment out next line if you prefer to install Eclipse IDE for Python (it needs some disk space).
+#dnf install -y eclipse-pydev eclipse-nls-${LANG%_*}
 # Download OGAgent environment installer.
 svn export http://opengnsys.es/svn/branches/version1.1/installer/ogagent-devel-installer.sh /home/vagrant
 # Instructions.
@@ -37,7 +38,9 @@ echo "Manual operations:"
 echo "- Reboot VM or launch desktop: startxfce4 &"
 echo "- Enlarge VM window."
 echo "- To prepare OGAgent environment, execute: ./ogagent-devel-installer.sh"
-echo "- Before modify OGAgent code, configure Eclipse:"
+echo "- If you use the default Atom IDE:"
+echo "  - Open a Project located in /home/vagrant/ogagent/src directory."
+echo "- Only if you enable Eclipse IDE installation, you need to configure it before coding:"
 echo "  - Set Python interpreter on Preferences/PyDev/Interpreters/Python Interpreter."
 echo "  - Create a new PyDev Project located in /home/vagrant/ogagent/src directory."
 EOT
@@ -46,6 +49,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # OpenGnsys boot-tools environment VM definition.
   config.vm.define "ogAgent" do |ag|
+    ag.ssh.insert_key = false
     # Specific VirtualBox configuration.
     ag.vm.provider "virtualbox" do |vb|
       # VM name, memory and CPUs.
@@ -55,7 +59,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.gui = true
     end
     # VM base and host name.
-    ag.vm.box = "fedora/23-cloud-base"
+    ag.vm.box = "fedora/24-cloud-base"
     ag.vm.hostname = "ogAgent"
     # Comment out if you want to disable synced folder.
     #ag.vm.synced_folder ".", "/vagrant", disabled: true
