@@ -10,11 +10,11 @@ define('LOG_FILE', '/opt/opengnsys/log/ogagent.log');
 
 /**
  * @brief    OGAgent notifies that its service is started on a client.
- * @note     Route: /ogagent/started, Method: POST
+ * @note     Route: /ogagent/started, Method: POST, Format: JSON
  * @param    string ip         IP address
  * @param    string mac        MAC (Ethernet) address
  * @param    string ostype     OS type (Linux, Windows)
- * @param    string osversion  OS name and version
+ * @param    string osversion  OS version
  * @param    string secret     random secret key to access client's REST API
  * @return   Null string if OK, else error message.
  */
@@ -29,9 +29,9 @@ $app->post('/ogagent/started',
 		$mac = htmlspecialchars($input->mac);
 		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
 		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
-		// Check sender IP address consistency (same as parameter value).
-		if ($ip !== $_SERVER['REMOTE_ADDR']) {
-		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		// Check sender agent type and IP address consistency (same as parameter value).
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
 		// Client secret key for secure communications.
 		if (isset($input->secret)) {
@@ -40,6 +40,7 @@ $app->post('/ogagent/started',
 			throw new Exception("Bad secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		    }
 		    // Store secret key in DB.
+		    if (isset($input->secret))  $secret = htmlspecialchars($input->secret));
 		    $cmd->texto = "UPDATE ordenadores
 				      SET agentkey='$secret'
 				    WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac',':',''))
@@ -66,7 +67,15 @@ $app->post('/ogagent/started',
     }
 );
 
-// OGAgent notifies that its service is stopped on client.
+/**
+ * @brief    OGAgent notifies that its service is stopped on client.
+ * @note     Route: /ogagent/stopped, Method: POST, Format: JSON
+ * @param    string ip         IP address
+ * @param    string mac        MAC (Ethernet) address
+ * @param    string ostype     OS type (Linux, Windows)
+ * @param    string osversion  OS version
+ * @return   Null string if OK, else error message.
+ */
 $app->post('/ogagent/stopped',
     function() use ($app) {
 	$osType = $osVersion = "none";
@@ -77,9 +86,9 @@ $app->post('/ogagent/stopped',
 		$mac = htmlspecialchars($input->mac);
 		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
 		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
-		// Check sender IP address consistency (same as parameter value).
-		if ($ip !== $_SERVER['REMOTE_ADDR']) {
-		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		// Check sender agent type and IP address consistency (same as parameter value).
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
 		// May check if client is included in the server database?
 		// Default processing: log activity.
@@ -96,7 +105,13 @@ $app->post('/ogagent/stopped',
     }
 );
 
-// OGAgent notifies that an user logs in.
+/**
+ * @brief    OGAgent notifies that an user logs in.
+ * @note     Route: /ogagent/loggedin, Method: POST, Format: JSON
+ * @param    string ip         IP address
+ * @param    string user       username
+ * @return   Null string if OK, else error message.
+ */
 $app->post('/ogagent/loggedin',
     function() use ($app) {
 	try {
@@ -105,8 +120,8 @@ $app->post('/ogagent/loggedin',
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
 		// Check sender IP address consistency (same as parameter value).
-		if ($ip !== $_SERVER['REMOTE_ADDR']) {
-		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
 		// May check if client is included in the server database?
 		// Default processing: log activity.
@@ -123,7 +138,13 @@ $app->post('/ogagent/loggedin',
     }
 );
 
-// OGAgent notifies that an user logs out.
+/**
+ * @brief    OGAgent notifies that an user logs out.
+ * @note     Route: /ogagent/loggedout, Method: POST, Format: JSON
+ * @param    string ip         IP address
+ * @param    string user       username
+ * @return   Null string if OK, else error message.
+ */
 $app->post('/ogagent/loggedout',
     function() use ($app) {
 	try {
@@ -131,9 +152,9 @@ $app->post('/ogagent/loggedout',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
-		// Check sender IP address consistency (same as parameter value).
-		if ($ip !== $_SERVER['REMOTE_ADDR']) {
-		    throw new Exception("Bad IP address: agent=$ip, sender=".$_SERVER['REMOTE_ADDR']);
+		// Check sender agent type and IP address consistency (same as parameter value).
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
+		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
 		// May check if client is included in the server database?
 		// Default processing: log activity.
@@ -151,4 +172,3 @@ $app->post('/ogagent/loggedout',
 );
 
 ?>
-
