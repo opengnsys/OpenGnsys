@@ -66,12 +66,14 @@ def getNetworkInfo():
     adapters = wmobj.ExecQuery("Select * from Win32_NetworkAdapterConfiguration where IpEnabled=True")
     try:
         for obj in adapters:
+            if obj.DefaultIPGateway == "None":   # Skip adapters without default router
+                continue
             for ip in obj.IPAddress:
                 if ':' in ip:  # Is IPV6, skip this
                     continue
                 if ip is None or ip == '' or ip.startswith('169.254') or ip.startswith('0.'):  # If single link ip, or no ip
                     continue
-                # logger.debug('Net config found: {}=({}, {})'.format(obj.Caption, obj.MACAddress, ip))
+                logger.debug('Net config found: {}=({}, {})'.format(obj.Caption, obj.MACAddress, ip))
                 yield utils.Bunch(name=obj.Caption, mac=obj.MACAddress, ip=ip)
     except Exception:
         return
