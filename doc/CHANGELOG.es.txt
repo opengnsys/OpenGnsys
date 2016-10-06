@@ -7,6 +7,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.0
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#141	Reconstruir función ogDiskToDev (resuelto en #748)
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
 #676	Soportar sistema de ficheros ZFS
 #678	Unidades organizativas con directorio de imágenes separado.
@@ -20,13 +21,15 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 Tickets resueltos en módulo OpenGnsys Client:
 #244	Internacionalización de los mensajes del Browser (mejora)
 #625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
-#724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10
+#709	Script para instalar módulos del Kenrel en el cliente ogLive
+#724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10 o Ubuntu 16.04 LTS
 #725	Sincronización horaria de clientes con servidor NTP
 #746	Reloj en barra de estado del Browser del cliente
 
 Tickets resueltos en módulo OpenGnsys Server:
 #723	Cambio temporal de fichero de arranque PXE
 #729	Instalar en cliente la misma versión de Rsync que la del servidor
+#736	Mejorar la seguridad del servidor
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux
@@ -230,7 +233,6 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #416	Clonar partición sólo datos
 #524	Eliminar imagen en caché del cliente
 #533	Scritps de interfaceAdm no deben incluir lógica de proceso
-#551	Consola web compatible con PHP 5.4 (tarea)
 #552	Permitir crear caché en cualquier disco
 #566	Asistente de gestión Master muestra todas las imágenes de su caché para enviarlas
 #585	Incluir en la administración web las opciones DNS y proxy para el ogLive
@@ -282,7 +284,7 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 #561	Crear script para borrar imágenes del repositorio
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
-#551	Consola web compatible con PHP 5.4
+#551	Consola web compatible con PHP 5.4 (tarea)
 #558	Correción Modulo Fotosordenadores
 #560	La pantalla de cola de acciones tarda mucho en mostrar los resultados
 
@@ -310,7 +312,6 @@ Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)
 #411	Menú por defecto para los clientes con información básica del estado de red
 #415	Compatiblidad hardware (red, disco) en los clientes OpenGnSys
-#416	Aviso en el browser de cliente rechazado
 #419	chntpw trunca las claves de registro largas
 #491	Log de seguimiento con información de caché local
 #494	Información de la caché en pantalla del cliente (no válido)
@@ -319,7 +320,6 @@ Tickets resueltos en módulo OpenGnSys Client:
 #525	Seleccionar el tipo de arranque de sistemas Windows (reinicio o en caliente)
 #529	Cliente ogLive basado en Ubuntu 12.04
 #546	ogLive en modo PXE durante el proceso de arranque no continuará hasta que la interfaz de red esté correctamente configurada
-#547	oglive basado en Ubuntu 12.04 no detecta ficheros de configuración de DNS
 
 Tickets resueltos en módulo OpenGnSys Server:
 #426	isAlive: control de los servicios OpenGnSys
