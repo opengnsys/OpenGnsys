@@ -40,7 +40,7 @@ $app->post('/ogagent/started',
 			throw new Exception("Bad secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		    }
 		    // Store secret key in DB.
-		    if (isset($input->secret))  $secret = htmlspecialchars($input->secret));
+		    if (isset($input->secret))  $secret = htmlspecialchars($input->secret);
 		    $cmd->texto = "UPDATE ordenadores
 				      SET agentkey='$secret'
 				    WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac',':',''))
