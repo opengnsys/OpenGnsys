@@ -83,6 +83,7 @@ $atributos=str_replace('$',chr(9),$atributos);
 $cadenaid="";
 $cadenaip="";
 $cadenamac="";
+$cadenaoga="";	// Clave de acceso a la API REST de OGAgent.
 
 if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
 	if(substr($filtro,strlen($cadenaid)-1,1)==";") // Si el último caracter es una coma
@@ -208,11 +209,15 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 				$urls = array();
 				$ipsuccess = '';
 				// Compose array of REST URLs.
-				foreach (explode (';', $cadenaip) as $ip) {
-					$urls[$ip] = "https://$ip:8000/opengnsys/$urlcomando";
+				$auxIp = explode(';', $cadenaip);
+				$auxKey = explode(";", $cadenaoga);
+				$i = 0;
+				foreach ($auxIp as $ip) {
+					$urls[$ip] = "https://$ip:8000/opengnsys/$urlcomando?secret=".$auxKey[$i];
+					$i++;
 				}
 				// Launch concurrent requests.
-				$responses = multiRequest($urls, array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
+				$responses = multiRequest($urls);
 				// Process responses array (IP as array index).
 				foreach ($responses as $ip => $data) {
 					if (isset($data)) {

@@ -2,11 +2,11 @@
  
 /*
  * Function: multiRequest.
- * Params:   urls array, cURL options array.
- * Returns:  array with JSON requests.
+ * Params:   URLs array, cURL options array.
+ * Returns:  Array with JSON requests.
  * Date:     2015-10-14
  */
-function multiRequest($data, $options = array()) {
+function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false)) {
  
   // array of curl handles
   $curly = array();
@@ -25,7 +25,11 @@ function multiRequest($data, $options = array()) {
  
     $url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
     curl_setopt($curly[$id], CURLOPT_URL, $url);
-    curl_setopt($curly[$id], CURLOPT_HEADER, 0);
+    if (is_array($d) && !empty($d['header'])) {
+       curl_setopt($curly[$id], CURLOPT_HEADER, $d['header']);
+    } else {
+       curl_setopt($curly[$id], CURLOPT_HEADER, 0);
+    }
     curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curly[$id], CURLOPT_TIMEOUT, 1);
  

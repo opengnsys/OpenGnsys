@@ -78,7 +78,7 @@
 		$urls[$ip] = "https://$ip:8000/opengnsys/status";
 	}
 	// Launch concurrent requests.
-	$responses = multiRequest($urls, array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
+	$responses = multiRequest($urls);
 	// Process responses array (IP as array index).
 	foreach ($responses as $ip => $data) {
 		if (isset($data)) {

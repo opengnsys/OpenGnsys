@@ -636,7 +636,7 @@ EOD;
 				if (empty($stat[0]) or preg_match('/OFF/', $stat[0])) {
 					// If no data, check OGAgent API connection.
 					$url = "https://$clientip:8000/opengnsys/status";
-					$result = multiRequest(Array($url), array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false));
+					$result = multiRequest(Array($url));
 					if (empty($result[0])) {
 						// Client is off.
 						$response['status'] = $status['OFF'];
