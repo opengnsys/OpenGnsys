@@ -89,6 +89,7 @@ if [ -n "$SERVERIP" ]; then
 		# - servidor o IP en URLs excepto si contienen "localhost".
 		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
 		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
+		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
 		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$1.}"
 		# Si se usa otro interfaz o cambian los datos de red; ...
