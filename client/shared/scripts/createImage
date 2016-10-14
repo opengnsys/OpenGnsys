@@ -29,6 +29,9 @@
 #@version 1.0.2 - Separacion de log
 #@author  Antonio J.Doblas Viso
 #@date   2011-08-4
+#@version 1.1.0 - La copia de seguridad de la imagen antigua se hace después de las comprobaciones.
+#@author  Irina Gomez - ETSII Universidad de Sevilla
+#@date    2016-10-14
 #*/ ##
 
 # Test 1.  crear una imagen en un REPO sin espacio libre. 
@@ -97,15 +100,6 @@ if [ $? != 0 ]; then
 fi
 IMGFILE=$IMGDIR/$(basename "/$4").$IMGEXT
 
-# Renombrar el fichero de imagen si ya existe.
-if [ -f "$IMGFILE" ]; then
-    ogEcho log session "[10] $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"."
-    mv "$IMGFILE" "$IMGFILE.ant"
-    mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
-    mv "$IMGFILE.sum" "$IMGFILE.sum.ant" 2>/dev/null
-    mv "$IMGFILE.full.sum" "$IMGFILE.full.sum.ant" 2>/dev/null
-fi
-
 echo " " > $OGLOGCOMMAND
 # Borramos ficheros de paginacion y configuracion
 ogCleanOs $1 $2
@@ -131,6 +125,15 @@ then
     NEWSIZEFS=$(ogGetFsSize  $1 $2)
     TIMEAUX=$[SECONDS-TIME1]
     ogEcho log session "      $MSG_SCRIPTS_TIME_PARTIAL ( $NEWSIZEFS KB ) : $[TIMEAUX/60]m $[TIMEAUX%60]s"
+fi
+
+# Renombrar el fichero de imagen si ya existe.
+if [ -f "$IMGFILE" ]; then
+    ogEcho log session "[10] $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"."
+    mv "$IMGFILE" "$IMGFILE.ant"
+    mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
+    mv "$IMGFILE.sum" "$IMGFILE.sum.ant" 2>/dev/null
+    mv "$IMGFILE.full.sum" "$IMGFILE.full.sum.ant" 2>/dev/null
 fi
 
 # Crear la imagen.
