@@ -8,12 +8,12 @@ BuildRoot: %{buildroot}
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Summary: OpenGnSys Agent & tools
+Summary: OpenGnsys Agent & tools
 License: BSD3
 Group: Admin
 Requires: python-six python-requests PyQt4 libXScrnSaver
-Vendor: Virtual Cable S.L.U.
-URL: http://www.udsenterprise.com
+Vendor: OpenGnsys Project
+URL: http://opengnsys.es
 Provides: ogagent
 
 %define _rpmdir ../
@@ -47,11 +47,11 @@ if [ $1 -eq 0 ]; then
     rm -rf /etc/ogagent
     rm /var/log/ogagent.log
 fi
-# And, posibly, the .pyc leaved behind on /usr/share/UDSActor
+# And, posibly, the .pyc leaved behind on /usr/share/OGAgent
 rm -rf /usr/share/OGAgent > /dev/null 2>&1
 
 %description
-This package provides the required components to allow this machine to work on an environment managed by OpenGnSys.
+This package provides the required components to allow this machine to work on an environment managed by OpenGnsys.
 
 %files
 %defattr(-,root,root)

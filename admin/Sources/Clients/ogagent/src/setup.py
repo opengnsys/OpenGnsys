@@ -30,7 +30,7 @@
 @author: Adolfo Gómez, dkmaster at dkmon dot com
 '''
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
 try:

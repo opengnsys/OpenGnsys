@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=OpenGnSys Agent Tools
-Comment=OpenGnSys Userspace tools
+Name=OpenGnsys Agent Tools
+Comment=OpenGnsys Userspace tools
 Exec=/usr/bin/OGAgentTool-startup
 Icon=/usr/share/OGAgent/img/oga.png
 Terminal=false

@@ -1,15 +1,15 @@
 # We need http://nsis.sourceforge.net/NSIS_Simple_Firewall_Plugin
 # Copy inside the two x86_xxxxx folders inside nsis plugins folder
-Name "OpenGnSys Agent"
+Name "OpenGnsys Agent"
 
 # OpenGnsys Actor version
-!define OGA_VERSION 1.0.0
+!define OGA_VERSION 1.1.0
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\OGAgent"
 !define VERSION ${OGA_VERSION}.0
-!define COMPANY "Virtual Cable S.L.U."
-!define URL http://www.udsenterprise.com
+!define COMPANY "OpenGnsys Project"
+!define URL http://opengnsys.es
 
 # MultiUser Symbol Definitions
 !define MULTIUSER_EXECUTIONLEVEL Admin
@@ -56,7 +56,7 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE German
 
 # Installer attributes
-BrandingText "OpenGnSys"
+BrandingText "OpenGnsys"
 OutFile OGAgentSetup-${OGA_VERSION}.exe
 InstallDir OGAgent
 CRCCheck on
@@ -68,7 +68,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} ProductVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyName "${COMPANY}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyWebsite "${URL}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} FileVersion "${VERSION}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} FileDescription "OpenGnSys Agent installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} FileDescription "OpenGnsys Agent installer"
 VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright "(c) 2015 Virtual Cable S.L.U."
 InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
@@ -101,12 +101,12 @@ Section -post SEC0001
     WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoRepair 1
     ExecWait '"$INSTDIR\vcredist_x86.exe" /passive /norestart'
     # Add the application to the firewall exception list - All Networks - All IP Version - Enabled
-    # SimpleFC::AddApplication "OpenGnSys Agent Service" "$INSTDIR\OGAgentService.exe" 0 2 "" 1
+    # SimpleFC::AddApplication "OpenGnsys Agent Service" "$INSTDIR\OGAgentService.exe" 0 2 "" 1
     # SimpleFC::AdvAddRule [name] [description] [protocol] [direction] 
     #  [status] [profile] [action] [application] [service_name] [icmp_types_and_codes] 
     #  [group] [local_ports] [remote_ports] [local_address] [remote_address]
     #
-    SimpleFC::AdvAddRule "OpenGnSys Agent Firewall rules" "Firewall rules for OpenGnSys Agent interaction with broker." "6" "1" \
+    SimpleFC::AdvAddRule "OpenGnsys Agent Firewall rules" "Firewall rules for OpenGnsys Agent interaction with broker." "6" "1" \
       "1" "7" "1" "$INSTDIR\OGAgentService.exe" "" "" \
       "" "" "" "" ""    
     Pop $0 ; return error(1)/success(0)
@@ -141,11 +141,11 @@ SectionEnd
 Section -un.post UNSEC0001
     # Remove application from the firewall exception list
     # SimpleFC::RemoveApplication "$INSTDIR\OGAgentService.exe"
-    SimpleFC::AdvRemoveRule "OpenGnSys Agent Firewall rules"
+    SimpleFC::AdvRemoveRule "OpenGnsys Agent Firewall rules"
     Pop $0 ; return error(1)/success(0)
 
     SetShellVarContext current
-    StrCpy $StartMenuGroup "OpenGnSys Agent"
+    StrCpy $StartMenuGroup "OpenGnsys Agent"
     DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\$(^UninstallLink).lnk"
     Delete /REBOOTOK $INSTDIR\OGAgentUninstaller.exe
@@ -163,7 +163,7 @@ SectionEnd
 # Installer functions
 Function .onInit
     InitPluginsDir
-    StrCpy $StartMenuGroup "OpenGnSys Agent"
+    StrCpy $StartMenuGroup "OpenGnsys Agent"
     
     !insertmacro MUI_LANGDLL_DISPLAY
     !insertmacro MULTIUSER_INIT
@@ -171,7 +171,7 @@ FunctionEnd
 
 # Uninstaller functions
 Function un.onInit
-    StrCpy $StartMenuGroup "OpenGnSys Agent"
+    StrCpy $StartMenuGroup "OpenGnsys Agent"
     !insertmacro MUI_UNGETLANGUAGE
     !insertmacro MULTIUSER_UNINIT
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}

@@ -1,5 +1,12 @@
 ogagent (1.0.0) stable; urgency=medium
 
-  * Initial release for OpenGnSys Agent
+  * Initial release for OpenGnsys Agent
 
  -- Adolfo Gómez García <agomez@virtualcable.es>  Tue, 18 Jul 2015 03:18:22 +0200
+
+ogagent (1.1.0) stable; urgency=medium
+
+  * Functional OpenGnsys Agent interacting with OpenGnsys Server 1.1.0
+
+ -- Ramón M. Gómez <ramongomez@us.es>  Tue, 13 Oct 2016 17:00:00 +0200
+

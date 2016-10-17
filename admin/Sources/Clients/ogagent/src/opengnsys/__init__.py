@@ -37,9 +37,9 @@ import six
 import modules
 from RESTApi import REST, RESTError
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 
-__title__ = 'OpenGnSys Agent'
+__title__ = 'OpenGnsys Agent'
 __version__ = VERSION
 __build__ = 0x010750
 __author__ = 'Adolfo Gómez'

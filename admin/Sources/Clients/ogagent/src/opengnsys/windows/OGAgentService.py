@@ -49,12 +49,12 @@ from opengnsys.log import logger
 
 class OGAgentSvc(win32serviceutil.ServiceFramework, CommonService):
     '''
-    This class represents a Windows Service for managing actor interactions
-    with UDS Broker and Machine
+    This class represents a Windows Service for managing Agent interactions
+    with OpenGnsys Server
     '''
     _svc_name_ = "OGAgent"
-    _svc_display_name_ = "OpenGnSys Agent Service"
-    _svc_description_ = "OpenGnSys Agent for machines"
+    _svc_display_name_ = "OpenGnsys Agent Service"
+    _svc_description_ = "OpenGnsys Agent for Operating Systems"
     # 'System Event Notification' is the SENS service
     _svc_deps_ = ['EventLog']
 

@@ -11,5 +11,5 @@ Section: admin
 Priority: optional
 Architecture: all
 Depends: policykit-1(>=0.100), python-requests (>=0.8.2), python-qt4 (>=4.9), python-six(>=1.1), python-prctl(>=1.1.1), python (>=2.7), libxss1, ${misc:Depends}
-Description: Agent for OpenGnSys
- This package provides the required components to allow this machine to work on an environment managed by OpenGnSys.
+Description: OpenGnsys Agent for Operating Systems
+ This package provides the required components to allow this machine to work on an environment managed by OpenGnsys.
