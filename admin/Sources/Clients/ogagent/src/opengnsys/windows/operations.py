@@ -66,7 +66,7 @@ def getNetworkInfo():
     adapters = wmobj.ExecQuery("Select * from Win32_NetworkAdapterConfiguration where IpEnabled=True")
     try:
         for obj in adapters:
-            if obj.DefaultIPGateway == "None":   # Skip adapters without default router
+            if obj.DefaultIPGateway is None:   # Skip adapters without default router
                 continue
             for ip in obj.IPAddress:
                 if ':' in ip:  # Is IPV6, skip this
