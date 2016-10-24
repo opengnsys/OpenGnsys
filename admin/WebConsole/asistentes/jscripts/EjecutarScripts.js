@@ -12,20 +12,15 @@
 		var RC='@';
 		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value)+RC;
 		// Enviar datos si el formulario no tiene método de clonación.
-		if (document.fdatos.idmetodo == undefined) {
-			document.fdatosejecucion.submit();
-		}else{
-			// Pedir confirmación si clonación masiva por Unicast.
-			if( document.fdatosejecucion.ambito.value!=16 && document.fdatos.idmetodo.value=="UNICAST" || document.fdatos.idmetodo.value=="UNICAST-DIRECT"){
-				if (confirm(TbMsg[4]) == true) {
-					document.fdatosejecucion.submit();
-				} else {
-					cancelar();
-				}
-			}else{
-				document.fdatosejecucion.submit();
+		// Pedir confirmación si clonación masiva por Unicast.
+		if (document.fdatosejecucion.ambito.value!=16 && document.fdatos.idmetodo !== undefined &&
+                   (document.fdatos.idmetodo.value=="UNICAST" || document.fdatos.idmetodo.value=="UNICAST-DIRECT")) {
+			if (confirm(TbMsg[4]) !== true) {
+				cancelar();
+				return false;
 			}
 		}
+		document.fdatosejecucion.submit();
 	}
  }
 //________________________________________________________________________________________________________
