@@ -1220,6 +1220,8 @@ function copyServerFiles ()
 			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
+			installer/opengnsys_export.sh \
+			installer/opengnsys_import.sh \
 			doc )
 	local TARGETS=( tftpboot \
 			bin \
@@ -1227,6 +1229,8 @@ function copyServerFiles ()
 			lib \
 			sbin \
 			sbin \
+			lib \
+			lib \
 			lib \
 			lib \
 			doc )

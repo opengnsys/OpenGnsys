@@ -678,6 +678,8 @@ function updateServerFiles()
 			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
+			installer/opengnsys_export.sh \
+			installer/opengnsys_import.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
@@ -686,6 +688,8 @@ function updateServerFiles()
 			sbin/ogAdmRepoAux \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
+			lib/opengnsys_export.sh \
+			lib/opengnsys_import.sh \
 			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
