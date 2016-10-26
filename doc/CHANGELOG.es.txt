@@ -29,7 +29,6 @@ Tickets resueltos en módulo OpenGnsys Client:
 Tickets resueltos en módulo OpenGnsys Server:
 #385	Servicios OpenGnsys para varias VLAN aisladas (no se resolverá)
 #723	Cambio temporal de fichero de arranque PXE
-#729	Instalar en cliente la misma versión de Rsync que la del servidor
 #736	Mejorar la seguridad del servidor
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
@@ -37,6 +36,7 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 #701	torrent-creator falla si el fichero de imagen a procesar no es válido
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#372	Comandos y asistentes deberían limitar equipos de operación dentro de ámbito
 #711	Mostrar porcentaje de uso de cada sistema de archivos
 #712	Formulario añadir nuevo ordenador no verifica la existencia previa del equipo
 #713	Mejorar el inventario de hardware y obtener número de serie
@@ -56,6 +56,7 @@ Lista de cambios incluidos en OpenGnSys 1.0.6b (versión de mantenimiento)
 ----------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Server
+#729	Instalar en cliente la misma versión de Rsync que la del servidor
 #752	Script setserveraddr parchea parámetro de configuración UrlMenu
 
 Tickets genéricos resueltos:
