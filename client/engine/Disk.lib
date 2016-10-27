@@ -843,8 +843,8 @@ fi
 # Contar el nº de veces que aparece el disco en su lista de particiones.
 DISK=$(ogDiskToDev $1) 2>/dev/null
 case "$(ogGetPartitionTableType $1)" in
-    GPT)    grep -c "${DISK#/dev/}." /proc/partitions ;;
-    MSDOS)  partx -gso NR $DISK 2>/dev/null | awk -v p=0 '{p=$1} END {print p}' ;;
+    GPT|MSDOS)
+            partx -gso NR $DISK 2>/dev/null | awk -v p=0 '{p=$1} END {print p}' ;;
     LVM)    lvs --noheadings $DISK 2>/dev/null | wc -l ;;
     ZPOOL)  zpool list &>/dev/null || modprobe zfs
             zpool import -f -R /mnt -N -a 2>/dev/null
