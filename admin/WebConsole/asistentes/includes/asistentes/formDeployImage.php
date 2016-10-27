@@ -1,4 +1,7 @@
 <?php
+// version 1.1: se incluye el atributo atrib_restore (ticket #757)
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-10-27
 $disksPartitions = array();
 $diskPartIndex = 0;
 // Recorremos todas las configuraciones y vamos creando un array con disco - particion
@@ -11,6 +14,7 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 }
 
 ?>
+<input type="hidden" name="atrib_restore" value="">
 <? echo $TbMsg["WDI13"] ?> <br>
 		<input type="radio" name="modo" value="deployImage" onClick="enableDirect(this.form)" checked ><? echo $TbMsg["WDI14"] ?> <br>
 		<input type="radio" name="modo" value="updateCache" onClick="disableDirect(this.form)" > <? echo $TbMsg["WDI15"] ?> <br> 

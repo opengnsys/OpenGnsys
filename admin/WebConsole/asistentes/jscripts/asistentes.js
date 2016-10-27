@@ -12,6 +12,9 @@
 // version 1.1: showPartitionForm: Se incluye aviso para particiones GTP.
 // autor: Irina Gomez, ETSII Universidad de Sevilla
 // fecha: 2016-06-21
+// version 1.1: codeDeployImage: Compone atributo para el comando restaurar imagen (ticket #757)
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-10-27
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
@@ -58,13 +61,13 @@ switch (form.idmetodo.value)
  		protocol="MULTICAST-DIRECT " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " ";
 		break;
 	case "TORRENT":
-		protocol=" TORRENT " +  form.modp2p.value + ":" + form.timep2p.value;
+		protocol="TORRENT " +  form.modp2p.value + ":" + form.timep2p.value;
 		break;
 	case "UNICAST":
-		protocol=" UNICAST";
+		protocol="UNICAST";
 		break;
 	case "UNICAST-DIRECT":
-		protocol=" UNICAST-DIRECT";
+		protocol="UNICAST-DIRECT";
 		break;
 }
 //form.codigo.value="deployImage REPO /";
@@ -76,7 +79,11 @@ if (form.modo[0].checked)
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
 command + " \n";
-	//form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+
+	// Atributos para comando RestaurarImagen
+	form.atrib_restore.value = "dsk=" + diskPart[0] + "@par="+ diskPart[1] +"@idi=" +imagen[2] +
+				   "@nci="+imagen[1] + "@ipr="+ imagen[0] +"@ifs=" +imagen[3] +
+				   "@ptc="+protocol +"@";
 }
 else
 {

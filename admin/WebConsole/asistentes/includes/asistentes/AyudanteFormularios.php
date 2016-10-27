@@ -2,6 +2,10 @@
 // version 1.1: cliente con varios repositorios - htmlOPTION_images: Imagenes de todos los repositorios de la UO.
 // autor: Irina Gomez, Universidad de Sevilla
 // fecha 2015-06-17
+// version 1.1: htmlOPTION_images: se modifica el valor de la imagen iprepo_nombreca_idimagen_idperfilsoft (ticket #757)
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-10-27
+
 
 /// funciones php
 
@@ -203,7 +207,7 @@ $subconsultarepo='select repositorios.idrepositorio from repositorios INNER JOIN
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ." /".$rs->campos["nombreca"]. '" ';
+			$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ."_".$rs->campos["nombreca"]."_".$rs->campos["idimagen"].'_'.$rs->campos["idperfilsoft"].'" ';
 			$SelectHtml.='>';
 			$SelectHtml.= $rs->campos["descripcion"] .' ('.$rs->campos["nombrerepo"].') </OPTION>';
 			$rs->Siguiente();
