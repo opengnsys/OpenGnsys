@@ -115,7 +115,7 @@ case "$(ogGetPartitionTableType $NDSK)" in
         # Salvamos la configuración de las particiones e incluimos la cache.
         trap "rm -f $TMPFILE" 1 2 3 9 15
         sfdisk --dump $DISK | grep -v $DISK$PART > $TMPFILE
-        echo  "$DISK$PART : start= $START, size= $SIZE, type=$ID" >> $TMPFILE
+        echo  "$DISK$PART : start= $START, size= $SIZE, Id=$ID" >> $TMPFILE
         # Guardamos nueva configuración en el disco.
         sfdisk --no-reread  $DISK < $TMPFILE && partprobe
         rm -f $TMPFILE
