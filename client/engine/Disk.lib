@@ -313,7 +313,7 @@ case "$CREATE" in
     GPT)
         # Si es necesario crear una tabla GPT pero la actual es MSDOS
         if [ "$PTTYPE" == "MSDOS" ]; then
-            sgdisk -g $DISK
+            sgdisk -go $DISK
         else
             echo -e "2\nw\nY\n" | gdisk $DISK
         fi
