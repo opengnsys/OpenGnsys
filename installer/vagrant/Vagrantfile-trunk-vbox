@@ -12,8 +12,8 @@ NCLIENTS = 4
 REPODISK = "ogRepo.vdi"
 REPOSIZE = 50
 # Amount of memory for server and clients (MB)
-SERVERMEM = 1024
-CLIENTMEM = 512
+SERVERMEM = 1024	# Minimum: 512
+CLIENTMEM = 512		# Minimum: 256
 # Clients MAC address prefix.
 MACPREFIX = "08:00:27:0E:65:"
 NETPREFIX = "192.168.2."
@@ -44,15 +44,16 @@ echo "LANG=\"$LANG\"" >> /etc/environment
 locale-gen --lang #{LANGUAGE}
 sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
-# Unmcomment next lines for automatic data insertion.
+# Comment out next lines for automatic data insertion.
 #SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
 #for ((i=1; i<=#{NCLIENTS}; i++)); do
 #    SQL="$SQL ('ogClient0$i', '#{NETPREFIX}1$i', REPLACE('#{MACPREFIX}0$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
 #done
 #mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
-#/opt/opengnsys/bin/setclientmode ogAdmin ogClient01 1
+#if ! grep -q "1\.0" /opt/opengnsys/doc/VERSION.txt; then AUX=1; fi
+#/opt/opengnsys/bin/setclientmode ogAdmin ogClient01 $AUX
 #for ((i=2; i<=#{NCLIENTS}; i++)); do
-#    /opt/opengnsys/bin/setclientmode ogClient ogClient0$i
+#    /opt/opengnsys/bin/setclientmode ogClient ogClient0$i $AUX
 #done
 echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
 EOT
@@ -94,8 +95,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: 8443
     og.vm.network "private_network", ip: "#{NETPREFIX}10", virtualbox__intnet: true
-    # Disable synced folder.
-    og.vm.synced_folder ".", "/vagrant", disabled: true
+    # Comment out to disable synced folder.
+    #og.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
     og.vm.provision "shell", inline: OGSERVERSCRIPT
   end

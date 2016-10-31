@@ -6,7 +6,7 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
 # Language.
 LANGUAGE = "es_ES"
 ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
-# Amount of memory VM.
+# Amount of virtual memory and virtual CPUs.
 VMMEM = 2048
 VMCPUS = 2
 # OpenGnsys boot-tools environment provisioning script.
@@ -18,7 +18,6 @@ echo "LANG=\"$LANG\"" >> /etc/environment
 locale-gen --lang #{LANGUAGE}
 sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
-# Update repositories.
 # Install main dependencies.
 apt-get update
 apt-get install -y build-essential gettext libssl-dev libucommon-dev libxtst-dev subversion
@@ -59,7 +58,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # VM base and host name.
     br.vm.box = "ubuntu/trusty32"
     br.vm.hostname = "ogBrowser"
-    # Disable synced folder.
+    # Comment out to disable synced folder.
     #br.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
     br.vm.provision "shell", inline: SCRIPT

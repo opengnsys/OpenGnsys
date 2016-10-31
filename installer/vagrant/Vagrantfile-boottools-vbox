@@ -6,7 +6,7 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
 # Language.
 LANGUAGE = "es_ES"
 ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
-# Amount of memory VM.
+# Amount of virtual memory.
 VMMEM = 1024
 # OpenGnsys boot-tools environment provisioning script.
 SCRIPT = <<EOT

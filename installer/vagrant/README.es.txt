@@ -33,7 +33,7 @@ Ejecutar el entorno virtual (Vagrantfile-trunk y Vagrantfile-devel).
    - LANGUAGE: idioma (se aceptan es_ES, ca_ES y en_GB).
    - NCLIENTS: nº de clientes a generar (de 2 a 9).
    - REPODISK, REPOSIZE: fichero y tamaño (en GB) del disco duro virtual para el repositorio de imágenes.
-   - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes.
+   - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes (mínimo 256 MB).
    - NETPREFIX: prefijo para las direcciones IP de la red virtual.
    - MACPREFIX: prefijo para las direcciones MAC de los clientes.
    - LOCALWEBPORT: puerto local para acceder al web de administración del servidor.
