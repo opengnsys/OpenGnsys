@@ -109,15 +109,27 @@ cp -r $TMPDIR/menus $OPENGNSYS/www
 # MYSQL
 echo "   * Importamos informacion mysql."
 source $OPENGNSYS/etc/ogAdmServer.cfg
+# Crear fichero temporal de acceso a la BD
+MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
+chmod 600 $MYCNF
+trap "rm -f $MYCNF" 1 2 3 6 9 15
+cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+
 # Copia de seguridad del estado de la base de datos
-mysqldump --opt -u $USUARIO -p$PASSWORD $CATALOG > $MYSQLBCK
+mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLBCK
 # Importamos los datos nuevos
-mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" < $MYSQLFILE &>/dev/null
+mysql --defaults-extra-file=$MYCNF -D "$CATALOG" < $MYSQLFILE &>/dev/null
 [ $? -ne 0 ] && echo "ERROR: Error al importar la información de la base de datos."
 # Importamos datos tabla usuario, ignoramos los repetidos
 sed -i -e s/IGNORE//g -e s/INSERT/"\nALTER TABLE usuarios  ADD UNIQUE (usuario);\n\nINSERT IGNORE"/g $MYSQLFILE2
-mysql -u "$USUARIO" -p"$PASSWORD" -D "$CATALOG" < $MYSQLFILE2 &>/dev/null
+mysql --defaults-extra-file=$MYCNF -D "$CATALOG" < $MYSQLFILE2 &>/dev/null
 [ $? -ne 0 ] && echo "ERROR: Error al importar la información de los usuarios de la consola"
+# Borrar fichero temporal
+rm -f $MYCNF
 
 echo -e "Se ha terminado de importar los datos del backup. \n\nSe han realizado copias de seguridad de los archivos antiguos:" 
 echo    "  - $DHCPCFGDIR/dhcpd.conf-$(date +%Y%m%d)"

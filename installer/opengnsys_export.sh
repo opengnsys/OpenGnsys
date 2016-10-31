@@ -82,15 +82,29 @@ cp $OPENGNSYS/client/etc/engine.cfg $TMPDIR
 echo "Guardamos las páginas de inicio."
 cp -r $OPENGNSYS/www/menus $TMPDIR
 
-# MYSQL: Excluimos las tablas del servidor de administración (entornos) y repositorios
+# Exportar la base de datos
 echo "Exportamos la información de la base de datos."
 source $OPENGNSYS/etc/ogAdmServer.cfg
-mysqldump --opt -u $USUARIO -p$PASSWORD $CATALOG \
+# Crear fichero temporal de acceso a la BD
+MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
+chmod 600 $MYCNF
+trap "rm -f $MYCNF" 1 2 3 6 9 15
+cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+
+# MYSQL: Excluimos las tablas del servidor de administración (entornos) y repositorios
+mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG \
           --ignore-table=${CATALOG}.entornos \
           --ignore-table=${CATALOG}.repositorios \
           --ignore-table=${CATALOG}.usuarios > $MYSQLFILE
 # Tabla usuario
-mysqldump --opt --no-create-info -u $USUARIO -p$PASSWORD $CATALOG usuarios > $MYSQLFILE2
+mysqldump --defaults-extra-file=$MYCNF --opt --no-create-info $CATALOG \
+          usuarios > $MYSQLFILE2
+# Borrar fichero temporal
+rm -f $MYCNF
 
 # IP SERVIDOR
 echo $ServidorAdm > $TMPDIR/IPSERVER.txt
@@ -102,5 +116,6 @@ echo $ServidorAdm > $TMPDIR/IPSERVER.txt
 echo "Creamos un archivo comprimido con los datos: $BACKUPFILE."
 cd /tmp
 tar -czvf $BACKUPFILE ${TMPDIR##*/} &>/dev/null
+
 # Cambio permisos: sólo puede leerlo el root
 chmod 600 $BACKUPFILE
