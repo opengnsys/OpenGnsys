@@ -26,6 +26,7 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
 	(CONV('A5',16,10), 'FREEBSD', 1),
 	(CONV('A6',16,10), 'OPENBSD', 1),
+	(CONV('A9',16,10), 'NETBSD', 1),
 	(CONV('AF',16,10), 'HFS', 1),
 	(CONV('BE',16,10), 'SOLARIS-BOOT', 1),
 	(CONV('DA',16,10), 'DATA', 1),
@@ -34,20 +35,30 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('FB',16,10), 'VMFS', 1),
 	(CONV('0700',16,10), 'WINDOWS', 1),
 	(CONV('0C01',16,10), 'WIN-RESERV', 1),
+	(CONV('2700',16,10), 'WIN-RECOV', 1),
 	(CONV('7F00',16,10), 'CHROMEOS-KRN', 1),
 	(CONV('7F01',16,10), 'CHROMEOS', 1),
 	(CONV('7F02',16,10), 'CHROMEOS-RESERV', 1),
 	(CONV('8200',16,10), 'LINUX-SWAP', 0),
 	(CONV('8300',16,10), 'LINUX', 1),
 	(CONV('8301',16,10), 'LINUX-RESERV', 1),
+	(CONV('8302',16,10), 'LINUX', 1),
 	(CONV('8E00',16,10), 'LINUX-LVM', 1),
 	(CONV('A500',16,10), 'FREEBSD-DISK', 0),
 	(CONV('A501',16,10), 'FREEBSD-BOOT', 1),
 	(CONV('A502',16,10), 'FREEBSD-SWAP', 0),
 	(CONV('A503',16,10), 'FREEBSD', 1),
+	(CONV('A504',16,10), 'FREEBSD', 1),
+	(CONV('A901',16,10), 'NETBSD-SWAP', 0),
+	(CONV('A902',16,10), 'NETBSD', 1),
+	(CONV('A903',16,10), 'NETBSD', 1),
+	(CONV('A904',16,10), 'NETBSD', 1),
+	(CONV('A905',16,10), 'NETBSD', 1),
+	(CONV('A906',16,10), 'NETBSD-RAID', 1),
 	(CONV('AB00',16,10), 'HFS-BOOT', 1),
 	(CONV('AF00',16,10), 'HFS', 1),
 	(CONV('AF01',16,10), 'HFS-RAID', 1),
+	(CONV('AF02',16,10), 'HFS-RAID', 1),
 	(CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
 	(CONV('BF00',16,10), 'SOLARIS', 1),
 	(CONV('BF01',16,10), 'SOLARIS', 1),
@@ -59,6 +70,9 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('EF00',16,10), 'EFI', 1),
 	(CONV('EF01',16,10), 'MBR', 0),
 	(CONV('EF02',16,10), 'BIOS-BOOT', 0),
+	(CONV('FB00',16,10), 'VMFS', 1),
+	(CONV('FB01',16,10), 'VMFS-RESERV', 1),
+	(CONV('FB02',16,10), 'VMFS-KRN', 1)
 	(CONV('FD00',16,10), 'LINUX-RAID', 1),
 	(CONV('FFFF',16,10), 'UNKNOWN', 1)
 	ON DUPLICATE KEY UPDATE
@@ -184,7 +198,10 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('REISERFS', 'REISERFS'),
 	('REISER4', 'REISER4'),
 	('UFS', 'UFS'),
-	('XFS', 'XFS')
+	('XFS', 'XFS'),
+	('LINUX-SWAP', 'LINUX-SWAP'),
+	('F2FS', 'F2FS'),
+	('NILFS2', 'NILFS2')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
 # Nuevas particiones marcadas como clonables.

@@ -785,7 +785,10 @@ INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `
  (15, 'REISER4', 'REISER4', 0),
  (16, 'UFS', 'UFS', 0),
  (17, 'XFS', 'XFS', 0),
- (18, 'EXFAT', 'EXFAT', 0);
+ (18, 'EXFAT', 'EXFAT', 0),
+ (19, 'LINUX-SWAP', 'LINUX-SWAP', 0),
+ (20, 'F2FS', 'F2FS', 0),
+ (21, 'NILFS2', 'NILFS2', 0);
 
 
 -- --------------------------------------------------------

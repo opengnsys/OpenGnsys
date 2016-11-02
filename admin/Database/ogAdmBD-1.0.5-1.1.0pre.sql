@@ -2,6 +2,31 @@
 # OpenGnSys 1.0.5 - 1.1.0
 #use ogAdmBD
 
+# Nuevos tipos de particiones y de sistemas de ficheros.
+INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
+	(CONV('A9',16,10), 'NETBSD', 1),
+	(CONV('2700',16,10), 'WIN-RECOV', 1),
+	(CONV('8302',16,10), 'LINUX', 1),
+	(CONV('A504',16,10), 'FREEBSD', 1),
+	(CONV('A901',16,10), 'NETBSD-SWAP', 0),
+	(CONV('A902',16,10), 'NETBSD', 1),
+	(CONV('A903',16,10), 'NETBSD', 1),
+	(CONV('A904',16,10), 'NETBSD', 1),
+	(CONV('A905',16,10), 'NETBSD', 1),
+	(CONV('A906',16,10), 'NETBSD-RAID', 1),
+	(CONV('AF02',16,10), 'HFS-RAID', 1),
+	(CONV('FB00',16,10), 'VMFS', 1),
+	(CONV('FB01',16,10), 'VMFS-RESERV', 1),
+	(CONV('FB02',16,10), 'VMFS-KRN', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
+INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
+	(19, 'LINUX-SWAP', 'LINUX-SWAP'),
+	(20, 'F2FS', 'F2FS'),
+	(21, 'NILFS2', 'NILFS2')
+	ON DUPLICATE KEY UPDATE
+		idsistemafichero=VALUES(idsistemafichero), nemonico=VALUES(nemonico), descripcion=VALUES(descripcion);
+
 # Incluir ordenador modelo y fecha de creación de imagen y
 # establecer valores por defecto (ticket #677).
 ALTER TABLE imagenes
@@ -76,3 +101,4 @@ UPDATE repositorios
 # Número de puestos del aula permite valores hasta 32768 (ticket #747)
 ALTER TABLE  aulas
      MODIFY puestos smallint  DEFAULT NULL;
+

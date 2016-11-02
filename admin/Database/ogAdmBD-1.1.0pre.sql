@@ -116,7 +116,7 @@ delimiter ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
-# Nuevos tipos de particiones.
+# Nuevos tipos de particiones y de sistemas de ficheros.
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('A9',16,10), 'NETBSD', 1),
 	(CONV('2700',16,10), 'WIN-RECOV', 1),
@@ -134,6 +134,13 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('FB02',16,10), 'VMFS-KRN', 1)
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
+INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
+	(19, 'LINUX-SWAP', 'LINUX-SWAP'),
+	(20, 'F2FS', 'F2FS'),
+	(21, 'NILFS2', 'NILFS2')
+		ON DUPLICATE KEY UPDATE
+		idsistemafichero=VALUES(idsistemafichero), nemonico=VALUES(nemonico), descripcion=VALUES(descripcion);
+
 
 # Preparar generación de claves de acceso a la API REST para el usuario principal y a la del repositorio principal (tickets #708 y #743).
 UPDATE usuarios
