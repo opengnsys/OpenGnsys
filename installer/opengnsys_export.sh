@@ -15,10 +15,10 @@
 # Variables globales.
 PROG="$(basename $0)"
 
-TMPDIR=/tmp/opengnsys_export
 OPENGNSYS="/opt/opengnsys"
+TMPDIR=/tmp
 MYSQLFILE="$TMPDIR/ogAdmBD.sql"
-MYSQLFILE2="$TMPDIR/usuarios.sql"
+BACKUPPREFIX="opengnsys_export"
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -49,38 +49,13 @@ fi
 
 # Comprobamos que exista el directorio para el archivo de backup
 BACKUPDIR=$(realpath $(dirname $1) 2>/dev/null)
-! [ $? -eq 0 ] && echo  "$PROG: Error: No existe el directorio para el archivo de backup" && exit 4
+[ $? -ne 0 ] && echo "$PROG: Error: No existe el directorio para el archivo de backup" && exit 4
 BACKUPFILE="$BACKUPDIR/$(basename $1)"
 
-# Si existe el directorio auxiliar lo borramos
-[ -d $TMPDIR ] && rm -rf $TMPDIR
-
-# Creamos directorio auxiliar
-echo "Creamos directorio auxiliar."
-mkdir -p $TMPDIR
-chmod 700 $TMPDIR
-
-# Información de la versión
-echo "Información de la versión."
-cp $OPENGNSYS/doc/VERSION.txt $TMPDIR
-
 # DHCP
-echo "Copiamos Configuración del dhcp."
-for DHCPCFGDIR in /etc/dhcp /etc/dhcp3; do
-    [ -r $DHCPCFGDIR/dhcpd.conf ] && cp $DHCPCFGDIR/dhcpd.conf $TMPDIR
+for DIR in /etc/dhcp /etc/dhcp3; do
+    [ -r $DIR/dhcpd.conf ] && DHCPDIR=$DIR
 done
-
-# TFTPBOOT
-echo "Guardamos los ficheros PXE de los clientes."
-cp -r $OPENGNSYS/tftpboot/menu.lst $TMPDIR
-
-# Configuración de los clientes
-echo "Guardamos la configuración de los clientes."
-cp $OPENGNSYS/client/etc/engine.cfg $TMPDIR
-
-# Páginas de inicio
-echo "Guardamos las páginas de inicio."
-cp -r $OPENGNSYS/www/menus $TMPDIR
 
 # Exportar la base de datos
 echo "Exportamos la información de la base de datos."
@@ -88,7 +63,7 @@ source $OPENGNSYS/etc/ogAdmServer.cfg
 # Crear fichero temporal de acceso a la BD
 MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 chmod 600 $MYCNF
-trap "rm -f $MYCNF" 1 2 3 6 9 15
+trap "rm -f $MYCNF $MYSQLFILE $TMPDIR/IPSERVER.txt" 1 2 3 6 9 15
 cat << EOT > $MYCNF
 [client]
 user=$USUARIO
@@ -102,20 +77,30 @@ mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG \
           --ignore-table=${CATALOG}.usuarios > $MYSQLFILE
 # Tabla usuario
 mysqldump --defaults-extra-file=$MYCNF --opt --no-create-info $CATALOG \
-          usuarios > $MYSQLFILE2
+          usuarios | sed 's/^INSERT /INSERT IGNORE /g' >> $MYSQLFILE
 # Borrar fichero temporal
 rm -f $MYCNF
 
 # IP SERVIDOR
 echo $ServidorAdm > $TMPDIR/IPSERVER.txt
 
-# Si existe ya archivo de blackup lo renombramos
+# Si existe ya archivo de backup lo renombramos
 [ -r $BACKUPFILE ] && mv $BACKUPFILE $BACKUPFILE-$(date +%Y%M%d)
 
 # Empaquetamos los ficheros
 echo "Creamos un archivo comprimido con los datos: $BACKUPFILE."
-cd /tmp
-tar -czvf $BACKUPFILE ${TMPDIR##*/} &>/dev/null
+tar -cvzf $BACKUPFILE --transform="s!^!$BACKUPPREFIX/!" \
+          -C $(dirname $MYSQLFILE) $(basename $MYSQLFILE) \
+          -C $TMPDIR IPSERVER.txt \
+          -C $DHCPDIR dhcpd.conf \
+          -C $OPENGNSYS/tftpboot menu.lst \
+          -C $OPENGNSYS/doc VERSION.txt \
+          -C $OPENGNSYS/client/etc engine.cfg \
+          -C $OPENGNSYS/www menus \
+          -C /etc default/opengnsys &>/dev/null
 
 # Cambio permisos: sólo puede leerlo el root
 chmod 600 $BACKUPFILE
+
+# Borrar ficheros temporales
+rm -f $MYSQLFILE $TMPDIR/IPSERVER.txt
