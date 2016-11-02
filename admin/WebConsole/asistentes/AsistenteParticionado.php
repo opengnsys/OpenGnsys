@@ -153,7 +153,7 @@ function doOnload(){
 		<table class="tabla_datos">		
 			<tr> 
 				<th><input type="button" name="GenerarInstruccion" Value="<?php echo $TbMsg[41];?>" onclick="codeParticionado(this.form)" /> </th>
-				<td colspan="2"><textarea class="cajatexto" name="codigo" cols="70" rows="7"></textarea></td>
+				<td colspan="2"><textarea class="cajatexto" name="codigo" id="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
 			<tr>
 				<th colspan="3"><?php echo $TbMsg["WARN_REBOOTAFTER"]; ?></th>
