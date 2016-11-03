@@ -2,7 +2,7 @@
 
 #/**
 #         configureOs
-#@brief   Scirpt para realizar la configuracion del sistema operativo restaurado.
+#@brief   Script para realizar la configuracion del sistema operativo restaurado.
 #@param 1 disco 
 #@param 2 particion 
 #@return  
@@ -29,6 +29,9 @@
 #@version 1.1.0 - Postconfiguración para agente de sistema operativo basado en REST.
 #@author Ramon Gomez, ETSII Universidad de Sevilla
 #@date   2016-08-16
+#@version 1.0.6b - llamadas opcionales para mejoras varias. Descomentar la instruccion para su activacion. ogConfigureFstab  
+#@author Antonio J. Doblas Viso.    Universidad de Malaga.
+#@date   2016-11-03
 #*/ ##
 
 # Carga el configurador del engine y los parámetros de red.
@@ -72,6 +75,7 @@ case "$OSTYPE" in
         ogWindowsBootParameters $1 $2
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
+        # OPCIONAL: desactivar el chkdisk de windows tras la restauracion. Requiere configuracion previa en el engine.cfg
         #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
         # Instalar nuevo agente de sistema operativo o el antiguo cliente para Windows.
         ogConfigureOsAgent $1 $2
@@ -81,6 +85,8 @@ case "$OSTYPE" in
         fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
+        #OPCIONAL Configurar el FSTAB. En esta versión solo autoconfigura la partición SWAP
+        #ogConfigureFstab $1 $2
         ## Install and Configure Grub based on OS installed and Grub 1st stage location.
         ogGrubInstallPartition $1 $2
         # Instalar nuevo agente de sistema operativo o el antiguo cliente para GNU/Linux.

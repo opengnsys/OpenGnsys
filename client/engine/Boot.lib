@@ -833,16 +833,19 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 ##
 #/**
 #         ogConfigureFstab int_ndisk int_nfilesys
-#@brief   Establece el nombre del equipo en los ficheros hostname y hosts.
+#@brief   Configura el fstab según particiones existentes 
 #@param   int_ndisk      nº de orden del disco
 #@param   int_nfilesys   nº de orden del sistema de archivos
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  No se encuentra el fichero fstab a procesar.
 #@warning Puede haber un error si hay más de 1 partición swap.
-#@version 1.0.5 - Primera versión para OpenGnSys.
-#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@version 1.0.5 - Primera versión para OpenGnSys. Solo configura la SWAP
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga. 
 #@date    2013-03-21
+#@version 1.0.6b - correccion. Si no hay partición fisica para la SWAP, eliminar entrada del fstab.  
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2016-11-03
 #*/ ##
 function ogConfigureFstab {
 # Variables locales.
@@ -873,16 +876,16 @@ then
     DEFSWAP=$(awk '$1!~/#/ && $3=="swap" {print $1}' ${FSTAB})
     if [ -n "$DEFSWAP" ]
     then
-        echo "Hay definicion de swap en el fstab $DEFSWAP -> modificamos fichero con nuevo valor $DEFSWAP->$PARTSWAP"	# Mensaje temporal.
+        echo "Hay definicion de SWAP en el FSTAB $DEFSWAP -> modificamos fichero con nuevo valor $DEFSWAP->$PARTSWAP"	# Mensaje temporal.
         sed "s|$DEFSWAP|$PARTSWAP|g ; s|$DEFROOT|$PARTROOT|g" ${FSTAB}.backup > ${FSTAB}
     else
-        echo "No hay definicion de swap y si hay partición swap -> moficamos fichero"	# Mensaje temporal.
+        echo "No hay definicion de SWAP y si hay partición SWAP -> moficamos fichero"	# Mensaje temporal.
         sed "s|$DEFROOT|$PARTROOT|g" ${FSTAB}.backup > ${FSTAB}
         echo "$PARTSWAP  none    swap    sw   0  0" >> ${FSTAB}
     fi  
 else
-    echo "No hay partición swap -> configuramos fstba"	# Mensaje temporal.
-    sed "s|$DEFROOT|$PARTROOT|g" ${FSTAB}.backup > ${FSTAB}
+    echo "No hay partición SWAP -> configuramos FSTAB"	# Mensaje temporal.
+    sed "/swap/d" ${FSTAB}.backup > ${FSTAB}
 fi
 }
 
