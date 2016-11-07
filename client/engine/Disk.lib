@@ -752,7 +752,7 @@ fi
 DISK=$(ogDiskToDev $1) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
-            [ "$ID" == "8301" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
+            [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
     LVM)    ID=10000 ;;
