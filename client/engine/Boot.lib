@@ -828,9 +828,7 @@ grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot
 grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 }
 
-###
-#En pruebas
-##
+
 #/**
 #         ogConfigureFstab int_ndisk int_nfilesys
 #@brief   Configura el fstab según particiones existentes 
@@ -957,9 +955,7 @@ fi
 }
 
 
-###
-#En pruebas
-##
+
 #/**
 #         ogCleanLinuxDevices int_ndisk int_nfilesys
 #@brief   Limpia los dispositivos del equipo de referencia. Interfaz de red ...
@@ -972,6 +968,9 @@ fi
 #@version 1.0.5 - Primera versión para OpenGnSys.
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2013-03-21
+#@version 1.0.6b - Elimina fichero resume de hibernacion
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2016-11-07
 #*/ ##
 function ogCleanLinuxDevices ()
 {
@@ -991,7 +990,9 @@ fi
 MNTDIR=$(ogMount $1 $2) || return $?
 
 # Eliminar fichero de configuración de udev para dispositivos fijos de red.
-rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
+[ -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules ] && rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
+# Eliminar fichero resume  (estado previo de hibernación) utilizado por el initrd scripts-premount
+[ -f ${MNTDIR}/etc/initramfs-tools/conf.d/resume ] && rm -f ${MNTDIR}/etc/initramfs-tools/conf.d/resume
 }
 
 #/**
