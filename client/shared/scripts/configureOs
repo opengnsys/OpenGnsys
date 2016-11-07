@@ -89,8 +89,12 @@ case "$OSTYPE" in
         #ogConfigureFstab $1 $2
         ##OPCIONAL Limpiar dispositivos reconocidos previamente
         #ogCleanLinuxDevices $1 $2
-        ## Install and Configure Grub based on OS installed and Grub 1st stage location.
+        ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
+        ## OPCIONAL: instala y configura el codigo de arranque del Grub en el MBR (no lo configura, se mantiene el original de la imagen)
+        #ogGrubInstallMbr $1 $2
+        ## OPCIONAL:  Instala y configura el Grub en el MBR y lo autoconfigura, entradas para los sitemas operativos, ademas al linux restaurado le añade los parmetros indicados.
+        #ogGrubInstallMbr $1 $2 TRUE "irqpoll pci=noacpi noresume quiet splash" 
         # Instalar nuevo agente de sistema operativo o el antiguo cliente para GNU/Linux.
         ogConfigureOsAgent $1 $2
         if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
