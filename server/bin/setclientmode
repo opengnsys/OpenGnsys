@@ -124,7 +124,7 @@ for MAC in $ETHERNET; do
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
-		sed -e "s/vga=[0-9]*//g; s#INFOHOST#$DATOS#g" $TEMPLATE >$PXEFILE
+		sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOS//,/\\,},g" $TEMPLATE >$PXEFILE
 		# Ponemos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
 		PERMS=$(ps axho user,group,comm|awk '!/root/ && /httpd|apache/ {u=$1; g=$2} END {if (g) printf "%s:%s",u,g}')
 		[ -n "$PERMS" ] && chown $PERMS $PXEFILE
