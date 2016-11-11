@@ -75,6 +75,7 @@ if (form.modo[0].checked)
 {
 	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
 	var diskPart = form.idparticion.value.split(";");
+	var imagen = form.idimagen.value.split("_");
 	command="deployImage " + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
