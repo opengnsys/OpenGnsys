@@ -97,6 +97,11 @@ command + " \n";
 
 }
 
+// Activa el área de texto del código, permitiendo modificarlo.
+function modificarCodigo() {
+	document.getElementById("codigo").disabled = false;
+}
+
 function codeParticionado(form){
 	var errorMsg = "¡El espacio libre en disco no puede ser menor que 0!";
 	var n_disk = form.n_disk.value;
