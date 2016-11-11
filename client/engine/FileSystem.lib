@@ -1069,6 +1069,38 @@ for ((PART=1; PART<=$(ogGetPartitionsNumber $1); PART++)); do
 done
 }
 
+#/**
+#         ogUnsetDirtyBit int_ndisk int_npart
+#@brief   Inhabilita el Dirty Bit del sistema de ficheros NTFS para evitar un CHKDSK en el primer arranque
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npart      nº de orden de partición
+#@return  Nada
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.1 - Versión para OpenGnSys.
+#@author  Carmelo Cabezuelo, ASIC Universidad Politécnica de Valencia
+#@date    2016/04/20
+#*/ ##
+function ogUnsetDirtyBit ()
+{
+# Variables locales
+local PART
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" "FUNCNAME 1"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener partición y punto de montaje.
+case "$(ogGetFsType $1 $2)" in
+    NTFS)
+        ogUnmount $1 $2 2>/dev/null
+        PART="$(ogDiskToDev $1 $2)" || return $?
+        ntfsfix -d $PART ;;
+    *) ;;
+esac
+}
 
 # AVISO:  Componer corretcamente esta función.
 function ogGetFreeSize () {
