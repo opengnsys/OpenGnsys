@@ -215,6 +215,23 @@ $app->post('/login',
 );
 
 /**
+ * @brief    Get the server status
+ * @note     Route: /status, Method: GET
+ * @param    no
+ * @return   JSON array with all data collected from server status. (RAM, %CPU,etc..)
+ */
+$app->get('/status', function() {
+      exec("awk '$1~/Mem/ {print $2}' /proc/meminfo",$memInfo);
+      $memInfo = array("total" => $memInfo[0], "used" => $memInfo[1]);
+      $cpuInfo = exec("awk '$1==\"cpu\" {printf \"%.2f\",($2+$4)*100/($2+$4+$5)}' /proc/stat");
+      $cpuModel = exec("awk -F: '$1~/model name/ {print $2}' /proc/cpuinfo");
+      $response["memInfo"] = $memInfo;
+      $response["cpu"] = array("model" => trim($cpuModel), "usage" => $cpuInfo);
+      jsonResponse(200, $response);
+} 
+);
+
+/**
  * @brief    List all defined Organizational Units
  * @note     Route: /ous, Method: GET
  * @param    no
@@ -264,6 +281,42 @@ $app->get('/ous/:ouid', 'validateApiKey',
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
+    }
+);
+
+// Listar grupos.
+$app->get('/ous/:ouid/groups', 'validateApiKey', function($ouid) {
+	global $cmd;
+	global $userid;
+
+	$ouid = htmlspecialchars($ouid);
+	if(checkAdmin($userid, $ouid) == true){
+		// Listar las salas de la UO si el usuario de la apikey es su admin.
+		// Consulta temporal,
+		$cmd->texto = "SELECT * FROM grupos WHERE idcentro='$ouid';";
+		$rs=new Recordset;
+		$rs->Comando=&$cmd;
+		if (!$rs->Abrir()) return(false); // Error al abrir recordset
+			$rs->Primero();
+			// Comprobar que exista la UO.
+			if (checkParameter($rs->campos["idcentro"])) {
+				$response = array();
+				while (!$rs->EOF) {
+					$tmp = array();
+					$tmp['id'] = $rs->campos["idgrupo"];
+					$tmp['name'] = $rs->campos["nombregrupo"];
+					$tmp['type'] = $rs->campos["tipo"];
+					$tmp['comments'] = $rs->campos["comentarios"];
+				if($rs->campos["grupoid"] != 0){
+					$tmp['parent']['id'] = $rs->campos["grupoid"];
+				}
+				array_push($response, $tmp);
+				$rs->Siguiente();
+			}
+			jsonResponse(200, $response);
+		}
+		$rs->Cerrar();
+	}
     }
 );
 

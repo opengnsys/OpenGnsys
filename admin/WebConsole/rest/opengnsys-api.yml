@@ -62,6 +62,23 @@ paths:
       tags:
         - server
         - user
+  /status:
+    get:
+      description: Gets OpenGnsys Server status information
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              memInfo:
+                description: Memory information
+                $ref: '#/definitions/meminfo'
+              cpu:
+                description: CPU information
+                $ref: '#/definitions/cpu'
+      tags:
+        - server
   /ous:
     get:
       description: Gets all `OU` objects.
@@ -113,6 +130,25 @@ paths:
       tags:
         - server
         - ou
+#  /ous/{ouid}/groups:
+#    get:
+#      description: Get all group of labs defined in an `OU` object.
+#      parameters:
+#        - name: ouid
+#          in: path
+#          description: Organization Unit identificator
+#          required: true
+#          type: integer
+#      responses:
+#        "200":
+#          description: Successful response
+#          schema:
+#          ...
+#      security:
+#        - apikey: []
+#      tags:
+#        - server
+#        - ou
   /ous/{ouid}/labs:
     get:
       description: Get all `lab` objects defined in an `OU`.
@@ -875,4 +911,22 @@ paths:
       tags:
         - server
         - agent
-
+definitions:
+  meminfo:
+    properties:
+      total:
+        description: Total amount of memory
+        type: integer
+        format: int64
+      used:
+        description: Amount of used memory
+        type: integer
+        format: int64
+  cpu:
+    properties:
+      model:
+        description: Processor model
+        type: string
+      usage:
+        description: Average of processor load
+        type: float
