@@ -207,7 +207,8 @@ $subconsultarepo='select repositorios.idrepositorio from repositorios INNER JOIN
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ."_".$rs->campos["nombreca"]."_".$rs->campos["idimagen"].'_'.$rs->campos["idperfilsoft"].'" ';
+			//$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ."_".$rs->campos["nombreca"]."_".$rs->campos["idimagen"].'_'.$rs->campos["idperfilsoft"].'" ';
+			$SelectHtml.='<OPTION value="'.$rs->campos["nombreca"] . '" ';
 			$SelectHtml.='>';
 			$SelectHtml.= $rs->campos["descripcion"] .' ('.$rs->campos["nombrerepo"].') </OPTION>';
 			$rs->Siguiente();
