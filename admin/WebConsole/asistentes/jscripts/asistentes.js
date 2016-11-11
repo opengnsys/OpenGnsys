@@ -70,13 +70,17 @@ switch (form.idmetodo.value)
 		protocol="UNICAST-DIRECT";
 		break;
 }
+
+// Datos imagen
+var imagen = form.idimagen.value.split("_");
+
 //form.codigo.value="deployImage REPO /";
 if (form.modo[0].checked) 
 {
 	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
 	var diskPart = form.idparticion.value.split(";");
 	var imagen = form.idimagen.value.split("_");
-	command="deployImage " + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
+	command="deployImage " + imagen[0] + " /" + imagen[1] + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
 command + " \n";
@@ -88,7 +92,7 @@ command + " \n";
 }
 else
 {
-	command="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
+	command="updateCache REPO /" + imagen[1] + ".img" + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command +"\"\n \ " +
 command + " \n";
