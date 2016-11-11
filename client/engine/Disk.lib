@@ -646,9 +646,9 @@ echo $TYPE
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/06/03
-#@version 1.1.0 - Usar "hdparm" y "partx" en vez de "sfdisk".
-#@author  Ramon Gomez, ETSII Universidad Sevilla
-#@date    2016-05-20
+#@version 1.0.6b - uso de sgdisk para todo tipo de particiones. Incidencia #762
+#@author  Universidad de Málaga
+#@date    2016/11/10
 #*/ ##
 function ogGetLastSector ()
 {
@@ -666,11 +666,12 @@ fi
 case $# in 
     1)  # Para un disco.
         DISK=$(ogDiskToDev $1) || return $?
-        LASTSECTOR=$[$(hdparm -N $DISK | awk -F"[=/]" '/=/ {print $2}') - 1]
+        LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
         ;;
     2)  # Para una partición.
+        DISK=$(ogDiskToDev $1) || return $?
         PART=$(ogDiskToDev $1 $2) || return $?
-        LASTSECTOR=$(partx -gso END $PART)
+        LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
         ;;
     *)  # Error si se reciben más parámetros.
         ogRaiseError $OG_ERR_FORMAT
