@@ -73,7 +73,7 @@ case "$OSTYPE" in
         ogWindowsBootParameters $1 $2
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
-        # Instalar nuevo agente de sistema operativo o el antiguo cliente para Windows.
+        # Instalar nuevo agente de sistema operativo; si no, el antiguo cliente para Windows.
         ogConfigureOsAgent $1 $2
         if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
             ogInstallMiniSetup $1 $2 postconf.cmd
@@ -83,7 +83,7 @@ case "$OSTYPE" in
     Linux)      # Postconfiguración de GNU/Linux.
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
-        # Instalar nuevo agente de sistema operativo o el antiguo cliente para GNU/Linux.
+        # Instalar nuevo agente de sistema operativo; si no, el antiguo cliente para GNU/Linux.
         ogConfigureOsAgent $1 $2
         if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
             ogInstallLinuxClient $1 $2
@@ -123,22 +123,6 @@ EOT
 
 # Ejecutar postconfiguración si existe el fichero indicador.
 if [ -e /osxpostconf ]; then
-	### NOTA: descomentar las opciones deseadas.
-	# Activar Journaling en HFS+ (no usar si el cliente continua en OpenGnsys).
-	#diskutil enableJournal disk$[$1-1]s$2
-	# Pedir usuario y clave en pantalla de conexión.
-	#defaults write /Library/Preferences/com.apple.loginwindow SHOWFULLNAME -bool yes
-	# No mostrar botón de cambio rápido de usuario.
-	#defaults write /Library/Preferences/.GlobalPreferences MultipleSessionEnabled -bool NO
-	# Bloquear escritorio, fondo, dock, etc del usuario "usuario".
-	#chflags uchange /Users/usuario/Library/Preferences/com.apple.desktop.plist
-	#chflags uchange /Users/usuario/Library/Preferences/com.apple.dock.plist
-	#chflags uchange /Users/usuario/Desktop
-	# Añadir usuario "usuario" a la lista de desarrolladores de Xcode.
-	#DevToolsSecurity --enable
-	#dscl . -append /Groups/_developer GroupMembership usuario
-	# Bajar volumen (valor entre 0 y 7).
-	#osascript -e 'set volume 1'
 	# Tomar nombre del equipo.
 	HOST="$HOST"
 	if [ -z "\$HOST" ]; then
@@ -162,8 +146,7 @@ if [ -e /osxpostconf ]; then
 	# Descromprimir ficheros de versión para obtener inventario de aplicaciones.
 	find /Applications -type d -name "*.app" -prune -exec \
 	     ditto --nopreserveHFSCompression "{}/Contents/version.plist" "{}/Contents/version.plist.uncompress"
-	# Borrar fichero indicador de psotconfiguración
-	rm -f /osxpostconf
+	rm -f /osxpostconf    # Borrar fichero indicador de psotconfiguración
 fi
 EOT
         # Dar permiso de ejecución.

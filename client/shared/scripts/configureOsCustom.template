@@ -51,7 +51,29 @@ case "$OSTYPE" in
         #ogGrubInstallMbr $1 $2 TRUE "irqpoll pci=noacpi noresume quiet splash"    
         ;;
     MacOS)          # Postconfiguración de Mac OS X.
-       
+        # Programa de inicio que será ejecutado en el arranque de Mac OS X.
+        # NOTA: no modificar la línea siguiente.
+        cat << EOT | sed -n -e '/rm -f /r /dev/stdin' -e 1x -e '2,${x;p}' -e '${x;p}' $MNTDIR/var/root/postconfd.sh
+
+	### NOTA: descomentar las opciones deseadas.
+	# Activar Journaling en HFS+ (no usar si el cliente continua en OpenGnsys).
+	#diskutil enableJournal disk$[$1-1]s$2
+	# Pedir usuario y clave en pantalla de conexión.
+	#defaults write /Library/Preferences/com.apple.loginwindow SHOWFULLNAME -bool yes
+	# No mostrar botón de cambio rápido de usuario.
+	#defaults write /Library/Preferences/.GlobalPreferences MultipleSessionEnabled -bool NO
+	# Bloquear escritorio, fondo, dock, etc del usuario "usuario".
+	#chflags uchange /Users/usuario/Library/Preferences/com.apple.desktop.plist
+	#chflags uchange /Users/usuario/Library/Preferences/com.apple.dock.plist
+	#chflags uchange /Users/usuario/Desktop
+	# Añadir usuario "usuario" a la lista de desarrolladores de Xcode.
+	#DevToolsSecurity --enable
+	#dscl . -append /Groups/_developer GroupMembership usuario
+	# Bajar volumen (valor entre 0 y 7).
+	#osascript -e 'set volume 1'
+
+EOT
+        # NOTA: no modificar la línea anterior.
         ;;
 esac
 
