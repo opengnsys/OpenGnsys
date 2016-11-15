@@ -72,11 +72,29 @@ paths:
             type: object
             properties:
               memInfo:
-                description: Memory information
-                $ref: '#/definitions/meminfo'
+                description: memory information
+                properties:
+                  total:
+                    description: total amount of memory
+                    type: integer
+                    format: int64
+                  used:
+                    description: amount of used memory
+                    type: integer
+                    format: int64
+                required: [ total, used ]
               cpu:
                 description: CPU information
-                $ref: '#/definitions/cpu'
+                properties:
+                  model:
+                    description: processor model
+                    type: string
+                  usage:
+                    description: average of processor load
+                    type: number
+                    format: float
+                required: [ model, usage ]
+            required: [ memInfo, cpu ]
       tags:
         - server
   /ous:
@@ -98,6 +116,7 @@ paths:
                 name:
                   type: string
                   description: Organization Unit name
+              required: [ id, name ]
       tags:
         - server
         - ou
@@ -125,30 +144,56 @@ paths:
               description:
                 type: string
                 description: OU description
+            required: [ id, name, description ]
       security:
         - apikey: []
       tags:
         - server
         - ou
-#  /ous/{ouid}/groups:
-#    get:
-#      description: Get all group of labs defined in an `OU` object.
-#      parameters:
-#        - name: ouid
-#          in: path
-#          description: Organization Unit identificator
-#          required: true
-#          type: integer
-#      responses:
-#        "200":
-#          description: Successful response
-#          schema:
-#          ...
-#      security:
-#        - apikey: []
-#      tags:
-#        - server
-#        - ou
+  /ous/{ouid}/groups:
+    get:
+      description: Get all group of labs defined in an `OU` object.
+      parameters:
+        - name: ouid
+          in: path
+          description: Organization Unit identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  description: group identificator
+                  type: integer
+                  format: int32
+                name:
+                  description: group name
+                  type: string
+                type:
+                  description: group type
+                  type: integer
+                comments:
+                  description: extra comments
+                  type: string
+                parent:
+                  description: parent group
+                  type: object
+                  properties:
+                    id:
+                      description: parent group identificator
+                      type: integer
+                      format: int32
+              required: [ id, name, comments ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - ou
   /ous/{ouid}/labs:
     get:
       description: Get all `lab` objects defined in an `OU`.
@@ -176,13 +221,21 @@ paths:
                 inremotepc:
                   type: boolean
                   description: laboratory usable in Remote PC Project flag
+                group:
+                  type: object
+                  properties:
+                    id:
+                      description: group identificator
+                      type: integer
+                      format: int32
                 ou:
                   type: object
                   properties:
                     id:
-                      type: integer
                       description: OU identificator
+                      type: integer
                       format: int32
+              required: [ id, name; inremotepc, ou ]
       security:
         - apikey: []
       tags:
@@ -279,6 +332,7 @@ paths:
               image:
                 description: Lab's picture file
                 type: string
+            required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, modomul, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, image ]
       security:
         - apikey: []
       tags:
@@ -307,9 +361,17 @@ paths:
               type: object
               properties:
                 id:
+                  description: client identificator
                   type: integer
                   format: int32
                 name:
+                  description: client name
+                  type: string
+                ip:
+                  description: client IP address
+                  type: string
+                mac:
+                  description: client MAC (Ethernet) address
                   type: string
                 ou:
                   type: object
@@ -323,6 +385,7 @@ paths:
                     id:
                       type: integer
                       format: int32
+              required: [ id, name, ip, mac, ou, lab ]
       security:
         - apikey: []
       tags:
@@ -397,6 +460,7 @@ paths:
               image:
                 description: client's picture file
                 type: string
+            required: [ id, name, serialno, netiface, netdriver, mac, ip, netmask, routerip, repo, validation, image ]
       security:
         - apikey: []
       tags:
@@ -446,6 +510,10 @@ paths:
                     description:
                       description: hardware component description
                       type: string
+                  required: [ type, description ]
+            required: [ id, name, hardware ]
+      security:
+        - apikey: []
       tags:
         - server
         - client
@@ -534,6 +602,9 @@ paths:
                         updated:
                           description: flag to check if the restaured image is updated
                           type: boolean
+            required: [ id, name, diskcfg ]
+      security:
+        - apikey: []
       tags:
         - server
         - client
@@ -576,6 +647,8 @@ paths:
               loggedin:
                 description: flag to check if an user is logged in
                 type: boolean
+      security:
+        - apikey: []
       tags:
         - server
         - client
@@ -911,22 +984,3 @@ paths:
       tags:
         - server
         - agent
-definitions:
-  meminfo:
-    properties:
-      total:
-        description: Total amount of memory
-        type: integer
-        format: int64
-      used:
-        description: Amount of used memory
-        type: integer
-        format: int64
-  cpu:
-    properties:
-      model:
-        description: Processor model
-        type: string
-      usage:
-        description: Average of processor load
-        type: float
