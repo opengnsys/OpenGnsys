@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `descrinotificacion` varchar(256) DEFAULT NULL,
   `ambito` smallint(6) NOT NULL DEFAULT '0',
   `idambito` int(11) NOT NULL DEFAULT '0',
-  `restrambito` text NOT NULL,
+  `restrambito` text,
   `idprocedimiento` int(11) NOT NULL DEFAULT '0',
   `idtarea` int(11) NOT NULL DEFAULT '0',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -521,7 +521,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
   `revision` smallint UNSIGNED NOT NULL DEFAULT '0',
   `idperfilsoft` int(11) NOT NULL DEFAULT '0',
   `fechadespliegue` datetime NULL,
-  `cache` text NOT NULL,
+  `cache` text,
   UNIQUE KEY `idordenadornumdisknumpar` (`idordenador`,`numdisk`,`numpar`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
@@ -534,7 +534,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
 CREATE TABLE IF NOT EXISTS `parametros` (
   `idparametro` int(11) NOT NULL AUTO_INCREMENT,
   `nemonico` char(3) NOT NULL DEFAULT '',
-  `descripcion` text NOT NULL,
+  `descripcion` text,
   `nomidentificador` varchar(64) NOT NULL DEFAULT '',
   `nomtabla` varchar(64) NOT NULL DEFAULT '',
   `nomliteral` varchar(64) NOT NULL DEFAULT '',
@@ -821,7 +821,7 @@ CREATE TABLE IF NOT EXISTS `tareas` (
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `ambito` smallint(6) NOT NULL DEFAULT '0',
   `idambito` int(11) NOT NULL DEFAULT '0',
-  `restrambito` text NOT NULL,
+  `restrambito` text,
   `comentarios` text,
   `grupoid` int(11) DEFAULT '0',
   PRIMARY KEY (`idtarea`)
