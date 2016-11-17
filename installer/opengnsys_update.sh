@@ -667,6 +667,58 @@ function createDirs()
 	return 0
 }
 
+# Actualización incremental de la BD (versión actaul a actaul+1, hasta final-1 a final).
+function updateDatabase()
+{
+	local OLDVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
+	local NEWVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
+	local DBDIR="$WORKDIR/opengnsys/admin/Database"
+	local file FILES=""
+
+	echoAndLog "${FUNCNAME}(): looking for database updates"
+	pushd $DBDIR >/dev/null
+	# Bucle de actualización incremental desde versión actual a la final.
+	for file in $OPENGNSYS_DATABASE-*-*.sql; do
+		case "$file" in
+			$OPENGNSYS_DATABASE-$OLDVERSION-$NEWVERSION.sql)
+				# Actualización única de versión inicial y final.
+				FILES="$FILES $file"
+				break
+				;;
+			$OPENGNSYS_DATABASE-*-postinst.sql)
+				# Ignorar fichero específico de post-instalación.
+				;;
+			$OPENGNSYS_DATABASE-$OLDVERSION-*.sql)
+				# Actualización de versión n a n+1.
+				FILES="$FILES $file"
+				OLDVERSION="$(echo $file | cut -f3 -d-)"
+				;;
+			$OPENGNSYS_DATABASE-*-$NEWVERSION.sql)
+				# Última actualización de versión final-1 a final.
+				if [ -n "$FILES" ]; then
+					FILES="$FILES $file"
+					break
+				fi
+				;;
+		esac
+	done
+	# Aplicar posible actualización propia para la versión final.
+	file=$OPENGNSYS_DATABASE-$NEWVERSION.sql
+	if [ -n "$FILES" -o "$OLDVERSION" = "$NEWVERSION" -a -r $file ]; then
+		FILES="$FILES $file"
+	fi
+
+	popd >/dev/null
+	if [ -n "$FILES" ]; then
+		for file in $FILES; do
+			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $file
+		done
+		echoAndLog "${FUNCNAME}(): database is update"
+	else
+		echoAndLog "${FUNCNAME}(): database unchanged"
+	fi
+}
+
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
 function updateServerFiles()
 {
@@ -987,20 +1039,8 @@ else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
-# Si existe fichero de actualización de la base de datos; aplicar cambios.
-INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
-REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-if [ "$INSTVERSION" == "$REPOVERSION" ]; then
-	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION.sql"
-else
-	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
-fi
-if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-	echoAndLog "Updating tables from file: $(basename $OPENGNSYS_DBUPDATEFILE)"
-	importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
-else
-	echoAndLog "Database unchanged."
-fi
+# Actualizar la BD.
+updateDatabase
 
 # Actualizar ficheros complementarios del servidor
 updateServerFiles
