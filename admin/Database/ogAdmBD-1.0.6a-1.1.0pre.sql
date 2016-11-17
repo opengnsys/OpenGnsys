@@ -1,1 +1,0 @@
-ogAdmBD-1.0.6-1.1.0pre.sql

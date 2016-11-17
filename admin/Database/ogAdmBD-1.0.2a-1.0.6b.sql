@@ -1,27 +1,31 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.3 - 1.1.0
+# OpenGnSys 1.0.2a - 1.0.6
 #use ogAdmBD
+
+UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
+UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
+
+# Habilita el comando Particionar y formatear
+UPDATE comandos SET activo = '1' WHERE comandos.idcomando = 10;
 
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
 
-# Soportar particiones GPT, añadir información de caché y fecha de despliegue.
+# Soportar particiones GPT y añadir información de caché.
 ALTER TABLE ordenadores_particiones
 	MODIFY codpar int(8) NOT NULL,
 	ADD numdisk smallint NOT NULL DEFAULT 1 AFTER idordenador,
-	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
-	ADD cache TEXT NOT NULL;
+	ADD cache varchar(500),
 	DROP INDEX idordenadornumpar,
 	ADD UNIQUE idordenadornumdisknumpar(idordenador,numdisk,numpar);
 
 # Nuevos tipos de particiones y particiones GPT.
-ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
 ALTER TABLE sistemasficheros MODIFY codpar int(8) NOT NULL;
+ALTER TABLE tipospar MODIFY codpar int(8) NOT NULL;
 INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(6, 'FAT16', 1),
 	(CONV('A5',16,10), 'FREEBSD', 1),
 	(CONV('A6',16,10), 'OPENBSD', 1),
-	(CONV('A9',16,10), 'NETBSD', 1),
 	(CONV('AF',16,10), 'HFS', 1),
 	(CONV('BE',16,10), 'SOLARIS-BOOT', 1),
 	(CONV('DA',16,10), 'DATA', 1),
@@ -30,30 +34,20 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('FB',16,10), 'VMFS', 1),
 	(CONV('0700',16,10), 'WINDOWS', 1),
 	(CONV('0C01',16,10), 'WIN-RESERV', 1),
-	(CONV('2700',16,10), 'WIN-RECOV', 1),
 	(CONV('7F00',16,10), 'CHROMEOS-KRN', 1),
 	(CONV('7F01',16,10), 'CHROMEOS', 1),
 	(CONV('7F02',16,10), 'CHROMEOS-RESERV', 1),
 	(CONV('8200',16,10), 'LINUX-SWAP', 0),
 	(CONV('8300',16,10), 'LINUX', 1),
 	(CONV('8301',16,10), 'LINUX-RESERV', 1),
-	(CONV('8302',16,10), 'LINUX', 1),
 	(CONV('8E00',16,10), 'LINUX-LVM', 1),
 	(CONV('A500',16,10), 'FREEBSD-DISK', 0),
 	(CONV('A501',16,10), 'FREEBSD-BOOT', 1),
 	(CONV('A502',16,10), 'FREEBSD-SWAP', 0),
 	(CONV('A503',16,10), 'FREEBSD', 1),
-	(CONV('A504',16,10), 'FREEBSD', 1),
-	(CONV('A901',16,10), 'NETBSD-SWAP', 0),
-	(CONV('A902',16,10), 'NETBSD', 1),
-	(CONV('A903',16,10), 'NETBSD', 1),
-	(CONV('A904',16,10), 'NETBSD', 1),
-	(CONV('A905',16,10), 'NETBSD', 1),
-	(CONV('A906',16,10), 'NETBSD-RAID', 1),
 	(CONV('AB00',16,10), 'HFS-BOOT', 1),
 	(CONV('AF00',16,10), 'HFS', 1),
 	(CONV('AF01',16,10), 'HFS-RAID', 1),
-	(CONV('AF02',16,10), 'HFS-RAID', 1),
 	(CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
 	(CONV('BF00',16,10), 'SOLARIS', 1),
 	(CONV('BF01',16,10), 'SOLARIS', 1),
@@ -65,41 +59,14 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 	(CONV('EF00',16,10), 'EFI', 1),
 	(CONV('EF01',16,10), 'MBR', 0),
 	(CONV('EF02',16,10), 'BIOS-BOOT', 0),
-	(CONV('FB00',16,10), 'VMFS', 1),
-	(CONV('FB01',16,10), 'VMFS-RESERV', 1),
-	(CONV('FB02',16,10), 'VMFS-KRN', 1)
 	(CONV('FD00',16,10), 'LINUX-RAID', 1),
 	(CONV('FFFF',16,10), 'UNKNOWN', 1)
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
-# Añadir proxy para aulas.
-ALTER TABLE aulas
-       ADD proxy VARCHAR(30) AFTER dns;
-
-# Valores por defecto para incorporar ordenadores (ticket #609).
-ALTER TABLE ordenadores
-	ALTER fotoord SET DEFAULT 'fotoordenador.gif',
-	ALTER idproautoexec SET DEFAULT 0;
-UPDATE ordenadores
-	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
-
-# Corregir errata en particiones vacías con número de partición asignado al código de partición.
-UPDATE ordenadores_particiones
-	SET codpar = 0
-	WHERE codpar = numpar AND tamano = 0;
-
-# Añadir foto de ordenador.
 ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
-# Actualizar localización de foto de aula (eliminar el camino).
 UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
-
-# Internacionalización correcta de los asistentes.
-UPDATE asistentes
-	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
-UPDATE asistentes
-	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir validación del cliente.
 ALTER TABLE aulas
@@ -128,7 +95,7 @@ INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, a
 		parametros=VALUES(parametros), comentarios=VALUES(comentarios),
 		activo=VALUES(activo), submenu=VALUES(submenu);
 
-# Actualizar y definir parámetros para los comandos nuevos.
+# Parámetros para los comandos nuevos.
 ALTER TABLE parametros
 	ADD KEY (nemonico);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
@@ -169,11 +136,11 @@ UPDATE grupos SET tipo=70 WHERE tipo=50;
 
 # Actualizar menús para nuevo parámetro "video" del Kernel, que sustituye a "vga" (ticket #573).
 ALTER TABLE menus
-     MODIFY resolucion VARCHAR(50) DEFAULT NULL;
-#UPDATE menus SET resolucion = CASE resolucion 
-#                		   WHEN '355' THEN 'uvesafb:1152x864-16'
+	MODIFY resolucion VARCHAR(50) DEFAULT NULL;
+#UPDATE menus SET resolucion = CASE resolucion
+#				   WHEN '355' THEN 'uvesafb:1152x864-16'
 #				   WHEN '788' THEN 'uvesafb:800x600-16'
-#        	        	   WHEN '789' THEN 'uvesafb:800x600-24'
+#				   WHEN '789' THEN 'uvesafb:800x600-24'
 #				   WHEN '791' THEN 'uvesafb:1024x768-16'
 #				   WHEN '792' THEN 'uvesafb:1024x768-24'
 #				   WHEN '794' THEN 'uvesafb:1280x1024-16'
@@ -216,11 +183,22 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('REISER4', 'REISER4'),
 	('UFS', 'UFS'),
 	('XFS', 'XFS'),
-	('LINUX-SWAP', 'LINUX-SWAP'),
-	('F2FS', 'F2FS'),
-	('NILFS2', 'NILFS2') 
+	('LINUX-SWAP', 'LINUX-SWAP')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
+# Nuevas particiones marcadas como clonables.
+INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
+	(CONV('EF',16,10), 'EFI', 1),
+	(CONV('AB00',16,10), 'HFS-BOOT', 1),
+	(CONV('EF00',16,10), 'EFI', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
+
+# Internacionalización correcta de los asistentes.
+UPDATE asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas
@@ -233,16 +211,12 @@ ALTER TABLE ordenadores
 UPDATE ordenadores
 	SET fotoord = SUBSTRING_INDEX(fotoord, '/', -1);
 
-# Corregir errata en particiones vacías con número de partición asignado al código de partición.
-UPDATE ordenadores_particiones
-	SET codpar = 0
-	WHERE codpar = numpar AND tamano = 0;
-
 # Incluir fecha de despliegue/restauración (ticket #677) y
 # correcion en eliminar imagen de cache de cliente (ticket #658)
 ALTER TABLE ordenadores_particiones
 	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
-	MODIFY cache TEXT NOT NULL;
+	MODIFY cache TEXT NOT NULL,
+	ADD INDEX idaulaip (idaula ASC, ip ASC);
 
 # Mostrar disco en comandos Inventario de software e Iniciar sesión.
 UPDATE comandos
@@ -252,47 +226,14 @@ UPDATE comandos
 	SET visuparametros = 'dsk;par', parametros = 'nfn;iph;dsk;par'
 	WHERE idcomando = 9;
 
-# Eliminar campos que ya no se usan y añadir clave de acceso a la API REST del repositorio (tickets #705 y #743).
+# Eliminar campos que ya no se usan (ticket #705).
 ALTER TABLE repositorios
 	DROP pathrepoconf,
 	DROP pathrepod,
-	DROP pathpxe,
-	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
+	DROP pathpxe;
 ALTER TABLE menus
 	DROP coorx,
 	DROP coory,
 	DROP scoorx,
 	DROP scoory;
 
-# Actualizar componentes hardware y añadir nº de serie y clave de acceso a API REST de OGAgent (tickets #713 y #718)
-ALTER TABLE tipohardwares
-        DROP pci;
-INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
-        (17, 'Chasis del Sistema', '', 'cha'),
-        (18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
-        (19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
-ALTER TABLE ordenadores
-	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador,
-	ADD agentkey VARCHAR(32) DEFAULT NULL,
-	ADD KEY idaulaip (idaula ASC, ip ASC);
-
-# Directorios en repo para distintas UO (ticket #678).
-ALTER TABLE entidades
-	ADD ogunit TINYINT(1) NOT NULL DEFAULT 0;
-ALTER TABLE centros
-	ADD directorio VARCHAR(50) DEFAULT '';
-
-# Campo ID sistema operativo en el perfil de software (tickets #738 #713)
-ALTER TABLE perfilessoft
-        ADD idnombreso SMALLINT UNSIGNED AFTER idperfilsoft;
-# Preparar generación de claves de acceso a la API REST para el usuario principal y a la del repositorio principal (tickets #708 y #743).
-UPDATE usuarios
-	SET apikey = 'APIKEY'
-	WHERE idusuario = 1 AND apikey = '';
-UPDATE repositorios
-	SET apikey = 'REPOKEY'
-	WHERE idrepositorio = 1 AND apikey = '';
-
-# Número de puestos del aula permite valores hasta 32768 (ticket #747)
-ALTER TABLE  aulas
-     MODIFY puestos smallint  DEFAULT NULL;
