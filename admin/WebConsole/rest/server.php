@@ -1,33 +1,17 @@
 <?php
 /**
  * @file    index.php
- * @brief   OpenGnsys REST API manager.
+ * @brief   OpenGnsys Server REST API manager.
  * @warning All input and output messages are formatted in JSON.
  * @note    Some ideas are based on article "How to create REST API for Android app using PHP, Slim and MySQL" by Ravi Tamada, thanx.
  * @license GNU GPLv3+
  * @author  Ramón M. Gómez, ETSII Univ. Sevilla
- * @version 1.1.0 - Primera versión para OpenGnsys
+ * @version 1.1.0 - First version
  * @date    2016-09-19
  */
 
 
 // Auxiliar functions.
-
-/**
- * @brief   Compose JSON response.
- * @param   int status      Status code for HTTP response.
- * @param   array response  Response data.
- * @return  string          JSON response.
- */
-function jsonResponse($status, $response) {
-	$app = \Slim\Slim::getInstance();
-	// HTTP status code.
-	$app->status($status);
-	// Content-type HTTP header.
-	$app->contentType('application/json');
-	// JSON response.
-	echo json_encode($response);
-}
 
 /**
  * @brief    Validate API key included in "Authorization" HTTP header.
@@ -146,7 +130,7 @@ function sendCommand($serverip, $serverport, $reqframe, &$values) {
 	}
 }
 
-// Define REST routes.
+// REST routes.
 
 /**
  * @brief    user login.
@@ -175,7 +159,7 @@ $app->post('/login',
 		$app->stop();
 	}
 
-	// Check parameters. 
+	// Checking parameters. 
 	if (! empty($user) and ! empty($pass)) {
 		// Database query.
 		$cmd->texto = "SELECT idusuario, apikey
@@ -215,23 +199,6 @@ $app->post('/login',
 );
 
 /**
- * @brief    Get the server status
- * @note     Route: /status, Method: GET
- * @param    no
- * @return   JSON array with all data collected from server status. (RAM, %CPU,etc..)
- */
-$app->get('/status', function() {
-      exec("awk '$1~/Mem/ {print $2}' /proc/meminfo",$memInfo);
-      $memInfo = array("total" => $memInfo[0], "used" => $memInfo[1]);
-      $cpuInfo = exec("awk '$1==\"cpu\" {printf \"%.2f\",($2+$4)*100/($2+$4+$5)}' /proc/stat");
-      $cpuModel = exec("awk -F: '$1~/model name/ {print $2}' /proc/cpuinfo");
-      $response["memInfo"] = $memInfo;
-      $response["cpu"] = array("model" => trim($cpuModel), "usage" => $cpuInfo);
-      jsonResponse(200, $response);
-} 
-);
-
-/**
  * @brief    List all defined Organizational Units
  * @note     Route: /ous, Method: GET
  * @param    no
@@ -255,7 +222,7 @@ $app->get('/ous', function() {
 	}
 	$rs->Cerrar(); 
 	jsonResponse(200, $response);
-} 
+   } 
 );
 
 /**

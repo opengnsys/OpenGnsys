@@ -62,6 +62,34 @@ paths:
       tags:
         - server
         - user
+  /info:
+    get:
+      description: Gets OpenGnsys Server information
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              project:
+                description: project name (OpenGnsys)
+                type: string
+              version:
+                description: project version
+                type: string
+              release:
+                description: project release
+                type: string
+              services:
+                description: actived services
+                type: array
+                items:
+                  type: string
+                  enum: [ 'server', 'repository', 'tracker' ]
+            required: [ project, version, release, services ]
+      tags:
+        - server
+        - repository 
   /status:
     get:
       description: Gets OpenGnsys Server status information

@@ -41,6 +41,9 @@ $app->setName('opengnsys');
 // Global variables.
 $userid = NULL;			// User id. with access to REST API.
 
+// Common funtions and routes.
+include("common.php");
+
 // Check if services are running.
 $config = parse_ini_file("/etc/default/opengnsys");
 
