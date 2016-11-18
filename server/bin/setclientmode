@@ -83,7 +83,7 @@ date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\" en modo \"$3\"" | tee -a $L
 NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
-	MACFILE=$(echo $MAC | tr [a-z] [A-Z])
+	MACFILE="${MAC^^}"
 	PXEFILE=$PXEDIR/01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
 	# Renombra el fichero PXE original
 	[ -e $PXEFILE ] && mv $PXEFILE $PXEFILE.netboot
