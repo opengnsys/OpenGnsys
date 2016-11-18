@@ -49,6 +49,10 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #747	Uso incorrecto del número de puestos de las propiedades del aula
 #751	Asistente de particionado: particiones GPT
 
+Tickets resueltos en módulo OpenGnSys Installer:
+#755	Scripts para exportar e importar los datos de OpenGnsys
+#765	Actualización incremental de la base de datos
+
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.
 #739	Estandarizar entornos virtuales de desarrollo con Vagrant
@@ -59,6 +63,10 @@ Lista de cambios incluidos en OpenGnSys 1.0.6b (versión de mantenimiento)
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #715	Revisión ogConfigureFstab
+#760	Eliminar CHKDSK en el primer arranque de un Windows restaurado
+
+Tickets resueltos en módulo OpenGnSys Client:
+#759	Añadir llamadas de ejemplos del configureOs al configureOsCustom.template
 
 Tickets resueltos en módulo OpenGnSys Server
 #729	Instalar en cliente la misma versión de Rsync que la del servidor
