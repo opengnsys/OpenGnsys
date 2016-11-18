@@ -50,8 +50,8 @@ CREATE PROCEDURE addcols() BEGIN
 			ADD agentkey VARCHAR(32) DEFAULT NULL;
 	END IF;
 	# Añadir índice para mostrar correctamente el formulario de estado.
-	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
-			WHERE COLUMN_NAME='idaulaip' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
+	IF NOT EXISTS (SELECT * FROM information_schema.STATISTICS
+			WHERE INDEX_NAME='idaulaip' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
 	THEN
 		ALTER TABLE ordenadores
 			ADD KEY idaulaip (idaula ASC, ip ASC);

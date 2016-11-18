@@ -711,7 +711,7 @@ function updateDatabase()
 	popd >/dev/null
 	if [ -n "$FILES" ]; then
 		for file in $FILES; do
-			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $file
+			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $DBDIR/$file
 		done
 		echoAndLog "${FUNCNAME}(): database is update"
 	else
