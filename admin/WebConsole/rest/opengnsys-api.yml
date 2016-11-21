@@ -675,6 +675,7 @@ paths:
               loggedin:
                 description: flag to check if an user is logged in
                 type: boolean
+            required: [ id, ip, status, loggedin ]
       security:
         - apikey: []
       tags:
@@ -708,6 +709,7 @@ paths:
                     id:
                       type: integer
                       format: int32
+              required: [ id, name, ou ]
       security:
         - apikey: []
       tags:
@@ -746,6 +748,7 @@ paths:
               ip:
                 description: repository IP address
                 type: string
+            required: [ id, name, description, ip ]
       security:
         - apikey: []
       tags:
@@ -781,6 +784,7 @@ paths:
                     id:
                       type: integer
                       format: int32
+              required: [ id, name, inremotepc, ou ]
       security:
         - apikey: []
       tags:
@@ -816,9 +820,19 @@ paths:
               description:
                 description: image description
                 type: string
+              comments:
+                description: extra comments
+                type: string
               inremotepc:
                 description: image usable in Remote PC Project flag
                 type: boolean
+              repo:
+                description: repository identification
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int32
               type:
                 description: image type (``monolithic``, ``basic``, ``incremental``)
                 type: string
@@ -828,13 +842,6 @@ paths:
               path:
                 description: image path (if ``type`` is ``incremental``)
                 type: string
-              repo:
-                description: repository identification
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    format: int32
               client:
                 description: model client's data
                 type: object
@@ -851,6 +858,7 @@ paths:
                     description: source partition number
                     type: integer
                     format: int32
+                required: [ id, disk, partition ]
               creationdate:
                 description: image creation date
                 type: string
@@ -858,6 +866,7 @@ paths:
               release:
                 description: image creation release
                 type: string
+            required: [ id, name, description, comments, inremotepc, repo, type ]
       security:
         - apikey: []
       tags:
@@ -902,13 +911,69 @@ paths:
                     application:
                       description: application name and version
                       type: string
+            required: [ id, name, os, software ]
       security:
         - apikey: []
       tags:
         - server
         - image
   #/ous/{ouid}/images/{imageid}/boot:
-  #/repository/images
+  /repository/images
+    get:
+      description: Get information about images stored in a repository
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              disk:
+                description: repository disk information
+                type: object
+                properties:
+                  total:
+                    description: total disk space
+                    type: string
+                  used:
+                    description: disk space used by files
+                    type: string
+                  free:
+                    description: amount of free disk space
+                    type: string
+                  percent:
+                    description: percentage of used space
+                    type: string
+                required: [ total, used, free, percent ]
+              images:
+                description: information about stored images
+                type: object
+                properties:
+                  file:
+                    description: image file information
+                    type: object
+                    properties:
+                    required: [ total, used, free, percent ]
+                      name:
+                        description: file name
+                        type: string
+                      size:
+                        description: file size (bytes)
+                        type: integer
+                        format: int64
+                      modified:
+                        description: file modification date
+                        type: string
+                         format: date-time
+                      permissions:
+                        description: file permissions
+                        type: string
+                    required: [ name, size, modified, permissions ]
+            required: [ disk, images ]
+      security:
+        - apikey: []
+      tags:
+        - repository
+        - image
   #/repository/poweron
   /ogagent/started:
     post:
