@@ -155,9 +155,8 @@ function doOnload(){
 				<th><input type="button" name="GenerarInstruccion" Value="<?php echo $TbMsg[41];?>" onclick="codeParticionado(this.form)" /> </th>
 				<td colspan="2"><textarea class="cajatexto" name="codigo" id="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
-			<tr>
-				<th colspan="3"><?php echo $TbMsg["WARN_REBOOTAFTER"]; ?></th>
-			</tr>
+			<tr> <th colspan="3"><?php echo $TbMsg["WARN_DISKSIZE"]; ?></th> </tr>
+			<tr> <th colspan="3"><?php echo $TbMsg["WARN_REBOOTAFTER"]; ?></th> </tr>
 			<tr id="warngpt" style="display:none">
 				<th colspan="3" ><?php echo $TbMsg["WARN_GPT"]; ?></th>
 			</tr>
