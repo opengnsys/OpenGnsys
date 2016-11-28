@@ -136,6 +136,9 @@ esac
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/13
+#@version 1.0.6b - llamada correcta a ogUpdatePartitionTable
+#@author  Antonio Doblas Universidad de Málaga
+#@date    2016/11/16
 #@version 1.1.0 - Sustituir "sfdisk" por "fdisk" para discos MSDOS.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016/05/25
@@ -160,17 +163,19 @@ case "$(ogGetPartitionTableType $NDISK)" in
     GPT)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
-        sgdisk $DISK -d$NPART 2>/dev/null && partprobe
+        sgdisk $DISK -d$NPART 2>/dev/null 
         ;;
     MSDOS)
         # Si la tabla de particiones no es valida, volver a generarla.
         parted -s $DISK print &>/dev/null || fdisk $DISK <<< "w"
         # Eliminar la partición de caché.
-        echo -e "d\n$NPART\nw" | fdisk $DISK 2>/dev/null && partprobe
+        echo -e "d\n$NPART\nw" | fdisk $DISK 2>/dev/null 
         ;;
 esac
 # Borrar etiqueta de la caché.
 rm -f /dev/disk/by-label/CACHE
+#Actualiza la tabla de particiones en el kernel.
+ogUpdatePartitionTable $NDISK
 }
 
 
