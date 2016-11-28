@@ -434,7 +434,8 @@ function getMinDiskSize(disk){
 		if(diskSizeArray[i].value < minSize)
 			minSize = diskSizeArray[i].value;
 	}
-	return minSize;
+	// Restar sectores iniciales del disco al tamaño total (1 MB).
+	return (minSize > 1024 ? minSize - 1024 : minSize)
 }
 
 // Código para calcular el espacio libre del disco.
