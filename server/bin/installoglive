@@ -112,4 +112,5 @@ fi
 # Desmontar SquashFS.
 umount $TMPDIR
 rmdir $TMPDIR
-
+# Versión del ogLive instalado.
+echo "${OGLIVEFILE%.*}" > $INSTALL_TARGET/doc/veroglive.txt

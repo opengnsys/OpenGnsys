@@ -37,10 +37,10 @@ $changelogfile="../../doc/".$buschangelog;
 ?>
 <?php
 // Añadir Manual.
-$usermanual="../../doc/userManual";
+$usermanual="../../doc/userManual-1.0.6";
 if (file_exists ($usermanual)){
 // Copiamos el directorio userManual
-system("cp -R ../../doc/userManual ../api");
+system("cp -R ../../doc/userManual-1.0.6 ../api/userManual");
 // Creamos el Inicio del Manual
 system("touch ../api/userManual/Inicio.php");
 // Añadimos instrucciones
@@ -132,7 +132,7 @@ fclose($crearficheroinicio);
 	include ($versionfile);}
 ?></p>
 
-<p><?php echo "<strong><a href='../api/userManual/Inicio.php' target='_blank'>".$TbMsg["MANUAL"]."</a></strong>";?></p>
+<p><?php echo "<strong><a href='../api/userManual/Inicio.php' target='_blank'>".$TbMsg["MANUAL"]." (v1.0.6)</a></strong>";?></p>
 
 <p><strong><?php echo $TbMsg["LINK"]; ?> <a href="http://opengnsys.es"  target="_blank" >opengnsys.es</a><strong></p>
 
