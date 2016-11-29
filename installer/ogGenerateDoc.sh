@@ -21,7 +21,7 @@ if [ $# = 2 ]
 then
 mkdir -p "$2"
 VERSION=$(cat $(dirname "$0")/../doc/VERSION.txt) 2>/dev/null
-VERSION=${VERSION:-"1.0 beta"}
+VERSION=${VERSION:-"1.1"}
 cat > /tmp/doxyfile << EOF
 # Doxyfile 1.5.6
 # Fichero para documentar codigo shellscripts linux.
@@ -30,9 +30,10 @@ cat > /tmp/doxyfile << EOF
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Proyecto OpenGnSys"
+PROJECT_NAME           = "Proyecto OpenGnsys"
 PROJECT_NUMBER         = $VERSION
 OUTPUT_DIRECTORY       = $2
+PROJECT_LOGO           = $(dirname "$0")/../doc/opengnsys-logo.png)
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = Spanish
 BRIEF_MEMBER_DESC      = YES
@@ -245,7 +246,7 @@ LATEX_HIDE_INDICES     = NO
 #---------------------------------------------------------------------------
 # configuration options related to the RTF output
 #---------------------------------------------------------------------------
-GENERATE_RTF           = YES
+GENERATE_RTF           = NO
 RTF_OUTPUT             = rtf
 COMPACT_RTF            = YES
 RTF_HYPERLINKS         = YES
@@ -254,7 +255,7 @@ RTF_EXTENSIONS_FILE    =
 #---------------------------------------------------------------------------
 # configuration options related to the man page output
 #---------------------------------------------------------------------------
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
 MAN_LINKS              = YES
@@ -273,7 +274,7 @@ GENERATE_AUTOGEN_DEF   = NO
 #---------------------------------------------------------------------------
 # configuration options related to the Perl module output
 #---------------------------------------------------------------------------
-GENERATE_PERLMOD       = YES
+GENERATE_PERLMOD       = NO
 PERLMOD_LATEX          = NO
 PERLMOD_PRETTY         = YES
 PERLMOD_MAKEVAR_PREFIX =

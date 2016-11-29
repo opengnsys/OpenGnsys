@@ -63,7 +63,10 @@ Lista de cambios incluidos en OpenGnSys 1.0.6b (versión de mantenimiento)
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #715	Revisión ogConfigureFstab
+#756	Comprobar cambios funciones en Disk.lib en el ogLive con kernel 3.2
 #760	Eliminar CHKDSK en el primer arranque de un Windows restaurado
+#762	ogGetLastSector error en modelo HP 6300 con disco duro de 1 TB
+#764	Error aleatorio al formatear la partición caché en el proceso de crearla
 
 Tickets resueltos en módulo OpenGnSys Client:
 #759	Añadir llamadas de ejemplos del configureOs al configureOsCustom.template
@@ -73,6 +76,8 @@ Tickets resueltos en módulo OpenGnSys Server
 #752	Script setserveraddr parchea parámetro de configuración UrlMenu
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#753	Asistente de particionado no crea correctamente la caché
+#757	Asistente DeployImagen: no guarda información de la imagen restaurada
 #758	Comando Formatear y Particionar no formatea la swap
 
 Tickets genéricos resueltos:
