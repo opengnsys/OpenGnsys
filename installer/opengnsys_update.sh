@@ -925,6 +925,8 @@ function updateClient()
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
 					$INSTALL_TARGET/bin/setsmbpass
+			# Versión del ogLive instalado.
+			echo "${FILENAME%.*}" > $INSTALL_TARGET/doc/veroglive.txt 
 		else
 			echoAndLog "${FUNCNAME}(): Client is already updated"
 		fi
