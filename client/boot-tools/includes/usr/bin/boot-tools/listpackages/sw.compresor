@@ -4,7 +4,6 @@ install zip
 install unzip 
 install gzip 
 install lzop 
-#install drbl-lzop	# Eliminado
 install pigz 
 install pbzip2 
 install lbzip2 

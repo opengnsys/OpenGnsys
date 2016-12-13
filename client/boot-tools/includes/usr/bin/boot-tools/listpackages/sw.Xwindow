@@ -4,10 +4,9 @@
 #install xorg
 #install lxde 
 #+80M roxterm y gparted
-install roxterm
-install gparted 
+#install roxterm
+#install gparted 
 #xvesa en compilacion 
 #install openbox
 #install midori
-# VESA Kernel 3.7+
-install v86d
+install v86d		# VESA Kernel 3.7+

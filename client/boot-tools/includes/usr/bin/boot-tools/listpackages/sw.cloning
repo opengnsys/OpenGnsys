@@ -1,5 +1,4 @@
 #sw.cloning
-#install drbl-partimage		# Eliminado
 install fsarchiver 
 install pv 
 install pxe-kexec
@@ -7,7 +6,6 @@ install mbuffer
 install parted 
 install gdisk
 install drbl-chntpw 
-#install chntpw 
 install clonezilla
 install registry-tools
 install reglookup
