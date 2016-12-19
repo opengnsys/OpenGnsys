@@ -913,6 +913,7 @@ function updateClient()
 			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
 		fi
+		CLIENTUPDATED=${FILENAME%.*}
 
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
@@ -977,7 +978,11 @@ function updateSummary()
 			echoAndLog "        New OpenGnsys services will be restarted by the cronjob."
 		fi
 	fi
-	echoAndLog "Warning: You must to clear web browser cache before loading OpenGnSys page."
+	echoAndLog "Warnings:"
+	echoAndLog " - You must to clear web browser cache before loading OpenGnSys page."
+	if [ -n "$CLIENTUPDATED" ]; then
+		echoAndLog " - ogLive Client is updated to: $CLIENTUPDATED"
+	fi
 	echo
 }
 
