@@ -38,17 +38,36 @@ function jsonResponse($status, $response) {
  * @return   JSON object with basic server information (version, services, etc.)
  */
 $app->get('/info', function() {
-      // Getting version info.
+      // Reading version file.
       @list($project, $version, $release) = explode(' ', file_get_contents('/opt/opengnsys/doc/VERSION.txt'));
-      $response["project"] = $project;
-      $response["version"] = $version;
-      $response["release"] = trim($release);
+      $response['project'] = trim($project);
+      $response['version'] = trim($version);
+      $response['release'] = trim($release);
       // Getting actived services.
       @$services = parse_ini_file('/etc/default/opengnsys');
-      $response["services"] = Array();
-      if (@$services["RUN_OGADMSERVER"] === "yes")  array_push($response["services"], "server");
-      if (@$services["RUN_OGADMREPO"] === "yes")  array_push($response["services"], "repository");
-      if (@$services["RUN_BTTRACKER"] === "yes")  array_push($response["services"], "tracker");
+      $response['services'] = Array();
+      if (@$services["RUN_OGADMSERVER"] === "yes") {
+          array_push($response['services'], "server");
+          $hasOglive = true;
+      }
+      if (@$services["RUN_OGADMREPO"] === "yes")  array_push($response['services'], "repository");
+      if (@$services["RUN_BTTRACKER"] === "yes")  array_push($response['services'], "tracker");
+      // Reading installed ogLive information file.
+      if ($hasOglive === true) {
+          $data = explode('-', @file_get_contents('/opt/opengnsys/doc/veroglive.txt'));
+          if ($data[0] === "ogLive") {
+              array_shift($data);
+              $response['oglive'] = array();
+              $tmp = Array();
+              $tmp['distribution'] = trim($data[0]);
+              array_shift($data);
+              $tmp['revision'] = trim(end($data));
+              array_pop($data);
+              $tmp['kernel'] = trim(implode('-', $data));
+              $tmp['directory'] = "tftpboot/ogclient";
+              array_push($response['oglive'], $tmp);
+          }
+      }
       jsonResponse(200, $response);
    }
 );

@@ -91,6 +91,28 @@ function checkAdmin($adminid) {
 	}
 }
 
+/**
+ * @fn    addClassroomGroup(&$classroomGroups, $rs)
+ * @brief Funcion privada usada para añadir grupos de aulas recursivamente
+ * @param classroomGroups Grupos de aulas que pueden contener más grupos
+ * @param rs resultset de la consulta a la base de datos.
+ */
+function addClassroomGroup(&$classroomGroups, $rs){
+
+	array_walk($classroomGroups, function(&$group,$key){
+		global $rs;
+		if (isset($group['id']) && $group['id'] === $rs->campos["group_group_id"]) {
+			array_push($group["classroomGroups"],array("id" => $rs->campos["group_id"], 
+				"name" => $rs->campos["nombregrupoordenador"], 
+				"comments" => $rs->campos["comentarios"],
+				"classroomGroups" => array()));
+		}
+		else if(count($group["classroomGroups"]) > 0){
+			addClassroomGroup($group["classroomGroups"], $rs);
+		}
+		/**/
+	});
+}
 
 /**
  * @fn       sendCommand($serverip, $serverport, $reqframe, &$values)
@@ -295,32 +317,64 @@ $app->get('/ous/:ouid/groups', 'validateApiKey', function($ouid) {
  */
 $app->get('/ous/:ouid/labs', 'validateApiKey',
     function($ouid) {
+	global $userid;
 	global $cmd;
+	global $rs;
 
 	$ouid = htmlspecialchars($ouid);
 	// Listar las salas de la UO si el usuario de la apikey es su admin.
 	$cmd->texto = <<<EOD
-SELECT aulas.*, adm.idadministradorcentro
+SELECT aulas.*, adm.idadministradorcentro, grp.idgrupo AS group_id,
+       grp.nombregrupoordenador, grp.grupoid AS group_group_id, grp.comentarios
   FROM aulas
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
- WHERE idcentro='$ouid';
+  LEFT JOIN gruposordenadores AS grp USING(idaula)
+ WHERE idcentro='$ouid' AND adm.idadministradorcentro = '$userid'
+ ORDER BY aulas.idaula, grp.idgrupo
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false);	// Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error opening recordset.
 	// Comprobar que exista la UO y que el usuario sea su administrador.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idcentro"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response = array();
 		while (!$rs->EOF) {
-			$tmp = array();
-			$tmp['id'] = $rs->campos["idaula"];
-			$tmp['name'] = $rs->campos["nombreaula"];
-			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-			$tmp['group']['id'] = $rs->campos["grupoid"];
-			$tmp['ou']['id'] = $ouid;
-			array_push($response, $tmp);
+			// En los resultados las aulas vienen repetidas tantas veces como grupos tengan, solo dejamos uno
+			$classroomIndex = -1;
+			$found=false;
+			$index = 0;
+			while(!$found && $index < count($response)){
+				if(isset($response[$index]["id"]) && $response[$index]["id"] == $rs->campos["idaula"]){
+					$classroomIndex = $index;
+					$found = true;
+				}
+				$index++;
+			}
+			if(!$found){
+				$tmp = array();
+				$tmp['id'] = $rs->campos["idaula"];
+				$tmp['name'] = $rs->campos["nombreaula"];
+				$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+				$tmp['group']['id'] = $rs->campos["grupoid"];
+				$tmp['ou']['id'] = $ouid;
+				array_push($response, $tmp);
+			}
+			else{
+				// Le añadimos el grupo en cuestion siempre que no sea un subgrupo
+				if($rs->campos["group_group_id"] == 0){
+					array_push($response[$classroomIndex]['classroomGroups'],
+						array("id" => $rs->campos["group_id"],
+						"name" => $rs->campos["nombregrupoordenador"],
+						"comments" => $rs->campos["comentarios"],
+						"classroomGroups" => array()));
+				}
+				else {
+					// Buscamos el grupo donde añadir el grupo
+					addClassroomGroup($response[$classroomIndex]['classroomGroups'], $rs);
+				}
+			}
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
