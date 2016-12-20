@@ -110,6 +110,10 @@ mountroot ()
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir SHARE -engine,scripts,interface, -share- on $OGSERVERSHARE : y/N "
     [ $? == 0 ] && sh || echo " "
 	ogConnect $OGSERVERSHARE $OGPROTOCOL $SRCOGSHARE $DSTOGSHARE 
+	if [ $? -ne 0 -a "$SRCOGSHARE" != "$DEFOGSHARE"]; then
+		ogConnect $OGSERVERSHARE $OGPROTOCOL $DEFOGSHARE $DSTOGSHARE && SRCOGSHARE=$DEFOGSHARE
+	fi
+	unset DEFOGSHARE
 	
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir LOG STORAGE on $OGSERVERLOG : y/N "
     [ $? == 0 ] && sh || echo " "

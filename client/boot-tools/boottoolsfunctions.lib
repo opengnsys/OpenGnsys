@@ -97,10 +97,17 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	xenial) 	# ogLive 1.1.0-rc4 basado en Ubuntu 16.04.
+	xenial|xenial-4.4) 	# ogLive 1.1.0-rc4 basado en Ubuntu 16.04 y Kernel 4.4.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="xenial"
 		OSRELEASE="4.4.0-34-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	xenial-4.8) 	# ogLive 1.1.0-rc5 basado en Ubuntu 16.04 y Kernel 4.8.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="xenial"
+		OSRELEASE="4.8.0-30-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;

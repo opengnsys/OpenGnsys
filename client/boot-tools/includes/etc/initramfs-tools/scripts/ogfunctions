@@ -133,7 +133,8 @@ ogExportVarEnvironment ()
 		;;
 		smb|SMB|cifs|CIFS|samba|SAMBA)
 			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
-			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+			export DEFOGSHARE="ogclient"
+			export SRCOGSHARE="${oglive:-$DEFOGSHARE}" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
 			export SRCOGIMAGES="ogimages$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
 		;;
@@ -454,7 +455,11 @@ ogConnect ()
 			# TODO: buscar condicion para NFS
 		   fi
 		;;
+		*)
+			return 1
+		;;
 	esac
+	return $?
 }
 
 
