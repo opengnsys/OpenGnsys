@@ -147,11 +147,14 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 			if (res == 0) { // Encontrada la función que procesa el mensaje
 				liberaMemoria(nfn);
 				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
-				liberaMemoria((char*)ptrTrama);
+				liberaMemoria(ptrTrama->parametros);
+				liberaMemoria(ptrTrama);
 				return(res);
 			}
 		}
-		
+		liberaMemoria(nfn);
+		liberaMemoria(ptrTrama->parametros);
+		liberaMemoria(ptrTrama);
 		/*
 		 Sólo puede ser un comando personalizado o su notificación
 		if (ptrTrama->tipo == MSG_COMANDO)
@@ -215,6 +218,7 @@ BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 	lSize = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lSize + 1);
 	if (Ipes == NULL) {
+		liberaMemoria(iph);
 		errorLog(modulo, 3, FALSE);
 		return (FALSE);
 	}
@@ -348,6 +352,7 @@ BOOLEAN EcoConsola(SOCKET *socket_c, TRAMA* ptrTrama)
 	// Lee archivo de eco de consola
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
 	sprintf(fileco,"/tmp/_Seconsola_%s",iph); // Nombre del archivo en el Servidor
+	liberaMemoria(iph);
 	lSize=lonArchivo(fileco);
 	if(lSize>0){ // Si el fichero tiene contenido...
 		initParametros(ptrTrama,lSize+LONGITUD_PARAMETROS);
@@ -504,6 +509,7 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+		liberaMemoria(iph);
 		errorLog(modulo, 20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
@@ -516,14 +522,19 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 				" WHERE ordenadores.ip = '%s'", iph);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		liberaMemoria(iph);
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		db.Close();
 		return (21);
 	}
 
 	if (tbl.ISEOF()) { // Si no existe el cliente
+		liberaMemoria(iph);
 		errorLog(modulo, 22, FALSE);
+		db.liberaResult(tbl);
+		db.Close();
 		return (22);
 	}
 
@@ -532,15 +543,22 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 		infoDebug(msglog);
 	}
 	if (!tbl.Get("idordenador", *idordenador)) {
+		liberaMemoria(iph);
+		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		db.Close();
 		return (FALSE);
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
+		liberaMemoria(iph);
+		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		db.Close();
 		return (FALSE);
 	}
+	db.liberaResult(tbl);
 	db.Close();
 	
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
@@ -604,6 +622,8 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuracion
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+		liberaMemoria(iph);
+		liberaMemoria(cfg);
 		errorLog(modulo, 20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);

@@ -25,6 +25,7 @@ public:
 	bool Close(void);
 	bool Execute(char* CmdStr);
 	bool Execute(char* CmdStr, Table& Tbl);
+	void liberaResult(Table& Tbl);
 	void GetErrorErrStr(char* ErrStr);
 };
 // __________________________________________________________________________
