@@ -45,6 +45,7 @@ import platform
 import time
 import random
 import string
+import urllib
 
 # Error handler decorator.
 def catchBackgroundError(fnc):
@@ -106,10 +107,12 @@ class OpenGnSysWorker(ServerWorker):
         if secret != self.random:
             logger.error('Unauthorized operation.')
             raise Exception('Unauthorized operation')
-        # Executing script
-        script = postParams.get('script')
+        # Decoding script.
+        script = urllib.unquote(postParams.get('script').decode('base64')).decode('utf8')
+        script = 'import subprocess; subprocess.check_output("""{}""",shell=True)'.format(script)
+        # Executing script.
         if postParams.get('client', 'false') == 'false':
-            thr = ScriptExecutorThread(script=script.decode('base64'))
+            thr = ScriptExecutorThread(script)
             thr.start()
         else:
             self.sendScriptMessage(script)

@@ -166,6 +166,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		echo '</SCRIPT>';
 	}
 	else{
+		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
+		$script=$ValorParametros["scp"];
 		if($sw_ejya=='on'){ 	
 			// Envio al servidor 
 			$shidra=new SockHidra($servidorhidra,$hidraport); 
@@ -200,6 +202,12 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					// Reiniciar
 					$urlcomando = 'reboot';
 					$ogAgentNuevo = true;
+					break;
+				case 8:
+					// Ejecutar script 
+					$urlcomando = 'script';
+					$ogAgentNuevo = true;
+					$paramsPost = '{"script":"'.base64_encode($script).'"}';
 					break;
 			}
 
