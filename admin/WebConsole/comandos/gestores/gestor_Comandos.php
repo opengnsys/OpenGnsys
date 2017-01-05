@@ -221,7 +221,11 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 				$auxKey = explode(";", $cadenaoga);
 				$i = 0;
 				foreach ($auxIp as $ip) {
-					$urls[$ip] = "https://$ip:8000/opengnsys/$urlcomando?secret=".$auxKey[$i];
+					//$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando";
+					//if (isset($auxKey[$i]))  $aurls[$ip]['header'] = "https://$ip:8000/opengnsys/$urlcomando?secret=".$auxKey[$i];
+					$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando?secret=".$auxKey[$i];
+					if (isset($paramsPost))  $aurls[$ip]['post'] = $paramsPost;
+
 					$i++;
 				}
 				// Launch concurrent requests.
