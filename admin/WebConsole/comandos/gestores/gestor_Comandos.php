@@ -167,7 +167,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 	}
 	else{
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
-		$script=$ValorParametros["scp"];
+		$script=urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
 			// Envio al servidor 
 			$shidra=new SockHidra($servidorhidra,$hidraport); 
@@ -221,10 +221,9 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 				$auxKey = explode(";", $cadenaoga);
 				$i = 0;
 				foreach ($auxIp as $ip) {
-					//$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando";
-					//if (isset($auxKey[$i]))  $aurls[$ip]['header'] = "https://$ip:8000/opengnsys/$urlcomando?secret=".$auxKey[$i];
-					$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando?secret=".$auxKey[$i];
-					if (isset($paramsPost))  $aurls[$ip]['post'] = $paramsPost;
+					$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando";
+					if (isset($auxKey[$i]))  $urls[$ip]['header'] = Array("Authorization: ".$auxKey[$i]);
+					if (isset($paramsPost))  $urls[$ip]['post'] = $paramsPost;
 
 					$i++;
 				}

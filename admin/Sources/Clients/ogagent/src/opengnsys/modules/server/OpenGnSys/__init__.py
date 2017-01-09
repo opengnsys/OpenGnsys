@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-@author: Adolfo Gómez, dkmaster at dkmon dot com
+@author: Ramón M. Gómez, ramongomez at us dot es 
 '''
 from __future__ import unicode_literals
 
@@ -65,6 +65,17 @@ class OpenGnSysWorker(ServerWorker):
     random = None     # Random string for secure connections
     length = 32       # Random string length
     
+    def checkSecret(self, server):
+        '''
+        Checks for received secret key and raise exception if it isn't valid.
+        '''
+        try:
+            if self.random != server.headers['Authorization']:
+                raise Exception('Unauthorized operation')
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
+
     def onActivation(self):
         '''
         Sends OGAgent activation notification to OpenGnsys server
@@ -96,27 +107,6 @@ class OpenGnSysWorker(ServerWorker):
     #   logger.debug('Processing doit')
     #   self.sendClientMessage('doit', {'param1': 'test', 'param2': 'test2'})
     #   return 'Processed message for {}, {}, {}'.format(path, getParams, postParams)
-    
-    def process_script(self, path, getParams, postParams, server):
-        '''
-        Processes an script execution (script should be encoded in base64)
-        '''
-        logger.debug('Processing script request')
-        # Checking received secret
-        secret = getParams.get('secret')
-        if secret != self.random:
-            logger.error('Unauthorized operation.')
-            raise Exception('Unauthorized operation')
-        # Decoding script.
-        script = urllib.unquote(postParams.get('script').decode('base64')).decode('utf8')
-        script = 'import subprocess; subprocess.check_output("""{}""",shell=True)'.format(script)
-        # Executing script.
-        if postParams.get('client', 'false') == 'false':
-            thr = ScriptExecutorThread(script)
-            thr.start()
-        else:
-            self.sendScriptMessage(script)
-        return {'op': 'launched'}
     
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
@@ -194,12 +184,8 @@ class OpenGnSysWorker(ServerWorker):
         Launches a system reboot operation.
         '''
         logger.debug('Received reboot operation')
-        # Check received secret
-        secret = getParams.get('secret')
-        if secret != self.random:
-            logger.error('Unauthorized operation.')
-            raise Exception('Unauthorized operation')
-        # Rebooting thread
+        self.checkSecret(server)
+        # Rebooting thread.
         def rebt():
             operations.reboot()
         threading.Thread(target=rebt).start()
@@ -210,29 +196,38 @@ class OpenGnSysWorker(ServerWorker):
         Launches a system power off operation.
         '''
         logger.debug('Received poweroff operation')
-        # Checking received secret
-        secret = getParams.get('secret')
-        if secret != self.random:
-            logger.error('Unauthorized operation.')
-            raise Exception('Unauthorized operation')
-        # Powering off thread
+        self.checkSecret(server)
+        # Powering off thread.
         def pwoff():
             time.sleep(2)
             operations.poweroff()
         threading.Thread(target=pwoff).start()
         return {'op': 'launched'}
 
+    def process_script(self, path, getParams, postParams, server):
+        '''
+        Processes an script execution (script should be encoded in base64)
+        '''
+        logger.debug('Processing script request')
+        self.checkSecret(server)
+        # Decoding script.
+        script = urllib.unquote(postParams.get('script').decode('base64')).decode('utf8')
+        script = 'import subprocess; subprocess.check_output("""{}""",shell=True)'.format(script)
+        # Executing script.
+        if postParams.get('client', 'false') == 'false':
+            thr = ScriptExecutorThread(script)
+            thr.start()
+        else:
+            self.sendScriptMessage(script)
+        return {'op': 'launched'}
+    
     def process_logoff(self, path, getParams, postParams, server):
         '''
         Closes user session.
         '''
         logger.debug('Received logoff operation')
-        # Checking received secret
-        secret = getParams.get('secret')
-        if secret != self.random:
-            logger.error('Unauthorized operation.')
-            raise Exception('Unauthorized operation')
-        # Sending log off message to OGAgent client
+        self.checkSecret(server)
+        # Sending log off message to OGAgent client.
         self.sendClientMessage('logoff', {})
-        return 'Logoff operation was sended to client'
+        return {'op': 'sended to client'}
 

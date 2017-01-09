@@ -26,7 +26,7 @@ function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CUR
     $url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
     curl_setopt($curly[$id], CURLOPT_URL, $url);
     if (is_array($d) && !empty($d['header'])) {
-       curl_setopt($curly[$id], CURLOPT_HEADER, $d['header']);
+       curl_setopt($curly[$id], CURLOPT_HTTPHEADER, $d['header']);
     } else {
        curl_setopt($curly[$id], CURLOPT_HEADER, 0);
     }
