@@ -35,11 +35,16 @@
 #@version 1.1.0 - Posibilidad de crear la caché en cualquier partición.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016/05/25
+#@version 1.1.0 - Soporte discos con sectores de 4k
+#@date    2017/01/09
+#@version 1.0.6b - Al crear las particiones ordenamos los dispositivos en el fichero auxiliar.
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017/01/09
 #*/ ##
 function ogCreateCache ()
 {
 # Variables locales.
-local FINDCACHE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID TMPFILE
+local FINDCACHE IOSIZE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID TMPFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [int_ndisk [int_npart]] int_partsize" \
@@ -78,7 +83,14 @@ TMPFILE=/tmp/sfdisk$$
 DISK=$(ogDiskToDev $NDSK) || return $?
 END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
 SIZE=$[$SIZECACHE*2]                            # Tamaño en sectores de 512 B.
-START=$[END-SIZE+1]
+# Inicio partición cache según el disco tenga sectores de 4k o menores
+IOSIZE=$(fdisk -l $DISK | awk '/I\/O/ {print $4}')
+if [ $IOSIZE -eq 4096 ]; then
+    END=$[$END-8192]
+    START=$[END-SIZE-8192]
+else
+    START=$[END-SIZE+1]
+fi
 ENDPREVPART=$[$(ogGetLastSector $NDSK $[PART-1] 2>/dev/null)]
 # Error si tamaño no está entre límites permitidos o si se solapa con la partición anterior.
 MINSIZE=25000                   # Error de formateo si tamaño < 50 MB.
@@ -105,7 +117,7 @@ case "$(ogGetPartitionTableType $NDSK)" in
         [ -n "$(ogFindCache)" ] && ogDeleteCache
         # Capturamos el codigo de particion GPT para cache
         ID=$(ogTypeToId CACHE GPT)
-        sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null && partprobe
+        sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null
         ;;
     MSDOS)
         # Si la tabla de particiones no es valida, volver a generarla.
@@ -116,11 +128,17 @@ case "$(ogGetPartitionTableType $NDSK)" in
         trap "rm -f $TMPFILE" 1 2 3 9 15
         sfdisk --dump $DISK | grep -v $DISK$PART > $TMPFILE
         echo  "$DISK$PART : start= $START, size= $SIZE, Id=$ID" >> $TMPFILE
+        # Ordenamos las líneas de los dispositivos
+        UNIT=$(grep unit $TMPFILE)
+        grep ^/dev $TMPFILE|sort -o $TMPFILE
+        sed -i "1i $UNIT\n" $TMPFILE
         # Guardamos nueva configuración en el disco.
-        sfdisk --no-reread  $DISK < $TMPFILE && partprobe
+        sfdisk --no-reread  $DISK < $TMPFILE
         rm -f $TMPFILE
         ;;
 esac
+# Actualiza la tabla de particiones en el kernel.
+ogUpdatePartitionTable
 }
 
 
