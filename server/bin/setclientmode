@@ -66,8 +66,9 @@ NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
 	# Si existe anteriormente el fichero PXE, lo borra
-	PXEFILE=$PXEDIR/01-${MAC:0:2}-${MAC:2:2}-${MAC:4:2}-${MAC:6:2}-${MAC:8:2}-${MAC:10:2}
-	[ -e $PXEFILE ] && rm $PXEFILE
+	MACFILE="${MAC^^}"
+	PXEFILE=$PXEDIR/01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
+	rm -f $PXEFILE ${PXEFILE,,}
 	if [ "$1" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
@@ -101,7 +102,7 @@ for MAC in $ETHERNET; do
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
-		sed -e "s/vga=[0-9]*//g; s/INFOHOST/$DATOS/g" $TEMPLATE >$PXEFILE
+		sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOS//,/\\,},g" $TEMPLATE >$PXEFILE
 		# Ponemos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web. 
 		PERMS=$(ps axho user,group,comm|awk '!/root/ && /httpd|apache/ {u=$1; g=$2} END {if (g) printf "%s:%s",u,g}') 
 		[ -n "$PERMS" ] && chown $PERMS $PXEFILE

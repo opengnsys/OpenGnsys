@@ -14,6 +14,10 @@
 #@version 1.0.6 - Detección automática del tipo de imagen.
 #@date    2014-10-29
 #@author  Ramón Gómez, ETSII Univ. Sevilla
+#@version 1.1.0 - Aunque no exista imagen permite recuperar la copia. 
+#@date    2016-10-14
+#@author  Irina Gómez, ETSII Univ. Sevilla
+#*/ ##
 
 
 PROG=$(basename $0)
@@ -50,25 +54,19 @@ if [ $# != 1 -o -n "$ERR" ]; then
 fi
 
 # Eliminar ficheros de imagen monolítica o sincronizada básica.
-IMGPATH="$OGIMG/$1.$IMGEXT"
-if [ -f $IMGPATH ]; then
-    echo "Borrando fichero $PATHDIR"
-    rm -f $IMGPATH && rm -f $IMGPATH.{sum,full.sum,torrent}
-else
-    # Eliminar ficheros de imagen sincronizada diferencial. 
-    IMGPATH="$OGIMG/$1.$IMGEXT.$DIFFEXT"
-    if [ -f $IMGPATH ]; then
-        echo "Borrando fichero $PATHDIR"
-        rm -f $IMGPATH && rm -f $IMGPATH.{sum,full.sum,torrent}
-    else
-        # Eliminar directorio de imagen sincronizada. 
-        IMGPATH="$OGIMG/$1"
-        if [ -d $IMGPATH ]; then
-            echo "Borrando directorio $PATHDIR"
-            rm -fr $IMGPATH
-        fi
+for IMG in "$OGIMG/$1.$IMGEXT" "$OGIMG/$1.$IMGEXT.$DIFFEXT" "$OGIMG/$1"; do
+    # Borro la imagen si existe
+    if [ -r $IMG ] ; then
+        IMGPATH=$IMG
+        echo "Borrando imagen $IMGPATH"
+        rm -f $IMGPATH{,.sum,.full.sum,.torrent}
+        break
     fi
-fi
+    # Compruebo si existe copia de seguridad
+    [ -r $IMG.$BAKEXT ] && OLDPATH=$IMG
+done
+
+[ "_${IMGPATH}_" == "__" ] && IMGPATH=$OLDPATH
 
 # Recuperar copia de seguridad de la imagen.
 if [ -n "$RECOVERBACKUP" ]; then

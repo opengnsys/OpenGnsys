@@ -2,7 +2,7 @@
 
 #/**
 #         configureOs
-#@brief   Scirpt para realizar la configuracion del sistema operativo restaurado.
+#@brief   Script para realizar la configuracion del sistema operativo restaurado.
 #@param 1 disco 
 #@param 2 particion 
 #@return  
@@ -26,6 +26,9 @@
 #@version 1.0.5 - Postconfiguración para Mac OS X.
 #@author Ramon Gomez, ETSII Universidad de Sevilla
 #@date   2013-10-11
+#@version 1.0.6b - Pasar las opciones no usadas al configureOsCustom.templates 
+#@author 
+#@date   2016-11-03
 
 # Carga el configurador del engine y los parámetros de red.
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
@@ -60,15 +63,12 @@ case "$OSTYPE" in
         # Cambiar nombre en sistemas Windows.
         HOST=${HOST:-"pc"}
         ogSetWindowsName $1 $2 "$HOST"
-        # Descomentar la siguiente línea para cambiar usuario de inicio.
-        #ogSetWinlogonUser $1 $2 " "
         # Configurar el boot sector de la partición Windows.
         ogFixBootSector $1 $2
         # Configurar el gestor de arranque de Windows XP/Vista/7.
-        ogWindowsBootParameters $1 $2
+        ogWindowsBootParameters $1 $2        
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
-        #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
         # Instalar cliente para Windows si se indica en la variable INSTALLOSCLIENT.
 	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
         	ogInstallMiniSetup $1 $2 postconf.cmd
@@ -76,9 +76,8 @@ case "$OSTYPE" in
 	fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
-        ## Install and Configure Grub based on OS installed and Grub 1st stage location.
+         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
-        # Instalar cliente para GNU/Linux si se indica en la variable INSTALLOSCLIENT.
 	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
         	ogInstallLinuxClient $1 $2
 	fi
@@ -117,22 +116,6 @@ EOT
 
 # Ejecutar postconfiguración si existe el fichero indicador.
 if [ -e /osxpostconf ]; then
-	### NOTA: descomentar las opciones deseadas.
-	# Activar Journaling en HFS+ (no usar si el cliente continua en OpenGnsys).
-	#diskutil enableJournal disk$[$1-1]s$2
-	# Pedir usuario y clave en pantalla de conexión.
-	#defaults write /Library/Preferences/com.apple.loginwindow SHOWFULLNAME -bool yes
-	# No mostrar botón de cambio rápido de usuario.
-	#defaults write /Library/Preferences/.GlobalPreferences MultipleSessionEnabled -bool NO
-	# Bloquear escritorio, fondo, dock, etc del usuario "usuario".
-	#chflags uchange /Users/usuario/Library/Preferences/com.apple.desktop.plist
-	#chflags uchange /Users/usuario/Library/Preferences/com.apple.dock.plist
-	#chflags uchange /Users/usuario/Desktop
-	# Añadir usuario "usuario" a la lista de desarrolladores de Xcode.
-	#DevToolsSecurity --enable
-	#dscl . -append /Groups/_developer GroupMembership usuario
-	# Bajar volumen (valor entre 0 y 7).
-	#osascript -e 'set volume 1'
 	# Tomar nombre del equipo.
 	HOST="$HOST"
 	if [ -z "\$HOST" ]; then
@@ -156,8 +139,7 @@ if [ -e /osxpostconf ]; then
 	# Descromprimir ficheros de versión para obtener inventario de aplicaciones.
 	find /Applications -type d -name "*.app" -prune -exec \
 	     ditto --nopreserveHFSCompression "{}/Contents/version.plist" "{}/Contents/version.plist.uncompress"
-	# Borrar fichero indicador de psotconfiguración
-	rm -f /osxpostconf
+	rm -f /osxpostconf       # Borrar fichero indicador de psotconfiguración
 fi
 EOT
         # Dar permiso de ejecución.

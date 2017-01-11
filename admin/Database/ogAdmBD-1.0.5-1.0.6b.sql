@@ -15,8 +15,9 @@ ALTER TABLE imagenes
 # Incluir fecha de despliegue/restauración de imagen (ticket #677) y
 # correcion en eliminar imagen de cache de cliente (ticket #658).
 ALTER TABLE ordenadores_particiones
+	MODIFY cache TEXT NOT NULL,
 	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
-	MODIFY cache TEXT NOT NULL;
+	ADD INDEX idaulaip (idaula ASC, ip ASC);
 
 # Mostrar protocolo de clonación en la cola de acciones (ticket #672).
 UPDATE parametros
@@ -41,4 +42,10 @@ ALTER TABLE menus
 	DROP coory,
 	DROP scoorx,
 	DROP scoory;
+
+# Añadir nuevos sistemas de ficheros (ticket #758)
+INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
+	(19, 'LINUX-SWAP', 'LINUX-SWAP')
+	ON DUPLICATE KEY UPDATE
+		idsistemafichero=VALUES(idsistemafichero), nemonico=VALUES(nemonico), descripcion=VALUES(descripcion);
 

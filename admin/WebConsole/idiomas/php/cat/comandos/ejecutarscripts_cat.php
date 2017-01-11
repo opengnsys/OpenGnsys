@@ -18,6 +18,7 @@
 	$TbMsg[10]='Dades a subministrar';
 	$TbMsg[11]='Eliminar Imatge de la Cache de Client';
 
+	$TbMsg["WDI10"]='Modificar código';
 	$TbMsg["WDI11"]='Asistent de Desplegament de la imatge';
 	$TbMsg["WDI12"]='Generar Instrucció OG';
 	$TbMsg["WDI13"]='Escull si només vols emmagatzemar la imatge en la Cache - UpdateCache  ';
@@ -40,6 +41,8 @@
 	$TbMsg["WDI29"]='Temps M&aacute;x. Espera (seg)   : ';
 
 	$TbMsg["WDI30"]='temps de llavor :';
+
+	$TbMsg["WDI31"]='AVISO: Si modifica el código no se guardará la información de los equipos después de desplegar la imagen.';
 
 	$TbMsg["WCRP31"]='Assistent Clonaci&oacute; Particions Remotes';
 	$TbMsg["WCRP32"]='Escull equip MASTER:';

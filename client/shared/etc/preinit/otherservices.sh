@@ -11,6 +11,9 @@
 # Lanzar servicios complementarios del cliente.
 echo "${MSG_OTHERSERVICES:-.}"
 
+# Iniciar rsyslog, si es necesario.
+[ -S /dev/log ] || service rsyslog start
+
 # Adpatar la clave de "root" para acceso SSH.
 PASS=$(grep "^[ 	]*\(export \)\?OPTIONS=" /scripts/ogfunctions 2>&1 | \
 	sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')

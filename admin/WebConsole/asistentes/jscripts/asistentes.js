@@ -6,6 +6,12 @@
 // Nombre del fichero: asistentes.js
 // DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero AsistentesEjecutarScripts.php (Comandos)
+// version 1.0.6b y 1.1: codeDeployImage: Compone atributo para el comando restaurar imagen (ticket #757)
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-10-27
+// versión 1.0.6b: Si existe Cache al crear las particiones reservamos la cuarta libre (ticket #753)
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-12-15
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
@@ -52,35 +58,46 @@ switch (form.idmetodo.value)
  		protocol="MULTICAST-DIRECT " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " ";
 		break;
 	case "TORRENT":
-		protocol=" TORRENT " +  form.modp2p.value + ":" + form.timep2p.value;
+		protocol="TORRENT " +  form.modp2p.value + ":" + form.timep2p.value;
 		break;
 	case "UNICAST":
-		protocol=" UNICAST";
+		protocol="UNICAST";
 		break;
 	case "UNICAST-DIRECT":
-		protocol=" UNICAST-DIRECT";
+		protocol="UNICAST-DIRECT";
 		break;
 }
+// Datos imagen
+var imagen = form.idimagen.value.split("_");
 //form.codigo.value="deployImage REPO /";
 if (form.modo[0].checked) 
 {
 	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
 	var diskPart = form.idparticion.value.split(";");
-	command="deployImage REPO /" + form.idimagen.value + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
+	command="deployImage " + imagen[0] + " /" + imagen[1] + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
 command + " \n";
-	//form.codigo.value="deployImage REPO /" + form.idimagen.value + " 1 " + form.idparticion.value + " " + protocol  ;
+
+	// Atributos para comando RestaurarImagen
+	form.atrib_restore.value = "dsk=" + diskPart[0] + "@par="+ diskPart[1] +"@idi=" +imagen[2] +
+				   "@nci="+imagen[1] + "@ipr="+ imagen[0] +"@ifs=" +imagen[3] +
+				   "@ptc="+protocol +"@";	
 }
 else
 {
-	command="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
+	command="updateCache REPO /" + imagen[1]  + ".img" + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command +"\"\n \ " +
 command + " \n";
 	//form.codigo.value="updateCache REPO /" + form.idimagen.value + ".img" + " " + protocol  ;
 }
 
+}
+
+// Activa el área de texto del código, permitiendo modificarlo.
+function modificarCodigo() {
+	document.getElementById("codigo").disabled = false;
 }
 
 function codeParticionado(form){
@@ -113,16 +130,27 @@ function codeParticionado(form){
 function codeParticionadoMSDOS (form) {
 	var partCode="";
 	var logicalCode="";
-	var cacheCode;
+	var sizecacheCode="";
+	// cacheCode: codigo para preparar la particion cache
+	var cacheCode="";
+	// cacheInit: codigo para crear la particion cache, al final de todo el proceso
+	var cacheInit="";
 	var cacheSize;
 	var extended=false;
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	var maxParts = 4;
+	var emptyCache = "";
 	
 	// Comprobamos si esta seleccionada la cuarta particion y no es CACHE
-        if(form.check4.checked && form.part4.value != "CACHE")
-                maxParts = 5;
+        if(form.check4.checked) {
+		if (form.part4.value == "CACHE") {
+			// Si existe Cache al crear las particiones reservamos la cuarta libre 
+			 emptyCache = " EMPTY:0";
+		} else {
+                	maxParts = 5;
+		}
+	}
 
 	for (var nPart=1; nPart<maxParts; nPart++) {
 		var partCheck=eval("form.check"+nPart);
@@ -147,43 +175,42 @@ function codeParticionadoMSDOS (form) {
 			} else {
 				partCode += ":" + partSize.value;
 			}
+			// En la partición 4 dejo espacio libre para la Cache
+			if (nPart == 3)  partCode += emptyCache;
 		} else {
 			partCode += " EMPTY:0";
 		}
 	}
 
-	var cacheCode="";
-
 	// Si se selecciono la particion 4 y es CACHE
 	if(form.part4.value == "CACHE"){
 		if (form.check4.checked) {
 			if (form.size4.value == "0") {
-				cacheCode="\
+				sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n \
+sizecache=`ogGetCacheSize` \n";
+				cacheInit="initCache "+n_disk+" $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
+				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
-ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "+n_disk+" $sizecache  &>/dev/null \n ";		
+ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \ ";
 			} else {
 				if (form.size4.value == "CUSTOM") { 
 					cacheSize = form.size4custom.value; 
 				} else {
 					cacheSize = form.size4.value;
 				} 
+				cacheInit="initCache " + n_disk + " " + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
 				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \
-ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache " + n_disk + " " + cacheSize + " &>/dev/null";	
+ogUpdatePartitionTable "+n_disk+" \n \ ";
 			} 
 		} else {
 			cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n";
+ogUpdatePartitionTable "+n_disk+" \n \ ";
 partCode += " EMPTY:0";
 		}
 	}
@@ -221,12 +248,13 @@ partCode += " EMPTY:0";
 	}
 
 	form.codigo.value="\
+" + sizecacheCode + " \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions \"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" 2>/dev/null\n  \
 ogUnmountCache \n \
-" + cacheCode + " \n \
+" + cacheCode + " \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogExecAndLog command session ogListPartitions "+n_disk+" \n \
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
@@ -236,14 +264,15 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
-reboot \n";
+" + cacheInit + " \
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
 }
 
 
 function codeParticionadoGPT (form) {
         var partCode="";
         var logicalCode="";
+	var sizecacheCode="";
         var cacheCode="";
         var cacheSize;
         var extended=false;
@@ -258,9 +287,10 @@ function codeParticionadoGPT (form) {
 			// Solo tratamos la particion 4 como cache, si se selecciono este tipo
 			if(nPart == 4 && form.partGPT4.value == "CACHE") {
 				if (form.sizeGPT4.value == "0") {
-					cacheCode="\
+					sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n \
+sizecache=`ogGetCacheSize` \n";
+					cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+"  \n \
 ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
@@ -308,6 +338,7 @@ partCode += " EMPTY:0";
                 }
         }
 	form.codigo.value="\
+" + sizecacheCode + " \n \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
@@ -323,8 +354,7 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
-reboot \n";
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
 }
 
 
@@ -396,7 +426,8 @@ function getMinDiskSize(disk){
 		if(diskSizeArray[i].value < minSize)
 			minSize = diskSizeArray[i].value;
 	}
-	return minSize;
+	// Restar sectores iniciales del disco al tamaño total (1 MB).
+	return (minSize > 1024 ? minSize - 1024 : minSize)
 }
 
 // Código para calcular el espacio libre del disco.
