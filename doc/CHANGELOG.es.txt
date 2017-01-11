@@ -2,6 +2,35 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
 
+Lista de cambios incluidos en OpenGnSys 1.0.6b (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnSys Cloning Engine:
+#715	Revisión ogConfigureFstab
+#724	Compatible con ogLive basado en Ubuntu 15.10 y Ubuntu 16.04 LTS (parcial)
+#756	Comprobar cambios funciones en Disk.lib en el ogLive con kernel 3.2
+#760	Eliminar CHKDSK en el primer arranque de un Windows restaurado
+#762	ogGetLastSector error en modelo HP 6300 con disco duro de 1 TB
+#764	Error aleatorio al formatear la partición caché en el proceso de crearla
+
+Tickets resueltos en módulo OpenGnSys Client:
+#759	Añadir llamadas de ejemplos del configureOs al configureOsCustom.template
+
+Tickets resueltos en módulo OpenGnSys Server
+#729	Instalar en cliente la misma versión de Rsync que la del servidor
+#752    Script setserveraddr parchea parámetro de configuración UrlMenu
+
+Tickets resueltos en módulo OpenGnSys Web Admin Console:
+#753	Asistente de particionado no crea correctamente la caché
+#757	Asistente DeployImagen: no guarda información de la imagen restaurada
+#758	Comando Formatear y Particionar no formatea la swap
+#766	Incluir cambios y manual
+
+Tickets genéricos resueltos:
+#139	Documentación y manuales OpenGnSys 1.0
+#754	Liberar versión de mantenimiento OpenGnSys 1.0.6b en rama principal
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.6a (versión de mantenimiento)
 ----------------------------------------------
 
@@ -177,10 +206,8 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #149	Controlar tamaño de caché en la consola
 #265	Consola Web: Actualización información al terminar los comandos (duplicado de #577)
-#416	Clonar partición sólo datos
 #524	Eliminar imagen en caché del cliente
 #533	Scritps de interfaceAdm no deben incluir lógica de proceso
-#551	Consola web compatible con PHP 5.4 (tarea)
 #552	Permitir crear caché en cualquier disco
 #566	Asistente de gestión Master muestra todas las imágenes de su caché para enviarlas
 #585	Incluir en la administración web las opciones DNS y proxy para el ogLive
@@ -269,7 +296,6 @@ Tickets resueltos en módulo OpenGnSys Client:
 #525	Seleccionar el tipo de arranque de sistemas Windows (reinicio o en caliente)
 #529	Cliente ogLive basado en Ubuntu 12.04
 #546	ogLive en modo PXE durante el proceso de arranque no continuará hasta que la interfaz de red esté correctamente configurada
-#547	oglive basado en Ubuntu 12.04 no detecta ficheros de configuración de DNS
 
 Tickets resueltos en módulo OpenGnSys Server:
 #426	isAlive: control de los servicios OpenGnSys
@@ -696,95 +722,95 @@ Lista de cambios incluidos hasta OpenGnSys 0.9
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #9	No lista bien particiones lógicas
 #12	Bloquear partición para operación de uso exclusivo
-#13 	Automatizar tamaños de partición al generar una imagen
+#13	Automatizar tamaños de partición al generar una imagen
 #15	Desmontar los sistemas de archivos de un disco antes de cambiar su tabla de particiones
 #17	Arrancar Windows Vista
 #38	Documentar codigo shell scripts linux con doxygen
-#50 	Ayuda en las funciones
-#52 	Función generación documentación Doxygen para BASH
-#58 	Utilizar formato de ayuda y función ogHelp
-#61 	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de partición en cuestión
-#71 	ogListPartitions falla con partición extendida
-#73 	Mensajes de error en particiones vacías
-#75 	Arrancar sistemas Linux en partición distinta a la original 
+#50	Ayuda en las funciones
+#52	Función generación documentación Doxygen para BASH
+#58	Utilizar formato de ayuda y función ogHelp
+#61	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de partición en cuestión
+#71	ogListPartitions falla con partición extendida
+#73	Mensajes de error en particiones vacías
+#75	Arrancar sistemas Linux en partición distinta a la original 
 #85	ogCreateImage no crea los subdirectorios del path indicado
 #86	ogRestoreImage siempre añade a la imagen pasada como parámetro la subcadena ".img"
 #87	Engine no se adapta a la sintaxis Doxygen
-#98 	ogGetParent no devuelve salida correcta para el argumento CACHE
-#99 	ogGetIpAddress obtiene la ip a partir del leases obtenido del dhcp
+#98	ogGetParent no devuelve salida correcta para el argumento CACHE
+#99	ogGetIpAddress obtiene la ip a partir del leases obtenido del dhcp
 #101	trunk Disk.lib error linea 445
 #109	ogSetPartitionId no modifica bien el identificador de la partición
 #110	ogCreatePartitions no llama a ogTypeToId
 #111	ogFormatFS no reconoce el tipo de partitición CACHE
-#121    ogCreatePartitions revisión 813 (no se resolverá)
+#121	ogCreatePartitions revisión 813 (no se resolverá)
 
 Tickets resueltos en módulo OpenGnSys Client:
-#11 	Páginas de inicio estilo rembo
-#18 	Adaptar logs a standard syslog
-#40 	Incluir bash en el cliente initrd
-#41 	Usar kernel 2.6.30 o superior en los clientes (mejora)
-#55  	Incluir tune2fs y resize2fs en cliente Initrd
-#56 	Montar particiones ReiserFS en cliente Initrd
-#59 	Añadir mkfs para los sitemas Ext al cliente initrd
-#60 	default de preinit no inicia el sistema
-#67 	Cliente QT no importa NFS
-#68 	Cliente no encuentra el subdirectorio de logs
-#72 	Error en el browser al intentar cargar la libpng12.so.0
+#11	Páginas de inicio estilo rembo
+#18	Adaptar logs a standard syslog
+#40	Incluir bash en el cliente initrd
+#41	Usar kernel 2.6.30 o superior en los clientes (mejora)
+#55	Incluir tune2fs y resize2fs en cliente Initrd
+#56	Montar particiones ReiserFS en cliente Initrd
+#59	Añadir mkfs para los sitemas Ext al cliente initrd
+#60	default de preinit no inicia el sistema
+#67	Cliente QT no importa NFS
+#68	Cliente no encuentra el subdirectorio de logs
+#72	Error en el browser al intentar cargar la libpng12.so.0
 #84	oginit considera siempre al servidor DHCP como si fuese el servidor OpenGnSys
-#105    El browser del cliente no detecta algunos ratones
-#106    Añadir al busybox del initrd soporte de configuración de red (no se resolverá)
-#118    Función ogGetIpAddress no obtiene la ip adecuadamente
+#105	El browser del cliente no detecta algunos ratones
+#106	Añadir al busybox del initrd soporte de configuración de red (no se resolverá)
+#118	Función ogGetIpAddress no obtiene la ip adecuadamente
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
-#10 	Consola no detecta bien el inventario de hardware
+#10	Consola no detecta bien el inventario de hardware
 #19	Integrar las bases de datos (tarea)
 #20	Creación de scripts de instalación (no se ressolverá)
-#25 	Interfaz web: Problemas con la creación de entidades
-#34 	Unificar codificación de caracteres en interfaz web
-#42 	Error en menú opciones ordenador (tarea)
-#54 	Gestión de usuarios
-#66 	Configuración consola web
+#25	Interfaz web: Problemas con la creación de entidades
+#34	Unificar codificación de caracteres en interfaz web
+#42	Error en menú opciones ordenador (tarea)
+#54	Gestión de usuarios
+#66	Configuración consola web
 #76	Problemas al crear tareas y trabajos nuevos (tarea)
-#77 	No se pueden añadir comandos a tareas, trabajos, etc. (tarea)
+#77	No se pueden añadir comandos a tareas, trabajos, etc. (tarea)
 #78	No funciona la consola web (tarea)
-#80 	Puerto por defecto del servidor opengnsys en el web admin
+#80	Puerto por defecto del servidor opengnsys en el web admin
 #97	Instalador no deja bien configurado controlacceso.php
-#113    Incluir ayuda Doxygen en la consola web
-#119    Mensaje de aviso en el browser al elegir opción de menú
-#120    Inventario Hardware: Error tipo de hardware no registrado
-#124    Error al crear usuarios
+#113	Incluir ayuda Doxygen en la consola web
+#119	Mensaje de aviso en el browser al elegir opción de menú
+#120	Inventario Hardware: Error tipo de hardware no registrado
+#124	Error al crear usuarios
 
 Tickets resueltos en módulo OpenGnSys Repository Server:
-#74 	Fallo al ejecutar ogAdmServer
-#69 	Error al compilar el servidor de repositorio ogAdmRepo (tarea)
-#114    Hora incorrecta en logs de ogAdmServer y ogAdmRepo
+#74	Fallo al ejecutar ogAdmServer
+#69	Error al compilar el servidor de repositorio ogAdmRepo (tarea)
+#114	Hora incorrecta en logs de ogAdmServer y ogAdmRepo
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #53	revertir el opengnsys_instaler.sh a la versión de Luis (181)
-#62 	Unificar los instaladores
-#79 	Especificaciones para incluir en el script de instalación la parte relativa al sistema de Administración
+#62	Unificar los instaladores
+#79	Especificaciones para incluir en el script de instalación la parte relativa al sistema de Administración
 #81	ogClient no se inicia
-#82 	Instalador no arranca ogAdmRepo
-#83 	Contraseña por defecto al instalar
-#94 	Problema proceso instalación en tar.gz (descarga svn)
-#95     Petición de clave rootMySQL en reintento de instalación tar.gz
+#82	Instalador no arranca ogAdmRepo
+#83	Contraseña por defecto al instalar
+#94	Problema proceso instalación en tar.gz (descarga svn)
+#95	Petición de clave rootMySQL en reintento de instalación tar.gz
 #102	Fallo en el instalador
 #103	ogAdmClient.cfg no compatible con el instalacion (lineas en blanco al final)
 #104	El instalador no configura bien el dhcp, nfs-export
-#107    Actualizador da error si no se ha eliminado el directorio de /tmp
-#123    Creación de usuarios por defecto en el instalador
+#107	Actualizador da error si no se ha eliminado el directorio de /tmp
+#123	Creación de usuarios por defecto en el instalador
 
 Tickets genéricos resueltos:
 #21	Elección de nombre para el proyecto
 #22	Documentar Subversion en Eclipse
-#23 	Generar la iso de instalación sobre ubunto server 9.04
+#23	Generar la iso de instalación sobre ubunto server 9.04
 #28	instalar la macro include
-#35 	Subversion: configuración saltos de línea
-#44 	Definición del proyecto OpenGnSys
+#35	Subversion: configuración saltos de línea
+#44	Definición del proyecto OpenGnSys
 #45	Propuesta Añadir un componente: Proyecto
-#47 	Manual de instalación de OpenGnSys (tarea)
-#48 	Añadir GPL v3 a cada módulo del OpenGnSys
-#49 	Añadir Creative Commons al módulo de documentación del OpenGnSys
-#63 	En la página principal sólo se puede acceder al Roadmap
-#88 	Adaptar el sistema para entornos donde exista servicios dhcp independientes o se quiera distribuir contenedores images y librerias
+#47	Manual de instalación de OpenGnSys (tarea)
+#48	Añadir GPL v3 a cada módulo del OpenGnSys
+#49	Añadir Creative Commons al módulo de documentación del OpenGnSys
+#63	En la página principal sólo se puede acceder al Roadmap
+#88	Adaptar el sistema para entornos donde exista servicios dhcp independientes o se quiera distribuir contenedores images y librerias
 

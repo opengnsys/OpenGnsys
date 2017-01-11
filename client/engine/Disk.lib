@@ -115,8 +115,8 @@ while [ $# -gt 0 ]; do
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
         [ $PART -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-        EXTSTART=$START
-        EXTSIZE=$SIZE
+        let EXTSTART=$START+2048
+        let EXTSIZE=$SIZE-2048
     fi
     # Incluir particiones lógicas dentro de la partición extendida.
     if [ $PART = 5 ]; then
@@ -155,7 +155,7 @@ ogCreatePartitionTable $ND
 # Definir particiones y notificar al kernel.
 sfdisk -f $DISK < $tmpsfdisk 2>/dev/null && partprobe $DISK
 rm -f $tmpsfdisk
-[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
+[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null || return 0
 }
 
 
@@ -196,6 +196,8 @@ ND="$1"
 DISK=$(ogDiskToDev "$ND") || return $?
 # Se calcula el ultimo sector del disco (total de sectores usables)
 SECTORS=$(ogGetLastSector $1)
+# Se recalcula el nº de sectores del disco si existe partición de caché.
+CACHEPART=$(ogFindCache 2>/dev/null)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 # Si el disco es GPT empieza en el sector 2048  por defecto, pero podria cambiarse
@@ -313,7 +315,7 @@ case "$CREATE" in
     GPT)
         # Si es necesario crear una tabla GPT pero la actual es MSDOS
         if [ "$PTTYPE" == "MSDOS" ]; then
-            sgdisk -g $DISK
+            sgdisk -go $DISK
         else
             echo -e "2\nw\nY\n" | gdisk $DISK
         fi
@@ -466,7 +468,7 @@ if [ "$*" == "help" ]; then
 fi
 
 # Listar dispositivos de discos duros.
-ALLDISKS=$(lsblk -n | awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
+ALLDISKS=$(lsblk -n -e 1,2 | awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
 
 # Listar volúmenes lógicos.
 VOLGROUPS=$(vgs -a --noheadings 2>/dev/null | awk '{printf "/dev/%s ",$1}')
@@ -604,12 +606,15 @@ echo $TYPE
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/06/03
+#@version 1.0.6b - uso de sgdisk para todo tipo de particiones. Incidencia #762
+#@author  Universidad de Málaga
+#@date    2016/11/10
 #*/ ##
 
 function ogGetLastSector ()
 {
 # Variables locales
-local DISK PART PTTYPE LASTSECTOR SECTORS CYLS IOSIZE
+local DISK PART LASTSECTOR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npart]" \
@@ -628,35 +633,12 @@ case $# in
         return $? ;;
 esac
 
-# Hay que comprobar si el disco es GPT
-PTTYPE=$(ogGetPartitionTableType $1)
-PTTYPE=${PTTYPE:-"MSDOS"}               # Por defecto para discos vacíos.
-case "$PTTYPE" in 
-    GPT)
-        if [ $# == 1 ]; then
-            LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
-        else
-            LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
-        fi
-        ;;
-    MSDOS)
-        if [ $# == 1 ]; then
-            SECTORS=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3*2}}' /proc/partitions)
-            CYLS=$(sfdisk -g $DISK | cut -f2 -d" ")
-	    ##########   agp  ###########
-	    IOSIZE=$(fdisk -l $DISK | grep I/O | cut -d ":" -f2 | cut -d "/" -f1 | cut -d " " -f2)
-	    if [[ $IOSIZE = 4096 ]]; then
-		LASTSECTOR=$[SECTORS-512]
-	    else
-		LASTSECTOR=$[SECTORS/CYLS*CYLS-1]
-	    fi
-	    ##########   agp  ###########
-        else
-            LASTSECTOR=$(sfdisk -uS -l $DISK 2>/dev/null | \
-                         awk -v P="$PART" '{if ($1==P) {if ($2=="*") print $4; else print $3} }')
-        fi
-        ;;
-esac
+if [ $# == 1 ]; then
+	LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
+else
+	LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
+fi
+
 echo $LASTSECTOR
 }
 
@@ -728,7 +710,7 @@ DISK=$(ogDiskToDev $1) || return $?
 PART=$(ogDiskToDev $1 $2) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
-            [ "$ID" == "8301" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
+            [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
 esac
@@ -755,7 +737,7 @@ echo $ID
 function ogGetPartitionSize ()
 {
 # Variables locales.
-local DISK PART
+local PART
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -767,16 +749,10 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Obtener el tamaño de la partición.
-DISK="$(ogDiskToDev $1)" || return $?
 PART="$(ogDiskToDev $1 $2)" || return $?
-case "$(ogGetPartitionId $1 $2)" in
-    5|f)  # Procesar detección de tamaño de partición Extendida.
-          sfdisk -l $DISK 2>/dev/null | \
-                    awk -v p=$PART '{if ($1==p) {sub (/[^0-9]+/,"",$5); print $5} }'
-          ;;
-    *)    sfdisk -s $PART
-          ;;
-esac
+partx -gbo SIZE $PART 2>/dev/null | awk '{print int($1/1024)}'
+[ ${PIPESTATUS[0]} -ne 0 ] && echo "0"
+return 0
 }
 
 
@@ -817,8 +793,8 @@ fi
 # Contar el nº de veces que aparece el disco en su lista de particiones.
 DISK=$(ogDiskToDev $1) 2>/dev/null
 case "$(ogGetPartitionTableType $1)" in
-    GPT)    grep -c "${DISK#/dev/}." /proc/partitions ;;
-    MSDOS)  sfdisk -l $DISK 2>/dev/null | grep -c "^$DISK" ;;
+    GPT|MSDOS)
+            partx -gso NR $DISK 2>/dev/null | awk -v p=0 '{p=$1} END {print p}' ;;
     LVM)    lvs --noheadings $DISK 2>/dev/null | wc -l ;;
 esac
 }
@@ -1057,13 +1033,9 @@ fi
 DISK="$(ogDiskToDev $1)" || return $?
 NPARTS=$(ogGetPartitionsNumber $1)
 for (( PART = 1; PART <= NPARTS; PART++ )); do
-    TYPE=$(ogGetPartitionType $1 $PART 2>/dev/null)
-    if [ $? -eq 0 ]; then
-        SIZE=$(ogGetPartitionSize $1 $PART 2>/dev/null)
-        echo -n "$TYPE:$SIZE "
-    else
-        echo -n "EMPTY:0 "
-    fi
+    TYPE=$(ogGetPartitionType $1 $PART 2>/dev/null); TYPE=${TYPE:-EMPTY}
+    SIZE=$(ogGetPartitionSize $1 $PART 2>/dev/null); SIZE=${SIZE:-0}
+    echo -n "$TYPE:$SIZE "
 done
 echo
 }

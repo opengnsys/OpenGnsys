@@ -2,8 +2,11 @@
 # installoglive - descarga e instala cliente ogLive.
 # Nota:	El usuario debe elegir el número del ogLive que desea instalar.
 # Uso:	installoglive
-# Autor: Ramón M. Gómez - ETSII Univ. Sevilla
-# Fecha: 2015-01-26
+# Autor:   Ramón M. Gómez - ETSII Univ. Sevilla
+# Fecha:   2015-01-26
+# Versión: 1.0.6b - Adaptar la versión de Rsync de cliente y servidor.
+# Autor:   Ramón M. Gómez - ETSII Univ. Sevilla
+# Fecha:   2015-12-16
 
 
 # Control de acceso.
@@ -56,7 +59,6 @@ mkdir -p $TMPDIR
 mount -o loop,ro $TARGETFILE $TMPDIR
 cp -va $TMPDIR/ogclient $OPENGNSYS/tftpboot/ogclient
 umount $TMPDIR
-rmdir $TMPDIR
 
 # Recuperar la clave de acceso a Samba o solicitar una nueva clave.
 if [ -n "$SAMBAPASS" ]; then
@@ -72,4 +74,21 @@ chown -R :opengnsys $OPENGNSYS/tftpboot/ogclient
 
 # Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
 cp -av $OPENGNSYS/tftpboot/ogclient/{ogvmlinuz,oginitrd.img}* $OPENGNSYS/tftpboot
+
+# Montar SquashFS para comprobar versión de Rsync.
+mount -o loop,ro $OPENGNSYS/tftpboot/ogclient/ogclient.sqfs $TMPDIR
+# Si versión Rsync de servidor > cliente, enlazar a fichero compilado.
+RSYNCSERV=$(rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+RSYNCCLNT=$(chroot $TMPDIR /usr/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then
+	[ -e $OPENGNSYS/client/bin/rsync-$RSYNCSERV ] && mv -f $OPENGNSYS/client/bin/rsync-$RSYNCSERV $OPENGNSYS/client/bin/rsync
+else
+	# Si no, renombrar fichero compilado con nº de protocolo.
+	[ -e $OPENGNSYS/client/bin/rsync ] && mv -f $OPENGNSYS/client/bin/rsync $OPENGNSYS/client/bin/rsync-$($OPENGNSYS/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+fi
+# Desmontar SquashFS.
+umount $TMPDIR
+rmdir $TMPDIR
+# Versión del ogLive instalado
+echo "${OGLIVEFILE%.*}" > $OPENGNSYS/doc/veroglive.txt
 

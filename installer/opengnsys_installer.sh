@@ -1320,12 +1320,6 @@ function copyClientFiles()
 		errstatus=1
 	fi
 	
-	# Si el servidor tiene instalado Rsync > 3.0.9, renombrar el ejecutable
-	# compilado para el cliente.
-	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
-		[ -e $INSTALL_TARGET/client/bin/rsync-3.1.0 ] && mv -f $INSTALL_TARGET/client/bin/rsync-3.1.0 $INSTALL_TARGET/client/bin/rsync
-	fi
-
 	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
@@ -1344,6 +1338,7 @@ function clientCreate()
 	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso	# 1.0.6-kernel3.11
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
 	local TMPDIR=/tmp/${FILENAME%.iso}
+	local RSYNCSERV RSYNCCLNT
  
 	# Descargar cliente, si es necesario.
 	if [ -s $PROGRAMDIR/$FILENAME ]; then
@@ -1378,6 +1373,24 @@ function clientCreate()
 	# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
 	cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
 	cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
+
+	# Montar SquashFS para comprobar versión de Rsync. 
+	mkdir -p $TMPDIR
+ 	mount -o loop,ro $INSTALL_TARGET/tftpboot/ogclient/ogclient.sqfs $TMPDIR 
+ 	# Si versión Rsync de servidor > cliente, enlazar a fichero compilado. 
+ 	RSYNCSERV=$(rsync --version 2>/dev/null | awk '/protocol/ {print $6}') 
+ 	RSYNCCLNT=$(chroot $TMPDIR /usr/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}') 
+ 	if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then 
+ 		[ -e $INSTALL_TARGET/client/bin/rsync-$RSYNCSERV ] && mv -f $INSTALL_TARGET/client/bin/rsync-$RSYNCSERV $INSTALL_TARGET/client/bin/rsync 
+ 	else 
+ 		# Si no, renombrar fichero compilado con nº de protocolo. 
+ 		[ -e $INSTALL_TARGET/client/bin/rsync ] && mv -f $INSTALL_TARGET/client/bin/rsync $INSTALL_TARGET/client/bin/rsync-$($INSTALL_TARGET/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}') 
+ 	fi 
+	# Desmontar SquashFS.
+	umount $TMPDIR 
+	rmdir $TMPDIR
+	# Versión del ogLive instalado
+	echo "${FILENAME%.*}" > $INSTALL_TARGET/doc/veroglive.txt
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
@@ -1511,6 +1524,8 @@ function installationSummary()
 	echoAndLog " - Review default Organization data and assign access to users."
 	echoAndLog "Log-in as Web Console organization user."
 	echoAndLog " - Insert OpenGnSys data (labs, computers, menus, etc)."
+	echoAndLog "Launch $INSTALL_TARGET/bin/installoglive script and select new ogLive"
+	echoAndLog "   for clients' hardware compatibilty."
 echo
 }
 

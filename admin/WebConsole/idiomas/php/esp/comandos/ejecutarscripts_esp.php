@@ -18,6 +18,7 @@
 	$TbMsg[10]='Datos a suministrar';
 	$TbMsg[11]='Eliminar Imagen de la Cach&eacute; de Cliente';
 
+	$TbMsg["WDI10"]='Modificar código';
 	$TbMsg["WDI11"]='Asistente de Despliegue de la imagen';
 	$TbMsg["WDI12"]='Generar Instrucci&oacute;n OG';
 	$TbMsg["WDI13"]='Elige si solo quieres almacenar la imagen en la Cache - UpdateCache  ';
@@ -40,6 +41,8 @@
 	$TbMsg["WDI29"]='Tiempo M&aacute;x. Espera (seg)   : ';
 
 	$TbMsg["WDI30"]='tiempo de semilla :';
+
+	$TbMsg["WDI31"]='AVISO: Si modifica el código no se guardará la información de los equipos después de desplegar la imagen.';
 
 	$TbMsg["WCRP31"]='Asistente Clonaci&oacute;n Particiones Remotas';
 	$TbMsg["WCRP32"]='Elige equipo MASTER:';

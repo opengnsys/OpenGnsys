@@ -1,12 +1,14 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.2a - 1.0.6
+# OpenGnSys 1.0.2 - 1.0.6
 #use ogAdmBD
+
+UPDATE entornos SET ipserveradm = 'SERVERIP' WHERE ipserveradm = '' LIMIT 1;
+
+# Mostrar protocolo de clonación en la cola de acciones (ticket #672)
+UPDATE parametros SET tipopa = 0 WHERE idparametro = 30;
 
 UPDATE idiomas SET descripcion = 'English' WHERE ididioma = 2;
 UPDATE idiomas SET descripcion = 'Català' WHERE ididioma = 3;
-
-# Habilita el comando Particionar y formatear
-UPDATE comandos SET activo = '1' WHERE comandos.idcomando = 10;
 
 # Añadir tipo de arranque Windows al perfil hardware.
 ALTER TABLE perfileshard ADD winboot enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot';
@@ -67,6 +69,12 @@ INSERT INTO tipospar (codpar,tipopar,clonable) VALUES
 ALTER TABLE ordenadores ADD fotoord VARCHAR (250) NOT NULL;
 
 UPDATE aulas SET urlfoto = SUBSTRING_INDEX (urlfoto, '/', -1) WHERE urlfoto LIKE '%/%';
+
+# Internacionalización correcta de los asistentes.
+UPDATE asistentes
+	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
+UPDATE asistentes
+	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir validación del cliente.
 ALTER TABLE aulas
@@ -182,7 +190,8 @@ INSERT INTO sistemasficheros (descripcion, nemonico) VALUES
 	('REISERFS', 'REISERFS'),
 	('REISER4', 'REISER4'),
 	('UFS', 'UFS'),
-	('XFS', 'XFS')
+	('XFS', 'XFS'),
+	('LINUX-SWAP', 'LINUX-SWAP')
 	ON DUPLICATE KEY UPDATE
 		descripcion=VALUES(descripcion), nemonico=VALUES(nemonico);
 # Nuevas particiones marcadas como clonables.
@@ -192,12 +201,6 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('EF00',16,10), 'EFI', 1)
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
-
-# Internacionalización correcta de los asistentes.
-UPDATE asistentes
-	SET descripcion = 'Asistente Deploy de Imagenes' WHERE descripcion = 'Asistente "Deploy" de Imagenes';
-UPDATE asistentes
-	SET descripcion = 'Asistente UpdateCache con Imagenes' WHERE descripcion = 'Asistente "UpdateCache" con Imagenes';
 
 # Añadir proxy para aulas.
 ALTER TABLE aulas
@@ -214,7 +217,8 @@ UPDATE ordenadores
 # correcion en eliminar imagen de cache de cliente (ticket #658)
 ALTER TABLE ordenadores_particiones
 	ADD fechadespliegue DATETIME NULL AFTER idperfilsoft,
-	MODIFY cache TEXT NOT NULL;
+	MODIFY cache TEXT NOT NULL,
+	ADD INDEX idaulaip (idaula ASC, ip ASC);
 
 # Mostrar disco en comandos Inventario de software e Iniciar sesión.
 UPDATE comandos

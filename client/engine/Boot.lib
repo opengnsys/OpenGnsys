@@ -267,8 +267,10 @@ NAME="$3"
 # Modificar datos de los valores de registro.
 ogSetRegistryValue $MNTDIR system '\ControlSet001\Control\ComputerName\ComputerName\ComputerName' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\HostName' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\Hostname' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV Hostname' "$NAME" 2>/dev/null
+ogSetRegistryValue $MNTDIR system '\ControlSet001\Services\Tcpip\Parameters\NV HostName' "$NAME" 2>/dev/null
 ogSetRegistryValue $MNTDIR system '\ControlSet001\services\Tcpip\Parameters\NV Hostname' "$NAME" 2>/dev/null
 }
 
@@ -734,6 +736,7 @@ echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
 #Preparar configuración segunda etapa: crear cabecera del fichero
+sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 /etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
@@ -823,6 +826,7 @@ echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
 #Preparar configuración segunda etapa: crear cabecera del fichero
+sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 /etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
@@ -831,21 +835,22 @@ grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot
 grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 }
 
-###
-#En pruebas
-##
+
 #/**
 #         ogConfigureFstab int_ndisk int_nfilesys
-#@brief   Establece el nombre del equipo en los ficheros hostname y hosts.
+#@brief   Configura el fstab según particiones existentes 
 #@param   int_ndisk      nº de orden del disco
 #@param   int_nfilesys   nº de orden del sistema de archivos
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  No se encuentra el fichero fstab a procesar.
 #@warning Puede haber un error si hay más de 1 partición swap.
-#@version 1.0.5 - Primera versión para OpenGnSys.
+#@version 1.0.5 - Primera versión para OpenGnSys. Solo configura la SWAP
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2013-03-21
+#@version 1.0.6b - correccion. Si no hay partición fisica para la SWAP, eliminar entrada del fstab.  
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2016-11-03
 #*/ ##
 function ogConfigureFstab {
 # Variables locales.
@@ -876,16 +881,16 @@ then
     DEFSWAP=$(awk '$1!~/#/ && $3=="swap" {print $1}' ${FSTAB})
     if [ -n "$DEFSWAP" ]
     then
-        echo "Hay definicion de swap en el fstab $DEFSWAP -> modificamos fichero con nuevo valor $DEFSWAP->$PARTSWAP"	# Mensaje temporal.
+        echo "Hay definicion de SWAP en el FSTAB $DEFSWAP -> modificamos fichero con nuevo valor $DEFSWAP->$PARTSWAP"	# Mensaje temporal.
         sed "s|$DEFSWAP|$PARTSWAP|g ; s|$DEFROOT|$PARTROOT|g" ${FSTAB}.backup > ${FSTAB}
     else
-        echo "No hay definicion de swap y si hay partición swap -> moficamos fichero"	# Mensaje temporal.
+        echo "No hay definicion de SWAP y si hay partición SWAP -> moficamos fichero"	# Mensaje temporal.
         sed "s|$DEFROOT|$PARTROOT|g" ${FSTAB}.backup > ${FSTAB}
         echo "$PARTSWAP  none    swap    sw   0  0" >> ${FSTAB}
     fi  
 else
-    echo "No hay partición swap -> configuramos fstba"	# Mensaje temporal.
-    sed "s|$DEFROOT|$PARTROOT|g" ${FSTAB}.backup > ${FSTAB}
+    echo "No hay partición SWAP -> configuramos FSTAB"	# Mensaje temporal.
+    sed "/swap/d" ${FSTAB}.backup > ${FSTAB}
 fi
 }
 
@@ -957,9 +962,7 @@ fi
 }
 
 
-###
-#En pruebas
-##
+
 #/**
 #         ogCleanLinuxDevices int_ndisk int_nfilesys
 #@brief   Limpia los dispositivos del equipo de referencia. Interfaz de red ...
@@ -972,6 +975,9 @@ fi
 #@version 1.0.5 - Primera versión para OpenGnSys.
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2013-03-21
+#@version 1.0.6b - Elimina fichero resume de hibernacion
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2016-11-07
 #*/ ##
 function ogCleanLinuxDevices ()
 {
@@ -991,7 +997,9 @@ fi
 MNTDIR=$(ogMount $1 $2) || return $?
 
 # Eliminar fichero de configuración de udev para dispositivos fijos de red.
-rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
+[ -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules ] && rm -f ${MNTDIR}/etc/udev/rules.d/70-persistent-net.rules
+# Eliminar fichero resume  (estado previo de hibernación) utilizado por el initrd scripts-premount
+[ -f ${MNTDIR}/etc/initramfs-tools/conf.d/resume ] && rm -f ${MNTDIR}/etc/initramfs-tools/conf.d/resume
 }
 
 #/**

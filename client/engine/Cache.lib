@@ -31,6 +31,9 @@
 #@version 1.0.5 - Posibilidad de crear la cache en cualquier disco duro
 #@author  Universidad de Huelva
 #@date    2012/09/18
+#@version 1.0.6b - Al crear las particiones ordenamos los dispositivos en el fichero auxiliar.
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2016/12/19
 #*/ ##
 function ogCreateCache ()
 {
@@ -100,16 +103,27 @@ case "$(ogGetPartitionTableType $NDSK)" in
         [ -n "$(ogFindCache)" ] && ogDeleteCache
         # Capturamos el codigo de particion GPT para cache
         ID=$(ogTypeToId CACHE GPT)
-        sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null && partprobe
+        sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null
         ;;
     MSDOS)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
         # Definir particiones y notificar al kernel.
         ID=$(ogTypeToId CACHE MSDOS)
-        sfdisk -f $DISK -uS -N$PART <<<"$START,$SIZE,$ID" 2>/dev/null && partprobe
+        local TMPFILE=/tmp/sfdisk$$
+        trap "rm -f $TMPFILE" 1 2 3 9 15
+        sfdisk --dump $DISK | grep -v $DISK$PART > $TMPFILE
+        echo  "$DISK$PART : start= $START, size= $SIZE, Id=$ID" >> $TMPFILE
+	# Ordenamos las lineas de los dispositivos
+	UNIT=$(grep unit $TMPFILE)
+	grep ^/dev $TMPFILE|sort -o $TMPFILE
+	sed -i "1i $UNIT\n" $TMPFILE	
+        sfdisk --no-reread  $DISK < $TMPFILE
+        rm -f $TMPFILE
         ;;
 esac
+#Actualiza la tabla de particiones en el kernel.
+ogUpdatePartitionTable $NDISK
 }
 
 
@@ -125,6 +139,9 @@ esac
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/13
+#@version 1.0.6b - llamada correcta a ogGetPartitionTableType y ogUpdatePartitionTable
+#@author  Antonio Doblas Universidad de Málaga
+#@date    2016/11/16
 #*/ ##
 function ogDeleteCache ()
 {
@@ -142,21 +159,23 @@ DISK=$(ogDiskToDev $NDISK)
 
 # Desmontar todos los sistemas de archivos del disco.
 ogUnmountAll $NDISK 2>/dev/null
-case "$(ogGetPartitionTableType $1)" in
+case "$(ogGetPartitionTableType $NDISK)" in
     GPT)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ ! $(sgdisk -p $DISK 2>&1 >/dev/null) ] || echo -e "2\nw\nY\n" | gdisk $DISK
-        sgdisk $DISK -d$NPART 2>/dev/null && partprobe
+        sgdisk $DISK -d$NPART 2>/dev/null  
         ;;
     MSDOS)
         # Si la tabla de particiones no es valida, volver a generarla.
         [ $(parted -s $DISK print >/dev/null) ] || fdisk $DISK <<< "w"
         # Eliminar (poner a 0) la partición de caché.
-        sfdisk -f $DISK -N$NPART <<<"0,0,0" 2>/dev/null && partprobe
+        sfdisk -f $DISK -N$NPART <<<"0,0,0" 2>/dev/null 
         ;;
 esac
 # Borrar etiqueta de la caché.
 rm -f /dev/disk/by-label/CACHE
+#Actualiza la tabla de particiones en el kernel.
+ogUpdatePartitionTable $NDISK
 }
 
 

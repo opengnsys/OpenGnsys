@@ -400,7 +400,10 @@ function getNetworkSettings()
 # Actualizar cliente OpenGnSys.
 function updateClientFiles()
 {
+	local ENGINECFG=$INSTALL_TARGET/client/etc/engine.cfg
+
 	# Actualizar ficheros del cliente.
+	backupFile $ENGINECFG
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
@@ -408,12 +411,6 @@ function updateClientFiles()
 		exit 1
 	fi
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
-	# Hacer coincidir las versiones de Rsync entre servidor y cliente.
-	if [ -n "$(rsync --version | awk '/version/ {if ($3>="3.1.0") print $3}')" ]; then
-		[ -e $WORKDIR/opengnsys/client/bin/rsync-3.1.0 ] && mv -f $WORKDIR/opengnsys/client/bin/rsync-3.1.0 $WORKDIR/opengnsys/client/bin/rsync
-	else
-		[ -e $WORKDIR/opengnsys/client/bin/rsync ] && mv -f $WORKDIR/opengnsys/client/bin/rsync $WORKDIR/opengnsys/client/bin/rsync-3.1.0
-	fi
 
 	# Actualizar librerías del motor de clonación.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
@@ -422,7 +419,12 @@ function updateClientFiles()
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
 	fi
-	
+	if ! diff -q ${ENGINECFG}{,-LAST} &>/dev/null; then
+		NEWFILES="$NEWFILES $ENGINECFG"
+	else
+		rm -f ${ENGINECFG}-LAST
+	fi
+
 	echoAndLog "${FUNCNAME}(): client files update success."
 }
 
@@ -766,17 +768,17 @@ function compileServices()
 function updateClient()
 {
 	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.6-kernel3.2
-	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso 	# 1.0.6-kernel3.11
+	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.4-rc4
+	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso 	# 1.0.6-rc1
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
-	local SOURCELENGTH
-	local TARGETLENGTH
+	local SOURCELENGTH TARGETLENGTH
 	local TMPDIR=/tmp/${FILENAME%.iso}
 	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
 	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
 	local SAMBAPASS
 	local KERNELVERSION
+	local RSYNCSERV RSYNCCLNT
 
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
@@ -835,6 +837,23 @@ function updateClient()
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
 		fi
 
+		# Montar SquashFS para comprobar versión de Rsync. 
+		mkdir -p $TMPDIR
+		mount -o loop,ro $INSTALL_TARGET/tftpboot/ogclient/ogclient.sqfs $TMPDIR
+		# Si versión Rsync de servidor > cliente, enlazar a fichero compilado. 
+		RSYNCSERV=$(rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+		RSYNCCLNT=$(chroot $TMPDIR /usr/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+		if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then
+			[ -e $INSTALL_TARGET/client/bin/rsync-$RSYNCSERV ] && mv -f $INSTALL_TARGET/client/bin/rsync-$RSYNCSERV $INSTALL_TARGET/client/bin/rsync
+		else
+			# Si no, renombrar fichero compilado con nº de protocolo. 
+			[ -e $INSTALL_TARGET/client/bin/rsync ] && mv -f $INSTALL_TARGET/client/bin/rsync $INSTALL_TARGET/client/bin/rsync-$($INSTALL_TARGET/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+		fi
+		# Desmontar SquashFS. 
+		umount $TMPDIR
+		rmdir $TMPDIR
+		CLIENTUPDATED=${FILENAME%.*}
+
 		echoAndLog "${FUNCNAME}(): Client update successfully"
 	else
 		# Si no existe, crear el fichero de claves de Rsync.
@@ -850,6 +869,8 @@ function updateClient()
 			echoAndLog "${FUNCNAME}(): Client is already updated"
 		fi
 	fi
+	# Versión del ogLive instalado
+	echo "${FILENAME%.*}" > $INSTALL_TARGET/doc/veroglive.txt
 }
 
 # Comprobar permisos y ficheros.
@@ -896,7 +917,13 @@ function updateSummary()
 			echoAndLog "        New OpenGnSys services will be restarted by the cronjob."
 		fi
 	fi
-	echoAndLog "Warning: You must to clear web browser cache before loading OpenGnSys page."
+	echoAndLog "Warnings:"
+	echoAndLog " - You must to clear web browser cache before loading OpenGnSys page."
+	if [ -n "$CLIENTUPDATED" ]; then
+		echoAndLog " - ogLive Client is updated to: $CLIENTUPDATED"
+	fi
+	echoAndLog " - Launch $INSTALL_TARGET/bin/installoglive script and select new ogLive"
+	echoAndLog "      for clients' hardware compatibilty."
 	echo
 }
 

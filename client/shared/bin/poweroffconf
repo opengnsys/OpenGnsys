@@ -56,8 +56,9 @@ case $# in
         ogRaiseError $OG_ERR_FORMAT "Formato: $0 [int_minutos | no]"
         exit $? ;;
 esac
-# Comprobar si hay algún script en ejecución.
-if [ -n "$(pgrep -fl $OPENGNSYS | egrep -v "$OGETC|$0")" ]; then
+# Comprobar si hay algún script en ejecución (verificando compatibilidad de "pgrep").
+[ -n "$(pgrep -fa 2>&1 | grep "invalid")" ] && PGREP="pgrep -fl" || PGREP="pgrep -fa"
+if [ -n "$($PGREP $OPENGNSYS | egrep -v "$OGETC|$0")" ]; then
     # Eliminar tiempo de inicio de espera, si se está ejecutando operación.
     perl -pi -e 's/POWEROFFTIME=.*$/POWEROFFTIME=/' $POWEROFFCONF
 else

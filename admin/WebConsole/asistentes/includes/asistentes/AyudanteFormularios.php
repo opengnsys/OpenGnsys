@@ -1,4 +1,8 @@
 <?php
+// version 1.1: htmlOPTION_images: se modifica el valor de la imagen iprepo_nombreca_idimagen_idperfilsoft (ticket #757)
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-10-27
+
 /// funciones php
 
 #devuelve los elementos [texto] multicast para un formulario.
@@ -196,7 +200,8 @@ $subconsultarepo='SELECT idrepositorio FROM  ordenadores where idordenador=' . $
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			$SelectHtml.='<OPTION value="'.$rs->campos["nombreca"] . '" ';
+			$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ."_".$rs->campos["nombreca"]."_".$rs->campos["idimagen"].'_'.$rs->campos["idperfilsoft"].'" ';
+			//$SelectHtml.='<OPTION value="'.$rs->campos["nombreca"] . '" ';
 			$SelectHtml.='>';
 			$SelectHtml.= $rs->campos["descripcion"] .'</OPTION>';
 			$rs->Siguiente();

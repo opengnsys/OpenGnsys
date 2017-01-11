@@ -18,6 +18,7 @@
 	$TbMsg[10]='Data to submit';
 	$TbMsg[11]='Delete Cache Image on Client';
 
+	$TbMsg["WDI10"]='Modificar código';
 	$TbMsg["WDI11"]='Deploy Image Wizard';
 	$TbMsg["WDI12"]='Generate OG Code';
 
@@ -42,6 +43,8 @@
 	$TbMsg["WDI29"]='Max. waiting time (sec)';
 
 	$TbMsg["WDI30"]='Seed time';
+
+	$TbMsg["WDI31"]='AVISO: Si modifica el código no se guardará la información de los equipos después de desplegar la imagen.';
 
 	$TbMsg["WCRP31"]='Clone to Remote Partition Wizard';
 	$TbMsg["WCRP32"]='Select MASTER PC:';
