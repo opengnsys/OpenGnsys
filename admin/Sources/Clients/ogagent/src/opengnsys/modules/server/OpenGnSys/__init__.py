@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-@author: Ramón M. Gómez, ramongomez at us dot es 
+@author: Ramón M. Gómez, ramongomez at us dot es
 '''
 from __future__ import unicode_literals
 
@@ -100,13 +100,6 @@ class OpenGnSysWorker(ServerWorker):
         #self.REST.sendMessage('deinitialize/{}/{}'.format(self.interface.mac, self.interface.ip))
         logger.debug('onDeactivation')
         self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip, 'ostype': operations.osType, 'osversion': operations.osVersion})
-    
-    # Processes message "doit" (sample)    
-    #def process_doit(self, path, getParams, postParams):
-    #   # Send a sample message to client
-    #   logger.debug('Processing doit')
-    #   self.sendClientMessage('doit', {'param1': 'test', 'param2': 'test2'})
-    #   return 'Processed message for {}, {}, {}'.format(path, getParams, postParams)
     
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
@@ -218,7 +211,7 @@ class OpenGnSysWorker(ServerWorker):
             thr = ScriptExecutorThread(script)
             thr.start()
         else:
-            self.sendScriptMessage(script)
+            self.sendClientMessage('script', {'code': script})
         return {'op': 'launched'}
     
     def process_logoff(self, path, getParams, postParams, server):

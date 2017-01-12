@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
-@author: Adolfo Gómez, dkmaster at dkmon dot com
+@author: Ramón M. Gómez, ramongomez at us dot es
 '''
 from __future__ import unicode_literals
 
@@ -34,6 +34,7 @@ from opengnsys.workers import ClientWorker
 
 from opengnsys import operations
 from opengnsys.log import logger
+from opengnsys.scriptThread import ScriptExecutorThread
 
 class OpenGnSysWorker(ClientWorker):
     name = 'opengnsys'
@@ -44,12 +45,14 @@ class OpenGnSysWorker(ClientWorker):
     def onDeactivation(self):
         logger.debug('Deactivate invoked')
     
-    # Processes message "doit" (sample)    
-    def process_doit(self, jsonParams):
-        logger.debug('Processed message doit with params {}'.format(jsonParams))
-        self.sendServerMessage('doit', {'data':1})
+    # Processes script execution
+    def process_script(self, jsonParams):
+        logger.debug('Processed message: script({})'.format(jsonParams))
+        thr = ScriptExecutorThread(jsonParams['code'])
+        thr.start()
+        #self.sendServerMessage({'op', 'launched'})
 
     def process_logoff(self, jsonParams):
-        logger.debug('Processed logoff message with params {}'.format(jsonParams))
+        logger.debug('Processed message: logoff({})'.format(jsonParams))
         operations.logoff()
 

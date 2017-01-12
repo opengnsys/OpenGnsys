@@ -1,7 +1,7 @@
 Source: ogagent
 Section: admin
 Priority: optional
-Maintainer: Adolfo Gómez García <agomez@virtualcable.es>
+Maintainer: Ramón M. Gómez <ramongomez@us.es>
 Build-Depends: debhelper (>= 7), po-debconf
 Standards-Version: 3.9.2
 Homepage: http://www.opengnsys.es
