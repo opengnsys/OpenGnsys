@@ -1,0 +1,427 @@
+#!/bin/bash
+
+#/**
+#         oglivecli command [options ...]
+#@file    oglivecli
+#@brief   Command line tool to manage ogLive clients.
+#@param   $1 command  Command to execute.
+#@param   $2 options  Parameters and options.
+#@warning This script uses "jshon" command.
+#@version 1.1.0 - Initial version.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2016-12-05
+#*/ ##
+
+
+# Auxiliar functions.
+
+# Create/edit JSON file about installed ogLive clients.
+function addToJson() {
+    local DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEREV="$3"
+    local OGLIVEDIR="$(basename $4)" OGLIVEISO="$(basename $5)"
+    # JSON data for installed ogLive.
+    DATA=$(cat << EOT | jshon
+{"distribution":"$OGLIVEDIST","kernel":"$OGLIVEKRNL","revision":"$OGLIVEREV","directory":"$OGLIVEDIR","iso":"$OGLIVEISO"}
+EOT
+    )
+    # Check JSON file consistency.
+    if [ "$(jshon -k -F $INFOFILE 2>/dev/null | tr '\n' ' ')" == "oglive default " ]; then
+        # Check if ogLive is defined into JSON file.
+        n=$(jshon -e oglive -l -F $INFOFILE)
+        for ((i=0; i<n; i++)); do
+            [ "$DATA" == "$(jshon -e oglive -e $i -F $INFOFILE)" ] && INDEX=$i
+        done
+        # Check if it needs to insert data.
+        if [ -z "$INDEX" ]; then
+            INDEX=$n
+            jshon -e oglive -n {} -i append -p -F $INFOFILE -I
+            jshon -e oglive -e $INDEX -s "$OGLIVEDIST" -i distribution -p -F $INFOFILE -I
+            jshon -e oglive -e $INDEX -s "$OGLIVEKRNL" -i kernel -p -F $INFOFILE -I
+            jshon -e oglive -e $INDEX -s "$OGLIVEREV" -i revision -p -F $INFOFILE -I
+            jshon -e oglive -e $INDEX -s "$OGLIVEDIR" -i directory -p -F $INFOFILE -I
+            jshon -e oglive -e $INDEX -s "$OGLIVEISO" -i iso -p -F $INFOFILE -I
+        fi
+        # Update dafault index.
+        jshon -n $INDEX -i "default" -F $INFOFILE -I
+        jshon -e oglive -e $INDEX -F $INFOFILE
+    else
+        # Create new JSON file.
+        cat << EOT | jshon | tee $INFOFILE
+{"oglive":[$DATA],"default":0}
+EOT
+    fi
+}
+
+# Show an error message.
+function raiseError() {
+    case "$1" in
+        usage)
+            echo "$PROG: Usage error: Type \"$PROG help\"" >&2
+            exit 1 ;;
+        notfound)
+            echo "$PROG: Resource not found: $2" >&2
+            exit 2 ;;
+        access)
+            echo "$PROG: Access error: $2" >&2
+            exit 3 ;;
+        download)
+            echo "$PROG: Download error: $2" >&2
+            exit 4 ;;
+        *)
+            echo "$PROG: Unknown error" >&2
+            exit 1 ;;
+    esac
+}
+
+# Command functions.
+
+# Show help message.
+function help() {
+    cat << EOT
+$PROG: manage ogLive cleints.
+Usage: $PROG command [options]
+Commands:
+  help                show this help
+  config              show configuration parameters
+  check               check system consistency
+  convert             convert old default ogclient to default ogLive client
+  list                list installed ogLive clients
+  show all            show JSON information about all installed ogLive clients
+  show default        show JSON information about ogLive client marked as default
+  show Index|Dir      show JSON information about an installed ogLive client
+  search Index|Dir    show corresponding index or directory
+  download            show a menu to download an ogLive ISO image from the OpenGnsys website
+  download Iso        download an specific ogLive ISO image from the OpenGnsys website
+  install Iso         install a new ogLive client from a downloaded ISO image
+  uninstall Iso       remove ISO image and uninstall its ogLive client
+  uninstall Index|Dir uninstall an ogLive client
+  get-default         get index value for default ogLive client
+  set-default Index   set default ogLive client
+  assign Iso Index    assign an ISO file to a JSON entry
+Parameters:
+  Index   a number, starting by 0
+  Dir     directory (relative to installation directory)
+  Iso     ISO file name (relative to download URL or download directory)
+EOT
+}
+
+# Convert default ogclient to a new ogLive format.
+function convert() {
+    local OGCLIENT=ogclient OLDINFOFILE=$OPENGNSYS/doc/veroglive.txt
+    local OGLIVEKRNL OGLIVEDIR OGLIVEISO
+    [ $# -ne 0 ] && raiseError usage
+    [ ! -w $(dirname $INFOFILE) ] && raiseError access "Configuration file."
+    pushd $TFTPDIR >/dev/null || raiseError access "Installation directory."
+    [ ! -f $OGCLIENT/ogvmlinuz ] && raiseError notfound "ogclient"
+    # Add entry to JSON file using ogclient kernel version.
+    OGLIVEKRNL=$(file -bkr $OGCLIENT/ogvmlinuz | awk '/Linux/ {for(i=1;i<=NF;i++) if($i~/version/) {v=$(i+1);sub(/-.*/,"",v);print v}}')
+    OGLIVEDIR=$DEFOGLIVE-$OGLIVEKRNL
+    [ -r $OLDINFOFILE ] && OGLIVEISO=$(head -1 $OLDINFOFILE).iso
+    addToJson "" "$OGLIVEKRNL" "" "$OGLIVEDIR" "$OGLIVEISO"
+    # Rename directory, link to default and clean old files.
+    mv -v $OGCLIENT $OGLIVEDIR
+    ln -vfs $OGLIVEDIR $DEFOGLIVE
+    ln -vfs $DEFOGLIVE $OGCLIENT
+    mv -v $OGCLIENT.old $OGLIVEDIR.old 2>/dev/null
+    rm -fv {ogvmlinuz,oginitrd.img}{,.sum} $OLDINFOFILE
+    popd >/dev/null
+}
+
+# Show script configuration parameters.
+function config() {
+    case $# in
+        0)  # Show all parameters.
+            cat << EOT
+Configuration file:             $INFOFILE
+ogLive download URL:            $DOWNLOADURL
+ogLive download directory:      $DOWNLOADDIR
+ogLive installation directory:  $TFTPDIR
+Default ogLive name:            $DEFOGLIVE
+EOT
+            ;;
+        1)  # Show specified parameter.
+            case "$1" in
+                config-file)    echo "$INFOFILE" ;;
+                download-url)   echo "$DOWNLOADURL" ;;
+                download-dir)   echo "$DOWNLOADDIR" ;;
+                install-dir)    echo "$TFTPDIR" ;;
+                default-name)   echo "$DEFOGLIVE" ;;
+                *)              raiseError notfound "$1" ;;
+            esac
+            ;;
+	*)  # Usage error.
+            raiseError usage
+            ;;
+esac
+}
+
+# Check consistency, showing configuration problems.
+function check() {
+    local ERR=0 AUX INST DEF
+    [ $# -ne 0 ] && raiseError usage
+    # Check for old system that needs conversion.
+    if [ -z "$(stat -c "%N" $TFTPDIR/ogclient | awk '$3~/'$DEFOGLIVE'/ {print}')" ]; then
+         echo "This server uses old ogclient, please run \"$PROG convert\" to update."
+         let ERR++
+         [ ! -f $INFOFILE ] && exit $ERR
+    fi
+    # Check for other problems.
+    [ ! -f $INFOFILE ] && echo "Configuration file does not exist: $INFOFILE" && let ERR++
+    [ "$(jshon -k -F $INFOFILE 2>/dev/null | tr '\n' ' ')" != "oglive default " ] && echo "Format error in configuration file: $INFOFILE" && let ERR++
+    [ ! -e $TFTPDIR ] && echo "TFTP directory does not exist: $TFTPDIR." && let ERR++
+    # Check for installed ogLives.
+    INST=( $(find $TFTPDIR/ -type d -name "$DEFOGLIVE-*" -a ! -name "*.old" -printf "%f\n" | sort) )
+    [[ ${#INST[@]} -eq 0 ]] && echo "No ogLive clients are installed." && let ERR++
+    DEF=( $(jshon -Q -e oglive -a -e directory -u -F $INFOFILE 2>/dev/null | sort) )
+    # Compare installed and defined ogLive clients.
+    AUX=$(comm -23 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
+    [ -n "$AUX" ] && echo "Some ogLive are installed but not defined: ${AUX//$'\n'/, }" && let ERR++
+    AUX=$(comm -13 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
+    [ -n "$AUX" ] && echo "Some ogLive are defined but not installed: ${AUX//$'\n'/, }" && let ERR++
+    # Compare downloaded and defined ISO images.
+    INST=( $(find $DOWNLOADDIR/ -type f -name "$DEFOGLIVE-*.iso" -printf "%f\n" | sort) )
+    DEF=( $(jshon -Q -e oglive -a -e iso -u -F $INFOFILE 2>/dev/null | sort) )
+    AUX=$(comm -23 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
+    [ -n "$AUX" ] && echo "Some ISOs are installed but not defined: ${AUX//$'\n'/, }" && let ERR++
+    AUX=$(comm -13 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
+    [ -n "$AUX" ] && echo "Some ISOs are defined but not installed: ${AUX//$'\n'/, }" && let ERR++
+    # Print result.
+    [ $ERR -eq 0 ] && echo "OK!" || echo "Problems detected: $ERR"
+    return $ERR
+}
+
+# List installed ogLive clients.
+function list() {
+    [ $# -ne 0 ] && raiseError usage
+    [ ! -r $INFOFILE ] && raiseError access "Configuration file."
+    # List all defined indexes, directories and check if missing.
+    jshon -Q -e oglive -a -e directory -u -F $INFOFILE | nl -v 0 | \
+	    awk '{system("echo -n "$0"; test -d '$TFTPDIR'/"$2" || echo -n \" (missing)\"; echo")}' | column -t
+}
+
+# Show information about an installed ogLive client. 
+function show() {
+    local INDEX
+    [ $# -ne 1 ] && raiseError usage
+    [ ! -r $INFOFILE ] && raiseError access "Configuration file."
+    # Show JSON entries.
+    case "$1" in
+        default)    # Default index.
+            INDEX=$(jshon -Q -e default -F $INFOFILE) ;;
+        all)        # All intries.
+            ;;
+        [0-9]*)     # Index.
+            INDEX=$1 ;;
+        *)          # Directory.
+            INDEX=$(search "$1" 2>/dev/null)
+            [ -z "$INDEX" ] && raiseError notfound "Directory \"$1\"."
+            ;;
+    esac
+    jshon -Q -e oglive ${INDEX:+"-e $INDEX"} -F $INFOFILE || raiseError notfound "Index \"$1\"."
+}
+
+# Show index or directory corresponding to searching parameter.
+function search() {
+    [ $# -ne 1 ] && raiseError usage
+    [ ! -r $INFOFILE ] && raiseError access "Configuration file."
+    # Show corresponding index or directory.
+    list | awk -v d="$1" '{if ($2==d) print $1; if ($1==d) print $2}' | grep . || raiseError notfound "Index/Directory \"$1\""
+}
+
+# Show a menu to select and download an ogLive ISO image from the OpenGnsys website.
+function download() {
+    local OGLIVE NISOS i SOURCELENGTH TARGETFILE
+    [ $# -gt 1 ] && raiseError usage
+    [ ! -d $DOWNLOADDIR ] && raiseError notfound "Download directory"
+    [ ! -w $DOWNLOADDIR ] && raiseError access "Download directory"
+    # Check parameter.
+    if [ -n "$1" ]; then
+        # ogLive to download.
+        OGLIVEFILE="$1"
+    else
+        # Show download menu.
+        OGLIVE=( $(wget $DOWNLOADURL -O - 2>/dev/null | grep $DEFOGLIVE.*iso) )
+        NISOS=${#OGLIVE[@]}
+        echo "Available downloads (+- = installed):"
+        for i in $(seq 1 $NISOS); do
+            [ -e $DOWNLOADDIR/${OGLIVE[i-1]} ] && OGLIVE[i-1]="+-${OGLIVE[i-1]}"
+        done
+        select opt in ${OGLIVE[@]}; do
+            [ -n "$opt" ] && OGLIVEFILE=${opt/+-/} && break
+        done
+    fi
+    # Get download size.
+    SOURCELENGTH=$(LANG=C wget --spider $DOWNLOADURL/$OGLIVEFILE 2>&1 | awk '/Length:/ {print $2}')
+    [ -n "$SOURCELENGTH" ] || raiseError download "$OGLIVEFILE"
+    # Download ogLive.
+    TARGETFILE=$DOWNLOADDIR/$OGLIVEFILE
+    trap "rm -f $TARGETFILE" 1 2 3 6 9 15
+    wget $DOWNLOADURL/$OGLIVEFILE -O $TARGETFILE || raiseError download "$OGLIVEFILE"
+}
+
+# Install an ogLive client from a previously downloaded ISO image.
+function install() {
+    local OGLIVEFILE OGLIVEDIST OGLIVEREV OGLIVEKRNL OGLIVEDIR OGINITRD OGSQFS
+    local SAMBAPASS TMPDIR RSYNCSERV RSYNCCLNT
+    [ $# -ne 1 ] && raiseError usage
+    OGLIVEFILE=$DOWNLOADDIR/"$1"
+    [ ! -f $OGLIVEFILE ] && raiseError notfound "Downloaded file: \"$1\"."
+    [ ! -r $OGLIVEFILE ] && raiseError access "Downloaded file: \"$1\"."
+    [ ! -w $(dirname $INFOFILE) ] && raiseError access "Configuration directory."
+    [ ! -w $TFTPDIR ] && raiseError access "Installation directory."
+    [ -z "$(file -b $OGLIVEFILE | grep "ISO.*ogClient")" ] && raiseError access "File is not an ogLive ISO image."
+    # Working directory (ogLive-Distribution-KernelVersion-CodeRevision).
+    OGLIVEDIST="$(echo $OGLIVEFILE|cut -f2 -d-)"
+    OGLIVEREV="${OGLIVEFILE##*-}"; OGLIVEREV="${OGLIVEREV%.*}"
+    OGLIVEKRNL="$(echo $OGLIVEFILE|cut -f3- -d-)"; OGLIVEKRNL="${OGLIVEKRNL%-$OGLIVEREV.*}"
+    OGLIVEDIR="$TFTPDIR/$DEFOGLIVE-$OGLIVEDIST-${OGLIVEKRNL%%-*}-$OGLIVEREV"
+    # Get current or default Samba key.
+    OGINITRD=$OGLIVEDIR/oginitrd.img
+    [ ! -r $OGINITRD ] && OGINITRD=$TFTPDIR/$DEFOGLIVE/oginitrd.img
+    if [ -r $OGINITRD ]; then
+    SAMBAPASS=$(gzip -dc $OGINITRD | \
+    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+            grep "^[ 	].*OPTIONS=" | \
+            sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+    fi
+    # Make ogLive backup.
+    rm -fr ${OGLIVEDIR}.old
+    mv -fv $OGLIVEDIR ${OGLIVEDIR}.old 2>/dev/null
+    # Mount ogLive ISO image, update its files, unmount it and set as default.
+    TMPDIR=/tmp/${OGLIVEFILE%.iso}
+    mkdir -p $OGLIVEDIR $TMPDIR
+    trap "umount $TMPDIR; rm -fr $TMPDIR" 1 2 3 6 9 15
+    mount -o loop,ro $OGLIVEFILE $TMPDIR
+    cp -va $TMPDIR/ogclient/* $OGLIVEDIR || exit 2
+    umount $TMPDIR
+    rm -f $TFTPDIR/$DEFOGLIVE
+    ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
+    # Recover or ask for a new Samba access key.
+    if [ -n "$SAMBAPASS" ]; then
+        echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | $OPENGNSYS/bin/setsmbpass
+    else
+        $OPENGNSYS/bin/setsmbpass
+    fi
+    # Set permissions.
+    find -L $OGLIVEDIR -type d -exec chmod 755 {} \;
+    find -L $OGLIVEDIR -type f -exec chmod 644 {} \;
+    chown -R :opengnsys $OGLIVEDIR
+    # Mount SquashFS and check Rsync version.
+    OGSQFS=$OGLIVEDIR/ogclient.sqfs
+    mount -o loop,ro $OGSQFS $TMPDIR
+    # If Rsync server version > client version, link to compiled file.
+    RSYNCSERV=$(rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+    RSYNCCLNT=$(chroot $TMPDIR /usr/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+    if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then
+        [ -e $OPENGNSYS/client/bin/rsync-$RSYNCSERV ] && mv -f $OPENGNSYS/client/bin/rsync-$RSYNCSERV $OPENGNSYS/client/bin/rsync
+    else
+	# Else, rename compiled file using Rsync protocol number.
+        [ -e $OPENGNSYS/client/bin/rsync ] && mv -f $OPENGNSYS/client/bin/rsync $OPENGNSYS/client/bin/rsync-$($OPENGNSYS/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
+    fi
+    # Unmount SquashFS.
+    umount $TMPDIR
+    rmdir $TMPDIR
+    # Update JSON file.
+    addToJson "$OGLIVEDIST" "$OGLIVEKRNL" "$OGLIVEREV" "$OGLIVEDIR" "$OGLIVEFILE"
+}
+
+# Uninstall an ogLive client.
+function uninstall() {
+    local ISO DIR INDEX DEFINDEX
+    [ $# -ne 1 ] && raiseError usage
+    [ ! -r $INFOFILE ] && raiseError access "Configuration file."
+    [ ! -w $TFTPDIR ] && raiseError access "Installation directory."
+    # Get index and directory for the entry.
+    case "$1" in
+        */*)    # Error (access to other directory).
+            raiseError access "Cannot access outside installation directory."
+            ;;
+        $DEFOGLIVE-*.iso)  # ISO file.
+            ISO="$1"
+            # Working directory (ogLive-Distribution-KernelVersion-CodeRevision).
+            DIR="$(echo $ISO|cut -f1,3 -d-)-${ISO##*-}"; DIR=${DIR%.*}
+            INDEX=$(search $DIR 2>/dev/null)
+            ;;
+        [0-9]*) # Index.
+            INDEX=$1; DIR=$(search $INDEX 2>/dev/null)
+            ;;
+        *)      # Directory.
+            DIR="$1"; INDEX=$(search $DIR 2>/dev/null)
+            ;;
+    esac
+    DEFINDEX=$(getdefault)
+    [[ $INDEX = $DEFINDEX ]] && raiseError access "Cannot uninstall default ogLive."
+    # Remove files and delete index entry.
+    #rm -vfr $ISO $DIR $DIR.old
+    rm -vfr $ISO $DIR
+    jshon -Q -e oglive -d $INDEX -p -F $INFOFILE -I
+}
+
+# Get default ogLive index.
+function getdefault() {
+    [ $# -ne 0 ] && raiseError usage
+    [ ! -r $INFOFILE ] && raiseError access "Configuration file."
+    # Read default parameter.
+    jshon -Q -e default -F $INFOFILE || raiseError notfound "Undefined default index."
+}
+
+# Set default ogLive index.
+function setdefault() {
+    local INDEX OGLIVEDIR
+    [ $# -ne 1 ] && raiseError usage
+    [ ! -w $INFOFILE ] && raiseError access "Configuration file."
+    INDEX=$1
+    # Check if index entry exists.
+    jshon -Q -e oglive -e $INDEX -F $INFOFILE || raiseError notfound "Index \"$INDEX\"."
+    # Get ogLive directory.
+    OGLIVEDIR=$(jshon -Q -e oglive -e $INDEX -e directory -u -F $INFOFILE) || raiseError notfound "Directory for index \"$INDEX\"."
+    # Update default parameter.
+    jshon -Q -n $INDEX -i "default" -F $INFOFILE -I
+    # Link to default directory.
+    rm -f $TFTPDIR/$DEFOGLIVE
+    ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
+}
+
+# Assign an ISO file to a JSON entry.
+function assign() {
+local ISOFILE DIR
+    [ $# -ne 2 ] && raiseError usage
+    [ ! -w $INFOFILE ] && raiseError access "Configuration file."
+    # Check if exist ISO file and index directory.
+    ISOFILE=$DOWNLOADFILE/$1
+    [ ! -f $DOWNLOADDIR/$ISOFILE ] && raiseError notfound "ISO file \"$1\"."
+    DIR=$(search $2 2>/dev/null)
+    [ ! -d $TFTPDIR/$DIR ] && raiseError notfound "Directory for index \"$2\"."
+    # Assign ISO file to JSON entry.
+    jshon -e oglive -e $2 -s "$1" -i iso -F $INFOFILE -I && jshon -e oglive -e $2 -F $INFOFILE
+}
+
+
+# Main progrram.
+
+# Global constants definition.
+PROG=$(basename $0)
+OPENGNSYS=/opt/opengnsys
+DOWNLOADDIR=$OPENGNSYS/lib
+DOWNLOADURL="http://opengnsys.es/downloads"
+TFTPDIR=$OPENGNSYS/tftpboot
+DEFOGLIVE=ogLive
+INFOFILE=$OPENGNSYS/etc/ogliveinfo.json
+
+# Access control.
+if [ "$USER" != "root" ]; then
+    raiseError access "Need to be root."
+fi
+# Check dependencies.
+if ! which jshon &>/dev/null; then
+    raiseError notfound "You must to install \"jshon\"."
+fi
+# Commands control.
+case "$1" in
+    help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|assign)
+        COMMAND="${1/-/}"; shift; $COMMAND "$@" ;;
+    *)  raiseError usage ;;
+esac
+
+exit $?
+
