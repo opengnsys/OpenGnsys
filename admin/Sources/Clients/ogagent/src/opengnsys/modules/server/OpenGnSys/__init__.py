@@ -88,24 +88,18 @@ class OpenGnSysWorker(ServerWorker):
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         
-        # Send an initialize message
-        #self.REST.sendMessage('initialize/{}/{}'.format(self.interface.mac, self.interface.ip))
-        # Send an POST message
+        # Send initalization message
         self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random, 'ostype': operations.osType, 'osversion': operations.osVersion})
         
     def onDeactivation(self):
         '''
         Sends OGAgent stopping notification to OpenGnsys server
         '''
-        #self.REST.sendMessage('deinitialize/{}/{}'.format(self.interface.mac, self.interface.ip))
         logger.debug('onDeactivation')
         self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip, 'ostype': operations.osType, 'osversion': operations.osVersion})
     
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
-    
-    #def process_client_doit(self, params):
-    #    self.REST.sendMessage('doit_done', params)
     
     def onLogin(self, user):
         '''
@@ -224,3 +218,16 @@ class OpenGnSysWorker(ServerWorker):
         self.sendClientMessage('logoff', {})
         return {'op': 'sended to client'}
 
+    def process_popup(self, path, getParams, postParams, server):
+        '''
+        Shows a message popup on the user's session.
+        '''
+        logger.debug('Received message operation')
+        self.checkSecret(server)
+        # Sending popup message to OGAgent client.
+        self.sendClientMessage('popup', postParams)
+        return {'op': 'launched'}
+
+    def process_client_popup(tself, params):
+        self.REST.sendMessage('popup_done', params)
+    

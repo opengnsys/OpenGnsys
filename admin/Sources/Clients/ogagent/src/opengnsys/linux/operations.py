@@ -269,3 +269,10 @@ def getCurrentUser():
     Returns current logged in user
     '''
     return os.environ['USER']
+
+def showPopup(title, message):
+    '''
+    Displays a message box on user's session (during 1 min).
+    '''
+    return subprocess.call('zenity --info --timeout 60 --title "{}" --text "{}"'.format(title, message), shell=True)
+

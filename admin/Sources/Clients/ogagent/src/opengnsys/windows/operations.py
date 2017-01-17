@@ -39,6 +39,7 @@ import win32con  # @UnresolvedImport, pylint: disable=import-error
 import ctypes
 from ctypes.wintypes import DWORD, LPCWSTR
 import os
+import subprocess
 
 from opengnsys import utils
 from opengnsys.log import logger
@@ -231,3 +232,11 @@ def getCurrentUser():
     Returns current logged in username
     '''
     return os.environ['USERNAME']
+
+def showPopup(title, message):
+    '''
+    Displays a message box on user's session (during 1 min).
+    '''
+    return subprocess.call('mshta "javascript:var sh=new ActiveXObject(\'WScript.Shell\'); sh.Popup( \'{}\', 60, \'{}\', 64); close()"'.format(message, title), shell=True)
+
+

@@ -50,9 +50,14 @@ class OpenGnSysWorker(ClientWorker):
         logger.debug('Processed message: script({})'.format(jsonParams))
         thr = ScriptExecutorThread(jsonParams['code'])
         thr.start()
-        #self.sendServerMessage({'op', 'launched'})
+        #self.sendServerMessage('script', {'op', 'launched'})
 
     def process_logoff(self, jsonParams):
         logger.debug('Processed message: logoff({})'.format(jsonParams))
         operations.logoff()
+
+    def process_popup(self, jsonParams):
+        logger.debug('Processed message: popup({})'.format(jsonParams))
+        ret = operations.showPopup(jsonParams['title'], jsonParams['message'])
+        #self.sendServerMessage('popup', {'op', ret})
 

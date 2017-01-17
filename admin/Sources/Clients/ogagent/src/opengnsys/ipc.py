@@ -46,6 +46,7 @@ from opengnsys.log import logger
 #    ------------  --------         --------------------------
 #    MSG_LOGOFF     None            Logout user from session
 #    MSG_MESSAGE    message,level   Display a message with level (INFO, WARN, ERROR, FATAL)     # TODO: Include level, right now only has message
+#    MSG_POPUP      title,message   Display a popup box with a title
 #    MSG_SCRIPT     python script   Execute an specific python script INSIDE CLIENT environment (this messages is not sent right now)
 # The messages received (sent from client) will be the following:
 #     Message_id       Data               Action
@@ -63,10 +64,12 @@ from opengnsys.log import logger
 # Client messages
 MSG_LOGOFF = 0xA1  # Request log off from an user
 MSG_MESSAGE = 0xB2
+MSG_POPUP = 0xB3
 MSG_SCRIPT = 0xC3 
 
 # Request messages
 REQ_MESSAGE = 0xD4
+REQ_POPUP = 0xD5
 REQ_LOGIN = 0xE5
 REQ_LOGOUT = 0xF6
 
@@ -74,6 +77,7 @@ REQ_LOGOUT = 0xF6
 REV_DICT = {
     MSG_LOGOFF: 'MSG_LOGOFF',
     MSG_MESSAGE: 'MSG_MESSAGE',
+    MSG_POPUP: 'MSG_POPUP',
     MSG_SCRIPT: 'MSG_SCRIPT',
     REQ_LOGIN: 'REQ_LOGIN',
     REQ_LOGOUT: 'REQ_LOGOUT',
@@ -236,6 +240,9 @@ class ServerIPC(threading.Thread):
 
     def sendMessageMessage(self, message):
         self.sendMessage(MSG_MESSAGE, message)
+
+    def sendPopupMessage(self, title, message):
+        self.sendMessage(MSG_POPUP, {'title':title, 'message':message})
 
     def sendScriptMessage(self, script):
         self.sendMessage(MSG_SCRIPT, script)

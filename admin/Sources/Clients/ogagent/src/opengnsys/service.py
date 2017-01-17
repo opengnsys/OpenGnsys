@@ -241,3 +241,9 @@ class CommonService(object):
         Sends a logoff message to client
         '''
         self.ipc.sendLoggofMessage()
+        
+    def sendPopupMessage(self, title, message):
+        '''
+        Sends a poup box to be displayed by client
+        '''
+        self.ipc.sendPopupMessage(title, message)

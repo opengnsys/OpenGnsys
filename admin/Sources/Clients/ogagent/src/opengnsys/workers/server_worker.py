@@ -181,3 +181,6 @@ class ServerWorker(object):
     
     def sendLogoffMessage(self):
         self.service.sendLogoffMessage()
+    
+    def sendPopupMessage(self):
+        self.service.sendPopupMessage()
