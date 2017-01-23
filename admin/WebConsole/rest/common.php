@@ -54,18 +54,9 @@ $app->get('/info', function() {
       if (@$services["RUN_BTTRACKER"] === "yes")  array_push($response['services'], "tracker");
       // Reading installed ogLive information file.
       if ($hasOglive === true) {
-          $data = explode('-', @file_get_contents('/opt/opengnsys/doc/veroglive.txt'));
-          if ($data[0] === "ogLive") {
-              array_shift($data);
-              $response['oglive'] = array();
-              $tmp = Array();
-              $tmp['distribution'] = trim($data[0]);
-              array_shift($data);
-              $tmp['revision'] = trim(end($data));
-              array_pop($data);
-              $tmp['kernel'] = trim(implode('-', $data));
-              $tmp['directory'] = "tftpboot/ogclient";
-              array_push($response['oglive'], $tmp);
+          $data = json_decode(@file_get_contents('/opt/opengnsys/etc/ogliveinfo.json'));
+          if (isset($data->oglive)) {
+              $response['oglive'] = $data->oglive;
           }
       }
       jsonResponse(200, $response);

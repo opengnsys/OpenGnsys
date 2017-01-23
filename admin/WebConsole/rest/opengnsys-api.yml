@@ -86,6 +86,27 @@ paths:
                 items:
                   type: string
                   enum: [ 'server', 'repository', 'tracker' ]
+              oglive:
+                description: installed ogLive clients
+                type: array
+                items:
+                  type: object
+                  properties:
+                    distribution:
+                      description: base distribution
+                      type: string
+                    kernel:
+                      description: kernel version
+                      type: string
+                    revision:
+                      description: OpenGnsys revision
+                      type: string
+                    directory:
+                      description: installation directory
+                      type: string
+                    iso:
+                      description: ISO file
+                      type: string
             required: [ project, version, release, services ]
       tags:
         - server
@@ -263,7 +284,7 @@ paths:
                       description: OU identificator
                       type: integer
                       format: int32
-              required: [ id, name; inremotepc, ou ]
+              required: [ id, name, inremotepc, ou ]
       security:
         - apikey: []
       tags:
@@ -360,7 +381,7 @@ paths:
               image:
                 description: Lab's picture file
                 type: string
-            required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, modomul, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, image ]
+            required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, mcastmode, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, image ]
       security:
         - apikey: []
       tags:
@@ -918,7 +939,7 @@ paths:
         - server
         - image
   #/ous/{ouid}/images/{imageid}/boot:
-  /repository/images
+  /repository/images:
     get:
       description: Get information about images stored in a repository
       responses:
@@ -952,7 +973,6 @@ paths:
                     description: image file information
                     type: object
                     properties:
-                    required: [ total, used, free, percent ]
                       name:
                         description: file name
                         type: string
@@ -963,7 +983,7 @@ paths:
                       modified:
                         description: file modification date
                         type: string
-                         format: date-time
+                        format: date-time
                       permissions:
                         description: file permissions
                         type: string
