@@ -442,6 +442,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		$encontradoobjetoimagen=$rs->campos["nombreca"];
 					}
 		if($encontradoobjetoimagen == $value){$encontradoobjetoimagen;}else{$encontradoobjetoimagen="";}
+		$idcentroimgpost=$rs->campos["idcentro"];
 		$rs->Cerrar();
 		// ####################################################################################		
 
@@ -534,6 +535,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		if($encontradoobjetoimagen<>"")
 		{
 			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
+			echo '<input type="hidden" name="idcentroimg'.$contar.'"  value="'.$idcentroimgpost.'">'.chr(13);
 		}
 		elseif (ereg(".ant",$nombrefichero))
 			{

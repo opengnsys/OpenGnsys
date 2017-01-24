@@ -488,7 +488,8 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
-  PRIMARY KEY (`idordenador`)
+  PRIMARY KEY (`idordenador`),
+  KEY `idaulaip` (`idaula` ASC, `ip` ASC)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 

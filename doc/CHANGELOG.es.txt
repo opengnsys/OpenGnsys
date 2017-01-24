@@ -18,12 +18,13 @@ Tickets resueltos en módulo OpenGnSys Client:
 
 Tickets resueltos en módulo OpenGnSys Server
 #729	Instalar en cliente la misma versión de Rsync que la del servidor
-#752    Script setserveraddr parchea parámetro de configuración UrlMenu
+#752	Script setserveraddr parchea parámetro de configuración UrlMenu
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #753	Asistente de particionado no crea correctamente la caché
 #757	Asistente DeployImagen: no guarda información de la imagen restaurada
 #758	Comando Formatear y Particionar no formatea la swap
+#763	Corregir errata Asistente Deploy de imágenes
 #766	Incluir cambios y manual
 
 Tickets genéricos resueltos:
@@ -75,7 +76,9 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #698	Mejoras en los mensajes de error
 
 Tickets resueltos en módulo OpenGnSys Client:
+#57	Incluir dpkg y rpm en cliente Initrd
 #136	Splash de arranque con Plymouth (no se resolverá)
+#603	ogLive 1.0.6 basado en Ubuntu 12.04 LTS con Kernel 3.11
 #615    Cliente oglive 1.0.5 basado en Ubuntu 12.04.2 LTS (duplicado de #603)
 #649	El arranque gráfico del ogLive depende del hardware (no se resolverá)
 #653	Decidir el número de parámetros del script configureOsCustom
@@ -159,7 +162,8 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #600	Eliminar el límite de tamaño de la caché
 #602	Adaptar funciones para soportar los sistemas de ficheros del Kernel 3.7
 #605	builtToOrder para discos SCSI con controlador lsi_sas
-#624	Reboot con valor por defecto de tiempo de sleep configurable.
+#618	ogCopyFile: Utilizar rsync a través del servicio y no sobre samba
+#624	Reboot con valor por defecto de tiempo de sleep configurable
 #628	Problema postconfiguración Windows dos veces seguidas
 #634	Problema si cliente de OpenGnSys ya se encuentra instalado en Windows
 #636	Recupearar log en tiempo real para comados de restauración
@@ -176,7 +180,9 @@ Tickets resueltos en módulo OpenGnSys Client:
 #547	ogLive basado en ubuntu 12.04 no detecta ficheros de configuración de DNS
 #568	Menú por defecto para los clientes incluye acceso a sistemas operativos
 #570	boot-tools: error en la generación del ogLive basado en ubuntu 12.10
+#572	ogLive: activación proxy
 #573	Crear cliente ogLive basado en Ubuntu 12.10 con Kernel 3.7 (tarea)
+#574	Browser con soporte para el protocolo HTTPS
 #579	El cliente no inicia cuando se conecta un dispositivo USB
 #563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
 #587	buildToOrder: activación controladores de disco para Windows 7
@@ -206,9 +212,12 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #149	Controlar tamaño de caché en la consola
 #265	Consola Web: Actualización información al terminar los comandos (duplicado de #577)
+#416	Clonar partición sólo datos
 #524	Eliminar imagen en caché del cliente
 #533	Scritps de interfaceAdm no deben incluir lógica de proceso
+#549	Crear página con información del proyecto
 #552	Permitir crear caché en cualquier disco
+#557	Cambio de Unidad Organizativa
 #566	Asistente de gestión Master muestra todas las imágenes de su caché para enviarlas
 #585	Incluir en la administración web las opciones DNS y proxy para el ogLive
 #594	Reactivar el comando Formatear y Particionar
@@ -222,6 +231,7 @@ Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #614	Compatibilidad múltiples dispositivos (mejora)
 #617	Botones barra menú (duplicado de #614)
 #619	Consola web asistente particionado: error si se incluye en la cola de acciones
+#620	opengnsys_update desde 1.0.4 no reconoce imagenes monolíticas
 #642	Mejoras en comandos de eliminación de imágenes
 #643	Validacion formulario propiedades del ordenador
 
@@ -259,7 +269,7 @@ Tickets resueltos en módulo OpenGnSys Repository Server:
 #561	Crear script para borrar imágenes del repositorio
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
-#551	Consola web compatible con PHP 5.4
+#551	Consola web compatible con PHP 5.4 (tarea)
 #558	Correción Modulo Fotosordenadores
 #560	La pantalla de cola de acciones tarda mucho en mostrar los resultados
 
@@ -287,7 +297,6 @@ Tickets resueltos en módulo OpenGnSys Client:
 #116	Aviso en el browser de cliente rechazado (no se resolverá)
 #411	Menú por defecto para los clientes con información básica del estado de red
 #415	Compatiblidad hardware (red, disco) en los clientes OpenGnSys
-#416	Aviso en el browser de cliente rechazado
 #419	chntpw trunca las claves de registro largas
 #491	Log de seguimiento con información de caché local
 #494	Información de la caché en pantalla del cliente (no válido)
@@ -361,6 +370,7 @@ Tickets resueltos en módulo OpenGnSys Client:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #376	Menú para el Browser en equipos sin menú asignados con valores por defecto (se solucionará en #411)
+#403	Incompatibilidad con Internet Explorer
 #454	Buscador de equipos para la interfaz de administración web (mejora)
 #475	Consola web comando->restaurar habilitar restauración directa (sin cache) por Multicast y Unicast (mejora)
 #483	Completar la internacionalización de la consola web (los 3 idiomas iniciales)
