@@ -112,7 +112,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         ubuntu|debian|linuxmint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan realpath php5-curl gettext )
+		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan realpath php5-curl gettext moreutils jq )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
@@ -129,7 +129,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		;;
         fedora|centos)
-		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng arp-scan gettext )
+		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng arp-scan gettext moreutils jq )
 		# En CentOS 7 instalar arp-scan de CentOS 6.
 		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
 		INSTALLPKGS="yum install -y"

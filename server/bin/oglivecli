@@ -6,7 +6,7 @@
 #@brief   Command line tool to manage ogLive clients.
 #@param   $1 command  Command to execute.
 #@param   $2 options  Parameters and options.
-#@warning This script uses "jshon" command.
+#@warning This script uses "jq" command.
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2016-12-05
@@ -15,38 +15,41 @@
 
 # Auxiliar functions.
 
+# Metafunction to check if JSON result exists.
+function jq() {
+    local OUTPUT
+    OUTPUT=$($JQ "$@") || return $?
+    [[ "$OUTPUT" = "null" ]] && return 1
+    echo "$OUTPUT"
+}
+
 # Create/edit JSON file about installed ogLive clients.
 function addToJson() {
     local DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEREV="$3"
     local OGLIVEDIR="$(basename $4)" OGLIVEISO="$(basename $5)"
     # JSON data for installed ogLive.
-    DATA=$(cat << EOT | jshon
+    DATA=$(cat << EOT | jq .
 {"distribution":"$OGLIVEDIST","kernel":"$OGLIVEKRNL","revision":"$OGLIVEREV","directory":"$OGLIVEDIR","iso":"$OGLIVEISO"}
 EOT
     )
     # Check JSON file consistency.
-    if [ "$(jshon -k -F $INFOFILE 2>/dev/null | tr '\n' ' ')" == "oglive default " ]; then
+    if [ "$(jq -c keys $INFOFILE 2>/dev/null)" == "[\"default\",\"oglive\"]" ]; then
         # Check if ogLive is defined into JSON file.
-        n=$(jshon -e oglive -l -F $INFOFILE)
+        n=$(jq ".oglive | length" $INFOFILE)
         for ((i=0; i<n; i++)); do
-            [ "$DATA" == "$(jshon -e oglive -e $i -F $INFOFILE)" ] && INDEX=$i
+            [ "$DATA" == "$(jq ".oglive[$i]" $INFOFILE)" ] && INDEX=$i
         done
         # Check if it needs to insert data.
         if [ -z "$INDEX" ]; then
             INDEX=$n
-            jshon -e oglive -n {} -i append -p -F $INFOFILE -I
-            jshon -e oglive -e $INDEX -s "$OGLIVEDIST" -i distribution -p -F $INFOFILE -I
-            jshon -e oglive -e $INDEX -s "$OGLIVEKRNL" -i kernel -p -F $INFOFILE -I
-            jshon -e oglive -e $INDEX -s "$OGLIVEREV" -i revision -p -F $INFOFILE -I
-            jshon -e oglive -e $INDEX -s "$OGLIVEDIR" -i directory -p -F $INFOFILE -I
-            jshon -e oglive -e $INDEX -s "$OGLIVEISO" -i iso -p -F $INFOFILE -I
+            jq ".oglive |= (. + [$DATA])" $INFOFILE | sponge $INFOFILE
         fi
         # Update dafault index.
-        jshon -n $INDEX -i "default" -F $INFOFILE -I
-        jshon -e oglive -e $INDEX -F $INFOFILE
+        jq ".default=$INDEX" $INFOFILE | sponge $INFOFILE
+        jq ".oglive[$INDEX]" $INFOFILE
     else
         # Create new JSON file.
-        cat << EOT | jshon | tee $INFOFILE
+        cat << EOT | jq . | tee $INFOFILE
 {"oglive":[$DATA],"default":0}
 EOT
     fi
@@ -111,6 +114,7 @@ function convert() {
     local OGLIVEKRNL OGLIVEDIR OGLIVEISO
     [ $# -ne 0 ] && raiseError usage
     [ ! -w $(dirname $INFOFILE) ] && raiseError access "Configuration file."
+    [ -n "$(stat -c "%N" $TFTPDIR/ogclient | awk '$3~/'$DEFOGLIVE'/ {print}')" ] && raiseError access "ogLive is already converted."
     pushd $TFTPDIR >/dev/null || raiseError access "Installation directory."
     [ ! -f $OGCLIENT/ogvmlinuz ] && raiseError notfound "ogclient"
     # Add entry to JSON file using ogclient kernel version.
@@ -167,12 +171,12 @@ function check() {
     fi
     # Check for other problems.
     [ ! -f $INFOFILE ] && echo "Configuration file does not exist: $INFOFILE" && let ERR++
-    [ "$(jshon -k -F $INFOFILE 2>/dev/null | tr '\n' ' ')" != "oglive default " ] && echo "Format error in configuration file: $INFOFILE" && let ERR++
+    [ "$(jq -c keys $INFOFILE 2>/dev/null)" != "[\"default\",\"oglive\"]" ] && echo "Format error in configuration file: $INFOFILE" && let ERR++
     [ ! -e $TFTPDIR ] && echo "TFTP directory does not exist: $TFTPDIR." && let ERR++
     # Check for installed ogLives.
     INST=( $(find $TFTPDIR/ -type d -name "$DEFOGLIVE-*" -a ! -name "*.old" -printf "%f\n" | sort) )
     [[ ${#INST[@]} -eq 0 ]] && echo "No ogLive clients are installed." && let ERR++
-    DEF=( $(jshon -Q -e oglive -a -e directory -u -F $INFOFILE 2>/dev/null | sort) )
+    DEF=( $(jq -r .oglive[].directory $INFOFILE 2>/dev/null | sort) )
     # Compare installed and defined ogLive clients.
     AUX=$(comm -23 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
     [ -n "$AUX" ] && echo "Some ogLive are installed but not defined: ${AUX//$'\n'/, }" && let ERR++
@@ -180,11 +184,11 @@ function check() {
     [ -n "$AUX" ] && echo "Some ogLive are defined but not installed: ${AUX//$'\n'/, }" && let ERR++
     # Compare downloaded and defined ISO images.
     INST=( $(find $DOWNLOADDIR/ -type f -name "$DEFOGLIVE-*.iso" -printf "%f\n" | sort) )
-    DEF=( $(jshon -Q -e oglive -a -e iso -u -F $INFOFILE 2>/dev/null | sort) )
+    DEF=( $(jq -r .oglive[].iso $INFOFILE 2>/dev/null | sort) )
     AUX=$(comm -23 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
-    [ -n "$AUX" ] && echo "Some ISOs are installed but not defined: ${AUX//$'\n'/, }" && let ERR++
+    [ -n "$AUX" ] && echo "Some ISOs are downloaded but not defined: ${AUX//$'\n'/, }" && let ERR++
     AUX=$(comm -13 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
-    [ -n "$AUX" ] && echo "Some ISOs are defined but not installed: ${AUX//$'\n'/, }" && let ERR++
+    [ -n "$AUX" ] && echo "Some ISOs are defined but not downloaded: ${AUX//$'\n'/, }" && let ERR++
     # Print result.
     [ $ERR -eq 0 ] && echo "OK!" || echo "Problems detected: $ERR"
     return $ERR
@@ -195,7 +199,7 @@ function list() {
     [ $# -ne 0 ] && raiseError usage
     [ ! -r $INFOFILE ] && raiseError access "Configuration file."
     # List all defined indexes, directories and check if missing.
-    jshon -Q -e oglive -a -e directory -u -F $INFOFILE | nl -v 0 | \
+    jq -r .oglive[].directory $INFOFILE | nl -v 0 | \
 	    awk '{system("echo -n "$0"; test -d '$TFTPDIR'/"$2" || echo -n \" (missing)\"; echo")}' | column -t
 }
 
@@ -207,17 +211,16 @@ function show() {
     # Show JSON entries.
     case "$1" in
         default)    # Default index.
-            INDEX=$(jshon -Q -e default -F $INFOFILE) ;;
+            INDEX="[$(jq -r .default $INFOFILE)]" ;;
         all)        # All intries.
             ;;
         [0-9]*)     # Index.
-            INDEX=$1 ;;
+            INDEX="[$1]" ;;
         *)          # Directory.
-            INDEX=$(search "$1" 2>/dev/null)
-            [ -z "$INDEX" ] && raiseError notfound "Directory \"$1\"."
+            INDEX="[$(search "$1" 2>/dev/null)]" || raiseError notfound "Directory \"$1\"."
             ;;
     esac
-    jshon -Q -e oglive ${INDEX:+"-e $INDEX"} -F $INFOFILE || raiseError notfound "Index \"$1\"."
+    jq ".oglive$INDEX" $INFOFILE || raiseError notfound "Index \"$1\"."
 }
 
 # Show index or directory corresponding to searching parameter.
@@ -352,9 +355,12 @@ function uninstall() {
     DEFINDEX=$(getdefault)
     [[ $INDEX = $DEFINDEX ]] && raiseError access "Cannot uninstall default ogLive."
     # Remove files and delete index entry.
-    #rm -vfr $ISO $DIR $DIR.old
-    rm -vfr $ISO $DIR
-    jshon -Q -e oglive -d $INDEX -p -F $INFOFILE -I
+    rm -vfr $ISO $TFTPDIR/$DIR    ### Remove $TFTPDIR/$DIR.old ?
+    if [ -n "$INDEX" ]; then
+        jq "del(.oglive[$INDEX])" $INFOFILE | sponge $INFOFILE
+        # Decrement default index if needed (removed < default).
+        [[ $INDEX < $DEFINDEX ]] && jq ".default=$[DEFINDEX-1]" $INFOFILE | sponge $INFOFILE
+    fi
 }
 
 # Get default ogLive index.
@@ -362,7 +368,7 @@ function getdefault() {
     [ $# -ne 0 ] && raiseError usage
     [ ! -r $INFOFILE ] && raiseError access "Configuration file."
     # Read default parameter.
-    jshon -Q -e default -F $INFOFILE || raiseError notfound "Undefined default index."
+    jq -r .default $INFOFILE || raiseError notfound "Undefined default index."
 }
 
 # Set default ogLive index.
@@ -372,11 +378,12 @@ function setdefault() {
     [ ! -w $INFOFILE ] && raiseError access "Configuration file."
     INDEX=$1
     # Check if index entry exists.
-    jshon -Q -e oglive -e $INDEX -F $INFOFILE || raiseError notfound "Index \"$INDEX\"."
+    jq ".oglive[$INDEX]" $INFOFILE || raiseError notfound "Index \"$INDEX\"."
     # Get ogLive directory.
-    OGLIVEDIR=$(jshon -Q -e oglive -e $INDEX -e directory -u -F $INFOFILE) || raiseError notfound "Directory for index \"$INDEX\"."
+    OGLIVEDIR=$(jq -r ".oglive[$INDEX].directory" $INFOFILE) || raiseError notfound "Directory for index \"$INDEX\"."
     # Update default parameter.
-    jshon -Q -n $INDEX -i "default" -F $INFOFILE -I
+    jq ".default=$INDEX" $INFOFILE | sponge $INFOFILE
+exit
     # Link to default directory.
     rm -f $TFTPDIR/$DEFOGLIVE
     ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
@@ -393,7 +400,7 @@ local ISOFILE DIR
     DIR=$(search $2 2>/dev/null)
     [ ! -d $TFTPDIR/$DIR ] && raiseError notfound "Directory for index \"$2\"."
     # Assign ISO file to JSON entry.
-    jshon -e oglive -e $2 -s "$1" -i iso -F $INFOFILE -I && jshon -e oglive -e $2 -F $INFOFILE
+    jq ".oglive[$2].iso=\"$1\"" $INFOFILE | sponge $INFOFILE && jq ".oglive[$2]" $INFOFILE
 }
 
 
@@ -413,9 +420,8 @@ if [ "$USER" != "root" ]; then
     raiseError access "Need to be root."
 fi
 # Check dependencies.
-if ! which jshon &>/dev/null; then
-    raiseError notfound "You must to install \"jshon\"."
-fi
+JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
+which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
 # Commands control.
 case "$1" in
     help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|assign)
