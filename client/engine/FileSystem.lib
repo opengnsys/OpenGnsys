@@ -800,7 +800,7 @@ case "$(ogGetFsType $1 $2)" in
                                        /resize at/ {r=int($5*1.1/1024+1)*1024}
                                        END { print d,r}')
         # Error si no puede obtenerse el tamaño máximo del volumen.
-        [ -n "$MAXSIZE" ] || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+        [ -n "$MAXSIZE" -o -n "$SIZE" ] || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         # Simular la redimensión y comprobar si es necesario ampliarala.
         RETVAL=1
         while [ $RETVAL != 0 -a $[ SIZE+=EXTRASIZE ] -lt $MAXSIZE ]; do
