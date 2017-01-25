@@ -355,7 +355,7 @@ function uninstall() {
     DEFINDEX=$(getdefault)
     [[ $INDEX = $DEFINDEX ]] && raiseError access "Cannot uninstall default ogLive."
     # Remove files and delete index entry.
-    rm -vfr $ISO $TFTPDIR/$DIR    ### Remove $TFTPDIR/$DIR.old ?
+    rm -vfr ${ISO:+$DOWNLOADDIR/$ISO} ${DIR:+$TFTPDIR/$DIR}    ### Remove $TFTPDIR/$DIR.old ?
     if [ -n "$INDEX" ]; then
         jq "del(.oglive[$INDEX])" $INFOFILE | sponge $INFOFILE
         # Decrement default index if needed (removed < default).
