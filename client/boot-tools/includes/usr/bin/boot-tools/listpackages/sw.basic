@@ -20,3 +20,5 @@ install realpath
 install rpm
 install sqlite3
 install os-prober
+install moreutils
+install jq

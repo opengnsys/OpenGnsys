@@ -13,15 +13,8 @@ export LANG=C
 source /opt/opengnsys/lib/engine/bin/ToolsGNU.c &>/dev/null
 pushd /tmp
 
-echo  "ctorrent "
-which ctorrent || ctorrent install &>/dev/null
-
-echo  "udp-sender "
-which udp-sender || udpcast install &>/dev/null
-
 echo  "ms-sys "
 which ms-sys || ms-sys install &>/dev/null
-
 
 echo  "spartlnx"
 which spartlnx.run || $(wget http://damien.guibouret.free.fr/savepart.zip &>/dev/null; unzip -o savepart.zip -d /sbin/)

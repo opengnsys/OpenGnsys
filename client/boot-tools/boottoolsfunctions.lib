@@ -107,17 +107,21 @@ case "${1,,}" in
 	xenial-4.8) 	# ogLive 1.1.0-rc5 basado en Ubuntu 16.04 y Kernel 4.8.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="xenial"
-		OSRELEASE="4.8.0-30-generic"
+		OSRELEASE="4.8.0-34-generic"
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	host | *)	# ogLive basado en la distribución del servidor.
+	host)	# ogLive basado en la distribución del servidor.
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
 		OSRELEASE=$(uname -a | awk '{print $3}')
 		#uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
 		OSARCH="i386"
 		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	*)	# Parámetro desconocido
+		echo "Parámetro no válido."
+		exit 1
 		;;
 esac
 SVNURL="http://opengnsys.es/svn/branches/version1.1/client"

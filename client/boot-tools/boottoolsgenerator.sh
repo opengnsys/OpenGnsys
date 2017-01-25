@@ -15,7 +15,7 @@
 
 
 #Variables
-TYPECLIENT="host"
+TYPECLIENT="${1:-host}"
 WORKDIR=/tmp/opengnsys_installer
 INSTALL_TARGET=/opt/opengnsys
 PROGRAMDIR=$(readlink -e $(dirname "$0"))

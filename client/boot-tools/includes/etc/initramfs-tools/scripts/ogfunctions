@@ -124,6 +124,8 @@ ogExportVarEnvironment ()
 	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 	# OPTIONS Para samba y local (a nfs no le afecta)
 	export OPTIONS=" -o user=opengnsys,pass=og"
+	export OGLIVEDIR="${oglivedir:-ogclient}" && echo "OGLIVEDIR=$OGLIVEDIR" >> $CFGINITRD
+	unset oglivedir
 	case "$OGPROTOCOL" in
 		nfs|NFS)			
 			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
@@ -133,8 +135,7 @@ ogExportVarEnvironment ()
 		;;
 		smb|SMB|cifs|CIFS|samba|SAMBA)
 			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
-			export DEFOGSHARE="ogclient"
-			export SRCOGSHARE="${oglive:-$DEFOGSHARE}" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
 			export SRCOGIMAGES="ogimages$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
 		;;
@@ -508,18 +509,18 @@ ogConnectOgLive ()
 ogMergeLive()
 {
 #Si existe en el punto de acceso del del oglive el fichero ogclient.sqfs	
-if [ -f $DSTOGLIVE/ogclient/ogclient.sqfs ]
+if [ -f $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs ]
 then	
 	cat /proc/mounts > /tmp/mtab.preunion
 	if [ "$og2nd" == "img" ]
 	then
 		#Montamos el ROOTFS tipo  img, para desarrolladores
 		#TODO: comprobar que se tiene acceso de escritura
-		losetup /dev/loop0 $DSTOGLIVE/ogclient/ogclient.img -o 32256
+		losetup /dev/loop0 $DSTOGLIVE/$OGLIVEDIR/ogclient.img -o 32256
 		mount /dev/loop0 $OGLIVEROOTFS
 	else
 		## Montamos el ROOTFS tipo squashfs
-		mount $DSTOGLIVE/ogclient/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
+		mount $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
 	fi
 # Realizamos la union entre el ogliveram(initrd) y el ogliverootfs(ogclient.sqfs)	
 # Nota: el orden es muy importante para evitar errores de montaje.

@@ -10,5 +10,7 @@ install ssmping
 install tcpdump 
 install nmap
 install arping 
-install iptraf 
+#install iptraf 
 install ntpdate
+install ctorrent
+install udpcast
