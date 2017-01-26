@@ -124,8 +124,8 @@ ogExportVarEnvironment ()
 	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 	# OPTIONS Para samba y local (a nfs no le afecta)
 	export OPTIONS=" -o user=opengnsys,pass=og"
-	export OGLIVEDIR="${oglivedir:-ogclient}" && echo "OGLIVEDIR=$OGLIVEDIR" >> $CFGINITRD
-	unset oglivedir
+	DEFOGLIVE="ogclient"
+	export OGLIVEDIR="${oglivedir:-$DEFOGLIVE}" && echo "OGLIVEDIR=$OGLIVEDIR" >> $CFGINITRD
 	case "$OGPROTOCOL" in
 		nfs|NFS)			
 			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
@@ -509,6 +509,10 @@ ogConnectOgLive ()
 ogMergeLive()
 {
 #Si existe en el punto de acceso del del oglive el fichero ogclient.sqfs	
+if [ ! -d $DSTOGLIVE/$OGLIVEDIR ]; then
+	echo "Usando ogLive por defecto."
+	export OGLIVEDIR=$DEFOGLIVE
+fi
 if [ -f $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs ]
 then	
 	cat /proc/mounts > /tmp/mtab.preunion
