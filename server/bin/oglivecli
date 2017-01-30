@@ -37,7 +37,7 @@ EOT
         # Check if ogLive is defined into JSON file.
         n=$(jq ".oglive | length" $INFOFILE)
         for ((i=0; i<n; i++)); do
-            [ "$DATA" == "$(jq ".oglive[$i]" $INFOFILE)" ] && INDEX=$i
+            [ "$(jq ".check=$DATA | .check==.oglive[$i]" $INFOFILE)" ] && INDEX=$i
         done
         # Check if it needs to insert data.
         if [ -z "$INDEX" ]; then
