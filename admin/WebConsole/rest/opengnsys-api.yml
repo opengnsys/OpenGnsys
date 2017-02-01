@@ -702,6 +702,115 @@ paths:
       tags:
         - server
         - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/events:
+    post:
+      description: Store UDS server URLs to resend some events recieved from OGAgent.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+        - name: data
+          in: body
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              urlLogin:
+                description: URL to resend a login event.
+                type: string
+              urlLogout:
+                description: URL to resend a logout event.
+                type: string
+            required: [ urlLogin, urlLogout ]
+      responses:
+        "200":
+          description: Successful response
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - uds
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/session:
+    post:
+      description: Record session data for a client.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+        - name: data
+          in: body
+          description: Session parameters
+          required: true
+          schema:
+            type: object
+            properties:
+              logoutAt:
+                description: Time to send a logout operation to the client
+                type: string
+                format: date-time
+      responses:
+        "200":
+          description: Successful response
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - uds
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/unreserve:
+    get:
+      description: Unreserve a client, clear its session data and send a poweroff operation.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: labid
+          in: path
+          description: Lab identificator
+          required: true
+          type: integer
+        - name: clientid
+          in: path
+          description: Client identificator
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successful response
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - uds
   /ous/{ouid}/repos:
     get:
       description: Get all `repo` objects defined in an `OU`.
@@ -938,7 +1047,50 @@ paths:
       tags:
         - server
         - image
-  #/ous/{ouid}/images/{imageid}/boot:
+  /ous/{ouid}/images/{imageid}/reserve:
+    get:
+      description: |
+        Reserve a random client with an installed image and send a boot/reboot operation.
+        If `labid` is specified, then choose a `client` defined in this lab.
+      parameters:
+        - name: ouid
+          in: path
+          description: OU identificator
+          required: true
+          type: integer
+        - name: imageid
+          in: path
+          description: image definition identificator
+          required: true
+          type: integer
+        - name: labid
+          in: query
+          description: lab. identificator
+          required: false
+          type: integer
+      responses:
+        "200":
+          description: Reserve a client to boot using an operating system image.
+          schema:
+            type: object
+            properties:
+              id:
+                description: selected client id
+                type: integer
+                format: int32
+              mac:
+                description: client MAC address
+                type: string
+              ip:
+                description: client IP address
+                type: string
+            required: [ id, mac, ip ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
+        - uds
   /repository/images:
     get:
       description: Get information about images stored in a repository
