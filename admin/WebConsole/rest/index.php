@@ -51,6 +51,7 @@ $config = parse_ini_file("/etc/default/opengnsys");
 if ($config['RUN_OGADMSERVER'] === "yes") {
     include("server.php");
     include("ogagent.php");
+    include("remotepc.php");
 }
 
 // If repository is running, include its routes.
