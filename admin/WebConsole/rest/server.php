@@ -434,7 +434,7 @@ EOD;
 		$response['mcastspeed'] = $rs->campos["velmul"];
 		$response['p2pmode'] = $rs->campos["modp2p"];
 		$response['p2ptime'] = $rs->campos["timep2p"];
-		$response['image'] = $rs->campos["urlfoto"];
+		$response['picture'] = $rs->campos["urlfoto"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
@@ -521,7 +521,7 @@ EOD;
 		//$response['menu']['id'] = $rs->campos["idmenu"];
 		$response['validation'] = $rs->campos["validacion"]==0 ? false: true;
 		$response['boottype'] = $rs->campos["arranque"];
-		$response['image'] = $rs->campos["fotoord"];
+		$response['picture'] = $rs->campos["fotoord"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 

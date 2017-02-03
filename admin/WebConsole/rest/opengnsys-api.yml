@@ -57,8 +57,18 @@ paths:
                 type: string
         "400":
           description: Missing parameters
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
         "500":
           description: Authentication error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
       tags:
         - server
         - user
@@ -378,7 +388,7 @@ paths:
                 description: Bittorrent connection extra time (in s.)
                 type: integer
                 format: int32
-              image:
+              picture:
                 description: Lab's picture file
                 type: string
             required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, mcastmode, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, image ]
@@ -506,7 +516,7 @@ paths:
               boottype:
                 description: boot template type
                 type: string
-              image:
+              picture:
                 description: client's picture file
                 type: string
             required: [ id, name, serialno, netiface, netdriver, mac, ip, netmask, routerip, repo, validation, image ]
@@ -738,12 +748,19 @@ paths:
       responses:
         "200":
           description: Successful response
+        "400":
+          description: Error message
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
       security:
         - apikey: []
       tags:
         - server
         - client
-        - uds
+        - remotepc
   /ous/{ouid}/labs/{labid}/clients/{clientid}/session:
     post:
       description: Record session data for a client.
@@ -782,7 +799,7 @@ paths:
       tags:
         - server
         - client
-        - uds
+        - remotepc
   /ous/{ouid}/labs/{labid}/clients/{clientid}/unreserve:
     get:
       description: Unreserve a client, clear its session data and send a poweroff operation.
@@ -810,7 +827,7 @@ paths:
       tags:
         - server
         - client
-        - uds
+        - remotepc
   /ous/{ouid}/repos:
     get:
       description: Get all `repo` objects defined in an `OU`.
@@ -969,9 +986,6 @@ paths:
               baseimg:
                 description: base image for an incremental image (if ``type`` is ``incremental``)
                 type: string
-              path:
-                description: image path (if ``type`` is ``incremental``)
-                type: string
               client:
                 description: model client's data
                 type: object
@@ -1084,13 +1098,31 @@ paths:
               ip:
                 description: client IP address
                 type: string
-            required: [ id, mac, ip ]
+              lab:
+                description: client's lab
+                type: object
+                properties:
+                  id:
+                    description: lab id
+                    type: integer
+                    format: int32
+                required: [ id ]
+              ou:
+                description: client's OU
+                type: object
+                properties:
+                  id:
+                    description: OU id
+                    type: integer
+                    format: int32
+                required: [ id ]
+            required: [ id, mac, ip, lab, ou ]
       security:
         - apikey: []
       tags:
         - server
         - image
-        - uds
+        - remotepc
   /repository/images:
     get:
       description: Get information about images stored in a repository
