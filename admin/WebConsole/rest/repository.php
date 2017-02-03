@@ -136,15 +136,15 @@ $app->get('/repository/images', 'validateRepositoryApiKey',
 $app->post('/repository/poweron', 'validateRepositoryApiKey',
     function() {
 		$app = \Slim\Slim::getInstance();
-		// Debe venir el parametro macs en el post
+		// Debe venir el parametro macs en el post (objeto JSON con array de MACs)
 		$data = $app->request()->post();
-		if(empty($data["macs"])){
+		if(empty($data->macs)){
 			// Print error message.
 			$response['message'] = 'Required param macs not found';
 			jsonResponse(400, $response);
 		}
 		else{
-			$macs = $data["macs"];
+			$macs = $data->macs;
 			$strMacs = "";
 			foreach($macs as $mac){
 				$strMacs .= " ".$mac;
