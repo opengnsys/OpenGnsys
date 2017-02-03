@@ -733,6 +733,20 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `remotepc`
+--
+
+CREATE TABLE IF NOT EXISTS `remotepc` (
+  `id` int(11) NOT NULL,
+  `reserved` tinyint(1) DEFAULT '0',
+  `urllogin` varchar(100),
+  `urllogout` varchar(100),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `repositorios`
 --
 
