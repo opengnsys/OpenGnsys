@@ -161,3 +161,13 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 # Número de puestos del aula permite valores hasta 32768 (ticket #747)
 ALTER TABLE  aulas
      MODIFY puestos smallint  DEFAULT NULL;
+
+# Nueva tabla para datos del proyecto Remote PC (ticket #708).
+CREATE TABLE IF NOT EXISTS remotepc ( 
+       id INT(11) NOT NULL, 
+       reserved TINYINT(1) DEFAULT '0', 
+       urllogin VARCHAR(100), 
+       urllogout VARCHAR(100), 
+       PRIMARY KEY (id) 
+    ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+

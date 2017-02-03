@@ -1,5 +1,4 @@
-### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.6 - 1.1.0
+# OpenGnSys 1.0.6, 1.0.6a - 1.1.0
 #use ogAdmBD
 
 # Nuevos tipos de particiones y de sistemas de ficheros (ticket #758).
@@ -21,6 +20,7 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
+	(19, 'LINUX-SWAP', 'LINUX-SWAP')
 	(20, 'F2FS', 'F2FS'),
 	(21, 'NILFS2', 'NILFS2')
 	ON DUPLICATE KEY UPDATE
@@ -65,7 +65,8 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 	(19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 ALTER TABLE ordenadores
 	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador,
-	ADD agentkey VARCHAR(32) DEFAULT NULL;
+	ADD agentkey VARCHAR(32) DEFAULT NULL,
+	ADD INDEX idaulaip (idaula ASC, ip ASC);
 
 # Directorios en repo para distintas UO (ticket #678).
 ALTER TABLE entidades
@@ -96,4 +97,6 @@ CREATE TABLE IF NOT EXISTS remotepc (
        urllogout VARCHAR(100), 
        PRIMARY KEY (id) 
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+
 
