@@ -801,7 +801,7 @@ paths:
         - client
         - remotepc
   /ous/{ouid}/labs/{labid}/clients/{clientid}/unreserve:
-    get:
+    delete:
       description: Unreserve a client, clear its session data and send a poweroff operation.
       parameters:
         - name: ouid
@@ -1062,7 +1062,7 @@ paths:
         - server
         - image
   /ous/{ouid}/images/{imageid}/reserve:
-    get:
+    post:
       description: |
         Reserve a random client with an installed image and send a boot/reboot operation.
         If `labid` is specified, then choose a `client` defined in this lab.

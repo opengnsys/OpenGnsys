@@ -16,9 +16,11 @@
 /**
  * @brief    Reserve a random client with an installed image and send a boot/reboot operation depending on its status. If "lab" parameter is specified, then choose a client defined in this lab.
  * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/events, Method: POST
+ * @param    integer ouid      OU identificator
+ * @param    integer imageid   image identificator
  * @param    integer labid     lab. identificator (optional)
  */
-$app->get('/ous/:ouid/images/:imageid/reserve', 'validateApiKey',
+$app->post('/ous/:ouid/images/:imageid/reserve', 'validateApiKey',
     function($ouid, $imageid) use ($app) {
 	global $cmd;
 	global $AMBITO_ORDENADORES;
@@ -45,12 +47,10 @@ SELECT entornos.ipserveradm, entornos.portserveradm,
  RIGHT JOIN usuarios USING(idusuario)
  RIGHT JOIN ordenadores_particiones USING(idordenador)
  RIGHT JOIN imagenes USING(idimagen)
- RIGHT JOIN remotepc ON remotepc.id=ordenadores.idordenador
+  LETT JOIN remotepc ON remotepc.id=ordenadores.idordenador
  WHERE administradores_centros.idadministradorcentro = '$userid'
-   AND idcentro = '$ouid'
-   AND aulas.idaula LIKE '$labid' AND aulas.inremotepc=1
-   AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc=1
-   AND remotepc.reserved = 0
+   AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
+   AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc = 1
  ORDER BY RAND() LIMIT 1;
 EOD;
 	$rs=new Recordset;
@@ -59,53 +59,55 @@ EOD;
 	// Check if client exists.
 	$rs->Primero();
 	if (checkParameter($rs->campos["idordenador"])) {
-		// Read query data.
-		$serverip = $rs->campos["ipserveradm"];
-		$serverport = $rs->campos["portserveradm"];
-		$clientid = $rs->campos["idordenador"];
-		$clientip = $rs->campos["ip"];
-		$clientmac = $rs->campos["mac"];
-		$agentkey = $rs->campos["agentkey"];
-		$reserved = $rs->campos["reserved"];
-		$disk = $rs->campos["numdisk"];
-		$part = $rs->campos["numpar"];
-		$labid = $rs->campos["idaula"];
-		$ouid = $rs->campos["idcentro"];
-		// Check client's status.
-		$url = "https://$clientip:8000/opengnsys/status";
-		$result = multiRequest(Array($url));
-		if (empty($result[0])) {
-			// Client is off, send a boot operation to ogAdmServer.
-			$reqframe = "nfn=Arrancar\r".
-				    "ido=".implode(',', $clientid)."\r".
-				    "iph=".implode(';', $clientip)."\r".
-				    "mac=".implode(';', $clientmac)."\r".
-				    "mar=1\r";
+		// Check if client is not reserved.
+		if ($reserved !== 1) {
+			$reserved = $rs->campos["reserved"];
+			// Read query data.
+			$serverip = $rs->campos["ipserveradm"];
+			$serverport = $rs->campos["portserveradm"];
+			$clientid = $rs->campos["idordenador"];
+			$clientip = $rs->campos["ip"];
+			$clientmac = $rs->campos["mac"];
+			$agentkey = $rs->campos["agentkey"];
+			$disk = $rs->campos["numdisk"];
+			$part = $rs->campos["numpar"];
+			$labid = $rs->campos["idaula"];
+			$ouid = $rs->campos["idcentro"];
+			// Check client's status.
+			$url = "https://$clientip:8000/opengnsys/status";
+			$result = multiRequest(Array($url));
+			if (empty($result[0])) {
+				// Client is off, send a boot operation to ogAdmServer.
+				$reqframe = "nfn=Arrancar\r".
+					    "ido=".implode(',', $clientid)."\r".
+					    "iph=".implode(';', $clientip)."\r".
+					    "mac=".implode(';', $clientmac)."\r".
+					    "mar=1\r";
+				sendCommand($serverip, $serverport, $reqframe, $values);
+				// ... (check response)
+				// ...
+			} else {
+				// Client is on,, send a reboot command to its OGAgent.
+				$url = "https://$clientip:8000/opengnsys/reboot";
+				$result = multiRequest(Array($url));
+				// ... (check response)
+				// ...
+			}
+			// Send init session operation to ogAdmServer.
+			$reqframe = "nfn=IniciarSesion\r".
+				    "ido=".$clientid[$i]."\r".
+				    "iph=".$clientip[$i]."\r".
+				    "dsk=".$clientdisk[$i]."\r".
+				    "par=".$clientpart[$i]."\r";
 			sendCommand($serverip, $serverport, $reqframe, $values);
 			// ... (check response)
 			// ...
-		} else {
-			// Client is on,, send a reboot command to its OGAgent.
-			$url = "https://$clientip:8000/opengnsys/reboot";
-			$result = multiRequest(Array($url));
-			// ... (check response)
-			// ...
-		}
-		// Send init session operation to ogAdmServer.
-		$reqframe = "nfn=IniciarSesion\r".
-			    "ido=".$clientid[$i]."\r".
-			    "iph=".$clientip[$i]."\r".
-			    "dsk=".$clientdisk[$i]."\r".
-			    "par=".$clientpart[$i]."\r";
-		sendCommand($serverip, $serverport, $reqframe, $values);
-		// ... (check response)
-		// ...
-		// Transaction: mark choosed client as reserved and
-		// register a init session operation into ogAdmServer's actions queue.
-		$cmd->texto = <<<EOD
+			// Transaction: mark choosed client as reserved and
+			// register a init session operation into ogAdmServer's actions queue.
+			$cmd->texto = <<<EOD
 START TRANSACTION;
 INSERT INTO remotepc
-   SET id=$clntid, reserved=1, urllogin=NULL, urllogout=NULL
+   SET id='$clntid', reserved=1, urllogin=NULL, urllogout=NULL
     ON DUPLICATE UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
        urllogin=VALUES(urllogin), urllogout=VALUES(urllogout)
@@ -126,17 +128,23 @@ INSERT INTO acciones
        restrambito='$clientip',
        idcentro=$ouid;
 COMMIT;
-EOD
-		$cmd->Ejecutar();
-		// ... (check commit)
-		// ...
-		// Compose JSON response.
-		$response['id'] = $clientid;
-		$response['ip'] = $clientip;
-		$response['mac'] = $clientmac;
-		$response['lab']['id'] = $labid;
-		$response['ou']['id'] = $ouid;
-		jsonResponse(200, $response);
+EOD;
+			$cmd->Ejecutar();
+			// ... (check commit)
+			// ...
+			// Compose JSON response.
+			$response['id'] = $clientid;
+			$response['ip'] = $clientip;
+			$response['mac'] = $clientmac;
+			$response['lab']['id'] = $labid;
+			$response['ou']['id'] = $ouid;
+			jsonResponse(200, $response);
+       		} else {
+			// Error message.
+			$response["message"] = "Client is already reserved";
+			jsonResponse(400, $response);
+			$app->stop();
+		}
        	} else {
 		// Error message.
 		$response["message"] = "No available clients";
@@ -196,21 +204,21 @@ EOD;
 	$rs->Primero();
 	if (checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
-		if ($rs->campos["reserved"] == 0) {
-			// Reserve client updating DB.
+		if ($rs->campos["reserved"] === 1) {
+			// Updating DB if client is reserved.
 			$cmd->texto = <<<EOD
 INSERT INTO remotepc
-   SET id=$clntid, reserved=1, urllogin=$urlLogin, urllogout=$urlLogout
+   SET id='$clntid', reserved=1, urllogin='$urlLogin', urllogout='$urlLogout'
     ON DUPLICATE UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
        urllogin=VALUES(urllogin), urllogout=VALUES(urllogout)
-EOD
+EOD;
 			$cmd->Ejecutar();
-			// Confirm reservation.
+			// Confirm operation.
 			jsonResponse(200, "");
         	} else {
 			// Error message.
-			$response["message"] = "Client is already reserved";
+			$response["message"] = "Client is not reserved";
 			jsonResponse(400, $response);
 			$app->stop();
         	}
@@ -231,7 +239,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 );
 
 
-$app->get('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey',
+$app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey',
     function($ouid, $imageid) {
 	global $cmd;
 	global $userid;
