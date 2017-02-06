@@ -21,7 +21,7 @@ function validateApiKey() {
 	global $cmd;
 	global $userid;
 	$response = array();
-
+	$app = \Slim\Slim::getInstance();
 	// Read Authorization HTTP header.
 	$headers = apache_request_headers();
 	if (! empty($headers['Authorization'])) {
@@ -29,7 +29,7 @@ function validateApiKey() {
 		$apikey = htmlspecialchars($headers['Authorization']);
 		$cmd->texto = "SELECT idusuario
 				 FROM usuarios
-				WHERE apikey='$apikey'";
+				WHERE apikey='$apikey' LIMIT 1";
 		$rs=new Recordset;
 		$rs->Comando=&$cmd;
 		if ($rs->Abrir()) {
