@@ -31,7 +31,7 @@ echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
 mount -a
 # Install OpenGnsys and change server address.
 wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash
-echo y | sudo /opt/opengnsys/bin/setserveraddr eth1
+echo y | sudo /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
 for ((i=#{NCLIENTS}; i>0; i--)); do
     sed -i "/^}$/ i host ogClient0${i} { hardware ethernet #{MACPREFIX}0${i}; fixed-address #{NETPREFIX}1${i}; }" /etc/dhcp/dhcpd.conf
@@ -61,8 +61,8 @@ EOT
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
 #apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-#wget -q http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/client/shared/lib/ogagent/ogagent_1.0.0_all.deb	# temporal
-#dpkg -i ogagent_1.0.0_all.deb
+#wget -q http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/client/shared/lib/ogagent/ogagent_1.1.0_all.deb	# temporal
+#dpkg -i ogagent_1.1.0_all.deb
 #sed -i "0,/remote=/ s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
 # Remove network configuration added by Vagrant.
 sed -i "/VAGRANT/,$ d" /etc/network/interfaces
@@ -91,10 +91,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ['createhd', '--filename', second_disk, '--size', REPOSIZE * 1024]
       end
       # Attach repo virtual disk.
-      vb.customize ['storageattach', :id, '--storagectl', 'SATAController', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
+      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
     end
     # VM base and host name.
-    og.vm.box = "ubuntu/trusty64"
+    og.vm.box = "bento/ubuntu-16.04"
     og.vm.hostname = "ogAdministrator"
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: 8443
@@ -107,7 +107,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Client 1 VM definition.
   config.vm.define "ogClient01", autostart: false do |v1|
-    v1.vm.box = "ubuntu/trusty64"
+    v1.vm.box = "bento/ubuntu-16.04"
     v1.vm.hostname = "ogClient01"
     v1.vm.network "private_network", mac: "#{MACPREFIX}01".tr(":",""), type: "dhcp", virtualbox__intnet: true
     v1.vm.provider "virtualbox" do |vb|

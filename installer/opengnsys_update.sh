@@ -328,9 +328,10 @@ function installDependencies()
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no deps needed."
 	else
+		PHP5VERSION=$(apt-cache pkgnames php5 2>/dev/null | sort | head -1)
 		while [ $# -gt 0 ]; do
-			package="$1"
-			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $1"
+			package="${1/php5/$PHP5VERSION}"
+			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $package"
 			shift
 		done
 		if [ -n "$INSTALLDEPS" ]; then
