@@ -216,14 +216,14 @@ EOD;
 	$rs->Primero();
 	if (checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
-		if ($rs->campos["reserved"] === 1) {
+		if ($rs->campos["reserved"] == 1) {
 			// Updating DB if client is reserved.
 			$cmd->texto = <<<EOD
 INSERT INTO remotepc
    SET id='$clntid', reserved=1, urllogin='$urlLogin', urllogout='$urlLogout'
-    ON DUPLICATE UPDATE
+    ON DUPLICATE KEY UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
-       urllogin=VALUES(urllogin), urllogout=VALUES(urllogout)
+       urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
 EOD;
 			$cmd->Ejecutar();
 			// Confirm operation.
@@ -234,11 +234,6 @@ EOD;
 			jsonResponse(400, $response);
 			$app->stop();
         	}
-       	} else {
-		// Error message.
-		$response["message"] = "Invalid parameter";
-		jsonResponse(400, $response);
-		$app->stop();
         }
 	$rs->Cerrar();
     }
