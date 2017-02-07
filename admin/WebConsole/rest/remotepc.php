@@ -28,7 +28,8 @@ $app->post('/ous/:ouid/images/:imageid/reserve', 'validateApiKey',
 	global $ACCION_INICIADA;
 	global $ACCION_SINRESULTADO;
 	global $userid;
-	$response = array();
+	$response = Array();
+	$ogagent = Array();
 
 	// Checking parameters. 
 	$ouid = htmlspecialchars($ouid);
@@ -47,7 +48,7 @@ SELECT entornos.ipserveradm, entornos.portserveradm,
  RIGHT JOIN usuarios USING(idusuario)
  RIGHT JOIN ordenadores_particiones USING(idordenador)
  RIGHT JOIN imagenes USING(idimagen)
-  LETT JOIN remotepc ON remotepc.id=ordenadores.idordenador
+  LEFT JOIN remotepc ON remotepc.id=ordenadores.idordenador
  WHERE administradores_centros.idadministradorcentro = '$userid'
    AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
    AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc = 1
@@ -60,85 +61,96 @@ EOD;
 	$rs->Primero();
 	if (checkParameter($rs->campos["idordenador"])) {
 		// Check if client is not reserved.
-		if ($reserved !== 1) {
-			$reserved = $rs->campos["reserved"];
+		if ($rs->campos["reserved"] !== 1) {
 			// Read query data.
 			$serverip = $rs->campos["ipserveradm"];
 			$serverport = $rs->campos["portserveradm"];
-			$clientid = $rs->campos["idordenador"];
-			$clientip = $rs->campos["ip"];
-			$clientmac = $rs->campos["mac"];
+			$clntid = $rs->campos["idordenador"];
+			$clntip = $rs->campos["ip"];
+			$clntmac = $rs->campos["mac"];
 			$agentkey = $rs->campos["agentkey"];
 			$disk = $rs->campos["numdisk"];
 			$part = $rs->campos["numpar"];
 			$labid = $rs->campos["idaula"];
 			$ouid = $rs->campos["idcentro"];
 			// Check client's status.
-			$url = "https://$clientip:8000/opengnsys/status";
-			$result = multiRequest(Array($url));
-			if (empty($result[0])) {
-				// Client is off, send a boot operation to ogAdmServer.
+			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
+			$result = multiRequest($ogagent);
+			if (empty($result[$clntip])) {
+				// Client is off, send a boot command to ogAdmServer.
 				$reqframe = "nfn=Arrancar\r".
-					    "ido=".implode(',', $clientid)."\r".
-					    "iph=".implode(';', $clientip)."\r".
-					    "mac=".implode(';', $clientmac)."\r".
+					    "ido=$clntid\r".
+					    "iph=$clntip\r".
+					    "mac=$clntmac\r".
 					    "mar=1\r";
 				sendCommand($serverip, $serverport, $reqframe, $values);
-				// ... (check response)
-				// ...
 			} else {
-				// Client is on,, send a reboot command to its OGAgent.
-				$url = "https://$clientip:8000/opengnsys/reboot";
-				$result = multiRequest(Array($url));
+				// Client is on, send a reboot command to its OGAgent.
+				$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/reboot";
+				$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
+				$result = multiRequest($ogagent);
 				// ... (check response)
 				// ...
 			}
-			// Send init session operation to ogAdmServer.
-			$reqframe = "nfn=IniciarSesion\r".
-				    "ido=".$clientid[$i]."\r".
-				    "iph=".$clientip[$i]."\r".
-				    "dsk=".$clientdisk[$i]."\r".
-				    "par=".$clientpart[$i]."\r";
-			sendCommand($serverip, $serverport, $reqframe, $values);
-			// ... (check response)
-			// ...
-			// Transaction: mark choosed client as reserved and
-			// register a init session operation into ogAdmServer's actions queue.
+			// DB Transaction: mark choosed client as reserved and
+			// create an init session command into ogAdmServer's actions queue.
+			$cmd->texto = "START TRANSACTION;";
+			$cmd->Ejecutar();
+			$timestamp = time();
 			$cmd->texto = <<<EOD
-START TRANSACTION;
 INSERT INTO remotepc
    SET id='$clntid', reserved=1, urllogin=NULL, urllogout=NULL
-    ON DUPLICATE UPDATE
+    ON DUPLICATE KEY UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
-       urllogin=VALUES(urllogin), urllogout=VALUES(urllogout)
+       urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
+EOD;
+			$t1 = $cmd->Ejecutar();
+			$cmd->texto = <<<EOD
 INSERT INTO acciones
    SET tipoaccion=$EJECUCION_COMANDO,
        idtipoaccion=9,
        idcomando=9,
-       parametros='nfn=IniciarSesion\rdsk=$clientdisk[$i]\rpar=$clientpart[$i]',
+       parametros='nfn=IniciarSesion\rdsk=$disk\rpar=$part',
        descriaccion='RemotePC Session',
-       idordenador=$clientid,
-       ip='$clientip',
-       sesion=$time(),
+       idordenador=$clntid,
+       ip='$clntip',
+       sesion=$timestamp,
        fechahorareg=NOW(),
        estado=$ACCION_INICIADA,
        resultado=$ACCION_SINRESULTADO,
        ambito=$AMBITO_ORDENADORES,
-       idambito=$clientid,
-       restrambito='$clientip',
+       idambito=$clntid,
+       restrambito='$clntip',
        idcentro=$ouid;
-COMMIT;
 EOD;
-			$cmd->Ejecutar();
-			// ... (check commit)
-			// ...
-			// Compose JSON response.
-			$response['id'] = $clientid;
-			$response['ip'] = $clientip;
-			$response['mac'] = $clientmac;
-			$response['lab']['id'] = $labid;
-			$response['ou']['id'] = $ouid;
-			jsonResponse(200, $response);
+			$t2 = $cmd->Ejecutar();
+			if ($t1 and $t2) {
+				// Commit transaction on success.
+				$cmd->texto = "COMMIT;";
+				$cmd->Ejecutar();
+				// Send init session command if client is booted on ogLive.
+				$reqframe = "nfn=IniciarSesion\r".
+				    	"ido=$clntid\r".
+					    "iph=$clntip\r".
+					    "dsk=$disk\r".
+					    "par=$part\r";
+				sendCommand($serverip, $serverport, $reqframe, $values);
+				// Compose JSON response.
+				$response['id'] = $clntid;
+				$response['ip'] = $clntip;
+				$response['mac'] = $clntmac;
+				$response['lab']['id'] = $labid;
+				$response['ou']['id'] = $ouid;
+				jsonResponse(200, $response);
+			} else{
+				// Roll-back transaction on DB error.
+				$cmd->texto = "ROLLBACK;";
+				$cmd->Ejecutar();
+				// Error message.
+				$response["message"] = "Error updating database";
+				jsonResponse(400, $response);
+				$app->stop();
+			}
        		} else {
 			// Error message.
 			$response["message"] = "Client is already reserved";
@@ -167,7 +179,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
     function($ouid, $labid, $clntid) use ($app) {
 	global $cmd;
 	global $userid;
-	$response = array();
+	$response = Array();
 
 	// Reading JSON parameters.
 	try {
@@ -245,6 +257,9 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	global $userid;
 	$response = array();
 
+	// ...
+	// (transaction: clear reservation data and finish command updating client's actions queue)
+	// (send poweroff command)
     }
 );
 
