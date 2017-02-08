@@ -14,7 +14,8 @@
 // REST routes.
 
 /**
- * @brief    Reserve a random client with an installed image and send a boot/reboot operation depending on its status. If "lab" parameter is specified, then choose a client defined in this lab.
+ * @brief    Reserve a random client with an installed image and send a boot/reboot operation depending on its status.
+ * @warning  If "lab" parameter is specified, then choose a client from this lab.
  * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/events, Method: POST
  * @param    integer ouid      OU identificator
  * @param    integer imageid   image identificator
@@ -93,7 +94,7 @@ EOD;
 				// ...
 			}
 			// DB Transaction: mark choosed client as reserved and
-			// create an init session command into ogAdmServer's actions queue.
+			// create an init session command into client's actions queue.
 			$cmd->texto = "START TRANSACTION;";
 			$cmd->Ejecutar();
 			$timestamp = time();
@@ -157,12 +158,7 @@ EOD;
 			jsonResponse(400, $response);
 			$app->stop();
 		}
-       	} else {
-		// Error message.
-		$response["message"] = "No available clients";
-		jsonResponse(400, $response);
-		$app->stop();
-	}
+       	}
 	$rs->Cerrar();
     }
 );
@@ -247,14 +243,72 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 
 
 $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey',
-    function($ouid, $imageid) {
+    function($ouid, $labid, $clntid) {
 	global $cmd;
 	global $userid;
-	$response = array();
+	$response = Array();
+	$ogagent = Array();
 
-	// ...
-	// (transaction: clear reservation data and finish command updating client's actions queue)
-	// (send poweroff command)
+	// Checking parameters. 
+	$ouid = htmlspecialchars($ouid);
+	$labid = htmlspecialchars($labid);
+	$clntid = htmlspecialchars($clntid);
+	// Select client data for UDS compatibility.
+	$cmd->texto = <<<EOD
+SELECT ordenadores.idordenador, ordenadores.agentkey, remotepc.reserved
+  FROM remotepc
+ RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros USING(idcentro)
+ RIGHT JOIN usuarios USING(idusuario)
+ WHERE administradores_centros.idadministradorcentro = '$userid'
+   AND idcentro = '$ouid' AND aulas.idaula ='$labid'
+   AND ordenadores.idordenador = '$clntid';
+EOD;
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(false);       // Error opening recordset.
+	// Check if client exists.
+	$rs->Primero();
+	if (checkParameter($rs->campos["idordenador"])) {
+		// Check if client is reserved.
+		if ($rs->campos["reserved"] == 1) {
+			// Read query data.
+			$agentkey = $rs->campos["agentkey"];
+			// DB Transaction: clear client reservation data and
+			// remove pending boot commands from client's actions queue.
+			$cmd->texto = "START TRANSACTION;";
+			$cmd->Ejecutar();
+			$cmd->texto = <<<EOD
+UPDATE remotepc
+   SET reserved=0, urllogin=NULL, urllogout=NULL
+ WHERE id='$clntid';
+EOD;
+			$cmd->Ejecutar();
+			$cmd->texto = <<<EOD
+DELETE FROM acciones
+ WHERE idordenador = '$clntid'
+   AND descriaccion = 'RemotePC Session'
+   AND fechahorafin = '0000-00-00 00:00:00';
+EOD;
+			$cmd->Ejecutar();
+			$cmd->texto = "COMMIT;";
+			$cmd->Ejecutar();
+			// Send a poweroff command to client's OGAgent.
+			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/poweroff";
+			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
+			$result = multiRequest($ogagent);
+			// ... (check response)
+			// ...
+			// Confirm operation.
+			jsonResponse(200, "");
+       		} else {
+			// Error message.
+			$response["message"] = "Client is not reserved";
+			jsonResponse(400, $response);
+		}
+       	}
+	$rs->Cerrar();
     }
 );
 
