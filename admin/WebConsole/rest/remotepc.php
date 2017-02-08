@@ -255,7 +255,7 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	$clntid = htmlspecialchars($clntid);
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.agentkey, remotepc.reserved
+SELECT ordenadores.ip, ordenadores.agentkey, remotepc.reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
   JOIN aulas USING(idaula)
@@ -274,6 +274,7 @@ EOD;
 		// Check if client is reserved.
 		if ($rs->campos["reserved"] == 1) {
 			// Read query data.
+			$clntip = $rs->campos["ip"];
 			$agentkey = $rs->campos["agentkey"];
 			// DB Transaction: clear client reservation data and
 			// remove pending boot commands from client's actions queue.
