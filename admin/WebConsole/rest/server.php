@@ -14,66 +14,6 @@
 // Auxiliar functions.
 
 /**
- * @brief    Validate API key included in "Authorization" HTTP header.
- * @return   JSON response on error.
- */
-function validateApiKey() {
-	global $cmd;
-	global $userid;
-	$response = array();
-	$app = \Slim\Slim::getInstance();
-	// Read Authorization HTTP header.
-	$headers = apache_request_headers();
-	if (! empty($headers['Authorization'])) {
-		// Assign user id. that match this key to global variable.
-		$apikey = htmlspecialchars($headers['Authorization']);
-		$cmd->texto = "SELECT idusuario
-				 FROM usuarios
-				WHERE apikey='$apikey' LIMIT 1";
-		$rs=new Recordset;
-		$rs->Comando=&$cmd;
-		if ($rs->Abrir()) {
-			$rs->Primero();
-			if (!$rs->EOF){
-				// Fetch user id.
-				$userid = $rs->campos["idusuario"];
-			} else {
-                		// Credentials error.
-                		$response['message'] = 'Login failed. Incorrect credentials';
-				jsonResponse(401, $response);
-				$app->stop();
-			}
-			$rs->Cerrar();
-		} else {
-			// Access error.
-			$response['message'] = "An error occurred, please try again";
-			jsonResponse(500, $response);
-		}
-	} else {
-		// Error: missing API key.
-		$response['message'] = 'Missing API key';
-		jsonResponse(400, $response);
-		$app->stop();
-	}
-}
-
-/**
- * @brief    Check if parameter is set and print error messages if empty.
- * @param    string param    Parameter to check.
- * @return   boolean         "false" if parameter is null, otherwise "true".
- */
-function checkParameter($param) {
-	if (isset($param)) {
-		return true;
-	} else {
-		// Print error message.
-		$response['message'] = 'Parameter not found';
-		jsonResponse(400, $response);
-		return false;
-	}
-}
-
-/**
  * @brief    Check if user is administrator and print error messages if not.
  * @param    int adminid   Administrator id.
  * @return   boolean       "true" if admin id. is equals to global user id., otherwise "false".
@@ -114,43 +54,6 @@ function addClassroomGroup(&$classroomGroups, $rs){
 	});
 }
 
-/**
- * @fn       sendCommand($serverip, $serverport, $reqframe, &$values)
- * @brief    Send a command to an OpenGnsys ogAdmServer and get request.
- * @param    string serverip    Server IP address.
- * @param    string serverport  Server port.
- * @param    string reqframe    Request frame (field's separator is "\r").
- * @param    array values       Response values (out parameter).
- * @return   boolean            "true" if success, otherwise "false".
- */
-function sendCommand($serverip, $serverport, $reqframe, &$values) {
-	global $LONCABECERA;
-	global $LONHEXPRM;
-
-	// Connect to server.
-	$respvalues = "";
-	$connect = new SockHidra($serverip, $serverport);
-	if ($connect->conectar()) {
-		// Send request frame to server.
-		$result = $connect->envia_peticion($reqframe);
-		if ($result) {
-			// Parse request frame.
-			$respframe = $connect->recibe_respuesta();
-			$connect->desconectar();
-			$paramlen = hexdec(substr($respframe, $LONCABECERA, $LONHEXPRM));
-			$params = substr($respframe, $LONCABECERA+$LONHEXPRM, $paramlen);
-			// Fetch values and return result.
-			$values = extrae_parametros($params, "\r", '=');
-			return ($values);
-		} else {
-			// Return with error.
-			return (false);
-		}
-	} else {
-		// Return with error.
-		return (false);
-	}
-}
 
 // REST routes.
 

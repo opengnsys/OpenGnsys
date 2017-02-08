@@ -32,10 +32,12 @@ if (!$cmd)
 	die("Access Error");
 
 // Install Slim application (development mode).
-//$app = new \Slim\Slim(array('mode' => 'production', 'debug' => false));
+//$app = new \Slim\Slim(array('mode' => 'production', ... );
 $app = new \Slim\Slim(array(
 		'mode' => 'development',
-		'debug' => true));
+		'log.enabled' => true,
+		'log.level' => \Slim\Log::ERROR,
+		'debug' => false));
 $app->setName('opengnsys');
 
 // Global variables.
