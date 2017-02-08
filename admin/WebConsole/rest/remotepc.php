@@ -255,7 +255,7 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	$clntid = htmlspecialchars($clntid);
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.ip, ordenadores.agentkey, remotepc.reserved
+SELECT ordenadores.idordenador, ordenadores.ip, ordenadores.agentkey, remotepc.reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
   JOIN aulas USING(idaula)

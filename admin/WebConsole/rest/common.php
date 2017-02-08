@@ -135,9 +135,11 @@ function sendCommand($serverip, $serverport, $reqframe, &$values) {
  */
 $app->hook('slim.after', function() use ($app) {
 	if ($app->response->getStatus() != 200 ) {
+		// Compose error message (max. 50 characters from error response). 
 		$app->log->error(date(DATE_ATOM) . ': ' .
 				 $app->getName() . ' ' .
 				 $app->response->getStatus() . ': ' .
+				 $app->request->getMethod() . ' ' .
 				 $app->request->getPathInfo() . ': ' .
 				 substr($app->response->getBody(), 0, 50));
 	}
