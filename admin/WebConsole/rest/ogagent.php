@@ -1,12 +1,23 @@
 <?php
-
-// OpenGnsys REST routes for OGAgent communications.
-// Author: Ramón M. Gómez
-// Date:   2016-10-03
+/**
+ * @file    ogagent.php
+ * @brief   OpenGnsys REST routes for OGAgent communications.
+ * @warning All input and output messages are formatted in JSON.
+ * @note    Some ideas are based on article "How to create REST API for Android app using PHP, Slim and MySQL" by Ravi Tamada, thanx.
+ * @license GNU GPLv3+
+ * @author  Ramón M. Gómez, ETSII Univ. Sevilla
+ * @version 1.1.0 - First version
+ * @date    2016-10-03
+ */
 
 
 // OGAgent sessions log file.
 define('LOG_FILE', '/opt/opengnsys/log/ogagent.log');
+
+// Function to write a line into log file.
+function writeLog($message = "") {
+	file_put_contents(LOG_FILE, date(DATE_ISO8601).": $message\n", FILE_APPEND);
+}
 
 /**
  * @brief    OGAgent notifies that its service is started on a client.
@@ -54,14 +65,14 @@ $app->post('/ogagent/started',
 		    throw new Exception("Insecure OGAgent started: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		}
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent started: ip=$ip, mac=$mac, os=$osType:$osVersion.\n", FILE_APPEND);
+		writeLog("OGAgent started: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		// Response. 
 		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
 	}
     }
@@ -92,14 +103,14 @@ $app->post('/ogagent/stopped',
 		}
 		// May check if client is included in the server database?
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": OGAgent stopped: ip=$ip, mac=$mac, os=$osType:$osVersion.\n", FILE_APPEND);
+		writeLog("OGAgent stopped: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		// Response. 
 		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
 	}
     }
@@ -114,6 +125,12 @@ $app->post('/ogagent/stopped',
  */
 $app->post('/ogagent/loggedin',
     function() use ($app) {
+	global $cmd;
+	$redirto = Array();
+	$result = Array();
+	$retries = 3;		// Number of retries.
+	$ttr = 10;		// Time to retry (secs)
+
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
@@ -123,16 +140,40 @@ $app->post('/ogagent/loggedin',
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
-		// May check if client is included in the server database?
-		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged in: ip=$ip, user=$user.\n", FILE_APPEND);
-		// Response. 
+		// Log activity and respond to client.
+		writeLog("User logged in: ip=$ip, user=$user.");
 		$response = "";
 		jsonResponse(200, $response);
+		// Check if client is included in the server database.
+		$cmd->texto = <<<EOD
+SELECT ordenadores.idordenador, ordenadores.ip, remotepc.urllogin
+  FROM remotepc
+ RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
+ WHERE ordenadores.ip = '$ip'
+ LIMIT 1;
+EOD;
+		$rs=new Recordset;
+		$rs->Comando=&$cmd;
+		if ($rs->Abrir()) {
+			// Read query data.
+			$rs->Primero();
+			$redirto[0]['url'] = $rs->campos['urllogin'];
+			$rs->Cerrar();
+			if (!is_null($redirto[0]['url'])) {
+				// Redirect notification to UDS server, if needed.
+				$redirto[0]['post'] = $app->request()->getBody();
+				$result = multiRequest($redirto);
+				// Check result code to retry notification after time.
+				for ($i=1; $i<=$retries and $result[0]['code'] != 200; $i++) {
+					sleep($ttr);
+					$result = multiRequest($redirto);
+				}
+			}
+		}
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
 	}
     }
@@ -158,14 +199,14 @@ $app->post('/ogagent/loggedout',
 		}
 		// May check if client is included in the server database?
 		// Default processing: log activity.
-		file_put_contents(LOG_FILE, date(DATE_RSS).": User logged out: ip=$ip, user=$user.\n", FILE_APPEND);
+		writeLog("User logged out: ip=$ip, user=$user.");
 		// Response. 
 		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
-		file_put_contents(LOG_FILE, date(DATE_RSS).": ".$app->request()->getResourceUri().": ERROR: ".$response["message"]."\n", FILE_APPEND);
+		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
 	}
     }
