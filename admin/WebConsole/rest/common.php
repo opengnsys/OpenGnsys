@@ -13,8 +13,6 @@
 
 // Common functions.
 
-
-
 /**
  * @brief   Compose JSON response.
  * @param   int status      Status code for HTTP response.
@@ -130,18 +128,26 @@ function sendCommand($serverip, $serverport, $reqframe, &$values) {
 }
 
 /**
+ * @brief   Show custom message for "not found" error (404).
+ */
+$app->notFound(function() {
+	echo "REST route not found.\n";
+   }
+);
+
+/**
  * @brief   Hook to write an error log message.
  * @warning Message will be written in web server's error file.
  */
 $app->hook('slim.after', function() use ($app) {
 	if ($app->response->getStatus() != 200 ) {
-		// Compose error message (max. 50 characters from error response). 
-		$app->log->error(date(DATE_ATOM) . ': ' .
+		// Compose error message (truncating long lines). 
+		$app->log->error(date(DATE_ISO8601) . ': ' .
 				 $app->getName() . ' ' .
 				 $app->response->getStatus() . ': ' .
 				 $app->request->getMethod() . ' ' .
 				 $app->request->getPathInfo() . ': ' .
-				 substr($app->response->getBody(), 0, 50));
+				 substr($app->response->getBody(), 0, 100));
 	}
    }
 );
@@ -198,4 +204,4 @@ $app->get('/status', function() {
       jsonResponse(200, $response);
    } 
 );
-
+?>

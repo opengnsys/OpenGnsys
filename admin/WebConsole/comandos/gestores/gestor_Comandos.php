@@ -230,13 +230,11 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 				// Launch concurrent requests.
 				$responses = multiRequest($urls);
 				// Process responses array (IP as array index).
-				foreach ($responses as $ip => $data) {
-					if (isset($data)) {
-						$status = json_decode($data);
-						if (!isset($status->error)) {
-							$ipsuccess .= "'".$ip."',";
-							$numip++;
-						}
+				foreach ($responses as $ip => $resp)) {
+					// Check if response code is OK (200).
+					if ($resp['code'] == 200)) {
+						$ipsuccess .= "'".$ip."',";
+						$numip++;
 					}
 				}
 				// quitamos último carácter ','

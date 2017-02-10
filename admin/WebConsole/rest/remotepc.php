@@ -77,7 +77,7 @@ EOD;
 			// Check client's status.
 			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
 			$result = multiRequest($ogagent);
-			if (empty($result[$clntip])) {
+			if (empty($result[$clntip]['data'])) {
 				// Client is off, send a boot command to ogAdmServer.
 				$reqframe = "nfn=Arrancar\r".
 					    "ido=$clntid\r".
@@ -91,6 +91,7 @@ EOD;
 				$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
 				$result = multiRequest($ogagent);
 				// ... (check response)
+				//if ($result[$clntip]['code'] != 200) {
 				// ...
 			}
 			// DB Transaction: mark choosed client as reserved and
@@ -300,6 +301,7 @@ EOD;
 			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
 			$result = multiRequest($ogagent);
 			// ... (check response)
+			//if ($result[$clntip]['code'] != 200) {
 			// ...
 			// Confirm operation.
 			jsonResponse(200, "");

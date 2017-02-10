@@ -1,16 +1,17 @@
 <?php
  
 /*
- * Function: multiRequest.
- * Params:   URLs array, cURL options array.
- * Returns:  Array with JSON requests.
- * Date:     2015-10-14
+ * @function multiRequest.
+ * @param    URLs array (may include header and POST data), cURL options array.
+ * @return   Array of arrays with JSON requests and response codes.
+ * @warning  Does not verifies server certificate.
+ * @Date     2015-10-14
  */
 function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false)) {
  
   // array of curl handles
   $curly = array();
-  // data to be returned
+  // Data to be returned (response data and code)
   $result = array();
  
   // multi handle
@@ -25,6 +26,7 @@ function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CUR
  
     $url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
     curl_setopt($curly[$id], CURLOPT_URL, $url);
+    // HTTP headers?
     if (is_array($d) && !empty($d['header'])) {
        curl_setopt($curly[$id], CURLOPT_HTTPHEADER, $d['header']);
     } else {
@@ -56,9 +58,10 @@ function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CUR
   } while($running > 0);
  
  
-  // get content and remove handles
+  // Get content and HTTP code, and remove handles
   foreach($curly as $id => $c) {
-    $result[$id] = curl_multi_getcontent($c);
+    $result[$id]['data'] = curl_multi_getcontent($c);
+    $result[$id]['code'] = curl_getinfo($c, CURLINFO_HTTP_CODE);
     curl_multi_remove_handle($mh, $c);
   }
 

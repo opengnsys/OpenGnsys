@@ -617,12 +617,12 @@ EOD;
 					// If no data, check OGAgent API connection.
 					$url = "https://$clientip:8000/opengnsys/status";
 					$result = multiRequest(Array($url));
-					if (empty($result[0])) {
+					if (empty($result[0]['data'])) {
 						// Client is off.
 						$response['status'] = $status['OFF'];
 					} else {
 						// Get status and session data.
-						$data = json_decode($result[0]);
+						$data = json_decode($result[0]['data']);
 						if (isset($status[$data->status])) {
 							$response['status'] = $status[$data->status];
 							$response['loggedin'] = $data->loggedin;
