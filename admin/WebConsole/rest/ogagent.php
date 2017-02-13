@@ -128,8 +128,6 @@ $app->post('/ogagent/loggedin',
 	global $cmd;
 	$redirto = Array();
 	$result = Array();
-	$retries = 3;		// Number of retries.
-	$ttr = 10;		// Time to retry (secs)
 
 	try {
 		// Reading POST parameters in JSON format.
@@ -163,11 +161,9 @@ EOD;
 				// Redirect notification to UDS server, if needed.
 				$redirto[0]['post'] = $app->request()->getBody();
 				$result = multiRequest($redirto);
-				// Check result code to retry notification after time.
-				for ($i=1; $i<=$retries and $result[0]['code'] != 200; $i++) {
-					sleep($ttr);
-					$result = multiRequest($redirto);
-				}
+				// ... (check response)
+				//if ($result[0]['code'] != 200) {
+				// ...
 			}
 		}
 	} catch (Exception $e) {
@@ -188,6 +184,10 @@ EOD;
  */
 $app->post('/ogagent/loggedout',
     function() use ($app) {
+	global $cmd;
+	$redirto = Array();
+	$result = Array();
+
 	try {
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
@@ -197,12 +197,34 @@ $app->post('/ogagent/loggedout',
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
-		// May check if client is included in the server database?
-		// Default processing: log activity.
+		// Log activity and respond to client.
 		writeLog("User logged out: ip=$ip, user=$user.");
-		// Response. 
 		$response = "";
 		jsonResponse(200, $response);
+		// Check if client is included in the server database.
+		$cmd->texto = <<<EOD
+SELECT ordenadores.idordenador, ordenadores.ip, remotepc.urllogin
+  FROM remotepc
+ RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
+ WHERE ordenadores.ip = '$ip'
+ LIMIT 1;
+EOD;
+		$rs=new Recordset;
+		$rs->Comando=&$cmd;
+		if ($rs->Abrir()) {
+			// Read query data.
+			$rs->Primero();
+			$redirto[0]['url'] = $rs->campos['urllogout'];
+			$rs->Cerrar();
+			if (!is_null($redirto[0]['url'])) {
+				// Redirect notification to UDS server, if needed.
+				$redirto[0]['post'] = $app->request()->getBody();
+				$result = multiRequest($redirto);
+				// ... (check response)
+				//if ($result[0]['code'] != 200) {
+				// ...
+			}
+		}
 	} catch (Exception $e) {
 		// Comunication error.
 		$response["message"] = $e->getMessage();
