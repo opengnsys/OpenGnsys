@@ -1,5 +1,5 @@
 #!/bin/bash
-# Scirpt de ejemplo para arancar un sistema operativo instalado.
+# Script de ejemplo para arancar un sistema operativo instalado.
 # (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
 
 PROG="$(basename $0)"
@@ -10,7 +10,7 @@ fi
 
 # Comprobar errores.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
-ogMount $1 $2 || exit $?
+ogMount $1 $2  &>/dev/null || exit $?
 
 echo "[0] Inicio del proceso de arranque."
 NAME="$(ogGetHostname)"
@@ -24,11 +24,6 @@ if [ "$OSTYPE" == "Windows" ]; then
     rm -f /mnt/*/ogboot.*
 fi
 
-echo "[10] Desmontar todos los sistemas de archivos."
-sync 
-for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
-    ogUnmountAll $i &>/dev/null
-done
 case "$OSTYPE" in
     Windows)
         echo "[30] Mostrar y activar particion de Windows $PART."
@@ -40,15 +35,25 @@ case "$OSTYPE" in
         [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
         if [ -f "$ETC/fstab" ]; then
             # Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
-            echo "[50] Actaualizar fstab con particion raiz \"$PART\"."
+            echo "[50] Actualizar fstab con particion raiz \"$PART\"."
             awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
                                  print }' $ETC/fstab >/tmp/fstab
             mv /tmp/fstab $ETC/fstab
         fi
         ;;
 esac
-echo "[70] Desmontar cache local."
+
+if which bootOsCustom  &>/dev/null; then
+    echo "[60] Configuración personalizada del inicio."
+    bootOsCustom $@
+fi
+
+echo "[70] Desmontar todos los sistemas de archivos."
+sync 
+for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
+    ogUnmountAll $i &>/dev/null
+done
+echo "[80] Desmontar cache local."
 ogUnmountCache
 echo "[90] Arrancar sistema operativo."
-#ogBoot "$@"
-
+ogBoot "$@"
