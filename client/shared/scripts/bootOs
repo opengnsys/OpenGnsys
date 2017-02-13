@@ -50,5 +50,5 @@ esac
 echo "[70] Desmontar cache local."
 ogUnmountCache
 echo "[90] Arrancar sistema operativo."
-ogBoot "$@"
+#ogBoot "$@"
 

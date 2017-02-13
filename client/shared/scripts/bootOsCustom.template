@@ -1,0 +1,43 @@
+#!/bin/bash
+#/**
+#         bootOsCustom
+#@brief   Plantilla para script de configuración personalizada de sistema operativo restaurado.
+#@param   $1 nº de disco 
+#@param   $2 nº de partición 
+#@warning Renombrar este fichero como "bootOsCustom" para personalizar el script estándar "bootOs".
+#**/
+# CONFIGURAR: Partición de datos de Windows que no queremos ocultar
+PARTDATA=0
+
+PROG="$(basename $0)"
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion"
+    exit $?
+fi
+
+MNTDIR=$(ogMount $1 $2)
+OSTYPE=$(ogGetOsType $1 $2)
+case "$OSTYPE" in
+    Windows)
+        # Mostrar las particiones NTFS de sistema y datos y ocultamos las demás. 
+        echo "[65] Activar particion de Windows $PART y ocultar las demás."
+        for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
+                if [ $i == $2 -o $i == $PARTDATA ]; then
+		    [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
+                    # Activo la particion si no es de datos
+                    [ $i -ne $PARTDATA ] && ogSetPartitionActive $1 $i
+                else
+                    [ "$(ogGetPartitionType $1 $i)" == NTFS ] && ogHidePartition $1 $i
+                fi
+        done
+    ;;
+    Linux)
+	# Cambiar claves usuarios, copiando fichero /etc/passwd
+	# En el servidor el nuevo fichero debe situarse en el directorio del grupo: 
+	#    /opt/opengnsys/images/groups/nombre_aula
+	if [ -r $(ogGetGroupDir)/passwd ]; then
+	    echo "[65] Cambiar claves de usuarios." 
+	    cp $(ogGetGroupDir)/passwd $MNTDIR/etc
+	fi
+    ;;
+esac
