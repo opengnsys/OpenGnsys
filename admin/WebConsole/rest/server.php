@@ -129,7 +129,7 @@ $app->post('/login',
  * @param    no
  * @return   JSON array with id. and name for every defined OU
  */
-$app->get('/ous', function() {
+$app->get('/ous(/)', function() {
 	global $cmd;
 
 	$cmd->texto = "SELECT * FROM centros";
@@ -156,17 +156,27 @@ $app->get('/ous', function() {
  * @param    id      OU id.
  * @return   JSON string with OU's parameters
  */
-$app->get('/ous/:ouid', 'validateApiKey',
+$app->get('/ous/:ouid(/)', 'validateApiKey',
     function($ouid) {
 	global $cmd;
+	global $userid;
 
 	$ouid = htmlspecialchars($ouid);
-	$cmd->texto = "SELECT * FROM centros WHERE idcentro='$ouid';";
+	// Show OU information if user is OU's admin.
+	$cmd->texto = <<<EOD
+SELECT *
+  FROM centros
+ RIGHT JOIN administradores_centros USING(idcentro)
+ WHERE administradores_centros.idadministradorcentro = '$userid'
+   AND centros.idcentro = '$ouid'
+ LIMIT 1;
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
-	if (checkParameter($rs->campos["nombrecentro"])) {
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and
+	    checkParameter($rs->campos["idcentro"])) {
 		$response['id'] = $ouid;
 		$response['name'] = $rs->campos["nombrecentro"];
 		$response['description'] = $rs->campos["comentarios"];
@@ -176,39 +186,50 @@ $app->get('/ous/:ouid', 'validateApiKey',
     }
 );
 
-// Listar grupos.
-$app->get('/ous/:ouid/groups', 'validateApiKey', function($ouid) {
+/**
+ * @brief    List group of labs in an Organizational Unit
+ * @note     Route: /ous/id/groups, Method: GET
+ * @param    id      OU id.
+ * @return   JSON array of OU groups
+ */
+$app->get('/ous/:ouid/groups(/)', 'validateApiKey', function($ouid) {
 	global $cmd;
 	global $userid;
 
 	$ouid = htmlspecialchars($ouid);
-	if(checkAdmin($userid, $ouid) == true){
-		// Listar las salas de la UO si el usuario de la apikey es su admin.
-		// Consulta temporal,
-		$cmd->texto = "SELECT * FROM grupos WHERE idcentro='$ouid';";
-		$rs=new Recordset;
-		$rs->Comando=&$cmd;
-		if (!$rs->Abrir()) return(false); // Error al abrir recordset
-			$rs->Primero();
-			// Comprobar que exista la UO.
-			if (checkParameter($rs->campos["idcentro"])) {
-				$response = array();
-				while (!$rs->EOF) {
-					$tmp = array();
-					$tmp['id'] = $rs->campos["idgrupo"];
-					$tmp['name'] = $rs->campos["nombregrupo"];
-					$tmp['type'] = $rs->campos["tipo"];
-					$tmp['comments'] = $rs->campos["comentarios"];
+	// List group of labs if user is OU's admin.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, grupos.*
+  FROM grupos
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND idcentro='$ouid';
+EOD;
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	$rs->Primero();
+	// Check if user is an UO admin.
+	if (checkAdmin($rs->campos["idadministradorcentro"])) {
+		$response = array();
+		// Read data.
+		if (! is_null($rs->campos["idcentro"])) {
+			while (!$rs->EOF) {
+				$tmp = array();
+				$tmp['id'] = $rs->campos["idgrupo"];
+				$tmp['name'] = $rs->campos["nombregrupo"];
+				$tmp['type'] = $rs->campos["tipo"];
+				$tmp['comments'] = $rs->campos["comentarios"];
 				if($rs->campos["grupoid"] != 0){
 					$tmp['parent']['id'] = $rs->campos["grupoid"];
 				}
 				array_push($response, $tmp);
 				$rs->Siguiente();
 			}
-			jsonResponse(200, $response);
 		}
-		$rs->Cerrar();
+		jsonResponse(200, $response);
 	}
+	$rs->Cerrar();
     }
 );
 
@@ -216,69 +237,71 @@ $app->get('/ous/:ouid/groups', 'validateApiKey', function($ouid) {
  * @brief    List all labs defined in an OU
  * @note     Route: /ous/id/labs, Method: GET
  * @param    id      OU id.
- * @return   JSON string with all UO's labs parameters
+ * @return   JSON array of all UO's labs data 
  */
-$app->get('/ous/:ouid/labs', 'validateApiKey',
+$app->get('/ous/:ouid/labs(/)', 'validateApiKey',
     function($ouid) {
 	global $userid;
 	global $cmd;
-	global $rs;
 
 	$ouid = htmlspecialchars($ouid);
-	// Listar las salas de la UO si el usuario de la apikey es su admin.
+	// Query: all labs in the UO if user is admin.
 	$cmd->texto = <<<EOD
-SELECT aulas.*, adm.idadministradorcentro, grp.idgrupo AS group_id,
+SELECT adm.idadministradorcentro, aulas.*, grp.idgrupo AS group_id,
        grp.nombregrupoordenador, grp.grupoid AS group_group_id, grp.comentarios
   FROM aulas
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
   LEFT JOIN gruposordenadores AS grp USING(idaula)
- WHERE idcentro='$ouid' AND adm.idadministradorcentro = '$userid'
+ WHERE adm.idadministradorcentro = '$userid'
+   AND idcentro='$ouid'
  ORDER BY aulas.idaula, grp.idgrupo
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Error opening recordset.
-	// Comprobar que exista la UO y que el usuario sea su administrador.
+	// Check if user is an UO admin.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idcentro"]) and checkAdmin($rs->campos["idadministradorcentro"])) {
+	if (checkAdmin($rs->campos["idadministradorcentro"])) {
 		$response = array();
-		while (!$rs->EOF) {
-			// En los resultados las aulas vienen repetidas tantas veces como grupos tengan, solo dejamos uno
-			$classroomIndex = -1;
-			$found=false;
-			$index = 0;
-			while(!$found && $index < count($response)){
-				if(isset($response[$index]["id"]) && $response[$index]["id"] == $rs->campos["idaula"]){
-					$classroomIndex = $index;
-					$found = true;
+		if (! is_null($rs->campos["idcentro"])) {
+			while (!$rs->EOF) {
+				// En los resultados las aulas vienen repetidas tantas veces como grupos tengan, solo dejamos uno
+				$classroomIndex = -1;
+				$found=false;
+				$index = 0;
+				while(!$found && $index < count($response)){
+					if(isset($response[$index]["id"]) && $response[$index]["id"] == $rs->campos["idaula"]){
+						$classroomIndex = $index;
+						$found = true;
+					}
+					$index++;
 				}
-				$index++;
-			}
-			if(!$found){
-				$tmp = array();
-				$tmp['id'] = $rs->campos["idaula"];
-				$tmp['name'] = $rs->campos["nombreaula"];
-				$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-				$tmp['group']['id'] = $rs->campos["grupoid"];
-				$tmp['ou']['id'] = $ouid;
-				array_push($response, $tmp);
-			}
-			else{
-				// Le añadimos el grupo en cuestion siempre que no sea un subgrupo
-				if($rs->campos["group_group_id"] == 0){
-					array_push($response[$classroomIndex]['classroomGroups'],
-						array("id" => $rs->campos["group_id"],
-						"name" => $rs->campos["nombregrupoordenador"],
-						"comments" => $rs->campos["comentarios"],
-						"classroomGroups" => array()));
+				if(!$found){
+					$tmp = array();
+					$tmp['id'] = $rs->campos["idaula"];
+					$tmp['name'] = $rs->campos["nombreaula"];
+					$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+					$tmp['group']['id'] = $rs->campos["grupoid"];
+					$tmp['ou']['id'] = $ouid;
+					array_push($response, $tmp);
 				}
-				else {
-					// Buscamos el grupo donde añadir el grupo
-					addClassroomGroup($response[$classroomIndex]['classroomGroups'], $rs);
+				else{
+					// Le añadimos el grupo en cuestion siempre que no sea un subgrupo
+					if($rs->campos["group_group_id"] == 0){
+						array_push($response[$classroomIndex]['classroomGroups'],
+							array("id" => $rs->campos["group_id"],
+							"name" => $rs->campos["nombregrupoordenador"],
+							"comments" => $rs->campos["comentarios"],
+							"classroomGroups" => array()));
+					}
+					else {
+						// Buscamos el grupo donde añadir el grupo
+						addClassroomGroup($response[$classroomIndex]['classroomGroups'], $rs);
+					}
 				}
+				$rs->Siguiente();
 			}
-			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
 	}
