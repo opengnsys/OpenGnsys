@@ -17,16 +17,17 @@
  * @brief   Compose JSON response.
  * @param   int status      Status code for HTTP response.
  * @param   array response  Response data.
+ * @param   int opts        Options to encode JSON data.
  * @return  string          JSON response.
  */
-function jsonResponse($status, $response) {
+function jsonResponse($status, $response, $opts=0) {
         $app = \Slim\Slim::getInstance();
         // HTTP status code.
         $app->status($status);
         // Content-type HTTP header.
         $app->contentType('application/json');
         // JSON response.
-        echo json_encode($response);
+        echo json_encode($response, $opts);
 }
 
 /**

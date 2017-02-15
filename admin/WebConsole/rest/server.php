@@ -70,8 +70,7 @@ $app->post('/login',
 	global $cmd;
 	global $userid;
 
-	$response = array();
-
+	$response = Array();
 	// Reading JSON parameters.
 	try {
 		$input = json_decode($app->request()->getBody());
@@ -136,10 +135,10 @@ $app->get('/ous(/)', function() {
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
-	$response = array();
+	$response = Array();
 	$rs->Primero();
 	while (!$rs->EOF) {
-		$tmp = array();
+		$tmp = Array();
 		$tmp['id'] = $rs->campos["idcentro"];
 		$tmp['name'] = $rs->campos["nombrecentro"];
 		array_push($response, $tmp);
@@ -211,11 +210,11 @@ EOD;
 	$rs->Primero();
 	// Check if user is an UO admin.
 	if (checkAdmin($rs->campos["idadministradorcentro"])) {
-		$response = array();
+		$response = Array();
 		// Read data.
 		if (! is_null($rs->campos["idcentro"])) {
 			while (!$rs->EOF) {
-				$tmp = array();
+				$tmp = Array();
 				$tmp['id'] = $rs->campos["idgrupo"];
 				$tmp['name'] = $rs->campos["nombregrupo"];
 				$tmp['type'] = $rs->campos["tipo"];
@@ -253,7 +252,7 @@ SELECT adm.idadministradorcentro, aulas.*, grp.idgrupo AS group_id,
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
   LEFT JOIN gruposordenadores AS grp USING(idaula)
  WHERE adm.idadministradorcentro = '$userid'
-   AND idcentro='$ouid'
+   AND adm.idcentro='$ouid'
  ORDER BY aulas.idaula, grp.idgrupo
 EOD;
 	$rs=new Recordset;
@@ -262,7 +261,7 @@ EOD;
 	// Check if user is an UO admin.
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"])) {
-		$response = array();
+		$response = Array();
 		if (! is_null($rs->campos["idcentro"])) {
 			while (!$rs->EOF) {
 				// En los resultados las aulas vienen repetidas tantas veces como grupos tengan, solo dejamos uno
@@ -277,7 +276,7 @@ EOD;
 					$index++;
 				}
 				if(!$found){
-					$tmp = array();
+					$tmp = Array();
 					$tmp['id'] = $rs->campos["idaula"];
 					$tmp['name'] = $rs->campos["nombreaula"];
 					$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
@@ -399,10 +398,10 @@ EOD;
 	$rs->Primero();
 	// Check if user is an UO admin and lab exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["labid"])) {
-		$response = array();
+		$response = Array();
 		while (!$rs->EOF) {
 			if (!is_null($rs->campos["idordenador"])) {
-				$tmp = array();
+				$tmp = Array();
 				$tmp['id'] = $rs->campos["idordenador"];
 				$tmp['name'] = $rs->campos["nombreordenador"];
 				$tmp['ip'] = $rs->campos["ip"];
@@ -514,10 +513,10 @@ EOD;
 		// Read data.
 		$response['id'] = $rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
-		$response['hardware'] = array();
+		$response['hardware'] = Array();
 		while (!$rs->EOF) {
 			if (!is_null($rs->campos["nemonico"])) {
-				$tmp = array();
+				$tmp = Array();
 				$tmp['type'] = $rs->campos["nemonico"];
 				$tmp['description'] = $rs->campos["descripcion"];
 				array_push($response['hardware'], $tmp);
@@ -575,13 +574,13 @@ EOD;
 		// Read data.
 		$response['id'] = $rs->campos["clientid"];
 		$response['name'] = $rs->campos["nombreordenador"];
-		$response['diskcfg'] = array();
+		$response['diskcfg'] = Array();
 		while (!$rs->EOF) {
 			if ($rs->campos["numdisk"] == 0) {
 				$rs->Siguiente();
 				continue;
 			}
-			$tmp = array();
+			$tmp = Array();
 			if ($rs->campos["numpar"] == 0) {
 				// Disk data.
 				$tmp['disk'] = $rs->campos["numdisk"];
@@ -637,7 +636,7 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/status(/)', 'validateApiKey',
 	global $LONHEXPRM;
 
 	// Status mapping.
-	$status = array('OFF'=>"off",
+	$status = Array('OFF'=>"off",
 			'INI'=>"initializing",
 			'OPG'=>"ogclient",
 			'BSY'=>"busy",
@@ -701,7 +700,7 @@ EOD;
 				// Compose JSON response.
 				$response['id'] = $clientid;
 				$response['ip'] = $clientip;
-				$stat = array();
+				$stat = Array();
 				preg_match('/\/[A-Z]*;/', $values["tso"], $stat);
 				// Check if data exists.
 				if (empty($stat[0]) or preg_match('/OFF/', $stat[0])) {
@@ -752,7 +751,7 @@ $app->get('/ous/:ouid/repos(/)', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, repositorios.*
+SELECT adm.idadministradorcentro, adm.idcentro AS ouid, repositorios.*
   FROM repositorios
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  WHERE adm.idadministradorcentro = '$userid'
@@ -763,11 +762,11 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idcentro"])) {
-		$response = array();
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["ouid"])) {
+		$response = Array();
 		while (!$rs->EOF) {
 			if (! is_null($rs->campos["idcentro"])) {
-				$tmp = array();
+				$tmp = Array();
 				$tmp['id'] = $rs->campos["idrepositorio"];
 				$tmp['name'] = $rs->campos["nombrerepositorio"];
 				$tmp['ou']['id'] = $ouid;
@@ -822,29 +821,42 @@ EOD;
     }
 );
 
-// Listar imágenes.
-$app->get('/ous/:ouid/images', 'validateApiKey',
+/**
+ * @brief    List all images defined in an OU
+ * @note     Route: /ous/id/images, Method: GET
+ * @param    id      OU id.
+ * @return   JSON array of all UO's image data 
+ */
+$app->get('/ous/:ouid/images(/)', 'validateApiKey',
     function($ouid) {
+	global $userid;
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	// Listar las salas de la UO si el usuario de la apikey es su admin.
-	// Consulta temporal,
-	$cmd->texto = "SELECT * FROM imagenes WHERE idcentro='$ouid';";
+	// Database query.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, adm.idcentro AS ouid, imagenes.*
+  FROM imagenes
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid';
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	// Comprobar que exista la UO.
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idcentro"])) {
-		$response = array();
+	// Check if user is an UO admin.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["ouid"])) {
+		$response = Array();
 		while (!$rs->EOF) {
-			$tmp = array();
-			$tmp['id'] = $rs->campos["idimagen"];
-			$tmp['name'] = $rs->campos["nombreca"];
-			$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-			$tmp['ou']['id'] = $ouid;
-			array_push($response, $tmp);
+			if (! is_null($rs->campos["idcentro"])) {
+				$tmp = Array();
+				$tmp['id'] = $rs->campos["idimagen"];
+				$tmp['name'] = $rs->campos["nombreca"];
+				$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+				$tmp['ou']['id'] = $ouid;
+				array_push($response, $tmp);
+			}
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -852,20 +864,36 @@ $app->get('/ous/:ouid/images', 'validateApiKey',
     }
 );
 
-// Obtener datos de una imagen.
-$app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
+/**
+ * @brief    Get image data
+ * @note     Route: /ous/id1/images/id2, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     image id.
+ * @return   JSON string with image parameters
+ */
+$app->get('/ous/:ouid/images/:imgid(/)', 'validateApiKey',
     function($ouid, $imgid) {
+	global $userid;
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
 	$imgid = htmlspecialchars($imgid);
-	$cmd->texto = "SELECT * FROM imagenes WHERE idimagen='$imgid';";
+	// Database query.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, imagenes.*
+  FROM imagenes
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
+   AND idimagen='$imgid';
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	// Comprobar que exista el repositorio.
-	if (checkParameter($rs->campos["idimagen"])) {
+	// Check if user is an UO admin and repo exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idimagen"])) {
+		// Read data.
 		$response['id'] = $rs->campos["idimagen"];
 		$response['name'] = $rs->campos["nombreca"];
 		$response['description'] = $rs->campos["descripcion"];
@@ -873,6 +901,7 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
 		$response['repo']['id'] = $rs->campos["idrepositorio"];
 		switch ($rs->campos["tipo"]) {
+			// Image type.
 			case 1:  $response['type'] = "monolithic"; break;
 			case 2:  $response['type'] = "base"; break;
 			case 3:  $response['type'] = "incremental";
@@ -882,6 +911,7 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 			default: $response['type'] = $rs->campos["tipo"];
 		}
 		if ($rs->campos["idordenador"] != 0) {
+			// Source client data.
 			$response['client']['id'] = $rs->campos["idordenador"];
 			$response['client']['disk'] = $rs->campos["numdisk"];
 			$response['client']['partition'] = $rs->campos["numpar"];
@@ -895,209 +925,56 @@ $app->get('/ous/:ouid/images/:imgid', 'validateApiKey',
 );
 
 // Lista de softeare instalado en una imagen.
-$app->get('/ous/:ouid/images/:imgid/software', 'validateApiKey',
+$app->get('/ous/:ouid/images/:imgid/software(/)', 'validateApiKey',
     function($ouid, $imgid) {
+	global $userid;
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
 	$imgid = htmlspecialchars($imgid);
+	// Database query.
 	$cmd->texto = <<<EOD
-SELECT imagenes.idimagen, imagenes.nombreca, nombresos.nombreso, softwares.descripcion
-  FROM perfilessoft
- RIGHT JOIN imagenes USING(idperfilsoft)
+SELECT adm.idadministradorcentro, imagenes.idimagen, imagenes.nombreca,
+       nombresos.nombreso, softwares.descripcion
+  FROM imagenes
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+  LEFT JOIN perfilessoft USING(idperfilsoft)
   LEFT JOIN nombresos USING(idnombreso)
   LEFT JOIN perfilessoft_softwares USING(idperfilsoft)
   LEFT JOIN softwares USING(idsoftware)
- WHERE imagenes.idimagen='$imgid'
+ WHERE adm.idadministradorcentro = '$userid'
+   AND imagenes.idimagen='$imgid'
  ORDER BY softwares.descripcion ASC;
-EOD;
-	$rs=new Recordset;
-	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false);	// Error al abrir recordset
-	$rs->Primero();
-	// Comprobar que exista el repositorio.
-	if (checkParameter($rs->campos["idimagen"])) {
-		$response['id'] = $rs->campos["idimagen"];
-		$response['name'] = $rs->campos["nombreca"];
-		$response['os'] = $rs->campos["nombreso"];
-		//$response['ostype'] = Tipo de SO (agrupar en array con nombre SO).
-		$response['software'] = array();
-		while (!$rs->EOF) {
-			if ($rs->campos["descripcion"] == null) {
-				$rs->Siguiente();
-				continue;
-			}
-			$tmp = array();
-			$tmp['application'] = $rs->campos["descripcion"];
-			array_push($response['software'], $tmp);
-			$rs->Siguiente();
-		}
-		jsonResponse(200, $response);
-	}
-	$rs->Cerrar(); 
-    }
-);
-
-// Arrancar un ordenador con una imagen instalada, elegido al azar.
-$app->get('/ous/:id1/images/:id2/boot', 'validateApiKey',
-    function($ouid, $imageid) {
-	global $cmd;
-	global $AMBITO_ORDENADORES;
-	global $EJECUCION_COMANDO;
-	global $ACCION_INICIADA;
-	global $ACCION_SINRESULTADO;
-
-	// Pparameters.
-	$ouid = htmlspecialchars($ouid);
-	$imegeid = htmlspecialchars($imageid);
-	// Boot 1 client.
-	$nclients = 1;
-
-	// Query: server data and all clients' boot data availabe for Remote PC with this image installed (random order).
-	$cmd->texto = <<<EOD
-SELECT s.ipserveradm, s.portserveradm,
-       c.idordenador, c.ip, c.mac, p.numdisk, p.numpar
-  FROM entornos AS s, ordenadores AS c
-  JOIN aulas USING(idaula)
-  JOIN centros USING(idcentro)
-  JOIN ordenadores_particiones AS p USING(idordenador)
-  JOIN imagenes USING(idimagen)
- WHERE centros.idcentro='$ouid'
-   AND aulas.inremotepc=1
-   AND imagenes.idimagen='$imageid'
-   AND imagenes.inremotepc=1
- ORDER BY RAND();
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	if (checkParameter($rs->campos["ipserveradm"])) {
-
-		$response['imageid'] = $imageid;
-		$response['sendto'] = array();
-
-		// AVISO: Procesar datos del servidor (solo 1er registro).
-
-		$serverip = $rs->campos["ipserveradm"];
-		$serverport = $rs->campos["portserveradm"];
-
-		// AVISO: Procesar datos de los clientes.
-
-		$clientid = array();
-		$clientip = array();
-		$clientmac = array();
-		$clientdisk = array();
-		$clientpart = array();
-		while (!$rs->EOF) {
-			array_push($clientid, $rs->campos["idordenador"]);
-			array_push($clientip, $rs->campos["ip"]);
-			array_push($clientmac, $rs->campos["mac"]);
-			array_push($clientdisk, $rs->campos["numdisk"]);
-			array_push($clientpart, $rs->campos["numpar"]);
-			$rs->Siguiente();
-		}
-		$rs->Cerrar(); 
-
-		// AVISO: consultar el estado de todos los clientes y
-		//        quitar aquellos que no tengan "OFF", "OPG" o ""
-		//        (estudiar si incluir los "BSY")
-
-		// Reset clients' status.
-		$reqframe = "nfn=Sondeo\r".
-			    "ido=".implode(',', $clientid)."\r".
-			    "iph=".implode(';', $clientip)."\r";
-		sendCommand($serverip, $serverport, $reqframe, $values);
-		 // Wait to get response.
-		sleep(3);
-		// Connect to check status.
-		$reqframe = "nfn=respuestaSondeo\r".
-			    "ido=".implode(',', $clientid)."\r".
-			    "iph=".implode(';', $clientip)."\r";
-		sendCommand($serverip, $serverport, $reqframe, $values);
-		// Check status type.
-		if (isset($values["tso"])) {
-			preg_match_all('/[A-Z]{3}/', $values["tso"], $stat);
-		}
-		if (isset($stat[0])) {
-			for ($i=0; $i<sizeof($stat[0]); $i++) {
-				if (! in_array($stat[0][$i], array("OFF", "OPG", ""))) {
-					unset($clientid[$i]);
-					unset($clientip[$i]);
-					unset($clientmac[$i]);
-					unset($clientdisk[$i]);
-					unset($clientpart[$i]);
+	// Check if user is an UO admin and repo exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idimagen"])) {
+		$response['id'] = $rs->campos["idimagen"];
+		$response['name'] = $rs->campos["nombreca"];
+		if (is_null($rs->campos["nombreso"])) {
+			// Null object.
+			$response['software'] = Array();
+			jsonResponse(200, $response, JSON_FORCE_OBJECT);
+		} else {
+			// Read data.
+			$response['software']['os'] = $rs->campos["nombreso"];
+			//$response['software']['type'] = ...;  // OS type
+			$response['software']['applications'] = Array();
+			while (!$rs->EOF) {
+				// Ignoring empty fields.
+				if (!is_null($rs->campos["descripcion"])) {
+					array_push($response['software']['application'], $rs->campos["descripcion"]);
 				}
+				$rs->Siguiente();
 			}
+			jsonResponse(200, $response);
 		}
-
-		// AVISO: el siguiente código inicia un único cliente.
-		//        Para iniciar varios: 
-		//	  - id. clientes separados por carácter ','.
-		//	  - IP clientes separadas por carácter ';'
-		//	  - MAC clientes separadas por carácter ';'
-
-		// Executing boot command.
-		$reqframe = "nfn=Arrancar\r".
-			    "ido=".implode(',', $clientid)."\r".
-			    "iph=".implode(';', $clientip)."\r".
-			    "mac=".implode(';', $clientmac)."\r".
-			    "mar=1\r";
-echo "req=".str_replace("\r"," ",$reqframe).".\n";
-		sendCommand($serverip, $serverport, $reqframe, $values);
-		if ($values["res"]) {
-print_r($values);
-			$tmp = array();
-			for ($i=0, $boot=0; $i<sizeof($clientid) and $boot!=1; $i++) {
-				$reqframe = "nfn=IniciarSesion\r".
-					    "ido=".$clientid[$i]."\r".
-					    "iph=".$clientip[$i]."\r".
-					    "dsk=".$clientdisk[$i]."\r".
-					    "par=".$clientpart[$i]."\r";
-echo "i=$i: req=".str_replace("\r"," ",$reqframe).".\n";
-				sendCommand($serverip, $serverport, $reqframe, $values);
-				if ($values["res"]) {
-
-					// AVISO: incluir comando Iniciar sesión en cola de acciones.
-					$timestamp=time();
-					$cmd->texto = <<<EOD
-INSERT INTO acciones
-	SET tipoaccion=$EJECUCION_COMANDO,
-	    idtipoaccion=9,
-	    idcomando=9,
-	    parametros='nfn=IniciarSesion\rdsk=$clientdisk[$i]\rpar=$clientpart[$i]',
-	    descriaccion='RemotePC Session',
-	    idordenador=$clientid[$i],
-	    ip='$clientip[$i]',
-	    sesion=$timestamp,
-	    fechahorareg=NOW(),
-	    estado=$ACCION_INICIADA,
-	    resultado=$ACCION_SINRESULTADO,
-	    ambito=$AMBITO_ORDENADORES,
-	    idambito=$clientid[$i],
-	    restrambito='$clientip[$i]',
-	    idcentro=$ouid;
-EOD;
-					$result = $cmd->Ejecutar();
-					if ($result) {
-						$tmp['id'] = $clientid[$i];
-						$tmp['ip'] = $clientip[$i];
-						$tmp['mac'] = $clientmac[$i];
-						array_push($response['sendto'], $tmp);
-						$boot = 1;
-					}
-				}
-			}
-		}
-		jsonResponse(200, $response);
 	}
+	$rs->Cerrar(); 
     }
 );
-// Alternativa como método GET.
-//$app->get('/ous/:id1/images/:id2/boot/:number', 'validateApiKey',
-//    function($ouid, $imageid, $number) {
-//
-//   }
-//);
 
 ?>
