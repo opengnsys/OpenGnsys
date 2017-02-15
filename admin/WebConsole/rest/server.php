@@ -135,7 +135,7 @@ $app->get('/ous(/)', function() {
 	$cmd->texto = "SELECT * FROM centros";
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$response = array();
 	$rs->Primero();
 	while (!$rs->EOF) {
@@ -173,7 +173,7 @@ SELECT *
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and
 	    checkParameter($rs->campos["idcentro"])) {
@@ -207,7 +207,7 @@ SELECT adm.idadministradorcentro, grupos.*
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin.
 	if (checkAdmin($rs->campos["idadministradorcentro"])) {
@@ -245,7 +245,7 @@ $app->get('/ous/:ouid/labs(/)', 'validateApiKey',
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	// Query: all labs in the UO if user is admin.
+	// Database query.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, aulas.*, grp.idgrupo AS group_id,
        grp.nombregrupoordenador, grp.grupoid AS group_group_id, grp.comentarios
@@ -322,9 +322,9 @@ $app->get('/ous/:ouid/labs/:labid(/)', 'validateApiKey',
 
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
-	// Query: lab data and number of defined clients, if user is admin.
+	// Database query.
 	$cmd->texto = <<<EOD
-SELECT COUNT(idordenador) AS defclients, aulas.*, adm.idadministradorcentro
+SELECT adm.idadministradorcentro, COUNT(idordenador) AS defclients, aulas.*
   FROM aulas
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
   LEFT JOIN ordenadores USING(idaula)
@@ -334,7 +334,7 @@ SELECT COUNT(idordenador) AS defclients, aulas.*, adm.idadministradorcentro
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and lab exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idaula"])) {
@@ -383,19 +383,19 @@ $app->get('/ous/:ouid/labs/:labid/clients(/)', 'validateApiKey',
 
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
-	// Query: all clients in a lab, if user is admin.
+	// Database query.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.*, adm.idadministradorcentro, aulas.idaula AS labid
+SELECT adm.idadministradorcentro, ordenadores.*, aulas.idaula AS labid
   FROM ordenadores
  RIGHT JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  WHERE adm.idadministradorcentro = '$userid'
-   AND idcentro='$ouid'
-   AND idaula='$labid';
+   AND adm.idcentro='$ouid'
+   AND aulas.idaula='$labid';
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false);	// Recordset open error.
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and lab exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["labid"])) {
@@ -425,7 +425,7 @@ EOD;
  * @param    id1     OU id.
  * @param    id2     lab id.
  * @param    id3     client id.
- * @return   JSON string with cleint parameters
+ * @return   JSON string with hardware parameters
  */
 $app->get('/ous/:ouid/labs/:labid/clients/:clntid(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
@@ -435,9 +435,9 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid(/)', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
-	// Query: client data, if user is admin.
+	// Database query.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.*, adm.idadministradorcentro
+SELECT adm.idadministradorcentro, ordenadores.*
   FROM ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
@@ -448,10 +448,11 @@ SELECT ordenadores.*, adm.idadministradorcentro
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false);	// Recordset open error.
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin, lab exists and client exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idaula"]) and checkParameter($rs->campos["idordenador"])) {
+		// Read data.
 		$response['id'] = $rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['serialno'] = $rs->campos["numserie"];
@@ -473,8 +474,15 @@ EOD;
     }
 );
 
-// Obtener la configuración de hardware de un cliente.
-$app->get('/ous/:ouid/labs/:labid/clients/:clntid/hardware', 'validateApiKey',
+/**
+ * @brief    Get client's harware configuration data
+ * @note     Route: /ous/id1/labs/id2clients/id3/hardware, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     lab id.
+ * @param    id3     client id.
+ * @return   JSON string with cleint parameters
+ */
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/hardware(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
 	global $userid;
 	global $cmd;
@@ -482,31 +490,38 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/hardware', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
+	// Database query.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.nombreordenador,
+SELECT adm.idadministradorcentro, ordenadores.idordenador, ordenadores.nombreordenador,
        tipohardwares.nemonico, hardwares.descripcion
-  FROM perfileshard
- RIGHT JOIN ordenadores USING(idperfilhard)
-  JOIN perfileshard_hardwares USING(idperfilhard)
-  JOIN hardwares ON perfileshard_hardwares.idhardware=hardwares.idhardware
-  JOIN tipohardwares ON tipohardwares.idtipohardware=hardwares.idtipohardware
- WHERE ordenadores.idordenador='$clntid'
+  FROM ordenadores
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+  LEFT JOIN perfileshard_hardwares USING(idperfilhard)
+  LEFT JOIN hardwares ON perfileshard_hardwares.idhardware=hardwares.idhardware
+  LEFT JOIN tipohardwares ON tipohardwares.idtipohardware=hardwares.idtipohardware
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
+   AND aulas.idaula='$labid'
+   AND ordenadores.idordenador='$clntid';
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-//	if ($ouid != $rs->campos["idcentro"]) ...
-//	if ($labid != $rs->campos["idaula"]) ...
-	if (checkParameter($rs->campos["idordenador"])) {
+	// Check if user is an UO admin and client exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
+		// Read data.
 		$response['id'] = $rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['hardware'] = array();
 		while (!$rs->EOF) {
-			$tmp = array();
-			$tmp['type'] = $rs->campos["nemonico"];
-			$tmp['description'] = $rs->campos["descripcion"];
-			array_push($response['hardware'], $tmp);
+			if (!is_null($rs->campos["nemonico"])) {
+				$tmp = array();
+				$tmp['type'] = $rs->campos["nemonico"];
+				$tmp['description'] = $rs->campos["descripcion"];
+				array_push($response['hardware'], $tmp);
+			}
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -515,34 +530,49 @@ EOD;
     }
 );
 
-// Obtener datos de configuración de discos del cliente.
-$app->get('/ous/:ouid/labs/:labid/clients/:clntid/diskcfg', 'validateApiKey',
+/**
+ * @brief    Get client's disk configuration data
+ * @note     Route: /ous/id1/labs/id2clients/id3/diskcfg, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     lab id.
+ * @param    id3     client id.
+ * @return   JSON string with disk parameters
+ */
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/diskcfg(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
+	global $userid;
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
 	$clntid = htmlspecialchars($clntid);
+	// Database query.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador AS clientid, ordenadores.nombreordenador,
-       ordenadores_particiones.*, tipospar.tipopar,
+SELECT adm.idadministradorcentro, ordenadores.idordenador AS clientid,
+       ordenadores.nombreordenador, ordenadores_particiones.*, tipospar.tipopar,
        sistemasficheros.nemonico, nombresos.nombreso, imagenes.nombreca,
        (imagenes.revision - ordenadores_particiones.revision) AS difimagen
   FROM ordenadores_particiones
  RIGHT JOIN ordenadores USING(idordenador)
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
   LEFT JOIN tipospar USING(codpar)
   LEFT JOIN sistemasficheros USING(idsistemafichero)
   LEFT JOIN nombresos USING(idnombreso)
   LEFT JOIN imagenes USING(idimagen)
- WHERE ordenadores.idordenador='$clntid'
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
+   AND aulas.idaula='$labid'
+   AND ordenadores.idordenador='$clntid'
  ORDER BY numdisk ASC, numpar ASC;
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-//	if ($labid != $rs->campos["idaula"]) ...
-	if (checkParameter($rs->campos["clientid"])) {
+	// Check if user is an UO admin and client exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["clientid"])) {
+		// Read data.
 		$response['id'] = $rs->campos["clientid"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['diskcfg'] = array();
@@ -553,6 +583,7 @@ EOD;
 			}
 			$tmp = array();
 			if ($rs->campos["numpar"] == 0) {
+				// Disk data.
 				$tmp['disk'] = $rs->campos["numdisk"];
 				switch ($rs->campos["codpar"]) {
 					case 1:  $tmp['parttable'] = "MSDOS"; break;
@@ -563,6 +594,7 @@ EOD;
 				}
 				$tmp['size'] = $rs->campos["tamano"];
 			} else {
+				// Partition data.
 				$tmp['partition'] = $rs->campos["numpar"];
 				$tmp['parttype'] = $rs->campos["tipopar"];
 				$tmp['filesystem'] = $rs->campos["nemonico"];
@@ -571,9 +603,10 @@ EOD;
 				if ($rs->campos["nombreso"] != null) {
 					$tmp['os'] = $rs->campos["nombreso"];
 					if ($rs->campos["idimagen"] > 0) {
+						// Restored image data.
 						$tmp['image']['id'] = $rs->campos["idimagen"];
 						$tmp['image']['deploydate'] = $rs->campos["fechadespliegue"];
-						// Comprobar si la imagen está actualizada.
+						// Check if image is updated.
 						$tmp['image']['updated'] = ($rs->campos["difimagen"]>0 ? "false" : "true");
 					}
 				}
@@ -588,9 +621,17 @@ EOD;
     }
 );
 
-// Obtener estado de ejecución del cliente.
-$app->get('/ous/:ouid/labs/:labid/clients/:clntid/status', 'validateApiKey',
+/**
+ * @brief    Get client's execution status
+ * @note     Route: /ous/id1/labs/id2clients/id3/status, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     lab id.
+ * @param    id3     client id.
+ * @return   JSON string with client status
+ */
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/status(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
+	global $userid;
 	global $cmd;
 	global $LONCABECERA;
 	global $LONHEXPRM;
@@ -609,15 +650,22 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/status', 'validateApiKey',
 
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT serv.ipserveradm, serv.portserveradm, clnt.idordenador, clnt.ip
-  FROM entornos AS serv, ordenadores AS clnt
- WHERE clnt.idordenador='$clntid';
+SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
+       ordenadores.idordenador, ordenadores.ip
+  FROM entornos, ordenadores
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
+   AND aulas.idaula='$labid'
+   AND ordenadores.idordenador='$clntid';
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idordenador"])) {
+	// Check if user is an UO admin and client exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// First, try to connect to ogAdmCleint service.
 		$serverip = $rs->campos["ipserveradm"];
 		$serverport = $rs->campos["portserveradm"];
@@ -690,28 +738,41 @@ EOD;
 );
 
 
-// Listar repositorios.
-$app->get('/ous/:ouid/repos', 'validateApiKey',
+/**
+ * @brief    List all image repositories defined in an OU
+ * @note     Route: /ous/id/repos, Method: GET
+ * @param    id      OU id.
+ * @return   JSON array of all UO's repo data 
+ */
+$app->get('/ous/:ouid/repos(/)', 'validateApiKey',
     function($ouid) {
+	global $userid;
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
-	// Listar las salas de la UO si el usuario de la apikey es su admin.
-	// Consulta temporal,
-	$cmd->texto = "SELECT * FROM repositorios WHERE idcentro='$ouid';";
+	// Database query.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, repositorios.*
+  FROM repositorios
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid';
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	// Comprobar que exista la UO.
-	if (checkParameter($rs->campos["idcentro"])) {
+	// Check if user is an UO admin.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idcentro"])) {
 		$response = array();
 		while (!$rs->EOF) {
-			$tmp = array();
-			$tmp['id'] = $rs->campos["idrepositorio"];
-			$tmp['name'] = $rs->campos["nombrerepositorio"];
-			$tmp['ou']['id'] = $ouid;
-			array_push($response, $tmp);
+			if (! is_null($rs->campos["idcentro"])) {
+				$tmp = array();
+				$tmp['id'] = $rs->campos["idrepositorio"];
+				$tmp['name'] = $rs->campos["nombrerepositorio"];
+				$tmp['ou']['id'] = $ouid;
+				array_push($response, $tmp);
+			}
 			$rs->Siguiente();
 		}
 		jsonResponse(200, $response);
@@ -720,20 +781,36 @@ $app->get('/ous/:ouid/repos', 'validateApiKey',
     }
 );
 
-// Obtener datos de un repositorio.
-$app->get('/ous/:ouid/repos/:repoid', 'validateApiKey',
+/**
+ * @brief    Get image repository data
+ * @note     Route: /ous/id1/repos/id2, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     repo id.
+ * @return   JSON string with repo parameters
+ */
+$app->get('/ous/:ouid/repos/:repoid(/)', 'validateApiKey',
     function($ouid, $repoid) {
+	global $userid;
 	global $cmd;
 
 	$ouid = htmlspecialchars($ouid);
 	$repoid = htmlspecialchars($repoid);
-	$cmd->texto = "SELECT * FROM repositorios WHERE idrepositorio='$repoid';";
+	// Database query.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, repositorios.*
+  FROM repositorios
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
+   AND idrepositorio='$repoid';
+EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	// Comprobar que exista el repositorio.
-	if (checkParameter($rs->campos["idrepositorio"])) {
+	// Check if user is an UO admin and repo exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idrepositorio"])) {
+		// Read data.
 		$response['id'] = $rs->campos["idrepositorio"];
 		$response['name'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
