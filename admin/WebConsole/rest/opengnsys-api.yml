@@ -1043,19 +1043,19 @@ paths:
               name:
                 description: image name
                 type: string
-              os:
-                description: installed operating system
-                type: string
               software:
-                description: array of installed applications
-                type: array
-                items:
-                  type: object
-                  properties:
-                    application:
-                      description: application name and version
+                description: software installed
+                type: object
+                properties:
+                  os:
+                    description: operating system
+                    type: string
+                  applications:
+                    type: array
+                    items:
+                      description: list of applications (name and version)
                       type: string
-            required: [ id, name, os, software ]
+            required: [ id, name, software ]
       security:
         - apikey: []
       tags:

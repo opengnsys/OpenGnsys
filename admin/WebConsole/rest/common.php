@@ -132,7 +132,7 @@ function sendCommand($serverip, $serverport, $reqframe, &$values) {
  * @brief   Show custom message for "not found" error (404).
  */
 $app->notFound(function() {
-	echo "REST route not found.\n";
+	echo "REST route not found.";
    }
 );
 

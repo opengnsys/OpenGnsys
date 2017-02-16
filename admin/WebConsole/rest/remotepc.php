@@ -39,18 +39,18 @@ $app->post('/ous/:ouid/images/:imageid/reserve', 'validateApiKey',
 	if (empty($labid))  $labid = '%';    // Clients in any lab.
 	// Randomly choose a client with image installed and get ogAdmServer data.
 	$cmd->texto = <<<EOD
-SELECT entornos.ipserveradm, entornos.portserveradm,
+SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
        ordenadores.idordenador, ordenadores.ip, ordenadores.mac, ordenadores.agentkey,
        ordenadores_particiones.numdisk, ordenadores_particiones.numpar,
        aulas.idaula, aulas.idcentro, remotepc.reserved
   FROM entornos, ordenadores
   JOIN aulas USING(idaula)
- RIGHT JOIN administradores_centros USING(idcentro)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
  RIGHT JOIN ordenadores_particiones USING(idordenador)
  RIGHT JOIN imagenes USING(idimagen)
   LEFT JOIN remotepc ON remotepc.id=ordenadores.idordenador
- WHERE administradores_centros.idadministradorcentro = '$userid'
+ WHERE adm.idadministradorcentro = '$userid'
    AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
    AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc = 1
  ORDER BY RAND() LIMIT 1;
@@ -58,9 +58,9 @@ EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);       // Error opening recordset.
-	// Check if client exists.
+	// Check if user is admin and client exists.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idordenador"])) {
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is not reserved.
 		if ($rs->campos["reserved"] !== 1) {
 			// Read query data.
@@ -196,22 +196,22 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 	$clntid = htmlspecialchars($clntid);
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, remotepc.*
+SELECT adm.idadministradorcentro, ordenadores.idordenador, remotepc.*
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
   JOIN aulas USING(idaula)
- RIGHT JOIN administradores_centros USING(idcentro)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
- WHERE administradores_centros.idadministradorcentro = '$userid'
+ WHERE adm.idadministradorcentro = '$userid'
    AND idcentro = '$ouid' AND aulas.idaula ='$labid'
    AND ordenadores.idordenador = '$clntid';
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);       // Error opening recordset.
-	// Check if client exists.
+	// Check if user is admin and client exists.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idordenador"])) {
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
 		if ($rs->campos["reserved"] == 1) {
 			// Updating DB if client is reserved.
@@ -256,22 +256,22 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	$clntid = htmlspecialchars($clntid);
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.ip, ordenadores.agentkey, remotepc.reserved
+SELECT adm.idadministradorcentro, ordenadores.idordenador, ordenadores.ip, ordenadores.agentkey, remotepc.reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
   JOIN aulas USING(idaula)
- RIGHT JOIN administradores_centros USING(idcentro)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
- WHERE administradores_centros.idadministradorcentro = '$userid'
+ WHERE adm.idadministradorcentro = '$userid'
    AND idcentro = '$ouid' AND aulas.idaula ='$labid'
    AND ordenadores.idordenador = '$clntid';
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);       // Error opening recordset.
-	// Check if client exists.
+	// Check if user is admin and client exists.
 	$rs->Primero();
-	if (checkParameter($rs->campos["idordenador"])) {
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
 		if ($rs->campos["reserved"] == 1) {
 			// Read query data.
