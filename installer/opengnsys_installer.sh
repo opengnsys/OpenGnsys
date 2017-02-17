@@ -1378,8 +1378,8 @@ function clientCreate()
 		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
 		mv $PROGRAMDIR/$FILENAME $TARGETFILE
 	else
-		echoAndLog "${FUNCNAME}(): Loading Client"
-		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		echoAndLog "${FUNCNAME}(): Downloading ogLive Client"
+		$INSTALL_TARGET/bin/oglivecli download $FILENAME
 	fi
 	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
@@ -1387,9 +1387,9 @@ function clientCreate()
 	fi
 
 	# Montar imagen, copiar cliente ogclient y desmontar.
-	echoAndLog "${FUNCNAME}(): Copying Client files"
+	echoAndLog "${FUNCNAME}(): Installing ogLive Client"
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | \
-			$INSTALL_TARGET/bin/installoglive $TARGETFILE
+			$INSTALL_TARGET/bin/oglivecli install $TARGETFILE
 	# Adaptar permisos.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 

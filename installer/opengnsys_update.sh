@@ -872,42 +872,41 @@ function compileServices()
 # Actualizar cliente OpenGnsys
 function updateClient()
 {
-	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
+	PATH=$PATH:$INSTALL_TARGET/bin
+	local DOWNLOADURL=$(oglivecli config download-url)
 	#local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
 	local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso		# 1.1.0-rc4
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
-	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
+	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
 	local SOURCELENGTH
 	local TARGETLENGTH
-	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
-	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	local OGINITRD
 	local SAMBAPASS
 	local KERNELVERSION
 
+	# Comprobar si debe convertirse el antiguo cliente al nuevo formato ogLive.
+	if oglivecli check | grep -q "oglivecli convert"; then
+		echoAndLog "${FUNCNAME}(): Converting OpenGnsys Client to default ogLive"
+		oglivecli convert
+	fi
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
-	TARGETLENGTH=$(ls -l $TARGETFILE 2>/dev/null | awk '{print $5}')
+	TARGETLENGTH=$(stat -c "%s" $TARGETFILE 2>/dev/null)
 	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
-		echoAndLog "${FUNCNAME}(): Loading Client"
-		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		echoAndLog "${FUNCNAME}(): Downloading ogLive"
+		oglivecli download $FILENAME
 		if [ ! -s $TARGETFILE ]; then
 			errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
 			return 1
 		fi
 		# Actaulizar la imagen ISO del ogclient.
-		echoAndLog "${FUNCNAME}(): Updatting ogclient files"
-		$INSTALL_TARGET/bin/installoglive $TARGETFILE
+		echoAndLog "${FUNCNAME}(): Updatting ogLive"
+		oglivecli install $FILENAME
 		
 		# Obtiene versión del Kernel del cliente (con 2 decimales).
-		KERNELVERSION=$(file -bkr $OGVMLINUZ 2>/dev/null | \
-				awk '/Linux/ { for (i=1; i<=NF; i++)
-						   if ($i~/version/) {
-						      v=$(i+1);
-						      printf ("%d",v);
-						      sub (/[0-9]*\./,"",v);
-						      printf (".%02d",v)
-					     } }')
+		KERNELVERSION=$(jq -r ".oglive[.default].kernel" | \
+				awk -F. '{printf("%d",$1); $1=""; printf(".%02d",$0)}'
 		# Actaulizar la base de datos adaptada al Kernel del cliente.
 		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
 		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
@@ -921,12 +920,12 @@ function updateClient()
 		# Si no existe, crear el fichero de claves de Rsync.
 		if [ ! -f /etc/rsyncd.secrets ]; then
 			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			OGINITRD=$(oglivecli config install-dir)/$(jq -r ".oglive[.default].directory")/oginitrd.img
 			SAMBAPASS=$(gzip -dc $OGINITRD | \
 				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
 				    grep "^[ 	].*OPTIONS=" | \
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
-			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
-					$INSTALL_TARGET/bin/setsmbpass
+			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | setsmbpass
 		else
 			echoAndLog "${FUNCNAME}(): Client is already updated"
 		fi
