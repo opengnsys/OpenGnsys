@@ -130,8 +130,9 @@ return ${PIPESTATUS[0]}
 function ogGetCaller () {
 
 # Obtener el nombre del programa o del script que ha llamado al proceso actual.
-basename "$(ps hlp $PPID | awk '{if ($13~/bash/ && $14!="") print $14;
-                                 else { sub(/^-/,"",$13); print $13; } }')"
+basename "$(COLUMNS=200 ps hp $PPID -o args | \
+            awk '{if ($1~/bash/ && $2!="") { print $2; }
+                  else { sub(/^-/,"",$1); print $1; } }')"
 }
 
 
