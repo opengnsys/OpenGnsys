@@ -409,7 +409,7 @@ local ISOFILE DIR
 # Main progrram.
 
 # Global constants definition.
-PROG=$(basename $0)
+PROG=$(basename $(realpath "$0"))
 OPENGNSYS=/opt/opengnsys
 DOWNLOADDIR=$OPENGNSYS/lib
 DOWNLOADURL="http://opengnsys.es/downloads"
@@ -418,9 +418,7 @@ DEFOGLIVE=ogLive
 INFOFILE=$OPENGNSYS/etc/ogliveinfo.json
 
 # Access control.
-if [ "$USER" != "root" ]; then
-    raiseError access "Need to be root."
-fi
+[ "$USER" = "root" ] || raiseError access "Need to be root."
 # Check dependencies.
 JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
