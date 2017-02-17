@@ -121,7 +121,7 @@ function convert() {
     OGLIVEKRNL=$(file -bkr $OGCLIENT/ogvmlinuz | awk '/Linux/ {for(i=1;i<=NF;i++) if($i~/version/) {v=$(i+1);sub(/-.*/,"",v);print v}}')
     OGLIVEDIR=$DEFOGLIVE-$OGLIVEKRNL
     [ -r $OLDINFOFILE ] && OGLIVEISO=$(head -1 $OLDINFOFILE).iso
-    addToJson "" "$OGLIVEKRNL" "" "$OGLIVEDIR" "$OGLIVEISO"
+    addToJson "$(echo $OGLIVEISO|cut -f2 -d-)" "$OGLIVEKRNL" "${OGLIVEISO##*-}" "$OGLIVEDIR" "$OGLIVEISO"
     # Rename directory, link to default and clean old files.
     mv -v $OGCLIENT $OGLIVEDIR
     ln -vfs $OGLIVEDIR $DEFOGLIVE
@@ -129,6 +129,8 @@ function convert() {
     mv -v $OGCLIENT.old $OGLIVEDIR.old 2>/dev/null
     rm -fv {ogvmlinuz,oginitrd.img}{,.sum} $OLDINFOFILE
     popd >/dev/null
+    # Delete old config file.
+    rm -f $OLDINFOFILE
 }
 
 # Show script configuration parameters.
