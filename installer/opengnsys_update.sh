@@ -905,7 +905,7 @@ function updateClient()
 		oglivecli install $FILENAME
 		
 		# Obtiene versión del Kernel del cliente (con 2 decimales).
-		KERNELVERSION=$(jq -r ".oglive[.default].kernel" | \
+		KERNELVERSION=$(jq -r ".oglive[.default].kernel" |
 				awk -F. '{printf("%d",$1); $1=""; printf(".%02d",$0)}'
 		# Actaulizar la base de datos adaptada al Kernel del cliente.
 		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
