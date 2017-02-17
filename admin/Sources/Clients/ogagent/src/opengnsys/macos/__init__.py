@@ -27,24 +27,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 '''
-@author: Adolfo Gómez, dkmaster at dkmon dot com
+@author: Ramón M. Gómez, ramongomez at us dot es
 '''
-# pylint: disable=unused-wildcard-import,wildcard-import
-
 from __future__ import unicode_literals
-
-import sys
-# Importing platform operations and getting operating system data.
-if sys.platform == 'win32':
-    from .windows.operations import *  # @UnusedWildImport
-    osType = 'Windows'
-    osVersion = '.'.join(map(str,getWindowsVersion()[:3]))+' '+getWindowsVersion()[4]
-else:
-    if sys.platform == 'darwin':
-        from .macos.operations import *  # @UnusedWildImport
-        osType = 'MacOS'
-        osVersion = getMacosVersion().replace(',','')
-    else:
-        from .linux.operations import *  # @UnusedWildImport
-        osType = 'Linux'
-        osVersion = getLinuxVersion().replace(',','')
