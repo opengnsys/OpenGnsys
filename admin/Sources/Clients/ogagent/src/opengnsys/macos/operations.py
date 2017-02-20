@@ -55,7 +55,7 @@ def _getMacAddr(ifname):
     if isinstance(ifname, six.text_type):
         ifname = ifname.encode('utf-8')  # If unicode, convert to bytes (or str in python 2.7)
     try:
-        return netifaces.ifaddress(ifname)[18][0]['addr']
+        return netifaces.ifaddresses(ifname)[18][0]['addr']
     except Exception:
         return None
 
@@ -70,7 +70,7 @@ def _getIpAddr(ifname):
     if isinstance(ifname, six.text_type):
         ifname = ifname.encode('utf-8')  # If unicode, convert to bytes (or str in python 2.7)
     try:
-        return netifaces.ifaddress(ifname)[2][0]['addr']
+        return netifaces.ifaddresses(ifname)[2][0]['addr']
     except Exception:
         return None
 
@@ -118,47 +118,41 @@ def getMacosVersion():
 
 def reboot(flags=0):
     '''
-    Simple reboot using os command
+    Simple reboot using AppleScript
     '''
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    # Check for OpenGnsys Client or GNU/Linux distribution.
-    if os.path.exists('/scripts/oginit'):
-        subprocess.call('source /opt/opengnsys/etc/preinit/loadenviron.sh; /opt/opengnsys/scripts/reboot', shell=True)
-    else:
-        subprocess.call(['/sbin/reboot'])
+    # Exec reboot using AppleScript.
+    subprocess.call('/usr/bin/osascript -e \'tell app "System Events" to restart\'', shell=True)
 
 def poweroff(flags=0):
     '''
-    Simple poweroff using os command
+    Simple poweroff using AppleScript
     '''
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    # Check for OpenGnsys Client or GNU/Linux distribution.
-    if os.path.exists('/scripts/oginit'):
-        subprocess.call('source /opt/opengnsys/etc/preinit/loadenviron.sh; /opt/opengnsys/scripts/poweroff', shell=True)
-    else:
-        subprocess.call(['/sbin/poweroff'])
-
+    # Exec shutdown using AppleScript.
+    subprocess.call('/usr/bin/osascript -e \'tell app "System Events" to shut down\'', shell=True)
 
 
 def logoff():
     '''
-    Kills all curent user processes, which must send a logogof
-    caveat: If the user has other sessions, will also disconnect from them
+    Simple logout using AppleScript
     '''
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    subprocess.call(['/usr/bin/pkill', '-u', os.environ['USER']])
+    # Exec logout using AppleSctipt
+    subprocess.call('/usr/bin/osascript -e \'tell app "System Events" to «event aevtrlgo»\'', shell=True)
+
 
 
 def renameComputer(newName):
@@ -248,5 +242,6 @@ def showPopup(title, message):
     '''
     Displays a message box on user's session (during 1 min).
     '''
-    return subprocess.call('zenity --info --timeout 60 --title "{}" --text "{}"'.format(title, message), shell=True)
+    # Show a dialog using AppleSctipt
+    return subprocess.call('/usr/bin/osascript -e \'display notification "{}" with title "{}"\''.format(message, title), shell=True)
 
