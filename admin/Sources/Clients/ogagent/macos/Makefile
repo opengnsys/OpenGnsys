@@ -9,7 +9,7 @@ BINDIR := $(DESTDIR)/bin
 SBINDIR = $(DESTDIR)/sbin
 #APPSDIR := $(DESTDIR)/usr/share/applications
 CFGDIR := $(DESTDIR)/etc/ogagent
-#INITDIR := $(DESTDIR)/etc/init.d
+INITDIR := /Library/LaunchDaemons
 #XDGAUTOSTARTDIR := $(DESTDIR)/etc/xdg/autostart
 #KDEAUTOSTARTDIR := $(DESTDIR)/usr/share/autostart
 
@@ -56,6 +56,7 @@ install-ogagent:
 	cp scripts/ogagent $(BINDIR)
 	cp scripts/OGAgentTool-startup $(BINDIR)
 	cp scripts/OGAgentTool $(BINDIR)
+	cp scripts/es.opengnsys.ogagent.plist $(INITDIR)
 	
 	# Fix permissions
 	chmod 755 $(BINDIR)/ogagent

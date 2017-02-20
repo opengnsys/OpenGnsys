@@ -1,0 +1,19 @@
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+        <dict>
+                <key>Label</key>
+                <string>es.opengnsys.ogagent</string>
+                <key>ProgramArguments</key>
+                <array>
+                        <string>/usr/local/bin/ogagent</string>
+                        <string>start</string>
+                </array>
+                <key>RunAtLoad</key>
+                <true/>
+                <key>StandardOutPath</key>
+                <string>/var/log/ogagent.log</string>
+                <key>StandardErrorPath</key>
+                <string>/var/log/ogagent.err</string>
+        </dict>
+</plist>
+

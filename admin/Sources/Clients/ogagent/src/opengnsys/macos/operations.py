@@ -55,9 +55,7 @@ def _getMacAddr(ifname):
     if isinstance(ifname, six.text_type):
         ifname = ifname.encode('utf-8')  # If unicode, convert to bytes (or str in python 2.7)
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        info = bytearray(fcntl.ioctl(s.fileno(), 0x8927, struct.pack(str('256s'), ifname[:15])))
-        return six.text_type(''.join(['%02x:' % char for char in info[18:24]])[:-1])
+        return netifaces.ifaddress(ifname)[18][0]['addr']
     except Exception:
         return None
 
@@ -106,7 +104,7 @@ def getNetworkInfo():
     '''
     for ifname in _getInterfaces():
         ip, mac = _getIpAndMac(ifname)
-        if mac != '00:00:00:00:00:00':  # Skips local interfaces
+        if mac != None:  # Skips local interfaces
             yield utils.Bunch(name=ifname, mac=mac, ip=ip)
 
 
