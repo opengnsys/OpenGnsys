@@ -188,6 +188,9 @@ function RecorriendoOrdenadores($cmd)
 <TD align="center">'.$TbMsg["STATUS_LNXS"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,7,'.$cid.')"></TD>
 
+<TD align="center">'.$TbMsg["STATUS_OSX"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,8,'.$cid.')"></TD>
+
 </TR>
 </TABLE>';
 	
@@ -306,6 +309,9 @@ function soIMG(so)
 		case 'LNXS':
 			MimgOrdenador="ordenador_LNXS.png"; // Sesión Linux
 			break;
+		case 'OSX':
+			MimgOrdenador="ordenador_OSX.png";  // macOS
+			break;
 		default:
 			MimgOrdenador="ordenador_OFF.png";	// Apagado
 			break;
@@ -328,42 +334,38 @@ function selector(oSLCT,op,id)
 				var oCHK = document.getElementById('chk-'+ip); // Recupera checkbox
 
 				switch(parseInt(op)){
-					case 1: // Apagados						
+					case 1: // Apagados
 						if(estado=="ordenador_OFF.png")
 							oCHK.checked=sw;
 						break;	
-						
 					case 2: // Ocupados
 						if(estado=="ordenador_BSY.png")
 							oCHK.checked=sw;
 						break;
-						
-					case 3: // Opengnsys
+					case 3: // OpenGnsys
 						if(estado=="ordenador_OPG.png")
 							oCHK.checked=sw;
 						break;
-						
 					case 4: // Windows
 						if(estado=="ordenador_WIN.png")
 							oCHK.checked=sw;
 						break;
-						
-					case 5: // Windows
+					case 5: // Sesión Windows
 						if(estado=="ordenador_WINS.png")
 							oCHK.checked=sw;
 						break;
-						
-					case 5: // Linux
+					case 6: // Linux
 						if(estado=="ordenador_LNX.png")
 							oCHK.checked=sw;
 						break;
-
-					case 7: // Linux
+					case 7: // Sesión Linux
 						if(estado=="ordenador_LNXS.png")
 							oCHK.checked=sw;
 						break;
-
-	
+					case 8: // macOS
+						if(estado=="ordenador_OSX.png")
+							oCHK.checked=sw;
+						break;
 				}
 			}
 		}

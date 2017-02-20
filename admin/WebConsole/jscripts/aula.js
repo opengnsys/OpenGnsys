@@ -132,6 +132,9 @@ function soIMG(so)
 		case 'LNXS':
 			MimgOrdenador="ordenador_LNXS.png"; // Sesión Linux
 			break;
+		case 'OSX':
+			MimgOrdenador="ordenador_OSX.png"; // macOS
+			break;
 		default:
 			MimgOrdenador="ordenador_OFF.png"; // Apagado
 			break;

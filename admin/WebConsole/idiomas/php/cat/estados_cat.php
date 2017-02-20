@@ -14,6 +14,7 @@ $TbMsg["STATUS_LNX"]="GNU/Linux";
 $TbMsg["STATUS_WXP"]="Windows";
 // Estats nou agent OGAgent.
 $TbMsg["STATUS_LNXS"]="Sessi&oacute; GNU/Linux";
+$TbMsg["STATUS_OSX"]="macOS";
 $TbMsg["STATUS_WIN"]="Windows";
 $TbMsg["STATUS_WINS"]="Sessi&oacute; Windows";
 ?>

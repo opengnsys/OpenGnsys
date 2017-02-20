@@ -80,7 +80,7 @@
 	// Launch concurrent requests.
 	$responses = multiRequest($urls);
 	// Process responses array (IP as array index).
-	foreach ($responses as $ip => $resp)) {
+	foreach ($responses as $ip => $resp) {
 		if (isset($resp['data'])) {
 			$data = json_decode($resp['data']);
 			// If user session is oppened, then append "S" to client status.
