@@ -4,7 +4,7 @@ OGAgent: agente OpenGnsys para sistemas operativos    INSTALL.es.txt
 
 Requisitos de creación
 ----------------------
-Sisitema operativo GNU/Linux con los siguientes paquetes instalados:
+Sisitema operativo Linux con los siguientes paquetes instalados:
 - Subversion
 - Python, librerías PyQt4
 - Wine (32 bits), Wine Gecko, Wine Mono, Samba Winbind, Cabextrct
@@ -20,7 +20,7 @@ Crear instaladores de OGAgent
 	./update.sh
 	cd ..
 
-- Crear paquetes Deb y RPM para distribuciones GNU/Linux (requiere permisos de "root"):
+- Crear paquetes Deb y RPM para distribuciones Linux (requiere permisos de "root"):
 	cd linux
 	sudo ./build-packages.sh
 	cd ..
@@ -30,7 +30,7 @@ Crear instaladores de OGAgent
 	./build-windows.sh
 	cd ..
 
-- Crear paquetes Deb y RPM para distribuciones GNU/Linux (requiere permisos de "root"):
+- Crear paquete Pkg para sistemas operativos macOS:
 	cd macos
 	./build-pkg.sh
 	cd ..
@@ -71,12 +71,16 @@ Instalar OGAgent en cliente modelo
   - Descargar e instalar el agente ejecutando:
 	OGAgentSetup-Version.exe
   - Seguir las instrucciones del instalador.
-   - Editar el fichero de configuación "C:\Program Files\OGAgent\cfg\ogagent.cfg" (o C:\Archivos de programa\OGAgent\cfg\ogagent.cfg) y modificar el valor de la cláusula "remote" de la sección [OGAgent] inclyendo la dirección IP del servidor OpenGnsys.
+  - Editar el fichero de configuación "C:\Program Files\OGAgent\cfg\ogagent.cfg" (o C:\Archivos de programa\OGAgent\cfg\ogagent.cfg) y modificar el valor de la cláusula "remote" de la sección [OGAgent] inclyendo la dirección IP del servidor OpenGnsys.
   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
 	NET START OGAgent
 
 - macOS:
-	(en preparación)
+	Descargar el paquete y usar Finder pulsando sobre el fichero para instalarlo.
+  - Configurar el agente:
+	sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /Applications/OGAgent.app/cfg/ogagent.cfg
+  - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
+	sudo ogagent start
 
 
 Postconfiguración para clientes clonados

@@ -75,7 +75,7 @@ popd >/dev/null
 
 # Build OGAgent for macOS.
 pushd $PROGDIR/macos >/dev/null
-sudo ./build-pkg.sh
+./build-pkg.sh
 popd >/dev/null
 
 # Build OGAgent for Windows. 
