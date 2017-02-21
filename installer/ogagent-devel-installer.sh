@@ -27,6 +27,7 @@ Prerequisites:
   - realpath
   - dpkg-dev
   - rpmbuild
+  - xar
 - Open a web browser and download Microsoft Visual C++ 2010 Redistributable Package (x86) from: http://www.microsoft.com/en-us/download/details.aspx?id=5555
 - Copy or move "vcredist_x86.exe" file to $PROGDIR directory.
 Press [Enter] key when ready to continue.
@@ -61,9 +62,20 @@ cp -a build.bat ogagent.nsi ..
 ln -s ../../.. wine/drive_c/ogagent
 popd >/dev/null
 
-# Build OGAgent for GNU/Linux.
+# Download, compile and install bomutils.
+svn export https://github.com/hogliux/bomutils.git/trunk ogagent/macos/bomutils
+pushd ogagent/macos/bomutils >/dev/null
+make && make install
+popd >/dev/null
+
+# Build OGAgent for Linux.
 pushd $PROGDIR/linux >/dev/null
 sudo ./build-packages.sh
+popd >/dev/null
+
+# Build OGAgent for macOS.
+pushd $PROGDIR/macos >/dev/null
+sudo ./build-pkg.sh
 popd >/dev/null
 
 # Build OGAgent for Windows. 
@@ -82,9 +94,13 @@ OGAgent project source code is available in $PROGDIR/src directory.
     cd $PROGDIR/src
     ./update.sh
 
-- Commands to rebuild GNU/Linux packages:
+- Commands to rebuild Linux packages:
     cd $PROGDIR/linux
     sudo ./build-packages.sh
+
+- Commands to rebuild macOS package:
+    cd $PROGDIR/macos
+    ./build-pkg.sh
 
 - Commands to rebuild Windows installer:
     cd $PROGDIR/windows

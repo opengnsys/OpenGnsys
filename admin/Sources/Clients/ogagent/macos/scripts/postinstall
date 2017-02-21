@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+# Directories
+SRCDIR=$(dirname "$0")
+BINDIR=/usr/local/bin
+INITDIR=/Library/LaunchDaemons
+
+# Dependencies:
+#easy_install pip	# Si no existe pip.
+# comprobar versión de six, descargar e instalar con easy_install.
+#easy_install netifaces
+
+# Copi files.
+cp $SRCDIR/ogagent $BINDIR
+cp $SRCDIR/es.opengnsys.ogagent.plist $INITDIR
+
+# Show post-install message.
+osascript -e 'display notification "You must update Python Six from sourece and install netifaces module." with title "OGAgent Installer'
+

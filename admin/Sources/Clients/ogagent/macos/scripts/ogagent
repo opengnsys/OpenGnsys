@@ -1,6 +1,6 @@
 #!/bin/sh
 
-FOLDER=/usr/local/share/OGAgent
+FOLDER=/Applications/OGAgent.app
 
 cd $FOLDER
 python -m opengnsys.linux.OGAgentService $@

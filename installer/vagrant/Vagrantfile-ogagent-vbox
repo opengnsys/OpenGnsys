@@ -21,7 +21,7 @@ localectl set-x11-keymap ${LANG%_*}
 # Update repositories.
 dnf install -y http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 # Install main dependencies.
-dnf install -y debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract
+dnf install -y debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract xar
 # Install desktop (XFCE) and GUI utils.
 dnf install -y @xfce-desktop-environment firefox VirtualBox-guest kmod-VirtualBox akmod-VirtualBox akmods
 systemctl set-default graphical.target
@@ -61,8 +61,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # VM base and host name.
     ag.vm.box = "fedora/24-cloud-base"
     ag.vm.hostname = "ogAgent"
-    # Comment out to disable synced folder.
-    #ag.vm.synced_folder ".", "/vagrant", disabled: true
+    # Comment to disable synced folder.
+    ag.vm.synced_folder ".", "/vagrant"
     # Launch provisioning script.
     ag.vm.provision "shell", inline: SCRIPT
   end

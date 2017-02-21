@@ -10,6 +10,7 @@ Sisitema operativo GNU/Linux con los siguientes paquetes instalados:
 - Wine (32 bits), Wine Gecko, Wine Mono, Samba Winbind, Cabextrct
 - Creación de paquetes Deb (debhelper, dpkg-dev)
 - Creación de paquetes RPM (rpm-build)
+- Creación de paquetes Pkg (xar, bomutils)
 
 
 Crear instaladores de OGAgent
@@ -27,6 +28,11 @@ Crear instaladores de OGAgent
 - Crear el programa instalador para sistemas operativos Windows:
 	cd windows
 	./build-windows.sh
+	cd ..
+
+- Crear paquetes Deb y RPM para distribuciones GNU/Linux (requiere permisos de "root"):
+	cd macos
+	./build-pkg.sh
 	cd ..
 
 - Subir los nuevos ficheros .deb, .rpm y .exe generados en el directorio
@@ -68,6 +74,9 @@ Instalar OGAgent en cliente modelo
    - Editar el fichero de configuación "C:\Program Files\OGAgent\cfg\ogagent.cfg" (o C:\Archivos de programa\OGAgent\cfg\ogagent.cfg) y modificar el valor de la cláusula "remote" de la sección [OGAgent] inclyendo la dirección IP del servidor OpenGnsys.
   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
 	NET START OGAgent
+
+- macOS:
+	(en preparación)
 
 
 Postconfiguración para clientes clonados
