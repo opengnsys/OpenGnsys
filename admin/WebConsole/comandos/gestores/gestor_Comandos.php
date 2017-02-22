@@ -167,7 +167,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 	}
 	else{
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
-		$script=urldecode($ValorParametros["scp"]);
+		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
 			// Envio al servidor 
 			$shidra=new SockHidra($servidorhidra,$hidraport); 

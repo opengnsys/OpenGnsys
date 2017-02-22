@@ -76,7 +76,12 @@ Instalar OGAgent en cliente modelo
 	NET START OGAgent
 
 - macOS:
-	Descargar el paquete y usar Finder pulsando sobre el fichero para instalarlo.
+  - Instalar dependencias:
+	sudo easy_install pip
+	sudo pip install netifaces requests six
+  - Puede ser necesario activar descargas desde cualquier sitio en Menú /
+Preferencias del sistema / Seguridad y privacidad / Pestaña General.
+  - Descargar el paquete y usar Finder pulsando sobre el fichero para instalarlo.
   - Configurar el agente:
 	sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /Applications/OGAgent.app/cfg/ogagent.cfg
   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):

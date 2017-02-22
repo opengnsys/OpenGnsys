@@ -476,7 +476,7 @@ fi
 MNTDIR=$(ogMount $1 $2) || return $?
 
 # Buscar fichero de configuración de OGAgent.
-for i in usr/share "Program Files" "Program Files (x86)"; do
+for i in usr/share "Program Files" "Program Files (x86)" Applications/OGAgent.app; do
     CFGFILE=$(ogGetPath "$MNTDIR/$i/OGAgent/cfg/ogagent.cfg")
     [ -n "$CFGFILE" ] && break
 done
