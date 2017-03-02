@@ -460,7 +460,8 @@ function apacheConfiguration ()
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules."
 		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
-
+	# Definir ficheros .pkg como binarios para descargar paquetes macOS.
+	sed -i '/pkg/! s/octet-stream\(.*\)/octet-stream\1 pkg/' /etc/mime-types
 	# Actualizar configuración para acceso a API REST
 	#    (solo actualizaciones de 1.0.x a 1.1.x).
 	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf ]; do

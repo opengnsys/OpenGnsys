@@ -1100,7 +1100,8 @@ function installWebConsoleApacheConf()
 	$APACHEMAKECERT
 	# Activar módulo Rewrite.
 	$APACHEREWRITEMOD
-
+	# Definir ficheros .pkg como binarios para descargar paquetes macOS.
+	sed -i '/pkg/! s/octet-stream\(.*\)/octet-stream\1 pkg/' /etc/mime-types
 	# Genera configuración de consola web a partir del fichero plantilla.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 		# Configuración para versiones anteriores de Apache.
@@ -1115,12 +1116,11 @@ function installWebConsoleApacheConf()
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): config file can't be linked to apache conf, verify your server installation"
 		return 1
-	else
-		echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
-		service=$APACHESERV
-		$ENABLESERVICE; $STARTSERVICE
-		return 0
 	fi
+	echoAndLog "${FUNCNAME}(): config file created and linked, restarting apache daemon"
+	service=$APACHESERV
+	$ENABLESERVICE; $STARTSERVICE
+	return 0
 }
 
 
