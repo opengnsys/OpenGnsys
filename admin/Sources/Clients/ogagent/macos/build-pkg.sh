@@ -6,7 +6,7 @@ VERSION=1.1.0
 AUTHOR="OpenGnsys Project"
 
 # Create directories.
-mkdir build && cd build
+mkdir -p build && cd build
 mkdir -p flat/base.pkg flat/Resources/en.lproj
 mkdir -p root/Applications
 
@@ -79,6 +79,7 @@ cat << EOT > flat/Distribution
 </installer-script>
 EOT
 
-# Create Xar application archive.
-( cd flat && xar --compression none -cf "../../../OGAgent-$VERSION Installer.pkg" * )
+# Create new Xar application archive.
+rm -f ../../../OGAgentInstaller-$VERSION.pkg
+( cd flat && xar --compression none -cf "../../../OGAgentInstaller-$VERSION.pkg" * )
 

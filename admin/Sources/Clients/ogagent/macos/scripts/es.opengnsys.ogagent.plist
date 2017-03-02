@@ -5,15 +5,11 @@
                 <string>es.opengnsys.ogagent</string>
                 <key>ProgramArguments</key>
                 <array>
-                        <string>/usr/local/bin/ogagent</string>
+                        <string>/usr/bin/ogagent</string>
                         <string>start</string>
                 </array>
                 <key>RunAtLoad</key>
                 <true/>
-                <key>StandardOutPath</key>
-                <string>/var/log/ogagent.log</string>
-                <key>StandardErrorPath</key>
-                <string>/var/log/ogagent.err</string>
         </dict>
 </plist>
 

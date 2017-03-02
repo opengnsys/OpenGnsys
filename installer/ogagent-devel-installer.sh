@@ -63,8 +63,9 @@ ln -s ../../.. wine/drive_c/ogagent
 popd >/dev/null
 
 # Download, compile and install bomutils.
-svn export https://github.com/hogliux/bomutils.git/trunk ogagent/macos/bomutils
-pushd ogagent/macos/bomutils >/dev/null
+mkdir -p ogagent/macos/downloads
+svn export https://github.com/hogliux/bomutils.git/trunk ogagent/macos/downloads/bomutils
+pushd ogagent/macos/downloads/bomutils >/dev/null
 make && make install
 popd >/dev/null
 

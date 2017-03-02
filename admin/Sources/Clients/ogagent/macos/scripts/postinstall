@@ -2,7 +2,7 @@
 
 # Directories
 SRCDIR=$(dirname "$0")
-BINDIR=/usr/local/bin
+BINDIR=/usr/bin
 INITDIR=/Library/LaunchDaemons
 
 # Dependencies:
