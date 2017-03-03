@@ -14,8 +14,13 @@ ln -s /bin/true /sbin/initctl
 #apt-get update; apt-get install --no-install-recommends dbus; dbus-uuidgen > /var/lib/dbus/machine-id; dpkg-divert --local --rename --add /sbin/initctl; ln -s /bin/true /sbin/initctl
 
 #cp /tmp/sources.list /etc/apt/sources.list
-#Limpiamos y actualizamos los repositorios apt
+#Limpiamos y actualizamos los repositorios apt (incluir siempre paquetes de 32 bits)
 apt-get clean
+OSARCH=${OSARCH:-$(dpkg --print-architecture)}
+if [ "$OSARCH" != "i386" ]; then
+        dpkg --add-architecture i386
+        PKGS32="lib32gcc1 lib32stdc++6 lib32z1"
+fi
 apt-get update
 apt-get upgrade -y
 
@@ -29,10 +34,7 @@ echo "/dev/sda1 / ext4 rw,errors=remount-ro 0 0" > /etc/mtab
 # Deteccion de la versión y kernel a usar
 OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
 [ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
-OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
-if [ -z "$OSARCH" ]; then
-	uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
-fi
+OSRELEASE=${OSRELEASE:-$(uname -r)}
 # inicio de la instalacion
 if [ "$OSRELEASE" == "3.7.6-030706-generic" ]; then
 	# Descargar e instalar Kernel 3.7.
@@ -62,7 +64,7 @@ console-setup console-setup/fontsize-fb47 select 8x16
 davfs2 davfs2/suid_file boolean false
 kexec-tools kexec-tools/load_kexec boolean true
 EOT
-apt-get -y install sshfs console-data kexec-tools davfs2
+apt-get -y install sshfs console-data kexec-tools davfs2 $PKGS32
 
 #comenzamos con la instalación de los paquetes a instalar.
 for group in `find /usr/bin/boot-tools/listpackages/ -name sw.*`
@@ -71,9 +73,6 @@ do
 	for package in ` awk /^install/'{print $2}' $group `
 	do
 		echo -n $package
-		#ADV
-		#TEST
-		#apt-get -y --force-yes install --no-install-recommends $package &>/dev/null
 		apt-get -y --force-yes  install $package &>/dev/null 
 		RETVAL=$?
 		if [ $RETVAL == 0 ]

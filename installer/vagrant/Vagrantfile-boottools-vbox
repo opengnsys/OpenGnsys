@@ -27,6 +27,8 @@ ln -fs /var/lib/tftpboot /opt/opengnsys
 svn export http://opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys/client
 echo "Connect to this VM, launch boot-tools generation script and follow instructions:"
 echo "    sudo /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh"
+echo "Warning: this process may take a long time."
+echo "ogLive ISO file will be located in /opt/opengnsys/tftpboot/ogclient directory."
 EOT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|

@@ -15,10 +15,8 @@ OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
 [ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
 OSDISTRIB=${OSDISTRIB:-$(lsb_release -is)}
 OSCODENAME=${OSCODENAME:-$(lsb_release -cs)}
-OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
-if [ -z "$OSARCH" ]; then
-	uname -a | grep x86_64 > /dev/null  &&  OSARCH="amd64" || OSARCH="i386"
-fi
+OSRELEASE=${OSRELEASE:-$(uname -r)}
+OSARCH=${OSARCH:-$(dpkg --print-architecture)}
 OSHTTP=${OSHTTP:-"http://es.archive.ubuntu.com/ubuntu/"}
 
 echo "$OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP"

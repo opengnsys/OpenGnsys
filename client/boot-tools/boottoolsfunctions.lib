@@ -107,16 +107,15 @@ case "${1,,}" in
 	xenial-4.8) 	# ogLive 1.1.0-rc5 basado en Ubuntu 16.04 y Kernel 4.8.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="xenial"
-		OSRELEASE="4.8.0-34-generic"
-		OSARCH="i386"
+		OSRELEASE="4.8.0-39-generic"
+		OSARCH="amd64"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
 	host)	# ogLive basado en la distribución del servidor.
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
-		OSRELEASE=$(uname -a | awk '{print $3}')
-		#uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
-		OSARCH="i386"
+		OSRELEASE=$(uname -r)
+		OSARCH=$(dpkg --print-architecture)
 		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
 	*)	# Parámetro desconocido
@@ -126,7 +125,7 @@ case "${1,,}" in
 esac
 SVNURL="http://opengnsys.es/svn/branches/version1.1/client"
 VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
-NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
+NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
 NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
 export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
