@@ -41,6 +41,7 @@ echo "    cd /home/vagrant/browser && qmake browser.pro && make"
 echo "Do not forget to copy all Browser's files to OpenGnsys Server:"
 echo " - Browser binary to /opt/opengnsys/client/bin directory on server."
 echo " - Qt linked libraries to /opt/opengnsys/client/lib/qtlibs directory."
+echo " - 64-bit-based ogLive only: libssl and libcrypto to /opt/opengnsys/client/lib/qtlibs directory."
 EOT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
