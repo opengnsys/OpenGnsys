@@ -19,7 +19,7 @@ apt-get clean
 OSARCH=${OSARCH:-$(dpkg --print-architecture)}
 if [ "$OSARCH" != "i386" ]; then
         dpkg --add-architecture i386
-        PKGS32="lib32gcc1 lib32stdc++6 lib32z1"
+        PKGS32="lib32gcc1 lib32stdc++6 lib32z1 libc6-i386"
 fi
 apt-get update
 apt-get upgrade -y
@@ -64,7 +64,7 @@ console-setup console-setup/fontsize-fb47 select 8x16
 davfs2 davfs2/suid_file boolean false
 kexec-tools kexec-tools/load_kexec boolean true
 EOT
-apt-get -y install sshfs console-data kexec-tools davfs2 $PKGS32
+apt-get -y install sshfs console-data kexec-tools davfs2
 
 #comenzamos con la instalación de los paquetes a instalar.
 for group in `find /usr/bin/boot-tools/listpackages/ -name sw.*`
@@ -100,6 +100,9 @@ while read -e mod vers; do
 		read
 	fi
 done < <(dkms status 2>/dev/null | awk -F, '$3~/added/ {print $1,$2}')
+
+# Instalar en último lugar librarías de 32 bits para distribuciones de 64 bits.
+[ -n "$PKGS32" ] && apt-get -y install $PKGS32
 
 #Activamos el hook del oginitrd.img 
 mv /etc/initramfs-tools/oghooks /etc/initramfs-tools/hooks/

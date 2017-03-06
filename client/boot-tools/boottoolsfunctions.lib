@@ -23,8 +23,12 @@ export BTSVNOG2=/tmp/opengnsys_installer/opengnsys2
 export BTTARGETDIR=/var/lib/tftpboot/ogclient/
 export BTROOTFSIMG=${BTTARGETDIR}ogclient.img
 export BTROOTFSMNT=${BTTARGETDIR}ogclientmount
-# tamaño maximo limitado por schroot 2GB
-export BTVIRTUALDISKSIZE=2000
+if [ "$OSARCH" = "i386" ]; then
+        # tamaño maximo limitado por schroot 2GB para 32 bits
+        export BTVIRTUALDISKSIZE=2000 
+else
+        export BTVIRTUALDISKSIZE="3G"
+fi
 export BTROOTFSIMGLABEL=ogClient
 
 export LOG_FILE=/tmp/boot-tools_installation.log
@@ -181,10 +185,12 @@ fi
 chown -R root:opengnsys $BTTARGETDIR
 
 #echo "$FUNCNAME(): Creando el disco virtual con tamaño máximo de  $BTVIRTUALDISKSIZE MB" 
-dd if=/dev/zero of=$BTROOTFSIMG bs=1048576 count=$BTVIRTUALDISKSIZE
-	#qemu-img create $BTROOTFSIMG 3G	
+if [ "$OSARCH" = "i386" ]; then
+        dd if=/dev/zero of=$BTROOTFSIMG bs=1048576 count=$BTVIRTUALDISKSIZE
 	#dd if=/dev/zero of=$BTROOTFSIMG bs=1k count=$OGCLIENTSIZEKB   # necesita 500MB
-
+else
+        qemu-img create $BTROOTFSIMG $BTVIRTUALDISKSIZE
+fi
 if [ $? -ne 0 ]
 then 
 	errorAndLog "$FUNCNAME(): Creando el disco virtual con tamaño maxima $BTVIRTUALDISKSIZE MB : ERROR" 
