@@ -25,11 +25,11 @@ function jq() {
 
 # Create/edit JSON file about installed ogLive clients.
 function addToJson() {
-    local DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEREV="$3"
-    local OGLIVEDIR="$(basename $4)" OGLIVEISO="$(basename $5)"
+    local DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEARCH="$3" OGLIVEREV="$4"
+    local OGLIVEDIR="$(basename $5)" OGLIVEISO="$(basename $6)"
     # JSON data for installed ogLive.
     DATA=$(cat << EOT | jq .
-{"distribution":"$OGLIVEDIST","kernel":"$OGLIVEKRNL","revision":"$OGLIVEREV","directory":"$OGLIVEDIR","iso":"$OGLIVEISO"}
+{"distribution":"$OGLIVEDIST","kernel":"$OGLIVEKRNL","architecture":"$OGLIVEARCH","revision":"$OGLIVEREV","directory":"$OGLIVEDIR","iso":"$OGLIVEISO"}
 EOT
     )
     # Check JSON file consistency.
@@ -37,7 +37,7 @@ EOT
         # Check if ogLive is defined into JSON file.
         n=$(jq ".oglive | length" $INFOFILE)
         for ((i=0; i<n; i++)); do
-            [ "$(jq ".check=$DATA | .check==.oglive[$i]" $INFOFILE)" ] && INDEX=$i
+            [ "$(jq ".check=$DATA | .check==.oglive[$i]" $INFOFILE)" == "true" ] && INDEX=$i
         done
         # Check if it needs to insert data.
         if [ -z "$INDEX" ]; then
@@ -87,7 +87,7 @@ Commands:
   help                show this help
   config              show configuration parameters
   check               check system consistency
-  convert             convert old default ogclient to default ogLive client
+  convert             convert old ogclient to new default ogLive client
   list                list installed ogLive clients
   show all            show JSON information about all installed ogLive clients
   show default        show JSON information about ogLive client marked as default
@@ -121,7 +121,7 @@ function convert() {
     OGLIVEKRNL=$(file -bkr $OGCLIENT/ogvmlinuz | awk '/Linux/ {for(i=1;i<=NF;i++) if($i~/version/) {v=$(i+1);sub(/-.*/,"",v);print v}}')
     OGLIVEDIR=$DEFOGLIVE-$OGLIVEKRNL
     [ -r $OLDINFOFILE ] && OGLIVEISO=$(head -1 $OLDINFOFILE).iso
-    addToJson "$(echo $OGLIVEISO|cut -f2 -d-)" "$OGLIVEKRNL" "${OGLIVEISO##*-}" "$OGLIVEDIR" "$OGLIVEISO"
+    addToJson "$(echo $OGLIVEISO|cut -f2 -d-)" "$OGLIVEKRNL" "i386" "${OGLIVEISO##*-}" "$OGLIVEDIR" "$OGLIVEISO"
     # Rename directory, link to default and clean old files.
     mv -v $OGCLIENT $OGLIVEDIR
     ln -vfs $OGLIVEDIR $DEFOGLIVE
@@ -202,7 +202,7 @@ function list() {
     [ ! -r $INFOFILE ] && raiseError access "Configuration file."
     # List all defined indexes, directories and check if missing.
     jq -r .oglive[].directory $INFOFILE | nl -v 0 | \
-	    awk '{system("echo -n "$0"; test -d '$TFTPDIR'/"$2" || echo -n \" (missing)\"; echo")}' | column -t
+            awk '{system("echo -n "$0"; test -d '$TFTPDIR'/"$2" || echo -n \" (missing)\"; echo")}' | column -t
 }
 
 # Show information about an installed ogLive client. 
@@ -279,7 +279,14 @@ function install() {
     OGLIVEDIST="$(echo $OGLIVEFILE|cut -f2 -d-)"
     OGLIVEREV="${OGLIVEFILE##*-}"; OGLIVEREV="${OGLIVEREV%.*}"
     OGLIVEKRNL="$(echo $OGLIVEFILE|cut -f3- -d-)"; OGLIVEKRNL="${OGLIVEKRNL%-$OGLIVEREV.*}"
-    OGLIVEDIR="$TFTPDIR/$DEFOGLIVE-$OGLIVEDIST-${OGLIVEKRNL%%-*}-$OGLIVEREV"
+    OGLIVEARCH="$(echo $OGLIVEFILE|awk -F- '{print $(NF-1)}')"
+    case "$OGLIVEARCH" in
+        i386|amd64)
+            OGLIVEKRNL="${OGLIVEKRNL%-$OGLIVEARCH}" ;;
+        *)
+            OGLIVEARCH="i386" ;;
+    esac
+    OGLIVEDIR="$TFTPDIR/$DEFOGLIVE-$OGLIVEDIST-${OGLIVEKRNL%%-*}-$OGLIVEARCH-$OGLIVEREV"
     # Get current or default Samba key.
     OGINITRD=$OGLIVEDIR/oginitrd.img
     [ ! -r $OGINITRD ] && OGINITRD=$TFTPDIR/$DEFOGLIVE/oginitrd.img
@@ -327,7 +334,7 @@ function install() {
     umount $TMPDIR
     rmdir $TMPDIR
     # Update JSON file.
-    addToJson "$OGLIVEDIST" "$OGLIVEKRNL" "$OGLIVEREV" "$OGLIVEDIR" "$OGLIVEFILE"
+    addToJson "$OGLIVEDIST" "$OGLIVEKRNL" "$OGLIVEARCH" "$OGLIVEREV" "$OGLIVEDIR" "$OGLIVEFILE"
 }
 
 # Uninstall an ogLive client.
