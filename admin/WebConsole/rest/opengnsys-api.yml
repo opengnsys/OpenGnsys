@@ -183,11 +183,7 @@ paths:
     get:
       description: Get an `OU` object.
       parameters:
-        - name: ouid
-          in: path
-          description: Organization Unit identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
       responses:
         "200":
           description: Successful response
@@ -213,11 +209,7 @@ paths:
     get:
       description: Get all group of labs defined in an `OU` object.
       parameters:
-        - name: ouid
-          in: path
-          description: Organization Unit identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
       responses:
         "200":
           description: Successful response
@@ -257,11 +249,7 @@ paths:
     get:
       description: Get all `lab` objects defined in an `OU`.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
       responses:
         "200":
           description: Successful response
@@ -304,16 +292,8 @@ paths:
     get:
       description: Get a `lab` object.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: laboratory identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
       responses:
         "200":
           description: Successful response
@@ -391,7 +371,7 @@ paths:
               picture:
                 description: Lab's picture file
                 type: string
-            required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, mcastmode, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, image ]
+            required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, mcastmode, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, picture ]
       security:
         - apikey: []
       tags:
@@ -401,16 +381,8 @@ paths:
     get:
       description: Get all `client` objects defined in an `lab`.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
       responses:
         "200":
           description: Successful response
@@ -450,25 +422,31 @@ paths:
       tags:
         - server
         - client
+  /ous/{ouid}/labs/{labid}/clients//status:
+    get:
+      description: Get execution status of all clients definied in a `lab`
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/StatusModel"
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
   /ous/{ouid}/labs/{labid}/clients/{clientid}:
     get:
       description: Get a `client` object.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
       responses:
         "200":
           description: Successful response
@@ -519,7 +497,7 @@ paths:
               picture:
                 description: client's picture file
                 type: string
-            required: [ id, name, serialno, netiface, netdriver, mac, ip, netmask, routerip, repo, validation, image ]
+            required: [ id, name, serialno, netiface, netdriver, mac, ip, netmask, routerip, repo, validation, picture ]
       security:
         - apikey: []
       tags:
@@ -529,21 +507,9 @@ paths:
     get:
       description: Get the hardware definition of a `client` object.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
       responses:
         "200":
           description: Successful response
@@ -580,21 +546,9 @@ paths:
     get:
       description: Get disks configuration of a `client`
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
       responses:
         "200":
           description: Successful response
@@ -671,42 +625,14 @@ paths:
     get:
       description: Get execution status of a `client`
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
       responses:
         "200":
           description: Successful response
           schema:
-            type: object
-            properties:
-              id:
-                description: client id
-                type: integer
-                format: int32
-              ip:
-                description: client IP address
-                type: string
-              status:
-                description: execution status
-                type: string
-                enum: [ "nodata", "off", "ogclient", "busy", "linux", "windows", "unknown" ]
-              loggedin:
-                description: flag to check if an user is logged in
-                type: boolean
-            required: [ id, ip, status, loggedin ]
+            $ref: "#/definitions/StatusModel"
       security:
         - apikey: []
       tags:
@@ -716,21 +642,9 @@ paths:
     post:
       description: Store UDS server URLs to resend some events recieved from OGAgent.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
         - name: data
           in: body
           description: Operation data
@@ -765,21 +679,9 @@ paths:
     post:
       description: Record session data for a client.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
         - name: data
           in: body
           description: Session parameters
@@ -804,21 +706,9 @@ paths:
     delete:
       description: Unreserve a client, clear its session data and send a poweroff operation.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: labid
-          in: path
-          description: Lab identificator
-          required: true
-          type: integer
-        - name: clientid
-          in: path
-          description: Client identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
       responses:
         "200":
           description: Successful response
@@ -832,11 +722,7 @@ paths:
     get:
       description: Get all `repo` objects defined in an `OU`.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
       responses:
         "200":
           description: Successful response
@@ -866,16 +752,8 @@ paths:
     get:
       description: Get a `repo` object.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: repoid
-          in: path
-          description: repository identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/repoParam"
       responses:
         "200":
           description: Successful response
@@ -905,11 +783,7 @@ paths:
     get:
       description: Get all `image` objects defined in an `OU`.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
       responses:
         "200":
           description: Successful response
@@ -941,16 +815,8 @@ paths:
     get:
       description: Get an `image` object.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: imageid
-          in: path
-          description: image definition identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/imageParam"
       responses:
         "200":
           description: Successful response
@@ -1020,16 +886,8 @@ paths:
     get:
       description: Get software inventory store into an `image`
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: imageid
-          in: path
-          description: image definition identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/imageParam"
       responses:
         "200":
           description: Successful response
@@ -1067,16 +925,8 @@ paths:
         Reserve a random client with an installed image and send a boot/reboot operation.
         If `labid` is specified, then choose a `client` defined in this lab.
       parameters:
-        - name: ouid
-          in: path
-          description: OU identificator
-          required: true
-          type: integer
-        - name: imageid
-          in: path
-          description: image definition identificator
-          required: true
-          type: integer
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/imageParam"
         - name: labid
           in: query
           description: lab. identificator
@@ -1281,3 +1131,53 @@ paths:
       tags:
         - server
         - agent
+parameters:
+  ouParam:
+    name: ouid
+    in: path
+    description: OU identificator
+    required: true
+    type: integer
+  labParam:
+    name: labid
+    in: path
+    description: Lab identificator
+    required: true
+    type: integer
+  clientParam:
+    name: clientid
+    in: path
+    description: Client identificator
+    required: true
+    type: integer
+  repoParam:
+    name: repoid
+    in: path
+    description: repository identificator
+    required: true
+    type: integer
+  imageParam:
+    name: imageid
+    in: path
+    description: image definition identificator
+    required: true
+    type: integer
+definitions:
+  StatusModel:     
+    type: object
+    properties:
+      id:
+        description: client id
+        type: integer
+        format: int32
+      ip:
+        description: client IP address
+        type: string
+      status:
+        description: execution status
+        type: string
+        enum: [ "off", "ogclient", "busy", "linux", "windows", "macos", "unknown" ]
+      loggedin:
+        description: flag to check if an user is logged in
+        type: boolean
+    required: [ id, ip, status ]

@@ -368,6 +368,7 @@ EOD;
     }
 );
 
+
 /**
  * @brief    List all clients defined in a lab
  * @note     Route: /ous/id1/labs/id2/clients, Method: GET
@@ -628,55 +629,71 @@ EOD;
  * @param    id3     client id.
  * @return   JSON string with client status
  */
-$app->get('/ous/:ouid/labs/:labid/clients/:clntid/status(/)', 'validateApiKey',
-    function($ouid, $labid, $clntid) {
+$app->get('/ous/:ouid/labs/:labid/clients//status(/)', 'validateApiKey', 'getStatus');
+$app->get('/ous/:ouid/labs/:labid/clients/:clntid/status(/)', 'validateApiKey', 'getStatus');
+function getStatus($ouid, $labid, $clntid=0) {
 	global $userid;
 	global $cmd;
 	global $LONCABECERA;
 	global $LONHEXPRM;
-
+	$app = \Slim\Slim::getInstance();
+	$clientid = $clientip = "";
+	$urls = Array();
 	// Status mapping.
 	$status = Array('OFF'=>"off",
 			'INI'=>"initializing",
 			'OPG'=>"ogclient",
 			'BSY'=>"busy",
 			'LNX'=>"linux",
-			'WIN'=>"windows");
+			'OSX'=>"macos",
+			'WIN'=>"windows",
+			'UNK'=>"unknown");
 	// Parameters.
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
-	$clntid = htmlspecialchars($clntid);
+	$single = is_numeric(explode("/", $app->request->getResourceUri())[6]);
 
 	// Database query.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
-       ordenadores.idordenador, ordenadores.ip
+       aulas.idaula, ordenadores.idordenador, ordenadores.ip
   FROM entornos, ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  WHERE adm.idadministradorcentro = '$userid'
    AND adm.idcentro='$ouid'
    AND aulas.idaula='$labid'
+EOD;
+	// Request for a single client.
+	if ($single) {
+		$clntid = htmlspecialchars($clntid);
+		$cmd->texto .= <<<EOD
    AND ordenadores.idordenador='$clntid';
 EOD;
+	} else {
+		$response = Array();
+	}
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	// Check if user is an UO admin and client exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
+	// Check if user is an UO admin and asset exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and (($single and checkParameter($rs->campos["idordenador"])) or (! $single and checkParameter($rs->campos["idaula"])))) {
 		// First, try to connect to ogAdmCleint service.
 		$serverip = $rs->campos["ipserveradm"];
 		$serverport = $rs->campos["portserveradm"];
-		$clientid = $rs->campos["idordenador"];
-		$clientip = $rs->campos["ip"];
-
+		while (!$rs->EOF) {
+			$id[$rs->campos["ip"]] = $rs->campos["idordenador"];
+			$stat[$rs->campos["ip"]] = $status['OFF'];
+			$rs->Siguiente();
+		}
 		// Connect to reset client's status.
+		$clientid = implode(",", $id);
+		$clientip = implode(";", array_keys($id));
 		$reqframe = "nfn=Sondeo\r".
 			    "ido=$clientid\r".
 			    "iph=$clientip\r";
 		$result = sendCommand($serverip, $serverport, $reqframe, $values);
-
 		// Connect to fetch client's status.
 		// Asuming client is off by default.
 		$values["tso"]="OFF";
@@ -692,40 +709,65 @@ EOD;
 			// Wait until next checking (0.1 ms).
 			usleep(100000);
 		}
-
 		// Parse status response.
 		if ($result) {
 			// Check status type.
 			if (checkParameter($values["tso"])) {
-				// Compose JSON response.
-				$response['id'] = $clientid;
-				$response['ip'] = $clientip;
-				$stat = Array();
-				preg_match('/\/[A-Z]*;/', $values["tso"], $stat);
-				// Check if data exists.
-				if (empty($stat[0]) or preg_match('/OFF/', $stat[0])) {
-					// If no data, check OGAgent API connection.
-					$url = "https://$clientip:8000/opengnsys/status";
-					$result = multiRequest(Array($url));
-					if (empty($result[0]['data'])) {
-						// Client is off.
-						$response['status'] = $status['OFF'];
-					} else {
-						// Get status and session data.
-						$data = json_decode($result[0]['data']);
-						if (isset($status[$data->status])) {
-							$response['status'] = $status[$data->status];
-							$response['loggedin'] = $data->loggedin;
+				foreach (explode(";", $values["tso"]) as $data) {
+					if (!empty($data)) {
+						list($clip, $clst) = explode("/", $data);
+						if ($clst != "OFF") {
+							// Update current status.
+							$stat[$clip] = $status[$clst];
 						}
 					}
-				} else {
-					$response['status'] = $status[substr($stat[0], 1, 3)];
 				}
-				if (empty($response['status'])) {
-					$response['status'] = "unknown";
-				}
-				jsonResponse(200, $response);
 			}
+			// Prepare request to new OGAgent for OSes.
+			foreach ($stat as $ip => $st) {
+				if ($st == "off") {
+					$urls[$ip] = "https://$ip:8000/opengnsys/status";
+				}
+			}
+			// Send request to OGAgents.
+			if (isset($urls)) {
+				$result = multiRequest($urls);
+			}
+			// Parse responses.
+			reset($urls);
+			foreach ($result as $res) {
+				if (!empty($res['data'])) {
+					// Get status and session data.
+					$ip = key($urls);
+					$data = json_decode($res['data']);
+					if (@isset($status[$data->status])) {
+						$stat[$ip] = $status[$data->status];
+						$logged[$ip] = $data->loggedin;
+					} else {
+						$stat[$ip] = $status['UNK'];
+					}
+				}
+				unset($urls[$ip]);
+			}
+			// Compose JSON response.
+			if ($single) {
+				// Single response.
+				$response['id'] = reset($id);
+				$response['ip'] = key($id);
+				$response['status'] = $stat[$ip];
+				empty($logged[$ip]) || $response['loggedin'] = $logged[$ip];
+			} else {
+				// Multiple responses.
+				foreach ($stat as $ip => $st) {
+					$tmp = Array();
+					$tmp['id'] = $id[$ip];
+					$tmp['ip'] = $ip;
+					$tmp['status'] = $stat[$ip];
+					empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
+					array_push($response, $tmp);
+				}
+			}
+			jsonResponse(200, $response);
 		} else {
 			// Access error.
 			$response['message'] = "Cannot access to OpenGnsys server";
@@ -733,8 +775,7 @@ EOD;
 		}
 	}
 	$rs->Cerrar(); 
-    }
-);
+}
 
 
 /**
