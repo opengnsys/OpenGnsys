@@ -59,7 +59,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.gui = true
     end
     # VM base and host name.
-    ag.vm.box = "fedora/24-cloud-base"
+    ag.vm.box = "fedora/25-cloud-base"
     ag.vm.hostname = "ogAgent"
     # Comment to disable synced folder.
     ag.vm.synced_folder ".", "/vagrant"

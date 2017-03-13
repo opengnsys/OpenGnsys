@@ -22,7 +22,7 @@ OGAgent devoloping environment installation
 
 Prerequisites:
 - Install packages, if needed:
-  - Wine for 32-bit with Winetricks
+  - Wine for 32-bit (Winetricks may be required)
   - Python 2.7 with pyqt4-dev-tools
   - realpath
   - dpkg-dev
@@ -47,8 +47,8 @@ cat << EOT
 
 Manual actions:
 - After all downloads, install Gecko for Wine, if needed.
-- Press [Esc] key or "Cancel" button on Winetricks screen.
-- Accept default settings for all other components
+- Press [Esc] key or "Cancel" button on Winetricks screen, if needed.
+- Accept default settings for all other components.
 - Uncheck all options on "Completing NSIS Setup" screen.
 Press [Enter] key to init downloads. 
 

@@ -8,6 +8,7 @@ Ficheros disponibles para descarga de agente OGAgent:
  - ogagent_Version_all.deb      OGAgent para sistemas Ubuntu, Debian y derivados
  - ogagent-Version.noarch.rpm   OGAgent para sistemas Red Hat, Fedora y derivados
  - ogagent-opensuse-Version.noarch.rpm   OGAgent para sistemas SuSE y OpenSuSE
+ - OGAgentInstaller-Version.pkg OGAgent para sistemas macOS X
  - OGAgentSetup-Version.exe     OGAgent para sistemas Windows
 
 
@@ -32,9 +33,21 @@ Instalación manual de los agentes.
 	chmod +x /etc/init.d/ogagent
    - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
 	service ogagent start
+   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
+	sudo ogagent start
 
  - OpenSuSE:
 	(en preparación)
+
+ - macOS X:
+   - Instalar dependencias:
+	sudo easy_install pip
+	sudo pip install netifaces requests six
+   - Descargar e instalar el agente:
+	sudo installer -pkg OGAgentInstaller-Version.pkg -target /
+   - Configurar el agente:
+	sudo sed "/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /Applications/OGAgent.app/cfg/ogagent.cfg > /tmp/ogagent.cfg
+	sudo mv /tmp/ogagent.cfg /Applications/OGAgent.app/cfg/ogagent.cfg
 
  - Windows (como usuario administrador):
    - Descargar e instalar el agente ejecutando:

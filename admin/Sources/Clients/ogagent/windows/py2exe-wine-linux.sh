@@ -2,7 +2,7 @@
 
 # We need:
 # * Wine (32 bit)
-# * winetricks
+# * winetricks (in some distributions)
 
 export WINEARCH=win32
 WINE=wine
@@ -25,8 +25,10 @@ download() {
 install_python() {
     WINEPREFIX=`pwd`/wine
     export WINEPREFIX
-    echo "Setting up wine prefix (using winetricks)"
-    winetricks
+    if which winetricks &>/dev/null; then
+        echo "Setting up wine prefix (using winetricks)"
+        winetricks
+    fi
     
     cd downloads
     echo "Installing python"
