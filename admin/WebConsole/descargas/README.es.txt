@@ -33,8 +33,6 @@ Instalación manual de los agentes.
 	chmod +x /etc/init.d/ogagent
    - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
 	service ogagent start
-   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
-	sudo ogagent start
 
  - OpenSuSE:
 	(en preparación)
@@ -48,6 +46,8 @@ Instalación manual de los agentes.
    - Configurar el agente:
 	sudo sed "/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /Applications/OGAgent.app/cfg/ogagent.cfg > /tmp/ogagent.cfg
 	sudo mv /tmp/ogagent.cfg /Applications/OGAgent.app/cfg/ogagent.cfg
+   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):
+	sudo ogagent start
 
  - Windows (como usuario administrador):
    - Descargar e instalar el agente ejecutando:
