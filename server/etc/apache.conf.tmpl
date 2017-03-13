@@ -2,19 +2,26 @@
 
 Alias /opengnsys CONSOLEDIR
 
+RewriteEngine On
+
 # Overrides default CentOS php.ini configuration.
 php_value short_open_tag on
 
+# Redirect HTTP to HTTPS and default configuration.
 <Directory CONSOLEDIR>
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
 	Require all granted
 	Options -Indexes +FollowSymLinks
 	DirectoryIndex index.php
+	AddType octet/stream .pkg
 </Directory>
 
-# RESTful configuration.
+# Redirect HTTP to HTTPS and RESTful configuration.
 <Directory CONSOLEDIR/rest>
-	RewriteEngine On
 	RewriteBase /opengnsys/rest/
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteRule ^ index.php [QSA,L]
 </Directory>

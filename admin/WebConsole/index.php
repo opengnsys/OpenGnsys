@@ -14,11 +14,6 @@ if(isset($_SESSION)){ 	// Si existe algua sesión ...
 	session_unset(); // Elimina variables
 	session_destroy(); // Destruye sesión
 }
-# Cambiar a HTTPS
-if (empty ($_SERVER["HTTPS"])) {
-	header ("Location: https://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]);
-	exit (0);
-}
 
 // Cargar configuración.
 include_once("controlacceso.php");
