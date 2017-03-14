@@ -1100,16 +1100,14 @@ function installWebConsoleApacheConf()
 	$APACHEMAKECERT
 	# Activar módulo Rewrite.
 	$APACHEREWRITEMOD
-	# Definir ficheros .pkg como binarios para descargar paquetes macOS.
-	sed -i '/pkg/! s/octet-stream\(.*\)/octet-stream\1 pkg/' /etc/mime-types
 	# Genera configuración de consola web a partir del fichero plantilla.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 		# Configuración para versiones anteriores de Apache.
-		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
 			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
 	else
 		# Configuración específica a partir de Apache 2.4
-		sed -e "s/CONSOLEDIR/${CONSOLEDIR//\//\\/}/g" \
+		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
 			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
 	fi
 	$APACHEENABLEOG
@@ -1162,7 +1160,7 @@ function createDirs()
 	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
-	mkdir -p $path_opengnsys_base/images
+	mkdir -p $path_opengnsys_base/images/group
 	mkdir -p $TFTPCFGDIR
 	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst

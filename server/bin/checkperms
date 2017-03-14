@@ -37,8 +37,11 @@ if [ -z "$(getent passwd "$APACHE_USER" 2>/dev/null)" -o -z "$(getent group "$AP
 	exit 1
 fi
 
-chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/{log/clients,images}
-chmod -R 775 $OPENGNSYS_DIR/{log/clients,images}
+chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/{log/clients,images/group}
+find $OPENGNSYS_DIR/log/clients -type f -exec chmod 664 {} \;
+find $OPENGNSYS_DIR/images -maxdepth 1 -exec chown :$OPENGNSYS_USER {} \;
+find $OPENGNSYS_DIR/images -maxdepth 1 -type d -exec chmod 775 {} \;
+find $OPENGNSYS_DIR/images -maxdepth 1 -type f -exec chmod 664 {} \;
 find $OPENGNSYS_DIR/client/{interfaceAdm,scripts} ! -name "*.txt" -exec chmod +x {} \;
 chown $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
 chmod 700 $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso

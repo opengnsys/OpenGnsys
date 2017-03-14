@@ -151,7 +151,7 @@ case "$OSDISTRIB" in
 		;;
 esac
 for i in apache2 httpd; do
-	[ -f /etc/$i ] && APACHECFGDIR="/etc/$i"
+	[ -d /etc/$i ] && APACHECFGDIR="/etc/$i"
 	[ -f /etc/init.d/$i ] && APACHESERV="/etc/init.d/$i"
 done
 for i in dhcpd dhcpd3-server isc-dhcp-server; do
@@ -446,35 +446,29 @@ EOT
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
+	local config template
+
 	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2) y
 	#    activar módulo Rewrite (solo actualizaciones desde 1.0.x a 1.1.x).
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules."
-		mv $APACHECFGDIR/sites-available/opengnsys.conf $APACHECFGDIR/sites-available/opengnsys
 		a2ensite default-ssl
 		a2enmod ssl
 		a2enmod rewrite
-		a2dissite opengnsys.conf
 		a2ensite opengnsys
 	elif [ -e $APACHECFGDIR/conf.modules.d ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules."
 		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
-	# Definir ficheros .pkg como binarios para descargar paquetes macOS.
-	sed -i '/pkg/! s/octet-stream\(.*\)/octet-stream\1 pkg/' /etc/mime-types
-	# Actualizar configuración para acceso a API REST
-	#    (solo actualizaciones de 1.0.x a 1.1.x).
-	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf ]; do
-		if [ -e $config ] && ! grep -q "/rest" $config; then 
-			cat << EOT >> $config
-<Directory $INSTALL_TARGET/www/rest>
-	RewriteEngine On
-	RewriteBase /opengnsys/rest/
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteRule ^ index.php [QSA,L]
-</Directory>
-EOT
+	# Actualizar configuración de Apache a partir de fichero de plantilla.
+	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
+		# Elegir plantilla según versión de Apache.
+		if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
+		       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
+		else
+		       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
 		fi
+		sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g" $template > $config
 	done
 
 	# Reiniciar Apache.
@@ -622,7 +616,7 @@ function createDirs()
 	local dir
 
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
-	mkdir -p ${INSTALL_TARGET}/{client,images}
+	mkdir -p ${INSTALL_TARGET}/{client,images/group}
 	mkdir -p ${INSTALL_TARGET}/log/clients
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	# Detectar directorio de instalación de TFTP.
