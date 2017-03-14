@@ -51,8 +51,10 @@ chown root:$APACHE_GROUP $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.c
 chmod 640 $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/images/{fotos,iconos}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/api
+chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/tmp	# ???
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/tftpboot/menu.lst
 chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/tftpboot/ogclient
 find -L $OPENGNSYS_DIR/tftpboot -type d -exec chmod 755 {} \;
 find -L $OPENGNSYS_DIR/tftpboot -type f -exec chmod 644 {} \;
+chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/log/ogagent.log
 

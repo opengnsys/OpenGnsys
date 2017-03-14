@@ -559,9 +559,6 @@ function updateWebFiles()
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 
-	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
 	# Fichero de logs del agente OGAgent.
 	touch $INSTALL_TARGET/log/ogagent.log
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/ogagent.log
@@ -584,9 +581,6 @@ function updateInterfaceAdm()
 		echoAndLog "${FUNCNAME}(): error while updating admin interface" 
 		exit 1
 	fi 
-	chmod -R +x $INSTALL_TARGET/client/interfaceAdm 
-	chown $OPENGNSYS_CLIENTUSER:$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
-	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 	echoAndLog "${FUNCNAME}(): Admin interface updated successfully."
 } 
 
@@ -603,7 +597,6 @@ function makeDoxygenFiles()
 	rm -fr "$INSTALL_TARGET/www/api"
 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
 	rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
 
@@ -625,11 +618,12 @@ function createDirs()
 			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
 		done
 	fi
-	mkdir -p ${INSTALL_TARGET}/tftpboot/menu.lst
+	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
 	fi
+	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
 
 	# Crear usuario ficticio.
 	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
@@ -641,17 +635,6 @@ function createDirs()
 			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
 			return 1
 		fi
-	fi
-
-	# Establecer los permisos básicos.
-	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
-	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
-	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while setting permissions"
-		return 1
 	fi
 
 	# Mover el fichero de registro al directorio de logs. 
