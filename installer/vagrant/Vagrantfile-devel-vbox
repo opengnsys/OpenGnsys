@@ -30,8 +30,9 @@ mkdir -p /opt/opengnsys/images
 echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
 mount -a
 # Install OpenGnsys and change server address.
-wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash
-echo y | sudo /opt/opengnsys/bin/setserveraddr enp0s8
+wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash || exit $?
+mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
+echo y | /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
 for ((i=#{NCLIENTS}; i>0; i--)); do
     sed -i "/^}$/ i host ogClient0${i} { hardware ethernet #{MACPREFIX}0${i}; fixed-address #{NETPREFIX}1${i}; }" /etc/dhcp/dhcpd.conf
@@ -54,19 +55,43 @@ dpkg-reconfigure -fnoninteractive console-setup
 #for ((i=2; i<=#{NCLIENTS}; i++)); do
 #    /opt/opengnsys/bin/setclientmode ogClient ogClient0$i 1
 #done
-echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
+# Comment out next lines to install new Angular-based web application (on early development).
+#apt-get install -y git nodejs npm
+#ln -fs nodejs /usr/bin/node
+#npm install bower -g
+#svn export http://opengnsys.es/svn/branches/version1.1-tickets/ogWebAdmin-ticket761/admin/WebConsole/angular /opt/opengnsys/www/angular
+#cd /opt/opengnsys/www/angular
+#chown -R vagrant.vagrant .
+#su vagrant -c "bower install -F"
+#sed -i 's!BASE_URL = .*$!BASE_URL = "https://localhost:#{LOCALWEBPORT}/opengnsys";!' ogWebAdmin/assets/js/config.constants.js
+#### TEMPORAL PATCHES
+#su vagrant -c "bower install angular-sanitize -F"
+#su vagrant -c "bower install angular-translate-loader-static-files -F"
+#su vagrant -c "bower install angular-ui-select -F"
+#su vagrant -c "bower install bootstrap -F"
+#su vagrant -c "bower install isteven-angular-multiselect -F"
+#ln -s globunet-util.min.css ogWebAdmin/lib/globunet/dist/css/globunet-util.css
+#cp -a ogWebAdmin/assets/i18n/es.json ogWebAdmin/assets/i18n/en.json
+#sed -i 's/jm.bardallo/usuog/' ogWebAdmin/assets/js/controllers/login.controller.js
+#sed -i "s/DirectoryIndex index.php/DirectoryIndex index.php index.html/" /etc/apache2/sites-enabled/opengnsys.conf
+#service apache2 reload
+echo "Notes:"
+echo "- OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
+[ -d /opt/opengnsys/www/angular ] && echo "- Angular-based web URL: https://localhost:#{LOCALWEBPORT}/opengnsys/angular/ogWebAdmin/"
 EOT
 
 # Client 1 OS provisioning script.
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
+#apt-get update -y
 #apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-#wget -q http://opengnsys.es/svn/branches/version1.1-tickets/OGAgent-ticket718/client/shared/lib/ogagent/ogagent_1.1.0_all.deb	# temporal
+#wget -q --no-check-certificate https://#{NETPREFIX}10/opengnsys/descargas/ogagent_1.1.0_all.deb
 #dpkg -i ogagent_1.1.0_all.deb
 #sed -i "0,/remote=/ s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
 # Remove network configuration added by Vagrant.
 sed -i "/VAGRANT/,$ d" /etc/network/interfaces
-echo "After now, use VirtualBox GUI to disable network interface 1 and work with this VM."
+echo "Notes:"
+echo "- After now, use VirtualBox GUI to disable network interface 1 and restart this VM."
 # Leave VM halted.
 sleep 2
 poweroff &
