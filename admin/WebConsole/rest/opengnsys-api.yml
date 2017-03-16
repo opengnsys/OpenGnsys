@@ -422,7 +422,7 @@ paths:
       tags:
         - server
         - client
-  /ous/{ouid}/labs/{labid}/clients//status:
+  /ous/{ouid}/labs/{labid}/clients/status:
     get:
       description: Get execution status of all clients definied in a `lab`
       parameters:

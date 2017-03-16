@@ -54,6 +54,160 @@ function addClassroomGroup(&$classroomGroups, $rs){
 	});
 }
 
+/**
+ * @fn    getStatus(ouid, labid, [clntid])
+ * @brief    Returns client execution status or status of all lab's clients.
+ * @param    ouid    OU id.
+ * @param    labid   Lab. id.
+ * @param    clntid  Client id. (optional)
+ * @return   string  JSON object or array of objects including status data.
+ */
+function getStatus($ouid, $labid, $clntid=0) {
+	global $userid;
+	global $cmd;
+	global $LONCABECERA;
+	global $LONHEXPRM;
+	$app = \Slim\Slim::getInstance();
+	$clientid = $clientip = "";
+	$urls = Array();
+	// Status mapping.
+	$status = Array('OFF'=>"off",
+			'INI'=>"initializing",
+			'OPG'=>"ogclient",
+			'BSY'=>"busy",
+			'LNX'=>"linux",
+			'OSX'=>"macos",
+			'WIN'=>"windows",
+			'UNK'=>"unknown");
+	// Parameters.
+	$ouid = htmlspecialchars($ouid);
+	$labid = htmlspecialchars($labid);
+	$single = is_numeric(explode("/", $app->request->getResourceUri())[6]);
+
+	// Database query.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
+       aulas.idaula, ordenadores.idordenador, ordenadores.ip
+  FROM entornos, ordenadores
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
+   AND aulas.idaula='$labid'
+EOD;
+	// Request for a single client.
+	if ($single) {
+		$clntid = htmlspecialchars($clntid);
+		$cmd->texto .= <<<EOD
+   AND ordenadores.idordenador='$clntid';
+EOD;
+	} else {
+		$response = Array();
+	}
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
+	$rs->Primero();
+	// Check if user is an UO admin and asset exists.
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and (($single and checkParameter($rs->campos["idordenador"])) or (! $single and checkParameter($rs->campos["idaula"])))) {
+		// First, try to connect to ogAdmCleint service.
+		$serverip = $rs->campos["ipserveradm"];
+		$serverport = $rs->campos["portserveradm"];
+		while (!$rs->EOF) {
+			$id[$rs->campos["ip"]] = $rs->campos["idordenador"];
+			$stat[$rs->campos["ip"]] = $status['OFF'];
+			$rs->Siguiente();
+		}
+		// Connect to reset client's status.
+		$clientid = implode(",", $id);
+		$clientip = implode(";", array_keys($id));
+		$reqframe = "nfn=Sondeo\r".
+			    "ido=$clientid\r".
+			    "iph=$clientip\r";
+		$result = sendCommand($serverip, $serverport, $reqframe, $values);
+		// Connect to fetch client's status.
+		// Asuming client is off by default.
+		$values["tso"]="OFF";
+		// Iterate to check client's status.
+		// Exit if status!=OFF or end iterations (status=OFF).
+		$maxIter = 30;
+		for ($i=1; $i<$maxIter and preg_match('/OFF/', $values["tso"]); $i++) {
+			// Connect to check status.
+			$reqframe = "nfn=respuestaSondeo\r".
+				    "ido=$clientid\r".
+				    "iph=$clientip\r";
+			$result = sendCommand($serverip, $serverport, $reqframe, $values);
+			// Wait until next checking (0.1 ms).
+			usleep(100000);
+		}
+		// Parse status response.
+		if ($result) {
+			// Check status type.
+			if (checkParameter($values["tso"])) {
+				foreach (explode(";", $values["tso"]) as $data) {
+					if (!empty($data)) {
+						list($clip, $clst) = explode("/", $data);
+						if ($clst != "OFF") {
+							// Update current status.
+							$stat[$clip] = $status[$clst];
+						}
+					}
+				}
+			}
+			// Prepare request to new OGAgent for OSes.
+			foreach ($stat as $ip => $st) {
+				if ($st == "off") {
+					$urls[$ip] = "https://$ip:8000/opengnsys/status";
+				}
+			}
+			// Send request to OGAgents.
+			if (isset($urls)) {
+				$result = multiRequest($urls);
+			}
+			// Parse responses.
+			reset($urls);
+			foreach ($result as $res) {
+				if (!empty($res['data'])) {
+					// Get status and session data.
+					$ip = key($urls);
+					$data = json_decode($res['data']);
+					if (@isset($status[$data->status])) {
+						$stat[$ip] = $status[$data->status];
+						$logged[$ip] = $data->loggedin;
+					} else {
+						$stat[$ip] = $status['UNK'];
+					}
+				}
+				unset($urls[$ip]);
+			}
+			// Compose JSON response.
+			if ($single) {
+				// Single response.
+				$response['id'] = reset($id);
+				$response['ip'] = key($id);
+				$response['status'] = $stat[$ip];
+				empty($logged[$ip]) || $response['loggedin'] = $logged[$ip];
+			} else {
+				// Multiple responses.
+				foreach ($stat as $ip => $st) {
+					$tmp = Array();
+					$tmp['id'] = $id[$ip];
+					$tmp['ip'] = $ip;
+					$tmp['status'] = $stat[$ip];
+					empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
+					array_push($response, $tmp);
+				}
+			}
+			jsonResponse(200, $response);
+		} else {
+			// Access error.
+			$response['message'] = "Cannot access to OpenGnsys server";
+			jsonResponse(500, $response);
+		}
+	}
+	$rs->Cerrar(); 
+}
+
 
 // REST routes.
 
@@ -420,6 +574,15 @@ EOD;
 );
 
 /**
+ * @brief    Get execution status of all clients defined in a lab
+ * @note     Route: /ous/id1/labs/id2clients/id3/status, Method: GET
+ * @param    id1     OU id.
+ * @param    id2     lab id.
+ * @return   JSON string with array of all client status defined in a lab
+ */
+$app->get('/ous/:ouid/labs/:labid/clients/status(/)', 'validateApiKey', 'getStatus');
+
+/**
  * @brief    Get client data
  * @note     Route: /ous/id1/labs/id2clients/id3, Method: GET
  * @param    id1     OU id.
@@ -629,154 +792,7 @@ EOD;
  * @param    id3     client id.
  * @return   JSON string with client status
  */
-$app->get('/ous/:ouid/labs/:labid/clients//status(/)', 'validateApiKey', 'getStatus');
 $app->get('/ous/:ouid/labs/:labid/clients/:clntid/status(/)', 'validateApiKey', 'getStatus');
-function getStatus($ouid, $labid, $clntid=0) {
-	global $userid;
-	global $cmd;
-	global $LONCABECERA;
-	global $LONHEXPRM;
-	$app = \Slim\Slim::getInstance();
-	$clientid = $clientip = "";
-	$urls = Array();
-	// Status mapping.
-	$status = Array('OFF'=>"off",
-			'INI'=>"initializing",
-			'OPG'=>"ogclient",
-			'BSY'=>"busy",
-			'LNX'=>"linux",
-			'OSX'=>"macos",
-			'WIN'=>"windows",
-			'UNK'=>"unknown");
-	// Parameters.
-	$ouid = htmlspecialchars($ouid);
-	$labid = htmlspecialchars($labid);
-	$single = is_numeric(explode("/", $app->request->getResourceUri())[6]);
-
-	// Database query.
-	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
-       aulas.idaula, ordenadores.idordenador, ordenadores.ip
-  FROM entornos, ordenadores
-  JOIN aulas USING(idaula)
- RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
-   AND adm.idcentro='$ouid'
-   AND aulas.idaula='$labid'
-EOD;
-	// Request for a single client.
-	if ($single) {
-		$clntid = htmlspecialchars($clntid);
-		$cmd->texto .= <<<EOD
-   AND ordenadores.idordenador='$clntid';
-EOD;
-	} else {
-		$response = Array();
-	}
-	$rs=new Recordset;
-	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
-	$rs->Primero();
-	// Check if user is an UO admin and asset exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and (($single and checkParameter($rs->campos["idordenador"])) or (! $single and checkParameter($rs->campos["idaula"])))) {
-		// First, try to connect to ogAdmCleint service.
-		$serverip = $rs->campos["ipserveradm"];
-		$serverport = $rs->campos["portserveradm"];
-		while (!$rs->EOF) {
-			$id[$rs->campos["ip"]] = $rs->campos["idordenador"];
-			$stat[$rs->campos["ip"]] = $status['OFF'];
-			$rs->Siguiente();
-		}
-		// Connect to reset client's status.
-		$clientid = implode(",", $id);
-		$clientip = implode(";", array_keys($id));
-		$reqframe = "nfn=Sondeo\r".
-			    "ido=$clientid\r".
-			    "iph=$clientip\r";
-		$result = sendCommand($serverip, $serverport, $reqframe, $values);
-		// Connect to fetch client's status.
-		// Asuming client is off by default.
-		$values["tso"]="OFF";
-		// Iterate to check client's status.
-		// Exit if status!=OFF or end iterations (status=OFF).
-		$maxIter = 30;
-		for ($i=1; $i<$maxIter and preg_match('/OFF/', $values["tso"]); $i++) {
-			// Connect to check status.
-			$reqframe = "nfn=respuestaSondeo\r".
-				    "ido=$clientid\r".
-				    "iph=$clientip\r";
-			$result = sendCommand($serverip, $serverport, $reqframe, $values);
-			// Wait until next checking (0.1 ms).
-			usleep(100000);
-		}
-		// Parse status response.
-		if ($result) {
-			// Check status type.
-			if (checkParameter($values["tso"])) {
-				foreach (explode(";", $values["tso"]) as $data) {
-					if (!empty($data)) {
-						list($clip, $clst) = explode("/", $data);
-						if ($clst != "OFF") {
-							// Update current status.
-							$stat[$clip] = $status[$clst];
-						}
-					}
-				}
-			}
-			// Prepare request to new OGAgent for OSes.
-			foreach ($stat as $ip => $st) {
-				if ($st == "off") {
-					$urls[$ip] = "https://$ip:8000/opengnsys/status";
-				}
-			}
-			// Send request to OGAgents.
-			if (isset($urls)) {
-				$result = multiRequest($urls);
-			}
-			// Parse responses.
-			reset($urls);
-			foreach ($result as $res) {
-				if (!empty($res['data'])) {
-					// Get status and session data.
-					$ip = key($urls);
-					$data = json_decode($res['data']);
-					if (@isset($status[$data->status])) {
-						$stat[$ip] = $status[$data->status];
-						$logged[$ip] = $data->loggedin;
-					} else {
-						$stat[$ip] = $status['UNK'];
-					}
-				}
-				unset($urls[$ip]);
-			}
-			// Compose JSON response.
-			if ($single) {
-				// Single response.
-				$response['id'] = reset($id);
-				$response['ip'] = key($id);
-				$response['status'] = $stat[$ip];
-				empty($logged[$ip]) || $response['loggedin'] = $logged[$ip];
-			} else {
-				// Multiple responses.
-				foreach ($stat as $ip => $st) {
-					$tmp = Array();
-					$tmp['id'] = $id[$ip];
-					$tmp['ip'] = $ip;
-					$tmp['status'] = $stat[$ip];
-					empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
-					array_push($response, $tmp);
-				}
-			}
-			jsonResponse(200, $response);
-		} else {
-			// Access error.
-			$response['message'] = "Cannot access to OpenGnsys server";
-			jsonResponse(500, $response);
-		}
-	}
-	$rs->Cerrar(); 
-}
-
 
 /**
  * @brief    List all image repositories defined in an OU
