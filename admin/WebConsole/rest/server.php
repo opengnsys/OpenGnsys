@@ -745,9 +745,11 @@ EOD;
 				continue;
 			}
 			$tmp = Array();
+			// Common data.
+			$tmp['disk'] = $rs->campos["numdisk"];
+			$tmp['size'] = $rs->campos["tamano"];
 			if ($rs->campos["numpar"] == 0) {
 				// Disk data.
-				$tmp['disk'] = $rs->campos["numdisk"];
 				switch ($rs->campos["codpar"]) {
 					case 1:  $tmp['parttable'] = "MSDOS"; break;
 					case 2:  $tmp['parttable'] = "GPT"; break;
@@ -755,13 +757,11 @@ EOD;
 					case 4:  $tmp['parttable'] = "ZPOOL"; break;
 					default: $tmp['parttable'] = $rs->campos["codpar"];
 				}
-				$tmp['size'] = $rs->campos["tamano"];
 			} else {
 				// Partition data.
 				$tmp['partition'] = $rs->campos["numpar"];
 				$tmp['parttype'] = $rs->campos["tipopar"];
 				$tmp['filesystem'] = $rs->campos["nemonico"];
-				$tmp['size'] = $rs->campos["tamano"];
 				$tmp['usage'] = $rs->campos["uso"];
 				if ($rs->campos["nombreso"] != null) {
 					$tmp['os'] = $rs->campos["nombreso"];

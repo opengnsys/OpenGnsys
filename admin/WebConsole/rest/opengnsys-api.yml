@@ -572,48 +572,49 @@ paths:
                   type: object
                   properties:
                     disk:
-                      description: disk number (only for disks configurations)
+                      description: disk number
                       type: integer
                       format: int32
+                      minimum: 1
+                    size:
+                      description: disk or partition size
+                      type: integer
+                      format: int64
                     parttable:
-                      description: partition table type (only for disks configurations)
+                      description: partition table type (only in disk configuration)
                       type: string
                       enum: [ "MSDOS", "GPT", "LVM", "ZVOL" ]
                     partition:
-                      description: partition number
+                      description: partition number (only in partition configuration)
                       type: integer
                       format: int32
                       minimum: 1
                     parttype:
-                      description: partition type
+                      description: partition type (only in partition configuration)
                       type: string
-                    size:
-                      description: disk size (used in both, disk and partition configuration)
-                      type: integer
-                      format: int64
                     filesystem:
-                      description: filesystem type
+                      description: filesystem type (only in partition configuration)
                       type: string
                     usage:
-                      description: data usage percentage in a formated filesystem
+                      description: percentage of data usage in a formated filesystem (only in partition configuration)
                       type: integer
                       format: int32
                     os:
-                      description: installed operating system
+                      description: installed operating system (only in partition configuration)
                       type: string
                     image:
-                      description: restaured image data (if needed)
+                      description: restaured image data, if needed (only in partition configuration)
                       type: object
                       properties:
                         id:
                           type: integer
                           format: int32
                         deploydate:
-                          description: image restauration/deploying date
+                          description: image restauration/deploying date (only in partition configuration)
                           type: string
                           format: date-time
                         updated:
-                          description: flag to check if the restaured image is updated
+                          description: flag to check if the restaured image is updated (only in partition configuration)
                           type: boolean
             required: [ id, name, diskcfg ]
       security:
