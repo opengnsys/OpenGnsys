@@ -5,14 +5,16 @@
 VERSION=1.1.0
 AUTHOR="OpenGnsys Project"
 
-# Create directories.
+# Create empty directories.
+cd $(dirname $0)
+rm -fr build
 mkdir -p build && cd build
 mkdir -p flat/base.pkg flat/Resources/en.lproj
 mkdir -p root/Applications
 
 # Copy application and script files.
-cp -r ../../src root/Applications/OGAgent.app
-cp -r ../scripts .
+cp -a ../../src root/Applications/OGAgent.app
+cp -a ../scripts .
 
 # Create plist file.
 cat << EOT > root/Applications/OGAgent.app/OGAgent.plist

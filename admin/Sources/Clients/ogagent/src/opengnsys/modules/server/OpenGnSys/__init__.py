@@ -83,11 +83,24 @@ class OpenGnSysWorker(ServerWorker):
         self.cmd = None
         # Ensure cfg has required configuration variables or an exception will be thrown
         self.REST = REST(self.service.config.get('opengnsys', 'remote'))
-        # Get network interfaces
-        self.interface = list(operations.getNetworkInfo())[0]  # Get first network interface
+        # Get network interfaces until they are active or timeout (30 sec)
+        for t in range(0,30):
+            try:
+                self.interface = list(operations.getNetworkInfo())[0]  # Get first network interface
+            except Exception as e:
+                # Wait 1 sec. and retry
+                sleep(1)
+            finally:
+                # Exit loop if interface is active
+                if self.interface:
+                    if t > 0:
+                        logger.debug("Fetch connection data after {} tries".format(t))
+                    break
+        # Raise error after timeout
+        if not self.interface:
+            raise e
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
-        
         # Send initalization message
         self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random, 'ostype': operations.osType, 'osversion': operations.osVersion})
         

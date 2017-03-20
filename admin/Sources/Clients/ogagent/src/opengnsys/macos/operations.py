@@ -104,7 +104,7 @@ def getNetworkInfo():
     '''
     for ifname in _getInterfaces():
         ip, mac = _getIpAndMac(ifname)
-        if mac != None:  # Skips local interfaces
+        if mac != None and ip != None:  # Skips local interfaces
             yield utils.Bunch(name=ifname, mac=mac, ip=ip)
 
 
