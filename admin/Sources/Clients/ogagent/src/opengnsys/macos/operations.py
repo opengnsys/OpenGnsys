@@ -118,27 +118,28 @@ def getMacosVersion():
 
 def reboot(flags=0):
     '''
-    Simple reboot using AppleScript
+    Simple reboot command
     '''
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    # Exec reboot using AppleScript.
-    subprocess.call('/usr/bin/osascript -e \'tell app "System Events" to restart\'', shell=True)
+    # Exec reboot command
+    subprocess.call('/sbin/shutdown -r now', shell=True)
+
 
 def poweroff(flags=0):
     '''
-    Simple poweroff using AppleScript
+    Simple poweroff command
     '''
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    # Exec shutdown using AppleScript.
-    subprocess.call('/usr/bin/osascript -e \'tell app "System Events" to shut down\'', shell=True)
+    # Exec shutdown command
+    subprocess.call('/sbin/shutdown -h now', shell=True)
 
 
 def logoff():
@@ -152,7 +153,6 @@ def logoff():
 
     # Exec logout using AppleSctipt
     subprocess.call('/usr/bin/osascript -e \'tell app "System Events" to «event aevtrlgo»\'', shell=True)
-
 
 
 def renameComputer(newName):

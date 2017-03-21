@@ -32,6 +32,7 @@ function process {
     pyuic4 message-dialog.ui -o message_dialog_ui.py -x
 }    
 
+cd $(dirname "$0")
 pyrcc4 -py3 OGAgent.qrc -o OGAgent_rc.py
 
 

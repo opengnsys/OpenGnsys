@@ -3,6 +3,7 @@
 VERSION=1.1.0
 RELEASE=1
 
+cd $(dirname "$0")
 top=`pwd`
 
 # Debian based

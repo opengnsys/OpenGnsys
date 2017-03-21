@@ -5,14 +5,13 @@ SRCDIR=$(dirname "$0")
 BINDIR=/usr/bin
 INITDIR=/Library/LaunchDaemons
 
-# Dependencies:
-#easy_install pip
-#pip install netifaces requests six
+# Check if it needs to install Python dependencies:
+if ! which pip &>/dev/null; then
+    easy_install pip
+    pip install netifaces requests six
+fi
 
-# Copy files.
+# Copying files.
 cp $SRCDIR/ogagent $BINDIR
 cp $SRCDIR/es.opengnsys.ogagent.plist $INITDIR
-
-# Show post-installation message.
-#osascript -e 'display notification "You must install following Python modules: netifaces, requests, six." with title "OGAgent Installer'
 

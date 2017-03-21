@@ -6,8 +6,8 @@ Requisitos de creación
 ----------------------
 Sisitema operativo Linux con los siguientes paquetes instalados:
 - Subversion
-- Python, librerías PyQt4
-- Wine (32 bits), Wine Gecko, Wine Mono, Samba Winbind, Cabextrct
+- GNU C++, Python, librerías PyQt4
+- Creación de instalador Exe (Wine 32 bits, Wine Gecko, Wine Mono, Samba Winbind, Cabextrct)
 - Creación de paquetes Deb (debhelper, dpkg-dev)
 - Creación de paquetes RPM (rpm-build)
 - Creación de paquetes Pkg (xar, bomutils)
@@ -16,26 +16,18 @@ Sisitema operativo Linux con los siguientes paquetes instalados:
 Crear instaladores de OGAgent
 -----------------------------
 - Paso previo: actaulizar componentes gráficos de PyQt para OGAgnet:
-	cd src
-	./update.sh
-	cd ..
+	src/update.sh
 
 - Crear paquetes Deb y RPM para distribuciones Linux (requiere permisos de "root"):
-	cd linux
-	sudo ./build-packages.sh
-	cd ..
+	sudo linux/build-packages.sh
+
+- Crear paquete Pkg para sistemas operativos macOS X:
+	sudo macos/build-pkg.sh
 
 - Crear el programa instalador para sistemas operativos Windows:
-	cd windows
-	./build-windows.sh
-	cd ..
+	windows/build-windows.sh
 
-- Crear paquete Pkg para sistemas operativos macOS:
-	cd macos
-	./build-pkg.sh
-	cd ..
-
-- Subir los nuevos ficheros .deb, .rpm y .exe generados en el directorio
+- Subir los nuevos ficheros .deb, .rpm, .pkg y .exe generados al directorio
 /opt/opengnsys/www/descargas  del servidor OpenGnsys.
 
 
@@ -79,8 +71,8 @@ Instalar OGAgent en cliente modelo
   - Instalar dependencias:
 	sudo easy_install pip
 	sudo pip install netifaces requests six
-  - Puede ser necesario activar descargas desde cualquier sitio en Menú /
-Preferencias del sistema / Seguridad y privacidad / Pestaña General.
+  - Descargar e instalar el agente:
+	sudo installer -pkg OGAgentInstaller-Version.pkg -target /
   - Descargar el paquete y usar Finder pulsando sobre el fichero para instalarlo.
   - Configurar el agente:
 	sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /Applications/OGAgent.app/cfg/ogagent.cfg
@@ -92,6 +84,6 @@ Postconfiguración para clientes clonados
 ----------------------------------------
 - Ejecutar manualmente o configurar automáticamente OGAgent en los clientes clonados
 en el script de postconfiguración tras restuarar imagen:
-	ogConfigureOsAgent NDisco Npart
+	ogConfigureOgagent NDisco Npart
 
 
