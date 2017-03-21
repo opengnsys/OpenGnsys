@@ -73,9 +73,12 @@ case "$OSTYPE" in
         ogWindowsBootParameters $1 $2
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
-        # Instalar nuevo agente de sistema operativo; si no, el antiguo cliente para Windows.
-        ogConfigureOsAgent $1 $2
-        if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        # Configurar nuevo agente OGAgent; si no, instalar antiguo cliente para Windows.
+        ogConfigureOgagent $1 $2
+        if [ $? == 0 ]; then
+            # Si se ha configurado OGAgent, eliminar el antiguo cliente de Windows.
+            [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient.exe)$(ogGetPath $MNTDIR/winnt/ogAdmWinClient.exe)" ] && ogUninstallWindowsClient $1 $2
+        elif [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
             ogInstallMiniSetup $1 $2 postconf.cmd
             ogInstallWindowsClient $1 $2 postconf.cmd
         fi
@@ -83,9 +86,12 @@ case "$OSTYPE" in
     Linux)      # Postconfiguración de GNU/Linux.
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
-        # Instalar nuevo agente de sistema operativo; si no, el antiguo cliente para GNU/Linux.
-        ogConfigureOsAgent $1 $2
-        if [ $? != 0 -a "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        # Configurar nuevo agente OGAgent; si no, instalar antiguo cliente para Linux.
+        ogConfigureOgagent $1 $2
+        if [ $? == 0 ]; then
+            # Si se ha configurado OGAgent, eliminar el antiguo cliente de Linux.
+            [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
+        elif [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
             ogInstallLinuxClient $1 $2
         fi
         ;;
@@ -151,6 +157,9 @@ fi
 EOT
         # Dar permiso de ejecución.
         chmod 700 $MNTDIR/var/root/postconfd.sh
+        # Configurar nuevo agente OGAgent de sistema operativo.
+        ogConfigureOgagent $1 $2
         ;;
 esac
+exit 0
 
