@@ -89,7 +89,7 @@ class OpenGnSysWorker(ServerWorker):
                 self.interface = list(operations.getNetworkInfo())[0]  # Get first network interface
             except Exception as e:
                 # Wait 1 sec. and retry
-                sleep(1)
+                time.sleep(1)
             finally:
                 # Exit loop if interface is active
                 if self.interface:
