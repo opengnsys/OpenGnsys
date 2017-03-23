@@ -1294,7 +1294,7 @@ ID="${3^^}"
 PTTYPE=$(ogGetPartitionTableType $1)
 case "$PTTYPE" in
     GPT)    sgdisk -t$2:$ID $DISK 2>/dev/null ;;
-    MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK | grep Syncing &>/dev/null ;;
+    MSDOS)  sfdisk --id $DISK $2 $ID 2>/dev/null
     *)      ogRaiseError $OG_ERR_OUTOFLIMIT "$1,$PTTYPE"
             return $? ;;
 esac
