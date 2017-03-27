@@ -48,9 +48,16 @@ if (!$cmd)
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[10] ?></SPAN>
 	<form  align=center name="fdatos"> 				
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
+			<tr>
+			<th><? echo $TbMsg[12] ?></th>
+				<td><input type="radio" name="modoejecucion" value="false"><? echo $TbMsg[13] ?>
+				    <input type="radio" name="modoejecucion" value="true" checked><? echo $TbMsg[14] ?>
+				</td>
+			</tr>
 			<tr> 
 				<th>&nbsp;<? echo $TbMsg[9]?>&nbsp;</th>
 				<td><textarea class="cajatexto" name="codigo" cols="70" rows="18"></textarea></td></tr>
+			<tr> <th align=center colspan="3"><? echo $TbMsg[15] ?></th></tr>
 		</table>	
 	</form>	
 	<?

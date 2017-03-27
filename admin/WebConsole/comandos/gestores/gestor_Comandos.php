@@ -206,7 +206,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					// Ejecutar script 
 					$urlcomando = 'script';
 					$ogAgentNuevo = true;
-					$paramsPost = '{"script":"'.base64_encode($script).'"}';
+					$client = (isset ($_POST['modoejecucion']) && $_POST['modoejecucion'] != '' ) ? $_POST['modoejecucion'] : 'true';
+					$paramsPost = '{"script":"'.base64_encode($script).'","client":"'.$client.'"}';
 					break;
 			}
 
