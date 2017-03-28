@@ -455,11 +455,14 @@ dd if="$DISK" of="$IMGFILE" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IM
 #@param	  int_part     numero de particion 
 #@param   str_repo     repositorio de imágenes   { REPO, CACHE }
 #@param   str_imageType Tipo de imagen: monolit (por defecto), sync o diff. (parametro opcional) 
-#@return  SIZEDATA SIZEREQUIRED ISENOUGHSPACE 
+#@return  SIZEDATA SIZEREQUIRED SIZEFREE ISENOUGHSPACE 
 #@note    si str_imageType= diff necesario /tmp/ogimg.info, que es creado por ogCreateInfoImage.
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2014/10/24
+#@version 1.1.0 - En la salida se incluye el espacio disponible en el repositorio (ticket #771)
+#@author  Irina Gomez - ETSII Universidad de Sevilla
+#@date    2017-03-28
 #*/ ##
 function ogGetSizeParameters ()
 {
@@ -515,7 +518,7 @@ fi
 
 [ "$SIZEREQUIRED" -lt "$SIZEFREE" ] && ISENOUGHSPACE=TRUE  ||  ISENOUGHSPACE=FALSE
 
-echo $SIZEDATA $SIZEREQUIRED $ISENOUGHSPACE
+echo $SIZEDATA $SIZEREQUIRED $SIZEFREE $ISENOUGHSPACE
 
 
 }

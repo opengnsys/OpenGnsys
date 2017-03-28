@@ -25,6 +25,9 @@
 #@version 1.0 - creacion de la diferencial con rsync y btrfs
 #@author  
 #@date   2012-12-04
+#@version 1.1.0 - Se muestra el espacio necesario para alojar la imagen y el disponible (ticket #771)
+#@author  Irina Gomez - ETSII Universidad de Sevilla
+#@date    2017-03-28
 #*/ ##
 trap "onexit $1 $2 $3 \"$4\" \"$5\"" 1 2 3 6 9 14 15 EXIT
 
@@ -127,9 +130,9 @@ ogCreateInfoImage $1 $2 $3 "$4" "${DIFFTYPE}"
 [ $? -eq $OG_ERR_NOTDIFFERENT ] &&  exit $(ogRaiseError session $OG_ERR_NOTDIFFERENT; echo $?)
 
 #Comprobar espacio que requerira la imagen para ser almacenada
-read SIZEDATA SIZEREQUIRED ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3" DIFF)
+read SIZEDATA SIZEREQUIRED SIZEFREE ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3" DIFF)
 
-ogEcho log session "[50] $PROG: $MSG_SCRIPTS_CREATE_SIZE  $SIZEREQUIRED"
+ogEcho log session "[50] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED $SIZEFREE"
 [ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
 
 #Calculamos el tamaño de la imagen:
