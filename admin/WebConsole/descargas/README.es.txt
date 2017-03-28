@@ -17,7 +17,7 @@ Instalación manual de los agentes.
  - Ubuntu, Debian y derivados:
    - Instalar dependencias (NOTA: revisar dependencias para Ubuntu 12.04):
 	sudo apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-   - Descargar e instalar el agente:
+   - Descargar el fichero e instalar el agente:
 	sudo dpkg -i ogagent_Version_all.deb
    - Configurar el agente:
 	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
@@ -25,7 +25,7 @@ Instalación manual de los agentes.
 	sudo service ogagent start
 
  - Red Hat, Fedora y derivados (como root):
-   - Descargar e instalar el agente:
+   - Descargar el fichero e instalar el agente:
 	yum install ogagent-Version.noarch.rpm
    - Configurar el agente:
 	sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
@@ -38,10 +38,10 @@ Instalación manual de los agentes.
 	(en preparación)
 
  - macOS X:
-   - Instalar dependencias:
+   - Instalar dependencias (la instalación puebe realizar estas operaciones):
 	sudo easy_install pip
 	sudo pip install netifaces requests six
-   - Descargar e instalar el agente:
+   - Descargar el fichero e instalar el agente:
 	sudo installer -pkg OGAgentInstaller-Version.pkg -target /
    - Configurar el agente:
 	sudo sed "/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /Applications/OGAgent.app/cfg/ogagent.cfg > /tmp/ogagent.cfg
@@ -50,7 +50,7 @@ Instalación manual de los agentes.
 	sudo ogagent start
 
  - Windows (como usuario administrador):
-   - Descargar e instalar el agente ejecutando:
+   - Descargar el fichero e instalar el agente ejecutando:
 	OGAgentSetup-Version.exe
    - Seguir las instrucciones del instalador.
    - Editar el fichero de configuación "C:\Program Files\OGAgent\cfg\ogagent.cfg" (o C:\Archivos de programa\OGAgent\cfg\ogagent.cfg) y modificar el valor de la cláusula "remote" de la sección [OGAgent] inclyendo la dirección IP del servidor OpenGnsys.

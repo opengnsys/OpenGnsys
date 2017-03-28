@@ -84,6 +84,7 @@ echo -e "\\n=============================="
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="www.opengnsys.es"
+DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
 else
@@ -1073,6 +1074,33 @@ function installWebFiles()
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 
+# Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
+function installDownloadableFiles()
+{
+	local FILENAME=ogagentpkgs-$INSTVERSION.tar.gz
+	local TARGETFILE=$WORKDIR/$FILENAME
+ 
+	# Descargar archivo comprimido, si es necesario.
+	if [ -s $PROGRAMDIR/$FILENAME ]; then
+		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
+		mv $PROGRAMDIR/$FILENAME $TARGETFILE
+	else
+		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	fi
+	if [ ! -s $TARGETFILE ]; then
+		errorAndLog "${FUNCNAME}(): Cannot download $FILENAME"
+		return 1
+	fi
+	
+	# Descomprimir fichero en zona de descargas.
+	tar xvzf $TARGETFILE -C $INSTALL_TARGET/www/descargas
+	if [ $? != 0 ]; then
+		errorAndLog "${FUNCNAME}(): Error uncompressing archive."
+		exit 1
+	fi
+}
+
 # Configuración específica de Apache.
 function installWebConsoleApacheConf()
 {
@@ -1366,7 +1394,6 @@ function copyClientFiles()
 # Crear cliente OpenGnsys.
 function clientCreate()
 {
-	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
 	#local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
 	local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso 	# 1.1.0-rc4
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
@@ -1376,11 +1403,11 @@ function clientCreate()
 		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
 		mv $PROGRAMDIR/$FILENAME $TARGETFILE
 	else
-		echoAndLog "${FUNCNAME}(): Downloading ogLive Client"
+		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
 		$INSTALL_TARGET/bin/oglivecli download $FILENAME
 	fi
 	if [ ! -s $TARGETFILE ]; then
-		errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
+		errorAndLog "${FUNCNAME}(): Error loading $FILENAME"
 		return 1
 	fi
 
@@ -1721,6 +1748,8 @@ rm -f $TMPMYCNF
 
 # Copiando páqinas web.
 installWebFiles
+# Descargar/descomprimir archivos descargables.
+installDownloadableFiles
 # Generar páqinas web de documentación de la API
 makeDoxygenFiles
 

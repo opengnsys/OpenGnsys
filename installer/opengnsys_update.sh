@@ -35,6 +35,7 @@
 ####  AVISO: NO EDITAR variables de configuración.
 ####  WARNING: DO NOT EDIT configuration variables.
 INSTALL_TARGET=/opt/opengnsys		# Directorio de instalación
+PATH=$PATH:$INSTALL_TARGET/bin
 OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
 
 
@@ -439,6 +440,9 @@ EOT
 	else
 		rm -f ${ENGINECFG}-LAST
 	fi
+	# Obtener URL para descargas adicionales.
+	DOWNLOADURL=$(oglivecli config download-url 2>/dev/null)
+	DOWNLOADURL=${DOWNLOADURL:-"http://$OPENGNSYS_SERVER/downloads"}
 
 	echoAndLog "${FUNCNAME}(): client files update success."
 }
@@ -564,6 +568,33 @@ function updateWebFiles()
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/ogagent.log
 
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
+}
+
+# Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
+function updateDownloadableFiles()
+{
+	local FILENAME=ogagentpkgs-$INSTVERSION.tar.gz
+	local TARGETFILE=$WORKDIR/$FILENAME
+
+	# Descargar archivo comprimido, si es necesario.
+	if [ -s $PROGRAMDIR/$FILENAME ]; then
+		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
+		mv $PROGRAMDIR/$FILENAME $TARGETFILE
+	else
+		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	fi
+	if [ ! -s $TARGETFILE ]; then
+		errorAndLog "${FUNCNAME}(): Cannot download $FILENAME"
+		return 1
+	fi
+
+	# Descomprimir fichero en zona de descargas.
+	tar xvzf $TARGETFILE -C $INSTALL_TARGET/www/descargas
+	if [ $? != 0 ]; then
+		errorAndLog "${FUNCNAME}(): Error uncompressing archive."
+		exit 1
+	fi
 }
 
 # Copiar carpeta de Interface 
@@ -696,6 +727,7 @@ function updateDatabase()
 	else
 		echoAndLog "${FUNCNAME}(): database unchanged"
 	fi
+	INSTVERSION="$NEWVERSION"
 }
 
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
@@ -850,10 +882,8 @@ function compileServices()
 # Actualizar cliente OpenGnsys
 function updateClient()
 {
-	PATH=$PATH:$INSTALL_TARGET/bin
-	local DOWNLOADURL=$(oglivecli config download-url)
-	#local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
-	local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso		# 1.1.0-rc4
+	#local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso	# 1.1.0-rc4
+	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5225.iso	# 1.1.0-rc5
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
 	local SOURCELENGTH
@@ -872,10 +902,10 @@ function updateClient()
 	TARGETLENGTH=$(stat -c "%s" $TARGETFILE 2>/dev/null)
 	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
-		echoAndLog "${FUNCNAME}(): Downloading ogLive"
+		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
 		oglivecli download $FILENAME
 		if [ ! -s $TARGETFILE ]; then
-			errorAndLog "${FUNCNAME}(): Error loading OpenGnsys Client"
+			errorAndLog "${FUNCNAME}(): Error downloading $FILENAME"
 			return 1
 		fi
 		# Actaulizar la imagen ISO del ogclient.
@@ -893,11 +923,11 @@ function updateClient()
 		fi
 		CLIENTUPDATED=${FILENAME%.*}
 
-		echoAndLog "${FUNCNAME}(): Client update successfully"
+		echoAndLog "${FUNCNAME}(): ogLive update successfully"
 	else
 		# Si no existe, crear el fichero de claves de Rsync.
 		if [ ! -f /etc/rsyncd.secrets ]; then
-			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			echoAndLog "${FUNCNAME}(): Restoring ogLive access key"
 			OGINITRD=$(oglivecli config install-dir)/$(jq -r ".oglive[.default].directory")/oginitrd.img
 			SAMBAPASS=$(gzip -dc $OGINITRD | \
 				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
@@ -905,7 +935,7 @@ function updateClient()
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | setsmbpass
 		else
-			echoAndLog "${FUNCNAME}(): Client is already updated"
+			echoAndLog "${FUNCNAME}(): ogLive is already updated"
 		fi
 		# Versión del ogLive instalado.
 		echo "${FILENAME%.*}" > $INSTALL_TARGET/doc/veroglive.txt 
@@ -1048,6 +1078,8 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnsys Web Admin files"
 	exit 1
 fi
+# Actaulizar ficheros descargables.
+updateDownloadableFiles
 # Generar páginas Doxygen para instalar en el web
 makeDoxygenFiles
 
