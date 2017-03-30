@@ -332,17 +332,19 @@ class Comando{
 			tipo = tipo de parametro:
 						0: El valor del par�etro debe ir encerrado entre comillas simples
 						1: El valor del par�etro no necesita ir entre comillas simples
-
+	Versión 1.1: Al incluir los valores se escapan caracteres especiales (ticket #777) 
+	Autor: Irina Gómez - ETSII, Universidad de Sevilla
+	Fecha: 2017-03-30
 
 	---------------------------------------------------------------------------------------------*/
 	function CreaParametro($nombre,$valor,$tipo){
 		for($i=0;$i<sizeof($this->parametros);$i++){
 			if($this->parametros[$i]["nombre"]==$nombre){
-				$this->parametros[$i]["valor"]=$valor;
+				$this->parametros[$i]["valor"]=mysql_real_escape_string($valor);
 				return;
 			}
 		}	
-		$p = new parametro($nombre,$valor,$tipo);
+		$p = new parametro($nombre,mysql_real_escape_string($valor),$tipo);
 		$this->AddParametro($p);
 	}
 
