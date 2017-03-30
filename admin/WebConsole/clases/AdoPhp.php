@@ -353,11 +353,14 @@ class Comando{
 		Par�etros de entrada:
 			nombre: El nombre del par�etro
 			valor : El nuevo valor del par�etro
+	Versión 1.1: Al incluir los valores se escapan caracteres especiales (ticket #777) 
+	Autor: Irina Gómez - ETSII, Universidad de Sevilla
+	Fecha: 2017-03-30
 	---------------------------------------------------------------------------------------------*/
 	function ParamSetValor($nombre,$valor){
 		for($i=0;$i<sizeof($this->parametros);$i++){
 			if($this->parametros[$i]["nombre"]==$nombre)
-				$this->parametros[$i]["valor"]=$valor;
+				$this->parametros[$i]["valor"]=mysql_real_escape_string($valor);
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
