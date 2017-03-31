@@ -1,4 +1,4 @@
-<? 
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -97,9 +97,9 @@ switch($idtipousuario){
 			<TR>
 				<TH>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
 				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
-					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>"></INPUT><?echo $pasguor?></TD>
+					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value=""></INPUT>****</TD>
 				<?}else{?>
-					<TD><INPUT type=text class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>">
+					<TD><INPUT type=text class=cajatexto  name="pasguor"  style="width:100" value="">
 				<?}?>
 			</TR>
 <!---------------------------------------------------	NOMBRE COMPLETO	----------------------------------------------------------------------------------------------->
@@ -182,7 +182,6 @@ include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
 	global $usuario;
-	global $pasguor;
 	global $nombre;
 	global $email;
         global $apikey;
@@ -196,7 +195,6 @@ function TomaPropiedades($cmd,$id){
 	$rs->Primero(); 
 	if (!$rs->EOF){
 			$usuario=$rs->campos["usuario"];
-			$pasguor=$rs->campos["pasguor"];
 			$nombre=$rs->campos["nombre"];
 			$email=$rs->campos["email"];
 			$apikey=$rs->campos["apikey"];

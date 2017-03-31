@@ -242,7 +242,7 @@ $app->post('/login',
 		// Database query.
 		$cmd->texto = "SELECT idusuario, apikey
 			 	 FROM usuarios
-				WHERE usuario='$user' AND pasguor='$pass'";
+				WHERE usuario='$user' AND pasguor=SHA2('$pass',224)";
 		$rs=new Recordset;
 		$rs->Comando=&$cmd;
 		if ($rs->Abrir()) {

@@ -110,7 +110,7 @@ if ($idc != 0)
 				INNER JOIN idiomas ON usuarios.ididioma=idiomas.ididioma
 				WHERE idtipousuario <> 3
 				  AND usuarios.usuario='".$usuario."'
-				  AND usuarios.pasguor='".$pasguor."'
+				  AND usuarios.pasguor=SHA2('".$pasguor."', 224)
 				  AND administradores_centros.idcentro=".$idcentro; 
 	}			
 	else{
@@ -119,7 +119,7 @@ if ($idc != 0)
 				INNER JOIN idiomas ON usuarios.ididioma=idiomas.ididioma
 				WHERE idtipousuario <> 3
 				  AND usuarios.usuario='".$usuario."'
-				  AND usuarios.pasguor='".$pasguor."'"; 
+				  AND usuarios.pasguor=SHA2('".$pasguor."', 224)"; 
 	}
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
