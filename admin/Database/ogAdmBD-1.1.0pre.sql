@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.6
+# OpenGnsys 1.1.0
 #use ogAdmBD
 
 # Eliminar procedimiento para evitar errores de ejecución.
@@ -109,6 +109,17 @@ CREATE PROCEDURE addcols() BEGIN
 	THEN
 		ALTER TABLE repositorios
 			ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
+	END IF;
+	# Codificar claves de los usuarios, si fuese necesario (ticket #778)
+	IF (SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS
+	     WHERE COLUMN_NAME='pasguor' AND TABLE_NAME='usuarios' AND TABLE_SCHEMA=DATABASE() != 56)
+	THEN
+		ALTER TABLE usuarios
+			MODIFY pasguor VARCHAR(56) NOT NULL DEFAULT '';
+		INSERT INTO usuarios (idusuario, pasguor)
+			SELECT idusuario, pasguor FROM usuarios
+			ON DUPLICATE KEY UPDATE
+				pasguor=SHA2(VALUES(pasguor),224);
 	END IF;
 END//
 # Ejecutar actualización condicional.

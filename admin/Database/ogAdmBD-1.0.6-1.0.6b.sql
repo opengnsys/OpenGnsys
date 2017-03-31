@@ -1,1 +1,1 @@
-ogAdmBD-1.0.6a-1.1.0pre.sql
+ogAdmBD-1.0.6a-1.0.6b.sql

@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.6 - 1.1.0
+# OpenGnSys 1.0.6 - OpenGnsys 1.1.0
 #use ogAdmBD
 
 # Nuevos tipos de particiones y de sistemas de ficheros (ticket #758).
@@ -34,13 +34,21 @@ ALTER TABLE aulas
 ALTER TABLE imagenes
 	ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER nombreca,
 	ADD inremotepc TINYINT DEFAULT 0;
-# Añadir campo para clave de acceso a la API REST (ticket #708).
+
+# Adaptar campo para codificar claves de usuarios (ticket #778),
+# añadir clave de acceso a la API REST (tickets #708).
 ALTER TABLE usuarios
+	MODIFY pasguor VARCHAR(56) NOT NULL DEFAULT '',
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 # Preparar generación de clave de acceso a la API REST para el usuario principal (ticket #708).
 UPDATE usuarios
 	SET apikey = 'APIKEY'
 	WHERE idusuario = 1 AND apikey = '';
+# Codificar claves de usuarios (ticket #)
+INSERT INTO usuarios (idusuario, pasguor)
+	SELECT idusuario, pasguor FROM usuarios
+	ON DUPLICATE KEY UPDATE
+		idusuario=VALUES(idusuario), pasguor=SHA2(VALUES(pasguor),224);
 
 # Añadir nº de revisión de imagen restaurada (ticket #737),
 # añadir porcentaje de uso de sistema de ficheros (ticket #711),

@@ -1076,7 +1076,7 @@ CREATE TABLE IF NOT EXISTS `urlimagesitems` (
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `idusuario` int(11) NOT NULL AUTO_INCREMENT,
   `usuario` varchar(50) NOT NULL DEFAULT '',
-  `pasguor` varchar(50) NOT NULL DEFAULT '',
+  `pasguor` varchar(56) NOT NULL DEFAULT '',
   `nombre` varchar(200) DEFAULT NULL,
   `email` varchar(200) DEFAULT NULL,
   `ididioma` int(11) DEFAULT NULL,
@@ -1090,6 +1090,6 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 --
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`, `apikey`) VALUES
-(1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
+(1, 'DBUSER', SHA2('DBPASSWORD', 224) 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
 
 
