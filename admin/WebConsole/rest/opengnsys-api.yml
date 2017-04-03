@@ -108,6 +108,10 @@ paths:
                     kernel:
                       description: kernel version
                       type: string
+                    architecture:
+                      description: kernel architecture (32-bit or 64-bit)
+                      type: string
+                      enum: [ "i386", "amd64" ]
                     revision:
                       description: OpenGnsys revision
                       type: string
@@ -117,6 +121,7 @@ paths:
                     iso:
                       description: ISO file
                       type: string
+                  required: [ distribution, kernel, architecture, revision, directory, iso ]
             required: [ project, version, release, services ]
       tags:
         - server

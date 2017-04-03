@@ -104,10 +104,10 @@ class HTTPServerHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         module, path, getParams = self.parseUrl()
 
-        # Tries to get json content
+        # Tries to get JSON content (UTF-8 encoded)
         try:
             length = int(self.headers.getheader('content-length'))
-            content = self.rfile.read(length)
+            content = self.rfile.read(length).decode('utf-8')
             logger.debug('length: {}, content >>{}<<'.format(length, content))
             postParams = json.loads(content)
         except Exception as e:
