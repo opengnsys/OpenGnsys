@@ -1090,6 +1090,6 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 --
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`, `apikey`) VALUES
-(1, 'DBUSER', SHA2('DBPASSWORD', 224) 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
+(1, 'DBUSER', SHA2('DBPASSWORD', 224), 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
 
 
