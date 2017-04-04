@@ -73,7 +73,7 @@ function getStatus($ouid, $labid, $clntid=0) {
 	// Status mapping.
 	$status = Array('OFF'=>"off",
 			'INI'=>"initializing",
-			'OPG'=>"ogclient",
+			'OPG'=>"oglive",
 			'BSY'=>"busy",
 			'LNX'=>"linux",
 			'OSX'=>"macos",
@@ -740,6 +740,7 @@ EOD;
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['diskcfg'] = Array();
 		while (!$rs->EOF) {
+			// Skip header.
 			if ($rs->campos["numdisk"] == 0) {
 				$rs->Siguiente();
 				continue;

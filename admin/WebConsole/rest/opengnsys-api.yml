@@ -855,6 +855,8 @@ paths:
               type:
                 description: image type (``monolithic``, ``basic``, ``incremental``)
                 type: string
+                enum: [ "monolithic", "basic", "incremental" ]
+                default: "monolithic"
               baseimg:
                 description: base image for an incremental image (if ``type`` is ``incremental``)
                 type: string
@@ -1182,7 +1184,7 @@ definitions:
       status:
         description: execution status
         type: string
-        enum: [ "off", "ogclient", "busy", "linux", "windows", "macos", "unknown" ]
+        enum: [ "off", "oglive", "busy", "linux", "windows", "macos", "unknown" ]
       loggedin:
         description: flag to check if an user is logged in
         type: boolean
