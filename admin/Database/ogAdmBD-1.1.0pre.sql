@@ -182,3 +182,11 @@ CREATE TABLE IF NOT EXISTS remotepc (
        PRIMARY KEY (id) 
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
+# Nuevo comando "Enviar mensaje" (ticket #779)
+INSERT INTO `comandos` 	(`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, 
+	`aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`, `submenu`) VALUES
+	(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '',
+	31, '', '', '', 1, '' );
+INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
+        (39, 'tit', 'Título', '', '', '', 0, 1),
+        (40, 'msj', 'Contenido', '', '', '', 0, 1);

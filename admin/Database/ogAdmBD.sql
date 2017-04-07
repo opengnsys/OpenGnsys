@@ -229,7 +229,8 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 (12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
 (13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
 (14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
-(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion');
+(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion')
+(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '', 31, 'tit;msj', 'nfn;iph;tit;msj', '', 1, '');
 
 
 
@@ -585,7 +586,9 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1), 
 (36, 'rti', 'Ruta de origen', '', '', '', 0, 1), 
 (37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
-(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1); 
+(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1),
+(39, 'tit', 'Título', '', '', '', 0, 1),
+(40, 'msj', 'Contenido', '', '', '', 0, 1); 
 
 -- --------------------------------------------------------
 

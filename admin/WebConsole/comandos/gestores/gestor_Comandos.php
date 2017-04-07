@@ -20,8 +20,7 @@ include_once("../../includes/RecopilaIpesMacs.php");
 //________________________________________________________________________________________________________
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
-
- // Recoge parametros de seguimiento
+// Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
 $sw_ejprg="";
@@ -169,9 +168,11 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			// Envio al servidor 
-			$shidra=new SockHidra($servidorhidra,$hidraport); 
-			if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+			// comando 16 sólo agente nuevo
+			if ($idcomando != 16){
+			    // Envio al servidor 
+			    $shidra=new SockHidra($servidorhidra,$hidraport); 
+			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
 				$parametros.=$acciones;
 				$resul=$shidra->envia_comando($parametros);
@@ -184,9 +185,13 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						$resul=$ValorParametros["res"];
 					}
 				$shidra->desconectar();
+			    }
+			    // Guardamos resultado de ogAgent original
+			    $resulhidra = $resul;
+			} else {
+			    // En agente nuevo devuelvo siempre correcto
+			    $resulhidra = 1;
 			}
-			// Guardamos resultado de ogAgent original
-			$resulhidra = $resul;
 
 	                // Comprobamos si el comando es soportado por el nuevo ogAgent
 			$numip=0;
@@ -208,6 +213,12 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					$ogAgentNuevo = true;
 					$client = (isset ($_POST['modoejecucion']) && $_POST['modoejecucion'] != '' ) ? $_POST['modoejecucion'] : 'true';
 					$paramsPost = '{"script":"'.base64_encode($script).'","client":"'.$client.'"}';
+					break;
+				case 16:
+					// Enviar mensaje
+					$urlcomando = 'popup';
+					$ogAgentNuevo = true;
+					$paramsPost = '{"title":"'.$_POST['titulo'].'","message":"'.$_POST['mensaje'].'"}';
 					break;
 			}
 
