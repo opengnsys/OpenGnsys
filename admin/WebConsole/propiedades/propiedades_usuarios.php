@@ -95,11 +95,21 @@ switch($idtipousuario){
 			</TR>
 <!----------------------------------------------------	PASSWORD	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
+			<!-- disables autocomplete --><input type="password" style="display:none">
 				<TH>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
 				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
 					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value=""></INPUT>****</TD>
 				<?}else{?>
-					<TD><INPUT type=text class=cajatexto  name="pasguor"  style="width:100" value="">
+					<TD><INPUT type=password class=cajatexto  name="pasguor"  style="width:100" value="">
+				<?}?>
+			</TR>
+<!----------------------------------------------------	CONFIRMAR PASSWORD	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+			<TR>
+				<TH>&nbsp;<?echo $TbMsg[18]?>&nbsp;</TH>
+				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
+					<TD><INPUT type=hidden class=cajatexto  name="confirmarpasguor"  style="width:100" value=""></INPUT>****</TD>
+				<?}else{?>
+					<TD><INPUT type=password class=cajatexto  name="confirmarpasguor"  style="width:100" value="">
 				<?}?>
 			</TR>
 <!---------------------------------------------------	NOMBRE COMPLETO	----------------------------------------------------------------------------------------------->
