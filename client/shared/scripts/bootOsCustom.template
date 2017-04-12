@@ -28,11 +28,26 @@ PART="$2"               # Nº de partición.
 
 
 MNTDIR=$(ogMount $DISK $PART)
+NAME="$(ogGetHostname)"
+NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $DISK $PART)
+
 case "$OSTYPE" in
     Windows)
-        ## Mostrar las particiones NTFS de sistema y datos y ocultamos las demás. 
-        #echo "[65] Activar particion de Windows $PART y ocultar las demás."
+        ## Borrar marcas de arrranque de todos los Windows instalados en el disco.
+        #echo "[30] Borrar marcas de arrranque de todos los Windows instalados en el disco."
+        #for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
+        #    [ "$(ogGetOsType $1 $i)" == "Windows" ] && ogMount $1 $i &>/dev/null
+        #done
+        #rm -f /mnt/*/ogboot.*
+
+        ## Mostrar las particiones NTFS de sistema (dos opciones)
+        ## Opción 1: SIN ocultar las demás. 
+        #echo "[40] Mostrar y activar particion de Windows $PART."
+        #[ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
+
+        ## Opción 2: Ocultamos las demás. 
+        #echo "[40] Activar particion de Windows $PART y ocultar las demás."
         #for (( i=1; i<=$(ogGetPartitionsNumber $DISK); i++ )); do
         #        if [ $i == $PART -o $i == $PARTDATA ]; then
         #	    [ $(ogGetPartitionType $DISK $PART) == "HNTFS" ] && ogUnhidePartition $1 $PART
@@ -44,6 +59,19 @@ case "$OSTYPE" in
         #done
     ;;
     Linux)
+        ## Modificar el nombre del equipo
+        #echo "[30] Asignar nombre Linux \"$NAME\"."
+        #ETC=$(ogGetPath $1 $2 /etc)
+        #[ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
+
+        ## Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
+        #if [ -f "$ETC/fstab" ]; then
+        #    echo "[40] Actualizar fstab con particion raiz \"$PART\"."
+        #    awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
+        #                         print }' $ETC/fstab >/tmp/fstab
+        #    mv /tmp/fstab $ETC/fstab
+        #fi
+
 	## Cambiar claves usuarios, copiando fichero /etc/passwd
 	## En el servidor el nuevo fichero debe situarse en el directorio del grupo: 
 	##    /opt/opengnsys/images/groups/nombre_aula

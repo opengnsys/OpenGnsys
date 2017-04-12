@@ -13,38 +13,9 @@ PART=$(ogDiskToDev "$1" "$2") || exit $?
 ogMount $1 $2  &>/dev/null || exit $?
 
 echo "[0] Inicio del proceso de arranque."
-NAME="$(ogGetHostname)"
-NAME=${NAME:-"pc"}
-OSTYPE=$(ogGetOsType $1 $2)
-# Borrar marcas de arrranque de todos los Windows instalados en el disco.
-if [ "$OSTYPE" == "Windows" ]; then
-    for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
-        [ "$(ogGetOsType $1 $i)" == "Windows" ] && ogMount $1 $i &>/dev/null
-    done
-    rm -f /mnt/*/ogboot.*
-fi
-
-case "$OSTYPE" in
-    Windows)
-        echo "[30] Mostrar y activar particion de Windows $PART."
-        [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
-        ;;
-    Linux)
-        echo "[30] Asignar nombre Linux \"$NAME\"."
-        ETC=$(ogGetPath $1 $2 /etc)
-        [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
-        if [ -f "$ETC/fstab" ]; then
-            # Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
-            echo "[50] Actualizar fstab con particion raiz \"$PART\"."
-            awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
-                                 print }' $ETC/fstab >/tmp/fstab
-            mv /tmp/fstab $ETC/fstab
-        fi
-        ;;
-esac
 
 if which bootOsCustom  &>/dev/null; then
-    echo "[60] Configuración personalizada del inicio."
+    echo "[10] Configuración personalizada del inicio."
     bootOsCustom $@
 fi
 
