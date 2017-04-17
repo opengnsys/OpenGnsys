@@ -28,6 +28,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10 o Ubuntu 16.04 LTS
 #725	Sincronización horaria de clientes con servidor NTP
 #746	Reloj en barra de estado del Browser del cliente
+#774	Soportar clientes ogLive de 64 bits
 
 Tickets resueltos en módulo OpenGnsys Server:
 #234	Importar/Exportar base de datos (resuelto en #755)
@@ -36,7 +37,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #736	Mejorar la seguridad del servidor
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
-#379	Usar identificador de operación para el ogAdmRepoAux
+#379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)
 #701	torrent-creator falla si el fichero de imagen a procesar no es válido
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
@@ -51,6 +52,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #738	Se pierde nombre de la imagen restaurada
 #747	Uso incorrecto del número de puestos de las propiedades del aula
 #751	Asistente de particionado: particiones GPT
+#778	Codificar claves de usuarios (mejora)
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
