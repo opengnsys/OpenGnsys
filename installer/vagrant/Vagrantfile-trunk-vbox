@@ -79,7 +79,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.memory = SERVERMEM
       vb.cpus = 1
       # Get VM disk path
-      line = `VBoxManage list systemproperties | grep "Default machine folder"`
+      line = `VBoxManage list systemproperties`.match("Default machine folder.*")[0]
       vb_machine_folder = line.split(':')[1].strip()
       second_disk = File.join(vb_machine_folder, vb.name, REPODISK)
       # Create repo virtual disk, if needed.
