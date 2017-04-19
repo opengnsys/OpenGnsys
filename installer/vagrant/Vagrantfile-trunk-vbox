@@ -78,10 +78,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.name = "ogAdministrator"
       vb.memory = SERVERMEM
       vb.cpus = 1
-      # Get VM disk path
-      line = `VBoxManage list systemproperties`.match("Default machine folder.*")[0]
-      vb_machine_folder = line.split(':')[1].strip()
-      second_disk = File.join(vb_machine_folder, vb.name, REPODISK)
+      # 2nd virtual disk path (current dir on Windows, VM dir on other OSes)
+      if Vagrant::Util::Platform.windows? then
+        second_disk = File.join(".", REPODISK)
+      else
+        line = `VBoxManage list systemproperties`.match("Default machine folder.*")[0]
+        vb_machine_folder = line.split(':')[1].strip()
+        second_disk = File.join(vb_machine_folder, vb.name, REPODISK)
+      end
       # Create repo virtual disk, if needed.
       unless File.exist?(second_disk)
         vb.customize ['createhd', '--filename', second_disk, '--size', REPOSIZE * 1024]
@@ -93,7 +97,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     og.vm.box = "ubuntu/trusty64"
     og.vm.hostname = "ogAdministrator"
     # Network configuration: forward web port and attach new interface to VMs private network.
-    og.vm.network "forwarded_port", guest: 443, host: 8443
+    og.vm.network "forwarded_port", guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
     og.vm.network "private_network", ip: "#{NETPREFIX}10", virtualbox__intnet: true
     # Comment out to disable synced folder.
     #og.vm.synced_folder ".", "/vagrant", disabled: true
