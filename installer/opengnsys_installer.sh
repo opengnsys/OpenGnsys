@@ -1394,8 +1394,8 @@ function copyClientFiles()
 # Crear cliente OpenGnsys.
 function clientCreate()
 {
-	#local FILENAME=ogLive-wily-4.2.0-35-generic-r4919.iso 		# 1.1.0-rc3
-	local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso 	# 1.1.0-rc4
+	#local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso 	# 1.1.0-rc4
+	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5225.iso	# 1.1.0-rc5
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
  
 	# Descargar cliente, si es necesario.
@@ -1414,7 +1414,7 @@ function clientCreate()
 	# Montar imagen, copiar cliente ogclient y desmontar.
 	echoAndLog "${FUNCNAME}(): Installing ogLive Client"
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | \
-			$INSTALL_TARGET/bin/oglivecli install $TARGETFILE
+			$INSTALL_TARGET/bin/oglivecli install $FILENAME
 	# Adaptar permisos.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 
