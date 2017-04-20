@@ -52,13 +52,15 @@ INSERT INTO usuarios (idusuario, pasguor)
 
 # Añadir nº de revisión de imagen restaurada (ticket #737),
 # añadir porcentaje de uso de sistema de ficheros (ticket #711),
-# evitar errores "TEXT NOT NULL" (ticket #730)
+# evitar errores "TEXT NOT NULL" y "NO_ZERO_DATE" (ticket #730).
 ALTER TABLE ordenadores_particiones
 	MODIFY cache TEXT,
 	ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER idimagen,
 	ADD uso TINYINT NOT NULL DEFAULT 0;
 ALTER TABLE acciones
-	MODIFY restrambito TEXT;
+	MODIFY restrambito TEXT,
+	MODIFY fechahorareg DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',
+	MODIFY fechahorafin DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00';
 ALTER TABLE parametros 
 	MODIFY descripcion TEXT;
 ALTER TABLE tareas

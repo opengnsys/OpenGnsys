@@ -741,12 +741,12 @@ function escribeNotificacion($rs,$oA)
 		else{
 			/* Fechas y horas */
 			list($fecha,$hora)=split(" ",substr($rs->campos["fechahorafin"],0));
-			if ($fecha=="0000-00-00") $hora="";
+			if ($fecha=="1970-01-01") $hora="";
 			$html.='<TD align=center>&nbsp;'.InvFecha($fecha).'&nbsp;</TD>';
 			$html.='<TD align=center>&nbsp;'.$hora.'&nbsp;</TD>';
 				
 			list($fecha,$hora)=split(" ",substr($rs->campos["fechahorareg"],0));
-			if ($fecha=="0000-00-00") $hora="";
+			if ($fecha=="1970-01-01") $hora="";
 			$html.='<TD align=center>&nbsp;'.InvFecha($fecha).'&nbsp;</TD>';
 			$html.='<TD align=center>&nbsp;'.$hora.'&nbsp;</TD>';
 		}	

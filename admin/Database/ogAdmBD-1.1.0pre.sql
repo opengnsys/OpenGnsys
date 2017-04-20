@@ -190,3 +190,9 @@ INSERT INTO `comandos` 	(`idcomando`, `descripcion`, `pagina`, `gestor`, `funcio
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
         (39, 'tit', 'Título', '', '', '', 0, 1),
         (40, 'msj', 'Contenido', '', '', '', 0, 1);
+
+# Evitar error de MySQL con modo NO_ZERO_DATE (ticket #730).
+ALTER TABLE acciones
+	MODIFY fechahorareg DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',
+	MODIFY fechahorafin DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00';
+
