@@ -149,7 +149,7 @@ EOD;
 				$cmd->texto = "ROLLBACK;";
 				$cmd->Ejecutar();
 				// Error message.
-				$response["message"] = "Error updating database";
+				$response["message"] = "Database error";
 				jsonResponse(400, $response);
 				$app->stop();
 			}
@@ -215,16 +215,24 @@ EOD;
 		// Check if client is reserved.
 		if ($rs->campos["reserved"] == 1) {
 			// Updating DB if client is reserved.
+			$cmd->CreaParametro("@urllogin", $urlLogin, 0);
+			$cmd->CreaParametro("@urllogout", $urlLogout, 0);
 			$cmd->texto = <<<EOD
 INSERT INTO remotepc
-   SET id='$clntid', reserved=1, urllogin='$urlLogin', urllogout='$urlLogout'
+   SET id='$clntid', reserved=1, urllogin=@urllogin, urllogout=@urllogout
     ON DUPLICATE KEY UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
        urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
 EOD;
-			$cmd->Ejecutar();
-			// Confirm operation.
-			jsonResponse(200, "");
+			if ($cmd->Ejecutar()) {
+				// Confirm operation.
+				jsonResponse(200, "");
+        		} else {
+				// Error message.
+				$response["message"] = "Database error";
+				jsonResponse(400, $response);
+				$app->stop();
+			}
         	} else {
 			// Error message.
 			$response["message"] = "Client is not reserved";
@@ -247,6 +255,7 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
     function($ouid, $labid, $clntid) {
 	global $cmd;
 	global $userid;
+	global $ACCION_INICIADA;
 	$response = Array();
 	$ogagent = Array();
 
@@ -291,7 +300,7 @@ EOD;
 DELETE FROM acciones
  WHERE idordenador = '$clntid'
    AND descriaccion = 'RemotePC Session'
-   AND fechahorafin = '0000-00-00 00:00:00';
+   AND estado = $ACCION_INICIADA;
 EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = "COMMIT;";
