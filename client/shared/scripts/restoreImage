@@ -11,9 +11,14 @@
 #@exception OG_ERR_FORMAT   1 formato incorrecto.
 #@exception OG_ERR_NOTFOUND  2 cambio de repositorio: repositorio no encontrado
 #@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception $OG_ERR_MCASTRECEIVERFILE  57 Error en la recepción Multicast de un fichero
+#@exception $OG_ERR_PROTOCOLJOINMASTER 60 Error en la conexión de una sesión Unicast|Multicast con el Master
 #@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2015-06-16
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017/04/20
 #**/
 
 TIME1=$SECONDS
@@ -80,7 +85,7 @@ case "$PROTO" in
         COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
         #TODO comprobar parametros anteriores
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
-        ogMcastRequest "$OGUNIT$IMGNAME.img" "$PROTOOPT" 
+        ogMcastRequest "$OGUNIT$IMGNAME.img" "$PROTOOPT" || exit $?
         ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
         RETVAL=$?
         ;;

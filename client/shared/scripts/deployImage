@@ -34,6 +34,9 @@
 #@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2015-06-16
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20 
 #**/
 
 
@@ -150,6 +153,10 @@ case "$MODE" in
                           	;;
                         esac # del RESTOREPROTOCOLNOTCACHE
                     ;;
+		    57|60)
+			# Time-out en la transferencia multicast (El mensaje de error está enviado)
+			exit $RETVAL
+		    ;;
                 esac
             ;;
             *)  # Error: protocolo desconocido.

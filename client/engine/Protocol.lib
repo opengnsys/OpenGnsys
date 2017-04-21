@@ -334,6 +334,9 @@ fi
 #@version 2.0 - cambios en udp-receiver para permitir multicast entre subredes
 #@author  Juan Carlos Garcia, Universidad de Zaragoza
 #@date    2015/11/17
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20
 #*/ ##
 #         
 
@@ -465,12 +468,13 @@ do
 	IPB=`echo "$IPB" | cut -c2-`
 	IPBT=$IPBT$IPB
 done
+MCASTWAIT=${MCASTWAIT:-120}
 REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
 CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
 if [ $REPOSUBRED == $CLIENTSUBRED ]; then
-	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE"
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE  --start-timeout $MCASTWAIT --receive-timeout $MCASTWAIT"
 else
-	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP"
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP  --start-timeout $MCASTWAIT --receive-timeout $MCASTWAIT"
 fi
 
 
@@ -646,7 +650,7 @@ then
 	return $RETVAL
 else
 	echo $COMMAND
-	eval $COMMAND || ogRaiseError $OG_ERR_MCASTRECEIVERFILE " "; return $?
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTRECEIVERFILE "$TARGETFILE"; return $?
 	#[ -s "$LOGFILE" ] || return 21
 fi
 }
@@ -767,6 +771,9 @@ fi
 #@version 1.0.5
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2012/05/29
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20
 #*/ ##
 function ogMcastRequest {
 # Variables locales
@@ -784,12 +791,12 @@ REPOPORTAUX=2009
 REPEAT=0
 until nmap -n -sU -p $PORTAUX $REPOIP | grep open
 do
+    let REPEAT=$REPEAT+1
+    [ "$REPEAT" -lt 6 ] || ogRaiseError session log $OG_ERR_PROTOCOLJOINMASTER "MULTICAST \"$FILE\" \"$PROTOOPT\" $FILELIST" || return $?
     echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $1 $2""
     #update-cache:
     hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST "$FILE" "$PROTOOPT""
     #multicas-direct:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$IMAGE.img $OPTPROTOCOLO"
-    let REPEAT=$REPEAT+1
-    [ "$REPEAT" -eq 5 ] && return
     sleep 10
 done
 }
