@@ -1504,7 +1504,7 @@ EOT
 	fi
 
 	# Evitar inicio de duplicado en Ubuntu 14.04 (Upstart y SysV Init).
-	if [ -f /etc/init/${MYSQLSERV}.conf ]; then
+	if [ -f /etc/init/${MYSQLSERV}.conf -a -n "$(which initctl 2>/dev/null)" ]; then
 		service=$MYSQLSERV
 		$DISABLESERVICE
 	fi
