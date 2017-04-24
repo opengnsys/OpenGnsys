@@ -101,7 +101,7 @@ ALTER TABLE  aulas
 # Nueva tabla para datos del proyecto Remote PC (ticket #708).
 CREATE TABLE IF NOT EXISTS remotepc ( 
        id INT(11) NOT NULL, 
-       reserved TINYINT(1) DEFAULT '0', 
+       reserved DATETIME DEFAULT NULL, 
        urllogin VARCHAR(100), 
        urllogout VARCHAR(100), 
        PRIMARY KEY (id) 

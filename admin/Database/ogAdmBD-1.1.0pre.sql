@@ -171,25 +171,26 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 
 # Número de puestos del aula permite valores hasta 32768 (ticket #747)
 ALTER TABLE  aulas
-     MODIFY puestos smallint  DEFAULT NULL;
+	MODIFY puestos smallint  DEFAULT NULL;
 
 # Nueva tabla para datos del proyecto Remote PC (ticket #708).
 CREATE TABLE IF NOT EXISTS remotepc ( 
-       id INT(11) NOT NULL, 
-       reserved TINYINT(1) DEFAULT '0', 
-       urllogin VARCHAR(100), 
-       urllogout VARCHAR(100), 
-       PRIMARY KEY (id) 
-    ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+	id INT(11) NOT NULL, 
+	reserved DATETIME DEFAULT NULL, 
+	urllogin VARCHAR(100), 
+	urllogout VARCHAR(100), 
+	PRIMARY KEY (id) 
+	) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+ALTER TABLE remotepc
+       MODIFY reserved DATETIME DEFAULT NULL;
 
 # Nuevo comando "Enviar mensaje" (ticket #779)
 INSERT INTO `comandos` 	(`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, 
 	`aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`, `submenu`) VALUES
-	(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '',
-	31, '', '', '', 1, '' );
+	(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '', 31, '', '', '', 1, '' );
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
-        (39, 'tit', 'Título', '', '', '', 0, 1),
-        (40, 'msj', 'Contenido', '', '', '', 0, 1);
+	(39, 'tit', 'Título', '', '', '', 0, 1),
+	(40, 'msj', 'Contenido', '', '', '', 0, 1);
 
 # Evitar error de MySQL con modo NO_ZERO_DATE (ticket #730).
 ALTER TABLE acciones

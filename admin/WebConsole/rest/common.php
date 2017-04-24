@@ -21,13 +21,13 @@
  * @return  string          JSON response.
  */
 function jsonResponse($status, $response, $opts=0) {
-        $app = \Slim\Slim::getInstance();
-        // HTTP status code.
-        $app->status($status);
-        // Content-type HTTP header.
-        $app->contentType('application/json');
-        // JSON response.
-        echo json_encode($response, $opts);
+	$app = \Slim\Slim::getInstance();
+	// HTTP status code.
+	$app->status($status);
+	// Content-type HTTP header.
+	$app->contentType('application/json; charset=utf-8');
+	// JSON response.
+	echo json_encode($response, $opts);
 }
 
 /**
@@ -88,6 +88,21 @@ function checkParameter($param) {
 		jsonResponse(400, $response);
 		return false;
 	}
+}
+
+/**
+ * @brief    Check if all parameters are positive integer numbers.
+ * @param    int id ...      Identificators to check (variable number of parameters).
+ * @return   boolean         "true" if all ids are int>0, otherwise "false".
+ */
+function checkIds() {
+	$opts = Array('options' => Array('min_range' => 1));	// Check for int>0
+	foreach (func_get_args() as $id) {
+		if (!filter_var($id, FILTER_VALIDATE_INT, $opts)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**

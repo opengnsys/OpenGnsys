@@ -741,7 +741,7 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
 
 CREATE TABLE IF NOT EXISTS `remotepc` (
   `id` int(11) NOT NULL,
-  `reserved` tinyint(1) DEFAULT '0',
+  `reserved` datetime DEFAULT NULL,
   `urllogin` varchar(100),
   `urllogout` varchar(100),
   PRIMARY KEY (`id`)

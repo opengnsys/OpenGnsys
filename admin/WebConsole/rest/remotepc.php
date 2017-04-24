@@ -21,7 +21,7 @@
  * @param    integer imageid   image identificator
  * @param    integer labid     lab. identificator (optional)
  */
-$app->post('/ous/:ouid/images/:imageid/reserve', 'validateApiKey',
+$app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
     function($ouid, $imageid) use ($app) {
 	global $cmd;
 	global $AMBITO_ORDENADORES;
@@ -33,16 +33,33 @@ $app->post('/ous/:ouid/images/:imageid/reserve', 'validateApiKey',
 	$ogagent = Array();
 
 	// Checking parameters. 
-	$ouid = htmlspecialchars($ouid);
-	$imageid = htmlspecialchars($imageid);
-	$labid = str_replace("%", "\%", htmlspecialchars($app->request()->params('lab')));
-	if (empty($labid))  $labid = '%';    // Clients in any lab.
+	try {
+		if (!check_ids($ouid, $imageid)) {
+			throw new Exception("Ids. must be positive integers");
+		}
+		// Reading POST parameters in JSON format.
+		$input = json_decode($app->request()->getBody());
+		$labid = isset($input->labid) ? $input->labid : '%';	// Default: no lab. filter
+		$maxtime = isset($input->maxtime) ? $input->maxtime : 24;	// Default: 24 h.
+		if (!filter_var($labid, FILTER_VALIDATE_INT, $opts) and $labid !== '%') {
+			throw new Exception("Lab id. must be positive integer");
+		}
+		if (!filter_var($maxtime, FILTER_VALIDATE_INT, $opts)) {
+			throw new Exception("Time must be positive integer (in hours)");
+		}
+	} catch (Exception $e) {
+		// Communication error.
+		$response["message"] = $e->getMessage();
+		jsonResponse(400, $response);
+		$app->stop();
+	}
 	// Randomly choose a client with image installed and get ogAdmServer data.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
-       ordenadores.idordenador, ordenadores.ip, ordenadores.mac, ordenadores.agentkey,
-       ordenadores_particiones.numdisk, ordenadores_particiones.numpar,
-       aulas.idaula, aulas.idcentro, remotepc.reserved
+       ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
+       ordenadores.mac, ordenadores.agentkey, ordenadores_particiones.numdisk,
+       ordenadores_particiones.numpar, aulas.idaula, aulas.idcentro,
+       remotepc.reserved
   FROM entornos, ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
@@ -62,11 +79,12 @@ EOD;
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is not reserved.
-		if ($rs->campos["reserved"] !== 1) {
+		if (is_null($rs->campos["reserved"])) {
 			// Read query data.
 			$serverip = $rs->campos["ipserveradm"];
 			$serverport = $rs->campos["portserveradm"];
 			$clntid = $rs->campos["idordenador"];
+			$clntname = $rs->campos["name"];
 			$clntip = $rs->campos["ip"];
 			$clntmac = $rs->campos["mac"];
 			$agentkey = $rs->campos["agentkey"];
@@ -101,7 +119,7 @@ EOD;
 			$timestamp = time();
 			$cmd->texto = <<<EOD
 INSERT INTO remotepc
-   SET id='$clntid', reserved=1, urllogin=NULL, urllogout=NULL
+   SET id='$clntid', reserved=NOW() + INTERVAL $maxtime HOUR, urllogin=NULL, urllogout=NULL
     ON DUPLICATE KEY UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
        urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
@@ -139,6 +157,7 @@ EOD;
 				sendCommand($serverip, $serverport, $reqframe, $values);
 				// Compose JSON response.
 				$response['id'] = $clntid;
+				$response['name'] = $clntname;
 				$response['ip'] = $clntip;
 				$response['mac'] = $clntmac;
 				$response['lab']['id'] = $labid;
@@ -178,11 +197,21 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 	global $userid;
 	$response = Array();
 
-	// Reading JSON parameters.
+	// Checking parameters. 
 	try {
+		if (!check_ids($ouid, $labid, $clntid)) {
+			throw new Exception("Ids. must be positive integers");
+		}
+		// Reading JSON parameters.
 		$input = json_decode($app->request()->getBody());
 		$urlLogin = htmlspecialchars($input->urlLogin);
 		$urlLogout = htmlspecialchars($input->urlLogout);
+		if (!filter_var($urlLogin, FILTER_VALIDATE_URL)) {
+			throw new Exception("Must be a valid URL for login notification");
+		}
+		if (!filter_var($urlLogout, FILTER_VALIDATE_URL)) {
+			throw new Exception("Must be a valid URL for logout notification");
+		}
 	} catch (Exception $e) {
 		// Error message.
 		$response["message"] = $e->getMessage();
@@ -190,10 +219,6 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 		$app->stop();
 	}
 
-	// Checking parameters. 
-	$ouid = htmlspecialchars($ouid);
-	$labid = htmlspecialchars($labid);
-	$clntid = htmlspecialchars($clntid);
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, ordenadores.idordenador, remotepc.*
@@ -213,16 +238,15 @@ EOD;
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
-		if ($rs->campos["reserved"] == 1) {
+		if (! is_null($rs->campos["reserved"])) {
 			// Updating DB if client is reserved.
 			$cmd->CreaParametro("@urllogin", $urlLogin, 0);
 			$cmd->CreaParametro("@urllogout", $urlLogout, 0);
 			$cmd->texto = <<<EOD
 INSERT INTO remotepc
-   SET id='$clntid', reserved=1, urllogin=@urllogin, urllogout=@urllogout
+   SET id='$clntid', urllogin=@urllogin, urllogout=@urllogout
     ON DUPLICATE KEY UPDATE
-       id=VALUES(id), reserved=VALUES(reserved),
-       urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
+       id=VALUES(id), urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
 EOD;
 			if ($cmd->Ejecutar()) {
 				// Confirm operation.
@@ -260,9 +284,17 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	$ogagent = Array();
 
 	// Checking parameters. 
-	$ouid = htmlspecialchars($ouid);
-	$labid = htmlspecialchars($labid);
-	$clntid = htmlspecialchars($clntid);
+	try {
+		if (!check_ids($ouid, $labid, $clntid)) {
+			throw new Exception("Ids. must be positive integers");
+		}
+	} catch (Exception $e) {
+		// Error message.
+		$response["message"] = $e->getMessage();
+		jsonResponse(400, $response);
+		$app->stop();
+	}
+
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, ordenadores.idordenador, ordenadores.ip, ordenadores.agentkey, remotepc.reserved
@@ -282,7 +314,7 @@ EOD;
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
-		if ($rs->campos["reserved"] == 1) {
+		if (! is_null($rs->campos["reserved"])) {
 			// Read query data.
 			$clntip = $rs->campos["ip"];
 			$agentkey = $rs->campos["agentkey"];
@@ -292,7 +324,7 @@ EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
 UPDATE remotepc
-   SET reserved=0, urllogin=NULL, urllogout=NULL
+   SET reserved=NULL, urllogin=NULL, urllogout=NULL
  WHERE id='$clntid';
 EOD;
 			$cmd->Ejecutar();

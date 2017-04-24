@@ -394,34 +394,7 @@ paths:
           schema:
             type: array
             items:
-              type: object
-              properties:
-                id:
-                  description: client identificator
-                  type: integer
-                  format: int32
-                name:
-                  description: client name
-                  type: string
-                ip:
-                  description: client IP address
-                  type: string
-                mac:
-                  description: client MAC (Ethernet) address
-                  type: string
-                ou:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      format: int32
-                lab:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      format: int32
-              required: [ id, name, ip, mac, ou, lab ]
+              $ref: "#/definitions/SelectedClientModel"
       security:
         - apikey: []
       tags:
@@ -935,46 +908,28 @@ paths:
       parameters:
         - $ref: "#/parameters/ouParam"
         - $ref: "#/parameters/imageParam"
-        - name: labid
-          in: query
-          description: lab. identificator
-          required: false
-          type: integer
+        - in: body
+          name: data
+          description: Operation data
+          schema:
+            type: object
+            properties:
+              labid:
+                description: lab id filter (optional)
+                type: integer
+                format: int32
+                minimum: 1
+              maxtime:
+                description: maximum reservation time, in h. (optional, 24 h. by default)
+                type: integer
+                format: int32
+                minimum: 1
+                default: 24
       responses:
         "200":
           description: Reserve a client to boot using an operating system image.
           schema:
-            type: object
-            properties:
-              id:
-                description: selected client id
-                type: integer
-                format: int32
-              mac:
-                description: client MAC address
-                type: string
-              ip:
-                description: client IP address
-                type: string
-              lab:
-                description: client's lab
-                type: object
-                properties:
-                  id:
-                    description: lab id
-                    type: integer
-                    format: int32
-                required: [ id ]
-              ou:
-                description: client's OU
-                type: object
-                properties:
-                  id:
-                    description: OU id
-                    type: integer
-                    format: int32
-                required: [ id ]
-            required: [ id, mac, ip, lab, ou ]
+            $ref: "#/definitions/SelectedClientModel"
       security:
         - apikey: []
       tags:
@@ -1146,30 +1101,35 @@ parameters:
     description: OU identificator
     required: true
     type: integer
+    minimum: 1
   labParam:
     name: labid
     in: path
     description: Lab identificator
     required: true
     type: integer
+    minimum: 1
   clientParam:
     name: clientid
     in: path
     description: Client identificator
     required: true
     type: integer
+    minimum: 1
   repoParam:
     name: repoid
     in: path
     description: repository identificator
     required: true
     type: integer
+    minimum: 1
   imageParam:
     name: imageid
     in: path
     description: image definition identificator
     required: true
     type: integer
+    minimum: 1
 definitions:
   StatusModel:     
     type: object
@@ -1178,6 +1138,7 @@ definitions:
         description: client id
         type: integer
         format: int32
+        minimum: 1
       ip:
         description: client IP address
         type: string
@@ -1189,3 +1150,41 @@ definitions:
         description: flag to check if an user is logged in
         type: boolean
     required: [ id, ip, status ]
+  SelectedClientModel:     
+    type: object
+    properties:
+      id:
+        description: client id
+        type: integer
+        format: int32
+        minimum: 1
+      name:
+        description: client name
+        type: string
+      mac:
+        description: client MAC address
+        type: string
+      ip:
+        description: client IP address
+        type: string
+      lab:
+        description: client's lab
+        type: object
+        properties:
+          id:
+            description: lab id
+            type: integer
+            format: int32
+            minimum: 1
+        required: [ id ]
+      ou:
+        description: client's OU
+        type: object
+        properties:
+          id:
+            description: OU id
+            type: integer
+            format: int32
+            minimum: 1
+        required: [ id ]
+    required: [ id, name, mac, ip, lab, ou ]
