@@ -708,6 +708,9 @@ function mysqlCreateDb()
 		errorAndLog "${FUNCNAME}(): error while creating database $database"
 		return 1
 	fi
+	# Quitar modo ONLY_FULL_GROUP_BY de MySQL (ticket #730).
+	mysql --defaults-extra-file=$TMPMYCNF -e "SET GLOBAL sql_mode=(SELECT TRIM(BOTH ',' FROM REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY','')));"
+
 	echoAndLog "${FUNCNAME}(): database $database created"
 	return 0
 }
