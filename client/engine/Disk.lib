@@ -785,7 +785,7 @@ echo $ID
 function ogGetPartitionSize ()
 {
 # Variables locales.
-local PART
+local PART SIZE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -796,11 +796,12 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Devolver tamaño de partición o del sistema de archivos (para ZFS).
+# Devolver tamaño de partición, del volumen lógico o del sistema de archivos (para ZFS).
 PART="$(ogDiskToDev $1 $2)" || return $?
-partx -gbo SIZE $PART 2>/dev/null | awk '{print int($1/1024)}'
-[ ${PIPESTATUS[0]} -ne 0 ] && ogGetFsSize $1 $2
-return 0
+SIZE=$(partx -gbo SIZE $PART 2>/dev/null | awk '{print int($1/1024)}')
+[ -z "$SIZE" ] && SIZE=$(lvs --noheadings -o lv_size --units k $PART | awk '{printf "%d",$0}')
+[ -z "$SIZE" ] && SIZE=$(ogGetFsSize $1 $2)
+echo ${SIZE:-0}
 }
 
 
