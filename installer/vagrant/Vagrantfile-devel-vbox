@@ -22,13 +22,16 @@ LOCALWEBPORT = 8443
 
 # OpenGnsys Server provisioning script: prepare repo disk, install OpenGnsys, change default interface, configure DHCP server.
 OGSERVERSCRIPT = <<EOT
-# Mount repository disk.
-test -n "$(blkid /dev/sdb1 | grep ext4)" && exit
-echo -e "o\nn\np\n\n\n\nw" | fdisk /dev/sdb
-mkfs -t ext4 /dev/sdb1
-mkdir -p /opt/opengnsys/images
-echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
-mount -a
+# Exit if OpenGnsys is installed.
+[ -f /opt/opengnsys/doc/VERSION.txt ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
+# Mount repository disk, if necesary.
+if [ -n "$(blkid /dev/sdb1 | grep ext4)" ]; then
+    echo -e "o\nn\np\n\n\n\nw" | fdisk /dev/sdb
+    mkfs -t ext4 /dev/sdb1
+    mkdir -p /opt/opengnsys/images
+    echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
+    mount -a
+fi
 # Install OpenGnsys and change server address.
 wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
@@ -78,6 +81,7 @@ dpkg-reconfigure -fnoninteractive console-setup
 echo "Notes:"
 echo "- OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
 [ -d /opt/opengnsys/www/angular ] && echo "- Angular-based web URL: https://localhost:#{LOCALWEBPORT}/opengnsys/angular/ogWebAdmin/"
+exit 0
 EOT
 
 # Client 1 OS provisioning script.
