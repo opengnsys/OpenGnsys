@@ -14,12 +14,12 @@
 	$TbMsg[6]='Scope';
 	$TbMsg[7]='Title';
 	$TbMsg[8]='Description';
-	$TbMsg[9]='OpenGnSys code';
+	$TbMsg[9]='Script code';
 	$TbMsg[10]='Data to submit';
 	$TbMsg[11]='Delete Cache Image on Client';
-	$TbMsg[12]='&nbsp;Modo de ejecución*&nbsp;';
-	$TbMsg[13]='Sistema';
-	$TbMsg[14]='Usuario';
+	$TbMsg[12]='&nbsp;Execution mode *&nbsp;';
+	$TbMsg[13]='System';
+	$TbMsg[14]='User';
 	$TbMsg[15]="AVISO El modo de ejecución sólo se aplica a los agentes de sistema operativo nuevos: <br>\n
 		    * El modo usuario sólo es válido si está iniciada la sesión en modo gráfico.<br>\n
 		    * El lenguaje del script a enviar debe corresponder al estado de cliente.<br>\n

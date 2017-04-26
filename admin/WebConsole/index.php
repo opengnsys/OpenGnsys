@@ -37,8 +37,7 @@ if (!$cmd)
    	die($TbMsg["ACCESS_ERROR"]);
 
         $rs=new Recordset;
-//      $cmd->texto="SELECT * FROM  centros WHERE idcentro='$idc'";
-        $cmd->texto="SELECT * FROM  centros ";
+        $cmd->texto="SELECT * FROM centros";
         $rs->Comando=&$cmd;
         if (!$rs->Abrir()) return(false); // Error al abrir recordset
         $rs->Primero();
@@ -110,13 +109,13 @@ function PulsaEnter(oEvento){
 <h2> <?php echo $TbMsg["ACCESS_SUBHEAD"]; ?> </h2>
 <form action="controlpostacceso.php" name="fdatos" method="post">
     <fieldset>
-	<p><label for="usu"><?php echo $TbMsg["ACCESS_USERNAME"]; ?></label>
-	   <input name="usu" type="text" onkeypress="PulsaEnter(event)" /></p>
-	<p><label for="pss"><?php echo $TbMsg["ACCESS_PASSWORD"]; ?></label>
-	   <input name="pss" type="password" onkeypress="PulsaEnter(event)" /></p>
-	<p><label for="idcentro"><?php echo $TbMsg["ACCESS_ORGUNIT"]; ?></label>
-	   <?php echo HTMLSELECT($cmd,0,'centros',$idcentro,'idcentro','nombrecentro',220); ?></p>
-	<button type="submit" onclick="confirmar()"><?php echo $TbMsg["ACCESS_OK"]; ?></button>
+	<div><label for="usu"><?php echo $TbMsg["ACCESS_USERNAME"]; ?></label>
+	   <input name="usu" type="text" onkeypress="PulsaEnter(event)" /></div>
+	<div><label for="pss"><?php echo $TbMsg["ACCESS_PASSWORD"]; ?></label>
+	   <input name="pss" type="password" onkeypress="PulsaEnter(event)" /></div>
+	<div><label for="idcentro"><?php echo $TbMsg["ACCESS_ORGUNIT"]; ?></label>
+	   <?php echo HTMLSELECT($cmd,0,'centros',$idcentro,'idcentro','nombrecentro',220); ?></div>
+	<div><button type="submit" onclick="confirmar()"><?php echo $TbMsg["ACCESS_OK"]; ?></button></div>
     </fieldset>
 </form>
 </div>

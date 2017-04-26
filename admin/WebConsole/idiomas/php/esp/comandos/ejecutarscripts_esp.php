@@ -17,7 +17,7 @@
 	$TbMsg[9]='C&oacute;digo del script';
 	$TbMsg[10]='Datos a suministrar';
 	$TbMsg[11]='Eliminar Imagen de la Cach&eacute; de Cliente';
-	$TbMsg[12]='&nbsp;Modo de ejecución*&nbsp;';
+	$TbMsg[12]='&nbsp;Modo de ejecución *&nbsp;';
 	$TbMsg[13]='Sistema';
 	$TbMsg[14]='Usuario';
 	$TbMsg[15]="AVISO El modo de ejecución sólo se aplica a los agentes de sistema operativo nuevos: <br>

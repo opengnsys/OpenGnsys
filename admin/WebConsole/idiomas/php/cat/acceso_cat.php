@@ -15,7 +15,7 @@ $TbErr[4]="ATENCIÓ: Vostè no te accés a aquesta aplicació";
 
 // Mensajes.
 $TbMsg=array();
-$TbMsg["ACCESS_TITLE"]="OpenGnSys: Administració web d\'aules";
+$TbMsg["ACCESS_TITLE"]="OpenGnsys: Administració web d\'aules";
 $TbMsg["ACCESS_HEADING"]="Gestió d\'Aules d\'Informàtica";
 $TbMsg["ACCESS_SUBHEAD"]="Accés per administradors";
 $TbMsg["ACCESS_USERNAME"]="Usuari";

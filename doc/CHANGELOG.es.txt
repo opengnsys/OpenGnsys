@@ -18,6 +18,8 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #740	Clonar disco completo en modo "raw"
 #744	Gestionar bloqueos de disco
 #748	Mejorar rendimiento usando fichero de configuración de discos (mejora)
+#771	Crear imagen no muestra correctamente el espacio necesario y disponible
+#781	Control de errores en la transferencia multicast
 
 Tickets resueltos en módulo OpenGnsys Client:
 #233	Añadir reloj al cliente (resuelto en #746)
@@ -35,6 +37,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #385	Servicios OpenGnsys para varias VLAN aisladas (no se resolverá)
 #723	Cambio temporal de fichero de arranque PXE
 #736	Mejorar la seguridad del servidor
+#745	Depurar ogAdmServer (duplicado de #559)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)
@@ -52,6 +55,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #738	Se pierde nombre de la imagen restaurada
 #747	Uso incorrecto del número de puestos de las propiedades del aula
 #751	Asistente de particionado: particiones GPT
+#777	Error SQL al incluir caracteres espaciales en los comentarios
 #778	Codificar claves de usuarios (mejora)
 
 Tickets resueltos en módulo OpenGnSys Installer:

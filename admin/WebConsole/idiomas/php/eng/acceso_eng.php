@@ -15,7 +15,7 @@ $TbErr[4]="Attention: You do not have access to this application";
 
 // Mensajes.
 $TbMsg=array();
-$TbMsg["ACCESS_TITLE"]="OpenGnSys: Labs web administration";
+$TbMsg["ACCESS_TITLE"]="OpenGnsys: Labs web administration";
 $TbMsg["ACCESS_HEADING"]="Computer Labs Management";
 $TbMsg["ACCESS_SUBHEAD"]="Administrators Access";
 $TbMsg["ACCESS_USERNAME"]="Username";
