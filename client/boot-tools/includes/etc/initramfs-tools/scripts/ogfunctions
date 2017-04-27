@@ -358,17 +358,22 @@ ogGetROOTSERVER ()
 
 
 #       ogUpdateInitrd
-#@brief   Actualiza el intird de la cache desde el servidor. Si el arranque ha disdo desde cache, compueba desde el servidor nueva version del initird.
+#@brief   Actualiza el initrd de la cache desde el servidor. Si el arranque ha sido desde cache, comprueba desde el servidor nueva version del initird.
 #@param1 
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@version 0.9
 #@author Antonio J. Doblas. Universidad de Malaga.
 #@date    2011/05/24
+#@author Irina Gómez. ETSII Universidad de Sevilla
+#@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@date    2017/04/27
 #*/ ##
 
 ogUpdateInitrd ()
 {
+	local OGLIVEDIR
+	OGLIVEDIR=${oglivedir:-"ogclient"}
 	cd /tmp
 	mkdir /tmp/cache
 	TYPE=$(blkid -po export $(blkid -L CACHE) 2>/dev/null | awk -F= '$1=="TYPE" { print $2}')
@@ -379,8 +384,8 @@ ogUpdateInitrd ()
 	
 	
 	# comparamos los del server
-	busybox tftp -g -r ogvmlinuz.sum $ROOTSERVER
-	busybox tftp -g -r oginitrd.img.sum $ROOTSERVER
+	busybox tftp -g -r $OGLIVEDIR/ogvmlinuz.sum $ROOTSERVER
+	busybox tftp -g -r $OGLIVEDIR/oginitrd.img.sum $ROOTSERVER
 	SERVERVMLINUZ=`cat ogvmlinuz.sum`
 	SERVERINITRD=`cat oginitrd.img.sum`
 
@@ -397,15 +402,15 @@ ogUpdateInitrd ()
 	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
 	then		
 		echo "ogvmlinuz updating"
-		busybox tftp -g -r ogvmlinuz $ROOTSERVER
-		busybox tftp -g -r ogvmlinuz.sum $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/ogvmlinuz $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/ogvmlinuz.sum $ROOTSERVER
 		DOREBOOT=true
 	fi
 	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
 	then
 		echo "oginitrd updating"
-		busybox tftp -g -r oginitrd.img $ROOTSERVER
-		busybox tftp -g -r oginitrd.img.sum $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/oginitrd.img $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/oginitrd.img.sum $ROOTSERVER
 		DOREBOOT=true
 	fi
 

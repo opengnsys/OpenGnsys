@@ -12,11 +12,13 @@
 #@version 1.0.1 - requiere el gestor de arranque grub2dos
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2010/07/27
+#@author Irina Gómez. ETSII Universidad de Sevilla
+#@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@date    2017/04/27
 #*/ ##
 
-
-
-OGBTFTP="/opt/oglive/tftpboot/ogclient"
+OGLIVEDIR=${oglivedir:-"ogclient"}
+OGBTFTP="/opt/oglive/tftpboot/$OGLIVEDIR"
 ogMountCache || exit 1
 
 [ -d $OGCAC/boot ] || mkdir -p $OGCAC/boot 
