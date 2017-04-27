@@ -26,7 +26,7 @@ function jq() {
 # Create/edit JSON file about installed ogLive clients.
 function addToJson() {
     local DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEARCH="$3" OGLIVEREV="$4"
-    local OGLIVEDIR="$(basename $5)" OGLIVEISO="$(basename $6)"
+    local OGLIVEDIR=$(basename $5 2>/dev/null) OGLIVEISO=$(basename $6 2>/dev/null)
     # JSON data for installed ogLive.
     DATA=$(cat << EOT | jq .
 {"distribution":"$OGLIVEDIST","kernel":"$OGLIVEKRNL","architecture":"$OGLIVEARCH","revision":"$OGLIVEREV","directory":"$OGLIVEDIR","iso":"$OGLIVEISO"}
@@ -100,6 +100,7 @@ Commands:
   uninstall Index|Dir uninstall an ogLive client
   get-default         get index value for default ogLive client
   set-default Index   set default ogLive client
+  rebuild             rebuild a lost configuration file
   assign Iso Index    assign an ISO file to a JSON entry
 Parameters:
   Index   a number, starting by 0
@@ -125,6 +126,7 @@ function convert() {
     # Rename directory, link to default and clean old files.
     mv -v $OGCLIENT $OGLIVEDIR
     ln -vfs $OGLIVEDIR $DEFOGLIVE
+    rm -f $OGCLIENT
     ln -vfs $DEFOGLIVE $OGCLIENT
     mv -v $OGCLIENT.old $OGLIVEDIR.old 2>/dev/null
     rm -fv {ogvmlinuz,oginitrd.img}{,.sum} $OLDINFOFILE
@@ -172,8 +174,8 @@ function check() {
          [ ! -f $INFOFILE ] && exit $ERR
     fi
     # Check for other problems.
-    [ ! -f $INFOFILE ] && echo "Configuration file does not exist: $INFOFILE" && let ERR++
-    [ "$(jq -c keys $INFOFILE 2>/dev/null)" != "[\"default\",\"oglive\"]" ] && echo "Format error in configuration file: $INFOFILE" && let ERR++
+    [ ! -f $INFOFILE ] && echo "Configuration file does not exists: $INFOFILE" && let ERR++
+    [ -f $INFOFILE -a "$(jq -c keys $INFOFILE 2>/dev/null)" != "[\"default\",\"oglive\"]" ] && echo "Format error in configuration file: $INFOFILE" && let ERR++
     [ ! -e $TFTPDIR ] && echo "TFTP directory does not exist: $TFTPDIR." && let ERR++
     # Check for installed ogLives.
     INST=( $(find $TFTPDIR/ -type d -name "$DEFOGLIVE-*" -a ! -name "*.old" -printf "%f\n" | sort) )
@@ -399,6 +401,26 @@ exit
     ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
 }
 
+# Rebuild a lost configuration file.
+function rebuild() {
+    local INST i NF DEF
+    [ $# -ne 0 ] && raiseError usage
+    [ -f $INFOFILE ] && raiseError access "Configuration file exists."
+    INST=$(find $TFTPDIR/ -type d -name "$DEFOGLIVE-*" -a ! -name "*.old" -printf "%f\n" | sort)
+    for i in $INST; do
+        NF=$(echo $i | awk -F- '{print NF-1}')
+        case $NF in
+            1)  addToJson "" "$(echo $i|cut -f2 -d-)" "i386" "" "$i" "" ;;
+            4)  addToJson $(echo $i | awk -F- '{printf "%s %s i386 %s %s '""'",$2,$3,$4,$0}') ;;
+            5)  addToJson $(echo $i | awk -F- '{printf "%s %s %s %s %s '""'",$2,$3,$4,$5,$0}') ;;
+        esac
+        # Check for is default oglive.
+        [ -n "$(stat -c "%N" $TFTPDIR/$DEFOGLIVE | awk '$3~/'$i'/ {print}')" ] && DEF="$i"
+    done
+    # Set default ogLive.
+    [ -n "$DEF" ] && setdefault $(search $DEF)
+}
+
 # Assign an ISO file to a JSON entry.
 function assign() {
 local ISOFILE DIR
@@ -432,7 +454,7 @@ JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
 # Commands control.
 case "$1" in
-    help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|assign)
+    help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|rebuild|assign)
         COMMAND="${1/-/}"; shift; $COMMAND "$@" ;;
     *)  raiseError usage ;;
 esac
