@@ -10,7 +10,7 @@
 	$TbMsg[2]='Labs';
 	$TbMsg[3]='Group of computers';
 	$TbMsg[4]='Computers';
-	$TbMsg[5]='Perfom Script';
+	$TbMsg[5]='Send message';
 	$TbMsg[6]='Scope';
 	$TbMsg[7]='Title';
 	$TbMsg[8]='Description';

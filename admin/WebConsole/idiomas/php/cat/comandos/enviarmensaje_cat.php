@@ -10,7 +10,7 @@
 	$TbMsg[2]='Aules';
 	$TbMsg[3]='Grup d\'ordinadors';
 	$TbMsg[4]='Ordinadors';
-	$TbMsg[5]='Executar script';
+	$TbMsg[5]='Enviar Mensaje';
 	$TbMsg[6]='Àmbit';
 	$TbMsg[7]='Títol';
 	$TbMsg[8]='Descripció';
