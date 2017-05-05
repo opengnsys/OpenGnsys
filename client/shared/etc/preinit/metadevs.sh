@@ -13,7 +13,7 @@
 #*/
 
 
-# Si está configurado OpenGNSys ...
+# Si está configurado OpenGnsys ...
 if [ -n "$OPENGNSYS" ]; then
     echo "$MSG_DETECTLVMRAID"
     # Detectar metadispositivos LVM.
@@ -21,8 +21,8 @@ if [ -n "$OPENGNSYS" ]; then
     # Detectar metadispositivos RAID.
     dmraid -ay &>/dev/null
 else
-    # FIXME Error: entorno de OpenGNSys no configurado.
-    echo "Error: OpenGNSys environment is not configured."   # FIXME: definir mensaje.
+    # FIXME Error: entorno de OpenGnsys no configurado.
+    echo "Error: OpenGnsys environment is not configured."   # FIXME: definir mensaje.
     exit 1
 fi
 

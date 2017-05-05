@@ -1,7 +1,7 @@
 <?php
 //********************************************************************
 // Descripción : 
-//              Pagina de informacion sobre el proyecto OpenGnSys
+//              Pagina de informacion sobre el proyecto OpenGnsys
 //********************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/acercade_".$idioma.".php");
@@ -19,7 +19,7 @@ include_once("../idiomas/php/".$idioma."/acercade_".$idioma.".php");
 
 <img alt="*" src="../images/acercade.png" align="left" hspace="10em" vspace="10em" />
 
-<h1><img alt="OpenGnSys" src="../images/iconos/logoopengnsys.png" /></h1>
+<h1><img alt="OpenGnsys" src="../images/iconos/logoopengnsys.png" /></h1>
 
 <p>
 <?php
@@ -64,7 +64,7 @@ fwrite($crearficheroinicio,"
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <p>&nbsp;</p>
-    <p><img alt='OpenGnSys' src='../../images/iconos/logoopengnsys.png' /></p></td>
+    <p><img alt='OpenGnsys' src='../../images/iconos/logoopengnsys.png' /></p></td>
     <td width='61%'>
     
 <p>
