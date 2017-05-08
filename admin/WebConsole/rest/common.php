@@ -31,6 +31,32 @@ function jsonResponse($status, $response, $opts=0) {
 }
 
 /**
+ * @brief   Print immediately JSON response to continue processing.
+ * @param   int status      Status code for HTTP response.
+ * @param   array response  Response data.
+ * @param   int opts        Options to encode JSON data.
+ * @return  string          JSON response.
+ */
+function jsonResponseNow($status, $response, $opts=0) {
+	// Flush buffer.
+	ob_end_clean();
+	ob_end_flush();
+	header("Connection: close");
+	// Compose headers and content.
+	http_response_code((int)$status);
+	header('Content-type: application/json; charset=utf-8');
+	ignore_user_abort();
+	ob_start();
+	echo json_encode($response, $opts);
+	$size = ob_get_length();
+	header("Content-Length: $size");
+	// Print content.
+	ob_end_flush();
+	flush();
+	session_write_close();
+}
+
+/**
  * @brief    Validate API key included in "Authorization" HTTP header.
  * @return   JSON response on error.
  */

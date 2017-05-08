@@ -52,10 +52,12 @@ $app->post('/ogagent/started',
 		    }
 		    // Store secret key in DB.
 		    if (isset($input->secret))  $secret = htmlspecialchars($input->secret);
-		    $cmd->texto = "UPDATE ordenadores
-				      SET agentkey='$secret'
-				    WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac',':',''))
-				    LIMIT 1";
+		    $cmd->texto = <<<EOD
+UPDATE ordenadores
+   SET agentkey='$secret'
+ WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac', ':', ''))
+ LIMIT 1;
+EOD;
 		    if ($cmd->Ejecutar() !== true or mysql_affected_rows() !== 1) {
 			// DB access error or not updated.
 			throw new Exception("Cannot store new secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
@@ -70,7 +72,7 @@ $app->post('/ogagent/started',
 		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
-		// Comunication error.
+		// Communication error.
 		$response["message"] = $e->getMessage();
 		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
@@ -108,7 +110,7 @@ $app->post('/ogagent/stopped',
 		$response = "";
 		jsonResponse(200, $response);
 	} catch (Exception $e) {
-		// Comunication error.
+		// Communication error.
 		$response["message"] = $e->getMessage();
 		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
@@ -138,16 +140,14 @@ $app->post('/ogagent/loggedin',
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
-		// Log activity and respond to client.
-		writeLog("User logged in: ip=$ip, user=$user.");
-		$response = "";
-		jsonResponse(200, $response);
 		// Check if client is included in the server database.
+		$cmd->CreaParametro("@ip", $ip, 0);
 		$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.ip, remotepc.urllogin
+SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin
+       remotepc.reserved > NOW() AS reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
- WHERE ordenadores.ip = '$ip'
+ WHERE ordenadores.ip=@ip
  LIMIT 1;
 EOD;
 		$rs=new Recordset;
@@ -155,19 +155,31 @@ EOD;
 		if ($rs->Abrir()) {
 			// Read query data.
 			$rs->Primero();
+			$id = $rs->campos['idordenador'];
 			$redirto[0]['url'] = $rs->campos['urllogin'];
+			$reserved = $rs->campos['reserved'];
 			$rs->Cerrar();
-			if (!is_null($redirto[0]['url'])) {
-				// Redirect notification to UDS server, if needed.
+			if (!is_null($id)) {
+				// Log activity, respond to client and continue processing.
+				writeLog("User logged in: ip=$ip, user=$user.");
+				$response = "";
+				jsonResponseNow(200, $response);
+			} else {
+		    		throw new Exception("Client is not in the database: ip=$ip, user=$user");
+			}
+			// Redirect notification to UDS server, if needed.
+			if ($reserved == 1 and !is_null($redirto[0]['url'])) {
 				$redirto[0]['post'] = $app->request()->getBody();
 				$result = multiRequest($redirto);
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {
 				// ...
 			}
+		} else {
+			throw new Exception("Database error");
 		}
 	} catch (Exception $e) {
-		// Comunication error.
+		// Communication error.
 		$response["message"] = $e->getMessage();
 		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
@@ -197,16 +209,14 @@ $app->post('/ogagent/loggedout',
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
-		// Log activity and respond to client.
-		writeLog("User logged out: ip=$ip, user=$user.");
-		$response = "";
-		jsonResponse(200, $response);
 		// Check if client is included in the server database.
+		$cmd->CreaParametro("@ip", $ip, 0);
 		$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.ip, remotepc.urllogin
+SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin
+       remotepc.reserved > NOW() AS reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
- WHERE ordenadores.ip = '$ip'
+ WHERE ordenadores.ip=@ip
  LIMIT 1;
 EOD;
 		$rs=new Recordset;
@@ -214,19 +224,31 @@ EOD;
 		if ($rs->Abrir()) {
 			// Read query data.
 			$rs->Primero();
+			$id = $rs->campos['idordenador'];
 			$redirto[0]['url'] = $rs->campos['urllogout'];
+			$reserved = $rs->campos['reserved'];
 			$rs->Cerrar();
-			if (!is_null($redirto[0]['url'])) {
-				// Redirect notification to UDS server, if needed.
+			if (!is_null($id)) {
+				// Log activity, respond to client and continue processing.
+				writeLog("User logged out: ip=$ip, user=$user.");
+				$response = "";
+				jsonResponseNow(200, $response);
+			} else {
+		    		throw new Exception("Client is not in the database: ip=$ip, user=$user");
+			}
+			// Redirect notification to UDS server, if needed.
+			if ($reserved == 1 and !is_null($redirto[0]['url'])) {
 				$redirto[0]['post'] = $app->request()->getBody();
 				$result = multiRequest($redirto);
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {
 				// ...
 			}
+		} else {
+			throw new Exception("Database error");
 		}
 	} catch (Exception $e) {
-		// Comunication error.
+		// Communication error.
 		$response["message"] = $e->getMessage();
 		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
