@@ -99,13 +99,13 @@ ALTER TABLE  aulas
      MODIFY puestos smallint  DEFAULT NULL;
 
 # Nueva tabla para datos del proyecto Remote PC (ticket #708).
-CREATE TABLE IF NOT EXISTS remotepc ( 
-       id INT(11) NOT NULL, 
-       reserved DATETIME DEFAULT NULL, 
-       urllogin VARCHAR(100), 
-       urllogout VARCHAR(100), 
-       PRIMARY KEY (id) 
-    ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+CREATE TABLE IF NOT EXISTS remotepc (
+	id INT(11) NOT NULL,
+	reserved DATETIME DEFAULT NULL,
+	urllogin VARCHAR(100),
+	urllogout VARCHAR(100),
+	PRIMARY KEY (id)
+	) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 # Nuevo comando "Enviar mensaje" (ticket #779)
 INSERT INTO comandos  (idcomando, descripcion, pagina, gestor, funcion, urlimg,
@@ -115,3 +115,18 @@ INSERT INTO comandos  (idcomando, descripcion, pagina, gestor, funcion, urlimg,
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES 
 	(39, 'tit', 'Título', '', '', '', 0, 1),
 	(40, 'msj', 'Contenido', '', '', '', 0, 1);
+
+# Crear tabla de log para la cola de acciones (ticket #...)
+CREATE TABLE IF NOT EXISTS acciones_log LIKE acciones;
+ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
+DELIMITER //
+CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW BEGIN
+	INSERT INTO acciones_log VALUES
+		(OLD.idaccion, OLD.tipoaccion, OLD.idtipoaccion, OLD.descriaccion,
+		OLD.idordenador, OLD.ip, OLD.sesion, OLD.idcomando, OLD.parametros,
+		OLD.fechahorareg, OLD.fechahorafin, OLD.estado, OLD.resultado,
+		OLD.descrinotificacion, OLD.ambito, OLD.idambito, OLD.restrambito,
+		OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion, NOW());
+END//
+DELIMITER ;
+

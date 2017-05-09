@@ -44,6 +44,26 @@ CREATE TABLE IF NOT EXISTS `acciones` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `acciones_log`
+--
+
+CREATE TABLE IF NOT EXISTS acciones_log LIKE acciones;
+ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
+DELIMITER //
+-- Trigger para guardar acciones antes de ser borradas.
+CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW BEGIN
+	INSERT INTO acciones_log VALUES
+		(OLD.idaccion, OLD.tipoaccion, OLD.idtipoaccion, OLD.descriaccion,
+		OLD.idordenador, OLD.ip, OLD.sesion, OLD.idcomando, OLD.parametros,
+		OLD.fechahorareg, OLD.fechahorafin, OLD.estado, OLD.resultado,
+		OLD.descrinotificacion, OLD.ambito, OLD.idambito, OLD.restrambito,
+		OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion, NOW());
+END//
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `acciones_menus`
 --
 
@@ -185,7 +205,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
 -- Volcar la base de datos para la tabla `centros`
 --
 INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
- (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
+ (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnsys');
 
 
 -- --------------------------------------------------------
@@ -255,7 +275,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
 --
 
 INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `iduniversidad`, `grupoid`) VALUES
-(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGnSys', 1, 0);
+(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGnsys', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1051,7 +1071,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
 --
 
 INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`) VALUES
-(1, 'Universidad (Default)', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGnSys');
+(1, 'Universidad (Default)', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGnsys');
 
 -- --------------------------------------------------------
 

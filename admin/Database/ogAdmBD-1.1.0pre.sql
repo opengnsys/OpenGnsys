@@ -5,7 +5,7 @@
 # Eliminar procedimiento para evitar errores de ejecución.
 DROP PROCEDURE IF EXISTS addcols;
 # Procedimiento para actualización condicional de tablas.
-delimiter '//'
+DELIMITER '//'
 CREATE PROCEDURE addcols() BEGIN
 	# Añadir campo para incluir aulas en proyecto Remote PC (ticket #708).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
@@ -121,9 +121,26 @@ CREATE PROCEDURE addcols() BEGIN
 			ON DUPLICATE KEY UPDATE
 				pasguor=SHA2(VALUES(pasguor),224);
 	END IF;
+	# Crear tabla de log para la cola de acciones (ticket #...)
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE TABLE_NAME='acciones_log' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		CREATE TABLE acciones_log LIKE acciones;
+		ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
+		CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW
+		BEGIN
+			INSERT INTO acciones_log VALUES
+				(OLD.idaccion, OLD.tipoaccion, OLD.idtipoaccion, OLD.descriaccion,
+				OLD.idordenador, OLD.ip, OLD.sesion, OLD.idcomando, OLD.parametros,
+				OLD.fechahorareg, OLD.fechahorafin, OLD.estado, OLD.resultado,
+				OLD.descrinotificacion, OLD.ambito, OLD.idambito, OLD.restrambito,
+				OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion,
+				NOW());
+		END;
+	END IF;
 END//
 # Ejecutar actualización condicional.
-delimiter ';'
+DELIMITER ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
@@ -170,8 +187,8 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 		descripcion=VALUES(descripcion), urlimg=VALUES(urlimg), nemonico=VALUES(nemonico);
 
 # Número de puestos del aula permite valores hasta 32768 (ticket #747)
-ALTER TABLE  aulas
-	MODIFY puestos smallint  DEFAULT NULL;
+ALTER TABLE aulas
+	MODIFY puestos SMALLINT DEFAULT NULL;
 
 # Nueva tabla para datos del proyecto Remote PC (ticket #708).
 CREATE TABLE IF NOT EXISTS remotepc ( 
