@@ -60,10 +60,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_tabs->addTab(m_output,tr(gettext("Salida")));
     slotCreateTerminal();
 
-    // Las pestanyas al dock
+    // Assign tabs to dock
     dock->setWidget(m_tabs);
 
-    // Y el dock al mainwindow
+    // Assign tabs dock to the mainwindow if admin mode is active
     if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
       addDockWidget(Qt::BottomDockWidgetArea,dock);
 
@@ -77,10 +77,10 @@ MainWindow::MainWindow(QWidget *parent)
     // WebBar
     m_webBar=new QLineEdit(dock);
 
-    // WebBar al dock
+    // WebBar to dock
     dock->setWidget(m_webBar);
 
-    // dock al mainwindow
+    // Assign top dock to the mainwindow if admin mode is active
     if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
       addDockWidget(Qt::TopDockWidgetArea,dock);
 
@@ -88,8 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
     QStatusBar* st=statusBar();
     st->setSizeGripEnabled(false);
     m_progressBar=new QProgressBar(this);
-    m_progressBar->setMinimum(0);
-    m_progressBar->setMaximum(100);
+    m_progressBar->setRange(0,100);
     m_clock=new DigitalClock(this);
 
     m_web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
@@ -125,16 +124,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     if(m_env.contains("OGLOGFILE") && m_env["OGLOGFILE"]!="")
     {
-        QFile* file=new QFile(m_env["OGLOGFILE"]);
-        if(!file->open(QIODevice::WriteOnly | QIODevice::Text |
-                    QIODevice::Append))
+        QFile* m_logfile=new QFile(m_env["OGLOGFILE"]);
+        if(!m_logfile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
         {
-            delete file;
+            delete m_logfile;
             print(tr(gettext("El fichero de log no ha podido ser abierto: "))+m_env["OGLOGFILE"]+".");
         }
         else
         {
-            m_logfile=file;
             m_logstream=new QTextStream(m_logfile);
         }
     }
@@ -157,7 +154,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotLinkHandle(const QUrl &url)
 {
-    // Si ya hay un proceso ejectuandose
+    // Check if it's executing another process
     if(m_process->state()!=QProcess::NotRunning)
     {
       print(tr(gettext("Hay otro proceso en ejecución. Por favor espere.")));
@@ -167,12 +164,12 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     QString urlString = url.toString();
     if(urlString.startsWith(COMMAND))
     {
-        // Si es link de tipo COMMAND, ejecutar.
+        // For COMMAND link, execute
         executeCommand(urlString.remove(0,QString(COMMAND).length()));
     }
     else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
     {
-        // Si es link de tipo COMMAND_WITH_CONFIRMATION, pedir confirmación de ejecutar.
+        // For COMMAND_WITH_CONFIRMATION link, show confirmation box and execute, if accepted
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setWindowTitle(tr(gettext("AVISO")));
@@ -189,7 +186,7 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     }
     else
     {
-        // Si es otro link, cargar página web.
+        // For other link, load webpage
         m_web->load(url);
     }
 }
@@ -250,7 +247,7 @@ void MainWindow::slotSslErrors(QNetworkReply* reply)
 
 void MainWindow::slotProcessStarted()
 {
-    print(tr(gettext("Lanzado satisfactoriamente.")));
+    m_output->insertPlainText(tr(gettext("Lanzado satisfactoriamente.")));
     startProgressBar();
 }
 
@@ -393,8 +390,10 @@ void MainWindow::print(QString s)
 {
   if(!s.endsWith("\n"))
     s+="\n";
-  if(m_logstream)
+  if(m_logstream) {
     *m_logstream<<CURRENT_TIME()<<": "<<s;
+    m_logstream->flush();
+  }
   if(m_output)
     m_output->insertPlainText(s);
 }
@@ -428,9 +427,7 @@ void MainWindow::startProgressBar()
 
 void MainWindow::finishProgressBar()
 {
-    QStatusBar* st=statusBar();
-    st->removeWidget(m_progressBar);
-    st->showMessage(tr(gettext("Listo")));
+    m_progressBar->reset();
     m_web->setEnabled(true);
 }
 
@@ -440,10 +437,10 @@ void MainWindow::executeCommand(QString &string)
     QStringList list=string.split(" ",QString::SkipEmptyParts);
     QString program=list.takeFirst();
     m_process->setReadChannel(QProcess::StandardOutput);
-    // Le ponemos el mismo entorno que tiene el browser ahora mismo
+    // Assign the same Browser's environment to the process.
     m_process->setEnvironment(QProcess::systemEnvironment());
     m_process->start(program,list);
-    m_output->insertPlainText(tr(gettext("Lanzando el comando: ")));
+    print(tr(gettext("Lanzando el comando: ")));
     m_output->setTextColor(QColor(Qt::darkGreen));
     print(program+" "+list.join(" "));
     m_output->setTextColor(QColor(Qt::black));
