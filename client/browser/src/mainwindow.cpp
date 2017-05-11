@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     // OpenGnsys logo (or alternate text)
     m_logo=new QLabel();
     QPixmap logo;
-    if (logo.load("/opt/opengnsys/lib/pictures/oglogo.png"))
+    if(logo.load("/opt/opengnsys/lib/pictures/oglogo.png"))
       m_logo->setPixmap(logo);
     else
       m_logo->setText("OG");
@@ -101,8 +101,9 @@ MainWindow::MainWindow(QWidget *parent)
     QString speed=readSpeed();
     m_speedInfo=new QLabel(speed);
     m_speedInfo->setAlignment(Qt::AlignCenter);
-    if (speed.compare("1000Mb/s"))
-      m_speedInfo->setStyleSheet("background-color: darkred; color: white; font-weight: bold;");
+    if(m_env.contains("DEFAULTSPEED") && m_env["DEFAULTSPEED"]!="")
+      if(speed.compare(m_env["DEFAULTSPEED"])!=0)
+        m_speedInfo->setStyleSheet("background-color: darkred; color: white; font-weight: bold;");
     // Clock
     m_clock=new DigitalClock(this);
 
@@ -136,18 +137,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(button,SIGNAL(clicked()),this,SLOT(slotCreateTerminal()));
     connect(m_webBar,SIGNAL(returnPressed()),this,SLOT(slotWebBarReturnPressed()));
 
+    // Open the log file for append
     if(m_env.contains("OGLOGFILE") && m_env["OGLOGFILE"]!="")
     {
-        QFile* m_logfile=new QFile(m_env["OGLOGFILE"]);
-        if(!m_logfile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
-        {
-            delete m_logfile;
-            print(tr(gettext("El fichero de log no ha podido ser abierto: "))+m_env["OGLOGFILE"]+".");
-        }
-        else
-        {
-            m_logstream=new QTextStream(m_logfile);
-        }
+      QFile* m_logfile=new QFile(m_env["OGLOGFILE"]);
+      if(!m_logfile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
+      {
+        delete m_logfile;
+        print(tr(gettext("El fichero de log no ha podido ser abierto: "))+m_env["OGLOGFILE"]+".");
+      }
+      else
+      {
+        m_logstream=new QTextStream(m_logfile);
+      }
     }
 
     QStringList arguments=QCoreApplication::arguments();
@@ -469,7 +471,7 @@ QString MainWindow::readSpeed() {
     if(m_env.contains("OGLOGFILE"))
     {
         QString infoFile=m_env["OGLOGFILE"].replace(".log", ".info.html");
-        QString command = "grep -hoe \"[0-9]*Mb/s\" "+infoFile+" 2>/dev/null";
+        QString command="grep -hoe \"[0-9]*Mb/s\" "+infoFile+" 2>/dev/null";
         QProcess process;
         process.start(command);
         process.waitForFinished();

@@ -3,8 +3,7 @@
 
 #define COMMAND "command:"
 #define COMMAND_WITH_CONFIRMATION "commandwithconfirmation:"
-#define ENVIRONMENT "OGLOGFILE,ogactiveadmin"
-//#define ENVIRONMENT "OGIP,OGSERVER,OGLOG"
+#define ENVIRONMENT "OGLOGFILE,ogactiveadmin,DEFAULTSPEED"
 
 #include <QWidget>
 #include <QProcess>
