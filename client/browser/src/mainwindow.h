@@ -26,6 +26,7 @@ class QTextStream;
 class QTermWidget;
 class QProgressBar;
 class QLineEdit;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -66,12 +67,15 @@ class MainWindow : public QMainWindow
         void startProgressBar();
         void finishProgressBar();
         void executeCommand(QString &string);
+        QString readSpeed();
 
 
     protected:
         QWebView *m_web;
         QTextEdit *m_output;
+        QLabel *m_logo;
         QProgressBar *m_progressBar;
+        QLabel *m_speedInfo;
         DigitalClock *m_clock;
         QTabWidget *m_tabs;
         QLineEdit *m_webBar;

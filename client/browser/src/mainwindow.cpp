@@ -87,8 +87,23 @@ MainWindow::MainWindow(QWidget *parent)
     // Status bar
     QStatusBar* st=statusBar();
     st->setSizeGripEnabled(false);
+    // OpenGnsys logo (or alternate text)
+    m_logo=new QLabel();
+    QPixmap logo;
+    if (logo.load("/opt/opengnsys/lib/pictures/oglogo.png"))
+      m_logo->setPixmap(logo);
+    else
+      m_logo->setText("OG");
+    // Progress bar
     m_progressBar=new QProgressBar(this);
     m_progressBar->setRange(0,100);
+    // Connection speed
+    QString speed=readSpeed();
+    m_speedInfo=new QLabel(speed);
+    m_speedInfo->setAlignment(Qt::AlignCenter);
+    if (speed.compare("1000Mb/s"))
+      m_speedInfo->setStyleSheet("background-color: darkred; color: white; font-weight: bold;");
+    // Clock
     m_clock=new DigitalClock(this);
 
     m_web->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
@@ -99,8 +114,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_web,SIGNAL(loadStarted()),this,SLOT(slotWebLoadStarted()));
     connect(m_web,SIGNAL(loadFinished(bool)),this,SLOT(slotWebLoadFinished(bool)));
     connect(m_web,SIGNAL(loadProgress(int)),this,SLOT(slotWebLoadProgress(int)));
-    connect(m_web,SIGNAL(urlChanged(const QUrl&)),this,
-            SLOT(slotUrlChanged(const QUrl&)));
+    connect(m_web,SIGNAL(urlChanged(const QUrl&)),this,SLOT(slotUrlChanged(const QUrl&)));
     // Ignore SSL errors.
     connect(m_web->page()->networkAccessManager(),
             SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)), this,
@@ -390,7 +404,8 @@ void MainWindow::print(QString s)
 {
   if(!s.endsWith("\n"))
     s+="\n";
-  if(m_logstream) {
+  if(m_logstream)
+  {
     *m_logstream<<CURRENT_TIME()<<": "<<s;
     m_logstream->flush();
   }
@@ -413,13 +428,15 @@ void MainWindow::captureOutputForStatusBar(QString output)
   }
 }
 
-// Iniciar barra de progreso con reloj digital
+// Init status bar
 void MainWindow::startProgressBar()
 {
     QStatusBar* st=statusBar();
     st->clearMessage();
+    st->addWidget(m_logo);
     st->addWidget(m_progressBar,90);
-    st->addWidget(m_clock,10);
+    st->addWidget(m_speedInfo,5);
+    st->addWidget(m_clock,5);
     m_progressBar->show();
     m_clock->show();
     m_web->setEnabled(false);
@@ -437,7 +454,7 @@ void MainWindow::executeCommand(QString &string)
     QStringList list=string.split(" ",QString::SkipEmptyParts);
     QString program=list.takeFirst();
     m_process->setReadChannel(QProcess::StandardOutput);
-    // Assign the same Browser's environment to the process.
+    // Assign the same Browser's environment to the process
     m_process->setEnvironment(QProcess::systemEnvironment());
     m_process->start(program,list);
     print(tr(gettext("Lanzando el comando: ")));
@@ -445,4 +462,22 @@ void MainWindow::executeCommand(QString &string)
     print(program+" "+list.join(" "));
     m_output->setTextColor(QColor(Qt::black));
     startProgressBar();
+}
+
+// Returns communication speed
+QString MainWindow::readSpeed() {
+    if(m_env.contains("OGLOGFILE"))
+    {
+        QString infoFile=m_env["OGLOGFILE"].replace(".log", ".info.html");
+        QString command = "grep -hoe \"[0-9]*Mb/s\" "+infoFile+" 2>/dev/null";
+        QProcess process;
+        process.start(command);
+        process.waitForFinished();
+        QString speed(process.readAllStandardOutput());
+        return speed.simplified();
+    }
+    else
+    {
+        return QString("");
+    }
 }
