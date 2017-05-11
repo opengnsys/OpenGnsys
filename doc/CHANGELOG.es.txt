@@ -29,8 +29,9 @@ Tickets resueltos en módulo OpenGnsys Client:
 #717	Indicar manualmente parámetros de arranque de un S.O.
 #724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10 o Ubuntu 16.04 LTS
 #725	Sincronización horaria de clientes con servidor NTP
-#746	Reloj en barra de estado del Browser del cliente
+#746	Reestructurar barra de estado del Browser del cliente (mejora)
 #774	Soportar clientes ogLive de 64 bits
+#783	Browser registra salida de comandos ejecutados al pulsar enlace
 
 Tickets resueltos en módulo OpenGnsys Server:
 #234	Importar/Exportar base de datos (resuelto en #755)
@@ -57,6 +58,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #751	Asistente de particionado: particiones GPT
 #777	Error SQL al incluir caracteres espaciales en los comentarios
 #778	Codificar claves de usuarios (mejora)
+#782	Crear registro de acciones para realizar informes
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
