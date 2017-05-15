@@ -34,6 +34,7 @@ $codpar=0;
 $idperfilsoft=0;
 $perfilsoft="";
 $comentarios="";
+$inremotepc="";
 $grupoid=0;
 $litamb="";
 $tipoimg=0;
@@ -71,6 +72,7 @@ if ( $opcion == 1 && $datospost == 1)
 	if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 	if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 	if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
+	if (isset($_POST["inremotepc"])) $inremotepc=$_POST["inremotepc"]; 
 	if (isset($_POST["identificador"])) $idimagen=$_POST["identificador"];
 	if (isset($_POST["modelo"])) $numpar=$_POST["modelo"]; 
 	if (isset($_POST["numdisk"])) $numpar=$_POST["numdisk"]; 
@@ -204,6 +206,20 @@ if ( $opcion == 1 && $datospost == 1)
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TH>';
 			?>
 		</TR>
+		<!-- Acceso remoto -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_REMOTEACCESS']?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td><input name="inremotepc" type="checkbox" disabled readonly';
+					if ($inremotepc)  echo ' checked ';
+					echo '></td>';
+				} else {
+					echo '<td><input name="inremotepc" type="checkbox" value="1"';
+					if ($inremotepc)  echo ' checked ';
+					echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+				}
+			?>
+		</tr>
 		<!-- Equipo modelo (aula) -->
 		<tr>
 			<th align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</th>
@@ -279,6 +295,7 @@ function TomaPropiedades($cmd,$idmagen){
 	global $ruta;
 	global $descripcion;
 	global $comentarios;
+	global $inremotepc;
 	global $idperfilsoft;
 	global $modelo;
 	global $numdisk;
@@ -310,6 +327,7 @@ function TomaPropiedades($cmd,$idmagen){
 		$descripcion=$rs->campos["descripcion"];		
 		$idperfilsoft=$rs->campos["idperfilsoft"];
 		$comentarios=$rs->campos["comentarios"];
+		$inremotepc=$rs->campos["inremotepc"];
 		$modelo=$rs->campos["modelo"];
 		$numdisk=$rs->campos["numdisk"];
 		$numpar=$rs->campos["numpar"];

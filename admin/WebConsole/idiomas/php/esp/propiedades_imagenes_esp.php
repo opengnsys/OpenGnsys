@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_imagenes_esp.php 
@@ -27,4 +27,6 @@ $TbMsg[17]='"Nombre canónico fichero-imagen existe : Introduzca otro nombre"';
 $TbMsg[18]="Introduzca otro Nombre";
 $TbMsg[19]="Equipo modelo";
 $TbMsg[20]="Fecha de creación";
+$TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
+$TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 ?>
