@@ -15,7 +15,7 @@ $TbMsg[6]="Ubicació";
 $TbMsg[7]="Canó";
 $TbMsg[8]="Pissarra";
 $TbMsg[9]="Aforament";
-$TbMsg[10]="Url Imatge";
+$TbMsg[10]="Foto";
 $TbMsg[11]="Menú";
 $TbMsg[12]="Comentaris";
 $TbMsg[13]="Intervals";
@@ -46,7 +46,9 @@ $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
 // Ramón
 $TbMsg['PROP_NTPIP']="IP Servidor NTP <em>(opcional)</em>";
-$TbMsg['PROP_DEFTIMEZONE']="zona horaria por defecto";
 $TbMsg['PROP_DNSIP']="IP Servidor DNS <em>(opcional)</em>";
 $TbMsg['PROP_PROXYURL']="URL Servidor Proxy <em>(opcional)</em>";
+$TbMsg['COMM_DEFTIMEZONE']="zona horaria por defecto";
+$TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
+$TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 ?>

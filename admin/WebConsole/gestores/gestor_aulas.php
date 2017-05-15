@@ -26,6 +26,7 @@ $idaula=0;
 $nombreaula="";
 $grupoid=0; 
 $urlfoto="";
+$inremotepc=false;
 $cagnon=false;
 $pizarra=false;
 $ubicacion="";
@@ -73,6 +74,7 @@ if (isset($_POST["identificador"])) $idaula=$_POST["identificador"];
 
 if (isset($_POST["nombreaula"])) $nombreaula=$_POST["nombreaula"]; 
 if (isset($_POST["urlfoto"])) $urlfoto=$_POST["urlfoto"]; 
+if (isset($_POST["inremotepc"])) $inremotepc=$_POST["inremotepc"]; 
 if (isset($_POST["cagnon"])) $cagnon=$_POST["cagnon"]; 
 if (isset($_POST["pizarra"])) $pizarra=$_POST["pizarra"];
 if (isset($_POST["ubicacion"])) $ubicacion=$_POST["ubicacion"]; 
@@ -176,6 +178,7 @@ function Gestiona(){
 	global	$idaula;
 	global	$nombreaula;
 	global	$urlfoto;
+	global	$inremotepc;
 	global	$cagnon;
 	global	$pizarra;
 	global	$ubicacion;
@@ -226,6 +229,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idaula",$idaula,1);
 	$cmd->CreaParametro("@nombreaula",$nombreaula,0);
 	$cmd->CreaParametro("@urlfoto",$urlfoto,0);
+	$cmd->CreaParametro("@inremotepc",$inremotepc,1);
 	$cmd->CreaParametro("@cagnon",$cagnon,1);
 	$cmd->CreaParametro("@pizarra",$pizarra,1);
 	$cmd->CreaParametro("@ubicacion",$ubicacion,0);
@@ -259,13 +263,13 @@ function Gestiona(){
 	switch($opcion){
 		case $op_alta :
 			$cmd->texto="INSERT INTO aulas
-						(idcentro, grupoid, nombreaula, urlfoto, cagnon,
-						 pizarra, ubicacion, comentarios, puestos,
+						(idcentro, grupoid, nombreaula, urlfoto, inremotepc,
+						 cagnon, pizarra, ubicacion, comentarios, puestos,
 						 horaresevini, horaresevfin, router, netmask,
 						 ntp, dns, proxy, modomul, ipmul, pormul, velmul,
 						 modp2p, timep2p, validacion, paginalogin, paginavalidacion) 
-					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @cagnon,
-						 @pizarra, @ubicacion, @comentarios, @puestos,
+					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @inremotepc,
+						 @cagnon, @pizarra, @ubicacion, @comentarios, @puestos,
 						 @horaresevini, @horaresevfin, @router, @netmask,
 						 @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
 						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion)";
@@ -281,8 +285,8 @@ function Gestiona(){
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE aulas SET
-					    nombreaula=@nombreaula, urlfoto=@urlfoto, cagnon=@cagnon,
-					    pizarra=@pizarra, ubicacion=@ubicacion,
+					    nombreaula=@nombreaula, urlfoto=@urlfoto, inremotepc=@inremotepc,
+					    cagnon=@cagnon, pizarra=@pizarra, ubicacion=@ubicacion,
 					    comentarios=@comentarios, puestos=@puestos,
 					    horaresevini=@horaresevini, horaresevfin=@horaresevfin,
 					    router=@router,netmask=@netmask, ntp=@ntp, dns=@dns, proxy=@proxy,

@@ -26,6 +26,7 @@ $nombreaula="";
 $grupoid=0;
 $ordenadores=0;
 $ubicacion="";
+$inremotepc="";
 $cagnon="";
 $pizarra="";
 $puestos=0;
@@ -215,6 +216,20 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=65>'.$comentarios.'</TEXTAREA></TD>';
 			?>
 		</TR>
+<!---- Ramón ------------------------inremotpc----------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_REMOTEACCESS'] ?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion){
+					echo '<td colspan="3"><input  class="formulariodatos" name="inremotepc" type="checkbox" onclick="desabilita(this)" ';
+					if ($inremotepc)  echo ' checked ';
+					echo '></td>';
+				} else {
+					echo '<td colspan="3"><input  class="formulariodatos" name="inremotepc" type="checkbox" value="1" ';
+					if ($inremotepc)  echo ' checked ';
+					echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+				}
+			?>
+		</tr>
 <!---- ADV ---------------------------router------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[28]?>&nbsp;</TH>
@@ -238,14 +253,15 @@ function abrir_ventana(URL){
 <!---- Ramón ------------------------ntp------------------------------------------------->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg['PROP_NTPIP'] ?>&nbsp;</th>
-			<?php	if ($opcion==$op_eliminacion)
+			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$ntp.'</td>';
-				else
+				} else {
 					echo '<td colspan="3"><input class="formulariodatos" name="ntp" style="width:100" type="text" maxlength="15" value="'.$ntp.'" /> ';
 					if (exec("timedatectl status | awk -F'[:()]' '/Time.*zone/ {print $2}'", $out, $err)) {
-						echo '<em>('.$TbMsg['PROP_DEFTIMEZONE'].': '.$out[0].')</em>';
+						echo '<em>('.$TbMsg['COMM_DEFTIMEZONE'].': '.$out[0].')</em>';
 					}
 					echo "</td>";
+				}
 			?>
 		</tr>
 <!---- Ramón ------------------------dns------------------------------------------------->
@@ -444,6 +460,7 @@ function TomaPropiedades($cmd,$ida)
 	global $idaula;
 	global $nombreaula;
 	global $urlfoto;
+	global $inremotepc;
 	global $cagnon;
 	global $pizarra;
 	global $ubicacion;
@@ -486,6 +503,7 @@ function TomaPropiedades($cmd,$ida)
 	$idaula=0; 
 	$nombreaula="";
 	$urlfoto="";
+	$inremotepc=false;
 	$cagnon=false;
 	$pizarra=false;
 	$ubicacion="";
@@ -540,6 +558,7 @@ function TomaPropiedades($cmd,$ida)
 		$nombreaula=$rs->campos["nombreaula"];
 		$urlfoto=$rs->campos["urlfoto"];
 		if ($urlfoto=="" ) $urlfoto="aula.jpg";
+		$inremotepc=$rs->campos["inremotepc"];
 		$cagnon=$rs->campos["cagnon"];
 		$pizarra=$rs->campos["pizarra"];
 		$ubicacion=$rs->campos["ubicacion"];

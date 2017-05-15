@@ -15,7 +15,7 @@ $TbMsg[6]="Ubicaci&oacute;n";
 $TbMsg[7]="Proyector";
 $TbMsg[8]="Pizarra";
 $TbMsg[9]="Aforo";
-$TbMsg[10]="URL Imagen";
+$TbMsg[10]="Foto";
 $TbMsg[11]="Men&uacute;";
 $TbMsg[12]="Comentarios";
 $TbMsg[13]="Reservas";
@@ -46,8 +46,10 @@ $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
 // Ramón
 $TbMsg['PROP_NTPIP']="IP Servidor NTP <em>(opcional)</em>";
-$TbMsg['PROP_DEFTIMEZONE']="zona horaria por defecto";
 $TbMsg['PROP_DNSIP']="IP Servidor DNS <em>(opcional)</em>";
 $TbMsg['PROP_PROXYURL']="URL Servidor Proxy <em>(opcional)</em>";
+$TbMsg['COMM_DEFTIMEZONE']="zona horaria por defecto";
+$TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
+$TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 ?>
 
