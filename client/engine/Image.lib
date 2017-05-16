@@ -83,8 +83,8 @@ case "$TOOL" in
         # Por compatibilidad, si no existe el ejecutable usar por defecto "parclone.dd".
         which $PARAM1 &>/dev/null || PARAM1="partclone.dd"
         PARAM1="$PARAM1 -d0 -F -c -s $DEV"
-        # El programa partclone.dd no tiene opción "-c".
-        [[ "$PARAM1" =~ ^partclone.dd ]] && PARAM1="${PARAM1/ -c / }"
+        # Algunas versiones de partclone.dd no tienen opción "-c".
+        [ -z "$(eval ${PARAM1%% *} --help 2>&1 | grep -- -c)" ] && PARAM1="${PARAM1/ -c / }"
         ;;
 esac
 # Comprobar que existe mbuffer.
