@@ -171,7 +171,7 @@ function check() {
     if [ -z "$(stat -c "%N" $TFTPDIR/ogclient | awk '$3~/'$DEFOGLIVE'/ {print}')" ]; then
          echo "This server uses old ogclient, please run \"$PROG convert\" to update."
          let ERR++
-         [ ! -f $INFOFILE ] && exit $ERR
+         [ ! -f $INFOFILE ] && return $ERR
     fi
     # Check for other problems.
     [ ! -f $INFOFILE ] && echo "Configuration file does not exists: $INFOFILE" && let ERR++
@@ -306,7 +306,7 @@ function install() {
     mkdir -p $OGLIVEDIR $TMPDIR
     trap "umount $TMPDIR; rm -fr $TMPDIR" 1 2 3 6 9 15
     mount -o loop,ro $OGLIVEFILE $TMPDIR
-    cp -va $TMPDIR/ogclient/* $OGLIVEDIR || exit 2
+    cp -va $TMPDIR/ogclient/* $OGLIVEDIR || raiseError access "Cannot copy files to ogLive directory."
     umount $TMPDIR
     rm -f $TFTPDIR/$DEFOGLIVE
     ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
@@ -395,7 +395,6 @@ function setdefault() {
     OGLIVEDIR=$(jq -r ".oglive[$INDEX].directory" $INFOFILE) || raiseError notfound "Directory for index \"$INDEX\"."
     # Update default parameter.
     jq ".default=$INDEX" $INFOFILE | sponge $INFOFILE
-exit
     # Link to default directory.
     rm -f $TFTPDIR/$DEFOGLIVE
     ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
