@@ -179,18 +179,18 @@ if [ "$#" -eq 4 ]; then
     #comprobar mbuffer
 	which mbuffer > /dev/null && MBUFFER="| mbuffer -q -m 40M " || MBUFFER=" "
 
-	case "$TOOL" in
-		"ntfsclone" | "NTFSCLONE")
+	case "${TOOL,,}" in
+		ntfsclone)
 			TOOL="| ntfsclone --restore-image --overwrite $PART -"
 		;;
-		"partimage"| "PARTIMAGE")
+		partimage)
 			TOOL="| partimage -f3 -B gui=no restore $PART stdin"
 		;;
-		"partclone" | "PARTCLONE")
+		partclone*)
 		    # -C para que no compruebe tamaños
 			TOOL="| partclone.restore -d0 -C -I -o $PART"
 		;;
-                partclone.dd)
+                dd)
                         TOOL="| pv | dd conv=sync,noerror bs=1M of=$PART"
 		;;
 		*)
