@@ -1,7 +1,10 @@
-#! /bin/sh
+#!/bin/bash
 set -e
 
-grub_probe=$OGBIN/grub-probe1.99
+DISK=
+PART=
+[ "$(arch)" == "x86_64" ] && grub_probe=$(which grub-probe 2>/dev/null)
+grub_probe=${grub_probe:-$OGBIN/grub-probe1.99}
 
 
 if [ $# == 3 ]; then
