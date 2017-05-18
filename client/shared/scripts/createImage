@@ -68,7 +68,10 @@ REPO="${3^^}"
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+# salvo si es llamado desde createImageCustom
+if [ "$(ogGetCaller)" != "createImageCustom" ]; then
+    echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+fi
 
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 

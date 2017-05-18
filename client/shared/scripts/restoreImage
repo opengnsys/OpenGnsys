@@ -36,7 +36,7 @@ fi
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
 echo " " > $OGLOGCOMMAND
-[ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION; 
+ogCheckStringInGroup "$(ogGetCaller)" "deployImage restoreImageCustom" || echo -n "" > $OGLOGSESSION; 
 
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
