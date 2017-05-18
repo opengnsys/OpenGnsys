@@ -19,16 +19,16 @@ PCNAME="$(hostname)"
 
 PROG="$(basename $0)"
 if [ "$*" == "help" ]; then
-    ogHelp "$PROG" "$PROG template" \
-           "$PROG pxe" \
-           "$PROG 01"
+    ogHelp "$PROG" "$PROG template [ 0 | 1 ] (0 - Temporary 1, - Permanent) " \
+           "$PROG ogClient 1" \
+           "$PROG 1hd-1partition 0"
     exit
 fi
 
 
 # Control básico de errores.
 if [ $# -ne 2 ]; then
-	ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT: $PROG TEMPLATE_NAME"
+	ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT: $PROG TEMPLATE_NAME [ 0 | 1 ] (0 - Temporary, 1 - Permanent)"
         exit $?
 fi
 
