@@ -14,12 +14,12 @@
 // REST routes.
 
 /**
- * @brief    Reserve a random client with an installed image and send a boot/reboot operation depending on its status.
+ * @brief    Reserve a client with an installed image and the older reservation time, then send a boot/reboot operation depending on its status.
  * @warning  If "lab" parameter is specified, then choose a client from this lab.
- * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/events, Method: POST
+ * @note     Route: /ous/:ouid/images/:imageid/reserve, Method: POST
  * @param    integer ouid      OU identificator
  * @param    integer imageid   image identificator
- * @param    integer labid     lab. identificator (optional)
+ * @note     Input JSON message: {"labid":int_labid,"maxtime":int_hours}
  */
 $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
     function($ouid, $imageid) use ($app) {
@@ -53,7 +53,7 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 		jsonResponse(400, $response);
 		$app->stop();
 	}
-	// Randomly choose a client with image installed and get ogAdmServer data.
+	// Choose older not-reserved client with image installed and get ogAdmServer data.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
        ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
@@ -70,7 +70,8 @@ SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
  WHERE adm.idadministradorcentro = '$userid'
    AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
    AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc = 1
- ORDER BY RAND() LIMIT 1;
+   AND remotepc.reserved < NOW()
+ ORDER BY remotepc.reserved ASC LIMIT 1;
 EOD;
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
@@ -97,6 +98,7 @@ EOD;
 			$result = multiRequest($ogagent);
 			if (empty($result[$clntip]['data'])) {
 				// Client is off, send a boot command to ogAdmServer.
+				// TODO: if client is busy?????
 				$reqframe = "nfn=Arrancar\r".
 					    "ido=$clntid\r".
 					    "iph=$clntip\r".
@@ -243,10 +245,9 @@ EOD;
 			$cmd->CreaParametro("@urllogin", $urlLogin, 0);
 			$cmd->CreaParametro("@urllogout", $urlLogout, 0);
 			$cmd->texto = <<<EOD
-INSERT INTO remotepc
-   SET id='$clntid', urllogin=@urllogin, urllogout=@urllogout
-    ON DUPLICATE KEY UPDATE
-       id=VALUES(id), urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
+UPDATE remotepc
+   SET urllogin=@urllogin, urllogout=@urllogout
+ WHERE id='$clntid';
 EOD;
 			if ($cmd->Ejecutar()) {
 				// Confirm operation.
@@ -318,13 +319,13 @@ EOD;
 			// Read query data.
 			$clntip = $rs->campos["ip"];
 			$agentkey = $rs->campos["agentkey"];
-			// DB Transaction: clear client reservation data and
+			// DB Transaction: set reservation time to the past and
 			// remove pending boot commands from client's actions queue.
 			$cmd->texto = "START TRANSACTION;";
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
 UPDATE remotepc
-   SET reserved=NULL, urllogin=NULL, urllogout=NULL
+   SET reserved=NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
  WHERE id='$clntid';
 EOD;
 			$cmd->Ejecutar();
