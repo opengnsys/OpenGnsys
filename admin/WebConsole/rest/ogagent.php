@@ -143,7 +143,7 @@ $app->post('/ogagent/loggedin',
 		// Check if client is included in the server database.
 		$cmd->CreaParametro("@ip", $ip, 0);
 		$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin
+SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin,
        remotepc.reserved > NOW() AS reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
@@ -212,7 +212,7 @@ $app->post('/ogagent/loggedout',
 		// Check if client is included in the server database.
 		$cmd->CreaParametro("@ip", $ip, 0);
 		$cmd->texto = <<<EOD
-SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin
+SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin,
        remotepc.reserved > NOW() AS reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
