@@ -220,6 +220,7 @@ if ( $opcion == 1 && $datospost == 1)
 				}
 			?>
 		</tr>
+	    <?php if ($opcion!=$op_alta) { ?>
 		<!-- Equipo modelo (aula) -->
 		<tr>
 			<th align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</th>
@@ -239,17 +240,22 @@ if ( $opcion == 1 && $datospost == 1)
 			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(r$revision)" : "") ?>
 			    &nbsp;<input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
 		</tr>
-		<!-------------------------------------------------------------------------------------->
-
+		<!-- Perfil de software -->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
 			<?
-					echo '<TD>'.$perfilsoft.'
-					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TH>';
+					echo '<TD>&nbsp;'.$perfilsoft.'
+					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TD>';
 
 			?>
 		</TR>			
-	<?}?>	
+		<!-- Sistema Operativo -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[21]?>&nbsp;</th>
+			<td>&nbsp;<?php	echo $sistoperativo?> </td>
+		</tr>
+	    <?php  } // fin if != op_alta
+	}?>	
 	<!-------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
@@ -305,18 +311,22 @@ function TomaPropiedades($cmd,$idmagen){
 	global $nombrerepositorio;
 	global $idrepositorio;
 	global $perfilsoft;
+	global $sistoperativo;
 	global $imagenid;
 	global $fechacreacion;
 	global $revision;
 	
 	$rs=new Recordset; 
-	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, perfilessoft.descripcion AS perfilsoft, CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo
+	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, 
+			perfilessoft.descripcion AS perfilsoft, nombreso AS sistoperativo,
+			CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo
 			FROM imagenes
 			LEFT OUTER JOIN tipospar ON tipospar.codpar=imagenes.codpar
 			LEFT OUTER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=imagenes.idperfilsoft
 			LEFT OUTER JOIN ordenadores ON ordenadores.idordenador=imagenes.idordenador
 			LEFT OUTER JOIN aulas ON ordenadores.idaula=aulas.idaula
+			LEFT OUTER JOIN nombresos ON perfilessoft.idnombreso=nombresos.idnombreso
 			WHERE imagenes.idimagen=".$idmagen;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(0); // Error al abrir recordset
@@ -336,6 +346,7 @@ function TomaPropiedades($cmd,$idmagen){
 		$idrepositorio=$rs->campos["idrepositorio"];
 		$nombrerepositorio=$rs->campos["nombrerepositorio"];
 		$perfilsoft=$rs->campos["perfilsoft"];
+		$sistoperativo=$rs->campos["sistoperativo"];
 		$imagenid=$rs->campos["imagenid"];
 		$fechacreacion=$rs->campos["fechacreacion"];
 		$revision=$rs->campos["revision"];

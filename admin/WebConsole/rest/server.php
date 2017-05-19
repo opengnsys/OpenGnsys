@@ -938,9 +938,11 @@ $app->get('/ous/:ouid/images/:imgid(/)', 'validateApiKey',
 	$imgid = htmlspecialchars($imgid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, imagenes.*
+SELECT adm.idadministradorcentro, imagenes.*, nombreso AS os
   FROM imagenes
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
+  LEFT JOIN perfilessoft USING(idperfilsoft)
+  LEFT JOIN nombresos USING(idnombreso)
  WHERE adm.idadministradorcentro = '$userid'
    AND adm.idcentro='$ouid'
    AND idimagen='$imgid';
@@ -975,6 +977,7 @@ EOD;
 			$response['client']['partition'] = $rs->campos["numpar"];
 			$response['creationdate'] = $rs->campos["fechacreacion"];
 			$response['release'] = $rs->campos["revision"];
+			$response['os'] = $rs->campos["os"];
 		}
 		jsonResponse(200, $response);
 	}

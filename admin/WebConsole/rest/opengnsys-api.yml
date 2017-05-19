@@ -857,6 +857,9 @@ paths:
               release:
                 description: image creation release
                 type: string
+              os:
+                description: installed operating system
+                type: string
             required: [ id, name, description, comments, inremotepc, repo, type ]
       security:
         - apikey: []
