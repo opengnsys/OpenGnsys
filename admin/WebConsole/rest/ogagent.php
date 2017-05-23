@@ -169,7 +169,7 @@ EOD;
 			}
 			// Redirect notification to UDS server, if needed.
 			if ($reserved == 1 and !is_null($redirto[0]['url'])) {
-				$redirto[0]['post'] = $app->request()->getBody();
+				$redirto[0]['get'] = $app->request()->getBody();
 				$result = multiRequest($redirto);
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {
@@ -238,7 +238,7 @@ EOD;
 			}
 			// Redirect notification to UDS server, if needed.
 			if ($reserved == 1 and !is_null($redirto[0]['url'])) {
-				$redirto[0]['post'] = $app->request()->getBody();
+				$redirto[0]['get'] = $app->request()->getBody();
 				$result = multiRequest($redirto);
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {

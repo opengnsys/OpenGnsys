@@ -152,7 +152,7 @@ EOD;
 				$cmd->Ejecutar();
 				// Send init session command if client is booted on ogLive.
 				$reqframe = "nfn=IniciarSesion\r".
-				    	"ido=$clntid\r".
+				   	    "ido=$clntid\r".
 					    "iph=$clntip\r".
 					    "dsk=$disk\r".
 					    "par=$part\r";
