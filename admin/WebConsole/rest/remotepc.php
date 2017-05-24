@@ -34,13 +34,19 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 
 	// Checking parameters. 
 	try {
-		if (!check_ids($ouid, $imageid)) {
+		if (!checkIds($ouid, $imageid)) {
 			throw new Exception("Ids. must be positive integers");
 		}
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
-		$labid = isset($input->labid) ? $input->labid : '%';	// Default: no lab. filter
+		// Default: no lab. filter.
+		if (isset($input->labid)) {
+			$labid = $input->labid != "0" ? $input->labid : '%';
+		} else {
+			$labid = '%';
+		}
 		$maxtime = isset($input->maxtime) ? $input->maxtime : 24;	// Default: 24 h.
+		$opts = Array('options' => Array('min_range' => 1));	// Check for int>0
 		if (!filter_var($labid, FILTER_VALIDATE_INT, $opts) and $labid !== '%') {
 			throw new Exception("Lab id. must be positive integer");
 		}
@@ -58,8 +64,7 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
        ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
        ordenadores.mac, ordenadores.agentkey, ordenadores_particiones.numdisk,
-       ordenadores_particiones.numpar, aulas.idaula, aulas.idcentro,
-       remotepc.reserved
+       ordenadores_particiones.numpar, aulas.idaula, aulas.idcentro
   FROM entornos, ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
@@ -79,55 +84,53 @@ EOD;
 	// Check if user is admin and client exists.
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
-		// Check if client is not reserved.
-		if (is_null($rs->campos["reserved"])) {
-			// Read query data.
-			$serverip = $rs->campos["ipserveradm"];
-			$serverport = $rs->campos["portserveradm"];
-			$clntid = $rs->campos["idordenador"];
-			$clntname = $rs->campos["name"];
-			$clntip = $rs->campos["ip"];
-			$clntmac = $rs->campos["mac"];
-			$agentkey = $rs->campos["agentkey"];
-			$disk = $rs->campos["numdisk"];
-			$part = $rs->campos["numpar"];
-			$labid = $rs->campos["idaula"];
-			$ouid = $rs->campos["idcentro"];
-			// Check client's status.
-			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
+		// Read query data.
+		$serverip = $rs->campos["ipserveradm"];
+		$serverport = $rs->campos["portserveradm"];
+		$clntid = $rs->campos["idordenador"];
+		$clntname = $rs->campos["nombreordenador"];
+		$clntip = $rs->campos["ip"];
+		$clntmac = $rs->campos["mac"];
+		$agentkey = $rs->campos["agentkey"];
+		$disk = $rs->campos["numdisk"];
+		$part = $rs->campos["numpar"];
+		$labid = $rs->campos["idaula"];
+		$ouid = $rs->campos["idcentro"];
+		// Check client's status.
+		$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
+		$result = multiRequest($ogagent);
+		if (empty($result[$clntip]['data'])) {
+			// Client is off, send a boot command to ogAdmServer.
+			// TODO: if client is busy?????
+			$reqframe = "nfn=Arrancar\r".
+				    "ido=$clntid\r".
+				    "iph=$clntip\r".
+				    "mac=$clntmac\r".
+				    "mar=1\r";
+			sendCommand($serverip, $serverport, $reqframe, $values);
+		} else {
+			// Client is on, send a reboot command to its OGAgent.
+			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/reboot";
+			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
 			$result = multiRequest($ogagent);
-			if (empty($result[$clntip]['data'])) {
-				// Client is off, send a boot command to ogAdmServer.
-				// TODO: if client is busy?????
-				$reqframe = "nfn=Arrancar\r".
-					    "ido=$clntid\r".
-					    "iph=$clntip\r".
-					    "mac=$clntmac\r".
-					    "mar=1\r";
-				sendCommand($serverip, $serverport, $reqframe, $values);
-			} else {
-				// Client is on, send a reboot command to its OGAgent.
-				$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/reboot";
-				$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
-				$result = multiRequest($ogagent);
-				// ... (check response)
-				//if ($result[$clntip]['code'] != 200) {
-				// ...
-			}
-			// DB Transaction: mark choosed client as reserved and
-			// create an init session command into client's actions queue.
-			$cmd->texto = "START TRANSACTION;";
-			$cmd->Ejecutar();
-			$timestamp = time();
-			$cmd->texto = <<<EOD
+			// ... (check response)
+			//if ($result[$clntip]['code'] != 200) {
+			// ...
+		}
+		// DB Transaction: mark choosed client as reserved and
+		// create an init session command into client's actions queue.
+		$cmd->texto = "START TRANSACTION;";
+		$cmd->Ejecutar();
+		$timestamp = time();
+		$cmd->texto = <<<EOD
 INSERT INTO remotepc
    SET id='$clntid', reserved=NOW() + INTERVAL $maxtime HOUR, urllogin=NULL, urllogout=NULL
     ON DUPLICATE KEY UPDATE
        id=VALUES(id), reserved=VALUES(reserved),
        urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
 EOD;
-			$t1 = $cmd->Ejecutar();
-			$cmd->texto = <<<EOD
+		$t1 = $cmd->Ejecutar();
+		$cmd->texto = <<<EOD
 INSERT INTO acciones
    SET tipoaccion=$EJECUCION_COMANDO,
        idtipoaccion=9,
@@ -145,38 +148,32 @@ INSERT INTO acciones
        restrambito='$clntip',
        idcentro=$ouid;
 EOD;
-			$t2 = $cmd->Ejecutar();
-			if ($t1 and $t2) {
-				// Commit transaction on success.
-				$cmd->texto = "COMMIT;";
-				$cmd->Ejecutar();
-				// Send init session command if client is booted on ogLive.
-				$reqframe = "nfn=IniciarSesion\r".
-				   	    "ido=$clntid\r".
-					    "iph=$clntip\r".
-					    "dsk=$disk\r".
-					    "par=$part\r";
-				sendCommand($serverip, $serverport, $reqframe, $values);
-				// Compose JSON response.
-				$response['id'] = $clntid;
-				$response['name'] = $clntname;
-				$response['ip'] = $clntip;
-				$response['mac'] = $clntmac;
-				$response['lab']['id'] = $labid;
-				$response['ou']['id'] = $ouid;
-				jsonResponse(200, $response);
-			} else{
-				// Roll-back transaction on DB error.
-				$cmd->texto = "ROLLBACK;";
-				$cmd->Ejecutar();
-				// Error message.
-				$response["message"] = "Database error";
-				jsonResponse(400, $response);
-				$app->stop();
-			}
-       		} else {
+		$t2 = $cmd->Ejecutar();
+		if ($t1 and $t2) {
+			// Commit transaction on success.
+			$cmd->texto = "COMMIT;";
+			$cmd->Ejecutar();
+			// Send init session command if client is booted on ogLive.
+			$reqframe = "nfn=IniciarSesion\r".
+			   	    "ido=$clntid\r".
+				    "iph=$clntip\r".
+				    "dsk=$disk\r".
+				    "par=$part\r";
+			sendCommand($serverip, $serverport, $reqframe, $values);
+			// Compose JSON response.
+			$response['id'] = $clntid;
+			$response['name'] = $clntname;
+			$response['ip'] = $clntip;
+			$response['mac'] = $clntmac;
+			$response['lab']['id'] = $labid;
+			$response['ou']['id'] = $ouid;
+			jsonResponse(200, $response);
+		} else{
+			// Roll-back transaction on DB error.
+			$cmd->texto = "ROLLBACK;";
+			$cmd->Ejecutar();
 			// Error message.
-			$response["message"] = "Client is already reserved";
+			$response["message"] = "Database error";
 			jsonResponse(400, $response);
 			$app->stop();
 		}
@@ -201,7 +198,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 
 	// Checking parameters. 
 	try {
-		if (!check_ids($ouid, $labid, $clntid)) {
+		if (!checkIds($ouid, $labid, $clntid)) {
 			throw new Exception("Ids. must be positive integers");
 		}
 		// Reading JSON parameters.
@@ -286,7 +283,7 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 
 	// Checking parameters. 
 	try {
-		if (!check_ids($ouid, $labid, $clntid)) {
+		if (!checkIds($ouid, $labid, $clntid)) {
 			throw new Exception("Ids. must be positive integers");
 		}
 	} catch (Exception $e) {

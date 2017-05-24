@@ -66,10 +66,9 @@ function validateApiKey() {
 	$response = array();
 	$app = \Slim\Slim::getInstance();
 	// Read Authorization HTTP header.
-	$headers = apache_request_headers();
-	if (! empty($headers['Authorization'])) {
+	if (! empty($_SERVER['HTTP_AUTHORIZATION'])) {
 		// Assign user id. that match this key to global variable.
-		$apikey = htmlspecialchars($headers['Authorization']);
+		$apikey = htmlspecialchars($_SERVER['HTTP_AUTHORIZATION']);
 		$cmd->texto = "SELECT idusuario
 				 FROM usuarios
 				WHERE apikey='$apikey' LIMIT 1";
