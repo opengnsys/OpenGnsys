@@ -4,7 +4,7 @@
 //	Idioma: Ingés 
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a computer name";
+TbMsg[0]="El nombre del ordenador puede contener caracteres alfanuméricos, subrayados y guiones";
 TbMsg[1]="You must introduce an IP Address";
 TbMsg[2]="You must introduce a MAC Address";
 TbMsg[3]="The serial number must be an alphanumeric value";

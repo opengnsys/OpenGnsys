@@ -92,7 +92,8 @@ function comprobar_datos(){
                 return(false);
         }
 
-	return 	validate (form.nombreordenador, validate_notnull, 0) &&
+	return 	validate (form.nombreordenador, validate_notspace, 0) &&
+	 	validate (form.nombreordenador, validate_text_notnull, 0) &&
 		validate (form.ip, validate_ipadress_notnull, 1) &&
 		validate (form.mac, validate_macaddress_notnull, 2) &&
 		validate (form.numserie, validate_alphanum, 3) &&
