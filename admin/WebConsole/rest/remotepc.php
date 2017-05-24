@@ -70,7 +70,7 @@ SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
  WHERE adm.idadministradorcentro = '$userid'
    AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
    AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc = 1
-   AND remotepc.reserved < NOW()
+   AND (remotepc.reserved < NOW() OR ISNULL(reserved))
  ORDER BY remotepc.reserved ASC LIMIT 1;
 EOD;
 	$rs=new Recordset;
@@ -332,8 +332,7 @@ EOD;
 			$cmd->texto = <<<EOD
 DELETE FROM acciones
  WHERE idordenador = '$clntid'
-   AND descriaccion = 'RemotePC Session'
-   AND estado = $ACCION_INICIADA;
+   AND descriaccion = 'RemotePC Session';
 EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = "COMMIT;";
