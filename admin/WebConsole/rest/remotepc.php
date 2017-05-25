@@ -149,6 +149,28 @@ INSERT INTO acciones
        idcentro=$ouid;
 EOD;
 		$t2 = $cmd->Ejecutar();
+		// Delete reservation on timeout (15 min.).
+		$timeout = "15 MINUTE";
+/*
+		$cmd->texto = <<<EOD
+CREATE EVENT e_timeout_$clntid
+       ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL $timeout DO
+       BEGIN
+       	    SET @clntid = NULL;
+	    UPDATE acciones
+	       SET estado = $ACCION_FINALIZADA, resultado = $ACCION_FALLIDA,
+		   descrinotificacion = 'Timeout'
+	     WHERE idordenador = (SELECT @clntid := '$clntid')
+	       AND descriaccion = 'RemotePC Session' AND estado = $ACCION_INICIADA;
+	    IF @clntid IS NOT NULL THEN
+	       UPDATE remotepc
+		  SET reserved=NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
+		WHERE id = @clntid;
+            END IF;
+       END
+EOD;
+		$t3 = $cmd->Ejecutar();
+*/
 		if ($t1 and $t2) {
 			// Commit transaction on success.
 			$cmd->texto = "COMMIT;";
