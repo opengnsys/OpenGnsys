@@ -27,7 +27,9 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 	global $AMBITO_ORDENADORES;
 	global $EJECUCION_COMANDO;
 	global $ACCION_INICIADA;
+	global $ACCION_FINALIZADA;
 	global $ACCION_SINRESULTADO;
+	global $ACCION_FALLIDA;
 	global $userid;
 	$response = Array();
 	$ogagent = Array();
@@ -149,29 +151,31 @@ INSERT INTO acciones
        idcentro=$ouid;
 EOD;
 		$t2 = $cmd->Ejecutar();
-		// Delete reservation on timeout (15 min.).
+		// Create event to remove reservation on timeout (15 min.).
 		$timeout = "15 MINUTE";
-/*
 		$cmd->texto = <<<EOD
 CREATE EVENT e_timeout_$clntid
        ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL $timeout DO
        BEGIN
-       	    SET @clntid = NULL;
+	    SET @clntid = NULL;
 	    UPDATE acciones
 	       SET estado = $ACCION_FINALIZADA, resultado = $ACCION_FALLIDA,
 		   descrinotificacion = 'Timeout'
-	     WHERE idordenador = (SELECT @clntid := '$clntid')
-	       AND descriaccion = 'RemotePC Session' AND estado = $ACCION_INICIADA;
+	     WHERE descriaccion = 'RemotePC Session' AND estado = $ACCION_INICIADA
+	       AND idordenador = (SELECT @clntid := '$clntid');
 	    IF @clntid IS NOT NULL THEN
 	       UPDATE remotepc
 		  SET reserved=NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
 		WHERE id = @clntid;
-            END IF;
+	       DELETE FROM acciones
+		WHERE idordenador = @clntid
+		  AND descriaccion = 'RemotePC Session'
+		  AND descrinotificacion = 'Timeout';
+	    END IF;
        END
 EOD;
 		$t3 = $cmd->Ejecutar();
-*/
-		if ($t1 and $t2) {
+		if ($t1 and $t2 and $t3) {
 			// Commit transaction on success.
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
@@ -190,7 +194,7 @@ EOD;
 			$response['lab']['id'] = $labid;
 			$response['ou']['id'] = $ouid;
 			jsonResponse(200, $response);
-		} else{
+		} else {
 			// Roll-back transaction on DB error.
 			$cmd->texto = "ROLLBACK;";
 			$cmd->Ejecutar();

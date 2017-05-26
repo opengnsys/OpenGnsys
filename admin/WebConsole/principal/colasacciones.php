@@ -930,7 +930,7 @@ function escribeResumen($oA)
 		}	
 		
 		/* Descripción de la notificación (Descripción del error si se ha producido alguno) */	
-		$html.='<TD style="BACKGROUND-COLOR: #b5daad" >&nbsp;'.$rs->campos["descrinotificacion"].'&nbsp;</TD>';
+		$html.='<TD style="BACKGROUND-COLOR: #b5daad" >&nbsp;'.@$rs->campos["descrinotificacion"].'&nbsp;</TD>';
 
 		/* Estado */
 		$html.='<TD style="BACKGROUND-COLOR: #b5daad"  align=center>&nbsp;</TD>';
