@@ -1,6 +1,7 @@
 -- Fichero de instalación de la base de datos.
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET GLOBAL event_scheduler = ON;
 
 --
 -- Base de datos: `ogAdmBD`

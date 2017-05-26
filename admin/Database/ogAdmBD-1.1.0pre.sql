@@ -124,7 +124,7 @@ CREATE PROCEDURE addcols() BEGIN
 			ON DUPLICATE KEY UPDATE
 				pasguor=SHA2(VALUES(pasguor),224);
 	END IF;
-	# Crear tabla de log pra la cola de acciones (ticket #782)
+	# Crear tabla de log para la cola de acciones (ticket #782)
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE TABLE_NAME='acciones_log' AND TABLE_SCHEMA=DATABASE())
 	THEN
