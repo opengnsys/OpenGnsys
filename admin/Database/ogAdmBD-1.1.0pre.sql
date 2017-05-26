@@ -2,8 +2,11 @@
 # OpenGnsys 1.1.0
 #use ogAdmBD
 
-# Eliminar procedimiento para evitar errores de ejecución.
+SET GLOBAL event_scheduler = ON;
+
+# Eliminar procedimiento y disparador para evitar errores de ejecución.
 DROP PROCEDURE IF EXISTS addcols;
+DROP TRIGGER IF EXISTS registrar_acciones;
 # Procedimiento para actualización condicional de tablas.
 DELIMITER '//'
 CREATE PROCEDURE addcols() BEGIN
@@ -111,8 +114,8 @@ CREATE PROCEDURE addcols() BEGIN
 			ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 	END IF;
 	# Codificar claves de los usuarios, si fuese necesario (ticket #778)
-	IF (SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS
-	     WHERE COLUMN_NAME='pasguor' AND TABLE_NAME='usuarios' AND TABLE_SCHEMA=DATABASE() != 56)
+	IF ((SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS
+	      WHERE COLUMN_NAME='pasguor' AND TABLE_NAME='usuarios' AND TABLE_SCHEMA=DATABASE()) != 56)
 	THEN
 		ALTER TABLE usuarios
 			MODIFY pasguor VARCHAR(56) NOT NULL DEFAULT '';
@@ -121,23 +124,24 @@ CREATE PROCEDURE addcols() BEGIN
 			ON DUPLICATE KEY UPDATE
 				pasguor=SHA2(VALUES(pasguor),224);
 	END IF;
-	# Crear tabla de log para la cola de acciones (ticket #...)
+	# Crear tabla de log pra la cola de acciones (ticket #782)
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE TABLE_NAME='acciones_log' AND TABLE_SCHEMA=DATABASE())
 	THEN
 		CREATE TABLE acciones_log LIKE acciones;
 		ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
-		CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW
-		BEGIN
-			INSERT INTO acciones_log VALUES
-				(OLD.idaccion, OLD.tipoaccion, OLD.idtipoaccion, OLD.descriaccion,
-				OLD.idordenador, OLD.ip, OLD.sesion, OLD.idcomando, OLD.parametros,
-				OLD.fechahorareg, OLD.fechahorafin, OLD.estado, OLD.resultado,
-				OLD.descrinotificacion, OLD.ambito, OLD.idambito, OLD.restrambito,
-				OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion,
-				NOW());
-		END;
 	END IF;
+END//
+# Disparador para mover acciones borradas a la tabla de registro de acciones.
+CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW
+BEGIN
+	INSERT INTO acciones_log VALUES
+		(OLD.idaccion, OLD.tipoaccion, OLD.idtipoaccion, OLD.descriaccion,
+		OLD.idordenador, OLD.ip, OLD.sesion, OLD.idcomando, OLD.parametros,
+		OLD.fechahorareg, OLD.fechahorafin, OLD.estado, OLD.resultado,
+		OLD.descrinotificacion, OLD.ambito, OLD.idambito, OLD.restrambito,
+		OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion,
+		NOW());
 END//
 # Ejecutar actualización condicional.
 DELIMITER ';'
@@ -202,12 +206,19 @@ ALTER TABLE remotepc
        MODIFY reserved DATETIME DEFAULT NULL;
 
 # Nuevo comando "Enviar mensaje" (ticket #779)
-INSERT INTO `comandos` 	(`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion`, `urlimg`, 
-	`aplicambito`, `visuparametros`, `parametros`, `comentarios`, `activo`, `submenu`) VALUES
-	(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '', 31, '', '', '', 1, '' );
+INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, 
+	aplicambito, visuparametros, parametros, comentarios, activo, submenu) VALUES
+	(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '', 31, '', '', '', 1, '' )
+	ON DUPLICATE KEY UPDATE
+		descripcion=VALUES(descripcion), pagina=VALUES(pagina),
+		gestor=VALUES(gestor), funcion=VALUES(funcion),
+		aplicambito=VALUES(aplicambito), activo=VALUES(activo);
 INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, nomtabla, nomliteral, tipopa, visual) VALUES
 	(39, 'tit', 'Título', '', '', '', 0, 1),
-	(40, 'msj', 'Contenido', '', '', '', 0, 1);
+	(40, 'msj', 'Contenido', '', '', '', 0, 1)
+	ON DUPLICATE KEY UPDATE
+		nemonico=VALUES(nemonico), descripcion=VALUES(descripcion),
+		tipopa=VALUES(tipopa), visual=VALUES(visual);
 
 # Evitar error de MySQL con modo NO_ZERO_DATE (ticket #730).
 ALTER TABLE acciones
