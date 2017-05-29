@@ -1062,6 +1062,8 @@ case "${ID,,}" in
      bf03)      TYPE="SOLARIS-DISK" ;;
      ef01)      TYPE="MBR" ;;
      ef02)      TYPE="BIOS-BOOT" ;;
+     10000)     TYPE="LVM-LV" ;;
+     10010)     TYPE="ZFS-VOL" ;;
      *)         TYPE="UNKNOWN" ;;
 esac
 echo "$TYPE"
@@ -1416,7 +1418,7 @@ ogSetPartitionId $1 $2 $ID
 function ogTypeToId ()
 {
 # Variables locales
-local PTTYPE ID
+local PTTYPE ID=""
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1460,7 +1462,6 @@ case "$PTTYPE" in
             CACHE)      ID=CA00;;
             EFI)        ID=EF00 ;;
             LINUX-RAID) ID=FD00 ;;
-            *)          ID="" ;;
         esac
         ;;
     MSDOS)
@@ -1491,7 +1492,16 @@ case "$PTTYPE" in
             EFI)        ID=ef ;;
             VMFS)       ID=fb ;;
             LINUX-RAID) ID=fd ;;
-            *)          ID="" ;;
+        esac
+        ;;
+    LVM)
+        case "$1" in
+            LVM-LV)     ID=10000 ;;
+        esac
+        ;;
+    ZVOL)
+        case "$1" in
+            ZFS-VOL)    ID=10010 ;;
         esac
         ;;
 esac

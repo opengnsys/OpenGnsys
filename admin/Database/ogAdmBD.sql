@@ -1,6 +1,7 @@
 -- Fichero de instalación de la base de datos.
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET sql_mode = "NO_AUTO_VALUE_ON_ZERO";
+SET GLOBAL sql_mode = TRIM(BOTH ',' FROM REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));
 SET GLOBAL event_scheduler = ON;
 
 --
@@ -1052,7 +1053,10 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('FB01',16,10), 'VMFS-RESERV', 1),
 (CONV('FB02',16,10), 'VMFS-KRN', 1),
 (CONV('FD00',16,10), 'LINUX-RAID', 1),
-(CONV('FFFF',16,10), 'UNKNOWN', 1);
+(CONV('FFFF',16,10), 'UNKNOWN', 1),
+(CONV('10000',16,10), 'LVM-LV', 1),
+(CONV('10010',16,10), 'ZFS-VOL', 1);
+
 
 -- --------------------------------------------------------
 

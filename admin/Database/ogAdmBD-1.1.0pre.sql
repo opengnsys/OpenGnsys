@@ -2,6 +2,9 @@
 # OpenGnsys 1.1.0
 #use ogAdmBD
 
+# Soportar cláusuloas GROUP BY especiales para configuración de equipos.
+SET GLOBAL sql_mode = TRIM(BOTH ',' FROM REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));
+# Activar calendario de eventos de MySQL.
 SET GLOBAL event_scheduler = ON;
 
 # Eliminar procedimiento y disparador para evitar errores de ejecución.
@@ -163,7 +166,9 @@ INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
 	(CONV('AF02',16,10), 'HFS-RAID', 1),
 	(CONV('FB00',16,10), 'VMFS', 1),
 	(CONV('FB01',16,10), 'VMFS-RESERV', 1),
-	(CONV('FB02',16,10), 'VMFS-KRN', 1)
+	(CONV('FB02',16,10), 'VMFS-KRN', 1),
+	(CONV('10000',16,10), 'LVM-LV', 1),
+	(CONV('10010',16,10), 'ZFS-VOL', 1)
 	ON DUPLICATE KEY UPDATE
 		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
