@@ -2,10 +2,11 @@
 # OpenGnSys 1.0.6 - OpenGnsys 1.1.0
 #use ogAdmBD
 
+### NOTA: la configuración de MySQL solo puede modificarla el usuario "root".
 # Soportar cláusuloas GROUP BY especiales para configuración de equipos.
-SET GLOBAL sql_mode = TRIM(BOTH ',' FROM REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));
+#SET GLOBAL sql_mode = TRIM(BOTH ',' FROM REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));
 # Activar calendario de eventos de MySQL.
-SET GLOBAL event_scheduler = ON;
+#SET GLOBAL event_scheduler = ON;
 
 # Nuevos tipos de particiones y de sistemas de ficheros (ticket #758).
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
