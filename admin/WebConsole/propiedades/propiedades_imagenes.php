@@ -165,17 +165,6 @@ if ( $opcion == 1 && $datospost == 1)
 	<?}?>
 	<?php if($tipoimg!=$IMAGENES_INCREMENTALES){?>
 	<!-------------------------------------------------------------------------------------->
-		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
-			<?php
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
-					echo '<td>'.$tipopar.' ('.dechex($codpar).')
-					&nbsp;<input type="hidden" name="codpar" value="'.$codpar.'"></td>';
-				else
-					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar',"CONCAT(CASE WHEN codpar BETWEEN 1 AND 255 THEN '1-MSDOS' WHEN codpar BETWEEN 256 AND 65535 THEN '2-GPT' ELSE codpar END,': ',tipopar,' (',HEX(codpar),')')",170,"","","clonable=1").'</td>';
-			?>
-		</tr>
-	<!-------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
 			<?
@@ -220,6 +209,7 @@ if ( $opcion == 1 && $datospost == 1)
 				}
 			?>
 		</tr>
+
 	    <?php if ($opcion!=$op_alta) { ?>
 		<!-- Equipo modelo (aula) -->
 		<tr>
@@ -227,18 +217,18 @@ if ( $opcion == 1 && $datospost == 1)
 			<td>&nbsp;<?php echo $modelo ?>
 			    &nbsp;<input type="hidden" name="modelo" value="<?php echo $modelo ?>">
 		</tr>
-		<!-- Disco y partición -->
+		<!-- Disco, partición y tipo de partición -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[8]?>&nbsp;</th>
-			<td>&nbsp;<?php if (! empty ($modelo)) echo "$numdisk, $numpar" ?>
-			    &nbsp;<input type="hidden" name="numdisk" value="<?php echo $numdisk ?>">
-			    &nbsp;<input type="hidden" name="numpar" value="<?php echo $numpar ?>"></td>
+			<td>&nbsp;<?php if (! empty($modelo)) echo "$numdisk, $numpar (".dechex($codpar)."-$tipopar)" ?>
+			    <input type="hidden" name="numdisk" value="<?php echo $numdisk ?>">
+			    <input type="hidden" name="numpar" value="<?php echo $numpar ?>"></td>
 		</tr>
 		<!-- Fecha de creación -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[20]?>&nbsp;</th>
 			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(r$revision)" : "") ?>
-			    &nbsp;<input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
+			    <input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
 		</tr>
 		<!-- Perfil de software -->
 		<TR>

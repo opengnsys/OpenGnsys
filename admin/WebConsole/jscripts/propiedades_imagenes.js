@@ -88,7 +88,6 @@ function comprobar_datos(){
 		return 	validate (form.nombreca, validate_nameimagefile, 3) &&
 				validate (form.nombreca, validate_notnull, 3) &&
 				validate (form.descripcion, validate_notnull, 0) &&
-				validate (form.codpar, validate_notnull, 5) &&
 				validate (form.idrepositorio, validate_notnull, 6);
 	}
 	else{
