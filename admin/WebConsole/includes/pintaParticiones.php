@@ -113,8 +113,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	
 						echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 						// Mostrar uso solo en clientes individuales.
-						if ($tbKeys[$k]["uso"] > 0 and strpos($idordenadores, ',') === false) {
-							echo'<td style="text-align:right; background-image:url(../images/flotantes/lsu.gif); background-size:'.$tbKeys[$k]["uso"].'% 100%; background-repeat:no-repeat"><a title="'.$TbMsg["USAGE"].': '.$tbKeys[$k]["uso"].'%">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</a></td>'.chr(13);
+						$uso=tomaUso($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]);
+						if ($uso > 0 and strpos($idordenadores, ',') === false) {
+							echo'<td style="text-align:right; background-image:url(../images/flotantes/lsu.gif); background-size:'.$uso.'% 100%; background-repeat:no-repeat"><a title="'.$TbMsg["USAGE"].': '.$uso.'%">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</a></td>'.chr(13);
 						} else {
 							echo'<td style="text-align:right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 						}

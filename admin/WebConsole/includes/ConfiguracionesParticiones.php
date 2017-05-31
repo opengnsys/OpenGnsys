@@ -663,6 +663,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 			   	ordenadores_particiones.tamano,
+			   	ANY_VALUE(ordenadores_particiones.uso) AS uso,
 				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
@@ -692,6 +693,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 	$idx=0; 
 	while (!$rs->EOF){
 		$tbTam[$idx]["tamano"]=$rs->campos["tamano"];
+		$tbTam[$idx]["uso"]=$rs->campos["uso"];
 		$tbTam[$idx]["numdisk"]=$rs->campos["numdisk"];
 		$tbTam[$idx]["numpar"]=$rs->campos["numpar"];			
 		$tbTam[$idx]["ordenadores"]=$rs->campos["ordenadores"];
@@ -719,6 +721,27 @@ function tomaTamano($numpar,$ordenadores,$numdisk = 1)
 			$intersec = array_intersect (explode(",", $tbTam[$k]["ordenadores"]), $pcs);
 			if (array_diff ($pcs, $intersec) == NULL) {
 				return ($tbTam[$k]["tamano"]);
+			}
+		}
+	}
+}
+/*________________________________________________________________________________________________________
+	
+		Toma porcentaje de uso de partición común a los ordenadores pasados como parámetros
+________________________________________________________________________________________________________*/
+function tomaUso($numpar, $ordenadores, $numdisk=1)
+{
+	global $tbTam;  // Tabla contenedora de ordenadores incluidos en la consulta
+	global $conTam; // Contador de elementos anteriores
+
+	for ($k=0; $k<$conTam; $k++) {
+		if ($tbTam[$k]["numdisk"] == $numdisk && $tbTam[$k]["numpar"] == $numpar) {
+//			$pos = strpos ($tbTam[$k]["ordenadores"], $ordenadores);
+//			if ($pos !== FALSE) { // Cadena encontrada
+			$pcs = explode (",", $ordenadores);
+			$intersec = array_intersect (explode(",", $tbTam[$k]["ordenadores"]), $pcs);
+			if (array_diff ($pcs, $intersec) == NULL) {
+				return ($tbTam[$k]["uso"]);
 			}
 		}
 	}
