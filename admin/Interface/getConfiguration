@@ -74,6 +74,9 @@ awk '{  n=split($0,sep,";");
 	    }
      }' $cfgfile
 
+# Borramos marcas de arranque de Windows
+rm -f /mnt/*/ogboot.* /mnt/*/*/ogboot.*
+
 # Volver a registrar los errores.
 unset DEBUG
 
