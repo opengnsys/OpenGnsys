@@ -12,24 +12,28 @@
 #@version 1.0.1 - requiere el gestor de arranque grub2dos
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2010/07/27
-#@author Irina Gómez. ETSII Universidad de Sevilla
 #@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@author Irina Gómez. ETSII Universidad de Sevilla
 #@date    2017/04/27
+#@version 1.1.0 - Se permite varios ogLives en la CACHE
+#@author Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2017/05/31
 #*/ ##
 
 OGLIVEDIR=${oglivedir:-"ogclient"}
 OGBTFTP="/opt/oglive/tftpboot/$OGLIVEDIR"
+OGBCACHE="$OGCAC/boot/$OGLIVEDIR"
 ogMountCache || exit 1
 
-[ -d $OGCAC/boot ] || mkdir -p $OGCAC/boot 
+[ -d $OGBCACHE ] || mkdir -p $OGBCACHE 
 	
 	# comparamos los del server
 	SERVERVMLINUZ=`cat ${OGBTFTP}/ogvmlinuz.sum`
 	SERVERINITRD=`cat  ${OGBTFTP}/oginitrd.img.sum`
 	
 	#comparamos los de la cache
-	CACHEVMLINUZ=`cat ${OGCAC}/boot/ogvmlinuz.sum`
-	CACHEINITRD=`cat  ${OGCAC}/boot/oginitrd.img.sum`
+	CACHEVMLINUZ=`cat ${OGBCACHE}/ogvmlinuz.sum`
+	CACHEINITRD=`cat ${OGBCACHE}/oginitrd.img.sum`
 	
 	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
 	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
@@ -38,15 +42,15 @@ ogMountCache || exit 1
 	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
 	then		
 		echo "ogvmlinuz updating"
-		cp ${OGBTFTP}/ogvmlinuz ${OGCAC}/boot/ogvmlinuz
-		cp ${OGBTFTP}/ogvmlinuz.sum ${OGCAC}/boot/ogvmlinuz.sum
+		cp "${OGBTFTP}/ogvmlinuz" "${OGBCACHE}/ogvmlinuz"
+		cp "${OGBTFTP}/ogvmlinuz.sum" "${OGBCACHE}/ogvmlinuz.sum"
 		DOREBOOT=true
 	fi
 	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
 	then
 		echo "oginitrd updating"
-		cp ${OGBTFTP}/oginitrd.img ${OGCAC}/boot/oginitrd.img
-		cp ${OGBTFTP}/oginitrd.img.sum ${OGCAC}/boot/oginitrd.img.sum
+		cp "${OGBTFTP}/oginitrd.img" "${OGBCACHE}/oginitrd.img"
+		cp "${OGBTFTP}/oginitrd.img.sum" "${OGBCACHE}/oginitrd.img.sum"
 		DOREBOOT=true
 	fi
 
@@ -54,9 +58,7 @@ echo $DOREBOOT
 #	[ "$DOREBOOT" == "true" ] && busybox reboot -f
 
 #TODO: Comprobar si es necesario
-#cp -prv cp ${OGBTFTP}/ ${OGCAC}/boot/
+#cp -prv cp ${OGBTFTP}/ ${OGBCACHE}
 
 #TODO
 #/opt/opengnsys/lib/grub4dos/bootlace.com /dev/sda
-
-

@@ -365,9 +365,12 @@ ogGetROOTSERVER ()
 #@version 0.9
 #@author Antonio J. Doblas. Universidad de Malaga.
 #@date    2011/05/24
-#@author Irina Gómez. ETSII Universidad de Sevilla
 #@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@author Irina Gómez. ETSII Universidad de Sevilla
 #@date    2017/04/27
+#@version 1.1.0 - Se permite varios ogLives en la CACHE
+#@author Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2017/05/31
 #*/ ##
 
 ogUpdateInitrd ()
@@ -380,7 +383,7 @@ ogUpdateInitrd ()
 	# Salir si no se detecta caché.
 	[ -z "$TYPE" ] && return
 	mount -t $TYPE LABEL=CACHE /tmp/cache || return
-	mkdir -p /tmp/cache/boot
+	mkdir -p /tmp/cache/boot/$OGLIVEDIR
 	
 	
 	# comparamos los del server
@@ -391,13 +394,13 @@ ogUpdateInitrd ()
 
 	
 	#comparamos los de la cache
-	CACHEVMLINUZ=`cat /tmp/cache/boot/ogvmlinuz.sum`
-	CACHEINITRD=`cat /tmp/cache/boot/oginitrd.img.sum`
+	CACHEVMLINUZ=`cat /tmp/cache/boot/$OGLIVEDIR/ogvmlinuz.sum`
+	CACHEINITRD=`cat /tmp/cache/boot/$OGLIVEDIR/oginitrd.img.sum`
 	
 	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
 	echo "MD5 on  CACHE: $CACHEVMLINUZ $CACHEINITRD"
 	
-	cd /tmp/cache/boot
+	cd /tmp/cache/boot/$OGLIVEDIR || mkdir -p /tmp/cache/boot/$OGLIVEDIR
 	
 	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
 	then		
