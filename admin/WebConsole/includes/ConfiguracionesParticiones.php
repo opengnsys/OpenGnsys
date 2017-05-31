@@ -68,13 +68,13 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	$cmd->texto="SELECT CONCAT_WS(';', LPAD(ordenadores_particiones.numdisk, 3, 0),
 				LPAD(ordenadores_particiones.numpar, 3, 0), ";
 
-	if($sws & $msk_tamano)						
+	if($sws & $msk_tamano)
 		$cmd->texto.="	ordenadores_particiones.tamano,";
 
-	if($sws & $msk_sysFi)						
+	if($sws & $msk_sysFi)
 		$cmd->texto.="	ordenadores_particiones.idsistemafichero, ";	
-		
-	if($sws & $msk_nombreSO)						
+
+	if($sws & $msk_nombreSO)
 		$cmd->texto.="	ordenadores_particiones.idnombreso, ";
 
 	if($sws & $msk_imagen)
@@ -84,62 +84,60 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$cmd->texto.="	ordenadores_particiones.idperfilsoft, ";
 
 	if($sws & $msk_cache)
-		$cmd->texto.="	ordenadores_particiones.cache, "; 
+		$cmd->texto.="	ordenadores_particiones.cache, ";
 
 	$cmd->texto.="		ordenadores_particiones.codpar) AS configuracion,
-				ordenadores_particiones.numdisk,
-				ordenadores_particiones.numpar ,
-				ordenadores_particiones.codpar ,
-				IFNULL (tipospar.tipopar, ordenadores_particiones.codpar) AS tipopar,
-				tipospar.clonable,
-				ordenadores_particiones.tamano,
-				ordenadores_particiones.uso,
-				sistemasficheros.descripcion AS sistemafichero,
-				ordenadores_particiones.idnombreso,
-				nombresos.nombreso,
-				imagenes.idimagen, 
-				imagenes.descripcion AS imagen,
-				(imagenes.revision - ordenadores_particiones.revision) AS difimagen,
-				imagenes.nombreca AS nombreca,
-				imagenes.idrepositorio AS repositorio,
-				ordenadores_particiones.fechadespliegue,
-				ordenadores_particiones.idperfilsoft,
-				perfilessoft.descripcion AS perfilsoft
+				ANY_VALUE(ordenadores_particiones.numdisk) AS numdisk,
+				ANY_VALUE(ordenadores_particiones.numpar) AS numpar,
+				ANY_VALUE(ordenadores_particiones.codpar) AS codpar,
+				IFNULL (ANY_VALUE(tipospar.tipopar), ANY_VALUE(ordenadores_particiones.codpar)) AS tipopar,
+				ANY_VALUE(tipospar.clonable) AS clonable,
+				ANY_VALUE(ordenadores_particiones.tamano) AS tamano,
+				ANY_VALUE(ordenadores_particiones.uso) AS uso,
+				ANY_VALUE(sistemasficheros.descripcion) AS sistemafichero,
+				ANY_VALUE(ordenadores_particiones.idnombreso) AS idnombreso,
+				ANY_VALUE(nombresos.nombreso) AS nombreso,
+				ANY_VALUE(imagenes.idimagen) AS idimagen,
+				ANY_VALUE(imagenes.descripcion) AS imagen,
+				(ANY_VALUE(imagenes.revision) - ANY_VALUE(ordenadores_particiones.revision)) AS difimagen,
+				ANY_VALUE(imagenes.nombreca) AS nombreca,
+				ANY_VALUE(imagenes.idrepositorio) AS repositorio,
+				ANY_VALUE(ordenadores_particiones.fechadespliegue) AS fechadespliegue,
+				ANY_VALUE(ordenadores_particiones.idperfilsoft) AS idperfilsoft,
+				ANY_VALUE(perfilessoft.descripcion) AS perfilsoft
 
 				FROM ordenadores
-					INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
-					LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-					LEFT OUTER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
-					LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-					LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-					LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
-					
+			  INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+			  LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
+			  LEFT OUTER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
+			  LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
+			  LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
+			  LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
+
 	switch($ambito){
 		case $AMBITO_AULAS :
 			$cmd->texto.=" INNER JOIN aulas ON aulas.idaula = ordenadores.idaula
-					WHERE aulas.idaula =".$idambito;
+					WHERE aulas.idaula=".$idambito;
 			break;
 		case $AMBITO_GRUPOSORDENADORES :
 			$cmd->texto.=" INNER JOIN gruposordenadores ON gruposordenadores.idgrupo = ordenadores.grupoid
-					WHERE gruposordenadores.idgrupo =".$idambito;
+					WHERE gruposordenadores.idgrupo=".$idambito;
 			break;
 		case $AMBITO_ORDENADORES :
-			$cmd->texto.=" WHERE ordenadores.idordenador =".$idambito;
+			$cmd->texto.=" WHERE ordenadores.idordenador=".$idambito;
 			break;
 	}
 	
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0 ";
 
-	$cmd->texto.=" GROUP by configuracion";
+	$cmd->texto.=" GROUP BY configuracion";
 
-	//echo "carga claves:".$cmd->texto;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
 	$rs->Primero();
 	$idx=0; 
-	//echo $cmd->texto;
 	while (!$rs->EOF){
 		$tbKeys[$idx]["cfg"]=$rs->campos["configuracion"];
 		$tbKeys[$idx]["numdisk"]=$rs->campos["numdisk"];
@@ -204,7 +202,6 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 	cargaNombresSO($cmd,$idambito,$ambito);
 	cargaTamano($cmd,$idambito,$ambito);
 	cargaCache($cmd,$idambito,$ambito);
-	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 				GROUP_CONCAT(CAST( temp2.idordenador AS CHAR(11) )  ORDER BY temp2.idordenador SEPARATOR ',' ) AS idordenadores,
 				temp2.configuraciones
@@ -380,19 +377,18 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="		GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idsistemafichero";
-	
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$idx=0; 
-	//echo $cmd->texto;
 	while (!$rs->EOF){
 			$tbSysFi[$idx]["idsistemafichero"]=$rs->campos["idsistemafichero"];
 			$tbSysFi[$idx]["numdisk"]=$rs->campos["numdisk"];			
 			$tbSysFi[$idx]["numpar"]=$rs->campos["numpar"];			
 			$tbSysFi[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
-			$tbSysFi[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
+			$tbSysFi[$idx]["ordenadores"]=$rs->campos["ordenadores"];
 			$idx++;
 		$rs->Siguiente();
 	}
@@ -412,8 +408,6 @@ function tomaSistemasFicheros($numpar,$ordenadores,$sw=false,$numdisk = 1)
 
 	for ($k=0; $k<$conSysFi; $k++){
 		if ($tbSysFi[$k]["numdisk"] == $numdisk && $tbSysFi[$k]["numpar"] == $numpar) {
-			//$pos = strpos($tbSysFi[$k]["ordenadores"], $ordenadores);
-			//if ($pos !== false) { // Cadena encontrada
 			$pcs = explode (",", $ordenadores);
 			$intersec = array_intersect (explode(",", $tbSysFi[$k]["ordenadores"]), $pcs);
 			if (array_diff ($pcs, $intersec) == NULL) {
@@ -464,7 +458,7 @@ function cargaPerfiles($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idperfilsoft";
-	//echo "carga perfiles:".$cmd->texto;
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
@@ -493,9 +487,6 @@ function tomaPerfiles($numpar,$ordenadores,$numdisk = 1)
 	global $conPerfil; // Contador de elementos anteriores
 
 	for ($k=0; $k<$conPerfil; $k++){
-		//$pos = strpos($tbPerfil[$k]["ordenadores"], $ordenadores);
-		//if ($pos !== false) { // Cadena encontrada
-			//if($tbPerfil[$k]["numpar"]==$numpar)
 		if ($tbPerfil[$k]["numdisk"] == $numdisk && $tbPerfil[$k]["numpar"] == $numpar) {
 			$pcs = explode (",", $ordenadores);
 			$intersec = array_intersect (explode(",", $tbPerfil[$k]["ordenadores"]), $pcs);
@@ -543,7 +534,7 @@ function cargaImagenes($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idimagen";
-	//echo "carga imagenes:".$cmd->texto;
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
@@ -572,9 +563,6 @@ function tomaImagenes($numpar,$ordenadores, $numdisk = 1)
 	global $conImg; // Contador de elementos anteriores
 
 	for ($k=0; $k<$conImg; $k++) {
-		//$pos = strpos($tbImg[$k]["ordenadores"], $ordenadores);
-		//if ($pos !== false) { // Cadena encontrada
-			//if($tbImg[$k]["numpar"]==$numpar){
 		if ($tbImg[$k]["numdisk"] == $numdisk && $tbImg[$k]["numpar"] == $numpar) {
 			$pcs = explode (",", $ordenadores);
 			$intersec = array_intersect (explode(",", $tbImg[$k]["ordenadores"]), $pcs);
@@ -620,7 +608,7 @@ function cargaNombresSO($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idnombreso";
-	//echo "carga nombresos:".$cmd->texto;
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
@@ -696,18 +684,18 @@ function cargaTamano($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.tamano";
-	//echo "carga tamaños:".$cmd->texto;
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero();
 	$idx=0; 
 	while (!$rs->EOF){
-			$tbTam[$idx]["tamano"]=$rs->campos["tamano"];
-            $tbTam[$idx]["numdisk"]=$rs->campos["numdisk"];
-			$tbTam[$idx]["numpar"]=$rs->campos["numpar"];			
-			$tbTam[$idx]["ordenadores"]=$rs->campos["ordenadores"];			
-			$idx++;
+		$tbTam[$idx]["tamano"]=$rs->campos["tamano"];
+		$tbTam[$idx]["numdisk"]=$rs->campos["numdisk"];
+		$tbTam[$idx]["numpar"]=$rs->campos["numpar"];			
+		$tbTam[$idx]["ordenadores"]=$rs->campos["ordenadores"];
+		$idx++;
 		$rs->Siguiente();
 	}
 	$conTam=$idx; // Guarda contador
@@ -771,6 +759,7 @@ function cargaCache($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.cache";
+
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
