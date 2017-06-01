@@ -31,7 +31,7 @@
 	location.href="../nada.php"
  }
 //________________________________________________________________________________________________________
-
+// No comprobamos datos de ejecución porque son obligatorios
   function comprobar_datos()
 {
 	function validate (field, validator, msgi) {
@@ -42,7 +42,8 @@
 		}
 		return true;
 	}
-	return 	validate (fdatos.titulo, validate_notnull, 1) &&
-	 	validate (fdatos.mensaje, validate_notnull, 2) &&
-		comprobar_datosejecucion();
+	// Escapamos los saltos de línea para evitar error con curl
+	fdatos.mensaje.value=fdatos.mensaje.value.split("\n").join("\\n");
+	return 	validate (fdatos.titulo, validate_text_notnull, 1) &&
+		validate (fdatos.mensaje, validate_text_notnull, 2)
 }

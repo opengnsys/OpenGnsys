@@ -48,6 +48,7 @@ if (!$cmd)
 	<P align=center>
 	<SPAN align=center class=subcabeceras><? echo $TbMsg[10] ?></SPAN>
 	<form  align=center name="fdatos"> 				
+		
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
 			<tr> 
 				<th>&nbsp;<? echo $TbMsg[7]?>&nbsp;</th>
@@ -56,16 +57,39 @@ if (!$cmd)
 				<th>&nbsp;<? echo $TbMsg[9]?>&nbsp;</th>
 				<td><textarea class="cajatexto" name="mensaje" cols="70" rows="18"></textarea></td></tr>
 			<tr> <th align=center colspan="3"><? echo $TbMsg["OGAGENT"] ?></th></tr>
+	    		<tr> <th align=center colspan="3"><? echo $TbMsg["OPTION"] ?></th></tr>
 		</table>	
 	</form>	
 	<?
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
-	//________________________________________________________________________________________________________
-	include_once("./includes/opcionesacciones.php");
-	//________________________________________________________________________________________________________
-?>
+	//  Sólo permite ejecutar inmediantemente como opción de ejecución 
+	// include_once("./includes/opcionesacciones.php")
+	?>
+	<P align=center><span align=center class=subcabeceras>Opciones de Ejecución</span></P>
+	<table align=center>
+		<tr>
+			<td><img border=0 style="cursor:pointer" src="../images/boton_aceptar_esp.gif" onclick="confirmar()" ></td>
+		</tr>
+	</table>
+	<BR>
+	<table class=opciones_ejecucion  align=center>
+	    <tr>
+		<td><input name=sw_ejya type=checkbox checked  readonly></td>
+		<td colspan=3> Ejecutar inmediatamente &nbsp; </td>
+	    </tr>
+	    <tr>
+		<td>&nbsp; </td>
+		<td><input name=sw_seguimiento type=radio value=1  readonly></td><td>Incluirlo en Cola de Acciones&nbsp;</td>
+	    </tr>
+	    <tr>
+		<td>&nbsp; </td>
+		<td><input checked name=sw_seguimiento type=radio value=0  readonly></td><td>No incluirlo en Cola de Acciones&nbsp;</td>
+	    </tr>
+	</table>
+
+	</FORM>
 <SCRIPT language="javascript">
 	Sondeo();
 </SCRIPT>
