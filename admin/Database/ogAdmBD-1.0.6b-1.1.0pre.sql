@@ -74,7 +74,7 @@ ALTER TABLE parametros
 ALTER TABLE tareas
 	MODIFY restrambito TEXT;
 
-# Actualizar componentes hardware y añadir nº de serie y clave de acceso a API REST de OGAgent (tickets #713 y #718)
+# Actualizar componentes hardware y añadir nº de serie, clave de acceso a API REST de OGAgent y directorio de ogLive(tickets #713, #718 y #768)
 ALTER TABLE tipohardwares
 	DROP pci;
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
@@ -82,8 +82,9 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 	(18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
 	(19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 ALTER TABLE ordenadores
-	ADD numserie varchar(25) DEFAULT NULL AFTER nombreordenador,
-	ADD agentkey VARCHAR(32) DEFAULT NULL;
+	ADD numserie VARCHAR(25) DEFAULT NULL AFTER nombreordenador,
+	ADD agentkey VARCHAR(32) DEFAULT NULL,
+	ADD oglivedir VARCHAR(50) NOT NULL DEFAULT 'ogLive';
 
 # Directorios en repo para distintas UO (ticket #678).
 ALTER TABLE entidades

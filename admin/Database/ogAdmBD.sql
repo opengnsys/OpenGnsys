@@ -519,6 +519,7 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
   `agentkey` varchar(32),
+  `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
   PRIMARY KEY (`idordenador`),
   KEY `idaulaip` (`idaula` ASC, `ip` ASC)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
