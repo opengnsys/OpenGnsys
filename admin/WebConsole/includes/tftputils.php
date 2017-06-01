@@ -51,12 +51,15 @@ function clientKernelVersion () {
  * @param    {String}  bootopt   Plantilla de arranque PXE.
  * @param    {Number}  hostid    Id. del ordenador.
  * @param    {String}  lang      Idioma de arranque.
- * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
+ * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado (Antonio J. Doblas Viso - Universidad de Málaga)
  * @author  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-25
  * @version  1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678).
  * @author   Irina Gómez - ETSII Universidad de Sevilla
  * @date     2015-12-16
+ * @version  1.1.0 - La segunda fase de carga del ogLive se define en el SERVER para evitar erores de sincronismo entre versiones (ticket #787).
+ * @author   Antonio J. Doblas Viso - Universidad de Malaga
+ * @date     2017-06-01
  */
 function createBootMode ($cmd, $bootopt, $hostid, $lang) {	
 
@@ -132,7 +135,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 		  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
 		  " group=$group" .
 		  " ogrepo=$repo" .
-		  " oglive=$repo" .
+		  " oglive=$server" .
 		  " oglog=$server" .
 		  " ogshare=$server";
 	// Añadir parámetros opcionales.
