@@ -316,6 +316,34 @@ EOT
         return 0
 }
 
+# Comprobar configuración de MySQL y recomendar cambios necesarios.
+function checkMysqlConfig()
+{
+	if [ $# -ne 2 ]; then
+		errorAndLog "${FNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	local dbuser="$1"
+	local dbpassword="$2"
+	local mycnf=/tmp/.my.cnf.$$
+
+	echoAndLog "${FUNCNAME}(): checking MySQL configuration."
+	touch $mycnf
+	cat << EOT > $mycnf
+[client]
+user=$dbuser
+password=$dbpassword
+EOT
+	# Check if scheduler is active.
+	if [ "$(mysql --defaults-extra-file=$mycnf -Nse 'SELECT @@GLOBAL.event_scheduler;')" = "OFF" ]; then
+		MYSQLCONFIG="SET GLOBAL event_scheduler = ON; "
+	fi
+	rm -f $mycnf
+
+        echoAndLog "${FUNCNAME}(): MySQL configuration has checked"
+        return 0
+}
 
 #####################################################################
 ####### Funciones de instalación de paquetes
@@ -987,9 +1015,13 @@ function updateSummary()
 		fi
 	fi
 	echoAndLog "Warnings:"
-	echoAndLog " - You must to clear web browser cache before loading OpenGnSys page."
+	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page."
 	if [ -n "$CLIENTUPDATED" ]; then
 		echoAndLog " - ogLive Client is updated to: $CLIENTUPDATED"
+	fi
+	if [ -n "$MYSQLCONFIG" ]; then
+		echoAndLog " - MySQL must be reconfigured: execute next code as DB root user and restart service:"
+		echoAndLog "      $MYSQLCONFIG"
 	fi
 	echo
 }
@@ -1053,6 +1085,9 @@ if [ $USESVN -eq 1 ]; then
 else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
+
+# Comprobar configuración de MySQL.
+checkMysqlConfig $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD
 
 # Actualizar la BD.
 updateDatabase

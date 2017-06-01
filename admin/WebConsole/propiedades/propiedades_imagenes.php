@@ -16,6 +16,7 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../idiomas/php/".$idioma."/propiedades_imagenes_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 
 if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion=0;} // Recoge parametros
@@ -35,6 +36,7 @@ $idperfilsoft=0;
 $perfilsoft="";
 $comentarios="";
 $inremotepc="";
+$scheduler="";
 $grupoid=0;
 $litamb="";
 $tipoimg=0;
@@ -54,14 +56,15 @@ if (isset($_GET["tipoimg"])) $tipoimg=$_GET["tipoimg"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
-if  ($opcion!=$op_alta){
+	header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+if  ($opcion!=$op_alta)
 	$resul=TomaPropiedades($cmd,$idimagen);
-	if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
-}
+else
+	$resul=TomaConfiguracion($cmd);
+if (!$resul)
+	header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 
-if ( $opcion == 1 && $datospost == 1)
+if ($opcion == 1 && $datospost == 1)
 	{
 	if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];// Recoge parametros
 	if (isset($_POST["idimagen"])) $idimagen=$_POST["idimagen"];
@@ -83,8 +86,6 @@ if ( $opcion == 1 && $datospost == 1)
 	if (isset($_POST["tipoimg"])) $tipoimg=$_POST["tipoimg"]; 
 	if (isset($_POST["fechacreacion"])) $fechacreacion=$_POST["fechacreacion"]; 
 	if (isset($_POST["litamb"])) $litamb=$_POST["litamb"]; 
-	
-
 	}
 //________________________________________________________________________________________________________
 ?>
@@ -205,7 +206,10 @@ if ( $opcion == 1 && $datospost == 1)
 				} else {
 					echo '<td><input name="inremotepc" type="checkbox" value="1"';
 					if ($inremotepc)  echo ' checked ';
-					echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+					if ($scheduler)
+						echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+					else
+						echo 'disabled> <em>'.$TbMsg['WARN_SCHEDULER'].'<em></td>';
 				}
 			?>
 		</tr>
@@ -292,6 +296,7 @@ function TomaPropiedades($cmd,$idmagen){
 	global $descripcion;
 	global $comentarios;
 	global $inremotepc;
+	global $scheduler;
 	global $idperfilsoft;
 	global $modelo;
 	global $numdisk;
@@ -309,7 +314,8 @@ function TomaPropiedades($cmd,$idmagen){
 	$rs=new Recordset; 
 	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, 
 			perfilessoft.descripcion AS perfilsoft, nombreso AS sistoperativo,
-			CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo
+			CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo,
+			IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler
 			FROM imagenes
 			LEFT OUTER JOIN tipospar ON tipospar.codpar=imagenes.codpar
 			LEFT OUTER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
@@ -328,6 +334,7 @@ function TomaPropiedades($cmd,$idmagen){
 		$idperfilsoft=$rs->campos["idperfilsoft"];
 		$comentarios=$rs->campos["comentarios"];
 		$inremotepc=$rs->campos["inremotepc"];
+		$scheduler=$rs->campos["scheduler"];
 		$modelo=$rs->campos["modelo"];
 		$numdisk=$rs->campos["numdisk"];
 		$numpar=$rs->campos["numpar"];
@@ -343,8 +350,27 @@ function TomaPropiedades($cmd,$idmagen){
 		$rs->Cerrar();
 		return(true);
 	}
-	else
+	return(false);
+}
+
+//________________________________________________________________________________________________________
+//	Recupera los algunos datos de configuración de la base de datos
+//		Parametros: 
+//		- cmd: comando ya operativo (con conexión abierta)  
+//________________________________________________________________________________________________________
+function TomaConfiguracion($cmd) {
+	global $scheduler;
+
+	$rs=new Recordset; 
+	$cmd->texto="SELECT IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler";
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(0); // Error al abrir recordset
+	if (!$rs->EOF){
+		$scheduler=$rs->campos["scheduler"];
+		$rs->Cerrar();
 		return(true);
+	}
+	return(false);
 }
 
 //________________________________________________________________________________________________________
@@ -368,9 +394,7 @@ function ValidaNombre($cmd,$nombreca){
 		$nombrecabase=$rs->campos["nombreca"];
 		if ( $nombrecabase == $nombreca )
 		{$validnombreca="1";}else{$validnombreca="0";}
-			}
-		$rs->Cerrar();
-
-
+	}
+	$rs->Cerrar();
 }
 ?>

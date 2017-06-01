@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_aulas_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -27,6 +28,7 @@ $grupoid=0;
 $ordenadores=0;
 $ubicacion="";
 $inremotepc="";
+$scheduler="";
 $cagnon="";
 $pizarra="";
 $puestos=0;
@@ -52,6 +54,10 @@ $idperfilhard="";
 $validacion="";
 $paginalogin="";
 $paginavalidacion="";
+$gidmenu=0;
+$gidprocedimiento=0;
+$gidrepositorio=0;
+$gidperfilhard=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"]; 
@@ -61,12 +67,13 @@ if (isset($_GET["identificador"])) $idaula=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
-if  ($opcion!=$op_alta){
+	header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+if  ($opcion!=$op_alta)
 	$resul=TomaPropiedades($cmd,$idaula);
-	if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
-}
+else
+	$resul=TomaConfiguracion($cmd);
+if (!$resul)
+	header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 else
 	$urlfoto="aula.jpg";
 //________________________________________________________________________________________________________
@@ -226,7 +233,10 @@ function abrir_ventana(URL){
 				} else {
 					echo '<td colspan="3"><input  class="formulariodatos" name="inremotepc" type="checkbox" value="1" ';
 					if ($inremotepc)  echo ' checked ';
-					echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+					if ($scheduler)
+						echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+					else
+						echo 'disabled> <em>'.$TbMsg['WARN_SCHEDULER'].'<em></td>';
 				}
 			?>
 		</tr>
@@ -461,6 +471,7 @@ function TomaPropiedades($cmd,$ida)
 	global $nombreaula;
 	global $urlfoto;
 	global $inremotepc;
+	global $scheduler;
 	global $cagnon;
 	global $pizarra;
 	global $ubicacion;
@@ -504,6 +515,7 @@ function TomaPropiedades($cmd,$ida)
 	$nombreaula="";
 	$urlfoto="";
 	$inremotepc=false;
+	$scheduler=false;
 	$cagnon=false;
 	$pizarra=false;
 	$ubicacion="";
@@ -545,7 +557,8 @@ function TomaPropiedades($cmd,$ida)
 				GROUP_CONCAT(DISTINCT CAST( ordenadores.idperfilhard AS char( 11 ) )  
 				ORDER BY ordenadores.idperfilhard SEPARATOR ',' ) AS idperfileshard,
 				GROUP_CONCAT(DISTINCT CAST( ordenadores.idproautoexec AS char( 11 ) )  
-				ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos
+				ORDER BY ordenadores.idproautoexec SEPARATOR ',' ) AS idprocedimientos,
+				IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler
 			FROM aulas
 			LEFT OUTER JOIN ordenadores ON ordenadores.idaula = aulas.idaula
 			WHERE aulas.idaula =".$ida." 
@@ -558,7 +571,6 @@ function TomaPropiedades($cmd,$ida)
 		$nombreaula=$rs->campos["nombreaula"];
 		$urlfoto=$rs->campos["urlfoto"];
 		if ($urlfoto=="" ) $urlfoto="aula.jpg";
-		$inremotepc=$rs->campos["inremotepc"];
 		$cagnon=$rs->campos["cagnon"];
 		$pizarra=$rs->campos["pizarra"];
 		$ubicacion=$rs->campos["ubicacion"];
@@ -584,7 +596,9 @@ function TomaPropiedades($cmd,$ida)
 		$validacion=$rs->campos["validacion"];
 		$paginalogin=$rs->campos["paginalogin"];
 		$paginavalidacion=$rs->campos["paginavalidacion"];
-###################### UHU
+#################### Ramón
+		$inremotepc=$rs->campos["inremotepc"];
+		$scheduler=$rs->campos["scheduler"];
 
 		$ordenadores=$rs->campos["numordenadores"];
 		$idmenu=$rs->campos["idmenus"];
@@ -603,6 +617,26 @@ function TomaPropiedades($cmd,$ida)
 		$gidrepositorio=$idrepositorio;
 		$gidperfilhard=$idperfilhard;
 
+		$rs->Cerrar();
+		return(true);
+	}
+	return(false);
+}
+
+//________________________________________________________________________________________________________
+//	Recupera algunos datos de configuración de la base de datos
+//		Parametros: 
+//		- cmd: comando ya operativo (con conexión abierta)  
+//________________________________________________________________________________________________________
+function TomaConfiguracion($cmd) {
+	global $scheduler;
+
+	$rs=new Recordset; 
+	$cmd->texto="SELECT IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler";
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(false);	// Error al abrir recordset
+	if (!$rs->EOF) {
+		$scheduler=$rs->campos["scheduler"];
 		$rs->Cerrar();
 		return(true);
 	}
