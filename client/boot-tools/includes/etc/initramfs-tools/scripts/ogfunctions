@@ -253,7 +253,12 @@ ogPostConfigureFS()
 	fi
 	
 	#configuramos el uso del servicio http proxy (parámetro del Kernel "ogproxy=URL_Proxy")
-	[ -n "${ogproxy}" ] && export http_proxy="$ogproxy" 	
+	if [ -n "${ogproxy}" ]; then
+		export http_proxy="$ogproxy"
+		export https_proxy="$ogproxy"
+		export ftp_proxy="$ogproxy"
+		export ftps_proxy="$ogproxy"   	
+	fi	
 	
 	# configuramos el /etc/networks
 	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
@@ -302,6 +307,11 @@ ogPostConfigureFS()
 		fi
 	   fi
 	fi
+
+	#Montamos un directorio temporal para permitir instalacion de softare desde el comando apt-get (parametor kernel "ogtmpfs=50" valor en megas
+    ogtmpfs="${ogtmpfs:-15}"
+    mount tmpfs /var/cache/apt/archives -t tmpfs -o size=${ogtmpfs}M
+    mkdir -p /var/cache/apt/archives/partial
 }
 
 
