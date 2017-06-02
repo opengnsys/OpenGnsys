@@ -24,12 +24,15 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 Tickets resueltos en módulo OpenGnsys Client:
 #233	Añadir reloj al cliente (resuelto en #746)
 #244	Internacionalización de los mensajes del Browser (mejora)
+#528	busybox tftp ogLive con acceso subdirectorio contenedor tftpd del server
 #625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
 #709	Script para instalar módulos del Kenrel en el cliente ogLive
 #717	Indicar manualmente parámetros de arranque de un S.O.
 #724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10 o Ubuntu 16.04 LTS
 #725	Sincronización horaria de clientes con servidor NTP
 #746	Reestructurar barra de estado del Browser del cliente (mejora)
+#769	ogLive ampliar espacio de memoria para instalar software en "caliente" y exportar proxy de https(s) y ftp(s)
+#773	Incluir script personalizado para bootOs
 #774	Soportar clientes ogLive de 64 bits
 #783	Browser registra salida de comandos ejecutados al pulsar enlace
 
@@ -39,6 +42,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #723	Cambio temporal de fichero de arranque PXE
 #736	Mejorar la seguridad del servidor
 #745	Depurar ogAdmServer (duplicado de #559)
+#787	Todos los elementos del ogLive se localizan en el Server
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)

@@ -1,27 +1,25 @@
 #!/bin/bash
-# listclientmode: Lista la plantilla de arranque PXE para los clientes, 
+# listclientlive: Lista la distribución ogLive asociada a los clientes, 
 #	ya sea un equipo o un aula.
-# Nota: Si no existe un enlace entre el fichero PXE con la Ethernet del equipo y su
-#	 archivo plantilla, se considera que la plantilla por omisión es "default".
-# Uso:	listclienmode NombrePC | NombreAula
-# Autores: Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
+# Uso:	listclienlive NombrePC | NombreAula
+# Autor: Ramón M. Gómez - Univ. Sevilla, junio 2017
 
 
 # Variables.
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
-TMPLDIR=$OPENGNSYS/tftpboot/menu.lst/templates
+TFTPDIR=$OPENGNSYS/tftpboot
 MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
 if [ $# -ne 1 ]; then
-	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG [NOMBRE_PC|NOMBRE_AULA]"
+	echo "$PROG: Error de ejecución" >&2
+	echo "Formato: $PROG [NOMBRE_PC|NOMBRE_AULA]" >&2
 	exit 1
 fi
 if [ ! -r $SERVERCONF ]; then
-	echo "$PROG: Sin acceso a fichero de configuración"
+	echo "$PROG: Sin acceso a fichero de configuración" >&2
 	exit 2
 fi
 
@@ -41,11 +39,11 @@ EOT
 trap "rm -f $MYCNF" 0 1 2 3 6 9 15
 # Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
 mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
-		"SELECT nombreordenador, arranque FROM ordenadores
+		"SELECT nombreordenador, oglivedir FROM ordenadores
 		   JOIN aulas USING (idaula)
 		  WHERE aulas.nombreaula='$RESOURCE'
 		     OR nombreordenador='$RESOURCE';" | \
-	while read PC TMPL; do
-		echo "Equipo \"$PC\" asociado a arranque tipo \"$(head -1 $TMPLDIR/$TMPL |cut -f2 -d" ")\" (fichero $TMPL)"
+	while read PC OGLIVE; do
+		echo "Equipo $PC asociado a cliente \"$OGLIVE\"  $([ -e $TFTPDIR/$OGLIVE ] || echo "(inexistente)")"
 	done
 

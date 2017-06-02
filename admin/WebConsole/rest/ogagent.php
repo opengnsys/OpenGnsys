@@ -19,6 +19,20 @@ function writeLog($message = "") {
 	file_put_contents(LOG_FILE, date(DATE_ISO8601).": $message\n", FILE_APPEND);
 }
 
+// Look for "show popup" pending operations into client's actions queue.
+function checkPendingPopup($clntid) {
+	global $cmd;
+
+	// Look for commands available to launch on the client.
+	$cmd->CreaParametro("@clntid", $clntid, 1);
+	$cmd->texto = <<<EOD
+SELECT parametros
+  FROM acciones
+ WHERE idordenador=@clntid AND estado=$ACCION_INICIADA AND idcomando=16;";
+EOD
+// ...
+}
+
 /**
  * @brief    OGAgent notifies that its service is started on a client.
  * @note     Route: /ogagent/started, Method: POST, Format: JSON

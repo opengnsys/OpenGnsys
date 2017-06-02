@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#/**
+# 	  setclientlive DirOGLive | IndiceOGLive { NombrePC | NombreAula } Modo_trabajo
+#@file	  setclientlive
+#@brief   Configura el archivo de arranque de PXE para asignar el cliente ogLive, ya sea a un equipo o a un aula
+#@param   $1 DirOGLive, IndiceOGLive o "default" (según script "oglivecli")
+#@param   $2 Ámbito { NombrePC | NombreAula }
+#warning  No se admiten cambios temporales.
+#@version 1.1.0 - Versión inicial basada en script "setclientmode".
+#@author  Ramón M. Gómez - Univ. Sevilla, junio 2017
+#*/ ##
+
+
+# Variables.
+PROG=$(basename "$0")
+PATH=$PATH:$(dirname $(realpath "$0"))
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+TFTPDIR=$OPENGNSYS/tftpboot
+LOGFILE=$OPENGNSYS/log/opengnsys.log
+MYCNF=/tmp/.my.cnf.$$
+
+# Control básico de errores.
+if [ $# -ne 2 ]; then
+	echo "$PROG: Error de ejecución" >&2
+	echo "Formato: $PROG {DIR_OGLIVE|INDICE_OGLIVE|default} {NOMBRE_PC|NOMBRE_AULA}" >&2
+	exit 1
+fi
+if [ ! -r $SERVERCONF ]; then
+	echo "$PROG: Sin acceso a fichero de configuración" >&2
+	exit 2
+fi
+case "$1" in
+	[0-9]*)     DIR=$(oglivecli search $1 2>/dev/null) ;;
+	"default")  DIR="ogLive" ;;
+	*)          if oglivecli search "$1" 2>/dev/null; then DIR="$1"; fi ;;
+esac
+if [ -z "$DIR" ]; then
+	echo "$PROG: ogLive no ecncontrado, listar ejecutando \"oglivecli list\"" >&2
+	exit 1
+fi
+if [ ! -e "$TFTPDIR/$DIR" ]; then
+	echo "$PROG: directorio de ogLive no ecncontrado: \"DIR\"" >&2
+	exit 1
+fi
+
+# Obtener datos de acceso a la Base de datos.
+source $SERVERCONF
+# Sustituir caracteres ' por \' para evitar inyección SQL.
+OGLIVEDIR="${DIR//\'/\'}"
+RESOURCE="${2//\'/\'}"
+# Componer fichero con credenciales de conexión. 
+touch $MYCNF 
+chmod 600 $MYCNF 
+cat << EOT > $MYCNF 
+[client] 
+user=$USUARIO 
+password=$PASSWORD 
+EOT
+# Borrar el fichero temporal si termina el proceso. 
+trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
+# Actualizar ogLive para todos los clientes y reasignar plantilla PXE.
+listclientmode "$RESOURCE" | awk -F\" '{print $2,$4}' | \
+        while read PC BOOTMODE; do
+		date +"%b %d %T $PROG: Configurando \"$PC\" con cliente \"$OGLIVEDIR\"" | tee -a $LOGFILE
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+				"UPDATE ordenadores SET oglivedir='$OGLIVEDIR' WHERE nombreordenador='$PC';"
+		setclientmode $BOOTMODE $PC PERM >/dev/null
+	done
