@@ -75,6 +75,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	// Obtener información de la base de datos.
 	$cmd->texto="SELECT ordenadores.nombreordenador AS hostname, ordenadores.ip AS ip,
 			    ordenadores.mac AS mac, ordenadores.netiface AS netiface,
+			    ordenadores.oglivedir AS oglivedir,
 			    aulas.netmask AS netmask, aulas.router AS router,
 			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
 			    aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
@@ -108,6 +109,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$server=$rs->campos["ipserveradm"];
 	$vga=$rs->campos["vga"];
 	$winboot=$rs->campos["winboot"];
+	$oglivedir=$rs->campos["oglivedir"];
 	$ogunit=$rs->campos["ogunit"];
 	if ($ogunit == 0 or $rs->campos["directorio"] == null) {
 		$directorio="" ;
@@ -137,7 +139,8 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 		  " ogrepo=$repo" .
 		  " oglive=$server" .
 		  " oglog=$server" .
-		  " ogshare=$server";
+		  " ogshare=$server" .
+		  " oglivedir=$oglivedir";
 	// Añadir parámetros opcionales.
 	if (! empty ($ntp))	{ $infohost.=" ogntp=$ntp"; }
 	if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
@@ -165,7 +168,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 		exec ("sed -e 's|vga=...||g' -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
 	}
 	else{
-		exec ("sed -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+		exec ("sed -e 's|INFOHOST|$infohost|g' -e 's|set ISODIR=.*|set ISODIR=$oglivedir|g' $pxedir/templates/$bootopt > $macfile");
 	}
 	exec ("chmod 777 $macfile");
 }
