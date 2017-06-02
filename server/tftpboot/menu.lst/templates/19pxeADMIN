@@ -9,7 +9,7 @@ set ISODIR=ogLive
 
 title OpenGnsys-NET
 kernel (pd)/%ISODIR%/ogvmlinuz  ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true ogupdateinitrd=true INFOHOST 
-initrd (pd)/%ISODIR%/ogvmlinuz
+initrd (pd)/%ISODIR%/oginitrd.img
 savedefault fallback
 boot
 
