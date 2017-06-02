@@ -7,7 +7,7 @@
 #@warning El archivo PXE por defecto "default" se deja en modo de ejecución "user" y se eliminan los enlaces para equipos con la plantilla por defecto.
 #@param   $1 NombrePlatilla
 #@param   $2 Ámbito { NombrePC | NombreAula }
-#@param   $3 Modo_trabajo = { 0, 1 } - 0 si es temporal y 1 si es permanente. 
+#@param   $3 Modo_trabajo = { 0, TEMP, 1, PERM } - 0 si es temporal y 1 si es permanente. 
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -45,12 +45,12 @@ if [ -z "$TEMPLATE" ]; then
 	echo "No existe archivo platilla: $1"
 	exit
 fi
-
-if [ $3 != "0" ] && [ $3 != "1" ]; then
-	echo "$PROG: Error de ejecución"
-	echo "el modo debe ser 0 o 1 (temporal o permanente)"
-	exit 1
-fi
+case "$3" in
+	0|TEMP)	MODE="TEMP" ;;
+	1|PERM)	MODE="PERM" ;;
+	*)	echo "$PROG: Modo desconodido: 0, TEMP (temporal), 1, PERM (permanente)"
+		exit 1 ;;
+esac
 
 # Obtener datos de acceso a la Base de datos.
 source $SERVERCONF
@@ -79,7 +79,7 @@ if [ -z "$ETHERNET" ]; then
 fi
 
 # Copiar fichero de configuración y actualizar base de datos.
-date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\" en modo \"$3\"" | tee -a $LOGFILE
+date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\" en modo \"$MODE\"" | tee -a $LOGFILE
 NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
@@ -132,14 +132,14 @@ for MAC in $ETHERNET; do
 		PERMS=$(ps axho user,group,comm|awk '!/root/ && /httpd|apache/ {u=$1; g=$2} END {if (g) printf "%s:%s",u,g}')
 		[ -n "$PERMS" ] && chown $PERMS $PXEFILE
 		# Si el modo de trabajo es temporal (0) mete un retardo, restaura el fichero PXE a su estado original y no toca la base de datos
-		if [ "$3" == "0" ]; then
+		if [ "$MODE" == "TEMP" ]; then
 			sleep 60
 			rm $PXEFILE	
 			[ -e $PXEFILE.netboot ] && mv $PXEFILE.netboot $PXEFILE
 		fi
 
 		# Si el modo de trabajo es permanente (1)  borra el fichero PXE.netboot si existe y graba los datos en la base de datos
-		if [ "$3" == "1" ]; then
+		if [ "$MODE" == "PERM" ]; then
 			[ -e $PXEFILE.netboot ] && rm $PXEFILE.netboot
 			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
 				"UPDATE ordenadores SET arranque='$(basename $TEMPLATE)' WHERE mac='$MAC';"
