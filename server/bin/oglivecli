@@ -447,15 +447,21 @@ DEFOGLIVE=ogLive
 INFOFILE=$OPENGNSYS/etc/ogliveinfo.json
 
 # Access control.
-[ "$USER" = "root" ] || raiseError access "Need to be root."
+[ -r $OPENGNSYS/www/controlacceso.php ] && ACCESS="web"
+[ "$USER" = "root" ] && ACCESS="root"
+[ -z "$ACCESS" ] && raiseError access "Need to be root."
 # Check dependencies.
 JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
 # Commands control.
+shopt -s extglob
+case "$ACCESS" in
+    root)   CMDS='+(help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|rebuild|assign)' ;;
+    web)    CMDS='+(list|show|search|get-default)' ;;
+esac
 case "$1" in
-    help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|rebuild|assign)
-        COMMAND="${1/-/}"; shift; $COMMAND "$@" ;;
-    *)  raiseError usage ;;
+    $CMDS)  COMMAND="${1/-/}"; shift; $COMMAND "$@" ;;
+    *)      raiseError usage ;;
 esac
 
 exit $?
