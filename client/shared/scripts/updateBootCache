@@ -20,7 +20,7 @@
 #@date    2017/05/31
 #*/ ##
 
-OGLIVEDIR=${oglivedir:-"ogclient"}
+OGLIVEDIR=${oglivedir:-"ogLive"}
 OGBTFTP="/opt/oglive/tftpboot/$OGLIVEDIR"
 OGBCACHE="$OGCAC/boot/$OGLIVEDIR"
 ogMountCache || exit 1
