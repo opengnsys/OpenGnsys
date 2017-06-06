@@ -64,7 +64,12 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_imagen;
 	global $msk_perfil;	
 	global $msk_cache;
-				
+
+	// Comprobar modos SQL para hacer que la consulta sea compatible.
+	$cmd->texto="SELECT @@sql_mode AS mode";
+	$cmd->ejecutar();
+	@$mode=$cmd->Recordset->campos["mode"];
+
 	$cmd->texto="SELECT CONCAT_WS(';', LPAD(ordenadores_particiones.numdisk, 3, 0),
 				LPAD(ordenadores_particiones.numpar, 3, 0), ";
 
@@ -105,7 +110,6 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				ANY_VALUE(ordenadores_particiones.fechadespliegue) AS fechadespliegue,
 				ANY_VALUE(ordenadores_particiones.idperfilsoft) AS idperfilsoft,
 				ANY_VALUE(perfilessoft.descripcion) AS perfilsoft
-
 				FROM ordenadores
 			  INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 			  LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
@@ -127,15 +131,18 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 			$cmd->texto.=" WHERE ordenadores.idordenador=".$idambito;
 			break;
 	}
-	
+
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
 		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0 ";
 
 	$cmd->texto.=" GROUP BY configuracion";
+	// Comprobar compatiblidad de cláusula GROUP BY.
+	if (strpos($mode, 'ONLY_FULL_GROUP_BY') === false)
+		$cmd->texto=preg_replace('/ANY_VALUE/', '', $cmd->texto);
 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	$idx=0; 
 	while (!$rs->EOF){
