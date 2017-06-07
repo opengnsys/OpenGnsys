@@ -44,6 +44,8 @@ $idrepositorio=0;
 $fechacreacion="";
 $revision=0;
 $imagenid=0;
+$validnombreca="";
+$validdescripcion="";
 if (isset($_POST["validnombreca"])) {$opcion=$_POST["validnombreca"];}else{$validnombreca="";} // Recoge parametros
 if (isset($_POST["datospost"])) {$datospost=$_POST["datospost"];}else{$datospost=0;} // Recoge parametros
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"];  // Recoge parametros
@@ -64,14 +66,21 @@ else
 if (!$resul)
 	header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 
-if ($opcion == 1 && $datospost == 1)
-	{
+if ($opcion == 1 && $datospost == 1) {
 	if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];// Recoge parametros
+	if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
 	if (isset($_POST["idimagen"])) $idimagen=$_POST["idimagen"];
-	if (isset($_POST["nombreca"])) 
-		{$nombreca=$_POST["nombreca"];ValidaNombre($cmd,$nombreca);}if ($validnombreca != 1 ) {$validnombreca=0;}
+	if (isset($_POST["nombreca"])) {
+		$nombreca=$_POST["nombreca"];
+		ValidaNombre($cmd,$nombreca,$idrepositorio);
+	}
+	if ($validnombreca != 1) {$validnombreca=0;}
 	if (isset($_POST["ruta"])) $ruta=$_POST["ruta"]; 
-	if (isset($_POST["descripcion"])) $descripcion=$_POST["descripcion"]; 
+	if (isset($_POST["descripcion"])) {
+		$descripcion=$_POST["descripcion"];
+		ValidaDescripcion($cmd,$nombreca,$descripcion);
+	}
+	if ($validdescripcion != 1) {$validdescripcion=0;}
 	if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 	if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 	if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
@@ -102,7 +111,7 @@ if ($opcion == 1 && $datospost == 1)
 </HEAD>
 <BODY>
 <DIV align=center>
-<?php if ( $opcion == 1 && $datospost == 1 && $validnombreca == 0 || $opcion != 1) { ?>
+<?php if ( $opcion == 1 && $datospost == 1 && $validnombreca == 0 && $validdescripcion == 0 || $opcion != 1) { ?>
 <FORM name="fdatos" action="../gestores/gestor_imagenes.php" method="post">
 <?php }else{ ?>
 <FORM name="fdatos" action="./propiedades_imagenes.php" method="post"> 
@@ -136,7 +145,7 @@ if ($opcion == 1 && $datospost == 1)
 	<!-------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion || !empty($idperfilsoft) || $opcion == 2)
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft) || $opcion == 2)
 	echo '<TD style="width:150">'.$nombreca.'
 					&nbsp;<INPUT type="hidden" name="nombreca" value="'.$nombreca.'"></TD>';
 				else
@@ -145,17 +154,20 @@ if ($opcion == 1 && $datospost == 1)
 	<!-------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
-					echo '<TD style="width:300">'.$descripcion.'</TD>';
-				else
-					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:350" type=text value="'.$descripcion.'"></TH>';?>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<TD style="width:300">'.$descripcion.'
+					&nbsp;<INPUT type="hidden" name="descripcion" value="'.$descripcion.'"></TD>';
+				} else {
+					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:350" type=text value="'.$descripcion.'">';
+					if ($validnombreca == 0 && $validdescripcion == 1){echo '<font color=red><strong>&nbsp;'.$TbMsg[22].'</strong>';}
+					echo '</TD>';
+				} ?>
 		</TR>
 	<!-------------------------------------------------------------------------------------->
-	<?if($tipoimg==$IMAGENES_INCREMENTALES){?>
+	<?php if($tipoimg==$IMAGENES_INCREMENTALES){?>
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.TomaDato($cmd,$idcentro,'imagenes',$imagenid,'imagenid','descripcion').'
 					&nbsp;<INPUT type="hidden" name="imagenid" value="'.$imagenid.'"></TD>';
 				else
@@ -163,13 +175,12 @@ if ($opcion == 1 && $datospost == 1)
 					tipo=".$IMAGENES_BASICAS,"imagenid").'</TD>';
 			?>
 		</TR>	
-	<?}?>
+	<?php } ?>
 	<?php if($tipoimg!=$IMAGENES_INCREMENTALES){?>
 	<!-------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$nombrerepositorio.'
 					&nbsp;<INPUT type="hidden" name="idrepositorio" value="'.$idrepositorio.'"></TD>';
 				else
@@ -180,7 +191,7 @@ if ($opcion == 1 && $datospost == 1)
 	<?if($tipoimg==$IMAGENES_BASICAS){?>	
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$ruta.'
 					&nbsp;<INPUT type="hidden" name="ruta" value="'.$ruta.'"></TD>';
 				else
@@ -190,7 +201,7 @@ if ($opcion == 1 && $datospost == 1)
 	<!-------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TH>';
@@ -237,7 +248,7 @@ if ($opcion == 1 && $datospost == 1)
 		<!-- Perfil de software -->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<?php
 					echo '<TD>&nbsp;'.$perfilsoft.'
 					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TD>';
 
@@ -254,7 +265,7 @@ if ($opcion == 1 && $datospost == 1)
 	</TABLE>
 </FORM>
 
-<?
+<?php
 if (!empty($idperfilsoft)){ // Nota a pie de página indicando que cuando la imagen tiene perfilsoft no pueden modificarse ciertos campos
 	echo '
 		<DIV id="Layer_nota" align=center >
@@ -264,17 +275,22 @@ if (!empty($idperfilsoft)){ // Nota a pie de página indicando que cuando la ima
 //________________________________________________________________________________________________________
 
 
-if ($validnombreca=="0"){
+if ($validnombreca=="0" && $validdescripcion=="0"){
 echo '<script type="text/javascript">';
 echo 'confirmar('.$opcion.')';
 echo '</script>';
-			}
+}
 if ($validnombreca=="1"){
 echo '<script type="text/javascript">';
 echo 'alert('.$TbMsg[17].')';
 echo '</script>';
+}
+if ($validnombreca=="0" && $validdescripcion=="1"){
+echo '<script type="text/javascript">';
+echo 'alert('.$TbMsg[21].')';
+echo '</script>';
+}
 
-				}
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 
@@ -378,12 +394,43 @@ function TomaConfiguracion($cmd) {
 //	Comprueba Nombre de la imagen
 //		Parametros: 
 //		- cmd: Una comando ya operativo (con conexión abierta)  
-//		- id: El identificador de la imagen
+//		- nombreca: Nombre de la imagen
+//		- descripcion: Descripcion de la imagen
 //________________________________________________________________________________________________________
 
-function ValidaNombre($cmd,$nombreca){
+function ValidaNombre($cmd,$nombreca,$idrepositorio){
 	global $nombreca;
 	global $validnombreca;
+	global $idrepositorio;
+
+	$rs=new Recordset;
+	$cmd->texto="SELECT * from imagenes WHERE nombreca='$nombreca'";
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(0); // Error al abrir recordset
+	$rs->Primero();
+	if (!$rs->EOF){
+		$nombrecabase=$rs->campos["nombreca"];
+		$idrepositoriobase=$rs->campos["idrepositorio"];
+		if ( $nombrecabase == $nombreca &&  $idrepositoriobase == $idrepositorio)
+		{$validnombreca="1";}else{$validnombreca="0";}
+	}
+	$rs->Cerrar();
+}
+
+//________________________________________________________________________________________________________
+
+//	Comprueba Descripcion del nombre canónico
+//		Parametros: 
+//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- nombreca: Nombre de la imagen
+//		- descripcion: Descripcion de la imagen
+//________________________________________________________________________________________________________
+
+function ValidaDescripcion($cmd,$nombreca,$descripcion){
+	global $nombreca;
+	global $validnombreca;
+	global $descripcion;
+	global $validdescripcion;
 
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * from imagenes WHERE nombreca='$nombreca'";
@@ -392,8 +439,9 @@ function ValidaNombre($cmd,$nombreca){
 	$rs->Primero(); 
 	if (!$rs->EOF){
 		$nombrecabase=$rs->campos["nombreca"];
-		if ( $nombrecabase == $nombreca )
-		{$validnombreca="1";}else{$validnombreca="0";}
+		$descripcionbase=$rs->campos["descripcion"];
+		if ( $nombrecabase == $nombreca && "$descripcionbase" == "$descripcion" )
+		{$validdescripcion="1";}else{$validdescripcion="0";}
 	}
 	$rs->Cerrar();
 }

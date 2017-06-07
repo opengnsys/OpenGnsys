@@ -27,7 +27,8 @@ $TbMsg[17]='"Nombre can�nico fichero-imagen existe :  Introduzca otro nombre"'
 $TbMsg[18]="Introduzca otro Nombre";
 $TbMsg[19]="Equipo modelo";
 $TbMsg[20]="Fecha de creación";
-$TbMsg[21]="Sistema operativo";
+$TbMsg[21]='"Descripción Nombre fichero-imagen existe : Introduzca otra Descripción"';
+$TbMsg[22]="Introduzca otra Descripción";
 $TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
 $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 ?>

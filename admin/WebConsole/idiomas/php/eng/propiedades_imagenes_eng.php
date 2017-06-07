@@ -25,9 +25,10 @@ $TbMsg[15]="ATTENTION. - A software image that has profile indicates that at som
 $TbMsg[16]="Route Origin";
 $TbMsg[17]='"Canonical name-image file exists: Enter another name"';
 $TbMsg[18]="Enter another Name";
-$TbMsg[19]="Equipo modelo";
-$TbMsg[20]="Fecha de creación";
-$TbMsg[21]="Sistema operativo";
+$TbMsg[19]="Source computer";
+$TbMsg[20]="Creation date";
+$TbMsg[21]='"Description Image file name exists: Enter another Description"';
+$TbMsg[22]="Enter another Description";
 $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow management of remote access to the computers";
 ?>
