@@ -87,24 +87,24 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 		RecopilaIpesMacs($cmd,$ambito,$idambito);		
 	?>
 		<FORM action="RestaurarImagen.php" name="fdatos" method="POST">
-				<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
-				<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">	
-				<INPUT type="hidden" name="cadenaid" value="<? echo $cadenaid?>">				
+				<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
+				<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">	
+				<INPUT type="hidden" name="cadenaid" value="<?php echo $cadenaid?>">				
 				<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 				<TR>
-					<TH height=15 align="center" colspan=14><? echo $TbMsg[18]?></TH>
+					<TH height=15 align="center" colspan=14><?php echo $TbMsg[18]?></TH>
 				</TR>
 				<TR>
-					<TD align=right><? echo $TbMsg[30]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_sysFi?>" name="fk_sysFi" <? if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[30]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_sysFi?>" name="fk_sysFi" <?php if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
 
-					<TD align=right><? echo $TbMsg[32]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_tamano?>" name="fk_tamano" <? if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[32]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_tamano?>" name="fk_tamano" <?php if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
 				
-					<TD align=right><? echo $TbMsg[31]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_nombreSO?>" name="fk_nombreSO" <? if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[31]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_nombreSO?>" name="fk_nombreSO" <?php if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>				
 				</TR>
 				<TR>
@@ -113,7 +113,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				<TR>
 					<TD height=20 align="center" colspan=14>
 						<A href=#>
-						<IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
+						<IMG border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
 				</TR>
 			</TABLE>
 		</FORM>	
@@ -150,11 +150,11 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idambito,$
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM imagenes
 				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio"; 
 	if($sw) // Imágenes con el mismo tipo de partición 
-		$cmd->texto.=	"	WHERE imagenes.codpar=".$codpar;								
+		$cmd->texto.=	"	WHERE imagenes.codpar=".$codpar;
 	else
-		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;		
+		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;
 		
-	$cmd->texto.=" AND imagenes.codpar>0 AND imagenes.idrepositorio>0	"; // La imagene debe existir y
+	$cmd->texto.=" AND imagenes.idrepositorio>0";	// La imagene debe existir en el repositorio.
 	$cmd->texto.=" AND imagenes.tipo=".$IMAGENES_MONOLITICAS;
     
 	// 1.1 Imagenes de todos los repositorios de la UO.
