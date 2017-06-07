@@ -23,12 +23,13 @@ $TbMsg[14]="Imagen b&aacute;sica";
 $TbMsg[15]="ATENCI&Oacute;N.- Una imagen que tiene perfil software indica que en alg&uacute;n momento se ha creado <br>
 			y por tanto no pueden modificarse ciertos datos a menos que la elimine y la vuelva a crear";
 $TbMsg[16]="Ruta Origen";
-$TbMsg[17]='"Nombre can&oacute;nico fichero-imagen existe : Introduzca otro nombre"';
+$TbMsg[17]='"Nombre canónico fichero-imagen existe : Introduzca otro nombre"';
 $TbMsg[18]="Introduzca otro Nombre";
 $TbMsg[19]="Equipo modelo";
 $TbMsg[20]="Fecha de creaci&oacute;n";
-$TbMsg[21]='"Descripci&oacute;n Nombre fichero-imagen existe : Introduzca otra Descripci&oacute;n"';
+$TbMsg[21]='"Descripción Nombre fichero-imagen existe : Introduzca otra Descripci&oacute;n"';
 $TbMsg[22]="Introduzca otra Descripci&oacute;n";
+$TbMsg['PROP_OS']="Sistema operativo";
 $TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
 $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 ?>

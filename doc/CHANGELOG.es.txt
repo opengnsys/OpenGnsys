@@ -60,6 +60,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #738	Se pierde nombre de la imagen restaurada
 #747	Uso incorrecto del número de puestos de las propiedades del aula
 #751	Asistente de particionado: particiones GPT
+#775	Permitir mismo nombre de imagen en diferentes repositorios de imagen
 #777	Error SQL al incluir caracteres espaciales en los comentarios
 #778	Codificar claves de usuarios (mejora)
 #782	Crear registro de acciones para realizar informes

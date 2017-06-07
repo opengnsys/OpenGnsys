@@ -29,6 +29,7 @@ $TbMsg[19]="Source computer";
 $TbMsg[20]="Creation date";
 $TbMsg[21]='"Description Image file name exists: Enter another Description"';
 $TbMsg[22]="Enter another Description";
+$TbMsg['PROP_OS']="Operating system";
 $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow management of remote access to the computers";
 ?>

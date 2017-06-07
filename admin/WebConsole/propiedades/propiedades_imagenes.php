@@ -256,7 +256,7 @@ if ($opcion == 1 && $datospost == 1) {
 		</TR>			
 		<!-- Sistema Operativo -->
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[21]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_OS']?>&nbsp;</th>
 			<td>&nbsp;<?php	echo $sistoperativo?> </td>
 		</tr>
 	    <?php  } // fin if != op_alta
