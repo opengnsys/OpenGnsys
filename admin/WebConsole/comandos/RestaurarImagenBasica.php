@@ -153,15 +153,8 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 	$SelectHtml="";
 	$cmd->texto="SELECT imagenes.*,repositorios.ip as iprepositorio,repositorios.nombrerepositorio
 				FROM  imagenes
-				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio"; 
-	
-	if($sw) // Im�genes con el mismo tipo de partici�n 
-		$cmd->texto.=	"	WHERE imagenes.codpar=".$codpar;								
-	else
-		$cmd->texto.=	"	WHERE imagenes.codpar<>".$codpar;		
-		
-	$cmd->texto.=" 	AND imagenes.tipo=".$IMAGENES_BASICAS." 
-					AND imagenes.codpar>0 
+				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
+			 	AND imagenes.tipo=".$IMAGENES_BASICAS." 
 					AND imagenes.idrepositorio>0";
 					//AND imagenes.idperfilsoft>0"; // La imagene debe existir y estar creada	
     
