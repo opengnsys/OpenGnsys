@@ -25,11 +25,14 @@ $TbMsg[15]="Validación";
 $TbMsg[16]="Pagina login";
 $TbMsg[17]="Pagina validación";
 // UHU
+// AGP
+$TbMsg[18]="ogLive";
 $TbMsg[509]="Foto ordenador";
 $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
+//AGP
 $TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 ?>

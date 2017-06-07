@@ -133,6 +133,7 @@ CREATE TABLE IF NOT EXISTS `aulas` (
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
   `inremotepc` tinyint DEFAULT '0',
+  `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

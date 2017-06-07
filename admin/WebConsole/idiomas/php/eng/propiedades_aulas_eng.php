@@ -40,10 +40,14 @@ $TbMsg[30]="Validation";
 $TbMsg[31]="Login page";
 $TbMsg[32]="Validation page";
 // UHU
+// AGP
+$TbMsg[33]="ogLive";
+$TbMsg[34]="*** There are equipment with different ogLive ***";
 $TbMsg[495]="Cache content";
 $TbMsg[509]="Computer picture";
 $TbMsg[5091]="Insert picture";
 $TbMsg[5092]="View pictures";
+// AGP
 // Ramón
 $TbMsg['PROP_NTPIP']="NTP Server IP <em>(optional)</em>";
 $TbMsg['PROP_DNSIP']="DNS Server IP <em>(optional)</em>";

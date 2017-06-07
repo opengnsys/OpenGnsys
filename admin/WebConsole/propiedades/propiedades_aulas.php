@@ -397,6 +397,87 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',330).'</TD>';
 			?>
 		</TR>
+<!----	AGP	-------------------------------------------------------------------------------	OGLIVE	--------------------------------------------------------------------------------------------------------->
+		<TR>
+			<th align=center>&nbsp;<?echo $TbMsg[33]?>&nbsp;</th>
+<?php
+// Comprobamos si todos los ordenadores tienen el mismo ogLives
+$cmd->texto="SELECT oglivedir,nombreordenador FROM ordenadores WHERE idaula=".$idaula." GROUP BY oglivedir";
+$rs=new Recordset;
+$rs->Comando=&$cmd;
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+$rs->Primero();
+$cont=0;
+	while (!$rs->EOF){
+		$bdordnombreordenador[]=$rs->campos["nombreordenador"];
+		$bdordoglivedir[]=$rs->campos["oglivedir"];
+		$cont++;
+		$rs->Siguiente();
+	}
+$rs->Cerrar();
+
+
+// Consultamos la tabla aulas
+$cmd->texto="SELECT * FROM aulas WHERE idaula=".$idaula;
+$rs=new Recordset;
+$rs->Comando=&$cmd;
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+$rs->Primero();
+	if (!$rs->EOF){
+		$bdogLive=$rs->campos["oglivedir"];
+	}
+$rs->Cerrar();
+
+				if ($opcion==$op_eliminacion){
+					echo '<td colspan="3">'.$bdogLive.'</td>';
+				}else{
+
+$ogcli=("bash /opt/opengnsys/bin/oglivecli list > /opt/opengnsys/www/tmp/ogcliaula.txt");
+$listogcli=shell_exec($ogcli);
+$listogcli=shell_exec("cat /opt/opengnsys/www/tmp/ogcliaula.txt");
+//$listogcli=split(" ",$listogcli);
+
+echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style="width:330">'."\n";
+echo '<option value="ogLive">ogLive (por defecto)</option>';
+$num=0;
+
+// Apertura y lectura de fichero
+$file = fopen("/opt/opengnsys/www/tmp/ogcliaula.txt", "r") or exit("Unable to open file!");
+//Output a line of the file until the end is reached
+while(!feof($file))
+{
+	$oglive=fgets($file);
+	if (ereg("ogLive",$oglive)){
+		$oglive=substr($oglive,1);
+		$oglive=trim($oglive);
+		//echo '<option value="'.$oglilve.'">'.$oglive.'</option>';
+		$Selectcli="";
+		$Selectcli.= '<option value="'.$oglive.'"';
+		If ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
+		$Selectcli.= '>'.$oglive.'</OPTION>';
+		echo $Selectcli;
+	}
+$num++;
+}
+fclose($file);
+/////////////////////////////////
+if ($cont >1){
+	echo '      </select><br><font color=red><strong>'.$TbMsg[34]."&nbsp;&nbsp;&nbsp;==></strong></font>\n &nbsp;&nbsp;";
+	$i=0;
+	echo '<select>';
+	foreach ($bdordnombreordenador as $datos) {
+		if ($bdogLive != $bdordoglivedir[$i]){
+			echo '<option>'.$bdordnombreordenador[$i].'</option>';
+		}
+		$i++;
+	}
+	echo '</select>';
+}else{
+	echo '      </select>'."\n";
+	}
+				}
+?>
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[20]?>&nbsp;</TH>

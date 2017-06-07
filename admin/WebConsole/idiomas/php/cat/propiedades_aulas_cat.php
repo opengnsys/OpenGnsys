@@ -40,10 +40,14 @@ $TbMsg[30]="Validació";
 $TbMsg[31]="Pàgina login";
 $TbMsg[32]="Pàgina validació";
 // UHU
+// AGP
+$TbMsg[33]="ogLive";
+$TbMsg[34]="*** Existeixen Equips amb diferents ogLive ***";
 $TbMsg[495]="Data/Caché";
 $TbMsg[509]="Foto ordinador";
 $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
+// AGP
 // Ramón
 $TbMsg['PROP_NTPIP']="IP Servidor NTP <em>(opcional)</em>";
 $TbMsg['PROP_DNSIP']="IP Servidor DNS <em>(opcional)</em>";

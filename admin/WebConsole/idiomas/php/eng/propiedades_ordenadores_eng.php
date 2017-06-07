@@ -19,12 +19,14 @@ $TbMsg[10]="Repository";
 $TbMsg[11]="Menu";
 $TbMsg[12]="Cache size";
 $TbMsg[13]="Network interface";
-$TbMsg[14]="Network driver";
+// AGP
+$TbMsg[18]="ogLive";
 $TbMsg[509]="Computer Photo";
 $TbMsg[5091]="Insert Photo";
 $TbMsg[5092]="View Images";
 $TbMsg[495]="Content Cache";
 $TbMsg[4951]="Cache Free";
+// AGP
 $TbMsg["PROP_SERIALNO"]="Serial No.";
 $TbMsg["WARN_NOTDETECTED"]="<em>(does not detected)</em>";
 ?>

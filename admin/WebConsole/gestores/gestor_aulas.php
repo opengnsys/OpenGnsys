@@ -37,6 +37,8 @@ $horaresevfin=0;
 $idmenu=0;
 $idproautoexec=0;
 $idrepositorio=0;
+### AGP
+$oglive="ogLive";
 $idperfilhard=0;
 $modomul=0;
 $ipmul="";
@@ -85,6 +87,7 @@ if (isset($_POST["horaresevfin"])) $horaresevfin=$_POST["horaresevfin"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"]; 
 if (isset($_POST["idprocedimiento"])) $idproautoexec=$_POST["idprocedimiento"]; 
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
+if (isset($_POST["seleoglive"])) $oglive=$_POST["seleoglive"];
 if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"]; 
 if (isset($_POST["modomul"])) $modomul=$_POST["modomul"]; 
 if (isset($_POST["ipmul"])) $ipmul=$_POST["ipmul"]; 
@@ -190,6 +193,7 @@ function Gestiona(){
 	global	$idmenu;
 	global	$idproautoexec;
 	global	$idrepositorio;
+	global	$oglive;
 	global	$idperfilhard;
 	
 	global $gidmenu;
@@ -240,6 +244,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idproautoexec",$idproautoexec,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@ntp",$ntp,0);
 	$cmd->CreaParametro("@dns",$dns,0);
@@ -267,12 +272,12 @@ function Gestiona(){
 						 cagnon, pizarra, ubicacion, comentarios, puestos,
 						 horaresevini, horaresevfin, router, netmask,
 						 ntp, dns, proxy, modomul, ipmul, pormul, velmul,
-						 modp2p, timep2p, validacion, paginalogin, paginavalidacion) 
+						 modp2p, timep2p, validacion, paginalogin, paginavalidacion, oglivedir) 
 					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @inremotepc,
 						 @cagnon, @pizarra, @ubicacion, @comentarios, @puestos,
 						 @horaresevini, @horaresevfin, @router, @netmask,
 						 @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
-						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion)";
+						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion, @oglivedir)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idaula=$cmd->Autonumerico();
@@ -292,7 +297,8 @@ function Gestiona(){
 					    router=@router,netmask=@netmask, ntp=@ntp, dns=@dns, proxy=@proxy,
 					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
 					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
-					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion
+					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion,
+						oglivedir=@oglivedir
 					WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -303,6 +309,7 @@ function Gestiona(){
 					$clsUpdate.="idproautoexec=@idproautoexec,";					
 				if($idrepositorio>0 || $gidrepositorio>0)	
 					$clsUpdate.="idrepositorio=@idrepositorio,";
+				$clsUpdate .="oglivedir=@oglivedir,";
 				if($idperfilhard>0 || $gidperfilhard>0)	
 					$clsUpdate.="idperfilhard=@idperfilhard,";
 				// UHU - Actualiza la validacion en los ordenadores

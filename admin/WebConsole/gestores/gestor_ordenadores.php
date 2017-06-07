@@ -35,6 +35,8 @@ $ip="";
 $mac="";
 $idperfilhard=0;
 $idrepositorio=0;
+### AGP
+$oglive="ogLive";
 $idmenu=0;
 $idprocedimiento=0;
 $idimagen=0;
@@ -72,6 +74,7 @@ if (isset($_POST["ip"])) $ip=$_POST["ip"];
 if (isset($_POST["mac"])) $mac=str_replace(":","",$_POST["mac"]);
 if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"];
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
+if (isset($_POST["seleoglive"])) $oglive=$_POST["seleoglive"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"];
 if (isset($_POST["idprocedimiento"])) $idprocedimiento=$_POST["idprocedimiento"];
 
@@ -177,6 +180,7 @@ function Gestiona(){
 	global $idaula;
 	global $idperfilhard;
 	global $idrepositorio;
+	global $oglive;
 	global $idmenu;
 	global $idprocedimiento;
 	global $netiface;
@@ -208,6 +212,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@mac",$mac,0);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@oglivedir",$oglive,0);
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idprocedimiento",$idprocedimiento,1);
 	$cmd->CreaParametro("@netiface",$netiface,0);
@@ -247,8 +252,8 @@ function Gestiona(){
 			     // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
 			     createBootMode ($cmd, "", $idordenador, $idioma); 
 			     //Insertar fotoord con Values @fotoordenador
-			     $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,ip,mac,idperfilhard,idrepositorio,
-			     idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@ip,@mac,@idperfilhard,@idrepositorio,
+			     $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,ip,mac,idperfilhard,idrepositorio,oglivedir,
+			     idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@ip,@mac,@idperfilhard,@idrepositorio,@oglivedir,
 			     @idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
                         }
 			$resul=$cmd->Ejecutar();
@@ -263,7 +268,7 @@ function Gestiona(){
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,numserie=@numserie,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
+			idrepositorio=@idrepositorio,oglivedir=@oglivedir,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
