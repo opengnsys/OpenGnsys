@@ -87,7 +87,7 @@ if (isset($_POST["horaresevfin"])) $horaresevfin=$_POST["horaresevfin"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"]; 
 if (isset($_POST["idprocedimiento"])) $idproautoexec=$_POST["idprocedimiento"]; 
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
-if (isset($_POST["seleoglive"])) $oglive=$_POST["seleoglive"];
+if (isset($_POST["oglive"])) $oglive=$_POST["oglive"];
 if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"]; 
 if (isset($_POST["modomul"])) $modomul=$_POST["modomul"]; 
 if (isset($_POST["ipmul"])) $ipmul=$_POST["ipmul"]; 
@@ -298,7 +298,7 @@ function Gestiona(){
 					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
 					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
 					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion,
-						oglivedir=@oglivedir
+						oglivedir=IF(@oglivedir=0,oglivedir,@oglivedir)
 					WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -309,7 +309,8 @@ function Gestiona(){
 					$clsUpdate.="idproautoexec=@idproautoexec,";					
 				if($idrepositorio>0 || $gidrepositorio>0)	
 					$clsUpdate.="idrepositorio=@idrepositorio,";
-				$clsUpdate .="oglivedir=@oglivedir,";
+				if($oglive != "0")	
+					$clsUpdate .="oglivedir=@oglivedir,";
 				if($idperfilhard>0 || $gidperfilhard>0)	
 					$clsUpdate.="idperfilhard=@idperfilhard,";
 				// UHU - Actualiza la validacion en los ordenadores
