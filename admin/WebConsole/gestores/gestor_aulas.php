@@ -244,7 +244,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idproautoexec",$idproautoexec,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
-	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@oglivedir",$oglivedir,0);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@ntp",$ntp,0);
 	$cmd->CreaParametro("@dns",$dns,0);
