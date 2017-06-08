@@ -670,7 +670,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
 			   	ordenadores_particiones.tamano,
-			   	ANY_VALUE(ordenadores_particiones.uso) AS uso,
+			   	ordenadores_particiones.uso AS uso,
 				ordenadores_particiones.numdisk,
 				ordenadores_particiones.numpar,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
