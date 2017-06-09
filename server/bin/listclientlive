@@ -6,7 +6,7 @@
 
 
 # Variables.
-PROG=$(basename $0)
+PROG=$(basename "$0")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 TFTPDIR=$OPENGNSYS/tftpboot
@@ -38,12 +38,13 @@ EOT
 # Borrar el fichero temporal si termina el proceso.
 trap "rm -f $MYCNF" 0 1 2 3 6 9 15
 # Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
-mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
-		"SELECT nombreordenador, oglivedir FROM ordenadores
+mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -s -N -e \
+		"SELECT ord.nombreordenador, ord.oglivedir
+		   FROM ordenadores AS ord
 		   JOIN aulas USING (idaula)
 		  WHERE aulas.nombreaula='$RESOURCE'
-		     OR nombreordenador='$RESOURCE';" | \
-	while read PC OGLIVE; do
-		echo "Equipo $PC asociado a cliente \"$OGLIVE\"  $([ -e $TFTPDIR/$OGLIVE ] || echo "(inexistente)")"
+		     OR ord.nombreordenador='$RESOURCE';" | \
+	while read -r PC OGLIVE; do
+		echo "Equipo \"$PC\" asociado a cliente \"$OGLIVE\"  $([ -e $TFTPDIR/$OGLIVE ] || echo "(inexistente)")"
 	done
 

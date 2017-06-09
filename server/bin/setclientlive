@@ -60,11 +60,14 @@ password=$PASSWORD
 EOT
 # Borrar el fichero temporal si termina el proceso. 
 trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
+# Actualizar ogLive asignado al aula.
+mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -e \
+		"UPDATE aulas SET oglivedir='$OGLIVEDIR' WHERE nombreaula='$RESOURCE';"
 # Actualizar ogLive para todos los clientes y reasignar plantilla PXE.
 listclientmode "$RESOURCE" | awk -F\" '{print $2,$4}' | \
-        while read PC BOOTMODE; do
+        while read -r PC BOOTMODE; do
 		date +"%b %d %T $PROG: Configurando \"$PC\" con cliente \"$OGLIVEDIR\"" | tee -a $LOGFILE
-		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+		mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -e \
 				"UPDATE ordenadores SET oglivedir='$OGLIVEDIR' WHERE nombreordenador='$PC';"
-		setclientmode $BOOTMODE $PC PERM >/dev/null
+		setclientmode "$BOOTMODE" "$PC" PERM >/dev/null
 	done
