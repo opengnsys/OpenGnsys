@@ -33,7 +33,7 @@ function addToJson() {
 EOT
     )
     # Check JSON file consistency.
-    if [ "$(jq -c keys $INFOFILE 2>/dev/null)" == "[\"default\",\"oglive\"]" ]; then
+    if [ "$(jq -c keys $INFOFILE 2>/dev/null)" == '["default","oglive"]' ]; then
         # Check if ogLive is defined into JSON file.
         n=$(jq ".oglive | length" $INFOFILE)
         for ((i=0; i<n; i++)); do
@@ -238,6 +238,7 @@ function search() {
 # Show a menu to select and download an ogLive ISO image from the OpenGnsys website.
 function download() {
     local OGLIVE NISOS i SOURCELENGTH TARGETFILE
+    local ISOREL MINREL=5000		# Mininum compatibility release.
     [ $# -gt 1 ] && raiseError usage
     [ ! -d $DOWNLOADDIR ] && raiseError notfound "Download directory"
     [ ! -w $DOWNLOADDIR ] && raiseError access "Download directory"
@@ -249,12 +250,14 @@ function download() {
         # Show download menu.
         OGLIVE=( $(wget $DOWNLOADURL -O - 2>/dev/null | grep $DEFOGLIVE.*iso) )
         NISOS=${#OGLIVE[@]}
-        echo "Available downloads (+- = installed):"
+        echo "Available downloads (+ = installed, * = full compatibility):"
         for i in $(seq 1 $NISOS); do
-            [ -e $DOWNLOADDIR/${OGLIVE[i-1]} ] && OGLIVE[i-1]="+-${OGLIVE[i-1]}"
+            [ -e $DOWNLOADDIR/${OGLIVE[i-1]} ] && OGLIVE[i-1]="(+) ${OGLIVE[i-1]}"
+            ISOREL=${OGLIVE[i-1]##*-r}; ISOREL=${ISOREL%.*}
+            [ $ISOREL -ge $MINREL ] && OGLIVE[i-1]="(*) ${OGLIVE[i-1]}"
         done
-        select opt in ${OGLIVE[@]}; do
-            [ -n "$opt" ] && OGLIVEFILE=${opt/+-/} && break
+        select opt in "${OGLIVE[@]}"; do
+            [ -n "$opt" ] && OGLIVEFILE=${opt#* } && break
         done
     fi
     # Get download size.
@@ -351,7 +354,7 @@ function uninstall() {
         */*)    # Error (access to other directory).
             raiseError access "Cannot access outside installation directory."
             ;;
-        $DEFOGLIVE-*.iso)  # ISO file.
+        *.iso)  # ISO file.
             ISO="$1"
             # Working directory (ogLive-Distribution-KernelVersion-CodeRevision).
             DIR="$(echo $ISO|cut -f1,3 -d-)-${ISO##*-}"; DIR=${DIR%.*}
