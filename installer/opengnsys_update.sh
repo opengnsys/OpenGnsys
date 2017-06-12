@@ -910,8 +910,8 @@ function compileServices()
 # Actualizar cliente OpenGnsys
 function updateClient()
 {
-	#local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso	# 1.1.0-rc4
-	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5225.iso	# 1.1.0-rc5
+	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso       # 1.1.0-rc6 (old)
+	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso   # 1.1.0-rc6
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
 	local SOURCELENGTH

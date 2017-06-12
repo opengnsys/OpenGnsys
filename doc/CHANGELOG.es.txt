@@ -72,6 +72,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.
 #739	Estandarizar entornos virtuales de desarrollo con Vagrant
+#768	Ofrecer diferentes ogLive a los clientes (tarea)
 
 
 Lista de cambios incluidos en OpenGnSys 1.0.6b (versión de mantenimiento)

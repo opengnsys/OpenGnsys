@@ -54,9 +54,9 @@ dpkg-reconfigure -fnoninteractive console-setup
 #    SQL="$SQL ('ogClient0$i', '#{NETPREFIX}1$i', REPLACE('#{MACPREFIX}0$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
 #done
 #mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
-#/opt/opengnsys/bin/setclientmode ogAdmin ogClient01 1
+#/opt/opengnsys/bin/setclientmode ogLiveAdmin ogClient01 PERM
 #for ((i=2; i<=#{NCLIENTS}; i++)); do
-#    /opt/opengnsys/bin/setclientmode ogClient ogClient0$i 1
+#    /opt/opengnsys/bin/setclientmode ogLive ogClient0$i PERM
 #done
 # Comment out next lines to install new Angular-based web application (on early development).
 #apt-get install -y git nodejs npm

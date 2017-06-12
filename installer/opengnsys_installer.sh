@@ -188,7 +188,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget net-tools doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
 				   'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		if [ "$OSDISTRIB" == "centos" ]; then
@@ -1392,8 +1392,8 @@ function copyClientFiles()
 # Crear cliente OpenGnsys.
 function clientCreate()
 {
-	#local FILENAME=ogLive-xenial-4.4.0-34-generic-r4999.iso 	# 1.1.0-rc4
-	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5225.iso	# 1.1.0-rc5
+	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso	# 1.1.0-rc6 (old)
+	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso	# 1.1.0-rc6
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
  
 	# Descargar cliente, si es necesario.
