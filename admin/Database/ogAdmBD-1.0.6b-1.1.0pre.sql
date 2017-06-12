@@ -125,7 +125,7 @@ INSERT INTO parametros (idparametro, nemonico, descripcion, nomidentificador, no
 	(39, 'tit', 'Título', '', '', '', 0, 1),
 	(40, 'msj', 'Contenido', '', '', '', 0, 1);
 
-# Crear tabla de log para la cola de acciones (ticket #...)
+# Crear tabla de log para la cola de acciones (ticket #782)
 CREATE TABLE IF NOT EXISTS acciones_log LIKE acciones;
 ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
 DELIMITER //
@@ -138,4 +138,8 @@ CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW BEGIN
 		OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion, NOW());
 END//
 DELIMITER ;
+
+# Ampliar programación de tareas hasta 2025 (ticket #732).
+ALTER TABLE programaciones
+	MODIFY annos SMALLINT DEFAULT NULL;
 

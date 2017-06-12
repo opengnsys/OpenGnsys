@@ -245,3 +245,7 @@ ALTER TABLE acciones
 	MODIFY fechahorareg DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',
 	MODIFY fechahorafin DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00';
 
+# Ampliar programación de tareas hasta 2025 (ticket #732).
+ALTER TABLE programaciones
+	MODIFY annos SMALLINT DEFAULT NULL;
+
