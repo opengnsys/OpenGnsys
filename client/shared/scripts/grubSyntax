@@ -3,8 +3,9 @@ set -e
 
 DISK=
 PART=
-[ "$(arch)" == "x86_64" ] && grub_probe=$(which grub-probe 2>/dev/null)
-grub_probe=${grub_probe:-$OGBIN/grub-probe1.99}
+#Versión de scripts compatible con la versión 1.99 de grub-probe
+#Uso del grub-probe 1.99  según arquitectura
+grub_probe=${grub_probe:-$OGBIN/grub-probe1.99_$(arch)}
 
 
 if [ $# == 3 ]; then
