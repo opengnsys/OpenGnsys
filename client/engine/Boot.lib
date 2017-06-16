@@ -996,7 +996,7 @@ MNTDIR=$(ogMount $1 $2) || return $?
 }
 
 #/**
-# ogGrubAddOgclient num_disk num_part [ timeout ] [ offline ]
+# ogGrubAddOgLive num_disk num_part [ timeout ] [ offline ]
 #@brief   Crea entrada de menu grub para ogclient, tomando como paramentros del kernel los actuales del cliente.
 #@param 1 Numero de disco
 #@param 2 Numero de particion
@@ -1007,9 +1007,18 @@ MNTDIR=$(ogMount $1 $2) || return $?
 #@exception OG_ERR_NOTFOUND No existe kernel o initrd  en cache.
 #@exception OG_ERR_NOTFOUND No existe archivo de configuracion del grub.
 # /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#@version 1.0.6 - Prmera integración
+#@author  
+#@date    2016-11-07
+#@version 1.1.0 - Se renombra funcion para adaptacion al cambio de nombre de ogclient a ogLive. Soporta varios ogLives en la cache. Se añade el ogLive asignado al cliente.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2017-06-17
+#*/ ##
+#*/ ##
+
 #*/
 
-function ogGrubAddOgclient () {
+function ogGrubAddOgLive () {
     local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
 
     # Si se solicita, mostrar ayuda.
@@ -1026,7 +1035,7 @@ function ogGrubAddOgclient () {
 
     # Error si no existe el kernel y el initrd en la cache.
     # Falta crear nuevo codigo de error.
-    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo $?)
+    [ -r $OGCAC/boot/${oglivedir}/ogvmlinuz -a -r $OGCAC/boot/${oglivedir}/oginitrd.img ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo $?)
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
@@ -1045,7 +1054,7 @@ function ogGrubAddOgclient () {
     read NUMDISK NUMPART <<< $(ogFindCache)
     let NUMDISK=$NUMDISK-1
     # kernel y sus opciones. Pasamos a modo usuario
-    KERNEL="/boot/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=[a-z]*//g /proc/cmdline)"
+    KERNEL="/boot/${oglivedir}/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=[a-z]*//g /proc/cmdline)"
 
     # Configuracion offline si existe parametro
     echo "$@" |grep offline &>/dev/null && STATUS=offline
@@ -1055,12 +1064,12 @@ function ogGrubAddOgclient () {
     # Numero de línea de la primera entrada del grub.
     NUMLINE=$(grep -n -m 1 "^menuentry" $GRUBGFC|cut -d: -f1)
     # Texto de la entrada de opengnsys
-MENUENTRY="menuentry "Opengnsys"  --class gnu-linux --class gnu --class os { \n \
+MENUENTRY="menuentry "OpenGnsys"  --class opengnsys --class gnu --class os { \n \
 \tinsmod part_$PARTTABLETYPE \n \
 \tinsmod ext2 \n \
 \tset root='(hd${NUMDISK},$PARTTABLETYPE${NUMPART})' \n \
 \tlinux $KERNEL \n \
-\tinitrd /boot/oginitrd.img \n \
+\tinitrd /boot/${oglivedir}/oginitrd.img \n \
 }"
 
 
