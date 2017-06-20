@@ -646,8 +646,8 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 }
 
 
-#         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
-#@brief   Instala y actualiza el gestor grub el el MBR del disco duro donde se encuentra el fichero grub.cfg. Admite sistemas Windows.
+#         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG  
+#@brief   Instala el grub el el MBR del primer disco duro (FIRSTSTAGE). El fichero de configuración grub.cfg ubicado según parametros disk y part(SECONDSTAGE). Admite sistemas Windows.
 #@param   int_disk_SecondStage      
 #@param   int_part_SecondStage     
 #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
@@ -662,6 +662,9 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@version 1.0.3 - Ficheros de configuracion independientes segun ubicación de la primera etapa
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2012-03-13
+#@version 1.1.0 - #791 El FIRSTSTAGE(MBR) siempre será el primer disco duro. EL SECONDSTAGE(grub.cfg) estára en el DISK y PART indicados en los parámetros.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2017-06-19
 #*/ ##
 
 function ogGrubInstallMbr {
@@ -691,8 +694,8 @@ BACKUPNAME=".backup.og"
 #VERSION=$(ogGetOsVersion $DISK $PART) 
 #echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
-#Localizar primera etapa del grub
-FIRSTSTAGE=$(ogDiskToDev $DISK)
+#La primera etapa del grub se fija en el primer disco duro 
+FIRSTSTAGE=$(ogDiskToDev 1)
 
 #localizar disco segunda etapa del grub
 SECONDSTAGE=$(ogMount $DISK $PART)
