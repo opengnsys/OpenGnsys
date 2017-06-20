@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnSys 1.0.6 - OpenGnsys 1.1.0
+# OpenGnSys 1.0.6b - OpenGnsys 1.1.0
 #use ogAdmBD
 
 ### NOTA: la configuración de MySQL solo puede modificarla el usuario "root".
