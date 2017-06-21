@@ -918,7 +918,6 @@ function updateClient()
 	local TARGETLENGTH
 	local OGINITRD
 	local SAMBAPASS
-	local KERNELVERSION
 
 	# Comprobar si debe convertirse el antiguo cliente al nuevo formato ogLive.
 	if oglivecli check | grep -q "oglivecli convert"; then
@@ -940,15 +939,6 @@ function updateClient()
 		echoAndLog "${FUNCNAME}(): Updatting ogLive"
 		oglivecli install $FILENAME
 		
-		# Obtiene versión del Kernel del cliente (con 2 decimales).
-		KERNELVERSION=$(jq -r ".oglive[.default].kernel" |
-				awk -F. '{printf("%d",$1); $1=""; printf(".%02d",$0)}')
-		# Actaulizar la base de datos adaptada al Kernel del cliente.
-		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
-		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
-			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
-		fi
 		CLIENTUPDATED=${FILENAME%.*}
 
 		echoAndLog "${FUNCNAME}(): ogLive update successfully"
