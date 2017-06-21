@@ -33,10 +33,11 @@ function colocar_ordenador(swsufijo){
 	var sufijonodo=currentNodo.toma_sufijo()
 	var identificador_ordenador=corte_currentNodo.toma_identificador()
 	var swsf=parseInt(swsufijo)
+	var colo='s';
 	if (swsf==0) // El ordenador se mueve a un grupo de ordenadores
-		var prm="opcion="+op_movida+"&grupoid="+identificador+"&idordenador="+identificador_ordenador
+		var prm="opcion="+op_movida+"&grupoid="+identificador+"&idordenador="+identificador_ordenador+"&coloc="+colo
 	else // El ordenador se mueve a un aula
-		var prm="opcion="+op_movida+"&idaula="+identificador+"&idordenador="+identificador_ordenador
+		var prm="opcion="+op_movida+"&idaula="+identificador+"&idordenador="+identificador_ordenador+"&coloc="+colo
 
 	var wurl="../gestores/gestor_ordenadores.php";
 	CallPage(wurl,prm,"retornoColocar","POST");

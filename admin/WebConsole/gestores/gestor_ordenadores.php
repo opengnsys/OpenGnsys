@@ -40,6 +40,7 @@ $oglive="ogLive";
 $idmenu=0;
 $idprocedimiento=0;
 $idimagen=0;
+$colocar"";
 #### ADV
 $netiface="";
 $netdriver="";
@@ -86,7 +87,23 @@ if (isset($_POST["paginalogin"])) $paginalogin=$_POST["paginalogin"];
 if (isset($_POST["paginavalidacion"])) $paginavalidacion=$_POST["paginavalidacion"];
 ######## Ramón
 if (isset($_POST["arranque"])) $arranque=$_POST["arranque"];
-
+######## AGP
+if (isset($_POST["coloc"])) $colocar=$_POST["coloc"];
+	if ($colocar=="s"){
+		
+		$cmd=CreaComando($cadenaconexion); // Crea objeto comando
+		$rs=new Recordset; 
+		$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$idordenador;
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return(false); // Error al abrir recordset
+		$rs->Primero(); 
+		if (!$rs->EOF){
+			$arranque=$rs->campos["arranque"];
+		$rs->Cerrar();
+		}
+	}
+######## AGP
+		
 $tablanodo=""; // Arbol para nodos insertados
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
@@ -282,6 +299,8 @@ function Gestiona(){
 		case $op_movida :
 			$cmd->texto="UPDATE ordenadores SET idaula=@idaula, grupoid=@grupoid WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
+			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
+			createBootMode ($cmd, $arranque, $idordenador, $idioma);
 			break;
 		default:
 			break;
