@@ -34,6 +34,7 @@ OGIMG="images"				# Directorio de imágenes del repositorio
 OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario Samba
 OPENGNSYS_OLDDATABASE="ogBDAdmin"	# Antigua base de datos
 MYCNF=/tmp/.my.cnf.$$			# Fichero temporal con credenciales de acceso a la BD.
+TFTPDIR=$(readlink $OPENGNSYS/tftpboot 2>/dev/null)	# Directorio de PXE/TFTP
 
 
 # Sólo ejecutable por usuario root
@@ -116,4 +117,5 @@ echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"
 echo "     (DHCP, PXE, TFTP, NFS/Samba, Apache, MySQL)."
 echo "- Delete repository directory \"$OPENGNSYS/$OGIMG\""
+[ -n "$TFTPDIR" ] && echo "- Delete PXE configuration directory \"$TFTPDIR\""
 
