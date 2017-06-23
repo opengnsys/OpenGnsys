@@ -774,11 +774,15 @@ fi
 #@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
 #@author  Irina Gomez, ETSII Universidad de Sevilla 
 #@date    2017/04/20
+#@version 1.1 - Unidades organizativas con directorio de imágenes separado. (ticket #678)
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/06/23
 #*/ ##
 function ogMcastRequest {
 # Variables locales
-local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT
-FILE="$1"
+local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT OGUNIT
+OGUNIT="$(df|awk '/ogimages/ {print $1}'|cut -d/ -f5)/"
+FILE="$OGUNIT$1"
 PROTOOPT="$2"
 
 #TODO AYUDA
@@ -793,7 +797,7 @@ until nmap -n -sU -p $PORTAUX $REPOIP | grep open
 do
     let REPEAT=$REPEAT+1
     [ "$REPEAT" -lt 6 ] || ogRaiseError session log $OG_ERR_PROTOCOLJOINMASTER "MULTICAST \"$FILE\" \"$PROTOOPT\" $FILELIST" || return $?
-    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $1 $2""
+    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $FILE $2""
     #update-cache:
     hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST "$FILE" "$PROTOOPT""
     #multicas-direct:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$IMAGE.img $OPTPROTOCOLO"

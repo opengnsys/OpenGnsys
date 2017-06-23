@@ -85,7 +85,7 @@ case "$PROTO" in
         COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
         #TODO comprobar parametros anteriores
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
-        ogMcastRequest "$OGUNIT$IMGNAME.img" "$PROTOOPT" || exit $?
+        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" || exit $?
         ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
         RETVAL=$?
         ;;
