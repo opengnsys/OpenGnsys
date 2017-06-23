@@ -44,8 +44,7 @@ EOT
             INDEX=$n
             jq ".oglive |= (. + [$DATA])" $INFOFILE | sponge $INFOFILE
         fi
-        # Update dafault index.
-        jq ".default=$INDEX" $INFOFILE | sponge $INFOFILE
+        # Show JSON entry.
         jq ".oglive[$INDEX]" $INFOFILE
     else
         # Create new JSON file.
@@ -304,16 +303,19 @@ function install() {
     # Make ogLive backup.
     rm -fr ${OGLIVEDIR}.old
     mv -fv $OGLIVEDIR ${OGLIVEDIR}.old 2>/dev/null
-    # Mount ogLive ISO image, update its files, unmount it and set as default.
+    # Mount ogLive ISO image, update its files and unmount it.
     TMPDIR=/tmp/${OGLIVEFILE%.iso}
     mkdir -p $OGLIVEDIR $TMPDIR
     trap "umount $TMPDIR; rm -fr $TMPDIR" 1 2 3 6 9 15
     mount -o loop,ro $OGLIVEFILE $TMPDIR
     cp -va $TMPDIR/ogclient/* $OGLIVEDIR || raiseError access "Cannot copy files to ogLive directory."
     umount $TMPDIR
-    rm -f $TFTPDIR/$DEFOGLIVE
-    ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
-    ln -vfs $DEFOGLIVE $TFTPDIR/$OGCLIENT
+    # Link to default directory if it's the first ogLive.
+    if [ ! -f $INFOFILE ]; then
+        rm -f $TFTPDIR/$DEFOGLIVE $TFTPDIR/$OGCLIENT
+        ln -vfs $(basename $OGLIVEDIR) $TFTPDIR/$DEFOGLIVE
+        ln -vfs $DEFOGLIVE $TFTPDIR/$OGCLIENT
+    fi
     # Recover or ask for a new Samba access key.
     if [ -n "$SAMBAPASS" ]; then
         echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | $OPENGNSYS/bin/setsmbpass
