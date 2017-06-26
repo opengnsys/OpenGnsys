@@ -25,13 +25,12 @@ echo "=============================="
 # Clave root de MySQL
 while : ; do
 	echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): ";
-	read MYSQL_ROOT_PASSWORD
+	read -r MYSQL_ROOT_PASSWORD
 	if [ -n "${MYSQL_ROOT_PASSWORD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
 	else
-		if [ -z $MYSQL_ROOT_PASSWORD ]; then # Si esta vacio ponemos el valor por defecto
-			MYSQL_ROOT_PASSWORD=$DEFAULT_MYSQL_ROOT_PASSWORD
-		fi
+		# Si esta vacio ponemos el valor por defecto
+		MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-$DEFAULT_MYSQL_ROOT_PASSWORD}"
 		break
 	fi
 done
@@ -39,13 +38,12 @@ done
 # Usuario de acceso a la base de datos
 while : ; do
 	echo -n -e "\\nEnter username for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_USER}): "
-	read OPENGNSYS_DB_USER
+	read -r OPENGNSYS_DB_USER
 	if [ -n "${OPENGNSYS_DB_USER//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
 	else
-		if [ -z $OPENGNSYS_DB_USER ]; then # Si esta vacio ponemos el valor por defecto
-			OPENGNSYS_DB_USER=$DEFAULT_OPENGNSYS_DB_USER
-		fi
+		# Si esta vacio ponemos el valor por defecto
+		OPENGNSYS_DB_USER="${OPENGNSYS_DB_USER:-$DEFAULT_OPENGNSYS_DB_USER}"
 		break
 	fi
 done
@@ -53,13 +51,12 @@ done
 # Clave de acceso a la base de datos
 while : ; do
 	echo -n -e "\\nEnter password for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
-	read OPENGNSYS_DB_PASSWD
+	read -r OPENGNSYS_DB_PASSWD
 	if [ -n "${OPENGNSYS_DB_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
 	else
-		if [ -z $OPENGNSYS_DB_PASSWD ]; then # Si esta vacio ponemos el valor por defecto
-			OPENGNSYS_DB_PASSWD=$DEFAULT_OPENGNSYS_DB_PASSWD
-		fi
+		# Si esta vacio ponemos el valor por defecto
+		OPENGNSYS_DB_PASSWD="${OPENGNSYS_DB_PASSWD:-$DEFAULT_OPENGNSYS_DB_PASSWD}"
 		break
 	fi
 done
@@ -67,21 +64,39 @@ done
 # Clave de acceso del cliente
 while : ; do
 	echo -n -e "\\nEnter root password for OpenGnsys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
-	read OPENGNSYS_CLIENT_PASSWD
+	read -r OPENGNSYS_CLIENT_PASSWD
 	if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
 		echo -e "\\aERROR: Must be alphanumeric, try again..."
 	else
-		if [ -z $OPENGNSYS_CLIENT_PASSWD ]; then # Si esta vacio ponemos el valor por defecto
-			OPENGNSYS_CLIENT_PASSWD=$DEFAULT_OPENGNSYS_CLIENT_PASSWD
-		fi
+		# Si esta vacio ponemos el valor por defecto
+		OPENGNSYS_CLIENT_PASSWD="${OPENGNSYS_CLIENT_PASSWD:-$DEFAULT_OPENGNSYS_CLIENT_PASSWD}"
 		break
 	fi
+done
+
+# Selección de clientes ogLive para descargar.
+while : ; do
+	echo -e "\\nChoose ogLive client to install."
+	echo -e "1) Kernel 4.8, 64-bit"
+	echo -e "2) Kernel 3.2, 32-bit"
+	echo -e "3) Both"
+	echo -n -e "Please, type a valid number (1): "
+	read -r OPT
+	case "$OPT" in
+		1|"")	OGLIVE="ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso"
+			break ;;
+		2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
+			break ;;
+		3)	OGLIVE="ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso ogLive-precise-3.2.0-23-generic-r5159.iso";
+			break ;;
+		*)	echo -e "\\aERROR: unknown option, try again."
+	esac
 done
 
 echo -e "\\n=============================="
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
-PROGRAMDIR=$(readlink -e $(dirname "$0"))
+PROGRAMDIR=$(readlink -e "$(dirname "$0")")
 PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="www.opengnsys.es"
 DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
@@ -97,6 +112,7 @@ mkdir -p $WORKDIR
 
 # Directorio destino de OpenGnsys.
 INSTALL_TARGET=/opt/opengnsys
+PATH=$PATH:$INSTALL_TARGET/bin
 
 # Registro de incidencias.
 OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log
@@ -151,7 +167,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient15-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php5-curl gettext moreutils jq )
+		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient15-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php5-curl gettext moreutils jq )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -188,7 +204,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget net-tools doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget curl net-tools doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
 				   'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		if [ "$OSDISTRIB" == "centos" ]; then
@@ -474,7 +490,7 @@ function installDependencies()
 	fi
 
 	DEBIAN_FRONTEND=$OLD_DEBIAN_FRONTEND		# Debian/Ubuntu
-	test grep -q "EPEL temporal" /etc/yum.repos.d/epel.repo 2>/dev/null ] || mv -f /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo 2>/dev/null	# CentOS/RedHat EPEL
+	test grep -q "EPEL temporal" /etc/yum.repos.d/epel.repo 2>/dev/null || mv -f /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo 2>/dev/null	# CentOS/RedHat EPEL
 
 	echoAndLog "${FUNCNAME}(): dependencies installed"
 }
@@ -1392,8 +1408,12 @@ function copyClientFiles()
 # Crear cliente OpenGnsys.
 function clientCreate()
 {
-	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso	# 1.1.0-rc6 (old)
-	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso	# 1.1.0-rc6
+	if [ $# -ne 1 ]; then
+		errorAndLog "${FUNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	local FILENAME="$1"
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
  
 	# Descargar cliente, si es necesario.
@@ -1402,7 +1422,7 @@ function clientCreate()
 		mv $PROGRAMDIR/$FILENAME $TARGETFILE
 	else
 		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
-		$INSTALL_TARGET/bin/oglivecli download $FILENAME
+		oglivecli download $FILENAME
 	fi
 	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Error loading $FILENAME"
@@ -1412,7 +1432,7 @@ function clientCreate()
 	# Montar imagen, copiar cliente ogclient y desmontar.
 	echoAndLog "${FUNCNAME}(): Installing ogLive Client"
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | \
-			$INSTALL_TARGET/bin/oglivecli install $FILENAME
+			oglivecli install $FILENAME
 	# Adaptar permisos.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 
@@ -1498,7 +1518,7 @@ EOT
 	# Revisar permisos generales.
 	if [ -x $INSTALL_TARGET/bin/checkperms ]; then
 		echoAndLog "${FUNCNAME}(): Checking permissions."
-		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENT_USER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
+		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENT_USER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" checkperms
 	fi
 
 	# Evitar inicio de duplicado en Ubuntu 14.04 (Upstart y SysV Init).
@@ -1539,6 +1559,7 @@ function installationSummary()
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"
+	echoAndLog "Installed ogLive client(s):       $(oglivecli list | awk '{print $2}')"
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console access data:          specified in installer script"
@@ -1767,11 +1788,12 @@ if [ $? -ne 0 ]; then
 fi
 
 # Crear la estructura del cliente de OpenGnsys.
-clientCreate
-if [ $? -ne 0 ]; then
-	errorAndLog "Error creating client"
-	exit 1
-fi
+for i in $OGLIVE; do
+	if ! clientCreate "$i"; then
+		errorAndLog "Error creating client $i"
+		exit 1
+	fi
+done
 
 # Configuración de servicios de OpenGnsys
 openGnsysConfigure
