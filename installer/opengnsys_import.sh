@@ -15,12 +15,13 @@
 # Variables globales.
 PROG="$(basename $0)"
 
+DATE=$(date +%Y%m%d)
 BACKUPFILE=$1
 TMPDIR=/tmp/opengnsys_export
 OPENGNSYS="/opt/opengnsys"
 MYSQLFILE="$TMPDIR/ogAdmBD.sql"
 MYSQLFILE2="$TMPDIR/usuarios.sql"
-MYSQLBCK="$OPENGNSYS/doc/ogAdmBD.sql-$(date +%Y%M%d)"
+MYSQLBCK="$OPENGNSYS/doc/ogAdmBD.sql-$DATE"
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -83,7 +84,7 @@ for DHCPCFGDIR in /etc/dhcp /etc/dhcp3; do
         let BEFOREHOST=$(grep -n -m1 -e "^[[:blank:]]*host" -e "^#[[:blank:]]*host" $DHCPCFGDIR/dhcpd.conf| cut -d: -f1)-1
         # Copia de seguridad de la configuración anterior
         cp $DHCPCFGDIR/dhcpd.conf $DHCPCFGDIR/dhcpd.conf-LAST
-        mv $DHCPCFGDIR/dhcpd.conf $DHCPCFGDIR/dhcpd.conf-$(date +%Y%m%d)
+        mv $DHCPCFGDIR/dhcpd.conf $DHCPCFGDIR/dhcpd.conf-$DATE
         # Nuevo fichero
         sed ${BEFOREHOST}q $DHCPCFGDIR/dhcpd.conf-LAST > $DHCPCFGDIR/dhcpd.conf
         sed -n -e "$OLDHOSTINI,\$p" $TMPDIR/dhcpd.conf >> $DHCPCFGDIR/dhcpd.conf
@@ -93,17 +94,17 @@ done
 
 # TFTP
 echo "   * Guardamos los ficheros PXE de los clientes."
-mv $OPENGNSYS/tftpboot/menu.lst $OPENGNSYS/tftpboot/menu.lst-$(date +%Y%m%d)
+mv $OPENGNSYS/tftpboot/menu.lst $OPENGNSYS/tftpboot/menu.lst-$DATE
 cp -r $TMPDIR/menu.lst  $OPENGNSYS/tftpboot
 
 # Configuración de los clientes
 echo "   * Guardamos la configuración de los clientes."
-mv $OPENGNSYS/client/etc/engine.cfg $OPENGNSYS/client/etc/engine.cfg-$(date +%Y%m%d)
+mv $OPENGNSYS/client/etc/engine.cfg $OPENGNSYS/client/etc/engine.cfg-$DATE
 cp $TMPDIR/engine.cfg $OPENGNSYS/client/etc/engine.cfg
 
 # Páginas de inicio
 echo "   * Guardamos las páginas de inicio."
-mv $OPENGNSYS/www/menus $OPENGNSYS/www/menus-$(date +%Y%m%d)
+mv $OPENGNSYS/www/menus $OPENGNSYS/www/menus-$DATE
 cp -r $TMPDIR/menus $OPENGNSYS/www
 
 # MYSQL
@@ -132,10 +133,10 @@ mysql --defaults-extra-file=$MYCNF -D "$CATALOG" < $MYSQLFILE2 &>/dev/null
 rm -f $MYCNF
 
 echo -e "Se ha terminado de importar los datos del backup. \n\nSe han realizado copias de seguridad de los archivos antiguos:" 
-echo    "  - $DHCPCFGDIR/dhcpd.conf-$(date +%Y%m%d)"
-echo    "  - $OPENGNSYS/tftpboot/menu.lst-$(date +%Y%m%d)"
-echo    "  - $OPENGNSYS/client/etc/engine.cfg-$(date +%Y%m%d)"
-echo    "  - $OPENGNSYS/www/menus-$(date +%Y%m%d)"
+echo    "  - $DHCPCFGDIR/dhcpd.conf-$DATE"
+echo    "  - $OPENGNSYS/tftpboot/menu.lst-$DATE"
+echo    "  - $OPENGNSYS/client/etc/engine.cfg-$DATE"
+echo    "  - $OPENGNSYS/www/menus-$DATE"
 echo -e "  - $MYSQLBCK \n"
 
 echo "Hay que revisar la configuración del dhcp. En la consola es necesario configurar los valores de las ips de repositorios, servidores ntp, etc y lanzar el \"netBoot Avanzado\" a todas las aulas"

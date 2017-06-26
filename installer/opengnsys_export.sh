@@ -18,6 +18,7 @@ PROG="$(basename $0)"
 OPENGNSYS="/opt/opengnsys"
 TMPDIR=/tmp
 MYSQLFILE="$TMPDIR/ogAdmBD.sql"
+MYSQLFILE2="$TMPDIR/usuarios.sql"
 BACKUPPREFIX="opengnsys_export"
 
 # Si se solicita, mostrar ayuda.
@@ -77,7 +78,7 @@ mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG \
           --ignore-table=${CATALOG}.usuarios > $MYSQLFILE
 # Tabla usuario
 mysqldump --defaults-extra-file=$MYCNF --opt --no-create-info $CATALOG \
-          usuarios | sed 's/^INSERT /INSERT IGNORE /g' >> $MYSQLFILE
+          usuarios | sed 's/^INSERT /INSERT IGNORE /g' >> $MYSQLFILE2
 # Borrar fichero temporal
 rm -f $MYCNF
 
@@ -91,6 +92,7 @@ echo $ServidorAdm > $TMPDIR/IPSERVER.txt
 echo "Creamos un archivo comprimido con los datos: $BACKUPFILE."
 tar -cvzf $BACKUPFILE --transform="s!^!$BACKUPPREFIX/!" \
           -C $(dirname $MYSQLFILE) $(basename $MYSQLFILE) \
+          -C $(dirname $MYSQLFILE2) $(basename $MYSQLFILE2) \
           -C $TMPDIR IPSERVER.txt \
           -C $DHCPDIR dhcpd.conf \
           -C $OPENGNSYS/tftpboot menu.lst \
