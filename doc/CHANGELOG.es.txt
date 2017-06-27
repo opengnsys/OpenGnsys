@@ -20,6 +20,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #748	Mejorar rendimiento usando fichero de configuración de discos (mejora)
 #771	Crear imagen no muestra correctamente el espacio necesario y disponible
 #781	Control de errores en la transferencia multicast
+#790	ogLive Xenial no identifica el orden correcto de varios discos duros sata
 
 Tickets resueltos en módulo OpenGnsys Client:
 #233	Añadir reloj al cliente (resuelto en #746)
@@ -63,11 +64,13 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #775	Permitir mismo nombre de imagen en diferentes repositorios de imagen
 #777	Error SQL al incluir caracteres espaciales en los comentarios
 #778	Codificar claves de usuarios (mejora)
+#779	Crear comando "Enviar mensaje"
 #782	Crear registro de acciones para realizar informes
 
 Tickets resueltos en módulo OpenGnSys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
 #765	Actualización incremental de la base de datos
+#795	Script opengnsys_uninstall.sh deberia añadir mas información
 
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.
