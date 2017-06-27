@@ -40,7 +40,7 @@ $oglive="ogLive";
 $idmenu=0;
 $idprocedimiento=0;
 $idimagen=0;
-$colocar"";
+$colocar="";
 #### ADV
 $netiface="";
 $netdriver="";
