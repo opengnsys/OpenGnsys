@@ -2,7 +2,7 @@
 
 #/**
 #         setsmbpass
-#@file    setsmbpass
+#@file    setsmbpass [ogLive]
 #@brief   Cambia la contraseña del usuario del cliente para acceder a los servicios Samba.
 #@warning Se modifica el Initrd del cliente y se cambia la clave en el servidor.
 #@warning No se modifica el usuario de acceso (usuario "opengnsys").
@@ -26,24 +26,28 @@ TMPDIR=/tmp/oglive$$
 let CHANGES=0
 
 # Control básico de errores.
-if [ $# != 0 ]; then
-	echo "$PROG: Error de ejecución" >&2
-	echo "Formato: $PROG"
-	exit 1
-fi
 if [ "$USER" != "root" ]; then
-	echo "$PROG: Error: solo ejecutable por root" >&2
-	exit 1
+    echo "$PROG: Error: solo ejecutable por root" >&2
+    exit 1
 fi
+case $# in
+    0)  # Cambios en todos los clientes ogLive instalados.
+        if which oglivecli &>/dev/null; then
+            LIST=$(oglivecli list | awk '{print $2}')
+        else
+            LIST="ogclient"
+        fi ;;
+    1)  # Cambios en único ogLive (AVISO: puede crear inconsistencias con otros ogLive).
+        LIST="$1" ;;
+    *)	# Error de formato.
+        echo "$PROG: Error de ejecución" >&2
+        echo "Formato: $PROG ogLive"
+        exit 1 ;;
+esac
 
 # Recuperar eco de consola si se corta el proceso.
 trap "stty echo 2>/dev/null" KILL
 # Buscar todos los clients ogLive instalados.
-if which oglivecli &>/dev/null; then
-    LIST=$(oglivecli list | awk '{print $2}')
-else
-    LIST="ogclient"
-fi
 for OGLIVE in $LIST; do
     # Crear clave para usuario de acceso a los recursos.
     CLIENTINITRD="$TFTPDIR/$OGLIVE/$INITRD"
@@ -96,7 +100,7 @@ for OGLIVE in $LIST; do
 	md5sum "$CLIENTINITRD" | cut -f1 -d" " > "$CLIENTINITRD.sum"
 	let CHANGES++
     else
-        echo "$PROG: Aviso: no se ha modificado la clave del cliente \"$OGLIVE\"."
+        echo "$PROG: Cliente \"$OGLIVE\" no accesible."
     fi
 done
 if [[ $CHANGES != 0 ]]; then
