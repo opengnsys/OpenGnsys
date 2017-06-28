@@ -1,6 +1,6 @@
 #!/bin/bash
 # Scirpt de ejemplo para apagar un ordenador
-# (puede usarse como base para el programa de apagado usado por OpenGNSys Admin).
+# Nota: se usa como base para el programa de apagado de OpenGnsys Admin.
 
 
 # Registrar ejecución manual de script. 

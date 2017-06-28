@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script de ejemplo para reiniciar un ordenador
-# (puede usarse como base para el programa de reinicio usado por OpenGNSys Admin).
+# Nota: se usa como base para el programa de reinicio de OpenGnsys Admin.
 
 
 # Registrar ejecución manual de script.

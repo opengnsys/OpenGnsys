@@ -1,9 +1,9 @@
 #!/bin/bash
 # Scirpt de ejemplo para almacenear en fichero temporal el listado de hardware.
-# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+# Nota: se usa como base para el programa de recogida de listado de hardware de OpenGnsys Admin.
 # Formato:  listHardwareInfo 
 
-PROG="$(basename $0)"
+PROG=$(basename "$0")
 if [ $# -ne 0 ]; then
     ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG "
     exit $?

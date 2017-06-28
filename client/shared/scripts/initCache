@@ -1,6 +1,6 @@
 #!/bin/bash
 # Scirpt de iniciación de la caché local de disco.
-# (puede usarse como base para el programa de restauración de imágenes usado por OpenGnSys Admin).
+# Nota: se usa como base para el programa de configuración de equipos de OpenGnsys Admin).
 # Formato: initCache [int_ndisk [int_npart]] {-1 | 0 | int_size} [NOMOUNT]
 # Versión: 0.9.1, 2009/03/17, - Ramón Gómez, Univ. Sevilla - Versión inicial.
 # Versión: 0.9.2, 2010/07/27, - Ramón Gómez, Univ. Sevilla - redefinir parámetro.

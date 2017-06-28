@@ -3,7 +3,7 @@
 #/**
 #         createDiffImage
 #@brief   Script de ejemplo para crear una imagen diferencial de un sistema de archivos.
-#@brief (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#@brief   Se usa como base para el programa de creación de imágenes de OpenGnsys Admin).
 #@param 1 disco 
 #@param 2 particion 
 #@param 3 REPO|CACHE
