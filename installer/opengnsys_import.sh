@@ -52,7 +52,7 @@ fi
 
 # Comprobamos  acceso a ficheros de configuración
 if ! [ -r $OPENGNSYS/etc/ogAdmServer.cfg ]; then
-    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnSys." | tee -a $FILESAL
+    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
     exit 4
 fi
 

@@ -44,7 +44,7 @@ fi
 
 # Comprobamos  acceso a ficheros de configuración
 if ! [ -r $OPENGNSYS/etc/ogAdmServer.cfg ]; then
-    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnSys." | tee -a $FILESAL
+    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
     exit 3
 fi
 
@@ -106,3 +106,6 @@ chmod 600 $BACKUPFILE
 
 # Borrar ficheros temporales
 rm -f $MYSQLFILE $TMPDIR/IPSERVER.txt
+
+echo -e "\nNo conveniente situar el fichero de backup dentro de /opt/opengnsys" \
+        "\n    ya que se borrará si desinstala OpenGnsys." 
