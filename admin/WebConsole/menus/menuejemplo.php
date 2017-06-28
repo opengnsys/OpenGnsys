@@ -3,7 +3,7 @@
 
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-	<title>Men&uacute; de inicio de los equipos OpenGnSys</title>
+	<title>Men&uacute; de inicio de los equipos OpenGnsys</title>
 
 	<style type="text/css">	
 	body { background: #fff; font-size: 0.7em; }
@@ -41,7 +41,12 @@
 	}
 
 	dt { float: left;}
-	dd {  margin: 1em 10em 1em 20em;  }
+	dd { margin: 1em 10em 1em 20em; }
+
+	div.admin {
+		margin: 1em;
+		float; right;
+	}
 	</style>
 
 </head>
@@ -77,6 +82,15 @@
 		<dt><a href="command:reboot" title="Reiniciar la m&aacute;quina, accesskey: 6" accesskey="6">[6] Reiniciar. </a></dt>
 			<dd>Reiniciar el ordenador.</dd>
 	</dl>
+
+<?php	// Acceso a menú privado.
+if ($_SERVER['HTTP_X_FORWARDED_FOR']) {
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'];
+}
+?>
+	<div class="admin"><a href="../varios/acceso_operador.php?iph=<?php echo $ip ?>">Administraci&oacute;n</a></div>
 
    </body>
 </html>

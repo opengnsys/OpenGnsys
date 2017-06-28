@@ -3,7 +3,7 @@
 
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-	<title>Init menu OpenGnSys client</title>
+	<title>Init menu for OpenGnsys clients</title>
 
 	<style type="text/css">	
 	body { background: #fff; font-size: 0.7em; }
@@ -41,7 +41,12 @@
 	}
 
 	dt { float: left;}
-	dd {  margin: 1em 20em;  }
+	dd { margin: 1em 20em; }
+
+	div.admin {
+		margin: 1em;
+		float: right;
+	}
 	</style>
 
 </head>
@@ -75,5 +80,15 @@
 		<dt><a href="command:reboot" title="Reboot" accesskey="6">Reboot.</a></dt>
 			<dd>Reboot computer.</dd>
 	</dl>
+
+<?php	// Access to private menu.
+if ($_SERVER['HTTP_X_FORWARDED_FOR']){
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'];
+}
+?>
+	<div class="admin"><a href="../varios/acceso_operador.php?iph=<?php echo $ip ?>">Admin Menu</a></div>
+
    </body>
 </html>
