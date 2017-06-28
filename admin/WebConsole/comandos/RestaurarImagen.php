@@ -172,7 +172,7 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idambito,$
 		$selectrepo='select idrepositorio from repositorios INNER JOIN aulas where repositorios.idcentro=aulas.idcentro AND idaula='.$idambito;
 		break;	  
 	}
-	$cmd->texto.=" AND repositorios.idrepositorio IN (".$selectrepo.")";
+	$cmd->texto.=" AND repositorios.idrepositorio IN (".$selectrepo.") ORDER BY imagenes.descripcion";
 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 

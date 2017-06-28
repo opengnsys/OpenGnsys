@@ -200,7 +200,7 @@ $subconsultarepo='select repositorios.idrepositorio from repositorios INNER JOIN
 	// 1.0.5  imagenes.tipo =1 para que solo muestre las monoloticas.
 	$cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM  imagenes
 		INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio 
-		AND repositorios.idrepositorio IN (" . $subconsultarepo . ") WHERE imagenes.tipo=1"; 
+		AND repositorios.idrepositorio IN (" . $subconsultarepo . ") WHERE imagenes.tipo=1 ORDER BY imagenes.descripcion"; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 
