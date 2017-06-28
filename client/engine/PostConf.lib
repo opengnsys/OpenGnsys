@@ -578,7 +578,7 @@ ogAddCmd $1 $2 $3 "ogAdmWinClient -install -s $(ogGetServerIp) -p 2008 -i $(ogGe
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
 #@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
-#@version 1.1.0 - Primera adaptación para OpenGnSys.
+#@version 1.1.0 - Primera adaptación para OpenGnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-08-22
 #*/ ##
@@ -615,7 +615,7 @@ sed -i -e '/ogAdmLnxClient/ d' $MNTDIR/{etc,usr/local/etc}/{rc.local,rc.d/rc.loc
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
 #@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
-#@version 1.1.0 - Primera adaptación para OpenGnSys.
+#@version 1.1.0 - Primera adaptación para OpenGnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-08-22
 #*/ ##

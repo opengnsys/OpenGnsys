@@ -18,7 +18,7 @@
 export LANG="${LANG:-es_ES}"
 locale-gen $LANG
 
-# Directorios del projecto OpenGnSys.
+# Directorios del proyecto OpenGnsys.
 export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys}"
 if [ -d $OPENGNSYS ]; then
     export OGBIN=$OPENGNSYS/bin

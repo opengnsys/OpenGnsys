@@ -1,10 +1,10 @@
-OpenGnSys Client boot-tools   INSTALL.es.txt
+OpenGnsys Client boot-tools   INSTALL.es.txt
 ============================================
 
 
 Advertencia previa:
 -----------------------------
-- No usar este instalador en un sistema OpenGnSys en producción.
+- No usar este instalador en un sistema OpenGnsys en producción.
 - Se puede ejecutar este script desde un sistema Ubuntu 10.04 o superior.
 - Mas información http://www.opengnsys.es/wiki/ClienteInitrdDSGenerarloV1.0.2
 
@@ -43,7 +43,6 @@ Notas para ejecución del instalador en Ubuntu 12.10:
   - pc / qwerty / Spanish / Standard / Standard,  UTF-8,  Combined - Latin; Slavic Cyrillic; Greek,  Fixed,  16
 
 
-     
 
 Descripción de la estrucutra de boot-tools
 ------------------------------------------

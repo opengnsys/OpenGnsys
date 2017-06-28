@@ -1075,7 +1075,7 @@ echo "$TYPE"
 #@param   int_ndisk      nº de orden del disco
 #@return  Código de salida: 0 - bloqueado, 1 - sin bloquear o error.
 #@note    Los ficheros de bloqueo se localizan en \c /var/lock/dev, siendo \c dev el dispositivo de la partición o de su disco, sustituyendo el carácter "/" por "-".
-#@version 1.1.0 - Primera versión para OpenGnSys.
+#@version 1.1.0 - Primera versión para OpenGnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-04-08
 #*/ ##
@@ -1186,7 +1186,7 @@ echo $PARTS | cut -sf5- -d" "
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@note    El fichero de bloqueo se localiza en \c /var/lock/disk, siendo \c disk el dispositivo del disco, sustituyendo el carácter "/" por "-".
-#@version 1.1.0 - Primera versión para OpenGnSys.
+#@version 1.1.0 - Primera versión para OpenGnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-04-07
 #*/ ##
@@ -1559,7 +1559,7 @@ ogSetPartitionType $1 $2 $NEWTYPE
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@note    El fichero de bloqueo se localiza en \c /var/lock/disk, siendo \c disk el dispositivo del disco, sustituyendo el carácter "/" por "-".
-#@version 1.1.0 - Primera versión para OpenGnSys.
+#@version 1.1.0 - Primera versión para OpenGnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-04-08
 #*/ ##

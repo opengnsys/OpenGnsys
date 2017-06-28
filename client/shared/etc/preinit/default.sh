@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Cargar entorno de OpenGnSys
+# Cargar entorno de OpenGnsys
 set -a
 source /opt/opengnsys/etc/preinit/loadenviron.sh
 
