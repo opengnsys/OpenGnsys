@@ -2,9 +2,9 @@
 Notas sobre arranque remoto de los clientes
 ===========================================
 
-Desde la versión OpenGnSys 1.0.2 se utiliza Grub4Dos como gestor de arranque en sustitución de PXELinux.
+Desde la versión OpenGnsys 1.0.2 se utiliza Grub4Dos como gestor de arranque en sustitución de PXELinux.
 
-El instalador de OpenGnSys configura por defecto el servicio DHCP para usar el fichero "grldr" como gestor PXE, incluyendo la siguiente cláusula que debe ser común a todos los equipos afectados:
+El instalador de OpenGnsys configura por defecto el servicio DHCP para usar el fichero "grldr" como gestor PXE, incluyendo la siguiente cláusula que debe ser común a todos los equipos afectados:
 
      filename "grldr";
 
@@ -34,13 +34,13 @@ No olvidar reiniciar el servicio DHCP tras cada modificación de su fichero de c
 Como cambiar el arranque en red PXELinux por Grub4DOS
 =====================================================
 
-NOTA: la siguiente información está anticuada y es válido solo para versiones anteriores a OpenGnSys 1.0.2.
+NOTA: la siguiente información está anticuada y es válido solo para versiones anteriores a OpenGnsys 1.0.2.
 
 
-OpenGnSys 1.0.1 usa como gestor PXE el binario pxelinux.0, sin embargo, la actulización a OpenGnSys 1.0.2 sustituye automáticamente dicho gestor por Grub4Dos.
+OpenGnsys 1.0.1 usa como gestor PXE el binario pxelinux.0, sin embargo, la actulización a OpenGnsys 1.0.2 sustituye automáticamente dicho gestor por Grub4Dos.
 
 
-Realizar los siguientes pasos para sutituir "a mano" PXELinux por Grub4Dos como gestor de arranque sin usar el proceso de actualización de OpenGnSys.
+Realizar los siguientes pasos para sutituir "a mano" PXELinux por Grub4Dos como gestor de arranque sin usar el proceso de actualización de OpenGnsys.
 
 
 Activar el grldr del grub4dos

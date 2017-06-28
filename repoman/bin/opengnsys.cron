@@ -1,5 +1,5 @@
 #!/bin/bash
-# opengnsys.cron - Script para comprobar si los servicios de OpenGnSys están levantados
+# opengnsys.cron - Script para comprobar si los servicios de OpenGnsys están levantados
 #                  e iniciarlos automáticamente.
 # Nota: este script debe ser lanzado por Cron cada minuto.
 
@@ -16,7 +16,7 @@ typeset -i OGCPU	# % uso CPU
 # Salir si no se debe ejecutar la revisión en el cron.
 [ "$RUN_CRONJOB" == "no" ] && exit
 
-# Comprobar si está activo el servidor OpenGnSys.
+# Comprobar si está activo el servidor OpenGnsys.
 if [ "$RUN_OGADMSERVER" == "yes" ]; then
 	# Parar procesos ogAdmServer si consume más de 90% de CPU.
 	OGPID=$(pgrep ogAdmServer)

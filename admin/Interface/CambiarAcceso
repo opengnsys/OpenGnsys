@@ -6,7 +6,7 @@
 # $1 modo  (admin, user)
 #______________________________________
 
-# Error si llamada no se realliza desde OpenGnSys Client.
+# Error si llamada no se realliza desde OpenGnsys Client.
 PROG=$(basename $0)
 CALLER=$(ogGetCaller)
 if ! $(ogCheckStringInGroup "$CALLER" "CrearImagen ConsolaRemota CrearImagenBasica CrearSoftIncremental"); then

@@ -1,7 +1,7 @@
 #!/bin/bash
 #/**
 #@file    loadenviron.sh
-#@brief   Script de carga de la API de funciones de OpenGNSys.
+#@brief   Script de carga de la API de funciones de OpenGnsys.
 #@warning License: GNU GPLv3+
 #@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla

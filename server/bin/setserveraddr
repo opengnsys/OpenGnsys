@@ -77,7 +77,7 @@ if [ -n "$SERVERIP" ]; then
 
 	# Comprobar si hay que modificar la configuración de OpenGnsys.
 	CHANGE=0
-	# Procesar los ficheros de configuración de OpenGnSys.
+	# Procesar los ficheros de configuración de OpenGnsys.
 	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
 		# Error si no existe algún fichero de configuración.
 		if [ ! -f $f ]; then
@@ -101,7 +101,7 @@ if [ -n "$SERVERIP" ]; then
 		fi
 	done
 
-	# Si ha cambiado la configuración, reiniciar OpenGnSys y actualizar la BD.
+	# Si ha cambiado la configuración, reiniciar OpenGnsys y actualizar la BD.
 	if [ $CHANGE == 1 ]; then
 		/etc/init.d/opengnsys restart
 		source $OPENGNSYS/etc/ogAdmServer.cfg

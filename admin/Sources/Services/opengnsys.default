@@ -1,5 +1,5 @@
-# RUN_OGADMSERVER run OpenGnSys Admin service.
-# RUN_OGADMREPO run OpenGnSys Repository Manager service.
+# RUN_OGADMSERVER run OpenGnsys Admin service.
+# RUN_OGADMREPO run OpenGnsys Repository Manager service.
 # RUN_BTTRACKER run Bittorrent Tracker
 # RUN_BTSEEDER starts seeding of selected torrent files
 # RUN_CRON run Cron script to check started processes

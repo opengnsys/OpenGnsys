@@ -2,7 +2,7 @@
 # checkperms: Comprueba que los permisos de los ficheros sean correctos.
 # Nota: Las siguientes variables de entorno pueden usarse para retocar los
 #	valores por defecto:
-#	- OPENGNSYS_USER - usuario de OpenGnSys.
+#	- OPENGNSYS_USER - usuario de OpenGnsys.
 #	- OPENGNSYS_DIR  - directorio de instalación.
 #	- APACHE_USER    - usuario de Apache.
 #	- APACHE_GROUP   - grupo de Apache.
@@ -14,10 +14,10 @@
 
 # Variables.
 OPENGNSYS_USER=${OPENGNSYS_USER:-"opengnsys"}	# Usuario del cliente para acceso remoto
-OPENGNSYS_DIR=${OPENGNSYS_DIR:-/opt/opengnsys}	# Directorio de instalación de OpenGnSys
+OPENGNSYS_DIR=${OPENGNSYS_DIR:-/opt/opengnsys}	# Directorio de instalación de OpenGnsys
 APACHE_USER=${APACHE_USER:-"www-data"}		# Usuario de ejecución de Apache
 APACHE_GROUP=${APACHE_GROUP:-"www-data"}	# Grupo de ejecución de Apache
-PROG=$(basename $0)
+PROG=$(basename "$0")
 
 # Control de errores.
 if [ "$USER" != "root" ]; then
@@ -25,11 +25,11 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 if [ "$OPENGNSYS_USER" == "root" -o -z "$(getent passwd "$OPENGNSYS_USER" 2>/dev/null)" ]; then
-	echo "$PROG: Error: el usuario de OpenGnSys debe existir y no ser root (OPENGNSYS_USER=\"$OPENGNSYS_USER\")" >&2
+	echo "$PROG: Error: el usuario de OpenGnsys debe existir y no ser root (OPENGNSYS_USER=\"$OPENGNSYS_USER\")" >&2
 	exit 1
 fi
 if [ ! -d "$OPENGNSYS_DIR" ]; then
-	echo "$PROG: Error: sin acceso al directorio de OpenGnSys (OPENGNSYS_DIR=\"$OPENGNSYS_DIR\")". >&2
+	echo "$PROG: Error: sin acceso al directorio de OpenGnsys (OPENGNSYS_DIR=\"$OPENGNSYS_DIR\")". >&2
 	exit 1
 fi
 if [ -z "$(getent passwd "$APACHE_USER" 2>/dev/null)" -o -z "$(getent group "$APACHE_GROUP" 2>/dev/null)" ]; then

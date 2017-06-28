@@ -67,7 +67,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #779	Crear comando "Enviar mensaje"
 #782	Crear registro de acciones para realizar informes
 
-Tickets resueltos en módulo OpenGnSys Installer:
+Tickets resueltos en módulo OpenGnsys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
 #765	Actualización incremental de la base de datos
 #795	Script opengnsys_uninstall.sh deberia añadir mas información

@@ -42,7 +42,7 @@ echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.t
 # Registro de inicio de ejecución
 ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
-# Solo ejecutable por OpenGnSys Client.
+# Solo ejecutable por OpenGnsys Client.
 PATH=$PATH:$(dirname $0)
 PROG=$(basename $0)
 CALLER=$(ogGetCaller)

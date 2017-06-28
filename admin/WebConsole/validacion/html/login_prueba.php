@@ -6,7 +6,7 @@ $path_parts = pathinfo(__FILE__);
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>OpenGnSys :::: Inicio de equipo - Men de opciones</title>
+<title>OpenGnsys :::: Inicio de equipo - Menú de opciones</title>
 <style>
         body {
         margin:0;
