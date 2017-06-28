@@ -49,7 +49,7 @@ if [ "$(whoami)" != 'root' ]; then
 fi
 
 # Solicitar confirmación para la desinstalación de OpenGnsys.
-read -rp "WARNING: Files under $OPENGNSYS directory will be delete. Continue to uninstall? (y/n): " REPLY
+read -rp "WARNING: Files under $OPENGNSYS directory will be removed. Continue to uninstall? (y/n): " REPLY
 if [ "${REPLY^^}" != "Y" ]; then
     echo "Operation cancelled."
     exit 0
