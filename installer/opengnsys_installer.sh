@@ -1100,7 +1100,7 @@ function installDownloadableFiles()
 		mv $PROGRAMDIR/$FILENAME $TARGETFILE
 	else
 		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
-		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		curl $DOWNLOADURL/$FILENAME -o $TARGETFILE
 	fi
 	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Cannot download $FILENAME"
