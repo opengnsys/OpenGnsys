@@ -2387,7 +2387,7 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	Database db;
 	Table tbl;
 	BOOLEAN res;
-	char *iph, *ido, *idi, *dsk, *par, *ifs;
+	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
@@ -2412,11 +2412,15 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	dsk = copiaParametro("dsk",ptrTrama); // Número de disco
 	par = copiaParametro("par",ptrTrama); // Número de partición
 	ifs = copiaParametro("ifs",ptrTrama); // Identificador del perfil software contenido
-	
+	cfg = copiaParametro("cfg",ptrTrama); // Configuración de discos
+	if(cfg){
+		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		liberaMemoria(cfg);	
+	}
 	res=actualizaRestauracionImagen(db, tbl, idi, dsk, par, ido, ifs);
 	
 	liberaMemoria(iph);
-	liberaMemoria(ido);	
+	liberaMemoria(ido);
 	liberaMemoria(idi);
 	liberaMemoria(par);
 	liberaMemoria(ifs);
@@ -2643,7 +2647,6 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 	}
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
-	
 	if(cfg){
 		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
 		liberaMemoria(cfg);	
@@ -3578,6 +3581,7 @@ int main(int argc, char *argv[]) {
 	socklen_t iAddrSize;
 	struct sockaddr_in local, cliente;
 	char modulo[] = "main()";
+	int activo=1;
 
 	/*--------------------------------------------------------------------------------------------------------
 	 Validación de parámetros de ejecución y lectura del fichero de configuración del servicio
@@ -3715,6 +3719,7 @@ int main(int argc, char *argv[]) {
 	 Creación y configuración del socket del servicio
 	 ---------------------------------------------------------------------------------------------------------*/
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
+	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
 	if (socket_s == SOCKET_ERROR) { // Error al crear el socket del servicio
 		errorLog(modulo, 13, TRUE);
 		exit(EXIT_FAILURE);

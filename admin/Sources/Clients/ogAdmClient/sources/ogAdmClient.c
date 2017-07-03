@@ -1453,7 +1453,7 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*ifs,*nci,*ids,*ptc,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*ifs,*cfg,*nci,*ids,*ptc,msglog[LONSTD];
 	char modulo[] = "RestaurarImagen()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1483,6 +1483,11 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	else
 		muestraMensaje(11,NULL);
 
+	/* Obtener nueva configuración */
+	cfg=LeeConfiguracion();
+	if(!cfg){ // No se puede recuperar la configuración del cliente
+		errorLog(modulo,36,FALSE);
+	}
 
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
@@ -1491,6 +1496,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de discos
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(nfn);	
@@ -1500,6 +1506,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	liberaMemoria(nci);	
 	liberaMemoria(ipr);	
 	liberaMemoria(ifs);	
+	liberaMemoria(cfg);	
 	liberaMemoria(ptc);	
 	liberaMemoria(ids);			
 
