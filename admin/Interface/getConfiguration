@@ -40,12 +40,18 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
 	case "$fsi" in
 		""|EMPTY|LINUX-SWAP|LINUX-LVM|ZVOL)
 			soi=""; uso=0 ;;
-		*)	soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
-			# Sistema de archivos para datos (sistema operativo "DATA")
-			[ -z "$soi" -a "$fsi" != "EMPTY" -a "$fsi" != "CACHE" ] && soi="DATA"
-			# Obtener porcentaje de uso.
-			uso=$(df $(ogGetMountPoint $dsk $par) | awk '{getline; printf "%d",$5}')
-			uso=${uso:0}
+		*)	if [ -n "$(ogMount $dsk $par 2>/dev/null)" ]; then
+				soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
+				# Hacer un 2º intento para algunos casos especiales.
+				[ -z "$soi" ] && soi=$(getOsVersion $dsk $par 2>/dev/null | cut -f2 -d:)
+				# Sistema de archivos para datos (sistema operativo "DATA")
+				[ -z "$soi" -a "$fsi" != "EMPTY" -a "$fsi" != "CACHE" ] && soi="DATA"
+				# Obtener porcentaje de uso.
+				uso=$(df $(ogGetMountPoint $dsk $par) | awk '{getline; printf "%d",$5}')
+				uso=${uso:0}
+			else
+				soi=""; uso=0
+			fi
 			;;
    	esac
 	cfg="$cfg$dsk:$par:$cod:$fsi:$soi:$tam:$uso;"
