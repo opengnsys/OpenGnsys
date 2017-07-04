@@ -1528,7 +1528,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*msy,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*cfg,*msy,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "RestaurarImagenBasica()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1551,8 +1551,6 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estén en origen	
 	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
 
-
-
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
 	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
@@ -1572,6 +1570,12 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	else
 		muestraMensaje(32,NULL);
 
+	/* Obtener nueva configuración */
+	cfg=LeeConfiguracion();
+	if(!cfg){ // No se puede recuperar la configuración del cliente
+		errorLog(modulo,36,FALSE);
+	}
+
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
@@ -1579,33 +1583,35 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de discos
 	respuestaEjecucionComando(ptrTrama,herror,ids);
-	
-	liberaMemoria(nfn);	
-	liberaMemoria(dsk);	
-	liberaMemoria(par);	
-	liberaMemoria(idi);	
-	liberaMemoria(nci);	
-	liberaMemoria(rti);	
-	liberaMemoria(ifs);	
-	liberaMemoria(ipr);	
+
+	liberaMemoria(nfn);
+	liberaMemoria(dsk);
+	liberaMemoria(par);
+	liberaMemoria(idi);
+	liberaMemoria(nci);
+	liberaMemoria(rti);
+	liberaMemoria(ifs);
+	liberaMemoria(cfg);
+	liberaMemoria(ipr);
 	liberaMemoria(met);
 
-	liberaMemoria(tpt);	
-	liberaMemoria(msy);	
+	liberaMemoria(tpt);
+	liberaMemoria(msy);
 
-	liberaMemoria(whl);	
-	liberaMemoria(eli);	
-	liberaMemoria(cmp);	
+	liberaMemoria(whl);
+	liberaMemoria(eli);
+	liberaMemoria(cmp);
 
-	liberaMemoria(bpi);	
-	liberaMemoria(cpc);	
-	liberaMemoria(bpc);	
+	liberaMemoria(bpi);
+	liberaMemoria(cpc);
+	liberaMemoria(bpc);
 	liberaMemoria(nba);
-	liberaMemoria(ids);		
+	liberaMemoria(ids);
 
 	muestraMenu();
-	
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________
