@@ -29,5 +29,6 @@ $TbMsg[4951]="Cache Free";
 // AGP
 $TbMsg["PROP_SERIALNO"]="Serial No.";
 $TbMsg["WARN_NOTDETECTED"]="<em>(does not detected)</em>";
+$TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
 ?>
 

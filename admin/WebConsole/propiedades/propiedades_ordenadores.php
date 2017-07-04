@@ -217,7 +217,7 @@ $listogcli=shell_exec("cat /opt/opengnsys/www/tmp/ogcliordenador.txt");
 //$listogcli=split(" ",$listogcli);
 
 echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250>'."\n";
-echo '<option value="ogLive">ogLive (por defecto)</option>';
+echo '<option value="ogLive">'.$TbMsg['COMM_DEFOGLIVE'].'</option>';
 $num=0;
 
 // Apertura y lectura de fichero

@@ -41,7 +41,7 @@ $TbMsg[31]="P&aacute;gina login";
 $TbMsg[32]="P&aacute;gina validaci&oacute;n";
 // UHU
 // AGP
-$TbMsg[33]="ogLive (* asignado al aula)";
+$TbMsg[33]="ogLive";
 $TbMsg[34]="*** Existen equipos con diferentes ogLive ***";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[509]="Foto ordenador";
@@ -55,6 +55,6 @@ $TbMsg['PROP_PROXYURL']="URL Servidor Proxy <em>(opcional)</em>";
 $TbMsg['COMM_DEFTIMEZONE']="zona horaria por defecto";
 $TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
 $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
-$TbMsg['COMM_DEFOGLIVE']="ogLive, por defecto";
+$TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
 ?>
 

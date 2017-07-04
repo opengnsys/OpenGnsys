@@ -35,5 +35,6 @@ $TbMsg[4951]="Cach&eacute; libre";
 //AGP
 $TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
+$TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
 ?>
 

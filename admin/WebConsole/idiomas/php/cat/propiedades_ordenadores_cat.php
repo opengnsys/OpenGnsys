@@ -2,22 +2,22 @@
 //____________________________________________________________
 //
 //	Fitxer d'idiomes php: propiedades_ordenadores_cat.php 
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //____________________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
-$TbMsg[0]="Sense Opció";
+$TbMsg[0]="Sense Opciï¿½";
 $TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestió Ordinadors";
+$TbMsg[4]="Gestiï¿½ Ordinadors";
 $TbMsg[5]="Nom";
-$TbMsg[6]="Direcció IP";
-$TbMsg[7]="Direcció MAC";
+$TbMsg[6]="Direcciï¿½ IP";
+$TbMsg[7]="Direcciï¿½ MAC";
 $TbMsg[8]="Perfil Hardware";
 $TbMsg[9]="Autoexec";
 $TbMsg[10]="Repositori";
-$TbMsg[11]="Menó";
-$TbMsg[12]="Grandària Caché";
+$TbMsg[11]="Menï¿½";
+$TbMsg[12]="Grandï¿½ria Cachï¿½";
 $TbMsg[13]="Interficie de Xarxa";
 $TbMsg[14]="Driver de Xarxa";
 // AGP
@@ -25,10 +25,11 @@ $TbMsg[18]="ogLive";
 $TbMsg[509]="Foto ordinador";
 $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
-$TbMsg[495]="Data/Caché";
-$TbMsg[4951]="Caché lliure";
+$TbMsg[495]="Data/Cachï¿½";
+$TbMsg[4951]="Cachï¿½ lliure";
 // AGP
 $TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
+$TbMsg['COMM_DEFOGLIVE']="Assignat per l'administrador";
 ?>
 

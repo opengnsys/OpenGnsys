@@ -41,7 +41,7 @@ $TbMsg[31]="Login page";
 $TbMsg[32]="Validation page";
 // UHU
 // AGP
-$TbMsg[33]="ogLive (* assigned to the lab)";
+$TbMsg[33]="ogLive";
 $TbMsg[34]="*** There are equipment with different ogLive ***";
 $TbMsg[495]="Cache content";
 $TbMsg[509]="Computer picture";
@@ -55,6 +55,6 @@ $TbMsg['PROP_PROXYURL']="Proxy Server URL <em>(optional)</em>";
 $TbMsg['COMM_DEFTIMEZONE']="default time zone";
 $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow management of remote access to the computers";
-$TbMsg['COMM_DEFOGLIVE']="ogLive, by default";
+$TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
 ?>
 
