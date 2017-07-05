@@ -1214,6 +1214,7 @@ function ogGrubDeleteEntry {
 #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION  Partición no soportada
 #@version 1.1.0 - Primeras pruebas instalando BURG. Codigo basado en el ogGrubInstallMBR.
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2017-06-23
