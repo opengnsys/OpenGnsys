@@ -249,3 +249,6 @@ ALTER TABLE acciones
 ALTER TABLE programaciones
 	MODIFY annos SMALLINT DEFAULT NULL;
 
+# Eliminar tabla sin uso (ticket #730).
+DROP TABLE IF EXISTS campus;
+

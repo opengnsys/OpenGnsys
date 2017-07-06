@@ -14,7 +14,8 @@ SET GLOBAL event_scheduler = ON;
 -- Estructura de tabla para la tabla `acciones`
 --
 
-CREATE TABLE IF NOT EXISTS `acciones` (
+DROP TABLE IF EXISTS `acciones`;
+CREATE TABLE `acciones` (
   `idaccion` int(11) NOT NULL AUTO_INCREMENT,
   `tipoaccion` smallint(6) NOT NULL DEFAULT '0',
   `idtipoaccion` int(11) NOT NULL DEFAULT '0', 
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `acciones` (
 -- Estructura de tabla para la tabla `acciones_log`
 --
 
-CREATE TABLE IF NOT EXISTS acciones_log LIKE acciones;
+DROP TABLE IF EXISTS `acciones_log`;
+CREATE TABLE acciones_log LIKE acciones;
 ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
 DELIMITER //
 -- Trigger para guardar acciones antes de ser borradas.
@@ -69,7 +71,8 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `acciones_menus`
 --
 
-CREATE TABLE IF NOT EXISTS `acciones_menus` (
+DROP TABLE IF EXISTS `acciones_menus`;
+CREATE TABLE `acciones_menus` (
   `idaccionmenu` int(11) NOT NULL AUTO_INCREMENT,
   `tipoaccion` tinyint(4) NOT NULL DEFAULT '0',
   `idtipoaccion` int(11) NOT NULL DEFAULT '0',
@@ -87,7 +90,8 @@ CREATE TABLE IF NOT EXISTS `acciones_menus` (
 -- Estructura de tabla para la tabla `administradores_centros`
 --
 
-CREATE TABLE IF NOT EXISTS `administradores_centros` (
+DROP TABLE IF EXISTS `administradores_centros`;
+CREATE TABLE `administradores_centros` (
   `idadministradorcentro` int(11) NOT NULL AUTO_INCREMENT,
   `idusuario` int(11) NOT NULL DEFAULT '0',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -103,7 +107,8 @@ INSERT INTO `administradores_centros` (`idadministradorcentro`, `idusuario`, `id
 -- Estructura de tabla para la tabla `aulas`
 --
 
-CREATE TABLE IF NOT EXISTS `aulas` (
+DROP TABLE IF EXISTS `aulas`;
+CREATE TABLE `aulas` (
   `idaula` int(11) NOT NULL AUTO_INCREMENT,
   `nombreaula` varchar(100) NOT NULL DEFAULT '',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -142,7 +147,8 @@ CREATE TABLE IF NOT EXISTS `aulas` (
 -- Estructura de tabla para la tabla `asistentes`
 --
 
-CREATE TABLE IF NOT EXISTS `asistentes` (
+DROP TABLE IF EXISTS `asistentes`;
+CREATE TABLE `asistentes` (
   `idcomando` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `pagina` varchar(256) NOT NULL DEFAULT '',
@@ -166,35 +172,14 @@ INSERT INTO `asistentes` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funci
 ('8', 'Asistente Particionado', '../asistentes/AsistenteParticionado.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1');
 
 
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `campus`
---
-
-CREATE TABLE IF NOT EXISTS `campus` (
-  `idcampus` int(11) NOT NULL AUTO_INCREMENT,
-  `nombrecampus` varchar(100) NOT NULL DEFAULT '',
-  `iduniversidad` int(11) DEFAULT NULL,
-  `urlmapa` varchar(255) DEFAULT NULL,
-  `cuadro_y` tinyint(3) DEFAULT NULL,
-  `cuadro_x` tinyint(3) DEFAULT NULL,
-  PRIMARY KEY (`idcampus`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
---
--- Volcar la base de datos para la tabla `campus`
---
-
-
 -- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `centros`
 --
 
-CREATE TABLE IF NOT EXISTS `centros` (
+DROP TABLE IF EXISTS `centros`;
+CREATE TABLE `centros` (
   `idcentro` int(11) NOT NULL AUTO_INCREMENT,
   `nombrecentro` varchar(100) NOT NULL DEFAULT '',
   `identidad` int(11) DEFAULT NULL,
@@ -217,7 +202,8 @@ INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALU
 -- Estructura de tabla para la tabla `comandos`
 --
 
-CREATE TABLE IF NOT EXISTS `comandos` (
+DROP TABLE IF EXISTS `comandos`;
+CREATE TABLE `comandos` (
   `idcomando` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `pagina` varchar(256) NOT NULL DEFAULT '',
@@ -263,7 +249,8 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 -- Estructura de tabla para la tabla `entidades`
 --
 
-CREATE TABLE IF NOT EXISTS `entidades` (
+DROP TABLE IF EXISTS `entidades`;
+CREATE TABLE `entidades` (
   `identidad` int(11) NOT NULL AUTO_INCREMENT,
   `nombreentidad` varchar(200) NOT NULL DEFAULT '',
   `comentarios` text,
@@ -286,7 +273,8 @@ INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `idunivers
 -- Estructura de tabla para la tabla `entornos`
 --
 
-CREATE TABLE IF NOT EXISTS `entornos` (
+DROP TABLE IF EXISTS `entornos`;
+CREATE TABLE `entornos` (
   `identorno` int(11) NOT NULL AUTO_INCREMENT,
   `ipserveradm` varchar(50) NOT NULL DEFAULT '',
   `portserveradm` int(20) NOT NULL DEFAULT 2008,
@@ -307,7 +295,8 @@ INSERT INTO `entornos` (`identorno`, `ipserveradm`, `portserveradm`, `protoclona
 -- Estructura de tabla para la tabla `estatus`
 --
 
-CREATE TABLE IF NOT EXISTS `estatus` (
+DROP TABLE IF EXISTS `estatus`;
+CREATE TABLE `estatus` (
   `idestatus` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idestatus`)
@@ -330,7 +319,8 @@ INSERT INTO `estatus` (`idestatus`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `grupos`
 --
 
-CREATE TABLE IF NOT EXISTS `grupos` (
+DROP TABLE IF EXISTS `grupos`;
+CREATE TABLE `grupos` (
   `idgrupo` int(11) NOT NULL AUTO_INCREMENT,
   `nombregrupo` varchar(250) NOT NULL DEFAULT '',
   `grupoid` int(11) NOT NULL DEFAULT '0',
@@ -347,7 +337,8 @@ CREATE TABLE IF NOT EXISTS `grupos` (
 -- Estructura de tabla para la tabla `gruposordenadores`
 --
 
-CREATE TABLE IF NOT EXISTS `gruposordenadores` (
+DROP TABLE IF EXISTS `gruposordenadores`;
+CREATE TABLE `gruposordenadores` (
   `idgrupo` int(11) NOT NULL AUTO_INCREMENT,
   `nombregrupoordenador` varchar(250) NOT NULL DEFAULT '',
   `idaula` int(11) NOT NULL DEFAULT '0',
@@ -362,7 +353,8 @@ CREATE TABLE IF NOT EXISTS `gruposordenadores` (
 -- Estructura de tabla para la tabla `hardwares`
 --
 
-CREATE TABLE IF NOT EXISTS `hardwares` (
+DROP TABLE IF EXISTS `hardwares`;
+CREATE TABLE `hardwares` (
   `idhardware` int(11) NOT NULL AUTO_INCREMENT,
   `idtipohardware` int(11) NOT NULL DEFAULT '0',
   `descripcion` varchar(250) NOT NULL DEFAULT '',
@@ -378,7 +370,8 @@ CREATE TABLE IF NOT EXISTS `hardwares` (
 -- Estructura de tabla para la tabla `iconos`
 --
 
-CREATE TABLE IF NOT EXISTS `iconos` (
+DROP TABLE IF EXISTS `iconos`;
+CREATE TABLE `iconos` (
   `idicono` int(11) NOT NULL AUTO_INCREMENT,
   `urlicono` varchar(200) DEFAULT NULL,
   `idtipoicono` int(11) DEFAULT NULL,
@@ -412,7 +405,8 @@ INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUE
 -- Estructura de tabla para la tabla `idiomas`
 --
 
-CREATE TABLE IF NOT EXISTS `idiomas` (
+DROP TABLE IF EXISTS `idiomas`;
+CREATE TABLE `idiomas` (
   `ididioma` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(100) DEFAULT NULL,
   `nemonico` char(3) DEFAULT NULL,
@@ -434,7 +428,8 @@ INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 -- Estructura de tabla para la tabla `imagenes`
 --
 
-CREATE TABLE IF NOT EXISTS `imagenes` (
+DROP TABLE IF EXISTS `imagenes`;
+CREATE TABLE `imagenes` (
   `idimagen` int(11) NOT NULL AUTO_INCREMENT,
   `nombreca` varchar(50) NOT NULL DEFAULT '',
   `revision` smallint UNSIGNED NOT NULL DEFAULT '0',
@@ -462,7 +457,8 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
 -- Estructura de tabla para la tabla `menus`
 --
 
-CREATE TABLE IF NOT EXISTS `menus` (
+DROP TABLE IF EXISTS `menus`;
+CREATE TABLE `menus` (
   `idmenu` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -484,7 +480,8 @@ CREATE TABLE IF NOT EXISTS `menus` (
 -- Estructura de tabla para la tabla `nombresos`
 --
 
-CREATE TABLE IF NOT EXISTS `nombresos` (
+DROP TABLE IF EXISTS `nombresos`;
+CREATE TABLE `nombresos` (
   `idnombreso` smallint(11) NOT NULL AUTO_INCREMENT,
   `nombreso` varchar(250) NOT NULL DEFAULT '',
   `idtiposo` int(11) DEFAULT '0',
@@ -497,7 +494,8 @@ CREATE TABLE IF NOT EXISTS `nombresos` (
 -- Estructura de tabla para la tabla `ordenadores`
 --
 
-CREATE TABLE IF NOT EXISTS `ordenadores` (
+DROP TABLE IF EXISTS `ordenadores`;
+CREATE TABLE `ordenadores` (
   `idordenador` int(11) NOT NULL AUTO_INCREMENT,
   `nombreordenador` varchar(100) DEFAULT NULL,
   `numserie` varchar(25) DEFAULT NULL,
@@ -533,7 +531,8 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 -- Estructura de tabla para la tabla `ordenadores_particiones`
 --
 
-CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
+DROP TABLE IF EXISTS `ordenadores_particiones`;
+CREATE TABLE `ordenadores_particiones` (
   `idordenador` int(11) NOT NULL DEFAULT '0',
   `numdisk` smallint NOT NULL DEFAULT '0',
   `numpar` smallint NOT NULL DEFAULT '0',
@@ -556,7 +555,8 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
 -- Estructura de tabla para la tabla `parametros`
 --
 
-CREATE TABLE IF NOT EXISTS `parametros` (
+DROP TABLE IF EXISTS `parametros`;
+CREATE TABLE `parametros` (
   `idparametro` int(11) NOT NULL AUTO_INCREMENT,
   `nemonico` char(3) NOT NULL DEFAULT '',
   `descripcion` text,
@@ -621,7 +621,8 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 
 --
 
-CREATE TABLE IF NOT EXISTS `perfileshard` (
+DROP TABLE IF EXISTS `perfileshard`;
+CREATE TABLE `perfileshard` (
   `idperfilhard` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `comentarios` text,
@@ -638,7 +639,8 @@ CREATE TABLE IF NOT EXISTS `perfileshard` (
 -- Estructura de tabla para la tabla `perfileshard_hardwares`
 --
 
-CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
+DROP TABLE IF EXISTS `perfileshard_hardwares`;
+CREATE TABLE `perfileshard_hardwares` (
   `idperfilhard` int(11) NOT NULL DEFAULT '0',
   `idhardware` int(11) NOT NULL DEFAULT '0',
   KEY `idperfilhard` (`idperfilhard`)
@@ -650,7 +652,8 @@ CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
 -- Estructura de tabla para la tabla `perfilessoft`
 --
 
-CREATE TABLE IF NOT EXISTS `perfilessoft` (
+DROP TABLE IF EXISTS `perfilessoft`;
+CREATE TABLE `perfilessoft` (
   `idperfilsoft` int(11) NOT NULL AUTO_INCREMENT,
   `idnombreso` smallint(5) unsigned DEFAULT NULL,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
@@ -666,7 +669,8 @@ CREATE TABLE IF NOT EXISTS `perfilessoft` (
 -- Estructura de tabla para la tabla `perfilessoft_softwares`
 --
 
-CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
+DROP TABLE IF EXISTS `perfilessoft_softwares`;
+CREATE TABLE `perfilessoft_softwares` (
   `idperfilsoft` int(11) NOT NULL DEFAULT '0',
   `idsoftware` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -677,7 +681,8 @@ CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
 -- Estructura de tabla para la tabla `plataformas`
 --
 
-CREATE TABLE IF NOT EXISTS `plataformas` (
+DROP TABLE IF EXISTS `plataformas`;
+CREATE TABLE `plataformas` (
   `idplataforma` int(11) NOT NULL AUTO_INCREMENT,
   `plataforma` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idplataforma`)
@@ -700,7 +705,8 @@ INSERT INTO `plataformas` (`idplataforma`, `plataforma`) VALUES
 -- Estructura de tabla para la tabla `procedimientos`
 --
 
-CREATE TABLE IF NOT EXISTS `procedimientos` (
+DROP TABLE IF EXISTS `procedimientos`;
+CREATE TABLE `procedimientos` (
   `idprocedimiento` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
@@ -716,7 +722,8 @@ CREATE TABLE IF NOT EXISTS `procedimientos` (
 -- Estructura de tabla para la tabla `procedimientos_acciones`
 --
 
-CREATE TABLE IF NOT EXISTS `procedimientos_acciones` (
+DROP TABLE IF EXISTS `procedimientos_acciones`;
+CREATE TABLE `procedimientos_acciones` (
   `idprocedimientoaccion` int(11) NOT NULL AUTO_INCREMENT,
   `idprocedimiento` int(11) NOT NULL DEFAULT '0',
   `orden` smallint(4) DEFAULT NULL,
@@ -732,7 +739,8 @@ CREATE TABLE IF NOT EXISTS `procedimientos_acciones` (
 -- Estructura de tabla para la tabla `programaciones`
 --
 
-CREATE TABLE IF NOT EXISTS `programaciones` (
+DROP TABLE IF EXISTS `programaciones`;
+CREATE TABLE `programaciones` (
   `idprogramacion` int(11) NOT NULL AUTO_INCREMENT,
   `tipoaccion` int(11) DEFAULT NULL,
   `identificador` int(11) DEFAULT NULL,
@@ -763,7 +771,8 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
 -- Estructura de tabla para la tabla `remotepc`
 --
 
-CREATE TABLE IF NOT EXISTS `remotepc` (
+DROP TABLE IF EXISTS `remotepc`;
+CREATE TABLE `remotepc` (
   `id` int(11) NOT NULL,
   `reserved` datetime DEFAULT NULL,
   `urllogin` varchar(100),
@@ -777,7 +786,8 @@ CREATE TABLE IF NOT EXISTS `remotepc` (
 -- Estructura de tabla para la tabla `repositorios`
 --
 
-CREATE TABLE IF NOT EXISTS `repositorios` (
+DROP TABLE IF EXISTS `repositorios`;
+CREATE TABLE `repositorios` (
   `idrepositorio` int(11) NOT NULL AUTO_INCREMENT,
   `nombrerepositorio` varchar(250) NOT NULL DEFAULT '',
   `ip` varchar(15) NOT NULL DEFAULT '',
@@ -800,7 +810,8 @@ INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,
 -- Estructura de tabla para la tabla `sistemasficheros`
 --
 
-CREATE TABLE IF NOT EXISTS `sistemasficheros` (
+DROP TABLE IF EXISTS `sistemasficheros`;
+CREATE TABLE `sistemasficheros` (
   `idsistemafichero` smallint(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
@@ -838,7 +849,8 @@ INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `
 -- Estructura de tabla para la tabla `softwares`
 --
 
-CREATE TABLE IF NOT EXISTS `softwares` (
+DROP TABLE IF EXISTS `softwares`;
+CREATE TABLE `softwares` (
   `idsoftware` int(11) NOT NULL AUTO_INCREMENT,
   `idtiposoftware` int(11) NOT NULL DEFAULT '0',
   `descripcion` varchar(250) NOT NULL DEFAULT '',
@@ -855,7 +867,8 @@ CREATE TABLE IF NOT EXISTS `softwares` (
 -- Estructura de tabla para la tabla `tareas`
 --
 
-CREATE TABLE IF NOT EXISTS `tareas` (
+DROP TABLE IF EXISTS `tareas`;
+CREATE TABLE `tareas` (
   `idtarea` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
@@ -874,7 +887,8 @@ CREATE TABLE IF NOT EXISTS `tareas` (
 -- Estructura de tabla para la tabla `tareas_acciones`
 --
 
-CREATE TABLE IF NOT EXISTS `tareas_acciones` (
+DROP TABLE IF EXISTS `tareas_acciones`;
+CREATE TABLE `tareas_acciones` (
   `idtareaaccion` int(11) NOT NULL AUTO_INCREMENT,
   `idtarea` int(11) NOT NULL DEFAULT '0',
   `orden` smallint(6) NOT NULL DEFAULT '0',
@@ -889,7 +903,8 @@ CREATE TABLE IF NOT EXISTS `tareas_acciones` (
 -- Estructura de tabla para la tabla `tipohardwares`
 --
 
-CREATE TABLE IF NOT EXISTS `tipohardwares` (
+DROP TABLE IF EXISTS `tipohardwares`;
+CREATE TABLE `tipohardwares` (
   `idtipohardware` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) NOT NULL DEFAULT '',
@@ -927,7 +942,8 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 -- Estructura de tabla para la tabla `tiposoftwares`
 --
 
-CREATE TABLE IF NOT EXISTS `tiposoftwares` (
+DROP TABLE IF EXISTS `tiposoftwares`;
+CREATE TABLE `tiposoftwares` (
   `idtiposoftware` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) NOT NULL DEFAULT '',
@@ -949,7 +965,8 @@ INSERT INTO `tiposoftwares` (`idtiposoftware`, `descripcion`, `urlimg`) VALUES
 -- Estructura de tabla para la tabla `tiposos`
 --
 
-CREATE TABLE IF NOT EXISTS `tiposos` (
+DROP TABLE IF EXISTS `tiposos`;
+CREATE TABLE `tiposos` (
   `idtiposo` int(11) NOT NULL AUTO_INCREMENT,
   `tiposo` varchar(250) NOT NULL DEFAULT '',
   `idplataforma` int(11) NOT NULL DEFAULT '0',
@@ -977,7 +994,8 @@ INSERT INTO `tiposos` (`idtiposo`, `tiposo`, `idplataforma`) VALUES
 -- Estructura de tabla para la tabla `tipospar`
 --
 
-CREATE TABLE IF NOT EXISTS `tipospar` (
+DROP TABLE IF EXISTS `tipospar`;
+CREATE TABLE `tipospar` (
   `codpar` int(8) NOT NULL,
   `tipopar` varchar(250) NOT NULL DEFAULT '',
   `clonable` tinyint(4) NOT NULL DEFAULT '0',
@@ -1066,7 +1084,8 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 -- Estructura de tabla para la tabla `universidades`
 --
 
-CREATE TABLE IF NOT EXISTS `universidades` (
+DROP TABLE IF EXISTS `universidades`;
+CREATE TABLE `universidades` (
   `iduniversidad` int(11) NOT NULL AUTO_INCREMENT,
   `nombreuniversidad` varchar(200) NOT NULL DEFAULT '',
   `comentarios` text,
@@ -1086,7 +1105,8 @@ INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`
 -- Estructura de tabla para la tabla `urlimagesitems`
 --
 
-CREATE TABLE IF NOT EXISTS `urlimagesitems` (
+DROP TABLE IF EXISTS `urlimagesitems`;
+CREATE TABLE `urlimagesitems` (
   `idurlimagesitems` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idurlimagesitems`)
@@ -1103,7 +1123,8 @@ CREATE TABLE IF NOT EXISTS `urlimagesitems` (
 -- Estructura de tabla para la tabla `usuarios`
 --
 
-CREATE TABLE IF NOT EXISTS `usuarios` (
+DROP TABLE IF EXISTS `usuarios`;
+CREATE TABLE `usuarios` (
   `idusuario` int(11) NOT NULL AUTO_INCREMENT,
   `usuario` varchar(50) NOT NULL DEFAULT '',
   `pasguor` varchar(56) NOT NULL DEFAULT '',

@@ -44,9 +44,11 @@ ALTER TABLE imagenes
 	ADD inremotepc TINYINT DEFAULT 0;
 
 # Adaptar campo para codificar claves de usuarios (ticket #778),
+# eliminar campo sin uso (ticket #730),
 # añadir clave de acceso a la API REST (tickets #708).
 ALTER TABLE usuarios
 	MODIFY pasguor VARCHAR(56) NOT NULL DEFAULT '',
+	DELETE idambito,
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 # Preparar generación de clave de acceso a la API REST para el usuario principal (ticket #708).
 UPDATE usuarios
@@ -141,5 +143,9 @@ DELIMITER ;
 
 # Ampliar programación de tareas hasta 2025 (ticket #732).
 ALTER TABLE programaciones
-	MODIFY annos SMALLINT DEFAULT NULL;
+	MODIFY annos SMALLINT DEFAULT NULL,
+	MODIFY meses SMALLINT DEFAULT NULL;
+
+# Eliminar tabla sin uso (ticket #730).
+DROP TABLE IF EXISTS campus;
 
