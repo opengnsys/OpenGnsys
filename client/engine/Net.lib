@@ -36,8 +36,8 @@ if [ $# -lt 1 ]; then
 fi
 
 REPO="${1^^}"
-# Si REPO tomamos el valor por defecto.
-[ "$REPO" == "REPO" ] && REPO=$ogrepo
+# Si REPO tomamos el repositorio actual
+[ "$REPO" == "REPO" ] && REPO=$(ogGetRepoIp)
 
 OLDREPO=$(ogGetRepoIp)
 # Si $1 y $2 son el repositorio y la OU actual me salgo
