@@ -20,7 +20,7 @@
 #@date    2015-06-16
 #*/
 function ogChangeRepo {
-local SRCIMG 
+local SRCIMG NEWREPO REPO OGUNIT
 
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME IPREPO [ OgUnit ]" \
@@ -35,13 +35,16 @@ if [ $# -lt 1 ]; then
     return $?
 fi
 
-REPO="${1^^}"
-# Si REPO tomamos el repositorio actual
-[ "$REPO" == "REPO" ] && REPO=$(ogGetRepoIp)
 
-OLDREPO=$(ogGetRepoIp)
+# Si REPO tomamos el repositorio y la unidad organizativa actual
+REPO=$(ogGetRepoIp)
+OGUNIT="$(df --output=source | awk -F "/" '/ogimages/ {print $5}')"
+
+# Parametros de entrada. Si $1 = "REPO" dejo el repositorio actual
+[ "${1^^}" == "REPO" ] && NEWREPO="$REPO" || NEWREPO="${1}"
+
 # Si $1 y $2 son el repositorio y la OU actual me salgo
-[ "$REPO" == "$OLDREPO" ] && [ "$2" == "$ogunit" ]  && return 0
+[ "$NEWREPO" == "$REPO" ] && [ "$2" == "$OGUNIT" ]  && return 0
 
 source /scripts/functions
 source /scripts/ogfunctions
@@ -50,13 +53,13 @@ umount $OGIMG
 eval $(grep "OPTIONS=" /scripts/ogfunctions)
 [ "$ogactiveadmin" == "true" ] && RW=",rw" || RW=",ro" 
 
-ogEcho session log "$MSG_HELP_ogChangeRepo $REPO ${2%/}"
-ogConnect $REPO $ogprotocol $SRCIMG $OGIMG $RW
+ogEcho session log "$MSG_HELP_ogChangeRepo $NEWREPO ${2%/}"
+ogConnect $NEWREPO $ogprotocol $SRCIMG $OGIMG $RW
 
 # Si da error volvemos a montar el inicial
 if [ $? -ne 0 ]; then
-    ogConnect $OLDREPO $ogprotocol $SRCIMG $OGIMG $RW
-    ogRaiseError session $OG_ERR_REPO "$REPO" 
+    ogConnect $REPO $ogprotocol $SRCIMG $OGIMG $RW
+    ogRaiseError session $OG_ERR_REPO "$NEWREPO" 
     return $?
 fi
 
