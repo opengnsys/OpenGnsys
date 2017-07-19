@@ -17,7 +17,7 @@
 PROG=$(basename "$(realpath "$0")")
 OPENGNSYS=/opt/opengnsys
 DOWNLOADDIR=$OPENGNSYS/lib
-DOWNLOADURL="http://opengnsys.es/downloads"
+DOWNLOADURL="https://opengnsys.es/trac/downloads"
 TFTPDIR=$OPENGNSYS/tftpboot
 DEFOGLIVE="ogLive"
 INFOFILE=$OPENGNSYS/etc/ogliveinfo.json
