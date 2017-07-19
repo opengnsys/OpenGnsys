@@ -66,13 +66,13 @@ fi
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
-OPENGNSYS_SERVER="www.opengnsys.es"
+OPENGNSYS_SERVER="opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
 else
 	USESVN=1
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.1/"
+SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -407,7 +407,7 @@ function svnExportCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
+	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
 	wget --spider -q $OPENGNSYS_SERVER
 }
 
@@ -470,7 +470,7 @@ EOT
 	fi
 	# Obtener URL para descargas adicionales.
 	DOWNLOADURL=$(oglivecli config download-url 2>/dev/null)
-	DOWNLOADURL=${DOWNLOADURL:-"http://$OPENGNSYS_SERVER/downloads"}
+	DOWNLOADURL=${DOWNLOADURL:-"https://$OPENGNSYS_SERVER/trac/downloads"}
 
 	echoAndLog "${FUNCNAME}(): client files update success."
 }

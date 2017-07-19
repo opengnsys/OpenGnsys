@@ -98,14 +98,14 @@ echo -e "\\n=============================="
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e "$(dirname "$0")")
 PROGRAMNAME=$(basename "$0")
-OPENGNSYS_SERVER="www.opengnsys.es"
-DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
+OPENGNSYS_SERVER="opengnsys.es"
+DOWNLOADURL="https://$OPENGNSYS_SERVER/trac/downloads"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
 else
 	USESVN=1
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/branches/version1.1/"
+SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -823,7 +823,7 @@ function checkNetworkConnection()
 	fi
 
 	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server conectivity."
-	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
+	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
 	if which wget &>/dev/null; then
 		wget --spider -q $OPENGNSYS_SERVER
 	elif which curl &>/dev/null; then
