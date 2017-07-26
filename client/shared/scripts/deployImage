@@ -63,6 +63,8 @@ PART="$4"
 PROTO="${5^^}"
 PROTO="${PROTO:-"UNICAST"}"
 PROTOOPT="$6"
+# Unidad organizativa.
+[ "$ogunit" != "" ] && OGUNIT="$ogunit"
 
 #Load engine configurator from engine.cfg file.
 #Carga el configurador del engine desde el fichero engine.cfg
@@ -83,17 +85,22 @@ ogEcho log session "$MSG_HELP_ogUnmount $DISK $PART"
 ogUnmount $DISK $PART 2>/dev/null
 
 # Valor por defecto para el repositorio.
-ogCheckIpAddress "$REPO"
-[ $? == 0 -o "$REPO" == "REPO"  ] && MODE="REPO"
-[ "$REPO" == "$(ogGetIpAddress)" -o "$REPO" == "CACHE" ] && MODE="CACHE"
+if [ "$REPO" == "$(ogGetIpAddress)" -o "$REPO" == "CACHE" ]; then
+    MODE="CACHE"
+else
+    ogCheckIpAddress "$REPO"
+    if [ $? == 0 -o "$REPO" == "REPO"  ]; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO ${OGUNIT} || exit $(ogRaiseError $OG_ERR_NOTFOUND "$REPO $OGUNIT"; echo $?)
+        MODE="REPO"
+    fi
+fi
 
-# Se comenta lo siguiente porque no se puede obtener antes de cambiar de repositorio
-# 	Solo informativo, se comprueba en updateCache y restoreImage
 #Informacioin previa de la imagen
-#IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2"; echo $?)
-#IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $MODE $IMGNAME.img`) || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2"; echo $?)
+IMGSIZE=$(ls -s `ogGetPath $MODE $IMGNAME.img`| cut -f1 -d" ")
 
-#ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
+ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
 
 # Procesar repositorio.
 case "$MODE" in
