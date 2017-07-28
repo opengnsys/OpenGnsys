@@ -48,6 +48,10 @@ PART="$4"
 PROTO="${5^^}"
 PROTO=${PROTO:-"UNICAST"}
 PROTOOPT="$6"
+# Si MCASTWAIT menos que tiempo de espera del servidor lo aumento
+if [ "${PROTO%-*}" == "MULTICAST" ] && [[ ${PROTOOPT##*:} =~ ^-?[0-9]+$ ]]; then
+    [ ${MCASTWAIT:-0} -lt ${PROTOOPT##*:} ] && let MCASTWAIT=${PROTOOPT##*:}+5
+fi
 IMGTYPE="${IMGTYPE:-"img"}"
 
 # Unidad organizativa
