@@ -1286,8 +1286,8 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
-	//muestraMensaje(7,NULL); // Creando Inventario Software
-	//if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
+	muestraMensaje(7,NULL); // Creando Inventario Software
+	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(30,NULL);// Creando Imagen Básica, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
 		sprintf(parametros,"%s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,whl,eli,cmp,bpi,cpc,bpc,nba,msy,rti);
@@ -1299,11 +1299,11 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 		}
 		else
 			muestraMensaje(28,NULL);// El proceso de creación de imagen básica ha terminado correctamente
-	//}
-	//else{
-	//	sprintf(msglog,"%s:%s",tbErrores[86],nfn);
-	//	errorInfo(modulo,msglog);
-	//}
+	}
+	else{
+		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		errorInfo(modulo,msglog);
+	}
 
 	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
 
@@ -1386,8 +1386,8 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
-//	muestraMensaje(7,NULL); // Creando Inventario Software
-//	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
+	muestraMensaje(7,NULL); // Creando Inventario Software
+	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(25,NULL);// Creando Imagen Incremental, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
 		sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,ncf,whl,eli,cmp,bpi,cpc,bpc,nba,msy,rti);
@@ -1400,11 +1400,11 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 		}
 		else
 			muestraMensaje(26,NULL);// El proceso de creación de imagen incremental ha terminado correctamente
-//	}
-//	else{
-//		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
-//		errorInfo(modulo,msglog);
-//	}
+	}
+	else{
+		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		errorInfo(modulo,msglog);
+	}
 
 	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
 
