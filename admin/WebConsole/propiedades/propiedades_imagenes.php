@@ -260,6 +260,10 @@ if ($opcion == 1 && $datospost == 1) {
 			<td>&nbsp;<?php	echo $sistoperativo?> </td>
 		</tr>
 	    <?php  } // fin if != op_alta
+	    // Mensaje aviso ruta de origen
+	    if ($opcion==$op_alta && $tipoimg==$IMAGENES_BASICAS) {
+		echo '<tr><th colspan="14">'.$TbMsg["WARN_SOURCE_PATH"].'</th></tr>';
+	    }
 	}?>	
 	<!-------------------------------------------------------------------------------------->
 	</TABLE>
