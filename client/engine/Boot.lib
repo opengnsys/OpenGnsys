@@ -1380,4 +1380,96 @@ grubSyntax "$KERNELPARAM" >> "$FILECFG"
 burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
 }
 
+#/**
+# ogBurgDefaultEntry   int_disk_GRUBCFG  int_partition_GRUBCFG
+#@brief   Configura la entrada por defecto de Burg
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@param   int_default_entry
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_OUTOFLIMIT Param $3 no es entero.
+#@exception OG_ERR_NOTFOUND   Fichero de configuración no encontrado: burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg 
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-08-09
+#*/ ##
+function ogBurgDefaultEntry {
+
+# Variables locales.
+local PART BURGCFG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_default_entry  " \
+           "$FUNCNAME 1 1 0 "
+    return
+fi  
+
+# Error si no se reciben 3 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_default_entry" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+
+# Comprobamos que $3 es un número
+[[ $3 =~ ^[0-9]+$ ]] || ogRaiseError $OG_ERR_OUTOFLIMIT "\'$3\' not integer" ||  return $?
+
+# Comprobamos que exista fichero burg.cfg
+BURGCFG=$PART/boot/burg/burg.cfg
+[ -f $BURGCFG ] || ogRaiseError $OG_ERR_NOTFOUND "$BURGCFG" || return $?
+
+sed -i s/"^set default.*$"/"set default=$3"/g $BURGCFG
+
+echo "${MSG_HELP_ogBurgDefaultEntry%%\.}: $@"
+}
+
+#/**
+# ogBurgOgliveDefaultEntry 
+#@brief   Configura la entrada de ogLive como la entrada por defecto de Burg.
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada de OgLive no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg 
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-08-09
+#*/ ##
+function  ogBurgOgliveDefaultEntry {
+
+# Variables locales.
+local PART BURGCFG NUMENTRY
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage" \
+           "$FUNCNAME 1 1"
+    return
+fi  
+
+# Error si no se reciben 2 parametros.
+[ $# -eq 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+
+# Comprobamos que exista fichero burg.cfg
+BURGCFG=$PART/boot/burg/burg.cfg
+[ -f $BURGCFG ] || ogRaiseError $OG_ERR_NOTFOUND "$BURGCFG" || return $?
+
+# Detectamos cual es la entrada de ogLive
+NUMENTRY=$(grep ^menuentry burg.cfg| grep -n "OpenGnsys Live"|cut -d: -f1)
+
+# Si no existe entrada de ogLive nos salimos
+[ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $BURGCFG" || return $?)
+
+let NUMENTRY=$NUMENTRY-1
+sed -i s/"^set default.*$"/"set default=$NUMENTRY"/g $BURGCFG
+
+echo "${MSG_HELP_ogBurgOgliveDefaultEntry%\.}: $@"
+}
 
