@@ -340,7 +340,7 @@ for AGENTDIR in usr/share/OGAgent "Program Files/OGAgent" "Program Files (x86)/O
 done
 [ -n "$CFGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "ogagent.cfg" || return $?
 # Parchear dirección del servidor OpenGnsys en el fichero de configuración de OGAgent.
-sed -i "0,/remote=/ s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys/rest/," $CFGFILE
+sed -i "0,/remote=/ s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys/rest/," "$CFGFILE"
 }
 
 
