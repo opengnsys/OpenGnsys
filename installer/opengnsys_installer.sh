@@ -204,7 +204,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget curl net-tools doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq )
 		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
 				   'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		if [ "$OSDISTRIB" == "centos" ]; then
@@ -834,6 +834,15 @@ function checkNetworkConnection()
 	fi
 }
 
+# Convierte nº de bits (notación CIDR) en máscara de red (gracias a FriedZombie en openwrt.org).
+cidr2mask ()
+{
+	# Number of args to shift, 255..255, first non-255 byte, zeroes
+	set -- $[ 5 - ($1 / 8) ] 255 255 255 255 $[ (255 << (8 - ($1 % 8))) & 255 ] 0 0 0
+	[ $1 -gt 1 ] && shift $1 || shift
+	echo ${1-0}.${2-0}.${3-0}.${4-0}
+}
+
 # Obtener los parámetros de red de la interfaz por defecto.
 function getNetworkSettings()
 {
@@ -858,12 +867,10 @@ function getNetworkSettings()
 		exit 1
 	fi
 	for dev in ${DEVICE[*]}; do
-		SERVERIP[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+		SERVERIP[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
 		if [ -n "${SERVERIP[i]}" ]; then
-			NETMASK[i]=$(LANG=C ifconfig $dev | \
-						awk '/Mask/ {sub(/.*:/,"",$4); print $4}
-						     /netmask/ {print $4}')
-			NETBROAD[i]=$(ip -o addr show dev $dev | awk '$3~/inet$/ {print ($6)}')
+			NETMASK[i]=$( cidr2mask $(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/.*\//, "", $4); print ($4)}') )
+			NETBROAD[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {print ($6)}')
 			NETIP[i]=$(ip route | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
 			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1=="default" && $5==d {print $3}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
