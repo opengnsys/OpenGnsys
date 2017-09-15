@@ -247,8 +247,6 @@ partCode += " EMPTY:0";
 
 	form.codigo.value="\
 " + sizecacheCode + " \n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions \"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" 2>/dev/null\n  \
 ogUnmountCache \n \
@@ -256,13 +254,17 @@ ogUnmountCache \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogExecAndLog command session ogListPartitions "+n_disk+" \n \
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
-ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
-ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
-ogSetPartitionActive "+n_disk+" 1 \n \
-ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
-ogUpdatePartitionTable "+n_disk+" \n \
-ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
+if ogExecAndLog command session ogCreatePartitions "+n_disk+" " + partCode + "; then \n \
+  ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
+  ogSetPartitionActive "+n_disk+" 1 \n \
+  ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
+  ogUpdatePartitionTable "+n_disk+" \n \
+  ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
+  ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
+else \n \
+  ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions \n \
+  sleep 5 \n \
+fi";
 }
 
 
