@@ -187,6 +187,7 @@ ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
 sizecache=`ogGetCacheSize` \n ";
 				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
@@ -199,6 +200,7 @@ initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";
 				} 
 				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
@@ -207,6 +209,7 @@ initCache " + n_disk + " " + cacheSize + " NOMOUNT &>/dev/null";
 		} else {
 			cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n";
 partCode += " EMPTY:0";
@@ -248,7 +251,7 @@ partCode += " EMPTY:0";
 	form.codigo.value="\
 " + sizecacheCode + " \n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
-ogUnmountAll "+n_disk+" 2>/dev/null\n  \
+ogUnmountAll "+n_disk+" 2>/dev/null \n \
 ogUnmountCache \n \
 " + cacheCode + " \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
@@ -262,7 +265,7 @@ if ogExecAndLog command session ogCreatePartitions "+n_disk+" " + partCode + "; 
   ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
   ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
 else \n \
-  ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions \n \
+  ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
   sleep 5 \n \
 fi";
 }
