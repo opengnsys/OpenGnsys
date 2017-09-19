@@ -77,6 +77,14 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE aulas
 			ADD oglivedir VARCHAR(50) NOT NULL DEFAULT 'ogLive';
 	END IF;
+	# Eliminar campos sin uso en aulas (ticket #730).
+	IF EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='cuadro_x' AND TABLE_NAME='aulas' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE aulas 
+			DROP cuadro_x,
+			DROP cuadro_y;
+	END IF;
 	# Eliminar campos no usado en inventario de hardware (ticket #713).
 	IF EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='pci' AND TABLE_NAME='tipohardwares' AND TABLE_SCHEMA=DATABASE())

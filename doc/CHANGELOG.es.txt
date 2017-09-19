@@ -67,6 +67,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #778	Codificar claves de usuarios (mejora)
 #779	Crear comando "Enviar mensaje"
 #782	Crear registro de acciones para realizar informes
+#789	Actualizar plantilla PXE al mover ordenador 
 #798	Mostrar imágenes en orden alfabético
 
 Tickets resueltos en módulo OpenGnsys Installer:

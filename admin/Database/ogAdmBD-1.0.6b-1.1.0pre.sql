@@ -34,8 +34,11 @@ INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
 	ON DUPLICATE KEY UPDATE
 		idsistemafichero=VALUES(idsistemafichero), nemonico=VALUES(nemonico), descripcion=VALUES(descripcion);
 
+# Eliminar campos sin uso (ticket #730).
 # Añadir campos para aulas: servidor NTP e inclusión en proyecto Remote PC (tickets #725 y #708).
 ALTER TABLE aulas
+	DROP cuadro_x,
+	DROP cuadro_y,
 	ADD ntp VARCHAR(30) AFTER proxy,
 	ADD inremotepc TINYINT DEFAULT 0;
 # Añadir campos para nº de revisión de imágenes y su inclusión en proyecto Remote PC (tickets #737 y #708).

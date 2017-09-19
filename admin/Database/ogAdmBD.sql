@@ -113,8 +113,6 @@ CREATE TABLE `aulas` (
   `nombreaula` varchar(100) NOT NULL DEFAULT '',
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `urlfoto` varchar(250) DEFAULT NULL,
-  `cuadro_y` char(3) DEFAULT NULL,
-  `cuadro_x` char(3) DEFAULT NULL,
   `cagnon` tinyint(1) DEFAULT NULL,
   `pizarra` tinyint(1) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
