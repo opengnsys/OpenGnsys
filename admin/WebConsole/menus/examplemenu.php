@@ -25,7 +25,7 @@
 	dl {
 		background: transparent url('images/xp_peque.png') no-repeat top left;
 		padding: 0 0 1em 5em;
-		margin: 5px 50px;
+		margin: 2em 10em;
 	}
 
 	dl.windows {
@@ -41,7 +41,7 @@
 	}
 
 	dt { float: left;}
-	dd { margin: 1em 20em; }
+	dd { margin: 1em 10em 1em 20em; }
 
 	div.admin {
 		margin: 1em;
@@ -56,33 +56,33 @@
 
 	<h1>Option Menu</h1>
 	<dl class="windows">
-		<dt><a href="command:bootOs 1 1" title="Init session Windows" accesskey="1">Init session Windows.</a></dt>
+		<dt><a href="command:bootOs 1 1" title="Init session Windows, accesskey: 1" accesskey="1">Init session Windows.</a></dt>
 			<dd>Normal boot Windows without changes.</dd>
-		<dt><a href="commandwithconfirmation:restoreImage REPO windows 1 1" title="Format the disk and install the Windows operating system" accesskey="3">Install Windows.</a></dt>
+		<dt><a href="commandwithconfirmation:restoreImage REPO windows 1 1" title="Format the disk and install the Windows operating system, accesskey: 2" accesskey="2">Install Windows.</a></dt>
 			<dd>The installation process takes a few minutes.</dd>
 	</dl>
 
-	<dl class="windows">
-		<dt><a href="commandwithconfirmation:/opt/opengnsys/interfaceAdm/RestaurarImagenBasica 1 1 WINXPRD2 10.1.15.3 0000 0" title="Restore Windows Image" accesskey="1">Restore Windows Image.</a></dt>
+	<!-- dl class="windows">
+		<dt><a href="commandwithconfirmation:/opt/opengnsys/interfaceAdm/RestaurarImagenBasica 1 1 WINXPRD2 10.1.15.3 0000 0" title="Restore Windows Image, accesskey: 2" accesskey="2">Restore Windows Image.</a></dt>
 			<dd>Restore Windows Image using synchronization.</dd>
-	</dl>	
+	</dl -->	
 	
 	<dl class="linux">
-		<dt><a href="command:bootOs 1 2" title="Init session GNU/Linux" accesskey="2">Init session GNU/Linux.</a></dt>
+		<dt><a href="command:bootOs 1 2" title="Init session GNU/Linux, accesskey: 3" accesskey="3">Init session GNU/Linux.</a></dt>
 			<dd>Normal boot <acronym title="GNU's not Unix">GNU</acronym>/Linux without changes.</dd>
-		<dt><a href="commandwithconfirmation:restoreImage REPO linux 1 2" title="Format the disk and install the GNU/Linux operating system GNU/Linux" accesskey="4">Install GNU/Linux.</a></dt>
+		<dt><a href="commandwithconfirmation:restoreImage REPO linux 1 2" title="Format the disk and install the GNU/Linux operating system GNU/Linux, accesskey: 4" accesskey="4">Install GNU/Linux.</a></dt>
 			<dd>The installation process takes a few minutes.</dd>
 	</dl>
 
 	<dl class="apagar">
-		<dt><a href="command:poweroff" title="Power-off" accesskey="5">Power-off.</a></dt>
+		<dt><a href="command:poweroff" title="Power-off, accesskey: 0" accesskey="0">Power-off.</a></dt>
 			<dd>Power-off computer.</dd>
-		<dt><a href="command:reboot" title="Reboot" accesskey="6">Reboot.</a></dt>
+		<dt><a href="command:reboot" title="Reboot, accesskey: 6" accesskey="6">Reboot.</a></dt>
 			<dd>Reboot computer.</dd>
 	</dl>
 
 <?php	// Access to private menu.
-if ($_SERVER['HTTP_X_FORWARDED_FOR']){
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 } else {
     $ip = $_SERVER['REMOTE_ADDR'];
