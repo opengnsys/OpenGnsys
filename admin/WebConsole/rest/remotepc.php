@@ -55,6 +55,10 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 		if (!filter_var($maxtime, FILTER_VALIDATE_INT, $opts)) {
 			throw new Exception("Time must be positive integer (in hours)");
 		}
+		// Check for a valid remote agent.
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
 	} catch (Exception $e) {
 		// Communication error.
 		$response["message"] = $e->getMessage();
@@ -237,6 +241,10 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 		if (!filter_var($urlLogout, FILTER_VALIDATE_URL)) {
 			throw new Exception("Must be a valid URL for logout notification");
 		}
+		// Check for a valid remote agent.
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
 	} catch (Exception $e) {
 		// Error message.
 		$response["message"] = $e->getMessage();
@@ -311,6 +319,10 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	try {
 		if (!checkIds($ouid, $labid, $clntid)) {
 			throw new Exception("Ids. must be positive integers");
+		}
+		// Check for a valid remote agent.
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
 		}
 	} catch (Exception $e) {
 		// Error message.
