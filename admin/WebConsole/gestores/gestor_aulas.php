@@ -298,7 +298,7 @@ function Gestiona(){
 					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
 					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
 					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion,
-						oglivedir=IF(@oglivedir=0,oglivedir,@oglivedir)
+					    oglivedir=IF(@oglivedir='0',oglivedir,@oglivedir)
 					WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
