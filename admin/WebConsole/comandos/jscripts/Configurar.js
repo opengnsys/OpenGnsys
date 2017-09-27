@@ -121,15 +121,24 @@ function comprobarDatos(cc)
 	var npar; // Partición en formato integer
 	var tch=0; // Tamaño de la caché
 
+	var allpartsize=0; // Tamaño total de todas las particiones.
+	var extsize=0; // Tamaño partición "EXTENDED"
+	var allextsize=0; // Tamaño total de las particiones extendidas.
+
+	var hdsize = document.getElementById("hdsize").value;
+
 	var trCfg = document.getElementById("TR_"+cc); // Recupera primer <TR> de la configuración
 	trCfg=trCfg.nextSibling; // Primera fila de particiones
+	trCfg=trCfg.nextSibling; // Fila datos disco duro
 	while(trCfg.id!="TRIMG_"+cc){
 
 		var tama=trCfg.childNodes[itama].childNodes[0].value; // Tamaño de partición
 
+
 		var par=tomavalorDesple(trCfg.childNodes[ipar].childNodes[0]); // Partición
 		npar=parseInt(par);
 		if(maxpar<npar) maxpar=npar; // Guarda partición de mayor orden
+
 		if (npar==4){
 			swc=true; // Se especifica partición caché
 			tch=tama;
@@ -155,7 +164,17 @@ function comprobarDatos(cc)
 			return(false);
 		}	
 
-		if(codpar=="EXTENDED") swe=true;
+		if(codpar=="EXTENDED") {
+			swe=true;
+			extsize=tama;
+		} else {
+			if (npar<=4){
+				allpartsize+=parseInt(tama);
+			} else {
+				allextsize+=parseInt(tama);
+			}
+		}
+
 		if(codpar=="CACHE" && npar!=4){
 			alert(TbMsg[6]);
 			trCfg.childNodes[icodpar].childNodes[0].focus();
@@ -194,6 +213,22 @@ function comprobarDatos(cc)
 			alert(TbMsg[7]);
 			return(false);
 		}
+	}
+
+
+	// Alerta si las particiones lógicas son mayores que la extendida
+	if(swe){
+		if (allextsize>extsize) {
+			alert(TbMsg["EXTSIZE"]);
+			return(false);
+		}
+		allpartsize+=parseInt(extsize);
+	}
+	// Alerta si tamaño del disco menor que las particiones 
+	if (hdsize<allpartsize) {
+		alert(TbMsg["HDSIZE"]);
+		return(false);
+
 	}
 
 	/* Compone cadena de particiones (Deja fuera la cache,

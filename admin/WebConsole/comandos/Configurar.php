@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/RecopilaIpesMacs.php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 include_once("../includes/ConfiguracionesParticiones.php");

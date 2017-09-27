@@ -12,4 +12,5 @@ TbMsg[4]="ATENCION: Se va a eliminar esta partición ¿ Esta seguro ?";
 TbMsg[5]="Debe especificar el tipo de sistema de ficheros si desea formatear la particion";
 TbMsg[6]="La CACHE solo puede definirse en la particion 4";
 TbMsg[7]="El número maximo de particiones es 4";
-
+TbMsg["EXTSIZE"]="El tamaño de las particiones lógicas es mayor que el de la partición extendida";
+TbMsg["HDSIZE"]="El tamaño de las particiones es mayor el tamaño del disco";
