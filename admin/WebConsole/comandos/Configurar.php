@@ -150,7 +150,7 @@ function HTMLSELECT_particiones($p)
 	
 	$SelectHtml="";
 	$opciones="";
-	for($i=0;$i<8;$i++)
+	for($i=0;$i<9;$i++)
 			$opciones.="$i=$i".chr(13);
 	$opciones.="$i=$i";
 	$SelectHtml.=HTMLCTESELECT($opciones,"particiones","estilodesple","",$p,40,"");

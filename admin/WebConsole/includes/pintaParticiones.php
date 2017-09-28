@@ -319,12 +319,6 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
 	echo '</TR>';
 
-	// Datos del disco
-	$tm=tomaTamano(0,$idordenadores);
-	echo "<tr align='center'>".
-	     "<td></td>\n<td></td>\n<td>Disco duro</td>\n".
-	     "<td></td>\n<td> $tm <input type='hidden' id='hdsize' name='hdsize' style='width:100' value='".$tm."'></td>\n".
-	     "<td></td>\n<td></td>\n</tr>";
 
 	$aviso=false;
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
@@ -358,7 +352,13 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 		}
 	}
 	// Marcar fin de zona de datos de la tabla.
-	echo '<TR id="TRIMG_'.$cc.'" height=1><th colspan='.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></TR>';
+	// Datos del disco
+	$tm=tomaTamano(0,$idordenadores);
+	echo '<tr id="TRIMG_'.$cc.'" align="center">'.
+	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px;  "'.">".$TbMsg["HD"]."</td>".
+     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px; "'."> $tm <input type='hidden' id='hdsize' name='hdsize' style='width:100' value='".$tm."'></td>".
+	     "\n<td></td>\n<td></td>\n</tr>";
+	echo '<TR><th colspan='.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></TR>';
 	// Mostrar aviso: solo disco 1 con tabla MSDOS.
 	if ($aviso) {
 		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';

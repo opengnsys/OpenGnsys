@@ -44,4 +44,6 @@
 	$TbMsg[32]='Grandària de partició';
 	$TbMsg[33]='Nom de la Imatge ';
 	$TbMsg[34]='Perfil Software';
+
+	$TbMsg["HD"]='Disco';
 ?>

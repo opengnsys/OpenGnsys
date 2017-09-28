@@ -23,4 +23,6 @@
 	$TbMsg[15]='Hide';
 	$TbMsg[16]='Show';
 	$TbMsg[17]='¡¡ Free  space !!';
+
+	$TbMsg["HD"]='Disk';
 ?>
