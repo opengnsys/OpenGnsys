@@ -129,7 +129,6 @@ function comprobarDatos(cc)
 
 	var trCfg = document.getElementById("TR_"+cc); // Recupera primer <TR> de la configuración
 	trCfg=trCfg.nextSibling; // Primera fila de particiones
-	trCfg=trCfg.nextSibling; // Fila datos disco duro
 	while(trCfg.id!="TRIMG_"+cc){
 
 		var tama=trCfg.childNodes[itama].childNodes[0].value; // Tamaño de partición
@@ -214,7 +213,6 @@ function comprobarDatos(cc)
 			return(false);
 		}
 	}
-
 
 	// Alerta si las particiones lógicas son mayores que la extendida
 	if(swe){
