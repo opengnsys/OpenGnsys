@@ -22,6 +22,9 @@ OPENGNSYS="/opt/opengnsys"
 MYSQLFILE="$TMPDIR/ogAdmBD.sql"
 MYSQLFILE2="$TMPDIR/usuarios.sql"
 MYSQLBCK="$OPENGNSYS/doc/ogAdmBD.sql-$DATE"
+CATALOG="ogAdmBD"
+
+DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"      # Clave por defecto root de MySQL
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -96,6 +99,7 @@ done
 echo "   * Guardamos los ficheros PXE de los clientes."
 mv $OPENGNSYS/tftpboot/menu.lst $OPENGNSYS/tftpboot/menu.lst-$DATE
 cp -r $TMPDIR/menu.lst  $OPENGNSYS/tftpboot
+chown -R www-data:www-data $OPENGNSYS/tftpboot/menu.lst
 
 # Configuración de los clientes
 echo "   * Guardamos la configuración de los clientes."
@@ -119,6 +123,34 @@ cat << EOT > $MYCNF
 user=$USUARIO
 password=$PASSWORD
 EOT
+
+# Si la BD tiene no definido el trigger necesitamos permisos de root
+mysql --defaults-extra-file=$MYCNF -e "SHOW TRIGGERS FROM ogAdmBD;" |grep "Trigger" &>/dev/null
+if [ $? -eq 0 ]; then
+    # Existe el trigger: eliminamos líneas del trigger en ogAdmBD.sql
+    read INI END <<< $(grep -n -e TRIGGER -e "END.*;;" $MYSQLFILE |cut -d: -f1)
+    sed -i "$INI,${END}d" $MYSQLFILE
+else
+    # No existe: necesitamos privilegios de root
+    # Clave root de MySQL
+    while : ; do
+        echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): ";
+        read -r MYSQL_ROOT_PASSWORD
+        if [ -n "${MYSQL_ROOT_PASSWORD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+                echo -e "\\aERROR: Must be alphanumeric, try again..."
+        else
+                # Si esta vacio ponemos el valor por defecto
+                MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-$DEFAULT_MYSQL_ROOT_PASSWORD}"
+                break
+        fi
+    done
+    cat << EOT > $MYCNF
+[client]
+user=root
+password=$MYSQL_ROOT_PASSWORD
+EOT
+
+fi
 
 # Copia de seguridad del estado de la base de datos
 mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLBCK
