@@ -343,9 +343,9 @@ fi
 function ogMcastSyntax ()
 {
 
-local ISUDPCAST PARM SESSION SESSIONPARM MODE PORTBASE PERROR
+local ISUDPCAST RECEIVERTIMEOUT PARM SESSION SESSIONPARM MODE PORTBASE PERROR
 local METHOD ADDRESS BITRATE NCLIENTS MAXTIME CERROR 
-local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT
+local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT 
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" -o "$2" == "help" ]; then
@@ -365,6 +365,12 @@ PERROR=0
 ISUDPCAST=$(udp-receiver --help 2>&1)
 echo $ISUDPCAST | grep start-timeout > /dev/null || ogRaiseError $OG_ERR_NOTEXEC "upd-cast no existe o version antigua -requerida 2009-"|| return $?
 
+# Si la version de  udp-receiver permite --receive-timeout utilizamos la opción
+if echo $ISUDPCAST | grep receive-timeout &>/dev/null; then
+    RECEIVERTIMEOUT=" --receive-timeout $MCASTWAIT"
+else
+    RECEIVERTIMEOUT=""
+fi
 
 # Error si no se reciben $PARM parámetros.
 echo "$1" | grep "PARTITION" > /dev/null && PARM=5 || PARM=3
@@ -472,13 +478,10 @@ MCASTWAIT=${MCASTWAIT:-120}
 REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
 CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
 if [ $REPOSUBRED == $CLIENTSUBRED ]; then
-	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE  --start-timeout $MCASTWAIT --receive-timeout $MCASTWAIT"
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
 else
-	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP  --start-timeout $MCASTWAIT --receive-timeout $MCASTWAIT"
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
 fi
-
-
-
 
 case "$1" in
 SENDPARTITION)

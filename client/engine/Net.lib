@@ -38,7 +38,7 @@ fi
 
 # Si REPO tomamos el repositorio y la unidad organizativa actual
 REPO=$(ogGetRepoIp)
-OGUNIT="$(df --output=source | awk -F "/" '/ogimages/ {print $5}')"
+OGUNIT="$(df | awk -F " " '/oglog/ {sub("//.*/oglog","",$1); sub("/","",$1);  print $1}')"
 
 # Parametros de entrada. Si $1 = "REPO" dejo el repositorio actual
 [ "${1^^}" == "REPO" ] && NEWREPO="$REPO" || NEWREPO="${1}"
