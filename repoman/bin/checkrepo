@@ -195,18 +195,19 @@ function checkremoved() {
     m=$(jq ".ous | length" $INFOFILE)
     for ((j=0; j<m; j++)); do
         # OU subdir.
-        OU="$(jq -r ".ous[$i].subdir" $INFOFILE)"
+        OU="$(jq -r ".ous[$j].subdir" $INFOFILE)"
         # Delete OU's entries if its subdir does not exist.
         if [ ! -e "$IMAGESDIR/$OU" ]; then
-            jq "del(.ous[[$j])" $INFOFILE | sponge $INFOFILE
+            jq "del(.ous[$j])" $INFOFILE | sponge $INFOFILE
         else
             n=$(jq ".images | length" $INFOFILE)
             for ((i=0; i<n; i++)); do
                 # Image name and type.
-                IMG="$(jq -r ".images[$i].name" $INFOFILE)"
-                TYPE="$(jq -r ".images[$i].type" $INFOFILE)"
+                IMG="$(jq -r ".ous[$j].images[$i].name" $INFOFILE)"
+                TYPE="$(jq -r ".ous[$j].images[$i].type" $INFOFILE)"
+                [ "$TYPE" != "dir" ] && IMG="$IMG.$TYPE"
                 # Delete entry if image does not exist and it's not locked.
-                [ ! -e "$IMAGESDIR/$OU/$IMG" -a ! -e "$IMAGESDIR/$OU/$IMG.lock" ] && jq "del(.ous[[$j].images[$i])" $INFOFILE | sponge $INFOFILE
+                [ ! -e "$IMAGESDIR/$OU/$IMG" -a ! -e "$IMAGESDIR/$OU/$IMG.lock" ] && jq "del(.ous[$j].images[$i])" $INFOFILE | sponge $INFOFILE
             done
         fi
     done
