@@ -64,6 +64,14 @@ function commandExist($cmd) {
     return (empty($returnVal) ? false : true);
 }
 
+function humanSize($bytes)
+{
+    $si_prefix = array( 'B', 'KB', 'MB', 'GB', 'TB', 'EB', 'ZB', 'YB' );
+    $base = 1024;
+    $class = min((int)log($bytes , $base) , count($si_prefix) - 1);
+    return sprintf('%1.2f' , $bytes / pow($base,$class)) . ' ' . $si_prefix[$class];
+}
+
 // Define REST routes.
 
 
@@ -74,56 +82,37 @@ function commandExist($cmd) {
  * @return   JSON array with imagename, file size
  */
 $app->get('/repository/images', 'validateRepositoryApiKey', 
-	function() {
-		$imgPath = '/opt/opengnsys/images';
-		$app = \Slim\Slim::getInstance();
-		// Comprobar si en la peticion se especificó un filtro por extensiones
-		$extensions = $app->request->get('extensions');
-
-		if ($manager = opendir($imgPath)) {
-			$repoInfo=exec("df -h ".$imgPath);
-			$repoInfo=split(" ",preg_replace('/\s+/', ' ', $repoInfo));
-
-			$response['disk']["total"]=$repoInfo[1];
-		    $response['disk']["used"]=$repoInfo[2];
-		    $response['disk']["free"]=$repoInfo[3];
-		    $response['disk']["percent"]=$repoInfo[4];
-
-		    $response['images'] = array();
-		    while (false !== ($entry = readdir($manager))) {
-		    	$include = true;
-		        if ($entry != "." && $entry != "..") {
-		        	// Si se especificó algun filtro por extension, comprobamos si el fichero la cumple
-		        	if($extensions){
-		        		$ext = pathinfo($imgPath."/".$entry, PATHINFO_EXTENSION);
-		        		// Puede ser una o varias dependiendo de si es array o no
-		        		if(is_array($extensions) && !in_array($ext, $extensions)){
-		        			$include = false;
-		        		}
-		        		else if(!is_array($extensions) && $extensions != $ext){
-		        			$include = false;
-		        		}
-
-		        	}
-		        	if($include == true){
-						$strFileName = $imgPath."/".$entry;
-						$fileInfo["file"]["name"] = $entry;
-						$fileInfo["file"]["size"] = filesize($strFileName);
-						$fileInfo["file"]["modified"] = date( "D d M Y g:i A", filemtime($strFileName));
-						$fileInfo["file"]["permissions"] = (is_readable($strFileName)?"r":"-").(is_writable($strFileName)?"w":"-").(is_executable($strFileName)?"x":"-");
-						array_push($response['images'], $fileInfo);
-					}
-		        }
-		    }
-		    closedir($manager);
-		    jsonResponse(200, $response);
-		}else{
-			// Print error message.
-			$response['message'] = 'Images directory not found';
-			jsonResponse(404, $response);
+    function() use ($app) {
+	$response = array();
+	// Read repository information file.
+	$cfgFile = '/opt/opengnsys/etc/repoinfo.json';
+	$response = json_decode(@file_get_contents($cfgFile), true);
+        // Check if directory exists.
+	$imgPath = @$response['directory'];
+	if (is_dir($imgPath)) {
+		// Complete image information.
+		for ($i=0; $i<sizeof(@$response['images']); $i++) {
+			$img=$response['images'][$i];
+			$file=$imgPath."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
+			$response['images'][$i]['size'] = @stat($file)['size'];
+			$response['images'][$i]['mode'] = substr(decoct(@stat($file)['mode']), -4);
 		}
-		$app->stop();
+		// Retrieve disk information.
+		$total=disk_total_space($imgPath);
+		$free=disk_free_space($imgPath);
+		$response['disk']["total"]=humanSize($total);
+		$response['disk']["used"]=humanSize($total - $free);
+		$response['disk']["free"]=humanSize($free);
+		$response['disk']["percent"]=floor(100 * $free / $total) . " %";
+                // JSON response.
+		jsonResponse(200, $response);
+	} else {
+		// Print error message.
+		$response['message'] = 'Images directory not found';
+		jsonResponse(404, $response);
 	}
+	$app->stop();
+    }
 );
 
 
