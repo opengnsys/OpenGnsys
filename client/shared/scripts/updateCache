@@ -204,7 +204,7 @@ case "$PROTOCOLO" in
     		#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
 		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
-		ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4"
+		ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds"
 		sleep $P2PWAIT
 		ogEcho log session "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4"
 		ogExecAndLog command ogTorrentStart CACHE "$2.torrent" $4
