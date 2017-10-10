@@ -25,7 +25,7 @@ pushd $OGIMG >/dev/null
 
 # Procesar ficheros de imágenes.
 trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
-for IMG in *.{img,pgz,diff} */*.{img,pgz,diff} ; do
+for IMG in *.{img,pgz,diff,dsk} */*.{img,pgz,diff,dsk} ; do
 	# Saltar al siguiente si la imagen está bloqueada o si no existe el fichero.
 	LOCKFILE="$IMG.lock"
 	if [ -f "$LOCKFILE" -o ! -f "$IMG" ]; then
@@ -62,6 +62,6 @@ for IMG in *.{img,pgz,diff} */*.{img,pgz,diff} ; do
 	# Modificación realizada en la corrección temporal de la incidencia #535
 	break	
 done
-	
+
 popd >/dev/null
 
