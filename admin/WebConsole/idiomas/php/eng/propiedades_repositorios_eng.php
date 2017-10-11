@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_repositorios_eng.php 
@@ -20,7 +20,7 @@ $TbMsg[11]="Space TOTAL";
 $TbMsg[12]="Space Taken"; 
 $TbMsg[13]="Space Free"; 
 $TbMsg[14]="% Taken";
-$TbMsg[15]='Limitations of this version';
-$TbMsg[16]='Space information is allowed only if Repository and Web Server are hosted on the same server';
+$TbMsg[15]='Unable to access repository information';
+$TbMsg[16]='Check repository connection<br>Check access key (Api Token field must match its value in "ogAdmRepo" file)';
 $TbMsg[17]='Api Token';
 ?>

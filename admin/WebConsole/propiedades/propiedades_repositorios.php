@@ -28,7 +28,6 @@ $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
 $numordenadores=0; // Número de ordenador a los que da servicio
-$repolocal="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
@@ -45,31 +44,13 @@ if  ($opcion!=$op_alta){
 }
 //________________________________________________________________________________________________________
 //#########################################################################
-$iprepositorio="";
-$ipservidor=$_SERVER['SERVER_ADDR'];
 
-if ($ip == $ipservidor)
-{
-	$repolocal="si";
-	$espaciorepo=exec("df -h /opt/opengnsys/images");
-	$espaciorepos=split(" ",preg_replace('/\s+/', ' ', $espaciorepo));
-
-	$totalrepo=$espaciorepos[1];
-    $ocupadorepo=$espaciorepos[2];
-    $librerepo=$espaciorepos[3];
-    $porcentajerepo=$espaciorepos[4];
-	
-}
-else{
-	$repolocal="no";
-	$repoWithApi=false;
-	$repoImages = null;
-
-	// Si tenemos un apiKey podemos obtener la información desde el webservice en el repositorio
-	if($apiKeyRepo != ""){
-		$repo[0]['url'] = "https://$ip/opengnsys/rest/repository/images";
-		$repo[0]['header'] = array('Authorization: '.$apiKeyRepo);
-		$result = multiRequest($repo);
+// Si tenemos un apiKey podemos obtener la información desde el webservice en el repositorio
+if($apiKeyRepo != ""){
+	$repo[0]['url'] = "https://$ip/opengnsys/rest/repository/images";
+	$repo[0]['header'] = array('Authorization: '.$apiKeyRepo);
+	$result = multiRequest($repo);
+	if ($result[0]['code'] === 200) {
 		$result = json_decode($result[0]['data']);
 		$repodir=$result->directory;
 		$totalrepo=$result->disk->total;
@@ -79,7 +60,15 @@ else{
 		$repoOus = $result->ous;
 		$repoImages = $result->images;
 		$repoWithApi = true;
+	} else {
+		// Error de acceso a la API REST.
+		$repoWithApi = false;
+		$repoImages = null;
 	}
+} else {
+	// Error de acceso a la API REST.
+	$repoWithApi = false;
+	$repoImages = null;
 }
 
 //#########################################################################
@@ -108,7 +97,7 @@ else{
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
 			<TH align="center">&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
 				else	
@@ -121,7 +110,7 @@ else{
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<?php
 			if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
 			else	
@@ -131,31 +120,31 @@ else{
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
+			<?php
+				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$puertorepo.'</TD>';
-			else	
-				echo'<TD><INPUT  class="formulariodatos" name=puertorepo type="text" style="width:200" value="'.$puertorepo.'"></TD>';
+				else	
+					echo'<TD><INPUT  class="formulariodatos" name=puertorepo type="text" style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
+			<?php
+				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$apiKeyRepo.'</TD>';
-			else	
-				echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200" value="'.$apiKeyRepo.'"></TD>';
+				else	
+					echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200" value="'.$apiKeyRepo.'"></TD>';
 			?>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
 			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
-			if ($opcion==$op_eliminacion)
+			<?php
+				if ($opcion==$op_eliminacion)
 					echo '<TD colspan="2">'.$comentarios.'</TD>';
-			else	
-				echo '<TD colspan="2"><TEXTAREA   class="formulariodatos" name="comentarios" rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
+				else	
+					echo '<TD colspan="2"><TEXTAREA   class="formulariodatos" name="comentarios" rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
 			?>
 		</TR>	
 
@@ -167,7 +156,7 @@ else{
 	<TABLE  align=center border=0 cellPadding=2 cellSpacing=2 class=tabla_datos >
     <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
-		<?php  if ($repolocal == "si" || $repoWithApi == true ) { ?>
+		<?php  if ($repoWithApi) { ?>
 		<TR>
 			<TH align=center width=125>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
 			<TH align=center width=120>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>

@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_servidoresrembo_cat.php 
@@ -20,7 +20,7 @@ $TbMsg[11]="Espai TOTAL";
 $TbMsg[12]="Espai Ocupat"; 
 $TbMsg[13]="Espai Lliure"; 
 $TbMsg[14]="% Ocupat"; 
-$TbMsg[15]='Limitacions d\'aquesta versió';
-$TbMsg[16]='Informació d\'espai és permès si Repositori i Servidor Web allotjats al mateix servidor';
+$TbMsg[15]='Sin acceso a informaci&oacute;n del repositorio';
+$TbMsg[16]='Revise la conexión con el repositorio<br>Revise la clave de acceso (campo Api Token debe coincidir con su valor en fichero "ogAdmRepo.cfg")';
 $TbMsg[17]='Api Token';
 ?>
