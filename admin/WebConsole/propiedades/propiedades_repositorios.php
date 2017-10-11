@@ -67,19 +67,18 @@ else{
 
 	// Si tenemos un apiKey podemos obtener la información desde el webservice en el repositorio
 	if($apiKeyRepo != ""){
-		$url = "http://".$ip."/opengnsys/rest/index.php/repository/images";
-		$headers = array('Authorization: '.$apiKeyRepo);
-		$result = callAPI("GET",$url, false, $headers);
-		$result = json_decode($result);
+		$repo[0]['url'] = "https://$ip/opengnsys/rest/repository/images";
+		$repo[0]['header'] = array('Authorization: '.$apiKeyRepo);
+		$result = multiRequest($repo);
+		$result = json_decode($result[0]['data']);
+		$repodir=$result->directory;
 		$totalrepo=$result->disk->total;
-	    $ocupadorepo=$result->disk->used;
-	    $librerepo=$result->disk->free;
-	    $porcentajerepo=$result->disk->percent;
-	    $repoImages = $result->images;
-	    $repoWithApi = true;
-	    
-
-		/**/
+		$ocupadorepo=$result->disk->used;
+		$librerepo=$result->disk->free;
+		$porcentajerepo=$result->disk->percent;
+		$repoOus = $result->ous;
+		$repoImages = $result->images;
+		$repoWithApi = true;
 	}
 }
 
@@ -184,15 +183,25 @@ else{
                 <?php 
 		   		// Si tenemos informacion del repositorio remoto, mostramos las imagenes
 		   		if($repoWithApi == true && is_array($repoImages)){
-		   			echo "<tr class='tabla_listados_sin'><th colspan='4'>Contenido /opengnsys/images</th></tr>";
+		   			echo "<tr class='tabla_listados_sin'><th colspan='4'>Contenido $repodir</th></tr>";
 		   			echo "<tr><td>File</td><td>Size</td><td>Modified</td><td>Permissions</td></tr>";
 		   			foreach($repoImages as $image){
 		   				echo "<tr class='tabla_listados_sin'>";
-		   				echo "<td>".$image->file->name."</td>";
-		   				echo "<td>".$image->file->size." bytes</td>";
-		   				echo "<td>".$image->file->modified."</td>";
-		   				echo "<td>".$image->file->permissions."</td>";
+		   				echo "<td>".$image->name." (".$image->type.")</td>";
+		   				echo "<td>".$image->size." bytes</td>";
+		   				echo "<td>".$image->modified."</td>";
+		   				echo "<td>".$image->mode."</td>";
 		   				echo "</tr>";
+		   			}
+		   			foreach($repoOus as $ou) {
+		   				foreach($ou->images as $image) {
+		   					echo "<tr class='tabla_listados_sin'>";
+		   					echo "<td>".$ou->subdir." / ".$image->name." (".$image->type.")</td>";
+		   					echo "<td>".$image->size." bytes</td>";
+		   					echo "<td>".$image->modified."</td>";
+		   					echo "<td>".$image->mode."</td>";
+		   					echo "</tr>";
+		   				}
 		   			}
 		   		}
 		   	?>
