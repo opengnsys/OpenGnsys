@@ -273,9 +273,11 @@ ogLockImage "$2" "$3.$IMGTYPE" || return $?
 trap "ogUnlockDisk $1; ogUnlockImage "$3" "$4.$IMGTYPE"; rm -f $IMGFILE" 1 2 3 6 9
 eval $PROGRAM
 
-# Controlar salida de error y desbloquear partición.
+# Controlar salida de error, crear fichero de información y desbloquear partición.
 ERRCODE=$?
-if [ $ERRCODE != 0 ]; then
+if [ $ERRCODE == 0 ]; then
+    echo "$(ogGetImageInfo $IMGFILE):$(ogGetHostname)" > $IMGFILE.info
+else
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
     rm -f "$IMGFILE"
 fi
@@ -284,7 +286,6 @@ ogUnlockDisk $1
 ogUnlockImage "$2" "$3.$IMGTYPE"
 return $ERRCODE
 }
-
 
 
 #/**
@@ -357,9 +358,11 @@ ogLockImage "$3" "$4.$IMGTYPE" || return $?
 trap "ogUnlock $1 $2; ogUnlockImage "$3" "$4.$IMGTYPE"; rm -f $IMGFILE" 1 2 3 6 9
 eval $PROGRAM
 
-# Controlar salida de error y desbloquear partición.
+# Controlar salida de error, crear fichero de información y desbloquear partición.
 ERRCODE=$?
-if [ $ERRCODE != 0 ]; then
+if [ $ERRCODE == 0 ]; then
+    echo "$(ogGetImageInfo $IMGFILE):$(ogGetHostname)" > $IMGFILE.info
+else
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
     rm -f "$IMGFILE"
 fi

@@ -48,7 +48,7 @@ function addToJson() {
   "clonator":"${CLONATOR,,}",
   "compressor":"${COMPRESSOR,,}",
   "filesystem":"${FSTYPE^^}",
-  "datasize":"$DATASIZE"
+  "datasize":${DATASIZE:-0}
 }
 EOT
     )
@@ -64,7 +64,7 @@ EOT
             # Check if it needs to update or insert data.
             if [ -n "$IMGIND" ]; then
                 # Update if image data changes and info file exists.
-                [ $# -gt 2 -a "$(jq ".check=$JSON | .check==.images[$IMGIND]" $INFOFILE)" == "false" ] && jq ".images[$IMGIND]=$JSON" $INFOFILE | sponge $INFOFILE
+                [ -n "$3" -a "$(jq ".check=$JSON | .check==.images[$IMGIND]" $INFOFILE)" == "false" ] && jq ".images[$IMGIND]=$JSON" $INFOFILE | sponge $INFOFILE
             else
                 # Append a new entry.
                 jq ".images |= (. + [$JSON])" $INFOFILE | sponge $INFOFILE
@@ -153,7 +153,7 @@ function checkfiles() {
         # Retrieve image creation data and delete temporary file.
         INFO="$IMG.info"
         [ -e "$INFO" -a "$INFO" -ot "$IMG" ] && rm -f "$INFO" && echo "Warning: Deleted outdated file $INFO"
-	[ -r "$INFO" ] && DATA=$(tr ':' ' ' < "$INFO")
+        [ -r "$INFO" ] && DATA=$(cat "$INFO")
         # Add data to configuration file (name, type and data) and remove image info file.
         IMG=${IMG#$IMAGESDIR/}
         addToJson "${IMG%.*}" "${IMG##*.}" "$DATA" && rm -f "$INFO"
