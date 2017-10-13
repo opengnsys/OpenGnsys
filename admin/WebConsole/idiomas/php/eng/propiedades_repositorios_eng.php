@@ -23,4 +23,10 @@ $TbMsg[14]="% Taken";
 $TbMsg[15]='Unable to access repository information';
 $TbMsg[16]='Check repository connection<br>Check access key (Api Token field must match its value in "ogAdmRepo" file)';
 $TbMsg[17]='Api Token';
+$TbMsg['MSG_CONTENT']='Content';
+$TbMsg['MSG_IMAGE']='Image';
+$TbMsg['MSG_TYPE']='Type';
+$TbMsg['MSG_SIZEBYTES']='Size (bytes)';
+$TbMsg['MSG_MODIFIED']='Modified';
+$TbMsg['MSG_PERMISSIONS']='Permissions';
 ?>

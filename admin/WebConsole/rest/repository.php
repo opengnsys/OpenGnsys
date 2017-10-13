@@ -77,11 +77,11 @@ function humanSize($bytes)
 
 /**
  * @brief    List all images in the repository
- * @note     Route: /images, Method: GET
+ * @note     Route: /repository/images, Method: GET
  * @param    no
- * @return   JSON array with imagename, file size
+ * @return   JSON object with directory, images array, ous array and disk data.
  */
-$app->get('/repository/images', 'validateRepositoryApiKey', 
+$app->get('/repository/images(/)', 'validateRepositoryApiKey', 
     function() use ($app) {
 	$response = array();
 	// Read repository information file.
@@ -92,29 +92,29 @@ $app->get('/repository/images', 'validateRepositoryApiKey',
 	if (is_dir($imgPath)) {
 		// Complete global image information.
 		for ($i=0; $i<sizeof(@$response['images']); $i++) {
-			$img=$response['images'][$i];
-			$file=$imgPath."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
+			$img = $response['images'][$i];
+			$file = $imgPath."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
 			$response['images'][$i]['size'] = @stat($file)['size'];
-			$response['images'][$i]['modified'] = date("Y-m-d H:i:s T", @stat($file)['mtime']);
+			$response['images'][$i]['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
 			$response['images'][$i]['mode'] = substr(decoct(@stat($file)['mode']), -4);
 		}
 		// Complete image in OUs information.
 		for ($j=0; $j<sizeof(@$response['ous']); $j++) {
 			for ($i=0; $i<sizeof(@$response['ous'][$j]['images']); $i++) {
-				$img=$response['ous'][$j]['images'][$i];
-				$file=$imgPath."/".$response['ous'][$j]['subdir']."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
+				$img = $response['ous'][$j]['images'][$i];
+				$file = $imgPath."/".$response['ous'][$j]['subdir']."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
 				$response['ous'][$j]['images'][$i]['size'] = @stat($file)['size'];
-				$response['ous'][$j]['images'][$i]['modified'] = date("Y-m-d H:i:s T", @stat($file)['mtime']);
+				$response['ous'][$j]['images'][$i]['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
 				$response['ous'][$j]['images'][$i]['mode'] = substr(decoct(@stat($file)['mode']), -4);
 			}
 		}
 		// Retrieve disk information.
-		$total=disk_total_space($imgPath);
-		$free=disk_free_space($imgPath);
-		$response['disk']['total']=humanSize($total);
-		$response['disk']['used']=humanSize($total - $free);
-		$response['disk']['free']=humanSize($free);
-		$response['disk']['percent']=floor(100 * $free / $total) . " %";
+		$total = disk_total_space($imgPath);
+		$free = disk_free_space($imgPath);
+		$response['disk']['total'] = humanSize($total);
+		$response['disk']['used'] = humanSize($total - $free);
+		$response['disk']['free'] = humanSize($free);
+		$response['disk']['percent'] = 100 - floor(100 * (100 - $free) / $total) . " %";
                 // JSON response.
 		jsonResponse(200, $response);
 	} else {

@@ -23,4 +23,10 @@ $TbMsg[14]="% Ocupado";
 $TbMsg[15]='Sin acceso a informaci&oacute;n del repositorio';
 $TbMsg[16]='Revise la conexión con el repositorio<br>Revise la clave de acceso (campo Api Token debe coincidir con su valor en fichero "ogAdmRepo.cfg")';
 $TbMsg[17]='Api Token';
+$TbMsg['MSG_CONTENT']='Contenido';
+$TbMsg['MSG_IMAGE']='Imagen';
+$TbMsg['MSG_TYPE']='Tipo';
+$TbMsg['MSG_SIZEBYTES']='Tama&ndile;o (bytes)';
+$TbMsg['MSG_MODIFIED']='Modificado';
+$TbMsg['MSG_PERMISSIONS']='Permisos';
 ?>

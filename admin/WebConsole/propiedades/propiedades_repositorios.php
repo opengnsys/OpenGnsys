@@ -172,15 +172,16 @@ if($apiKeyRepo != ""){
                 <?php 
 		   		// Si tenemos informacion del repositorio remoto, mostramos las imagenes
 		   		if($repoWithApi == true && is_array($repoImages)){
-		   			echo "<tr class='tabla_listados_sin'><th colspan='4'>Contenido $repodir</th></tr>";
-		   			echo "<tr><td>File</td><td>Size</td><td>Modified</td><td>Permissions</td></tr>";
+					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>";
+
+echo "<tr><td>".$TbMsg['MSG_IMAGE']."</td><td>".$TbMsg['MSG_TYPE']."</td><td>".$TbMsg['MSG_SIZEBYTES']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
 		   			foreach($repoImages as $image){
 		   				echo "<tr class='tabla_listados_sin'>";
 		   				echo "<td>".$image->name." (".$image->type.")</td>";
 		   				echo "<td>".$image->size." bytes</td>";
 		   				echo "<td>".$image->modified."</td>";
 		   				echo "<td>".$image->mode."</td>";
-		   				echo "</tr>";
+		   				echo "</tr>\n";
 		   			}
 		   			foreach($repoOus as $ou) {
 		   				foreach($ou->images as $image) {
@@ -189,7 +190,7 @@ if($apiKeyRepo != ""){
 		   					echo "<td>".$image->size." bytes</td>";
 		   					echo "<td>".$image->modified."</td>";
 		   					echo "<td>".$image->mode."</td>";
-		   					echo "</tr>";
+		   					echo "</tr>\n";
 		   				}
 		   			}
 		   		}

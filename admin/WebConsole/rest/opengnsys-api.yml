@@ -948,6 +948,28 @@ paths:
           schema:
             type: object
             properties:
+              directory:
+                description: repository directory
+                type: string
+              images:
+                description: information about repository-global images
+                type: array
+                items:
+                  $ref: "#/definitions/ImageModel"
+              ous:
+                description: OUs defined
+                type: array
+                items:
+                  type: object
+                  properties:
+                    subdir:
+                      description: OU subdirectory
+                      type: string
+                    images:
+                      description: information about OU-based images
+                      type: array
+                      items:
+                        $ref: "#/definitions/ImageModel"
               disk:
                 description: repository disk information
                 type: object
@@ -965,30 +987,7 @@ paths:
                     description: percentage of used space
                     type: string
                 required: [ total, used, free, percent ]
-              images:
-                description: information about stored images
-                type: object
-                properties:
-                  file:
-                    description: image file information
-                    type: object
-                    properties:
-                      name:
-                        description: file name
-                        type: string
-                      size:
-                        description: file size (bytes)
-                        type: integer
-                        format: int64
-                      modified:
-                        description: file modification date
-                        type: string
-                        format: date-time
-                      permissions:
-                        description: file permissions
-                        type: string
-                    required: [ name, size, modified, permissions ]
-            required: [ disk, images ]
+            required: [ directory, images, ous, disk ]
       security:
         - apikey: []
       tags:
@@ -1191,3 +1190,41 @@ definitions:
             minimum: 1
         required: [ id ]
     required: [ id, name, mac, ip, lab, ou ]
+  ImageModel:
+    type: object
+    properties:
+      name:
+        description: image name (file name without extension)
+        type: string
+      type:
+        description: image type (file extension or ''dir'' for directory image)
+        type: string
+      clientname:
+        description: source client name
+        type: string
+      clonator:
+        description: clonation program
+        type: string
+      compressor:
+        description: compression program
+        type: string
+      filesystem:
+        description: filesystem type
+        type: string
+      datasize:
+        description: data size (bytes)
+        type: integer
+        format: int64
+      size:
+        description: image size (bytes)
+        type: integer
+        format: int64
+      modified:
+        description: image modification date
+        type: string
+        format: date-time
+      mode:
+        description: image access permissions (four octal digits)
+        type: string
+    required: [ name, type, clientname, clonator, compressor, filesystem, datasize, size, modified, mode ]
+
