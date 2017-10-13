@@ -172,13 +172,13 @@ if($apiKeyRepo != ""){
                 <?php 
 		   		// Si tenemos informacion del repositorio remoto, mostramos las imagenes
 		   		if($repoWithApi == true && is_array($repoImages)){
-					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>";
+					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>\n";
 
-echo "<tr><td>".$TbMsg['MSG_IMAGE']."</td><td>".$TbMsg['MSG_TYPE']."</td><td>".$TbMsg['MSG_SIZEBYTES']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
+echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg['MSG_SIZEBYTES']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
 		   			foreach($repoImages as $image){
 		   				echo "<tr class='tabla_listados_sin'>";
 		   				echo "<td>".$image->name." (".$image->type.")</td>";
-		   				echo "<td>".$image->size." bytes</td>";
+		   				echo "<td>".$image->size."</td>";
 		   				echo "<td>".$image->modified."</td>";
 		   				echo "<td>".$image->mode."</td>";
 		   				echo "</tr>\n";

@@ -114,7 +114,7 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
 		$response['disk']['total'] = humanSize($total);
 		$response['disk']['used'] = humanSize($total - $free);
 		$response['disk']['free'] = humanSize($free);
-		$response['disk']['percent'] = 100 - floor(100 * (100 - $free) / $total) . " %";
+		$response['disk']['percent'] = 100 - floor(100 * $free / $total) . " %";
                 // JSON response.
 		jsonResponse(200, $response);
 	} else {

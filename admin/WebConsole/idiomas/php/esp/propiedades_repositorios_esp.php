@@ -26,7 +26,7 @@ $TbMsg[17]='Api Token';
 $TbMsg['MSG_CONTENT']='Contenido';
 $TbMsg['MSG_IMAGE']='Imagen';
 $TbMsg['MSG_TYPE']='Tipo';
-$TbMsg['MSG_SIZEBYTES']='Tama&ndile;o (bytes)';
+$TbMsg['MSG_SIZEBYTES']='Tama&ntilde;o (bytes)';
 $TbMsg['MSG_MODIFIED']='Modificado';
 $TbMsg['MSG_PERMISSIONS']='Permisos';
 ?>
