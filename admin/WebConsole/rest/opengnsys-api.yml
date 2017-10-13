@@ -1197,7 +1197,7 @@ definitions:
         description: image name (file name without extension)
         type: string
       type:
-        description: image type (file extension or ''dir'' for directory image)
+        description: image type (file extension or `dir` for directory image)
         type: string
       clientname:
         description: source client name
@@ -1226,5 +1226,13 @@ definitions:
       mode:
         description: image access permissions (four octal digits)
         type: string
-    required: [ name, type, clientname, clonator, compressor, filesystem, datasize, size, modified, mode ]
+      backedup:
+        description: image backed up flag (check if `.ant` file exists)
+        type: boolean
+        default: false
+      backupsize:
+        description: image backup size (bytes)
+        type: integer
+        format: int64
+    required: [ name, type, clientname, clonator, compressor, filesystem, datasize, size, modified, mode, backedup ]
 

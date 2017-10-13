@@ -97,6 +97,13 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
 			$response['images'][$i]['size'] = @stat($file)['size'];
 			$response['images'][$i]['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
 			$response['images'][$i]['mode'] = substr(decoct(@stat($file)['mode']), -4);
+			$backupfile = $file.".ant";
+			if (file_exists($backupfile)) {
+				$response['images'][$i]['backedup'] = true;
+				$response['images'][$i]['backupsize'] = @stat($backupfile)['size'];
+			} else {
+				$response['images'][$i]['backedup'] = false;
+			}
 		}
 		// Complete image in OUs information.
 		for ($j=0; $j<sizeof(@$response['ous']); $j++) {

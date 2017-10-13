@@ -153,6 +153,7 @@ function checkfiles() {
         # Retrieve image creation data and delete temporary file.
         INFO="$IMG.info"
         [ -e "$INFO" -a "$INFO" -ot "$IMG" ] && rm -f "$INFO" && echo "Warning: Deleted outdated file $INFO"
+        DATA=""
         [ -r "$INFO" ] && DATA=$(cat "$INFO")
         # Add data to configuration file (name, type and data) and remove image info file.
         IMG=${IMG#$IMAGESDIR/}
@@ -170,7 +171,7 @@ function checkdirs() {
         IMG="$(dirname "${INFO#$IMAGESDIR/}")"
         # Skip repository root directory and locked images.
         [ "$IMG" == "$IMAGESDIR" -o -e "$IMG.lock" ] && continue
-        DATA=$(awk -F= '$1=="# fstype" {fs=$2} $1=="# sizedata" {sz=$2} END {printf "::%s:%s:",fs,sz}' "$INFO")
+        DATA=$(awk -F= '$1=="# fstype" {fs=$2} $1=="# sizedata" {sz=$2} END {printf "rsync::%s:%s:",fs,sz}' "$INFO")
         # Add data to configuration file (name, type and data).
         addToJson "$IMG" "dir" "$DATA"
     done
