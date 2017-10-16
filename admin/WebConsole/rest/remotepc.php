@@ -10,6 +10,14 @@
  * @date    2017-02-01
  */
 
+// OGAgent sessions log file.
+define('REMOTEPC_LOGFILE', '/opt/opengnsys/log/remotepc.log');
+
+// Function to write a line into log file.
+function writeRemotepcLog($message = "") {
+        file_put_contents(REMOTEPC_LOGFILE, date(DATE_ISO8601).": $message\n", FILE_APPEND);
+}
+
 
 // REST routes.
 
@@ -34,8 +42,13 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 	$response = Array();
 	$ogagent = Array();
 
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
 	// Checking parameters. 
 	try {
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
 		if (!checkIds($ouid, $imageid)) {
 			throw new Exception("Ids. must be positive integers");
 		}
@@ -55,16 +68,17 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 		if (!filter_var($maxtime, FILTER_VALIDATE_INT, $opts)) {
 			throw new Exception("Time must be positive integer (in hours)");
 		}
-		// Check for a valid remote agent.
-		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
-			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
-		}
 	} catch (Exception $e) {
 		// Communication error.
 		$response["message"] = $e->getMessage();
+		if ($app->settings['debug'])
+			writeRemotepcLog($app->request()->getResourceUri(). ": ERROR: ".$response["message"].".");
 		jsonResponse(400, $response);
 		$app->stop();
 	}
+
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Parameters: labid=$labid, maxtime=$maxtime");
 	// Choose older not-reserved client with image installed and get ogAdmServer data.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
@@ -104,6 +118,8 @@ EOD;
 		$ouid = $rs->campos["idcentro"];
 		// Check client's status.
 		$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
+		if ($app->settings['debug'])
+			writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent status, url=".$ogagent[$clntip]['url'].".");
 		$result = multiRequest($ogagent);
 		if (empty($result[$clntip]['data'])) {
 			// Client is off, send a boot command to ogAdmServer.
@@ -113,11 +129,15 @@ EOD;
 				    "iph=$clntip\r".
 				    "mac=$clntmac\r".
 				    "mar=1\r";
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). "Send Boot command to ogAdmClient, ido=$clntid,iph=$clntip,mac=$clntmac.");
 			sendCommand($serverip, $serverport, $reqframe, $values);
 		} else {
-			// Client is on, send a reboot command to its OGAgent.
+			// Client is on, send a rieboot command to its OGAgent.
 			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/reboot";
 			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent reboot, url=".$ogagent[$clntip]['url'].".");
 			$result = multiRequest($ogagent);
 			// ... (check response)
 			//if ($result[$clntip]['code'] != 200) {
@@ -183,12 +203,16 @@ EOD;
 			// Commit transaction on success.
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": DB tables and events updated, clntid=$clntid.");
 			// Send init session command if client is booted on ogLive.
 			$reqframe = "nfn=IniciarSesion\r".
 			   	    "ido=$clntid\r".
 				    "iph=$clntip\r".
 				    "dsk=$disk\r".
 				    "par=$part\r";
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": Send Init Session command to ogAdmClient, ido=$clntid,iph=$clntip,dsk=$disk,par=$part.");
 			sendCommand($serverip, $serverport, $reqframe, $values);
 			// Compose JSON response.
 			$response['id'] = $clntid;
@@ -197,16 +221,23 @@ EOD;
 			$response['mac'] = $clntmac;
 			$response['lab']['id'] = $labid;
 			$response['ou']['id'] = $ouid;
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": Response, ".var_export($response,true).".");
 			jsonResponse(200, $response);
 		} else {
 			// Roll-back transaction on DB error.
 			$cmd->texto = "ROLLBACK;";
 			$cmd->Ejecutar();
 			// Error message.
-			$response["message"] = "Database error";
+			$response["message"] = "Database error: $t1, $t2, $t3";
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": ERROR: ".$response["message"].".");
 			jsonResponse(400, $response);
 			$app->stop();
 		}
+       	} else {
+		if ($app->settings['debug'])
+			writeRemotepcLog($app->request()->getResourceUri(). ": UNASSIGNED");
        	}
 	$rs->Cerrar();
     }
@@ -226,8 +257,13 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 	global $userid;
 	$response = Array();
 
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
 	// Checking parameters. 
 	try {
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
 		if (!checkIds($ouid, $labid, $clntid)) {
 			throw new Exception("Ids. must be positive integers");
 		}
@@ -241,17 +277,17 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 		if (!filter_var($urlLogout, FILTER_VALIDATE_URL)) {
 			throw new Exception("Must be a valid URL for logout notification");
 		}
-		// Check for a valid remote agent.
-		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
-			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
-		}
 	} catch (Exception $e) {
 		// Error message.
 		$response["message"] = $e->getMessage();
+		if ($app->settings['debug'])
+			writeRemotepcLog($app->request()->getResourceUri(). ": ERROR: ".$response["message"].".");
 		jsonResponse(400, $response);
 		$app->stop();
 	}
 
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Parameters: urlLogin=$urlLogin, urlLogout=$urlLogout");
 	// Select client data for UDS compatibility.
 	$cmd->texto = <<<EOD
 SELECT adm.idadministradorcentro, ordenadores.idordenador, remotepc.*
@@ -301,32 +337,80 @@ EOD;
 );
 
 
+/*
+ * @brief    Store session time (in sec).
+ * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/session, Method: POST
+ * @param    int    deadLine   maximum time session will be active (in seconds)
+ * @warning  Parameters will be stored in a new "remotepc" table.
+ */
 $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
-    function($ouid, $imageid) use ($app) {
+    function($ouid, $labid, $clntid) use ($app) {
+	global $cmd;
+	global $userid;
+	$response = Array();
+
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
+	// Checking parameters. 
+	try {
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
+		if (!checkIds($ouid, $labid, $clntid)) {
+			throw new Exception("Ids. must be positive integers");
+		}
+		// Reading JSON parameters.
+		$input = json_decode($app->request()->getBody());
+		$deadLine = $input->deadLine;
+		if (!filter_var($deadLine, FILTER_VALIDATE_INT)) {
+			throw new Exception("Deadline must be integer");
+		}
+	} catch (Exception $e) {
+		// Error message.
+		$response["message"] = $e->getMessage();
+		if ($app->settings['debug'])
+			writeRemotepcLog($app->request()->getResourceUri(). ": ERROR: ".$response["message"].".");
+		jsonResponse(400, $response);
+		$app->stop();
+	}
+
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Parameters: deadLine=$deadLine");
+	# ...
+	# ...
+	#$rs->Cerrar();
     }
 );
 
 
+/**
+ * @brief    Store UDS server URLs to resend some events recieved from OGAgent.
+ * @brief    Unreserve a client and send a poweroff operation.
+ * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/unreserve, Method: DELETE
+ */
 $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey',
-    function($ouid, $labid, $clntid) {
+    function($ouid, $labid, $clntid) use ($app) {
 	global $cmd;
 	global $userid;
 	global $ACCION_INICIADA;
 	$response = Array();
 	$ogagent = Array();
 
+	if ($app->settings['debug'])
+		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
 	// Checking parameters. 
 	try {
-		if (!checkIds($ouid, $labid, $clntid)) {
-			throw new Exception("Ids. must be positive integers");
-		}
-		// Check for a valid remote agent.
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
 			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
+		if (!checkIds($ouid, $labid, $clntid)) {
+			throw new Exception("Ids. must be positive integers");
 		}
 	} catch (Exception $e) {
 		// Error message.
 		$response["message"] = $e->getMessage();
+		if ($app->settings['debug'])
+			writeRemotepcLog($app->request()->getResourceUri(). ": ERROR: ".$response["message"].".");
 		jsonResponse(400, $response);
 		$app->stop();
 	}
