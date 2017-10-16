@@ -380,3 +380,19 @@
 		}
 		return($selecHtml);	
 	}
+
+	/*
+	 * Devuelve el valor legible para un tamaño (en múltiplos de 1024).
+	 * Nota: obtenido de la documentación de PHP (php.net).
+	 * Parámetros:
+	 * 	bytes - tamaño en bytes (entero)
+	 * Devielve:
+	 * 	cadena con número en formato de sistema internacional (2 decimales)
+	 */
+	function humanSize($bytes) {
+		$si_prefix = array( 'B', 'KB', 'MB', 'GB', 'TB', 'EB', 'ZB', 'YB' );
+		$base = 1024;
+		$class = min((int)log($bytes , $base) , count($si_prefix) - 1);
+		return sprintf('%1.2f' , $bytes / pow($base,$class)) . ' ' . $si_prefix[$class];
+	}
+

@@ -39,6 +39,8 @@ function addToJson() {
         OUNAME="${IMAGENAME%/*}"
         IMAGENAME="${IMAGENAME##*/}"
     fi
+    # Data size must be numeric (in KB).
+    [[ $DATASIZE =~ ^[0-9]*$ ]] || DATASIZE=0
     # JSON-formatted new entry.
     JSON=$(cat << EOT | jq .
 {
@@ -48,7 +50,7 @@ function addToJson() {
   "clonator":"${CLONATOR,,}",
   "compressor":"${COMPRESSOR,,}",
   "filesystem":"${FSTYPE^^}",
-  "datasize":${DATASIZE:-0}
+  "datasize":$[ DATASIZE * 1024]
 }
 EOT
     )

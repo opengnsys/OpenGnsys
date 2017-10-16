@@ -10,6 +10,7 @@
 // **********************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
+include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../clases/AdoPhp.php");
 include_once("../idiomas/php/".$idioma."/propiedades_repositorios_".$idioma.".php");
@@ -52,11 +53,11 @@ if($apiKeyRepo != ""){
 	$result = multiRequest($repo);
 	if ($result[0]['code'] === 200) {
 		$result = json_decode($result[0]['data']);
-		$repodir=$result->directory;
-		$totalrepo=$result->disk->total;
-		$ocupadorepo=$result->disk->used;
-		$librerepo=$result->disk->free;
-		$porcentajerepo=$result->disk->percent;
+		$repodir = $result->directory;
+		$totalrepo = humanSize($result->disk->total);
+		$librerepo = humanSize($result->disk->free);
+		$ocupadorepo = humanSize($result->disk->total - $result->disk->free);
+		$porcentajerepo = 100 - floor(100 * $result->disk->$free / $result->disk->$total);
 		$repoOus = $result->ous;
 		$repoImages = $result->images;
 		$repoWithApi = true;
@@ -158,27 +159,27 @@ if($apiKeyRepo != ""){
 
 		<?php  if ($repoWithApi) { ?>
 		<TR>
-			<TH align=center width=125>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
-			<TH align=center width=120>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
-			<TH align=center width=120>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
-			<TH align=center width=101>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
+			<TH align=center width=125>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?php echo $TbMsg[12]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</TD>
+			<TH align=center width=101>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
 		</TR>
                 <TR>
-			<TD align=center width=125>&nbsp;<?echo $totalrepo?>&nbsp;</TD>
-            		<TD align=center width=120>&nbsp;<?echo $ocupadorepo?>&nbsp;</TD>
-           		<TD align=center width=120>&nbsp;<?echo $librerepo?>&nbsp;</TD>
-           		<TD align=center width=101>&nbsp;<?echo $porcentajerepo?>&nbsp;</TD>
+			<TD align=center width=125>&nbsp;<?php echo $totalrepo?>&nbsp;</TD>
+            		<TD align=center width=120>&nbsp;<?php echo $ocupadorepo?>&nbsp;</TD>
+           		<TD align=center width=120>&nbsp;<?php echo $librerepo?>&nbsp;</TD>
+           		<TD align=center width=101>&nbsp;<?php echo "$porcentajerepo %" ?>&nbsp;</TD>
                 </TR>
                 <?php 
-		   		// Si tenemos informacion del repositorio remoto, mostramos las imagenes
-		   		if($repoWithApi == true && is_array($repoImages)){
+				// Si tenemos informacion del repositorio remoto, mostramos las imagenes
+				if($repoWithApi == true && is_array($repoImages)){
 					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>\n";
 
 echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg['MSG_SIZEBYTES']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
 		   			foreach($repoImages as $image){
 		   				echo "<tr class='tabla_listados_sin'>";
 		   				echo "<td>".$image->name." (".$image->type.")</td>";
-		   				echo "<td>".$image->size."</td>";
+		   				echo "<td>".humanSize($image->size)."</td>";
 		   				echo "<td>".$image->modified."</td>";
 		   				echo "<td>".$image->mode."</td>";
 		   				echo "</tr>\n";
