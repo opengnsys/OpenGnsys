@@ -1006,6 +1006,7 @@ function updateSummary()
 	fi
 	echoAndLog "Warnings:"
 	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page."
+	echoAndLog " - Generated new key to access Repository REST API (file ogAdmRepo.cfg)."
 	if [ -n "$CLIENTUPDATED" ]; then
 		echoAndLog " - ogLive Client is updated to: $CLIENTUPDATED"
 	fi
