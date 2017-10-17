@@ -11,7 +11,30 @@
  */
 
 
+// Common constants.
+define('REST_LOGFILE', '/opt/opengnsys/log/rest.log');
+
+
 // Common functions.
+
+/**
+ * @brief   Function to write a line into log file.
+ * @param   string message  Message to log.
+ * warning  Line format: "Date: ClientIP: UserId: Status: Method Route: Message"
+ */
+function writeRestLog($message = "") {
+	global $userid;
+	if (is_writable(REST_LOGFILE)) {
+		$app = \Slim\Slim::getInstance();
+		file_put_contents(REST_LOGFILE, date(DATE_ISO8601) .": " .
+						$_SERVER['REMOTE_ADDR'] . ": " .
+						(isset($userid) ? $userid : "-") . ": " .
+						$app->response->getStatus() . ": " .
+						$app->request->getMethod() . " " .
+						$app->request->getPathInfo() . ": $message\n",
+			  	FILE_APPEND);
+	}
+}
 
 /**
  * @brief   Compose JSON response.
@@ -177,19 +200,34 @@ $app->notFound(function() {
 );
 
 /**
- * @brief   Hook to write an error log message.
- * @warning Message will be written in web server's error file.
+ * @brief   Hook to write a REST init log message, if debug is enabled.
+ * @warning Message will be written in REST log file.
+ */
+$app->hook('slim.before', function() use ($app) {
+	if ($app->settings['debug'])
+		writeRestLog("Init.");
+    }
+);
+
+/**
+ * @brief   Hook to write an error log message and a REST exit log message if debug is enabled.
+ * @warning Error message will be written in web server's error file.
+ * @warning REST message will be written in REST log file.
  */
 $app->hook('slim.after', function() use ($app) {
 	if ($app->response->getStatus() != 200 ) {
 		// Compose error message (truncating long lines). 
 		$app->log->error(date(DATE_ISO8601) . ': ' .
-				 $app->getName() . ' ' .
+				 $app->getName() . ': ' .
+				 $_SERVER['REMOTE_ADDR'] . ": " .
+				 (isset($userid) ? $userid : "-") . ": " .
 				 $app->response->getStatus() . ': ' .
 				 $app->request->getMethod() . ' ' .
 				 $app->request->getPathInfo() . ': ' .
 				 substr($app->response->getBody(), 0, 100));
 	}
+	if ($app->settings['debug'])
+		writeRestLog("Exit.");
    }
 );
 

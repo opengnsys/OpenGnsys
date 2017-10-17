@@ -37,7 +37,7 @@ $app = new \Slim\Slim(array(
 		'mode' => 'development',
 		'log.enabled' => true,
 		'log.level' => \Slim\Log::ERROR,
-		'debug' => false));
+		'debug' => true));
 $app->setName('opengnsys');
 
 // Global variables.
