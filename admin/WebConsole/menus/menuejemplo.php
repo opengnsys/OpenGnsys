@@ -84,7 +84,7 @@
 	</dl>
 
 <?php	// Acceso a menú privado.
-if ($_SERVER['HTTP_X_FORWARDED_FOR']) {
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 } else {
     $ip = $_SERVER['REMOTE_ADDR'];
