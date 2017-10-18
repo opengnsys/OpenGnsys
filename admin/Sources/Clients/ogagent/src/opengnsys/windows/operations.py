@@ -31,15 +31,15 @@
 '''
 from __future__ import unicode_literals
 
+import os
+import subprocess
+import ctypes
+from ctypes.wintypes import DWORD, LPCWSTR
 import win32com.client  # @UnresolvedImport, pylint: disable=import-error
 import win32net  # @UnresolvedImport, pylint: disable=import-error
 import win32security  # @UnresolvedImport, pylint: disable=import-error
 import win32api  # @UnresolvedImport, pylint: disable=import-error
 import win32con  # @UnresolvedImport, pylint: disable=import-error
-import ctypes
-from ctypes.wintypes import DWORD, LPCWSTR
-import os
-import subprocess
 
 from opengnsys import utils
 from opengnsys.log import logger
@@ -61,7 +61,7 @@ def getNetworkInfo():
       name: Name of the interface
       mac: mac of the interface
       ip: ip of the interface
-    '''    
+    '''
     obj = win32com.client.Dispatch("WbemScripting.SWbemLocator")
     wmobj = obj.ConnectServer("localhost", "root\cimv2")
     adapters = wmobj.ExecQuery("Select * from Win32_NetworkAdapterConfiguration where IpEnabled=True")
@@ -119,7 +119,7 @@ def poweroff(flags=0):
     '''
     Simple poweroff command.
     '''
-    reboot(flags=EWX_FORCEIFHUNG | EWX_POWEROFF)
+    reboot(flags=EWX_FORCEIFHUNG | EWX_SHUTDOWN)
 
 def logoff():
     win32api.ExitWindowsEx(EWX_LOGOFF)
@@ -187,7 +187,7 @@ def joinDomain(domain, ou, account, password, executeInOneStep=False):
         error = getErrorMessage(res)
         if res == 1355:
             error = "DC Is not reachable"
-        print res, error
+        print('{} {}'.format(res, error))
         raise Exception('Error joining domain {}, with credentials {}/*****{}: {}, {}'.format(domain.value, account.value, ', under OU {}'.format(ou.value) if ou.value is not None else '', res, error))
 
 
@@ -238,5 +238,4 @@ def showPopup(title, message):
     Displays a message box on user's session (during 1 min).
     '''
     return subprocess.call('mshta "javascript:var sh=new ActiveXObject(\'WScript.Shell\'); sh.Popup( \'{}\', 60, \'{}\', 64); close()"'.format(message, title), shell=True)
-
 

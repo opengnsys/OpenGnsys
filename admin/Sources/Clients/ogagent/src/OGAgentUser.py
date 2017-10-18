@@ -294,7 +294,8 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
                 self.ipc.stop()
             except Exception:
                 # May we have lost connection with server, simply log and exit in that case
-                logger.exception("Got an exception processing quit")
+                logger.exception()
+                logger.exception("Got an exception, processing quit")
 
             try:
                 # operations.logoff()  # Uncomment this after testing to logoff user
