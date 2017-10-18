@@ -12,7 +12,7 @@
 
 # Variables.
 PROGDIR=$PWD/ogagent
-SVNURL=http://opengnsys.es/svn/branches/version1.1/admin/Sources/Clients/ogagent
+SVNURL=https://opengnsys.es/svn/branches/version1.1/admin/Sources/Clients/ogagent
 
 # Show prerequisites needed to build the environment.
 mkdir -p $PROGDIR || exit 1
@@ -69,7 +69,7 @@ pushd ogagent/macos/downloads/bomutils >/dev/null
 make && make install
 popd >/dev/null
 
-# Build OGAgent for Linux.
+# Build OGAgent for GNU/Linux.
 pushd $PROGDIR/linux >/dev/null
 sudo ./build-packages.sh
 popd >/dev/null
