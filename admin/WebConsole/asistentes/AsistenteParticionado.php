@@ -55,6 +55,7 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/asistentes_'.$idioma.'.js"></SCRIPT>'?>
 
 
 <?php 
@@ -64,6 +65,7 @@ $xajax->printJavascript('../xajax/');
 <script>
 function doOnload(){
 	calculateFreeDisk(document.fdatos);
+	getMaxCacheSize();
 }
 
 </script>

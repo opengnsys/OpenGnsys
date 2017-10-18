@@ -119,6 +119,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						} else {
 							echo'<td style="text-align:right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 						}
+						
 						echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 
 						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
@@ -150,6 +151,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 											}
 								}
 							}
+							// Si es CACHE incluyo cambo oculto con el tamaño
+							echo "\n    <input type='hidden' name='cachesize' value='".tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"])."'/>\n";
 							echo '&nbsp;</td>'.chr(13);
 
 						} else {

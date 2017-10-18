@@ -71,6 +71,7 @@ for ($p=1; $p<4; $p++) {
 <th>
 <input type="hidden" id="numGPTpartitions" value="4"/>
 <input type="hidden" id="minsizeGPT" />
+<input type="hidden" id="maxcachesize" />
 <?php echo $TbMsg[38];?>: <input type="text" id="freediskGPT" width="15" disabled="true" />
 </th>
 </tr>

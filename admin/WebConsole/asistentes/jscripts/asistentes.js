@@ -107,29 +107,36 @@ function modificarCodigo() {
 }
 
 function codeParticionado(form){
-	var errorMsg = "¡El espacio libre en disco no puede ser menor que 0!";
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	// Comprobamos si la opcion elejida es GPT o MSDOS para llamar a una funcion u otra
 	if(tipo_part_table == "GPT"){
+		var freediskGPT = parseInt(document.getElementById("freediskGPT").value);
 		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
-		if(parseInt(document.getElementById("freediskGPT").value) < 0){
-			alert(errorMsg);
+		if(freediskGPT < 0){
+			alert(TbMsg['NODISKSIZE']);
+		}
+		else if (!validaCache(freediskGPT)) {
+			alert(TbMsg['NOCACHESIZE']);
 		}
 		else{
 			codeParticionadoGPT(form);
 		}
 	}
 	else{
+		var freedisk = parseInt(document.getElementById("freedisk").value);
 		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
-		if(parseInt(document.getElementById("freedisk").value) < 0){
-			alert(errorMsg);
+		if(freedisk < 0){
+			alert(TbMsg['NODISKSIZE']);
+		}
+		else if (!validaCache(freedisk)) {
+			alert(TbMsg['NOCACHESIZE']);
 		}
 		else{
 			codeParticionadoMSDOS(form);
 		}
 	}
-	
+
 }
 
 
@@ -443,6 +450,30 @@ function getMinDiskSize(disk){
 	return (minSize > 1024 ? minSize - 1024 : minSize)
 }
 
+// Calcula el tamaño de la mayor cache y lo guarda en un campo oculto
+function getMaxCacheSize() {
+	var cacheSizeArray = document.getElementsByName("cachesize");
+	var maxSize = cacheSizeArray[0].value;
+	for(var i= 1; i < cacheSizeArray.length; i++){
+		if(maxSize < cacheSizeArray[i].value)
+			maxSize = cacheSizeArray[i].value;
+	}
+	document.getElementById("maxcachesize").value = maxSize;
+	return
+
+}
+
+
+// Comprueba que la cache quepa en el espacio libre del disco
+function validaCache (freedisk) {
+	var form = document.fdatos;
+	var maxcachesize = parseInt(document.getElementById("maxcachesize").value);
+        if(form.part4.value == "CACHE" && form.check4.checked && form.size4.value == 0 ){
+	    return (freedisk - maxcachesize > 0 ? true : false);
+	}
+	return true;
+}
+
 // Código para calcular el espacio libre del disco.
 function calculateFreeDisk(form) {
 	// Si esta seleccionada la opcion GPT, se llama a la funcion correspondiente
@@ -628,4 +659,5 @@ function checkExtendedPartition(form) {
 		logical.style.visibility="hidden";
 	}
 }
+
 

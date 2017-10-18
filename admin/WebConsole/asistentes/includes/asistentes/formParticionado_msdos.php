@@ -128,6 +128,7 @@ for ($p=5; $p<=9; $p++) {
 <tr>
 <th>
 <input type="hidden" id="minsize" />
+<input type="hidden" id="maxcachesize" />
 <?php echo $TbMsg[38];?>: <input type="text" id="freedisk" width="15" disabled="true" />
 </th>
 </tr>
