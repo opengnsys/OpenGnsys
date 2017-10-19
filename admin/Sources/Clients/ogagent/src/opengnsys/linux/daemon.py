@@ -156,7 +156,7 @@ class Daemon:
 
         # Try killing the daemon process
         try:
-            while True:
+            for i in range(10):
                 os.kill(pid, SIGTERM)
                 time.sleep(1)
         except OSError as err:

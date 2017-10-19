@@ -28,6 +28,7 @@
 
 '''
 @author: Adolfo Gómez, dkmaster at dkmon dot com
+@author: Ramón M. Gómez, ramongomez at us dot es
 '''
 
 VERSION = '1.1.0'
@@ -63,9 +64,12 @@ import os
 sys.argv.append('py2exe')
 
 def get_requests_cert_file():
-    """Add Python requests .pem file for installers."""
+    """Add Python requests or certifi .pem file for installers."""
     import requests
     f = os.path.join(os.path.dirname(requests.__file__), 'cacert.pem')
+    if not os.path.exists(f):
+        import certifi
+        f = os.path.join(os.path.dirname(certifi.__file__), 'cacert.pem')
     return f
 
 
@@ -117,8 +121,8 @@ setup(
             'bundle_files': 3,
             'compressed': True,
             'optimize': 2,
-            'includes': [ 'sip', 'PyQt4', 'win32com.shell', 'requests'] + HIDDEN_BY_SIX,
-            'excludes': [ 'doctest', 'unittest' ],
+            'includes': ['sip', 'PyQt4', 'win32com.shell', 'requests'] + HIDDEN_BY_SIX,
+            'excludes': ['doctest', 'unittest'],
             'dll_excludes': ['msvcp90.dll'],
             'dist_dir': '..\\bin',
         }

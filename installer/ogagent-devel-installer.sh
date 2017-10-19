@@ -3,7 +3,7 @@
 #@file     ogagent-devel-installer.sh
 #@brief    Script to download and prepare the environmnt to compile OGAgent packages.
 #@warning  Some operations need "root" privileges.
-#@note     This script will make a "ogagent" directory with 1.5 GiB approx.
+#@note     This script will make the "ogagent" directory with 1.5 GiB approx.
 #@version  1.0 - Initial version for OpenGnsys 1.1.0.
 #@author   Ramón M. Gómez, ETSII Universidad de Sevilla
 #@date     2016-04-07
@@ -66,7 +66,7 @@ popd >/dev/null
 mkdir -p ogagent/macos/downloads
 svn export https://github.com/hogliux/bomutils.git/trunk ogagent/macos/downloads/bomutils
 pushd ogagent/macos/downloads/bomutils >/dev/null
-make && make install
+make && sudo make install
 popd >/dev/null
 
 # Build OGAgent for GNU/Linux.
