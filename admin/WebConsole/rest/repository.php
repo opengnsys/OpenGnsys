@@ -126,6 +126,48 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
 
 
 /**
+ * @brief    List image data
+ * @note     Route: /repository/image/:imagename, Method: GET
+ * @param    no
+ * @return   JSON object with image data.
+ */
+$app->get('/repository/image/:imagename(/)', 'validateRepositoryApiKey', 
+    function($imagename) use ($app) {
+	$response = array();
+	// Search image name in repository information file.
+	$cfgFile = '/opt/opengnsys/etc/repoinfo.json';
+	$json = json_decode(@file_get_contents($cfgFile), true);
+	$imgPath = @$json['directory'];
+	foreach ($json['images'] as $img) {
+		if ($img['name'] == $imagename) {
+			$response['image'] = $img;
+			$file = $imgPath."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
+			$response['image']['size'] = @stat($file)['size'];
+			$response['image']['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
+			$response['image']['mode'] = substr(decoct(@stat($file)['mode']), -4);
+			$backupfile = $file.".ant";
+			if (file_exists($backupfile)) {
+				$response['image']['backedup'] = true;
+				$response['image']['backupsize'] = @stat($backupfile)['size'];
+			} else {
+				$response['image']['backedup'] = false;
+			}
+		}
+	}
+	if (isset ($response['image'])) {
+                // JSON response.
+		jsonResponse(200, $response);
+	} else {
+		// Print error message.
+		$response['message'] = 'Image not found';
+		jsonResponse(404, $response);
+	}
+	$app->stop();
+    }
+);
+
+
+/**
  * @brief    Power on a pc or group of pcs with the MAC specified in POST parameters
  * @note     Route: /poweron, Method: POST
  * @param    macs      OU id.
