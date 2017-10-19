@@ -82,8 +82,8 @@ class Target:
         self.name = 'OGAgentService'
         self.description = 'OpenGnsys Agent Service'
         self.author = 'Adolfo Gomez'
-        self.url = 'http://www.opengnsys.es'
-        self.company_name = "VirtualCable S.L.U."
+        self.url = 'https://opengnsys.es/'
+        self.company_name = "OpenGnsys Project"
         self.copyright = "(c) 2014 VirtualCable S.L.U."
         self.name = "OpenGnsys Agent"
 
