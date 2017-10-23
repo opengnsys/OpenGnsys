@@ -90,13 +90,15 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
 			$response['images'][$i]['size'] = @stat($file)['size'];
 			$response['images'][$i]['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
 			$response['images'][$i]['mode'] = substr(decoct(@stat($file)['mode']), -4);
-			$backupfile = $file.".ant";
+			$backupfile = "$file.ant";
 			if (file_exists($backupfile)) {
 				$response['images'][$i]['backedup'] = true;
 				$response['images'][$i]['backupsize'] = @stat($backupfile)['size'];
 			} else {
 				$response['images'][$i]['backedup'] = false;
 			}
+			$lockfile = "$file.lock";
+			$response['images'][$i]['locked'] = file_exists($lockfile);
 		}
 		// Complete image in OUs information.
 		for ($j=0; $j<sizeof(@$response['ous']); $j++) {
@@ -106,6 +108,9 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
 				$response['ous'][$j]['images'][$i]['size'] = @stat($file)['size'];
 				$response['ous'][$j]['images'][$i]['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
 				$response['ous'][$j]['images'][$i]['mode'] = substr(decoct(@stat($file)['mode']), -4);
+				$response['ous'][$j]['images'][$i]['backedup'] = false;
+				$lockfile = "$file.lock";
+				$response['ous'][$j]['images'][$i]['locked'] = file_exists($lockfile);
 			}
 		}
 		// Retrieve disk information.
@@ -158,13 +163,15 @@ $app->get('/repository/image(/:ouname)/:imagename(/)', 'validateRepositoryApiKey
 			$response['size'] = @stat($file)['size'];
 			$response['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
 			$response['mode'] = substr(decoct(@stat($file)['mode']), -4);
-			$backupfile = $file.".ant";
+			$backupfile = "$file.ant";
 			if (file_exists($backupfile)) {
 				$response['backedup'] = true;
 				$response['backupsize'] = @stat($backupfile)['size'];
 			} else {
 				$response['backedup'] = false;
 			}
+			$lockfile = "$file.lock";
+			$response['locked'] = file_exists($lockfile);
 		}
 	}
 	if (isset ($response)) {

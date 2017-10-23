@@ -993,6 +993,30 @@ paths:
       tags:
         - repository
         - image
+  /repository/image/{ouname}/{imagename:
+    get:
+      description: 
+      parameters:
+        - in: path
+          name: ouname
+          description: OU name (optional)
+          required: false
+          type: string
+        - in: path
+          name: imagename
+          description: image name
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: "#/definitions/ImageModel"
+      security:
+        - apikey: []
+      tags:
+        - repository
+        - image
   #/repository/poweron
   /ogagent/started:
     post:
@@ -1234,5 +1258,9 @@ definitions:
         description: image backup size (bytes)
         type: integer
         format: int64
-    required: [ name, type, clientname, clonator, compressor, filesystem, datasize, size, modified, mode, backedup ]
+      locked:
+        description: image locked flag (check if `.lock` file exists)
+        type: boolean
+        default: false
+    required: [ name, type, clientname, clonator, compressor, filesystem, datasize, size, modified, mode, backedup, locked ]
 
