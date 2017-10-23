@@ -131,30 +131,43 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
  * @param    no
  * @return   JSON object with image data.
  */
-$app->get('/repository/image/:imagename(/)', 'validateRepositoryApiKey', 
-    function($imagename) use ($app) {
+$app->get('/repository/image(/:ouname)/:imagename(/)', 'validateRepositoryApiKey', 
+    function($ouname="/", $imagename) use ($app) {
+	$images = array();
 	$response = array();
 	// Search image name in repository information file.
 	$cfgFile = '/opt/opengnsys/etc/repoinfo.json';
 	$json = json_decode(@file_get_contents($cfgFile), true);
 	$imgPath = @$json['directory'];
-	foreach ($json['images'] as $img) {
-		if ($img['name'] == $imagename) {
-			$response['image'] = $img;
-			$file = $imgPath."/".($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
-			$response['image']['size'] = @stat($file)['size'];
-			$response['image']['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
-			$response['image']['mode'] = substr(decoct(@stat($file)['mode']), -4);
-			$backupfile = $file.".ant";
-			if (file_exists($backupfile)) {
-				$response['image']['backedup'] = true;
-				$response['image']['backupsize'] = @stat($backupfile)['size'];
-			} else {
-				$response['image']['backedup'] = false;
+	if (empty($ouname) or $ouname == "/") {
+		// Search in global directory.
+		$images = @$json['images'];
+	} else {
+		// Search in OU directory.
+		for ($i=0; $i<sizeof(@$json['ous']); $i++) {
+			if ($json['ous'][$i]['subdir'] == $ouname) {
+				$images = $json['ous'][$i]['images'];
 			}
 		}
 	}
-	if (isset ($response['image'])) {
+	// Search image.
+	foreach ($images as $img) {
+		if ($img['name'] == $imagename) {
+			$response = $img;
+			$file = "$imgPath/$ouname/" . ($img['type']==="dir" ? $img["name"] : $img["name"].".".$img["type"]);
+			$response['size'] = @stat($file)['size'];
+			$response['modified'] = date("Y-m-d H:i:s", @stat($file)['mtime']);
+			$response['mode'] = substr(decoct(@stat($file)['mode']), -4);
+			$backupfile = $file.".ant";
+			if (file_exists($backupfile)) {
+				$response['backedup'] = true;
+				$response['backupsize'] = @stat($backupfile)['size'];
+			} else {
+				$response['backedup'] = false;
+			}
+		}
+	}
+	if (isset ($response)) {
                 // JSON response.
 		jsonResponse(200, $response);
 	} else {
