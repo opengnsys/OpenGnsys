@@ -7,6 +7,9 @@
 // Nombre del fichero: propiedades_perfilhardwares.php
 // Descripción : 
 //		 Presenta el formulario de captura de datos de un pefil hardware para insertar,modificar y eliminar
+// Versión: 1.1 - Se elimina la opción de arranque directo.
+// Autor:   Irina Gómez - ETSII Universidad de Sevilla
+// Date: 2017-10-23
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
@@ -57,6 +60,7 @@ if  ($opcion!=$op_alta){
 	<input type="hidden" name="idperfilhard" value="<?=$idperfilhard?>" />
 	<input type="hidden" name="ordenadores" value="<?=$ordenadores?>" />
 	<input type="hidden" name="grupoid" value="<?=$grupoid?>" />
+	<input type="hidden" name="winboot" value="reboot" />
 	<p align="center" class="cabeceras"><?echo $TbMsg["HARD_TITLE"]?><br />
 	<span align="center" class="subcabeceras"><? echo $opciones[$opcion]?></span></p>
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
@@ -76,18 +80,6 @@ if  ($opcion!=$op_alta){
 					echo '<td>'.$comentarios.'</td>';
 				else
 					echo '<td><textarea class="formulariodatos" name="comentarios" rows="3" cols="40">'.$comentarios.'</textarea></td>';
-			?>
-		</tr>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg["HARD_WINBOOT"]?> <sup>*</sup>&nbsp;</th>
-			<?php	if ($opcion==$op_eliminacion)
-					echo "<td>$winboot</td>";
-				else {
-					$params = "reboot=".$TbMsg["HARD_REBOOT"].chr(13);
-					$params.= "kexec=".$TbMsg["HARD_KEXEC"];
-					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",110)."</td>";
-				}
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
