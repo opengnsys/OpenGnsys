@@ -1086,26 +1086,50 @@ MENUENTRY="menuentry "OpenGnsys"  --class opengnsys --class gnu --class os { \n 
     [ $TIMEOUT ] &&  sed -i s/timeout=.*$/timeout=$TIMEOUT/g $GRUBGFC
 }
 
-
 #/**
 # ogGrubHidePartitions num_disk num_part
-#@brief Configura el grub para que oculte las particiones de windows que no se esten iniciando.
+#@see ogBootLoaderHidePartitions
+#*/
+function ogGrubHidePartitions {
+    ogBootLoaderHidePartitions $@
+    return $?
+}
+
+#/**
+# ogBurgHidePartitions num_disk num_part
+#@see ogBootLoaderHidePartitions
+#*/
+function ogBurgHidePartitions {
+    ogBootLoaderHidePartitions $@
+    return $?
+}
+
+#/**
+# ogBootLoaderHidePartitions num_disk num_part
+#@brief Configura el grub/burg para que oculte las particiones de windows que no se esten iniciando.
 #@param 1 Numero de disco
 #@param 2 Numero de particion
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception No existe archivo de configuracion del grub.
+#@exception No existe archivo de configuracion del grub/burg.
 #@version 1.1 Se comprueban las particiones de Windows con blkid (y no con grub.cfg)
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2015-11-17
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-10-20
 #*/
-function ogGrubHidePartitions {
-    local DIRMOUNT GRUBGFC PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
+function ogBootLoaderHidePartitions {
+    local FUNC DIRMOUNT GFCFILE PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
+
+    # Nombre de la función que llama a esta.
+    FUNC="${FUNCNAME[@]:1}"
+    FUNC="${FUNC%%\ *}"
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-                "$FUNCNAME 1 6"
+        ogHelp  "$FUNC" "$FUNC int_ndisk int_npartition" \
+                "$FUNC 1 6"
         return
     fi
 
@@ -1114,21 +1138,33 @@ function ogGrubHidePartitions {
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
-    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+    # La función debe ser llamanda desde ogGrubHidePartitions or ogBurgHidePartitions.
+    case "$FUNC" in
+        ogGrubHidePartitions)
+            CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+            ;;
+        ogBurgHidePartitions)
+            CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
+            ;;
+        *)
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubHidePartitions or ogBurgHidePartitions."
+            return $?
+            ;;
+    esac
 
     # Error si no existe archivo del grub
-    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
+    [ -r $CFGFILE ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE" 1>&2; echo $?)
 
     # Si solo hay una particion de Windows me salgo
     [ $(fdisk -l $(ogDiskToDev $1) | grep 'NTFS' |wc -l) -eq 1 ] && return 0
 
     # Elimino llamadas a parttool, se han incluido en otras ejecuciones de esta funcion.
-    sed -i '/parttool/d' $GRUBGFC
+    sed -i '/parttool/d' $CFGFILE
 
     PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
 
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
-    WINENTRY=$(awk '/menuentry.*Windows/ { gsub(/\/dev\/sda/,""); gsub(/\)\"/, "");  print NR":"$6} ' $GRUBGFC | sed '1!G;h;$!d' )
+    WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)\"/, "");  print NR":"$6} ' $CFGFILE | sed -e '1!G;h;$!d' -e s/[a-z\/]//g)
     # Particiones de Windows, pueden no estar en el grub.
     WINPART=$(fdisk -l $(ogDiskToDev $1)|awk '/NTFS/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
     # Modifico todas las entradas de Windows.
@@ -1144,67 +1180,109 @@ function ogGrubHidePartitions {
                 TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2) hidden$HIDDEN \n$TEXT"
         done
 	
-        sed -i "${LINE}a\ $TEXT" $GRUBGFC
+        sed -i "${LINE}a\ $TEXT" $CFGFILE
     done
 
     # Activamos la particion que se inicia en todas las entradas de windows.
-    sed -i "/chainloader/i\\\tparttool \$\{root\} boot+"  $GRUBGFC
+    sed -i "/chainloader/i\\\tparttool \$\{root\} boot+"  $CFGFILE
 
 }
 
 #/**
 # ogGrubDeleteEntry num_disk num_part num_part_delete
+#@see ogBootLoaderDeleteEntry
+#*/
+function ogGrubDeleteEntry {
+    ogBootLoaderDeleteEntry $@
+    return $?
+}
+
+#/**
+# ogBurgDeleteEntry num_disk num_part num_part_delete
+#@see ogBootLoaderDeleteEntry
+#*/
+function ogBurgDeleteEntry {
+    ogBootLoaderDeleteEntry $@
+    return $?
+}
+
+#/**
+# ogBootLoaderDeleteEntry num_disk num_part num_part_delete
 #@brief Borra en el grub las entradas para el inicio en una particion.
 #@param 1 Numero de disco donde esta el grub
 #@param 2 Numero de particion donde esta el grub
-#@parm 3 Numero de la particion de la que borramos las entradas
+#@param 3 Numero de la particion de la que borramos las entradas
+#@note Tiene que ser llamada desde ogGrubDeleteEntry o ogBurgDeleteEntry
 #@return  (nada)
+#@exception OG_ERR_FORMAT    Use ogGrubDeleteEntry or ogBurgDeleteEntry.
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception No existe archivo de configuracion del grub.
-#@ /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#@exception OG_ERR_NOTFOUND  No existe archivo de configuracion del grub.
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-10-20
 #*/
+function ogBootLoaderDeleteEntry {
+    local FUNC DIRMOUNT CFGFILE DEVICE MENUENTRY DELETEENTRY ENDENTRY ENTRY
 
+    # Nombre de la función que llama a esta.
+    FUNC="${FUNCNAME[@]:1}"
+    FUNC="${FUNC%%\ *}"
 
-function ogGrubDeleteEntry {
-    local DIRMOUNT GRUBGFC MENUENTRY DELETEENTRY ENDENTRY ENTRY
+    # Archivo de configuracion del grub
+    DIRMOUNT=$(ogMount $1 $2)
+    # La función debe ser llamanda desde ogGrubDeleteEntry or ogBurgDeleteEntry.
+    case "$FUNC" in
+        ogGrubDeleteEntry)
+            CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+            ;;
+        ogBurgDeleteEntry)
+            CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
+            ;;
+        *)
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubDeleteEntry or ogBurgDeleteEntry."
+            return $?
+            ;;
+    esac
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
-                "$FUNCNAME 1 6 2"
+        ogHelp  "$FUNC" "$FUNC int_ndisk int_npartition int_npartition_delete" \
+                "$FUNC 1 6 2"
         return
     fi
 
     # Error si no se reciben 3 parámetros.
-    [ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
+    [ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNC num_disk num_part"; echo $?)
 
-    # Archivo de configuracion del grub
-    DIRMOUNT=$(ogMount $1 $2)
-    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+    # Dispositivo
+    DEVICE=$(ogDiskToDev $1)
 
     # Error si no existe archivo del grub)
-    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC"; echo $?)
+    [ -r $CFGFILE ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE"; echo $?)
 
     # Numero de linea de cada entrada, de mayor a menor.
-    MENUENTRY="$(grep -n -e menuentry.*/dev/sda $GRUBGFC| cut -d: -f1 | sed '1!G;h;$!d' )"
+    MENUENTRY="$(grep -n -e menuentry.*$DEVICE $CFGFILE| cut -d: -f1 | sed '1!G;h;$!d' )"
 
     # Entradas que hay que borrar.
-    DELETEENTRY=$(grep -n menuentry.*/dev/sda$3 $GRUBGFC| cut -d: -f1)
+    DELETEENTRY=$(grep -n menuentry.*$DEVICE$3 $CFGFILE| cut -d: -f1)
+
+    # Si no hay entradas para borrar me salgo con aviso
+    [ "$DELETEENTRY" == "" ] && ogEcho session log warning "No menuentry $DEVICE$3" && return
 
     # Recorremos el fichero del final hacia el principio.
-    ENDENTRY="$(wc -l $GRUBGFC|cut  -d" " -f1)"
+    ENDENTRY="$(wc -l $CFGFILE|cut  -d" " -f1)"
     for ENTRY in $MENUENTRY; do
         # Comprobamos si hay que borrar la entrada.
         if  ogCheckStringInGroup $ENTRY "$DELETEENTRY" ; then
             let ENDENTRY=$ENDENTRY-1
-            sed -i -e $ENTRY,${ENDENTRY}d  $GRUBGFC
+            sed -i -e $ENTRY,${ENDENTRY}d  $CFGFILE
         fi
 
         # Guardamos el número de línea de la entrada, que sera el final de la siguiente.
         ENDENTRY=$ENTRY
     done
-
 }
+
 
 #         ogBurgInstallMbr   int_disk_GRUBCFG  int_partition_GRUBCFG 
 #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
