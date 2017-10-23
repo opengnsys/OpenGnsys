@@ -15,6 +15,8 @@ include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
+include_once("../includes/comunes.php");
+include_once("../includes/restfunctions.php");
 include_once("../idiomas/php/".$idioma."/propiedades_imagenes_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
@@ -41,6 +43,8 @@ $grupoid=0;
 $litamb="";
 $tipoimg=0;
 $idrepositorio=0;
+$repoip="";
+$repokey="";
 $fechacreacion="";
 $revision=0;
 $imagenid=0;
@@ -96,6 +100,23 @@ if ($opcion == 1 && $datospost == 1) {
 	if (isset($_POST["fechacreacion"])) $fechacreacion=$_POST["fechacreacion"]; 
 	if (isset($_POST["litamb"])) $litamb=$_POST["litamb"]; 
 	}
+// Solicitar datos del fichero de imagen a la API REST de su repositorio.
+if  ($opcion!=$op_alta and isset($repokey)) {
+	$repo[0]['url'] = "https://$repoip/opengnsys/rest/repository/image/$nombreca";
+	$repo[0]['header'] = array('Authorization: '.$repokey);
+	$result = multiRequest($repo);
+	if ($result[0]['code'] === 200) {
+		$result = json_decode($result[0]['data']);
+		$imgpath = (@$result->type==="dir" ? @$result->name : @$result->name.".".@$result->type);
+		$imgsize = humanSize(@$result->size);
+		$imgbackup = @$result->backedup;
+		$imgbksize = isset($result->backupsize) ? humanSize($result->backupsize) : 0;
+		$imglock = @$result->locked;
+	} else {
+		$imgpath = "";
+	}
+}
+
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -259,6 +280,40 @@ if ($opcion == 1 && $datospost == 1) {
 			<th align="center">&nbsp;<?php echo $TbMsg['PROP_OS']?>&nbsp;</th>
 			<td>&nbsp;<?php	echo $sistoperativo?> </td>
 		</tr>
+	    <?php
+		// Datos de imagen en el repositorio
+		if (isset($imgpath)) {
+			print <<< EOT
+		<tr>
+			<th colspan="2" align="center">Datos del repositorio</th>
+		</tr>
+		<tr>
+			<th align="center">Camino</th>
+			<td>&nbsp;/$imgpath&nbsp;</td>
+		</tr>
+		<tr>
+			<th align="center">Tamaño</th>
+			<td>&nbsp;$imgsize&nbsp;</td>
+		</tr>
+EOT;
+			if ($imgbackup) {
+				print <<< EOT
+		<tr>
+			<th align="center">Copia de seguridad</th>
+			<td>&nbsp;$imgbksize&nbsp;</td>
+		</tr>
+EOT;
+			}
+			if ($imglock) {
+				print <<< EOT
+		<tr>
+			<th align="center">Bloqueada</th>
+			<td>&nbsp;Atención: la imagen está bloqueda por operación de uso exclusivo&nbsp;</td>
+		</tr>
+EOT;
+			}
+		}
+	    ?>
 	    <?php  } // fin if != op_alta
 	    // Mensaje aviso ruta de origen
 	    if ($opcion==$op_alta && $tipoimg==$IMAGENES_BASICAS) {
@@ -325,6 +380,8 @@ function TomaPropiedades($cmd,$idmagen){
 	global $tipopar;
 	global $nombrerepositorio;
 	global $idrepositorio;
+	global $repoip;
+	global $repokey;
 	global $perfilsoft;
 	global $sistoperativo;
 	global $imagenid;
@@ -333,6 +390,7 @@ function TomaPropiedades($cmd,$idmagen){
 	
 	$rs=new Recordset; 
 	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, 
+			repositorios.ip, repositorios.apikey,
 			perfilessoft.descripcion AS perfilsoft, nombreso AS sistoperativo,
 			CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo,
 			IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler
@@ -362,6 +420,8 @@ function TomaPropiedades($cmd,$idmagen){
 		$codpar=$rs->campos["codpar"];
 		$idrepositorio=$rs->campos["idrepositorio"];
 		$nombrerepositorio=$rs->campos["nombrerepositorio"];
+		$repoip=$rs->campos["ip"];
+		$repokey=$rs->campos["apikey"];
 		$perfilsoft=$rs->campos["perfilsoft"];
 		$sistoperativo=$rs->campos["sistoperativo"];
 		$imagenid=$rs->campos["imagenid"];
