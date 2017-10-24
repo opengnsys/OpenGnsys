@@ -121,7 +121,7 @@ setup(
             'bundle_files': 3,
             'compressed': True,
             'optimize': 2,
-            'includes': ['sip', 'PyQt4', 'win32com.shell', 'requests'] + HIDDEN_BY_SIX,
+            'includes': ['sip', 'PyQt4', 'win32com.shell', 'requests', 'encodings', 'encodings.utf_8'] + HIDDEN_BY_SIX,
             'excludes': ['doctest', 'unittest'],
             'dll_excludes': ['msvcp90.dll'],
             'dist_dir': '..\\bin',

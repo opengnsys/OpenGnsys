@@ -237,5 +237,5 @@ def showPopup(title, message):
     '''
     Displays a message box on user's session (during 1 min).
     '''
-    return subprocess.call('mshta "javascript:var sh=new ActiveXObject(\'WScript.Shell\'); sh.Popup( \'{}\', 60, \'{}\', 64); close()"'.format(message, title), shell=True)
+    return subprocess.call('mshta "javascript:var sh=new ActiveXObject(\'WScript.Shell\'); sh.Popup( \'{}\', 60, \'{}\', 64); close()"'.format(message.encode('unicode_escape'), title.encode('unicode_escape')), shell=True)
 

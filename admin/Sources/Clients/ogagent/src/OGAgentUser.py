@@ -32,14 +32,13 @@
 from __future__ import unicode_literals
 
 import sys
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-
 import time
 import signal
 import json
 import six
 import atexit
+from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 from opengnsys import ipc
 from opengnsys import utils
@@ -52,6 +51,11 @@ from opengnsys.scriptThread import ScriptExecutorThread
 from opengnsys import VERSION
 from opengnsys.config import readConfig
 from opengnsys.loader import loadModules
+
+# Set default characters encoding to UTF-8
+reload(sys)
+if hasattr(sys, 'setdefaultencoding'):
+    sys.setdefaultencoding('utf-8')
 
 trayIcon = None
 
@@ -309,7 +313,7 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
             self.cleanup()
             self.app.quit()
 
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         logger.debug("Exec closeEvent")
         event.accept()
         self.quit()
