@@ -233,13 +233,13 @@ EOD;
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": ERROR: ".$response["message"].".");
 			jsonResponse(400, $response);
-			$app->stop();
 		}
        	} else {
 		if ($app->settings['debug'])
 			writeRemotepcLog($app->request()->getResourceUri(). ": UNASSIGNED");
        	}
 	$rs->Cerrar();
+	$app->stop();
     }
 );
 
@@ -323,16 +323,15 @@ EOD;
 				// Error message.
 				$response["message"] = "Database error";
 				jsonResponse(400, $response);
-				$app->stop();
 			}
         	} else {
 			// Error message.
 			$response["message"] = "Client is not reserved";
 			jsonResponse(400, $response);
-			$app->stop();
         	}
         }
 	$rs->Cerrar();
+	$app->stop();
     }
 );
 
@@ -340,7 +339,7 @@ EOD;
 /*
  * @brief    Store session time (in sec).
  * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/session, Method: POST
- * @param    int    deadLine   maximum time session will be active (in seconds)
+ * @param    int    deadLine   maximum time session (in seconds)
  * @warning  Parameters will be stored in a new "remotepc" table.
  */
 $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
@@ -376,9 +375,67 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 
 	if ($app->settings['debug'])
 		writeRemotepcLog($app->request()->getResourceUri(). ": Parameters: deadLine=$deadLine");
-	# ...
-	# ...
-	#$rs->Cerrar();
+	// Get client's data.
+	$cmd->texto = <<<EOD
+SELECT adm.idadministradorcentro, ordenadores.idordenador, remotepc.reserved
+  FROM remotepc
+ RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ WHERE adm.idadministradorcentro = '$userid'
+   AND aulas.idcentro = '$ouid' AND aulas.idaula = '$labid'
+   AND ordenadores.idordenador = '$clntid';
+EOD;
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(false);       // Error opening recordset.
+	// Check if user is admin and client exists.
+	$rs->Primero();
+	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
+		// Check if client is reserved.
+		if (! is_null($rs->campos["reserved"])) {
+			// Read query data.
+			$clntid = $rs->campos["idordenador"];
+			# Removing previous commands from OGAgent operations queue.
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": Updating database.");
+			$cmd->texto = <<<EOD
+DELETE FROM ogagent_queue
+ WHERE id='$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
+EOD;
+			$cmd->Ejecutar();
+			# Add new commands to OGAgent operations queue.
+			$cmd->texto = "INSERT INTO ogagent_queue (id, time, command) VALUES";
+			if ($deadLine > 600) {
+				# Add reminder 10 min. before deadline.
+				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND - INTERVAL 10 MINUTE, 'popup-10'),";
+			}
+			if ($deadLine > 300) {
+				# Add reminder 5 min. before deadline.
+				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND - INTERVAL 5 MINUTE, 'popup-5'),";
+			}
+			# Add power off command at deadline time.
+			$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
+echo $cmd->texto."\n";
+			if ($cmd->Ejecutar()) {
+				// Confirm operation.
+				jsonResponse(200, "");
+        		} else {
+				// Error message.
+				$response["message"] = "Database error";
+				jsonResponse(400, $response);
+			}
+		} else {
+			// Error message.
+			$response["message"] = "Client is not reserved";
+			jsonResponse(400, $response);
+		}
+       	} else {
+		// Error message.
+		$response["message"] = "Client does not exist";
+		jsonResponse(404, $response);
+	}
+	$rs->Cerrar();
     }
 );
 
@@ -465,12 +522,16 @@ EOD;
 			// ...
 			// Confirm operation.
 			jsonResponse(200, "");
-       		} else {
+		} else {
 			// Error message.
 			$response["message"] = "Client is not reserved";
 			jsonResponse(400, $response);
 		}
-       	}
+	} else {
+		// Error message.
+		$response["message"] = "Client does not exist";
+		jsonResponse(404, $response);
+	}
 	$rs->Cerrar();
     }
 );

@@ -110,7 +110,7 @@ function validateApiKey() {
 			}
 			$rs->Cerrar();
 		} else {
-			// Access error.
+			// Database error.
 			$response['message'] = "An error occurred, please try again";
 			jsonResponse(500, $response);
 		}

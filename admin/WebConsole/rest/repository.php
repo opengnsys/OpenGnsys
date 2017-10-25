@@ -47,7 +47,7 @@ function validateRepositoryApiKey() {
 				$app->stop();
 			}
 		} else {
-			// Access error.
+			// Cannot access configuration file.
 			$response['message'] = "An error occurred, please try again";
 			jsonResponse(500, $response);
 		}
@@ -55,7 +55,6 @@ function validateRepositoryApiKey() {
 		// Error: missing API key.
        		$response['message'] = 'Missing Repository API key';
 		jsonResponse(400, $response);
-		$app->stop();
 	}
 }
 
