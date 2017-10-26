@@ -405,7 +405,7 @@ DELETE FROM ogagent_queue
 EOD;
 			$cmd->Ejecutar();
 			# Add new commands to OGAgent operations queue.
-			$cmd->texto = "INSERT INTO ogagent_queue (clientid, exectime, command) VALUES";
+			$cmd->texto = "INSERT INTO ogagent_queue (clientid, exectime, operation) VALUES";
 			if ($deadLine > 600) {
 				# Add reminder 10 min. before deadline.
 				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND - INTERVAL 10 MINUTE, 'popup-10'),";
@@ -416,7 +416,6 @@ EOD;
 			}
 			# Add power off command at deadline time.
 			$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
-echo $cmd->texto."\n";
 			if ($cmd->Ejecutar()) {
 				// Confirm operation.
 				jsonResponse(200, "");
