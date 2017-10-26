@@ -1088,9 +1088,9 @@ function installWebFiles()
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
-	# Fichero de logs del agente OGAgent.
-	touch $INSTALL_TARGET/log/ogagent.log
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/ogagent.log
+	# Ficheros de log de la API REST.
+	touch $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
 
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
@@ -1467,6 +1467,7 @@ function openGnsysConfigure()
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
+	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
 
 	echoAndLog "${FUNCNAME}(): Creating logrotate configuration file."
 	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \

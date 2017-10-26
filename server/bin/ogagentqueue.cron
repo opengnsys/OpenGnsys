@@ -1,0 +1,94 @@
+#!/bin/bash
+
+#/**
+#@file	  ogagentqueue.cron
+#@brief   Cronfile to send pending operations to OGAgent.
+#warning  This file must be executed under system Cron every minute.
+#@version 1.1.0 - Initial version.
+#@date    2017-10-26
+#@author  Ramón M. Gómez - Univ. Sevilla
+#*/ ##
+
+
+# Variables.
+PROG=$(basename "$0")
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+LOGFILE=$OPENGNSYS/log/remotepc.log
+MYCNF=/tmp/.my.cnf.$$
+
+# Basic error control
+if [ ! -r "$SERVERCONF" ]; then
+	echo "$PROG: Cannot access to configuration file." >&2
+	exit 2
+fi
+if ! touch "$LOGFILE"; then
+	echo "$PROG: Cannot write to the log file." >&2
+	exit 2
+fi
+
+# Fetching database access data.
+source "$SERVERCONF"
+# Composing connection credentils file.
+touch $MYCNF 
+chmod 600 $MYCNF 
+cat << EOT > $MYCNF 
+[client] 
+user=$USUARIO 
+password=$PASSWORD 
+EOT
+# Trap to delete temporal file if process ends.
+trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
+# Reading pending operations.
+mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -Nse "
+SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
+       ordenadores.idordenador, ordenadores.ip, ordenadores.agentkey
+  FROM ogagent_queue
+  JOIN ordenadores ON ogagent_queue.clientid=ordenadores.idordenador
+ WHERE exectime < NOW()
+ ORDER BY exectime;" | \
+        while read -r OPERID DATE TIME OPER CLNTID AGNTIP AGNTKEY; do
+		# Preparing operation data.
+		# TODO: preparing messages translation.
+		case "$OPER" in
+			popup-10)	# Message:  min. before power off.
+				AGNTURL=https://$AGNTIP:8000/opengnsys/popup
+				DATA='{"title":"Apagado en 10 min.","message","Fin del tiempo de acceso remoto.\nEl ordenador se apagará automáticamente dentro de 10 minutos."}'
+				;;
+			popup-5)	# Message: 5 min. before power off.
+				AGNTURL=https://$AGNTIP:8000/opengnsys/popup
+				DATA='{"title":"Apagado en 5 min.","message","El ordenador se apagará automáticamente dentro de 5 minutos.\nATENCIÓN: Este es el último aviso."}'
+				;;
+			poweroff)	# Power off client.
+				AGNTURL=https://$AGNTIP:8000/opengnsys/poweroff
+				DATA=
+				;;
+			*)		# Unknown operation.
+				AGNTURL=
+				;;
+		esac
+		# Sending operation to OGAgent.
+		if [ -n "$AGNTURL" ]; then
+			CODE=$(curl -ksm 1 -w "%{http_code}" -o /dev/null -H "'Authorization: $AGNTKEY'" ${DATA:+"-d '$DATA'"} "$AGNTURL")
+			 case "$CODE" in
+				000)	# Client does not respond may be halted).
+					;;
+				200)	# Operation sended.
+					echo "$(date +"%FT%T%z"): $PROG: Operation sended to OGAgent: client=$AGNTIP, oper=$OPER, exectime=\"$DATE $TIME\"" >> $LOGFILE ;;
+				*)	# Operation error.
+					echo "$(date +"%FT%T%z"): $PROG: Operation error: client=$AGNTIP, oper=$OPER, code=$CODE" >> $LOGFILE ;;
+			esac
+		else	# Unknown operation.
+			echo "$(date +"%FT%T%z"): $PROG: Unknown operation: client=$AGNTIP, oper=$OPER" >> $LOGFILE
+		fi
+		# Deleting operation from database.
+		mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -Nse "
+DELETE FROM ogagent_queue
+ WHERE id='$OPERID';
+UPDATE remotepc
+   SET reserved = NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
+ WHERE id = '$CNLTID';
+DELETE FROM acciones
+ WHERE idordenador = '$CLNTID'
+   AND descriaccion = 'RemotePC Session';"
+	done

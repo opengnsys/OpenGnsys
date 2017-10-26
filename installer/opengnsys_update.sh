@@ -591,9 +591,9 @@ function updateWebFiles()
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 
-	# Fichero de logs del agente OGAgent.
-	touch $INSTALL_TARGET/log/ogagent.log
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/ogagent.log
+	# Fichero de log de la API REST.
+	touch $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/{log/ogagent,rest,remotepc}.log
 
 	echoAndLog "${FUNCNAME}(): Web files updated successfully."
 }
@@ -824,6 +824,7 @@ function updateServerFiles()
 	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	[ ! -f /etc/cron.d/imagedelete ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
+	[ ! -f /etc/cron.d/ogagentqueue ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
 	echoAndLog "${FUNCNAME}(): server files updated successfully."
 }
 
