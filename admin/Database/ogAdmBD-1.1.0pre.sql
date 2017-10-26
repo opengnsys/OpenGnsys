@@ -222,7 +222,7 @@ INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
 ALTER TABLE aulas
 	MODIFY puestos SMALLINT DEFAULT NULL;
 
-# Nueva tabla para datos del proyecto Remote PC (ticket #708).
+# Nuevas tablas para datos del proyecto Remote PC y operaciones de OGAgent (ticket #708).
 CREATE TABLE IF NOT EXISTS remotepc ( 
 	id INT(11) NOT NULL, 
 	reserved DATETIME DEFAULT NULL, 
@@ -232,6 +232,13 @@ CREATE TABLE IF NOT EXISTS remotepc (
 	) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 ALTER TABLE remotepc
        MODIFY reserved DATETIME DEFAULT NULL;
+CREATE TABLE IF NOT EXISTS ogagent_queue (
+	id INT(11) NOT NULL AUTO_INCREMENT,
+	clientid INT(11) NOT NULL,
+	exectime DATETIME DEFAULT NULL,
+	operation VARCHAR(25),
+	PRIMARY KEY (id)
+	) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 # Nuevo comando "Enviar mensaje" (ticket #779)
 INSERT INTO comandos (idcomando, descripcion, pagina, gestor, funcion, urlimg, 

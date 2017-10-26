@@ -489,6 +489,22 @@ CREATE TABLE `nombresos` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `ogagent_queue`
+--
+
+DROP TABLE IF EXISTS `ogagent_queue`;
+CREATE TABLE `ogagent_queue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `clientid` int(11) NOT NULL,
+  `exectime` datetime DEFAULT NULL,
+  `operation` varchar(25),
+--  `parameters` varchar(100),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `ordenadores`
 --
 
