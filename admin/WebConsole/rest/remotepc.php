@@ -514,6 +514,7 @@ EOD;
 			$cmd->texto = <<<EOD
 DELETE FROM ogagent_queue
  WHERE clientid = '$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
+EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
