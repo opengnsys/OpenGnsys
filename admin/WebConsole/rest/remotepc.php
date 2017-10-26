@@ -401,11 +401,11 @@ EOD;
 				writeRemotepcLog($app->request()->getResourceUri(). ": Updating database.");
 			$cmd->texto = <<<EOD
 DELETE FROM ogagent_queue
- WHERE id='$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
+ WHERE clientid = '$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
 EOD;
 			$cmd->Ejecutar();
 			# Add new commands to OGAgent operations queue.
-			$cmd->texto = "INSERT INTO ogagent_queue (id, time, command) VALUES";
+			$cmd->texto = "INSERT INTO ogagent_queue (clientid, exectime, command) VALUES";
 			if ($deadLine > 600) {
 				# Add reminder 10 min. before deadline.
 				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND - INTERVAL 10 MINUTE, 'popup-10'),";
@@ -496,7 +496,7 @@ EOD;
 			$clntip = $rs->campos["ip"];
 			$agentkey = $rs->campos["agentkey"];
 			// DB Transaction: set reservation time to the past and
-			// remove pending boot commands from client's actions queue.
+			// remove pending boot commands from client's and agent's queues.
 			$cmd->texto = "START TRANSACTION;";
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
@@ -510,6 +510,10 @@ DELETE FROM acciones
  WHERE idordenador = '$clntid'
    AND descriaccion = 'RemotePC Session';
 EOD;
+			$cmd->Ejecutar();
+			$cmd->texto = <<<EOD
+DELETE FROM ogagent_queue
+ WHERE clientid = '$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
 			$cmd->Ejecutar();
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
