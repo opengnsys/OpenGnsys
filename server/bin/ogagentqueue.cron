@@ -53,11 +53,11 @@ SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
 		case "$OPER" in
 			popup-10)	# Message:  min. before power off.
 				AGNTURL=https://$AGNTIP:8000/opengnsys/popup
-				DATA='{"title":"Apagado en 10 min.","message","Fin del tiempo de acceso remoto.\nEl ordenador se apagará automáticamente dentro de 10 minutos."}'
+				DATA='{"title":"Apagado en 10 min.","message":"Fin del tiempo de acceso remoto.\nEl ordenador se apagará automáticamente dentro de 10 minutos."}'
 				;;
 			popup-5)	# Message: 5 min. before power off.
 				AGNTURL=https://$AGNTIP:8000/opengnsys/popup
-				DATA='{"title":"Apagado en 5 min.","message","El ordenador se apagará automáticamente dentro de 5 minutos.\nATENCIÓN: Este es el último aviso."}'
+				DATA='{"title":"Apagado en 5 min.","message":"El ordenador se apagará automáticamente dentro de 5 minutos.\nATENCIÓN: Este es el último aviso."}'
 				;;
 			poweroff)	# Power off client.
 				AGNTURL=https://$AGNTIP:8000/opengnsys/poweroff
@@ -69,7 +69,7 @@ SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
 		esac
 		# Sending operation to OGAgent.
 		if [ -n "$AGNTURL" ]; then
-			CODE=$(curl -ksm 1 -w "%{http_code}" -o /dev/null -H "'Authorization: $AGNTKEY'" ${DATA:+"-d '$DATA'"} "$AGNTURL")
+			CODE=$(curl -ksm 1 -w "%{http_code}" -o /dev/null -H "Authorization: $AGNTKEY" ${DATA:+"-d $DATA"} "$AGNTURL")
 			 case "$CODE" in
 				000)	# Client does not respond may be halted).
 					;;
@@ -82,13 +82,13 @@ SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
 			echo "$(date +"%FT%T%z"): $PROG: Unknown operation: client=$AGNTIP, oper=$OPER" >> $LOGFILE
 		fi
 		# Deleting operation from database.
-		mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -Nse "
-DELETE FROM ogagent_queue
- WHERE id='$OPERID';
+		SQL="DELETE FROM ogagent_queue WHERE id='$OPERID';"
+		[ "$OPER" == "poweroff" ] && SQL="$SQL
 UPDATE remotepc
    SET reserved = NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
  WHERE id = '$CNLTID';
 DELETE FROM acciones
  WHERE idordenador = '$CLNTID'
    AND descriaccion = 'RemotePC Session';"
+		mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -Nse "$SQL"
 	done
