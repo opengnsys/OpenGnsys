@@ -33,7 +33,7 @@ if [ $# -ne 2 ]; then
 fi
 
 if [ -z  "$TEMPLATE" ]; then
-	ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND: $TEMPLATE"
+	ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND: $1"
         exit $?
 fi
 
