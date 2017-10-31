@@ -215,12 +215,12 @@ EOD;
 				writeRemotepcLog($app->request()->getResourceUri(). ": Send Init Session command to ogAdmClient, ido=$clntid,iph=$clntip,dsk=$disk,par=$part.");
 			sendCommand($serverip, $serverport, $reqframe, $values);
 			// Compose JSON response.
-			$response['id'] = $clntid;
+			$response['id'] = (int)$clntid;
 			$response['name'] = $clntname;
 			$response['ip'] = $clntip;
 			$response['mac'] = $clntmac;
 			$response['lab']['id'] = $labid;
-			$response['ou']['id'] = $ouid;
+			$response['ou']['id'] = (int)$ouid;
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": Response, ".var_export($response,true).".");
 			jsonResponse(200, $response);
@@ -318,7 +318,8 @@ UPDATE remotepc
 EOD;
 			if ($cmd->Ejecutar()) {
 				// Confirm operation.
-				jsonResponse(200, "");
+				$response = "";
+				jsonResponse(200, $response);
         		} else {
 				// Error message.
 				$response["message"] = "Database error";
@@ -418,7 +419,8 @@ EOD;
 			$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
 			if ($cmd->Ejecutar()) {
 				// Confirm operation.
-				jsonResponse(200, "");
+				$response = "";
+				jsonResponse(200, $response);
         		} else {
 				// Error message.
 				$response["message"] = "Database error";
@@ -525,7 +527,8 @@ EOD;
 			//if ($result[$clntip]['code'] != 200) {
 			// ...
 			// Confirm operation.
-			jsonResponse(200, "");
+			$response = "";
+			jsonResponse(200, $response);
 		} else {
 			// Error message.
 			$response["message"] = "Client is not reserved";

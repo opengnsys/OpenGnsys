@@ -8,7 +8,7 @@ info:
     Repository Manager).
   contact:
     name: OpenGnsys Project
-    url: http://opengnsys.es/
+    url: https://opengnsys.es/
   license:
     name: Creative Commons 4.0 International
     url: http://creativecommons.org/licenses/by/4.0/
@@ -906,7 +906,7 @@ paths:
   /ous/{ouid}/images/{imageid}/reserve:
     post:
       description: |
-        Reserve a random client with an installed image and send a boot/reboot operation.
+        Reserve a client with an installed image and send a boot/reboot operation.
         If `labid` is specified, then choose a `client` defined in this lab.
       parameters:
         - $ref: "#/parameters/ouParam"
@@ -993,9 +993,9 @@ paths:
       tags:
         - repository
         - image
-  /repository/image/{ouname}/{imagename:
+  /repository/image/{ouname}/{imagename}:
     get:
-      description: 
+      description: Get information about an specific image stored in the repository
       parameters:
         - in: path
           name: ouname

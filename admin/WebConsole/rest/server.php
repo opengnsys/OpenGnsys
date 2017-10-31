@@ -183,7 +183,7 @@ EOD;
 			// Compose JSON response.
 			if ($single) {
 				// Single response.
-				$response['id'] = reset($id);
+				$response['id'] = (int)reset($id);
 				$response['ip'] = key($id);
 				$response['status'] = $stat[$ip];
 				empty($logged[$ip]) || $response['loggedin'] = $logged[$ip];
@@ -191,7 +191,7 @@ EOD;
 				// Multiple responses.
 				foreach ($stat as $ip => $st) {
 					$tmp = Array();
-					$tmp['id'] = $id[$ip];
+					$tmp['id'] = (int)$id[$ip];
 					$tmp['ip'] = $ip;
 					$tmp['status'] = $stat[$ip];
 					empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
@@ -293,7 +293,7 @@ $app->get('/ous(/)', function() {
 	$rs->Primero();
 	while (!$rs->EOF) {
 		$tmp = Array();
-		$tmp['id'] = $rs->campos["idcentro"];
+		$tmp['id'] = (int)$rs->campos["idcentro"];
 		$tmp['name'] = $rs->campos["nombrecentro"];
 		array_push($response, $tmp);
 		$rs->Siguiente();
@@ -330,7 +330,7 @@ EOD;
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and
 	    checkParameter($rs->campos["idcentro"])) {
-		$response['id'] = $ouid;
+		$response['id'] = (int)$ouid;
 		$response['name'] = $rs->campos["nombrecentro"];
 		$response['description'] = $rs->campos["comentarios"];
 		jsonResponse(200, $response);
@@ -369,12 +369,12 @@ EOD;
 		if (! is_null($rs->campos["idcentro"])) {
 			while (!$rs->EOF) {
 				$tmp = Array();
-				$tmp['id'] = $rs->campos["idgrupo"];
+				$tmp['id'] = (int)$rs->campos["idgrupo"];
 				$tmp['name'] = $rs->campos["nombregrupo"];
 				$tmp['type'] = $rs->campos["tipo"];
 				$tmp['comments'] = $rs->campos["comentarios"];
 				if($rs->campos["grupoid"] != 0){
-					$tmp['parent']['id'] = $rs->campos["grupoid"];
+					$tmp['parent']['id'] = (int)$rs->campos["grupoid"];
 				}
 				array_push($response, $tmp);
 				$rs->Siguiente();
@@ -431,18 +431,18 @@ EOD;
 				}
 				if(!$found){
 					$tmp = Array();
-					$tmp['id'] = $rs->campos["idaula"];
+					$tmp['id'] = (int)$rs->campos["idaula"];
 					$tmp['name'] = $rs->campos["nombreaula"];
 					$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-					$tmp['group']['id'] = $rs->campos["grupoid"];
-					$tmp['ou']['id'] = $ouid;
+					$tmp['group']['id'] = (int)$rs->campos["grupoid"];
+					$tmp['ou']['id'] = (int)$ouid;
 					array_push($response, $tmp);
 				}
 				else{
 					// Le añadimos el grupo en cuestion siempre que no sea un subgrupo
 					if($rs->campos["group_group_id"] == 0){
 						array_push($response[$classroomIndex]['classroomGroups'],
-							array("id" => $rs->campos["group_id"],
+							array("id" => (int)$rs->campos["group_id"],
 							"name" => $rs->campos["nombregrupoordenador"],
 							"comments" => $rs->campos["comentarios"],
 							"classroomGroups" => array()));
@@ -491,13 +491,13 @@ EOD;
 	$rs->Primero();
 	// Check if user is an UO admin and lab exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idaula"])) {
-		$response['id'] = $rs->campos["idaula"];
+		$response['id'] = (int)$rs->campos["idaula"];
 		$response['name'] = $rs->campos["nombreaula"];
 		$response['location'] = $rs->campos["ubicacion"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-		$response['capacity'] = $rs->campos["puestos"];
-		$response['defclients'] = $rs->campos["defclients"];
+		$response['capacity'] = (int)$rs->campos["puestos"];
+		$response['defclients'] = (int)$rs->campos["defclients"];
 		$response['projector'] = $rs->campos["cagnon"]==0 ? false: true;
 		$response['board'] = $rs->campos["pizarra"]==0 ? false: true;
 		$response['routerip'] = $rs->campos["router"];
@@ -557,12 +557,12 @@ EOD;
 		while (!$rs->EOF) {
 			if (!is_null($rs->campos["idordenador"])) {
 				$tmp = Array();
-				$tmp['id'] = $rs->campos["idordenador"];
+				$tmp['id'] = (int)$rs->campos["idordenador"];
 				$tmp['name'] = $rs->campos["nombreordenador"];
 				$tmp['ip'] = $rs->campos["ip"];
 				$tmp['mac'] = $rs->campos["mac"];
-				$tmp['ou']['id'] = $ouid;
-				$tmp['lab']['id'] = $labid;
+				$tmp['ou']['id'] = (int)$ouid;
+				$tmp['lab']['id'] = (int)$labid;
 				array_push($response, $tmp);
 			}
 			$rs->Siguiente();
@@ -616,7 +616,7 @@ EOD;
 	// Check if user is an UO admin, lab exists and client exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idaula"]) and checkParameter($rs->campos["idordenador"])) {
 		// Read data.
-		$response['id'] = $rs->campos["idordenador"];
+		$response['id'] = (int)$rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['serialno'] = $rs->campos["numserie"];
 		$response['netiface'] = $rs->campos["netiface"];
@@ -625,7 +625,7 @@ EOD;
 		$response['ip'] = $rs->campos["ip"];
 		$response['netmask'] = $rs->campos["mascara"];
 		$response['routerip'] = $rs->campos["router"];
-		$response['repo']['id'] = $rs->campos["idrepositorio"];
+		$response['repo']['id'] = (int)$rs->campos["idrepositorio"];
 		//$response['hardprofile']['id'] = $rs->campos["idperfilhard"];
 		//$response['menu']['id'] = $rs->campos["idmenu"];
 		$response['validation'] = $rs->campos["validacion"]==0 ? false: true;
@@ -675,7 +675,7 @@ EOD;
 	// Check if user is an UO admin and client exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Read data.
-		$response['id'] = $rs->campos["idordenador"];
+		$response['id'] = (int)$rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['hardware'] = Array();
 		while (!$rs->EOF) {
@@ -736,7 +736,7 @@ EOD;
 	// Check if user is an UO admin and client exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["clientid"])) {
 		// Read data.
-		$response['id'] = $rs->campos["clientid"];
+		$response['id'] = (int)$rs->campos["clientid"];
 		$response['name'] = $rs->campos["nombreordenador"];
 		$response['diskcfg'] = Array();
 		while (!$rs->EOF) {
@@ -747,8 +747,8 @@ EOD;
 			}
 			$tmp = Array();
 			// Common data.
-			$tmp['disk'] = $rs->campos["numdisk"];
-			$tmp['size'] = $rs->campos["tamano"];
+			$tmp['disk'] = (int)$rs->campos["numdisk"];
+			$tmp['size'] = (int)$rs->campos["tamano"];
 			if ($rs->campos["numpar"] == 0) {
 				// Disk data.
 				switch ($rs->campos["codpar"]) {
@@ -760,15 +760,15 @@ EOD;
 				}
 			} else {
 				// Partition data.
-				$tmp['partition'] = $rs->campos["numpar"];
+				$tmp['partition'] = (int)$rs->campos["numpar"];
 				$tmp['parttype'] = $rs->campos["tipopar"];
 				$tmp['filesystem'] = $rs->campos["nemonico"];
-				$tmp['usage'] = $rs->campos["uso"];
+				$tmp['usage'] = (int)$rs->campos["uso"];
 				if ($rs->campos["nombreso"] != null) {
 					$tmp['os'] = $rs->campos["nombreso"];
 					if ($rs->campos["idimagen"] > 0) {
 						// Restored image data.
-						$tmp['image']['id'] = $rs->campos["idimagen"];
+						$tmp['image']['id'] = (int)$rs->campos["idimagen"];
 						$tmp['image']['deploydate'] = $rs->campos["fechadespliegue"];
 						// Check if image is updated.
 						$tmp['image']['updated'] = ($rs->campos["difimagen"]>0 ? "false" : "true");
@@ -825,9 +825,9 @@ EOD;
 		while (!$rs->EOF) {
 			if (! is_null($rs->campos["idcentro"])) {
 				$tmp = Array();
-				$tmp['id'] = $rs->campos["idrepositorio"];
+				$tmp['id'] = (int)$rs->campos["idrepositorio"];
 				$tmp['name'] = $rs->campos["nombrerepositorio"];
-				$tmp['ou']['id'] = $ouid;
+				$tmp['ou']['id'] = (int)$ouid;
 				array_push($response, $tmp);
 			}
 			$rs->Siguiente();
@@ -868,7 +868,7 @@ EOD;
 	// Check if user is an UO admin and repo exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idrepositorio"])) {
 		// Read data.
-		$response['id'] = $rs->campos["idrepositorio"];
+		$response['id'] = (int)$rs->campos["idrepositorio"];
 		$response['name'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['ip'] = $rs->campos["ip"];
@@ -909,10 +909,10 @@ EOD;
 		while (!$rs->EOF) {
 			if (! is_null($rs->campos["idcentro"])) {
 				$tmp = Array();
-				$tmp['id'] = $rs->campos["idimagen"];
+				$tmp['id'] = (int)$rs->campos["idimagen"];
 				$tmp['name'] = $rs->campos["nombreca"];
 				$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-				$tmp['ou']['id'] = $ouid;
+				$tmp['ou']['id'] = (int)$ouid;
 				array_push($response, $tmp);
 			}
 			$rs->Siguiente();
@@ -954,12 +954,12 @@ EOD;
 	// Check if user is an UO admin and repo exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idimagen"])) {
 		// Read data.
-		$response['id'] = $rs->campos["idimagen"];
+		$response['id'] = (int)$rs->campos["idimagen"];
 		$response['name'] = $rs->campos["nombreca"];
 		$response['description'] = $rs->campos["descripcion"];
 		$response['comments'] = $rs->campos["comentarios"];
 		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
-		$response['repo']['id'] = $rs->campos["idrepositorio"];
+		$response['repo']['id'] = (int)$rs->campos["idrepositorio"];
 		switch ($rs->campos["tipo"]) {
 			// Image type.
 			case 1:  $response['type'] = "monolithic"; break;
@@ -972,11 +972,11 @@ EOD;
 		}
 		if ($rs->campos["idordenador"] != 0) {
 			// Source client data.
-			$response['client']['id'] = $rs->campos["idordenador"];
-			$response['client']['disk'] = $rs->campos["numdisk"];
-			$response['client']['partition'] = $rs->campos["numpar"];
+			$response['client']['id'] = (int)$rs->campos["idordenador"];
+			$response['client']['disk'] = (int)$rs->campos["numdisk"];
+			$response['client']['partition'] = (int)$rs->campos["numpar"];
 			$response['creationdate'] = $rs->campos["fechacreacion"];
-			$response['release'] = $rs->campos["revision"];
+			$response['release'] = (int)$rs->campos["revision"];
 			$response['os'] = $rs->campos["os"];
 		}
 		jsonResponse(200, $response);
@@ -1013,7 +1013,7 @@ EOD;
 	$rs->Primero();
 	// Check if user is an UO admin and repo exists.
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idimagen"])) {
-		$response['id'] = $rs->campos["idimagen"];
+		$response['id'] = (int)$rs->campos["idimagen"];
 		$response['name'] = $rs->campos["nombreca"];
 		if (is_null($rs->campos["nombreso"])) {
 			// Null object.
