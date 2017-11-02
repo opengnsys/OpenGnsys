@@ -7,6 +7,7 @@
 // Nombre del fichero: informacion_perfilessoft.php
 // Descripción : 
 //		Muestra los componentes software que forman parte de un perfil software y los perfiles softwares disponibles
+// Version 1.1 - Muetra sistema operativo.
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -68,10 +69,11 @@ function SubarbolXML_PerfilesSoftwares($cmd,$idperfilsoft)
 	$cadenaXML="";
 
 	$cmd->texto="SELECT perfilessoft.idperfilsoft ,perfilessoft.descripcion as pdescripcion, perfilessoft.comentarios,
-								softwares.idsoftware,softwares.descripcion as hdescripcion,tiposoftwares.urlimg FROM perfilessoft  
+								softwares.idsoftware,softwares.descripcion as hdescripcion,tiposoftwares.urlimg, nombreso FROM perfilessoft  
 								LEFT OUTER JOIN  perfilessoft_softwares  ON perfilessoft.idperfilsoft=perfilessoft_softwares.idperfilsoft
 								LEFT OUTER JOIN  softwares  ON softwares.idsoftware=perfilessoft_softwares.idsoftware
 								LEFT OUTER JOIN  tiposoftwares  ON softwares.idtiposoftware=tiposoftwares.idtiposoftware
+								LEFT OUTER JOIN nombresos USING (idnombreso)
 								WHERE perfilessoft.idperfilsoft=".$idperfilsoft."
 								ORDER by tiposoftwares.idtiposoftware,softwares.descripcion";
 	$rs=new Recordset; 								
@@ -99,6 +101,14 @@ function SubarbolXML_PerfilesSoftwares($cmd,$idperfilsoft)
 				$cadenaXML.=' infonodo="'.$TbMsg[6].'"';
 				$cadenaXML.='>';
 				$swcompo=true;
+				if ( $rs->campos["nombreso"] != "") {
+					$cadenaXML.='<PERFILSOFTWARE';
+					// Atributos
+					$cadenaXML.=' imagenodo="../images/iconos/so.gif"';
+					$cadenaXML.=' infonodo="'.$rs->campos["nombreso"].'"';
+					$cadenaXML.='>';
+				$cadenaXML.='</PERFILSOFTWARE>';
+				}
 			}	
 			$cadenaXML.='<PERFILSOFTWARE';
 			// Atributos

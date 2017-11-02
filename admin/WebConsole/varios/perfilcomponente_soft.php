@@ -48,11 +48,20 @@ if (!$cmd)
 				<TH><?echo $TbMsg[3]?></TH>
 			</TR>
 		<?
+			$nombreso=false;
 			$rs=new Recordset; 
-			$cmd->texto='SELECT softwares.idsoftware,softwares.descripcion,tiposoftwares.descripcion as hdescripcion,tiposoftwares.urlimg FROM softwares INNER JOIN perfilessoft_softwares ON softwares.idsoftware=perfilessoft_softwares.idsoftware INNER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware WHERE perfilessoft_softwares.idperfilsoft='.$idperfilsoft.' ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion';
+			$cmd->texto='SELECT softwares.idsoftware,softwares.descripcion,tiposoftwares.descripcion as hdescripcion,tiposoftwares.urlimg, nombreso FROM softwares INNER JOIN perfilessoft_softwares ON softwares.idsoftware=perfilessoft_softwares.idsoftware INNER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware INNER JOIN perfilessoft USING (idperfilsoft) LEFT OUTER JOIN nombresos USING (idnombreso) WHERE perfilessoft_softwares.idperfilsoft='.$idperfilsoft.' ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion';
 			$rs->Comando=&$cmd; 
 			if ($rs->Abrir()){ 
 				$rs->Primero();
+				if (!$nombreso && $rs->campos["nombreso"] != "") {
+					echo '<TR>';
+					echo '<TD></TD>';
+					echo '<TD align=center width="10%" ><img alt="'. $rs->campos["nombreso"].'" src="../images/iconos/so.gif"></TD>';
+					echo '<TD  width="80%" >&nbsp;'.$rs->campos["nombreso"].'</TD>';
+					echo '</TR>';
+					$nombreso=true;
+				}
 				$A_W=" WHERE ";
 				$strex="";
 				while (!$rs->EOF){
