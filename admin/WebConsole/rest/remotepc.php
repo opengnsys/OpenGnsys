@@ -498,6 +498,8 @@ EOD;
 			$agentkey = $rs->campos["agentkey"];
 			// DB Transaction: set reservation time to the past and
 			// remove pending boot commands from client's and agent's queues.
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": Updating database.");
 			$cmd->texto = "START TRANSACTION;";
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
@@ -520,6 +522,8 @@ EOD;
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
 			// Send a poweroff command to client's OGAgent.
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent poweroff, url=".$ogagent[$clntip]['url'].".");
 			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/poweroff";
 			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
 			$result = multiRequest($ogagent);
