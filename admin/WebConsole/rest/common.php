@@ -146,7 +146,7 @@ function checkParameter($param) {
 function checkIds() {
 	$opts = Array('options' => Array('min_range' => 1));	// Check for int>0
 	foreach (func_get_args() as $id) {
-		if (!filter_var($id, FILTER_VALIDATE_INT, $opts)) {
+		if (filter_var($id, FILTER_VALIDATE_INT, $opts) === false) {
 			return false;
 		}
 	}

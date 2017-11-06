@@ -62,10 +62,10 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 		}
 		$maxtime = isset($input->maxtime) ? $input->maxtime : 24;	// Default: 24 h.
 		$opts = Array('options' => Array('min_range' => 1));	// Check for int>0
-		if (!filter_var($labid, FILTER_VALIDATE_INT, $opts) and $labid !== '%') {
+		if (filter_var($labid, FILTER_VALIDATE_INT, $opts) === false and $labid !== '%') {
 			throw new Exception("Lab id. must be positive integer");
 		}
-		if (!filter_var($maxtime, FILTER_VALIDATE_INT, $opts)) {
+		if (filter_var($maxtime, FILTER_VALIDATE_INT, $opts) === false) {
 			throw new Exception("Time must be positive integer (in hours)");
 		}
 	} catch (Exception $e) {
@@ -271,10 +271,10 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 		$input = json_decode($app->request()->getBody());
 		$urlLogin = htmlspecialchars($input->urlLogin);
 		$urlLogout = htmlspecialchars($input->urlLogout);
-		if (!filter_var($urlLogin, FILTER_VALIDATE_URL)) {
+		if (filter_var($urlLogin, FILTER_VALIDATE_URL) === false) {
 			throw new Exception("Must be a valid URL for login notification");
 		}
-		if (!filter_var($urlLogout, FILTER_VALIDATE_URL)) {
+		if (filter_var($urlLogout, FILTER_VALIDATE_URL) === false) {
 			throw new Exception("Must be a valid URL for logout notification");
 		}
 	} catch (Exception $e) {
@@ -362,7 +362,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 		// Reading JSON parameters.
 		$input = json_decode($app->request()->getBody());
 		$deadLine = $input->deadLine;
-		if (!filter_var($deadLine, FILTER_VALIDATE_INT)) {
+		if (filter_var($deadLine, FILTER_VALIDATE_INT) === false) {
 			throw new Exception("Deadline must be integer");
 		}
 	} catch (Exception $e) {
@@ -415,16 +415,22 @@ EOD;
 				# Add reminder 5 min. before deadline.
 				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND - INTERVAL 5 MINUTE, 'popup-5'),";
 			}
-			# Add power off command at deadline time.
-			$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
-			if ($cmd->Ejecutar()) {
-				// Confirm operation.
+			# Add power off command at deadline time (0=unlimited).
+			if ($deadLine > 0) {
+				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
+				if ($cmd->Ejecutar()) {
+					// Confirm operation.
+					$response = "";
+					jsonResponse(200, $response);
+        			} else {
+					// Error message.
+					$response["message"] = "Database error";
+					jsonResponse(400, $response);
+				}
+        		} else {
+				// Unlimited time, do nothing.
 				$response = "";
 				jsonResponse(200, $response);
-        		} else {
-				// Error message.
-				$response["message"] = "Database error";
-				jsonResponse(400, $response);
 			}
 		} else {
 			// Error message.
