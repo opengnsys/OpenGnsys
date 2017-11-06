@@ -365,6 +365,9 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 		if (filter_var($deadLine, FILTER_VALIDATE_INT) === false) {
 			throw new Exception("Deadline must be integer");
 		}
+		if ($deadLine <= 0) {
+			throw new Exception("Resource unavailable");
+		}
 	} catch (Exception $e) {
 		// Error message.
 		$response["message"] = $e->getMessage();
@@ -415,22 +418,16 @@ EOD;
 				# Add reminder 5 min. before deadline.
 				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND - INTERVAL 5 MINUTE, 'popup-5'),";
 			}
-			# Add power off command at deadline time (0=unlimited).
-			if ($deadLine > 0) {
-				$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
-				if ($cmd->Ejecutar()) {
-					// Confirm operation.
-					$response = "";
-					jsonResponse(200, $response);
-        			} else {
-					// Error message.
-					$response["message"] = "Database error";
-					jsonResponse(400, $response);
-				}
-        		} else {
-				// Unlimited time, do nothing.
+			# Add power off command at deadline time.
+			$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
+			if ($cmd->Ejecutar()) {
+				// Confirm operation.
 				$response = "";
 				jsonResponse(200, $response);
+        		} else {
+				// Error message.
+				$response["message"] = "Database error";
+				jsonResponse(400, $response);
 			}
 		} else {
 			// Error message.
@@ -528,10 +525,10 @@ EOD;
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
 			// Send a poweroff command to client's OGAgent.
-			if ($app->settings['debug'])
-				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent poweroff, url=".$ogagent[$clntip]['url'].".");
 			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/poweroff";
 			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent poweroff, url=".$ogagent[$clntip]['url'].".");
 			$result = multiRequest($ogagent);
 			// ... (check response)
 			//if ($result[$clntip]['code'] != 200) {
