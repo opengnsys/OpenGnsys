@@ -38,9 +38,9 @@ grub-install --version | grep 1.99 && cp -r /opt/opengnsys/lib/os-probes/* /usr/
 #fichero de reconocimeinto de grub
 #fichero de lsb-release en la cache (al final de este scripts se elimina esta entrada para que el browser no lo muestre
 
-if [ $(ls /opt/opengnsys/cache/boot/$oglivedir/ogvmlinuz) ]; then
+if [ $(ls /opt/opengnsys/cache/boot/$oglivedir/ogvmlinuz 2>/dev/null) ]; then
 	sed -i 's|/boot/\${oglivedir}/ogvmlinuz |/vmlinuz |i' /usr/lib/linux-boot-probes/mounted/90fallback
-    sed -i 's|/vmlinuz |/vmlinuz /boot/\${oglivedir}/ogvmlinuz |1' /usr/lib/linux-boot-probes/mounted/90fallback
+	sed -i 's|/vmlinuz |/vmlinuz /boot/\${oglivedir}/ogvmlinuz |1' /usr/lib/linux-boot-probes/mounted/90fallback
 	mkdir -p /opt/opengnsys/cache/etc/
 	echo "DISTRIB_ID=Ubuntu" > /opt/opengnsys/cache/etc/lsb-release
 	echo "DISTRIB_RELEASE= " >> /opt/opengnsys/cache/etc/lsb-release
