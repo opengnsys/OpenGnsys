@@ -634,6 +634,7 @@ char* LeeConfiguracion()
 {
 	char* parametroscfg;
 	char modulo[] = "LeeConfiguracion()";
+	int herrorcfg;
 
 	// Reservar memoria para los datos de cofiguración.
 	parametroscfg=(char*)reservaMemoria(LONGITUD_SCRIPTSALIDA);
@@ -643,9 +644,9 @@ char* LeeConfiguracion()
 	}
 	// Ejecutar script y obtener datos.
 	sprintf(interface,"%s/%s",pathinterface,"getConfiguration");
-	herror=interfaceAdmin(interface,NULL,parametroscfg);
+	herrorcfg=interfaceAdmin(interface,NULL,parametroscfg);
 
-	if(herror){ // No se puede recuperar la configuración del cliente
+	if(herrorcfg){ // No se puede recuperar la configuración del cliente
 		liberaMemoria(parametroscfg);
 		errorLog(modulo,36,FALSE);
 		return(NULL);
