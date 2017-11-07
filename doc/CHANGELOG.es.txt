@@ -37,6 +37,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #773	Incluir script personalizado para bootOs
 #774	Soportar clientes ogLive de 64 bits
 #783	Browser registra salida de comandos ejecutados al pulsar enlace
+#813	Restaurar Imagen no muestra el error en la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Server:
 #234	Importar/Exportar base de datos (resuelto en #755)
@@ -68,7 +69,10 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #779	Crear comando "Enviar mensaje"
 #782	Crear registro de acciones para realizar informes
 #789	Actualizar plantilla PXE al mover ordenador 
+#792	Incluir en los html personalizados de ejemplo los enlaces al acceso privado
 #798	Mostrar imágenes en orden alfabético
+#806	Comando Particionar y Formatear: controlar que no se exceda el tamaño del disco
+#807	Consola Web: Incorporar ordenadores da error de time-out
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
