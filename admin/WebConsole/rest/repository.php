@@ -19,28 +19,16 @@ function validateRepositoryApiKey() {
 	$response = array();
 	$app = \Slim\Slim::getInstance();
 
-	// Read Authorization HTTP header.
-	$headers = apache_request_headers();
-	if (! empty($headers['Authorization'])) {
-		// Assign user id. that match this key to global variable.
-		$apikey = htmlspecialchars($headers['Authorization']);
-		// El repositorio recupera el token desde el fichero de configuracion ogAdmRepo.cfg
-		$confFile = fopen("../../etc/ogAdmRepo.cfg", "r");
-
-		// Leemos cada linea hasta encontrar la clave "ApiToken"
+	// Assign user id. that match this key to global variable.
+	@$apikey = htmlspecialchars(function_exists('apache_request_headers') ? apache_request_headers()['Authorization'] : $_SERVER['HTTP_AUTHORIZATION']);
+	if (isset($apikey)) {
+		// fetch repository token from ogAdmRepo.cfg configuration file.
+		@$confFile = parse_ini_file('../../etc/ogAdmRepo.cfg', 'r');
 		if ($confFile) {
-			$found = false;
-			while(!feof($confFile)){
-				$line = fgets($confFile);
-				$key = strtok($line,"=");
-				if($key == "ApiToken"){
-					$token = trim(strtok("="));
-					if(strcmp($apikey,$token) == 0){
-						$found = true;
-					}
-				}
-			}
-			if (!$found){
+			if(@strcmp($apikey, $confFile['ApiToken']) == 0) {
+				// Credentials OK.
+				return true;
+			} else {
 				// Credentials error.
                 		$response['message'] = 'Login failed. Incorrect credentials';
 				jsonResponse(401, $response);
@@ -50,11 +38,13 @@ function validateRepositoryApiKey() {
 			// Cannot access configuration file.
 			$response['message'] = "An error occurred, please try again";
 			jsonResponse(500, $response);
+			$app->stop();
 		}
 	} else {
 		// Error: missing API key.
        		$response['message'] = 'Missing Repository API key';
 		jsonResponse(400, $response);
+		$app->stop();
 	}
 }
 
