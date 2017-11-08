@@ -42,6 +42,10 @@ REPODIR="$BASEDIR/images"
 BINDIR="$BASEDIR/bin"
 PROG="$(basename $0)"
 # Cargamos los mensajes en el idioma del sistema.
+# Comprobamos que el fichero de idioma existe. Si no "es_ES" por defecto.
+ls $BASEDIR/client/etc/lang.$LANG.conf &>/dev/null
+[ $? -eq 0 ] || LANG="es_ES"
+
 source $BASEDIR/client/etc/lang.$LANG.conf
 
 # Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 

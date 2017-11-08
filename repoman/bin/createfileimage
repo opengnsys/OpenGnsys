@@ -15,6 +15,10 @@
 BASEDIR=/opt/opengnsys
 REPODIR="$BASEDIR/images"
 REPOLOG=$BASEDIR/log/ogAdmRepo.log
+# Cargamos los mensajes en el idioma del sistema.
+# Comprobamos que el fichero de idioma existe. Si no "es_ES" por defecto.
+ls $BASEDIR/client/etc/lang.$LANG.conf &>/dev/null
+[ $? -eq 0 ] || LANG="es_ES"
 source $BASEDIR/client/etc/lang.$LANG.conf
 
 PROG="$(basename $0)"
