@@ -55,7 +55,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_usuarios.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_alta :
@@ -93,7 +93,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /*________________________________________________________________________________________________________
 	Inserta, modifica o elimina datos en la tabla usuarios
 ________________________________________________________________________________________________________*/

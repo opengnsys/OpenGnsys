@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -153,10 +153,10 @@ function borrar_fecha(){
 </HEAD>
 <BODY>
 <FORM action="calendario_ventana.php" name="fdatos" method="post">
-	<INPUT type=hidden name=dia_elegido value="<? echo $dia_elegido?>">
-	<INPUT type=hidden name=mes_elegido value="<? echo $mes_elegido?>">
-	<INPUT type=hidden name=anno_elegido value="<? echo $anno_elegido?>">
-	<?
+	<INPUT type=hidden name=dia_elegido value="<?php echo $dia_elegido?>">
+	<INPUT type=hidden name=mes_elegido value="<?php echo $mes_elegido?>">
+	<INPUT type=hidden name=anno_elegido value="<?php echo $anno_elegido?>">
+	<?php
 $mialmanaque=new Almanaque("tabla_meses");
 
 echo '<TABLE align="center">';

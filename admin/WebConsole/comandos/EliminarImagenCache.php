@@ -34,8 +34,8 @@ if (!$cmd)
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/EliminarImagenCache.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/eliminarimagencache_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/eliminarimagencache_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 </HEAD>
 <BODY>
@@ -145,7 +145,7 @@ switch($ambito){
          <TABLE  id="tabla" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
        		<TH align=center >&nbsp;
-		<? if ($ambito==16){
+		<?php if ($ambito==16){
 			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[16]."</br>".$TbMsg[18];
 		}else{ 
 			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[15]."</br>".$TbMsg[18]; }
@@ -156,7 +156,7 @@ switch($ambito){
 <!-- //#agp-->
 
         <P align=center>
-        <SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
+        <SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
 	</P>
 
 <form  align=center name="fdatos"> 

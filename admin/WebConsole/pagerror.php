@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -18,7 +18,7 @@ if (isset($_GET["herror"])) $herror=$_GET["herror"];
 		<LINK rel="stylesheet" type="text/css" href="estilos.css">
 	</HEAD>
 	<BODY>
-		<?
+		<?php
 			echo '<SCRIPT LANGUAGE="JAVASCRIPT">'.chr(13);
 			echo '	var o=window.top;'.chr(13);
 			echo '	var ao=o.parent;'.chr(13);

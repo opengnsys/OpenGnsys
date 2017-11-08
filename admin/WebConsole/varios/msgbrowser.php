@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -65,7 +65,7 @@ else
 	</STYLE>
 </HEAD>
 <BODY>
-<?
+<?php
 if(empty($idx) && empty($msg)) {
 	// No hay operaciones realizandose
 	echo '<BR><BR><BR><BR><BR>';

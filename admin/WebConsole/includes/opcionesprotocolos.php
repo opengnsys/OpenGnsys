@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * @file: opcionesprotocolos.php
  * @brief: Toma los parametros de mcast y torrent para mostrarlos en las paginas de restaurar imagen (monoliticas y sincronizadas)

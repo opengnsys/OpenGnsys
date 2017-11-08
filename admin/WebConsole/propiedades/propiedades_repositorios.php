@@ -82,22 +82,22 @@ if($apiKeyRepo != ""){
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_repositorios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
 <FORM  name="fdatos" action="../gestores/gestor_repositorios.php" method="post"> 
-	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
-	<INPUT type=hidden name=idrepositorio value="<? echo $idrepositorio?>">
-	<INPUT type=hidden name=grupoid value="<? echo $grupoid?>">
-	<INPUT type=hidden name=ordenadores value="<? echo $ordenadores?>">
+	<INPUT type=hidden name=opcion value="<?php echo $opcion?>">
+	<INPUT type=hidden name=idrepositorio value="<?php echo $idrepositorio?>">
+	<INPUT type=hidden name=grupoid value="<?php echo $grupoid?>">
+	<INPUT type=hidden name=ordenadores value="<?php echo $ordenadores?>">
 
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align="center">&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align="center">&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
@@ -106,11 +106,11 @@ if($apiKeyRepo != ""){
 			?>
 			<TD valign="top" align="left" rowspan="4"	><CENTER>
 				<IMG border="3" style="border-color:#63676b" src="../images/aula.jpg">
-				<BR>&nbsp;Ordenadores:&nbsp;<? echo $ordenadores?></CENTER></TD>
+				<BR>&nbsp;Ordenadores:&nbsp;<?php echo $ordenadores?></CENTER></TD>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
 			<?php
 			if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
@@ -120,7 +120,7 @@ if($apiKeyRepo != ""){
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TD>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$puertorepo.'</TD>';
@@ -130,7 +130,7 @@ if($apiKeyRepo != ""){
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</TD>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$apiKeyRepo.'</TD>';
@@ -140,7 +140,7 @@ if($apiKeyRepo != ""){
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan="2">'.$comentarios.'</TD>';
@@ -209,14 +209,14 @@ echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg[
 	
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un repositorio
 //		Parametros: 

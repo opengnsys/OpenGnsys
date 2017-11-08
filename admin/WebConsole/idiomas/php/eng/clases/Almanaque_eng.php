@@ -1,4 +1,4 @@
-	<?
+	<?php
 /*============================================================================
 	Esta clase genera tablas HTML para selección de fechas (Versión inglesa)
 	

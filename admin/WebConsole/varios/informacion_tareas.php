@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -30,7 +30,7 @@ if (isset($_GET["descripciontarea"]))	$descripciontarea=$_GET["descripciontarea"
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <BODY>
-	<?
+	<?php
 	$cmd=CreaComando($cadenaconexion);
 	if ($cmd){
 		$rs=new Recordset; 
@@ -50,7 +50,7 @@ if (isset($_GET["descripciontarea"]))	$descripciontarea=$_GET["descripciontarea"
 	?>
 </BODY>
 </HTML>	
-<?
+<?php
 // *************************************************************************************************************************************************
 function pintacomandos($cmd,$idtareacomando){
 	global $TbMsg;

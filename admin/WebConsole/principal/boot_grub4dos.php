@@ -95,10 +95,10 @@ while($encontrado==FALSE)
 <TABLE  align=center border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <TR valign="bottom"><TD colspan="100%" align="left" nowrap>
 <form name="modoadmin" id="modoadmin" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-   		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-   		<input type="hidden" name="opcion" value="<? echo $opcion?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+   		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+   		<input type="hidden" name="opcion" value="<?php echo $opcion?>">
 <?php	
 	if (empty($_SESSION["widcentro"]))
 	{$modo=1;

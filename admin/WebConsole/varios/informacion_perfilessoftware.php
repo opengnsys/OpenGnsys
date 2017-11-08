@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -43,13 +43,13 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"><BR><BR>
-	<IMG src="../images/iconos/perfilsoftware.gif"><SPAN class=presentaciones>&nbsp;&nbsp;<U><?echo $TbMsg[2]?></U>:	<? echo $descripcionperfil?></SPAN></P>
-	<?echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones?>
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"><BR><BR>
+	<IMG src="../images/iconos/perfilsoftware.gif"><SPAN class=presentaciones>&nbsp;&nbsp;<U><?php echo $TbMsg[2]?></U>:	<?php echo $descripcionperfil?></SPAN></P>
+	<?php echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones?>
 </BODY>
 </HTML>
-<?
+<?php
 /**************************************************************************************************************************************************
 	Devuelve una cadena con formato XML de toda la Información de los perfiles software
 	softwares

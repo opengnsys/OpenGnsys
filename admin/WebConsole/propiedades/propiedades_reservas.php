@@ -1,4 +1,4 @@
-<? 
+<?php 
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -56,30 +56,30 @@ if  ($opcion!=$op_alta){
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_reservas.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_reservas_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_reservas_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
 <FORM  name="fdatos" action="../gestores/gestor_reservas.php" method="post"> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=idreserva value=<?=$idreserva?>>
-	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
-	<INPUT type=hidden name=estado value=<?=$estado?>>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
+	<INPUT type=hidden name=idreserva value=<?php echo $idreserva?>>
+	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
+	<INPUT type=hidden name=estado value=<?php echo $estado?>>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300">'.$descripcion.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=descripcion rows=3 cols=55">'.$descripcion.'</TEXTAREA></TD>';?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300">'.$solicitante.'</TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=solicitante style="width:300" type=text value="'.$solicitante.'"></TD>';
@@ -87,8 +87,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300">'.$email.'</TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=email style="width:300" type=text value="'.$email.'"></TD>';
@@ -96,8 +96,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[9]?>&nbsp;</TH>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,0,'estatus',$idestatus,'idestatus','descripcion').'</TD>';
 				else
@@ -106,8 +106,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TH>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'aulas',$idaula,'idaula','nombreaula').'</TD>';
 				else
@@ -116,8 +116,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'imagenes',$idimagen,'idimagen','descripcion').'</TD>';
 				else
@@ -126,8 +126,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[19]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</TH>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'tareas',$idtarea,'idtarea','descripcion').'</TD>';
 				else
@@ -136,8 +136,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[20]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[20]?>&nbsp;</TH>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'trabajos',$idtrabajo,'idtrabajo','descripcion').'</TD>';
 				else
@@ -145,14 +145,14 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<?
+		<?php
 		$tbimg[$RESERVA_CONFIRMADA]='../images/iconos/confirmadas.gif';
 		$tbimg[$RESERVA_PENDIENTE]='../images/iconos/pendientes.gif';
 		$tbimg[$RESERVA_DENEGADA]='../images/iconos/denegadas.gif';
 		?>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300"><IMG src="'.$tbimg[$estado].'">&nbsp;&nbsp;('.$TbMsg[12+$estado].')</TD>';
 			else{
 					echo '<TD>';
@@ -174,8 +174,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TD>';
@@ -184,14 +184,14 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de una reserva
 //		Parametros: 

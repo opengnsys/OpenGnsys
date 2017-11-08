@@ -1,4 +1,4 @@
-<?
+<?php
 // Fichero con funciones para trabajar con el webservice
 include_once("../../includes/restfunctions.php");
 

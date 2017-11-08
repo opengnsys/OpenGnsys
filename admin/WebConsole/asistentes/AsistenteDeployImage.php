@@ -106,13 +106,13 @@ switch($ambito){
 			
 			<tr> 
 				<th >
-				    <INPUT TYPE="button" NAME="GenerarInstruccion" Value="<? echo $TbMsg["WDI12"] ?>" onClick="codeDeployImage(this.form)"> 
-				    <INPUT TYPE="button" NAME="ModificarCodigo" Value="<? echo $TbMsg["WDI10"] ?>" onClick="modificarCodigo()"> 	
+				    <INPUT TYPE="button" NAME="GenerarInstruccion" Value="<?php echo $TbMsg["WDI12"] ?>" onClick="codeDeployImage(this.form)"> 
+				    <INPUT TYPE="button" NAME="ModificarCodigo" Value="<?php echo $TbMsg["WDI10"] ?>" onClick="modificarCodigo()"> 	
 				</th>
 				<td colspan="5"><textarea class="cajatexto" name="codigo" id="codigo" cols="70" rows="7" disabled></textarea></td>
 			</tr>
 			<tr>	
-                       		 <th  colspan="4"><? echo $TbMsg["WDI31"] ?></th>
+                       		 <th  colspan="4"><?php echo $TbMsg["WDI31"] ?></th>
 			</tr>
 		</table>	
 	</form>	

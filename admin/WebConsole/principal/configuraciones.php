@@ -94,33 +94,33 @@ if (!$cmd)
 	}
 	if($ambito!=$AMBITO_ORDENADORES){			
 	?>
-		<P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[19]?></SPAN></P>
+		<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[19]?></SPAN></P>
 		<FORM action="configuraciones.php" name="fdatos" method="POST">
-				<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
-				<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">			
+				<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
+				<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">			
 				<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 				<TR>
-					<TH height=15 align="center" colspan=17><? echo $TbMsg[18]?></TH>
+					<TH height=15 align="center" colspan=17><?php echo $TbMsg[18]?></TH>
 				</TR>
 				<TR>
 
-					<TD align=right><? echo $TbMsg[30]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_sysFi?>" name="fk_sysFi" <? if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[30]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_sysFi?>" name="fk_sysFi" <?php if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
-					<TD align=right><? echo $TbMsg[31]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_nombreSO?>" name="fk_nombreSO" <? if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[31]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_nombreSO?>" name="fk_nombreSO" <?php if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
-					<TD align=right><? echo $TbMsg[32]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_tamano?>" name="fk_tamano" <? if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[32]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_tamano?>" name="fk_tamano" <?php if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
-					<TD align=right><? echo $TbMsg[33]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_imagen?>" name="fk_imagen" <? if($fk_imagen==$msk_imagen) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[33]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_imagen?>" name="fk_imagen" <?php if($fk_imagen==$msk_imagen) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>		
-					<TD align=right><? echo $TbMsg[34]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_perfil?>" name="fk_perfil" <? if($fk_perfil==$msk_perfil) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[34]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_perfil?>" name="fk_perfil" <?php if($fk_perfil==$msk_perfil) echo " checked "?>></TD>
                     <TD width="20" align=center>&nbsp;</TD>
-					<TD align=right><? echo $TbMsg[495]?></TD>
-                    <TD align=center><INPUT type="checkbox" value="<? echo $msk_cache?>" name="fk_cache" <? if($fk_cache==$msk_cache) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[495]?></TD>
+                    <TD align=center><INPUT type="checkbox" value="<?php echo $msk_cache?>" name="fk_cache" <?php if($fk_cache==$msk_cache) echo " checked "?>></TD>
 
 
 				</TR>
@@ -171,8 +171,8 @@ function datosAulas($cmd,$idaula)
 ?> 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 			<TR>	
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<?php
 					echo '<TD>'. $nombreaula.'</TD>';
 					echo '<TH align=center>&nbsp;'.$TbMsg[7].'&nbsp;</TH>';
 					echo '<TD><INPUT  class="formulariodatos" name=cagnon type=checkbox ';
@@ -181,33 +181,33 @@ function datosAulas($cmd,$idaula)
 			?>
 							<TD valign=top align=center rowspan=3>
 					<IMG border=3 style="border-color:#63676b"
-					src="<? echo "../images/fotos/".$urlfoto?>">
-					 <BR><center>&nbsp;<? echo $TbMsg[13].':&nbsp;'. $ordenadores?></center></TD>
+					src="<?php echo "../images/fotos/".$urlfoto?>">
+					 <BR><center>&nbsp;<?php echo $TbMsg[13].':&nbsp;'. $ordenadores?></center></TD>
 		</TR>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+			<?php
 					echo '<TD>'.$ubicacion.'</TD>';
 			?>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TD>
+			<?php
 					echo '<TD><INPUT  class="formulariodatos" name=pizarra type=checkbox ';
 					if ($pizarra) echo ' checked ';
 					echo '></TD>';					
 			?>
 		</TR>	
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[9]?>&nbsp;</TD>
-			<?
+			<TH align=center&nbsp;><?php echo $TbMsg[9]?>&nbsp;</TD>
+			<?php
 					echo '<TD>'.$puestos.'</TD>';
 			?>
-			<TH align=center>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[12]?>&nbsp;</TD>
+			<?php
 					echo '<TD>'.$comentarios.'</TD>';
 			?>
 		</TR>	
 	</TABLE>
-<?
+<?php
 }
 //________________________________________________________________________________________________________
 function datosOrdenadores($cmd,$idordenador)
@@ -243,23 +243,23 @@ src="<?php if ($fotoordenador==""){echo "../images/fotos/fotoordenador.gif";}
 			
 			</TR>	
 		<TR>
-				<TH align=center>&nbsp;<?echo $TbMsg[15]?>&nbsp;</TD>
-				<?echo '<TD>'.$ip.'</TD>';?>
+				<TH align=center>&nbsp;<?php echo $TbMsg[15]?>&nbsp;</TD>
+				<?php echo '<TD>'.$ip.'</TD>';?>
 			</TR>
 		<TR>
-				<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
-				<? echo '<TD>'.$mac.'</TD>';?>
+				<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TD>
+				<?php echo '<TD>'.$mac.'</TD>';?>
 			</TR>	
 		<TR>
-				<TH align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</TD>
-				<? echo '<TD>'.$perfilhard.'</TD>';?>
+				<TH align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</TD>
+				<?php echo '<TD>'.$perfilhard.'</TD>';?>
 			</TR>	
 		<TR>
 	</TABLE>
-<?
+<?php
 }
 ?>	
-<?
+<?php
 //________________________________________________________________________________________________________
 function datosGruposOrdenadores($cmd,$idgrupo)
 {
@@ -316,8 +316,8 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 ?> 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5].'</br>'.$nombreaula?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[5].'</br>'.$nombreaula?>&nbsp;</TD>
+			<?php
 					echo '<TD>'.$nombregrupoordenador.'</TD>
 								<TD colspan=2 valign=top align=center rowspan=2>
 					<IMG border=3 style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'"><br>

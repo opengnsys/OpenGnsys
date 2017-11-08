@@ -49,11 +49,11 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 <BODY>
 <FORM action="incorporaordenadores.php" method="post" name="fdatos">
 	<INPUT type=hidden name=swf value=1>
-	<INPUT type=hidden name=idaula value=<?echo $idaula?>>
-	<INPUT type=hidden name=nombreaula value=<?echo $nombreaula?>>
+	<INPUT type=hidden name=idaula value=<?php echo $idaula?>>
+	<INPUT type=hidden name=nombreaula value=<?php echo $nombreaula?>>
 	<BR>
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><IMG src="../images/iconos/aula.gif">&nbsp;<?echo $TbMsg[1].":".$nombreaula ?></SPAN></P>
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><IMG src="../images/iconos/aula.gif">&nbsp;<?php echo $TbMsg[1].":".$nombreaula ?></SPAN></P>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <table align="center" class="tabla_datos" border="0" cellpadding="0" cellspacing="1">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

@@ -59,12 +59,12 @@ if (!$cmd)
 	
         ?>
 	<P align=center>
-	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
 	</BR>
 <form  align=center name="fdatos" method="POST"> 
-	<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
-	<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">
-	<INPUT type="hidden" name="cadenaid" value="<? echo $cadenaid?>">
+	<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
+	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
+	<INPUT type="hidden" name="cadenaid" value="<?php echo $cadenaid?>">
 </form>
 	<?php } // fin if $ambito!=$AMBITO_ORDENADORES
 

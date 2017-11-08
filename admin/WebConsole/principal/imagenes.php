@@ -47,7 +47,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/imagenes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
-<?
+<?php
 //________________________________________________________________________________________________________
 
 echo $arbol->CreaArbolVistaXML(); // Muestra árbol en pantalla

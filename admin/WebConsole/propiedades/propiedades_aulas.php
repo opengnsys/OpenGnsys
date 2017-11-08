@@ -177,8 +177,8 @@ function abrir_ventana(URL){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!--  HORARIO DE SERVICIO TEMPORALMENTE DESHABILITADO.
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</TD>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$TbMsg[14].$horaresevini.'&nbsp;&nbsp;&nbsp&nbsp;'.$TbMsg[15].$horaresevfin.'</TD>';
 				else
@@ -201,14 +201,14 @@ function abrir_ventana(URL){
 						while (false !== ($entry = readdir($handle))) {
 						if ($entry != "." && $entry != "..") {?>
 						
-						<option value="<? echo $entry ?>"><? echo $entry ?></option>
+						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
 						<?php }
 						}
 						closedir($handle);
 						} 
 						?>
 					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><? echo $TbMsg[5092] ?></a>
+<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
 					</TD>
 
 					<?php
@@ -243,8 +243,8 @@ function abrir_ventana(URL){
 		</tr>
 <!---- ADV ---------------------------router------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[28]?>&nbsp;</TH>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[28]?>&nbsp;</TH>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$router.'</TD>';
 				else
@@ -253,7 +253,7 @@ function abrir_ventana(URL){
 		</TR>
 <!---- ADV --------------------------netmask------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[29]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[29]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$netmask.'</TD>';
 				else

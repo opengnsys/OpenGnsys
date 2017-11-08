@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -53,7 +53,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_centros.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_alta :
@@ -91,7 +91,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /*________________________________________________________________________________________________________
 	Inserta, modifica o elimina datos en la tabla centros
 ________________________________________________________________________________________________________*/

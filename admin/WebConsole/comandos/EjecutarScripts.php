@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -33,11 +33,11 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
@@ -45,22 +45,22 @@ if (!$cmd)
 	//________________________________________________________________________________________________________
 ?>			
 	<P align=center>
-	<SPAN align=center class=subcabeceras><? echo $TbMsg[10] ?></SPAN>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[10] ?></SPAN>
 	<form  align=center name="fdatos"> 				
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
 			<tr>
-			<th><? echo $TbMsg[12] ?></th>
-				<td><input type="radio" name="modoejecucion" value="false"><? echo $TbMsg[13] ?>
-				    <input type="radio" name="modoejecucion" value="true" checked><? echo $TbMsg[14] ?>
+			<th><?php echo $TbMsg[12] ?></th>
+				<td><input type="radio" name="modoejecucion" value="false"><?php echo $TbMsg[13] ?>
+				    <input type="radio" name="modoejecucion" value="true" checked><?php echo $TbMsg[14] ?>
 				</td>
 			</tr>
 			<tr> 
-				<th>&nbsp;<? echo $TbMsg[9]?>&nbsp;</th>
+				<th>&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
 				<td><textarea class="cajatexto" name="codigo" cols="70" rows="18"></textarea></td></tr>
-			<tr> <th align=center colspan="3"><? echo $TbMsg[15] ?></th></tr>
+			<tr> <th align=center colspan="3"><?php echo $TbMsg[15] ?></th></tr>
 		</table>	
 	</form>	
-	<?
+	<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________

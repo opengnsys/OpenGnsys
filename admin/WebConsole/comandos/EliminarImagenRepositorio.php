@@ -247,7 +247,7 @@ $repolocal="no";
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <script type="text/javascript">
 function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(mensaje)) {document.eliimarepo.submit();}}
@@ -255,7 +255,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 </script> 
 </HEAD>
 <BODY>
-<?
+<?php
 
 			$urlimg='../images/iconos/repositorio.gif';
 			$textambito=$TbMsg[0];
@@ -269,20 +269,20 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<?php if ($espaciorepo != ""){?>
 			<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[18]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?echo $TbMsg[19]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?echo $TbMsg[20]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?echo $TbMsg[21]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[20]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[21]?>&nbsp;</TD>
 		</TR>
                 <TR>
-			<TD align=center width=110>&nbsp;<?echo $totalrepo?>&nbsp;</TD>
-            <TD align=center width=120>&nbsp;<?echo $ocupadorepo?>&nbsp;</TD>
-            <TD align=center width=120>&nbsp;<?echo $librerepo?>&nbsp;</TD>
-            <TD align=center width=101>&nbsp;<?echo $porcentajerepo?>&nbsp;</TD>
+			<TD align=center width=110>&nbsp;<?php echo $totalrepo?>&nbsp;</TD>
+            <TD align=center width=120>&nbsp;<?php echo $ocupadorepo?>&nbsp;</TD>
+            <TD align=center width=120>&nbsp;<?php echo $librerepo?>&nbsp;</TD>
+            <TD align=center width=101>&nbsp;<?php echo $porcentajerepo?>&nbsp;</TD>
                 </TR>
 		<?php }else {?>
         			<TR>
-            <TH align=center width=485>&nbsp;<?echo $TbMsg[22]?>&nbsp;</TD>
+            <TH align=center width=485>&nbsp;<?php echo $TbMsg[22]?>&nbsp;</TD>
 
 					</TR>
         <?php } ?>
@@ -290,13 +290,13 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
       	</TABLE>
 
 	<P align=center>
-	<div align=center class=subcabeceras><? echo $TbMsg[7] ?>
+	<div align=center class=subcabeceras><?php echo $TbMsg[7] ?>
 
 		
 			<form  align="center" name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
-			<INPUT type="hidden" name="opcion" value="<? echo $opcion?>">
-			<INPUT type="hidden" name="idrepositorio" value="<? echo $idrepositorio?>">
-			<INPUT type="hidden" name="grupoid" value="<? echo $grupoid ?>">
+			<INPUT type="hidden" name="opcion" value="<?php echo $opcion?>">
+			<INPUT type="hidden" name="idrepositorio" value="<?php echo $idrepositorio?>">
+			<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
 			<?php if ($modov == "0"){?>
 				<INPUT type="hidden" name="modov" value="1">
 				<input type=button onclick=submit() value="<?php echo $TbMsg[28]; ?>"/>
@@ -315,33 +315,33 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
 			<TD align=center>&nbsp;</TD>
-			<TH align=center>&nbsp;<? echo $TbMsg[27] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo "F => ".$TbMsg[31];  ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[27] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo "F => ".$TbMsg[31];  ?>&nbsp;</TH>
 			<TD align=center>&nbsp;</TD>
 			<TD align=center>&nbsp;</TD>
-			<TH align=center>&nbsp;<? echo "D => ".$TbMsg[32]; ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo "D => ".$TbMsg[32]; ?>&nbsp;</TH>
 			<TD align=center>&nbsp;</TD>
 			<TD align=center>&nbsp;</TD>
-			<TH align=center>&nbsp;<? echo "B => Backup" ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo "B => Backup" ?>&nbsp;</TH>
 			<TD align=center>&nbsp;</TD>
 		</TR>
 	</TABLE>
 
 	<TABLE  id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<? echo $TbMsg[11] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[12] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[27] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[10] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[13] ?>&nbsp;</TH>
-			<TH align=center>&nbsp;<? echo $TbMsg[26] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[11] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[12] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[27] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[10] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[13] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[26] ?>&nbsp;</TH>
 			<?php if ($modov == 1){ // Vista Repositorio Completo ?>
-			<TH align=center>&nbsp;<? echo $TbMsg[30] ?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[30] ?>&nbsp;</TH>
 			<?php } ?>
 
 
 		</TR>
-			<?
+			<?php
 				//echo tabla_configuraciones($cmd,$idambito);
 
 				
@@ -605,9 +605,9 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	?>
 
 			
-	<INPUT type="hidden" name="opcion" value="<? echo $opcion?>">
-	<INPUT type="hidden" name="idrepositorio" value="<? echo $idrepositorio?>">
-	<INPUT type="hidden" name="grupoid" value="<? echo $grupoid ?>">
+	<INPUT type="hidden" name="opcion" value="<?php echo $opcion?>">
+	<INPUT type="hidden" name="idrepositorio" value="<?php echo $idrepositorio?>">
+	<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
 	<INPUT type="hidden" name="modov" value="<?php echo $modov; ?>">
 
 	</TABLE><BR/>
@@ -618,7 +618,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		</TR>
 		<TR>
 			<TD></TD>
-		<TD align=center><A href=#><IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" onclick="javascript:confirmeliminar()" ></A></TD>
+		<TD align=center><A href=#><IMG border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="javascript:confirmeliminar()" ></A></TD>
 		</TR>
 	</TABLE>
 </FORM>

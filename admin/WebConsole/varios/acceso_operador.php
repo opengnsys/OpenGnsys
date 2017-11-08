@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -84,7 +84,7 @@ function PulsaEnter(oEvento){
 		</DIV>
 	</FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 // Posiciona cursor en campo usuario y muestra mensaje de error si lo hubiera
 echo '<SCRIPT LANGUAGE="javascript">';

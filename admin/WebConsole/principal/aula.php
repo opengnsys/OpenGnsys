@@ -60,9 +60,9 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/aulas_'.$idioma.'.js"></SCRIPT>'?>
-<?	
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/aulas_'.$idioma.'.js"></SCRIPT>'?>
+<?php	
 //________________________________________________________________________________________________________
 switch($litambito){
 	case $LITAMBITO_CENTROS :
@@ -94,14 +94,14 @@ switch($litambito){
 <FORM name="fcomandos" action="" method="post" target="frame_contenidos">
 	<INPUT type="hidden" name="idcomando" value="">
 	<INPUT type="hidden" name="descricomando" value="">	
-	<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">
-	<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
+	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
+	<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
 	<INPUT type="hidden" name="nombreambito" value="">
 	<INPUT type="hidden" name="gestor" value="">
 	<INPUT type="hidden" name="funcion" value="">
 	<INPUT type="hidden" name="script" value="">
 </FORM>
-<?
+<?php
 $flotante=new MenuContextual(); // Crea objeto menu contextual
 $XMLcontextual=ContextualXMLAulas();  // Crea contextual de aulas
 echo $flotante->CreaMenuContextual($XMLcontextual);
@@ -138,7 +138,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 </SCRIPT>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function RecorreCentro($cmd){
 	global $AMBITO_GRUPOSAULAS;

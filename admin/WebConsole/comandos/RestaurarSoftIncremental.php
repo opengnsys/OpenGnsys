@@ -1,4 +1,4 @@
-<?
+<?php
 // ********************************************************************************************************
 // Aplicaci�n WEB: ogAdmWebCon
 // Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -67,11 +67,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarsoftincremental_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/restaurarsoftincremental_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 
 //________________________________________________________________________________________________________
 //
@@ -92,24 +92,24 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 		RecopilaIpesMacs($cmd,$ambito,$idambito);		
 	?>
 		<FORM action="RestaurarSoftIncremental.php" name="fdatos" method="POST">
-				<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
-				<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">	
-				<INPUT type="hidden" name="cadenaid" value="<? echo $cadenaid?>">				
+				<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
+				<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">	
+				<INPUT type="hidden" name="cadenaid" value="<?php echo $cadenaid?>">				
 				<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 				<TR>
-					<TH height=15 align="center" colspan=14><? echo $TbMsg[18]?></TH>
+					<TH height=15 align="center" colspan=14><?php echo $TbMsg[18]?></TH>
 				</TR>
 				<TR>
-					<TD align=right><? echo $TbMsg[30]?></TD>
-					<TD align=center><INPUT onclick="document.fdatos.submit()" type="checkbox" value="<? echo $msk_sysFi?>" name="fk_sysFi" <? if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[30]?></TD>
+					<TD align=center><INPUT onclick="document.fdatos.submit()" type="checkbox" value="<?php echo $msk_sysFi?>" name="fk_sysFi" <?php if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
 
-					<TD align=right><? echo $TbMsg[32]?></TD>
-					<TD align=center><INPUT onclick="document.fdatos.submit()" type="checkbox" value="<? echo $msk_tamano?>" name="fk_tamano" <? if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[32]?></TD>
+					<TD align=center><INPUT onclick="document.fdatos.submit()" type="checkbox" value="<?php echo $msk_tamano?>" name="fk_tamano" <?php if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
 				
-					<TD align=right><? echo $TbMsg[31]?></TD>
-					<TD align=center><INPUT onclick="document.fdatos.submit()" type="checkbox" value="<? echo $msk_nombreSO?>" name="fk_nombreSO" <? if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[31]?></TD>
+					<TD align=center><INPUT onclick="document.fdatos.submit()" type="checkbox" value="<?php echo $msk_nombreSO?>" name="fk_nombreSO" <?php if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>				
 				</TR>
 				<TR>
@@ -117,7 +117,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				</TR>
 			</TABLE>
 		</FORM>	
-<?
+<?php
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,true,"pintaParticionesRestaurarImagenSincronizacion1");	
@@ -135,7 +135,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </SCRIPT>
 </BODY>
 </HTML>
-<?
+<?php
 
 /*________________________________________________________________________________________________________
 

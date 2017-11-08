@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -34,11 +34,11 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/enviarmensaje_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/enviarmensaje_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
@@ -46,21 +46,21 @@ if (!$cmd)
 	//________________________________________________________________________________________________________
 ?>			
 	<P align=center>
-	<SPAN align=center class=subcabeceras><? echo $TbMsg[10] ?></SPAN>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[10] ?></SPAN>
 	<form  align=center name="fdatos"> 				
 		
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
 			<tr> 
-				<th>&nbsp;<? echo $TbMsg[7]?>&nbsp;</th>
+				<th>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</th>
 				<td><input type="text" name="titulo"></td></tr>
 			<tr> 
-				<th>&nbsp;<? echo $TbMsg[9]?>&nbsp;</th>
+				<th>&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
 				<td><textarea class="cajatexto" name="mensaje" cols="70" rows="18"></textarea></td></tr>
-			<tr> <th align=center colspan="3"><? echo $TbMsg["OGAGENT"] ?></th></tr>
-	    		<tr> <th align=center colspan="3"><? echo $TbMsg["OPTION"] ?></th></tr>
+			<tr> <th align=center colspan="3"><?php echo $TbMsg["OGAGENT"] ?></th></tr>
+	    		<tr> <th align=center colspan="3"><?php echo $TbMsg["OPTION"] ?></th></tr>
 		</table>	
 	</form>	
-	<?
+	<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________

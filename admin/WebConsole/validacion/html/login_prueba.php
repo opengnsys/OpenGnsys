@@ -1,4 +1,4 @@
-<?
+<?php
 $path_parts = pathinfo(__FILE__);
 ?>
 

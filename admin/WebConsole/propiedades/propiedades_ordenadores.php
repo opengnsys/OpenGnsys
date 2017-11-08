@@ -82,8 +82,8 @@ function abrir_ventana(URL){
 	<input type="hidden" name="grupoid" value="<?php echo $grupoid?>" />
 	<input type="hidden" name="idaula" value="<?php echo $idaula?>" />
 	<input type="hidden" name="arranque" value="<?php echo $arranque?>" />
-	<p align="center" class="cabeceras"><?echo $TbMsg[4]?><br />
-	<span align="center" class="subcabeceras"><? echo $opciones[$opcion]?></span></p>
+	<p align="center" class="cabeceras"><?php echo $TbMsg[4]?><br />
+	<span align="center" class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
@@ -141,8 +141,8 @@ function abrir_ventana(URL){
 		</tr>
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[509]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$fotoordenador.'</TD>';
 				else	{
@@ -159,24 +159,24 @@ function abrir_ventana(URL){
 						while (false !== ($entry = readdir($handle))) {
 						if ($entry != "." && $entry != "..") {?>
 						
-						<option value="<? echo $entry ?>"><? echo $entry ?></option>
-						<?}
+						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
+						<?php }
 						}
 						closedir($handle);
 						} 
 						?>
 					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><? echo $TbMsg[5092] ?></a>
+<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
 					</TD>
-					<?
+					<?php
 					}
 					?>
 			
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion').'</TD>';
 				else
@@ -185,8 +185,8 @@ function abrir_ventana(URL){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
 				else
@@ -195,7 +195,7 @@ function abrir_ventana(URL){
 		</TR>
 <!----	AGP	--------------------------------------------------------------------	OGLIVE	--------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[18]?>&nbsp;</th>
+			<th align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
 <?php
 $cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$idordenador;
 $rs=new Recordset;
@@ -246,8 +246,8 @@ echo '      </select>'."\n";
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion').'</TD>';
 				else
@@ -256,8 +256,8 @@ echo '      </select>'."\n";
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'procedimientos',$idprocedimiento,'idprocedimiento','descripcion').'&nbsp;</TD>';
 				else
@@ -266,7 +266,7 @@ echo '      </select>'."\n";
 		</TR>		
 <!-----ADV -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align=center&nbsp;>&nbsp;<?echo $TbMsg[13]?>&nbsp;</th>
+			<th align=center&nbsp;>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$netiface.'</td>';
 				} else {
@@ -281,7 +281,7 @@ echo '      </select>'."\n";
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg[14]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[14]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$netdriver.'</td>';
 				} else {
@@ -296,7 +296,7 @@ echo '      </select>'."\n";
 <!--------------------------------------------------------------UHU comprobar si se requiere validacion ------------------------------------------------------------------------------->
 
                 <tr>
-                        <th align=center&nbsp;><? echo $TbMsg[15]; ?> &nbsp;</th>
+                        <th align=center&nbsp;><?php echo $TbMsg[15]; ?> &nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$validacion.'</td>';
 				} else {
@@ -308,7 +308,7 @@ echo '      </select>'."\n";
                         ?>
                 </tr>
                 <tr>
-                        <th align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</th>
+                        <th align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</th>
                         <?php	if ($opcion==$op_eliminacion)
                                         echo '<td colspan="3">'.$paginalogin.'</td>';
                                 else
@@ -316,7 +316,7 @@ echo '      </select>'."\n";
                         ?>
                 </tr>
                 <tr>
-                        <th align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</th>
+                        <th align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</th>
                         <?php	if ($opcion==$op_eliminacion)
                                         echo '<td colspan="3">'.$paginavalidacion.'</td>';
                                 else

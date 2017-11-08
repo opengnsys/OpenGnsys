@@ -1,4 +1,4 @@
-<?
+<?php
 // __________________________________________________
 //
 //      Fichero de idiomas php: acceso_cat.php 

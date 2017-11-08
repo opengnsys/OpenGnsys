@@ -1,4 +1,4 @@
-<? 
+<?php 
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -56,30 +56,30 @@ if  ($opcion!=$op_alta){
 	<SCRIPT language="javascript" src="../jscripts/propiedades_centros.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_centros_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_centros_'.$idioma.'.js"></SCRIPT>'?>
 
 </HEAD>
 <BODY>
 <FORM  name="fdatos" action="../gestores/gestor_centros.php" method="post"> 
-	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
-	<INPUT type=hidden name=idcentro value=<?=$idcentro?>>
-	<INPUT type=hidden name=identidad value=<?=$identidad?>>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=opcion value="<?php echo $opcion?>">
+	<INPUT type=hidden name=idcentro value=<?php echo $idcentro?>>
+	<INPUT type=hidden name=identidad value=<?php echo $identidad?>>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion){?>
-					<TD><?echo $nombrecentro?></TD>
-				<?}else{?>
-					<TD><INPUT type=text class=cajatexto  name="nombrecentro"  style="width:350" value="<? echo $nombrecentro?>">
-				<?}?>
+				<TH>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion){?>
+					<TD><?php echo $nombrecentro?></TD>
+				<?php }else{?>
+					<TD><INPUT type=text class=cajatexto  name="nombrecentro"  style="width:350" value="<?php echo $nombrecentro?>">
+				<?php }?>
 			</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=66>'.$comentarios.'</TEXTAREA></TD>';
@@ -87,7 +87,7 @@ if  ($opcion!=$op_alta){
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-               <?  if ($opcion!=$op_eliminacion) {
+               <?php  if ($opcion!=$op_eliminacion) {
 echo "			<TR>\n".
      "				<TH align=center>&nbsp;".$TbMsg['DIR']."&nbsp;</TH>\n".
      "				<TD><INPUT type=text class=cajatexto  name='directorio' maxlength='50' style='width:30em' value='".$directorio."'></TD>\n".
@@ -100,14 +100,14 @@ echo "			<TR>\n".
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un centro
 //		Parametros: 

@@ -1,4 +1,4 @@
-<? 
+<?php 
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -46,28 +46,28 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_componentehardwares.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_componentehardwares_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_componentehardwares_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos" action="../gestores/gestor_componentehardwares.php" method="post"> 
-	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
-	<INPUT type=hidden name=idhardware value=<?=$idhardware?>>
-	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=opcion value="<?php echo $opcion?>">
+	<INPUT type=hidden name=idhardware value=<?php echo $idhardware?>>
+	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD style="width:215">'.$descripcion.'</TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:250" type=text value="'.$descripcion.'"></TD>';?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.TomaDato($cmd,0,'tipohardwares',$idtipohardware,'idtipohardware','descripcion').'</TD>';
 				else
@@ -78,14 +78,14 @@ if  ($opcion!=$op_alta){
 	</TABLE>
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un componente hardware
 //		Parametros: 

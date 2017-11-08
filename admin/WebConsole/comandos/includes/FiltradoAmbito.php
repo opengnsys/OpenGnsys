@@ -230,8 +230,8 @@ echo '</SCRIPT>';
 ?>
 <SCRIPT language="javascript">
 function Sondeo(){
-	var ambito=<? echo $ambito?>;
-	var idambito=<? echo $idambito?>;
+	var ambito=<?php echo $ambito?>;
+	var idambito=<?php echo $idambito?>;
 	var wurl="../principal/sondeo.php";
 	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=1";
 	CallPage(wurl,prm,"retornoSondeo","POST");
@@ -246,8 +246,8 @@ function retornoSondeo(resul)
 //________________________________________________________________________________________________________
 //
 function respuestaSondeo(){
-	var ambito=<? echo $ambito?>;
-	var idambito=<? echo $idambito?>;
+	var ambito=<?php echo $ambito?>;
+	var idambito=<?php echo $idambito?>;
 	var wurl="../principal/sondeo.php";
 	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=2"; 
 	CallPage(wurl,prm,"retornorespuestaSondeo","POST");

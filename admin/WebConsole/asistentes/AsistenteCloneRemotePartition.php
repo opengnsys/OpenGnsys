@@ -40,8 +40,8 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../comandos/jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 <?php 
 //indicamos al objeto xajax se encargue de generar el javascript de las funciones registradas por ejm: ListarParticionesXip
 $xajax->printJavascript('../xajax/'); 
@@ -50,7 +50,7 @@ $xajax->printJavascript('../xajax/');
 
 
 <body>
-<?
+<?php
 switch($ambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
@@ -85,7 +85,7 @@ switch($ambito){
 
 	
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
-			<?
+			<?php
 		 	 include_once("./includes/asistentes/AyudanteFormularios.php");
 			 include_once("./includes/asistentes/formCloneRemotePartition.php");
 ?>
@@ -93,13 +93,13 @@ switch($ambito){
 		
 		
 			<tr> 
-				<th><INPUT TYPE="button" NAME="GenerarInstruccion" Value="<? echo $TbMsg["WDI12"]  ?>" onClick="codeCloneRemotePartition(this.form)"> 	</th>
+				<th><INPUT TYPE="button" NAME="GenerarInstruccion" Value="<?php echo $TbMsg["WDI12"]  ?>" onClick="codeCloneRemotePartition(this.form)"> 	</th>
 				<td colspan="5"><textarea class="cajatexto" name="codigo" id="codigo" cols="70" rows="7"></textarea></td>
 			</tr>
 						</table>	
 	</form>	
 
-<?
+<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________

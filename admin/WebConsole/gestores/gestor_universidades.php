@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -43,7 +43,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_universidades.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_modificacion:
@@ -65,7 +65,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /**************************************************************************************************************************************************
 	Inserta, modifica o elimina datos en la tabla iduniversidades
 ________________________________________________________________________________________________________*/

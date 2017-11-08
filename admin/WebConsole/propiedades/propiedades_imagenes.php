@@ -128,7 +128,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_imagenes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_imagenes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_imagenes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV align=center>
@@ -138,11 +138,11 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 <FORM name="fdatos" action="./propiedades_imagenes.php" method="post"> 
 <?php } ?>
 
-	<INPUT type="hidden" name="opcion" value="<?=$opcion?>">
-	<INPUT type="hidden" name="idimagen" value="<?=$idimagen?>">
-	<INPUT type="hidden" name="grupoid" value="<?=$grupoid?>">
-	<INPUT type="hidden" name="tipoimg" value="<?=$tipoimg?>">
-	<INPUT type="hidden" name="litamb" value="<?=$litamb?>">
+	<INPUT type="hidden" name="opcion" value="<?php echo $opcion?>">
+	<INPUT type="hidden" name="idimagen" value="<?php echo $idimagen?>">
+	<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid?>">
+	<INPUT type="hidden" name="tipoimg" value="<?php echo $tipoimg?>">
+	<INPUT type="hidden" name="litamb" value="<?php echo $litamb?>">
 	<INPUT type="hidden" name="datospost" value="1">
 	<?php
 		switch($tipoimg){
@@ -158,14 +158,14 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		}
 		
 	?>
-	<P align=center class=cabeceras><?echo $lit?><BR>
-		<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN>
+	<P align=center class=cabeceras><?php echo $lit?><BR>
+		<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN>
 	</P>
 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft) || $opcion == 2)
 	echo '<TD style="width:150">'.$nombreca.'
 					&nbsp;<INPUT type="hidden" name="nombreca" value="'.$nombreca.'"></TD>';
@@ -174,7 +174,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		</TR>
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<TD style="width:300">'.$descripcion.'
 					&nbsp;<INPUT type="hidden" name="descripcion" value="'.$descripcion.'"></TD>';
@@ -187,7 +187,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 	<!-------------------------------------------------------------------------------------->
 	<?php if($tipoimg==$IMAGENES_INCREMENTALES){?>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.TomaDato($cmd,$idcentro,'imagenes',$imagenid,'imagenid','descripcion').'
 					&nbsp;<INPUT type="hidden" name="imagenid" value="'.$imagenid.'"></TD>';
@@ -200,7 +200,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 	<?php if($tipoimg!=$IMAGENES_INCREMENTALES){?>
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$nombrerepositorio.'
 					&nbsp;<INPUT type="hidden" name="idrepositorio" value="'.$idrepositorio.'"></TD>';
@@ -209,19 +209,19 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 			?>
 		</TR>				
 	<!-------------------------------------------------------------------------------------->
-	<?if($tipoimg==$IMAGENES_BASICAS){?>	
+	<?php if($tipoimg==$IMAGENES_BASICAS){?>	
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$ruta.'
 					&nbsp;<INPUT type="hidden" name="ruta" value="'.$ruta.'"></TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=ruta style="width:350" type=text value="'.$ruta.'"></TH>';?>
 		</TR>	
-	<?}?>				
+	<?php }?>				
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
@@ -268,7 +268,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		</tr>
 		<!-- Perfil de software -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
 			<?php
 					echo '<TD>&nbsp;'.$perfilsoft.'
 					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TD>';
@@ -356,7 +356,7 @@ include_once("../includes/opcionesbotonesop.php");
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 
 //	Recupera los datos de una imagen

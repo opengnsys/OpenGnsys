@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: 
 // Autor: 
@@ -46,8 +46,8 @@ else
 
 <HTML>
 <HEAD>
-<TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
-<?
+<TITLE>Log: <?php echo $_GET["nombreordenador"] ?> </TITLE>
+<?php
 echo "<meta http-equiv='Refresh' content='2;URL=http://".$ip."/cgi-bin/httpd-log.sh'";
 ?>
 <meta charset="utf-8">
