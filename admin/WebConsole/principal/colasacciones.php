@@ -1129,10 +1129,10 @@ function escribeCheck()
 	echo'
 	<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 		<TR>
-		TH height=15 align="center" colspan=14><? echo $TbMsg[18]?></TH>
+		TH height=15 align="center" colspan=14><?php echo $TbMsg[18]?></TH>
 		</TR>
 		<TR>
-			<TD align=right><? echo $TbMsg[30]?></TD>
+			<TD align=right><?php echo $TbMsg[30]?></TD>
 			<TD align=center><INPUT type="checkbox" checked></TD>
 			<TD width="20" align=center>&nbsp;</TD>
 		</TR>
