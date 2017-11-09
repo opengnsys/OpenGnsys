@@ -457,28 +457,37 @@ dd if="$DISK" of="$IMGFILE" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IM
 #@param   int_disk     numero de disco
 #@param	  int_part     numero de particion 
 #@param   str_repo     repositorio de imágenes   { REPO, CACHE }
+#@param   str_imageName Nombre de la imagen
 #@param   str_imageType Tipo de imagen: monolit (por defecto), sync o diff. (parametro opcional) 
 #@return  SIZEDATA SIZEREQUIRED SIZEFREE ISENOUGHSPACE 
 #@note    si str_imageType= diff necesario /tmp/ogimg.info, que es creado por ogCreateInfoImage.
+#@note    para el tamaño de la imagen no sigue enlaces simbólicos.
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2014/10/24
 #@version 1.1.0 - En la salida se incluye el espacio disponible en el repositorio (ticket #771)
 #@author  Irina Gomez - ETSII Universidad de Sevilla
 #@date    2017-03-28
+#@version 1.1.0 - Si la imagen ya existe en el REPO se suma su tamaño al espacio libre
+#@author  Irina Gomez - ETSII Universidad de Sevilla
+#@date    2017-11-08
 #*/ ##
 function ogGetSizeParameters ()
 {
 local MNTDIR SIZEDATA KERNELVERSION SIZEREQUIRED FACTORGZIP FACTORLZOP SIZEFREE 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part str_repo [monolic|sync|diff]" \
-           "if $FUNCNAME 1 2 REPO sync ; then ...; fi" \
-           "if $FUNCNAME 1 6 CACHE ; then ...; fi" 
+    ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part str_repo str_imgname [monolit|sync|diff]" \
+           "if $FUNCNAME 1 2 REPO Windows10 sync ; then ...; fi" \
+           "if $FUNCNAME 1 6 Ubuntu16 CACHE ; then ...; fi" 
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
-[ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE [monolitic|sync]" ; echo $?)
+[ $# -lt 4 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imgname [monolit|sync|diff]" ; echo $?)
+
+# Recogemos parametros
+REPO=${3^^}
+IMGTYPE="_${5^^}_"
 
 MNTDIR=$(ogMount $1 $2)
 if [ "$MNTDIR" == "" ]; then
@@ -496,7 +505,7 @@ else
 fi
 
 #Aplicar factor de compresion
-if [ "_${4^^}_" == "_SYNC_" -o "_${4^^}_" == "_DIFF_" ]; then
+if [ "_$IMGTYPE_" == "_SYNC_" -o "_$IMGTYPE_" == "_DIFF_" ]; then
 	
 	# Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
 	KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
@@ -516,13 +525,33 @@ else
 fi
 
 #Comprobar espacio libre en el contenedor.
-[ "${3^^}" == "CACHE" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
-[ "${3^^}" == "REPO" ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
+[ "$REPO" == "CACHE" ] && SIZEFREE=$(ogGetFreeSize `ogFindCache`)
+[ "$REPO" == "REPO" ] && SIZEFREE=$(df -k | grep $OGIMG | awk '{print $4}')
+
+# Comprobamos si existe una imagen con el mismo nombre en $REPO
+# En sincronizadas restamos tamaño de la imagen y en monoloticas de la .ant
+case "${IMGTYPE}" in
+    _DIFF_) IMGEXT="img.diff"
+	    ;;
+    _SYNC_) IMGEXT="img"
+            ;;
+    *)      IMGEXT="img.ant"
+            ;;
+esac
+
+IMGDIR=$(ogGetParentPath "$REPO" "/$4")
+IMGFILE=$(ogGetPath "$IMGDIR/$(basename "/$4").$IMGEXT")
+if [ -z "$IMGFILE" ]; then
+    IMGSIZE=0
+else
+    IMGSIZE=$(ls -s "$IMGFILE" | cut -f1 -d" ")
+fi
+
+let SIZEFREE=$SIZEFREE+$IMGSIZE
 
 [ "$SIZEREQUIRED" -lt "$SIZEFREE" ] && ISENOUGHSPACE=TRUE  ||  ISENOUGHSPACE=FALSE
 
 echo $SIZEDATA $SIZEREQUIRED $SIZEFREE $ISENOUGHSPACE
-
 
 }
 
