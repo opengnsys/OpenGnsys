@@ -57,11 +57,10 @@ chdir($oldpwd);
 function sendFile($file) {
 	// Check if file exists in current directory and it isn't this file.
 	if (file_exists($file) and strpos($file,"/") === false and $file !== basename(__FILE__)) {
-		$file_info = apache_lookup_uri($file);
-		header('Content-Type: ' . $file_info->content_type);
+		header('Content-Type: ' . mime_content_type($file));
 		header('Content-Length: ' . filesize($file));
 		header('Content-Disposition: attachment; filename="' . $file . '"');
-		virtual($file);
+		readfile($file);
 	}
 }
 
