@@ -73,27 +73,21 @@ case "$OSTYPE" in
         ogWindowsBootParameters $1 $2
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
-        # Configurar nuevo agente OGAgent; si no, instalar antiguo cliente para Windows.
-        ogConfigureOgagent $1 $2
-        if [ $? == 0 ]; then
-            # Si se ha configurado OGAgent, eliminar el antiguo cliente de Windows.
-            [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient.exe)$(ogGetPath $MNTDIR/winnt/ogAdmWinClient.exe)" ] && ogUninstallWindowsClient $1 $2
-        elif [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
+        # Eliminar el antiguo cliente de Windows.
+        if [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient.exe)$(ogGetPath $MNTDIR/winnt/ogAdmWinClient.exe)" ]; then
             ogInstallMiniSetup $1 $2 postconf.cmd
-            ogInstallWindowsClient $1 $2 postconf.cmd
+            ogUninstallWindowsClient $1 $2 postconf.cmd
         fi
+        # Configurar nuevo agente OGAgent.
+        ogConfigureOgagent $1 $2
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
-        # Configurar nuevo agente OGAgent; si no, instalar antiguo cliente para Linux.
+        # Eliminar el antiguo cliente de Linux.
+        [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
+        # Configurar nuevo agente OGAgent.
         ogConfigureOgagent $1 $2
-        if [ $? == 0 ]; then
-            # Si se ha configurado OGAgent, eliminar el antiguo cliente de Linux.
-            [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
-        elif [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
-            ogInstallLinuxClient $1 $2
-        fi
         ;;
     MacOS)      # Postconfiguración de Mac OS X.
         # Fichero indicador de activación de postconfiguración.

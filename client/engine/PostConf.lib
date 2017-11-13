@@ -633,13 +633,13 @@ fi
 # Error si no se reciben 3 parámetros.
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Obtener sistema de archvios.
-MNTDIR=$(ogMount $1 $2) || return $?
+MNTDIR=$(ogMount "$1" "$2") || return $?
 
 # Crear órdenes para desinstalar servicio y borrar ejecutable del cliente.
 if [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient.exe)" -o -n "$(ogGetPath $MNTDIR/winnt/ogAdmWinClient.exe)" ]; then
-    ogAddCmd $1 $2 $3 'ogAdmWinClient -remove'
-    ogAddCmd $1 $2 $3 'DEL C:\Windows\ogAdmWinClient.exe'
-    ogAddCmd $1 $2 $3 'DEL C:\Winnt\ogAdmWinClient.exe'
+    ogAddCmd $1 $2 "$3" 'ogAdmWinClient -remove'
+    ogAddCmd $1 $2 "$3" 'DEL C:\Windows\ogAdmWinClient.exe'
+    ogAddCmd $1 $2 "$3" 'DEL C:\Winnt\ogAdmWinClient.exe'
 fi
 }
 
