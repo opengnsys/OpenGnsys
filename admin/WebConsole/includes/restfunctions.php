@@ -4,10 +4,10 @@
  * @function multiRequest.
  * @param    URLs array (may include header and POST data), cURL options array.
  * @return   Array of arrays with JSON requests and response codes.
- * @warning  Does not verifies server certificate.
+ * @warning  Default options: does not verifying certificate, connection timeout 200 ms.
  * @Date     2015-10-14
  */
-function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false)) {
+function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false, CURLOPT_TIMEOUT_MS => 200)) {
  
   // array of curl handles
   $curly = array();
@@ -33,7 +33,6 @@ function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CUR
        curl_setopt($curly[$id], CURLOPT_HEADER, 0);
     }
     curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curly[$id], CURLOPT_TIMEOUT, 1);
  
     // post?
     if (is_array($d)) {
