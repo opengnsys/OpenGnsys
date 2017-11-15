@@ -158,11 +158,14 @@ function SubarbolXML_Ordenadores($cmd,$idimagen)
 
 	$cadenaXML="";
 	$gidaula=null;
-	$cmd->texto="SELECT DISTINCT aulas.idaula,aulas.nombreaula,ordenadores.idordenador,ordenadores.nombreordenador,
-								ordenadores_particiones.numpar,ordenadores.idperfilhard FROM ordenadores
- 								INNER JOIN aulas ON  ordenadores.idaula=aulas.idaula
-								INNER JOIN ordenadores_particiones ON  ordenadores_particiones.idordenador=ordenadores.idordenador
- 								WHERE ordenadores_particiones.idimagen=".$idimagen." ORDER BY aulas.idaula,ordenadores.nombreordenador";
+	$cmd->texto="SELECT DISTINCT aulas.idaula, aulas.nombreaula, ordenadores.idordenador,
+			    ordenadores.nombreordenador, ordenadores.idperfilhard,
+			    ordenadores_particiones.numdisk, ordenadores_particiones.numpar
+		       FROM ordenadores
+ 		      INNER JOIN aulas ON ordenadores.idaula=aulas.idaula
+		      INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+		      WHERE ordenadores_particiones.idimagen='$idimagen'
+		      ORDER BY aulas.idaula, ordenadores.nombreordenador";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
@@ -188,7 +191,7 @@ function SubarbolXML_Ordenadores($cmd,$idimagen)
 		$cadenaXML.='<ORDENADOR';
 		// Atributos			
 		$cadenaXML.=' imagenodo="../images/iconos/ordenador.gif"';
-		$litpar="(Par:".$rs->campos["numpar"].")";
+		$litpar="(Par:".$rs->campos["numdisk"].",".$rs->campos["numpar"].")";
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreordenador"].' '.$litpar.'"' ;
 		$cadenaXML.='></ORDENADOR>';
 		$rs->Siguiente();
@@ -196,7 +199,7 @@ function SubarbolXML_Ordenadores($cmd,$idimagen)
 	if ($gidaula)
 		$cadenaXML.='</AULA>';
 	if ($rs->numeroderegistros>0)
-			$cadenaXML.='</ORDENADORES>';
+		$cadenaXML.='</ORDENADORES>';
 	$rs->Cerrar();
 	return($cadenaXML);
 }

@@ -270,9 +270,12 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
 			<?php
+				if (isset($modelo)) {
 					echo '<TD>&nbsp;'.$perfilsoft.'
 					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TD>';
-
+				} else {
+					echo '<TD>'.HTMLSELECT($cmd,$idcentro,'perfilessoft',$idperfilsoft,'idperfilsoft','descripcion',300).'</TD>';
+				}
 			?>
 		</TR>			
 		<!-- Sistema Operativo -->
