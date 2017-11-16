@@ -474,7 +474,9 @@ dd if="$DISK" of="$IMGFILE" bs=446 count=1 || ogRaiseError $OG_ERR_IMAGE "$1 $IM
 #*/ ##
 function ogGetSizeParameters ()
 {
-local MNTDIR SIZEDATA KERNELVERSION SIZEREQUIRED FACTORGZIP FACTORLZOP SIZEFREE 
+local REPO MNTDIR SIZEDATA KERNELVERSION SIZEREQUIRED FACTORGZIP FACTORLZOP FACTORSYNC SIZEFREE 
+local IMGTYPE IMGDIR IMGFILE IMGEXT IMGSIZE
+
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part str_repo str_imgname [monolit|sync|diff]" \
@@ -496,7 +498,7 @@ if [ "$MNTDIR" == "" ]; then
 fi
 
 # Datos contenidos en la particion o en la lista de archivos de contiene la diferencial.
-if [ "_${4^^}_" == "_DIFF_" ]; then
+if [ "$IMGTYPE" == "_DIFF_" ]; then
 	[ -r /tmp/ogimg.info ] || return $(ogRaiseError session $OG_ERR_NOTFOUND "/tmp/ogimg.info"; echo $?)
 	cd $MNTDIR
 	SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
@@ -505,7 +507,7 @@ else
 fi
 
 #Aplicar factor de compresion
-if [ "_$IMGTYPE_" == "_SYNC_" -o "_$IMGTYPE_" == "_DIFF_" ]; then
+if [ "$IMGTYPE" == "_SYNC_" -o "$IMGTYPE" == "_DIFF_" ]; then
 	
 	# Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
 	KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
