@@ -43,7 +43,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.cpus = 1
     end
     # VM base and host name.
-    bt.vm.box = "ubuntu/wily32"
+    bt.vm.box = "ubuntu/xenial64"
     bt.vm.hostname = "ogBootTools"
     # Comment out to disable synced folder.
     #bt.vm.synced_folder ".", "/vagrant", disabled: true
