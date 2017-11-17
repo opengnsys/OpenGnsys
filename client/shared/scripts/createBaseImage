@@ -136,6 +136,7 @@ ogReduceImage $3 "$4" $IMGEXT
 ogWaitSyncImage "$3" "$4" $IMGEXT "reduced" $SIZEREQUIRED || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
 
 echo  " " > $OGLOGCOMMAND
+sleep 2
 # Comprobamos que la imagen esta bien detectacdo que es un sistema de ficheros.
 ogEcho log session "[95] $MSG_HELP_ogCheckSyncImage"
 ogCheckSyncImage $3 "$4" "img" || exit $(ogRaiseError session $OG_ERR_IMAGE "$3 $4 img" ; echo $?)

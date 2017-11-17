@@ -170,6 +170,7 @@ ogWaitSyncImage "$3" "$5" $DIFFTYPE "reduced" $SIZEREQUIRED || exit $(ogRaiseErr
 # TODO: necesaria funcion que espere a que se reduzca la imagen para continuar el script
 
 echo " " > $OGLOGCOMMAND
+sleep 2
 # Comprobamos que la imagen esta bien
 ogEcho log session "[95] $MSG_HELP_ogCheckSyncImage"
 ogCheckSyncImage $3 "$5" diff ||  exit $(ogRaiseError session $OG_ERR_IMAGE "$3 $5 diff"; echo $?)

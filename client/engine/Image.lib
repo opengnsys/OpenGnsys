@@ -502,6 +502,7 @@ if [ "$IMGTYPE" == "_DIFF_" ]; then
 	[ -r /tmp/ogimg.info ] || return $(ogRaiseError session $OG_ERR_NOTFOUND "/tmp/ogimg.info"; echo $?)
 	cd $MNTDIR
 	SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
+	cd /
 else
 	SIZEDATA=$(df -k | grep $MNTDIR | awk '{print $3}')
 fi
@@ -512,7 +513,7 @@ if [ "$IMGTYPE" == "_SYNC_" -o "$IMGTYPE" == "_DIFF_" ]; then
 	# Sistema de fichero de la imagen según kernel, menor que 3.7 EXT4. comparamos revision 
 	KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
 	[ $KERNELVERSION \< 3.07 ] &&  IMGFS="EXT4" || IMGFS=${IMGFS:-"BTRFS"}
-	FACTORSYNC=${FACTORSYNC:-"120"}
+	FACTORSYNC=${FACTORSYNC:-"130"}
 	# Si IMGFS="BTRFS" la compresion es mayor.
 	[ $IMGFS == "BTRFS" ] && let FACTORSYNC=$FACTORSYNC-20
 
