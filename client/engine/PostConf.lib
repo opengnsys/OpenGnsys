@@ -65,7 +65,7 @@ case $# in
     6|8) # Ejecución en el "runonce".
         ogInstallRunonce "$@" ;;
     *)  ogRaiseError $OG_ERR_FORMAT
-        exit $? ;;
+        return $? ;;
 esac
 }
 
