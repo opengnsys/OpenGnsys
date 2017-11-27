@@ -381,7 +381,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 		writeRemotepcLog($app->request()->getResourceUri(). ": Parameters: deadLine=$deadLine");
 	// Get client's data.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, ordenadores.idordenador, remotepc.reserved
+SELECT adm.idadministradorcentro, ordenadores.idordenador, remotepc.*
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
   JOIN aulas USING(idaula)
@@ -397,7 +397,7 @@ EOD;
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
 		// Check if client is reserved.
-		if (! is_null($rs->campos["reserved"])) {
+		if (! is_null($rs->campos["urllogin"])) {
 			// Read query data.
 			$clntid = $rs->campos["idordenador"];
 			# Removing previous commands from OGAgent operations queue.
