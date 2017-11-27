@@ -405,7 +405,7 @@ EOD;
 				writeRemotepcLog($app->request()->getResourceUri(). ": Updating database.");
 			$cmd->texto = <<<EOD
 DELETE FROM ogagent_queue
- WHERE clientid = '$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
+ WHERE clientid = '$clntid' AND operation IN ('popup-10', 'popup-5', 'poweroff');
 EOD;
 			$cmd->Ejecutar();
 			# Add new commands to OGAgent operations queue.
