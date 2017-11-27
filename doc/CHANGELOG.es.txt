@@ -37,6 +37,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #773	Incluir script personalizado para bootOs
 #774	Soportar clientes ogLive de 64 bits
 #783	Browser registra salida de comandos ejecutados al pulsar enlace
+#786	Adaptar el ogLive-precise-3.2.0-23-generic-r4820.iso como ogLive de 32 bits
 #813	Restaurar Imagen no muestra el error en la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Server:
@@ -70,9 +71,12 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #782	Crear registro de acciones para realizar informes
 #789	Actualizar plantilla PXE al mover ordenador 
 #792	Incluir en los html personalizados de ejemplo los enlaces al acceso privado
+#797	Revisar log en los procesos de restauración
 #798	Mostrar imágenes en orden alfabético
+#799	Consola web: estado de los equipos tarda en mostar 
 #806	Comando Particionar y Formatear: controlar que no se exceda el tamaño del disco
 #807	Consola Web: Incorporar ordenadores da error de time-out
+#814	Sustituir las etiquetas cortas de php por el formato largo
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
