@@ -266,7 +266,7 @@ function download() {
             [ $ISOREL -ge $MINREL ] && OGLIVE[i-1]="(*) ${OGLIVE[i-1]}"
         done
         select opt in "${OGLIVE[@]}"; do
-            [ -n "$opt" ] && OGLIVEFILE=${opt#* } && break
+            [ -n "$opt" ] && OGLIVEFILE=${opt##* } && break
         done
     fi
     # Get download size.
