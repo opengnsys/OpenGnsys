@@ -165,10 +165,10 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	// Crear fichero de arranque a partir de la plantilla y los datos del cliente.
 	// UHU - si el parametro vga no existe, no se quita.
 	if (! empty ($vga)) {
-		exec ("sed -e 's|vga=...||g' -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+		exec ("sed -e 's|vga=...||g; s|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' $pxedir/templates/$bootopt > $macfile");
 	}
 	else{
-		exec ("sed -e 's|INFOHOST|$infohost|g' -e 's|set ISODIR=.*|set ISODIR=$oglivedir|g' $pxedir/templates/$bootopt > $macfile");
+		exec ("sed -e 's|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' $pxedir/templates/$bootopt > $macfile");
 	}
 	exec ("chmod 777 $macfile");
 }
