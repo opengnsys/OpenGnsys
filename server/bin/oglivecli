@@ -186,7 +186,7 @@ function check() {
     [ ! -f $INFOFILE ] && echo "Configuration file does not exists: $INFOFILE" && let ERR++
     [ -f $INFOFILE -a "$(jq -c keys $INFOFILE 2>/dev/null)" != "[\"default\",\"oglive\"]" ] && echo "Format error in configuration file: $INFOFILE" && let ERR++
     [ ! -e $TFTPDIR ] && echo "TFTP directory does not exist: $TFTPDIR." && let ERR++
-    # Check for installed ogLives.
+    # Check for installed ogLive clients.
     INST=( $(find $TFTPDIR/ -type d -name "$DEFOGLIVE-*" -a ! -name "*.old" -printf "%f\n" | sort) )
     [[ ${#INST[@]} -eq 0 ]] && echo "No ogLive clients are installed." && let ERR++
     DEF=( $(jq -r .oglive[].directory $INFOFILE 2>/dev/null | sort) )
@@ -202,6 +202,12 @@ function check() {
     [ -n "$AUX" ] && echo "Some ISOs are downloaded but not defined: ${AUX//$'\n'/, }" && let ERR++
     AUX=$(comm -13 <(printf "%s\n" ${INST[*]}) <(printf "%s\n" ${DEF[*]}))
     [ -n "$AUX" ] && echo "Some ISOs are defined but not downloaded: ${AUX//$'\n'/, }" && let ERR++
+    # Check for new ISO files downloaded after installation.
+    AUX=$(jq -r '.oglive[] as $og | $og.iso + ":" + $og.directory' $INFOFILE 2>/dev/null | \
+            while IFS=":" read -r DEF INST; do
+                [ $DOWNLOADDIR/$DEF -nt $TFTPDIR/$INST ] && echo "$DEF"
+            done)
+    [ -n "$AUX" ] && echo "Some ISOs are downloaded after installation: ${AUX//$'\n'/, }" && let ERR++
     # Print result.
     [ $ERR -eq 0 ] && echo "OK!" || echo "Problems detected: $ERR"
     return $ERR
