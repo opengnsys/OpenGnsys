@@ -136,6 +136,9 @@ $app->post('/ogagent/loggedin',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
+		$language = isset($input->language) ? substr($input->language, 0, strpos($input->language, "_")) : "";
+		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
+		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
 		// Check sender IP address consistency (same as parameter value).
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -161,7 +164,7 @@ EOD;
 			$rs->Cerrar();
 			if (!is_null($id)) {
 				// Log activity, respond to client and continue processing.
-				writeLog("User logged in: ip=$ip, user=$user.");
+				writeLog("User logged in: ip=$ip, user=$user, lang=$language, os=$osType:$osVersion.");
 				$response = "";
 				jsonResponseNow(200, $response);
 			} else {
@@ -174,6 +177,13 @@ EOD;
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {
 				// ...
+				// Updating user's session language for messages.
+				$cmd->texto = <<<EOD
+UPDATE remotepc
+   SET language = '$language'
+ WHERE id = '$id';
+EOD;
+				$cmd->Ejecutar();
 			}
 		} else {
 			throw new Exception("Database error");
@@ -205,6 +215,8 @@ $app->post('/ogagent/loggedout',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
+		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
+		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
 		// Check sender agent type and IP address consistency (same as parameter value).
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -230,7 +242,7 @@ EOD;
 			$rs->Cerrar();
 			if (!is_null($id)) {
 				// Log activity, respond to client and continue processing.
-				writeLog("User logged out: ip=$ip, user=$user.");
+				writeLog("User logged out: ip=$ip, user=$user, os=$osType:$osVersion.");
 				$response = "";
 				jsonResponseNow(200, $response);
 			} else {

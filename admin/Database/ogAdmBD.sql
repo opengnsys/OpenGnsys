@@ -791,6 +791,7 @@ CREATE TABLE `remotepc` (
   `reserved` datetime DEFAULT NULL,
   `urllogin` varchar(100),
   `urllogout` varchar(100),
+  `language` varchar(5),
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 

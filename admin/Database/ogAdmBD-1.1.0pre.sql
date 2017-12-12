@@ -223,16 +223,17 @@ ALTER TABLE aulas
 	MODIFY puestos SMALLINT DEFAULT NULL;
 
 # Nuevas tablas para datos del proyecto Remote PC y operaciones de OGAgent (ticket #708).
-CREATE TABLE IF NOT EXISTS remotepc ( 
+DROP TABLE IF EXISTS remotepc; 
+CREATE TABLE remotepc ( 
 	id INT(11) NOT NULL, 
 	reserved DATETIME DEFAULT NULL, 
 	urllogin VARCHAR(100), 
 	urllogout VARCHAR(100), 
+	language VARCHAR(5), 
 	PRIMARY KEY (id) 
 	) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-ALTER TABLE remotepc
-       MODIFY reserved DATETIME DEFAULT NULL;
-CREATE TABLE IF NOT EXISTS ogagent_queue (
+DROP TABLE IF EXISTS ogagent_queue;
+CREATE TABLE ogagent_queue (
 	id INT(11) NOT NULL AUTO_INCREMENT,
 	clientid INT(11) NOT NULL,
 	exectime DATETIME DEFAULT NULL,
