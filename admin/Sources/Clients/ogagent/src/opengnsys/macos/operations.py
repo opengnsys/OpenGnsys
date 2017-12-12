@@ -35,6 +35,7 @@ import socket
 import platform
 import fcntl
 import os
+import locale
 import ctypes  # @UnusedImport
 import ctypes.util
 import subprocess
@@ -238,10 +239,17 @@ def getCurrentUser():
     '''
     return os.environ['USER']
 
+
+def getSessionLanguage():
+    '''
+    Returns the user's session language
+    '''
+    return locale.getdefaultlocale()[0]
+
+
 def showPopup(title, message):
     '''
     Displays a message box on user's session (during 1 min).
     '''
     # Show a dialog using AppleSctipt
     return subprocess.call('/usr/bin/osascript -e \'display notification "{}" with title "{}"\''.format(message, title), shell=True)
-

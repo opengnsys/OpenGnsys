@@ -65,7 +65,7 @@ from opengnsys.log import logger
 MSG_LOGOFF = 0xA1  # Request log off from an user
 MSG_MESSAGE = 0xB2
 MSG_POPUP = 0xB3
-MSG_SCRIPT = 0xC3 
+MSG_SCRIPT = 0xC3
 
 # Request messages
 REQ_MESSAGE = 0xD4
@@ -317,12 +317,12 @@ class ClientIPC(threading.Thread):
         msg = six.int2byte(msg) + six.int2byte(l & 0xFF) + six.int2byte(l >> 8) + data
         self.clientSocket.sendall(msg)
 
-    def sendLogin(self, username):
-        self.sendRequestMessage(REQ_LOGIN, username)
+    def sendLogin(self, username, language):
+        self.sendRequestMessage(REQ_LOGIN, username+','+language)
 
     def sendLogout(self, username):
         self.sendRequestMessage(REQ_LOGOUT, username)
-        
+
     def sendMessage(self, module, message, data=None):
         '''
         Sends a message "message" with data (data will be encoded as json, so ensure that it is serializable)

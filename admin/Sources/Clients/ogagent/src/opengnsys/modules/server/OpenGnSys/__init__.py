@@ -113,13 +113,14 @@ class OpenGnSysWorker(ServerWorker):
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
 
-    def onLogin(self, user):
+    def onLogin(self, userData):
         '''
         Sends session login notification to OpenGnsys server
         '''
-        logger.debug('Received login for {}'.format(user))
+        user, sep, language = userData.partition(',')
+        logger.debug('Received login for {} with language {}'.format(user, language))
         self.loggedin = True
-        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'ostype': operations.osType, 'osversion': operations.osVersion})
+        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language, 'ostype': operations.osType, 'osversion': operations.osVersion})
 
     def onLogout(self, user):
         '''
@@ -241,4 +242,3 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_client_popup(self, params):
         self.REST.sendMessage('popup_done', params)
-

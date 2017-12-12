@@ -35,6 +35,7 @@ import socket
 import platform
 import fcntl
 import os
+import locale
 import ctypes  # @UnusedImport
 import ctypes.util
 import subprocess
@@ -157,6 +158,7 @@ def reboot(flags=0):
     else:
         subprocess.call(['/sbin/reboot'])
 
+
 def poweroff(flags=0):
     '''
     Simple poweroff using os command
@@ -171,7 +173,6 @@ def poweroff(flags=0):
         subprocess.call('source /opt/opengnsys/etc/preinit/loadenviron.sh; /opt/opengnsys/scripts/poweroff', shell=True)
     else:
         subprocess.call(['/sbin/poweroff'])
-
 
 
 def logoff():
@@ -270,9 +271,16 @@ def getCurrentUser():
     '''
     return os.environ['USER']
 
+
+def getSessionLanguage():
+    '''
+    Returns the user's session language
+    '''
+    return locale.getdefaultlocale()[0]
+
+
 def showPopup(title, message):
     '''
     Displays a message box on user's session (during 1 min).
     '''
     return subprocess.call('zenity --info --timeout 60 --title "{}" --text "{}"'.format(title, message), shell=True)
-
