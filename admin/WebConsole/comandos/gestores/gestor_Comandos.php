@@ -114,6 +114,11 @@ $cmd->CreaParametro("@restrambito","",0);
 $cmd->CreaParametro("@ordprocedimiento",0,1);
 $cmd->CreaParametro("@ordtarea",0,1);
 
+/* PARCHE UHU heredado de la version 1.1.0: Si la accion a realizar es Arrancar incluimos una pagina para arrancar desde el repo */
+if($funcion == "nfn=Arrancar".chr(13))
+	include("wakeonlan_repo.php");
+/**/
+
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 	$cmd->ParamSetValor("@restrambito",$idambito);
 	$idambito=0;

@@ -1,6 +1,6 @@
-<?php
+<?
 // Fichero con funciones para trabajar con el webservice
-include_once("../../includes/restfunctions.php");
+include_once("../../rest/util.php");
 
 /**
 	En este punto disponemos de tres variables indicando las ips, las macs y las ids de los 
@@ -50,11 +50,13 @@ foreach($reposAndMacs as $repo => $macs){
 	if($macs["apikey"] !== ""){
 		$apiKeyRepo = $macs["apikey"];
 		unset($macs["apikey"]);
-		$url = "http://".$repo."/opengnsys/rest/index.php/repository/poweron";
-		$headers = array('Authorization: '.$apiKeyRepo);
-		$data = http_build_query(array("macs" => $macs));
-		$result = callAPI("POST",$url, $data, $headers);
-		$result = json_decode($result);
+		// Componer objeto JSON y llamar a la función REST.
+		$rest[0]['url'] = "https://$repo/opengnsys/rest/repository/poweron";
+		$rest[0]['header'] = array('Authorization: '. $apiKeyRepo);
+		$rest[0]['post'] = '{"macs": ["' . implode('","', $macs) . '"]}';
+		$result = multiRequest($rest);
+		if (empty($result))
+			echo "Error de acceso al webservice del repositorio";
 	}
 	else{
 		echo "No hacemos nada, el repositorio no tiene el webservice activo";

@@ -183,19 +183,17 @@ $app->get('/repository/image(/:ouname)/:imagename(/)', 'validateRepositoryApiKey
  * @return   JSON string ok if the power on command was sent
  */
 $app->post('/repository/poweron', 'validateRepositoryApiKey',
-    function() {
-		$app = \Slim\Slim::getInstance();
+    function() use($app) {
 		// Debe venir el parametro macs en el post (objeto JSON con array de MACs)
-		$data = $app->request()->post();
+		$data = json_decode($app->request()->getBody());
 		if(empty($data->macs)){
 			// Print error message.
 			$response['message'] = 'Required param macs not found';
 			jsonResponse(400, $response);
 		}
 		else{
-			$macs = $data->macs;
 			$strMacs = "";
-			foreach($macs as $mac){
+			foreach($data->macs as $mac){
 				$strMacs .= " ".$mac;
 			}
 			// Ejecutar comando wakeonlan, debe estar disponible en el sistema operativo
