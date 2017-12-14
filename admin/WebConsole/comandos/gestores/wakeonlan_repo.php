@@ -1,6 +1,6 @@
-<?
+<?php
 // Fichero con funciones para trabajar con el webservice
-include_once("../../rest/util.php");
+include_once("../../includes/restfunctions.php");
 
 /**
 	En este punto disponemos de tres variables indicando las ips, las macs y las ids de los 
@@ -50,19 +50,26 @@ foreach($reposAndMacs as $repo => $macs){
 	if($macs["apikey"] !== ""){
 		$apiKeyRepo = $macs["apikey"];
 		unset($macs["apikey"]);
-		// Componer objeto JSON y llamar a la función REST.
-		$rest[0]['url'] = "https://$repo/opengnsys/rest/repository/poweron";
-		$rest[0]['header'] = array('Authorization: '. $apiKeyRepo);
-		$rest[0]['post'] = '{"macs": ["' . implode('","', $macs) . '"]}';
-		$result = multiRequest($rest);
-		if (empty($result))
-			echo "Error de acceso al webservice del repositorio";
+		// Componer datos de conexión para el repositorio.
+		$urls[$repo]['url'] = "https://$repo/opengnsys/rest/repository/poweron";
+		$urls[$repo]['header'] = array('Authorization: '. $apiKeyRepo);
+		$urls[$repo]['post'] = '{"macs": ["' . implode('","', $macs) . '"]}';
 	}
 	else{
-		echo "No hacemos nada, el repositorio no tiene el webservice activo";
-
+		$avisoRepo = true;
 	}
 }
+// Enviar petición múltiple a los repositorios afectados.
+if (isset($urls)) {
+	$result = multiRequest($urls);
+	// Comprobar respuesta.
+	foreach ($result as $repo => $res) {
+		if ($res['code'] != 200) {
+			$avisoRepo = true;
+		}
+	}
+}
+
 
 function existREPO($repo, $repos){
 	$found=false;

@@ -1017,7 +1017,35 @@ paths:
       tags:
         - repository
         - image
-  #/repository/poweron
+  /repository/poweron:
+    post:
+      description: send Wake-On-Lan notification to many clients
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              macs:
+                type: array
+                items:
+                  description: MAC (Ethernet) address
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              output:
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - repository
+        - client
   /ogagent/started:
     post:
       description: Process push notification when OGAgent is started

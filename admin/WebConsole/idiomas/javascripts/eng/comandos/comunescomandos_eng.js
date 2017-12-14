@@ -22,3 +22,4 @@ CTbMsg[13]="WARNING: You must choose a way of inclusion this command on task exe
 CTbMsg[14]="WARNING: You must specify the name of the new task where this command will be added";
 CTbMsg[15]="WARNING: You must choose the task that will add this command";
 CTbMsg[16]="AVISO: si el código incluye reinicio o apagado, puede provocar que el cliente no inicie correctamente";
+CTbMsg[17]="The command has been successfully registered, but there was some problems connecting repository REST API";

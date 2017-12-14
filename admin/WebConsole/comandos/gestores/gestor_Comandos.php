@@ -28,6 +28,7 @@ $sw_mkprocedimiento="";
 $nombreprocedimiento="";
 $idprocedimiento="";
 $ordprocedimiento=0;
+$avisoRepo=false;
 
 $sw_mktarea="";
 $nombretarea="";
@@ -274,7 +275,11 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			}
 			else{
 				echo '<SCRIPT language="javascript">'.chr(13);
-				echo 'resultado_comando(2);'.chr(13);
+				if ($avisoRepo) {
+					echo 'resultado_comando(17);'.chr(13);
+				} else {
+					echo 'resultado_comando(2);'.chr(13);
+				}
 				echo '</SCRIPT>'.chr(13);
 			}		
 		}
