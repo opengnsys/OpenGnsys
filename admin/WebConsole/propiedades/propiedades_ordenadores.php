@@ -202,46 +202,29 @@ $rs=new Recordset;
 $rs->Comando=&$cmd;
 if (!$rs->Abrir()) return(true); // Error al abrir recordset
 $rs->Primero();
-	if (!$rs->EOF){
-		$bdogLive=$rs->campos["oglivedir"];
-	}
+if (!$rs->EOF){
+	$bdogLive=$rs->campos["oglivedir"];
+}
 $rs->Cerrar();
 
-				if ($opcion==$op_eliminacion){
-					echo '<td colspan="3">'.$bdogLive.'</td>';
-				}else{
-
-$ogcli=("bash /opt/opengnsys/bin/oglivecli list > /opt/opengnsys/www/tmp/ogcliordenador.txt");
-$listogcli=shell_exec($ogcli);
-$listogcli=shell_exec("cat /opt/opengnsys/www/tmp/ogcliordenador.txt");
-//$listogcli=split(" ",$listogcli);
-
-echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250>'."\n";
-echo '<option value="ogLive">'.$TbMsg['COMM_DEFOGLIVE'].'</option>';
-$num=0;
-
-// Apertura y lectura de fichero
-$file = fopen("/opt/opengnsys/www/tmp/ogcliordenador.txt", "r") or exit("Unable to open file!");
-//Output a line of the file until the end is reached
-while(!feof($file))
-{
-	$oglive=fgets($file);
-	if (ereg("ogLive",$oglive)){
-		$oglive=substr($oglive,1);
-		$oglive=trim($oglive);
-		//echo '<option value="'.$oglilve.'">'.$oglive.'</option>';
-		$Selectcli="";
-		$Selectcli.= '<option value="'.$oglive.'"';
-		If ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
-		$Selectcli.= '>'.$oglive.'</OPTION>';
-		echo $Selectcli;
+if ($opcion==$op_eliminacion){
+	echo '<td colspan="3">'.$bdogLive.'</td>';
+}else{
+	exec("bash /opt/opengnsys/bin/oglivecli list", $listogcli);
+	echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250>'."\n";
+	echo '<option value="ogLive">'.$TbMsg['COMM_DEFOGLIVE'].'</option>';
+	foreach ($listogcli as $oglive) {
+		if (preg_match("/ogLive/",$oglive)){
+			$oglive=substr($oglive,1);
+			$oglive=trim($oglive);
+			$Selectcli = '<option value="'.$oglive.'"';
+			If ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
+			$Selectcli.= '>'.$oglive.'</OPTION>';
+			echo $Selectcli;
+		}
 	}
-$num++;
+	echo '      </select>'."\n";
 }
-fclose($file);
-/////////////////////////////////
-echo '      </select>'."\n";
-				}
 ?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
