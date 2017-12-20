@@ -215,8 +215,6 @@ $app->post('/ogagent/loggedout',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
-		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
-		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
 		// Check sender agent type and IP address consistency (same as parameter value).
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -242,7 +240,7 @@ EOD;
 			$rs->Cerrar();
 			if (!is_null($id)) {
 				// Log activity, respond to client and continue processing.
-				writeLog("User logged out: ip=$ip, user=$user, os=$osType:$osVersion.");
+				writeLog("User logged out: ip=$ip, user=$user.");
 				$response = "";
 				jsonResponseNow(200, $response);
 			} else {

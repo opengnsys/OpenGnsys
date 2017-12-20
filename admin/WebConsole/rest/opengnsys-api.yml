@@ -1117,6 +1117,12 @@ paths:
                 type: string
               user:
                 type: string
+              language:
+                type: string
+              ostype:
+                type: string
+              osversion:
+                type: string
       responses:
         "200":
           description: Successful operation
