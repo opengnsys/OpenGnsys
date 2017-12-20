@@ -668,7 +668,7 @@ function createDirs()
 	local dir
 
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
-	mkdir -p ${INSTALL_TARGET}/{client,images/group}
+	mkdir -p ${INSTALL_TARGET}/{client,images/groups}
 	mkdir -p ${INSTALL_TARGET}/log/clients
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	# Detectar directorio de instalación de TFTP.

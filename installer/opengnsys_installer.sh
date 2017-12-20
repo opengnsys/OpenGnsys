@@ -1209,7 +1209,7 @@ function createDirs()
 	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
-	mkdir -p $path_opengnsys_base/images/group
+	mkdir -p $path_opengnsys_base/images/groups
 	mkdir -p $TFTPCFGDIR
 	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
 	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
