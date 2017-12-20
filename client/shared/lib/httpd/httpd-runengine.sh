@@ -1,3 +1,4 @@
+#!/bin/bash
 # Exportar parámetros del kernel.
 
 for i in $(cat /proc/cmdline); do

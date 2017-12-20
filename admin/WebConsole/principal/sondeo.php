@@ -51,6 +51,7 @@
 	//________________________________________________________________________________________________________
 	$resul=false;
 	$trama="";
+	$trama_notificacion="";
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
 	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 		$parametros="nfn=".$funcion.chr(13);
