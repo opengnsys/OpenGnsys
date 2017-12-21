@@ -124,7 +124,7 @@ function PulsaEnter(oEvento){
 // Añadir versión y URL al proyecto.
 $versionfile="../doc/VERSION.txt";
 if (file_exists ($versionfile)) {
-	echo '<span><a href="http://opengnsys.es/">';
+	echo '<span><a href="https://opengnsys.es/">';
 	include ($versionfile);
 	echo '</a></span>';
 }

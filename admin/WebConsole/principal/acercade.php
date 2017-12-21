@@ -123,7 +123,7 @@ fclose($crearficheroinicio);
 
 <p><?php echo $TbMsg["DESCRIPTION"] ?> </p>
 
-<p><?php echo $TbMsg["LICENSE"] ?> <a href="http://www.gnu.org/licenses/gpl.html"  target="_blank" ><img alt="GPL v3"  src="../images/gplv3-88x31.png" height="20em" /></a></p>
+<p><?php echo $TbMsg["LICENSE"] ?> <a href="https://www.gnu.org/licenses/gpl.html"  target="_blank" ><img alt="GPL v3"  src="../images/gplv3-88x31.png" height="20em" /></a></p>
 
 <p><?php
  if (file_exists ($changelogfile)){ 
@@ -134,7 +134,7 @@ fclose($crearficheroinicio);
 
 <p><?php echo "<strong><a href='../api/userManual/Inicio.php' target='_blank'>".$TbMsg["MANUAL"]." (v1.0.6)</a></strong>";?></p>
 
-<p><strong><?php echo $TbMsg["LINK"]; ?> <a href="http://opengnsys.es"  target="_blank" >opengnsys.es</a><strong></p>
+<p><strong><?php echo $TbMsg["LINK"]; ?> <a href="https://opengnsys.es"  target="_blank" >opengnsys.es</a><strong></p>
 
 
 

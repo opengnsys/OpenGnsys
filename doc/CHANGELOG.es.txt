@@ -13,6 +13,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #678	Unidades organizativas con directorio de imágenes separado.
 #716	Revisión ogCleanLinuxDevices
 #722	Multicast entre subredes
+#726	Reducir el registro de errores y avisos en algunas operaciones 
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
 #731	Soporte para cualquier versión de Windows
 #740	Clonar disco completo en modo "raw"
@@ -51,6 +52,8 @@ Tickets resueltos en módulo OpenGnsys Server:
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)
 #701	torrent-creator falla si el fichero de imagen a procesar no es válido
+#743	Funcion en el webservice API REST para wakeonlan 
+#810	API REST de respositorio para listado de imágenes 
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #372	Comandos y asistentes deberían limitar equipos de operación dentro de ámbito
@@ -86,6 +89,8 @@ Tickets resueltos en módulo OpenGnsys Installer:
 
 Tickets genéricos resueltos:
 #679	Varios repositorios para un mismo cliente.
+#708	Crear API REST para integración de OpenGnsys con UDS
+#718	Nuevo agente modular con comunicaciones REST
 #739	Estandarizar entornos virtuales de desarrollo con Vagrant
 #768	Ofrecer diferentes ogLive a los clientes (tarea)
 
