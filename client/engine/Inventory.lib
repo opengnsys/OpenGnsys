@@ -291,15 +291,18 @@ lshw | awk 'BEGIN {type="mod";}
        /clock:/   {clock=$2;}
        /slot:/    {sub(/ *slot: */,"");     slot=$0;}
        /\*-/      {if (type=="mem"){
-                     if (size!="")
-                       print type"="vend,prod,size,clock" ("slot")";
+                     if (size!=""){
+                       numbank++;
+                       print type"="vend,prod,size,clock" ("slot")";}
                    }else{
-                     if (type!="" && prod!=""){
-                       if (prod=="v."vers)
-                         vers="";
-                       print type"="vend,prod,size,vers;} }
-                   if (type=="totalmem") {
-                        totalmemory="mem="size;
+                     if (type=="totalmem"){
+                       if (size!=""){
+                          totalmemory="mem="size;}
+                     }else{
+                       if (type!="" && prod!=""){
+                         if (prod=="v."vers)
+                           vers="";
+                         print type"="vend,prod,size,vers;} }
                    }
                    type=prod=vend=vers=size=clock=slot="";}
        $1~/-core/    {type="boa";}
@@ -319,7 +322,7 @@ lshw | awk 'BEGIN {type="mod";}
        $1~/-serial/  {type="bus";}
        END           {if (type!="" && prod!="")
                         print type"="vend,prod,size,vers;
-                      if ( length(numbank) == 0 && length(totalmemory) >=4 )
+                      if (length(numbank)==0 && length(totalmemory)>=4)
                         print totalmemory; }
       '
 # */ (comentario para Doxygen)

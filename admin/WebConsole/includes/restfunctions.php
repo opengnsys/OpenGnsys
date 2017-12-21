@@ -7,7 +7,7 @@
  * @warning  Default options: does not verifying certificate, connection timeout 200 ms.
  * @Date     2015-10-14
  */
-function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false, CURLOPT_TIMEOUT_MS => 200)) {
+function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false, CURLOPT_TIMEOUT_MS => 500)) {
  
   // array of curl handles
   $curly = array();
