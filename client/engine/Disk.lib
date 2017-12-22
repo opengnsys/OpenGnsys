@@ -1158,6 +1158,13 @@ function ogListPrimaryPartitions ()
 # Variables locales.
 local PTTYPE PARTS
 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1  =>  NTFS:10000000 EXT3:5000000 EXTENDED:1000000"
+    return
+fi
+
 PTTYPE=$(ogGetPartitionTableType $1) || return $?
 PARTS=$(ogListPartitions "$@") || return $?
 case "$PTTYPE" in
@@ -1178,6 +1185,12 @@ function ogListLogicalPartitions ()
 # Variables locales.
 local PTTYPE PARTS
 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1  =>  LINUX-SWAP:999998"
+    return
+fi
 PTTYPE=$(ogGetPartitionTableType $1) || return $?
 [ "$PTTYPE" == "MSDOS" ] || ogRaiseError $OG_ERR_PARTITION "" || return $?
 PARTS=$(ogListPartitions "$@") || return $?

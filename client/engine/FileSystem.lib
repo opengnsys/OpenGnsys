@@ -800,11 +800,26 @@ echo "$MNTDIR"
 }
 
 
-#####  PRUEBAS
-# Montar CDROM
+#/**
+#         ogMountCdrom
+#@brief   Monta dispositivo óptico por defecto
+#@return  Punto de montaje
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de particion desconocido o no se puede montar.
+#@version 
+#@author  
+#@date    
+#*/ ##
 function ogMountCdrom ()
 {
 local DEV MNTDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+# Error si se reciben parámetros.
+[ $# == 0 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 DEV="/dev/cdrom"            # Por defecto
 MNTDIR=$(mount | awk -v D=$DEV '{if ($1==D) {print $3}}')
 if [ -z "$MNTDIR" ]; then

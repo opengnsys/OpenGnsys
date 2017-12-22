@@ -1091,6 +1091,12 @@ MENUENTRY="menuentry "OpenGnsys"  --class opengnsys --class gnu --class os { \n 
 #@see ogBootLoaderHidePartitions
 #*/
 function ogGrubHidePartitions {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+               "$FUNCNAME 1 6"
+        return
+    fi
     ogBootLoaderHidePartitions $@
     return $?
 }
@@ -1100,6 +1106,12 @@ function ogGrubHidePartitions {
 #@see ogBootLoaderHidePartitions
 #*/
 function ogBurgHidePartitions {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+               "$FUNCNAME 1 6"
+        return
+    fi
     ogBootLoaderHidePartitions $@
     return $?
 }
@@ -1122,16 +1134,15 @@ function ogBurgHidePartitions {
 function ogBootLoaderHidePartitions {
     local FUNC DIRMOUNT GFCFILE PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
 
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$MSG_SEE ogGrubHidePartitions ogBurgHidePartitions"
+        return
+    fi
+
     # Nombre de la función que llama a esta.
     FUNC="${FUNCNAME[@]:1}"
     FUNC="${FUNC%%\ *}"
-
-    # Si se solicita, mostrar ayuda.
-    if [ "$*" == "help" ]; then
-        ogHelp  "$FUNC" "$FUNC int_ndisk int_npartition" \
-                "$FUNC 1 6"
-        return
-    fi
 
     # Error si no se reciben 2 parámetros.
     [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
@@ -1193,6 +1204,12 @@ function ogBootLoaderHidePartitions {
 #@see ogBootLoaderDeleteEntry
 #*/
 function ogGrubDeleteEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
+                "$FUNCNAME 1 6 2"
+        return
+    fi
     ogBootLoaderDeleteEntry $@
     return $?
 }
@@ -1202,6 +1219,12 @@ function ogGrubDeleteEntry {
 #@see ogBootLoaderDeleteEntry
 #*/
 function ogBurgDeleteEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
+                "$FUNCNAME 1 6 2"
+        return
+    fi
     ogBootLoaderDeleteEntry $@
     return $?
 }
@@ -1224,6 +1247,12 @@ function ogBurgDeleteEntry {
 function ogBootLoaderDeleteEntry {
     local FUNC DIRMOUNT CFGFILE DEVICE MENUENTRY DELETEENTRY ENDENTRY ENTRY
 
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$MSG_SEE ogBurgDeleteEntry ogGrubDeleteEntry"
+        return
+    fi
+
     # Nombre de la función que llama a esta.
     FUNC="${FUNCNAME[@]:1}"
     FUNC="${FUNC%%\ *}"
@@ -1243,13 +1272,6 @@ function ogBootLoaderDeleteEntry {
             return $?
             ;;
     esac
-
-    # Si se solicita, mostrar ayuda.
-    if [ "$*" == "help" ]; then
-        ogHelp  "$FUNC" "$FUNC int_ndisk int_npartition int_npartition_delete" \
-                "$FUNC 1 6 2"
-        return
-    fi
 
     # Error si no se reciben 3 parámetros.
     [ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNC num_disk num_part"; echo $?)
@@ -1540,7 +1562,7 @@ BURGCFG=$PART/boot/burg/burg.cfg
 [ -f $BURGCFG ] || ogRaiseError $OG_ERR_NOTFOUND "$BURGCFG" || return $?
 
 # Detectamos cual es la entrada de ogLive
-NUMENTRY=$(grep ^menuentry burg.cfg| grep -n "OpenGnsys Live"|cut -d: -f1)
+NUMENTRY=$(grep ^menuentry $BURGCFG| grep -n "OpenGnsys Live"|cut -d: -f1)
 
 # Si no existe entrada de ogLive nos salimos
 [ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $BURGCFG" || return $?)

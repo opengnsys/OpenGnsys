@@ -59,6 +59,11 @@ esac
 #*/ ##
 function ogInstallMiniSetup ()
 {
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogInstallFirstBoot ogInstallRunonce"
+    return
+fi
 case $# in
     3)  # Ejecución en el primer arranque de la máquina.
         ogInstallFirstBoot "$@" ;;
@@ -347,7 +352,7 @@ sed -i "0,/remote=/ s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys/rest/,
 
 #/**
 #         ogInstallLaunchDaemon int_ndisk int_nfilesys str_filename
-#@brief   Instala archivo que se ejecutará en el arranque de Mac OS.
+#@brief   Instala archivo que se ejecutará en el arranque de macOS.
 #@param   int_ndisk         nº de orden del disco
 #@param   int_nfilesys      nº de orden del sistema de archivos
 #@param   str_filename      nombre del script
@@ -546,6 +551,7 @@ local MNTDIR CLIENTFILE i DIR WINDIR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_filename" \
+           "$FUNCNAME 1 1 filename.cmd" 
     return
 fi
 
@@ -628,6 +634,7 @@ local MNTDIR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_filename" \
+           "$FUNCNAME 1 1 filename.cmd" 
     return
 fi
 
