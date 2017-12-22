@@ -234,7 +234,7 @@ local DISK PROGRAM IMGDIR IMGFILE IMGTYPE ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_repo path_image" \
            "$FUNCNAME 1 REPO /disk1"
     return
 fi
@@ -324,8 +324,8 @@ local PART PROGRAM IMGDIR IMGFILE IMGTYPE ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart path_dir str_image" \
-           "$FUNCNAME 1 1 REPO /aula1/winxp"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart str_repo path_image" \
+           "$FUNCNAME 1 1 REPO /aula1/win7"
     return
 fi
 # Error si no se reciben entre 4 y 6 parámetros.
@@ -397,7 +397,7 @@ function ogCreateMbrImage ()
 local DISK IMGDIR IMGFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_repo path_image" \
            "$FUNCNAME 1 REPO /aula1/mbr"
     return
 fi
@@ -435,7 +435,7 @@ function ogCreateBootLoaderImage ()
 local DISK IMGDIR IMGFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_repo path_image" \
            "$FUNCNAME 1 REPO /aula1/mbr"
     return
 fi
@@ -479,7 +479,7 @@ local IMGTYPE IMGDIR IMGFILE IMGEXT IMGSIZE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part str_repo str_imgname [monolit|sync|diff]" \
+    ogHelp "$FUNCNAME" "$FUNCNAME num_disk num_part str_repo path_imgname [monolit|sync|diff]" \
            "if $FUNCNAME 1 2 REPO Windows10 sync ; then ...; fi" \
            "if $FUNCNAME 1 6 Ubuntu16 CACHE ; then ...; fi" 
     return
@@ -578,8 +578,8 @@ function ogIsImageLocked ()
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
-           "if $FUNCNAME /opt/opengnsys/images/aula1/winxp.img; then ...; fi" \
-           "if $FUNCNAME REPO /aula1/winxp.img; then ...; fi"
+           "if $FUNCNAME /opt/opengnsys/images/aula1/win7.img; then ...; fi" \
+           "if $FUNCNAME REPO /aula1/win7.img; then ...; fi"
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
@@ -611,8 +611,8 @@ local IMGDIR
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
-           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
-           "$FUNCNAME REPO /aula1/winxp.img"
+           "$FUNCNAME /opt/opengnsys/images/aula1/win7.img" \
+           "$FUNCNAME REPO /aula1/win7.img"
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
@@ -650,8 +650,8 @@ local DISK DISKSIZE IMGFILE IMGTYPE IMGSIZE PROGRAM ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
-           "$FUNCNAME REPO /aula1/winxp 1"
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image int_ndisk" \
+           "$FUNCNAME REPO /aula1/win7 1"
     return
 fi
 # Error si no se reciben 4 parámetros.
@@ -736,8 +736,8 @@ local PART PARTSIZE IMGFILE IMGTYPE IMGSIZE FSTYPE PROGRAM ERRCODE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk int_npart" \
-           "$FUNCNAME REPO /aula1/winxp 1 1"
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image int_ndisk int_npart" \
+           "$FUNCNAME REPO /aula1/win7 1 1"
     return
 fi
 # Error si no se reciben 4 parámetros.
@@ -816,7 +816,7 @@ function ogRestoreMbrImage ()
 local DISK IMGFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image int_ndisk" \
            "$FUNCNAME REPO /aula1/mbr 1"
     return
 fi
@@ -852,7 +852,7 @@ function ogRestoreBootLoaderImage ()
 local DISK IMGFILE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image int_ndisk" \
            "$FUNCNAME REPO /aula1/mbr 1"
     return
 fi
@@ -885,8 +885,8 @@ function ogUnlockImage ()
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [str_repo] path_image" \
-           "$FUNCNAME /opt/opengnsys/images/aula1/winxp.img" \
-           "$FUNCNAME REPO /aula1/winxp.img"
+           "$FUNCNAME /opt/opengnsys/images/aula1/win7.img" \
+           "$FUNCNAME REPO /aula1/win7.img"
     return
 fi
 # Error si no se reciben 1 o 2 parámetros.
@@ -918,12 +918,12 @@ function ogGetImageInfo ()
 {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME  filename " \
-           "$FUNCNAME  /opt/opengnsys/images/prueba.img "
+    ogHelp "$FUNCNAME" "$FUNCNAME path_filename" \
+           "$FUNCNAME /opt/opengnsys/images/prueba.img  ==>  PARTCLONE:LZOP:NTFS:5642158"
     return
 fi
 
-# Error si no se reciben 1 parámetros.
+# Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 #comprobando que el parametro uno es un file.
@@ -1002,33 +1002,57 @@ else
 fi
 }
 
+
 function ogGetImageProgram ()
 {
 local IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image" \
+           "$FUNCNAME REPO prueba  ==>  PARTCLONE"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 ogGetImageInfo $IMGFILE | awk -F: '{print $1}'
-
 }
+
 
 function ogGetImageCompressor ()
 {
 local IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image" \
+           "$FUNCNAME REPO prueba  ==>  LZOP"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 ogGetImageInfo $IMGFILE | awk -F: '{print $2}'
 }
 
+
 function ogGetImageType ()
 {
 local IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image" \
+           "$FUNCNAME REPO prueba  ==>  NTFS"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
-#partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
-#        awk '/^Filesystem/ {sub(/\.\.+/," "); sub(/fs$/,""); print toupper($2);}'
 ogGetImageInfo $IMGFILE | awk -F: '{print $3}'
-
 }
+
 
 function ogGetImageSize ()
 {
@@ -1037,8 +1061,8 @@ local IMGFILE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME REPO|CACHE /str_image" \
-           "$FUNCNAME REPO /aula1/winxp  ==>  5642158"
+    ogHelp "$FUNCNAME" "$FUNCNAME str repo path_image" \
+           "$FUNCNAME REPO prueba  ==>  5642158"
     return
 fi
 # Error si no se reciben 2 parámetros.
@@ -1048,8 +1072,6 @@ IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 # Devuelve el tamaño de la imagen en KB.
-#partimage -B gui=no imginfo "$IMGFILE" 2>&1 | \
-#        awk '/Partition size/ {sub(/\.\.+/," "); printf "%d\n",$3*1024*1024;}'
 ogGetImageInfo $IMGFILE | awk -F: '{print $4}'
 }
 

@@ -361,6 +361,14 @@ cd /
 #*/
 function ogRestoreAclImage () {
 local PART IMGACL
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+                "$FUNCNAME num_disk num_part" \
+                "$FUNCNAME 1 1"
+    return
+fi
+
 PART=$(ogDiskToDev "$1" "$2") || return $?
 IMGACL="ogimg.acl"
 
