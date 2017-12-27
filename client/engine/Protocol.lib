@@ -784,11 +784,19 @@ fi
 function ogMcastRequest {
 # Variables locales
 local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT OGUNIT
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_filename str_mcastoptions"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ "$#" == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
 OGUNIT="$(df|awk '/ogimages/ {print $1}'|cut -d/ -f5)/"
 FILE="$OGUNIT$1"
 PROTOOPT="$2"
 
-#TODO AYUDA
 #TODO: CONTROL PARAMETROS
 
 PORT=$(echo $2 | cut -f1 -d":")

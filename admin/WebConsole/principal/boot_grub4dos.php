@@ -138,7 +138,6 @@ if (empty($modo))
 
 <input type="hidden" name="listOfItems" value="">
 <?php
-echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
 ?>
 <!-- primer file, nombre de las equipos por pxe hace falta  <td>  </td>-->
 <td width="80"> 
@@ -169,7 +168,6 @@ if (!empty($_SESSION["widcentro"]))
     $desconocido="00unknown";
 //
 
-    echo $estado;
 //mostrar los datos
 for($i=0; $i<count($pn); $i++)
 	{//for

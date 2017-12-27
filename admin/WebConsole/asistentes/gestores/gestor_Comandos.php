@@ -23,6 +23,7 @@ include_once("../includes/capturaacciones.php");
  // Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
+$sw_ejprg="";
 
 $sw_mkprocedimiento="";
 $nombreprocedimiento="";

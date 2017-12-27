@@ -190,6 +190,12 @@ function ogRaiseError () {
 # Variables locales
 local CONT=1 LOGS MSG CODE FUNCS
 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_logfile ...] int_errorcode str_errormessage"
+    return
+fi
+
 # Selección de rgistros de incidencias.
 while [ $CONT ]; do
     case "${1,,}" in
@@ -268,6 +274,12 @@ function ogIsRepoLocked ()
 {
 # Variables locales.
 local f FILES
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" "if $FUNCNAME; then ...; fi"
+    return
+fi
 
 # No hacer nada, si no está definido el punto de montaje del repositorio.
 [ -z "$OGIMG" ] && return 1
