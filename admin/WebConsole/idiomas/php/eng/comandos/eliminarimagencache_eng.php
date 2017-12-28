@@ -5,12 +5,12 @@
 //	Idioma: English
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
-	$TbMsg[0]='Generation of software profiles';
-	$TbMsg[1]='Computer features';
-	$TbMsg[2]='Name';
-	$TbMsg[3]='IP Address';
-	$TbMsg[4]='MAC Address';
-	$TbMsg[5]='Image Delete Cache Client';
+	$TbMsg[0]='Organizational Unit';
+	$TbMsg[1]='Group of labs';
+	$TbMsg[2]='Lab';
+	$TbMsg[3]='Group of comuters';
+	$TbMsg[4]='Computer';
+	$TbMsg[5]='Delete Images from Clients Cache';
 	$TbMsg[6]='Environment';
 	$TbMsg[7]='Available Images';
 	$TbMsg[8]='Par';
