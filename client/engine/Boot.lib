@@ -217,6 +217,7 @@ awk 'BEGIN {cont=-1;}
                                    if (def ~ /saved_entry/) def=0;
                                  }
      $1~/^(title|menuentry)$/ {cont++}
+     $1~/^set$/ && $2~/^root=.\(hd'$[1-1]',(msdos|gpt)'$2'\).$/ { if (def==0) def=cont; }
      $1~/^(kernel|linux(16|efi)?)$/ { if (def==cont) {
                                        kern=$2;
                                        sub($1,""); sub($1,""); sub(/^[ \t]*/,""); app=$0
