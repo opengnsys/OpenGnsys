@@ -669,10 +669,10 @@ function cargaTamano($cmd,$idambito,$ambito)
 	global $AMBITO_ORDENADORES;
 	
 	$cmd->texto="SELECT	COUNT(*) AS con,
-			   	ordenadores_particiones.tamano,
-			   	ordenadores_particiones.uso AS uso,
-				ordenadores_particiones.numdisk,
-				ordenadores_particiones.numpar,
+			   	ANY_VALUE(ordenadores_particiones.tamano) AS tamano,
+			   	ANY_VALUE(ordenadores_particiones.uso) AS uso,
+				ANY_VALUE(ordenadores_particiones.numdisk) AS numdisk,
+				ANY_VALUE(ordenadores_particiones.numpar) AS numpart,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
 					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
 			   FROM ordenadores

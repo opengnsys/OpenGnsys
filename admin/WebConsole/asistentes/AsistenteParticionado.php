@@ -102,7 +102,7 @@ function doOnload(){
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[1].'
 			: '.$textambito.'</U></span>&nbsp;&nbsp;</span></p>';
 
-	$sws=0x11111;	// Mostrar todas las configuraciones diferentes.
+	$sws=bindec('0x11111');	// Mostrar todas las configuraciones diferentes.
 	$configuraciones = pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
