@@ -37,7 +37,7 @@ if [ -z "$(getent passwd "$APACHE_USER" 2>/dev/null)" -o -z "$(getent group "$AP
 	exit 1
 fi
 
-chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/{log/clients,images/group}
+chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/{log/clients,images/groups}
 find $OPENGNSYS_DIR/log/clients -type f -exec chmod 664 {} \;
 find $OPENGNSYS_DIR/images -maxdepth 1 -exec chown :$OPENGNSYS_USER {} \;
 find $OPENGNSYS_DIR/images -maxdepth 1 -type d -exec chmod 775 {} \;
