@@ -1201,14 +1201,14 @@ function ogBootLoaderHidePartitions {
 }
 
 #/**
-# ogGrubDeleteEntry num_disk num_part num_part_delete
+# ogGrubDeleteEntry num_disk num_part num_disk_delete num_part_delete
 #@see ogBootLoaderDeleteEntry
 #*/
 function ogGrubDeleteEntry {
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
-                "$FUNCNAME 1 6 2"
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_delete int_npartition_delete" \
+                "$FUNCNAME 1 6 2 1"
         return
     fi
     ogBootLoaderDeleteEntry $@
@@ -1216,14 +1216,14 @@ function ogGrubDeleteEntry {
 }
 
 #/**
-# ogBurgDeleteEntry num_disk num_part num_part_delete
+# ogBurgDeleteEntry num_disk num_part num_disk_delete num_part_delete
 #@see ogBootLoaderDeleteEntry
 #*/
 function ogBurgDeleteEntry {
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
-                "$FUNCNAME 1 6 2"
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_delete int_npartition_delete" \
+                "$FUNCNAME 1 6 2 1"
         return
     fi
     ogBootLoaderDeleteEntry $@
@@ -1235,7 +1235,8 @@ function ogBurgDeleteEntry {
 #@brief Borra en el grub las entradas para el inicio en una particion.
 #@param 1 Numero de disco donde esta el grub
 #@param 2 Numero de particion donde esta el grub
-#@param 3 Numero de la particion de la que borramos las entradas
+#@param 3 Numero del disco del que borramos las entradas
+#@param 4 Numero de la particion de la que borramos las entradas
 #@note Tiene que ser llamada desde ogGrubDeleteEntry o ogBurgDeleteEntry
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Use ogGrubDeleteEntry or ogBurgDeleteEntry.
@@ -1253,6 +1254,10 @@ function ogBootLoaderDeleteEntry {
         ogHelp  "$FUNCNAME" "$MSG_SEE ogBurgDeleteEntry ogGrubDeleteEntry"
         return
     fi
+
+    # Si el número de parámetros menos que 4 nos salimos
+    [ $# -lt 4 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part num_disk_delete num_part_delete"; echo $?)
+ 
 
     # Nombre de la función que llama a esta.
     FUNC="${FUNCNAME[@]:1}"
@@ -1274,23 +1279,20 @@ function ogBootLoaderDeleteEntry {
             ;;
     esac
 
-    # Error si no se reciben 3 parámetros.
-    [ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNC num_disk num_part"; echo $?)
-
     # Dispositivo
-    DEVICE=$(ogDiskToDev $1)
+    DEVICE=$(ogDiskToDev $3 $4)
 
     # Error si no existe archivo del grub)
-    [ -r $CFGFILE ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE"; echo $?)
+    [ -r $CFGFILE ] || ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE" || return $?
 
-    # Numero de linea de cada entrada, de mayor a menor.
-    MENUENTRY="$(grep -n -e menuentry.*$DEVICE $CFGFILE| cut -d: -f1 | sed '1!G;h;$!d' )"
+    # Numero de linea de cada entrada.
+    MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | sed '1!G;h;$!d' )"
 
     # Entradas que hay que borrar.
-    DELETEENTRY=$(grep -n menuentry.*$DEVICE$3 $CFGFILE| cut -d: -f1)
+    DELETEENTRY=$(grep -n menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
 
     # Si no hay entradas para borrar me salgo con aviso
-    [ "$DELETEENTRY" == "" ] && ogEcho session log warning "No menuentry $DEVICE$3" && return
+    [ "$DELETEENTRY" != "" ] || ogRaiseError log session $OG_ERR_NOTFOUND "Menuentry $DEVICE" || return $?
 
     # Recorremos el fichero del final hacia el principio.
     ENDENTRY="$(wc -l $CFGFILE|cut  -d" " -f1)"
@@ -1482,52 +1484,145 @@ burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
 }
 
 #/**
-# ogBurgDefaultEntry   int_disk_GRUBCFG  int_partition_GRUBCFG
+# ogGrubDefaultEntry int_disk_GRUGCFG  int_partition_GRUBCFG int_disk_default_entry int_npartition_default_entry
+#@see ogBootLoaderDefaultEntry
+#*/
+function ogGrubDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_default_entry int_npartition_default_entry" \
+               "$FUNCNAME 1 6 1 1"
+        return
+    fi
+    ogBootLoaderDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBurgDefaultEntry int_disk_BURGCFG  int_partition_BURGCFG int_disk_default_entry int_npartition_default_entry
+#@see ogBootLoaderDefaultEntry
+#*/
+function ogBurgDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_default_entry int_npartition_default_entry" \
+               "$FUNCNAME 1 6 1 1"
+        return
+    fi
+    ogBootLoaderDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBootLoaderDefaultEntry   int_disk_CFG  int_partition_CFG int_disk_default_entry int_npartition_default_entry
 #@brief   Configura la entrada por defecto de Burg
 #@param   int_disk_SecondStage      
 #@param   int_part_SecondStage     
-#@param   int_default_entry
+#@param   int_disk_default_entry
+#@param   int_part_default_entry
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
 #@exception OG_ERR_OUTOFLIMIT Param $3 no es entero.
 #@exception OG_ERR_NOTFOUND   Fichero de configuración no encontrado: burg.cfg.
-#@version 1.1.0 - Primeras pruebas con Burg 
+#@version 1.1.0 - Define la entrada por defecto del Burg
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2017-08-09
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2018-01-04
 #*/ ##
-function ogBurgDefaultEntry {
+function ogBootLoaderDefaultEntry {
 
 # Variables locales.
-local PART BURGCFG
+local PART CFGFILE DEFAULTENTRY MSG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_default_entry  " \
-           "$FUNCNAME 1 1 0 "
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubDefaultEntry ogBurgDefaultEntry"
     return
 fi  
 
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
 # Error si no se reciben 3 parametros.
-[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_default_entry" || return $?
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_disk_default_entry int_partitions_default_entry" || return $?
 
 # Error si no puede montar sistema de archivos.
-PART=$(ogMount $1 $2) || return $?
+DIRMOUNT=$(ogMount $1 $2) || return $?
 
-# Comprobamos que $3 es un número
-[[ $3 =~ ^[0-9]+$ ]] || ogRaiseError $OG_ERR_OUTOFLIMIT "\'$3\' not integer" ||  return $?
+# Comprobamos que exista fichero de configuración
+# La función debe ser llamanda desde ogGrubDefaultEntry or ogBurgDefaultEntry.
+case "$FUNC" in
+    ogGrubDefaultEntry)
+        CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+        ;;
+    ogBurgDefaultEntry)
+        CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubDefaultEntry or ogBurgDefaultEntry."
+        return $?
+        ;;
+esac
 
-# Comprobamos que exista fichero burg.cfg
-BURGCFG=$PART/boot/burg/burg.cfg
-[ -f $BURGCFG ] || ogRaiseError $OG_ERR_NOTFOUND "$BURGCFG" || return $?
+# Error si no existe archivo de configuración
+[ -r $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
 
-sed -i s/"^set default.*$"/"set default=$3"/g $BURGCFG
+# Dispositivo
+DEVICE=$(ogDiskToDev $3 $4)
 
-echo "${MSG_HELP_ogBurgDefaultEntry%%\.}: $@"
+# Número de línea de la entrada por defecto en CFGFILE (primera de la partición).
+DEFAULTENTRY=$(grep -n -m 1 menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
+
+# Si no hay entradas para borrar me salgo con aviso
+[ "$DEFAULTENTRY" != "" ] || ogRaiseError session log $OG_ERR_NOTFOUND "No menuentry $DEVICE" || return $?
+
+# Número de la de linea por defecto en el menú de usuario
+MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | grep -n $DEFAULTENTRY |cut -d: -f1)"
+# Las líneas empiezan a contar desde cero
+let MENUENTRY=$MENUENTRY-1
+
+sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$MENUENTRY\""/g $CFGFILE
+
+MSG="MSG_HELP_$FUNC"
+echo "${!MSG%%\.}: $@"
 }
 
 #/**
-# ogBurgOgliveDefaultEntry 
+# ogGrubOgliveDefaultEntry num_disk num_part
+#@see ogBootLoaderOgliveDefaultEntry
+#*/
+function ogGrubOgliveDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage" \
+               "$FUNCNAME 1 6"
+        return
+    fi
+    ogBootLoaderOgliveDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBurgOgliveDefaultEntry num_disk num_part
+#@see ogBootLoaderOgliveDefaultEntry
+#*/
+function ogBurgOgliveDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage" \
+               "$FUNCNAME 1 6"
+        return
+    fi
+    ogBootLoaderOgliveDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBootLoaderOgliveDefaultEntry 
 #@brief   Configura la entrada de ogLive como la entrada por defecto de Burg.
 #@param   int_disk_SecondStage      
 #@param   int_part_SecondStage     
@@ -1539,38 +1634,57 @@ echo "${MSG_HELP_ogBurgDefaultEntry%%\.}: $@"
 #@version 1.1.0 - Primeras pruebas con Burg 
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2017-08-09
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2018-01-04
 #*/ ##
-function  ogBurgOgliveDefaultEntry {
+function  ogBootLoaderOgliveDefaultEntry {
 
 # Variables locales.
-local PART BURGCFG NUMENTRY
+local FUNC PART CFGFILE NUMENTRY MSG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage" \
-           "$FUNCNAME 1 1"
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubOgliveDefaultEntry ogBurgOgliveDefaultEntry" \
     return
 fi  
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
 
 # Error si no se reciben 2 parametros.
 [ $# -eq 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage" || return $?
 
 # Error si no puede montar sistema de archivos.
 PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubOgliveDefaultEntry or ogBurgOgliveDefaultEntry.
+case "$FUNC" in
+    ogGrubOgliveDefaultEntry)
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"
+        ;;
+    ogBurgOgliveDefaultEntry)
+        CFGFILE="$PART/boot/burg/burg.cfg"
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubOgliveDefaultEntry or ogBurgOgliveDefaultEntry."
+        return $?
+        ;;
+esac
 
-# Comprobamos que exista fichero burg.cfg
-BURGCFG=$PART/boot/burg/burg.cfg
-[ -f $BURGCFG ] || ogRaiseError $OG_ERR_NOTFOUND "$BURGCFG" || return $?
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
 
 # Detectamos cual es la entrada de ogLive
-NUMENTRY=$(grep ^menuentry $BURGCFG| grep -n "OpenGnsys Live"|cut -d: -f1)
+NUMENTRY=$(grep ^menuentry $CFGFILE| grep -n "OpenGnsys Live"|cut -d: -f1)
 
 # Si no existe entrada de ogLive nos salimos
-[ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $BURGCFG" || return $?)
+[ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $CFGFILE" || return $?)
 
 let NUMENTRY=$NUMENTRY-1
-sed -i s/"^set default.*$"/"set default=$NUMENTRY"/g $BURGCFG
+sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$NUMENTRY\""/g $CFGFILE
 
-echo "${MSG_HELP_ogBurgOgliveDefaultEntry%\.}: $@"
+MSG="MSG_HELP_$FUNC"
+echo "${!MSG%%\.}: $@"
 }
 
