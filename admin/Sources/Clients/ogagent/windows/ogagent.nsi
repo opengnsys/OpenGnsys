@@ -3,13 +3,13 @@
 Name "OpenGnsys Agent"
 
 # OpenGnsys Actor version
-!define OGA_VERSION 1.1.0
+!define /file OGA_VERSION "src\VERSION"
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\OGAgent"
 !define VERSION ${OGA_VERSION}.0
 !define COMPANY "OpenGnsys Project"
-!define URL http://opengnsys.es
+!define URL https://opengnsys.es
 
 # MultiUser Symbol Definitions
 !define MULTIUSER_EXECUTIONLEVEL Admin
@@ -20,7 +20,6 @@ Name "OpenGnsys Agent"
 !define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUE "Path"
 
 # MUI Symbol Definitions
-#!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\orange-install.ico"
 !define MUI_ICON "src\img\oga.ico"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_UNICON "src\img\oga.ico"
@@ -110,6 +109,10 @@ Section -post SEC0001
       "1" "7" "1" "$INSTDIR\OGAgentService.exe" "" "" \
       "" "" "" "" ""    
     Pop $0 ; return error(1)/success(0)
+    # Disable fast boot on Windows 10, if registry key exists.
+    ReadRegDWORD $0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Power" HiberbootEnabled
+    IfErrors 0 +2
+    WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Power" HiberbootEnabled 0
     # Install service
     nsExec::Exec /OEM "$INSTDIR\OGAgentService.exe --startup auto install" # Add service after installation
     # Update recovery options
@@ -156,8 +159,9 @@ Section -un.post UNSEC0001
     SetShellVarContext all
     RmDir /REBOOTOK $INSTDIR
     SetRebootFlag true
-    MessageBox MB_OK|MB_USERICON "Your system needs to reboot to complete uninstallation."
-    Reboot # Reboot is needed after uninstalling, so new installs works fine
+    MessageBox MB_YESNO "$(^RebootMessage)" IDNO donotreboot
+        Reboot # Reboot is needed after uninstalling, so new installs works fine
+    donotreboot:
 SectionEnd
 
 # Installer functions
@@ -182,3 +186,7 @@ LangString ^UninstallLink ${LANG_ENGLISH} "Uninstall $(^Name)"
 LangString ^UninstallLink ${LANG_SPANISH} "Desinstalar $(^Name)"
 LangString ^UninstallLink ${LANG_FRENCH} "D�sinstaller $(^Name)"
 LangString ^UninstallLink ${LANG_GERMAN} "deinstallieren $(^Name)"
+LangString ^RebootMessage ${LANG_ENGLISH} "Reboot the system to complete uninstall process?$\nNote: for a new $(^Name) installation, you will need to reboot."
+LangString ^RebootMessage ${LANG_SPANISH} "¿Reiniciar el sistema para completar el proceso?$\nNota: es necesario reiniciar para instalar un nuevo $(^Name)."
+LangString ^RebootMessage ${LANG_FRENCH} "Reboot the system to complete uninstall process?$\nNote: for a new $(^Name) installation, you will ned to reboot."
+LangString ^RebootMessage ${LANG_GERMAN} "Reboot the system to complete uninstall process?$\nNote: for a new $(^Name) installation, you will ned to reboot."

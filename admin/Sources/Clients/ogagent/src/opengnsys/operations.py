@@ -38,7 +38,7 @@ import sys
 if sys.platform == 'win32':
     from .windows.operations import *  # @UnusedWildImport
     osType = 'Windows'
-    osVersion = '.'.join(map(str,getWindowsVersion()[:3]))+' '+getWindowsVersion()[4]
+    osVersion = getWindowsVersion()
 else:
     if sys.platform == 'darwin':
         from .macos.operations import *  # @UnusedWildImport

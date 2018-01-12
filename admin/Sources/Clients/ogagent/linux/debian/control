@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ramón M. Gómez <ramongomez@us.es>
 Build-Depends: debhelper (>= 7), po-debconf
 Standards-Version: 3.9.2
-Homepage: http://www.opengnsys.es
+Homepage: https://opengnsys.es
 
 Package: ogagent
 Section: admin

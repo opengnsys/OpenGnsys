@@ -99,7 +99,18 @@ def getDomainName():
 
 
 def getWindowsVersion():
-    return win32api.GetVersionEx()
+    '''
+    Returns Windows version.
+    '''
+    import _winreg
+    reg = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion')
+    try:
+        data = '{} {}'.format(_winreg.QueryValueEx(reg, 'ProductName')[0], _winreg.QueryValueEx(reg, 'ReleaseId')[0])
+    except Exception:
+        data = '{} {}'.format(_winreg.QueryValueEx(reg, 'ProductName')[0], _winreg.QueryValueEx(reg, 'CurrentBuildNumber')[0])
+    reg.Close()
+    return data
+
 
 EWX_LOGOFF = 0x00000000
 EWX_SHUTDOWN = 0x00000001
@@ -135,6 +146,7 @@ def renameComputer(newName):
         error = getErrorMessage()
         computerName = win32api.GetComputerNameEx(win32con.ComputerNamePhysicalDnsHostname)
         raise Exception('Error renaming computer from {} to {}: {}'.format(computerName, newName, error))
+
 
 NETSETUP_JOIN_DOMAIN = 0x00000001
 NETSETUP_ACCT_CREATE = 0x00000002

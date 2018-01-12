@@ -82,8 +82,8 @@ class OpenGnSysWorker(ServerWorker):
         self.cmd = None
         # Ensure cfg has required configuration variables or an exception will be thrown
         self.REST = REST(self.service.config.get('opengnsys', 'remote'))
-        # Get network interfaces until they are active or timeout (1 minute)
-        for t in range(0, 60):
+        # Get network interfaces until they are active or timeout (5 minutes)
+        for t in range(0, 300):
             try:
                 self.interface = list(operations.getNetworkInfo())[0]  # Get first network interface
             except Exception as e:
