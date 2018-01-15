@@ -1682,7 +1682,7 @@ NUMENTRY=$(grep ^menuentry $CFGFILE| grep -n "OpenGnsys Live"|cut -d: -f1)
 [ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $CFGFILE" || return $?)
 
 let NUMENTRY=$NUMENTRY-1
-sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$NUMENTRY\""/g $CFGFILE
+sed --regexp-extended -i  s/"set default=\"?[0-9]+\"?"/"set default=\"$NUMENTRY\""/g $CFGFILE
 
 MSG="MSG_HELP_$FUNC"
 echo "${!MSG%%\.}: $@"
