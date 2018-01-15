@@ -354,7 +354,7 @@ lshw | awk 'BEGIN {type="mod";}
 function ogListSoftware ()
 {
 # Variables locales.
-local MNTDIR TYPE DPKGDIR RPMDIR PACMANDIR KEYS KEYS32 k PROG VERS
+local MNTDIR TYPE DPKGDIR RPMDIR PACMANDIR k
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -412,24 +412,46 @@ for k in db.keys():
         fi
         ;;
     Windows)        # Software de Windows.
-        # Claves de registro para programas instalados: formato "{clave}".
-        KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
-        KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
-        # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
-        (for k in $KEYS; do
-            PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
-            if [ -n "$PROG" ]; then
-                VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
-                echo "$PROG $VERS"
+        # Comprobar tipo de proceso del registro de Windows.
+        if which hivexregedit &>/dev/null; then
+            # Nuevo proceso más rápido basado en "hivexregedit".
+            local HIVE TMPFILE
+            HIVE=$(ogGetHivePath $MNTDIR software 2>/dev/null)
+            if [ -n "$HIVE" ]; then
+                # Claves de registro para programas instalados.
+                TMPFILE=/tmp/tmp$$
+                trap "rm -f $TMPFILE" 1 2 3 9 15
+                hivexregedit --unsafe-printable-strings --export "$HIVE" '\Microsoft\Windows\CurrentVersion\Uninstall' > $TMPFILE 2>/dev/null
+                hivexregedit --unsafe-printable-strings --export "$HIVE" '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall' >> $TMPFILE 2>/dev/null
+                # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+                awk -F\" '$1~/^\[/ {n=""}
+                          $2~/DisplayName/ {n=$4}
+                          $2~/DisplayVersion/ {print n,$4}
+                         ' $TMPFILE | sort | uniq
+                rm -f $TMPFILE
             fi
-        done
-        for k in $KEYS32; do
-            PROG=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
-            if [ -n "$PROG" ]; then
-                VERS=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
-                echo "$PROG $VERS"
-            fi
-        done) | sort | uniq
+        else
+            # Compatibilidad con clientes ogLive antiguos.
+            local KEYS KEYS32 PROG VERS
+            # Claves de registro para programas instalados: formato "{clave}".
+            KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+            KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
+            # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+            (for k in $KEYS; do
+                PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+                if [ -n "$PROG" ]; then
+                    VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                    echo "$PROG $VERS"
+                fi
+             done
+             for k in $KEYS32; do
+                PROG=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+                if [ -n "$PROG" ]; then
+                    VERS=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                    echo "$PROG $VERS"
+                fi
+             done) | sort | uniq
+        fi
         ;;
     MacOS)          # Software de Mac OS.
         # Listar directorios de aplicaciones e intentar obtener la versión del fichero .plist (tanto original como descomprimido).
