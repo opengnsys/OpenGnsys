@@ -504,7 +504,7 @@ if [ "$IMGTYPE" == "_DIFF_" ]; then
 	SIZEDATA=$(grep -v "\/$" /tmp/ogimg.info | tr '\n' '\0'| du -x -c --files0-from=- 2>/dev/null|tail -n1 |cut -f1)
 	cd /
 else
-	SIZEDATA=$(df -k | grep $MNTDIR | awk '{print $3}')
+	SIZEDATA=$(df -k | grep $MNTDIR\$ | awk '{print $3}')
 fi
 
 #Aplicar factor de compresion
