@@ -672,7 +672,7 @@ function cargaTamano($cmd,$idambito,$ambito)
 			   	ANY_VALUE(ordenadores_particiones.tamano) AS tamano,
 			   	ANY_VALUE(ordenadores_particiones.uso) AS uso,
 				ANY_VALUE(ordenadores_particiones.numdisk) AS numdisk,
-				ANY_VALUE(ordenadores_particiones.numpar) AS numpart,
+				ANY_VALUE(ordenadores_particiones.numpar) AS numpar,
 				GROUP_CONCAT(CAST(ordenadores_particiones.idordenador AS CHAR(11) )
 					ORDER BY ordenadores_particiones.idordenador SEPARATOR ',' ) AS ordenadores
 			   FROM ordenadores
