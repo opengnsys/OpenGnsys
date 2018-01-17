@@ -98,6 +98,12 @@ class OpenGnSysWorker(ServerWorker):
         # Raise error after timeout
         if not self.interface:
             raise e
+        # Delete marking files
+        for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
+            try:
+                os.remove(os.sep + f)
+            except OSError:
+                pass
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Send initalization message
