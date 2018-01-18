@@ -125,7 +125,7 @@ function comprobarDatos(cc)
 	var extsize=0; // Tamaño partición "EXTENDED"
 	var allextsize=0; // Tamaño total de las particiones extendidas.
 
-	var hdsize = document.getElementById("hdsize").value;
+	var hdsize = document.getElementById("hdsize"+cc).value;
 
 	var trCfg = document.getElementById("TR_"+cc); // Recupera primer <TR> de la configuración
 	trCfg=trCfg.nextSibling; // Primera fila de particiones

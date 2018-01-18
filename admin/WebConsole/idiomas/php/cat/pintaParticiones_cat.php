@@ -10,12 +10,17 @@ if(!isset($TbMsg)){
 }
 
 $TbMsg["PARTITION"]='Partici&oacute;n';
+$TbMsg["INSTALLED_OS"]='Sistema Operativo Instalado';
 $TbMsg["INST_SO"]='S.O. Instalado';
 $TbMsg["SIZE_KB"]='Tama&ntilde;o (KB)';
 $TbMsg["PARTITION_TYPE"]='Tipo';
 $TbMsg["IMAGE"]='Imagen';
 $TbMsg["SOFT_PROFILE"]='Perfil Software';
+$TbMsg["FILESYSTEM"]='Sistema de Ficheros';
 $TbMsg["FILESYSTEM_SHORT"]='S.F.';
+
+$TbMsg["REFORMAT"]='Reformatear';
+$TbMsg["REMOVE"]='Eliminar';
 
 $TbMsg["DISK"]='Disco';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
@@ -52,5 +57,6 @@ $TbMsg["SEND"]='Protocolo';
 // AVISOS.
 $TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
 $TbMsg["WARN_DIFFIMAGE"]='Hay una nueva versi&oacute; de la imagen (se muestra la diferencia de revisiones).';
+$TbMsg["WARN_DIFFDISKSIZE"]='ATENCI&Oacute;N: no se pueden particionar grupos de ordenadores con distinto tama&ntilde;o de disco.<br>Marcar la opción de &quot;Desagrupar por tama&ntilde;o de partici&oacute;n&quot; y pulsar &quot;Aceptar&quot; en el men&uacute; superior para aplicar esta operaci&oacute;n adecuadamente.';
 ?>
 

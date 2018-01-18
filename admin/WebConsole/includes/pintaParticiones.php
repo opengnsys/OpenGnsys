@@ -178,7 +178,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 			echo'<td></td>'.chr(13);
 			echo'<td></td>'.chr(13);
 			echo'<td></td>'.chr(13);
-			echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</span></strong>&nbsp;</td>'.chr(13);
+			echo'<td align="right">&nbsp;<strong>'.(isset($disksize[$disk])?$disksize[$disk]:('<em>'.$TbMsg["VARIABLE"].'</em>')).'</span></strong>&nbsp;</td>'.chr(13);
 			// Creamos un campo oculto para guardar información sobre el disco y su tamaño separados por ;
 			echo "<input type='hidden' name='disksize_".$disk."' value='".$disksize[$disk]."'/>\n";
 			echo'<td></td>'.chr(13);
@@ -313,13 +313,13 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 
 	$colums=7;
 	echo '<TR id="TR_'.$cc.'">';
-	echo '<TH align=center><IMG src="../images/iconos/eliminar.gif"></TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[24].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[27].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[22].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[21].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
+	echo '<TH align=center>&nbsp;'.$TbMsg['REMOVE'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['PARTITION'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['PARTITION_TYPE'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['FILESYSTEM'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['SIZE_KB'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['INSTALLED_OS'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['REFORMAT'].'&nbsp;</TH>';	
 	echo '</TR>';
 
 
@@ -358,23 +358,27 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	// Datos del disco
 	$tm=tomaTamano(0,$idordenadores);
 	echo '<tr id="TRIMG_'.$cc.'" align="center">'.
-	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px;  "'.">".$TbMsg["HD"]."</td>".
-     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px; "'."> $tm <input type='hidden' id='hdsize' name='hdsize' style='width:100' value='".$tm."'></td>".
+	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px;  "'.">".$TbMsg["DISK"]."</td>".
+     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px; "> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>"))." <input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100' value='".$tm."'></td>".
 	     "\n<td></td>\n<td></td>\n</tr>";
-	echo '<TR><th colspan='.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></TR>';
+	echo '<tr><th colspan="'.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></tr>';
 	// Mostrar aviso: solo disco 1 con tabla MSDOS.
 	if ($aviso) {
-		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
+		echo '<tr><th colspan="'.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
 	}
 	// Botones de añadir y confirmar.
-	echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
-	echo '	<A href="#add" style="text-decoration:none">
+	if (isset($tm)) {
+		echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
+		echo '	<A href="#add" style="text-decoration:none">
 						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
 						value="'.$k.'" onclick="addParticion(this,'.$cc.')"></A>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<A href="#add" style="text-decoration:none">
 						<IMG border=0 src="../images/boton_aceptar.gif" onclick="Confirmar('.$cc.')"></A></TD>
 					</TR>';
+	} else {
+		echo '<tr><th colspan="'.$colums.'">'.$TbMsg["WARN_DIFFDISKSIZE"].'</th></tr>'."\n";
+	}
 }
 
 /*
