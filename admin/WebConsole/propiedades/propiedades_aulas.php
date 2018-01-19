@@ -72,12 +72,11 @@ if (!$cmd)
 	header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 if  ($opcion!=$op_alta)
 	$resul=TomaPropiedades($cmd,$idaula);
-else
+else{
 	$resul=TomaConfiguracion($cmd);
+	$urlfoto="aula.jpg";} 
 if (!$resul)
 	header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
-else
-	$urlfoto="aula.jpg";
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -111,8 +110,12 @@ function abrir_ventana(URL){
 	
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><?php  echo $opciones[$opcion]?></SPAN></P>
-	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+	<TABLE  align=center border=5 cellPadding=1 cellSpacing=1 class=tabla_datos >	<!-- AGP -->
+<!--------------------------------------------------	AGP	----------------------------------------------------------------->
+		<TR>
+			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TH>
+		</TR>
+<!--------------------------------------------------	AGP	----------------------------------------------------------------->
 		<tr>
 			<th align="center"><?php echo $TbMsg[5]?></th>
 			<?php	if ($opcion==$op_eliminacion){
@@ -380,7 +383,15 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion',330).'</TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------	AGP	------------------------------------------------------------------------------------------------------------->
+</TABLE></br>
+<!-- ###########################################	PROPIEDADES APLICABLES A TODOS LOS ORDENADORES	#################################################################################-->
+
+<TABLE  align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
+		<TR>
+			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[1888]?>&nbsp;</TH>
+		</TR>
+<!--------------------------------------------------------------	AGP	------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion)

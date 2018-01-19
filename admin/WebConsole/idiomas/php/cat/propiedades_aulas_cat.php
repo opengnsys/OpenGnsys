@@ -24,6 +24,7 @@ $TbMsg[15]="Hora fins:";
 $TbMsg[16]="Repositori";
 $TbMsg[17]="Perfil Hardware";
 $TbMsg[18]="Propietats per tots els ordinadors";
+$TbMsg[1888]="Modificador massiu de propietats d'ordinadors";
 $TbMsg[19]="Grandària caché (KB)";
 $TbMsg[20]="Autoexec";
 $TbMsg[21]="Ordinadors";

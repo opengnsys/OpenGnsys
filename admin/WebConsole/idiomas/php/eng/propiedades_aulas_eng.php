@@ -24,6 +24,7 @@ $TbMsg[15]="End reserves";
 $TbMsg[16]="Repository";
 $TbMsg[17]="Hardware profile";
 $TbMsg[18]="Properties for all computers in this lab";
+$TbMsg[1888]="Massive modifier of computer properties";
 $TbMsg[19]="Cache size (KB)";
 $TbMsg[20]="Autoexec";
 $TbMsg[21]="Computers";
