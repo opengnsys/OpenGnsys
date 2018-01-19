@@ -266,8 +266,6 @@ function Gestiona(){
 
                         // Si no hay datos duplicados insertamos el ordenador;
                         if ( $datosduplicados == "" ) {
-			     // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
-			     createBootMode ($cmd, "", $idordenador, $idioma); 
 			     //Insertar fotoord con Values @fotoordenador
 			     $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,ip,mac,idperfilhard,idrepositorio,oglivedir,
 			     idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@ip,@mac,@idperfilhard,@idrepositorio,@oglivedir,
@@ -275,12 +273,15 @@ function Gestiona(){
                         }
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
-				$idordenador=$cmd->Autonumerico();
-				$arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
-				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
-				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
-				$tablanodo=$arbol->CreaArbolVistaXML();
+			    $idordenador=$cmd->Autonumerico();
+			    // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
+			    createBootMode ($cmd, "", $idordenador, $idioma); 
+			    // Insertar datos en el árbol de configuración.
+			    $arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
+			    $baseurlimg="../images/signos"; // Url de las imagenes de signo
+			    $clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+			    $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
+			    $tablanodo=$arbol->CreaArbolVistaXML();
 			}
 			break;
 		case $op_modificacion:
