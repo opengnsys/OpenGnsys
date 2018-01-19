@@ -167,7 +167,6 @@ function codeParticionadoMSDOS (form) {
 				switch(partTypeCustom.value) {
 				    case "EXTENDED":
 					extended=true;
-					console.log("extended");
 					break;
 				    case "LINUX-SWAP":
 					swapPart.push(nPart);
@@ -179,7 +178,6 @@ function codeParticionadoMSDOS (form) {
 				switch(partType.value) {
 				    case "EXTENDED":
 					extended=true;
-					console.log("extended");
 					break;
 				    case "LINUX-SWAP":
 					swapPart.push(nPart);
