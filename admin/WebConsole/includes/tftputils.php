@@ -185,10 +185,11 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 function deleteBootFile ($mac) {	
 
 	// Obtener nombre de fichero a partir de dirección MAC.
-	$pxedir="/opt/opengnsys/tftpboot/menu.lst";
+	$mac = strtoupper($mac);
+	$pxedir = "/opt/opengnsys/tftpboot/menu.lst";
 	$macfile = "$pxedir/01-" . substr($mac,0,2) . "-" . substr($mac,2,2) . "-" . substr($mac,4,2) . "-" . substr($mac,6,2) . "-" . substr($mac,8,2) . "-" . substr($mac,10,2);
 	// Eliminar el fichero.
-	exec ("rm -f $macfile");
+	@unlink($macfile);
 }
 
 /**
