@@ -15,6 +15,7 @@ include_once("../clases/ArbolVistaXML.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 include_once("../includes/opciones.php");
+include_once("../includes/tftputils.php");
 include_once("./relaciones/repositorios_eliminacion.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
@@ -148,6 +149,9 @@ function Gestiona(){
 		case $op_modificacion:
 			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,puertorepo=@puertorepo,comentarios=@comentarios, apikey=@apiKeyRepo WHERE idrepositorio=@idrepositorio";
 			$resul=$cmd->Ejecutar();
+			if ($resul) {
+				updateBootRepo($cmd, $idrepositorio);
+			}
 			break;
 		case $op_eliminacion :
 			$resul=Eliminarepositorios($cmd,$idrepositorio,"idrepositorio");

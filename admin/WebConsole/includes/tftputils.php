@@ -11,6 +11,9 @@
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 
+// Directorio de ficheros PXE.
+define("PXEDIR", "/opt/opengnsys/tftpboot/menu.lst");
+
 
 /**
  * @brief    Sustituye espacio por "_" y quita acentos y tildes.
@@ -157,20 +160,18 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	}
 	if (! empty ($directorio)) { $infohost.=" ogunit=$directorio"; }
 	
-	// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
-	$pxedir="/opt/opengnsys/tftpboot/menu.lst";
 	$mac = substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-	$macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));	
+	$macfile = PXEDIR . "/01-" . str_replace(":", "-", strtoupper($mac));	
 
 	// Crear fichero de arranque a partir de la plantilla y los datos del cliente.
 	// UHU - si el parametro vga no existe, no se quita.
 	if (! empty ($vga)) {
-		exec ("sed -e 's|vga=...||g; s|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' $pxedir/templates/$bootopt > $macfile");
+		exec("sed -e 's|vga=...||g; s|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' " . PXEDIR . "/templates/$bootopt > $macfile");
 	}
 	else{
-		exec ("sed -e 's|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' $pxedir/templates/$bootopt > $macfile");
+		exec("sed -e 's|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' " . PXEDIR . "/templates/$bootopt > $macfile");
 	}
-	exec ("chmod 777 $macfile");
+	chmod($macfile, 0777);
 }
 
 
@@ -186,8 +187,7 @@ function deleteBootFile ($mac) {
 
 	// Obtener nombre de fichero a partir de dirección MAC.
 	$mac = strtoupper($mac);
-	$pxedir = "/opt/opengnsys/tftpboot/menu.lst";
-	$macfile = "$pxedir/01-" . substr($mac,0,2) . "-" . substr($mac,2,2) . "-" . substr($mac,4,2) . "-" . substr($mac,6,2) . "-" . substr($mac,8,2) . "-" . substr($mac,10,2);
+	$macfile = PXEDIR . "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
 	// Eliminar el fichero.
 	@unlink($macfile);
 }
@@ -232,6 +232,48 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 		}
 		$rs->Cerrar();
 	}
+}
+
+/**
+ *           updateBootRepo ($cmd, $repoid)
+ * @brief    Actualiza la IP del repositorio en los ficheros PXE de todos sus equipos asociados.
+ * @param    {Object}  cmd      Objeto de conexión con la base de datos
+ * @param    {Integer} repoid   Campo identificador del repositorio
+ * @return   {Integer}          0, sin errores; -1, error acceso a BD; >0, ficheros no modificados
+ * @versión  1.1.0 - Primera versión.
+ * @authors  Ramón Gómez - ETSII Universidad de Sevilla
+ * @date     2018-01-19
+ */
+function updateBootRepo ($cmd, $repoid) {
+	$errors = 0;
+	// Obtener todas las MAC de los ordenadores incluidos en el repositorio.
+	$cmd->texto = "SELECT UPPER(ordenadores.mac) AS mac, repositorios.ip AS iprepo
+			 FROM ordenadores
+			 JOIN repositorios USING (idrepositorio)
+			WHERE ordenadores.idrepositorio = '$repoid'";
+	$rs = new Recordset;
+	$rs->Comando=&$cmd;
+	if ($rs->Abrir()) {
+		$rs->Primero();
+		while (! $rs->EOF) {
+			$mac = $rs->campos["mac"];
+			$repo = $rs->campos["iprepo"];
+			// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
+			$macfile = PXEDIR . "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
+			// Actualizar parámetro "ogrepo" en el fichero PXE.
+			if ($pxecode = @file_get_contents($macfile)) {
+				$pxecode = preg_replace("/ogrepo=[^ ]*/", "ogrepo=$repo", $pxecode);
+				if (! @file_put_contents($macfile, $pxecode)) {
+					$erros++;
+				}
+			}
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	} else {
+		$errors = -1;
+	}
+	return($errors);
 }
 
 ?>
