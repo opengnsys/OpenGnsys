@@ -150,6 +150,8 @@ function codeParticionadoMSDOS (form) {
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	var maxParts = 4;
+	var swapPart = new Array();
+	var swapCode = "";
 	
 	// Comprobamos si esta seleccionada la cuarta particion y no es CACHE
         if(form.check4.checked && form.part4.value != "CACHE")
@@ -162,13 +164,26 @@ function codeParticionadoMSDOS (form) {
 			if (partType.value == "CUSTOM" ) {
 				var partTypeCustom=eval("form.part"+nPart+"custom");
 				partCode += " " + partTypeCustom.value;
-				if (partTypeCustom.value == "EXTENDED") {
+				switch(partTypeCustom.value) {
+				    case "EXTENDED":
 					extended=true;
+					console.log("extended");
+					break;
+				    case "LINUX-SWAP":
+					swapPart.push(nPart);
+					break;
 				}
+	
 			} else {
 				partCode += " " + partType.value;
-				if (partType.value == "EXTENDED") {
+				switch(partType.value) {
+				    case "EXTENDED":
 					extended=true;
+					console.log("extended");
+					break;
+				    case "LINUX-SWAP":
+					swapPart.push(nPart);
+					break;
 				}
 			}
 			var partSize=eval("form.size"+nPart);
@@ -182,7 +197,6 @@ function codeParticionadoMSDOS (form) {
 			partCode += " EMPTY:0";
 		}
 	}
-
 	var cacheCode="";
 
 	// Si se selecciono la particion 4 y es CACHE
@@ -238,8 +252,14 @@ partCode += " EMPTY:0";
 				if (partType.value == "CUSTOM" ) {
 					var partTypeCustom=eval("form.part"+nPart+"custom");
 					logicalCode += " " + partTypeCustom.value;
+					// Partición swap
+					if (partTypeCustom.value == "LINUX-SWAP")
+						swapPart.push(nPart);
 				} else {
 					logicalCode += " " + partType.value;
+					// Partición swap
+					if (partType.value == "LINUX-SWAP")
+						swapPart.push(nPart);
 				}
 				var partSize=eval("form.size"+nPart);
 				if (partSize.value == "CUSTOM" ) {
@@ -254,6 +274,15 @@ partCode += " EMPTY:0";
 		}
 		partCode += logicalCode;
 	}
+
+	// Formateo de la partición swap
+	if (swapPart.length > 0) {
+	    for (var i=0; i < swapPart.length; i++) {
+		swapCode += "ogEcho session log \"$MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n   " ;
+		swapCode += "ogExecAndLog command session log ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n   ";
+	    }
+
+        }
 
 	form.codigo.value="\
 " + sizecacheCode + " \n \
@@ -271,6 +300,7 @@ if ogExecAndLog command session ogCreatePartitions "+n_disk+" " + partCode + "; 
   ogUpdatePartitionTable "+n_disk+" \n \
   ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
   ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
+  "+ swapCode +"\
 else \n \
   ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
   sleep 5 \n \
@@ -287,6 +317,9 @@ function codeParticionadoGPT (form) {
         var extended=false;
         var n_disk = form.n_disk.value;
         var tipo_part_table = form.tipo_part_table.value;
+	var swapPart = new Array();
+	var swapCode = "";
+
 		numParts=document.getElementById("numGPTpartitions").value;
 		
         for (var nPart=1; nPart <= numParts; nPart++) {
@@ -323,8 +356,14 @@ initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null";
 				if (partType.value == "CUSTOM" ) {
 					var partTypeCustom=eval("form.partGPT"+nPart+"custom");
 					partCode += " " + partTypeCustom.value;
+					// Partición swap
+					if (partTypeCustom.value == "LINUX-SWAP")
+                                                swapPart.push(nPart);
 				} else {
 					partCode += " " + partType.value;
+					// Partición swap
+					if (partType.value == "LINUX-SWAP")
+                                                swapPart.push(nPart);
 				}
 				var partSize=eval("form.sizeGPT"+nPart);
 				if (partSize.value == "CUSTOM" ) {
@@ -346,6 +385,14 @@ partCode += " EMPTY:0";
 			}
                 }
         }
+	// Formateo de la partición swap
+	if (swapPart.length > 0) {
+            for (var i=0; i < swapPart.length; i++) {
+                swapCode += " ogEcho session log \"$MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n" ;
+                swapCode += " ogExecAndLog command session log ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n";
+	    }
+	}
+            
 	form.codigo.value="\
 " + sizecacheCode + " \n \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
@@ -363,7 +410,10 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n";  
+
+// Formateo de la swap
+form.codigo.value += swapCode;
 }
 
 
