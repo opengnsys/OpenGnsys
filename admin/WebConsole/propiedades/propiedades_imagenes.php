@@ -80,11 +80,7 @@ if ($opcion == 1 && $datospost == 1) {
 	}
 	if ($validnombreca != 1) {$validnombreca=0;}
 	if (isset($_POST["ruta"])) $ruta=$_POST["ruta"]; 
-	if (isset($_POST["descripcion"])) {
-		$descripcion=$_POST["descripcion"];
-		ValidaDescripcion($cmd,$nombreca,$descripcion);
-	}
-	if ($validdescripcion != 1) {$validdescripcion=0;}
+	if (isset($_POST["descripcion"])) {$descripcion=$_POST["descripcion"];}
 	if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 	if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 	if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
