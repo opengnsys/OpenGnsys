@@ -256,6 +256,10 @@ ogDevToDisk ${PART%% *} 2>/dev/null
 #@version 0.91 - Creacion cache local.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010-03-11
+#@version 1.1.0 - llamada a updateBootCache.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-21
+
 #*/ ##
 function ogFormatCache ()
 {
@@ -278,6 +282,9 @@ mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError
 # Crear estructura básica. 
 MNTDIR=$(ogMountCache) 
 mkdir -p $MNTDIR/$OGIMG 
+
+# Incluir kernel e Initrd del ogLive
+updateBootCache 2>&1>/dev/null
 }
 
 
