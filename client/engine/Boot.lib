@@ -723,6 +723,10 @@ then
 fi
 
 # SI Reconfigurar segunda etapa (grub.cfg) == TRUE 
+
+#llamada a updateBootCache para que aloje la primera fase del ogLive
+updateBootCache
+
 #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
 echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
