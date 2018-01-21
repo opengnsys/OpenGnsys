@@ -114,7 +114,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$repo=$rs->campos["iprepo"];
 	$server=$rs->campos["ipserveradm"];
 	$vga=$rs->campos["vga"];
-	$hardprofile=$rs->campos["hardprofile"];
+	$hardprofile=cleanString($rs->campos["hardprofile"]);
 	$oglivedir=$rs->campos["oglivedir"];
 	$ogunit=$rs->campos["ogunit"];
 	if ($ogunit == 0 or $rs->campos["directorio"] == null) {
