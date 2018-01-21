@@ -1321,6 +1321,9 @@ function ogBootLoaderDeleteEntry {
 #@version 1.1.0 - Primeras pruebas instalando BURG. Codigo basado en el ogGrubInstallMBR.
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2017-06-23
+#@version 1.1.0 - Redirección del proceso de copiado de archivos y de la instalacion del binario
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2018-01-21
 #*/ ##
 
 function ogBurgInstallMbr {
@@ -1356,11 +1359,11 @@ FIRSTSTAGE=$(ogDiskToDev 1)
 SECONDSTAGE=$(ogMount $DISK $PART)
 
 # prepara el directorio principal de la segunda etapa (y copia los binarios)
-[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/; cp  $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/;
+[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp  $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null;
 
 #Copiamos el tema 
 mkdir -p  ${SECONDSTAGE}/boot/burg/themes/OpenGnsys
-cp -prv "$OGLIB/burg/themes" "${SECONDSTAGE}/boot/burg/"
+cp -prv "$OGLIB/burg/themes" "${SECONDSTAGE}/boot/burg/" 2>&1>/dev/null
 
 #Localizar directorio segunda etapa del grub   
 #PREFIXSECONDSTAGE="/boot/burg/"
@@ -1370,7 +1373,7 @@ if [ -f ${SECONDSTAGE}/boot/burg/burg.cfg -o -f ${SECONDSTAGE}/boot/burg/burg.cf
 then 
     if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
     then
-        burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
         return $?
     fi
 fi
@@ -1480,7 +1483,7 @@ grubSyntax "$KERNELPARAM" >> "$FILECFG"
 
 
 #Instalar el burg 
-burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
 }
 
 #/**
