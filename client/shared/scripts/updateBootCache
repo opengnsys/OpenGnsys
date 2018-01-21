@@ -6,7 +6,8 @@
 #@param 1 
 #@param ejemplo:  
 #@return  
-#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_NOTFOUND=2        # Fichero o dispositivo no encontrado.
 #@note   
 #@todo: 
 #@version 1.0.1 - requiere el gestor de arranque grub2dos
@@ -18,22 +19,28 @@
 #@version 1.1.0 - Se permite varios ogLives en la CACHE
 #@author Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2017/05/31
+#@version 1.1.0 - Limpieza de codigo, control errores
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-21
 #*/ ##
 
 OGLIVEDIR=${oglivedir:-"ogLive"}
 OGBTFTP="/opt/oglive/tftpboot/$OGLIVEDIR"
 OGBCACHE="$OGCAC/boot/$OGLIVEDIR"
-ogMountCache || exit 1
+
+#control de errores
+[ -d  "$OGBTFTP" ] || exit $(ogRaiseError $OG_ERR_NOTFOUND "$OGBTFTP"; echo $?)
+ogMountCache || exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
 
 [ -d $OGBCACHE ] || mkdir -p $OGBCACHE 
 	
 	# comparamos los del server
-	SERVERVMLINUZ=`cat ${OGBTFTP}/ogvmlinuz.sum`
-	SERVERINITRD=`cat  ${OGBTFTP}/oginitrd.img.sum`
+	SERVERVMLINUZ=`cat ${OGBTFTP}/ogvmlinuz.sum 2>/dev/null`
+	SERVERINITRD=`cat  ${OGBTFTP}/oginitrd.img.sum 2>/dev/null`
 	
 	#comparamos los de la cache
-	CACHEVMLINUZ=`cat ${OGBCACHE}/ogvmlinuz.sum`
-	CACHEINITRD=`cat ${OGBCACHE}/oginitrd.img.sum`
+	CACHEVMLINUZ=`cat ${OGBCACHE}/ogvmlinuz.sum 2>/dev/null`
+	CACHEINITRD=`cat ${OGBCACHE}/oginitrd.img.sum 2>/dev/null`
 	
 	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
 	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
@@ -56,9 +63,3 @@ ogMountCache || exit 1
 
 echo $DOREBOOT
 #	[ "$DOREBOOT" == "true" ] && busybox reboot -f
-
-#TODO: Comprobar si es necesario
-#cp -prv cp ${OGBTFTP}/ ${OGBCACHE}
-
-#TODO
-#/opt/opengnsys/lib/grub4dos/bootlace.com /dev/sda
