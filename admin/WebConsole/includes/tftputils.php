@@ -63,6 +63,9 @@ function clientKernelVersion () {
  * @version  1.1.0 - La segunda fase de carga del ogLive se define en el SERVER para evitar erores de sincronismo entre versiones (ticket #787).
  * @author   Antonio J. Doblas Viso - Universidad de Malaga
  * @date     2017-06-01
+  * @version  1.1.0 - Se incluye el nombre del perfil hardware y se elimina el winboot (ticket #828).
+ * @author   Antonio J. Doblas Viso - Universidad de Malaga
+ * @date     2018-01-21 
  */
 function createBootMode ($cmd, $bootopt, $hostid, $lang) {	
 
@@ -83,7 +86,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
 			    aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
 			    (SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
-			    menus.resolucion AS vga, perfileshard.winboot AS winboot,
+			    menus.resolucion AS vga, perfileshard.descripcion AS hardprofile,
 			    centros.directorio, entidades.ogunit
 			FROM ordenadores 
 			JOIN aulas USING (idaula)
@@ -111,7 +114,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$repo=$rs->campos["iprepo"];
 	$server=$rs->campos["ipserveradm"];
 	$vga=$rs->campos["vga"];
-	$winboot=$rs->campos["winboot"];
+	$hardprofile=$rs->campos["hardprofile"];
 	$oglivedir=$rs->campos["oglivedir"];
 	$ogunit=$rs->campos["ogunit"];
 	if ($ogunit == 0 or $rs->campos["directorio"] == null) {
@@ -148,7 +151,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	if (! empty ($ntp))	{ $infohost.=" ogntp=$ntp"; }
 	if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
 	if (! empty ($proxy))	{ $infohost.=" ogproxy=$proxy"; }
-	if (! empty ($winboot))	{ $infohost.=" winboot=$winboot"; }
+	if (! empty ($hardprofile))	{ $infohost.=" hardprofile=$hardprofile"; }
 	// Comprobar si se usa el parámetro "vga" (número de 3 cifras) o "video" (cadena).
 	if (! empty ($vga)) {
 		// UHU - Se sustituye la función is_int por is_numeric, ya que al ser un string no funciona bien con is_int
