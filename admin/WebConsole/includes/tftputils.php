@@ -24,7 +24,7 @@ define("PXEDIR", "/opt/opengnsys/tftpboot/menu.lst");
  * @date     
 */
 function cleanString ($cadena) {
-	return strtr ($cadena, " áéíóúñçÁÉÍÓÚÑÇ", "_aeiouncAEIOUNC");
+	return strtr(trim($cadena), " áéíóúñçÁÉÍÓÚÑÇ", "_aeiouncAEIOUNC");
 }
 
 

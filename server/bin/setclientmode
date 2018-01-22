@@ -93,36 +93,36 @@ for MAC in $ETHERNET; do
 		# Obtener de la BD los parámetros de arranque asociados (separador es TAB).
 		DATOS=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 			"SELECT ' LANG=$LANG',
-				' ip=', CONCAT_WS (':', ordenadores.ip,
+				' ip=', CONCAT_WS(':', ordenadores.ip,
 				(@repoip:=repositorios.ip), aulas.router, aulas.netmask,
 				ordenadores.nombreordenador, ordenadores.netiface, 'none'),
-				' group=', REPLACE (aulas.nombreaula, ' ', '_'),
+				' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
 				' ogrepo=', @repoip,
 				' oglive=', @repoip,
 				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
 				' ogshare=', @serverip,
 				' oglivedir=', ordenadores.oglivedir,
-				' winboot=', IFNULL (perfileshard.winboot, 'reboot'),
-				IF (aulas.ntp='', '', CONCAT (' ogntp=', aulas.ntp)),
-				IF (aulas.dns='', '', CONCAT (' ogdns=', aulas.dns)),
-				IF (aulas.proxy='', '', CONCAT (' ogproxy=', aulas.proxy)),
-				IF (entidades.ogunit=1 AND NOT centros.directorio='', CONCAT (' ogunit=', centros.directorio),''),
+				IF(perfileshard.descripcion='', '', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_'))),
+				IF(aulas.ntp='', '', CONCAT(' ogntp=', aulas.ntp)),
+				IF(aulas.dns='', '', CONCAT(' ogdns=', aulas.dns)),
+				IF(aulas.proxy='', '', CONCAT(' ogproxy=', aulas.proxy)),
+				IF(entidades.ogunit=1 AND NOT centros.directorio='', CONCAT(' ogunit=', centros.directorio),''),
 				CASE
 				    WHEN menus.resolucion IS NULL THEN ''
-				    WHEN menus.resolucion <= '999' THEN CONCAT (' vga=', menus.resolucion)
-				    WHEN menus.resolucion LIKE '%:%' THEN CONCAT (' video=', menus.resolucion)
+				    WHEN menus.resolucion <= '999' THEN CONCAT(' vga=', menus.resolucion)
+				    WHEN menus.resolucion LIKE '%:%' THEN CONCAT(' video=', menus.resolucion)
 				    ELSE menus.resolucion
 				END
 				FROM ordenadores 
-				JOIN aulas USING (idaula)
-				JOIN centros USING (idcentro)
-				JOIN entidades USING (identidad)
-				JOIN repositorios USING (idrepositorio)
-				LEFT JOIN perfileshard USING (idperfilhard)
-				LEFT JOIN menus USING (idmenu)
+				JOIN aulas USING(idaula)
+				JOIN centros USING(idcentro)
+				JOIN entidades USING(identidad)
+				JOIN repositorios USING(idrepositorio)
+				LEFT JOIN perfileshard USING(idperfilhard)
+				LEFT JOIN menus USING(idmenu)
 				WHERE ordenadores.mac='$MAC';")
 		# Quitar tabuladores, sustituir acentos y dejar resolución por defecto.
-		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñÁÉÍÓÚÑ' 'aeiounAEIOUN')
+		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñçÁÉÍÓÚÑÇ' 'aeiouncAEIOUNC')
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Obtener directorio ogLive a partir de los datos.
 		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
