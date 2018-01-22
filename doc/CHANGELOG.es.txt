@@ -19,10 +19,15 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #740	Clonar disco completo en modo "raw"
 #744	Gestionar bloqueos de disco
 #748	Mejorar rendimiento usando fichero de configuración de discos (mejora)
+#770	Imágenes sincronizadas: transferencia multicast
 #771	Crear imagen no muestra correctamente el espacio necesario y disponible
 #781	Control de errores en la transferencia multicast
 #790	ogLive Xenial no identifica el orden correcto de varios discos duros sata
 #791	ogGrubInstallMBR con dos discos duros
+#796	Burg como systemMenu gráfico
+#815	Crear Imagen: cálculo del espacio libre en el repositorio
+#823	Mejorar el rendimiento al obtener el inventario de software de Windows (mejora)
+#827	ogGrubInstallMbr debe mostrar entrada al ogLive, como ogBurgInstallMbr
 
 Tickets resueltos en módulo OpenGnsys Client:
 #233	Añadir reloj al cliente (resuelto en #746)
@@ -54,6 +59,7 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 #701	torrent-creator falla si el fichero de imagen a procesar no es válido
 #743	Funcion en el webservice API REST para wakeonlan 
 #810	API REST de respositorio para listado de imágenes 
+#820	checkperms da error al cambiar permisos sobre el directorio de agrupamiento de imágenes en el repo 
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #372	Comandos y asistentes deberían limitar equipos de operación dentro de ámbito
@@ -67,6 +73,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #738	Se pierde nombre de la imagen restaurada
 #747	Uso incorrecto del número de puestos de las propiedades del aula
 #751	Asistente de particionado: particiones GPT
+#767	Revisar estabilidad del asistente de particionado
 #775	Permitir mismo nombre de imagen en diferentes repositorios de imagen
 #777	Error SQL al incluir caracteres espaciales en los comentarios
 #778	Codificar claves de usuarios (mejora)
@@ -80,6 +87,12 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #806	Comando Particionar y Formatear: controlar que no se exceda el tamaño del disco
 #807	Consola Web: Incorporar ordenadores da error de time-out
 #814	Sustituir las etiquetas cortas de php por el formato largo
+#817	Correcciones al formulario propiedades del aula
+#818	Actualización ficheros PXE tras modificar propiedad de IP del repositorio 
+#819	Eliminar un objeto ordenador no elimina fichero PXE 
+#821	Comando Particionar sólo funciona correctamente en al ámbito de tipo ordenador 
+#822	Llamar al updateBootCache desde el particionado de la cache
+#828	Identificador de perfil hardware disponible desde el ogLive y eliminación de winboot
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #755	Scripts para exportar e importar los datos de OpenGnsys
