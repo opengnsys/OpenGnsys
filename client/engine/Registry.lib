@@ -234,16 +234,11 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Camino del fichero de registro de usuario o de sistema (de menor a mayor prioridad).
-for FILE in $(ogGetPath "/$1/Documents and Settings/$2/NTUSER.DAT") \
-            $(ogGetPath "/$1/Users/$2/NTUSER.DAT") \
-            $(ogGetPath "/$1/winnt/system32/config/$2") \
-            $(ogGetPath "/$1/windows/system32/config/$2"); do
-    [ -f "$FILE" ] && HIVE="$FILE"
-done
-# Error si no se encuentra el fichero de registro.
-[ -f "$HIVE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
-
-echo "$HIVE"
+FILE="$(ogGetPath "/$1/Windows/System32/config/$2")"
+[ -z "$FILE" ] && FILE="$(ogGetPath "/$1/Users/$2/NTUSER.DAT")"
+[ -z "$FILE" ] && FILE="$(ogGetPath "/$1/winnt/system32/config/$2")"
+[ -z "$FILE" ] && FILE="$(ogGetPath "/$1/Documents and Settings/$2/NTUSER.DAT")"
+[ -f "$FILE" ] && echo "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
 }
 
 

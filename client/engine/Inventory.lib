@@ -168,8 +168,23 @@ fi
 # Para Windows: leer la version del registro.
 if [ -z "$VERSION" ]; then
     TYPE="Windows"
-    VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
-    [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+    FILE="$(ogGetHivePath $MNTDIR SOFTWARE)"
+    if [ -n "$FILE" ]; then
+        # Nuevo método más rápido para acceder al registro de Windows..
+        VERSION=$(echo $(hivexsh << EOT 2>/dev/null
+load $FILE
+cd \Microsoft\Windows NT\CurrentVersion
+lsval ProductName
+lsval ReleaseId
+EOT
+        ))
+        [ -n "$(reglookup -H -p "Microsoft/Windows/CurrentVersion/ProgramW6432Dir" "$FILE" 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+        if [ -z "$VERSION" ]; then
+            # Compatibilidad con métrodo antiguo y más lento de acceder al registro.
+            VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
+            [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+        fi
+    fi
 fi
 # Para cargador Windows: buscar versión en fichero BCD (basado en os-prober).
 if [ -z "$VERSION" ]; then
@@ -184,14 +199,14 @@ if [ -z "$VERSION" ]; then
         done
     fi
 fi
-# Para MacOS: detectar kernel y completar con fichero plist de información del sistema.
+# Para macOS: detectar kernel y completar con fichero plist de información del sistema.
 if [ -z "$VERSION" ]; then
     TYPE="MacOS"
     # Kernel de Mac OS (no debe ser fichero de texto).
     FILE="$MNTDIR/mach_kernel"
     if [ -z "$(file -b $FILE | grep 'text')" ]; then
         # Obtener tipo de kernel.
-        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS"
+        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="macOS"
         [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
         # Datos de configuración de versión de Mac OS.
         FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
@@ -199,7 +214,7 @@ if [ -z "$VERSION" ]; then
                                       /ProductName/ {getline;s=$3}
                                       /ProductVersion/ {getline;v=$3}
                                       END {print s,v}' $FILE)
-        # Datos de recuperación de Mac OS.
+        # Datos de recuperación de macOS.
         FILE="$MNTDIR/com.apple.recovery.boot"
         [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
     fi
