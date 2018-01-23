@@ -371,10 +371,14 @@ function abrir_ventana(URL){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+</TABLE></br>
+<!-- ###########################################	PROPIEDADES APLICABLES A TODOS LOS ORDENADORES	#################################################################################-->
+
+<TABLE  align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
 		<TR>
-			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:#999999" colspan=4 align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TH>
+			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[1888]?>&nbsp;</TH>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------	AGP	------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion)
@@ -382,14 +386,6 @@ function abrir_ventana(URL){
 				else
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion',330).'</TD>';
 			?>
-		</TR>
-<!--------------------------------------------------------------	AGP	------------------------------------------------------------------------------------------------------------->
-</TABLE></br>
-<!-- ###########################################	PROPIEDADES APLICABLES A TODOS LOS ORDENADORES	#################################################################################-->
-
-<TABLE  align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
-		<TR>
-			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[1888]?>&nbsp;</TH>
 		</TR>
 <!--------------------------------------------------------------	AGP	------------------------------------------------------------------------------------------------------------->
 		<TR>
