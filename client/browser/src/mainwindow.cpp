@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
       m_logo->setPixmap(logo);
     else
       m_logo->setText("OG");
-    m_logo->setToolTip(tr(gettext("Proyecto OpenGnsys"))+"\nhttp://opengnsys.es");
+    m_logo->setToolTip(tr(gettext("Proyecto OpenGnsys"))+"\nhttps://opengnsys.es");
     // Progress bar
     m_progressBar=new QProgressBar(this);
     m_progressBar->setRange(0,100);

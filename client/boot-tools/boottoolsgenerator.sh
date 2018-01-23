@@ -11,7 +11,7 @@
 #*/
 
  #mkdir -p /tmp/opengnsys_installer/opengnsys
- #svn export http://opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys
+ #svn export https://opengnsys.es/svn/branches/version1.1/client /tmp/opengnsys_installer/opengnsys
 
 
 #Variables

@@ -1,3 +1,3 @@
-OGAgent is the agent intended for OpengGnSys interaction.
+OGAgent is the agent intended for OpengGnsys interaction.
 
-Please, visit http://www.opengnsys.es for more information
+Please, visit https://opengnsys.es for more information

@@ -1,7 +1,7 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: ogagent
 Maintainer: Ramón M. Gómez
-Source: http://opengnsys.es
+Source: https://opengnsys.es
 
 Copyright: 2014 Virtual Cable S.L.U.
 License: BSD-3-clause

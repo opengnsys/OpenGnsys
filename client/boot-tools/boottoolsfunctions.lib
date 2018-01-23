@@ -127,7 +127,7 @@ case "${1,,}" in
 		exit 1
 		;;
 esac
-SVNURL="http://opengnsys.es/svn/branches/version1.1/client"
+SVNURL="https://opengnsys.es/svn/branches/version1.1/client"
 VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
 NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
 NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"

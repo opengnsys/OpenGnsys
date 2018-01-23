@@ -17,7 +17,7 @@ Minimum storage requirements:
 Installation
 ------------
 
-To install OpenGnSys run opengnsys_installer.sh after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh.
+To install OpenGnsys, run opengnsys_installer.sh after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh.
 
 Unpacking example:
 	tar xvzf opengnsys-1.0.5.tar.gz
@@ -38,7 +38,7 @@ You must be root to run the installation script:
 
 The following information will be requested in order to configure the access to the service (a default value will be introduced if no parameter is indicated):
     * MySQL root password
-    * Web console user and OpenGnSys Super Administrator
+    * Web console user and OpenGnsys Super Administrator
     * Web console user's password
     * Client's password for accessing remote services
 
@@ -46,16 +46,16 @@ The following processes will be carried out:
     * Gathering of the basic network parameters.
     * Checking the installed packages.
     * Downloading and installing dependencies.
-    * Creating OpenGnSys basic folder sctructure.
+    * Creating OpenGnsys basic folder sctructure.
     * Download the code repository to a temporal folder (/tmp/opengnsys_installer). In upcoming releases this process will not be necessary.
-    * Compiling and installing OpenGnSys services.
-    * Basic configuration of OpenGnSys network services (DHCP, PXE and Samba) using the existing configuration templates.
+    * Compiling and installing OpenGnsys services.
+    * Basic configuration of OpenGnsys network services (DHCP, PXE and Samba) using the existing configuration templates.
     * Copying additional server management files.
-    * Creating the database and configuring OpenGnSys administration console web server.
+    * Creating the database and configuring OpenGnsys administration console web server.
     * Copying web administration console pages.
-    * Copying the OpenGnSys client folder structure.
-    * Downloading OpenGnSys client initial image.
-    * Basic configuration of OpenGnSys services using network parameters.
+    * Copying the OpenGnsys client folder structure.
+    * Downloading OpenGnsys client initial image.
+    * Basic configuration of OpenGnsys services using network parameters.
 
 Once the installation is finished you can start working with the system:
     * Configuring DHCP.
@@ -82,12 +82,10 @@ You must be root to run this script:
 Uninstall
 ---------
 
-There is also an uninstall script for the OpenGnSys components:
-    * OpenGnSys files and data base will be deleted. 
+There is also an uninstall script for the OpenGnsys components:
+    * OpenGnsys files and data base will be deleted. 
     * Packages belonging to the operating system and their configuration files will be preserved.
     * The image folder and its content will not be deleted.
-
-
 
 You must be root to run this script:
     sudo /opt/opengnsys/lib/opengnsys_uninstall.sh
