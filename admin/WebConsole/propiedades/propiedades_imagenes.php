@@ -333,7 +333,7 @@ if (!empty($idperfilsoft)){ // Nota a pie de página indicando que cuando la ima
 //________________________________________________________________________________________________________
 
 
-if ($validnombreca=="0" && $validdescripcion=="0"){
+if ($validnombreca=="0"){
 echo '<script type="text/javascript">';
 echo 'confirmar('.$opcion.')';
 echo '</script>';
@@ -341,11 +341,6 @@ echo '</script>';
 if ($validnombreca=="1"){
 echo '<script type="text/javascript">';
 echo 'alert('.$TbMsg[17].')';
-echo '</script>';
-}
-if ($validnombreca=="0" && $validdescripcion=="1"){
-echo '<script type="text/javascript">';
-echo 'alert('.$TbMsg[21].')';
 echo '</script>';
 }
 
