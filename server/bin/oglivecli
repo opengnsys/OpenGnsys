@@ -289,7 +289,9 @@ function install() {
     local OGLIVEFILE OGLIVEDIST OGLIVEREV OGLIVEKRNL OGLIVEDIR OGINITRD OGSQFS OGCLIENT=ogclient
     local SAMBAPASS TMPDIR RSYNCSERV RSYNCCLNT
     [ $# -ne 1 ] && raiseError usage
-    OGLIVEFILE=$DOWNLOADDIR/"$1"
+    OGLIVEFILE=$(realpath $DOWNLOADDIR/$1)
+    # Only 1 file in pathname expansion.
+    [ $(echo $OGLIVEFILE | wc -w) -gt 1 ] && raiseError usage
     [ ! -f $OGLIVEFILE ] && raiseError notfound "Downloaded file: \"$1\"."
     [ ! -r $OGLIVEFILE ] && raiseError access "Downloaded file: \"$1\"."
     [ ! -w $(dirname $INFOFILE) ] && raiseError access "Configuration directory."
