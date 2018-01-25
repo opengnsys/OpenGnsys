@@ -74,7 +74,7 @@ if  ($opcion!=$op_alta)
 	$resul=TomaPropiedades($cmd,$idaula);
 else{
 	$resul=TomaConfiguracion($cmd);
-	$urlfoto="aula.jpg";} 
+	$urlfoto="aula.jpg";}
 if (!$resul)
 	header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 //________________________________________________________________________________________________________
@@ -177,18 +177,6 @@ function abrir_ventana(URL){
 					echo '<td><input  class="formulariodatos" name=puestos style="width:30" type=text value='.$puestos.'></td>';
 			?>
 		</tr>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-<!--  HORARIO DE SERVICIO TEMPORALMENTE DESHABILITADO.
-		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</TD>
-			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.$TbMsg[14].$horaresevini.'&nbsp;&nbsp;&nbsp&nbsp;'.$TbMsg[15].$horaresevfin.'</TD>';
-				else
-					echo '<TD colspan=3>'.$TbMsg[14].'&nbsp<INPUT  class="formulariodatos" onclick="vertabla_horas(this)"  name=horaresevini style="width:30" type=text value='.$horaresevini.'>&nbsp;&nbsp;&nbsp&nbsp;'.$TbMsg[15].'&nbsp<INPUT  class="formulariodatos" onclick="vertabla_horas(this)" name=horaresevfin style="width:30" type=text value='.$horaresevfin.'></TD>';
-			?>
-		</TR>
--->
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TH>
