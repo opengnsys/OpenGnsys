@@ -5,7 +5,7 @@ Preparar entorno virtual de desarrollo para OpenGnsys
 
 Ficheros de configuración disponibles:
 
- - Vagrantfile-trunk-vbox  Vagrantfile para OpenGnsys oficial con proveedor VirtualBox.
+ - Vagrantfile-trunk-vbox  Vagrantfile para OpenGnsys estable con proveedor VirtualBox.
  - Vagrantfile-devel-vbox  Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
  - Vagrantfile-boottools-vbox  Vagrantfile para preparar el entorno de generación del cliente ogLive (recomendado solo para desarrolladores experimentados).
  - Vagrantfile-browser-vbox    Vagrantfile para preparar el entorno de desarrollo del Browser del cliente (recomendado solo para miembros del grupo de desarrollo).
@@ -21,8 +21,8 @@ Requisitos previos.
 El entorno de trabajo de OpenGnsys.
 
  - ogAdministrator: MV para servidor OpenGnsys basada en Ubuntu 16.04 y 2º disco para repositorio.
- - ogClient01: MV cliente modelo con Ubuntu 16.04 instalado.
- - ogClient02 - ogclient0N: MV clientes para restaurar con disco vacío.
+ - pc11: MV cliente mlodelo con Ubuntu 16.04 instalado.
+ - pc12 - ogclientN: MV clientes para restaurar con disco vacío.
 
 
 Ejecutar el entorno virtual (Vagrantfile-trunk-vbox y Vagrantfile-devel-vbox).
@@ -36,6 +36,7 @@ Ejecutar el entorno virtual (Vagrantfile-trunk-vbox y Vagrantfile-devel-vbox).
    - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes (mínimo 256 MB).
    - NETPREFIX: prefijo para las direcciones IP de la red virtual.
    - MACPREFIX: prefijo para las direcciones MAC de los clientes.
+   - SERVERIP: dirección IP del servidor OpenGnsys
    - LOCALWEBPORT: puerto local para acceder al web de administración del servidor.
  - Opcional: para una definición automática del aula virtual con sus clientes, descomentar las líneas del fichero Vagrantfile de los comandos "mysql" y "setclientmode".
 
@@ -43,9 +44,9 @@ Ejecutar el entorno virtual (Vagrantfile-trunk-vbox y Vagrantfile-devel-vbox).
 	vagrant up
  - Iniciar las MV de los clientes (tras iniciar el servidor):
    - Cliente modelo:
-	vagrant up ogClient01
+	vagrant up pc11
    - Clientes vacíos para restaurar:
-	vagrant up ogClient0X      (siendo X de 2 al nº máximo definido)
+	vagrant up pcX     (siendo X de 12 al nº máximo definido + 10)
 
 Notas:
  - Los procesos de inicio pueden tardar varios minutos en la primera ejecución, porque descargan y configuran las máquinas virtuales.

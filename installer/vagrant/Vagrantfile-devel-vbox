@@ -14,9 +14,11 @@ REPOSIZE = 50
 # Amount of memory for server and clients (MB)
 SERVERMEM = 1024	# Minimum: 512
 CLIENTMEM = 512		# Minimum: 256
-# Clients MAC address prefix.
-MACPREFIX = "08:00:27:0E:65:"
-NETPREFIX = "192.168.2."
+# Prefixes for MAC and IP addresses.
+MACPREFIX = "08:00:27:0E:65"
+NETPREFIX = "192.168.2"
+# OpenGnsys Server IP address.
+SERVERIP = "#{NETPREFIX}.10"
 # Local port to access OpenGnsys Server.
 LOCALWEBPORT = 8443
 
@@ -24,21 +26,24 @@ LOCALWEBPORT = 8443
 OGSERVERSCRIPT = <<EOT
 # Exit if OpenGnsys is installed.
 [ -f /opt/opengnsys/doc/VERSION.txt ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
-# Mount repository disk, if necesary.
-if [ -n "$(blkid /dev/sdb1 | grep ext4)" ]; then
-    echo -e "o\nn\np\n\n\n\nw" | fdisk /dev/sdb
-    mkfs -t ext4 /dev/sdb1
+# Create repository disk using LVM, if necesary.
+if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
+    pvcreate /dev/sdb
+    vgcreate og /dev/sdb
+    vgchange -ay
+    lvcreate -ay -n images -l 100%VG og
+    mkfs -t ext4 /dev/mapper/og-images
     mkdir -p /opt/opengnsys/images
-    echo "/dev/sdb1  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
+    echo "/dev/mapper/og-images  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
     mount -a
 fi
 # Install OpenGnsys and change server address.
-wget -q http://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash || exit $?
+wget -q https://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
-for ((i=#{NCLIENTS}; i>0; i--)); do
-    sed -i "/^}$/ i host ogClient0${i} { hardware ethernet #{MACPREFIX}0${i}; fixed-address #{NETPREFIX}1${i}; }" /etc/dhcp/dhcpd.conf
+for ((i=#{NCLIENTS+10}; i>0; i--)); do
+    sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
 done
 service isc-dhcp-server restart
 # Set language.
@@ -49,20 +54,20 @@ locale-gen --lang #{LANGUAGE}
 sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
 # Comment out next lines for automatic data insertion.
-#SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
-#for ((i=1; i<=#{NCLIENTS}; i++)); do
-#    SQL="$SQL ('ogClient0$i', '#{NETPREFIX}1$i', REPLACE('#{MACPREFIX}0$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
+#SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}.1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
+#for ((i=11; i<=#{NCLIENTS+10}; i++)); do
+#    SQL="$SQL ('pc$i', '#{NETPREFIX}.$i', REPLACE('#{MACPREFIX}$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}.1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
 #done
 #mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
-#/opt/opengnsys/bin/setclientmode ogLiveAdmin ogClient01 PERM
-#for ((i=2; i<=#{NCLIENTS}; i++)); do
-#    /opt/opengnsys/bin/setclientmode ogLive ogClient0$i PERM
+#/opt/opengnsys/bin/setclientmode ogLiveAdmin pc11 PERM
+#for ((i=12; i<=#{NCLIENTS+10}; i++)); do
+#    /opt/opengnsys/bin/setclientmode ogLive pc$i PERM
 #done
 # Comment out next lines to install new Angular-based web application (on early development).
 #apt-get install -y git nodejs npm
 #ln -fs nodejs /usr/bin/node
 #npm install bower -g
-#svn export http://opengnsys.es/svn/branches/version1.1-tickets/ogWebAdmin-ticket761/admin/WebConsole/angular /opt/opengnsys/www/angular
+#svn export https://opengnsys.es/svn/branches/version1.1-tickets/ogWebAdmin-ticket761/admin/WebConsole/angular /opt/opengnsys/www/angular
 #cd /opt/opengnsys/www/angular
 #chown -R vagrant.vagrant .
 #su vagrant -c "bower install -F"
@@ -85,15 +90,21 @@ exit 0
 EOT
 
 # Client 1 OS provisioning script.
+OGAGENTPKG = "ogagent_1.1.0_all.deb"
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
 #apt-get update -y
-#apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
-#wget -q --no-check-certificate https://#{NETPREFIX}10/opengnsys/descargas/ogagent_1.1.0_all.deb
-#dpkg -i ogagent_1.1.0_all.deb
-#sed -i "0,/remote=/ s,remote=.*,remote=https://#{NETPREFIX}10/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+#wget -q --no-check-certificate https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG}
+#if [ -f #{OGAGENTPKG} ]; then
+#    dpkg -i #{OGAGENTPKG}
+#    apt-get install -fy || exit $?
+#    sed -i "0,/remote=/ s,remote=.*,remote=https://#{SERVERIP}/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+#    rm -f #{OGAGENTPKG}
+#else
+#    echo "Warning: cannot install OGAgent package #{OGAGENTPKG}"
+#fi
 # Remove network configuration added by Vagrant.
-sed -i "/VAGRANT/,$ d" /etc/network/interfaces
+sed -i "/enp0s3/ d" /etc/network/interfaces
 echo "Notes:"
 echo "- After now, use VirtualBox GUI to disable network interface 1 and restart this VM."
 # Leave VM halted.
@@ -131,7 +142,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     og.vm.hostname = "ogAdministrator"
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
-    og.vm.network "private_network", ip: "#{NETPREFIX}10", virtualbox__intnet: true
+    og.vm.network "private_network", mac: "#{MACPREFIX}10".tr(":",""), ip: "#{SERVERIP}", virtualbox__intnet: true
     # Comment out to disable synced folder.
     #og.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
@@ -139,12 +150,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # Client 1 VM definition.
-  config.vm.define "ogClient01", autostart: false do |v1|
+  config.vm.define "pc11", autostart: false do |v1|
     v1.vm.box = "bento/ubuntu-16.04"
-    v1.vm.hostname = "ogClient01"
-    v1.vm.network "private_network", mac: "#{MACPREFIX}01".tr(":",""), type: "dhcp", virtualbox__intnet: true
+    v1.vm.hostname = "pc11"
+    v1.vm.network "private_network", mac: "#{MACPREFIX}11".tr(":",""), type: "dhcp", virtualbox__intnet: true
     v1.vm.provider "virtualbox" do |vb|
-      vb.name = "ogClient01"
+      vb.name = "pc11"
       vb.memory = CLIENTMEM
       vb.cpus = 1
       vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
@@ -155,13 +166,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Clonable clients definition.
   (2..NCLIENTS).each do |i|
-    config.vm.define "ogClient0#{i}", autostart: false do |cl|
+    config.vm.define "pc#{i+10}", autostart: false do |cl|
       cl.vm.box = "clink15/pxe"
       cl.ssh.insert_key = false
       cl.vm.boot_timeout = 5
-      cl.vm.network "private_network", mac: "#{MACPREFIX}".tr(":","") + "%02d" % "#{i}", type: "dhcp", virtualbox__intnet: true
+      cl.vm.network "private_network", mac: "#{MACPREFIX}#{i+10}".tr(":",""), type: "dhcp", virtualbox__intnet: true
       cl.vm.provider "virtualbox" do |vb|
-        vb.name = "ogClient0#{i}"
+        vb.name = "pc#{i+10}"
         vb.memory = CLIENTMEM
         vb.cpus = 1
         vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
