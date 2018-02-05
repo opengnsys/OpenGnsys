@@ -668,6 +668,10 @@ function cargaTamano($cmd,$idambito,$ambito)
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
 	
+	// Comprobar modos SQL para hacer que la consulta sea compatible.
+	$cmd->texto="SELECT @@sql_mode AS mode";
+	$cmd->ejecutar();
+	@$mode=$cmd->Recordset->campos["mode"];
 	$cmd->texto="SELECT	COUNT(*) AS con,
 			   	ANY_VALUE(ordenadores_particiones.tamano) AS tamano,
 			   	ANY_VALUE(ordenadores_particiones.uso) AS uso,
@@ -692,6 +696,9 @@ function cargaTamano($cmd,$idambito,$ambito)
 			break;
 	}	
 	$cmd->texto.="			GROUP BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.tamano";
+	// Comprobar compatiblidad de cláusula GROUP BY.
+	if (strpos($mode, 'ONLY_FULL_GROUP_BY') === false)
+		$cmd->texto=preg_replace('/ANY_VALUE/', '', $cmd->texto);
 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
