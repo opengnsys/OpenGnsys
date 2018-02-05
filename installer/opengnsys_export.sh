@@ -7,6 +7,8 @@
 #@exception 2 Sólo ejecutable por usuario root.
 #@exception 3 Sin acceso a la configuración de OpenGnsys.
 #@exception 4 No existe el directorio de backup.
+#@exception 5 Es necesario instalar el comando realpath.
+#@warning This script uses "realpath" command.
 #@version 1.1.0 - Versión inicial.
 #@author  Irina Gómez - ETSII Univ. Sevilla
 #@date    2016-10-18
@@ -40,6 +42,12 @@ fi
 if [ "$USER" != "root" ]; then
     echo "$PROG: Error: solo ejecutable por root." >&2
     exit 2
+fi
+
+# Comprobamos que esté instalado el comando realpath
+if ! which realpath &>/dev/null ; then
+    echo "Need to install \"realpath\"."
+    exit 5
 fi
 
 # Comprobamos  acceso a ficheros de configuración
