@@ -14,6 +14,12 @@
 // Common constants.
 define('REST_LOGFILE', '/opt/opengnsys/log/rest.log');
 
+// Set time zone.
+if (function_exists("date_default_timezone_set")) {
+    if (exec("timedatectl status | awk '/Time zone/ {print $3}'", $out, $err)) {
+        date_default_timezone_set($out[0]);
+    }
+}
 
 // Common functions.
 
