@@ -204,13 +204,9 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++ libstdc++.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan gettext moreutils jq wakeonlan )
-		INSTALLEXTRADEPS=( 'rpm -Uv ftp://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/files/i586/RPMS/netpipes-4.2-alt1.i586.rpm' 
-				   'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		if [ "$OSDISTRIB" == "centos" ]; then
-			UPDATEPKGLIST='test rpm -q --quiet epel-release || echo -e "[epel]\nname=EPEL temporal\nmirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch\nenabled=1\ngpgcheck=0" >/etc/yum.repos.d/epel.repo'
-		fi
-		INSTALLPKG="yum install -y"
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
+		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
 		SYSTEMD=$(which systemctl 2>/dev/null)
 		if [ -n "$SYSTEMD" ]; then
@@ -310,19 +306,27 @@ case "$OSDISTRIB" in
 		[ -z "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
-		# Incluir repositorio de paquetes EPEL y paquetes específicos.
-		DEPENDENCIES=( ${DEPENDENCIES[@]} epel-release procps )
+		# Configuración para PHP 5 en Ubuntu 16.x+.
+		if ! yum list php5\*w &>/dev/null; then
+			if [ $OSVERSION -ge 7 ]; then
+				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/webtatic-release.rpm
+			else
+				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/latest.rpm
+			fi
+			PHP5VERSION=$(yum list -q php5\*w | awk -F. '/^php/ {p=$1} END {print p}')
+			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP5VERSION} )
+		fi
 		# Cambios a aplicar a partir de CentOS 7.
 		if [ $OSVERSION -ge 7 ]; then
 			# Sustituir MySQL por MariaDB.
 			DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
-			# Instalar arp-scan de CentOS 6 (no disponible en CentOS 7).
-			DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
+			# Instalar ctorrent de EPEL para CentOS 6 (no disponible en CentOS 7).
+			DEPENDENCIES=( ${DEPENDENCIES[*]/ctorrent/http://dl.fedoraproject.org/pub/epel/6/$(arch)/Packages/c/ctorrent-1.3.4-14.dnh3.3.2.el6.$(arch).rpm} )
 		fi
 		;;
 	fedora)	# Postconfiguación personalizada para Fedora. 
 		# Incluir paquetes específicos.
-		DEPENDENCIES=( ${DEPENDENCIES[@]} libstdc++-static.i686 btrfs-progs procps-ng )
+		DEPENDENCIES=( ${DEPENDENCIES[@]} btrfs-progs )
 		# Sustituir MySQL por MariaDB a partir de Fedora 20.
 		[ $OSVERSION -ge 20 ] && DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
 		;;
