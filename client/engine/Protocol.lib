@@ -91,7 +91,7 @@ else
 fi
 
 #3er param check - que puede ser un dispositvo o un fichero.
-#ogGetPath "$3" > /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
+#[ -n "$(ogGetPath "$3")" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
 DEVICE=$3
 
 #4 y 5 param check .  solo si es sobre particiones.
@@ -1090,23 +1090,23 @@ ogFindCache &>/dev/null || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 [ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_repo relative_path_image [protocol|FULL]"; echo $?)
 
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
-FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+FILESOURCE=`ogGetPath $1 $2`
+[ -n "$FILESOURCE" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
 #echo "paso 1. si no existe la imagen, confirmar que es necesario actualizar la cache."
 FILETARGET=`ogGetPath CACHE $2`
-if [ -z $FILETARGET ]
+if [ -z "$FILETARGET" ]
 then
     # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
-    ogGetPath CACHE "/$2.torrent.bf" && ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
-    ogGetPath CACHE "/$2.sum" && ogDeleteFile CACHE "/$2.sum" &> /dev/null
-    ogGetPath CACHE "/$2.full.sum" && ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.torrent.bf")" ] && ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.sum")" ] && ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.full.sum")" ] && ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
     echo "TRUE(0), es necesario actualizar. Paso 1, la cache no contiene esa imagen "
     return 0 
 fi
 
 #echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
-if ogGetPath $FILETARGET.torrent.bf  > /dev/null
-then
+if [ -n "$(ogGetPath "$FILETARGET.torrent.bf")" ]; then
     #TODO: comprobar los md5 del fichero .torrent para asegurarnos que la imagen a descarga es la misma.
     echo "TRUE(0), es necesario actualizar. Paso 2, la imagen esta en un estado de descarga torrent interrumpido"
     return 0
