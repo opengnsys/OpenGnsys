@@ -1331,6 +1331,9 @@ function ogBootLoaderDeleteEntry {
 #@version 1.1.0 - Redirección del proceso de copiado de archivos y de la instalacion del binario
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2018-01-21
+#@version 1.1.0 - Refactorizar fichero de configuacion
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2018-01-24
 #*/ ##
 
 function ogBurgInstallMbr {
@@ -1366,7 +1369,7 @@ FIRSTSTAGE=$(ogDiskToDev 1)
 SECONDSTAGE=$(ogMount $DISK $PART)
 
 # prepara el directorio principal de la segunda etapa (y copia los binarios)
-[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp  $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null;
+[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null;
 
 #Copiamos el tema 
 mkdir -p  ${SECONDSTAGE}/boot/burg/themes/OpenGnsys
@@ -1407,11 +1410,10 @@ cat > "$FILECFG" << EOF
 
 set theme_name=OpenGnsys
 set gfxmode=1024x768
-#set root='(hd$(expr $DISK - 1),$(expr $PART - 1))'
+
 
 set locale_dir=(\$root)/boot/burg/locale
 
-#GRUB_DEFAULT="Reboot"
 set default=0
 set timeout=25
 set lang=es
@@ -1421,9 +1423,13 @@ insmod ext2
 insmod gettext
 
 
+
+
 if [ -s \$prefix/burgenv ]; then
   load_env
 fi
+
+
 
 if [ \${prev_saved_entry} ]; then
   set saved_entry=\${prev_saved_entry}
@@ -1469,8 +1475,7 @@ if test -f \${prefix}/themes/\${theme_name}/theme ; then
   insmod coreui
   menu_region.text
   load_string '+theme_menu { -OpenGnsys { command="set theme_name=OpenGnsys" }}'   
- # Comentar los hotkety
- #load_config \${prefix}/themes/conf.d/10_hotkey
+  load_config \${prefix}/themes/conf.d/10_hotkey   
   load_config \${prefix}/themes/\${theme_name}/theme \${prefix}/themes/custom/theme_\${theme_name}
   insmod vbe
   insmod png
@@ -1698,3 +1703,466 @@ MSG="MSG_HELP_$FUNC"
 echo "${!MSG%%\.}: $@"
 }
 
+
+#/**
+# ogGrubSetTheme num_disk num_part str_theme
+#@see ogBootLoaderSetTheme
+#*/
+function ogGrubSetTheme {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_themeName" \
+               "$FUNCNAME 1 4 ThemeBasic"\
+               "$FUNCNAME \$(ogFindCache) ThemeBasic"
+        return
+    fi
+    ogBootLoaderSetTheme $@
+    return $?
+}
+
+#/**
+# ogBurgSetTheme num_disk num_part str_theme
+#@see ogBootLoaderSetTheme
+#*/
+function ogBurgSetTheme  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_themeName" \
+               "$FUNCNAME 1 4 ThemeBasic" \
+               "$FUNCNAME \$(ogFindCache) ThemeBasic"
+        echo "Temas disponibles:\ $(ls $OGCAC/boot/burg/themes/)"
+               
+        return
+    fi
+    ogBootLoaderSetTheme $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetTheme
+#@brief   asigna un tema al BURG
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   str_theme_name   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetTheme {
+
+# Variables locales.
+local FUNC PART CFGFILE THEME NEWTHEME BOOTLOADER MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTheme ogBurgSetTheme"
+    return   
+fi
+  
+
+NEWTHEME="$3"
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+
+
+# Error si no se reciben 2 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage str_themeName" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubSetTheme or ogBurgSetTheme.
+case "$FUNC" in
+    ogGrubSetTheme)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
+        ogRaiseError $OG_ERR_FORMAT "ogGrubSetTheme not sopported" 
+        return $?               
+        ;;
+    ogBurgSetTheme)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTheme or ogBurgSetTheme."
+        return $?
+        ;;
+esac
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Detectamos cual es el tema asignado 
+THEME=$(grep "set theme_name=" $CFGFILE | grep ^set | cut -d= -f2)
+
+# Si no existe entrada de theme_name  nos salimos
+[ -z "$THEME" ] && (ogRaiseError $OG_ERR_NOTFOUND "theme_name in $CFGFILE" || return $?)
+
+#Actualizamos el tema del servidor a la particion
+if [ -d $OGLIB/$BOOTLOADER/themes/$NEWTHEME ]; then
+	cp -pr $OGLIB/$BOOTLOADER/themes/$NEWTHEME $PART/boot/$BOOTLOADERDIR/themes/	
+fi
+
+#Verificamos que el tema esta en la particion
+if ! [ -d $PART/boot/$BOOTLOADERDIR/themes/$NEWTHEME ]; then
+		ogRaiseError $OG_ERR_NOTFOUND "theme_name=$NEWTHEME in $PART/boot/$BOOTLOADERDIR/themes/" || return $?
+fi 
+
+#Cambiamos la entrada el fichero de configuración.
+sed --regexp-extended -i  s/"$THEME"/"$NEWTHEME"/g $CFGFILE
+
+
+}
+
+#/**
+# ogGrubSetAdminKeys num_disk num_part str_theme
+#@see ogBootLoaderSetTheme
+#*/
+function ogGrubSetAdminKeys {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_bolean" \
+               "$FUNCNAME 1 4 FALSE "\
+               "$FUNCNAME \$(ogFindCache) ThemeBasic"
+        return
+    fi
+    ogBootLoaderSetAdminKeys $@
+    return $?
+}
+
+#/**
+# ogBurgSetAdminKeys num_disk num_part str_bolean
+#@see ogBootLoaderSetAdminKeys
+#*/
+function ogBurgSetAdminKeys  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_bolean" \
+               "$FUNCNAME 1 4 TRUE" \
+               "$FUNCNAME \$(ogFindCache) FALSE"               
+        return
+    fi
+    ogBootLoaderSetAdminKeys $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetAdminKeys
+#@brief   Activa/Desactica las teclas de administracion 
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   Boolean TRUE/FALSE   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetAdminKeys {
+
+# Variables locales.
+local FUNC PART CFGFILE BOOTLOADER BOOTLOADERDIR CFGFILE MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetSetAdminKeys ogBurgSetSetAdminKeys"
+    return   
+fi
+  
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+
+# Error si no se reciben 2 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage str_bolean" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubSetAdminKeys or ogBurgSetAdminKeys.
+case "$FUNC" in
+    ogGrubSetAdminKeys)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
+        ogRaiseError $OG_ERR_FORMAT "ogGrubSetAdminKeys not sopported" 
+        return $?        
+        ;;
+    ogBurgSetAdminKeys)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetAdminKeys"
+        return $?
+        ;;
+esac
+
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+
+case "$3" in
+	true|TRUE)
+		[ -f ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey.disabled ] && mv ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey.disabled ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey
+	;;
+	false|FALSE)
+		[ -f ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey ] && mv ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey.disabled
+	;;	
+	*)
+	   ogRaiseError $OG_ERR_FORMAT "str bolean unknow "
+        return $?
+    ;;	
+esac
+}
+
+
+
+#/**
+# ogGrubSetTimeOut num_disk num_part int_timeout_seconds
+#@see ogBootLoaderSetTimeOut
+#*/
+function ogGrubSetTimeOut {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage int_timeout_seconds" \
+               "$FUNCNAME 1 4 50 "\
+               "$FUNCNAME \$(ogFindCache) 50"
+        return
+    fi
+    ogBootLoaderSetTimeOut $@
+    return $?
+}
+
+#/**
+# ogBurgSetTimeOut num_disk num_part str_bolean
+#@see ogBootLoaderSetTimeOut
+#*/
+function ogBurgSetTimeOut  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_timeout_seconds" \
+               "$FUNCNAME 1 4 50" \
+               "$FUNCNAME \$(ogFindCache) 50"               
+        return
+    fi
+    ogBootLoaderSetTimeOut $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetTimeOut
+#@brief   Define el tiempo (segundos) que se muestran las opciones de inicio 
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   int_timeout_seconds   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. GRUB solo si está instalado en MBR
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetTimeOut {
+
+# Variables locales.
+local FUNC PART CFGFILE TIMEOUT BOOTLOADER BOOTLOADERDIR CFGFILE MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTimeOut ogBurgSetTimeOut"
+    return   
+fi
+  
+ogCheckStringInReg $3 "^[0-9]{1,10}$" &&  TIMEOUT="$3" || ogRaiseError $OG_ERR_FORMAT "param 3 is not a integer"
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+# Error si no se reciben 3 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_timeout_seconds" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubSetTimeOut or ogBurgSetTimeOut.
+case "$FUNC" in
+    ogGrubSetTimeOut)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"     
+        ;;
+    ogBurgSetTimeOut)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTimeOut"
+        return $?
+        ;;
+esac
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Asignamos el timeOut.
+sed -i s/timeout=.*$/timeout=$TIMEOUT/g $CFGFILE
+}
+
+
+#/**
+# ogGrubSetResolution num_disk num_part int_resolution
+#@see ogBootLoaderSetResolution
+#*/
+function ogGrubSetResolution {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [str_resolution]" \
+             "$FUNCNAME 1 4 1024x768" \
+             "$FUNCNAME \$(ogFindCache) 1024x768" \
+             "$FUNCNAME 1 4"  
+        return
+    fi
+    ogBootLoaderSetResolution $@
+    return $?
+}
+
+#/**
+# ogBurgSetResolution num_disk num_part str_bolean
+#@see ogBootLoaderSetResolution
+#*/
+function ogBurgSetResolution  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [str_resolution]" \
+               "$FUNCNAME 1 4 1024x768" \
+               "$FUNCNAME \$(ogFindCache) 1024x768" \
+               "$FUNCNAME 1 4"               
+        return
+    fi
+    ogBootLoaderSetResolution $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetResolution
+#@brief   Define la resolucion que usuara el thema del gestor de arranque 
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   str_resolution (Opcional)    
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetResolution {
+
+# Variables locales.
+local FUNC PART CFGFILE RESOLUTION NEWRESOLUTION DEFAULTRESOLUTION BOOTLOADER BOOTLOADERDIR CFGFILE MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetResolution ogBurgSetResolution" 
+    return   
+fi
+
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+
+# Error si no se reciben 2 parametros.
+[ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage [str_resolution]" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde oogGrugSetResolution or ogBurgSetResolution.
+case "$FUNC" in
+    ogGrubSetResolution)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
+        ogRaiseError $OG_ERR_FORMAT "ogGrubSetResolution not sopported" 
+        return $?     
+        ;;
+    ogBurgSetResolution)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogBootLoaderSetResolution"
+        return $?
+        ;;
+esac
+
+DEFAULTRESOLUTION=1024x768
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+#controlar variable a consierar vga (default template) o video (menu)
+#Si solo dos parametros autoconfiguracion basado en el parametro vga de las propiedad menu. si no hay menu asignado es 788 por defecto
+if [ $# -eq 2 ] ; then  
+	if [ -n $video ]; then
+		NEWRESOLUTION=$(echo "$video" | cut -f2 -d: | cut -f1 -d-)
+	fi
+	if [ -n $vga ] ; then
+	case "$vga" in
+		788|789|814) 
+			NEWRESOLUTION=800x600
+			;;
+		791|792|824)
+			NEWRESOLUTION=1024x768
+			;;
+		355)
+			NEWRESOLUTION=1152x864
+			;;
+		794|795|829) 
+			NEWRESOLUTION=1280x1024
+			;;
+	esac
+	fi
+fi
+
+if [ $# -eq 3 ] ; then
+	#comprobamos que el parametro 3 cumple formato NNNNxNNNN 
+	ogCheckStringInReg $3 "[0-9]{3,4}[x][0-9]{3,4}\$" &&  NEWRESOLUTION="$3" || ogRaiseError $OG_ERR_FORMAT "param 3 is not a valid resolution: 800x600, 1024x768, 1152x864, 1280x1024, 1600x1200"
+fi
+
+# Si no existe NEWRESOLUCION  asignamos la defaulT
+[ -z "$NEWRESOLUTION" ] && NEWRESOLUTION=$DEFAULRESOLUTION
+
+#Cambiamos la entrada el fichero de configuración.
+sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
+}
