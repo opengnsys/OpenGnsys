@@ -51,7 +51,6 @@ ALTER TABLE imagenes
 # añadir clave de acceso a la API REST (tickets #708).
 ALTER TABLE usuarios
 	MODIFY pasguor VARCHAR(56) NOT NULL DEFAULT '',
-	DELETE idambito,
 	ADD apikey VARCHAR(32) NOT NULL DEFAULT '';
 # Preparar generación de clave de acceso a la API REST para el usuario principal (ticket #708).
 UPDATE usuarios
