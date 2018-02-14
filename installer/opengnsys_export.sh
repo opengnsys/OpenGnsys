@@ -12,6 +12,9 @@
 #@version 1.1.0 - Versión inicial.
 #@author  Irina Gómez - ETSII Univ. Sevilla
 #@date    2016-10-18
+#@version 1.1.0 - Cambia cómo se exporta la base de datos para permitir importar en versiones posteriores.
+#@note    Incompatible con versiones de opengnsys_import.sh anteriores a esta fecha.
+#@date    2018-02-14
 #*/ ##
 
 # Variables globales.
@@ -20,7 +23,6 @@ PROG="$(basename $0)"
 OPENGNSYS="/opt/opengnsys"
 TMPDIR=/tmp
 MYSQLFILE="$TMPDIR/ogAdmBD.sql"
-MYSQLFILE2="$TMPDIR/usuarios.sql"
 BACKUPPREFIX="opengnsys_export"
 
 # Si se solicita, mostrar ayuda.
@@ -79,14 +81,8 @@ user=$USUARIO
 password=$PASSWORD
 EOT
 
-# MYSQL: Excluimos las tablas del servidor de administración (entornos) y repositorios
-mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG \
-          --ignore-table=${CATALOG}.entornos \
-          --ignore-table=${CATALOG}.repositorios \
-          --ignore-table=${CATALOG}.usuarios > $MYSQLFILE
-# Tabla usuario
-mysqldump --defaults-extra-file=$MYCNF --opt --no-create-info $CATALOG \
-          usuarios | sed 's/^INSERT /INSERT IGNORE /g' >> $MYSQLFILE2
+mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLFILE
+
 # Borrar fichero temporal
 rm -f $MYCNF
 
@@ -100,7 +96,6 @@ echo $ServidorAdm > $TMPDIR/IPSERVER.txt
 echo "Creamos un archivo comprimido con los datos: $BACKUPFILE."
 tar -cvzf $BACKUPFILE --transform="s!^!$BACKUPPREFIX/!" \
           -C $(dirname $MYSQLFILE) $(basename $MYSQLFILE) \
-          -C $(dirname $MYSQLFILE2) $(basename $MYSQLFILE2) \
           -C $TMPDIR IPSERVER.txt \
           -C $DHCPDIR dhcpd.conf \
           -C $OPENGNSYS/tftpboot menu.lst \
