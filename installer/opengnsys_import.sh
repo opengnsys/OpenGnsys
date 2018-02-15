@@ -326,3 +326,5 @@ echo    "  - $OPENGNSYS/www/menus-$DATE"
 echo -e "  - $MYSQLBCK \n"
 
 echo "Hay que revisar la configuración del dhcp. En la consola es necesario configurar los valores de las ips de repositorios, servidores ntp, etc y lanzar el \"netBoot Avanzado\" a todas las aulas"
+
+echo "Es necesario probar todos los procedimientos y en caso de error borrarlos y generarlos de nuevo."
