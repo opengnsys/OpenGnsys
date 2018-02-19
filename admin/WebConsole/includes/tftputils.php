@@ -145,8 +145,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 		  " ogrepo=$repo" .
 		  " oglive=$server" .
 		  " oglog=$server" .
-		  " ogshare=$server" .
-		  " oglivedir=$oglivedir";
+		  " ogshare=$server";
 	// Añadir parámetros opcionales.
 	if (! empty ($ntp))	{ $infohost.=" ogntp=$ntp"; }
 	if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }

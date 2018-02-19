@@ -102,11 +102,11 @@ for MAC in $ETHERNET; do
 				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
 				' ogshare=', @serverip,
 				' oglivedir=', ordenadores.oglivedir,
-				IF(perfileshard.descripcion='', '', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_'))),
-				IF(aulas.ntp='', '', CONCAT(' ogntp=', aulas.ntp)),
-				IF(aulas.dns='', '', CONCAT(' ogdns=', aulas.dns)),
-				IF(aulas.proxy='', '', CONCAT(' ogproxy=', aulas.proxy)),
-				IF(entidades.ogunit=1 AND NOT centros.directorio='', CONCAT(' ogunit=', centros.directorio),''),
+				IF(perfileshard.descripcion<>'', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_')), ''),
+				IF(aulas.ntp<>'', CONCAT(' ogntp=', aulas.ntp), ''),
+				IF(aulas.dns<>'', CONCAT(' ogdns=', aulas.dns), ''),
+				IF(aulas.proxy<>'', CONCAT(' ogproxy=', aulas.proxy), ''),
+				IF(entidades.ogunit=1 AND NOT centros.directorio='', CONCAT(' ogunit=', centros.directorio), ''),
 				CASE
 				    WHEN menus.resolucion IS NULL THEN ''
 				    WHEN menus.resolucion <= '999' THEN CONCAT(' vga=', menus.resolucion)
@@ -126,6 +126,10 @@ for MAC in $ETHERNET; do
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Obtener directorio ogLive a partir de los datos.
 		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
+		# Comprobar si existe "oglivedir" en la plantilla para evitar duplicados.
+		if grep -q "oglivedir=" $TEMPLATE 2>/dev/null; then
+			DATOS="${DATOS/oglivedir=$OGLIVEDIR/}"
+		fi
 		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
 		sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOS//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" $TEMPLATE >$PXEFILE
 		# Ponemos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
