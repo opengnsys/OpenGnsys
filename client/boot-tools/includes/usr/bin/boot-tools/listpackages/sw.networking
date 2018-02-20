@@ -1,5 +1,6 @@
 #sw.networking
 install netpipes 
+install curl
 install wget 
 install tftp
 install dnsutils

@@ -28,7 +28,7 @@ cp -a $OPENGNSYS/etc/preinit/loadenviron.sh /etc/profile.d/
 #setterm -blank 0 -powersave off -powerdown 0 < /dev/console > /dev/console 2>&1
 
 # Activado WOL en la interfaz usada en arranque PXE.
-#ethtool -s $DEVICE wol g 2>/dev/null
+ethtool -s $DEVICE wol g 2>/dev/null
 
 # TODO Localizar correctamente el script de arranque.
 [ -f /opt/opengnsys/scripts/runhttplog.sh ] && /opt/opengnsys/scripts/runhttplog.sh 2>/dev/null

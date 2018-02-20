@@ -306,7 +306,7 @@ case "$OSDISTRIB" in
 		[ -z "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
-		# Configuración para PHP 5 en Ubuntu 16.x+.
+		# Configuración para PHP 5.
 		if ! yum list php5\*w &>/dev/null; then
 			if [ $OSVERSION -ge 7 ]; then
 				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/webtatic-release.rpm

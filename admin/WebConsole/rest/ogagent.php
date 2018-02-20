@@ -24,7 +24,7 @@ function writeLog($message = "") {
  * @note     Route: /ogagent/started, Method: POST, Format: JSON
  * @param    string ip         IP address
  * @param    string mac        MAC (Ethernet) address
- * @param    string ostype     OS type (Linux, Windows)
+ * @param    string ostype     OS type (Linux, Windows, macOS)
  * @param    string osversion  OS version
  * @param    string secret     random secret key to access client's REST API
  * @return   Null string if OK, else error message.
@@ -85,7 +85,7 @@ EOD;
  * @note     Route: /ogagent/stopped, Method: POST, Format: JSON
  * @param    string ip         IP address
  * @param    string mac        MAC (Ethernet) address
- * @param    string ostype     OS type (Linux, Windows)
+ * @param    string ostype     OS type (Linux, Windows, macOS)
  * @param    string osversion  OS version
  * @return   Null string if OK, else error message.
  */
@@ -123,6 +123,9 @@ $app->post('/ogagent/stopped',
  * @note     Route: /ogagent/loggedin, Method: POST, Format: JSON
  * @param    string ip         IP address
  * @param    string user       username
+ * @param    string language   session language
+ * @param    string ostype     OS type (Linux, Windows, macOS)
+ * @param    string osversion  OS version
  * @return   Null string if OK, else error message.
  */
 $app->post('/ogagent/loggedin',
