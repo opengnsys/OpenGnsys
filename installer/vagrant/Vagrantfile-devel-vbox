@@ -42,7 +42,7 @@ wget -q https://opengnsys.es/svn/branches/version1.1/installer/opengnsys_install
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
-for ((i=#{NCLIENTS+10}; i>0; i--)); do
+for ((i=#{NCLIENTS+10}; i>10; i--)); do
     sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
 done
 service isc-dhcp-server restart
