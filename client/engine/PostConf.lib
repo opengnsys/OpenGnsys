@@ -146,6 +146,9 @@ ogSetRegistryValue "$MNTDIR" SYSTEM "\Setup\CmdLine" "cmd.exe /c $(basename $CMD
 #@version 1.0.4 - Heredado de antigua función ogInstallMiniSetup
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2012-04-16
+#@version 1.1.0 - Resuelve problemas a partir de Windows 10
+#@author  Carmelo Cabezuelo Aguilar - Universidad Politécnica de Valencia
+#@date    2018-02-20
 #*/ ##
 function ogInstallRunonce ()
 {
@@ -189,10 +192,16 @@ fi
 #Creamos las claves de registro necesarias para que meter el cmd en el runonce del usuario y este haga autologin
 ogAddRegistryValue $MOUNTPOINT software '\Microsoft\Windows\CurrentVersion\RunOnce\PostConfiguracion' 2>/dev/null
 ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows\CurrentVersion\RunOnce\PostConfiguracion' "C:\windows\system32\\$3" 2>/dev/null
+ogAddRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon' 2>/dev/null 
 ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon' 1 2>/dev/null
+ogAddRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName' 2>/dev/null
 ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultUserName' "$4" 2>/dev/null
+ogAddRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName' 2>/dev/null
+ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultDomainName' ".\\" 2>/dev/null
 ogAddRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword' 2>/dev/null
 ogSetRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\DefaultPassword' "$5" 2>/dev/null
+ogDeleteRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\ForceAutoLockOnLogon' 2>/dev/null  
+ogDeleteRegistryValue $MOUNTPOINT software '\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoLogonCount' 2>/dev/null 
 }
 
 #/**
