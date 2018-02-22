@@ -17,7 +17,7 @@
 
 		// Pedir confirmación si clonación masiva por Unicast.
 		if (document.fdatosejecucion.ambito.value!=16 && document.fdatos.idmetodo !== undefined &&
-		   (document.fdatos.idmetodo.value=="UNICAST" || document.fdatos.idmetodo.value=="UNICAST-DIRECT")) {
+                   (document.fdatos.idmetodo.value=="UNICAST" || document.fdatos.idmetodo.value=="UNICAST-DIRECT")) {
 			if (confirm(TbMsg[4]) !== true) {
 				cancelar();
 				return false;

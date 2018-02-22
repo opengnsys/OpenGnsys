@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -41,11 +41,11 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/hardwares_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/hardwares_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
-<?
+<?php
 //________________________________________________________________________________________________________
 echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
@@ -74,7 +74,7 @@ $XMLcontextual=CreacontextualXMLPerfil_Hardware(); // Perfiles
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 //	Devuelve una cadena con formato XML de toda la informaci� del hardware registrado en un Centro concreto
 //	Parametros: 

@@ -5,7 +5,7 @@
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="El nombre del aula debe contener caracteres alfanumericos";
-TbMsg[1]="You must introduce a number of places for this lab";
+TbMsg[1]="You must introduce a number of Capacity for this lab";
 TbMsg[2]="WARNING.- This lab contain others groups or labs. If you remove it, you will also remove all these. ¿ Are you sure ?";
 TbMsg[3]="Time for begining of reserves periode must be smaller than final time";
 TbMsg[4]="Multicast speed is not valid, use numbers only";
@@ -23,3 +23,4 @@ TbMsg[15]="La URL de la pagina de login no es valida";
 TbMsg[16]="La URL de la pagina de validación no es valida";
 TbMsg[17]="La ubicacion solo puede contener caracteres alfanumericos"
 TbMsg[18]="Los comentarios solo pueden contener caracteres alfanumericos"
+TbMsg[19]="NTP server IP address is not valid";

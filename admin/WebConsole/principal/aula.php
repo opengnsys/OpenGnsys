@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -60,9 +60,9 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/aulas_'.$idioma.'.js"></SCRIPT>'?>
-<?	
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/aulas_'.$idioma.'.js"></SCRIPT>'?>
+<?php	
 //________________________________________________________________________________________________________
 switch($litambito){
 	case $LITAMBITO_CENTROS :
@@ -94,14 +94,14 @@ switch($litambito){
 <FORM name="fcomandos" action="" method="post" target="frame_contenidos">
 	<INPUT type="hidden" name="idcomando" value="">
 	<INPUT type="hidden" name="descricomando" value="">	
-	<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">
-	<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
+	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
+	<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
 	<INPUT type="hidden" name="nombreambito" value="">
 	<INPUT type="hidden" name="gestor" value="">
 	<INPUT type="hidden" name="funcion" value="">
 	<INPUT type="hidden" name="script" value="">
 </FORM>
-<?
+<?php
 $flotante=new MenuContextual(); // Crea objeto menu contextual
 $XMLcontextual=ContextualXMLAulas();  // Crea contextual de aulas
 echo $flotante->CreaMenuContextual($XMLcontextual);
@@ -138,7 +138,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 </SCRIPT>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function RecorreCentro($cmd){
 	global $AMBITO_GRUPOSAULAS;
@@ -232,7 +232,7 @@ function RecorreOrdenadores($cmd){
 		$idordenador=$rs->campos["idordenador"];
 		$Midordenador[$k]=$rs->campos["idordenador"];
 		$Mnombreordenador[$k]=$rs->campos["nombreordenador"];
-		$MimgOrdenador[$k]="ordenador_OFF.gif";
+		$MimgOrdenador[$k]="ordenador_OFF.png";
 		$Mip[$k]=$rs->campos["ip"];
 		$Mmac[$k]=$rs->campos["mac"];
 		$cadenaip.=$rs->campos["ip"].";";
@@ -295,13 +295,17 @@ function pintaordenadores(){
 		}
 	}
 	echo '</TABLE>';
-	echo '
-<p>
-<table style="border: #d4d0c8 1px solid; background: #eeeeee" align=center>
-  <tr align="center">';
-	foreach ( Array ("OPG", "BSY", "WXP", "LNX", "OFF") as $status) {
-		echo '    <td><img src="../images/ordenador_'.$status.'.gif" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$TbMsg["STATUS_$status"].'</font></td>';
+	echo '<p>';
+	echo '<table style="border: #d4d0c8 1px solid; background: #eeeeee" align="center">';
+	echo '  <tr align="center" valign="top">';
+	foreach (Array ("OPG", "WIN", "LNX", "OSX") as $status) {
+		echo '    <td><img src="../images/ordenador_'.$status.'.png" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$TbMsg["STATUS_$status"].'</font></td>';
 	}
+	echo '  <tr align="center" valign="top">';
+	foreach (Array ("BSY", "WINS", "LNXS", "OFF") as $status) {
+		echo '    <td><img src="../images/ordenador_'.$status.'.png" alt="'.$status.'" width="24" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.str_replace(" ", "<br>", $TbMsg["STATUS_$status"]).'</font></td>';
+	}
+	echo '  </tr>';
 	echo '  </tr>';
 	echo '</table>';
 	if ($nombreaula!="")

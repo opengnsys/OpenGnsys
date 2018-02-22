@@ -1,9 +1,9 @@
 
-OpenGnSys 1.0.x Filesystem Hiearchy
+OpenGnsys 1.1.x Filesystem Hiearchy
 ===================================
 
 
-Directory Structure of OpenGnSys Client
+Directory Structure of OpenGnsys Client
 ---------------------------------------------
 
 /opt/opengnsys
@@ -18,21 +18,23 @@ Directory Structure of OpenGnSys Client
 
 
 
-Directory Structure of OpenGnSys Server:
+Directory Structure of OpenGnsys Server:
 ----------------------------------------------
 
 /opt/opengnsys
   bin - server binaries.
   client - exports the client's directory structure.
+  doc - documentation files.
   etc - configuration files.
-  lib - tool libraries.
-  log - ficheros de registro de incidencias.
+  lib - tools and libraries.
   log - log files.
+  sbin - binaries for services.
   tftpboot - remote boot files (linked to TFTP directory).
+  www - web files.
 
 
 
-Directory Structure of OpenGnSys Repository Manager
+Directory Structure of OpenGnsys Repository Manager
 ---------------------------------------------------------
 
 /opt/opengnsys
@@ -40,6 +42,7 @@ Directory Structure of OpenGnSys Repository Manager
   etc - configuration files.
   images - filesystem images.
   log - log files.
+  sbin - binaries for services.
 
 
 

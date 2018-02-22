@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Sincroniza una base de datos externa con la de opengnsys.
  * No es necesaria su implementacion, puede dejarse en blanco

@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -37,6 +37,7 @@ if (isset($_POST["identidad"])) $identidad=$_POST["identidad"];
 if (isset($_POST["identificador"])) $identidad=$_POST["identificador"];
 if (isset($_POST["nombreentidad"])) $nombreentidad=$_POST["nombreentidad"];
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"];
+if (isset($_POST["ogunit"])) $ogunit=$_POST["ogunit"];
 
 
 $tablanodo=""; // Arbol para nodos insertados
@@ -51,6 +52,7 @@ if($opcion!=$op_movida){
 	echo '<HTML>';
 	echo '<HEAD>';
 	echo '	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">';
+	echo '</HEAD>';
 	echo '<BODY>';
 	echo '<P><SPAN style="visibility:hidden" id="arbol_nodo">'.$tablanodo.'</SPAN></P>';
 	echo '	<SCRIPT language="javascript" src="../jscripts/propiedades_entidades.js"></SCRIPT>';
@@ -102,6 +104,7 @@ function Gestiona(){
 	global $identidad;
 	global $nombreentidad;
 	global $comentarios;
+	global $ogunit;
 	global $grupoid;
 	global $iduniversidad;
 
@@ -116,10 +119,11 @@ function Gestiona(){
 	$cmd->CreaParametro("@identidad",$identidad,1);
 	$cmd->CreaParametro("@nombreentidad",$nombreentidad,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
+	$cmd->CreaParametro("@ogunit",$ogunit,0);
 	
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO entidades(nombreentidad,comentarios,iduniversidad,grupoid) VALUES (@nombreentidad,@comentarios,@iduniversidad,@grupoid)";
+			$cmd->texto="INSERT INTO entidades(nombreentidad,comentarios,ogunit,iduniversidad,grupoid) VALUES (@nombreentidad,@comentarios,@ogunit,@iduniversidad,@grupoid)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$identidad=$cmd->Autonumerico();
@@ -131,7 +135,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE entidades SET nombreentidad=@nombreentidad,comentarios=@comentarios WHERE identidad=@identidad";
+			$cmd->texto="UPDATE entidades SET nombreentidad=@nombreentidad,comentarios=@comentarios,ogunit=@ogunit WHERE identidad=@identidad";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :

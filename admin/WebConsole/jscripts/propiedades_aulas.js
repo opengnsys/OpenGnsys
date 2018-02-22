@@ -123,6 +123,7 @@ function comprobar_datos(){
 	       validate (form.comentarios, validate_text, 18) &&
 	       validate (form.router, validate_ipadress_notnull, 4) &&
 	       validate (form.netmask, validate_ipadress_notnull, 5) && 
+	       validate (form.ntp, validate_ipadress, 19) && 
 	       validate (form.dns, validate_ipadress, 12) && 
 	       validate (form.proxy, validate_url, 13) && 
 	       validate (form.modp2p, validate_notnull, 6) &&

@@ -1,4 +1,4 @@
-<?
+<?php
 
 function connect_to_ldap(){	
 	$server = "IP_SERVIDOR";

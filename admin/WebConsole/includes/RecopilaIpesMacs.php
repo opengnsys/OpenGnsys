@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -38,7 +38,9 @@ function RecopilaIpesMacs($cmd,$ambito,$idambito,$filtroip=""){
 		
 	if(!empty($filtroip)){
 		$filtroip="'".str_replace(";","','",$filtroip)."'"; // Cambia caracter ; para consulta alfanumérica
-		$cmd->texto="SELECT ip, mac, nombreordenador, idordenador FROM ordenadores WHERE ip IN (".$filtroip.")";
+		$cmd->texto="SELECT ip, mac, nombreordenador, idordenador, agentkey
+			       FROM ordenadores
+			      WHERE ip IN (".$filtroip.")";
 		RecorreOrdenadores($cmd);
 	}
 	else{
@@ -60,13 +62,16 @@ function RecopilaIpesMacs($cmd,$ambito,$idambito,$filtroip=""){
 				RecorreGruposOrdenadores($cmd);
 				break;
 			case $AMBITO_ORDENADORES :
-				$cmd->texto="SELECT ip,mac,nombreordenador,idordenador  FROM ordenadores WHERE idordenador=".$idambito;
+				$cmd->texto="SELECT ip, mac, nombreordenador, idordenador, agentkey
+					       FROM ordenadores
+					      WHERE idordenador=".$idambito;
 				RecorreOrdenadores($cmd);
 				break;
 			default: // Se trata de un conjunto aleatorio de ordenadores
-				$cmd->texto="SELECT ip,mac,nombreordenador,idordenador  FROM ordenadores WHERE idordenador IN (".$idambito.")";
+				$cmd->texto="SELECT ip, mac, nombreordenador, idordenador, agentkey
+					       FROM ordenadores
+					      WHERE idordenador IN (".$idambito.")";
 				RecorreOrdenadores($cmd);
-				
 		}
 	}
 	$cadenaid=substr($cadenaid,0,strlen($cadenaid)-1); // Quita la coma
@@ -116,7 +121,9 @@ function RecorreAulas($cmd){
 		$idaula=$rs->campos["idaula"];
 		$cmd->texto="SELECT idgrupo,nombregrupoordenador FROM gruposordenadores WHERE idaula=".$idaula." AND grupoid=0";
 		RecorreGruposOrdenadores($cmd);
-		$cmd->texto="SELECT ip,mac,nombreordenador,idordenador FROM ordenadores WHERE  idaula=".$idaula." AND grupoid=0";
+		$cmd->texto="SELECT ip, mac, nombreordenador, idordenador, agentkey
+			       FROM ordenadores
+			      WHERE idaula=".$idaula." AND grupoid=0";
 		RecorreOrdenadores($cmd);
 		$rs->Siguiente();
 	}
@@ -132,7 +139,9 @@ function RecorreGruposOrdenadores($cmd){
 		$idgrupo=$rs->campos["idgrupo"];
 		$cmd->texto="SELECT idgrupo,nombregrupoordenador FROM gruposordenadores WHERE grupoid=".$idgrupo;
 		RecorreGruposOrdenadores($cmd);
-		$cmd->texto="SELECT ip,mac,nombreordenador,idordenador FROM ordenadores WHERE  grupoid=".$idgrupo;
+		$cmd->texto="SELECT ip, mac, nombreordenador, idordenador, agentkey
+			       FROM ordenadores
+			      WHERE grupoid=".$idgrupo;
 		RecorreOrdenadores($cmd);
 		$rs->Siguiente();
 	}
@@ -143,6 +152,7 @@ function RecorreOrdenadores($cmd){
 	global $cadenaid;
 	global $cadenaip;
 	global $cadenamac;
+	global $cadenaoga;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
@@ -150,6 +160,7 @@ function RecorreOrdenadores($cmd){
 		$cadenaid.=$rs->campos["idordenador"].",";
 		$cadenaip.=$rs->campos["ip"].";";
 		$cadenamac.=$rs->campos["mac"].";";
+		$cadenaoga.=(is_null($rs->campos["agentkey"])?"":$rs->campos["agentkey"]).";";
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();

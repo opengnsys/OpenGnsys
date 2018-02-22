@@ -26,6 +26,7 @@ $idaula=0;
 $nombreaula="";
 $grupoid=0; 
 $urlfoto="";
+$inremotepc=false;
 $cagnon=false;
 $pizarra=false;
 $ubicacion="";
@@ -36,6 +37,8 @@ $horaresevfin=0;
 $idmenu=0;
 $idproautoexec=0;
 $idrepositorio=0;
+### AGP
+$oglive="ogLive";
 $idperfilhard=0;
 $modomul=0;
 $ipmul="";
@@ -47,6 +50,7 @@ $netmask=0;
 $modp2p=0;
 $timep2p=0;
 ############ Ramón
+$ntp="";
 $dns="";
 $proxy="";
 ############ UHU
@@ -72,6 +76,7 @@ if (isset($_POST["identificador"])) $idaula=$_POST["identificador"];
 
 if (isset($_POST["nombreaula"])) $nombreaula=$_POST["nombreaula"]; 
 if (isset($_POST["urlfoto"])) $urlfoto=$_POST["urlfoto"]; 
+if (isset($_POST["inremotepc"])) $inremotepc=$_POST["inremotepc"]; 
 if (isset($_POST["cagnon"])) $cagnon=$_POST["cagnon"]; 
 if (isset($_POST["pizarra"])) $pizarra=$_POST["pizarra"];
 if (isset($_POST["ubicacion"])) $ubicacion=$_POST["ubicacion"]; 
@@ -82,6 +87,7 @@ if (isset($_POST["horaresevfin"])) $horaresevfin=$_POST["horaresevfin"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"]; 
 if (isset($_POST["idprocedimiento"])) $idproautoexec=$_POST["idprocedimiento"]; 
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
+if (isset($_POST["oglive"])) $oglive=$_POST["oglive"];
 if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"]; 
 if (isset($_POST["modomul"])) $modomul=$_POST["modomul"]; 
 if (isset($_POST["ipmul"])) $ipmul=$_POST["ipmul"]; 
@@ -93,6 +99,7 @@ if (isset($_POST["netmask"])) $netmask=$_POST["netmask"];
 if (isset($_POST["modp2p"])) $modp2p=$_POST["modp2p"]; 
 if (isset($_POST["timep2p"])) $timep2p=$_POST["timep2p"]; 
 ################# Ramón
+if (isset($_POST["ntp"])) $ntp=$_POST["ntp"]; 
 if (isset($_POST["dns"])) $dns=$_POST["dns"]; 
 if (isset($_POST["proxy"])) $proxy=$_POST["proxy"]; 
 ################# UHU
@@ -174,6 +181,7 @@ function Gestiona(){
 	global	$idaula;
 	global	$nombreaula;
 	global	$urlfoto;
+	global	$inremotepc;
 	global	$cagnon;
 	global	$pizarra;
 	global	$ubicacion;
@@ -185,6 +193,7 @@ function Gestiona(){
 	global	$idmenu;
 	global	$idproautoexec;
 	global	$idrepositorio;
+	global	$oglive;
 	global	$idperfilhard;
 	
 	global $gidmenu;
@@ -202,6 +211,7 @@ function Gestiona(){
 	global  $modp2p;
 	global  $timep2p;
 ########################## Ramón
+	global $ntp;
 	global $dns;
 	global $proxy;
 	global $idioma;
@@ -223,6 +233,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idaula",$idaula,1);
 	$cmd->CreaParametro("@nombreaula",$nombreaula,0);
 	$cmd->CreaParametro("@urlfoto",$urlfoto,0);
+	$cmd->CreaParametro("@inremotepc",$inremotepc,1);
 	$cmd->CreaParametro("@cagnon",$cagnon,1);
 	$cmd->CreaParametro("@pizarra",$pizarra,1);
 	$cmd->CreaParametro("@ubicacion",$ubicacion,0);
@@ -233,7 +244,9 @@ function Gestiona(){
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idproautoexec",$idproautoexec,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@oglivedir",$oglive,0);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
+	$cmd->CreaParametro("@ntp",$ntp,0);
 	$cmd->CreaParametro("@dns",$dns,0);
 	$cmd->CreaParametro("@proxy",$proxy,0);
 	$cmd->CreaParametro("@modomul",$modomul,1);
@@ -255,16 +268,16 @@ function Gestiona(){
 	switch($opcion){
 		case $op_alta :
 			$cmd->texto="INSERT INTO aulas
-						(idcentro, grupoid, nombreaula, urlfoto, cagnon,
-						 pizarra, ubicacion, comentarios, puestos,
+						(idcentro, grupoid, nombreaula, urlfoto, inremotepc,
+						 cagnon, pizarra, ubicacion, comentarios, puestos,
 						 horaresevini, horaresevfin, router, netmask,
-						 dns, proxy, modomul, ipmul, pormul, velmul,
-						 modp2p, timep2p, validacion, paginalogin, paginavalidacion) 
-					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @cagnon,
-						 @pizarra, @ubicacion, @comentarios, @puestos,
+						 ntp, dns, proxy, modomul, ipmul, pormul, velmul,
+						 modp2p, timep2p, validacion, paginalogin, paginavalidacion, oglivedir) 
+					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @inremotepc,
+						 @cagnon, @pizarra, @ubicacion, @comentarios, @puestos,
 						 @horaresevini, @horaresevfin, @router, @netmask,
-						 @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
-						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion)";
+						 @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
+						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion, @oglivedir)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idaula=$cmd->Autonumerico();
@@ -277,14 +290,15 @@ function Gestiona(){
 			break;
 		case $op_modificacion:
 			$cmd->texto="UPDATE aulas SET
-					    nombreaula=@nombreaula, urlfoto=@urlfoto, cagnon=@cagnon,
-					    pizarra=@pizarra, ubicacion=@ubicacion,
+					    nombreaula=@nombreaula, urlfoto=@urlfoto, inremotepc=@inremotepc,
+					    cagnon=@cagnon, pizarra=@pizarra, ubicacion=@ubicacion,
 					    comentarios=@comentarios, puestos=@puestos,
 					    horaresevini=@horaresevini, horaresevfin=@horaresevfin,
-					    router=@router,netmask=@netmask, dns=@dns, proxy=@proxy,
+					    router=@router,netmask=@netmask, ntp=@ntp, dns=@dns, proxy=@proxy,
 					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
 					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
-					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion
+					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion,
+					    oglivedir=IF(@oglivedir='0',oglivedir,@oglivedir)
 					WHERE idaula=@idaula";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
@@ -295,6 +309,8 @@ function Gestiona(){
 					$clsUpdate.="idproautoexec=@idproautoexec,";					
 				if($idrepositorio>0 || $gidrepositorio>0)	
 					$clsUpdate.="idrepositorio=@idrepositorio,";
+				if($oglive != "0")	
+					$clsUpdate .="oglivedir=@oglivedir,";
 				if($idperfilhard>0 || $gidperfilhard>0)	
 					$clsUpdate.="idperfilhard=@idperfilhard,";
 				// UHU - Actualiza la validacion en los ordenadores

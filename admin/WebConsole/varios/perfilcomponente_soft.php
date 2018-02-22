@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -30,29 +30,38 @@ if (!$cmd)
 <SCRIPT language="javascript" src="../jscripts/perfilcomponente_soft.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/perfilcomponente_soft_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/perfilcomponente_soft_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 
-	<INPUT type=hidden value="<? echo $idcentro?>" id=idcentro>	 
-	<INPUT type=hidden value="<? echo $idperfilsoft?>" id=idperfilsoft>	 
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
+	<INPUT type=hidden value="<?php echo $idcentro?>" id=idcentro>	 
+	<INPUT type=hidden value="<?php echo $idperfilsoft?>" id=idperfilsoft>	 
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
 	<BR>
 	<DIV align=center id="Layer_componentes">
-		<SPAN align=center class=presentaciones><B><U><?echo $TbMsg[2]?></U>:&nbsp;<? echo $descripcionperfil?></B></SPAN></P>
+		<SPAN align=center class=presentaciones><B><U><?php echo $TbMsg[2]?></U>:&nbsp;<?php echo $descripcionperfil?></B></SPAN></P>
 		<TABLE width="100%" class="tabla_listados" cellspacing=1 cellpadding=0 >
 			 <TR>
 				<TH>&nbsp</TH>
 				<TH>T</TH>
-				<TH><?echo $TbMsg[3]?></TH>
+				<TH><?php echo $TbMsg[3]?></TH>
 			</TR>
-		<?
+		<?php
+			$nombreso=false;
 			$rs=new Recordset; 
-			$cmd->texto='SELECT softwares.idsoftware,softwares.descripcion,tiposoftwares.descripcion as hdescripcion,tiposoftwares.urlimg FROM softwares INNER JOIN perfilessoft_softwares ON softwares.idsoftware=perfilessoft_softwares.idsoftware INNER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware WHERE perfilessoft_softwares.idperfilsoft='.$idperfilsoft.' ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion';
+			$cmd->texto='SELECT softwares.idsoftware,softwares.descripcion,tiposoftwares.descripcion as hdescripcion,tiposoftwares.urlimg, nombreso FROM softwares INNER JOIN perfilessoft_softwares ON softwares.idsoftware=perfilessoft_softwares.idsoftware INNER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware INNER JOIN perfilessoft USING (idperfilsoft) LEFT OUTER JOIN nombresos USING (idnombreso) WHERE perfilessoft_softwares.idperfilsoft='.$idperfilsoft.' ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion';
 			$rs->Comando=&$cmd; 
 			if ($rs->Abrir()){ 
 				$rs->Primero();
+				if (!$nombreso && $rs->campos["nombreso"] != "") {
+					echo '<TR>';
+					echo '<TD></TD>';
+					echo '<TD align=center width="10%" ><img alt="'. $rs->campos["nombreso"].'" src="../images/iconos/so.gif"></TD>';
+					echo '<TD  width="80%" >&nbsp;'.$rs->campos["nombreso"].'</TD>';
+					echo '</TR>';
+					$nombreso=true;
+				}
 				$A_W=" WHERE ";
 				$strex="";
 				while (!$rs->EOF){
@@ -86,7 +95,7 @@ if (!$cmd)
 	</DIV>		
 	<DIV id="Layer_nota" align=center >
 		<BR>
-		<SPAN align=center class=notas><I><?echo $TbMsg[4]?></I></SPAN>
+		<SPAN align=center class=notas><I><?php echo $TbMsg[4]?></I></SPAN>
 	</DIV>
 </FORM>
 </BODY>

@@ -94,6 +94,9 @@ function validate_text(value) {
 function validate_text_notnull(value) {
 	return validate_text(value) && validate_notnull(value);
 }
+function validate_notspace(value) {
+	return ! validate_expr(value, /.*[ ]/);
+}
 
 function validation_highlight(field) {
 	field.focus();

@@ -23,4 +23,5 @@ $TbMsg[14]="Double menu";
 $TbMsg[15]="URL menú personalizado";
 $TbMsg[17]="Screen resolution";
 $TbMsg[18]="Background image";
+$TbMsg["PROP_DEFAULT"]="Detected by default";
 ?>

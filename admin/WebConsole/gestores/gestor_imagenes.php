@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -26,6 +26,7 @@ $descripcion="";
 $grupoid=0; 
 $idperfilsoft=0;
 $comentarios="";
+$inremotepc=false;
 $numpar=0;
 $codpar=0;
 $idrepositorio=0;
@@ -42,6 +43,7 @@ if (isset($_POST["descripcion"])) $descripcion=$_POST["descripcion"];
 if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
+if (isset($_POST["inremotepc"])) $inremotepc=$_POST["inremotepc"]; 
 if (isset($_POST["identificador"])) $idimagen=$_POST["identificador"];
 if (isset($_POST["numpar"])) $numpar=$_POST["numpar"]; 
 if (isset($_POST["codpar"])) $codpar=$_POST["codpar"]; 
@@ -117,6 +119,7 @@ function Gestiona(){
 	global	$descripcion;
 	global	$grupoid;
 	global	$comentarios;
+	global	$inremotepc;
 	global	$numpar;
 	global	$codpar;
 	global	$idrepositorio;
@@ -140,6 +143,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idperfilsoft",$idperfilsoft,1);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
+	$cmd->CreaParametro("@inremotepc",$inremotepc,1);
 	$cmd->CreaParametro("@numpar",$numpar,1);
 	$cmd->CreaParametro("@codpar",$codpar,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
@@ -148,8 +152,13 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO imagenes (nombreca,ruta,descripcion,idperfilsoft,comentarios,numpar,codpar,idrepositorio,imagenid,idcentro,grupoid,tipo)
-								 VALUES (@nombreca,@ruta,@descripcion,@idperfilsoft,@comentarios,@numpar,@codpar,@idrepositorio,@imagenid,@idcentro,@grupoid,@tipo)";
+			$cmd->texto="INSERT INTO imagenes
+						 (nombreca, ruta, descripcion, idperfilsoft, 
+						 comentarios, inremotepc, numpar, codpar,
+						 idrepositorio, imagenid, idcentro, grupoid, tipo)
+					  VALUES (@nombreca, @ruta, @descripcion, @idperfilsoft,
+						 @comentarios, @inremotepc, @numpar, @codpar,
+						 @idrepositorio, @imagenid, @idcentro, @grupoid, @tipo)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idimagen=$cmd->Autonumerico();
@@ -161,10 +170,12 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE imagenes SET  nombreca=@nombreca,ruta=@ruta,descripcion=@descripcion,idperfilsoft=@idperfilsoft,
-						 comentarios=@comentarios,numpar=@numpar,codpar=@codpar,idrepositorio=@idrepositorio,
-						 imagenid=@imagenid
-						WHERE idimagen=@idimagen";
+			$cmd->texto="UPDATE imagenes SET
+					    nombreca=@nombreca, ruta=@ruta, descripcion=@descripcion,
+					    idperfilsoft=@idperfilsoft, comentarios=@comentarios,
+					    inremotepc=@inremotepc, numpar=@numpar,codpar=@codpar,
+					    idrepositorio=@idrepositorio, imagenid=@imagenid
+				      WHERE idimagen=@idimagen";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :

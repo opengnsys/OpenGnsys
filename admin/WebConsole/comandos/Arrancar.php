@@ -34,7 +34,7 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/Arrancar.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>		
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <?php
@@ -43,7 +43,7 @@ if (!$cmd)
 	//
 	include_once("./includes/FiltradoAmbito.php");
 ?>
-	<P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN></p>
+	<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></p>
 	</BR>
 	<TABLE id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>

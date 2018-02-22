@@ -106,6 +106,11 @@ bool Database::Execute(char* CmdStr, Table& Tbl)
 	return (true);
 }
 // __________________________________________________________________________
+void Database::liberaResult (Table& Tbl) {
+	//Free resources after mysql_store_result
+	mysql_free_result(Tbl.m_Rec);
+}
+// __________________________________________________________________________
 Table::Table()
 {
 	m_Rec=NULL;

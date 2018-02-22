@@ -2,12 +2,121 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
 
+
+Lista de cambios incluidos en OpenGnsys 1.1.0
+---------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#141	Reconstruir función ogDiskToDev (resuelto en #748)
+#544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
+#676	Soportar sistema de ficheros ZFS
+#678	Unidades organizativas con directorio de imágenes separado (mejora)
+#716	Revisión ogCleanLinuxDevices
+#722	Multicast entre subredes (mejora)
+#726	Reducir el registro de errores y avisos en algunas operaciones 
+#727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
+#731	Soporte para cualquier versión de Windows
+#740	Clonar disco completo en modo "raw"
+#744	Gestionar bloqueos de disco
+#748	Mejorar rendimiento usando fichero de configuración de discos (mejora)
+#770	Imágenes sincronizadas: transferencia multicast (mejora)
+#771	Crear imagen no muestra correctamente el espacio necesario y disponible
+#781	Control de errores en la transferencia multicast
+#790	ogLive Xenial no identifica el orden correcto de varios discos duros sata
+#791	ogGrubInstallMBR con dos discos duros
+#796	Burg como systemMenu gráfico
+#815	Crear Imagen: cálculo del espacio libre en el repositorio (mejora)
+#823	Mejorar el rendimiento al obtener el inventario de software de Windows (mejora)
+#827	ogGrubInstallMbr debe mostrar entrada al ogLive, como ogBurgInstallMbr
+#829	Funciones auxiliares de configuración de BURG
+#832	Fallo en Autologon de Windows 10
+
+Tickets resueltos en módulo OpenGnsys Client:
+#233	Añadir reloj al cliente (resuelto en #746)
+#244	Internacionalización de los mensajes del Browser (mejora)
+#528	busybox tftp ogLive con acceso subdirectorio contenedor tftpd del server
+#625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
+#709	Script para instalar módulos del Kenrel en el cliente ogLive
+#717	Indicar manualmente parámetros de arranque de un SO (mejora)
+#724	Cliente ogLive 1.1.0 basado en Ubuntu 15.10 o Ubuntu 16.04 LTS
+#725	Sincronización horaria de clientes con servidor NTP
+#746	Reestructurar barra de estado del Browser del cliente (mejora)
+#769	ogLive ampliar espacio de memoria para instalar software en "caliente" y exportar proxy de https(s) y ftp(s)
+#773	Incluir script personalizado para bootOs (mejora)
+#774	Soportar clientes ogLive de 64 bits
+#783	Browser registra salida de comandos ejecutados al pulsar enlace (mejora)
+#786	Adaptar el ogLive-precise-3.2.0-23-generic-r4820.iso como ogLive de 32 bits
+#813	Restaurar Imagen no muestra el error en la cola de acciones
+
+Tickets resueltos en módulo OpenGnsys Server:
+#234	Importar/Exportar base de datos (resuelto en #755)
+#385	Servicios OpenGnsys para varias VLAN aisladas (no se resolverá)
+#723	Cambio temporal de fichero de arranque PXE (mejora)
+#736	Mejorar la seguridad del servidor (mejora)
+#745	Depurar ogAdmServer (duplicado de #559)
+#787	Todos los elementos del ogLive se localizan en el Server
+
+Tickets resueltos en módulo OpenGnsys Repository Server:
+#379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)
+#701	torrent-creator falla si el fichero de imagen a procesar no es válido
+#743	Funcion en el webservice API REST para wakeonlan (mejora)
+#810	API REST de respositorio para listado de imágenes 
+#820	checkperms da error al cambiar permisos sobre el directorio de agrupamiento de imágenes en el repo 
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#372	Comandos y asistentes deberían limitar equipos de operación dentro de ámbito
+#711	Mostrar porcentaje de uso de cada sistema de archivos (mejora)
+#712	Formulario añadir nuevo ordenador no verifica la existencia previa del equipo
+#713	Mejorar el inventario de hardware y obtener número de serie (mejora)
+#714	Comando Particionar y Formatear no se ejecuta en ámbito superior a un ordenador
+#720	Fallo en alerta de Unicast al restaurar imagen
+#732	Ampliar el calendario de programación de acciones más allá de 2015
+#737	Incluir número de revisión de creación de imágenes (mejora)
+#738	Se pierde nombre de la imagen restaurada
+#747	Uso incorrecto del número de puestos de las propiedades del aula
+#751	Asistente de particionado: particiones GPT (mejora)
+#767	Revisar estabilidad del asistente de particionado
+#775	Permitir mismo nombre de imagen en diferentes repositorios de imagen
+#777	Error SQL al incluir caracteres espaciales en los comentarios
+#778	Codificar claves de usuarios (mejora)
+#779	Crear comando "Enviar mensaje"
+#782	Crear registro de acciones para realizar informes
+#789	Actualizar plantilla PXE al mover ordenador 
+#792	Incluir en los html personalizados de ejemplo los enlaces al acceso privado
+#797	Revisar log en los procesos de restauración
+#798	Mostrar imágenes en orden alfabético
+#799	Consola web: estado de los equipos tarda en mostar 
+#806	Comando Particionar y Formatear: controlar que no se exceda el tamaño del disco
+#807	Consola Web: Incorporar ordenadores da error de time-out
+#814	Sustituir las etiquetas cortas de php por el formato largo
+#817	Correcciones al formulario propiedades del aula
+#818	Actualización ficheros PXE tras modificar propiedad de IP del repositorio 
+#819	Eliminar un objeto ordenador no elimina fichero PXE 
+#821	Comando Particionar sólo funciona correctamente en al ámbito de tipo ordenador 
+#822	Llamar al updateBootCache desde el particionado de la cache
+#828	Identificador de perfil hardware disponible desde el ogLive y eliminación de winboot
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#755	Scripts para exportar e importar los datos de OpenGnsys
+#765	Actualización incremental de la base de datos
+#795	Script opengnsys_uninstall.sh deberia añadir mas información
+#801	Script opengnsys_update.sh con URL de descarga incorrecto
+
+Tickets genéricos resueltos:
+#679	Varios repositorios para un mismo cliente (tarea)
+#708	Crear API REST para integración de OpenGnsys con UDS (tarea)
+#718	Nuevo agente modular con comunicaciones REST (tarea)
+#730	Integración de rama OpenGnsys 1.1.0 en rama principal (tarea)
+#739	Estandarizar entornos virtuales de desarrollo con Vagrant (tarea)
+#768	Ofrecer diferentes ogLive a los clientes (tarea)
+#831	Manuel de usuario OpenGnsys 1.1.0
+
+
 Lista de cambios incluidos en OpenGnSys 1.0.6b (versión de mantenimiento)
 ----------------------------------------------
 
 Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #715	Revisión ogConfigureFstab
-#724	Compatible con ogLive basado en Ubuntu 15.10 y Ubuntu 16.04 LTS (parcial)
 #756	Comprobar cambios funciones en Disk.lib en el ogLive con kernel 3.2
 #760	Eliminar CHKDSK en el primer arranque de un Windows restaurado
 #762	ogGetLastSector error en modelo HP 6300 con disco duro de 1 TB
@@ -47,7 +156,6 @@ Tickets resueltos en módulo OpenGnSys Server:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #721	Consola Restaurar Imagen: falla el filtro de equipos
-#732	Ampliar el calendario de programación de acciones más allá de 2015 (parcial)
 
 Tickets genéricos resueltos:
 #734	Liberar versión de mantenimiento OpenGnSys 1.0.6a en rama principal
@@ -105,7 +213,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 
 Tickets resueltos en módulo OpenGnSys Web Admin Console:
 #512	Asistente particionado: comprobar que las particiones no sobrepasan disco (mejora)
-#654	Eliminar imagen de caché duplica algunas imágenes.
+#654	Eliminar imagen de caché duplica algunas imágenes
 #655	Gestión Arranque Avanzado: opción eliminar no muestra plantillas (no válido)
 #658	Correccion en eliminar imagen de caché de cliente
 #661	Error al mostrar configuración de varios equipos con caché
@@ -705,7 +813,7 @@ Tickets resueltos en módulo OpenGnSys Installer:
 #171	binarios y scripts para multicast
 
 Tickets genéricos resueltos:
-#129	Decidir entre NFS y NBD.
+#129	Decidir entre NFS y NBD
 
 
 Lista de cambios incluidos en OpenGnSys 0.9.1

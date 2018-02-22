@@ -70,7 +70,7 @@ $arbol=new ArbolVistaXml($cadenaXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titu
 	?>
 	<P align=center class=cabeceras><?php echo $litcab?><BR>
 	<SPAN align=center class=subcabeceras><?php echo $litsub?></SPAN>&nbsp;<IMG src="../images/iconos/acciones.gif"><BR>
-	<IMG src="<?php echo $urlimg?>"><SPAN class=presentaciones>&nbsp;&nbsp;<?echo $descripcionaccion?></SPAN></P>
+	<IMG src="<?php echo $urlimg?>"><SPAN class=presentaciones>&nbsp;&nbsp;<?php echo $descripcionaccion?></SPAN></P>
 	<?php echo urldecode($arbol->CreaArbolVistaXml()); // Crea arbol de configuraciones?>
 </BODY>
 </HTML>

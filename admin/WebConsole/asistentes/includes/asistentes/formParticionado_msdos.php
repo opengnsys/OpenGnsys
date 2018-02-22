@@ -59,7 +59,7 @@ for ($p=1; $p<4; $p++) {
 </select>
 <br />
 -->
-<select name="part4" id="part4" style="width:220" disabled="true" onchange="checkExtendedPartition(form);"><? echo htmlForm_typepartnotcacheEngine10(4) ?></select>
+<select name="part4" id="part4" style="width:220" disabled="true" onchange="checkExtendedPartition(form);"><?php echo htmlForm_typepartnotcacheEngine10(4) ?></select>
 </td>
 <td><select name="size4" id="size4" style="width:220" disabled="true" onclick="if (this.form.size4.options[this.form.size4.selectedIndex].value == 'CUSTOM') { this.form.size4custom.disabled=false } else { this.form.size4custom.disabled=true }" onchange="calculateFreeDisk(this.form);" />
 	<option value="0"> <?php echo $TbMsg[40];?> </option>
@@ -128,6 +128,7 @@ for ($p=5; $p<=9; $p++) {
 <tr>
 <th>
 <input type="hidden" id="minsize" />
+<input type="hidden" id="maxcachesize" />
 <?php echo $TbMsg[38];?>: <input type="text" id="freedisk" width="15" disabled="true" />
 </th>
 </tr>

@@ -18,7 +18,7 @@ include_once("../idiomas/php/".$idioma."/comandos/eliminarimagencache_".$idioma.
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
-$funcion=EjecutarScript;
+$funcion="EjecutarScript";
 $idc=$_SESSION["widcentro"];
 $ipservidor=$_SERVER['SERVER_ADDR'];
 //________________________________________________________________________________________________________
@@ -34,8 +34,8 @@ if (!$cmd)
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/EliminarImagenCache.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/eliminarimagencache_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/eliminarimagencache_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 </HEAD>
 <BODY>
@@ -49,6 +49,10 @@ switch($ambito){
                 case $AMBITO_GRUPOSAULAS :
                         $urlimg='../images/iconos/carpeta.gif';
                         $textambito=$TbMsg[1];
+                        $cmd->texto="SELECT DISTINCT ordenadores.idrepositorio
+                                FROM aulas
+                                LEFT JOIN ordenadores ON ordenadores.idaula=aulas.idaula
+                                WHERE aulas.idaula=$idambito";
                         break;
                 case $AMBITO_AULAS :
                         $urlimg='../images/iconos/aula.gif';
@@ -136,7 +140,7 @@ switch($ambito){
         }
 
         echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
-        echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
+        echo '<img src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><u>'.$textambito.': '.$nombreambito.'</u></span>&nbsp;&nbsp;</span></p>';
 ?>
 <!-- //#agp-->
 <?php 
@@ -145,7 +149,7 @@ switch($ambito){
          <TABLE  id="tabla" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
        		<TH align=center >&nbsp;
-		<? if ($ambito==16){
+		<?php if ($ambito==16){
 			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[16]."</br>".$TbMsg[18];
 		}else{ 
 			echo $TbMsg[17]."</br>".$nombreambito.$TbMsg[15]."</br>".$TbMsg[18]; }
@@ -156,7 +160,7 @@ switch($ambito){
 <!-- //#agp-->
 
         <P align=center>
-        <SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
+        <SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
 	</P>
 
 <form  align=center name="fdatos"> 
@@ -282,64 +286,50 @@ function tabla_configuraciones($cmd,$idambito){
 switch($ambito){
                 case $AMBITO_CENTROS :
                         $urlimg='../images/iconos/centros.gif';
-                        //echo "ambito - ".$ambito."<br>";
-                        //echo "idcentro - ".$idc;
                         break;
 
                 case $AMBITO_GRUPOSAULAS :
-
-        $cmd->texto="SELECT * FROM grupos WHERE nombregrupo='$nombreambito' AND idcentro='$idc'";
-        $rs=new Recordset;
-        $rs->Comando=&$cmd; 
-        if (!$rs->Abrir()) return(true); // Error al abrir recordset
-        $rs->Primero(); 
-        if (!$rs->EOF){
-                $identificadorgrupo=$rs->campos["idgrupo"];
-        }
-        $rs->Cerrar();
-
-                        $cmd->texto="SELECT * FROM aulas,grupos
-                                        WHERE grupos.nombregrupo='$nombreambito'
-                                        AND aulas.idcentro='$idc'
-                                        AND aulas.grupoid='$identificadorgrupo'
-                                        AND aulas.grupoid=grupos.idgrupo";
-
-
+                        $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones 
+				        JOIN grupos USING(idgrupo)
+				        JOIN sistemasficheros USING(idsistemafichero)
+                                        WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
+                                        AND ordenadores.idaula=aulas.idaula
+                                        AND grupos.nombregrupo='$nombreambito'
+                                        AND grupos.idcentro='$idc'
+                                        AND sistemasficheros.nemonico='CACHE'";
                         break;
 
                 case $AMBITO_AULAS :
                         $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones 
+				        JOIN sistemasficheros USING(idsistemafichero)
                                         WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
                                         AND ordenadores.idaula=aulas.idaula
                                         AND aulas.nombreaula='$nombreambito'
-                                   AND aulas.idcentro='$idc'
-                                        AND ordenadores_particiones.numpar=4  
-                                        GROUP BY ordenadores_particiones.cache";
-
+                                        AND aulas.idcentro='$idc'
+                                        AND sistemasficheros.nemonico='CACHE'";
                         break;
 
                 case $AMBITO_GRUPOSORDENADORES :
                         $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones,gruposordenadores 
+				        JOIN sistemasficheros USING(idsistemafichero)
                                         WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
                                         AND ordenadores.idaula=aulas.idaula
-                                   AND gruposordenadores.idaula=aulas.idaula
-                                   AND aulas.idcentro='$idc'
-                                        AND ordenadores_particiones.numpar=4  
-                                        AND ordenadores.grupoid='$idambito'
-                                        GROUP BY ordenadores_particiones.cache";
-
+                                        AND gruposordenadores.idaula=aulas.idaula
+                                        AND aulas.idcentro='$idc'
+                                        AND sistemasficheros.nemonico='CACHE'
+                                        AND ordenadores.grupoid='$idambito'";
                         break;
+
                 case $AMBITO_ORDENADORES :
                         $cmd->texto="SELECT * FROM ordenadores,ordenadores_particiones 
+				        JOIN sistemasficheros USING(idsistemafichero)
                                         WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
                                         AND ordenadores.nombreordenador='$nombreambito'
-                                        AND ordenadores_particiones.numpar=4  
-                                        GROUP BY ordenadores_particiones.cache";
+                                        AND sistemasficheros.nemonico='CACHE'";
                         break;
         }
 
         $tablaHtml="";
-
 
         $rs->Comando=&$cmd;  
         $rs=new Recordset; 

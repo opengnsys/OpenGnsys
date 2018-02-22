@@ -1,61 +1,86 @@
 #!/bin/bash
-# setsmbpass: cambia la contraseña del usuario del cliente para acceder a los
-#	servicios Samba.
-# Nota: se modifica el Initrd del cliente y se cambia la clave en el servidor.
-# Nota: no se modifica el usuario de acceso (usuario "opengnsys").
-# Uso:	setsmbpass
-# Autor: Ramon Gomez - Univ. Sevilla, julio 2011
+
+#/**
+#         setsmbpass
+#@file    setsmbpass [ogLive]
+#@brief   Cambia la contraseña del usuario del cliente para acceder a los servicios Samba.
+#@warning Se modifica el Initrd del cliente y se cambia la clave en el servidor.
+#@warning No se modifica el usuario de acceso (usuario "opengnsys").
+#@version 1.0.2 - Versión inicial.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2011-07-28
+#@version 1.1.0 - Soporte para varios clientes ogLive.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2017-06-20
+#*/ ##
 
 
 # Variables.
-PROG=$(basename $0)
+PROG=$(basename "$0")
+PATH=$PATH:$(dirname "$(realpath "$0")")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SAMBAUSER="opengnsys"				# Usuario por defecto.
 TFTPDIR=$OPENGNSYS/tftpboot
-CLIENTINITRD=$TFTPDIR/ogclient/oginitrd.img
-TMPDIR=/tmp/ogclient$$
+INITRD=oginitrd.img
+TMPDIR=/tmp/oglive$$
+let CHANGES=0
 
 # Control básico de errores.
-if [ $# != 0 ]; then
-	echo "$PROG: Error de ejecución" >&2
-	echo "Formato: $PROG"
-	exit 1
-fi
 if [ "$USER" != "root" ]; then
-	echo "$PROG: Error: solo ejecutable por root" >&2
-	exit 1
+    echo "$PROG: Error: solo ejecutable por root" >&2
+    exit 1
 fi
+case $# in
+    0)  # Cambios en todos los clientes ogLive instalados.
+        if which oglivecli &>/dev/null; then
+            LIST=$(oglivecli list | awk '{print $2}')
+        else
+            LIST="ogclient"
+        fi ;;
+    1)  # Cambios en único ogLive (AVISO: puede crear inconsistencias con otros ogLive).
+        LIST="$1" ;;
+    *)	# Error de formato.
+        echo "$PROG: Error de ejecución" >&2
+        echo "Formato: $PROG ogLive"
+        exit 1 ;;
+esac
 
-# Crear clave para usuario de acceso a los recursos.
-if [ -r $CLIENTINITRD ]; then
-	# Recuperar eco de consola si se corta el proceso.
-	trap "stty echo 2>/dev/null" KILL
-	# Obtener clave del teclado sin eco en pantalla.
-	stty -echo 2>/dev/null
-	echo -n "Clave del usuario Samba: "
-	read SAMBAPASS
-	# Solo se deben aceptar números y letras para la clave de acceso.
-	if [[ "$SAMBAPASS" =~ [^a-zA-Z0-9] ]]; then
+# Recuperar eco de consola si se corta el proceso.
+trap "stty echo 2>/dev/null" KILL
+# Buscar todos los clients ogLive instalados.
+for OGLIVE in $LIST; do
+    # Crear clave para usuario de acceso a los recursos.
+    CLIENTINITRD="$TFTPDIR/$OGLIVE/$INITRD"
+    if [ -r "$CLIENTINITRD" ]; then
+        if [ -z "$SAMBAPASS" ]; then
+	    # Obtener clave del teclado sin eco en pantalla.
+	    stty -echo 2>/dev/null
+	    echo -n "Clave del usuario Samba: "
+	    read -r SAMBAPASS
+	    # Solo se deben aceptar números y letras para la clave de acceso.
+	    if [[ "$SAMBAPASS" =~ [^a-zA-Z0-9] ]]; then
 		echo
 		echo "$PROG: Error: la clave solo debe contener caracteres alfanuméricos" >&2
 		stty echo 2>/dev/null
 		exit 2
-	fi
-	echo
-	# Obtener confirmación clave sin eco en pantalla.
-	echo -n "Confirmar clave: "
-	read SAMBAPASS2
-	echo
-	stty echo 2>/dev/null
-	if [ "$SAMBAPASS" != "$SAMBAPASS2" ]; then
+	    fi
+	    echo
+	    # Obtener confirmación clave sin eco en pantalla.
+	    echo -n "Confirmar clave: "
+	    read -r SAMBAPASS2
+	    echo
+	    stty echo 2>/dev/null
+	    if [ "$SAMBAPASS" != "$SAMBAPASS2" ]; then
 		echo "$PROG: Error: las claves no coinciden" >&2
 		exit 2
+	    fi
 	fi
 	# Editar la parte de acceso del cliente:
 	#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
+	echo "Configurando cliente \"$OGLIVE\" ..."
 	mkdir -p $TMPDIR
-	cd $TMPDIR
-	gzip -dc $CLIENTINITRD | cpio -im
+	cd $TMPDIR || exit 3
+	gzip -dc "$CLIENTINITRD" | cpio -im
 	if [ -f scripts/ogfunctions ]; then
 		sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
 		# TEMPORAL: solución ticket 554, actualizar cliente en caché (ogLive r3257).
@@ -66,21 +91,26 @@ if [ -r $CLIENTINITRD ]; then
 		chown root.root scripts/passrsync
 		chmod 400 scripts/passrsync
 		# Generar Initrd del cliente.
-		find . | cpio -H newc -oa | gzip -9c > $CLIENTINITRD
-		# Ticket 565, preparar acceso Rsync servidor.
-		echo "$SAMBAUSER:$SAMBAPASS" > /etc/rsyncd.secrets
-		chown root.root /etc/rsyncd.secrets
-		chmod 600 /etc/rsyncd.secrets
+		find . | cpio -H newc -oa | gzip -9c > "$CLIENTINITRD"
 	else
-		echo "$PROG: Aviso: no se ha modificado la clave del cliente."
+		echo "$PROG: Aviso: no se ha modificado la clave del cliente \"$OGLIVE\"."
 	fi
 	rm -fr $TMPDIR
-	md5sum $CLIENTINITRD | cut -f1 -d" " > $CLIENTINITRD.sum
-	cp -a $CLIENTINITRD $TFTPDIR
-	cp -a $CLIENTINITRD.sum $TFTPDIR
+	# Calcular suma de comprobación.
+	md5sum "$CLIENTINITRD" | cut -f1 -d" " > "$CLIENTINITRD.sum"
+	let CHANGES++
+    else
+        echo "$PROG: Cliente \"$OGLIVE\" no accesible."
+    fi
+done
+if [[ $CHANGES != 0 ]]; then
+    # Ticket 565, preparar acceso Rsync servidor.
+    echo "$SAMBAUSER:$SAMBAPASS" > /etc/rsyncd.secrets
+    chown root.root /etc/rsyncd.secrets
+    chmod 600 /etc/rsyncd.secrets
+    # Cambiar clave Samba.
+    echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | smbpasswd -a -s $SAMBAUSER
 else
-	SAMBAPASS="og"                  # Clave por defecto.
-        echo "$PROG: Aviso: no se ha modificado la clave del cliente."
+    echo "$PROG: Aviso: no se ha modificado la clave de ningún cliente."
 fi
-echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | smbpasswd -a -s $SAMBAUSER
 

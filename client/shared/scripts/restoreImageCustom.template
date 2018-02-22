@@ -11,13 +11,16 @@
 
 
 # Control de parámetros.
-[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: createImageCustom int_ndisc int_npart str_repo str_imgname" || exit $?
+[ $# -ge 4 -a $# -le 6 ] || ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: restoreImageCustom str_repo str_imagen int_ndisco int_npart [ str_proto [\"str_opciones\"] ]" || exit $?
 
 # Toma de parámetros.
-DISK="$1"		# Nº de disco.
-PART="$2"		# Nº de partición.
-REPO="${3^^}"		# Repositorio (en mayúsculas).
-IMGNAME="$4"		# Nombre canónico de imagen (sin extensión).
+REPO="${1^^}"		# Repositorio (en mayúsculas).
+IMGNAME="$2"		# Nombre canónico de imagen (sin extensión).
+DISK="$3"		# Nº de disco.
+PART="$4"		# Nº de partición.
+PROTO="${5^^}"		# Protocolo de comunicaciones (por defecto, UNICAST).
+PROTO=${PROTO:-"UNICAST"}
+PROTOOPT="$6"		# Opciones del protocolo separadas por ":" (opcional).
 
 
 # Paso 0: Añadir código para realizar control de errores de los parámetros de entrada (recomendado).

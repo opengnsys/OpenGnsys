@@ -175,6 +175,7 @@ function insertar(l,t,w,h,pages,swi,idu){
 function resultado_insertar(resul,descrierror,nwid,tablanodo){
 	if (!resul){
 		alert(descrierror);
+		return;
 	}
 	InsertaNodo(currentNodo,tablanodo);
 	alert(CTbMsg[4]);

@@ -79,8 +79,14 @@ function comprobar_datos(){
 		document.forms.fdatos.usuario.focus()
 		return(false)
 	}
-	if (document.fdatos.pasguor.value==""){
-		alert(TbMsg[1])
+	if (document.fdatos.pasguor.value.length < 8){
+		alert(TbMsg[6])
+		document.forms.fdatos.pasguor.focus()
+		return(false)
+	}
+
+	if (document.fdatos.pasguor.value != document.fdatos.confirmarpasguor.value){
+		alert(TbMsg[5])
 		document.forms.fdatos.pasguor.focus()
 		return(false)
 	}

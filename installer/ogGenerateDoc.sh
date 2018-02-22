@@ -21,7 +21,7 @@ if [ $# = 2 ]
 then
 mkdir -p "$2"
 VERSION=$(cat $(dirname "$0")/../doc/VERSION.txt) 2>/dev/null
-VERSION=${VERSION:-"1.0"}
+VERSION=${VERSION:-"1.1"}
 cat > /tmp/doxyfile << EOF
 # Doxyfile 1.5.6
 # Fichero para documentar codigo shellscripts linux.
@@ -30,10 +30,10 @@ cat > /tmp/doxyfile << EOF
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Proyecto OpenGnSys"
+PROJECT_NAME           = "Proyecto OpenGnsys"
 PROJECT_NUMBER         = $VERSION
-PROJECT_LOGO           = $(dirname "$0")/../doc/opengnsys-logo.png)
 OUTPUT_DIRECTORY       = $2
+PROJECT_LOGO           = $(dirname "$0")/../doc/opengnsys-logo.png)
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = Spanish
 BRIEF_MEMBER_DESC      = YES

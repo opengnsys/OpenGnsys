@@ -1,4 +1,4 @@
-<? 
+<?php 
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -47,25 +47,25 @@ else
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_universidades.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_universidades_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_universidades_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
 <FORM  name="fdatos" action="../gestores/gestor_universidades.php" method="post"> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=iduniversidad value=<?=$iduniversidad?>>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
+	<INPUT type=hidden name=iduniversidad value=<?php echo $iduniversidad?>>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?echo $TbMsg[5]?>&nbsp;</TD>
-			<?echo '<TD colspan=3><INPUT  class="formulariodatos" name=nombreuniversidad style="width:350" type=text value="'.$nombreuniversidad.'"></TD>';?>
+			<TH align=center&nbsp;><?php echo $TbMsg[5]?>&nbsp;</TD>
+			<?php echo '<TD colspan=3><INPUT  class="formulariodatos" name=nombreuniversidad style="width:350" type=text value="'.$nombreuniversidad.'"></TD>';?>
 		</TR>
 	<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=66>'.$comentarios.'</TEXTAREA></TD>';
@@ -75,14 +75,14 @@ else
 	</TABLE>
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un universidad
 //		Parametros: 

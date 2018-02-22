@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Cargar entorno de OpenGnSys
+# Cargar entorno de OpenGnsys
 set -a
 source /opt/opengnsys/etc/preinit/loadenviron.sh
 
@@ -10,7 +10,7 @@ for f in fileslinks loadmodules metadevs mountrepo poweroff otherservices; do
 done
 unset f
 
-if [ -f $OGETC/init/$OG_IP.sh ]; then
+if [ -f $OGETC/init/$IPV4ADDR.sh ]; then
     $OGETC/init/$OG_IP.sh
 
 elif [ -f $OGETC/init/$OGGROUP.sh ]; then

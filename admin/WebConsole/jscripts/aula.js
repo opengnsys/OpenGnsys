@@ -111,43 +111,32 @@ function soIMG(so)
 	var MimgOrdenador="";
 	switch(so){
 		case 'INI':
-			MimgOrdenador="ordenador_INI.gif";  // Iniciando cliente
+			MimgOrdenador="ordenador_INI.png";  // Iniciando cliente
 			break;
 		case 'BSY':
-			MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
+			MimgOrdenador="ordenador_BSY.png";  // Cliente ocupado
 			break;
 		case 'OPG':
-			MimgOrdenador="ordenador_OPG.gif";  // Cliente OpenGnSys
-			break;
-		case 'WS2': 
-			MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
-			break;
-		case 'W2K':
-			MimgOrdenador="ordenador_W2K.gif"; // Windows 2000
-			break;
-		case 'WXP':
-			MimgOrdenador="ordenador_WXP.gif"; // Windows XP
-			break;
-		case 'WNT':
-			MimgOrdenador="ordenador_WNT.gif"; // Windows NT
-			break;
-		case 'W95':
-			MimgOrdenador="ordenador_W95.gif"; // Windows 95
-			break;
-		case 'W98':
-			MimgOrdenador="ordenador_W98.gif"; // Windows 98
-			break;
-		case 'WML':
-			MimgOrdenador="ordenador_WML.gif"; // Windows Millenium
+			MimgOrdenador="ordenador_OPG.png";  // Cliente OpenGnsys
 			break;
 		case 'WIN':
-			MimgOrdenador="ordenador_WXP.gif"; // Windows
+		case 'WXP':
+			MimgOrdenador="ordenador_WIN.png"; // Windows
+			break;
+		case 'WINS':
+			MimgOrdenador="ordenador_WINS.png"; // Sesión Windows
 			break;
 		case 'LNX':
-			MimgOrdenador="ordenador_LNX.gif"; // Linux
+			MimgOrdenador="ordenador_LNX.png"; // Linux
+			break;
+		case 'LNXS':
+			MimgOrdenador="ordenador_LNXS.png"; // Sesión Linux
+			break;
+		case 'OSX':
+			MimgOrdenador="ordenador_OSX.png"; // macOS
 			break;
 		default:
-			MimgOrdenador="ordenador_OFF.gif"; // Apagado
+			MimgOrdenador="ordenador_OFF.png"; // Apagado
 			break;
 	}
 	return(MimgOrdenador);

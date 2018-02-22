@@ -1,7 +1,6 @@
 ##NO-TOCAR-ESTA-LINEA 1hd-1partition
 timeout 1
 title FirstHardDisk-FirstPartition
-keeppxe
 root (hd0,0)
 chainloader (hd0,0)+1
 boot

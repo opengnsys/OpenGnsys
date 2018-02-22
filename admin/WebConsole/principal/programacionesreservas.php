@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -108,11 +108,11 @@ if (isset($_POST["situacion"])){
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/programacionesreservas.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/programacionesreservas_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/programacionesreservas_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 switch($ambito){
 		case $AMBITO_GRUPOSRESERVAS :
 			$urlimg='../images/iconos/carpeta.gif';
@@ -210,7 +210,7 @@ echo "		</TD></TR><TABLE></DIV>";
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function ProcesoAnual($fechainicio,$fechafin){
 	global $EJECUCION_RESERVA;

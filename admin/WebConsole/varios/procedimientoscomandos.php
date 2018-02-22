@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -33,22 +33,22 @@ if (!$cmd)
 <SCRIPT language="javascript" src="../jscripts/procedimientoscomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/procedimientoscomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/procedimientoscomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 
-	<INPUT type=hidden value="<? echo $idcentro?>" id=idcentro>	 
-	<P align=center class=cabeceras><IMG src="../images/iconos/procedimiento.gif">&nbsp;<?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/comandos.gif"><BR><BR>
-	<SPAN align=center class=presentaciones><B><?echo $TbMsg[2]?>:&nbsp;</B><? echo $descripcionprocedimiento?></SPAN></P>
+	<INPUT type=hidden value="<?php echo $idcentro?>" id=idcentro>	 
+	<P align=center class=cabeceras><IMG src="../images/iconos/procedimiento.gif">&nbsp;<?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/comandos.gif"><BR><BR>
+	<SPAN align=center class=presentaciones><B><?php echo $TbMsg[2]?>:&nbsp;</B><?php echo $descripcionprocedimiento?></SPAN></P>
 	<TABLE  align=center class="tabla_listados" cellspacing=1 cellpadding=0  id="TABLACOMANDOS">
 				<TR  height=20>
 					<TH ><IMG src="../images/iconos/eliminar.gif"></TH>
-					<TH  colspan=2 align=left>&nbsp;<?echo $TbMsg[3]?></TH>
-					<TH  ><?echo $TbMsg[4]?></TH>
+					<TH  colspan=2 align=left>&nbsp;<?php echo $TbMsg[3]?></TH>
+					<TH  ><?php echo $TbMsg[4]?></TH>
 					<TH  >A</TH>
 			</TR>
-		<?
+		<?php
 			$rs=new Recordset; 
 			$cmd->texto='SELECT  procedimientos_acciones.*, comandos.descripcion,comandos.visuparametros
 											 FROM procedimientos_acciones 
@@ -83,11 +83,11 @@ if (!$cmd)
 		?>
 		</TABLE>
 		<br>
-		<P align=center><span align=center class=notas><I><?echo $TbMsg[7]?>.</I></P>
+		<P align=center><span align=center class=notas><I><?php echo $TbMsg[7]?>.</I></P>
 </FORM>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function pintacomandos($cmd,$rs){
 	global $TbMsg;

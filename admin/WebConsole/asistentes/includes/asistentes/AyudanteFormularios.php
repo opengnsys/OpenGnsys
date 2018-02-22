@@ -1,7 +1,11 @@
 <?php
+// version 1.1: cliente con varios repositorios - htmlOPTION_images: Imagenes de todos los repositorios de la UO.
+// autor: Irina Gomez, Universidad de Sevilla
+// fecha 2015-06-17
 // version 1.1: htmlOPTION_images: se modifica el valor de la imagen iprepo_nombreca_idimagen_idperfilsoft (ticket #757)
 // autor: Irina Gomez, ETSII Universidad de Sevilla
 // fecha: 2016-10-27
+
 
 /// funciones php
 
@@ -176,34 +180,37 @@ $cmd->texto='SELECT nombreordenador,idordenador,ip FROM  ordenadores where idaul
 
 function htmlOPTION_images($cmd,$ambito,$idambito)
 {
+// 1.1  Imagenes de todos los repositorios de la UO.
 if ($ambito == 4)
 {
-$subconsultarepo='SELECT DISTINCT idrepositorio from ordenadores where idaula=' . $idambito ;
+// ambito aulas
+$subconsultarepo='select idrepositorio from repositorios INNER JOIN aulas where repositorios.idcentro=aulas.idcentro AND idaula='.$idambito;
 }
 if ($ambito == 8) 
 {
-$subconsultarepo='SELECT DISTINCT idrepositorio FROM  ordenadores where grupoid=' . $idambito ;
+$subconsultarepo='select idrepositorio  from repositorios INNER JOIN aulas INNER JOIN gruposordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=gruposordenadores.idaula AND idgrupo='.$idambito;
 }
 if ($ambito == 16)
 {
-$subconsultarepo='SELECT idrepositorio FROM  ordenadores where idordenador=' . $idambito ;
+$subconsultarepo='select repositorios.idrepositorio from repositorios INNER JOIN aulas INNER JOIN ordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=ordenadores.idaula AND idordenador='.$idambito;
 }	
 	
 	
 	$SelectHtml="";
 	// 1.0.5  imagenes.tipo =1 para que solo muestre las monoloticas.
-	$cmd->texto="SELECT *,repositorios.ip as iprepositorio	FROM  imagenes
-				INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio AND repositorios.idrepositorio=(" . $subconsultarepo . ") WHERE imagenes.tipo=1"; 
+	$cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM  imagenes
+		INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio 
+		AND repositorios.idrepositorio IN (" . $subconsultarepo . ") WHERE imagenes.tipo=1 ORDER BY imagenes.descripcion"; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
-	
+
 	if ($rs->Abrir()){
 		$rs->Primero(); 
 		while (!$rs->EOF){
 			$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ."_".$rs->campos["nombreca"]."_".$rs->campos["idimagen"].'_'.$rs->campos["idperfilsoft"].'" ';
 			//$SelectHtml.='<OPTION value="'.$rs->campos["nombreca"] . '" ';
 			$SelectHtml.='>';
-			$SelectHtml.= $rs->campos["descripcion"] .'</OPTION>';
+			$SelectHtml.= $rs->campos["descripcion"] .' ('.$rs->campos["nombrerepo"].') </OPTION>';
 			$rs->Siguiente();
 		}
 		$rs->Cerrar();

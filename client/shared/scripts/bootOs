@@ -1,54 +1,30 @@
 #!/bin/bash
-# Scirpt de ejemplo para arancar un sistema operativo instalado.
-# (puede usarse como base para el programa de arranque usado por OpenGNSys Admin).
+# Script de ejemplo para arancar un sistema operativo instalado.
+# Nota: se usa como base para el programa de arranque de OpenGnsys Admin.
 
 PROG="$(basename $0)"
-if [ $# -ne 2 ]; then
-    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nparticion"
+if [ $# -lt 2 -o $# -gt 3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nfilesys [str_kernel str_initrd str_kernelparams]"
     exit $?
 fi
 
 # Comprobar errores.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
-ogMount $1 $2 || exit $?
+ogMount $1 $2  &>/dev/null || exit $?
 
 echo "[0] Inicio del proceso de arranque."
-NAME="$(ogGetHostname)"
-NAME=${NAME:-"pc"}
-OSTYPE=$(ogGetOsType $1 $2)
-# Borrar marcas de arrranque de todos los Windows instalados en el disco.
-if [ "$OSTYPE" == "Windows" ]; then
-    for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
-        [ "$(ogGetOsType $1 $i)" == "Windows" ] && ogMount $1 $i &>/dev/null
-    done
-    rm -f /mnt/*/ogboot.*
+
+if which bootOsCustom  &>/dev/null; then
+    echo "[10] Configuración personalizada del inicio."
+    bootOsCustom $@
 fi
 
-echo "[10] Desmontar todos los sistemas de archivos."
+echo "[70] Desmontar todos los sistemas de archivos."
 sync 
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
     ogUnmountAll $i &>/dev/null
 done
-case "$OSTYPE" in
-    Windows)
-        echo "[30] Mostrar y activar particion de Windows $PART."
-        [ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
-        ;;
-    Linux)
-        echo "[30] Asignar nombre Linux \"$NAME\"."
-        ETC=$(ogGetPath $1 $2 /etc)
-        [ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
-        if [ -f "$ETC/fstab" ]; then
-            # Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
-            echo "[50] Actaualizar fstab con particion raiz \"$PART\"."
-            awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
-                                 print }' $ETC/fstab >/tmp/fstab
-            mv /tmp/fstab $ETC/fstab
-        fi
-        ;;
-esac
-echo "[70] Desmontar cache local."
+echo "[80] Desmontar cache local."
 ogUnmountCache
 echo "[90] Arrancar sistema operativo."
-ogBoot $1 $2
-
+ogBoot "$@"

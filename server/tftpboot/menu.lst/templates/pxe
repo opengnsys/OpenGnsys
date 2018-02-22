@@ -1,15 +1,17 @@
-##NO-TOCAR-ESTA-LINEA ogClient
+##NO-TOCAR-ESTA-LINEA ogLive
 default saved
 timeout 1
 hiddenmenu
-fallback 1 2 3
+fallback 1 2 3 4
+
+set ISODIR=ogLive
+
 
 title firsboot
 find --set-root --ignore-floppies --ignore-cd /ogboot.me
 cmp /ogboot.me /ogboot.firstboot || ls FALLBACK
 write /ogboot.firstboot iniciado
 chainloader +1
-savedefault fallback
 boot
 
 title secondboot
@@ -17,23 +19,20 @@ find --set-root --ignore-floppies --ignore-cd /ogboot.me
 cmp /ogboot.me /ogboot.secondboot || ls FALLBACK
 write /ogboot.secondboot iniciado
 chainloader +1
-savedefault fallback
 boot
 
 title OpenGnsys-CACHE
-find --set-root --ignore-floppies --ignore-cd /boot/ogvmlinuz
-kernel /boot/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogupdateinitrd=true INFOHOST 
-initrd /boot/oginitrd.img
-savedefault fallback
+find --set-root --ignore-floppies --ignore-cd /boot/%ISODIR%/ogvmlinuz
+kernel /boot/%ISODIR%/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogupdateinitrd=true ogtmpfs=15 oglivedir=%ISODIR% INFOHOST 
+initrd /boot/%ISODIR%/oginitrd.img
 boot
 
 title OpenGnsys-NET
-keeppxe
-kernel (pd)/ogclient/ogvmlinuz  ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false INFOHOST 
-initrd (pd)/ogclient/oginitrd.img
+kernel (pd)/%ISODIR%/ogvmlinuz  ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=%ISODIR% INFOHOST 
+initrd (pd)/%ISODIR%/oginitrd.img
 boot
 
-
-
-
-
+title OpenGnsys-NET default
+kernel (pd)/ogLive/ogvmlinuz  ro boot=oginit oglivedir=ogLive quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=ogLive INFOHOST
+initrd (pd)/ogLive/oginitrd.img
+boot

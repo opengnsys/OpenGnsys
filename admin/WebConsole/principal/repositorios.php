@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -45,7 +45,7 @@ $XMLcontextual=ContextualXMLComandos($LITAMBITO_CENTROS,$AMBITO_CENTROS);
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
 <FORM name="fcomandos" action="" method="post" target="frame_contenidos">
@@ -57,7 +57,7 @@ $XMLcontextual=ContextualXMLComandos($LITAMBITO_CENTROS,$AMBITO_CENTROS);
 	<INPUT type="hidden" name="gestor" value="">
 	<INPUT type="hidden" name="funcion" value="">
 </FORM>
-<?
+<?php
 //________________________________________________________________________________________________________
 echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
@@ -72,7 +72,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 ?>
 </BODY OnContextMenu="return false">
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 //	Devuelve una cadena con formato XML de toda la información de los repositorios de un Centro concreto
 //	Parametros: 

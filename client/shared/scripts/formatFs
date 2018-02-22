@@ -1,6 +1,6 @@
 #!/bin/bash
 # Scirpt de ejemplo para formatear un sistema de archivos.
-# (puede usarse como base para el programa de formateo de OpenGnSys Admin).
+# Nota: se usa como base para el programa de formateo de OpenGnsys Admin).
 
 TIME1=$SECONDS
 PROG="$(basename $0)"

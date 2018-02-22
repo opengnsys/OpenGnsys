@@ -51,9 +51,9 @@ deb-src http://security.ubuntu.com/ubuntu OSCODENAME-security multiverse
 deb http://archive.ubuntu.com/ubuntu OSCODENAME main
 deb http://free.nchc.org.tw/drbl-core drbl stable
 deb http://free.nchc.org.tw/ubuntu OSCODENAME-security main restricted universe multiverse
-deb http://ppa.launchpad.net/freenx-team/ubuntu/ OSCODENAME main
-deb http://ppa.launchpad.net/randomaction/ppa/ubuntu OSCODENAME main
-deb-src http://ppa.launchpad.net/randomaction/ppa/ubuntu OSCODENAME main
+#deb http://ppa.launchpad.net/freenx-team/ubuntu/ OSCODENAME main
+#deb http://ppa.launchpad.net/randomaction/ppa/ubuntu OSCODENAME main
+#deb-src http://ppa.launchpad.net/randomaction/ppa/ubuntu OSCODENAME main
 # Ubuntu-ZFS
 deb http://ppa.launchpad.net/zfs-native/stable/ubuntu OSCODENAME main
 deb-src http://ppa.launchpad.net/zfs-native/stable/ubuntu OSCODENAME main

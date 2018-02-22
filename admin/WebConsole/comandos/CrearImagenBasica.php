@@ -49,30 +49,30 @@ if (!$resul){
 <!------------------------------------------------------------------------------------------
  Cabecera 
 ------------------------------------------------------------------------------------------->
-	<P align=center class=cabeceras><? echo $TbMsg[0] ?><P>
+	<P align=center class=cabeceras><?php echo $TbMsg[0] ?><P>
 	<P align=center>
-	<SPAN align=center class=subcabeceras><? echo $TbMsg[1] ?></SPAN>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1] ?></SPAN>
 	</BR>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<? echo $TbMsg[2] ?>&nbsp;</TD>
-			<? echo '<TD>'.$nombreordenador.'</TD>';?>
+			<TH align=center>&nbsp;<?php echo $TbMsg[2] ?>&nbsp;</TD>
+			<?php echo '<TD>'.$nombreordenador.'</TD>';?>
 			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
 		</TR>	
 		<TR>
-			<TH align=center>&nbsp;<? echo $TbMsg[3] ?>&nbsp;</TD>
-			<? echo '<TD>'.$ip.'</TD>';?>
+			<TH align=center>&nbsp;<?php echo $TbMsg[3] ?>&nbsp;</TD>
+			<?php echo '<TD>'.$ip.'</TD>';?>
 		</TR>
 		<TR>
-			<TH align=center>&nbsp;<? echo $TbMsg[4] ?>&nbsp;</TD>
-			<? echo '<TD>'.$mac.'</TD>';?>
+			<TH align=center>&nbsp;<?php echo $TbMsg[4] ?>&nbsp;</TD>
+			<?php echo '<TD>'.$mac.'</TD>';?>
 		</TR>	
 	</TABLE>
 	</P>
 <!------------------------------------------------------------------------------------------
  Subcabecera 
 -------------------------------------------------------------------------------------------> 	
-	<P align=center><SPAN align=center class=subcabeceras><? echo $TbMsg[6] ?></SPAN></p>
+	<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></p>
 	<FORM  align=center name="fdatos"> 
 		<TABLE  width=90% align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
@@ -88,17 +88,17 @@ if (!$resul){
 <!------------------------------------------------------------------------------------------
  Detalle 
 -------------------------------------------------------------------------------------------> 					
-		<?
+		<?php
 				$tbPar=tablaConfiguracionesSincronizacion1($idambito);
 		?>
 		</TABLE>
-	<input type=hidden id="cadPar" value="<? echo $tbPar ?>">
+	<input type=hidden id="cadPar" value="<?php echo $tbPar ?>">
 	<br>
-		<?
+		<?php
 				opcionesAdicionales();
 		?>
 </FORM>
-<?
+<?php
 //---------------------------------------------------------------------------------------------
 // Pie 
 //----------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ if (!$resul){
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //*********************************************************************************************
 //	FUNCIONES
 //*********************************************************************************************

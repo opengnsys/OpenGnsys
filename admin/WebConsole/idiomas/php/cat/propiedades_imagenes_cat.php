@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: propiedades_imagenes_cat.php 
@@ -25,4 +25,11 @@ $TbMsg[15]="ATENCI�N.- Una imagen que tiene perfil software indica que en alg�
 $TbMsg[16]="Ruta Origen";
 $TbMsg[17]='"Nombre can�nico fichero-imagen existe :  Introduzca otro nombre"';
 $TbMsg[18]="Introduzca otro Nombre";
+$TbMsg[19]="Equipo modelo";
+$TbMsg[20]="Fecha de creación";
+$TbMsg[21]='"Descripción Nombre fichero-imagen existe : Introduzca otra Descripción"';
+$TbMsg[22]="Introduzca otra Descripción";
+$TbMsg['PROP_OS']="Sistema operativo";
+$TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
+$TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 ?>

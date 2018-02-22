@@ -1,16 +1,28 @@
 #!/bin/bash
 # Scirpt de ejemplo para apagar un ordenador
-# (puede usarse como base para el programa de apagado usado por OpenGNSys Admin).
+# Nota: se usa como base para el programa de apagado de OpenGnsys Admin.
 
+
+# Registrar ejecución manual de script. 
+case "$(ogGetCaller)" in
+    browser|bash)  ogEcho log info "Script: $0" ;;
+esac
+
+# No registrar errores.
+export DEBUG="no"
 
 # Desmontar los sistemas de archivos y la caché local.
 echo "[10] Desmontar todos los sistemas de archivos."
 sync
 for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
-    ogUnmountAll $i 2>/dev/null
+    ogUnmountAll $i &>/dev/null
 done
 echo "[50] Desmontar cache local."
-ogUnmountCache 2>/dev/null
+ogUnmountCache &>/dev/null
+
+# Volver a registrar errores.
+unset DEBUG
+
 echo "[70] Apagando el equipo."
 # Estado correcto de Wake-On-Lan antes de apagar.
 ethtool -s $DEVICE wol g 2>/dev/null

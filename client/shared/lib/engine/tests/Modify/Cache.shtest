@@ -14,7 +14,7 @@ $ AUX=$(ogListPartitions 1) ; echo ${AUX##*CACHE:} | sed s/\ .*\$//g
 
 # Comprobamos que no esta formateada
 $ ogCheckFs 1 4
-OpenGnSys error:  ogCheckFs:  "1, 4, CACHE"
+OpenGnsys error:  ogCheckFs:  "1, 4, CACHE"
 
 $ ogFormatCache|tail -1
 ReiserFS is successfully created on /dev/sda4.
@@ -60,13 +60,13 @@ $ rm $OGCAC$OGIMG/lll
 Comprobamos los errores de las entradas de datos
 ================================================
 $ ogCreateCache
-OpenGnSys error:  ogCreateCache:  ""
+OpenGnsys error:  ogCreateCache:  ""
 
 $ ogCreateCache -1
-OpenGnSys error:  ogCreateCache:  "-1"
+OpenGnsys error:  ogCreateCache:  "-1"
 
 $ ogCreateCache 0
-OpenGnSys error:  ogCreateCache:  "0"
+OpenGnsys error:  ogCreateCache:  "0"
 
 # cuando se está usando la cuarta partitión no debe crearse la cache
 #$ ogCreatePartition 1 NTFS:200000 EXT3:2000000 EXT3:2000000 NTFS:30000000

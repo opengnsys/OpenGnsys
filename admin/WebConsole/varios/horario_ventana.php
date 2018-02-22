@@ -1,4 +1,4 @@
-<?
+<?php
 include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/clases/Almanaque_".$idioma.".php");
 $hora=""; 
@@ -67,7 +67,7 @@ function borrar_fecha(){
 </SCRIPT>
 </HEAD>
 <BODY>
-	<?
+	<?php
 $mialmanaque=new Almanaque("tabla_meses");
 echo '<DIV style="position:absolute;top:5px;left:10px">';
 echo '<img style="cursor:hand" SRC="../images/iconos/salir_on.gif" onclick="cerrar_ventana()">';

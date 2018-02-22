@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot-Tools
 #@class   Boot-Tools
 #@brief   Funciones para generar un sistema operativo cliente para opengnsys
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -23,8 +23,12 @@ export BTSVNOG2=/tmp/opengnsys_installer/opengnsys2
 export BTTARGETDIR=/var/lib/tftpboot/ogclient/
 export BTROOTFSIMG=${BTTARGETDIR}ogclient.img
 export BTROOTFSMNT=${BTTARGETDIR}ogclientmount
-# tamaño maximo limitado por schroot 2GB
-export BTVIRTUALDISKSIZE=2000
+if [ "$OSARCH" = "i386" ]; then
+        # tamaño maximo limitado por schroot 2GB para 32 bits
+        export BTVIRTUALDISKSIZE=2000 
+else
+        export BTVIRTUALDISKSIZE="3G"
+fi
 export BTROOTFSIMGLABEL=ogClient
 
 export LOG_FILE=/tmp/boot-tools_installation.log
@@ -55,6 +59,13 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	wheezy) 	# ogLive basado en Debian 7.3.
+		OSDISTRIB="debian"
+		OSCODENAME="wheezy"
+		OSRELEASE="3.2.0-4-i386"
+		OSARCH="i386"
+		OSHTTP="http://ftp.es.debian.org/debian/"
+		;;
 	quantal)	# ogLive 1.0.5-rc2 basado en Ubuntu 12.10 con Kernel descargado.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="quantal"
@@ -69,13 +80,6 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	wheezy) 	# ogLive basado en Debian 7.3.
-		OSDISTRIB="debian"
-		OSCODENAME="wheezy"
-		OSRELEASE="3.2.0-4-i386"
-		OSARCH="i386"
-		OSHTTP="http://ftp.es.debian.org/debian/"
-		;;
 	trusty) 	# ogLive 1.0.5-rc4 basado en Ubuntu 14.04.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="trusty"
@@ -83,23 +87,53 @@ case "${1,,}" in
 		OSARCH="i386"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
-	host | *)	# ogLive basado en la distribución del servidor.
+	vivid) 	        # ogLive 1.1.0-rc2 basado en Ubuntu 15.04.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="vivid"
+		OSRELEASE="3.19.0-49-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	wily) 	        # ogLive 1.1.0-rc1 basado en Ubuntu 15.10.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="wily"
+		OSRELEASE="4.2.0-35-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	xenial|xenial-4.4) 	# ogLive 1.1.0-rc4 basado en Ubuntu 16.04 y Kernel 4.4.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="xenial"
+		OSRELEASE="4.4.0-34-generic"
+		OSARCH="i386"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	xenial-4.8) 	# ogLive 1.1.0-rc5 basado en Ubuntu 16.04 y Kernel 4.8.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="xenial"
+		OSRELEASE="4.8.0-39-generic"
+		OSARCH="amd64"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	host)	# ogLive basado en la distribución del servidor.
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
-		OSRELEASE=$(uname -a | awk '{print $3}')
-		#uname -a | grep x86_64 > /dev/null && OSARCH="amd64" || OSARCH="i386"
-		OSARCH="i386"
+		OSRELEASE=$(uname -r)
+		OSARCH=$(dpkg --print-architecture)
 		export OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	*)	# Parámetro desconocido
+		echo "Parámetro no válido."
+		exit 1
+		;;
 esac
-SVNURL="http://opengnsys.es/svn/trunk/client"
+SVNURL="https://opengnsys.es/svn/trunk/client"
 VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
-NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$VERSIONSVN"
+NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
 NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
 export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
 ### El fichero de configuración debe sustituir a estos 3 ficheros (borrar las 3 líneas siguientes).
-echo "$VERSIONSVN" > /tmp/versionsvn.txt
 echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
 echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
 # Generar fichero de configuración.
@@ -151,10 +185,12 @@ fi
 chown -R root:opengnsys $BTTARGETDIR
 
 #echo "$FUNCNAME(): Creando el disco virtual con tamaño máximo de  $BTVIRTUALDISKSIZE MB" 
-dd if=/dev/zero of=$BTROOTFSIMG bs=1048576 count=$BTVIRTUALDISKSIZE
-	#qemu-img create $BTROOTFSIMG 3G	
+if [ "$OSARCH" = "i386" ]; then
+        dd if=/dev/zero of=$BTROOTFSIMG bs=1048576 count=$BTVIRTUALDISKSIZE
 	#dd if=/dev/zero of=$BTROOTFSIMG bs=1k count=$OGCLIENTSIZEKB   # necesita 500MB
-
+else
+        qemu-img create $BTROOTFSIMG $BTVIRTUALDISKSIZE
+fi
 if [ $? -ne 0 ]
 then 
 	errorAndLog "$FUNCNAME(): Creando el disco virtual con tamaño maxima $BTVIRTUALDISKSIZE MB : ERROR" 
@@ -367,16 +403,22 @@ btogGetVar
 #Preparamos los gestores de arranque
 mkdir -p /tmp/iso/isolinux
 cp -av /usr/lib/syslinux/* /tmp/iso/isolinux/
-cp -av /usr/share/gpxe/* /tmp/iso/isolinux/
+if [ -d /usr/share/gpxe ]; then
+    cp -av /usr/share/gpxe/* /tmp/iso/isolinux
+    PXE=gpxe
+elif [ -d /usr/lib/ipxe ]; then
+    cp -av /usr/lib/ipxe/* /tmp/iso/isolinux
+    PXE=ipxe
+fi
 
-# Si existe isolinux/gpxe.iso, montarlo para extraer isolinux.bin.
-if [ -f /tmp/iso/isolinux/gpxe.iso ]; then
+# Si existe el fichero ISO, montarlo para extraer isolinux.bin.
+if [ -f /tmp/iso/isolinux/$PXE.iso ]; then
     mkdir -p /tmp/iso/isolinux/mount
-    mount -o loop /tmp/iso/isolinux/gpxe.iso /tmp/iso/isolinux/mount
+    mount -o loop /tmp/iso/isolinux/$PXE.iso /tmp/iso/isolinux/mount
     cp -va /tmp/iso/isolinux/mount/* /tmp/iso/isolinux
     umount /tmp/iso/isolinux/mount
     rmdir /tmp/iso/isolinux/mount
-    rm -f /tmp/iso/isolinux/gpxe.iso
+    rm -f /tmp/iso/isolinux/$PXE.iso
 fi
 
 cat << FIN > /tmp/iso/isolinux/isolinux.cfg
@@ -414,22 +456,22 @@ append -
 
 label 5
 MENU LABEL Network boot via gPXE lkrn
-KERNEL gpxe.lkrn
+KERNEL $PXE.lkrn
 
 label 6
 MENU LABEL Network boot via gPXE usb
-KERNEL gpxe.usb
+KERNEL $PXE.usb
 
 label 7
 MENU LABEL Network boot via gPXE  pxe
-KERNEL gpxe.pxe
+KERNEL $PXE.pxe
 
 label 8
 MENU LABEL Network boot via gPXE  iso
-KERNEL gpxe.iso
+KERNEL $PXE.iso
 
 label 9
-MENU LABEL gpxe
+MENU LABEL pxe
 KERNEL /clonezilla/live/vmlinuz1
 APPEND initrd=/clonezilla/live/initrd1.img boot=live union=aufs noswap vga=788 ip=frommedia
 FIN

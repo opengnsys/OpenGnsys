@@ -10,9 +10,12 @@
 #*/
 
 
-# Si está configurado OpenGnSys ...
+# Si está configurado OpenGnsys ...
 if [ -n "$OPENGNSYS" ]; then
     echo "${MSG_POWEROFFCONF:-.}"
+
+    # Sincronización horaria con servidor NTP.
+    [ -n "$ogntp" -a "$status" != "offline" ] && ntpdate $ogntp
 
     # Crear fichero de configuración por defecto (30 min. de espera).
     POWEROFFCONF=/etc/poweroff.conf
@@ -20,6 +23,8 @@ if [ -n "$OPENGNSYS" ]; then
 POWEROFFSLEEP=30
 POWEROFFTIME=
 FIN
+    # Incluir zona horaria en el fichero de configuración.
+    awk 'BEGIN {RS=" "} /^TZ=/ {print}' /proc/cmdline >> $POWEROFFCONF
 
     # Lanzar el proceso "cron".
     cron -l
@@ -28,8 +33,8 @@ FIN
     echo "* * * * *   [ -x $OGBIN/poweroffconf ] && $OGBIN/poweroffconf" | crontab -
 
 else
-    # FIXME Error: entorno de OpenGnSys no configurado.
-    echo "Error: OpenGnSys environment is not configured."   # FIXME: definir mensaje.
+    # FIXME Error: entorno de OpenGnsys no configurado.
+    echo "Error: OpenGnsys environment is not configured."   # FIXME: definir mensaje.
     exit 1
 fi
 

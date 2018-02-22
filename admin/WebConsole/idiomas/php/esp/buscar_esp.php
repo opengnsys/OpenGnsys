@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________
 //
 //	Fichero de idiomas php: buscar_esp.php 

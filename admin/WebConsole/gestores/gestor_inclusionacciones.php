@@ -1,4 +1,4 @@
-<?
+<?php
 // *********************************************************************************************************
 // Aplicaci�n WEB: ogAdmWebCon
 // Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla

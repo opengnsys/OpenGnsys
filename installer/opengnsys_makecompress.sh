@@ -2,7 +2,7 @@
 #
 # Script:	opengnsys_compress.sh
 # Descripción:	Programa para descargar y generar un fichero comprimido con los
-#		datos de la última revisión de código del Proyecto OpenGnSys.
+#		datos de la última revisión de código del Proyecto OpenGnsys.
 # Salida:	Datos del fichero comprimido generado.
 # Versión:	1.0 - Incluido en OpenGnSys 1.0.1
 # Autor:	Ramón Gómez, Universidad de Sevilla
@@ -10,7 +10,7 @@
 
 
 # Variables
-SVNURL="http://www.opengnsys.es/svn/trunk/"
+SVNURL="https://opengnsys.es/svn/trunk/"
 SVNREV=$(LANG=C svn info $SVNURL | awk '/Last Changed Rev:/ {print "r"$4}')
 
 # Descargar repositorio SVN

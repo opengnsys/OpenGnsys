@@ -49,11 +49,11 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 <BODY>
 <FORM action="incorporaordenadores.php" method="post" name="fdatos">
 	<INPUT type=hidden name=swf value=1>
-	<INPUT type=hidden name=idaula value=<?echo $idaula?>>
-	<INPUT type=hidden name=nombreaula value=<?echo $nombreaula?>>
+	<INPUT type=hidden name=idaula value=<?php echo $idaula?>>
+	<INPUT type=hidden name=nombreaula value=<?php echo $nombreaula?>>
 	<BR>
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><IMG src="../images/iconos/aula.gif">&nbsp;<?echo $TbMsg[1].":".$nombreaula ?></SPAN></P>
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><IMG src="../images/iconos/aula.gif">&nbsp;<?php echo $TbMsg[1].":".$nombreaula ?></SPAN></P>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <table align="center" class="tabla_datos" border="0" cellpadding="0" cellspacing="1">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -94,45 +94,45 @@ function procesaLineas($cmd,$idaula,$buffer)
 	$MAC="";
 	$IP="";
 	$sw=false;
-	$posa=-1;
 
-	while($posa<strlen($buffer)){
-			if ('host'==substr($buffer,$posa,4)){
-				$posa=$posa+4;
-				$posb=$posa;
-				while(	substr($buffer,$posb,1)!="{") $posb++;
-				$nombre=substr($buffer,$posa,$posb-$posa);
-			}
-			if ('hardware ethernet'==substr($buffer,$posa,17)){
-				$posa=$posa+17;
-				$posb=$posa;
-				while(	substr($buffer,$posb,1)!=";") $posb++;
-				$MAC=substr($buffer,$posa,$posb-$posa);
-			}
+	$equipos = preg_split('/}/',$buffer);
 
-			if ('fixed-address'==substr($buffer,$posa,13)){
-				$posa=$posa+13;
-				$posb=$posa;
-				while(	substr($buffer,$posb,1)!=";") 
-					$posb++;
-				$IP=substr($buffer,$posa,$posb-$posa);
-			}
-			if(!empty($nombre) && !empty($MAC) && !empty($IP)){
-				if(!Inserta($cmd,$idaula,$nombre,$MAC,$IP)) 
-					return(4);
-				$sw=true;
-				$nombre="";
-				$MAC="";
-				$IP="";
-				$resul=true;
-			}
-			$posa++;
+	// Recorro todos los equipos
+	foreach ($equipos as $equipo) {
+	    $nombre = strstr($equipo, '{', true);
+	    $nombre = str_replace('host', '', $nombre);
+	    $valores = strstr($equipo, '{');
+	    // Eliminamos caracteres inútiles
+	    $valores = str_replace(array (' ','{',':'), '',$valores);
+
+	    $propiedades = preg_split('/;/',$valores);
+
+	    // Recorro todas las propiedades
+	    foreach ($propiedades as $propiedad) {
+		if (strpos (" $propiedad " , "fixed-address")) {
+		    $IP = str_replace("fixed-address", '', $propiedad);
+		}
+		if (strpos ( " $propiedad " , "hardwareethernet")) {
+		    $MAC = str_replace("hardwareethernet", '', $propiedad);
+		}
+	    }
+
+	    // Si tengo los valores necesario incluyo el equipo
+	    if(!empty($nombre) && !empty($MAC) && !empty($IP)){
+		if(!Inserta($cmd,$idaula,$nombre,$MAC,$IP)) {
+			return(4);
+		}
+		$sw=true;
+		$nombre="";
+		$MAC="";
+		$IP="";
+		$resul=true;
+	    }
 	}
 	if($sw)
-		return(3);
+	    return(3);
 	else
-		return(4);
-
+	    return(4);
 }
 //________________________________________________________________________________________________________
 function Inserta($cmd,$idaula,$nombre,$lamac,$laip)

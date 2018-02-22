@@ -195,7 +195,6 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 	global $idcentro;
 	global $TbMsg;
 	$tablaHtml="";
-	$rs=new Recordset; 
 	$cmd->texto="SELECT ordenadores.ip AS masterip,ordenadores_particiones.numdisk, ordenadores_particiones.numpar,ordenadores_particiones.codpar,ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso,nombresos.nombreso,tipospar.tipopar,tipospar.clonable,
 				imagenes.nombreca,imagenes.descripcion as imagen,perfilessoft.idperfilsoft,
@@ -208,20 +207,18 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 				LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 				LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
 				WHERE ordenadores.idordenador=".$idordenador." ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
-	//echo 	$cmd->texto;
-	$rs->Comando=&$cmd; 
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) 
 		return($tablaHtml."</table>"); // Error al abrir recordset
 	$rs->Primero();
 	$actualDisk = 0;
-	$columns = 6;
+	$columns = 5;
 	while (!$rs->EOF){
 		
 		if($actualDisk != $rs->campos["numdisk"]){
 			$actualDisk = $rs->campos["numdisk"];
-			$tablaHtml.='<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td>'.chr(13);
+			$tablaHtml.='<TR><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td></TR>'.chr(13);
 		}
 		
 		$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
@@ -236,9 +233,8 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 				$tablaHtml.='<TD align=center>&nbsp;'.'<span style="FONT-SIZE:10px;	COLOR: red;" >'.$TbMsg[12].'</span></TD>'.chr(13);
 			else
 				$tablaHtml.='<TD>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</TD>'.chr(13);
+	
 			$tablaHtml.='<TD>'.HTMLSELECT_imagenes($cmd,$idrepositorio,$rs->campos["idperfilsoft"],$rs->campos["numdisk"],$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
-			$tablaHtml.='<TD>'.HTMLSELECT_repositorios($cmd,$idcentro,$idrepositorio,$rs->campos["numdisk"],$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
-			//$tablaHtml.='<TD>&nbsp;</TD>';
 		}
 		$tablaHtml.='</TR>'.chr(13);	
 		$rs->Siguiente();
@@ -259,8 +255,7 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION_TYPE"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["SO_NAME"] .'&nbsp;</TH>'.chr(13);
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["IMAGE_TO_CREATE"] .'&nbsp;</TH>'.chr(13);
-                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["DESTINATION_REPOSITORY"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["IMAGE_TO_CREATE"].' -- '.$TbMsg["DESTINATION_REPOSITORY"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='        </TR>'.chr(13);
 
                 $tablaHtml=$inicioTabla.$tablaHtml;

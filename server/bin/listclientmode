@@ -46,6 +46,6 @@ mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 		  WHERE aulas.nombreaula='$RESOURCE'
 		     OR nombreordenador='$RESOURCE';" | \
 	while read PC TMPL; do
-		echo "Equipo $PC asociado a arranque tipo \"$(head -1 $TMPLDIR/$TMPL |cut -f2 -d" ")\" (fichero $TMPL)"
+		echo "Equipo \"$PC\" asociado a arranque tipo \"$(head -1 $TMPLDIR/$TMPL |cut -f2 -d" ")\" (fichero $TMPL)"
 	done
 

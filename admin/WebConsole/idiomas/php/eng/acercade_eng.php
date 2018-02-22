@@ -10,11 +10,11 @@ if(!isset($TbMsg)){
 }
 
 $TbMsg["TITLE"]='Free and open-source application for deployment and management of operating systems.';
-$TbMsg["DESCRIPTION"]='OpenGnSys <em> (Open Genesis)</em> Project brings together the combined efforts of several Spanish Public Universities. OpenGnSys provide a number of free and open tools for managing and deploying computers. These tools supplies a complete, versatile and intuitive sytem. This system allows the arrangement, installation and deployment of different operating systems.';
-$TbMsg["LICENSE"]='OpenGnSys is a Free Software project. As such, all code is licensed under ';
+$TbMsg["DESCRIPTION"]='OpenGnsys <em> (Open Genesis)</em> Project brings together the combined efforts of several Spanish Public Universities. OpenGnsys provide a number of free and open tools for managing and deploying computers. These tools supplies a complete, versatile and intuitive sytem. This system allows the arrangement, installation and deployment of different operating systems.';
+$TbMsg["LICENSE"]='OpenGnsys is a Free Software project. As such, all code is licensed under ';
 $TbMsg["LINK"]='Web project:';
 $TbMsg["CHANGE"]='Changes in: ';
-$TbMsg["MANUAL"]='Manual OpenGnSys ';
+$TbMsg["MANUAL"]='Manual OpenGnsys ';
 
 
 ?>

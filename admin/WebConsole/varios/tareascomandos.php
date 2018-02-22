@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -34,23 +34,23 @@ if (!$cmd)
 <SCRIPT language="javascript" src="../jscripts/tareascomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/tareascomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/tareascomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 
-	<INPUT type=hidden value="<? echo $idcentro?>" id=idcentro>	 
-	<P align=center class=cabeceras><IMG src="../images/iconos/tareas.gif">&nbsp;<?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/comandos.gif"><BR><BR>
-	<SPAN align=center class=presentaciones><B><?echo $TbMsg[2]?>:&nbsp;</B><? echo $descripciontarea?></SPAN></P>
+	<INPUT type=hidden value="<?php echo $idcentro?>" id=idcentro>	 
+	<P align=center class=cabeceras><IMG src="../images/iconos/tareas.gif">&nbsp;<?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/comandos.gif"><BR><BR>
+	<SPAN align=center class=presentaciones><B><?php echo $TbMsg[2]?>:&nbsp;</B><?php echo $descripciontarea?></SPAN></P>
 	<DIV align=center id="Layer_componentes">
 		<TABLE class="tabla_listados" cellspacing=1 cellpadding=0 id="TABLACOMANDOS">
 				<TR height=20>
 					<TH><IMG src="../images/iconos/eliminar.gif"></TH>
-					<TH align=left>&nbsp;<?echo $TbMsg[3]?></TH>
-					<TH><?echo $TbMsg[4]?></TH>
+					<TH align=left>&nbsp;<?php echo $TbMsg[3]?></TH>
+					<TH><?php echo $TbMsg[4]?></TH>
 					<TH>A</TH>
 			</TR>
-		<?
+		<?php
 			$rs=new Recordset; 
 			$cmd->texto='SELECT  tareas_acciones.*, comandos.descripcion,comandos.visuparametros 
 							FROM tareas_acciones 
@@ -87,12 +87,12 @@ if (!$cmd)
 	</DIV>		
 	<DIV id="Layer_nota"  align=center>
 		<br>
-		<span align=left class=notas><I><?echo $TbMsg[7]?>.</I></span>
+		<span align=left class=notas><I><?php echo $TbMsg[7]?>.</I></span>
 	</DIV>
 </FORM>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function pintacomandos($cmd,$rs){
 	global $TbMsg;

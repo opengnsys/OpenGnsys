@@ -1,4 +1,4 @@
-<? 
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -25,6 +25,7 @@ $usuario="";
 $pasguor="";
 $nombre="";
 $email="";
+$apikey="";
 $identificador=0;
 $idambito=0;
 $ididioma=0;
@@ -69,67 +70,91 @@ switch($idtipousuario){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_usuarios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_usuarios_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_usuarios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos" action="../gestores/gestor_usuarios.php" method="post"> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=idusuario value=<?=$idusuario?>>
-	<INPUT type=hidden name=idtipousuario value=<?=$idtipousuario?>>
-	<INPUT type=hidden name=idambito value=<?=$idambito?>>
+	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
+	<INPUT type=hidden name=idusuario value=<?php echo $idusuario?>>
+	<INPUT type=hidden name=idtipousuario value=<?php echo $idtipousuario?>>
+	<INPUT type=hidden name=idambito value=<?php echo $idambito?>>
 
-	<P align=center class=cabeceras><?echo $TbMsg[4]." (".$litusu.")"?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]." (".$litusu.")"?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------	NOMBRE USUARIO	-------------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
-					<TD><INPUT type=hidden class=cajatexto name="usuario"  style="width:100" value="<? echo $usuario?>"></INPUT><?echo $usuario?>&nbsp&nbsp;<IMG src="<? echo $urlimg ?>"></TD>
-				<?}else{?>
-					<TD><INPUT type=text class=cajatexto name="usuario"  style="width:100" value="<? echo $usuario?>">
-					<IMG src="<? echo $urlimg ?>">
+				<TH>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
+					<TD><INPUT type=hidden class=cajatexto name="usuario"  style="width:100" value="<?php echo $usuario?>"></INPUT><?php echo $usuario?>&nbsp&nbsp;<IMG src="<?php echo $urlimg ?>"></TD>
+				<?php }else{?>
+					<TD><INPUT type=text class=cajatexto name="usuario"  style="width:100" value="<?php echo $usuario?>">
+					<IMG src="<?php echo $urlimg ?>">
 
-				<?}?>
+				<?php }?>
 			</TR>
 <!----------------------------------------------------	PASSWORD	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
-					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>"></INPUT><?echo $pasguor?></TD>
-				<?}else{?>
-					<TD><INPUT type=text class=cajatexto  name="pasguor"  style="width:100" value="<? echo $pasguor?>">
-				<?}?>
+			<!-- disables autocomplete --><input type="password" style="display:none">
+				<TH>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
+					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value=""></INPUT>****</TD>
+				<?php }else{?>
+					<TD><INPUT type=password class=cajatexto  name="pasguor"  style="width:100" value="">
+				<?php }?>
+			</TR>
+<!----------------------------------------------------	CONFIRMAR PASSWORD	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+			<TR>
+				<TH>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
+					<TD><INPUT type=hidden class=cajatexto  name="confirmarpasguor"  style="width:100" value=""></INPUT>****</TD>
+				<?php }else{?>
+					<TD><INPUT type=password class=cajatexto  name="confirmarpasguor"  style="width:100" value="">
+				<?php }?>
 			</TR>
 <!---------------------------------------------------	NOMBRE COMPLETO	----------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idusuario==1)){?>
-					<TD><INPUT type=hidden class=cajatexto name="nombre"  style="width:250" value="<? echo $nombre?>"></INPUT><?echo $nombre?></TD>
-				<?}else{?>
-					<TD><INPUT type=text class=cajatexto name="nombre"  style="width:250" value="<? echo $nombre?>">
-				<?}?>
+				<TH>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idusuario==1)){?>
+					<TD><INPUT type=hidden class=cajatexto name="nombre"  style="width:250" value="<?php echo $nombre?>"></INPUT><?php echo $nombre?></TD>
+				<?php }else{?>
+					<TD><INPUT type=text class=cajatexto name="nombre"  style="width:250" value="<?php echo $nombre?>">
+				<?php }?>
 			</TR>
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion){?>
-					<TD><?echo $email?></TD>
-				<?}else{?>
-					<TD><INPUT type=text class=cajatexto name="email"  style="width:250" value="<? echo $email?>">
-				<?}?>
+				<TH>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion){?>
+					<TD><?php echo $email?></TD>
+				<?php }else{?>
+					<TD><INPUT type=text class=cajatexto name="email"  style="width:250" value="<?php echo $email?>">
+				<?php }?>
 			</TR>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TH>
-				<?if ($opcion==$op_eliminacion){?>
-					<TD><? echo TomaDato($cmd,0,"idiomas",$ididioma,"ididioma","descripcion")?></TD> 
-				<?}else{?>
-					<TD><? echo HTMLSELECT($cmd,0,"idiomas",$ididioma,"ididioma","descripcion",100)?></TD>
-				<?}?>
+				<TH>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TH>
+				<?php if ($opcion==$op_eliminacion){?>
+					<TD><?php echo TomaDato($cmd,0,"idiomas",$ididioma,"ididioma","descripcion")?></TD> 
+				<?php }else{?>
+					<TD><?php echo HTMLSELECT($cmd,0,"idiomas",$ididioma,"ididioma","descripcion",100)?></TD>
+				<?php }?>
 			</TR>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+                        <?php if ($opcion!=$op_eliminacion){?>
+                        <TR>
+                                <TH>&nbsp;<?php echo $TbMsg['APIKEY']?>&nbsp;</TH>
+				<?php // Opcion nuevo usuario
+				if ($opcion == 1) {?>
+					<TD><?php echo $TbMsg['NEWAPIKEY']?></TD>
+				<?php } else { ?>
+					<TD><?php echo $apikey?></TD>
+				<?php }?>
+                        </TR>
+                        <?php }?>
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
 	</TABLE>
 </FORM>
 </DIV>
@@ -138,18 +163,17 @@ switch($idtipousuario){
 if ($idusuario==1){
 ///*
 
-       echo '<TABLE  id=tabla_conf align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>';
-		  echo '<TR>';
-               echo '</TR>';
-		  echo '<div onclick=window.open("http://opengnsys.es/wiki/ModificarUsuarios")><TR>';
-       	echo	'<TH align=center >&nbsp;'.$TbMsg[14].$TbMsg[15].$TbMsg[16].$TbMsg[17].'<a color=white href='.$TbMsg[17].' target=blank></a></br>'.$nombreambito.$TbMsg[23].'</br>'.$TbMsg[24].'&nbsp;</TH>';
-               echo '</TR></div>';
-       echo '</TABLE>';
+       echo '<table id="tabla_conf" align="center" border="0" cellPadding="5" cellspacing="1" class="tabla_datos">';
+		echo '<tr>';
+		echo '<th align="center">&nbsp;'.$TbMsg[14].$TbMsg[15].'<a style="color:white" href="'.$TbMsg[17].'" target="_blank">'.$TbMsg[16].'</a>&nbsp;</th>';
+		echo '</tr>';
+       echo '</table>';
+       echo '<p>';
 
 //*/
 }
 ?>
-<?
+<?php
 if ($opcion==$op_eliminacion && $idusuario==1)
 {}else{
 //________________________________________________________________________________________________________
@@ -159,7 +183,7 @@ include_once("../includes/opcionesbotonesop.php");
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un usuario
 //		Parametros: 
@@ -168,10 +192,9 @@ include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
 	global $usuario;
-	global $pasguor;
 	global $nombre;
 	global $email;
-	global $idambito;
+        global $apikey;
 	global $ididioma;
 	global $idtipousuario;
 	
@@ -182,10 +205,9 @@ function TomaPropiedades($cmd,$id){
 	$rs->Primero(); 
 	if (!$rs->EOF){
 			$usuario=$rs->campos["usuario"];
-			$pasguor=$rs->campos["pasguor"];
 			$nombre=$rs->campos["nombre"];
 			$email=$rs->campos["email"];
-			$idambito=$rs->campos["idambito"];
+			$apikey=$rs->campos["apikey"];
 			$ididioma=$rs->campos["ididioma"];
 			$idtipousuario=$rs->campos["idtipousuario"];
 		$rs->Cerrar();

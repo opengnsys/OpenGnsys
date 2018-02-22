@@ -1,4 +1,4 @@
-<? 
+<?php
 // ********************************************************************
 // Aplicación WEB: ogAdmWebCon 
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla 
@@ -31,7 +31,7 @@ $rs=new Recordset;
 $cmd->texto="SELECT usuarios.idusuario,usuarios.idtipousuario
 		FROM usuarios
 		INNER JOIN administradores_centros ON administradores_centros.idusuario=usuarios.idusuario
-		 WHERE usuarios.usuario='".$usu."' AND usuarios.pasguor='".$pss."'"; 
+		 WHERE usuarios.usuario='".$usu."' AND usuarios.pasguor=SHA2('".$pss."',224)"; 
 $rs->Comando=&$cmd; 
 
 if (!$rs->Abrir()){

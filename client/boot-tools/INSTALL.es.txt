@@ -1,12 +1,12 @@
-OpenGnSys Client boot-tools   INSTALL.es.txt
+OpenGnsys Client boot-tools   INSTALL.es.txt
 ============================================
 
 
 Advertencia previa:
 -----------------------------
-- No usar este instalador en un sistema OpenGnSys en producción.
+- No usar este instalador en un sistema OpenGnsys en producción.
 - Se puede ejecutar este script desde un sistema Ubuntu 10.04 o superior.
-- Mas información http://www.opengnsys.es/wiki/ClienteInitrdDSGenerarloV1.0.2
+- Mas información https://opengnsys.es/trac/wiki/ClienteInitrdDSGenerarloV1.0.2
 
 
 Requisitos iniciales
@@ -23,7 +23,7 @@ mv /opt/opengnsys/tftpboot/ogclient /opt/opengnsys/tftpboot/ogclient-old;
 
 #1. Descargar del Subversion las herramientas del cliente
 apt-get install subversion wget
-svn checkout http://www.opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys/client/;
+svn checkout https://opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys/client/;
 find /tmp/opengnsys_installer/ -name .svn -type d -exec rm -fr {} \; 2>/dev/null;
 
 #2. Ejecutar el instalador: 
@@ -43,7 +43,6 @@ Notas para ejecución del instalador en Ubuntu 12.10:
   - pc / qwerty / Spanish / Standard / Standard,  UTF-8,  Combined - Latin; Slavic Cyrillic; Greek,  Fixed,  16
 
 
-     
 
 Descripción de la estrucutra de boot-tools
 ------------------------------------------

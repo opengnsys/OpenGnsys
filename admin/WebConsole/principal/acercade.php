@@ -1,7 +1,7 @@
 <?php
 //********************************************************************
 // Descripción : 
-//              Pagina de informacion sobre el proyecto OpenGnSys
+//              Pagina de informacion sobre el proyecto OpenGnsys
 //********************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/acercade_".$idioma.".php");
@@ -19,7 +19,7 @@ include_once("../idiomas/php/".$idioma."/acercade_".$idioma.".php");
 
 <img alt="*" src="../images/acercade.png" align="left" hspace="10em" vspace="10em" />
 
-<h1><img alt="OpenGnSys" src="../images/iconos/logoopengnsys.png" /></h1>
+<h1><img alt="OpenGnsys" src="../images/iconos/logoopengnsys.png" /></h1>
 
 <p>
 <?php
@@ -38,13 +38,14 @@ $changelogfile="../../doc/".$buschangelog;
 <?php
 // Añadir Manual.
 $usermanual="../../doc/userManual";
+$destdir="../api/userManual";
 if (file_exists ($usermanual)){
 // Copiamos el directorio userManual
-system("cp -R ../../doc/userManual ../api");
+system("rm -fr $destdir; cp -a $usermanual $destdir");
 // Creamos el Inicio del Manual
-system("touch ../api/userManual/Inicio.php");
 // Añadimos instrucciones
-$ficheroinicio="../api/userManual/Inicio.php";
+$ficheroinicio="$destdir/Inicio.php";
+system("touch $ficheroinicio");
 
 $crearficheroinicio=fopen($ficheroinicio,"w");
 fwrite($crearficheroinicio,"
@@ -64,7 +65,7 @@ fwrite($crearficheroinicio,"
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <p>&nbsp;</p>
-    <p><img alt='OpenGnSys' src='../../images/iconos/logoopengnsys.png' /></p></td>
+    <p><img alt='OpenGnsys' src='../../images/iconos/logoopengnsys.png' /></p></td>
     <td width='61%'>
     
 <p>
@@ -123,7 +124,7 @@ fclose($crearficheroinicio);
 
 <p><?php echo $TbMsg["DESCRIPTION"] ?> </p>
 
-<p><?php echo $TbMsg["LICENSE"] ?> <a href="http://www.gnu.org/licenses/gpl.html"  target="_blank" ><img alt="GPL v3"  src="../images/gplv3-88x31.png" height="20em" /></a></p>
+<p><?php echo $TbMsg["LICENSE"] ?> <a href="https://www.gnu.org/licenses/gpl.html"  target="_blank" ><img alt="GPL v3"  src="../images/gplv3-88x31.png" height="20em" /></a></p>
 
 <p><?php
  if (file_exists ($changelogfile)){ 
@@ -132,9 +133,9 @@ fclose($crearficheroinicio);
 	include ($versionfile);}
 ?></p>
 
-<p><?php echo "<strong><a href='../api/userManual/Inicio.php' target='_blank'>".$TbMsg["MANUAL"]."</a></strong>";?></p>
+<p><?php echo "<strong><a href='$ficheroinicio' target='_blank'>".$TbMsg["MANUAL"]."</a></strong>";?></p>
 
-<p><strong><?php echo $TbMsg["LINK"]; ?> <a href="http://opengnsys.es"  target="_blank" >opengnsys.es</a><strong></p>
+<p><strong><?php echo $TbMsg["LINK"]; ?> <a href="https://opengnsys.es"  target="_blank" >opengnsys.es</a><strong></p>
 
 
 

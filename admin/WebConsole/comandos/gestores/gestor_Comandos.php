@@ -9,6 +9,7 @@
 //		Gestor de todos los comandos
 // *************************************************************************************************************************************************
 include_once("../../includes/ctrlacc.php");
+include_once("../../includes/restfunctions.php");
 include_once("../../clases/AdoPhp.php");
 include_once("../../clases/SockHidra.php");
 include_once("../../includes/constantes.php");
@@ -19,8 +20,7 @@ include_once("../../includes/RecopilaIpesMacs.php");
 //________________________________________________________________________________________________________
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
-
- // Recoge parametros de seguimiento
+// Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
 $sw_ejprg="";
@@ -28,6 +28,7 @@ $sw_mkprocedimiento="";
 $nombreprocedimiento="";
 $idprocedimiento="";
 $ordprocedimiento=0;
+$avisoRepo=false;
 
 $sw_mktarea="";
 $nombretarea="";
@@ -74,18 +75,7 @@ $atributos=str_replace('$',chr(9),$atributos);
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/comunescomandos.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
-<?php
-//##################################################################
-if ( ereg("ptc=UNICAST", $atributos) & $ambito!=16) { ?>
-	<SCRIPT language="javascript">
-	if (confirm(TbMsg[4]) == false) {
-		alert(CTbMsg[0]);
-		location.href="../../nada.php"
-	}
-	</SCRIPT>
-<?php } ?>
+	<?php echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
 <?php
 //##################################################################
@@ -93,6 +83,7 @@ if ( ereg("ptc=UNICAST", $atributos) & $ambito!=16) { ?>
 $cadenaid="";
 $cadenaip="";
 $cadenamac="";
+$cadenaoga="";	// Clave de acceso a la API REST de OGAgent.
 
 if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
 	if(substr($filtro,strlen($cadenaid)-1,1)==";") // Si el último caracter es una coma
@@ -123,6 +114,11 @@ $cmd->CreaParametro("@idambito",0,1);
 $cmd->CreaParametro("@restrambito","",0);
 $cmd->CreaParametro("@ordprocedimiento",0,1);
 $cmd->CreaParametro("@ordtarea",0,1);
+
+/* PARCHE UHU heredado de la version 1.1.0: Si la accion a realizar es Arrancar incluimos una pagina para arrancar desde el repo */
+if($funcion == "nfn=Arrancar".chr(13))
+	include("wakeonlan_repo.php");
+/**/
 
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 	$cmd->ParamSetValor("@restrambito",$idambito);
@@ -166,7 +162,6 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						VALUES (@idordenador,@tipoaccion,@idtipoaccion,@descriaccion,@ip,
 						@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idcentro)";
 			$resul=$cmd->Ejecutar();
-			//echo "<br>".$cmd->texto;
 		}
 		$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	}
@@ -176,13 +171,16 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		echo '</SCRIPT>';
 	}
 	else{
+		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
+		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			// Envio al servidor 
-			$shidra=new SockHidra($servidorhidra,$hidraport); 
-			if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
+			// comando 16 sólo agente nuevo
+			if ($idcomando != 16){
+			    // Envio al servidor 
+			    $shidra=new SockHidra($servidorhidra,$hidraport); 
+			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
 				$parametros.=$acciones;
-				//die($parametros);
 				$resul=$shidra->envia_comando($parametros);
 				if($resul)
 					$trama=$shidra->recibe_respuesta();
@@ -193,15 +191,95 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						$resul=$ValorParametros["res"];
 					}
 				$shidra->desconectar();
+			    }
+			    // Guardamos resultado de ogAgent original
+			    $resulhidra = $resul;
+			} else {
+			    // En agente nuevo devuelvo siempre correcto
+			    $resulhidra = 1;
 			}
-			if (!$resul){
+
+	                // Comprobamos si el comando es soportado por el nuevo ogAgent
+			$numip=0;
+			$ogAgentNuevo = false;
+			switch ($idcomando) {
+				case 2:
+ 					// Apagar
+					$urlcomando = 'poweroff';
+					$ogAgentNuevo = true;
+					break;
+				case 5:
+					// Reiniciar
+					$urlcomando = 'reboot';
+					$ogAgentNuevo = true;
+					break;
+				case 8:
+					// Ejecutar script 
+					$urlcomando = 'script';
+					$ogAgentNuevo = true;
+					$client = (isset ($_POST['modoejecucion']) && $_POST['modoejecucion'] != '' ) ? $_POST['modoejecucion'] : 'true';
+					$paramsPost = '{"script":"'.base64_encode($script).'","client":"'.$client.'"}';
+					break;
+				case 16:
+					// Enviar mensaje
+					$urlcomando = 'popup';
+					$ogAgentNuevo = true;
+					$paramsPost = '{"title":"'.$_POST['titulo'].'","message":"'.$_POST['mensaje'].'"}';
+					break;
+			}
+
+	                // Se envía acción al nuevo ogAgent
+			if ( $ogAgentNuevo ) {
+				// Send REST requests to new OGAgent clients.
+				$urls = array();
+				$ipsuccess = '';
+				// Compose array of REST URLs.
+				$auxIp = explode(';', $cadenaip);
+				$auxKey = explode(";", $cadenaoga);
+				$i = 0;
+				foreach ($auxIp as $ip) {
+					$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando";
+					if (isset($auxKey[$i]))  $urls[$ip]['header'] = Array("Authorization: ".$auxKey[$i]);
+					if (isset($paramsPost))  $urls[$ip]['post'] = $paramsPost;
+
+					$i++;
+				}
+				// Launch concurrent requests.
+				$responses = multiRequest($urls);
+				// Process responses array (IP as array index).
+				foreach ($responses as $ip => $resp) {
+					// Check if response code is OK (200).
+					if ($resp['code'] == 200) {
+						$ipsuccess .= "'".$ip."',";
+						$numip++;
+					}
+				}
+				// quitamos último carácter ','
+				$ipsuccess=substr($ipsuccess, 0, -1);
+
+				// Actualizamos la cola de acciones con los que no dan error
+				if ( $numip >> 0 ) {
+					$fin= date ("Y-m-d H:i:s");
+					$cmd->texto="UPDATE acciones SET resultado='1', estado='3', ".
+						" descrinotificacion='', fechahorafin='".$fin."' ".
+						" WHERE ip IN  ($ipsuccess) AND idcomando='$idcomando' ".
+						" ORDER BY idaccion DESC LIMIT $numip";
+					$resul=$cmd->Ejecutar();
+				}
+			}
+			// Mostramos mensaje con resultado
+			if (!$resulhidra && $numip == 0){
 				echo '<SCRIPT language="javascript">';
 				echo 'resultado_comando(1);'.chr(13);
 				echo '</SCRIPT>';
 			}
 			else{
 				echo '<SCRIPT language="javascript">'.chr(13);
-				echo 'resultado_comando(2);'.chr(13);
+				if ($avisoRepo) {
+					echo 'resultado_comando(17);'.chr(13);
+				} else {
+					echo 'resultado_comando(2);'.chr(13);
+				}
 				echo '</SCRIPT>'.chr(13);
 			}		
 		}

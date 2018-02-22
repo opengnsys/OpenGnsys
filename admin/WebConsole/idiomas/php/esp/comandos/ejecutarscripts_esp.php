@@ -17,6 +17,13 @@
 	$TbMsg[9]='C&oacute;digo del script';
 	$TbMsg[10]='Datos a suministrar';
 	$TbMsg[11]='Eliminar Imagen de la Cach&eacute; de Cliente';
+	$TbMsg[12]='&nbsp;Modo de ejecución *&nbsp;';
+	$TbMsg[13]='Sistema';
+	$TbMsg[14]='Usuario';
+	$TbMsg[15]="AVISO El modo de ejecución sólo se aplica a los agentes de sistema operativo nuevos: <br>
+		     * El modo usuario sólo es válido si está iniciada la sesión en modo gráfico.<br>
+		     * El lenguaje del script a enviar debe corresponder al estado de cliente.<br>
+		     * Para Windows hay que escapar las contrabarras.";
 
 	$TbMsg["WDI10"]='Modificar código';
 	$TbMsg["WDI11"]='Asistente de Despliegue de la imagen';

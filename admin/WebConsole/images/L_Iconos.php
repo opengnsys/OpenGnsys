@@ -1,4 +1,4 @@
-<?
+<?php
 // ********************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -50,17 +50,17 @@ var NS=(navigator.appName=="Netscape");
 </SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="L_Iconos.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/iconos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/iconos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
-  <P align="center"><SPAN class=textos><? echo $TbMsg["SEARCH_OPT"]; ?> </SPAN></P>
+  <P align="center"><SPAN class=textos><?php echo $TbMsg["SEARCH_OPT"]; ?> </SPAN></P>
    <FORM name="fdatos" action="L_Iconos.php" method="post">
 	<INPUT type=hidden name=identificador value="0">
 	<TABLE align=center class=tabla_busquedas>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH>&nbsp;<? echo $TbMsg["TYPE"] ?>&nbsp;</TD>
-			<TD ><?
+			<TH>&nbsp;<?php echo $TbMsg["TYPE"] ?>&nbsp;</TD>
+			<TD ><?php
 					$parametros="0=".chr(13);
 					$parametros.=$TbMsg["SELECT_WEB"] .chr(13);
 					$parametros.=$TbMsg["SELECT_ITEMS"] .chr(13);
@@ -75,38 +75,38 @@ var NS=(navigator.appName=="Netscape");
 <P align=center><A href="#"><img border=0 src="../images/iconos/busquedas.gif" onclick="document.fdatos.submit()" alt="Buscar"></A></P>
 </FORM>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
-<P align="center"><SPAN class=textos><? echo $TbMsg["SEARCH_RESULT"]. $rs->numeroderegistros?></SPAN></P>
+<P align="center"><SPAN class=textos><?php echo $TbMsg["SEARCH_RESULT"]. $rs->numeroderegistros?></SPAN></P>
 <TABLE align="center" class="tabla_listados">
   <TR>
 	<TH align="center">A</TH>
-	<TH align="center">&nbsp;<? echo $TbMsg["DESCRIP"] ?>&nbsp;</TH>
-	<TH align="center">&nbsp;<? echo $TbMsg["NAME"] ?>&nbsp;</TH>
+	<TH align="center">&nbsp;<?php echo $TbMsg["DESCRIP"] ?>&nbsp;</TH>
+	<TH align="center">&nbsp;<?php echo $TbMsg["NAME"] ?>&nbsp;</TH>
 	<TH align="center">&nbsp;</TH>
 	<TH align="center">&nbsp;T&nbsp;</TH>
 
 	</TR>
-  <?
+  <?php
 	$TBtipo[1]="W";
 	$TBtipo[2]="I";
 	$TBtipo[3]="F";	
   while (!$rs->EOF){?>
 	<TR>
-		<TD  align=center><IMG  id=<?=$rs->campos["idicono"]?> style="cursor:hand" onclick="menu_contextual(this)" src="../images/iconos/administrar_off.gif"></TD>
-		<TD>&nbsp;<? echo  ( $TbMsg[basename($rs->campos["descripcion"])] ) ? $TbMsg[basename($rs->campos["descripcion"])] : basename($rs->campos["descripcion"]);  ?>&nbsp;</TD> 
-		<TD>&nbsp;<? echo basename($rs->campos["urlicono"])?>&nbsp;</TD>
-		<TD align=center>&nbsp;<IMG src="./iconos/<? echo $rs->campos["urlicono"] ?>"
+		<TD  align=center><IMG  id=<?php echo $rs->campos["idicono"]?> style="cursor:hand" onclick="menu_contextual(this)" src="../images/iconos/administrar_off.gif"></TD>
+		<TD>&nbsp;<?php echo  ( $TbMsg[basename($rs->campos["descripcion"])] ) ? $TbMsg[basename($rs->campos["descripcion"])] : basename($rs->campos["descripcion"]);  ?>&nbsp;</TD> 
+		<TD>&nbsp;<?php echo basename($rs->campos["urlicono"])?>&nbsp;</TD>
+		<TD align=center>&nbsp;<IMG src="./iconos/<?php echo $rs->campos["urlicono"] ?>"
 
-		<? if ($rs->campos["idtipoicono"]==2) //icono item 
+		<?php if ($rs->campos["idtipoicono"]==2) //icono item 
 			echo " width=64 ";
 		else
 			echo " width=16 ";
 		?>
 		>&nbsp;</TD>
-		<TD align=center>&nbsp;<? echo $TBtipo[$rs->campos["idtipoicono"]] ?>&nbsp;</TD>
+		<TD align=center>&nbsp;<?php echo $TBtipo[$rs->campos["idtipoicono"]] ?>&nbsp;</TD>
   </TR>
-   <?  $rs->Siguiente();}?>
+   <?php  $rs->Siguiente();}?>
 </TABLE>
-<? 
+<?php 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 // Menu contextual
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 
 </BODY>
 </HTML>
-<?
+<?php
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 //	Menus contextuales
 //-------------------------------------------------------------------------------------------------------------------------------------------------

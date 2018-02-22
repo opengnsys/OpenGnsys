@@ -1,4 +1,4 @@
-<?
+<?php
 // __________________________________________________
 //
 //      Fichero de idiomas php: acceso_esp.php 
@@ -15,7 +15,7 @@ $TbErr[4]="ATENCIÓN: Usted no tiene acceso a esta aplicación";
 
 // Mensajes.
 $TbMsg=array();
-$TbMsg["ACCESS_TITLE"]="OpenGnSys: Administraci&oacute;n web de aulas";
+$TbMsg["ACCESS_TITLE"]="OpenGnsys: Administraci&oacute;n web de aulas";
 $TbMsg["ACCESS_HEADING"]="Gestión de Aulas de Inform&aacute;tica";
 $TbMsg["ACCESS_SUBHEAD"]="Acceso para administradores";
 $TbMsg["ACCESS_USERNAME"]="Usuario";

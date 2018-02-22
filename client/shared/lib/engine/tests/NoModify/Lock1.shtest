@@ -33,7 +33,7 @@ $ ogUnmount 1 1 >/dev/null 2>&1
 $ ogLock 1 1
 
 $ ogCheckFs 1 1
-OpenGnSys error:  ogCheckFs:  "1 1"
+OpenGnsys error:  ogCheckFs:  "1 1"
 
 $ ogUnlock 1 1
 
@@ -70,16 +70,16 @@ $ rm $OGIMG/_test_.*
 
 # Comprobando los errores (FALTA)
 $ ogLock
-OpenGnSys error:  ogLockPartition:  ""
+OpenGnsys error:  ogLockPartition:  ""
 
 
 $ ogLock 1 10
-OpenGnSys error:  ogDiskToDev:  ""
+OpenGnsys error:  ogDiskToDev:  ""
 
 
 $ ogIsLocked
-OpenGnSys error:  ogIsLocked:  ""
+OpenGnsys error:  ogIsLocked:  ""
 
 $ ogIsLocked 1 10
-OpenGnSys error:  ogDiskToDev:  ""
+OpenGnsys error:  ogDiskToDev:  ""
 

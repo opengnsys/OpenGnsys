@@ -1,4 +1,4 @@
-<?
+<?php
 /*______________________________________________________________________
 	Cambia de posicion los extremos de una fecha. Devuelve una fecha con formato 
 	dd-mm-aaaa si el formato de entrada es aaaa-mm-dd y viseversa
@@ -6,7 +6,7 @@
 		- fecha: Una cadena con los datos de una fecha
 _______________________________________________________________________*/
 function InvFecha($fecha){
-	if ($fecha=="0000-00-00")return("");
+	if ($fecha=="1970-01-01")return("");
 
 	$auxsplit=split(" ",$fecha);
 	list($anno_p,$mes_p,$dia_p)=split("[/-]",$auxsplit[0]);

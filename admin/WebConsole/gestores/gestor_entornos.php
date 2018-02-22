@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -39,9 +39,9 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_entornos.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 	
-<?
+<?php
 
 $literal="resultado_modificar_entornos";
 
@@ -60,7 +60,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /**************************************************************************************************************************************************
 	Inserta, modifica o elimina datos en la tabla entornos
 ________________________________________________________________________________________________________*/

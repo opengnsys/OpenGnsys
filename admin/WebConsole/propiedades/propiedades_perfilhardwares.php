@@ -1,4 +1,4 @@
-<?  
+<?php  
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -7,6 +7,9 @@
 // Nombre del fichero: propiedades_perfilhardwares.php
 // Descripción : 
 //		 Presenta el formulario de captura de datos de un pefil hardware para insertar,modificar y eliminar
+// Versión: 1.1 - Se elimina la opción de arranque directo.
+// Autor:   Irina Gómez - ETSII Universidad de Sevilla
+// Date: 2017-10-23
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
@@ -53,16 +56,17 @@ if  ($opcion!=$op_alta){
 <body>
 <div align="center">
 <form name="fdatos" action="../gestores/gestor_perfilhardwares.php" method="post"> 
-	<input type="hidden" name="opcion" value="<?=$opcion?>" />
-	<input type="hidden" name="idperfilhard" value="<?=$idperfilhard?>" />
-	<input type="hidden" name="ordenadores" value="<?=$ordenadores?>" />
-	<input type="hidden" name="grupoid" value="<?=$grupoid?>" />
-	<p align="center" class="cabeceras"><?echo $TbMsg["HARD_TITLE"]?><br />
-	<span align="center" class="subcabeceras"><? echo $opciones[$opcion]?></span></p>
+	<input type="hidden" name="opcion" value="<?php echo $opcion?>" />
+	<input type="hidden" name="idperfilhard" value="<?php echo $idperfilhard?>" />
+	<input type="hidden" name="ordenadores" value="<?php echo $ordenadores?>" />
+	<input type="hidden" name="grupoid" value="<?php echo $grupoid?>" />
+	<input type="hidden" name="winboot" value="reboot" />
+	<p align="center" class="cabeceras"><?php echo $TbMsg["HARD_TITLE"]?><br />
+	<span align="center" class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg["HARD_NAME"]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg["HARD_NAME"]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td style="width:215">'.$descripcion.'</td>';
 				else
@@ -79,29 +83,17 @@ if  ($opcion!=$op_alta){
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg["HARD_WINBOOT"]?> <sup>*</sup>&nbsp;</th>
-			<?php	if ($opcion==$op_eliminacion)
-					echo "<td>$winboot</td>";
-				else {
-					$params = "reboot=".$TbMsg["HARD_REBOOT"].chr(13);
-					$params.= "kexec=".$TbMsg["HARD_KEXEC"];
-					echo "<td>".HTMLCTESELECT($params,"winboot","estilodesple","","$winboot",110)."</td>";
-				}
-			?>
-		</tr>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</table>
 </form>
 </div>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </body>
 </html>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un perfil hardware
 //		Parametros: 

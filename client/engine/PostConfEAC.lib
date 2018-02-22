@@ -601,3 +601,96 @@ schroot -c linux
 schroot -end-sessiona --all-sessions
 }
 
+
+#/**  @function ogDiskToRelativeDev: @brief Traduce los ID de discos o particiones EAC a ID Linux relativos, es decir 1 1 => sda1
+#@param  Admite 1 parametro:   $1  int_numdisk
+#@param  Admite 2 parametro:   $1   int_numdisk                    $2  int_partition
+#@return  Para 1 parametros traduce Discos Duros: Devuelve la ruta relativa linux del disco duro indicado con nomenclatura EAC.........ejemplo: IdPartition 1 => sda
+#@return  Para 2 parametros traduce Particiones: Devuelve la ruta relativa linux de la particion indicado con nomenclatura EAC...........  ejemplo: IdPartition  2 1 => sdb1
+#@warning  No definidas
+#@attention
+#@note	  Notas sin especificar
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:  IdPartition en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
+#*/
+function ogDiskToRelativeDev () {
+if [ $# = 0 ]
+then
+	Msg "Info: Traduce el identificador del dispositivo EAC a dispositivo linux \n" info
+	Msg "Sintaxis1: IdPartition int_disk -----------------Ejemplo1: IdPartition 1 -> sda " example
+	Msg "Sintaxis2: IdPartition int_disk int_partition  --Ejemplo2: IdPartition 1 2 -> sda2 " example
+
+return
+fi
+#PART="$(Disk|cut -f$1 -d' ')$2"    # se comenta esta linea porque doxygen no reconoce la funcion disk y no crea los enlaces y referencias correctas.
+PART=$(ogDiskToDev|cut -f$1 -d' ')$2
+echo $PART | cut -f3 -d \/
+}
+
+
+#/**  @function ogDeletePartitionsLabels: @brief Elimina la informacion que tiene el kernel del cliente og sobre los labels de los sistemas de archivos
+#@param  No requiere
+#@return   Nada
+#@warning
+#@attention Requisitos:  comando interno linux rm
+#@note
+#@version 0.1 -  Integracion para Opengnsys  -  EAC:   DeletePartitionTable()  en ATA.lib
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    27/10/2008
+#*/
+function ogDeletePartitionsLabels () {
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME " \
+           "$FUNCNAME "
+    return
+fi
+
+rm /dev/disk/by-label/*    # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
+}
+
+
+#/**  @function ogInfoCache: @brief muestra la informacion de la CACHE.
+#@param  sin parametros
+#@return  texto que se almacena en $IP.-InfoCache.  punto_montaje, tama?oTotal, TamanioOcupado, TaminioLibre, imagenes dentro de la cahce
+#@warning  Salidas de errores no determinada
+#@warning   printf no soportado por busybox
+#@attention
+#@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
+#*/
+function ogInfoCache ()
+{
+local info infoFilesystem infoSize infoUsed infoUsedPorcet infoMountedOn content
+if ogMountCache
+then
+	info=`df -h | grep $OGCAC`
+	infoFilesystem=`echo $info | cut -f1 -d" "`
+	infoSize=`echo $info | cut -f2 -d" "`
+	infoUsed=`echo $info | cut -f3 -d" "`
+	infoAvail=`echo $info | cut -f4 -d" "`
+	infoUsedPorcet=`echo $info | cut -f5 -d" "`
+	infoMountedOn=`echo $info | cut -f2 -d" "`
+        if `ls  ${OGCAC}$OGIMG > /dev/null 2>&1`
+	then
+	       cd ${OGCAC}${OPENGNSYS}
+		#content=`find images/ -type f -printf "%h/  %f  %s \n"`   busybox no soporta printf
+		content=`find images/ -type f`
+		cd /
+		echo $info
+		echo -ne $content
+		echo " "
+		#echo "$info" > ${OGLOG}/${IP}-InfoCache
+		#echo "$content" >> {$OGLOG}/${IP}-InfoCache
+	else
+		echo $info
+		#echo "$info" > {$OGLOG}/${IP}-InfoCache
+	fi
+	ogUnmountCache
+else
+	echo " "
+	#echo " " > {$OGLOG}/${IP}-InfoCache
+
+fi
+}
+

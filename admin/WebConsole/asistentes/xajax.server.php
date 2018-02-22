@@ -87,7 +87,7 @@ function ListarOrigenMaster($ip){
 //Tercera consulta: Imagenes del REPO, que el MASTER se encargara de enivarlas
 	$cmd->texto='SELECT *,repositorios.ip as iprepositorio FROM  imagenes
 INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
-where repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.ip="' .$ip .'")';
+where repositorios.idrepositorio=(select idrepositorio from ordenadores where ordenadores.ip="' .$ip .'") ORDER BY imagenes.descripcion';
    
 	$rs->Comando=&$cmd;
 	
@@ -98,7 +98,7 @@ where repositorios.idrepositorio=(select idrepositorio from ordenadores where or
 			while (!$rs->EOF){
 				$SelectHtml.='<OPTION value=" REPO /'.$rs->campos["nombreca"].'"';				
 				$SelectHtml.='>';
-				$SelectHtml.='IMG-REPO: ' . $rs->campos["nombreca"].'</OPTION>';
+				$SelectHtml.='IMG-REPO: ' . $rs->campos["descripcion"].'</OPTION>';
 				$rs->Siguiente();
 			}
 		}

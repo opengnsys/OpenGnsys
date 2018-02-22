@@ -7,6 +7,9 @@
 // Nombre del fichero: gestor_ordenadores.php
 // Descripción :
 //		Gestiona el mantenimiento de la tabla de ordenadores
+// Versión 1.1.0: Al insertar ordenador se comprueba que no existen duplicados nombre, ip y mac
+// Autor: Irina Gómez  - ETSII, Universidad de Sevilla
+// Fecha: 2016-03-04
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -17,6 +20,8 @@ include_once("../includes/constantes.php");
 include_once("./relaciones/ordenadores_eliminacion.php");
 include_once("../includes/tftputils.php");
 include_once("../includes/opciones.php");
+include_once("../idiomas/php/".$idioma."/gestor_ordenadores_".$idioma.".php");
+
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
 
@@ -25,13 +30,17 @@ $grupoid=0;
 $idaula=0; 
 $idordenador=0; 
 $nombreordenador="";
+$numserie="";
 $ip="";
 $mac="";
 $idperfilhard=0;
 $idrepositorio=0;
+### AGP
+$oglive="ogLive";
 $idmenu=0;
 $idprocedimiento=0;
 $idimagen=0;
+$colocar="";
 #### ADV
 $netiface="";
 $netdriver="";
@@ -41,6 +50,8 @@ $paginalogin="";
 $paginavalidacion="";
 ### Ramón
 $arranque="";
+### Irina
+$datosduplicados="";
 
 //##agp
 if (isset($_FILES['archivo'])) {
@@ -59,10 +70,12 @@ if (isset($_POST["idaula"])) $idaula=$_POST["idaula"];
 if (isset($_POST["idordenador"])) $idordenador=$_POST["idordenador"];
 if (isset($_POST["identificador"])) $idordenador=$_POST["identificador"];
 if (isset($_POST["nombreordenador"])) $nombreordenador=$_POST["nombreordenador"];
+if (isset($_POST["numserie"])) $numserie=$_POST["numserie"];
 if (isset($_POST["ip"])) $ip=$_POST["ip"];
 if (isset($_POST["mac"])) $mac=str_replace(":","",$_POST["mac"]);
 if (isset($_POST["idperfilhard"])) $idperfilhard=$_POST["idperfilhard"];
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
+if (isset($_POST["seleoglive"])) $oglive=$_POST["seleoglive"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"];
 if (isset($_POST["idprocedimiento"])) $idprocedimiento=$_POST["idprocedimiento"];
 
@@ -74,7 +87,23 @@ if (isset($_POST["paginalogin"])) $paginalogin=$_POST["paginalogin"];
 if (isset($_POST["paginavalidacion"])) $paginavalidacion=$_POST["paginavalidacion"];
 ######## Ramón
 if (isset($_POST["arranque"])) $arranque=$_POST["arranque"];
-
+######## AGP
+if (isset($_POST["coloc"])) $colocar=$_POST["coloc"];
+	if ($colocar=="s"){
+		
+		$cmd=CreaComando($cadenaconexion); // Crea objeto comando
+		$rs=new Recordset; 
+		$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$idordenador;
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return(false); // Error al abrir recordset
+		$rs->Primero(); 
+		if (!$rs->EOF){
+			$arranque=$rs->campos["arranque"];
+		$rs->Cerrar();
+		}
+	}
+######## AGP
+		
 $tablanodo=""; // Arbol para nodos insertados
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
@@ -118,8 +147,13 @@ if($opcion!=$op_movida){
 			break;
 	}
 if ($resul){
-	if ($opcion==$op_alta )
+	if ($opcion==$op_alta ) {
+	    if ( $datosduplicados != '') {
+		echo $literal."(0,'".$TbMsg["DUPLICADO"].$datosduplicados." ',".$idordenador.",o.innerHTML);".chr(13);
+	    } else {  
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ',".$idordenador.",o.innerHTML);".chr(13);
+	    }
+	}
 	else
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ','".$nombreordenador."');".chr(13);
 }
@@ -157,11 +191,13 @@ function Gestiona(){
 	global $grupoid;
 	global $idordenador;
 	global $nombreordenador;
+	global $numserie;
 	global $ip;
 	global $mac;
 	global $idaula;
 	global $idperfilhard;
 	global $idrepositorio;
+	global $oglive;
 	global $idmenu;
 	global $idprocedimiento;
 	global $netiface;
@@ -180,15 +216,20 @@ function Gestiona(){
 	global $op_movida;
 	global $tablanodo;
 
+####################### Irina
+	global $datosduplicados;
+
 	
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idaula",$idaula,1);
 	$cmd->CreaParametro("@idordenador",$idordenador,1);
 	$cmd->CreaParametro("@nombreordenador",$nombreordenador,0);
+	$cmd->CreaParametro("@numserie",$numserie,0);
 	$cmd->CreaParametro("@ip",$ip,0);
 	$cmd->CreaParametro("@mac",$mac,0);
 	$cmd->CreaParametro("@idperfilhard",$idperfilhard,1);
 	$cmd->CreaParametro("@idrepositorio",$idrepositorio,1);
+	$cmd->CreaParametro("@oglivedir",$oglive,0);
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
 	$cmd->CreaParametro("@idprocedimiento",$idprocedimiento,1);
 	$cmd->CreaParametro("@netiface",$netiface,0);
@@ -203,27 +244,49 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			//Insertar fotoord con Values @fotoordenador
-			$cmd->texto="INSERT INTO ordenadores(nombreordenador,ip,mac,idperfilhard,idrepositorio,
-			idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@ip,@mac,@idperfilhard,@idrepositorio,
-			@idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
+                        // Comprueba que no existan duplicados
+                        $ipduplicada='no';
+                        $nombreduplicado='no';
+                        $macduplicada='no';
+                        $cmd->texto="SELECT nombreordenador,ip,mac FROM  ordenadores
+                                WHERE nombreordenador=@nombreordenador OR ip=@ip OR mac=@mac";
+                        $rs=new Recordset;
+                        $rs->Comando=&$cmd;
+                        if (!$rs->Abrir()) return(0); // Error al abrir recordset
+                        $rs->Primero();
+                        while (!$rs->EOF){
+                           if ( $nombreordenador == $rs->campos["nombreordenador"]) $datosduplicados ="nombre: $nombreordenador,";
+                           if ( $ip == $rs->campos["ip"]) $datosduplicados .=" ip: $ip,";
+                           if ( $mac == $rs->campos["mac"]) $datosduplicados .=" mac: $mac,";
+                           $rs->Siguiente();
+                        }
+                        $rs->Cerrar();
+                        // quitamos última coma
+                        $datosduplicados = trim($datosduplicados, ',');
 
+                        // Si no hay datos duplicados insertamos el ordenador;
+                        if ( $datosduplicados == "" ) {
+			     //Insertar fotoord con Values @fotoordenador
+			     $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,ip,mac,idperfilhard,idrepositorio,oglivedir,
+			     idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@ip,@mac,@idperfilhard,@idrepositorio,@oglivedir,
+			     @idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
+                        }
 			$resul=$cmd->Ejecutar();
-			//echo $cmd->texto;
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
-				$idordenador=$cmd->Autonumerico();
-				$arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
-				$baseurlimg="../images/signos"; // Url de las imagenes de signo
-				$clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
-				$arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
-				$tablanodo=$arbol->CreaArbolVistaXML();
+			    $idordenador=$cmd->Autonumerico();
+			    // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
+			    createBootMode ($cmd, "", $idordenador, $idioma); 
+			    // Insertar datos en el árbol de configuración.
+			    $arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
+			    $baseurlimg="../images/signos"; // Url de las imagenes de signo
+			    $clasedefault="texto_arbol"; // Hoja de estilo (Clase por defecto) del árbol
+			    $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault);
+			    $tablanodo=$arbol->CreaArbolVistaXML();
 			}
-			// Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
-			createBootMode ($cmd, "", $idordenador, $idioma);
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
+			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,numserie=@numserie,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
+			idrepositorio=@idrepositorio,oglivedir=@oglivedir,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
@@ -237,6 +300,8 @@ function Gestiona(){
 		case $op_movida :
 			$cmd->texto="UPDATE ordenadores SET idaula=@idaula, grupoid=@grupoid WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
+			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
+			createBootMode ($cmd, $arranque, $idordenador, $idioma);
 			break;
 		default:
 			break;

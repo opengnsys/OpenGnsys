@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -23,6 +23,7 @@ include_once("../includes/capturaacciones.php");
  // Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
+$sw_ejprg="";
 
 $sw_mkprocedimiento="";
 $nombreprocedimiento="";
@@ -72,7 +73,7 @@ $atributos=str_replace('$',chr(9),$atributos);
 <BODY>
 	<SCRIPT language="javascript" src="../../comandos/jscripts/comunescomandos.js"></SCRIPT>
 	<?php echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<?
+<?php
 
 /* Recopila identificadore ,ipes y macs para envío de comandos */
 $cadenaid="";

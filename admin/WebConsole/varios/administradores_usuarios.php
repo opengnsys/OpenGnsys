@@ -1,4 +1,4 @@
-<?
+<?php
 // *******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -31,17 +31,17 @@ if (!$cmd)
 <SCRIPT language="javascript" src="../jscripts/administradores_usuarios.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/administradores_usuarios_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/administradores_usuarios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 
-	<INPUT type=hidden value="<? echo $idusuario?>" id=idusuario>	
+	<INPUT type=hidden value="<?php echo $idusuario?>" id=idusuario>	
  
-	<P align=center class=cabeceras><?echo $nombre?></SPAN>&nbsp;<IMG src="../images/iconos/administradores.gif">
+	<P align=center class=cabeceras><?php echo $nombre?></SPAN>&nbsp;<IMG src="../images/iconos/administradores.gif">
 	<BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
 
-		<?
+		<?php
 			$rs=new Recordset; 
 			// Usuarios asignados
 			$cmd->texto="SELECT centros.idcentro,centros.nombrecentro, centros.identidad FROM centros 
@@ -101,7 +101,7 @@ if (!$cmd)
 		</TABLE>
 	<DIV id="Layer_nota" align=center >
 		<BR>
-		<SPAN align=center class=notas><I><?echo $TbMsg[4]?></I></SPAN>
+		<SPAN align=center class=notas><I><?php echo $TbMsg[4]?></I></SPAN>
 	</DIV>
 </FORM>
 </BODY>

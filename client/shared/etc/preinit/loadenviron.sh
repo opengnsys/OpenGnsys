@@ -1,7 +1,7 @@
 #!/bin/bash
 #/**
 #@file    loadenviron.sh
-#@brief   Script de carga de la API de funciones de OpenGNSys.
+#@brief   Script de carga de la API de funciones de OpenGnsys.
 #@warning License: GNU GPLv3+
 #@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
@@ -16,8 +16,9 @@
 
 # Idioma por defecto.
 export LANG="${LANG:-es_ES}"
+locale-gen $LANG
 
-# Directorios del projecto OpenGnSys.
+# Directorios del proyecto OpenGnsys.
 export OPENGNSYS="${OPENGNSYS:-/opt/opengnsys}"
 if [ -d $OPENGNSYS ]; then
     export OGBIN=$OPENGNSYS/bin
@@ -116,6 +117,7 @@ export OG_ERR_OUTOFLIMIT=19	# Valor fuera de rango o no válido.
 export OG_ERR_FILESYS=20	# Sistema de archivos desconocido o no se puede montar
 export OG_ERR_CACHE=21 		# Error en partición de caché local
 export OG_ERR_NOGPT=22		# El disco indicado no contiene una particion GPT
+export OG_ERR_REPO=23		# Error al montar el repositorio de imagenes
 
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
 export OG_ERR_UPDATECACHE=31	# Error al realizar el comando updateCache

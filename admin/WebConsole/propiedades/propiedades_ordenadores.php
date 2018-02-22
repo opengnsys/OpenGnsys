@@ -24,6 +24,7 @@ $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
 $idordenador=0; 
 $nombreordenador="";
+$numserie="";
 $ip="";
 $mac="";
 $idperfilhard=0;
@@ -81,8 +82,8 @@ function abrir_ventana(URL){
 	<input type="hidden" name="grupoid" value="<?php echo $grupoid?>" />
 	<input type="hidden" name="idaula" value="<?php echo $idaula?>" />
 	<input type="hidden" name="arranque" value="<?php echo $arranque?>" />
-	<p align="center" class="cabeceras"><?echo $TbMsg[4]?><br />
-	<span align="center" class="subcabeceras"><? echo $opciones[$opcion]?></span></p>
+	<p align="center" class="cabeceras"><?php echo $TbMsg[4]?><br />
+	<span align="center" class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
@@ -97,7 +98,7 @@ function abrir_ventana(URL){
 				$fotomenu=$fotoordenador;
 				$dirfotos="../images/fotos";
 			?>
-			<td colspan="2" valign="top" align="left" rowspan="3">
+			<td colspan="2" valign="top" align="left" rowspan="4">
 			<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
 			<?php	if ($opcion!=$op_eliminacion) {
 				echo '<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'><br />';
@@ -124,10 +125,24 @@ function abrir_ventana(URL){
 					echo '<td><input class="formulariodatos" name=mac  type=text value="'. $mac.'"></td>';
 			?>
 		</tr>	
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg["PROP_SERIALNO"]?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td>'.(isset($numserie)?$numserie:$TbMsg["WARN_NOTDETECTED"]).'</td>';
+				} else {
+					echo '<td><input class="formulariodatos" name="numserie" type="text" value="'.$numserie.'">';
+					if (empty($numserie)) {
+						echo $TbMsg["WARN_NOTDETECTED"];
+					}
+					echo "</td>\n";
+				}
+			?>
+		</tr>
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[509]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[509]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$fotoordenador.'</TD>';
 				else	{
@@ -144,24 +159,24 @@ function abrir_ventana(URL){
 						while (false !== ($entry = readdir($handle))) {
 						if ($entry != "." && $entry != "..") {?>
 						
-						<option value="<? echo $entry ?>"><? echo $entry ?></option>
-						<?}
+						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
+						<?php }
 						}
 						closedir($handle);
 						} 
 						?>
 					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><? echo $TbMsg[5092] ?></a>
+<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
 					</TD>
-					<?
+					<?php
 					}
 					?>
 			
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion').'</TD>';
 				else
@@ -170,18 +185,52 @@ function abrir_ventana(URL){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
 				else
 					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250).'</TD>';
 			?>
 		</TR>
+<!----	AGP	--------------------------------------------------------------------	OGLIVE	--------------------------------------------------------------------------------------------------------->
+		<TR>
+			<th align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
+<?php
+$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$idordenador;
+$rs=new Recordset;
+$rs->Comando=&$cmd;
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+$rs->Primero();
+if (!$rs->EOF){
+	$bdogLive=$rs->campos["oglivedir"];
+}
+$rs->Cerrar();
+
+if ($opcion==$op_eliminacion){
+	echo '<td colspan="3">'.$bdogLive.'</td>';
+}else{
+	exec("bash /opt/opengnsys/bin/oglivecli list", $listogcli);
+	echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250>'."\n";
+	echo '<option value="ogLive">'.$TbMsg['COMM_DEFOGLIVE'].'</option>';
+	foreach ($listogcli as $oglive) {
+		if (preg_match("/ogLive/",$oglive)){
+			$oglive=substr($oglive,1);
+			$oglive=trim($oglive);
+			$Selectcli = '<option value="'.$oglive.'"';
+			If ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
+			$Selectcli.= '>'.$oglive.'</OPTION>';
+			echo $Selectcli;
+		}
+	}
+	echo '      </select>'."\n";
+}
+?>
+		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'menus',$idmenu,'idmenu','descripcion').'</TD>';
 				else
@@ -190,8 +239,8 @@ function abrir_ventana(URL){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<th align=center>&nbsp;<?echo $TbMsg[9]?>&nbsp;</th>
-			<?
+			<th align=center>&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'procedimientos',$idprocedimiento,'idprocedimiento','descripcion').'&nbsp;</TD>';
 				else
@@ -200,7 +249,7 @@ function abrir_ventana(URL){
 		</TR>		
 <!-----ADV -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align=center&nbsp;>&nbsp;<?echo $TbMsg[13]?>&nbsp;</th>
+			<th align=center&nbsp;>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$netiface.'</td>';
 				} else {
@@ -215,7 +264,7 @@ function abrir_ventana(URL){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg[14]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[14]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$netdriver.'</td>';
 				} else {
@@ -230,7 +279,7 @@ function abrir_ventana(URL){
 <!--------------------------------------------------------------UHU comprobar si se requiere validacion ------------------------------------------------------------------------------->
 
                 <tr>
-                        <th align=center&nbsp;><? echo $TbMsg[15]; ?> &nbsp;</th>
+                        <th align=center&nbsp;><?php echo $TbMsg[15]; ?> &nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$validacion.'</td>';
 				} else {
@@ -242,7 +291,7 @@ function abrir_ventana(URL){
                         ?>
                 </tr>
                 <tr>
-                        <th align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</th>
+                        <th align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</th>
                         <?php	if ($opcion==$op_eliminacion)
                                         echo '<td colspan="3">'.$paginalogin.'</td>';
                                 else
@@ -250,7 +299,7 @@ function abrir_ventana(URL){
                         ?>
                 </tr>
                 <tr>
-                        <th align=center>&nbsp;<?echo $TbMsg[17]?>&nbsp;</th>
+                        <th align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</th>
                         <?php	if ($opcion==$op_eliminacion)
                                         echo '<td colspan="3">'.$paginavalidacion.'</td>';
                                 else
@@ -280,9 +329,12 @@ include_once("../includes/opcionesbotonesop.php");
 <?php
 //________________________________________________________________________________________________________
 //
-// Frame con la información de la configuración
+// Frames para descargas de clientes y con información de la configuración
 // Si es la opcion insertar no muestra nada -> opcion=$op_alta
 if ($opcion!=$op_alta) {
+	echo '<div align="center">';
+	echo '<iframe scrolling="auto" height="70" width="90%" frameborder="0" src="../descargas/"></iframe>';
+	echo '</div>';
 	echo '<div align="center">';
 	echo '<iframe scrolling="auto" height="500" width="90%" frameborder="0"
 		 src="../principal/configuraciones.php?swp=1&idambito='.$idordenador.'&ambito='.$AMBITO_ORDENADORES.'"></iframe>';
@@ -302,6 +354,7 @@ if ($opcion!=$op_alta) {
 function TomaPropiedades($cmd,$id){
 	global $idordenador; 
 	global $nombreordenador;
+	global $numserie;
 	global $ip;
 	global $mac;
 	global $fotoordenador;
@@ -325,6 +378,7 @@ function TomaPropiedades($cmd,$id){
 	$rs->Primero(); 
 	if (!$rs->EOF){
 		$nombreordenador=$rs->campos["nombreordenador"];
+		$numserie=$rs->campos["numserie"];
 		$ip=$rs->campos["ip"];
 		$mac=$rs->campos["mac"];
 		$idperfilhard=$rs->campos["idperfilhard"];

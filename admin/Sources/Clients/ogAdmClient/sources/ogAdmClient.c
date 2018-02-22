@@ -634,6 +634,7 @@ char* LeeConfiguracion()
 {
 	char* parametroscfg;
 	char modulo[] = "LeeConfiguracion()";
+	int herrorcfg;
 
 	// Reservar memoria para los datos de cofiguración.
 	parametroscfg=(char*)reservaMemoria(LONGITUD_SCRIPTSALIDA);
@@ -643,9 +644,9 @@ char* LeeConfiguracion()
 	}
 	// Ejecutar script y obtener datos.
 	sprintf(interface,"%s/%s",pathinterface,"getConfiguration");
-	herror=interfaceAdmin(interface,NULL,parametroscfg);
+	herrorcfg=interfaceAdmin(interface,NULL,parametroscfg);
 
-	if(herror){ // No se puede recuperar la configuración del cliente
+	if(herrorcfg){ // No se puede recuperar la configuración del cliente
 		liberaMemoria(parametroscfg);
 		errorLog(modulo,36,FALSE);
 		return(NULL);
@@ -1286,8 +1287,8 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
-	//muestraMensaje(7,NULL); // Creando Inventario Software
-	//if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
+	muestraMensaje(7,NULL); // Creando Inventario Software
+	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(30,NULL);// Creando Imagen Básica, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
 		sprintf(parametros,"%s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,whl,eli,cmp,bpi,cpc,bpc,nba,msy,rti);
@@ -1299,11 +1300,11 @@ BOOLEAN CrearImagenBasica(TRAMA* ptrTrama)
 		}
 		else
 			muestraMensaje(28,NULL);// El proceso de creación de imagen básica ha terminado correctamente
-	//}
-	//else{
-	//	sprintf(msglog,"%s:%s",tbErrores[86],nfn);
-	//	errorInfo(modulo,msglog);
-	//}
+	}
+	else{
+		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		errorInfo(modulo,msglog);
+	}
 
 	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
 
@@ -1386,8 +1387,8 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
 	nba=copiaParametro("nba",ptrTrama); // No borrar archivos en destino
 
-//	muestraMensaje(7,NULL); // Creando Inventario Software
-//	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
+	muestraMensaje(7,NULL); // Creando Inventario Software
+	if(InventariandoSoftware(ptrTrama,FALSE,"InventarioSoftware")){ // Crea inventario Software previamente
 		muestraMensaje(25,NULL);// Creando Imagen Incremental, por favor espere...
 		sprintf(interface,"%s/%s",pathinterface,nfn);
 		sprintf(parametros,"%s %s %s %s %s %s %s%s%s %s%s%s%s %s %s",nfn,dsk,par,nci,ipr,ncf,whl,eli,cmp,bpi,cpc,bpc,nba,msy,rti);
@@ -1400,11 +1401,11 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 		}
 		else
 			muestraMensaje(26,NULL);// El proceso de creación de imagen incremental ha terminado correctamente
-//	}
-//	else{
-//		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
-//		errorInfo(modulo,msglog);
-//	}
+	}
+	else{
+		sprintf(msglog,"%s:%s",tbErrores[86],nfn);
+		errorInfo(modulo,msglog);
+	}
 
 	ids=copiaParametro("ids",ptrTrama); // Identificador de la sesión
 
@@ -1453,7 +1454,7 @@ BOOLEAN CrearSoftIncremental(TRAMA* ptrTrama)
 BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*ifs,*nci,*ids,*ptc,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*ifs,*cfg,*nci,*ids,*ptc,msglog[LONSTD];
 	char modulo[] = "RestaurarImagen()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1483,6 +1484,11 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	else
 		muestraMensaje(11,NULL);
 
+	/* Obtener nueva configuración */
+	cfg=LeeConfiguracion();
+	if(!cfg){ // No se puede recuperar la configuración del cliente
+		errorLog(modulo,36,FALSE);
+	}
 
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
@@ -1491,6 +1497,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de discos
 	respuestaEjecucionComando(ptrTrama,herror,ids);
 	
 	liberaMemoria(nfn);	
@@ -1500,6 +1507,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 	liberaMemoria(nci);	
 	liberaMemoria(ipr);	
 	liberaMemoria(ifs);	
+	liberaMemoria(cfg);	
 	liberaMemoria(ptc);	
 	liberaMemoria(ids);			
 
@@ -1521,7 +1529,7 @@ BOOLEAN RestaurarImagen(TRAMA* ptrTrama)
 BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 {
 	int lon;
-	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*msy,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
+	char *nfn,*dsk,*par,*idi,*ipr,*met,*nci,*rti,*ifs,*cfg,*msy,*whl,*eli,*cmp,*tpt,*bpi,*cpc,*bpc,*nba,*ids,msglog[LONSTD];
 	char modulo[] = "RestaurarImagenBasica()";
 
 	if (ndebug>=DEBUG_MAXIMO) {
@@ -1544,8 +1552,6 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	eli=copiaParametro("eli",ptrTrama); // Elimiar archivos en destino que no estén en origen	
 	cmp=copiaParametro("cmp",ptrTrama); // Comprimir antes de enviar
 
-
-
 	bpi=copiaParametro("bpi",ptrTrama); // Borrar la imagen antes de crearla
 	cpc=copiaParametro("cpc",ptrTrama); // Copiar también imagen a la cache
 	bpc=copiaParametro("bpc",ptrTrama); // Borrarla de la cache antes de copiarla en ella
@@ -1565,6 +1571,12 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	else
 		muestraMensaje(32,NULL);
 
+	/* Obtener nueva configuración */
+	cfg=LeeConfiguracion();
+	if(!cfg){ // No se puede recuperar la configuración del cliente
+		errorLog(modulo,36,FALSE);
+	}
+
 	/* Envia respuesta de ejecución de la función de interface */
 	initParametros(ptrTrama,0);
 	lon=sprintf(ptrTrama->parametros,"nfn=%s\r","RESPUESTA_RestaurarImagenBasica");
@@ -1572,33 +1584,35 @@ BOOLEAN RestaurarImagenBasica(TRAMA* ptrTrama)
 	lon+=sprintf(ptrTrama->parametros+lon,"dsk=%s\r",dsk); // Número de disco
 	lon+=sprintf(ptrTrama->parametros+lon,"par=%s\r",par); // Número de partición
 	lon+=sprintf(ptrTrama->parametros+lon,"ifs=%s\r",ifs); // Identificador del perfil software
+	lon+=sprintf(ptrTrama->parametros+lon,"cfg=%s\r",cfg); // Configuración de discos
 	respuestaEjecucionComando(ptrTrama,herror,ids);
-	
-	liberaMemoria(nfn);	
-	liberaMemoria(dsk);	
-	liberaMemoria(par);	
-	liberaMemoria(idi);	
-	liberaMemoria(nci);	
-	liberaMemoria(rti);	
-	liberaMemoria(ifs);	
-	liberaMemoria(ipr);	
+
+	liberaMemoria(nfn);
+	liberaMemoria(dsk);
+	liberaMemoria(par);
+	liberaMemoria(idi);
+	liberaMemoria(nci);
+	liberaMemoria(rti);
+	liberaMemoria(ifs);
+	liberaMemoria(cfg);
+	liberaMemoria(ipr);
 	liberaMemoria(met);
 
-	liberaMemoria(tpt);	
-	liberaMemoria(msy);	
+	liberaMemoria(tpt);
+	liberaMemoria(msy);
 
-	liberaMemoria(whl);	
-	liberaMemoria(eli);	
-	liberaMemoria(cmp);	
+	liberaMemoria(whl);
+	liberaMemoria(eli);
+	liberaMemoria(cmp);
 
-	liberaMemoria(bpi);	
-	liberaMemoria(cpc);	
-	liberaMemoria(bpc);	
+	liberaMemoria(bpi);
+	liberaMemoria(cpc);
+	liberaMemoria(bpc);
 	liberaMemoria(nba);
-	liberaMemoria(ids);		
+	liberaMemoria(ids);
 
 	muestraMenu();
-	
+
 	return(TRUE);
 }
 //______________________________________________________________________________________________________

@@ -47,7 +47,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5);
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/imagenes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
-<?
+<?php
 //________________________________________________________________________________________________________
 
 echo $arbol->CreaArbolVistaXML(); // Muestra árbol en pantalla
@@ -235,12 +235,14 @@ function SubarbolXML_Imagenes($grupoid,$amb,$litamb,$tipo)
 	
 	$cadenaXML="";
 	$rs=new Recordset; 
-	$cmd->texto="SELECT idimagen,descripcion
-				FROM imagenes 
-				WHERE idcentro=".$idcentro." 
-				AND grupoid=".$grupoid." 
-				AND tipo=".$tipo." 
-				ORDER BY descripcion";
+	#### agp ### Añado la consulta el campo idrepositorio	####
+	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion,repositorios.nombrerepositorio,repositorios.ip
+				FROM  imagenes INNER JOIN repositorios USING  (idrepositorio)
+				WHERE imagenes.idrepositorio = repositorios.idrepositorio
+				AND imagenes.idcentro=".$idcentro."
+				AND imagenes.grupoid=".$grupoid."  
+				AND imagenes.tipo=".$tipo." 
+				ORDER BY imagenes.descripcion";
 	//echo "<br>".$cmd->texto;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
@@ -249,7 +251,7 @@ function SubarbolXML_Imagenes($grupoid,$amb,$litamb,$tipo)
 		$cadenaXML.='<IMAGEN';
 		// Atributos
 		$cadenaXML.=' imagenodo="../images/iconos/imagen.gif"';
-		$cadenaXML.=' infonodo="'.$rs->campos["descripcion"].'"';
+		$cadenaXML.=' infonodo="'.$rs->campos["descripcion"].' ('.$rs->campos["nombrerepositorio"].')"';
 		$cadenaXML.=' nodoid='.$litamb.'-'.$rs->campos["idimagen"];
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$litamb."'" .')"';
 		$cadenaXML.='>';

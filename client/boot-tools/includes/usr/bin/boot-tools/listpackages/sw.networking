@@ -1,5 +1,6 @@
 #sw.networking
 install netpipes 
+install curl
 install wget 
 install tftp
 install dnsutils
@@ -7,8 +8,10 @@ install trickle
 install lighttpd 
 install ethtool 
 install ssmping 
-install mii-diag
 install tcpdump 
 install nmap
 install arping 
-install iptraf 
+#install iptraf 
+install ntpdate
+install ctorrent
+install udpcast

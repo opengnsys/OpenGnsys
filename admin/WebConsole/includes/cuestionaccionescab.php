@@ -1,4 +1,4 @@
-<?
+<?php
 $sw_ejya="";
 $sw_seguimiento="";
 

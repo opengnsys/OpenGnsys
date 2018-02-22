@@ -15,8 +15,8 @@
 
 
 # Variables generales.
-OPENGNSYS=${OPENGNSYS:-/opt/opengnsys}	# Instalación de OpenGnSys
-OGETC=${OGETC:-$OPENGNSYS/etc}		# Configuración de OpenGnSys
+OPENGNSYS=${OPENGNSYS:-/opt/opengnsys}	# Instalación de OpenGnsys
+OGETC=${OGETC:-$OPENGNSYS/etc}		# Configuración de OpenGnsys
 POWEROFFCONF=/etc/poweroff.conf		# Configuración del script
 
 # Error si no existe el fichero de configuración de ahorro de energía. 
@@ -26,6 +26,7 @@ if [ ! -f $POWEROFFCONF ]; then
 fi
 # Obtener parámetros de configuración de ahorro de energía.
 source $POWEROFFCONF
+export TZ
 
 case $# in
     0)  # Sin parámetros, comprobar que existe la variable POWEROFFSLEEP.

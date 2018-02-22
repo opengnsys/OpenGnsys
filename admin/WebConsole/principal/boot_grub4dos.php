@@ -95,10 +95,10 @@ while($encontrado==FALSE)
 <TABLE  align=center border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <TR valign="bottom"><TD colspan="100%" align="left" nowrap>
 <form name="modoadmin" id="modoadmin" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-   		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-   		<input type="hidden" name="opcion" value="<? echo $opcion?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+   		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+   		<input type="hidden" name="opcion" value="<?php echo $opcion?>">
 <?php	
 	if (empty($_SESSION["widcentro"]))
 	{$modo=1;
@@ -138,7 +138,6 @@ if (empty($modo))
 
 <input type="hidden" name="listOfItems" value="">
 <?php
-echo "<input type='hidden' name='rungrupo' value='" . $_GET['id_aula']  . "'>";
 ?>
 <!-- primer file, nombre de las equipos por pxe hace falta  <td>  </td>-->
 <td width="80"> 
@@ -169,7 +168,6 @@ if (!empty($_SESSION["widcentro"]))
     $desconocido="00unknown";
 //
 
-    echo $estado;
 //mostrar los datos
 for($i=0; $i<count($pn); $i++)
 	{//for

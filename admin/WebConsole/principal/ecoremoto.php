@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -28,7 +28,7 @@ if (isset($_GET["nomambito"])) $nomambito=$_GET["nomambito"];
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Eco-<? echo $nomambito?></TITLE>
+<TITLE>Eco-<?php echo $nomambito?></TITLE>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
@@ -41,12 +41,12 @@ if (isset($_GET["nomambito"])) $nomambito=$_GET["nomambito"];
 //______________________________________________________________________________________________________
 </SCRIPT> 
 	<FORM name="fdatos" action="shellconsola.php">
-		<INPUT type=hidden name="idambito" value=<?echo $idambito?>>
-		<INPUT type=hidden name="litambito" value=<?echo $litambito?>>
-		<INPUT type=hidden name="nomambito" value=<?echo $nomambito?>>
+		<INPUT type=hidden name="idambito" value=<?php echo $idambito?>>
+		<INPUT type=hidden name="litambito" value=<?php echo $litambito?>>
+		<INPUT type=hidden name="nomambito" value=<?php echo $nomambito?>>
 	</FORM>
 
-<?
+<?php
 switch($litambito){
 		case $LITAMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
@@ -70,17 +70,17 @@ switch($litambito){
 			break;
 	}
 ?>
-	<P align=center class=cabeceras><?echo $TbMsg[7]?><BR>
+	<P align=center class=cabeceras><?php echo $TbMsg[7]?><BR>
 	<SPAN align=center class=subcabeceras>
-		<IMG src="<? echo $urlimg?>">&nbsp;<?echo $textambito.": ".$nomambito?></SPAN></P>
+		<IMG src="<?php echo $urlimg?>">&nbsp;<?php echo $textambito.": ".$nomambito?></SPAN></P>
 		<DIV id="Layer_nota" align=center >
 		<BR>
-		<SPAN align=center class=notas><I><?echo $TbMsg[8]?></I></SPAN>
+		<SPAN align=center class=notas><I><?php echo $TbMsg[8]?></I></SPAN>
 
 	<table align=center border="0" cellpadding="0" cellspacing="1">
 			<tr><td class="presentaciones">Salida</td></tr>
 			<tr><td>
-				<div id="diveco" class="marco" align=left style="width:700px;height:500px;overflow:scroll"><P><? echo $TbMsg[11]?></P></div>
+				<div id="diveco" class="marco" align=left style="width:700px;height:500px;overflow:scroll"><P><?php echo $TbMsg[11]?></P></div>
 			</td></tr>
 	</table>
 	</DIV>

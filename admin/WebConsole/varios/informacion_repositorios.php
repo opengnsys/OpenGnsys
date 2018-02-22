@@ -40,11 +40,11 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/repositorio.gif"><BR><BR>
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/repositorio.gif"><BR><BR>
 	<IMG src="../images/iconos/repositorio.gif"><SPAN class=presentaciones>&nbsp;&nbsp;
-	<U><?echo $TbMsg[2]?></U>:<? echo $descripcionrepositorio?></SPAN></P>
-	<?echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones?>
+	<U><?php echo $TbMsg[2]?></U>:<?php echo $descripcionrepositorio?></SPAN></P>
+	<?php echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones?>
 </BODY>
 </HTML>
 <?php

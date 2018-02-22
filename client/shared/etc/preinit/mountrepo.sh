@@ -17,13 +17,14 @@ if [ "$ogactiveadmin" == "true" ]; then
 	umount $OGIMG 2>/dev/null
 
 	protocol=${ogprotocol:-"smb"}
+	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 	printf "$MSG_MOUNTREPO\n" "$protocol" "$boot"
 	case "$ogprotocol" in
-		nfs)	mount.nfs ${ROOTREPO}:$OGIMG $OGIMG -o rw,nolock ;;
+		nfs)	mount.nfs ${ROOTREPO}:$OGIMG$OGUNIT $OGIMG -o rw,nolock ;;
 		smb)	PASS=$(grep "^[ 	]*\(export \)\?OPTIONS=" /scripts/ogfunctions 2>&1 | \
 				sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
 			PASS=${PASS:-"og"}
-			mount.cifs //${ROOTREPO}/ogimages $OGIMG -o rw,serverino,acl,username=opengnsys,password=$PASS
+			mount.cifs //${ROOTREPO}/ogimages$OGUNIT $OGIMG -o rw,serverino,acl,username=opengnsys,password=$PASS
 			;;
 		local)	# TODO: hacer funcion dentro de este script que monte smb
 			# Comprobamos que estatus sea online.

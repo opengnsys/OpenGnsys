@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -47,7 +47,7 @@ if ($cmd){
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
-<?
+<?php
 $literal="resultado_ordenadorestandar";
 if ($resul){
 	echo '<SCRIPT language="javascript">'.chr(13);
@@ -65,7 +65,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 // *************************************************************************************************************************************************
 function Gestiona(){
 	global	$cmd;

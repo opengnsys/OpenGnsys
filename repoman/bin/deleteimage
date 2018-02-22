@@ -1,10 +1,11 @@
 #!/bin/bash
-#         deleteimage [ -b | -r ] str_image
+#         deleteimage [ -b | -r ] [ str_image | str_dir/str_image ]
 #@file    deleteimage
 #@brief   Borra del repositorio los ficheros de una imagen.
 #@param   -b           Elimina también la copia de seguridad de la imagen (opcional).
 #@param   -r           Recupera la copia de seguridad de la imagen (opcional).
-#@param   str_image    Nombre canónico de la imagen, sin extensión.
+#@param   str_image    Nombre canónico de la imagen, sin extensión. Permite directorio.
+#@exception 1 Error de formato
 #@version 1.0 - Versión inicial.
 #@date    2012-10-14
 #@author  Ramón Gómez, ETSII Univ. Sevilla
@@ -19,7 +20,6 @@
 #@author  Irina Gómez, ETSII Univ. Sevilla
 #*/ ##
 
-
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 OGIMG=$OPENGNSYS/images
@@ -31,10 +31,11 @@ DIFFEXT="diff"
 if [ "$*" == "help" ]; then
     cat << EOT
 $PROG: Borra los ficheros de una imagen del repositorio.
-Formato: $PROG [ -b | -r ] str_image
+Formato: $PROG [ -b | -r ] [ str_image | str_dir/str_image ]
          -b  Elimina también la copia de seguridad de la imagen.
          -r  Recupera la copia de seguridad de la imagen.
 Ejemplo: $PROG imagen1
+         $PROG -r dir2/imagen2
 EOT
     exit 0
 fi
@@ -49,17 +50,17 @@ while getopts br OPTION; do
 done
 [ -n "$DELETEBACKUP" ] && [ -n "$RECOVERBACKUP" ] && ERR=1
 if [ $# != 1 -o -n "$ERR" ]; then
-    echo "$PROG Error: Formato: $PROG [ -b | -r ] str_image" 
+    echo "$PROG Error: Formato: $PROG [ -b | -r ] [ str_image | str_dir/str_image ]"
     exit 1
 fi
 
-# Eliminar ficheros de imagen monolítica o sincronizada básica.
+# Eliminar ficheros de imagen monolítica o sincronizada.
 for IMG in "$OGIMG/$1.$IMGEXT" "$OGIMG/$1.$IMGEXT.$DIFFEXT" "$OGIMG/$1"; do
     # Borro la imagen si existe
     if [ -r $IMG ] ; then
         IMGPATH=$IMG
         echo "Borrando imagen $IMGPATH"
-        rm -f $IMGPATH{,.sum,.full.sum,.torrent}
+        rm -f $IMGPATH{,.sum,.full.sum,.torrent} 
         break
     fi
     # Compruebo si existe copia de seguridad
@@ -67,7 +68,6 @@ for IMG in "$OGIMG/$1.$IMGEXT" "$OGIMG/$1.$IMGEXT.$DIFFEXT" "$OGIMG/$1"; do
 done
 
 [ "_${IMGPATH}_" == "__" ] && IMGPATH=$OLDPATH
-
 # Recuperar copia de seguridad de la imagen.
 if [ -n "$RECOVERBACKUP" ]; then
     [ -e $IMGPATH.$BAKEXT ] && echo "Recuperando copia $IMGPATH.$BAKEXT"
@@ -79,7 +79,6 @@ fi
 
 # Borrar copia de seguridad de la imagen.
 if [ -n "$DELETEBACKUP" ]; then
-    [ -e $IMGPATH ] && echo "Eliminando copia $IMGPATH.$BAKEXT"
+    [ -e $IMGPATH.$BAKEXT ] && echo "Eliminando copia $IMGPATH.$BAKEXT"
     rm -f $IMGPATH.$BAKEXT && rm -f $IMGPATH.{sum,full.sum,torrent}.$BAKEXT
 fi
-

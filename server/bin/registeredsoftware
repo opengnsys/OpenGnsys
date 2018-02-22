@@ -7,6 +7,9 @@
 #@version 1.0 - Creación del script.
 #@author  Ramón Gómez - Univ. Sevilla
 #@date    2014-02-27
+#@version 1.1.0 - Incluir sistema operativo.
+#@author  Ramón Gómez - Univ. Sevilla
+#@date    2016-06-08
 
 
 # Variables.
@@ -52,12 +55,18 @@ trap "rm -f $MYCNF" 0 1 2 3 6 9 15
 
 # Obtener lista de componentes del perfil de software asociado a la imagen.
 mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
-		"SELECT softwares.descripcion
+	"SELECT descr FROM
+	       ((SELECT 1 AS orden, nombresos.nombreso AS descr
 		   FROM perfilessoft
-	LEFT OUTER JOIN perfilessoft_softwares ON perfilessoft.idperfilsoft=perfilessoft_softwares.idperfilsoft
-	LEFT OUTER JOIN softwares ON softwares.idsoftware=perfilessoft_softwares.idsoftware
-	LEFT OUTER JOIN tiposoftwares ON softwares.idtiposoftware=tiposoftwares.idtiposoftware
-	LEFT OUTER JOIN imagenes ON perfilessoft.idperfilsoft=imagenes.idperfilsoft
-		  WHERE imagenes.nombreca='$RESOURCE'
-	       ORDER BY tiposoftwares.idtiposoftware,softwares.descripcion;"
+		   JOIN imagenes USING(idperfilsoft)
+		   JOIN nombresos USING(idnombreso)
+		  WHERE imagenes.nombreca='$RESOURCE')
+		UNION
+                (SELECT 2, softwares.descripcion
+		   FROM perfilessoft
+		   JOIN perfilessoft_softwares USING(idperfilsoft)
+		   JOIN softwares USING(idsoftware)
+		   JOIN imagenes USING(idperfilsoft)
+		  WHERE imagenes.nombreca='$RESOURCE')) AS unidas
+	  ORDER BY orden ASC, descr ASC;"
 

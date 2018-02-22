@@ -1,4 +1,4 @@
-<?
+<?php
 // ******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -15,6 +15,7 @@ include_once("../clases/ArbolVistaXML.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 include_once("../includes/opciones.php");
+include_once("../includes/tftputils.php");
 include_once("./relaciones/repositorios_eliminacion.php");
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
@@ -26,6 +27,7 @@ $passguor="";
 
 $grupoid=0;
 $puertorepo="";
+$apiKeyRepo="";
 $comentarios="";
 
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"]; // Recoge parametros
@@ -38,6 +40,7 @@ if (isset($_POST["nombrerepositorio"])) $nombrerepositorio=$_POST["nombrereposit
 if (isset($_POST["ip"])) $ip=$_POST["ip"]; 
 if (isset($_POST["passguor"])) $passguor=$_POST["passguor"]; 
 if (isset($_POST["puertorepo"])) $puertorepo=$_POST["puertorepo"];
+if (isset($_POST["apiKeyRepo"])) $apiKeyRepo=$_POST["apiKeyRepo"];
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"];
 
 $tablanodo=""; // Arbol para nodos insertados
@@ -109,6 +112,7 @@ function Gestiona(){
 	global	$ip;
 	global	$passguor;
 	global  $puertorepo;
+	global  $apiKeyRepo;
 	global	$comentarios;
 	
 	global	$op_alta;
@@ -126,11 +130,12 @@ function Gestiona(){
 	$cmd->CreaParametro("@ip",$ip,0);
 	$cmd->CreaParametro("@passguor",$passguor,0);
 	$cmd->CreaParametro("@puertorepo",$puertorepo,0);
+	$cmd->CreaParametro("@apiKeyRepo",$apiKeyRepo,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO repositorios(idcentro,grupoid,nombrerepositorio,ip,passguor,puertorepo,comentarios) VALUES (@idcentro,@grupoid,@nombrerepositorio,@ip,@passguor,@puertorepo,@comentarios)";
+			$cmd->texto="INSERT INTO repositorios(idcentro,grupoid,nombrerepositorio,ip,passguor,puertorepo,comentarios,apikey) VALUES (@idcentro,@grupoid,@nombrerepositorio,@ip,@passguor,@puertorepo,@comentarios,@apiKeyRepo)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la p�gina que llam� �sta
 				$idrepositorio=$cmd->Autonumerico();
@@ -142,8 +147,11 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,puertorepo=@puertorepo,comentarios=@comentarios WHERE idrepositorio=@idrepositorio";
+			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,puertorepo=@puertorepo,comentarios=@comentarios, apikey=@apiKeyRepo WHERE idrepositorio=@idrepositorio";
 			$resul=$cmd->Ejecutar();
+			if ($resul) {
+				updateBootRepo($cmd, $idrepositorio);
+			}
 			break;
 		case $op_eliminacion :
 			$resul=Eliminarepositorios($cmd,$idrepositorio,"idrepositorio");

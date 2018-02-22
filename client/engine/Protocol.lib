@@ -91,7 +91,7 @@ else
 fi
 
 #3er param check - que puede ser un dispositvo o un fichero.
-#ogGetPath "$3" > /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
+#[ -n "$(ogGetPath "$3")" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
 DEVICE=$3
 
 #4 y 5 param check .  solo si es sobre particiones.
@@ -331,15 +331,21 @@ fi
 #@version 1.0 - 
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
+#@version 2.0 - cambios en udp-receiver para permitir multicast entre subredes
+#@author  Juan Carlos Garcia, Universidad de Zaragoza
+#@date    2015/11/17
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20
 #*/ ##
 #         
 
 function ogMcastSyntax ()
 {
 
-local ISUDPCAST PARM SESSION SESSIONPARM MODE PORTBASE PERROR
+local ISUDPCAST RECEIVERTIMEOUT PARM SESSION SESSIONPARM MODE PORTBASE PERROR
 local METHOD ADDRESS BITRATE NCLIENTS MAXTIME CERROR 
-local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT
+local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT 
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" -o "$2" == "help" ]; then
@@ -359,6 +365,12 @@ PERROR=0
 ISUDPCAST=$(udp-receiver --help 2>&1)
 echo $ISUDPCAST | grep start-timeout > /dev/null || ogRaiseError $OG_ERR_NOTEXEC "upd-cast no existe o version antigua -requerida 2009-"|| return $?
 
+# Si la version de  udp-receiver permite --receive-timeout utilizamos la opción
+if echo $ISUDPCAST | grep receive-timeout &>/dev/null; then
+    RECEIVERTIMEOUT=" --receive-timeout $MCASTWAIT"
+else
+    RECEIVERTIMEOUT=""
+fi
 
 # Error si no se reciben $PARM parámetros.
 echo "$1" | grep "PARTITION" > /dev/null && PARM=5 || PARM=3
@@ -425,8 +437,51 @@ which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' "
 
 # Generamos la instrucción base de multicast -Envio,Recepcion-
 SYNTAXSERVER="udp-sender $MBUFFER --nokbd --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
-SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
+#SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
 
+
+# Deteccion automatica de la subred del cliente para anadir la  IP del repositorio a la orden udp-receiver en el caso de encontrarse en distinta subred del repo
+REPOIP="$(ogGetRepoIp)"
+CLIENTIP=$(ip -o address show up | awk '$2!~/lo/ {if ($3~/inet$/) {printf ("%s ", $4)}}')
+MASCARA=`echo $CLIENTIP | cut -f2 -d/`
+CLIENTIP=`echo $CLIENTIP | cut -f1 -d/`
+RIPBT=""
+IPBT=""
+for (( i = 1 ; i < 5 ; i++ ))
+do
+	RIP=`echo $REPOIP | cut -f$i -d.`
+	RIP=`echo "$[$RIP + 256]"`
+	RIPB=""
+	while [ $RIP -gt 0 ]
+	do
+		let COCIENTE=$RIP/2
+		let RESTO=$RIP%2
+		RIPB=$RESTO$RIPB
+		RIP=$COCIENTE
+	done
+	RIPB=`echo "$RIPB" | cut -c2-`
+	RIPBT=$RIPBT$RIPB
+	IP=`echo $CLIENTIP | cut -f$i -d.`
+	IP=`echo "$[$IP + 256]"`
+	IPB=""
+	while [ $IP -gt 0 ]
+	do
+		let COCIENTE=$IP/2
+		let RESTO=$IP%2
+		IPB=$RESTO$IPB
+		IP=$COCIENTE
+	done
+	IPB=`echo "$IPB" | cut -c2-`
+	IPBT=$IPBT$IPB
+done
+MCASTWAIT=${MCASTWAIT:-120}
+REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
+CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
+if [ $REPOSUBRED == $CLIENTSUBRED ]; then
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
+else
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
+fi
 
 case "$1" in
 SENDPARTITION)
@@ -598,7 +653,7 @@ then
 	return $RETVAL
 else
 	echo $COMMAND
-	eval $COMMAND || ogRaiseError $OG_ERR_MCASTRECEIVERFILE " "; return $?
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTRECEIVERFILE "$TARGETFILE"; return $?
 	#[ -s "$LOGFILE" ] || return 21
 fi
 }
@@ -719,14 +774,29 @@ fi
 #@version 1.0.5
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2012/05/29
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20
+#@version 1.1 - Unidades organizativas con directorio de imágenes separado. (ticket #678)
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/06/23
 #*/ ##
 function ogMcastRequest {
 # Variables locales
-local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT
-FILE="$1"
+local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT OGUNIT
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_filename str_mcastoptions"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ "$#" == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+OGUNIT="$(df|awk '/ogimages/ {print $1}'|cut -d/ -f5)/"
+FILE="$OGUNIT$1"
 PROTOOPT="$2"
 
-#TODO AYUDA
 #TODO: CONTROL PARAMETROS
 
 PORT=$(echo $2 | cut -f1 -d":")
@@ -736,12 +806,12 @@ REPOPORTAUX=2009
 REPEAT=0
 until nmap -n -sU -p $PORTAUX $REPOIP | grep open
 do
-    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $1 $2""
+    let REPEAT=$REPEAT+1
+    [ "$REPEAT" -lt 6 ] || ogRaiseError session log $OG_ERR_PROTOCOLJOINMASTER "MULTICAST \"$FILE\" \"$PROTOOPT\" $FILELIST" || return $?
+    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $FILE $2""
     #update-cache:
     hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST "$FILE" "$PROTOOPT""
     #multicas-direct:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$IMAGE.img $OPTPROTOCOLO"
-    let REPEAT=$REPEAT+1
-    [ "$REPEAT" -eq 5 ] && return
     sleep 10
 done
 }
@@ -1020,23 +1090,23 @@ ogFindCache &>/dev/null || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
 [ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_repo relative_path_image [protocol|FULL]"; echo $?)
 
 ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
-FILESOURCE=`ogGetPath $1 $2` || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+FILESOURCE=`ogGetPath $1 $2`
+[ -n "$FILESOURCE" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
 
 #echo "paso 1. si no existe la imagen, confirmar que es necesario actualizar la cache."
 FILETARGET=`ogGetPath CACHE $2`
-if [ -z $FILETARGET ]
+if [ -z "$FILETARGET" ]
 then
     # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
-    ogGetPath CACHE "/$2.torrent.bf" && ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
-    ogGetPath CACHE "/$2.sum" && ogDeleteFile CACHE "/$2.sum" &> /dev/null
-    ogGetPath CACHE "/$2.full.sum" && ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.torrent.bf")" ] && ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.sum")" ] && ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.full.sum")" ] && ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
     echo "TRUE(0), es necesario actualizar. Paso 1, la cache no contiene esa imagen "
     return 0 
 fi
 
 #echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
-if ogGetPath $FILETARGET.torrent.bf  > /dev/null
-then
+if [ -n "$(ogGetPath "$FILETARGET.torrent.bf")" ]; then
     #TODO: comprobar los md5 del fichero .torrent para asegurarnos que la imagen a descarga es la misma.
     echo "TRUE(0), es necesario actualizar. Paso 2, la imagen esta en un estado de descarga torrent interrumpido"
     return 0

@@ -13,6 +13,12 @@
 		document.fdatos.codigo.value+="\n";
 		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value+"\n")+RC;
 		filtrado();
+		// Incluimos el modo de ejecución en fdatosejecucion.
+		var modoejecucion=document.createElement('input');
+		modoejecucion.name="modoejecucion";
+		modoejecucion.value=document.fdatos.modoejecucion.value;
+		document.fdatosejecucion.appendChild(modoejecucion);
+
 		document.fdatosejecucion.submit();
 	}
  }

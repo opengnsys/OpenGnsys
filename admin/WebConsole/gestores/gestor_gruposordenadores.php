@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -49,7 +49,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_grupos.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_alta :
@@ -84,7 +84,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /**************************************************************************************************************************************************
 	Busca identificador del aula cuando el grupo a crear está pertenece a otro grupo 
 ________________________________________________________________________________________________________*/

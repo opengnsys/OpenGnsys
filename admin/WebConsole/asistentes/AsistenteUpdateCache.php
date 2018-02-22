@@ -50,8 +50,8 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../comandos/jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
 
 <?php 
@@ -62,7 +62,7 @@ $xajax->printJavascript('../xajax/');
 
 
 <body>
-<?
+<?php
 # ambito:   4->aulas   16->ordenadores
 # idambito:  id de los elementos en su correspondiente tabla-ambito (aulas, ordenadores...)
 # nombreambito: nombre del elemento.
@@ -108,7 +108,7 @@ switch($ambito){
 
 	
 		<table  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
-			<?
+			<?php
 		 	 include_once("./includes/asistentes/formDeployImage.php");
 		 ?>
 			
@@ -119,7 +119,7 @@ switch($ambito){
 						</table>	
 	</form>	
 
-<?
+<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
