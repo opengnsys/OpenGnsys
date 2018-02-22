@@ -1,4 +1,4 @@
-# Vagrantfile to install OpenGnsys Trunk (v1.1.0) virtual environment using VirtualBox provider.
+# Vagrantfile to install old OpenGnSys 1.0.6b virtual environment using VirtualBox provider.
 
 VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
@@ -14,11 +14,9 @@ REPOSIZE = 50
 # Amount of memory for server and clients (MB)
 SERVERMEM = 1024	# Minimum: 512
 CLIENTMEM = 512		# Minimum: 256
-# Prefixes for MAC and IP addresses.
+# Clients MAC address prefix.
 MACPREFIX = "08:00:27:0E:65"
 NETPREFIX = "192.168.2"
-# OpenGnsys Server IP address.
-SERVERIP = "#{NETPREFIX}.10"
 # Local port to access OpenGnsys Server.
 LOCALWEBPORT = 8443
 
@@ -28,6 +26,10 @@ OGSERVERSCRIPT = <<EOT
 [ -f /opt/opengnsys/doc/VERSION.txt ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
 # Create repository disk using LVM, if necesary.
 if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
+    if ! which vgcreate &>/dev/null; then
+        apt-get update
+        apt-get install -y lvm2
+    fi
     pvcreate /dev/sdb
     vgcreate og /dev/sdb
     vgchange -ay
@@ -38,9 +40,9 @@ if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     mount -a
 fi
 # Install OpenGnsys and change server address.
-wget -q https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh -O - | bash || exit $?
+wget -q https://opengnsys.es/svn/tags/opengnsys-1.0.6b/installer/opengnsys_installer.sh -O - | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
-echo y | /opt/opengnsys/bin/setserveraddr enp0s8
+echo y | /opt/opengnsys/bin/setserveraddr eth1
 # Insert DHCP data.
 for ((i=#{NCLIENTS+10}; i>10; i--)); do
     sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
@@ -54,38 +56,24 @@ locale-gen --lang #{LANGUAGE}
 sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
 # Comment out next lines for automatic data insertion.
-#SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}.1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
+#SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}.1', '255.255.255.0', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
 #for ((i=11; i<=#{NCLIENTS+10}; i++)); do
 #    SQL="$SQL ('pc$i', '#{NETPREFIX}.$i', REPLACE('#{MACPREFIX}$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}.1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
 #done
 #mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
-#/opt/opengnsys/bin/setclientmode ogLiveAdmin pc11 PERM
+#if ! grep -q "1\.0" /opt/opengnsys/doc/VERSION.txt; then AUX=1; fi
+#/opt/opengnsys/bin/setclientmode ogAdmin pc11 $AUX
 #for ((i=12; i<=#{NCLIENTS+10}; i++)); do
-#    /opt/opengnsys/bin/setclientmode ogLive pc$i PERM
+#    /opt/opengnsys/bin/setclientmode ogClient pc$i $AUX
 #done
-echo "Notes:"
-echo "- OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
-exit 0
+echo "New OpenGnsys local URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
 EOT
 
 # Client 1 OS provisioning script.
-OGAGENTPKG = "ogagent_1.1.0_all.deb"
 MODELSCRIPT = <<EOT
-# Comment out next lines to install and configure OGAgent for Ubuntu.
-#apt-get update -y
-#wget -q --no-check-certificate https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG}
-#if [ -f #{OGAGENTPKG} ]; then
-#    dpkg -i #{OGAGENTPKG}
-#    apt-get install -fy || exit $?
-#    sed -i "0,/remote=/ s,remote=.*,remote=https://#{SERVERIP}/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
-#    rm -f #{OGAGENTPKG}
-#else
-#    echo "Warning: cannot install OGAgent package #{OGAGENTPKG}"
-#fi
 # Remove network configuration added by Vagrant.
-sed -i "/enp0s3/ d" /etc/network/interfaces
-echo "Notes:"
-echo "- After now, use VirtualBox GUI to disable network interface 1 and restart this VM."
+sed -i "/VAGRANT/,$ d" /etc/network/interfaces
+echo "After now, use VirtualBox GUI to disable network interface 1 and work with this VM."
 # Leave VM halted.
 sleep 2
 poweroff &
@@ -114,14 +102,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ['createhd', '--filename', second_disk, '--size', REPOSIZE * 1024]
       end
       # Attach repo virtual disk.
-      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
+      vb.customize ['storageattach', :id, '--storagectl', 'SATAController', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
     end
     # VM base and host name.
-    og.vm.box = "bento/ubuntu-16.04"
+    og.vm.box = "ubuntu/trusty64"
     og.vm.hostname = "ogAdministrator"
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
-    og.vm.network "private_network", mac: "#{MACPREFIX}10".tr(":",""), ip: "#{SERVERIP}", virtualbox__intnet: true
+    og.vm.network "private_network", mac: "#{MACPREFIX}10".tr(":",""), ip: "#{NETPREFIX}.10", virtualbox__intnet: true
     # Comment out to disable synced folder.
     #og.vm.synced_folder ".", "/vagrant", disabled: true
     # Launch provisioning script.
@@ -130,7 +118,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Client 1 VM definition.
   config.vm.define "pc11", autostart: false do |v1|
-    v1.vm.box = "bento/ubuntu-16.04"
+    v1.vm.box = "ubuntu/trusty64"
     v1.vm.hostname = "pc11"
     v1.vm.network "private_network", mac: "#{MACPREFIX}11".tr(":",""), type: "dhcp", virtualbox__intnet: true
     v1.vm.provider "virtualbox" do |vb|
@@ -149,7 +137,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       cl.vm.box = "clink15/pxe"
       cl.ssh.insert_key = false
       cl.vm.boot_timeout = 5
-      cl.vm.network "private_network", mac: "#{MACPREFIX}#{i+10}".tr(":",""), type: "dhcp", virtualbox__intnet: true
+      cl.vm.network "private_network", mac: "#{MACPREFIX}${i+10}".tr(":",""), type: "dhcp", virtualbox__intnet: true
       cl.vm.provider "virtualbox" do |vb|
         vb.name = "pc#{i+10}"
         vb.memory = CLIENTMEM

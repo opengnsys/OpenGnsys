@@ -29,6 +29,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #823	Mejorar el rendimiento al obtener el inventario de software de Windows (mejora)
 #827	ogGrubInstallMbr debe mostrar entrada al ogLive, como ogBurgInstallMbr
 #829	Funciones auxiliares de configuración de BURG
+#832	Fallo en Autologon de Windows 10
 
 Tickets resueltos en módulo OpenGnsys Client:
 #233	Añadir reloj al cliente (resuelto en #746)
