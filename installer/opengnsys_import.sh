@@ -231,7 +231,8 @@ if [ $OLDVERSION != $NEWVERSION ] ; then
         exit 0
     fi
     # Nos bajamos los archivos de actualización de la base de datos
-    SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version${NEWVERSION%.*}/admin/Database"
+    SVN_URL="https://$OPENGNSYS_SERVER/svn/tags/opengnsys-$NEWVERSION/admin/Database"
+    [[ "$NEWVERSION" =~ pre ]] && SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version${NEWVERSION%.*}/admin/Database"
     svn checkout "$SVN_URL" $TMPDIR/Database
     [ $? -ne 0 ] && errorAndLog "$PROG: Error getting code from $SVN_URL" && exit 6
     
